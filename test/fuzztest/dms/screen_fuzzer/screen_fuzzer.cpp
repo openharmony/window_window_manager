@@ -22,9 +22,15 @@
 #include "display.h"
 #include "dm_common.h"
 #include "screen.h"
+#include "screen_info.h"
 #include "screen_manager.h"
 
 namespace OHOS::Rosen {
+
+namespace {
+    constexpr char END_CHAR = '\0';
+    constexpr size_t LEN = 10;
+}
 template<class T>
 size_t GetObject(T &object, const uint8_t *data, size_t size)
 {
@@ -35,21 +41,42 @@ size_t GetObject(T &object, const uint8_t *data, size_t size)
     return memcpy_s(&object, objectSize, data, objectSize) == EOK ? objectSize : 0;
 }
 
-bool ScreenFuzzTest(const uint8_t *data, size_t size)
+sptr<ScreenInfo> CreateScreenInfo(const uint8_t *data, size_t size)
 {
-    DisplayManager& displayManager = DisplayManager::GetInstance();
-    sptr<Display> display = displayManager.GetDefaultDisplay();
-    if (display == nullptr) {
-        return false;
+    sptr<ScreenInfo> info = new(std::nothrow) ScreenInfo();
+    if (info == nullptr) {
+        return nullptr;
     }
-    ScreenId screenId = display->GetScreenId();
-    sptr<Screen> screen = ScreenManager::GetInstance().GetScreenById(screenId);
-    if (screen == nullptr) {
+    size_t startPos = 0;
+    char name[LEN + 1];
+    name[LEN] = END_CHAR;
+    for (size_t i = 0; i < LEN; i++) {
+        startPos += GetObject<char>(name[i], data + startPos, size - startPos);
+    }
+    std::string windowName(name);
+    info->name_ = windowName;
+    startPos += GetObject<ScreenId>(info->id_, data + startPos, size - startPos);
+    startPos += GetObject<uint32_t>(info->virtualWidth_, data + startPos, size - startPos);
+    startPos += GetObject<uint32_t>(info->virtualHeight_, data + startPos, size - startPos);
+    startPos += GetObject<float>(info->virtualPixelRatio_, data + startPos, size - startPos);
+    startPos += GetObject<ScreenId>(info->lastParent_, data + startPos, size - startPos);
+    startPos += GetObject<ScreenId>(info->parent_, data + startPos, size - startPos);
+    startPos += GetObject<bool>(info->isScreenGroup_, data + startPos, size - startPos);
+    startPos += GetObject<Rotation>(info->rotation_, data + startPos, size - startPos);
+    startPos += GetObject<Orientation>(info->orientation_, data + startPos, size - startPos);
+    startPos += GetObject<ScreenType>(info->type_, data + startPos, size - startPos);
+    startPos += GetObject<uint32_t>(info->modeId_, data + startPos, size - startPos);
+    return info;
+}
+bool ScreenFuzzTest(sptr<Screen> screen, sptr<Display> display, const uint8_t *data, size_t size)
+{
+    if (screen == nullptr || display == nullptr) {
         return false;
     }
     uint32_t modeId;
     Orientation orientation;
-    if (data == nullptr || size < sizeof(modeId) + sizeof(orientation)) {
+    size_t minSize = sizeof(modeId) + sizeof(orientation);
+    if (data == nullptr || size < minSize) {
         return false;
     }
     size_t startPos = 0;
@@ -67,15 +94,36 @@ bool ScreenFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
-bool ColorGamutsFuzzTest(const uint8_t *data, size_t size)
+bool ScreenFuzzTestNoDisplay(sptr<Screen> screen, const uint8_t *data, size_t size)
 {
-    DisplayManager& displayManager = DisplayManager::GetInstance();
-    sptr<Display> display = displayManager.GetDefaultDisplay();
-    if (display == nullptr) {
+    if (screen == nullptr) {
         return false;
     }
-    ScreenId screenId = display->GetScreenId();
-    sptr<Screen> screen = ScreenManager::GetInstance().GetScreenById(screenId);
+    uint32_t modeId;
+    Orientation orientation;
+    uint32_t originalDensityDpi = 0;
+    uint32_t modifiedDensityDpi = 0;
+    size_t minSize = sizeof(modeId) + sizeof(orientation) + sizeof(originalDensityDpi) +
+        sizeof(modifiedDensityDpi);
+    if (data == nullptr || size < minSize) {
+        return false;
+    }
+    size_t startPos = 0;
+    GetObject<uint32_t>(originalDensityDpi, data + startPos, size - startPos);
+    GetObject<uint32_t>(modifiedDensityDpi, data + startPos, size - startPos);
+    startPos += GetObject<uint32_t>(modeId, data + startPos, size - startPos);
+    GetObject<Orientation>(orientation, data + startPos, size - startPos);
+    screen->SetScreenActiveMode(modeId);
+    screen->SetOrientation(orientation);
+    screen->SetDensityDpi(modifiedDensityDpi);
+    screen->SetScreenActiveMode(0);
+    screen->SetOrientation(Orientation::UNSPECIFIED);
+    screen->SetDensityDpi(originalDensityDpi);
+    return true;
+}
+
+bool ColorGamutsFuzzTest(sptr<Screen> screen, const uint8_t *data, size_t size)
+{
     if (screen == nullptr) {
         return false;
     }
@@ -104,14 +152,35 @@ bool ColorGamutsFuzzTest(const uint8_t *data, size_t size)
     // It is necessary to judge whether gamutMap and screenGamutMap are equal.
     return true;
 }
+
+void DoMyFuzzTest(const uint8_t* data, size_t size)
+{
+    DisplayManager& displayManager = DisplayManager::GetInstance();
+    sptr<Display> display = displayManager.GetDefaultDisplay();
+
+    sptr<Screen> screen = nullptr;
+    if (display != nullptr) {
+        ScreenId screenId = display->GetScreenId();
+        sptr<Screen> screen = ScreenManager::GetInstance().GetScreenById(screenId);
+    } else {
+        sptr<ScreenInfo> info = CreateScreenInfo(data, size);
+        screen = new (std::nothrow) Screen(info);
+    }
+    if (display == nullptr) {
+        ScreenFuzzTestNoDisplay(screen, data, size);
+    } else {
+        ScreenFuzzTest(screen, display, data, size);
+    }
+    ColorGamutsFuzzTest(screen, data, size);
+}
+
 } // namespace.OHOS::Rosen
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::Rosen::ScreenFuzzTest(data, size);
-    OHOS::Rosen::ColorGamutsFuzzTest(data, size);
+    OHOS::Rosen::DoMyFuzzTest(data, size);
     return 0;
 }
 
