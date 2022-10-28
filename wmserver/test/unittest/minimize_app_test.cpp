@@ -100,7 +100,7 @@ HWTEST_F(MinimizeAppTest, MinimizeAppTest01, Function | SmallTest | Level2)
     ASSERT_EQ(false, MinimizeApp::IsNodeNeedMinimize(node11));
     ASSERT_EQ(false, MinimizeApp::IsNodeNeedMinimize(conflictNode));
 
-    MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::SPLIT_REPLACE);
+    MinimizeApp::ExecuteMinimizeTargetReasons(MinimizeReason::SPLIT_REPLACE);
     MinimizeApp::ExecuteMinimizeAll();
 }
 /**
@@ -167,6 +167,83 @@ HWTEST_F(MinimizeAppTest, MinimizeAppTest05, Function | SmallTest | Level2)
     ASSERT_EQ(node1, getNodes2[1]);
 
     MinimizeApp::ClearNodesWithReason(MinimizeReason::MINIMIZE_ALL);
+}
+/**
+ * @tc.name: IsNodeNeedMinimizeWithReason
+ * @tc.desc: check node need minimize or not
+ * @tc.type: FUNC
+ */
+HWTEST_F(MinimizeAppTest, IsNodeNeedMinimizeWithReason01, Function | SmallTest | Level2)
+{
+    ASSERT_EQ(false, MinimizeApp::IsNodeNeedMinimizeWithReason(nullptr, MinimizeReason::MINIMIZE_ALL));
+
+    sptr<WindowNode> node1 = new WindowNode();
+    sptr<WindowNode> node2 = new WindowNode();
+    MinimizeApp::AddNeedMinimizeApp(node1, MinimizeReason::MINIMIZE_BUTTON);
+    MinimizeApp::AddNeedMinimizeApp(node2, MinimizeReason::MINIMIZE_ALL);
+
+    ASSERT_EQ(false, MinimizeApp::IsNodeNeedMinimizeWithReason(node1, MinimizeReason::GESTURE_ANIMATION));
+    ASSERT_EQ(false, MinimizeApp::IsNodeNeedMinimizeWithReason(node1, MinimizeReason::MINIMIZE_ALL));
+    ASSERT_EQ(true, MinimizeApp::IsNodeNeedMinimizeWithReason(node1, MinimizeReason::MINIMIZE_BUTTON));
+
+    MinimizeApp::ClearNodesWithReason(MinimizeReason::MINIMIZE_ALL);
+    MinimizeApp::ClearNodesWithReason(MinimizeReason::MINIMIZE_BUTTON);
+}
+/**
+ * @tc.name: ClearNodesWithReason
+ * @tc.desc: clear node with reason
+ * @tc.type: FUNC
+ */
+HWTEST_F(MinimizeAppTest, ClearNodesWithReason01, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> node1 = new WindowNode();
+    sptr<WindowNode> node2 = new WindowNode();
+    MinimizeApp::AddNeedMinimizeApp(node1, MinimizeReason::MINIMIZE_BUTTON);
+    MinimizeApp::AddNeedMinimizeApp(node2, MinimizeReason::MINIMIZE_ALL);
+
+    MinimizeApp::ClearNodesWithReason(MinimizeReason::MINIMIZE_ALL);
+    ASSERT_EQ(0, MinimizeApp::GetNeedMinimizeAppNodesWithReason(MinimizeReason::MINIMIZE_ALL).size());
+    MinimizeApp::ClearNodesWithReason(MinimizeReason::GESTURE_ANIMATION);
+    ASSERT_EQ(1, MinimizeApp::GetNeedMinimizeAppNodesWithReason(MinimizeReason::MINIMIZE_BUTTON).size());
+}
+/**
+ * @tc.name: GetRecoverdNodeFromMinimizeList
+ * @tc.desc: Get recoverd node from list
+ * @tc.type: FUNC
+ */
+HWTEST_F(MinimizeAppTest, GetRecoverdNodeFromMinimizeList01, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> node1 = new WindowNode();
+    MinimizeApp::AddNeedMinimizeApp(node1, MinimizeReason::MINIMIZE_BUTTON);
+
+    ASSERT_EQ(nullptr, MinimizeApp::GetRecoverdNodeFromMinimizeList());
+    MinimizeApp::ClearNodesWithReason(MinimizeReason::MINIMIZE_BUTTON);
+}
+/**
+ * @tc.name: IsNodeNeedMinimize
+ * @tc.desc: check node need minize or not
+ * @tc.type: FUNC
+ */
+HWTEST_F(MinimizeAppTest, IsNodeNeedMinimize01, Function | SmallTest | Level2)
+{
+    ASSERT_EQ(false, MinimizeApp::IsNodeNeedMinimize(nullptr));
+}
+/**
+ * @tc.name: ExecuteMinimizeTargetReasons
+ * @tc.desc: Execute Minimize With TargetReason
+ * @tc.type: FUNC
+ */
+HWTEST_F(MinimizeAppTest, ExecuteMinimizeTargetReasons01, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> node1 = new WindowNode();
+    MinimizeApp::AddNeedMinimizeApp(node1, MinimizeReason::MINIMIZE_BUTTON);
+
+    MinimizeApp::ExecuteMinimizeTargetReasons(MinimizeReason::MINIMIZE_BUTTON);
+    ASSERT_EQ(0, MinimizeApp::GetNeedMinimizeAppNodesWithReason(MinimizeReason::MINIMIZE_BUTTON).size());
+
+    MinimizeApp::AddNeedMinimizeApp(node1, MinimizeReason::MINIMIZE_BUTTON);
+    MinimizeApp::ExecuteMinimizeTargetReasons(MinimizeReason::GESTURE_ANIMATION);
+    ASSERT_EQ(1, MinimizeApp::GetNeedMinimizeAppNodesWithReason(MinimizeReason::MINIMIZE_BUTTON).size());
 }
 }
 }

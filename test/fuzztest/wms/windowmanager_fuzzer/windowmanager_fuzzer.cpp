@@ -15,6 +15,8 @@
 
 #include <parcel.h>
 
+#include <securec.h>
+
 #include "marshalling_helper.h"
 #include "window_manager.h"
 
@@ -24,6 +26,17 @@ namespace OHOS {
 namespace {
     constexpr size_t DATA_MIN_SIZE = 2;
 }
+
+template<class T>
+size_t GetObject(T &object, const uint8_t *data, size_t size)
+{
+    size_t objectSize = sizeof(object);
+    if (objectSize > size) {
+        return 0;
+    }
+    return memcpy_s(&object, objectSize, data, objectSize) == EOK ? objectSize : 0;
+}
+
 class FocusChangedListener : public IFocusChangedListener {
 public:
     virtual void OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo) override
@@ -56,21 +69,68 @@ public:
     }
 };
 
-bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
+class CameraFloatWindowChangedListener : public ICameraFloatWindowChangedListener {
+public:
+    void OnCameraFloatWindowChange(uint32_t accessTokenId, bool isShowing) override
+    {
+    }
+};
+
+
+bool DoSomethingForWindowManagerImpl(WindowManager& windowManager, const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
         return false;
     }
-    WindowManager& windowManager = WindowManager::GetInstance();
+    size_t startPos = 0;
+    uint32_t accessTokenId;
+    bool isShowing;
+    startPos += GetObject<uint32_t>(accessTokenId, data + startPos, size - startPos);
+    startPos += GetObject<bool>(isShowing, data + startPos, size - startPos);
+    windowManager.UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
+
+    Parcel windowVisibilityInfosParcel;
+    if (windowVisibilityInfosParcel.WriteBuffer(data, size)) {
+        std::vector<sptr<WindowVisibilityInfo>> infos;
+        if (MarshallingHelper::UnmarshallingVectorParcelableObj<WindowVisibilityInfo>(windowVisibilityInfosParcel,
+            infos)) {
+            windowManager.GetVisibilityWindowInfo(infos);
+            windowManager.UpdateWindowVisibilityInfo(infos);
+        }
+    }
+
+    DisplayId displayId;
+    SystemBarRegionTints tints;
+    startPos += GetObject<DisplayId>(displayId, data + startPos, size - startPos);
+    startPos += GetObject<SystemBarRegionTints>(tints, data + startPos, size - startPos);
+    windowManager.UpdateSystemBarRegionTints(displayId, tints);
+
+    return true;
+}
+
+void CheckAccessibilityWindowInfo(WindowManager& windowManager, const uint8_t* data, size_t size)
+{
     Parcel accessibilityWindowInfosParcel;
     if (accessibilityWindowInfosParcel.WriteBuffer(data, size)) {
         std::vector<sptr<AccessibilityWindowInfo>> infos;
         if (MarshallingHelper::UnmarshallingVectorParcelableObj<AccessibilityWindowInfo>(accessibilityWindowInfosParcel,
             infos)) {
             windowManager.GetAccessibilityWindowInfo(infos);
+            WindowUpdateType type;
+            GetObject<WindowUpdateType>(type, data, size);
+            windowManager.NotifyAccessibilityWindowInfo(infos, type);
         }
     }
+}
 
+bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size < DATA_MIN_SIZE) {
+        return false;
+    }
+    WindowManager& windowManager = WindowManager::GetInstance();
+    CheckAccessibilityWindowInfo(windowManager, data, size);
+    
     Parcel focusChangeInfoParcel;
     if (focusChangeInfoParcel.WriteBuffer(data, size)) {
         FocusChangeInfo::Unmarshalling(focusChangeInfoParcel);
@@ -102,11 +162,14 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     windowManager.RegisterVisibilityChangedListener(visibilityChangedListener);
     sptr<IWindowUpdateListener> windowUpdateListener = new WindowUpdateListener();
     windowManager.RegisterWindowUpdateListener(windowUpdateListener);
+    sptr<ICameraFloatWindowChangedListener> cameraFloatWindowChanagedListener = new CameraFloatWindowChangedListener();
+    windowManager.RegisterCameraFloatWindowChangedListener(cameraFloatWindowChanagedListener);
     windowManager.SetWindowLayoutMode(static_cast<WindowLayoutMode>(data[0]));
     windowManager.UnregisterFocusChangedListener(focusChangedListener);
     windowManager.UnregisterSystemBarChangedListener(systemBarChangedListener);
     windowManager.UnregisterVisibilityChangedListener(visibilityChangedListener);
     windowManager.UnregisterWindowUpdateListener(windowUpdateListener);
+    windowManager.UnregisterCameraFloatWindowChangedListener(cameraFloatWindowChanagedListener);
     return true;
 }
 } // namespace.OHOS

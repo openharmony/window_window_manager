@@ -70,6 +70,58 @@ public:
         return 0;
     }
 };
+class MockIRemoteObject : public IRemoteObject {
+public:
+    MockIRemoteObject() : IRemoteObject {u"MockIRemoteObject"}
+    {
+    }
+
+    ~MockIRemoteObject()
+    {
+    }
+
+    int32_t GetObjectRefCount()
+    {
+        return 0;
+    }
+
+    int SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+    {
+        return sendRequestResult_;
+    }
+
+    bool IsProxyObject() const
+    {
+        return true;
+    }
+
+    bool CheckObjectLegality() const
+    {
+        return true;
+    }
+
+    bool AddDeathRecipient(const sptr<DeathRecipient> &recipient)
+    {
+        return true;
+    }
+
+    bool RemoveDeathRecipient(const sptr<DeathRecipient> &recipient)
+    {
+        return true;
+    }
+
+    sptr<IRemoteBroker> AsInterface()
+    {
+        return nullptr;
+    }
+
+    int Dump(int fd, const std::vector<std::u16string> &args)
+    {
+        return 0;
+    }
+
+    int sendRequestResult_ = 0;
+};
 }
 }
 

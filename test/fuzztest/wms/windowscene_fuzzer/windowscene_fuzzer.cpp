@@ -129,6 +129,9 @@ size_t InitWindowOption2(WindowOption &windowOption, const uint8_t *data, size_t
     Orientation requestedOrientation;
     startPos += GetObject<Orientation>(requestedOrientation, data + startPos, size - startPos);
     windowOption.SetRequestedOrientation(requestedOrientation);
+    bool isMainHandleAvailable;
+    startPos += GetObject<bool>(isMainHandleAvailable, data + startPos, size - startPos);
+    windowOption.SetMainHandlerAvailable(isMainHandleAvailable);
     return startPos;
 }
 

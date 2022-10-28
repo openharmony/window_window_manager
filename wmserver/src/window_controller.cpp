@@ -94,7 +94,7 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, std::shar
     if (windowRoot_->AddWindowNode(0, node, true) != WMError::WM_OK) {
         return;
     }
-    StartingWindow::DrawStartingWindow(node, pixelMap, bkgColor, isColdStart, windowRoot_->IsUniRender());
+    StartingWindow::DrawStartingWindow(node, pixelMap, bkgColor, isColdStart);
     FlushWindowInfo(node->GetWindowId());
     node->startingWindowShown_ = true;
     WLOGFI("StartingWindow show success with id:%{public}u!", node->GetWindowId());
@@ -294,6 +294,8 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
             WLOGFI("id:%{public}u execute minimize all", node->GetWindowId());
         }
         node->stateMachine_.TransitionTo(WindowNodeState::SHOWN); // for normal show which not use remote animation
+    } else if (WindowHelper::IsMainWindow(node->GetWindowType())) {
+        MinimizeApp::ExecuteMinimizeTargetReasons(~MinimizeReason::OTHER_WINDOW);
     }
     return WMError::WM_OK;
 }
@@ -826,7 +828,7 @@ void WindowController::NotifySystemBarTints()
 
 WMError WindowController::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller)
 {
-    return RemoteAnimation::SetWindowAnimationController(controller, windowRoot_);
+    return RemoteAnimation::SetWindowAnimationController(controller);
 }
 
 AvoidArea WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType) const
@@ -1332,7 +1334,7 @@ void WindowController::MinimizeWindowsByLauncher(std::vector<uint32_t>& windowId
 {
     windowRoot_->MinimizeTargetWindows(windowIds);
     auto func = []() {
-        MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::GESTURE_ANIMATION);
+        MinimizeApp::ExecuteMinimizeTargetReasons(MinimizeReason::GESTURE_ANIMATION);
     };
     if (!isAnimated) {
         func();
