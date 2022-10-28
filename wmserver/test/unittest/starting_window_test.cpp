@@ -19,6 +19,7 @@
 #include "remote_animation.h"
 #include "starting_window.h"
 
+#include "window_helper.h"
 #include "window_transition_info.h"
 using namespace testing;
 using namespace testing::ext;
@@ -90,7 +91,7 @@ HWTEST_F(StartingWindowTest, NeedToStopStartingWindow01, Function | SmallTest | 
 {
     transitionInfo_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<WindowNode> node = new WindowNode(CreateWindowProperty());
-    ASSERT_EQ(false, StartingWindow::NeedToStopStartingWindow(node->GetWindowMode(),
+    ASSERT_EQ(true, WindowHelper::CheckSupportWindowMode(node->GetWindowMode(),
         node->GetModeSupportInfo(), transitionInfo_));
 }
 
@@ -104,7 +105,7 @@ HWTEST_F(StartingWindowTest, NeedToStopStartingWindow02, Function | SmallTest | 
     sptr<WindowNode> node = new WindowNode(CreateWindowProperty());
     node->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     node->SetModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
-    ASSERT_EQ(true, StartingWindow::NeedToStopStartingWindow(node->GetWindowMode(),
+    ASSERT_EQ(false, WindowHelper::CheckSupportWindowMode(node->GetWindowMode(),
         node->GetModeSupportInfo(), transitionInfo_));
 }
 
@@ -116,7 +117,7 @@ HWTEST_F(StartingWindowTest, NeedToStopStartingWindow02, Function | SmallTest | 
 HWTEST_F(StartingWindowTest, NeedToStopStartingWindow03, Function | SmallTest | Level2)
 {
     sptr<WindowNode> node = new WindowNode(CreateWindowProperty());
-    ASSERT_EQ(false, StartingWindow::NeedToStopStartingWindow(node->GetWindowMode(),
+    ASSERT_EQ(true, WindowHelper::CheckSupportWindowMode(node->GetWindowMode(),
         node->GetModeSupportInfo(), transitionInfo_));
 }
 
@@ -131,7 +132,7 @@ HWTEST_F(StartingWindowTest, NeedToStopStartingWindow04, Function | SmallTest | 
     transitionInfo_->SetShowFlagWhenLocked(true);
     node->SetModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
                              WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
-    ASSERT_EQ(true, StartingWindow::NeedToStopStartingWindow(node->GetWindowMode(),
+    ASSERT_EQ(false, WindowHelper::CheckSupportWindowMode(node->GetWindowMode(),
         node->GetModeSupportInfo(), transitionInfo_));
 }
 
