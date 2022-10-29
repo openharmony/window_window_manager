@@ -102,8 +102,8 @@ void DisplayCutoutController::CheckBoundingRectsBoundary(DisplayId displayId, st
     for (auto iter = boundingRects.begin(); iter != boundingRects.end();) {
         DMRect boundingRect = *iter;
         if (boundingRect.posX_ < 0 || boundingRect.posY_ < 0 ||
-            boundingRect.width_ + boundingRect.posX_ > displayWidth ||
-            boundingRect.height_ + boundingRect.posY_ > displayHeight ||
+            static_cast<int32_t>(boundingRect.width_) + boundingRect.posX_ > static_cast<int32_t>(displayWidth) ||
+            static_cast<int32_t>(boundingRect.height_) + boundingRect.posY_ > static_cast<int32_t>(displayHeight) ||
             boundingRect.width_ > displayWidth || boundingRect.height_ > displayHeight ||
             boundingRect.isUninitializedRect()) {
             WLOGFE("boundingRect boundary is invalid");
@@ -153,10 +153,10 @@ void DisplayCutoutController::CalcBuiltInDisplayWaterfallRects()
         waterfallDisplayAreaRects_ = emptyRects;
         return;
     }
-    uint32_t left = curvedScreenBoundary_[0];
-    uint32_t top = curvedScreenBoundary_[1];
-    uint32_t right = curvedScreenBoundary_[2];
-    uint32_t bottom = curvedScreenBoundary_[3];
+    uint32_t left = static_cast<uint32_t>(curvedScreenBoundary_[0]);
+    uint32_t top = static_cast<uint32_t>(curvedScreenBoundary_[1]);
+    uint32_t right = static_cast<uint32_t>(curvedScreenBoundary_[2]);
+    uint32_t bottom = static_cast<uint32_t>(curvedScreenBoundary_[3]);
     if (left == 0 && top == 0 && right == 0 && bottom == 0) {
         waterfallDisplayAreaRects_ = emptyRects;
         return;
@@ -181,10 +181,10 @@ void DisplayCutoutController::CalcBuiltInDisplayWaterfallRects()
 void DisplayCutoutController::CalcBuiltInDisplayWaterfallRectsByRotation(
     Rotation rotation, uint32_t displayHeight, uint32_t displayWidth)
 {
-    uint32_t left = curvedScreenBoundary_[0];
-    uint32_t top = curvedScreenBoundary_[1];
-    uint32_t right = curvedScreenBoundary_[2];
-    uint32_t bottom = curvedScreenBoundary_[3];
+    uint32_t left = static_cast<uint32_t>(curvedScreenBoundary_[0]);
+    uint32_t top = static_cast<uint32_t>(curvedScreenBoundary_[1]);
+    uint32_t right = static_cast<uint32_t>(curvedScreenBoundary_[2]);
+    uint32_t bottom = static_cast<uint32_t>(curvedScreenBoundary_[3]);
     switch (rotation) {
         case Rotation::ROTATION_0: {
             DMRect leftRect = CreateWaterfallRect(0, 0, left, displayHeight);

@@ -36,7 +36,7 @@ public:
 
 private:
     sptr<WindowRoot> windowRoot_;
-    MMI::DisplayGroupInfo displayGroupInfo_;
+    MMI::DisplayGroupInfo displayGroupInfo_ = {};
     void TraverseWindowNodes(const std::vector<sptr<WindowNode>>& windowNodes,
                              std::vector<MMI::WindowInfo>& windowsInfo);
     void UpdateDisplayGroupInfo(const sptr<WindowNodeContainer>& windowNodeContainer,

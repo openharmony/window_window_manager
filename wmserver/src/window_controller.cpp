@@ -334,7 +334,7 @@ void WindowController::ResizeSoftInputCallingWindowIfNeed(const sptr<WindowNode>
     }
     int32_t posY = std::max(requestedRect.posY_, static_cast<int32_t>(statusBarWindowRect.height_));
     if (posY != requestedRect.posY_) {
-        requestedRect.height_ = softInputWindowRect.posY_ - posY;
+        requestedRect.height_ = static_cast<uint32_t>(softInputWindowRect.posY_ - posY);
         requestedRect.posY_ = posY;
     }
     callingWindowRestoringRect_ = callingWindowRect;
@@ -723,8 +723,8 @@ void WindowController::StopBootAnimationIfNeed(const sptr<WindowNode>& node)
     std::vector<sptr<WindowNode>> windowNodes;
     windowNodeContainer->TraverseContainer(windowNodes);
     WmOcclusion::Rect defaultDisplayRect = { defaultDisplayRect_.posX_, defaultDisplayRect_.posY_,
-        defaultDisplayRect_.posX_ + defaultDisplayRect_.width_,
-        defaultDisplayRect_.posY_ + defaultDisplayRect_.height_};
+        defaultDisplayRect_.posX_ + static_cast<int32_t>(defaultDisplayRect_.width_),
+        defaultDisplayRect_.posY_ + static_cast<int32_t>(defaultDisplayRect_.height_)};
     WmOcclusion::Region defaultDisplayRegion(defaultDisplayRect);
     WmOcclusion::Region allRegion; // Counts the area of all shown windows
     for (auto& node : windowNodes) {
@@ -733,7 +733,7 @@ void WindowController::StopBootAnimationIfNeed(const sptr<WindowNode>& node)
         }
         auto windowRect = node->GetWindowRect();
         WmOcclusion::Rect curRect = { windowRect.posX_, windowRect.posY_,
-            windowRect.posX_ + windowRect.width_, windowRect.posY_ + windowRect.height_};
+            windowRect.posX_ + static_cast<int32_t>(windowRect.width_), windowRect.posY_ + static_cast<int32_t>(windowRect.height_)};
         WmOcclusion::Region curRegion(curRect);
         allRegion = curRegion.Or(allRegion);
         WmOcclusion::Region subResult = defaultDisplayRegion.Sub(allRegion);
@@ -748,8 +748,8 @@ void WindowController::StopBootAnimationIfNeed(const sptr<WindowNode>& node)
 
 void WindowController::RecordBootAnimationEvent() const
 {
-    uint64_t time = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::steady_clock::now()).
-        time_since_epoch().count();
+    uint64_t time = static_cast<uint64_t>(std::chrono::time_point_cast<std::chrono::seconds>
+        (std::chrono::steady_clock::now()).time_since_epoch().count());
     WLOGFI("boot animation done duration(s): %{public}" PRIu64"", time);
     std::ostringstream os;
     os << "boot animation done duration(s): " << time <<";";
