@@ -51,7 +51,7 @@
         "third_party": [
           "flutter",
           "libxml2",
-          "libpng"
+          "libjpeg-turbo"
         ]
       },
       "build": {
