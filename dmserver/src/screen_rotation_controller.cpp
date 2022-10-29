@@ -270,14 +270,15 @@ DeviceRotation ScreenRotationController::CalcDeviceRotation(SensorRotation senso
     if (sensorRotation == SensorRotation::INVALID) {
         return DeviceRotation::INVALID;
     }
-    int32_t bias = defaultDeviceRotationOffset_ / 90; // offset(in degree) divided by 90 to get rotation bias
+    // offset(in degree) divided by 90 to get rotation bias
+    int32_t bias = static_cast<int32_t>(defaultDeviceRotationOffset_ / 90);
     int32_t deviceRotationValue = static_cast<int32_t>(sensorRotation) - bias;
     while (deviceRotationValue < 0) {
         // +4 is used to normalize the values into the range 0~3, corresponding to the four rotations.
         deviceRotationValue += 4;
     }
     if (defaultDeviceRotation_ == 1) {
-        deviceRotationValue += defaultDeviceRotation_;
+        deviceRotationValue += static_cast<int32_t>(defaultDeviceRotation_);
         // %2 to determine whether the rotation is horizontal or vertical.
         if (deviceRotationValue % 2 == 0) {
             // if device's default rotation is landscape, use -2 to swap 0 and 90, 180 and 270.

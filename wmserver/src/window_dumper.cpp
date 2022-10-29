@@ -88,7 +88,7 @@ WMError WindowDumper::DumpScreenGroupWindowInfo(ScreenId screenGroupId,
         << std::endl;
     std::vector<sptr<WindowNode>> windowNodes;
     windowNodeContainer->TraverseContainer(windowNodes);
-    int zOrder = windowNodes.size();
+    int zOrder = static_cast<int32_t>(windowNodes.size());
     windowRoot_->GetBackgroundNodesByScreenId(screenGroupId, windowNodes);
     for (auto& windowNode : windowNodes) {
         if (zOrder < 0) {
