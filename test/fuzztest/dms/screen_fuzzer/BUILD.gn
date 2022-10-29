@@ -30,12 +30,14 @@ ohos_fuzztest("ScreenFuzzTest") {
   configs = [
     "//foundation/window/window_manager/test/fuzztest:configs_cc_ld",
     "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "//foundation/window/window_manager/resources/config/build:testcase_flags",
   ]
 
   sources = [ "screen_fuzzer.cpp" ]
   deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/window/window_manager/dm:libdm",
+    "//foundation/window/window_manager/utils:libwmutil",
   ]
   external_deps = [ "c_utils:utils" ]
 }
