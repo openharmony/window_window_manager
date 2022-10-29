@@ -284,6 +284,17 @@ HWTEST_F(WindowProxyTest, RestoreSplitWindowMode01, Function | SmallTest | Level
     ASSERT_EQ(err, WMError::WM_OK);
 }
 
+/**
+ * @tc.name: NotifyScreenshot
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowProxyTest, NotifyScreenshot, Function | SmallTest | Level2)
+{
+    WMError err = windowProxy_->NotifyScreenshot();
+    ASSERT_EQ(err, WMError::WM_OK);
+}
+
 }
 }
 }
