@@ -83,4 +83,26 @@ void CommonTestUtils::SetAceessTokenPermission(const std::string processName)
     SetSelfTokenID(tokenId);
     OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
 }
+
+void CommonTestUtils::SetAceessTokenPermission(const std::string processName,
+    const char** perms, const int permCount)
+{
+    if (perms == nullptr || permCount == 0) {
+        return;
+    }
+    uint64_t tokenId;
+    NativeTokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = permCount,
+        .aclsNum = 0,
+        .dcaps = nullptr,
+        .perms = perms,
+        .acls = nullptr,
+        .processName = processName.c_str(),
+        .aplStr = "system_basic",
+    };
+    tokenId = GetAccessTokenId(&infoInstance);
+    SetSelfTokenID(tokenId);
+    OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
+}
 } // namespace OHOS::Rosen
