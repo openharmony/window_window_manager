@@ -14,7 +14,6 @@
  */
 
 #include <gtest/gtest.h>
-#include "png.h"
 #include "display_manager.h"
 #include "pixel_map.h"
 
