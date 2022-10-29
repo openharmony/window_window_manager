@@ -183,7 +183,7 @@ void AvoidAreaControllerTest::SetUpTestCase()
 
     sptr<WindowProperty> keyboardProperty = new WindowProperty();
     keyboardProperty->SetWindowId(101u);
-    keyboardProperty->SetWindowName("navigation bar");
+    keyboardProperty->SetWindowName("keyboard bar");
     keyboardProperty->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     keyboardProperty->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     Rect keyboardRect = { 0, static_cast<int32_t>(screenRect.height_ / 2), screenRect.width_, screenRect.height_ / 2 };
@@ -515,6 +515,36 @@ HWTEST_F(AvoidAreaControllerTest, KeyboardAvoidArea02, Function | SmallTest | Le
         ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
     }
     avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
+}
+/**
+ * @tc.name: KeyboardAvoidArea02
+ * @tc.desc: Get avoid areas with listener, TYPE_KEYBOARD.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AvoidAreaControllerTest, UpdateAvoidAreaListener01, Function | SmallTest | Level2)
+{
+    sptr<WindowProperty> property = createWindowProperty(110u, "test",
+        WindowType::APP_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, screenRect);
+    sptr<WindowListener> listener = new WindowListener();
+    sptr<WindowNode> appWindow = new WindowNode(property, listener, nullptr);
+    uint32_t focusedWindow = appWindow->GetWindowId();
+    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(focusedWindow);
+
+    avoidAreaController->avoidAreaListenerNodes_.clear();
+    avoidAreaController->lastUpdatedAvoidArea_.clear();
+    avoidAreaController->avoidAreaListenerNodes_.insert(appWindow);
+    auto avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_KEYBOARD);
+    std::map<AvoidAreaType, AvoidArea> type_area_map;
+    auto pair = std::make_pair(AvoidAreaType::TYPE_KEYBOARD, avoidArea);
+    type_area_map.insert(pair);
+    avoidAreaController->lastUpdatedAvoidArea_.insert(std::make_pair(focusedWindow, type_area_map));
+    avoidAreaController->UpdateAvoidAreaListener(appWindow, false);
+    ASSERT_EQ(0, avoidAreaController->avoidAreaListenerNodes_.size());
+    ASSERT_EQ(0, avoidAreaController->lastUpdatedAvoidArea_.size());
+
+    sptr<WindowNode> node = nullptr;
+    avoidAreaController->UpdateAvoidAreaListener(node, true);
+    ASSERT_EQ(0, avoidAreaController->avoidAreaListenerNodes_.size());
 }
 }
 } // namespace Rosen
