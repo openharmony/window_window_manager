@@ -114,8 +114,8 @@ void WindowLayoutPolicy::UpdateDisplayGroupLimitRect()
         int32_t maxHeight = std::max(newDisplayGroupLimitRect.posY_ +
                                      static_cast<int32_t>(newDisplayGroupLimitRect.height_),
                                      elem.second.posY_+ static_cast<int32_t>(elem.second.height_));
-        newDisplayGroupLimitRect.width_  = maxWidth - newDisplayGroupLimitRect.posX_;
-        newDisplayGroupLimitRect.height_ = maxHeight - newDisplayGroupLimitRect.posY_;
+        newDisplayGroupLimitRect.width_  = static_cast<uint32_t>(maxWidth - newDisplayGroupLimitRect.posX_);
+        newDisplayGroupLimitRect.height_ = static_cast<uint32_t>(maxHeight - newDisplayGroupLimitRect.posY_);
     }
     displayGroupLimitRect_ = newDisplayGroupLimitRect;
     WLOGFI("displayGroupLimitRect_: [ %{public}d, %{public}d, %{public}d, %{public}d]",
@@ -453,17 +453,17 @@ Rect WindowLayoutPolicy::CalcEntireWindowHotZone(const sptr<WindowNode>& node, c
 
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         if (rect.width_ < rect.height_) {
-            rect.posX_ -= hotZoneX;
+            rect.posX_ -= static_cast<int32_t>(hotZoneX);
             rect.width_ += (hotZoneX + hotZoneX);
         } else {
-            rect.posY_ -= hotZoneY;
+            rect.posY_ -= static_cast<int32_t>(hotZoneY);
             rect.height_ += (hotZoneY + hotZoneY);
         }
     } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) {
         rect = displayGroupInfo_->GetDisplayRect(node->GetDisplayId());
     } else if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
-        rect.posX_ -= hotZoneX;
-        rect.posY_ -= hotZoneY;
+        rect.posX_ -= static_cast<int32_t>(hotZoneX);
+        rect.posY_ -= static_cast<int32_t>(hotZoneY);
         rect.width_ += (hotZoneX + hotZoneX);
         rect.height_ += (hotZoneY + hotZoneY);
     }
@@ -829,21 +829,24 @@ void WindowLayoutPolicy::LimitWindowPositionWhenDrag(const sptr<WindowNode>& nod
     if (oriWinRect.posX_ > limitMaxPosX) {
         winRect.posX_ = limitMaxPosX;
         if (oriWinRect.width_ != lastRect.width_) {
-            winRect.width_ = oriWinRect.posX_ + static_cast<int32_t>(oriWinRect.width_) - winRect.posX_;
+            winRect.width_ = static_cast<uint32_t>(
+                oriWinRect.posX_ + static_cast<int32_t>(oriWinRect.width_) - winRect.posX_);
         }
     }
     // minimum position y
     if (oriWinRect.posY_ < limitMinPosY) {
         winRect.posY_ = limitMinPosY;
         if (oriWinRect.height_ != lastRect.height_) {
-            winRect.height_ = oriWinRect.posY_ + static_cast<int32_t>(oriWinRect.height_) - winRect.posY_;
+            winRect.height_ = static_cast<uint32_t>(
+                oriWinRect.posY_ + static_cast<int32_t>(oriWinRect.height_) - winRect.posY_);
         }
     }
     // maximum position y
     if (winRect.posY_ > limitMaxPosY) {
         winRect.posY_ = limitMaxPosY;
         if (oriWinRect.height_ != lastRect.height_) {
-            winRect.height_ = oriWinRect.posY_ + static_cast<int32_t>(oriWinRect.height_) - winRect.posY_;
+            winRect.height_ = static_cast<uint32_t>(
+                oriWinRect.posY_ + static_cast<int32_t>(oriWinRect.height_) - winRect.posY_);
         }
     }
     WLOGFI("After limit by position, winRect: %{public}d %{public}d %{public}u %{public}u",

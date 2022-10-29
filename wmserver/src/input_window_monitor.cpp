@@ -123,13 +123,15 @@ void InputWindowMonitor::UpdateDisplayInfo(const std::vector<sptr<DisplayInfo>>&
         if (displayInfo == nullptr) {
             continue;
         }
-        uint32_t displayWidth = displayInfo->GetWidth();
-        uint32_t displayHeight = displayInfo->GetHeight();
+        uint32_t displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
+        uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
         int32_t offsetX = displayInfo->GetOffsetX();
         int32_t offsetY = displayInfo->GetOffsetY();
         if (displayInfo->GetWaterfallDisplayCompressionStatus()) {
-            displayWidth = displayWidth + offsetX * 2; // 2: Get full width;
-            displayHeight = displayHeight + offsetY * 2; // 2: Get full height;
+            displayWidth = static_cast<uint32_t>(
+                static_cast<int32_t>(displayWidth) + offsetX * 2); // 2: Get full width;
+            displayHeight = static_cast<uint32_t>(
+                static_cast<int32_t>(displayHeight) + offsetY * 2); // 2: Get full height;
             offsetX = 0;
             offsetY = 0;
         }
