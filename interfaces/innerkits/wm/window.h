@@ -358,26 +358,26 @@ public:
      *
      * @param listener
      */
-    virtual void RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
-    virtual void RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) = 0;
-    virtual void UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
-    virtual void UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) = 0;
-    virtual void RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
-    virtual void UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
-    virtual void RegisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
-    virtual void UnregisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
-    virtual void RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
-    virtual void UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
+    virtual bool RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
+    virtual bool RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) = 0;
+    virtual bool UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
+    virtual bool UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) = 0;
+    virtual bool RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
+    virtual bool UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
+    virtual bool RegisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
+    virtual bool UnregisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
+    virtual bool RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
+    virtual bool UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) = 0;
-    virtual void RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
-    virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
-    virtual void RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) = 0;
-    virtual void UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) = 0;
-    virtual void RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener) = 0;
-    virtual void RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) = 0;
-    virtual void UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) = 0;
-    virtual void RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) = 0;
-    virtual void UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) = 0;
+    virtual bool RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
+    virtual bool UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
+    virtual bool RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) = 0;
+    virtual bool UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) = 0;
+    virtual bool RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener) = 0;
+    virtual bool RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) = 0;
+    virtual bool UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) = 0;
+    virtual bool RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) = 0;
+    virtual bool UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) = 0;
     virtual void RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) = 0;
     virtual void UnregisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) = 0;
     virtual void NotifyTouchDialogTarget() = 0;

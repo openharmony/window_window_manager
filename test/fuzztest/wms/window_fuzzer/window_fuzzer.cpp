@@ -102,6 +102,7 @@ void CheckWindowImplFunctionsPart1(sptr<Window> window, const uint8_t* data, siz
     bool boolVal = false;
     startPos += GetObject(boolVal, data + startPos, size - startPos);
     window->SetFocusable(boolVal);
+    window->IsFocused();
     startPos += GetObject(boolVal, data + startPos, size - startPos);
     window->SetTouchable(boolVal);
 
