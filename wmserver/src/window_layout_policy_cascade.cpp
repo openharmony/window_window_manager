@@ -349,7 +349,7 @@ void WindowLayoutPolicyCascade::LimitDividerPositionBySplitRatio(DisplayId displ
     uint32_t minDiff = std::max(limitRectMap_[displayId].width_, limitRectMap_[displayId].height_);
     int32_t closestPoint = oriPos;
     for (const auto& elem : splitRatioPointsMap_[displayId]) {
-        uint32_t diff = (oriPos > elem) ? (oriPos - elem) : (elem - oriPos);
+        uint32_t diff = (oriPos > elem) ? static_cast<uint32_t>(oriPos - elem) : static_cast<uint32_t>(elem - oriPos);
         if (diff < minDiff) {
             closestPoint = elem;
             minDiff = diff;
@@ -389,9 +389,9 @@ void WindowLayoutPolicyCascade::SetSplitRectByDivider(const Rect& divRect, Displ
         primaryRect.width_ = divRect.posX_;
         primaryRect.height_ = displayRect.height_;
 
-        secondaryRect.posX_ = divRect.posX_ + dividerRect.width_;
+        secondaryRect.posX_ = divRect.posX_ + static_cast<int32_t>(dividerRect.width_);
         secondaryRect.posY_ = displayRect.posY_;
-        secondaryRect.width_ = displayRect.width_ - secondaryRect.posX_;
+        secondaryRect.width_ = static_cast<uint32_t>(static_cast<int32_t>(displayRect.width_) - secondaryRect.posX_);
         secondaryRect.height_ = displayRect.height_;
     } else {
         primaryRect.posX_ = displayRect.posX_;
@@ -400,8 +400,8 @@ void WindowLayoutPolicyCascade::SetSplitRectByDivider(const Rect& divRect, Displ
         primaryRect.width_ = displayRect.width_;
 
         secondaryRect.posX_ = displayRect.posX_;
-        secondaryRect.posY_ = divRect.posY_ + dividerRect.height_;
-        secondaryRect.height_ = displayRect.height_ - secondaryRect.posY_;
+        secondaryRect.posY_ = divRect.posY_ + static_cast<int32_t>(dividerRect.height_);
+        secondaryRect.height_ = static_cast<uint32_t>(static_cast<int32_t>(displayRect.height_) - secondaryRect.posY_);
         secondaryRect.width_ = displayRect.width_;
     }
     WLOGFD("DividerRect: [%{public}d %{public}d %{public}u %{public}u] "
