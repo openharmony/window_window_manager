@@ -224,7 +224,7 @@ void WindowLayoutPolicyTile::PushBackNodeInTileQueue(const sptr<WindowNode>& nod
         return;
     }
     auto& foregroundNodes = foregroundNodesMap_[displayId];
-    while (foregroundNodes.size() >= maxTileWinNumMap_[displayId]) {
+    while (!foregroundNodes.empty() && foregroundNodes.size() >= maxTileWinNumMap_[displayId]) {
         auto removeNode = foregroundNodes.front();
         foregroundNodes.pop_front();
         WLOGFD("Minimize win in queue head for add new win, windowId: %{public}d", removeNode->GetWindowId());
