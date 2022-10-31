@@ -15,12 +15,21 @@
 
 #include <gtest/gtest.h>
 #include "display_manager.h"
+#include "window.h"
+
+#include "mock_display_manager_adapter.h"
+#include "singleton_mocker.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+using Mocker = SingletonMocker<DisplayManagerAdapter, MockDisplayManagerAdapter>;
+class DmMockScreenshotListener : public DisplayManager::IScreenshotListener {
+public:
+    void OnScreenshot(const ScreenshotInfo info) override {}
+};
 class DisplayManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -125,6 +134,42 @@ HWTEST_F(DisplayManagerTest, Unfreeze03, Function | SmallTest | Level1)
 {
     std::vector<DisplayId> displayIds;
     bool ret = DisplayManager::GetInstance().Unfreeze(displayIds);
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: RegisterScreenshotListener01
+ * @tc.desc: test RegisterScreenshotListener with null listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, RegisterScreenshotListener01, Function | SmallTest | Level1)
+{
+    bool ret = DisplayManager::GetInstance().RegisterScreenshotListener(nullptr);
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: RegisterScreenshotListener02
+ * @tc.desc: test RegisterScreenshotListener with null listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, RegisterScreenshotListener02, Function | SmallTest | Level1)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(false));
+    sptr<DisplayManager::IScreenshotListener> listener = new DmMockScreenshotListener();
+    bool ret = DisplayManager::GetInstance().RegisterScreenshotListener(listener);
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UnregisterScreenshotListener01
+ * @tc.desc: test UnregisterScreenshotListener with null listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, UnregisterScreenshotListener01, Function | SmallTest | Level1)
+{
+    bool ret = DisplayManager::GetInstance().UnregisterScreenshotListener(nullptr);
     ASSERT_FALSE(ret);
 }
 
