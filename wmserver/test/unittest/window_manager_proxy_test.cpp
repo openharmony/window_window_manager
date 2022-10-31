@@ -208,6 +208,18 @@ HWTEST_F(WindowManagerProxyTest, BindDialogTarget01, Function | SmallTest | Leve
     ASSERT_EQ(err, WMError::WM_OK);
 }
 
+/**
+ * @tc.name: GetVisibilityWindowInfo01
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, GetVisibilityWindowInfo01, Function | SmallTest | Level2)
+{
+    std::vector<sptr<WindowVisibilityInfo>> infos;
+    WMError err = windowManagerProxy_->GetVisibilityWindowInfo(infos);
+    ASSERT_EQ(err, WMError::WM_OK);
+}
+
 }
 }
 }
