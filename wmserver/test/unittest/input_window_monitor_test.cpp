@@ -69,6 +69,32 @@ HWTEST_F(InputWindowMonitorTest, UpdateInputWindow01, Function | SmallTest | Lev
     input_monitor_->UpdateInputWindow(0);
     ASSERT_EQ(nullptr, input_monitor_->windowRoot_->windowNodeMap_[0]);
 }
+/**
+ * @tc.name: GetDisplayDirectionForMmi
+ * @tc.desc: get display direction
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputWindowMonitorTest, GetDisplayDirectionForMmi01, Function | SmallTest | Level2)
+{
+    Rotation rotate = Rotation::ROTATION_0;
+    ASSERT_EQ(MMI::Direction0, input_monitor_->GetDisplayDirectionForMmi(rotate));
+}
+/**
+ * @tc.name: UpdateDisplayInfo
+ * @tc.desc: update displayinfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputWindowMonitorTest, UpdateDisplayInfo01, Function | SmallTest | Level2)
+{
+    std::vector<sptr<DisplayInfo>> displayInfos;
+    std::vector<MMI::DisplayInfo> displayInfoVector;
+    displayInfos.clear();
+    displayInfoVector.clear();
+    sptr<DisplayInfo> displayinfo = nullptr;
+    displayInfos.emplace_back(displayinfo);
+    input_monitor_->UpdateDisplayInfo(displayInfos, displayInfoVector);
+    ASSERT_EQ(0, displayInfoVector.size());
+}
 }
 }
 }
