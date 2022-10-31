@@ -63,6 +63,17 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo01, Function | SmallT
 }
 
 /**
+ * @tc.name: UpdateFocusChangeInfo02
+ * @tc.desc: test failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo02, Function | SmallTest | Level2)
+{
+    sptr<FocusChangeInfo> focusChangeInfo = nullptr;
+    windowManagerAgentProxy_->UpdateFocusChangeInfo(focusChangeInfo, false);
+}
+
+/**
  * @tc.name: UpdateSystemBarRegionTints01
  * @tc.desc: test success
  * @tc.type: FUNC
