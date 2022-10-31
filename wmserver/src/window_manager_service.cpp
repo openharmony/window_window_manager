@@ -664,9 +664,10 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
         WLOGFE("window is invalid");
         return WMError::WM_ERROR_NULLPTR;
     }
-    bool isSystemWindowExceptAlarmWindow = property->GetWindowType() != WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW &&
+    bool isNeedSystemPrivilege = property->GetWindowType() != WindowType::WINDOW_TYPE_DRAGGING_EFFECT &&
+        property->GetWindowType() != WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW &&
         WindowHelper::IsSystemWindow(property->GetWindowType());
-    if (isSystemWindowExceptAlarmWindow && !Permission::IsSystemCalling()) {
+    if (isNeedSystemPrivilege && !Permission::IsSystemCalling()) {
         WLOGFE("create system window permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
@@ -686,9 +687,10 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
         WLOGFE("property is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    bool isSystemWindowExceptAlarmWindow = property->GetWindowType() != WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW &&
+    bool isNeedSystemPrivilege = property->GetWindowType() != WindowType::WINDOW_TYPE_DRAGGING_EFFECT &&
+        property->GetWindowType() != WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW &&
         WindowHelper::IsSystemWindow(property->GetWindowType());
-    if ((isSystemWindowExceptAlarmWindow ||
+    if ((isNeedSystemPrivilege ||
         property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) &&
         !Permission::IsSystemCalling()) {
         WLOGFE("add window with animation permission denied!");
