@@ -19,6 +19,7 @@
 #include "screen.h"
 #include "surface_draw.h"
 #include "wm_common.h"
+#include "wm_common_inner.h"
 #include "window.h"
 #include "window_option.h"
 #include "window_manager_hilog.h"
@@ -193,14 +194,22 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered01, Function | SmallTest | L
  */
 HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered02, Function | SmallTest | Level2)
 {
+    sptr<Display> display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_NE(nullptr, display);
+    auto vpr = display->GetVirtualPixelRatio();
+    uint32_t baseWidth = vpr * MIN_FLOATING_WIDTH;
+
     sptr<Window> window1 = CreateWindow("test", WindowMode::WINDOW_MODE_FULLSCREEN, Rect {0, 0, 0, 0});
     // 10:rect.posX_, 120:rect.posY_, 650:rect.width, 500:rect.height
-    sptr<Window> window2 = CreateWindow("private", WindowMode::WINDOW_MODE_FLOATING, Rect {10, 120, 650, 500});
+    sptr<Window> window2 = CreateWindow("private", WindowMode::WINDOW_MODE_FLOATING,
+                                        Rect {10, 220, baseWidth + 10, 500});
     window2->SetPrivacyMode(true);
     // 5:rect.posX_, 110:rect.posY_, 655:rect.width, 500:rect.height
-    sptr<Window> window3 = CreateWindow("covered1", WindowMode::WINDOW_MODE_FLOATING, Rect {5, 110, 655, 500});
+    sptr<Window> window3 = CreateWindow("covered1", WindowMode::WINDOW_MODE_FLOATING,
+                                        Rect {5, 210, baseWidth + 15, 500});
     // 5:rect.posX_, 300:rect.posY_, 655:rect.width, 500:rect.height
-    sptr<Window> window4 = CreateWindow("covered2", WindowMode::WINDOW_MODE_FLOATING, Rect {5, 300, 655, 500});
+    sptr<Window> window4 = CreateWindow("covered2", WindowMode::WINDOW_MODE_FLOATING,
+                                        Rect {5, 400, baseWidth + 15, 500});
     ASSERT_NE(nullptr, window1);
     ASSERT_NE(nullptr, window2);
     ASSERT_NE(nullptr, window3);
