@@ -26,6 +26,7 @@
 namespace OHOS::Rosen {
 class ScreenManager : public RefBase {
 WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenManager);
+friend class DMSDeathRecipient;
 public:
     class IScreenListener : public virtual RefBase {
     public:
@@ -73,6 +74,7 @@ public:
 private:
     ScreenManager();
     ~ScreenManager();
+    void OnRemoteDied();
 
     class Impl;
     sptr<Impl> pImpl_;

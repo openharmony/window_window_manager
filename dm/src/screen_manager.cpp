@@ -45,6 +45,7 @@ public:
     bool UnregisterScreenGroupListener(sptr<IScreenGroupListener> listener);
     bool RegisterVirtualScreenGroupListener(sptr<IVirtualScreenGroupListener> listener);
     bool UnregisterVirtualScreenGroupListener(sptr<IVirtualScreenGroupListener> listener);
+    void OnRemoteDied();
 
 private:
     void NotifyScreenConnect(sptr<ScreenInfo> info);
@@ -573,5 +574,18 @@ bool ScreenManager::Impl::UpdateScreenInfoLocked(sptr<ScreenInfo> screenInfo)
 bool ScreenManager::Impl::isAllListenersRemoved() const
 {
     return screenListeners_.empty() && screenGroupListeners_.empty() && virtualScreenGroupListeners_.empty();
+}
+
+void ScreenManager::Impl::OnRemoteDied()
+{
+    WLOGFI("dms is died");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    screenManagerListener_ = nullptr;
+    virtualScreenAgent_ = nullptr;
+}
+
+void ScreenManager::OnRemoteDied()
+{
+    pImpl_->OnRemoteDied();
 }
 } // namespace OHOS::Rosen
