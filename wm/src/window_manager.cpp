@@ -247,17 +247,22 @@ bool WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedListene
     }
 
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
-    auto iter = std::find(pImpl_->focusChangedListeners_.begin(), pImpl_->focusChangedListeners_.end(), listener);
-    if (iter != pImpl_->focusChangedListeners_.end()) {
-        WLOGFW("Listener is already registered.");
-        return true;
-    }
-    pImpl_->focusChangedListeners_.push_back(listener);
     bool ret = true;
     if (pImpl_->focusChangedListenerAgent_ == nullptr) {
         pImpl_->focusChangedListenerAgent_ = new WindowManagerAgent();
         ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS, pImpl_->focusChangedListenerAgent_);
+    }
+    if (!ret) {
+        WLOGFW("RegisterWindowManagerAgent failed !");
+        pImpl_->focusChangedListenerAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->focusChangedListeners_.begin(), pImpl_->focusChangedListeners_.end(), listener);
+        if (iter != pImpl_->focusChangedListeners_.end()) {
+            WLOGFW("Listener is already registered.");
+            return true;
+        }
+        pImpl_->focusChangedListeners_.push_back(listener);
     }
     return ret;
 }
@@ -293,18 +298,23 @@ bool WindowManager::RegisterSystemBarChangedListener(const sptr<ISystemBarChange
     }
 
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
-    auto iter = std::find(pImpl_->systemBarChangedListeners_.begin(), pImpl_->systemBarChangedListeners_.end(),
-        listener);
-    if (iter != pImpl_->systemBarChangedListeners_.end()) {
-        WLOGFW("Listener is already registered.");
-        return true;
-    }
-    pImpl_->systemBarChangedListeners_.push_back(listener);
     bool ret = true;
     if (pImpl_->systemBarChangedListenerAgent_ == nullptr) {
         pImpl_->systemBarChangedListenerAgent_ = new WindowManagerAgent();
         ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR, pImpl_->systemBarChangedListenerAgent_);
+    }
+    if (!ret) {
+        WLOGFW("RegisterWindowManagerAgent failed !");
+        pImpl_->systemBarChangedListenerAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->systemBarChangedListeners_.begin(), pImpl_->systemBarChangedListeners_.end(),
+            listener);
+        if (iter != pImpl_->systemBarChangedListeners_.end()) {
+            WLOGFW("Listener is already registered.");
+            return true;
+        }
+        pImpl_->systemBarChangedListeners_.push_back(listener);
     }
     return ret;
 }
@@ -362,17 +372,22 @@ bool WindowManager::RegisterWindowUpdateListener(const sptr<IWindowUpdateListene
         return false;
     }
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
-    auto iter = std::find(pImpl_->windowUpdateListeners_.begin(), pImpl_->windowUpdateListeners_.end(), listener);
-    if (iter != pImpl_->windowUpdateListeners_.end()) {
-        WLOGFI("Listener is already registered.");
-        return true;
-    }
-    pImpl_->windowUpdateListeners_.emplace_back(listener);
     bool ret = true;
     if (pImpl_->windowUpdateListenerAgent_ == nullptr) {
         pImpl_->windowUpdateListenerAgent_ = new WindowManagerAgent();
         ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE, pImpl_->windowUpdateListenerAgent_);
+    }
+    if (!ret) {
+        WLOGFW("RegisterWindowManagerAgent failed !");
+        pImpl_->windowUpdateListenerAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->windowUpdateListeners_.begin(), pImpl_->windowUpdateListeners_.end(), listener);
+        if (iter != pImpl_->windowUpdateListeners_.end()) {
+            WLOGFI("Listener is already registered.");
+            return true;
+        }
+        pImpl_->windowUpdateListeners_.emplace_back(listener);
     }
     return ret;
 }
@@ -406,19 +421,24 @@ bool WindowManager::RegisterVisibilityChangedListener(const sptr<IVisibilityChan
         return false;
     }
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
-    auto iter = std::find(pImpl_->windowVisibilityListeners_.begin(), pImpl_->windowVisibilityListeners_.end(),
-        listener);
-    if (iter != pImpl_->windowVisibilityListeners_.end()) {
-        WLOGFW("Listener is already registered.");
-        return true;
-    }
-    pImpl_->windowVisibilityListeners_.emplace_back(listener);
     bool ret = true;
     if (pImpl_->windowVisibilityListenerAgent_ == nullptr) {
         pImpl_->windowVisibilityListenerAgent_ = new WindowManagerAgent();
         ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
             pImpl_->windowVisibilityListenerAgent_);
+    }
+    if (!ret) {
+        WLOGFW("RegisterWindowManagerAgent failed !");
+        pImpl_->windowVisibilityListenerAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->windowVisibilityListeners_.begin(), pImpl_->windowVisibilityListeners_.end(),
+            listener);
+        if (iter != pImpl_->windowVisibilityListeners_.end()) {
+            WLOGFW("Listener is already registered.");
+            return true;
+        }
+        pImpl_->windowVisibilityListeners_.emplace_back(listener);
     }
     return ret;
 }
@@ -453,19 +473,24 @@ bool WindowManager::RegisterCameraFloatWindowChangedListener(const sptr<ICameraF
     }
 
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
-    auto iter = std::find(pImpl_->cameraFloatWindowChangedListeners_.begin(),
-        pImpl_->cameraFloatWindowChangedListeners_.end(), listener);
-    if (iter != pImpl_->cameraFloatWindowChangedListeners_.end()) {
-        WLOGFW("Listener is already registered.");
-        return true;
-    }
-    pImpl_->cameraFloatWindowChangedListeners_.push_back(listener);
     bool ret = true;
     if (pImpl_->cameraFloatWindowChangedListenerAgent_ == nullptr) {
         pImpl_->cameraFloatWindowChangedListenerAgent_ = new WindowManagerAgent();
         ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT,
             pImpl_->cameraFloatWindowChangedListenerAgent_);
+    }
+    if (!ret) {
+        WLOGFW("RegisterWindowManagerAgent failed !");
+        pImpl_->cameraFloatWindowChangedListenerAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->cameraFloatWindowChangedListeners_.begin(),
+            pImpl_->cameraFloatWindowChangedListeners_.end(), listener);
+        if (iter != pImpl_->cameraFloatWindowChangedListeners_.end()) {
+            WLOGFW("Listener is already registered.");
+            return true;
+        }
+        pImpl_->cameraFloatWindowChangedListeners_.push_back(listener);
     }
     return ret;
 }
@@ -553,6 +578,17 @@ WMError WindowManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibility
 void WindowManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) const
 {
     pImpl_->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
+}
+
+void WindowManager::OnRemoteDied() const
+{
+    WLOGFI("wms is died");
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    pImpl_->focusChangedListenerAgent_ = nullptr;
+    pImpl_->systemBarChangedListenerAgent_ = nullptr;
+    pImpl_->windowUpdateListenerAgent_ = nullptr;
+    pImpl_->windowVisibilityListenerAgent_ = nullptr;
+    pImpl_->cameraFloatWindowChangedListenerAgent_ = nullptr;
 }
 } // namespace Rosen
 } // namespace OHOS

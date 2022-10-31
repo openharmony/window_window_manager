@@ -49,6 +49,7 @@ public:
     bool RegisterScreenshotListener(sptr<IScreenshotListener> listener);
     bool UnregisterScreenshotListener(sptr<IScreenshotListener> listener);
     sptr<Display> GetDisplayByScreenId(ScreenId screenId);
+    void OnRemoteDied();
 private:
     void ClearDisplayStateCallback();
     void NotifyScreenshot(sptr<ScreenshotInfo> info);
@@ -792,5 +793,20 @@ bool DisplayManager::Unfreeze(std::vector<DisplayId> displayIds)
         return false;
     }
     return SingletonContainer::Get<DisplayManagerAdapter>().SetFreeze(displayIds, false);
+}
+
+void DisplayManager::Impl::OnRemoteDied()
+{
+    WLOGFI("dms is died");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    displayManagerListener_ = nullptr;
+    displayStateAgent_ = nullptr;
+    powerEventListenerAgent_ = nullptr;
+    screenshotListenerAgent_ = nullptr;
+}
+
+void DisplayManager::OnRemoteDied()
+{
+    pImpl_->OnRemoteDied();
 }
 } // namespace OHOS::Rosen
