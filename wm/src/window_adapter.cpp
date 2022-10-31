@@ -16,6 +16,7 @@
 #include "window_adapter.h"
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
+#include "window_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 
@@ -221,7 +222,9 @@ void WMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
         WLOGFE("object is null");
         return;
     }
+    WLOGFI("wms OnRemoteDied");
     SingletonContainer::Get<WindowAdapter>().ClearWindowAdapter();
+    SingletonContainer::Get<WindowManager>().OnRemoteDied();
 }
 
 WMError WindowAdapter::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
