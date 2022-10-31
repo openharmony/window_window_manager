@@ -234,10 +234,16 @@ void WindowLayoutPolicyCascade::InitCascadeRect(DisplayId displayId)
     constexpr uint32_t half = 2;
     constexpr float ratio = DEFAULT_ASPECT_RATIO;
 
-    // calculate default H and w
+    /*
+     * Calculate default width and height, if width or height is
+     * smaller than minWidth or minHeight, use the minimum limits
+     */
     const auto& displayRect = displayGroupInfo_->GetDisplayRect(displayId);
-    uint32_t defaultW = static_cast<uint32_t>(displayRect.width_ * ratio);
-    uint32_t defaultH = static_cast<uint32_t>(displayRect.height_ * ratio);
+    auto vpr = displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
+    uint32_t defaultW = std::max(static_cast<uint32_t>(displayRect.width_ * ratio),
+                                 static_cast<uint32_t>(MIN_FLOATING_WIDTH * vpr));
+    uint32_t defaultH = std::max(static_cast<uint32_t>(displayRect.height_ * ratio),
+                                 static_cast<uint32_t>(MIN_FLOATING_HEIGHT * vpr));
 
     // calculate default x and y
     Rect resRect = {0, 0, defaultW, defaultH};
