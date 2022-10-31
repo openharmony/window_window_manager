@@ -166,7 +166,7 @@ HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid02, Function | MediumTest | Leve
  */
 HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid03, Function | MediumTest | Level2)
 {
-    const std::string imgPath = "/data/snapshot_display_test.png";
+    const std::string imgPath = "/data/snapshot_display_test.jpeg";
     std::string extraParam = "-i " + std::to_string(defaultId_);
     ASSERT_EQ(true, TakeScreenshotBySpecifiedParam(defaultCmd_, imgPath, extraParam));
 }
@@ -178,7 +178,7 @@ HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid03, Function | MediumTest | Leve
  */
 HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid04, Function | MediumTest | Level2)
 {
-    const std::string imgPath = "/data/snapshot_display_test.png";
+    const std::string imgPath = "/data/snapshot_display_test.jpeg";
     std::string extraParam = "-i " + std::to_string(defaultId_) + " -w 100 -h 100";
     ASSERT_EQ(true, TakeScreenshotBySpecifiedParam(defaultCmd_, imgPath, extraParam));
 }
@@ -190,7 +190,7 @@ HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid04, Function | MediumTest | Leve
  */
 HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid05, Function | MediumTest | Level2)
 {
-    const std::string imgPath = "/data/snapshot_display_test.png";
+    const std::string imgPath = "/data/snapshot_display_test.jpeg";
     std::string extraParam = "-i " + std::to_string(defaultId_) + " -w 100";
     ASSERT_EQ(true, TakeScreenshotBySpecifiedParam(defaultCmd_, imgPath, extraParam));
 }
@@ -202,7 +202,7 @@ HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid05, Function | MediumTest | Leve
  */
 HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid06, Function | MediumTest | Level2)
 {
-    const std::string imgPath = "/data/snapshot_display_test.png";
+    const std::string imgPath = "/data/snapshot_display_test.jpeg";
     std::string extraParam = "-i " + std::to_string(defaultId_) + " -h 100";
     ASSERT_EQ(true, TakeScreenshotBySpecifiedParam(defaultCmd_, imgPath, extraParam));
 }
@@ -214,7 +214,7 @@ HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid06, Function | MediumTest | Leve
  */
 HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid07, Function | MediumTest | Level2)
 {
-    const std::string imgPath = "/data/snapshot_display_test.png";
+    const std::string imgPath = "/data/snapshot_display_test.jpeg";
     std::string extraParam = "-i " + std::to_string(defaultId_) + " -w 10000 -h 10000";
     ASSERT_EQ(false, TakeScreenshotBySpecifiedParam(defaultCmd_, imgPath, extraParam));
 }
@@ -226,7 +226,7 @@ HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid07, Function | MediumTest | Leve
  */
 HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid08, Function | MediumTest | Level2)
 {
-    const std::string imgPath = "/data/snapshot_display_test.png";
+    const std::string imgPath = "/data/snapshot_display_test.jpeg";
     std::string extraParam = "-i " + std::to_string(defaultId_) + " -m";
     ASSERT_EQ(false, TakeScreenshotBySpecifiedParam(defaultCmd_, imgPath, extraParam));
 }
