@@ -30,7 +30,7 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
-    const std::string defaultFile_ = "/data/snapshot_display_1.png";
+    const std::string defaultFile_ = "/data/snapshot_display_1.jpeg";
     const int defaultBitDepth_ = 8;
 };
 
@@ -54,7 +54,7 @@ void SnapshotUtilsTest::TearDown()
 namespace {
 /**
  * @tc.name: Check01
- * @tc.desc: Check if default png is valid file names
+ * @tc.desc: Check if default jpeg is valid file names
  * @tc.type: FUNC
  */
 HWTEST_F(SnapshotUtilsTest, Check01, Function | SmallTest | Level3)
@@ -64,12 +64,12 @@ HWTEST_F(SnapshotUtilsTest, Check01, Function | SmallTest | Level3)
 
 /**
  * @tc.name: Check02
- * @tc.desc: Check custom png is valid file names
+ * @tc.desc: Check custom jpeg is valid file names
  * @tc.type: FUNC
  */
 HWTEST_F(SnapshotUtilsTest, Check02, Function | SmallTest | Level3)
 {
-    std::string fileName = "/data/test.png";
+    std::string fileName = "/data/test.jpeg";
     ASSERT_EQ(true, SnapShotUtils::CheckFileNameValid(fileName));
 }
 
@@ -80,7 +80,7 @@ HWTEST_F(SnapshotUtilsTest, Check02, Function | SmallTest | Level3)
  */
 HWTEST_F(SnapshotUtilsTest, Check03, Function | SmallTest | Level3)
 {
-    std::string fileName1 = "/path/to/test/1.png";
+    std::string fileName1 = "/path/to/test/1.jpeg";
     ASSERT_EQ(false, SnapShotUtils::CheckFileNameValid(fileName1));
     std::string fileName2 = "";
     ASSERT_EQ(false, SnapShotUtils::CheckFileNameValid(fileName2));
@@ -88,7 +88,7 @@ HWTEST_F(SnapshotUtilsTest, Check03, Function | SmallTest | Level3)
 
 /**
  * @tc.name: Write01
- * @tc.desc: Write default png using valid file names and valid PixelMap
+ * @tc.desc: Write default jpeg using valid file names and valid PixelMap
  * @tc.type: FUNC
  */
 HWTEST_F(SnapshotUtilsTest, Write01, Function | MediumTest | Level3)
@@ -101,7 +101,7 @@ HWTEST_F(SnapshotUtilsTest, Write01, Function | MediumTest | Level3)
 
 /**
  * @tc.name: Write02
- * @tc.desc: Write default png using valid file names and valid WriteToJpegParam
+ * @tc.desc: Write default jpeg using valid file names and valid WriteToJpegParam
  * @tc.type: FUNC
  */
 HWTEST_F(SnapshotUtilsTest, Write02, Function | MediumTest | Level3)
@@ -121,7 +121,7 @@ HWTEST_F(SnapshotUtilsTest, Write02, Function | MediumTest | Level3)
 
 /**
  * @tc.name: Write03
- * @tc.desc: Write custom png using valid file names and valid WriteToJpegParam
+ * @tc.desc: Write custom jpeg using valid file names and valid WriteToJpegParam
  * @tc.type: FUNC
  */
 HWTEST_F(SnapshotUtilsTest, Write03, Function | MediumTest | Level3)
@@ -141,7 +141,7 @@ HWTEST_F(SnapshotUtilsTest, Write03, Function | MediumTest | Level3)
 
 /**
  * @tc.name: Write04
- * @tc.desc: Write pixel map with png, using fd
+ * @tc.desc: Write pixel map with jpeg, using fd
  * @tc.type: FUNC
  */
 HWTEST_F(SnapshotUtilsTest, Write04, Function | MediumTest | Level3)
@@ -165,7 +165,7 @@ HWTEST_F(SnapshotUtilsTest, CheckWHValid, Function | SmallTest | Level3)
 
 /**
  * @tc.name: CheckParamValid01
- * @tc.desc: Check png param whether valid width
+ * @tc.desc: Check jpeg param whether valid width
  * @tc.type: FUNC
  */
 HWTEST_F(SnapshotUtilsTest, CheckParamValid01, Function | SmallTest | Level3)
@@ -182,7 +182,7 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid01, Function | SmallTest | Level3)
 
 /**
  * @tc.name: CheckParamValid02
- * @tc.desc: Check png param whether valid height
+ * @tc.desc: Check jpeg param whether valid height
  * @tc.type: FUNC
  */
 HWTEST_F(SnapshotUtilsTest, CheckParamValid02, Function | SmallTest | Level3)
@@ -199,7 +199,7 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid02, Function | SmallTest | Level3)
 
 /**
  * @tc.name: CheckParamValid03
- * @tc.desc: Check png param whether valid stride
+ * @tc.desc: Check jpeg param whether valid stride
  * @tc.type: FUNC
  */
 HWTEST_F(SnapshotUtilsTest, CheckParamValid03, Function | SmallTest | Level3)
@@ -216,7 +216,7 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid03, Function | SmallTest | Level3)
 
 /**
  * @tc.name: CheckParamValid04
- * @tc.desc: Check png param whether valid data
+ * @tc.desc: Check jpeg param whether valid data
  * @tc.type: FUNC
  */
 HWTEST_F(SnapshotUtilsTest, CheckParamValid04, Function | SmallTest | Level3)
