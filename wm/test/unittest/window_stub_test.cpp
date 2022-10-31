@@ -187,6 +187,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest06, Function | SmallTest | Level2)
     MessageOption option;
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
+    data.WriteRawData(nullptr, 0);
 
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_DUMP_INFO);
 
