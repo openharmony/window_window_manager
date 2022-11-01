@@ -71,10 +71,16 @@ WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeActio
 {
     return WMError::WM_OK;
 };
-void RegisterWindowManagerAgent(WindowManagerAgentType type,
-    const sptr<IWindowManagerAgent>& windowManagerAgent){};
-void UnregisterWindowManagerAgent(WindowManagerAgentType type,
-    const sptr<IWindowManagerAgent>& windowManagerAgent){};
+bool RegisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    return true;
+};
+bool UnregisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    return true;
+};
 WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
 {
     return WMError::WM_OK;

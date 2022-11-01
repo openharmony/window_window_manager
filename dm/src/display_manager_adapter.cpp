@@ -19,6 +19,8 @@
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 
+#include "display_manager.h"
+#include "screen_manager.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -283,7 +285,10 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
         WLOGFE("object is null");
         return;
     }
+    WLOGFI("dms OnRemoteDied");
     adapter_.Clear();
+    SingletonContainer::Get<DisplayManager>().OnRemoteDied();
+    SingletonContainer::Get<ScreenManager>().OnRemoteDied();
     return;
 }
 

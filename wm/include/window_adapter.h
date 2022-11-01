@@ -55,9 +55,9 @@ public:
     virtual WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones);
     virtual WMError UpdateRsTree(uint32_t windowId, bool isAdd);
     virtual WMError BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken);
-    virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,
+    virtual bool RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
-    virtual void UnregisterWindowManagerAgent(WindowManagerAgentType type,
+    virtual bool UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
 
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);
