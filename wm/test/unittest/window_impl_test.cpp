@@ -1673,6 +1673,24 @@ HWTEST_F(WindowImplTest, CalculatePointerDirection, Function | SmallTest | Level
     ASSERT_EQ(11, window->CalculatePointerDirection(102, 0));
     ASSERT_EQ(5, window->CalculatePointerDirection(102, 50));
 }
+
+/*
+ * @tc.name: IsFocused
+ * @tc.desc: IsFocused test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, IsFocused, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowImpl> window = new WindowImpl(option);
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
+    window->UpdateFocusStatus(false);
+    ASSERT_FALSE(window->IsFocused());
+    window->UpdateFocusStatus(true);
+    ASSERT_TRUE(window->IsFocused());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

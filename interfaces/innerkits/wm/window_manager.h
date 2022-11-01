@@ -119,17 +119,18 @@ public:
 class WindowManager {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowManager);
 friend class WindowManagerAgent;
+friend class WMSDeathRecipient;
 public:
-    void RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
-    void UnregisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
-    void RegisterSystemBarChangedListener(const sptr<ISystemBarChangedListener>& listener);
-    void UnregisterSystemBarChangedListener(const sptr<ISystemBarChangedListener>& listener);
-    void RegisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
-    void UnregisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
-    void RegisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
-    void UnregisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
-    void RegisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener);
-    void UnregisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener);
+    bool RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
+    bool UnregisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
+    bool RegisterSystemBarChangedListener(const sptr<ISystemBarChangedListener>& listener);
+    bool UnregisterSystemBarChangedListener(const sptr<ISystemBarChangedListener>& listener);
+    bool RegisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
+    bool UnregisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
+    bool RegisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
+    bool UnregisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
+    bool RegisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener);
+    bool UnregisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener);
     void MinimizeAllAppWindows(DisplayId displayId);
     WMError ToggleShownStateForAllAppWindows();
     WMError SetWindowLayoutMode(WindowLayoutMode mode);
@@ -151,6 +152,7 @@ private:
     void UpdateWindowVisibilityInfo(
         const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const;
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) const;
+    void OnRemoteDied() const;
 };
 } // namespace Rosen
 } // namespace OHOS
