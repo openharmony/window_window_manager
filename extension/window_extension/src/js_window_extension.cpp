@@ -213,7 +213,7 @@ void JsWindowExtension::OnStart(const AAFwk::Want& want)
     want.GetIntParam(RECT_FORM_KEY_POS_Y, 0),
     want.GetIntParam(RECT_FORM_KEY_WIDTH, 0),
     want.GetIntParam(RECT_FORM_KEY_HEIGHT, 0) };
-    uint32_t windowId = want.GetIntParam(WINDOW_ID, INVALID_WINDOW_ID);
+    uint32_t windowId = static_cast<uint32_t>(want.GetIntParam(WINDOW_ID, INVALID_WINDOW_ID));
     if (stub_ != nullptr) {
         auto context = GetContext();
         if (context == nullptr) {
