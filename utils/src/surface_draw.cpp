@@ -397,7 +397,7 @@ bool SurfaceDraw::DrawMasking(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect s
     canvas.DrawBitmap(transBitmap, static_cast<Drawing::scalar>(transparentRect.posX_),
         static_cast<Drawing::scalar>(transparentRect.posY_));
 
-    uint32_t addrSize = screenWidth * screenHeight * IMAGE_BYTES_STRIDE;
+    uint32_t addrSize = static_cast<uint32_t>(screenWidth * screenHeight * IMAGE_BYTES_STRIDE);
     errno_t ret = memcpy_s(addr, addrSize, fullbitmap.GetPixels(), addrSize);
     if (ret != EOK) {
         WLOGFE("draw failed");
