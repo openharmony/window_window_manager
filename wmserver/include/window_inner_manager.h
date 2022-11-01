@@ -67,7 +67,7 @@ protected:
 private:
     bool Init();
 
-    pid_t pid_;
+    pid_t pid_ = INVALID_PID;
     bool isRecentHolderEnable_ = false;
     sptr<MoveDragController> moveDragController_;
     // event handle for inner window
