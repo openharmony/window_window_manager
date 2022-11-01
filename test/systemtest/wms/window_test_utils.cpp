@@ -136,12 +136,17 @@ Rect WindowTestUtils::GetDefaultFloatingRect(const sptr<Window>& window)
     limitDisplayRect_ = displayRect_;
     UpdateSplitRects(window);
     constexpr uint32_t half = 2;
-    constexpr float ratio = DEFAULT_ASPECT_RATIO;  // 0.75: default height/width ratio
+    constexpr float ratio = DEFAULT_ASPECT_RATIO;  // 0.67: default height/width ratio
+    float vpr = GetVirtualPixelRatio(0);
 
-    // calculate default H and w
-    uint32_t defaultW = static_cast<uint32_t>(displayRect_.width_ * ratio);
-    uint32_t defaultH = static_cast<uint32_t>(displayRect_.height_ * ratio);
-
+    /*
+     * Calculate default width and height, if width or height is
+     * smaller than minWidth or minHeight, use the minimum limits
+     */
+    uint32_t defaultW = std::max(static_cast<uint32_t>(displayRect_.width_ * ratio),
+                                 static_cast<uint32_t>(MIN_FLOATING_WIDTH * vpr));
+    uint32_t defaultH = std::max(static_cast<uint32_t>(displayRect_.height_ * ratio),
+                                 static_cast<uint32_t>(MIN_FLOATING_HEIGHT * vpr));
     // calculate default x and y
     Rect resRect = {0, 0, defaultW, defaultH};
     if (defaultW <= limitDisplayRect_.width_ && defaultH <= limitDisplayRect_.height_) {
