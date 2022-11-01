@@ -66,7 +66,7 @@ private:
     std::vector<int> curvedScreenBoundary_; // Order: left top right bottom
 
     // Calulated data
-    WaterfallDisplayAreaRects waterfallDisplayAreaRects_;
+    WaterfallDisplayAreaRects waterfallDisplayAreaRects_ = {};
     std::map<DisplayId, std::vector<DMRect>> boundingRects_;
 
     // For waterfall display curved area compression.

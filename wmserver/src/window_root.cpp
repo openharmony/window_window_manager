@@ -550,7 +550,8 @@ Rect WindowRoot::GetDisplayRectWithoutSystemBarAreas(DisplayId displayId)
     bool isStatusShow = true;
     if (systemBarRects.count(WindowType::WINDOW_TYPE_STATUS_BAR)) {
         isStatusShow = systemBarRects[WindowType::WINDOW_TYPE_STATUS_BAR].first;
-        targetRect.posY_ = displayRect.posY_ + systemBarRects[WindowType::WINDOW_TYPE_STATUS_BAR].second.height_;
+        targetRect.posY_ = displayRect.posY_ + static_cast<int32_t>(
+            systemBarRects[WindowType::WINDOW_TYPE_STATUS_BAR].second.height_);
         targetRect.height_ -= systemBarRects[WindowType::WINDOW_TYPE_STATUS_BAR].second.height_;
         WLOGFD("after status bar winRect:[x:%{public}d, y:%{public}d, w:%{public}d, h:%{public}d]",
             targetRect.posX_, targetRect.posY_, targetRect.width_, targetRect.height_);

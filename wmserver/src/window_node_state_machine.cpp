@@ -35,7 +35,7 @@ WindowNodeStateMachine::~WindowNodeStateMachine()
 
 void WindowNodeStateMachine::SetDestroyTaskParam(bool onlySelf)
 {
-    destroyOnlySelf_ &= onlySelf;
+    destroyOnlySelf_ = destroyOnlySelf_ && onlySelf;
 }
 
 bool WindowNodeStateMachine::GetDestroyTaskParam()
