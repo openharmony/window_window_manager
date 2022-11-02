@@ -270,7 +270,8 @@ DeviceRotation ScreenRotationController::CalcDeviceRotation(SensorRotation senso
     if (sensorRotation == SensorRotation::INVALID) {
         return DeviceRotation::INVALID;
     }
-    int32_t bias = static_cast<int32_t>(defaultDeviceRotationOffset_ / 90); // offset(in degree) divided by 90 to get rotation bias
+    // offset(in degree) divided by 90 to get rotation bias
+    int32_t bias = static_cast<int32_t>(defaultDeviceRotationOffset_ / 90);
     int32_t deviceRotationValue = static_cast<int32_t>(sensorRotation) - bias;
     while (deviceRotationValue < 0) {
         // +4 is used to normalize the values into the range 0~3, corresponding to the four rotations.

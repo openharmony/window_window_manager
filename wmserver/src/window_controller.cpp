@@ -733,7 +733,8 @@ void WindowController::StopBootAnimationIfNeed(const sptr<WindowNode>& node)
         }
         auto windowRect = node->GetWindowRect();
         WmOcclusion::Rect curRect = { windowRect.posX_, windowRect.posY_,
-            windowRect.posX_ + static_cast<int32_t>(windowRect.width_), windowRect.posY_ + static_cast<int32_t>(windowRect.height_)};
+            windowRect.posX_ + static_cast<int32_t>(windowRect.width_),
+            windowRect.posY_ + static_cast<int32_t>(windowRect.height_) };
         WmOcclusion::Region curRegion(curRect);
         allRegion = curRegion.Or(allRegion);
         WmOcclusion::Region subResult = defaultDisplayRegion.Sub(allRegion);
