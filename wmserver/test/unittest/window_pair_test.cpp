@@ -1138,7 +1138,7 @@ HWTEST_F(WindowPairTest, ExitSplitMode03, Function | SmallTest | Level2)
     const Rect primary_rect1 = {0, 0, 20, 20};
     const Rect secondary_rect1 = {0, 20, 50, 70};
     const Rect secondary_rect2 = {0, 20, 10, 20};
-    node3->SetWindowRect(divider_rect1);//is_vertical false
+    node3->SetWindowRect(divider_rect1); // is_vertical false
     node2->SetWindowRect(secondary_rect1);
     node1->SetWindowRect(primary_rect1);
     windowPair->divider_ = node3;
