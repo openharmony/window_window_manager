@@ -157,7 +157,6 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
         }
         WLOGFI("StartingWindow::Replace surfaceNode, id: %{public}u", weakNode->GetWindowId());
         weakNode->leashWinSurfaceNode_->RemoveChild(weakNode->startingWinSurfaceNode_);
-        weakNode->leashWinSurfaceNode_->AddChild(weakNode->surfaceNode_, -1);
         AAFwk::AbilityManagerClient::GetInstance()->CompleteFirstFrameDrawing(weakNode->abilityToken_);
         RSTransaction::FlushImplicitTransaction();
         weakNode->firstFrameAvaliable_ = true;
