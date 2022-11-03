@@ -24,6 +24,7 @@ group("unittest") {
     ":utils_screen_group_info_test",
     ":utils_screen_info_test",
     ":utils_string_test",
+    ":utils_surface_draw_test",
     ":utils_window_helper_test",
     ":utils_window_property_test",
     ":utils_window_transition_info_test",
@@ -84,6 +85,25 @@ ohos_unittest("utils_wm_math_test") {
   deps = [ ":utils_unittest_common" ]
 }
 
+ohos_unittest("utils_surface_draw_test") {
+  module_out_path = module_out_path
+
+  sources = [ "surface_draw_test.cpp" ]
+
+  deps = [ ":utils_unittest_common" ]
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
+    "ability_runtime:abilitykit_native",
+    "ace_engine:ace_uicontent",
+    "input:libmmi-client",
+    "ipc:ipc_core",
+  ]
+}
+
 ohos_unittest("utils_window_helper_test") {
   module_out_path = module_out_path
 
@@ -134,6 +154,8 @@ config("utils_unittest_common_public_config") {
     "//foundation/window/window_manager/interfaces/innerkits/dm",
     "//foundation/window/window_manager/interfaces/innerkits/wm",
     "//foundation/window/window_manager/utils/include",
+    "//foundation/window/window_manager/wm/include",
+    "//foundation/window/window_manager/dm/include",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
   ]
 }
@@ -153,7 +175,9 @@ ohos_static_library("utils_unittest_common") {
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/window/window_manager/dm:libdm",
     "//foundation/window/window_manager/utils:libwmutil",
+    "//foundation/window/window_manager/wm:libwm",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
