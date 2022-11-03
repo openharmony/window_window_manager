@@ -102,6 +102,7 @@ public:
     // parentDisplayId is the same as displayId in single-display mode
     bool RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId displayId, DisplayId parentDisplayId,
         WindowUpdateType type, bool animationPlayed = false);
+    bool AddAppSurfaceNodeOnRSTree(sptr<WindowNode>& node);
 
     sptr<WindowLayoutPolicy> GetLayoutPolicy() const;
     sptr<AvoidAreaController> GetAvoidController() const;
@@ -159,6 +160,7 @@ private:
     bool CheckWindowNodeWhetherInWindowTree(const sptr<WindowNode>& node) const;
     void UpdateModeSupportInfoWhenKeyguardChange(const sptr<WindowNode>& node, bool up);
     void RemoveFromRsTreeWhenRemoveWindowNode(sptr<WindowNode>& node, bool fromAnimation);
+
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     uint32_t brightnessWindow_ = INVALID_WINDOW_ID;
     uint32_t zOrder_ { 0 };
