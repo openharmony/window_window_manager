@@ -621,6 +621,46 @@ WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarPropert
     return ret;
 }
 
+WMError WindowImpl::UpdateSystemBarProperty(bool status)
+{
+    if (!IsWindowValid()) {
+        WLOGFE("PutSystemBarProperty errCode:%{public}d winId:%{public}u",
+            static_cast<int32_t>(WMError::WM_ERROR_INVALID_WINDOW), property_->GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    SystemBarProperty naviProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    if (status) {
+        statusProperty.enable_ = false;
+        naviProperty.enable_ = false;
+    } else {
+        statusProperty.enable_ = true;
+        naviProperty.enable_ = true;
+    }
+
+    if ((GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR) == statusProperty) &&
+        (GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR) == naviProperty)) {
+        return WMError::WM_OK;
+    }
+    if (!(GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR) == statusProperty)) {
+        property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusProperty);
+    }
+    if (!(GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR) == naviProperty)) {
+        property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR, naviProperty);
+    }
+    if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
+        return WMError::WM_OK;
+    }
+
+    WMError ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetSystemBarProperty errCode:%{public}d winId:%{public}u",
+            static_cast<int32_t>(ret), property_->GetWindowId());
+    }
+    return ret;
+}
+
 WMError WindowImpl::SetLayoutFullScreen(bool status)
 {
     WLOGFI("[Client] Window %{public}u SetLayoutFullScreen: %{public}u", property_->GetWindowId(), status);
@@ -661,25 +701,9 @@ WMError WindowImpl::SetFullScreen(bool status)
         WLOGFE("invalid window or fullscreen mode is not be supported, winId:%{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    SystemBarProperty statusProperty = GetSystemBarPropertyByType(
-        WindowType::WINDOW_TYPE_STATUS_BAR);
-    SystemBarProperty naviProperty = GetSystemBarPropertyByType(
-        WindowType::WINDOW_TYPE_NAVIGATION_BAR);
-    if (status) {
-        statusProperty.enable_ = false;
-        naviProperty.enable_ = false;
-    } else {
-        statusProperty.enable_ = true;
-        naviProperty.enable_ = true;
-    }
-    WMError ret = SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusProperty);
+    WMError ret = UpdateSystemBarProperty(status);
     if (ret != WMError::WM_OK) {
-        WLOGFE("SetSystemBarProperty errCode:%{public}d winId:%{public}u",
-            static_cast<int32_t>(ret), property_->GetWindowId());
-    }
-    ret = SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR, naviProperty);
-    if (ret != WMError::WM_OK) {
-        WLOGFE("SetSystemBarProperty errCode:%{public}d winId:%{public}u",
+        WLOGFE("UpdateSystemBarProperty errCode:%{public}d winId:%{public}u",
             static_cast<int32_t>(ret), property_->GetWindowId());
     }
     ret = SetLayoutFullScreen(status);
@@ -1892,6 +1916,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
             property_->GetWindowId());
         return;
     }
+    Rect lastOriRect = property_->GetWindowRect();
 
     property_->SetDecoStatus(decoStatus);
     if (reason == WindowSizeChangeReason::HIDE) {
@@ -1919,7 +1944,9 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
         }
     }
     ResSchedReport::GetInstance().RequestPerfIfNeed(reason, GetType(), GetMode());
-    NotifySizeChange(rectToAce, reason);
+    if (rectToAce != lastOriRect) {
+        NotifySizeChange(rectToAce, reason);
+    }
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         if (uiContent_ == nullptr) {
