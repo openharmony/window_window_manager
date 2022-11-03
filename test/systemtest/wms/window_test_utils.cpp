@@ -261,8 +261,10 @@ void WindowTestUtils::InitTileWindowRects(const sptr<Window>& window)
     limitDisplayRect_ = displayRect_;
     UpdateSplitRects(window);
 
-    uint32_t w = displayRect_.width_ * ratio;
-    uint32_t h = displayRect_.height_ * ratio;
+    uint32_t minFloatingW = static_cast<uint32_t>(MIN_FLOATING_WIDTH * virtualPixelRatio);
+    uint32_t minFloatingH = static_cast<uint32_t>(MIN_FLOATING_HEIGHT * virtualPixelRatio);
+    uint32_t w = std::max(static_cast<uint32_t>(displayRect_.width_ * ratio), minFloatingW);
+    uint32_t h = std::max(static_cast<uint32_t>(displayRect_.height_ * ratio), minFloatingH);
     w = w > limitDisplayRect_.width_ ? limitDisplayRect_.width_ : w;
     h = h > limitDisplayRect_.height_ ? limitDisplayRect_.height_ : h;
     int x = limitDisplayRect_.posX_ + ((limitDisplayRect_.width_ - w) / half);
