@@ -161,10 +161,30 @@ HWTEST_F(DisplayDumperTest, Dump06, Function | SmallTest | Level1)
 
 /**
  * @tc.name: Dump07
- * @tc.desc: Dump two param with '-s -1'
+ * @tc.desc: Dump two param with '-s 1'
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayDumperTest, Dump07, Function | SmallTest | Level1)
+{
+    sptr<DisplayDumper> displayDumper;
+    displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
+        DisplayManagerService::GetInstance().abstractScreenController_,
+        DisplayManagerService::GetInstance().mutex_);
+    int fd = 5;
+    std::vector<std::u16string> args;
+    const std::u16string DUMP_SCREEN = u"-s";
+    const std::u16string DUMP_NUMBER = u"1";
+    args.emplace_back(DUMP_SCREEN);
+    args.emplace_back(DUMP_NUMBER);
+    displayDumper->Dump(fd, args);
+}
+
+/**
+ * @tc.name: Dump07
+ * @tc.desc: Dump two param with '-s -1'
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayDumperTest, Dump071, Function | SmallTest | Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -181,10 +201,30 @@ HWTEST_F(DisplayDumperTest, Dump07, Function | SmallTest | Level1)
 
 /**
  * @tc.name: Dump08
- * @tc.desc: Dump two param with '-d -1'
+ * @tc.desc: Dump two param with '-d 1'
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayDumperTest, Dump08, Function | SmallTest | Level1)
+{
+    sptr<DisplayDumper> displayDumper;
+    displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
+        DisplayManagerService::GetInstance().abstractScreenController_,
+        DisplayManagerService::GetInstance().mutex_);
+    int fd = 6;
+    std::vector<std::u16string> args;
+    const std::u16string DUMP_DISPLAY = u"-d";
+    const std::u16string DUMP_NUMBER = u"1";
+    args.emplace_back(DUMP_DISPLAY);
+    args.emplace_back(DUMP_NUMBER);
+    displayDumper->Dump(fd, args);
+}
+
+/**
+ * @tc.name: Dump09
+ * @tc.desc: Dump two param with '-d -1'
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayDumperTest, Dump09, Function | SmallTest | Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -200,11 +240,11 @@ HWTEST_F(DisplayDumperTest, Dump08, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: Dump09
- * @tc.desc: Dump three param with '-d -a -1'
+ * @tc.name: Dump10
+ * @tc.desc: Dump three param with '-d -a 1'
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayDumperTest, Dump09, Function | SmallTest | Level1)
+HWTEST_F(DisplayDumperTest, Dump10, Function | SmallTest | Level1)
 {
     sptr<DisplayDumper> displayDumper;
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
@@ -214,7 +254,7 @@ HWTEST_F(DisplayDumperTest, Dump09, Function | SmallTest | Level1)
     std::vector<std::u16string> args;
     const std::u16string DUMP_DISPLAY = u"-d";
     const std::u16string DUMP_ALL = u"-a";
-    const std::u16string DUMP_NUMBER = u"-1";
+    const std::u16string DUMP_NUMBER = u"1";
     args.emplace_back(DUMP_DISPLAY);
     args.emplace_back(DUMP_ALL);
     args.emplace_back(DUMP_NUMBER);
