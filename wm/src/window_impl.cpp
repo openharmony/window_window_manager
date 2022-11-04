@@ -30,6 +30,7 @@
 #include "ressched_report.h"
 #include "singleton_container.h"
 #include "surface_capture_future.h"
+#include "sys_cap_util.h"
 #include "window_adapter.h"
 #include "window_agent.h"
 #include "window_helper.h"
@@ -986,7 +987,7 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
             property_->SetTokenState(true);
         }
     }
-
+    InitAbilityInfo();
     SetSystemConfig();
 
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
@@ -1021,6 +1022,34 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
     InputTransferStation::GetInstance().AddInputWindow(self);
     needRemoveWindowInputChannel_ = true;
     return ret;
+}
+
+void WindowImpl::InitAbilityInfo()
+{
+    AbilityInfo info;
+    info.bundleName_ = SysCapUtil::GetBundleName();
+    auto originalAbilityInfo = GetOriginalAbilityInfo();
+    if (originalAbilityInfo != nullptr) {
+        info.abilityName_ = originalAbilityInfo->name;
+    } else {
+        WLOGFD("original ability info is null %{public}s", name_.c_str());
+    }
+    property_->SetAbilityInfo(info);
+}
+
+std::shared_ptr<AppExecFwk::AbilityInfo> WindowImpl::GetOriginalAbilityInfo() const
+{
+    if (context_ == nullptr) {
+        WLOGFD("context is null %{public}s", name_.c_str());
+        return nullptr;
+    }
+
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    if (abilityContext == nullptr) {
+        WLOGFD("abilityContext is null %{public}s", name_.c_str());
+        return nullptr;
+    }
+    return abilityContext->GetAbilityInfo();
 }
 
 WMError WindowImpl::BindDialogTarget(sptr<IRemoteObject> targetToken)
