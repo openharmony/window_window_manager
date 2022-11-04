@@ -474,6 +474,8 @@ private:
     WMError Destroy(bool needNotifyServer);
     WMError SetBackgroundColor(uint32_t color);
     uint32_t GetBackgroundColor() const;
+    void InitAbilityInfo();
+    std::shared_ptr<AppExecFwk::AbilityInfo> GetOriginalAbilityInfo() const;
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError errCode) const;
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     Rect GetSystemAlarmWindowDefaultSize(Rect defaultRect);
