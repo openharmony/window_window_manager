@@ -14,7 +14,7 @@
  */
 
 #include <gtest/gtest.h>
-#include "window_manager_config.h"
+#include "window_manager_service.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -26,25 +26,82 @@ const std::string XML_STR = R"(<?xml version='1.0' encoding="utf-8"?>
 <Configs>
     <!--decor enable is true means app main window show decoration-->
     <decor enable="false"></decor>
+    <!--max number of main window that could be shown on display-->
     <maxAppWindowNumber>100</maxAppWindowNumber>
+    <!--maximum number of windows supported by unified rendering -->
+    <maxUniRenderAppWindowNumber>99</maxUniRenderAppWindowNumber>
+    <!--minimizeByOther enable is true means fullscreen window will be minmized by other fullscreen window-->
+    <minimizeByOther enable="true"></minimizeByOther>
+    <!--window mdoe change hot zones config, fullscreen primary secondary-->
+    <modeChangeHotZones>50 50 50</modeChangeHotZones>
+    <!--stretchable enable is true means all window be stretchable-->
+    <stretchable enable="false"></stretchable>
+    <!--exit split screen mode ratio config-->
+    <exitSplitRatios>0.1 0.9</exitSplitRatios>
+    <!--split screen ratios config-->
+    <splitRatios>0.5 0.33 0.67</splitRatios>
+    <!--default window mode config-->
+    <defaultWindowMode>1</defaultWindowMode>
+    <!--window animation config-->
     <windowAnimation>
         <timing>
+            <!--duration of animation when add/remove window, unit is ms-->
             <duration>350</duration>
+            <!--timing curve of animation, config it as below:
+            name=ease, easeIn, easeOut, easeInOut, default, linear,
+            spring, interactiveSpring, cubic(float float float float)-->
             <curve name="easeOut"></curve>
         </timing>
+        <!--scaleX and scaleY of animation start state-->
         <scale>0.7 0.7</scale>
+        <!--rotation of animation start state, 4 numbers is axis and angle-->
         <rotation>0 0 1 0</rotation>
+        <!--translateX and translateY of animation start state-->
         <translate>0 0</translate>
+        <!--opacity of animation start state-->
         <opacity>0</opacity>
     </windowAnimation>
     <!--keyboard animation config-->
     <keyboardAnimation>
         <timing>
+            <!--duration of animation when add keyboard, unit is ms-->
             <durationIn>500</durationIn>
+            <!--duration of animation when remove keyboard, unit is ms-->
             <durationOut>300</durationOut>
+            <!--friction curve-->
             <curve name="cubic">0.2 0.0 0.2 1.0</curve>
         </timing>
     </keyboardAnimation>
+    <!--enable/disable remote animation-->
+    <remoteAnimation enable="true"></remoteAnimation>
+    <!--window effect config-->
+    <windowEffect>
+        <appWindows>
+            <cornerRadius>
+                <!--off: no corner, defaultCornerRadiusXS: 4vp, defaultCornerRadiusS: 8vp-->
+                <!--defaultCornerRadiusM: 12vp, defaultCornerRadiusL: 16vp, defaultCornerRadiusXL: 24vp-->
+                <fullScreen>off</fullScreen>
+                <split>off</split>
+                <float>off</float>
+            </cornerRadius>
+            <shadow>
+                <focused>
+                    <elevation>0</elevation>
+                    <color>#000000</color>
+                    <offsetX>0</offsetX>
+                    <offsetY>0</offsetY>
+                    <alpha>0</alpha>
+                </focused>
+                <unfocused>
+                    <elevation>0</elevation>
+                    <color>#000000</color>
+                    <offsetX>0</offsetX>
+                    <offsetY>0</offsetY>
+                    <alpha>0</alpha>
+                </unfocused>
+            </shadow>
+        </appWindows>
+    </windowEffect>
 </Configs>
 )";
 
@@ -55,9 +112,6 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
     ConfigItem ReadConfig(const std::string& xmlStr);
-    void ConfigMaxAppWindowNumber(const ConfigItem& config);
-    ConfigItem config_;
-    uint32_t maxAppWindowNumber_ = 100;
 };
 
 void WindowManagerConfigTest::SetUpTestCase()
@@ -70,22 +124,10 @@ void WindowManagerConfigTest::TearDownTestCase()
 
 void WindowManagerConfigTest::SetUp()
 {
-    config_ = ReadConfig(XML_STR);
 }
 
 void WindowManagerConfigTest::TearDown()
 {
-}
-
-void WindowManagerConfigTest::ConfigMaxAppWindowNumber(const ConfigItem& config)
-{
-    auto item = config["maxAppWindowNumber"];
-    if (item.IsInts()) {
-        auto numbers = *item.intsValue_;
-        if (numbers.size() == 1 && numbers[0] > 0) {
-            maxAppWindowNumber_ = numbers[0];
-        }
-    }
 }
 
 ConfigItem WindowManagerConfigTest::ReadConfig(const std::string& xmlStr)
@@ -118,26 +160,28 @@ namespace {
  */
 HWTEST_F(WindowManagerConfigTest, AnimationConfig, Function | SmallTest | Level2)
 {
-    ConfigItem item = config_["windowAnimation"];
+    WindowManagerConfig::config_ = ReadConfig(XML_STR);
+    WindowManagerService::GetInstance().ConfigureWindowManagerService();
+    ConfigItem item = WindowManagerConfig::config_["windowAnimation"];
     ASSERT_EQ(true, item.IsMap());
-    item = config_["windowAnimation"]["timing"]["duration"];
+    item = WindowManagerConfig::config_["windowAnimation"]["timing"]["duration"];
     ASSERT_EQ(true, item.IsInts());
     auto value = *item.intsValue_;
     ASSERT_EQ(true, value.size() == 1);
     ASSERT_EQ(350, value[0]);
-    item = config_["windowAnimation"]["timing"]["curve"].GetProp("name");
+    item = WindowManagerConfig::config_["windowAnimation"]["timing"]["curve"].GetProp("name");
     ASSERT_EQ(true, item.IsString());
     ASSERT_EQ("easeOut", item.stringValue_);
-    item = config_["windowAnimation"]["scale"];
+    item = WindowManagerConfig::config_["windowAnimation"]["scale"];
     ASSERT_EQ(true, item.IsFloats());
     ASSERT_EQ(true, item.floatsValue_->size() == 2);
-    item = config_["windowAnimation"]["rotation"];
+    item = WindowManagerConfig::config_["windowAnimation"]["rotation"];
     ASSERT_EQ(true, item.IsFloats());
     ASSERT_EQ(true, item.floatsValue_->size() == 4);
-    item = config_["windowAnimation"]["translate"];
+    item = WindowManagerConfig::config_["windowAnimation"]["translate"];
     ASSERT_EQ(true, item.IsFloats());
     ASSERT_EQ(true, item.floatsValue_->size() == 2);
-    item = config_["windowAnimation"]["opacity"];
+    item = WindowManagerConfig::config_["windowAnimation"]["opacity"];
     ASSERT_EQ(true, item.IsFloats());
     ASSERT_EQ(true, item.floatsValue_->size() == 1);
 }
@@ -147,39 +191,63 @@ HWTEST_F(WindowManagerConfigTest, AnimationConfig, Function | SmallTest | Level2
  * @tc.desc: maxAppWindowNumber test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerConfigTest, maxAppWindowNumber, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerConfigTest, MaxAppWindowNumber, Function | SmallTest | Level2)
 {
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<maxAppWindowNumber>0</maxAppWindowNumber>"
         "</Configs>";
-    ConfigItem config = ReadConfig(xmlStr);
-    ConfigMaxAppWindowNumber(config);
-    ASSERT_EQ(true, maxAppWindowNumber_ == 100);
+    WindowManagerConfig::config_ = ReadConfig(xmlStr);
+    WindowManagerService::GetInstance().ConfigureWindowManagerService();
+    ASSERT_EQ(true, WindowManagerService::GetInstance().windowRoot_->maxAppWindowNumber_ == 100);
 
     xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<maxAppWindowNumber>-2</maxAppWindowNumber>"
         "</Configs>";
-    config = ReadConfig(xmlStr);
-    ConfigMaxAppWindowNumber(config);
-    ASSERT_EQ(true, maxAppWindowNumber_ == 100);
+    WindowManagerConfig::config_ = ReadConfig(xmlStr);
+    WindowManagerService::GetInstance().ConfigureWindowManagerService();
+    ASSERT_EQ(true, WindowManagerService::GetInstance().windowRoot_->maxAppWindowNumber_ == 100);
 
     xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<maxAppWindowNumber>4</maxAppWindowNumber>"
         "</Configs>";
-    config = ReadConfig(xmlStr);
-    ConfigMaxAppWindowNumber(config);
-    ASSERT_EQ(true, maxAppWindowNumber_ == 4);
+    WindowManagerConfig::config_ = ReadConfig(xmlStr);
+    WindowManagerService::GetInstance().ConfigureWindowManagerService();
+    ASSERT_EQ(true, WindowManagerService::GetInstance().windowRoot_->maxAppWindowNumber_ == 4);
 
     xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<maxAppWindowNumber>1000</maxAppWindowNumber>"
         "</Configs>";
-    config = ReadConfig(xmlStr);
-    ConfigMaxAppWindowNumber(config);
-    ASSERT_EQ(true, maxAppWindowNumber_ == 1000);
+    WindowManagerConfig::config_ = ReadConfig(xmlStr);
+    WindowManagerService::GetInstance().ConfigureWindowManagerService();
+    ASSERT_EQ(true, WindowManagerService::GetInstance().windowRoot_->maxAppWindowNumber_ == 1000);
+}
+
+/**
+ * @tc.name: decor
+ * @tc.desc: set decor true and false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerConfigTest, Decor, Function | SmallTest | Level2)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<decor enable=\"true\"/>"
+        "</Configs>";
+    WindowManagerConfig::config_ = ReadConfig(xmlStr);
+    WindowManagerService::GetInstance().ConfigureWindowManagerService();
+    ASSERT_EQ(true, WindowManagerService::GetInstance().systemConfig_.isSystemDecorEnable_);
+
+    xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<decor enable=\"false\"/>"
+        "</Configs>";
+    WindowManagerConfig::config_ = ReadConfig(xmlStr);
+    WindowManagerService::GetInstance().ConfigureWindowManagerService();
+    ASSERT_EQ(false, WindowManagerService::GetInstance().systemConfig_.isSystemDecorEnable_);
 }
 } // namespace
 } // namespace Rosen
