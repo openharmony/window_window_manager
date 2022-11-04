@@ -32,12 +32,18 @@ public:
         std::shared_ptr<RSSurfaceNode> surfaceNode)
         : surfaceNode_(surfaceNode), property_(property), windowToken_(window)
     {
+        if (property != nullptr) {
+            abilityInfo_ = property->GetAbilityInfo();
+        }
     }
     WindowNode(const sptr<WindowProperty>& property, const sptr<IWindow>& window,
         std::shared_ptr<RSSurfaceNode> surfaceNode, int32_t pid, int32_t uid)
         : surfaceNode_(surfaceNode), property_(property), windowToken_(window), callingPid_(pid), callingUid_(uid)
     {
         inputCallingPid_ = pid;
+        if (property != nullptr) {
+            abilityInfo_ = property->GetAbilityInfo();
+        }
     }
     WindowNode() : property_(new WindowProperty())
     {
