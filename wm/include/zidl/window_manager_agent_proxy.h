@@ -39,4 +39,4 @@ private:
 };
 } // namespace Rosen
 } // namespace OHOS
-#endif // OHOS_WINDOW_MANAGER_PROXY_H
+#endif // OHOS_WINDOW_MANAGER_AGENT_PROXY_H
