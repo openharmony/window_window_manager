@@ -42,7 +42,12 @@ public:
     MOCK_METHOD2(GetModeChangeHotZones, WMError(DisplayId displayId, ModeChangeHotZones& hotZones));
     MOCK_METHOD3(NotifyServerReadyToMoveOrDrag, void(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty));
+    MOCK_METHOD2(RegisterWindowManagerAgent, bool(WindowManagerAgentType type,
+                                                const sptr<IWindowManagerAgent>& windowManagerAgent));
+    MOCK_METHOD2(UnregisterWindowManagerAgent, bool(WindowManagerAgentType type,
+                                                const sptr<IWindowManagerAgent>& windowManagerAgent));
     MOCK_METHOD1(GetVisibilityWindowInfo, WMError(std::vector<sptr<WindowVisibilityInfo>>& infos));
+    MOCK_METHOD1(GetAccessibilityWindowInfo, WMError(std::vector<sptr<AccessibilityWindowInfo>>& infos));
 };
 }
 } // namespace OHOS
