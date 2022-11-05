@@ -161,7 +161,7 @@ sptr<Window> ScreenManagerTest::CreateWindowByDisplayId(DisplayId displayId)
     if (option == nullptr) {
         return nullptr;
     }
-    Rect displayRect = {0, 0, 200, 400};
+    Rect displayRect = {0, 0, 640, 480};
     option->SetDisplayId(displayId);
     option->SetWindowRect(displayRect);
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
