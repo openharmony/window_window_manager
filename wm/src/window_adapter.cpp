@@ -39,35 +39,30 @@ WMError WindowAdapter::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>&
     std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId, const sptr<IRemoteObject>& token)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
     return windowManagerServiceProxy_->CreateWindow(window, windowProperty, surfaceNode, windowId, token);
 }
 
 WMError WindowAdapter::AddWindow(sptr<WindowProperty>& windowProperty)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
     return windowManagerServiceProxy_->AddWindow(windowProperty);
 }
 
 WMError WindowAdapter::RemoveWindow(uint32_t windowId)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
     return windowManagerServiceProxy_->RemoveWindow(windowId);
 }
 
 WMError WindowAdapter::DestroyWindow(uint32_t windowId)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
     return windowManagerServiceProxy_->DestroyWindow(windowId);
 }
 
 WMError WindowAdapter::RequestFocus(uint32_t windowId)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
     return windowManagerServiceProxy_->RequestFocus(windowId);
 }
 
@@ -75,7 +70,6 @@ bool WindowAdapter::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     INIT_PROXY_CHECK_RETURN(false);
-
     return windowManagerServiceProxy_->RegisterWindowManagerAgent(type, windowManagerAgent);
 }
 
@@ -83,21 +77,18 @@ bool WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     INIT_PROXY_CHECK_RETURN(false);
-
     return windowManagerServiceProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
 }
 
 WMError WindowAdapter::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
     return windowManagerServiceProxy_->GetAccessibilityWindowInfo(infos);
 }
 
 WMError WindowAdapter::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
     return windowManagerServiceProxy_->GetVisibilityWindowInfo(infos);
 }
 
@@ -118,49 +109,42 @@ void WindowAdapter::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<Window
     sptr<MoveDragProperty>& moveDragProperty)
 {
     INIT_PROXY_CHECK_RETURN();
-
     return windowManagerServiceProxy_->NotifyServerReadyToMoveOrDrag(windowId, windowProperty, moveDragProperty);
 }
 
 void WindowAdapter::ProcessPointDown(uint32_t windowId)
 {
     INIT_PROXY_CHECK_RETURN();
-
     return windowManagerServiceProxy_->ProcessPointDown(windowId);
 }
 
 void WindowAdapter::ProcessPointUp(uint32_t windowId)
 {
     INIT_PROXY_CHECK_RETURN();
-
     return windowManagerServiceProxy_->ProcessPointUp(windowId);
 }
 
 void WindowAdapter::MinimizeAllAppWindows(DisplayId displayId)
 {
     INIT_PROXY_CHECK_RETURN();
-
     windowManagerServiceProxy_->MinimizeAllAppWindows(displayId);
 }
 
 WMError WindowAdapter::ToggleShownStateForAllAppWindows()
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
     return windowManagerServiceProxy_->ToggleShownStateForAllAppWindows();
 }
 
 WMError WindowAdapter::GetSystemConfig(SystemConfig& systemConfig)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
     return windowManagerServiceProxy_->GetSystemConfig(systemConfig);
 }
 
 WMError WindowAdapter::GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
     return windowManagerServiceProxy_->GetModeChangeHotZones(displayId, hotZones);
 }
 
@@ -230,14 +214,12 @@ void WMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 WMError WindowAdapter::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
     return windowManagerServiceProxy_->GetTopWindowId(mainWinId, topWinId);
 }
 
 WMError WindowAdapter::SetWindowLayoutMode(WindowLayoutMode mode)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
     return windowManagerServiceProxy_->SetWindowLayoutMode(mode);
 }
 
@@ -250,7 +232,6 @@ WMError WindowAdapter::UpdateProperty(sptr<WindowProperty>& windowProperty, Prop
 WMError WindowAdapter::NotifyWindowTransition(sptr<WindowTransitionInfo> from, sptr<WindowTransitionInfo> to)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
     return windowManagerServiceProxy_->NotifyWindowTransition(from, to, true);
 }
 
@@ -259,7 +240,6 @@ void WindowAdapter::MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, b
 {
     INIT_PROXY_CHECK_RETURN();
     windowManagerServiceProxy_->MinimizeWindowsByLauncher(windowIds, isAnimated, finishCallback);
-    return;
 }
 
 WMError WindowAdapter::UpdateAvoidAreaListener(uint32_t windowId, bool haveListener)
