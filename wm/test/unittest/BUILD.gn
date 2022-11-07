@@ -161,6 +161,7 @@ config("wm_unittest_common_public_config") {
     "//base/global/resource_management/interfaces/inner_api/include",
     "//third_party/node/deps/icu-small/source/common",
     "${ability_runtime_inner_api_path}/ability_manager/include",
+    "//foundation/ability/ability_base/interfaces/kits/native/configuration/include/",
 
     # abilityContext end
   ]
@@ -198,6 +199,7 @@ ohos_static_library("wm_unittest_common") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "bundle_framework:appexecfwk_base",

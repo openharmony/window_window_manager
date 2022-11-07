@@ -164,6 +164,10 @@ void DisplayCutoutController::CalcBuiltInDisplayWaterfallRects()
     sptr<SupportedScreenModes> modes =
         DisplayManagerServiceInner::GetInstance().GetScreenModesByDisplayId(
             DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId());
+    if (!modes) {
+        WLOGE("support screen modes get failed");
+        return;
+    }
     uint32_t displayHeight = modes->height_;
     uint32_t displayWidth = modes->width_;
 
@@ -174,7 +178,7 @@ void DisplayCutoutController::CalcBuiltInDisplayWaterfallRects()
         return;
     }
     CalcBuiltInDisplayWaterfallRectsByRotation(
-        DisplayManagerServiceInner::GetInstance().GetDisplayById(0)->GetRotation(),
+        DisplayManagerServiceInner::GetInstance().GetDefaultDisplay()->GetRotation(),
         displayHeight, displayWidth);
 }
 
@@ -235,7 +239,12 @@ void DisplayCutoutController::TransferBoundingRectsByRotation(DisplayId displayI
         boundingRects = resultVec;
         return;
     }
-    Rotation currentRotation = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId)->GetRotation();
+    sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
+    if (!displayInfo) {
+        WLOGFE("display invaild");
+        return;
+    }
+    Rotation currentRotation = displayInfo->GetRotation();
     CheckBoundingRectsBoundary(displayId, displayBoundingRects);
     if (currentRotation == Rotation::ROTATION_0) {
         boundingRects = displayBoundingRects;
@@ -243,6 +252,10 @@ void DisplayCutoutController::TransferBoundingRectsByRotation(DisplayId displayI
     }
     sptr<SupportedScreenModes> modes =
         DisplayManagerServiceInner::GetInstance().GetScreenModesByDisplayId(displayId);
+    if (!modes) {
+        WLOGE("support screen modes get failed");
+        return;
+    }
     uint32_t displayHeight = modes->height_;
     uint32_t displayWidth = modes->width_;
     
