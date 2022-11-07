@@ -228,6 +228,7 @@ sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
     displayInfo->SetVirtualPixelRatio(virtualPixelRatio_);
     displayInfo->SetRotation(rotation_);
     displayInfo->SetOrientation(orientation_);
+    displayInfo->SetDpi(virtualPixelRatio_ * DOT_PER_INCH);
     displayInfo->displayState_ = displayState_;
     displayInfo->SetWaterfallDisplayCompressionStatus(waterfallDisplayCompressionStatus_);
     return displayInfo;
