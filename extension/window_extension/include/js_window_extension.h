@@ -29,7 +29,7 @@ namespace OHOS {
 namespace Rosen {
 class JsWindowExtension : public WindowExtension {
 public:
-    JsWindowExtension(AbilityRuntime::JsRuntime& jsRuntime);
+    explicit JsWindowExtension(AbilityRuntime::JsRuntime& jsRuntime);
     virtual ~JsWindowExtension() override;
 
     /**

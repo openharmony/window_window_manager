@@ -72,7 +72,7 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             PointInfo point;
             point.x = data.ReadInt32();
             point.y = data.ReadInt32();
-            DragEvent event = static_cast<DragEvent> (data.ReadUint32());
+            DragEvent event = static_cast<DragEvent>(data.ReadUint32());
             UpdateWindowDragInfo(point, event);
             break;
         }

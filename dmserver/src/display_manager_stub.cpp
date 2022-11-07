@@ -71,7 +71,7 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
                 surface = Surface::CreateSurfaceAsProducer(bp);
             }
             sptr<IRemoteObject> virtualScreenAgent = data.ReadRemoteObject();
-            VirtualScreenOption option = {
+            VirtualScreenOption virScrOption = {
                 .name_ = name,
                 .width_ = width,
                 .height_ = height,
@@ -80,7 +80,7 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
                 .flags_ = flags,
                 .isForShot_ = isForShot
             };
-            ScreenId screenId = CreateVirtualScreen(option, virtualScreenAgent);
+            ScreenId screenId = CreateVirtualScreen(virScrOption, virtualScreenAgent);
             reply.WriteUint64(static_cast<uint64_t>(screenId));
             break;
         }
