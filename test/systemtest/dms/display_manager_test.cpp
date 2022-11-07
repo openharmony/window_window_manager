@@ -23,6 +23,7 @@
 #include "window.h"
 #include "window_option.h"
 #include "window_manager_hilog.h"
+#include "display_manager_agent_controller.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -32,6 +33,15 @@ namespace  {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DisplayManagerTest"};
     const int WAIT_FOR_SYNC_US = 1000 * 500;  // 500ms
 }
+
+class DisplayChangeEventListener : public DisplayManager::IDisplayListener {
+public:
+    virtual void OnCreate(DisplayId displayId) {}
+
+    virtual void OnDestroy(DisplayId displayId) {}
+
+    virtual void OnChange(DisplayId displayId) {}
+};
 
 class DisplayManagerTest : public testing::Test {
 public:
@@ -278,5 +288,6 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowSkipSnapShot, Function | SmallTest 
     window2->Destroy();
     ASSERT_TRUE(!hasPrivateWindow);
 }
+
 }
 } // namespace OHOS::Rosen

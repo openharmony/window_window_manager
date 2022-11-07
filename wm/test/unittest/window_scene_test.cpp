@@ -18,6 +18,7 @@
 #include "mock_static_call.h"
 #include "singleton_mocker.h"
 #include "window_impl.h"
+#include <configuration.h>
 
 using namespace testing;
 using namespace testing::ext;
@@ -187,12 +188,167 @@ HWTEST_F(WindowSceneTest, GetMainWindow01, Function | SmallTest | Level2)
 
 /**
  * @tc.name: GetMainWindow02
- * @tc.desc: GetMainWindow01 with scene init success
+ * @tc.desc: GetMainWindow01 with nullptr
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneTest, GetMainWindow02, Function | SmallTest | Level2)
 {
     ASSERT_NE(nullptr, scene_->GetMainWindow());
+}
+
+/**
+ * @tc.name: GetSubWindow01
+ * @tc.desc: GetSubWindow without scene init
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, GetSubWindow01, Function | SmallTest | Level2)
+{
+    sptr<WindowScene> scene = new WindowScene();
+    std::vector<sptr<Window>> subWindows = scene->GetSubWindow();
+    ASSERT_TRUE(subWindows.empty());
+}
+
+/**
+ * @tc.name: GetSubWindow02
+ * @tc.desc: GetSubWindow without scene init
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, GetSubWindow02, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> optionTest = new WindowOption();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
+    DisplayId displayId = 0;
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowScene> scene = new WindowScene();
+    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext, listener));
+    std::vector<sptr<Window>> subWindows = scene->GetSubWindow();
+    ASSERT_TRUE(subWindows.empty());
+}
+
+/**
+ * @tc.name: OnNewWant01
+ * @tc.desc: OnNewWant nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, OnNewWant01, Function | SmallTest | Level2)
+{
+    sptr<WindowScene> scene = new WindowScene();
+    AAFwk::Want want;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->OnNewWant(want));
+}
+
+/**
+ * @tc.name: OnNewWant02
+ * @tc.desc: OnNewWant without scene init
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, OnNewWant02, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> optionTest = new WindowOption();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
+    DisplayId displayId = 0;
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowScene> scene = new WindowScene();
+    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext, listener));
+    AAFwk::Want want;
+    ASSERT_EQ(WMError::WM_OK, scene->OnNewWant(want));
+}
+
+/**
+ * @tc.name: UpdateConfiguration01
+ * @tc.desc: UpdateConfiguration nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, UpdateConfiguration01, Function | SmallTest | Level2)
+{
+    sptr<WindowScene> scene = new WindowScene();
+    std::shared_ptr<AppExecFwk::Configuration> configuration = nullptr;
+    scene->UpdateConfiguration(configuration);
+}
+
+/**
+ * @tc.name: UpdateConfiguration02
+ * @tc.desc: UpdateConfiguration without scene init
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, UpdateConfiguration02, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> optionTest = new WindowOption();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
+    DisplayId displayId = 0;
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowScene> scene = new WindowScene();
+    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext, listener));
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+    scene->UpdateConfiguration(configuration);
+}
+
+/**
+ * @tc.name: GetContentInfo01
+ * @tc.desc: GetContentInfo nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, GetContentInfo01, Function | SmallTest | Level2)
+{
+    sptr<WindowScene> scene = new WindowScene();
+    ASSERT_EQ("", scene->GetContentInfo());
+}
+
+/**
+ * @tc.name: GetContentInfo02
+ * @tc.desc: GetContentInfo without scene init
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, GetContentInfo02, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> optionTest = new WindowOption();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
+    DisplayId displayId = 0;
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowScene> scene = new WindowScene();
+    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext, listener));
+    ASSERT_EQ("", scene->GetContentInfo());
+}
+
+/**
+ * @tc.name: SetSystemBarProperty01
+ * @tc.desc: SetSystemBarProperty nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, SetSystemBarProperty01, Function | SmallTest | Level2)
+{
+    sptr<WindowScene> scene = new WindowScene();
+    WindowType type = WindowType::WINDOW_TYPE_DIALOG;
+    SystemBarProperty property;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->SetSystemBarProperty(type, property));
+}
+
+/**
+ * @tc.name: SetSystemBarProperty02
+ * @tc.desc: SetSystemBarProperty without scene init
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, SetSystemBarProperty02, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> optionTest = new WindowOption();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
+    DisplayId displayId = 0;
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowScene> scene = new WindowScene();
+    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext, listener));
+    WindowType type = WindowType::WINDOW_TYPE_DIALOG;
+    SystemBarProperty property;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, scene->SetSystemBarProperty(type, property));
 }
 
 /**
