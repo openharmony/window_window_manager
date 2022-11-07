@@ -670,7 +670,7 @@ NativeValue* JsWindowManager::OnUnregisterWindowManagerCallback(NativeEngine& en
         registerManager_->UnregisterListener(nullptr, cbType, CaseType::CASE_WINDOW_MANAGER, value);
     } else {
         value = info.argv[1];
-        if ((value== nullptr) || (!value->IsCallable())) {
+        if ((value == nullptr) || (!value->IsCallable())) {
             registerManager_->UnregisterListener(nullptr, cbType, CaseType::CASE_WINDOW_MANAGER, nullptr);
         } else {
             registerManager_->UnregisterListener(nullptr, cbType, CaseType::CASE_WINDOW_MANAGER, value);

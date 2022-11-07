@@ -48,9 +48,9 @@ void WindowNode::SetWindowRect(const Rect& rect)
     property_->SetWindowRect(rect);
 }
 
-void WindowNode::SetDecoStatus(bool status)
+void WindowNode::SetDecoStatus(bool decoStatus)
 {
-    property_->SetDecoStatus(status);
+    property_->SetDecoStatus(decoStatus);
 }
 
 void WindowNode::SetRequestRect(const Rect& rect)

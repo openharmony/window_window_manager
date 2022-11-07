@@ -29,10 +29,10 @@ public:
     ~RSIWindowAnimationControllerMocker() {};
     MOCK_METHOD3(OnStartApp, void(StartingAppType type, const sptr<RSWindowAnimationTarget>& startingWindowTarget,
         const sptr<RSIWindowAnimationFinishedCallback>& finishedCallback));
-    MOCK_METHOD3(OnAppTransition, void(const sptr<RSWindowAnimationTarget>& from, const sptr<RSWindowAnimationTarget>& to,
-        const sptr<RSIWindowAnimationFinishedCallback>& finishedCallback));
-    MOCK_METHOD3(OnAppBackTransition, void(const sptr<RSWindowAnimationTarget>& from, const sptr<RSWindowAnimationTarget>& to,
-        const sptr<RSIWindowAnimationFinishedCallback>& finishedCallback));
+    MOCK_METHOD3(OnAppTransition, void(const sptr<RSWindowAnimationTarget>& from,
+        const sptr<RSWindowAnimationTarget>& to, const sptr<RSIWindowAnimationFinishedCallback>& finishedCallback));
+    MOCK_METHOD3(OnAppBackTransition, void(const sptr<RSWindowAnimationTarget>& from,
+        const sptr<RSWindowAnimationTarget>& to, const sptr<RSIWindowAnimationFinishedCallback>& finishedCallback));
     MOCK_METHOD2(OnMinimizeWindow, void(const sptr<RSWindowAnimationTarget>& minimizingWindow,
         const sptr<RSIWindowAnimationFinishedCallback>& finishedCallback));
     MOCK_METHOD2(OnMinimizeAllWindow, void(std::vector<sptr<RSWindowAnimationTarget>> minimizingWindows,

@@ -36,7 +36,7 @@ class WindowTransitionInfo : public Parcelable {
 public:
     WindowTransitionInfo() = default;
     ~WindowTransitionInfo() = default;
-    WindowTransitionInfo(sptr<AAFwk::AbilityTransitionInfo> info);
+    explicit WindowTransitionInfo(sptr<AAFwk::AbilityTransitionInfo> info);
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static WindowTransitionInfo* Unmarshalling(Parcel& parcel);

@@ -118,7 +118,7 @@ napi_value AsyncProcess(napi_env env,
 
     auto completeFunc = [](napi_env env, napi_status status, void *data) {
         AsyncCallbackInfo *info = reinterpret_cast<AsyncCallbackInfo *>(data);
-        napi_value result[PARAM_NUMBER] = {0};
+        napi_value result[PARAM_NUMBER] = {nullptr};
         if (info->param->wret == Rosen::DmErrorCode::DM_OK) {
             napi_get_undefined(env, &result[0]);
             result[1] = info->resolve(env, info->param);

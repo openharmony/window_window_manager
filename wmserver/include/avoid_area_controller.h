@@ -39,7 +39,7 @@ enum class AvoidControlType : uint32_t {
 
 class AvoidAreaController : public RefBase {
 public:
-    AvoidAreaController(uint32_t& focusedWindow) : focusedWindow_(focusedWindow) {};
+    explicit AvoidAreaController(uint32_t& focusedWindow) : focusedWindow_(focusedWindow) {};
     ~AvoidAreaController() = default;
 
     void UpdateAvoidAreaListener(sptr<WindowNode>& windowNode, bool isRegisterListener);

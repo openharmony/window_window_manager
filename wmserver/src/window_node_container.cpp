@@ -91,7 +91,9 @@ uint32_t WindowNodeContainer::GetWindowCountByType(WindowType windowType)
 {
     uint32_t windowNumber = 0;
     auto counter = [&windowNumber, &windowType](sptr<WindowNode>& windowNode) {
-        if (windowNode->GetWindowType() == windowType && !windowNode->startingWindowShown_) ++windowNumber;
+        if (windowNode->GetWindowType() == windowType && !windowNode->startingWindowShown_) {
+            ++windowNumber;
+        }
     };
     std::for_each(belowAppWindowNode_->children_.begin(), belowAppWindowNode_->children_.end(), counter);
     std::for_each(appWindowNode_->children_.begin(), appWindowNode_->children_.end(), counter);
@@ -1906,6 +1908,24 @@ Rect WindowNodeContainer::GetDisplayGroupRect() const
     return layoutPolicy_->GetDisplayGroupRect();
 }
 
+void WindowNodeContainer::UpdateSizeChangeReason(sptr<WindowNode>& node, WindowMode srcMode, WindowMode dstMode)
+{
+    if ((srcMode == WindowMode::WINDOW_MODE_FULLSCREEN) && (dstMode == WindowMode::WINDOW_MODE_FLOATING)) {
+        node->SetWindowSizeChangeReason(WindowSizeChangeReason::RECOVER);
+    } else if (dstMode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        node->SetWindowSizeChangeReason(WindowSizeChangeReason::MAXIMIZE);
+        if (srcMode == WindowMode::WINDOW_MODE_FLOATING) {
+            node->SetRequestRect(node->GetWindowRect());
+        }
+    } else if (WindowHelper::IsFullScreenWindow(srcMode) && WindowHelper::IsSplitWindowMode(dstMode)) {
+        node->SetWindowSizeChangeReason(WindowSizeChangeReason::FULL_TO_SPLIT);
+    } else if (WindowHelper::IsSplitWindowMode(srcMode) && WindowHelper::IsFullScreenWindow(dstMode)) {
+        node->SetWindowSizeChangeReason(WindowSizeChangeReason::SPLIT_TO_FULL);
+    } else {
+        node->SetWindowSizeChangeReason(WindowSizeChangeReason::RESIZE);
+    }
+}
+
 WMError WindowNodeContainer::SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode)
 {
     if (node == nullptr) {
@@ -1923,20 +1943,7 @@ WMError WindowNodeContainer::SetWindowMode(sptr<WindowNode>& node, WindowMode ds
     }
 
     WMError res = WMError::WM_OK;
-    if ((srcMode == WindowMode::WINDOW_MODE_FULLSCREEN) && (dstMode == WindowMode::WINDOW_MODE_FLOATING)) {
-        node->SetWindowSizeChangeReason(WindowSizeChangeReason::RECOVER);
-    } else if (dstMode == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        node->SetWindowSizeChangeReason(WindowSizeChangeReason::MAXIMIZE);
-        if (srcMode == WindowMode::WINDOW_MODE_FLOATING) {
-            node->SetRequestRect(node->GetWindowRect());
-        }
-    } else if (WindowHelper::IsFullScreenWindow(srcMode) && WindowHelper::IsSplitWindowMode(dstMode)) {
-        node->SetWindowSizeChangeReason(WindowSizeChangeReason::FULL_TO_SPLIT);
-    } else if (WindowHelper::IsSplitWindowMode(srcMode) && WindowHelper::IsFullScreenWindow(dstMode)) {
-        node->SetWindowSizeChangeReason(WindowSizeChangeReason::SPLIT_TO_FULL);
-    } else {
-        node->SetWindowSizeChangeReason(WindowSizeChangeReason::RESIZE);
-    }
+    UpdateSizeChangeReason(node, srcMode, dstMode);
     node->SetWindowMode(dstMode);
     auto windowPair = displayGroupController_->GetWindowPairByDisplayId(node->GetDisplayId());
     if (windowPair == nullptr) {

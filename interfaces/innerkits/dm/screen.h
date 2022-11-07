@@ -92,7 +92,7 @@ public:
     DMError SetScreenColorTransform();
 protected:
     // No more methods or variables can be defined here.
-    Screen(sptr<ScreenInfo> info);
+    explicit Screen(sptr<ScreenInfo> info);
     void UpdateScreenInfo() const;
     void UpdateScreenInfo(sptr<ScreenInfo> info) const;
 private:
