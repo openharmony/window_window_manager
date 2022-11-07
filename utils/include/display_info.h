@@ -46,6 +46,7 @@ public:
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(float, VirtualPixelRatio, virtualPixelRatio, 1.0f);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(float, XDpi, xDpi, 0.0f);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(float, YDpi, yDpi, 0.0f);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(int32_t, Dpi, dpi, 320);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Rotation, Rotation, rotation, Rotation::ROTATION_0);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, Orientation, orientation, Orientation::UNSPECIFIED);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(int32_t, OffsetX, offsetX, 0);
