@@ -83,6 +83,24 @@ HWTEST_F(ScreenGroupTest, UpdateScreenGroupInfo01, Function | SmallTest | Level2
     ScreenCombination comb = screenGroup->GetCombination();
     ASSERT_EQ(ScreenCombination::SCREEN_EXPAND, comb);
 }
+
+/**
+ * @tc.name: UpdateScreenGroupInfo03
+ * @tc.desc: test InterfaceToken check success
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenGroupTest, UpdateScreenGroupInfo03, Function | SmallTest | Level2)
+{
+    sptr<ScreenGroupInfo> screenGroupInfo = new(std::nothrow) ScreenGroupInfo();
+    sptr<ScreenGroup> screenGroup = new ScreenGroup(screenGroupInfo);
+    std::vector<Point> position;
+    position.emplace_back(0, 0);
+    screenGroupInfo->position_ = position;
+    SingletonMocker<ScreenManagerAdapter, MockScreenManagerAdapter> m;
+    EXPECT_CALL(m.Mock(), GetScreenGroupInfoById(_)).Times(1).WillOnce(Return(screenGroupInfo));
+    std::vector<Point> pos = screenGroup->GetChildPositions();
+    ASSERT_EQ(position.size(), pos.size());
+}
 }
 }
 }
