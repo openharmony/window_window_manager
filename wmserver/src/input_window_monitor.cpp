@@ -145,6 +145,7 @@ void InputWindowMonitor::UpdateDisplayInfo(const std::vector<sptr<DisplayInfo>>&
             .y = offsetY,
             .width = static_cast<int32_t>(displayWidth),
             .height = static_cast<int32_t>(displayHeight),
+            .dpi = displayInfo->GetDpi(),
             .name = (std::stringstream("display ")<<displayInfo->GetDisplayId()).str(),
             .uniq = "default" + std::to_string(displayInfo->GetDisplayId()),
             .direction = GetDisplayDirectionForMmi(displayInfo->GetRotation()),
