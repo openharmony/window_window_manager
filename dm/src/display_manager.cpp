@@ -60,6 +60,7 @@ private:
     void NotifyDisplayDestroy(DisplayId);
     void NotifyDisplayChange(sptr<DisplayInfo> displayInfo);
     bool UpdateDisplayInfoLocked(sptr<DisplayInfo>);
+    void Clear();
 
     std::map<DisplayId, sptr<Display>> displayMap_;
     DisplayStateCallback displayStateCallback_;
@@ -186,32 +187,39 @@ private:
 
 bool DisplayManager::Impl::CheckRectValid(const Media::Rect& rect, int32_t oriHeight, int32_t oriWidth) const
 {
-    if (!((rect.left >= 0) && (rect.left < oriWidth) && (rect.top >= 0) && (rect.top < oriHeight))) {
-        WLOGFE("rect left or top invalid!");
+    if (rect.left < 0) {
         return false;
     }
-
-    if (!((rect.width > 0) && (rect.width <= (oriWidth - rect.left)) &&
-        (rect.height > 0) && (rect.height <= (oriHeight - rect.top)))) {
-        if (!((rect.width == 0) && (rect.height == 0))) {
-            WLOGFE("rect height or width invalid!");
-            return false;
-        }
+    if (rect.top < 0) {
+        return false;
+    }
+    if (rect.width < 0) {
+        return false;
+    }
+    if (rect.height < 0) {
+        return false;
+    }
+    if (rect.width + rect.left > oriWidth) {
+        return false;
+    }
+    if (rect.height + rect.top > oriHeight) {
+        return false;
     }
     return true;
 }
 
 bool DisplayManager::Impl::CheckSizeValid(const Media::Size& size, int32_t oriHeight, int32_t oriWidth) const
 {
-    if (!((size.width > 0) && (size.height > 0))) {
-        if (!((size.width == 0) && (size.height == 0))) {
-            WLOGFE("width or height invalid!");
-            return false;
-        }
+    if (size.width < 0) {
+        return false;
     }
-
-    if ((size.width > MAX_RESOLUTION_SIZE_SCREENSHOT) or (size.height > MAX_RESOLUTION_SIZE_SCREENSHOT)) {
-        WLOGFE("width or height too big!");
+    if (size.height < 0) {
+        return false;
+    }
+    if (size.width > MAX_RESOLUTION_SIZE_SCREENSHOT) {
+        return false;
+    }
+    if (size.height > MAX_RESOLUTION_SIZE_SCREENSHOT) {
         return false;
     }
     return true;
@@ -228,7 +236,7 @@ void DisplayManager::Impl::ClearDisplayStateCallback()
     }
 }
 
-DisplayManager::Impl::~Impl()
+void DisplayManager::Impl::Clear()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     bool res = true;
@@ -250,6 +258,11 @@ DisplayManager::Impl::~Impl()
         WLOGFW("UnregisterDisplayManagerAgent DISPLAY_POWER_EVENT_LISTENER failed !");
     }
     ClearDisplayStateCallback();
+}
+
+DisplayManager::Impl::~Impl()
+{
+    Clear();
 }
 
 DisplayManager::DisplayManager() : pImpl_(new Impl())
