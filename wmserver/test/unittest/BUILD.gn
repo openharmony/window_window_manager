@@ -206,6 +206,11 @@ ohos_unittest("wmserver_window_dumper_test") {
   sources = [ "window_dumper_test.cpp" ]
 
   deps = [ ":wmserver_unittest_common" ]
+
+  external_deps = [
+    "common_event_service:cesfwk_innerkits",
+    "ipc:ipc_core",
+  ]
 }
 
 ## Build wmserver_unittest_common.a {{{
