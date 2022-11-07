@@ -24,7 +24,8 @@
 #include <hitrace_meter.h>
 #include <limits>
 #include <power_mgr_client.h>
-#include "transaction/rs_transaction.h"
+#include <transaction/rs_interfaces.h>
+#include <transaction/rs_transaction.h>
 
 #include "common_event_manager.h"
 #include "dm_common.h"
@@ -670,22 +671,27 @@ void WindowNodeContainer::UpdateFocusStatus(uint32_t id, bool focused) const
     auto node = FindWindowNodeById(id);
     if (node == nullptr) {
         WLOGFW("cannot find focused window id:%{public}d", id);
-    } else {
-        if (node->GetWindowToken()) {
-            node->GetWindowToken()->UpdateFocusStatus(focused);
-        }
-        if (node->abilityToken_ == nullptr) {
-            WLOGFI("abilityToken is null, window : %{public}d", id);
-        }
-        if (focused) {
-            WLOGFW("current focus window: windowId: %{public}d, windowName: %{public}s",
-                id, node->GetWindowProperty()->GetWindowName().c_str());
-        }
-        sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo(node->GetWindowId(), node->GetDisplayId(),
-            node->GetCallingPid(), node->GetCallingUid(), node->GetWindowType(), node->abilityToken_);
-        WindowManagerAgentController::GetInstance().UpdateFocusChangeInfo(
-            focusChangeInfo, focused);
+        return;
     }
+    if (focused && node->GetWindowProperty() != nullptr) {
+        AbilityInfo info = node->GetWindowProperty()->GetAbilityInfo();
+        WLOGFW("current focus window: windowId: %{public}d, windowName: %{public}s, bundleName: %{public}s,"
+            " abilityName: %{public}s, pid: %{public}d, uid: %{public}d", id,
+            node->GetWindowProperty()->GetWindowName().c_str(), info.bundleName_.c_str(), info.abilityName_.c_str(),
+            node->GetCallingPid(), node->GetCallingUid());
+        FocusAppInfo appInfo = { node->GetCallingPid(), node->GetCallingUid(), info.bundleName_, info.abilityName_ };
+        RSInterfaces::GetInstance().SetFocusAppInfo(appInfo);
+    }
+    if (node->GetWindowToken()) {
+        node->GetWindowToken()->UpdateFocusStatus(focused);
+    }
+    if (node->abilityToken_ == nullptr) {
+        WLOGFI("abilityToken is null, window : %{public}d", id);
+    }
+    sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo(node->GetWindowId(), node->GetDisplayId(),
+        node->GetCallingPid(), node->GetCallingUid(), node->GetWindowType(), node->abilityToken_);
+    WindowManagerAgentController::GetInstance().UpdateFocusChangeInfo(
+        focusChangeInfo, focused);
 }
 
 void WindowNodeContainer::UpdateActiveStatus(uint32_t id, bool isActive) const
@@ -1229,7 +1235,7 @@ void WindowNodeContainer::DumpScreenWindowTree()
         const std::string& windowName = node->GetWindowName().size() < WINDOW_NAME_MAX_LENGTH ?
             node->GetWindowName() : node->GetWindowName().substr(0, WINDOW_NAME_MAX_LENGTH);
         WLOGI("DumpScreenWindowTree: %{public}10s %{public}9" PRIu64" %{public}5u %{public}4u %{public}4u %{public}4u "
-            "%{public}4u %{public}11u %{public}d [%{public}4d %{public}4d %{public}4u %{public}4u]",
+            "%{public}4u %{public}11u %{public}12d [%{public}4d %{public}4d %{public}4u %{public}4u]",
             windowName.c_str(), node->GetDisplayId(), node->GetWindowId(), node->GetWindowType(), node->GetWindowMode(),
             node->GetWindowFlags(), --zOrder, static_cast<uint32_t>(node->GetRequestedOrientation()),
             node->abilityToken_ != nullptr, rect.posX_, rect.posY_, rect.width_, rect.height_);
