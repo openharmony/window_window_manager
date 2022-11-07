@@ -119,6 +119,7 @@ HWTEST_F(WindowPropertyTest, Read, Function | SmallTest | Level2)
     winPropDst.Read(parcel, PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA);
     winPropDst.Read(parcel, PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY);
     winPropDst.Read(parcel, PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
+    winPropDst.Read(parcel, PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
 
     ASSERT_EQ(false, winPropDst.GetPrivacyMode());
     ASSERT_EQ(false, winPropDst.GetTransparent());
@@ -164,6 +165,33 @@ HWTEST_F(WindowPropertyTest, SetAbilityInfo, Function | SmallTest | Level2)
     winPropDst.SetAbilityInfo(info);
     ASSERT_EQ("testBundleName", winPropDst.GetAbilityInfo().bundleName_);
     ASSERT_EQ("testAbilityName", winPropDst.GetAbilityInfo().abilityName_);
+}
+
+/**
+ * @tc.name: ResumeLastWindowMode
+ * @tc.desc: Test ResumeLastWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, ResumeLastWindowMode, Function | SmallTest | Level2)
+{
+    WindowProperty winPropDst;
+    winPropDst.modeSupportInfo_ =  WindowModeSupport::WINDOW_MODE_SUPPORT_PIP;
+    winPropDst.lastMode_ =  WindowMode::WINDOW_MODE_PIP;
+    winPropDst.mode_ = WindowMode::WINDOW_MODE_UNDEFINED;
+    winPropDst.ResumeLastWindowMode();
+    ASSERT_EQ(WindowMode::WINDOW_MODE_PIP, winPropDst.mode_);
+
+    winPropDst.modeSupportInfo_ =  WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY;
+    winPropDst.lastMode_ =  WindowMode::WINDOW_MODE_PIP;
+    winPropDst.mode_ = WindowMode::WINDOW_MODE_UNDEFINED;
+    winPropDst.ResumeLastWindowMode();
+    ASSERT_EQ(WindowMode::WINDOW_MODE_PIP, winPropDst.mode_);
+
+    winPropDst.modeSupportInfo_ =  WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
+    winPropDst.lastMode_ =  WindowMode::WINDOW_MODE_PIP;
+    winPropDst.mode_ = WindowMode::WINDOW_MODE_UNDEFINED;
+    winPropDst.ResumeLastWindowMode();
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, winPropDst.mode_);
 }
 }
 } // namespace Rosen
