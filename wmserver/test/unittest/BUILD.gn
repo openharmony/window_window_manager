@@ -23,6 +23,7 @@ group("unittest") {
     ":wmserver_input_window_monitor_test",
     ":wmserver_minimize_app_test",
     ":wmserver_starting_window_test",
+    ":wmserver_window_controller_test",
     ":wmserver_window_dumper_test",
     ":wmserver_window_layout_policy_test",
     ":wmserver_window_manager_config_test",
@@ -51,6 +52,14 @@ ohos_unittest("wmserver_avoid_area_controller_test") {
   sources = [ "avoid_area_controller_test.cpp" ]
 
   deps = [ ":wmserver_unittest_common" ]
+}
+
+ohos_unittest("wmserver_window_controller_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_controller_test.cpp" ]
+
+  deps = [ ":wmserver_unittest_common_rs" ]
 }
 
 ohos_unittest("wmserver_minimize_app_test") {
@@ -138,32 +147,7 @@ ohos_unittest("wmserver_starting_window_test") {
 
   sources = [ "starting_window_test.cpp" ]
 
-  public_configs = [
-    ":wmserver_unittest_common_public_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
-    "//foundation/window/window_manager/resources/config/build:testcase_flags",
-  ]
-
-  public_deps = [
-    "${ability_runtime_inner_api_path}/ability_manager:ability_manager",
-    "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
-    "//foundation/graphic/graphic_2d/rosen/modules/animation/window_animation:window_animation",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
-    "//foundation/window/window_manager/dm:libdm",
-    "//foundation/window/window_manager/dmserver:libdms",
-    "//foundation/window/window_manager/test/common/utils:libtestutil",
-    "//foundation/window/window_manager/utils:libwmutil",
-    "//foundation/window/window_manager/wm:libwm",
-    "//foundation/window/window_manager/wmserver:libwms",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
-  ]
-
-  external_deps = [
-    "hilog_native:libhilog",
-    "ipc:ipc_core",
-  ]
+  deps = [ ":wmserver_unittest_common_rs" ]
 }
 
 ohos_unittest("wmserver_window_manager_service_test") {
@@ -284,6 +268,38 @@ ohos_static_library("wmserver_unittest_common") {
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "bundle_framework:appexecfwk_base",
+    "hilog_native:libhilog",
+    "ipc:ipc_core",
+  ]
+}
+
+ohos_static_library("wmserver_unittest_common_rs") {
+  visibility = [ ":*" ]
+  testonly = true
+
+  public_configs = [
+    ":wmserver_unittest_common_public_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "//foundation/window/window_manager/resources/config/build:testcase_flags",
+  ]
+
+  public_deps = [
+    "${ability_runtime_inner_api_path}/ability_manager:ability_manager",
+    "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
+    "//foundation/graphic/graphic_2d/rosen/modules/animation/window_animation:window_animation",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
+    "//foundation/window/window_manager/dm:libdm",
+    "//foundation/window/window_manager/dmserver:libdms",
+    "//foundation/window/window_manager/test/common/utils:libtestutil",
+    "//foundation/window/window_manager/utils:libwmutil",
+    "//foundation/window/window_manager/wm:libwm",
+    "//foundation/window/window_manager/wmserver:libwms",
+    "//third_party/googletest:gmock",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
     "hilog_native:libhilog",
     "ipc:ipc_core",
   ]
