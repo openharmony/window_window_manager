@@ -540,10 +540,10 @@ std::string WindowImpl::GetContentInfo()
     return uiContent_->GetContentInfo();
 }
 
-ColorSpace WindowImpl::GetColorSpaceFromSurfaceGamut(ColorGamut ColorGamut)
+ColorSpace WindowImpl::GetColorSpaceFromSurfaceGamut(ColorGamut colorGamut)
 {
     for (auto item: colorSpaceConvertMap) {
-        if (item.surfaceColorGamut == ColorGamut) {
+        if (item.surfaceColorGamut == colorGamut) {
             return item.colorSpace;
         }
     }

@@ -28,7 +28,7 @@ enum DumpType : uint32_t {
 };
 class WindowDumper : public RefBase {
 public:
-    WindowDumper(const sptr<WindowRoot>& root) : windowRoot_(root) {}
+    explicit WindowDumper(const sptr<WindowRoot>& root) : windowRoot_(root) {}
     WMError Dump(int fd, const std::vector<std::u16string>& args) const;
 
 private:

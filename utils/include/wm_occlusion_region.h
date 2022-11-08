@@ -151,6 +151,12 @@ public:
     }
 
     Region(const Region& reg) : rects_(reg.rects_), bound_(reg.bound_) {}
+    Region& operator=(const Region& reg)
+    {
+        rects_ = reg.rects_;
+        bound_ = reg.bound_;
+        return *this;
+    }
     ~Region() {}
 
     std::vector<Rect> GetRegionRects() const

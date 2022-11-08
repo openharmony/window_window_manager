@@ -45,7 +45,7 @@ protected:
 
 class DMSDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
-    DMSDeathRecipient(BaseAdapter& adapter);
+    explicit DMSDeathRecipient(BaseAdapter& adapter);
     virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
 private:
     BaseAdapter& adapter_;

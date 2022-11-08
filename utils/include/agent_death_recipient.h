@@ -21,7 +21,7 @@ namespace OHOS {
 namespace Rosen {
 class AgentDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
-    AgentDeathRecipient(std::function<void(sptr<IRemoteObject>&)> callback = nullptr) : callback_(callback) {}
+    explicit AgentDeathRecipient(std::function<void(sptr<IRemoteObject>&)> callback = nullptr) : callback_(callback) {}
     ~AgentDeathRecipient() = default;
 
     virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;

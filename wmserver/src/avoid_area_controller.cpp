@@ -226,8 +226,8 @@ AvoidPosType AvoidAreaController::GetAvoidPosType(const Rect& windowRect, const 
     uint32_t centerX = overlayRect.posX_ + (overlayRect.width_ >> 1);
     uint32_t centerY = overlayRect.posY_ + (overlayRect.height_ >> 1);
     float res1 = float(centerY) - float(windowRect.height_) / float(windowRect.width_) * float(centerX);
-    float res2 = float(centerY) + float(windowRect.height_) / float(windowRect.width_)  * float(centerX)
-        - float(windowRect.height_);
+    float res2 = float(centerY) + float(windowRect.height_) / float(windowRect.width_)  * float(centerX) -
+        float(windowRect.height_);
     if (res1 < 0) {
         if (res2 < 0) {
             return AvoidPosType::AVOID_POS_TOP;

@@ -699,12 +699,12 @@ void AbstractScreenController::SetScreenRotateAnimation(
     }
     std::weak_ptr<RSDisplayNode> weakNode = GetRSDisplayNodeByScreenId(screenId);
     static const RSAnimationTimingProtocol timingProtocol(600); // animation time
-    static const RSAnimationTimingCurve curve_ =
+    static const RSAnimationTimingCurve curve =
         RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0); // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
     // Increase frequency to improve windowRotation perf
     // 10012 means "web_gesture" level that setting duration: 800, lit_cpu_min_freq: 1421000, mid_cpu_min_feq: 1882000
     OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(10012, "");
-    RSNode::Animate(timingProtocol, curve_, [weakNode, x, y, w, h, rotationAfter]() {
+    RSNode::Animate(timingProtocol, curve, [weakNode, x, y, w, h, rotationAfter]() {
         auto displayNode = weakNode.lock();
         if (displayNode == nullptr) {
             WLOGFE("SetScreenRotateAnimation error, cannot get DisplayNode");

@@ -15,8 +15,6 @@
 
 #include <gtest/gtest.h>
 #include "common_test_utils.h"
-// mock class declare
-//#include "mock_IWindow.h"
 #include "iremote_object_mocker.h"
 #include "mock_RSIWindowAnimationController.h"
 #include "window_manager_service.h"
@@ -138,7 +136,6 @@ HWTEST_F(WindowManagerServiceTest, RegisterWindowManagerServiceHandler01, Functi
  */
 HWTEST_F(WindowManagerServiceTest, Dump01, Function | SmallTest | Level2)
 {
-    
     wms->windowDumper_ = nullptr;
     std::vector<std::u16string> args;
     ASSERT_EQ(static_cast<int>(WMError::WM_ERROR_INVALID_PARAM), wms->Dump(-1, args));
@@ -151,7 +148,6 @@ HWTEST_F(WindowManagerServiceTest, Dump01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowManagerServiceTest, NotifyWindowTransition01, Function | SmallTest | Level2)
 {
-    
     sptr<WindowTransitionInfo> fromInfo = nullptr;
     sptr<WindowTransitionInfo> toInfo = nullptr;
     ASSERT_EQ(WMError::WM_OK, wms->NotifyWindowTransition(fromInfo, toInfo, false));
@@ -164,7 +160,6 @@ HWTEST_F(WindowManagerServiceTest, NotifyWindowTransition01, Function | SmallTes
  */
 HWTEST_F(WindowManagerServiceTest, StartingWindow01, Function | SmallTest | Level2)
 {
-    
     wms->startingOpen_ = false;
     wms->StartingWindow(nullptr, nullptr, false, 0);
     ASSERT_EQ(false, wms->startingOpen_);
@@ -261,7 +256,8 @@ HWTEST_F(WindowManagerServiceTest, NotifyServerReadyToMoveOrDrag01, Function | S
     moveDragProperty->startDragFlag_ = false;
     moveDragProperty->startMoveFlag_ = true;
     wms->NotifyServerReadyToMoveOrDrag(0, windowProperty, moveDragProperty);
-    ASSERT_EQ(true, WindowInnerManager::GetInstance().NotifyServerReadyToMoveOrDrag(0, windowProperty, moveDragProperty));
+    ASSERT_EQ(true, WindowInnerManager::GetInstance().NotifyServerReadyToMoveOrDrag(0, windowProperty,
+        moveDragProperty));
 }
 /**
  * @tc.name: UpdateProperty
@@ -271,7 +267,8 @@ HWTEST_F(WindowManagerServiceTest, NotifyServerReadyToMoveOrDrag01, Function | S
 HWTEST_F(WindowManagerServiceTest, UpdateProperty01, Function | SmallTest | Level2)
 {
     sptr<WindowProperty> windowProperty = nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->UpdateProperty(windowProperty, PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG, true));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->UpdateProperty(windowProperty,
+        PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG, true));
 }
 /**
  * @tc.name: GetModeChangeHotZones

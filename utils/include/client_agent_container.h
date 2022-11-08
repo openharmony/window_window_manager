@@ -41,7 +41,7 @@ private:
     static constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "ClientAgentContainer"};
 
     struct finder_t {
-        finder_t(sptr<IRemoteObject> remoteObject) : remoteObject_(remoteObject) {}
+        explicit finder_t(sptr<IRemoteObject> remoteObject) : remoteObject_(remoteObject) {}
 
         bool operator()(sptr<T1> agent)
         {

@@ -224,7 +224,7 @@ napi_value Resolve(napi_env env, std::unique_ptr<Param> &param)
 napi_value MainFunc(napi_env env, napi_callback_info info)
 {
     GNAPI_LOG("%{public}s called", __PRETTY_FUNCTION__);
-    napi_value argv[2] = {0}; // the max number of input parameters is 2
+    napi_value argv[2] = {nullptr}; // the max number of input parameters is 2
     size_t argc = 2; // the max number of input parameters is 2
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
