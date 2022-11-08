@@ -19,6 +19,7 @@ group("unittest") {
   testonly = true
   deps = [
     ":wmserver_avoid_area_controller_test",
+    ":wmserver_display_group_controller_test",
     ":wmserver_input_window_monitor_test",
     ":wmserver_minimize_app_test",
     ":wmserver_starting_window_test",
@@ -211,6 +212,14 @@ ohos_unittest("wmserver_window_dumper_test") {
     "common_event_service:cesfwk_innerkits",
     "ipc:ipc_core",
   ]
+}
+
+ohos_unittest("wmserver_display_group_controller_test") {
+  module_out_path = module_out_path
+
+  sources = [ "display_group_controller_test.cpp" ]
+
+  deps = [ ":wmserver_unittest_common" ]
 }
 
 ## Build wmserver_unittest_common.a {{{
