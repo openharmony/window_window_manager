@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "window_property.h"
+#include "wm_common_inner.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -147,6 +148,22 @@ HWTEST_F(WindowPropertyTest, Write, Function | SmallTest | Level2)
     ASSERT_EQ(true, winPropDst.Write(parcel, PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA));
     ASSERT_EQ(true, winPropDst.Write(parcel, PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY));
     ASSERT_EQ(true, winPropDst.Write(parcel, PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG));
+}
+
+/**
+ * @tc.name: SetAbilityInfo
+ * @tc.desc: Test SetAbilityInfo and GetAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, SetAbilityInfo, Function | SmallTest | Level2)
+{
+    WindowProperty winPropDst;
+    AbilityInfo info;
+    info.bundleName_ = "testBundleName";
+    info.abilityName_ = "testAbilityName";
+    winPropDst.SetAbilityInfo(info);
+    ASSERT_EQ("testBundleName", winPropDst.GetAbilityInfo().bundleName_);
+    ASSERT_EQ("testAbilityName", winPropDst.GetAbilityInfo().abilityName_);
 }
 }
 } // namespace Rosen
