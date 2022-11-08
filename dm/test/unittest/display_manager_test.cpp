@@ -316,6 +316,34 @@ HWTEST_F(DisplayManagerTest, CheckSizeValid, Function | SmallTest | Level1)
     ret = DisplayManager::GetInstance().pImpl_->CheckSizeValid(size, oriHeight, oriWidth);
     ASSERT_FALSE(ret);
 }
+
+/**
+ * @tc.name: ImplGetDefaultDisplay01
+ * @tc.desc: Impl GetDefaultDisplay nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ImplGetDefaultDisplay01, Function | SmallTest | Level1)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(nullptr));
+    sptr<Display> display = DisplayManager::GetInstance().pImpl_->GetDefaultDisplay();
+    ASSERT_EQ(display, nullptr);
+}
+
+/**
+ * @tc.name: ImplGetDefaultDisplay02
+ * @tc.desc: Impl GetDefaultDisplay nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ImplGetDefaultDisplay02, Function | SmallTest | Level1)
+{
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    displayInfo->SetDisplayId(DISPLAY_ID_INVALID);
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(displayInfo));
+    sptr<Display> display = DisplayManager::GetInstance().pImpl_->GetDefaultDisplay();
+    ASSERT_EQ(display, nullptr);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
