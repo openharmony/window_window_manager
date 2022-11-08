@@ -2465,15 +2465,11 @@ void WindowImpl::UpdateDragEvent(const PointInfo& point, DragEvent event)
 
 void WindowImpl::NotifyDragEvent(const PointInfo& point, DragEvent event)
 {
-    std::vector<sptr<IWindowDragListener>> windowDragListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        windowDragListeners = windowDragListeners_;
-    }
+    auto windowDragListeners = GetListeners<IWindowDragListener>();
     Rect rect = GetRect();
     for (auto& listener : windowDragListeners) {
-        if (listener != nullptr) {
-            listener->OnDrag(point.x - rect.posX_, point.y - rect.posY_, event);
+        if (listener.GetRefPtr() != nullptr) {
+            listener.GetRefPtr()->OnDrag(point.x - rect.posX_, point.y - rect.posY_, event);
         }
     }
 }
@@ -2503,56 +2499,40 @@ void WindowImpl::UpdateActiveStatus(bool isActive)
 
 void WindowImpl::NotifyScreenshot()
 {
-    std::vector<sptr<IScreenshotListener>> screenshotListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        screenshotListeners = screenshotListeners_;
-    }
+    auto screenshotListeners = GetListeners<IScreenshotListener>();
     for (auto& screenshotListener : screenshotListeners) {
-        if (screenshotListener != nullptr) {
-            screenshotListener->OnScreenshot();
+        if (screenshotListener.GetRefPtr() != nullptr) {
+            screenshotListener.GetRefPtr()->OnScreenshot();
         }
     }
 }
 
 void WindowImpl::NotifyTouchOutside()
 {
-    std::vector<sptr<ITouchOutsideListener>> touchOutsideListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        touchOutsideListeners = touchOutsideListeners_;
-    }
+    auto touchOutsideListeners = GetListeners<ITouchOutsideListener>();
     for (auto& touchOutsideListener : touchOutsideListeners) {
-        if (touchOutsideListener != nullptr) {
-            touchOutsideListener->OnTouchOutside();
+        if (touchOutsideListener.GetRefPtr() != nullptr) {
+            touchOutsideListener.GetRefPtr()->OnTouchOutside();
         }
     }
 }
 
 void WindowImpl::NotifyTouchDialogTarget()
 {
-    std::vector<sptr<IDialogTargetTouchListener>> dialogTargetTouchListeners;
     SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId());
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        dialogTargetTouchListeners = dialogTargetTouchListeners_;
-    }
+    auto dialogTargetTouchListeners = GetListeners<IDialogTargetTouchListener>();
     for (auto& dialogTargetTouchListener : dialogTargetTouchListeners) {
-        if (dialogTargetTouchListener != nullptr) {
-            dialogTargetTouchListener->OnDialogTargetTouch();
+        if (dialogTargetTouchListener.GetRefPtr() != nullptr) {
+            dialogTargetTouchListener.GetRefPtr()->OnDialogTargetTouch();
         }
     }
 }
 
 void WindowImpl::NotifyDestroy()
 {
-    sptr<IDialogDeathRecipientListener> dialogDeathRecipientListener;
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        dialogDeathRecipientListener = dialogDeathRecipientListener_;
-    }
-    if (dialogDeathRecipientListener != nullptr) {
-        dialogDeathRecipientListener->OnDialogDeathRecipient();
+    auto dialogDeathRecipientListener = GetListener<IDialogDeathRecipientListener>();
+    if (dialogDeathRecipientListener.GetRefPtr() != nullptr) {
+        dialogDeathRecipientListener.GetRefPtr()->OnDialogDeathRecipient();
     }
 }
 
@@ -2596,70 +2576,50 @@ void WindowImpl::UpdateZoomTransform(const Transform& trans, bool isDisplayZoomO
 
 void WindowImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reason)
 {
-    std::vector<sptr<IWindowChangeListener>> windowChangeListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        windowChangeListeners = windowChangeListeners_;
-    }
+    auto windowChangeListeners = GetListeners<IWindowChangeListener>();
     for (auto& listener : windowChangeListeners) {
-        if (listener != nullptr) {
-            listener->OnSizeChange(rect, reason);
+        if (listener.GetRefPtr() != nullptr) {
+            listener.GetRefPtr()->OnSizeChange(rect, reason);
         }
     }
 }
 
 void WindowImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
-    std::vector<sptr<IAvoidAreaChangedListener>> avoidAreaChangeListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        avoidAreaChangeListeners = avoidAreaChangeListeners_;
-    }
+    auto avoidAreaChangeListeners = GetListeners<IAvoidAreaChangedListener>();
     for (auto& listener : avoidAreaChangeListeners) {
-        if (listener != nullptr) {
-            listener->OnAvoidAreaChanged(*avoidArea, type);
+        if (listener.GetRefPtr() != nullptr) {
+            listener.GetRefPtr()->OnAvoidAreaChanged(*avoidArea, type);
         }
     }
 }
 
 void WindowImpl::NotifyDisplayMoveChange(DisplayId from, DisplayId to)
 {
-    std::vector<sptr<IDisplayMoveListener>> displayMoveListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        displayMoveListeners = displayMoveListeners_;
-    }
+    auto displayMoveListeners = GetListeners<IDisplayMoveListener>();
     for (auto& listener : displayMoveListeners) {
-        if (listener != nullptr) {
-            listener->OnDisplayMove(from, to);
+        if (listener.GetRefPtr() != nullptr) {
+            listener.GetRefPtr()->OnDisplayMove(from, to);
         }
     }
 }
 
 void WindowImpl::NotifyModeChange(WindowMode mode)
 {
-    std::vector<sptr<IWindowChangeListener>> windowChangeListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        windowChangeListeners = windowChangeListeners_;
-    }
+    auto windowChangeListeners = GetListeners<IWindowChangeListener>();
     for (auto& listener : windowChangeListeners) {
-        if (listener != nullptr) {
-            listener->OnModeChange(mode);
+        if (listener.GetRefPtr() != nullptr) {
+            listener.GetRefPtr()->OnModeChange(mode);
         }
     }
 }
 
 void WindowImpl::NotifyOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info)
 {
-    std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        occupiedAreaChangeListeners = occupiedAreaChangeListeners_;
-    }
+    auto occupiedAreaChangeListeners = GetListeners<IOccupiedAreaChangeListener>();
     for (auto& listener : occupiedAreaChangeListeners) {
-        if (listener != nullptr) {
-            listener->OnSizeChange(info);
+        if (listener.GetRefPtr() != nullptr) {
+            listener.GetRefPtr()->OnSizeChange(info);
         }
     }
 }
