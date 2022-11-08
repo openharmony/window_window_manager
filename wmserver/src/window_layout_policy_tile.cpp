@@ -123,7 +123,7 @@ bool WindowLayoutPolicyTile::IsTileRectSatisfiedWithSizeLimits(const sptr<Window
     const auto& displayId = node->GetDisplayId();
     auto& foregroundNodes = foregroundNodesMap_[displayId];
     auto num = foregroundNodes.size();
-    if (num > maxTileWinNumMap_[displayId] || num == 0) {
+    if (num > maxTileWinNumMap_[displayId] || maxTileWinNumMap_[displayId] == 0) {
         return false;
     }
 
