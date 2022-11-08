@@ -80,12 +80,14 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenGroupChange, Function | Smal
 {
     sptr<ScreenInfo> screenInfo = nullptr;
     std::string trigger;
-    DisplayManagerAgentController::GetInstance().OnScreenGroupChange(trigger, screenInfo, ScreenGroupChangeEvent::ADD_TO_GROUP);
+    DisplayManagerAgentController::GetInstance().OnScreenGroupChange(trigger, screenInfo,
+        ScreenGroupChangeEvent::ADD_TO_GROUP);
     ASSERT_EQ(0, DisplayManagerAgentController::GetInstance().
                 dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
     std::vector<sptr<ScreenInfo>> screenInfos;
     screenInfos.push_back(screenInfo);
-    DisplayManagerAgentController::GetInstance().OnScreenGroupChange(trigger, screenInfos, ScreenGroupChangeEvent::ADD_TO_GROUP);
+    DisplayManagerAgentController::GetInstance().OnScreenGroupChange(trigger, screenInfos,
+        ScreenGroupChangeEvent::ADD_TO_GROUP);
 }
 /**
  * @tc.name: OnDisplayCreate

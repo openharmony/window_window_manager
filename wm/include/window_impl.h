@@ -511,7 +511,7 @@ private:
         ColorGamut surfaceColorGamut;
     };
     static const ColorSpaceConvertMap colorSpaceConvertMap[];
-    static ColorSpace GetColorSpaceFromSurfaceGamut(ColorGamut ColorGamut);
+    static ColorSpace GetColorSpaceFromSurfaceGamut(ColorGamut colorGamut);
     static ColorGamut GetSurfaceGamutFromColorSpace(ColorSpace colorSpace);
 
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;

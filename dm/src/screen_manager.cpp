@@ -70,7 +70,7 @@ private:
 
 class ScreenManager::Impl::ScreenManagerListener : public DisplayManagerAgentDefault {
 public:
-    ScreenManagerListener(sptr<Impl> impl) : pImpl_(impl)
+    explicit ScreenManagerListener(sptr<Impl> impl) : pImpl_(impl)
     {
     }
 
@@ -398,7 +398,7 @@ bool ScreenManager::Impl::RegisterDisplayManagerAgent()
     bool regSucc = true;
     if (screenManagerListener_ == nullptr) {
         screenManagerListener_ = new ScreenManagerListener(this);
-        bool regSucc = SingletonContainer::Get<ScreenManagerAdapter>().RegisterDisplayManagerAgent(
+        regSucc = SingletonContainer::Get<ScreenManagerAdapter>().RegisterDisplayManagerAgent(
             screenManagerListener_, DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
         if (!regSucc) {
             screenManagerListener_ = nullptr;

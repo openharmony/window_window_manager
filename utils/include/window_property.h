@@ -32,7 +32,7 @@ namespace Rosen {
 class WindowProperty : public Parcelable {
 public:
     WindowProperty() = default;
-    WindowProperty(const sptr<WindowProperty>& property);
+    explicit WindowProperty(const sptr<WindowProperty>& property);
     ~WindowProperty() = default;
 
     void CopyFrom(const sptr<WindowProperty>& property);

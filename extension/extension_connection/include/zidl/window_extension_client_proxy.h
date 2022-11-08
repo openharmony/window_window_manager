@@ -23,7 +23,7 @@ namespace OHOS {
 namespace Rosen {
 class WindowExtensionClientProxy : public IRemoteProxy<IWindowExtensionClient> {
 public:
-    WindowExtensionClientProxy(const sptr<IRemoteObject>& impl)
+    explicit WindowExtensionClientProxy(const sptr<IRemoteObject>& impl)
         : IRemoteProxy<IWindowExtensionClient>(impl) {};
     ~WindowExtensionClientProxy() {};
     void OnWindowReady(const std::shared_ptr<RSSurfaceNode>& surfaceNode) override;

@@ -93,9 +93,9 @@ public:
 
     static inline bool IsOverlayWindow(WindowType type)
     {
-        return (type == WindowType::WINDOW_TYPE_STATUS_BAR
-            || type == WindowType::WINDOW_TYPE_NAVIGATION_BAR
-            || type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+        return (type == WindowType::WINDOW_TYPE_STATUS_BAR ||
+            type == WindowType::WINDOW_TYPE_NAVIGATION_BAR ||
+            type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     }
 
     static inline bool IsRotatableWindow(WindowType type, WindowMode mode)

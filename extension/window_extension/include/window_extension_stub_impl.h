@@ -27,7 +27,7 @@ namespace OHOS {
 namespace Rosen {
 class WindowExtensionStubImpl : public WindowExtensionStub {
 public:
-    WindowExtensionStubImpl(const std::string& windowName);
+    explicit WindowExtensionStubImpl(const std::string& windowName);
     ~WindowExtensionStubImpl();
 
     virtual void SetBounds(const Rect& rect) override;
