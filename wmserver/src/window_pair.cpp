@@ -474,11 +474,11 @@ bool WindowPair::TakePairSnapshot()
         WLOGD("Take pair snapshot id:[%{public}u, %{public}u]", primary_->GetWindowId(), secondary_->GetWindowId());
         std::shared_ptr<Media::PixelMap> pixelMap;
         // get pixelmap time out 2000ms
-        if (SurfaceDraw::GetSurfaceSnapshot(primary_->surfaceNode_, pixelMap, 2000)) {
+        if (SurfaceDraw::GetSurfaceSnapshot(primary_->surfaceNode_, pixelMap, SNAPSHOT_TIMEOUT_MS)) {
             primary_->SetSnapshot(pixelMap);
         }
         // get pixelmap time out 2000ms
-        if (SurfaceDraw::GetSurfaceSnapshot(secondary_->surfaceNode_, pixelMap, 2000)) {
+        if (SurfaceDraw::GetSurfaceSnapshot(secondary_->surfaceNode_, pixelMap, SNAPSHOT_TIMEOUT_MS)) {
             secondary_->SetSnapshot(pixelMap);
         }
         return true;

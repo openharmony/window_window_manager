@@ -15,6 +15,7 @@
 
 #include "surface_draw.h"
 #include <algorithm>
+#include <hitrace_meter.h>
 #include <surface.h>
 #include <transaction/rs_interfaces.h>
 #include <ui/rs_surface_extractor.h>
@@ -354,6 +355,7 @@ bool SurfaceDraw::GetSurfaceSnapshot(const std::shared_ptr<RSSurfaceNode> surfac
         WLOGFE("surfaceNode is null");
         return false;
     }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SurfaceDraw:GetSurfaceSnapshot(%llu)", surfaceNode->GetId());
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
     if (RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, scaleW, scaleH)) {
         pixelMap = callback->GetResult(timeoutMs); // get pixelmap time out ms

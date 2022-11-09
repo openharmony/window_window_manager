@@ -232,6 +232,27 @@ void WindowInnerManager::CloseAbility(const wptr<WindowNode> &node)
     PostTask(task, "CloseAbility");
 }
 
+void WindowInnerManager::CompleteFirstFrameDrawing(const wptr<WindowNode> &node)
+{
+    // asynchronously calls the CloseAbility of AbilityManager
+    auto weakNode = node.promote();
+    if (weakNode == nullptr) {
+        WLOGFE("CompleteFirstFrameDrawing failed.");
+        return;
+    }
+    wptr<IRemoteObject> weakToken(weakNode->abilityToken_);
+    WLOGFD("CompleteFirstFrameDrawing %{public}u", weakNode->GetWindowId());
+    auto task = [weakToken]() {
+        auto token = weakToken.promote();
+        if (token == nullptr) {
+            WLOGE("CompleteFirstFrameDrawing failed, because window token is nullptr.");
+            return;
+        }
+        AAFwk::AbilityManagerClient::GetInstance()->CompleteFirstFrameDrawing(token);
+    };
+    PostTask(task, "CompleteFirstFrameDrawing");
+}
+
 void WindowInnerManager::PostTask(InnerTask &&task, std::string name, EventPriority priority)
 {
     if (eventHandler_ == nullptr) {
