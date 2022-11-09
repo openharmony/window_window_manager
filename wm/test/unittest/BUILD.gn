@@ -38,6 +38,7 @@ group("unittest") {
 ohos_unittest("wm_window_manager_test") {
   module_out_path = module_out_path
 
+  include_dirs = [ "//foundation/window/window_manager/wm/src" ]
   sources = [ "window_manager_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
