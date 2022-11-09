@@ -507,9 +507,9 @@ HWTEST_F(AbstractScreenControllerTest, ChangeScreenGroup01, Function | SmallTest
 {
     sptr<AbstractScreenGroup> group = screenGroupVec[0];
     Point point;
-    auto abs2point_pair = std::make_pair(screenVec[0], point);
-    group->abstractScreenMap_.insert(std::make_pair(0, abs2point_pair));
-    group->abstractScreenMap_.insert(std::make_pair(1, abs2point_pair));
+    auto abs2pointPair = std::make_pair(screenVec[0], point);
+    group->abstractScreenMap_.insert(std::make_pair(0, abs2pointPair));
+    group->abstractScreenMap_.insert(std::make_pair(1, abs2pointPair));
     std::vector<Point> startPoints;
     std::vector<ScreenId> screens;
     for (ScreenId i = 0; i < 7; ++i) {
@@ -531,9 +531,9 @@ HWTEST_F(AbstractScreenControllerTest, ChangeScreenGroup02, Function | SmallTest
 {
     sptr<AbstractScreenGroup> group = screenGroupVec[0];
     Point point;
-    auto abs2point_pair = std::make_pair(screenVec[0],point);
-    group->abstractScreenMap_.insert(std::make_pair(0, abs2point_pair));
-    group->abstractScreenMap_.insert(std::make_pair(1, abs2point_pair));
+    auto abs2pointPair = std::make_pair(screenVec[0], point);
+    group->abstractScreenMap_.insert(std::make_pair(0, abs2pointPair));
+    group->abstractScreenMap_.insert(std::make_pair(1, abs2pointPair));
     std::vector<Point> startPoints;
     std::vector<ScreenId> screens;
     for(ScreenId i = 0; i < 7; ++i) {
@@ -700,7 +700,7 @@ HWTEST_F(AbstractScreenControllerTest, NotifyScreenGroupChanged, Function | Smal
  */
 HWTEST_F(AbstractScreenControllerTest, SetScreenPowerForAll, Function | SmallTest | Level3)
 {
-    for (ScreenId i = 0; i < screenVec.size(); ++i) {
+    for (uint32_t i = 0; i < screenVec.size(); ++i) {
         if (screenVec[i] != nullptr && screenVec[i]->type_ == ScreenType::REAL) {
             screenVec[i]->type_ = ScreenType::UNDEFINED;
         }
