@@ -19,6 +19,7 @@
 #include "screen_manager_utils.h"
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
+#include "screen_manager.cpp"
 
 using namespace testing;
 using namespace testing::ext;
@@ -26,6 +27,12 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using Mocker = SingletonMocker<ScreenManagerAdapter, MockScreenManagerAdapter>;
+class DmMockScreenListener : public ScreenManager::IScreenListener {
+public:
+    void OnConnect(ScreenId) override {}
+    void OnDisconnect(ScreenId) override {}
+    void OnChange(ScreenId) override {}
+};
 class ScreenManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -187,6 +194,101 @@ HWTEST_F(ScreenManagerTest, SetSurface02, Function | SmallTest | Level1)
     ASSERT_EQ(SCREEN_ID_INVALID, id);
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, surfaceRes);
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, destroyRes);
+}
+
+/**
+ * @tc.name: OnScreenConnect01
+ * @tc.desc: OnScreenConnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, OnScreenConnect01, Function | SmallTest | Level1)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(true));
+    sptr<ScreenManager::IScreenListener> listener = new DmMockScreenListener();
+    ScreenManager::GetInstance().RegisterScreenListener(listener);
+    auto screenManagerListener = ScreenManager::GetInstance().pImpl_->screenManagerListener_;
+    ASSERT_NE(screenManagerListener, nullptr);
+    screenManagerListener->OnScreenConnect(nullptr);
+    sptr<ScreenInfo> screenInfo = new ScreenInfo();
+    screenInfo->SetScreenId(SCREEN_ID_INVALID);
+    screenManagerListener->OnScreenConnect(screenInfo);
+    screenInfo->SetScreenId(0);
+    screenManagerListener->OnScreenConnect(screenInfo);
+    ASSERT_NE(screenManagerListener->pImpl_, nullptr);
+    screenManagerListener->pImpl_ = nullptr;
+    screenManagerListener->OnScreenConnect(screenInfo);
+    ScreenManager::GetInstance().pImpl_->screenManagerListener_ = nullptr;
+}
+
+/**
+ * @tc.name: OnScreenDisconnect01
+ * @tc.desc: OnScreenDisconnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, OnScreenDisconnect01, Function | SmallTest | Level1)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(true));
+    sptr<ScreenManager::IScreenListener> listener = new DmMockScreenListener();
+    ScreenManager::GetInstance().RegisterScreenListener(listener);
+    auto screenManagerListener = ScreenManager::GetInstance().pImpl_->screenManagerListener_;
+    ASSERT_NE(screenManagerListener, nullptr);
+    screenManagerListener->OnScreenDisconnect(SCREEN_ID_INVALID);
+    ASSERT_NE(screenManagerListener->pImpl_, nullptr);
+    screenManagerListener->pImpl_ = nullptr;
+    screenManagerListener->OnScreenDisconnect(0);
+    ScreenManager::GetInstance().pImpl_->screenManagerListener_ = nullptr;
+}
+
+/**
+ * @tc.name: OnScreenChange01
+ * @tc.desc: OnScreenChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, OnScreenChange01, Function | SmallTest | Level1)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(true));
+    sptr<ScreenManager::IScreenListener> listener = new DmMockScreenListener();
+    ScreenManager::GetInstance().RegisterScreenListener(listener);
+    auto screenManagerListener = ScreenManager::GetInstance().pImpl_->screenManagerListener_;
+    ASSERT_NE(screenManagerListener, nullptr);
+    screenManagerListener->OnScreenChange(nullptr, ScreenChangeEvent::UPDATE_ORIENTATION);
+    ASSERT_NE(screenManagerListener->pImpl_, nullptr);
+    sptr<ScreenInfo> screenInfo = new ScreenInfo();
+    screenManagerListener->pImpl_ = nullptr;
+    screenManagerListener->OnScreenChange(screenInfo, ScreenChangeEvent::UPDATE_ORIENTATION);
+    ScreenManager::GetInstance().pImpl_->screenManagerListener_ = nullptr;
+}
+
+/**
+ * @tc.name: OnScreenGroupChange01
+ * @tc.desc: OnScreenGroupChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, OnScreenGroupChange01, Function | SmallTest | Level1)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(true));
+    sptr<ScreenManager::IScreenListener> listener = new DmMockScreenListener();
+    ScreenManager::GetInstance().RegisterScreenListener(listener);
+    auto screenManagerListener = ScreenManager::GetInstance().pImpl_->screenManagerListener_;
+    ASSERT_NE(screenManagerListener, nullptr);
+    std::string trigger;
+    std::vector<sptr<ScreenInfo>> screenInfos;
+    ScreenGroupChangeEvent groupEvent = ScreenGroupChangeEvent::CHANGE_GROUP;
+    screenManagerListener->OnScreenGroupChange(trigger, screenInfos, groupEvent);
+    ASSERT_NE(screenManagerListener->pImpl_, nullptr);
+    sptr<ScreenInfo> screenInfo = new ScreenInfo();
+    screenInfo->SetScreenId(1);
+    sptr<ScreenInfo> screenInfo2 = new ScreenInfo();
+    screenInfos.emplace_back(screenInfo);
+    screenInfos.emplace_back(screenInfo2);
+    screenManagerListener->OnScreenGroupChange(trigger, screenInfos, groupEvent);
+    screenManagerListener->pImpl_ = nullptr;
+    screenManagerListener->OnScreenGroupChange(trigger, screenInfos, groupEvent);
+    ScreenManager::GetInstance().pImpl_->screenManagerListener_ = nullptr;
 }
 }
 } // namespace Rosen
