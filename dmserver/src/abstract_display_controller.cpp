@@ -424,9 +424,6 @@ void AbstractDisplayController::ProcessDisplayUpdateOrientation(sptr<AbstractScr
         SetDisplayStateChangeListener(abstractDisplay, DisplayStateChangeType::UPDATE_ROTATION);
         ProcessDisplayCompression(absScreen);
     }
-    // Notify orientation event to DisplayManager
-    DisplayManagerAgentController::GetInstance().OnDisplayChange(abstractDisplay->ConvertToDisplayInfo(),
-        DisplayChangeEvent::UPDATE_ORIENTATION);
 }
 
 void AbstractDisplayController::ProcessDisplaySizeChange(sptr<AbstractScreen> absScreen)
