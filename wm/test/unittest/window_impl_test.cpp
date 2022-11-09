@@ -2194,14 +2194,14 @@ HWTEST_F(WindowImplTest, SetFullScreen, Function | SmallTest | Level3)
     window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = true;
     window->property_->SetWindowFlags(window->property_->GetWindowFlags() |
         (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(4).WillRepeatedly(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(3).WillRepeatedly(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->SetFullScreen(true));
 
     window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = false;
     window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = false;
     window->property_->SetWindowFlags(window->property_->GetWindowFlags() &
         (~static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(4)
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(3)
         .WillRepeatedly(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->SetFullScreen(false));
 
@@ -2209,8 +2209,7 @@ HWTEST_F(WindowImplTest, SetFullScreen, Function | SmallTest | Level3)
     window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = true;
     window->property_->SetWindowFlags(window->property_->GetWindowFlags() |
         (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(3)
-        .WillOnce(Return(WMError::WM_OK))
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(2)
         .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_DO_NOTHING));
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetFullScreen(true));
@@ -2219,20 +2218,8 @@ HWTEST_F(WindowImplTest, SetFullScreen, Function | SmallTest | Level3)
     window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = true;
     window->property_->SetWindowFlags(window->property_->GetWindowFlags() |
         (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(4)
-        .WillOnce(Return(WMError::WM_OK))
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(3)
         .WillOnce(Return(WMError::WM_DO_NOTHING))
-        .WillOnce(Return(WMError::WM_OK))
-        .WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->SetFullScreen(true));
-
-    window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = true;
-    window->property_->sysBarPropMap_[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = true;
-    window->property_->SetWindowFlags(window->property_->GetWindowFlags() |
-        (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(4)
-        .WillOnce(Return(WMError::WM_DO_NOTHING))
-        .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->SetFullScreen(true));
