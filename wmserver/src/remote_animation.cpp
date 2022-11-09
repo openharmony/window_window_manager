@@ -161,8 +161,7 @@ static void GetAndDrawSnapShot(const sptr<WindowNode>& srcNode)
     }
     if (srcNode->firstFrameAvaliable_) {
         std::shared_ptr<Media::PixelMap> pixelMap;
-        // snapshot time out 2000ms
-        bool snapSucc = SurfaceDraw::GetSurfaceSnapshot(srcNode->surfaceNode_, pixelMap, 2000, 1.0, 1.0);
+        bool snapSucc = SurfaceDraw::GetSurfaceSnapshot(srcNode->surfaceNode_, pixelMap, SNAPSHOT_TIMEOUT_MS, 1.0, 1.0);
         if (!snapSucc) {
             // need to draw starting window when get pixelmap failed
             WLOGFE("get surfaceSnapshot failed for window:%{public}u", srcNode->GetWindowId());

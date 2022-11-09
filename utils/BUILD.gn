@@ -71,6 +71,7 @@ ohos_shared_library("libwmutil") {
     "graphic_standard:surface",
     "hilog_native:libhilog",
     "hisysevent_native:libhisysevent",
+    "hitrace_native:hitrace_meter",
     "input:libmmi-client",
     "ipc:ipc_core",
     "multimedia_image_framework:image_native",
