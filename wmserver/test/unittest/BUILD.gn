@@ -76,6 +76,12 @@ ohos_unittest("wmserver_window_manager_config_test") {
     ":wmserver_unittest_common",
     "//third_party/libxml2:libxml2",
   ]
+
+  external_deps = [
+    "common_event_service:cesfwk_innerkits",
+    "hilog_native:libhilog",
+    "ipc:ipc_core",
+  ]
 }
 
 ohos_unittest("wmserver_window_snapshot_test") {
