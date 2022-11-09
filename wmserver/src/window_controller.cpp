@@ -319,7 +319,7 @@ void WindowController::RelayoutKeyboard(const sptr<WindowNode>& node)
 
     uint32_t navigationBarHeight = 0;
     WindowNodeOperationFunc func = [&navigationBarHeight](sptr<WindowNode> windowNode) {
-        if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+        if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR && windowNode->isVisible_) {
             navigationBarHeight = windowNode->GetWindowRect().height_;
             return true;
         }
