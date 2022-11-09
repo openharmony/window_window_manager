@@ -34,6 +34,10 @@ void MinimizeApp::AddNeedMinimizeApp(const sptr<WindowNode>& node, MinimizeReaso
     if (!EnableMinimize(reason)) {
         return;
     }
+    if (!node) {
+        WLOGFE("AddNeedMinimizeApp failed since node is nullptr");
+        return;
+    }
     wptr<WindowNode> weakNode(node);
     for (auto& appNodes: needMinimizeAppNodes_) {
         auto windowId = node->GetWindowId();
