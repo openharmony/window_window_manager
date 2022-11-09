@@ -404,19 +404,11 @@ HWTEST_F(DisplayChangeTest, CheckWaterfallCompression01, Function | SmallTest | 
     ASSERT_EQ(testSizeInVp, DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal());
 
     Orientation originOrientation = defaultScreen_->GetOrientation();
-    defaultScreen_->SetOrientation(Orientation::VERTICAL);
-    sleep(SPLIT_TEST_SLEEP_S);
-    defaultScreen_->SetOrientation(Orientation::HORIZONTAL);
-    sleep(SPLIT_TEST_SLEEP_S);
-    defaultScreen_->SetOrientation(Orientation::VERTICAL);
-    sleep(SPLIT_TEST_SLEEP_S);
     DisplayCutoutController::SetWaterfallAreaCompressionSizeWhenHorizontal(originSize);
     ASSERT_EQ(originSize, DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal());
     DisplayCutoutController::SetWaterfallAreaCompressionEnableWhenHorzontal(originStatus);
     ASSERT_EQ(originStatus, DisplayCutoutController::IsWaterfallAreaCompressionEnableWhenHorizontal());
     DisplayCutoutController::SetIsWaterfallDisplay(originWaterfallEnable);
-    defaultScreen_->SetOrientation(originOrientation);
-    sleep(SPLIT_TEST_SLEEP_S);
     ASSERT_EQ(originOrientation, defaultScreen_->GetOrientation());
 }
 }
