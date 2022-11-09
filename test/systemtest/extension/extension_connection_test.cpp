@@ -97,6 +97,10 @@ HWTEST_F(ExtensionConnectionTest, WindowExtensionConnection01, Function | SmallT
     element.SetAbilityName("WindowExtAbility");
     Rosen::Rect rect {100, 100, 60, 60};
     ASSERT_TRUE(connection->ConnectExtension(element, rect, 100, INVALID_WINDOW_ID, nullptr) != ERR_OK);
+    connection->Show();
+    connection->RequestFocus();
+    connection->SetBounds(rect);
+    connection->Hide();
 }
 }
 } // Rosen
