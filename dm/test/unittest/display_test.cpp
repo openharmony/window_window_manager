@@ -145,29 +145,6 @@ HWTEST_F(DisplayTest, SetWaterfallCompression02, Function | SmallTest | Level1)
     DisplayCutoutController::SetIsWaterfallDisplay(isWaterfallDisplayOrigin);
     ASSERT_EQ(isWaterfallDisplayOrigin, DisplayCutoutController::IsWaterfallDisplay());
 }
-/**
- * @tc.name: GetName01
- * @tc.desc: GetName function cover
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayTest, GetName01, Function | SmallTest | Level1)
-{
-    auto name = defaultDisplay_->GetName();
-    ASSERT_EQ("display_0", name);
-}
-
-/**
- * @tc.name: GetDpi01
- * @tc.desc: GetDpi function cover
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayTest, GetDpi01, Function | SmallTest | Level1)
-{
-    auto dpi = defaultDisplay_->GetDpi();
-
-    auto vpr = defaultDisplay_->GetVirtualPixelRatio();
-    ASSERT_EQ(vpr * DOT_PER_INCH, dpi);
-}
 }
 } // namespace Rosen
 } // namespace OHOS
