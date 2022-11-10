@@ -14,9 +14,30 @@
  */
 
 #include "vsync_station.h"
-
+#include "frame_trace.h"
 #include "transaction/rs_interfaces.h"
 #include "window_manager_hilog.h"
+
+using namespace FRAME_TRACE;
+const std::string UI_INTERVAL_NAME = "ui";
+static struct TraceHandle* g_handleUI = nullptr;
+static struct TidHandle* g_handleTid = nullptr;
+
+static void VsyncStartTrace()
+{
+    if (FrameAwareTraceEnable(UI_INTERVAL_NAME)) {
+        if (g_handleUI == nullptr) {
+            g_handleUI = CreateTraceTag(UI_INTERVAL_NAME);
+        }
+        if (g_handleUI != nullptr) {
+            if (JudgeUnequalFrameTrace(g_handleTid)) {
+                UpdateFrameTraceTid(g_handleTid);
+                EnableTraceForThread(g_handleUI);
+            }
+            StartFrameTrace(g_handleUI);
+        }
+    }
+}
 
 namespace OHOS {
 namespace Rosen {
@@ -61,6 +82,14 @@ void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallb
             vsyncHandler_->PostTask(vsyncTimeoutCallback_, VSYNC_TIME_OUT_TASK, VSYNC_TIME_OUT_MILLISECONDS);
         }
     }
+    if (FrameAwareTraceEnable(UI_INTERVAL_NAME)) {
+        if (g_handleUI == nullptr) {
+            g_handleUI = CreateTraceTag(UI_INTERVAL_NAME);
+        }
+        if (g_handleUI != nullptr) {
+            StopFrameTrace(g_handleUI);
+        }
+    }
     receiver_->RequestNextVSync(frameCallback_);
 }
 
@@ -91,6 +120,7 @@ void VsyncStation::OnVsync(int64_t timestamp, void* client)
     auto vsyncClient = static_cast<VsyncStation*>(client);
     if (vsyncClient) {
         vsyncClient->VsyncCallbackInner(timestamp);
+        VsyncStartTrace();
     } else {
         WLOGFE("VsyncClient is null");
     }

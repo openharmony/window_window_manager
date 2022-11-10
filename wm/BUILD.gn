@@ -33,6 +33,8 @@ config("libwm_public_config") {
 
 ## Build libwm.so
 ohos_shared_library("libwm") {
+  include_dirs = [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf" ]
+
   sources = [
     "../wmserver/src/zidl/window_manager_proxy.cpp",
     "src/color_parser.cpp",
@@ -62,6 +64,7 @@ ohos_shared_library("libwm") {
 
   deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf:frame_trace_intf",
     "//foundation/window/window_manager/dm:libdm",
     "//foundation/window/window_manager/utils:libwmutil",
   ]
