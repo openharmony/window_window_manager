@@ -251,8 +251,8 @@ uint32_t WindowTestUtils::GetMaxTileWinNum()
 void WindowTestUtils::InitTileWindowRects(const sptr<Window>& window)
 {
     float virtualPixelRatio = GetVirtualPixelRatio(0);
-    uint32_t edgeInterval = EDGE_INTERVAL * virtualPixelRatio; // 48 is edge interval
-    uint32_t midInterval = MID_INTERVAL * virtualPixelRatio; // 24 is mid interval
+    uint32_t edgeInterval = static_cast<uint32_t>(EDGE_INTERVAL * virtualPixelRatio); // 48 is edge interval
+    uint32_t midInterval = static_cast<uint32_t>(MID_INTERVAL * virtualPixelRatio); // 24 is mid interval
     constexpr float ratio = DEFAULT_ASPECT_RATIO;
     constexpr int half = 2;
     limitDisplayRect_ = displayRect_;
