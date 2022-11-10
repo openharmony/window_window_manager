@@ -91,7 +91,7 @@ sptr<WindowTransitionInfo> MakeWindowTransitionInfo(const uint8_t* data, size_t 
     startPos += GetObject<OHOS::Rosen::WindowSizeLimits>(info->sizeLimits_, data + startPos, size - startPos);
 
     int32_t missionId;
-    startPos += GetObject<int32_t>(missionId, data + startPos, size - startPos);
+    GetObject<int32_t>(missionId, data + startPos, size - startPos);
     info->SetMissionId(missionId);
     return info;
 }
@@ -137,7 +137,7 @@ void WindowControllerFuzzTestPart1(sptr<WindowController> windowController,
     windowController->ToggleShownStateForAllAppWindows();
 
     WindowLayoutMode mode;
-    startPos += GetObject<WindowLayoutMode>(mode, data + startPos, size - startPos);
+    GetObject<WindowLayoutMode>(mode, data + startPos, size - startPos);
     windowController->SetWindowLayoutMode(mode);
 }
 
@@ -184,7 +184,7 @@ void WindowControllerFuzzTestPart2(sptr<WindowController> windowController,
     windowController->SetAnchorOffset(x, y);
     windowController->OffWindowZoom();
 
-    startPos += GetObject<uint32_t>(windowId, data + startPos, size - startPos);
+    GetObject<uint32_t>(windowId, data + startPos, size - startPos);
     windowController->InterceptInputEventToServer(windowId);
     windowController->RecoverInputEventToClient(windowId);
     windowController->RecoverDefaultMouseStyle(windowId);
@@ -227,7 +227,7 @@ void WindowControllerFuzzTestPart3(sptr<WindowController> windowController,
     windowController->SetWindowMode(windowId, dstMode);
     windowController->RestoreCallingWindowSizeIfNeed();
 
-    startPos += GetObject<uint32_t>(windowId, data + startPos, size - startPos);
+    GetObject<uint32_t>(windowId, data + startPos, size - startPos);
     windowController->UpdateTransform(windowId);
     windowController->AsyncFlushInputInfo(windowId);
 }

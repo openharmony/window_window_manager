@@ -87,7 +87,7 @@ bool DoSomethingInterestingWithMyAPI2(const uint8_t* data, size_t size)
     windowPair->DumpPairInfo();
     windowPair->HandleRemoveWindow(windowNode);
     OHOS::Rosen::Rect rect;
-    startPos += GetObject(rect, data + startPos, size - startPos);
+    GetObject(rect, data + startPos, size - startPos);
     windowPair->RotateDividerWindow(rect);
     windowPair->SetDividerRect(rect);
     windowPair->ClearPairSnapshot();
@@ -114,7 +114,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     windowPair->Find(windowNode);
     windowPair->IsPaired();
     float ratio;
-    startPos += GetObject<float>(ratio, data + startPos, size - startPos);
+    GetObject<float>(ratio, data + startPos, size - startPos);
     windowPair->SetSplitRatio(ratio);
     windowPair->GetSplitRatio();
     windowPair->GetPairStatus();
