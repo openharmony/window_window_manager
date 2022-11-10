@@ -94,6 +94,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow01, Function | MediumTest | Level2)
 
     ASSERT_EQ(WMError::WM_OK, subWindow->Hide());
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
+    sleep(1);
 
     subWindow->Destroy();
     scene->GoDestroy();
@@ -118,6 +119,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow02, Function | MediumTest | Level2)
 
     ASSERT_EQ(WMError::WM_OK, subWindow->Hide());
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
+    sleep(1);
 
     subWindow->Destroy();
     scene->GoDestroy();
@@ -142,6 +144,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow03, Function | MediumTest | Level2)
 
     ASSERT_EQ(WMError::WM_OK, subWindow->Hide());
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
+    sleep(1);
 
     subWindow->Destroy();
     scene->GoDestroy();
@@ -166,6 +169,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow04, Function | MediumTest | Level2)
 
     ASSERT_EQ(WMError::WM_OK, subWindow->Hide());
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
+    sleep(1);
 
     subWindow->Destroy();
     scene->GoDestroy();
@@ -195,6 +199,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow05, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, subWindow->Hide());
     ASSERT_EQ(WMError::WM_OK, subWindow2->Hide());
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
+    sleep(1);
 
     subWindow->Destroy();
     subWindow2->Destroy();
@@ -224,6 +229,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow06, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, subWindow0->Hide());
     ASSERT_EQ(WMError::WM_OK, subWindow1->Hide());
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
+    sleep(1);
 
     subWindow0->Destroy();
     subWindow1->Destroy();
@@ -249,6 +255,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow07, Function | MediumTest | Level4)
 
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
     ASSERT_EQ(WMError::WM_OK, subWindow->Hide());
+    sleep(1);
 
     subWindow->Destroy();
     scene->GoDestroy();
@@ -290,6 +297,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow09, Function | MediumTest | Level2)
 
     ASSERT_EQ(WMError::WM_OK, subWindow->Hide());
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
+    sleep(1);
 
     ASSERT_EQ(WMError::WM_OK, subWindow->Destroy());
 
@@ -313,6 +321,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow10, Function | MediumTest | Level2)
 
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     ASSERT_EQ(WMError::WM_OK, subWindow->Show());
+    sleep(1);
 
     sptr<Window> mainWindow = scene->GetMainWindow();
     ASSERT_EQ(WMError::WM_OK, mainWindow->Destroy());
@@ -359,6 +368,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow11, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, subWindow3->Hide());
     ASSERT_EQ(WMError::WM_OK, subWindow4->Hide());
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
+    sleep(1);
 
     subWindow0->Destroy();
     subWindow1->Destroy();
@@ -388,6 +398,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow12, Function | MediumTest | Level3)
 
     ASSERT_EQ(WMError::WM_OK, subWindow0->Hide());
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
+    sleep(1);
 
     subWindow0->Destroy();
     scene->GoDestroy();
@@ -416,6 +427,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow13, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, subWindow1->Destroy());
 
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
+    sleep(1);
     scene->GoDestroy();
 }
 } // namespace Rosen
