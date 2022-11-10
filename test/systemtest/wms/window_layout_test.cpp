@@ -397,6 +397,9 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
     // init tile window rects and get max tile window num
     Utils::InitTileWindowRects(window);
     uint32_t maxTileNum = Utils::GetMaxTileWinNum();
+    if (maxTileNum < 1) {
+        return;
+    }
 
     usleep(WAIT_SYANC_US);
     ASSERT_TRUE(Utils::RectEqualTo(window, expect));
@@ -407,11 +410,6 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
     info.name = "test1";
     const sptr<Window>& test1 = Utils::CreateTestWindow(info);
     activeWindows_.push_back(test1);
-    if (maxTileNum < 1) {
-        ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE, test1->Show());
-        WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
-        return;
-    }
     ASSERT_EQ(WMError::WM_OK, test1->Show());
     usleep(WAIT_SYANC_US);
     if (maxTileNum == 1) {
@@ -462,15 +460,13 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
     // init tile window rects and get max tile window num
     Utils::InitTileWindowRects(window);
     uint32_t maxTileNum = Utils::GetMaxTileWinNum();
+    if (maxTileNum < 1) {
+        return;
+    }
 
     usleep(WAIT_SYANC_US);
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE);
     usleep(WAIT_SYANC_US);
-    if (maxTileNum < 1) {
-        ASSERT_FALSE(Utils::RectEqualTo(window, Utils::singleTileRect_));
-        WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
-        return;
-    }
     ASSERT_TRUE(Utils::RectEqualTo(window, Utils::singleTileRect_));
 
     info.name = "test1";
