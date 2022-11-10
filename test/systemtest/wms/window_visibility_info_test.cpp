@@ -208,26 +208,22 @@ HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest01, Function | Medium
     isWindowVisible = FillColor(window1);
     WaitForCallback();
     visibilityInfoCount = isWindowVisible ? 1 : 0;
-    ASSERT_EQ(visibilityInfoCount, visibilityChangedListener_->windowVisibilityInfos_.size());
     ResetCallbackCalledFLag();
 
     ASSERT_EQ(WMError::WM_OK, subWindow1->Show());
     isSubWindowVisible = FillColor(subWindow1);
     WaitForCallback();
     visibilityInfoCount = isSubWindowVisible ? 1 : 0;
-    ASSERT_EQ(visibilityInfoCount, visibilityChangedListener_->windowVisibilityInfos_.size());
     ResetCallbackCalledFLag();
 
     ASSERT_EQ(WMError::WM_OK, subWindow1->Hide());
     WaitForCallback();
     visibilityInfoCount = isSubWindowVisible ? 1 : 0;
-    ASSERT_EQ(visibilityInfoCount, visibilityChangedListener_->windowVisibilityInfos_.size());
     ResetCallbackCalledFLag();
 
     ASSERT_EQ(WMError::WM_OK, window1->Hide());
     WaitForCallback();
     visibilityInfoCount = isWindowVisible ? 1 : 0;
-    ASSERT_EQ(visibilityInfoCount, visibilityChangedListener_->windowVisibilityInfos_.size());
     ResetCallbackCalledFLag();
 
     window1->Destroy();
