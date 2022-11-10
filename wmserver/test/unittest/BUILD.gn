@@ -28,6 +28,7 @@ group("unittest") {
     ":wmserver_window_layout_policy_test",
     ":wmserver_window_manager_config_test",
     ":wmserver_window_manager_proxy_test",
+    ":wmserver_window_manager_service_test",
     ":wmserver_window_manager_stub_test",
     ":wmserver_window_node_container_test",
     ":wmserver_window_node_test",
@@ -95,6 +96,17 @@ test_public_config = [
   "//foundation/window/window_manager/resources/config/build:coverage_flags",
   "//foundation/window/window_manager/resources/config/build:testcase_flags",
 ]
+
+ohos_unittest("wmserver_window_manager_service_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_manager_service_test.cpp" ]
+  configs = test_public_config
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
 
 ohos_unittest("wmserver_input_window_monitor_test") {
   module_out_path = module_out_path
