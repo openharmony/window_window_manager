@@ -65,7 +65,7 @@ sptr<ScreenInfo> CreateScreenInfo(const uint8_t *data, size_t size)
     startPos += GetObject<Rotation>(info->rotation_, data + startPos, size - startPos);
     startPos += GetObject<Orientation>(info->orientation_, data + startPos, size - startPos);
     startPos += GetObject<ScreenType>(info->type_, data + startPos, size - startPos);
-    startPos += GetObject<uint32_t>(info->modeId_, data + startPos, size - startPos);
+    GetObject<uint32_t>(info->modeId_, data + startPos, size - startPos);
     return info;
 }
 bool ScreenFuzzTest(sptr<Screen> screen, sptr<Display> display, const uint8_t *data, size_t size)
@@ -161,7 +161,7 @@ void DoMyFuzzTest(const uint8_t* data, size_t size)
     sptr<Screen> screen = nullptr;
     if (display != nullptr) {
         ScreenId screenId = display->GetScreenId();
-        sptr<Screen> screen = ScreenManager::GetInstance().GetScreenById(screenId);
+        screen = ScreenManager::GetInstance().GetScreenById(screenId);
     } else {
         sptr<ScreenInfo> info = CreateScreenInfo(data, size);
         screen = new (std::nothrow) Screen(info);

@@ -282,7 +282,7 @@ NativeValue* CreateJsScreenModeArrayObject(NativeEngine& engine, std::vector<spt
     NativeValue* arrayValue = engine.CreateArray(screenModes.size());
     NativeArray* array = ConvertNativeValueTo<NativeArray>(arrayValue);
     size_t i = 0;
-    for (auto& mode : screenModes) {
+    for (const auto& mode : screenModes) {
         array->SetElement(i++, CreateJsScreenModeObject(engine, mode));
     }
     return arrayValue;
