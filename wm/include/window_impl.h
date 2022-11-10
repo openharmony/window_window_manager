@@ -17,12 +17,12 @@
 #define OHOS_ROSEN_WINDOW_IMPL_H
 
 #include <map>
+#include <string>
 
 #include <ability_context.h>
 #include <i_input_event_consumer.h>
 #include <key_event.h>
 #include <refbase.h>
-#include <string>
 #include <ui_content.h>
 #include <ui/rs_surface_node.h>
 #include <struct_multimodal.h>

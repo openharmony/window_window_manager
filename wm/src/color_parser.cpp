@@ -41,10 +41,9 @@ bool ColorParser::Parse(const std::string& colorStr, uint32_t& colorValue)
         if (colorStr.size() == 7) { // #RRGGBB: RRGGBB -> AARRGGBB
             colorValue |= 0xff000000;
             return true;
-        } else if (colorStr.size() == 9) { // #AARRGGBB
+        }
+        if (colorStr.size() == 9) { // #AARRGGBB
             return true;
-        } else {
-            // do nothing
         }
     }
     return false;

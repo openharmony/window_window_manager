@@ -164,7 +164,7 @@ WMError WindowAgent::NotifyScreenshot()
         WLOGFE("notify screenshot failed: window is null.");
         return WMError::WM_ERROR_NULLPTR;
     }
-    WLOGFI("called");
+    WLOGFD("called");
     window_->NotifyScreenshot();
     return WMError::WM_OK;
 }

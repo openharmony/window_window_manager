@@ -15,7 +15,6 @@
 
 #include "window_impl.h"
 
-
 #include <ability_manager_client.h>
 #include <common/rs_common_def.h>
 #include <hisysevent.h>
@@ -62,6 +61,10 @@ static int deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
     property_ = new (std::nothrow) WindowProperty();
+    if (property_ == nullptr) {
+        WLOGFE("Property is null");
+        return;
+    }
     property_->SetWindowName(option->GetWindowName());
     property_->SetRequestRect(option->GetWindowRect());
     property_->SetWindowType(option->GetWindowType());
@@ -89,6 +92,9 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
 
     moveDragProperty_ = new (std::nothrow) MoveDragProperty();
+    if (moveDragProperty_ == nullptr) {
+        WLOGFE("MoveDragProperty is null");
+    }
     WLOGFI("WindowImpl constructorCnt: %{public}d name: %{public}s",
         ++constructorCnt, property_->GetWindowName().c_str());
 }
@@ -311,7 +317,7 @@ SystemBarProperty WindowImpl::GetSystemBarPropertyByType(WindowType type) const
 
 WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 {
-    WLOGFI("GetAvoidAreaByType  Search Type: %{public}u", static_cast<uint32_t>(type));
+    WLOGFI("GetAvoidAreaByType Search Type: %{public}u", static_cast<uint32_t>(type));
     uint32_t windowId = property_->GetWindowId();
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetAvoidAreaByType(windowId, type, avoidArea);
     if (ret != WMError::WM_OK) {
@@ -1148,7 +1154,7 @@ void WindowImpl::DestroyFloatingWindow()
 void WindowImpl::DestroySubWindow()
 {
     if (subWindowMap_.count(property_->GetParentId()) > 0) { // remove from subWindowMap_
-        std::vector<sptr<WindowImpl>>& subWindows = subWindowMap_.at(property_->GetParentId());
+        auto& subWindows = subWindowMap_.at(property_->GetParentId());
         for (auto iter = subWindows.begin(); iter < subWindows.end(); ++iter) {
             if ((*iter) == nullptr) {
                 continue;
@@ -2806,14 +2812,13 @@ Rect WindowImpl::GetSystemAlarmWindowDefaultSize(Rect defaultRect)
     uint32_t height = static_cast<uint32_t>(display->GetHeight());
     WLOGFI("width:%{public}u, height:%{public}u, displayId:%{public}" PRIu64"",
         width, height, property_->GetDisplayId());
-    Rect rect;
     uint32_t alarmWidth = static_cast<uint32_t>((static_cast<float>(width) *
         SYSTEM_ALARM_WINDOW_WIDTH_RATIO));
     uint32_t alarmHeight = static_cast<uint32_t>((static_cast<float>(height) *
         SYSTEM_ALARM_WINDOW_HEIGHT_RATIO));
 
-    rect = { static_cast<int32_t>((width - alarmWidth) / 2), static_cast<int32_t>((height - alarmHeight) / 2),
-                alarmWidth, alarmHeight }; // divided by 2 to middle the window
+    Rect rect = { static_cast<int32_t>((width - alarmWidth) / 2), static_cast<int32_t>((height - alarmHeight) / 2),
+        alarmWidth, alarmHeight }; // divided by 2 to middle the window
     return rect;
 }
 
