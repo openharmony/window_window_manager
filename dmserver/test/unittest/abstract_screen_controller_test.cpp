@@ -153,82 +153,6 @@ HWTEST_F(AbstractScreenControllerTest, RegisterAbstractScreenCallback, Function 
     ASSERT_EQ(6, absController_->dmsScreenMap_.size());
 }
 /**
- * @tc.name: OnRsScreenConnectionChange
- * @tc.desc: OnRsScreenConnectionChange test
- * @tc.type: FUNC
- */
-HWTEST_F(AbstractScreenControllerTest, OnRsScreenConnectionChange01, Function | SmallTest | Level3)
-{
-    ScreenEvent event = ScreenEvent::DISCONNECTED;
-    ScreenId rsScreenId = 1;
-    absController_->OnRsScreenConnectionChange(rsScreenId, event);
-    ASSERT_EQ(6, absController_->dmsScreenMap_.size());
-}
-/**
- * @tc.name: OnRsScreenConnectionChange
- * @tc.desc: OnRsScreenConnectionChange test
- * @tc.type: FUNC
- */
-HWTEST_F(AbstractScreenControllerTest, OnRsScreenConnectionChange02, Function | SmallTest | Level3)
-{
-    ScreenEvent event = ScreenEvent::UNKNOWN;
-    ScreenId rsScreenId = 1;
-    absController_->OnRsScreenConnectionChange(rsScreenId, event);
-    ASSERT_EQ(6, absController_->dmsScreenMap_.size());
-}
-/**
- * @tc.name: ProcessScreenConnected
- * @tc.desc: ProcessScreenConnected test
- * @tc.type: FUNC
- */
-HWTEST_F(AbstractScreenControllerTest, ProcessScreenConnected01, Function | SmallTest | Level3)
-{
-    ScreenId id = 0;
-    absController_->ProcessScreenConnected(id);
-    ASSERT_EQ(true, absController_->screenIdManager_.HasRsScreenId(id));
-}
-/**
- * @tc.name: ProcessScreenDisconnected
- * @tc.desc: ProcessScreenDisconnected test
- * @tc.type: FUNC
- */
-HWTEST_F(AbstractScreenControllerTest, ProcessScreenDisconnected01, Function | SmallTest | Level3)
-{
-    ScreenId rsId = 6;
-    ScreenId dmsId;
-    absController_->ProcessScreenDisconnected(rsId);
-    ASSERT_EQ(false, absController_->screenIdManager_.ConvertToDmsScreenId(rsId, dmsId));
-}
-/**
- * @tc.name: ProcessScreenDisconnected
- * @tc.desc: ProcessScreenDisconnected test
- * @tc.type: FUNC
- */
-HWTEST_F(AbstractScreenControllerTest, ProcessScreenDisconnected02, Function | SmallTest | Level3)
-{
-    ScreenId rsId = 2;
-    ScreenId dmsId;
-    absController_->ProcessScreenDisconnected(rsId);
-    absController_->screenIdManager_.ConvertToDmsScreenId(rsId, dmsId);
-    absController_->dmsScreenMap_.erase(dmsId);
-    ASSERT_EQ(false, absController_->screenIdManager_.ConvertToDmsScreenId(rsId, dmsId));
-    ASSERT_EQ(absController_->dmsScreenMap_.end(), absController_->dmsScreenMap_.find(dmsId));
-}
-/**
- * @tc.name: ProcessScreenDisconnected
- * @tc.desc: ProcessScreenDisconnected test
- * @tc.type: FUNC
- */
-HWTEST_F(AbstractScreenControllerTest, ProcessScreenDisconnected03, Function | SmallTest | Level3)
-{
-    ScreenId rsId = 2;
-    ScreenId dmsId;
-    absController_->abstractScreenCallback_ = nullptr;
-    absController_->ProcessScreenDisconnected(rsId);
-    ASSERT_EQ(false, absController_->screenIdManager_.ConvertToDmsScreenId(rsId, dmsId));
-    ASSERT_NE(absController_->dmsScreenMap_.end(), absController_->dmsScreenMap_.find(dmsId));
-}
-/**
  * @tc.name: AddToGroupLocked
  * @tc.desc: AddToGroupLocked test
  * @tc.type: FUNC
@@ -378,20 +302,6 @@ HWTEST_F(AbstractScreenControllerTest, SetOrientation01, Function | SmallTest | 
     ASSERT_EQ(false, absController_->SetOrientation(1, orientation, true));
 }
 /**
- * @tc.name: SetScreenRotateAnimation
- * @tc.desc: SetScreenRotateAnimation test
- * @tc.type: FUNC
- */
-HWTEST_F(AbstractScreenControllerTest, SetScreenRotateAnimation01, Function | SmallTest | Level3)
-{
-    RSDisplayNodeConfig config;
-    absController_->dmsScreenMap_[1]->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
-    sptr<AbstractScreen> screen = screenVec[0];
-    screen->rotation_ = Rotation::ROTATION_270;
-    absController_->SetScreenRotateAnimation(screen, 1, Rotation::ROTATION_0);
-    ASSERT_EQ(Rotation::ROTATION_270, screen->rotation_);
-}
-/**
  * @tc.name: SetRotation
  * @tc.desc: SetRotation test
  * @tc.type: FUNC
@@ -450,53 +360,6 @@ HWTEST_F(AbstractScreenControllerTest, ProcessScreenModeChanged03, Function | Sm
 {
     absController_->ProcessScreenModeChanged(2);
     ASSERT_NE(nullptr, absController_->dmsScreenMap_[2]);
-}
-/**
- * @tc.name: MakeMirror
- * @tc.desc: MakeMirror test
- * @tc.type: FUNC
- */
-HWTEST_F(AbstractScreenControllerTest, MakeMirror01, Function | SmallTest | Level3)
-{
-    std::vector<ScreenId> screens;
-    ASSERT_EQ(false, absController_->MakeMirror(5, screens));
-}
-/**
- * @tc.name: MakeMirror
- * @tc.desc: MakeMirror test
- * @tc.type: FUNC
- */
-HWTEST_F(AbstractScreenControllerTest, MakeMirror02, Function | SmallTest | Level3)
-{
-    std::vector<ScreenId> screens;
-    absController_->dmsScreenMap_[2]->type_ = ScreenType::UNDEFINED;
-    ASSERT_EQ(false, absController_->MakeMirror(2, screens));
-}
-/**
- * @tc.name: MakeMirror
- * @tc.desc: MakeMirror test
- * @tc.type: FUNC
- */
-HWTEST_F(AbstractScreenControllerTest, MakeMirror03, Function | SmallTest | Level3)
-{
-    std::vector<ScreenId> screens;
-    absController_->dmsScreenMap_[2]->type_ = ScreenType::REAL;
-    absController_->dmsScreenMap_[2]->groupDmsId_ = 5;
-    absController_->abstractScreenCallback_ = nullptr;
-    ASSERT_EQ(false, absController_->MakeMirror(2, screens));
-}
-/**
- * @tc.name: MakeMirror
- * @tc.desc: MakeMirror test
- * @tc.type: FUNC
- */
-HWTEST_F(AbstractScreenControllerTest, MakeMirror04, Function | SmallTest | Level3)
-{
-    std::vector<ScreenId> screens;
-    absController_->dmsScreenMap_[2]->type_ = ScreenType::REAL;
-    absController_->dmsScreenMap_[2]->groupDmsId_ = 5;
-    absController_->abstractScreenCallback_ = new AbstractScreenController::AbstractScreenCallback;
-    ASSERT_EQ(false, absController_->MakeMirror(2, screens));
 }
 /**
  * @tc.name: ChangeScreenGroup
