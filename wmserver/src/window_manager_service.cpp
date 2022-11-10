@@ -746,7 +746,10 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId, bool onlySelf)
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:DestroyWindow(%u)", windowId);
             WindowInnerManager::GetInstance().NotifyWindowRemovedOrDestroyed(windowId);
             auto node = windowRoot_->GetWindowNode(windowId);
-            if (node != nullptr && node->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
+            if (node == nullptr) {
+                return WMError::WM_OK;
+            }
+            if (node->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
                 dragController_->FinishDrag(windowId);
             }
             return windowController_->DestroyWindow(windowId, node->stateMachine_.GetDestroyTaskParam());
