@@ -28,8 +28,6 @@ namespace {
 void WindowManagerAgentProxy::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused)
 {
     MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
     if (focusChangeInfo == nullptr) {
         WLOGFE("Invalid focus change info");
         return;
@@ -53,7 +51,8 @@ void WindowManagerAgentProxy::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>&
         WLOGFE("Write Focus failed");
         return;
     }
-
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_FOCUS),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -63,8 +62,6 @@ void WindowManagerAgentProxy::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>&
 void WindowManagerAgentProxy::UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints)
 {
     MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;
@@ -86,6 +83,8 @@ void WindowManagerAgentProxy::UpdateSystemBarRegionTints(DisplayId displayId, co
         WLOGFE("Write SystemBarRegionTint failed");
         return;
     }
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_SYSTEM_BAR_PROPS),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -96,8 +95,6 @@ void WindowManagerAgentProxy::NotifyAccessibilityWindowInfo(const std::vector<sp
     WindowUpdateType type)
 {
     MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;
@@ -112,6 +109,8 @@ void WindowManagerAgentProxy::NotifyAccessibilityWindowInfo(const std::vector<sp
         WLOGFE("Write windowUpdateType failed");
         return;
     }
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STATUS),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -122,8 +121,6 @@ void WindowManagerAgentProxy::UpdateWindowVisibilityInfo(
     const std::vector<sptr<WindowVisibilityInfo>>& visibilityInfos)
 {
     MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;
@@ -138,7 +135,8 @@ void WindowManagerAgentProxy::UpdateWindowVisibilityInfo(
             return;
         }
     }
-
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_VISIBILITY),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -148,8 +146,6 @@ void WindowManagerAgentProxy::UpdateWindowVisibilityInfo(
 void WindowManagerAgentProxy::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)
 {
     MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;
@@ -164,7 +160,8 @@ void WindowManagerAgentProxy::UpdateCameraFloatWindowStatus(uint32_t accessToken
         WLOGFE("Write is showing status failed");
         return;
     }
-
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_FLOAT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");

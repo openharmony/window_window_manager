@@ -37,4 +37,4 @@ private:
 } // namespace ROSEN
 } // namespace OHOS
 
-#endif // FRAMEWORKS_WM_TEST_UT_STATIC_CALL_H
+#endif // OHOS_STATIC_CALL_H

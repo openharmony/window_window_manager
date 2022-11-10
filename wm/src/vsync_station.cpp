@@ -66,8 +66,8 @@ void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallb
 
 void VsyncStation::RemoveCallback()
 {
+    WLOGFI("Remove Vsync callback");
     std::lock_guard<std::mutex> lock(mtx_);
-    WLOGFI("[WM] Remove Vsync callback");
     vsyncCallbacks_.clear();
 }
 
@@ -98,8 +98,8 @@ void VsyncStation::OnVsync(int64_t timestamp, void* client)
 
 void VsyncStation::OnVsyncTimeOut()
 {
+    WLOGFI("Vsync time out");
     std::lock_guard<std::mutex> lock(mtx_);
-    WLOGFI("[WM] Vsync time out");
     hasRequestedVsync_ = false;
 }
 }

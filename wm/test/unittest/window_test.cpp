@@ -92,11 +92,11 @@ HWTEST_F(WindowTest, Create03, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: Create06
+ * @tc.name: Create04
  * @tc.desc: Create window with WindowName and no option
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, Create06, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, Create04, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = nullptr;
     ASSERT_EQ(nullptr, Window::Create("", option));
