@@ -156,6 +156,7 @@ enum class WindowSizeChangeReason : uint32_t {
     MOVE,
     HIDE,
     TRANSFORM,
+    END,
 };
 
 enum class WindowLayoutMode : uint32_t {

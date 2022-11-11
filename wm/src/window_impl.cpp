@@ -1973,8 +1973,9 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
         }
     }
     ResSchedReport::GetInstance().RequestPerfIfNeed(reason, GetType(), GetMode());
-    if (rectToAce != lastOriRect) {
+    if ((rectToAce != lastOriRect) || (reason != lastSizeChangeReason_)) {
         NotifySizeChange(rectToAce, reason);
+        lastSizeChangeReason_ = reason;
     }
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
