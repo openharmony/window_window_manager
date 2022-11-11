@@ -37,7 +37,7 @@ void WindowExtensionProxy::SetBounds(const Rect& rect)
         return;
     }
     if (!(data.WriteInt32(rect.posX_) && data.WriteInt32(rect.posY_) &&
-        data.WriteInt32(rect.height_) && data.WriteInt32(rect.width_))) {
+        data.WriteInt32(rect.width_) && data.WriteInt32(rect.height_))) {
         WLOGFE("write rect failed");
         return;
     }
