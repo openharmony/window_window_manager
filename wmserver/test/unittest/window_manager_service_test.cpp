@@ -78,12 +78,10 @@ void WindowManagerServiceTest::TearDownTestCase()
 void WindowManagerServiceTest::SetUp()
 {
     CommonTestUtils::SetAceessTokenPermission("WindowManagerServiceTest");
-    wms->OnStart();
 }
 
 void WindowManagerServiceTest::TearDown()
 {
-    wms->OnStop();
 }
 
 namespace {
@@ -108,17 +106,6 @@ HWTEST_F(WindowManagerServiceTest, WindowVisibilityChangeCallback01, Function | 
     std::shared_ptr<RSOcclusionData> occlusionData = nullptr;
     wms->WindowVisibilityChangeCallback(occlusionData);
     ASSERT_EQ(nullptr, occlusionData);
-}
-/**
- * @tc.name: RegisterSnapshotHandler
- * @tc.desc: Register Snapshot Handler
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerServiceTest, RegisterSnapshotHandler01, Function | SmallTest | Level2)
-{
-    wms->snapshotController_ = nullptr;
-    wms->RegisterSnapshotHandler();
-    ASSERT_NE(nullptr, wms->snapshotController_);
 }
 /**
  * @tc.name: RegisterWindowManagerServiceHandler
@@ -173,15 +160,6 @@ HWTEST_F(WindowManagerServiceTest, StartingWindow01, Function | SmallTest | Leve
     wms->StartingWindow(nullptr, nullptr, false, 0);
     ASSERT_EQ(true, wms->startingOpen_);
     wms->CancelStartingWindow(nullptr);
-}
-/**
- * @tc.name: RemoveWindow
- * @tc.desc: RemoveWindow test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerServiceTest, RemoveWindow01, Function | SmallTest | Level2)
-{
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->RemoveWindow(0));
 }
 /**
  * @tc.name: CreateWindow
@@ -243,25 +221,6 @@ HWTEST_F(WindowManagerServiceTest, OnWindowEvent01, Function | SmallTest | Level
     wms->OnWindowEvent(static_cast<Event>(1), remoteObject);
     wms->OnWindowEvent(Event::REMOTE_DIED, remoteObject);
     ASSERT_EQ(INVALID_WINDOW_ID, wms->windowRoot_->GetWindowIdByObject(remoteObject));
-}
-/**
- * @tc.name: NotifyServerReadyToMoveOrDrag
- * @tc.desc: NotifyServerReadyToMoveOrDrag test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerServiceTest, NotifyServerReadyToMoveOrDrag01, Function | SmallTest | Level2)
-{
-    sptr<WindowProperty> windowProperty = nullptr;
-    sptr<MoveDragProperty> moveDragProperty = nullptr;
-    wms->NotifyServerReadyToMoveOrDrag(0, windowProperty, moveDragProperty);
-    windowProperty = new WindowProperty();
-    wms->NotifyServerReadyToMoveOrDrag(0, windowProperty, moveDragProperty);
-    ASSERT_EQ(nullptr, moveDragProperty);
-    moveDragProperty = new MoveDragProperty();
-    moveDragProperty->startDragFlag_ = false;
-    moveDragProperty->startMoveFlag_ = true;
-    wms->NotifyServerReadyToMoveOrDrag(0, windowProperty, moveDragProperty);
-    ASSERT_EQ(true, WindowInnerManager::GetInstance().NotifyServerReadyToMoveOrDrag(0, windowProperty, moveDragProperty));
 }
 /**
  * @tc.name: UpdateProperty
