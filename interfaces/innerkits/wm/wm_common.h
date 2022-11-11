@@ -191,6 +191,7 @@ enum class WindowSizeChangeReason : uint32_t {
     CUSTOM_ANIMATION_SHOW,
     FULL_TO_SPLIT,
     SPLIT_TO_FULL,
+    END,
 };
 
 enum class WindowLayoutMode : uint32_t {
