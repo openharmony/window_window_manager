@@ -536,7 +536,7 @@ HWTEST_F(AbstractScreenControllerTest, ChangeScreenGroup02, Function | SmallTest
     group->abstractScreenMap_.insert(std::make_pair(1, abs2pointPair));
     std::vector<Point> startPoints;
     std::vector<ScreenId> screens;
-    for(ScreenId i = 0; i < 7; ++i) {
+    for (ScreenId i = 0; i < 7; ++i) {
         screens.emplace_back(i);
         startPoints.emplace_back(point);
         if (i < absController_->dmsScreenMap_.size() && absController_->dmsScreenMap_[i] != nullptr) {

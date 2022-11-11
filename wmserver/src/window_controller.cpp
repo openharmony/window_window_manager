@@ -336,7 +336,7 @@ void WindowController::RelayoutKeyboard(const sptr<WindowNode>& node)
     auto previousRect = node->GetWindowRect();
     WLOGFD("relayout keyboard window with navigationBarHeight: %{public}u", navigationBarHeight);
     Rect requestedRect = { previousRect.posX_,
-        defaultDisplayInfo->GetHeight() - previousRect.height_ - navigationBarHeight,
+        static_cast<int32_t>(defaultDisplayInfo->GetHeight() - previousRect.height_ - navigationBarHeight),
         previousRect.width_, previousRect.height_ };
     ResizeRect(node->GetWindowId(), requestedRect, WindowSizeChangeReason::MOVE);
 }
