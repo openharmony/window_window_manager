@@ -114,7 +114,8 @@ HWTEST_F(WindowInputMethodTest, InputMethodWindow03, Function | MediumTest | Lev
     keyGuardWindow->Show();
     inputMethodWindow->Show();
     ASSERT_TRUE(Utils::RectEqualTo(keyGuardWindow, Utils::displayRect_));
-    ASSERT_TRUE(Utils::RectEqualTo(inputMethodWindow, Utils::customAppRect_));
+    ASSERT_EQ(inputMethodWindow->GetRect().width_,  Utils::customAppRect_.width_);
+    ASSERT_EQ(inputMethodWindow->GetRect().height_,  Utils::customAppRect_.height_);
 }
 } // namespace
 } // namespace Rosen
