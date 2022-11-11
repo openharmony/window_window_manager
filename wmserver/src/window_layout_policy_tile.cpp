@@ -94,8 +94,8 @@ void WindowLayoutPolicyTile::InitTileRects(DisplayId displayId)
     uint32_t h = displayRect.height_ * ratio;
     w = w > limitRect.width_ ? limitRect.width_ : w;
     h = h > limitRect.height_ ? limitRect.height_ : h;
-    int x = limitRect.posX_ + ((limitRect.width_ - w) / half);
-    int y = limitRect.posY_ + ((limitRect.height_ - h) / half);
+    int32_t x = limitRect.posX_ + (static_cast<int32_t>(limitRect.width_ - w) / half);
+    int32_t y = limitRect.posY_ + (static_cast<int32_t>(limitRect.height_ - h) / half);
 
     std::vector<Rect> single = {{ x, y, w, h }};
     presetRectsForAllLevel.emplace_back(single);
@@ -103,7 +103,7 @@ void WindowLayoutPolicyTile::InitTileRects(DisplayId displayId)
         w = (limitRect.width_ - edgeIntervalVp * half - midIntervalVp * (num - 1)) / num;
         std::vector<Rect> curLevel;
         for (uint32_t i = 0; i < num; i++) {
-            int curX = limitRect.posX_ + edgeIntervalVp + i * (w + midIntervalVp);
+            int32_t curX = static_cast<int32_t>(limitRect.posX_ + edgeIntervalVp + i * (w + midIntervalVp));
             Rect curRect = { curX, y, w, h };
             WLOGFD("presetRectsForAllLevel: level %{public}u, id %{public}u, tileRect: [%{public}d %{public}d "
                 "%{public}u %{public}u]", num, i, curX, y, w, h);
