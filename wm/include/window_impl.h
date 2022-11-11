@@ -540,6 +540,7 @@ private:
     std::recursive_mutex mutex_;
     const float SYSTEM_ALARM_WINDOW_WIDTH_RATIO = 0.8;
     const float SYSTEM_ALARM_WINDOW_HEIGHT_RATIO = 0.3;
+    WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
 
     sptr<MoveDragProperty> moveDragProperty_;
     bool isAppDecorEnable_ = true;

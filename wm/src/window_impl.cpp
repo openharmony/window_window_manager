@@ -1990,8 +1990,9 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
         }
     }
     ResSchedReport::GetInstance().RequestPerfIfNeed(reason, GetType(), GetMode());
-    if (rectToAce != lastOriRect) {
+    if ((rectToAce != lastOriRect) || (reason != lastSizeChangeReason_)) {
         NotifySizeChange(rectToAce, reason);
+        lastSizeChangeReason_ = reason;
     }
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -2005,7 +2006,6 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
         config.SetPosition(rectToAce.posX_, rectToAce.posY_);
         config.SetDensity(display->GetVirtualPixelRatio());
         uiContent_->UpdateViewportConfig(config, reason);
-        WLOGFD("notify uiContent window size change end");
     }
 }
 
