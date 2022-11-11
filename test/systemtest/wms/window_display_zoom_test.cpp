@@ -78,7 +78,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom01, Function | MediumTest | Level3)
     WindowImpl* implPtr = (WindowImpl*)ptr;
     ASSERT_EQ(WMError::WM_OK, window->Show());
     Transform expect;
-    ASSERT_EQ(expect, implPtr->GetWindowProperty()->GetZoomTransform());
+    ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
 
     WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 2);
     sleep(1);
@@ -86,25 +86,25 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom01, Function | MediumTest | Level3)
     expect.pivotX_ = (0 - rect.posX_) * 1.0 / rect.width_;
     expect.pivotY_ = (0 - rect.posY_) * 1.0 / rect.height_;
     expect.scaleX_ = expect.scaleY_ = 2;
-    ASSERT_EQ(expect, implPtr->GetWindowProperty()->GetZoomTransform());
+    ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
 
     WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 2);
     sleep(1);
     expect.scaleX_ = expect.scaleY_ = 4;
-    ASSERT_EQ(expect, implPtr->GetWindowProperty()->GetZoomTransform());
+    ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
 
     WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 0.5);
     sleep(1);
     expect.scaleX_ = expect.scaleY_ = 2;
-    ASSERT_EQ(expect, implPtr->GetWindowProperty()->GetZoomTransform());
+    ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
 
     WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 0.1);
     sleep(1);
-    ASSERT_EQ(expect, implPtr->GetWindowProperty()->GetZoomTransform());
+    ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
 
     WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, -0.1);
     sleep(1);
-    ASSERT_EQ(expect, implPtr->GetWindowProperty()->GetZoomTransform());
+    ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
 
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     window->Destroy();
@@ -135,13 +135,13 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom02, Function | MediumTest | Level3)
     expect.pivotY_ = (0 - rect.posY_) * 1.0 / rect.height_;
     expect.scaleX_ = expect.scaleY_ = 2;
     expect.translateX_ = expect.translateY_ = -100;
-    ASSERT_EQ(expect, implPtr->GetWindowProperty()->GetZoomTransform());
+    ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
 
     WindowAccessibilityController::GetInstance().SetAnchorOffset(200, 200);
     sleep(1);
 
     expect.translateX_ = expect.translateY_ = 0;
-    ASSERT_EQ(expect, implPtr->GetWindowProperty()->GetZoomTransform());
+    ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
 
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     window->Destroy();
@@ -167,7 +167,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom03, Function | MediumTest | Level3)
     sleep(1);
 
     Transform expect;
-    ASSERT_EQ(expect, implPtr->GetWindowProperty()->GetZoomTransform());
+    ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
 
     window->Destroy();
 }
@@ -194,7 +194,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom04, Function | MediumTest | Level3)
     expect.pivotX_ = (0 - rect.posX_) * 1.0 / rect.width_;
     expect.pivotY_ = (0 - rect.posY_) * 1.0 / rect.height_;
     expect.scaleX_ = expect.scaleY_ = 2;
-    ASSERT_EQ(expect, implPtr->GetWindowProperty()->GetZoomTransform());
+    ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
 
     ASSERT_EQ(WMError::WM_OK, window->Hide());;
     WindowAccessibilityController::GetInstance().OffWindowZoom();
@@ -203,7 +203,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom04, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Show());
     sleep(1);
     Transform identity;
-    ASSERT_EQ(identity, implPtr->GetWindowProperty()->GetZoomTransform());
+    ASSERT_TRUE(identity == implPtr->GetWindowProperty()->GetZoomTransform());
 
     window->Destroy();
 }
@@ -270,7 +270,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom06, Function | MediumTest | Level3)
     sleep(1);
 
     Transform expect;
-    ASSERT_EQ(expect, implPtr->GetWindowProperty()->GetZoomTransform());
+    ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
 
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     window->Destroy();
