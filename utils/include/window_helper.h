@@ -101,7 +101,8 @@ public:
     static inline bool IsRotatableWindow(WindowType type, WindowMode mode)
     {
         return WindowHelper::IsMainFullScreenWindow(type, mode) || type == WindowType::WINDOW_TYPE_KEYGUARD ||
-            type == WindowType::WINDOW_TYPE_DESKTOP;
+            type == WindowType::WINDOW_TYPE_DESKTOP ||
+            ((type == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) && (mode == WindowMode::WINDOW_MODE_FULLSCREEN));
     }
 
     static inline bool IsFullScreenWindow(WindowMode mode)
