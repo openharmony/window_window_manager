@@ -70,6 +70,8 @@ public:
     const sptr<WindowRoot>& windowRoot);
     static bool IsRemoteAnimationEnabledAndFirst(DisplayId displayId = 0);
     static void CallbackTimeOutProcess();
+    static sptr<RSWindowAnimationFinishedCallback> CreateAnimationFinishedCallback(
+        const std::function<void(void)>& callback);
     static inline bool IsAnimationFirst()
     {
         return animationFirst_;
@@ -85,12 +87,15 @@ private:
         const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode, bool needMinimizeSrcNode);
     static sptr<RSWindowAnimationFinishedCallback> CreateHideAnimationFinishedCallback(
         const sptr<WindowNode>& srcNode, TransitionEvent event);
-    static void ProcessNodeStateTask(const sptr<WindowNode>& node);
+    static void ProcessNodeStateTask(sptr<WindowNode>& node);
     static void GetExpectRect(const sptr<WindowNode>& dstNode, const sptr<RSWindowAnimationTarget>& dstTarget);
     static void PostProcessShowCallback(const sptr<WindowNode>& node);
-    static void PostFinalStateTask(const sptr<WindowNode>& node);
+    static void ExecuteFinalStateTask(sptr<WindowNode>& node);
     static void GetAnimationTargetsForHome(std::vector<sptr<RSWindowAnimationTarget>>& animationTargets,
         std::vector<wptr<WindowNode>> needMinimizeAppNodes);
+    static sptr<RSWindowAnimationFinishedCallback> GetTransitionFinishedCallback(
+        const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode);
+
     static sptr<RSIWindowAnimationController> windowAnimationController_;
     static wptr<WindowRoot> windowRoot_;
     static std::weak_ptr<AppExecFwk::EventHandler> wmsTaskHandler_;
