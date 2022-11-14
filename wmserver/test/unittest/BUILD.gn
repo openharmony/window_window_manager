@@ -19,10 +19,12 @@ group("unittest") {
   testonly = true
   deps = [
     ":wmserver_avoid_area_controller_test",
+    ":wmserver_display_group_controller_test",
     ":wmserver_input_window_monitor_test",
     ":wmserver_minimize_app_test",
     ":wmserver_starting_window_test",
     ":wmserver_window_controller_test",
+    ":wmserver_window_dumper_test",
     ":wmserver_window_layout_policy_test",
     ":wmserver_window_manager_config_test",
     ":wmserver_window_manager_proxy_test",
@@ -185,6 +187,27 @@ ohos_unittest("wmserver_window_manager_proxy_test") {
   module_out_path = module_out_path
 
   sources = [ "window_manager_proxy_test.cpp" ]
+
+  deps = [ ":wmserver_unittest_common" ]
+}
+
+ohos_unittest("wmserver_window_dumper_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_dumper_test.cpp" ]
+
+  deps = [ ":wmserver_unittest_common" ]
+
+  external_deps = [
+    "common_event_service:cesfwk_innerkits",
+    "ipc:ipc_core",
+  ]
+}
+
+ohos_unittest("wmserver_display_group_controller_test") {
+  module_out_path = module_out_path
+
+  sources = [ "display_group_controller_test.cpp" ]
 
   deps = [ ":wmserver_unittest_common" ]
 }

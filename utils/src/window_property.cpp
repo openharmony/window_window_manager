@@ -29,6 +29,11 @@ void WindowProperty::SetWindowName(const std::string& name)
     windowName_ = name;
 }
 
+void WindowProperty::SetAbilityInfo(const AbilityInfo& info)
+{
+    abilityInfo_ = info;
+}
+
 void WindowProperty::SetWindowRect(const struct Rect& rect)
 {
     ComputeTransform();
@@ -330,6 +335,11 @@ void WindowProperty::ResumeLastWindowMode()
 const std::string& WindowProperty::GetWindowName() const
 {
     return windowName_ ;
+}
+
+const AbilityInfo& WindowProperty::GetAbilityInfo() const
+{
+    return abilityInfo_ ;
 }
 
 Rect WindowProperty::GetWindowRect() const
@@ -672,7 +682,8 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(originRect_.width_) && parcel.WriteUint32(originRect_.height_) &&
         parcel.WriteBool(isStretchable_) && MarshallingTouchHotAreas(parcel) && parcel.WriteUint32(accessTokenId_) &&
         MarshallingTransform(parcel) && MarshallingWindowSizeLimits(parcel) && zoomTrans_.Marshalling(parcel) &&
-        parcel.WriteBool(isDisplayZoomOn_);
+        parcel.WriteBool(isDisplayZoomOn_) && parcel.WriteString(abilityInfo_.bundleName_) &&
+        parcel.WriteString(abilityInfo_.abilityName_) && parcel.WriteInt32(abilityInfo_.missionId_);
 }
 
 WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
@@ -727,6 +738,8 @@ WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
     zoomTrans.Unmarshalling(parcel);
     property->SetZoomTransform(zoomTrans);
     property->SetDisplayZoomState(parcel.ReadBool());
+    AbilityInfo info = { parcel.ReadString(), parcel.ReadString(), parcel.ReadInt32() };
+    property->SetAbilityInfo(info);
     return property;
 }
 
@@ -897,6 +910,7 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     zoomTrans_ = property->zoomTrans_;
     isDisplayZoomOn_ = property->isDisplayZoomOn_;
     reCalcuZoomTransformMat_ = true;
+    abilityInfo_ = property->abilityInfo_;
 }
 }
 }

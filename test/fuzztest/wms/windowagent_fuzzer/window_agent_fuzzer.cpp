@@ -78,7 +78,7 @@ void CheckWindowAgentFunctionsPart1(sptr<WindowAgent> agent, const uint8_t* data
     agent->UpdateAvoidArea(avoidArea, type);
 
     WindowState state;
-    startPos += GetObject<WindowState>(state, data + startPos, size - startPos);
+    GetObject<WindowState>(state, data + startPos, size - startPos);
     agent->UpdateWindowState(state);
 }
 
@@ -122,13 +122,12 @@ void CheckWindowAgentFunctionsPart2(sptr<WindowAgent> agent, const uint8_t* data
     agent->UpdateZoomTransform(trans, boolVal);
 
     uint32_t mode;
-    startPos += GetObject<uint32_t>(mode, data + startPos, size - startPos);
+    GetObject<uint32_t>(mode, data + startPos, size - startPos);
     agent->RestoreSplitWindowMode(mode);
 }
 
 void WindowAgentFuzzTest(const uint8_t* data, size_t size)
 {
-    std::string name = "WindowFuzzTest";
     sptr<OHOS::Rosen::WindowOption> option = new OHOS::Rosen::WindowOption();
     sptr<OHOS::Rosen::WindowImpl> window = new(std::nothrow) OHOS::Rosen::WindowImpl(option);
     if (window == nullptr) {
