@@ -2027,8 +2027,9 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
         }
     }
     ResSchedReport::GetInstance().RequestPerfIfNeed(reason, GetType(), GetMode());
-    if (rectToAce != lastOriRect) {
+    if ((rectToAce != lastOriRect) || (reason != lastSizeChangeReason_)) {
         NotifySizeChange(rectToAce, reason);
+        lastSizeChangeReason_ = reason;
     }
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -2036,13 +2037,12 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
             return;
         }
         Ace::ViewportConfig config;
-        WLOGFD("UpdateViewportConfig Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
-            property_->GetWindowId(), rectToAce.posX_, rectToAce.posY_, rectToAce.width_, rectToAce.height_);
         config.SetSize(rectToAce.width_, rectToAce.height_);
         config.SetPosition(rectToAce.posX_, rectToAce.posY_);
         config.SetDensity(display->GetVirtualPixelRatio());
         uiContent_->UpdateViewportConfig(config, reason);
-        WLOGFD("notify uiContent window size change end");
+        WLOGFD("UpdateViewportConfig Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+            property_->GetWindowId(), rectToAce.posX_, rectToAce.posY_, rectToAce.width_, rectToAce.height_);
     }
 }
 
