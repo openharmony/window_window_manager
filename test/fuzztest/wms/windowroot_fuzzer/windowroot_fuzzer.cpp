@@ -109,7 +109,7 @@ void WindowRootFuzzPart1(sptr<WindowRoot> windowRoot, sptr<WindowNode> windowNod
     windowRoot->UpdateWindowNode(windowNode->GetWindowId(), reason);
 
     uint64_t surfaceNodeId;
-    startPos += GetObject<uint64_t>(surfaceNodeId, data + startPos, size - startPos);
+    GetObject<uint64_t>(surfaceNodeId, data + startPos, size - startPos);
     windowRoot->AddSurfaceNodeIdWindowNodePair(surfaceNodeId, windowNode);
 
     windowRoot->IsVerticalDisplay(windowNode);
@@ -162,7 +162,7 @@ void WindowRootFuzzPart2(sptr<WindowRoot> windowRoot, sptr<WindowNode> windowNod
     WindowState windowState;
     WindowStateChangeReason windowStateChangeReason;
     startPos += GetObject<WindowState>(windowState, data + startPos, size - startPos);
-    startPos += GetObject<WindowStateChangeReason>(windowStateChangeReason, data + startPos, size - startPos);
+    GetObject<WindowStateChangeReason>(windowStateChangeReason, data + startPos, size - startPos);
     windowRoot->ProcessWindowStateChange(windowState, windowStateChangeReason);
 }
 
@@ -260,7 +260,7 @@ void WindowRootFuzzPart4(sptr<WindowRoot> windowRoot, sptr<WindowNode> windowNod
     infos.clear();
 
     int accountId;
-    startPos += GetObject<int>(accountId, data + startPos, size - startPos);
+    GetObject<int>(accountId, data + startPos, size - startPos);
     windowRoot->RemoveSingleUserWindowNodes(accountId);
 
     windowRoot->NotifySystemBarTints();
@@ -292,7 +292,7 @@ void WindowRootFuzzPart5(sptr<WindowRoot> windowRoot, sptr<WindowNode> windowNod
     windowRoot->IsUniRender();
 
     bool afterAnimation;
-    startPos += GetObject<bool>(afterAnimation, data + startPos, size - startPos);
+    GetObject<bool>(afterAnimation, data + startPos, size - startPos);
     windowRoot->LayoutWhenAddWindowNode(windowNode, afterAnimation);
 }
 
@@ -325,7 +325,7 @@ void WindowRootFuzzPart6(sptr<WindowRoot> windowRoot, sptr<WindowNode> windowNod
     windowRoot->MoveNotShowingWindowToDefaultDisplay(defaultDisplayId, displayId);
 
     bool isToUnified;
-    startPos += GetObject<bool>(isToUnified, data + startPos, size - startPos);
+    GetObject<bool>(isToUnified, data + startPos, size - startPos);
     windowRoot->ChangeRSRenderModeIfNeeded(isToUnified);
     windowRoot->IsAppWindowExceed();
 }

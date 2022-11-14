@@ -83,8 +83,8 @@ public:
 
 private:
     void UpdateLimitDisplayRect(const Rect& avoidRect);
-    void UpdateLimitSplitRects(int32_t divPos);
-    void UpdateLimitSplitRect(Rect& limitSplitRect);
+    static void UpdateLimitSplitRects(int32_t divPos);
+    static void UpdateLimitSplitRect(Rect& limitSplitRect);
     static AvoidPosType GetAvoidPosType(const Rect& rect);
     AvoidArea avoidArea_;
 };
