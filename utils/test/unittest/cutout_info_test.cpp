@@ -47,16 +47,19 @@ void CutoutInfoTest::TearDown()
 
 namespace {
 /**
- * @tc.name: MarshallingUnmarshalling
- * @tc.desc: Marshalling Unmarshalling test
+ * @tc.name: WriteBoundingRectsVector
+ * @tc.desc: WriteBoundingRectsVector test
  * @tc.type: FUNC
  */
-HWTEST_F(CutoutInfoTest, MarshallingUnmarshalling, Function | SmallTest | Level2)
+HWTEST_F(CutoutInfoTest, WriteBoundingRectsVector, Function | SmallTest | Level2)
 {
     sptr<CutoutInfo> info = new CutoutInfo();
+    DMRect rect = {0, 0, 0, 0};
     std::vector<DMRect> boundingRects;
+    boundingRects.emplace_back(rect);
     Parcel parcel;
-    info->WriteBoundingRectsVector(boundingRects, parcel);
+    bool ret = info->WriteBoundingRectsVector(boundingRects, parcel);
+    ASSERT_TRUE(ret);
 }
 }
 } // namespace Rosen

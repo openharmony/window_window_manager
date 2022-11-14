@@ -108,12 +108,14 @@ HWTEST_F(DisplayCutoutControllerTest, CalcBuiltInDisplayWaterfallRects, Function
     std::vector<int> curvedScreenBoundary;
     controller->SetCurvedScreenBoundary(curvedScreenBoundary);
     controller->CalcBuiltInDisplayWaterfallRects();
+    ASSERT_TRUE(controller->waterfallDisplayAreaRects_.isUninitialized());
     curvedScreenBoundary.emplace_back(1);
     curvedScreenBoundary.emplace_back(2);
     curvedScreenBoundary.emplace_back(3);
     curvedScreenBoundary.emplace_back(4);
     controller->SetCurvedScreenBoundary(curvedScreenBoundary);
     controller->CalcBuiltInDisplayWaterfallRects();
+    ASSERT_TRUE(controller->waterfallDisplayAreaRects_.isUninitialized());
 }
 
 
@@ -138,6 +140,7 @@ HWTEST_F(DisplayCutoutControllerTest, CalcBuiltInDisplayWaterfallRectsByRotation
     controller->CalcBuiltInDisplayWaterfallRectsByRotation(Rotation::ROTATION_90, displayHeight, displayWidth);
     controller->CalcBuiltInDisplayWaterfallRectsByRotation(Rotation::ROTATION_0, displayHeight, displayWidth);
     controller->CalcBuiltInDisplayWaterfallRectsByRotation(static_cast<Rotation>(10), displayHeight, displayWidth);
+    ASSERT_FALSE(controller->waterfallDisplayAreaRects_.isUninitialized());
 }
 
 /**
@@ -151,6 +154,7 @@ HWTEST_F(DisplayCutoutControllerTest, CheckBoundingRectsBoundary, Function | Sma
     DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
     std::vector<DMRect> boundingRects;
     controller->CheckBoundingRectsBoundary(displayId, boundingRects);
+    ASSERT_TRUE(boundingRects.empty());
 }
 
 /**
@@ -162,7 +166,9 @@ HWTEST_F(DisplayCutoutControllerTest, CalcCutoutBoundingRect, Function | SmallTe
 {
     sptr<DisplayCutoutController> controller = new DisplayCutoutController();
     std::string svgPath = "M 100,100 m -75,0 a 75,75 0 1,0 150,0 a 75,75 0 1,0 -150,0 z";
-    controller->CalcCutoutBoundingRect(svgPath);
+    DMRect rect = controller->CalcCutoutBoundingRect(svgPath);
+    DMRect emptyRect = {0, 0, 0, 0};
+    ASSERT_NE(rect, emptyRect);
 }
 
 /**
@@ -221,8 +227,13 @@ HWTEST_F(DisplayCutoutControllerTest, TransferBoundingRectsByRotation03, Functio
     displayController->abstractDisplayMap_.insert((std::make_pair(id, absDisplay)));
 
     sptr<DisplayCutoutController> controller = new DisplayCutoutController();
-    std::vector<DMRect> emptyRects;
-    controller->boundingRects_[id] = emptyRects;
+    std::vector<DMRect> dmRects;
+    DMRect rect = {1, 1, 100, 100};
+    dmRects.emplace_back(rect);
+    controller->boundingRects_[id] = dmRects;
+    ASSERT_FALSE(controller->boundingRects_.count(id) == 0);
+    ASSERT_FALSE(controller->boundingRects_[id].empty());
+    ASSERT_NE(DisplayManagerServiceInner::GetInstance().GetDisplayById(id), nullptr);
     std::vector<DMRect> boundingRects;
     controller->TransferBoundingRectsByRotation(id, boundingRects);
 
@@ -237,7 +248,7 @@ HWTEST_F(DisplayCutoutControllerTest, TransferBoundingRectsByRotation03, Functio
 
     absDisplay->RequestRotation(Rotation::ROTATION_270);
     controller->TransferBoundingRectsByRotation(id, boundingRects);
-
+    ASSERT_FALSE(boundingRects.empty());
     displayController->abstractDisplayMap_.clear();
     absScreenController->dmsScreenMap_.clear();
 }
