@@ -203,7 +203,7 @@ void WindowNodeContainer::LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool a
 
 WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode, bool afterAnimation)
 {
-    if (!node->startingWindowShown_) {
+    if (!node->startingWindowShown_) { // window except main Window
         WMError res = AddWindowNodeOnWindowTree(node, parentNode);
         if (res != WMError::WM_OK) {
             return res;
@@ -215,9 +215,10 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
             AddNodeOnRSTree(node, displayId, displayId, WindowUpdateType::WINDOW_UPDATE_ADDED,
                 node->isPlayAnimationShow_);
         }
-    } else {
+    } else { // only main app window has starting window
         node->isPlayAnimationShow_ = false;
         node->startingWindowShown_ = false;
+        AddAppSurfaceNodeOnRSTree(node);
         ReZOrderShowWhenLockedWindowIfNeeded(node);
         RaiseZOrderForAppWindow(node, parentNode);
     }
@@ -464,6 +465,31 @@ void WindowNodeContainer::UpdateWindowTree(sptr<WindowNode>& node)
         }
     }
     parentNode->children_.insert(position, node);
+}
+
+bool WindowNodeContainer::AddAppSurfaceNodeOnRSTree(sptr<WindowNode>& node)
+{
+    /*
+     * App main window must has starting window, and show after starting window
+     * Starting Window has already update leashWindowSurfaceNode and starting window surfaceNode on RSTree
+     * Just need add appSurface Node as child of leashWindowSurfaceNode
+     */
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "AddAppSurfaceNodeOnRSTree");
+    if (!WindowHelper::IsMainWindow(node->GetWindowType())) {
+        WLOGFE("id:%{public}u not main app window but has start window", node->GetWindowId());
+        return false;
+    }
+    if (!node->leashWinSurfaceNode_ || !node->surfaceNode_) {
+        WLOGFE("id:%{public}u leashWinSurfaceNode or surfaceNode is null but has start window!", node->GetWindowId());
+        return false;
+    }
+    WLOGFI("AddAppSurfaceNodeOnRSTree windowId: %{public}d", node->GetWindowId());
+    if (!node->currentVisibility_) {
+        WLOGFI("window: %{public}d is invisible, do not need update RS tree", node->GetWindowId());
+        return false;
+    }
+    node->leashWinSurfaceNode_->AddChild(node->surfaceNode_, -1);
+    return true;
 }
 
 bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId displayId, DisplayId parentDisplayId,
@@ -714,19 +740,26 @@ void WindowNodeContainer::AssignZOrder()
 {
     zOrder_ = 0;
     WindowNodeOperationFunc func = [this](sptr<WindowNode> node) {
+        if (!node->leashWinSurfaceNode_ && !node->surfaceNode_ && !node->startingWinSurfaceNode_) {
+            ++zOrder_;
+            WLOGFE("Id: %{public}u has no surface nodes", node->GetWindowId());
+            return false;
+        }
         if (node->leashWinSurfaceNode_ != nullptr) {
+            ++zOrder_;
             node->leashWinSurfaceNode_->SetPositionZ(zOrder_);
         }
 
         if (node->surfaceNode_ != nullptr) {
+            ++zOrder_;
             node->surfaceNode_->SetPositionZ(zOrder_);
             node->zOrder_ = zOrder_;
         }
-
+        // make sure starting window above app
         if (node->startingWinSurfaceNode_ != nullptr) {
+            ++zOrder_;
             node->startingWinSurfaceNode_->SetPositionZ(zOrder_);
         }
-        ++zOrder_;
         return false;
     };
     TraverseWindowTree(func, false);
