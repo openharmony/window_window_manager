@@ -104,12 +104,14 @@ WMError WindowNodeContainer::AddWindowNodeOnWindowTree(sptr<WindowNode>& node, c
     }
     node->requestedVisibility_ = true;
     if (parentNode != nullptr) { // subwindow
-        if (WindowHelper::IsSystemSubWindow(node->GetWindowType())) {
+        if (WindowHelper::IsSystemSubWindow(node->GetWindowType()) ||
+            node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
             if (WindowHelper::IsSubWindow(parentNode->GetWindowType()) ||
                 WindowHelper::IsSystemSubWindow(parentNode->GetWindowType()) ||
+                parentNode->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT ||
                 parentNode->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
                 // some times, dialog is a child window, so exclude
-                WLOGFE("the parent of system sub window cannot be any sub window");
+                WLOGFE("the parent of window cannot be any sub window");
                 return WMError::WM_ERROR_INVALID_PARAM;
             }
         } else {
