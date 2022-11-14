@@ -353,9 +353,11 @@ HWTEST_F(ScreenManagerTest, ScreenManager05, Function | MediumTest | Level2)
         usleep(sleepUs_);
     }
     ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId));
+    usleep(sleepUs_);
     ASSERT_GT(utils.successCount_, 0);
     ASSERT_GT(maxWaitCount_, waitCount_);
     waitCount_ = 0;
+    usleep(sleepUs_);
 }
 
 /**
@@ -389,6 +391,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager06, Function | MediumTest | Level2)
         usleep(sleepUs_);
     }
     DMError res = ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
+    usleep(sleepUs_);
     ASSERT_EQ(DMError::DM_OK, res);
     ASSERT_GT(utils.successCount_, 0);
     ASSERT_GT(maxWaitCount_, waitCount_);
@@ -446,6 +449,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager08, Function | MediumTest | Level2)
     ScreenManager::GetInstance().UnregisterScreenListener(screenListener);
     ScreenManager::GetInstance().UnregisterScreenGroupListener(screenGroupChangeListener);
     ScreenManager::GetInstance().UnregisterVirtualScreenGroupListener(virtualScreenGroupChangeListener);
+    usleep(sleepUs_);
 }
 
 /**
@@ -558,6 +562,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager11, Function | MediumTest | Level2)
         ScreenManager::GetInstance().UnregisterScreenListener(screenListener);
         ScreenManager::GetInstance().UnregisterScreenGroupListener(screenGroupChangeListener);
         ScreenManager::GetInstance().UnregisterVirtualScreenGroupListener(virtualScreenGroupChangeListener);
+        usleep(sleepUs_);
     }
 }
 
@@ -601,6 +606,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager12, Function | MediumTest | Level2)
     ScreenManager::GetInstance().UnregisterScreenListener(screenListener);
     ScreenManager::GetInstance().UnregisterScreenGroupListener(screenGroupChangeListener);
     ScreenManager::GetInstance().UnregisterVirtualScreenGroupListener(virtualScreenGroupChangeListener);
+    usleep(sleepUs_);
 }
 
 /**
@@ -641,6 +647,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager13, Function | MediumTest | Level2)
     ScreenManager::GetInstance().UnregisterScreenListener(screenListener);
     ScreenManager::GetInstance().UnregisterScreenGroupListener(screenGroupChangeListener);
     ScreenManager::GetInstance().UnregisterVirtualScreenGroupListener(virtualScreenGroupChangeListener);
+    usleep(sleepUs_);
 }
 
 /**
@@ -675,6 +682,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager14, Function | MediumTest | Level2)
     CheckScreenGroupState(ScreenCombination::SCREEN_MIRROR, ScreenGroupChangeEvent::CHANGE_GROUP,
         virtualScreenId, group, screenGroupChangeListener);
     CheckScreenStateInGroup(true, group, groupId, virtualScreen, virtualScreenId);
+    usleep(sleepUs_);
 
     ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId));
     CHECK_SCREEN_STATE_AFTER_DESTROY_VIRTUAL_SCREEN
@@ -685,6 +693,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager14, Function | MediumTest | Level2)
     ScreenManager::GetInstance().UnregisterScreenListener(screenListener);
     ScreenManager::GetInstance().UnregisterScreenGroupListener(screenGroupChangeListener);
     ScreenManager::GetInstance().UnregisterVirtualScreenGroupListener(virtualScreenGroupChangeListener);
+    usleep(sleepUs_);
 }
 
 /**
@@ -733,6 +742,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager15, Function | MediumTest | Level2)
     ScreenManager::GetInstance().UnregisterScreenListener(screenListener);
     ScreenManager::GetInstance().UnregisterScreenGroupListener(screenGroupChangeListener);
     ScreenManager::GetInstance().UnregisterVirtualScreenGroupListener(virtualScreenGroupChangeListener);
+    usleep(sleepUs_);
 }
 
 /**
@@ -756,11 +766,13 @@ HWTEST_F(ScreenManagerTest, ScreenManager16, Function | MediumTest | Level2)
         usleep(1E6);
         ASSERT_EQ(static_cast<uint32_t>(screens[0]->GetOrientation()), orientation);
         ASSERT_EQ(static_cast<uint32_t>(display->GetOrientation()), orientation);
+        usleep(sleepUs_);
     }
     screens[0]->SetOrientation(Orientation::UNSPECIFIED);
     ASSERT_EQ(static_cast<uint32_t>(screens[0]->GetOrientation()), static_cast<uint32_t>(Orientation::UNSPECIFIED));
     ASSERT_EQ(static_cast<uint32_t>(display->GetOrientation()), static_cast<uint32_t>(Orientation::UNSPECIFIED));
     ScreenManager::GetInstance().UnregisterScreenListener(screenListener);
+    usleep(sleepUs_);
 }
 
 /**
@@ -777,6 +789,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager17, Function | MediumTest | Level2)
         defaultOption_.surface_ = utils.psurface_;
         ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
         ASSERT_NE(SCREEN_ID_INVALID, virtualScreenId);
+        usleep(sleepUs_);
     }
 }
 
@@ -792,6 +805,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager18, Function | SmallTest | Level1)
     bool modifiedLockedStatus = ScreenManager::GetInstance().IsScreenRotationLocked();
     ScreenManager::GetInstance().SetScreenRotationLocked(originalLockStatus);
     ASSERT_EQ(!originalLockStatus, modifiedLockedStatus);
+    usleep(sleepUs_);
 }
 }
 } // namespace Rosen
