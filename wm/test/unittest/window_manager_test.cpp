@@ -63,6 +63,18 @@ HWTEST_F(WindowManagerTest, GetVisibilityWindowInfo01, Function | SmallTest | Le
     EXPECT_CALL(m->Mock(), GetVisibilityWindowInfo(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_INVALID_WINDOW));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, WindowManager::GetInstance().GetVisibilityWindowInfo(infos));
 }
+
+/**
+ * @tc.name: ToggleShownStateForAllAppWindows
+ * @tc.desc: ToggleShownStateForAllAppWindows ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, ToggleShownStateForAllAppWindows, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), ToggleShownStateForAllAppWindows()).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, WindowManager::GetInstance().ToggleShownStateForAllAppWindows());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

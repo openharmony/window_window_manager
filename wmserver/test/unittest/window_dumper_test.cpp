@@ -16,6 +16,8 @@
 #include <gtest/gtest.h>
 #include "window_dumper.h"
 #include "window_manager_service.h"
+#include "window_impl.h"
+#include "window_agent.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -161,6 +163,48 @@ HWTEST_F(WindowDumperTest, Dump07, Function | SmallTest | Level1)
     args.emplace_back(DUMP_WINDOW);
     args.emplace_back(DUMP_WINDOW_ID);
     windowDumper->Dump(fd, args);
+}
+
+/**
+ * @tc.name: ShowAceDumpHelp01
+ * @tc.desc: ShowAceDumpHelp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowDumperTest, ShowAceDumpHelp01, Function | SmallTest | Level1)
+{
+    sptr<WindowDumper> windowDumper;
+    sptr<WindowNode> node = new WindowNode();
+    uint32_t id = 101;
+    node->property_->SetWindowId(id);
+    node->property_->SetWindowType(WindowType::WINDOW_TYPE_KEYGUARD);
+    sptr<WindowOption> windowOption = new WindowOption();
+    sptr<WindowImpl> windowImpl = new WindowImpl(windowOption);
+    sptr<IWindow> window = new WindowAgent(windowImpl);
+    node->SetWindowToken(window);
+    WindowManagerService::GetInstance().windowRoot_->windowNodeMap_.insert(std::make_pair(id, node));
+    windowDumper = new WindowDumper(WindowManagerService::GetInstance().windowRoot_);
+    std::string dumpInfo;
+    windowDumper->ShowAceDumpHelp(dumpInfo);
+    WindowManagerService::GetInstance().windowRoot_->windowNodeMap_.clear();
+}
+
+/**
+ * @tc.name: ShowAceDumpHelp02
+ * @tc.desc: ShowAceDumpHelp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowDumperTest, ShowAceDumpHelp02, Function | SmallTest | Level1)
+{
+    sptr<WindowDumper> windowDumper;
+    sptr<WindowNode> node = new WindowNode();
+    uint32_t id = 102;
+    node->property_->SetWindowId(id);
+    node->property_->SetWindowType(WindowType::WINDOW_TYPE_KEYGUARD);
+    WindowManagerService::GetInstance().windowRoot_->windowNodeMap_.insert(std::make_pair(id, node));
+    windowDumper = new WindowDumper(WindowManagerService::GetInstance().windowRoot_);
+    std::string dumpInfo;
+    windowDumper->ShowAceDumpHelp(dumpInfo);
+    WindowManagerService::GetInstance().windowRoot_->windowNodeMap_.clear();
 }
 }
 }

@@ -35,6 +35,7 @@ public:
     MOCK_METHOD2(BindDialogTarget, WMError(uint32_t& windowId, sptr<IRemoteObject> targetToken));
     MOCK_METHOD2(UpdateRsTree, WMError(uint32_t windowId, bool isAdd));
     MOCK_METHOD1(MinimizeAllAppWindows, void(DisplayId displayId));
+    MOCK_METHOD0(ToggleShownStateForAllAppWindows, WMError());
     MOCK_METHOD1(ProcessPointDown, void(uint32_t windowId));
     MOCK_METHOD1(ProcessPointUp, void(uint32_t windowId));
     MOCK_METHOD1(RequestFocus, WMError(uint32_t windowId));
