@@ -23,8 +23,8 @@ namespace Rosen {
 class SysCapUtil {
 public:
     static std::string GetClientName();
-private:
     static std::string GetBundleName();
+private:
     static std::string GetProcessName();
 };
 } // Rosen
