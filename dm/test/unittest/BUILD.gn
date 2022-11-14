@@ -21,6 +21,7 @@ group("unittest") {
   deps = [
     ":dm_display_change_unit_test",
     ":dm_display_manager_adapter_test",
+    ":dm_display_manager_agent_stub_test",
     ":dm_display_manager_test",
     ":dm_display_power_unit_test",
     ":dm_display_test",
@@ -66,6 +67,8 @@ ohos_unittest("dm_screenshot_test") {
 ohos_unittest("dm_screen_manager_test") {
   module_out_path = module_out_path
 
+  include_dirs = [ "//foundation/window/window_manager/dm/src" ]
+
   sources = [ "screen_manager_test.cpp" ]
 
   deps = [ ":dm_unittest_common" ]
@@ -98,7 +101,17 @@ ohos_unittest("dm_display_manager_adapter_test") {
 ohos_unittest("dm_display_manager_test") {
   module_out_path = module_out_path
 
+  include_dirs = [ "//foundation/window/window_manager/dm/src" ]
+
   sources = [ "display_manager_test.cpp" ]
+
+  deps = [ ":dm_unittest_common" ]
+}
+
+ohos_unittest("dm_display_manager_agent_stub_test") {
+  module_out_path = module_out_path
+
+  sources = [ "display_manager_agent_stub_test.cpp" ]
 
   deps = [ ":dm_unittest_common" ]
 }
@@ -107,6 +120,7 @@ ohos_unittest("dm_display_manager_test") {
 config("dm_unittest_common_public_config") {
   include_dirs = [
     "//foundation/window/window_manager/dm/include",
+    "//foundation/window/window_manager/dm/include/zidl",
     "//foundation/window/window_manager/dmserver/include",
     "//foundation/window/window_manager/snapshot",
     "//foundation/window/window_manager/test/common/mock",
