@@ -275,6 +275,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         return res;
     }
     windowRoot_->FocusFaultDetection();
+    RelayoutKeyboard(node);
     FlushWindowInfo(property->GetWindowId());
     NotifyAfterAddWindow(node);
     HandleTurnScreenOn(node);
@@ -298,6 +299,46 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         MinimizeApp::ExecuteMinimizeTargetReasons(~MinimizeReason::OTHER_WINDOW);
     }
     return WMError::WM_OK;
+}
+
+void WindowController::RelayoutKeyboard(const sptr<WindowNode>& node)
+{
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return;
+    }
+    if (node->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        return;
+    }
+
+    auto container = windowRoot_->GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (container == nullptr) {
+        WLOGFE("window node container is null");
+        return;
+    }
+
+    uint32_t navigationBarHeight = 0;
+    WindowNodeOperationFunc func = [&navigationBarHeight](sptr<WindowNode> windowNode) {
+        if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR && windowNode->isVisible_) {
+            navigationBarHeight = windowNode->GetWindowRect().height_;
+            return true;
+        }
+        return false;
+    };
+    container->TraverseWindowTree(func, true);
+
+    sptr<DisplayInfo> defaultDisplayInfo = DisplayManagerServiceInner::GetInstance().GetDefaultDisplay();
+    if (defaultDisplayInfo == nullptr) {
+        WLOGFE("defaultDisplayInfo is null");
+        return;
+    }
+
+    auto previousRect = node->GetWindowRect();
+    WLOGFD("relayout keyboard window with navigationBarHeight: %{public}u", navigationBarHeight);
+    Rect requestedRect = { previousRect.posX_,
+        defaultDisplayInfo->GetHeight() - previousRect.height_ - navigationBarHeight,
+        previousRect.width_, previousRect.height_ };
+    ResizeRect(node->GetWindowId(), requestedRect, WindowSizeChangeReason::MOVE);
 }
 
 void WindowController::ResizeSoftInputCallingWindowIfNeed(const sptr<WindowNode>& node)
