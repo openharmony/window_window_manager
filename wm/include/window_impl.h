@@ -476,6 +476,8 @@ private:
     WMError Destroy(bool needNotifyServer);
     WMError SetBackgroundColor(uint32_t color);
     uint32_t GetBackgroundColor() const;
+    void InitAbilityInfo();
+    std::shared_ptr<AppExecFwk::AbilityInfo> GetOriginalAbilityInfo() const;
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError errCode) const;
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     Rect GetSystemAlarmWindowDefaultSize(Rect defaultRect);
@@ -540,6 +542,7 @@ private:
     std::recursive_mutex mutex_;
     const float SYSTEM_ALARM_WINDOW_WIDTH_RATIO = 0.8;
     const float SYSTEM_ALARM_WINDOW_HEIGHT_RATIO = 0.3;
+    WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
 
     sptr<MoveDragProperty> moveDragProperty_;
     bool isAppDecorEnable_ = true;

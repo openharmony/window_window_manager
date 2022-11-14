@@ -38,6 +38,7 @@ public:
     void CopyFrom(const sptr<WindowProperty>& property);
 
     void SetWindowName(const std::string& name);
+    void SetAbilityInfo(const AbilityInfo& info);
     void SetRequestRect(const struct Rect& rect);
     void SetWindowRect(const struct Rect& rect);
     void SetDecoStatus(bool decoStatus);
@@ -88,6 +89,7 @@ public:
     void ClearTransformZAxisOffset(Transform& trans);
 
     const std::string& GetWindowName() const;
+    const AbilityInfo& GetAbilityInfo() const;
     Rect GetRequestRect() const;
     Rect GetWindowRect() const;
     bool GetDecoStatus() const;
@@ -148,6 +150,7 @@ private:
     void HandleComputeTransform(const Transform& trans);
 
     std::string windowName_;
+    AbilityInfo abilityInfo_;
     Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
     Rect windowRect_ { 0, 0, 0, 0 }; // actual window rect
     bool decoStatus_ { false }; // window has been decorated or not

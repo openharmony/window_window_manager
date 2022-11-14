@@ -82,6 +82,18 @@ HWTEST_F(DisplayTest, UpdateDisplayInfo01, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: GetName
+ * @tc.desc: UpdateDisplayInfo with nullptr
+ * @tc.type: FUNC
+ * @tc.require: issueI5K0JP
+ */
+HWTEST_F(DisplayTest, GetName, Function | SmallTest | Level1)
+{
+    defaultDisplay_->GetName();
+    defaultDisplay_->GetDpi();
+}
+
+/**
  * @tc.name: SetWaterfallCompression01
  * @tc.desc: Set waterfall compression related values with valid input.
  * @tc.type: FUNC

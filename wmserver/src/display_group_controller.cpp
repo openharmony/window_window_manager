@@ -182,6 +182,10 @@ void DisplayGroupController::UpdateWindowDisplayIdIfNeeded(const sptr<WindowNode
     // current multi-display is only support left-right combination, maxNum is two
     DisplayId newDisplayId = node->GetDisplayId();
     const auto& curShowingDisplays = node->GetShowingDisplays();
+    if (curShowingDisplays.empty()) {
+        WLOGFE("id:%{public}u not show on any display!", node->GetWindowId());
+        return;
+    }
     const auto& winRect = node->GetWindowRect();
     if (curShowingDisplays.size() == 1) {
         newDisplayId = *(curShowingDisplays.begin());
@@ -339,6 +343,11 @@ void DisplayGroupController::ProcessNotCrossNodesOnDestroyedDisplay(DisplayId di
 {
     if (displayId == defaultDisplayId_) {
         WLOGFE("Move window nodes failed, displayId is the same as defaultDisplayId");
+        return;
+    }
+    if (displayGroupWindowTree_.find(displayId) == displayGroupWindowTree_.end()) {
+        WLOGFE("displayId: %{public}" PRIu64" not in display group window tree", displayId);
+        return;
     }
     WLOGFI("move window nodes for display destroy, displayId: %{public}" PRIu64"", displayId);
 
@@ -348,6 +357,9 @@ void DisplayGroupController::ProcessNotCrossNodesOnDestroyedDisplay(DisplayId di
         WindowRootNodeType::BELOW_WINDOW_NODE
     };
     for (const auto& type : rootNodeType) {
+        if (displayGroupWindowTree_[displayId].find(type) == displayGroupWindowTree_[displayId].end()) {
+            continue;
+        }
         auto nodesVec = *(displayGroupWindowTree_[displayId][type]);
         for (auto node : nodesVec) {
             WLOGFD("node on destroied display, windowId: %{public}d, isShowingOnMulti: %{public}d",

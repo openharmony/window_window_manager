@@ -102,7 +102,7 @@ bool DoSomethingForWindowManagerImpl(WindowManager& windowManager, const uint8_t
     DisplayId displayId;
     SystemBarRegionTints tints;
     startPos += GetObject<DisplayId>(displayId, data + startPos, size - startPos);
-    startPos += GetObject<SystemBarRegionTints>(tints, data + startPos, size - startPos);
+    GetObject<SystemBarRegionTints>(tints, data + startPos, size - startPos);
     windowManager.UpdateSystemBarRegionTints(displayId, tints);
 
     return true;

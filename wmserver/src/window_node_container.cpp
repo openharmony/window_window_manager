@@ -24,7 +24,8 @@
 #include <hitrace_meter.h>
 #include <limits>
 #include <power_mgr_client.h>
-#include "transaction/rs_transaction.h"
+#include <transaction/rs_interfaces.h>
+#include <transaction/rs_transaction.h>
 
 #include "common_event_manager.h"
 #include "dm_common.h"
@@ -202,7 +203,7 @@ void WindowNodeContainer::LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool a
 
 WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode, bool afterAnimation)
 {
-    if (!node->startingWindowShown_) {
+    if (!node->startingWindowShown_) { // window except main Window
         WMError res = AddWindowNodeOnWindowTree(node, parentNode);
         if (res != WMError::WM_OK) {
             return res;
@@ -214,9 +215,10 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
             AddNodeOnRSTree(node, displayId, displayId, WindowUpdateType::WINDOW_UPDATE_ADDED,
                 node->isPlayAnimationShow_);
         }
-    } else {
+    } else { // only main app window has starting window
         node->isPlayAnimationShow_ = false;
         node->startingWindowShown_ = false;
+        AddAppSurfaceNodeOnRSTree(node);
         ReZOrderShowWhenLockedWindowIfNeeded(node);
         RaiseZOrderForAppWindow(node, parentNode);
     }
@@ -465,6 +467,31 @@ void WindowNodeContainer::UpdateWindowTree(sptr<WindowNode>& node)
     parentNode->children_.insert(position, node);
 }
 
+bool WindowNodeContainer::AddAppSurfaceNodeOnRSTree(sptr<WindowNode>& node)
+{
+    /*
+     * App main window must has starting window, and show after starting window
+     * Starting Window has already update leashWindowSurfaceNode and starting window surfaceNode on RSTree
+     * Just need add appSurface Node as child of leashWindowSurfaceNode
+     */
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "AddAppSurfaceNodeOnRSTree");
+    if (!WindowHelper::IsMainWindow(node->GetWindowType())) {
+        WLOGFE("id:%{public}u not main app window but has start window", node->GetWindowId());
+        return false;
+    }
+    if (!node->leashWinSurfaceNode_ || !node->surfaceNode_) {
+        WLOGFE("id:%{public}u leashWinSurfaceNode or surfaceNode is null but has start window!", node->GetWindowId());
+        return false;
+    }
+    WLOGFI("AddAppSurfaceNodeOnRSTree windowId: %{public}d", node->GetWindowId());
+    if (!node->currentVisibility_) {
+        WLOGFI("window: %{public}d is invisible, do not need update RS tree", node->GetWindowId());
+        return false;
+    }
+    node->leashWinSurfaceNode_->AddChild(node->surfaceNode_, -1);
+    return true;
+}
+
 bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId displayId, DisplayId parentDisplayId,
     WindowUpdateType type, bool animationPlayed)
 {
@@ -642,22 +669,27 @@ void WindowNodeContainer::UpdateFocusStatus(uint32_t id, bool focused) const
     auto node = FindWindowNodeById(id);
     if (node == nullptr) {
         WLOGFW("cannot find focused window id:%{public}d", id);
-    } else {
-        if (node->GetWindowToken()) {
-            node->GetWindowToken()->UpdateFocusStatus(focused);
-        }
-        if (node->abilityToken_ == nullptr) {
-            WLOGFI("abilityToken is null, window : %{public}d", id);
-        }
-        if (focused) {
-            WLOGFW("current focus window: windowId: %{public}d, windowName: %{public}s",
-                id, node->GetWindowProperty()->GetWindowName().c_str());
-        }
-        sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo(node->GetWindowId(), node->GetDisplayId(),
-            node->GetCallingPid(), node->GetCallingUid(), node->GetWindowType(), node->abilityToken_);
-        WindowManagerAgentController::GetInstance().UpdateFocusChangeInfo(
-            focusChangeInfo, focused);
+        return;
     }
+    if (focused && node->GetWindowProperty() != nullptr) {
+        AbilityInfo info = node->GetWindowProperty()->GetAbilityInfo();
+        WLOGFW("current focus window: windowId: %{public}d, windowName: %{public}s, bundleName: %{public}s,"
+            " abilityName: %{public}s, pid: %{public}d, uid: %{public}d", id,
+            node->GetWindowProperty()->GetWindowName().c_str(), info.bundleName_.c_str(), info.abilityName_.c_str(),
+            node->GetCallingPid(), node->GetCallingUid());
+        FocusAppInfo appInfo = { node->GetCallingPid(), node->GetCallingUid(), info.bundleName_, info.abilityName_ };
+        RSInterfaces::GetInstance().SetFocusAppInfo(appInfo);
+    }
+    if (node->GetWindowToken()) {
+        node->GetWindowToken()->UpdateFocusStatus(focused);
+    }
+    if (node->abilityToken_ == nullptr) {
+        WLOGFI("abilityToken is null, window : %{public}d", id);
+    }
+    sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo(node->GetWindowId(), node->GetDisplayId(),
+        node->GetCallingPid(), node->GetCallingUid(), node->GetWindowType(), node->abilityToken_);
+    WindowManagerAgentController::GetInstance().UpdateFocusChangeInfo(
+        focusChangeInfo, focused);
 }
 
 void WindowNodeContainer::UpdateActiveStatus(uint32_t id, bool isActive) const
@@ -708,19 +740,26 @@ void WindowNodeContainer::AssignZOrder()
 {
     zOrder_ = 0;
     WindowNodeOperationFunc func = [this](sptr<WindowNode> node) {
+        if (!node->leashWinSurfaceNode_ && !node->surfaceNode_ && !node->startingWinSurfaceNode_) {
+            ++zOrder_;
+            WLOGFE("Id: %{public}u has no surface nodes", node->GetWindowId());
+            return false;
+        }
         if (node->leashWinSurfaceNode_ != nullptr) {
+            ++zOrder_;
             node->leashWinSurfaceNode_->SetPositionZ(zOrder_);
         }
 
         if (node->surfaceNode_ != nullptr) {
+            ++zOrder_;
             node->surfaceNode_->SetPositionZ(zOrder_);
             node->zOrder_ = zOrder_;
         }
-
+        // make sure starting window above app
         if (node->startingWinSurfaceNode_ != nullptr) {
+            ++zOrder_;
             node->startingWinSurfaceNode_->SetPositionZ(zOrder_);
         }
-        ++zOrder_;
         return false;
     };
     TraverseWindowTree(func, false);
@@ -1194,7 +1233,7 @@ void WindowNodeContainer::DumpScreenWindowTree()
         const std::string& windowName = node->GetWindowName().size() < WINDOW_NAME_MAX_LENGTH ?
             node->GetWindowName() : node->GetWindowName().substr(0, WINDOW_NAME_MAX_LENGTH);
         WLOGI("DumpScreenWindowTree: %{public}10s %{public}9" PRIu64" %{public}5u %{public}4u %{public}4u %{public}4u "
-            "%{public}4u %{public}11u %{public}d [%{public}4d %{public}4d %{public}4u %{public}4u]",
+            "%{public}4u %{public}11u %{public}12d [%{public}4d %{public}4d %{public}4u %{public}4u]",
             windowName.c_str(), node->GetDisplayId(), node->GetWindowId(), node->GetWindowType(), node->GetWindowMode(),
             node->GetWindowFlags(), --zOrder, static_cast<uint32_t>(node->GetRequestedOrientation()),
             node->abilityToken_ != nullptr, rect.posX_, rect.posY_, rect.width_, rect.height_);
