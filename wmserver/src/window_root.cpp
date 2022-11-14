@@ -1702,7 +1702,8 @@ bool WindowRoot::IsAppWindowExceed() const
         if (winMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || winMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             return false;
         }
-        if (winType >= WindowType::APP_WINDOW_BASE && winType < WindowType::APP_WINDOW_END && it.second->isVisible_) {
+        if (winType >= WindowType::APP_WINDOW_BASE && winType < WindowType::APP_WINDOW_END &&
+            it.second->currentVisibility_) {
             appWindowNum++;
         }
     }
