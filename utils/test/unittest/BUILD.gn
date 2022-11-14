@@ -19,6 +19,7 @@ group("unittest") {
   testonly = true
 
   deps = [
+    ":utils_cutout_info_test",
     ":utils_display_info_test",
     ":utils_perform_reporter_test",
     ":utils_screen_group_info_test",
@@ -121,6 +122,14 @@ ohos_unittest("utils_perform_reporter_test") {
   module_out_path = module_out_path
 
   sources = [ "perform_reporter_test.cpp" ]
+
+  deps = [ ":utils_unittest_common" ]
+}
+
+ohos_unittest("utils_cutout_info_test") {
+  module_out_path = module_out_path
+
+  sources = [ "cutout_info_test.cpp" ]
 
   deps = [ ":utils_unittest_common" ]
 }
