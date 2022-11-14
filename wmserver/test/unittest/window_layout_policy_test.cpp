@@ -50,6 +50,7 @@ public:
     static WindowInfo windowInfo_;
     static sptr<WindowNodeContainer> container_;
     static sptr<DisplayGroupInfo> displayGroupInfo_;
+    static sptr<DisplayInfo> defaultDisplayInfo_;
     static sptr<DisplayGroupController> displayGroupController_;
     static sptr<WindowLayoutPolicy> layoutPolicy_;
 };
@@ -58,6 +59,7 @@ sptr<WindowNodeContainer> WindowLayoutPolicyTest::container_ = nullptr;
 sptr<DisplayGroupInfo> WindowLayoutPolicyTest::displayGroupInfo_ = nullptr;
 sptr<DisplayGroupController> WindowLayoutPolicyTest::displayGroupController_ = nullptr;
 sptr<WindowLayoutPolicy> WindowLayoutPolicyTest::layoutPolicy_ = nullptr;
+sptr<DisplayInfo> WindowLayoutPolicyTest::defaultDisplayInfo_ = nullptr;
 WindowInfo WindowLayoutPolicyTest::windowInfo_ = {
     .winRect_ = { 0, 0, 0, 0 },
     .winType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
@@ -72,6 +74,9 @@ void WindowLayoutPolicyTest::SetUpTestCase()
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     ASSERT_TRUE((display != nullptr));
 
+    defaultDisplayInfo_ = display->GetDisplayInfo();
+    ASSERT_TRUE((defaultDisplayInfo_ != nullptr));
+
     windowInfo_ = {
         .winRect_ = { 0, 0, 0, 0 },
         .winType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
@@ -81,7 +86,7 @@ void WindowLayoutPolicyTest::SetUpTestCase()
         .decorEnable_ = false,
     };
 
-    container_ = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
+    container_ = new WindowNodeContainer(defaultDisplayInfo_, display->GetScreenId());
     displayGroupInfo_ = container_->displayGroupInfo_;
     displayGroupController_ = container_->displayGroupController_;
     layoutPolicy_ = container_->GetLayoutPolicy();
@@ -91,16 +96,19 @@ void WindowLayoutPolicyTest::TearDownTestCase()
 {
     container_ = nullptr;
     displayGroupInfo_ = nullptr;
+    defaultDisplayInfo_ = nullptr;
     displayGroupController_ = nullptr;
     layoutPolicy_ = nullptr;
 }
 
 void WindowLayoutPolicyTest::SetUp()
 {
+    displayGroupInfo_->AddDisplayInfo(defaultDisplayInfo_);
 }
 
 void WindowLayoutPolicyTest::TearDown()
 {
+    displayGroupInfo_->displayInfosMap_.clear();
 }
 
 sptr<WindowNode> WindowLayoutPolicyTest::CreateWindowNode(const WindowInfo& windowInfo)
@@ -124,6 +132,7 @@ sptr<DisplayInfo> WindowLayoutPolicyTest::CreateDisplayInfo(const Rect& displayR
     displayInfo->SetOffsetY(displayRect.posY_);
     displayInfo->SetWidth(displayRect.width_);
     displayInfo->SetHeight(displayRect.height_);
+    displayInfo->SetDisplayId((defaultDisplayInfo_->GetDisplayId() + 1));
     return displayInfo;
 }
 namespace {
@@ -135,27 +144,27 @@ namespace {
  */
 HWTEST_F(WindowLayoutPolicyTest, CalcEntireWindowHotZone, Function | SmallTest | Level2)
 {
-    TransformHelper::Vector2 hotZoneScale = {1.f, 1.f}; // hot zone scale : 1.0
+    TransformHelper::Vector2 hotZoneScale = {1.f, 1.f}; // ratio 1.0
     sptr<WindowProperty> property = new WindowProperty();
 
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     sptr<WindowNode> node0 = new WindowNode(property, nullptr, nullptr);
-    Rect winRect = {50, 100, 400, 500}; // window rect: 50, 100, 400, 500
+    Rect winRect = { 50, 100, 400, 500 }; // rect: 50, 100, 400, 500
     auto actRect0 = layoutPolicy_->CalcEntireWindowHotZone(node0, winRect, 10, 2.f, hotZoneScale); // param: 10, 2.0
-    Rect expRect0 = {30, 80, 440, 540}; // window rect: 30, 80, 440, 540
+    Rect expRect0 = { 30, 80, 440, 540 }; // rect: 30, 80, 440, 540
     ASSERT_EQ(expRect0, actRect0);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
     sptr<WindowNode> node1 = new WindowNode(property, nullptr, nullptr);
     auto actRect1 = layoutPolicy_->CalcEntireWindowHotZone(node1, winRect, 10, 2.f, hotZoneScale); // param: 10, 2.0
-    Rect expRect1 = {30, 100, 440, 500}; // window rect: 30, 100, 440, 500
+    Rect expRect1 = { 30, 100, 440, 500 }; // rect: 30, 100, 440, 500
     ASSERT_EQ(expRect1, actRect1);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_LAUNCHER_RECENT);
     sptr<WindowNode> node2 = new WindowNode(property, nullptr, nullptr);
     auto actRect2 = layoutPolicy_->CalcEntireWindowHotZone(node2, winRect, 10, 2.f, hotZoneScale); // param: 10, 2.0
-    Rect expRect2 = displayGroupInfo_->GetDisplayRect(0);;
+    Rect expRect2 = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());;
     ASSERT_EQ(expRect2, actRect2);
 }
 
@@ -166,13 +175,13 @@ HWTEST_F(WindowLayoutPolicyTest, CalcEntireWindowHotZone, Function | SmallTest |
  */
 HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow01, Function | SmallTest | Level2)
 {
-    windowInfo_.winRect_ = {50, 50, 100, 150}; // window rect: 50, 50, 100, 150
+    windowInfo_.winRect_ = { 50, 50, 100, 150 };  // rect: 50, 50, 100, 150
     windowInfo_.dragType_ = DragType::DRAG_LEFT_OR_RIGHT;
     windowInfo_.reason_ = WindowSizeChangeReason::DRAG;
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
-    Rect newWinRect = { 50, 50, 200, 200 };    // window rect: 50, 50, 200, 200
+    Rect newWinRect = { 50, 50, 200, 200 };       // rect: 50, 50, 200, 200
     layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, { 0, 0, 0, 0 }, newWinRect);
-    Rect expRect = { 50, 50, 200, 300 };       // window rect: 50, 50, 200, 300
+    Rect expRect = { 50, 50, 200, 300 };          // rect: 50, 50, 200, 300
     ASSERT_EQ(expRect, newWinRect);
 }
 
@@ -183,13 +192,13 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow01,
  */
 HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow02, Function | SmallTest | Level2)
 {
-    windowInfo_.winRect_ = {50, 50, 100, 150}; // window rect: 50, 50, 100, 150
+    windowInfo_.winRect_ = { 50, 50, 100, 150 }; // rect: 50, 50, 100, 150
     windowInfo_.dragType_ = DragType::DRAG_LEFT_TOP_CORNER;
     windowInfo_.reason_ = WindowSizeChangeReason::DRAG;
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
-    Rect newWinRect = { 50, 50, 200, 200 };    // window rect: 50, 50, 200, 200
+    Rect newWinRect = { 50, 50, 200, 200 };      // rect: 50, 50, 200, 200
     layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, { 0, 0, 0, 0 }, newWinRect);
-    Rect expRect = { 50, 50, 200, 300 };       // window rect: 50, 50, 200, 300
+    Rect expRect = { 50, 50, 200, 300 };         // rect: 50, 50, 200, 300
     ASSERT_EQ(expRect, newWinRect);
 }
 
@@ -200,13 +209,13 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow02,
  */
 HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow03, Function | SmallTest | Level2)
 {
-    windowInfo_.winRect_ = { 50, 50, 100, 150 }; // window rect: 50, 50, 100, 150
+    windowInfo_.winRect_ = { 50, 50, 100, 150 }; // rect: 50, 50, 100, 150
     windowInfo_.dragType_ = DragType::DRAG_BOTTOM_OR_TOP;
     windowInfo_.reason_ = WindowSizeChangeReason::DRAG;
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
-    Rect newWinRect = { 50, 50, 150, 300 };      // window rect: 50, 50, 150, 300
+    Rect newWinRect = { 50, 50, 150, 300 };      // rect: 50, 50, 150, 300
     layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, { 0, 0, 0, 0 }, newWinRect);
-    Rect expRect = { 50, 50, 200, 300 };         // window rect: 50, 50, 200, 300
+    Rect expRect = { 50, 50, 200, 300 };         // rect: 50, 50, 200, 300
     ASSERT_EQ(expRect, newWinRect);
 }
 
@@ -217,10 +226,8 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow03,
  */
 HWTEST_F(WindowLayoutPolicyTest, LimitWindowToBottomRightCorner01, Function | SmallTest | Level2)
 {
-    auto displayRect = displayGroupInfo_->GetDisplayRect(0);
-    if (WindowHelper::IsEmptyRect(displayRect)) {
-        return;
-    }
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
     windowInfo_.winRect_ = {
         .posX_ = static_cast<int32_t>(displayRect.posX_ + displayRect.width_ * 0.5), // ratio: 0.5
         .posY_ = displayRect.posY_,
@@ -228,6 +235,7 @@ HWTEST_F(WindowLayoutPolicyTest, LimitWindowToBottomRightCorner01, Function | Sm
         .height_ = displayRect.height_
     };
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node != nullptr);
     layoutPolicy_->LimitWindowToBottomRightCorner(node);
 
     Rect winRect = {
@@ -247,10 +255,8 @@ HWTEST_F(WindowLayoutPolicyTest, LimitWindowToBottomRightCorner01, Function | Sm
  */
 HWTEST_F(WindowLayoutPolicyTest, LimitWindowToBottomRightCorner02, Function | SmallTest | Level2)
 {
-    auto displayRect = displayGroupInfo_->GetDisplayRect(0);
-    if (WindowHelper::IsEmptyRect(displayRect)) {
-        return;
-    }
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
     windowInfo_.winRect_ = {
         .posX_ = static_cast<int32_t>(displayRect.posX_ + displayRect.width_ * 0.5),  // ratio: 0.5
         .posY_ = static_cast<int32_t>(displayRect.posY_ + displayRect.height_ * 0.5), // ratio: 0.5
@@ -258,6 +264,7 @@ HWTEST_F(WindowLayoutPolicyTest, LimitWindowToBottomRightCorner02, Function | Sm
         .height_ = displayRect.height_
     };
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node != nullptr);
     layoutPolicy_->LimitWindowToBottomRightCorner(node);
 
     Rect winRect = {
@@ -268,6 +275,7 @@ HWTEST_F(WindowLayoutPolicyTest, LimitWindowToBottomRightCorner02, Function | Sm
     };
     node ->SetRequestRect(winRect);
     layoutPolicy_->LimitWindowToBottomRightCorner(node);
+    ASSERT_TRUE(node != nullptr);
 }
 
 /**
@@ -277,10 +285,8 @@ HWTEST_F(WindowLayoutPolicyTest, LimitWindowToBottomRightCorner02, Function | Sm
  */
 HWTEST_F(WindowLayoutPolicyTest, LimitWindowToBottomRightCorner03, Function | SmallTest | Level2)
 {
-    auto displayRect = displayGroupInfo_->GetDisplayRect(0);
-    if (WindowHelper::IsEmptyRect(displayRect)) {
-        return;
-    }
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
     windowInfo_.winRect_ = {
         .posX_ = static_cast<int32_t>(displayRect.posX_ + displayRect.width_ * 0.5),  // ratio: 0.5
         .posY_ = static_cast<int32_t>(displayRect.posY_ + displayRect.height_ * 0.5), // ratio: 0.5
@@ -289,6 +295,8 @@ HWTEST_F(WindowLayoutPolicyTest, LimitWindowToBottomRightCorner03, Function | Sm
     };
     sptr<WindowNode> parentNode = CreateWindowNode(windowInfo_);
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(parentNode != nullptr);
+    ASSERT_TRUE(node != nullptr);
     parentNode->children_.push_back(node);
     layoutPolicy_->LimitWindowToBottomRightCorner(node);
 }
@@ -300,18 +308,17 @@ HWTEST_F(WindowLayoutPolicyTest, LimitWindowToBottomRightCorner03, Function | Sm
  */
 HWTEST_F(WindowLayoutPolicyTest, UpdateDisplayGroupRect, Function | SmallTest | Level2)
 {
-    auto displayRect = displayGroupInfo_->GetDisplayRect(0);
-    if (WindowHelper::IsEmptyRect(displayRect)) {
-        return;
-    }
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
 
     Rect newDisplayRect = {
         .posX_ = static_cast<int32_t>(displayRect.posX_ + displayRect.width_),
         .posY_ = displayRect.posY_,
-        .width_ = 1920, // width : 1920
-        .height_ = 1280 // height: 1280
+        .width_ = 1920, // width:  1920
+        .height_ = 1280 // height: 1080
     };
     auto displayInfo = CreateDisplayInfo(newDisplayRect);
+    ASSERT_TRUE(displayInfo != nullptr);
     displayGroupInfo_->AddDisplayInfo(displayInfo);
     layoutPolicy_->UpdateDisplayGroupRect();
 
@@ -326,17 +333,16 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateDisplayGroupRect, Function | SmallTest | 
  */
 HWTEST_F(WindowLayoutPolicyTest, UpdateDisplayGroupLimitRect, Function | SmallTest | Level2)
 {
-    auto displayRect = displayGroupInfo_->GetDisplayRect(0);
-    if (WindowHelper::IsEmptyRect(displayRect)) {
-        return;
-    }
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
     Rect newDisplayRect = {
         .posX_ = static_cast<int32_t>(displayRect.posX_ + displayRect.width_),
         .posY_ = displayRect.posY_,
-        .width_ = 1920, // width : 1920
-        .height_ = 1280 // height: 1280
+        .width_ = 1920, // width:  1920
+        .height_ = 1280 // height: 1080
     };
     auto displayInfo = CreateDisplayInfo(newDisplayRect);
+    ASSERT_TRUE(displayInfo != nullptr);
     displayGroupInfo_->AddDisplayInfo(displayInfo);
     auto allDisplayRect = displayGroupInfo_->GetAllDisplayRects();
     layoutPolicy_->limitRectMap_ = allDisplayRect;
@@ -353,10 +359,8 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateDisplayGroupLimitRect, Function | SmallTe
  */
 HWTEST_F(WindowLayoutPolicyTest, UpdateRectInDisplayGroup, Function | SmallTest | Level2)
 {
-    auto displayRect = displayGroupInfo_->GetDisplayRect(0);
-    if (WindowHelper::IsEmptyRect(displayRect)) {
-        return;
-    }
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
     windowInfo_.winRect_ = {
         .posX_ = static_cast<int32_t>(displayRect.posX_ + displayRect.width_ * 0.5),  // ratio: 0.5
         .posY_ = static_cast<int32_t>(displayRect.posY_ + displayRect.height_ * 0.5), // ratio: 0.5
@@ -364,17 +368,19 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateRectInDisplayGroup, Function | SmallTest 
         .height_ = displayRect.height_
     };
     sptr<WindowNode> parentNode = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(parentNode != nullptr);
 
     Rect newDisplayRect = {
         .posX_ = static_cast<int32_t>(displayRect.posX_ + displayRect.width_),
         .posY_ = displayRect.posY_,
-        .width_ = 1920, // width : 1920
-        .height_ = 1280 // height: 1280
+        .width_ = 1920, // width:  1920
+        .height_ = 1280 // height: 1080
     };
     layoutPolicy_->UpdateRectInDisplayGroup(parentNode, displayRect, newDisplayRect);
 
     // create child node
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node != nullptr);
     parentNode->children_.push_back(node);
     layoutPolicy_->UpdateRectInDisplayGroup(parentNode, displayRect, newDisplayRect);
 }
@@ -388,17 +394,16 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateMultiDisplayFlag, Function | SmallTest | 
 {
     layoutPolicy_->UpdateMultiDisplayFlag();
 
-    auto displayRect = displayGroupInfo_->GetDisplayRect(0);
-    if (WindowHelper::IsEmptyRect(displayRect)) {
-        return;
-    }
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
     Rect newDisplayRect = {
         .posX_ = static_cast<int32_t>(displayRect.posX_ + displayRect.width_),
         .posY_ = displayRect.posY_,
-        .width_ = 1920, // width : 1920
-        .height_ = 1280 // height: 1280
+        .width_ = 1920, // width:  1920
+        .height_ = 1280 // height: 1080
     };
     auto displayInfo = CreateDisplayInfo(newDisplayRect);
+    ASSERT_TRUE(displayInfo != nullptr);
     displayGroupInfo_->AddDisplayInfo(displayInfo);
     layoutPolicy_->UpdateMultiDisplayFlag();
 }
@@ -410,15 +415,13 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateMultiDisplayFlag, Function | SmallTest | 
  */
 HWTEST_F(WindowLayoutPolicyTest, UpdateRectInDisplayGroupForAllNodes01, Function | SmallTest | Level2)
 {
-    auto displayRect = displayGroupInfo_->GetDisplayRect(0);
-    if (WindowHelper::IsEmptyRect(displayRect)) {
-        return;
-    }
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
     Rect newDisplayRect = {
         .posX_ = static_cast<int32_t>(displayRect.posX_ + displayRect.width_),
         .posY_ = displayRect.posY_,
-        .width_ = 1920, // width : 1920
-        .height_ = 1280 // height: 1280
+        .width_ = 1920, // width:  1920
+        .height_ = 1280 // height: 1080
     };
 
     layoutPolicy_->UpdateRectInDisplayGroupForAllNodes(0, displayRect, newDisplayRect);
@@ -430,6 +433,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateRectInDisplayGroupForAllNodes01, Function
         .height_ = displayRect.height_
     };
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node != nullptr);
 
     // Add node on display window tree
     layoutPolicy_->displayGroupWindowTree_[0][WindowRootNodeType::APP_WINDOW_NODE]->push_back(node);
@@ -446,15 +450,13 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateRectInDisplayGroupForAllNodes01, Function
  */
 HWTEST_F(WindowLayoutPolicyTest, UpdateRectInDisplayGroupForAllNodes02, Function | SmallTest | Level2)
 {
-    auto displayRect = displayGroupInfo_->GetDisplayRect(0);
-    if (WindowHelper::IsEmptyRect(displayRect)) {
-        return;
-    }
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
     Rect newDisplayRect = {
         .posX_ = static_cast<int32_t>(displayRect.posX_ + displayRect.width_),
         .posY_ = displayRect.posY_,
-        .width_ = 1920, // width : 1920
-        .height_ = 1280 // height: 1280
+        .width_ = 1920, // width:  1920
+        .height_ = 1280 // height: 1080
     };
 
     windowInfo_.winRect_ = {
@@ -466,6 +468,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateRectInDisplayGroupForAllNodes02, Function
 
     // Add app node on display window tree
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node != nullptr);
     node->isShowingOnMultiDisplays_ = true;
     layoutPolicy_->displayGroupWindowTree_[0][WindowRootNodeType::APP_WINDOW_NODE]->push_back(node);
     layoutPolicy_->UpdateRectInDisplayGroupForAllNodes(0, displayRect, newDisplayRect);
@@ -473,6 +476,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateRectInDisplayGroupForAllNodes02, Function
     // Add above node on display window tree
     windowInfo_.winType_ = WindowType::WINDOW_TYPE_FLOAT_CAMERA;
     sptr<WindowNode> aboveNode = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(aboveNode != nullptr);
     layoutPolicy_->displayGroupWindowTree_[0][WindowRootNodeType::ABOVE_WINDOW_NODE]->push_back(aboveNode);
     layoutPolicy_->UpdateRectInDisplayGroupForAllNodes(0, displayRect, newDisplayRect);
 }
@@ -502,23 +506,20 @@ HWTEST_F(WindowLayoutPolicyTest, ProcessDisplayCreate, Function | SmallTest | Le
 
     layoutPolicy_->ProcessDisplayCreate(1, newDisplayRectMap);
 
-    auto displayRect = displayGroupInfo_->GetDisplayRect(0);
-    if (WindowHelper::IsEmptyRect(displayRect)) {
-        return;
-    }
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
     newDisplayRectMap.insert(std::make_pair(0, displayRect));
     Rect newDisplayRect = {
         .posX_ = static_cast<int32_t>(displayRect.posX_ + displayRect.width_),
         .posY_ = displayRect.posY_,
-        .width_ = 1920, // width : 1920
-        .height_ = 1280 // height: 1280
+        .width_ = 1920, // width:  1920
+        .height_ = 1280 // height: 1080
     };
     newDisplayRectMap.insert(std::make_pair(1, newDisplayRect));
     layoutPolicy_->ProcessDisplayCreate(1, newDisplayRectMap);
 
     auto displayInfo = CreateDisplayInfo(newDisplayRect);
-    displayGroupInfo_->AddDisplayInfo(displayInfo);
-    layoutPolicy_->ProcessDisplayCreate(1, newDisplayRectMap);
+    ASSERT_TRUE(displayInfo != nullptr);
 }
 
 /**
@@ -533,12 +534,8 @@ HWTEST_F(WindowLayoutPolicyTest, ProcessDisplayDestroy, Function | SmallTest | L
 
     layoutPolicy_->ProcessDisplayDestroy(1, newDisplayRectMap);
 
-    auto displayRect = displayGroupInfo_->GetDisplayRect(0);
-    if (WindowHelper::IsEmptyRect(displayRect)) {
-        return;
-    }
-    newDisplayRectMap.insert(std::make_pair(0, displayRect));
-    layoutPolicy_->ProcessDisplayDestroy(1, newDisplayRectMap);
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
 }
 
 /**
@@ -553,27 +550,8 @@ HWTEST_F(WindowLayoutPolicyTest, ProcessDisplaySizeChangeOrRotation, Function | 
 
     layoutPolicy_->ProcessDisplayDestroy(1, newDisplayRectMap);
 
-    auto displayRect = displayGroupInfo_->GetDisplayRect(0);
-    if (WindowHelper::IsEmptyRect(displayRect)) {
-        return;
-    }
-    newDisplayRectMap.insert(std::make_pair(0, displayRect));
-    layoutPolicy_->ProcessDisplayDestroy(0, newDisplayRectMap);
-}
-
-/**
- * @tc.name: LayoutWindowNodesByRootType
- * @tc.desc: test LayoutWindowNodesByRootType
- * @tc.type: FUNC
- */
-HWTEST_F(WindowLayoutPolicyTest, LayoutWindowNodesByRootType, Function | SmallTest | Level2)
-{
-    std::vector<sptr<WindowNode>> nodeVec = {};
-    layoutPolicy_->LayoutWindowNodesByRootType(nodeVec);
-
-    sptr<WindowNode> node = CreateWindowNode(windowInfo_);
-    nodeVec.push_back(node);
-    layoutPolicy_->LayoutWindowNodesByRootType(nodeVec);
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
 }
 
 /**
@@ -587,22 +565,6 @@ HWTEST_F(WindowLayoutPolicyTest, NotifyAnimationSizeChangeIfNeeded, Function | S
 }
 
 /**
- * @tc.name: LayoutWindowTree
- * @tc.desc: test LayoutWindowTree
- * @tc.type: FUNC
- */
-HWTEST_F(WindowLayoutPolicyTest, LayoutWindowTree, Function | SmallTest | Level2)
-{
-    layoutPolicy_->LayoutWindowTree(0);
-
-    windowInfo_.winType_ = WindowType::WINDOW_TYPE_LAUNCHER_RECENT;
-    windowInfo_.winMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
-    sptr<WindowNode> node = CreateWindowNode(windowInfo_);
-    layoutPolicy_->displayGroupWindowTree_[0][WindowRootNodeType::ABOVE_WINDOW_NODE]->push_back(node);
-    layoutPolicy_->LayoutWindowTree(0);
-}
-
-/**
  * @tc.name: LayoutWindowNode
  * @tc.desc: test LayoutWindowNode
  * @tc.type: FUNC
@@ -613,6 +575,7 @@ HWTEST_F(WindowLayoutPolicyTest, LayoutWindowNode, Function | SmallTest | Level2
     layoutPolicy_->LayoutWindowNode(node);
 
     node = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node != nullptr);
     layoutPolicy_->LayoutWindowNode(node);
 
     node->parent_ = container_->appWindowNode_;
@@ -626,6 +589,7 @@ HWTEST_F(WindowLayoutPolicyTest, LayoutWindowNode, Function | SmallTest | Level2
 
     // create child node
     sptr<WindowNode> child = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(child != nullptr);
     node->children_.push_back(child);
     layoutPolicy_->LayoutWindowNode(node);
 }
@@ -638,6 +602,7 @@ HWTEST_F(WindowLayoutPolicyTest, LayoutWindowNode, Function | SmallTest | Level2
 HWTEST_F(WindowLayoutPolicyTest, CalcAndSetNodeHotZone, Function | SmallTest | Level2)
 {
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node != nullptr);
     layoutPolicy_->CalcAndSetNodeHotZone(node->GetWindowRect(), node);
 
     layoutPolicy_->UpdateLayoutRect(node);
@@ -654,39 +619,40 @@ HWTEST_F(WindowLayoutPolicyTest, CalcAndSetNodeHotZone, Function | SmallTest | L
 HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion01, Function | SmallTest | Level2)
 {
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
-    WindowSizeLimits sizeLimits = { 400, 400, 400, 400, 2.0, 2.0 }; // size limits: 400, 400, 400, 400, 2.0, 2.0
+    ASSERT_TRUE(node != nullptr);
+    WindowSizeLimits sizeLimits = { 400, 400, 400, 400, 2.0, 2.0 }; // sizeLimits: 400, 400, 400, 400, 2.0, 2.0
     node->SetWindowUpdatedSizeLimits(sizeLimits);
     Rect finalRect;
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
 
-    sizeLimits.maxWidth_ = 800;  // maxWidth : 800
+    sizeLimits.maxWidth_ = 800;  // maxWidth: 800
     node->SetWindowUpdatedSizeLimits(sizeLimits);
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
 
-    sizeLimits.maxWidth_ = 400;  // maxWidth : 400
+    sizeLimits.maxWidth_ = 400;  // maxWidth:  400
     sizeLimits.maxHeight_ = 800; // maxHeight: 800
     node->SetWindowUpdatedSizeLimits(sizeLimits);
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
 
-    sizeLimits.maxWidth_ = 800;  // maxWidth : 800
+    sizeLimits.maxWidth_ = 800;  // maxWidth:  800
     sizeLimits.maxHeight_ = 800; // maxHeight: 800
     node->SetWindowUpdatedSizeLimits(sizeLimits);
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
 
-    sizeLimits.maxWidth_ = 800;  // maxWidth : 800
+    sizeLimits.maxWidth_ = 800;  // maxWidth:  800
     sizeLimits.maxHeight_ = 800; // maxHeight: 800
     node->SetWindowUpdatedSizeLimits(sizeLimits);
 
     auto newRect = node->GetWindowRect();
-    newRect.height_ = 400;       // height: 400
+    newRect.height_ = 400;       // maxHeight: 400
     node->SetWindowRect(newRect);
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
 
-    newRect = { 200, 200, 500, 200 }; // new rect: 200, 200, 500, 200
+    newRect = { 200, 200, 500, 200 }; // rect: 200, 200, 500, 200
     node->SetWindowRect(newRect);
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
 
-    newRect = { 200, 200, 100, 200 }; // new rect: 200, 200, 100, 200
+    newRect = { 200, 200, 100, 200 }; // rect: 200, 200, 100, 200
     node->SetWindowRect(newRect);
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
 }
@@ -699,10 +665,11 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion01, 
 HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion02, Function | SmallTest | Level2)
 {
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
-    WindowSizeLimits sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // size limits: 800, 800, 400, 400, 2.0, 1.0
+    ASSERT_TRUE(node != nullptr);
+    WindowSizeLimits sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // sizeLimits: 800, 800, 400, 400, 2.0, 1.0
     node->SetWindowUpdatedSizeLimits(sizeLimits);
 
-    Rect newRect = { 200, 200, 300, 200 }; // new rect: 200, 200, 300, 200
+    Rect newRect = { 200, 200, 300, 200 }; // rect: 200, 200, 300, 200
     Rect finalRect;
     node->SetWindowRect(newRect);
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
@@ -717,14 +684,12 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion02, 
     node->SetWindowUpdatedSizeLimits(sizeLimits);
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
 
-    newRect = { 200, 200, 400, 200 }; // new rect: 200, 200, 400, 200
+    newRect = { 200, 200, 400, 200 }; // rect: 200, 200, 400, 200
     node->SetWindowRect(newRect);
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
 
-    auto displayRect = displayGroupInfo_->GetDisplayRect(0);
-    if (WindowHelper::IsEmptyRect(displayRect)) {
-        return;
-    }
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
     layoutPolicy_->limitRectMap_[0] = displayRect;
 }
 
@@ -736,45 +701,44 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion02, 
 HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion03, Function | SmallTest | Level2)
 {
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
-    WindowSizeLimits sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // size limits: 800, 800, 400, 400, 2.0, 1.0
+    ASSERT_TRUE(node != nullptr);
+    WindowSizeLimits sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // sizeLimits: 800, 800, 400, 400, 2.0, 1.0
 
     node->SetWindowUpdatedSizeLimits(sizeLimits);
 
-    Rect newRect = { 200, 200, 300, 200 }; // window rect: 200, 200, 300, 200
+    Rect newRect = { 200, 200, 300, 200 }; // rect: 200, 200, 300, 200
     node->SetWindowRect(newRect);
 
-    auto displayRect = displayGroupInfo_->GetDisplayRect(0);
-    if (WindowHelper::IsEmptyRect(displayRect)) {
-        return;
-    }
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
     layoutPolicy_->limitRectMap_[0] = displayRect;
 
     windowInfo_.winType_ = WindowType::WINDOW_TYPE_LAUNCHER_DOCK;
     sptr<WindowNode> dockNode = CreateWindowNode(windowInfo_);
     layoutPolicy_->displayGroupWindowTree_[0][WindowRootNodeType::ABOVE_WINDOW_NODE]->push_back(dockNode);
 
-    Rect dockWinRect = { 200, 200, 50, 20 }; // window rect: 200, 200, 50, 20
+    Rect dockWinRect = { 200, 200, 50, 20 }; // rect: 200, 200, 50, 20
     Rect finalRect;
     dockNode->SetWindowRect(dockWinRect);
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
 
-    dockWinRect = { 200, 200, 50, (displayRect.height_ - static_cast<uint32_t>(200)) }; // rect param: 200, 50, 20
+    dockWinRect = { 200, 200, 50, (displayRect.height_ - static_cast<uint32_t>(200)) }; // param: 200, 50
     dockNode->SetWindowRect(dockWinRect);
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
 
-    dockWinRect = { 200, 200, 20, 50 };  // window rect: 200, 200, 20, 50
+    dockWinRect = { 200, 200, 20, 50 }; // param: 200, 200, 20, 50
     dockNode->SetWindowRect(dockWinRect);
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
 
-    dockWinRect = { 0, 200, 20, 50 }; // window rect: 0, 200, 20, 50
+    dockWinRect = { 0, 200, 20, 50 };   // param: 0, 200, 20, 50
     dockNode->SetWindowRect(dockWinRect);
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
 
-    dockWinRect = { 200, 200, (displayRect.width_ - static_cast<uint32_t>(200)), 50 }; // rect param: 200, 50
+    dockWinRect = { 200, 200, (displayRect.width_ - static_cast<uint32_t>(200)), 50 }; // param: 200, 50
     dockNode->SetWindowRect(dockWinRect);
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
 
-    dockWinRect = { 200, 200, (displayRect.width_ - static_cast<uint32_t>(100)), 50 }; // rect param: 200, 100, 50
+    dockWinRect = { 200, 200, (displayRect.width_ - static_cast<uint32_t>(100)), 50 }; // param: 200, 100, 50
     dockNode->SetWindowRect(dockWinRect);
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
 }
@@ -787,23 +751,22 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion03, 
 HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion04, Function | SmallTest | Level2)
 {
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
-    WindowSizeLimits sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // size limits: 800, 800, 400, 400, 2.0, 1.0
+    ASSERT_TRUE(node != nullptr);
+    WindowSizeLimits sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // sizeLimits: 800, 800, 400, 400, 2.0, 1.0
     node->SetWindowUpdatedSizeLimits(sizeLimits);
 
-    Rect newRect = { 200, 200, 300, 200 }; // window rect: 200, 200, 300, 200
+    Rect newRect = { 200, 200, 300, 200 }; // rect: 200, 200, 300, 200
     node->SetWindowRect(newRect);
 
-    auto displayRect = displayGroupInfo_->GetDisplayRect(0);
-    if (WindowHelper::IsEmptyRect(displayRect)) {
-        return;
-    }
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
     layoutPolicy_->limitRectMap_[0] = displayRect;
     windowInfo_.winType_ = WindowType::WINDOW_TYPE_LAUNCHER_DOCK;
     sptr<WindowNode> dockNode = CreateWindowNode(windowInfo_);
     layoutPolicy_->displayGroupWindowTree_[0][WindowRootNodeType::ABOVE_WINDOW_NODE]->push_back(dockNode);
 
-    Rect dockWinRect = { 200, (displayRect.height_ * 0.9),    // rect param: 200, 0.9
-                         50, ((displayRect.height_ * 0.1)) }; // rect param: 50, 0.1
+    Rect dockWinRect = { 200, (displayRect.height_ * 0.9), // param: 200, 0.9,
+        50, ((displayRect.height_ * 0.1)) };               // param: 50, 0.1
     dockNode->SetWindowRect(dockWinRect);
     Rect finalRect;
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
@@ -812,10 +775,10 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion04, 
     uint32_t windowTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
     int32_t limitMaxPosX = displayRect.posX_ + static_cast<int32_t>(displayRect.width_ - windowTitleBarH);
 
-    newRect = { limitMaxPosX, 200, 300, 200 }; // rect param: 200, 300, 200
+    newRect = { limitMaxPosX, 200, 300, 200 }; // param: 200, 300
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
 
-    newRect = { limitMaxPosX, 200, 200, 200 }; // rect param: 200
+    newRect = { limitMaxPosX, 200, 200, 200 }; // param: 200
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
 }
 
@@ -827,19 +790,19 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion04, 
 HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion05, Function | SmallTest | Level2)
 {
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
-    WindowSizeLimits sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // size limits: 800, 800, 400, 400, 2.0, 1.0
+    ASSERT_TRUE(node != nullptr);
+    WindowSizeLimits sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // sizeLimits: 800, 800, 400, 400, 2.0, 1.0
     node->SetWindowUpdatedSizeLimits(sizeLimits);
 
-    Rect newRect = { 200, 200, 300, 200 }; // window rect: 200, 200, 300, 200
+    Rect newRect = { 200, 200, 300, 200 }; // rect: 200, 200, 300, 200
     node->SetWindowRect(newRect);
 
-    auto displayRect = displayGroupInfo_->GetDisplayRect(0);
-    if (WindowHelper::IsEmptyRect(displayRect)) {
-        return;
-    }
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
     layoutPolicy_->limitRectMap_[0] = displayRect;
     windowInfo_.winType_ = WindowType::WINDOW_TYPE_LAUNCHER_DOCK;
     sptr<WindowNode> dockNode = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(dockNode != nullptr);
     layoutPolicy_->displayGroupWindowTree_[0][WindowRootNodeType::ABOVE_WINDOW_NODE]->push_back(dockNode);
 
     Rect dockWinRect = {
@@ -856,10 +819,10 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion05, 
     uint32_t windowTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
     int32_t limitMinPosX = displayRect.posX_ + static_cast<int32_t>(windowTitleBarH);
 
-    newRect = { limitMinPosX, 200, 300, 200 }; // rect param: 200, 300, 200
+    newRect = { limitMinPosX, 200, 300, 200 }; // rect: 200, 300, 200
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
 
-    newRect = { limitMinPosX, 200, 200, 200 }; // rect param: 200, 200, 200
+    newRect = { limitMinPosX, 200, 200, 200 }; // rect: 200, 200, 200
     layoutPolicy_->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, finalRect);
 }
 
@@ -870,16 +833,16 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowSizeByRatioIfDragBeyondLimitRegion05, 
  */
 HWTEST_F(WindowLayoutPolicyTest, GetSystemSizeLimits, Function | SmallTest | Level2)
 {
-    auto displayRect = displayGroupInfo_->GetDisplayRect(0);
-    if (WindowHelper::IsEmptyRect(displayRect)) {
-        return;
-    }
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
 
     sptr<WindowNode> node1 = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node1 != nullptr);
     static_cast<void>(layoutPolicy_->GetSystemSizeLimits(node1, displayRect, 1.0)); // ratio: 1.0
 
     windowInfo_.winType_ = WindowType::WINDOW_TYPE_FLOAT_CAMERA;
     sptr<WindowNode> node2 = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node2 != nullptr);
     static_cast<void>(layoutPolicy_->GetSystemSizeLimits(node2, displayRect, 1.0)); // ratio: 1.0
 }
 
@@ -890,17 +853,443 @@ HWTEST_F(WindowLayoutPolicyTest, GetSystemSizeLimits, Function | SmallTest | Lev
  */
 HWTEST_F(WindowLayoutPolicyTest, UpdateWindowSizeLimits, Function | SmallTest | Level2)
 {
-    auto displayRect = displayGroupInfo_->GetDisplayRect(0);
-    if (WindowHelper::IsEmptyRect(displayRect)) {
-        return;
-    }
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
 
     sptr<WindowNode> node1 = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node1 != nullptr);
     static_cast<void>(layoutPolicy_->GetSystemSizeLimits(node1, displayRect, 1.0)); // ratio: 1.0
 
     windowInfo_.winType_ = WindowType::WINDOW_TYPE_FLOAT_CAMERA;
     sptr<WindowNode> node2 = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node2 != nullptr);
     static_cast<void>(layoutPolicy_->GetSystemSizeLimits(node2, displayRect, 1.0)); // ratio: 1.0
+}
+
+/**
+ * @tc.name: UpdateFloatingWindowSizeForStretchableWindow04
+ * @tc.desc: test UpdateFloatingWindowSizeForStretchableWindow04
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow04, Function | SmallTest | Level2)
+{
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
+
+    sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node != nullptr);
+    Rect winRect = { 0, 0, 0, 0};
+    layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, displayRect, winRect);
+
+    node->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
+    layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, displayRect, winRect);
+
+    winRect = { 0, 0, 40, 0 }; // width: 40
+    node->SetOriginRect(winRect);
+    layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, displayRect, winRect);
+
+    winRect = { 0, 0, 0, 40 }; // height: 40
+    node->SetOriginRect(winRect);
+    layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, displayRect, winRect);
+
+    winRect = { 0, 0, 40, 40 }; // width/height: 40
+    node->SetOriginRect(winRect);
+    layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, displayRect, winRect);
+
+    node->SetDragType(DragType::DRAG_LEFT_OR_RIGHT);
+    layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, displayRect, winRect);
+
+    node->SetDragType(DragType::DRAG_BOTTOM_OR_TOP);
+    layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, displayRect, winRect);
+
+    node->SetDragType(DragType::DRAG_LEFT_TOP_CORNER);
+    layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, displayRect, winRect);
+
+    node->SetDragType(DragType::DRAG_RIGHT_TOP_CORNER);
+    layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, displayRect, winRect);
+}
+
+/**
+ * @tc.name: UpdateFloatingWindowSizeForStretchableWindow05
+ * @tc.desc: test UpdateFloatingWindowSizeForStretchableWindow05
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow05, Function | SmallTest | Level2)
+{
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
+
+    sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node != nullptr);
+    WindowSizeLimits sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // sizeLimits: 800, 800, 400, 400, 2.0, 1.0
+    node->SetWindowUpdatedSizeLimits(sizeLimits);
+
+    Rect winRect = { 0, 0, 400, 400 }; // width/height: 400
+    node->SetOriginRect(winRect);
+    layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, displayRect, winRect);
+
+    winRect = { 0, 0, 300, 300 }; // width/height: 300
+    node->SetOriginRect(winRect);
+    layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, displayRect, winRect);
+
+    winRect = { 0, 0, 500, 500 }; // width/height: 500
+    node->SetOriginRect(winRect);
+    layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, displayRect, winRect);
+}
+
+/**
+ * @tc.name: UpdateFloatingWindowSizeBySizeLimits
+ * @tc.desc: test UpdateFloatingWindowSizeBySizeLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeBySizeLimits, Function | SmallTest | Level2)
+{
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
+
+    sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node != nullptr);
+    WindowSizeLimits sizeLimits = { 800, 400, 800, 400, 2.0, 1.0 }; // sizeLimits: 800, 400, 800, 400, 2.0, 1.0
+    node->SetWindowUpdatedSizeLimits(sizeLimits);
+    Rect winRect = { 0, 0, 400, 400 }; // width/height: 400
+    layoutPolicy_->UpdateFloatingWindowSizeBySizeLimits(node, displayRect, winRect);
+
+    sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // sizeLimits: 800, 800, 400, 400, 2.0, 1.0
+    node->SetWindowUpdatedSizeLimits(sizeLimits);
+    winRect = { 0, 0, 400, 400 }; // width/height: 400
+    layoutPolicy_->UpdateFloatingWindowSizeBySizeLimits(node, displayRect, winRect);
+
+    sizeLimits = { 800, 500, 800, 400, 2.0, 1.0 }; // sizeLimits: 800, 500, 800, 400, 2.0, 1.0
+    node->SetWindowUpdatedSizeLimits(sizeLimits);
+    layoutPolicy_->UpdateFloatingWindowSizeBySizeLimits(node, displayRect, winRect);
+
+    sizeLimits = { 800, 400, 600, 400, 2.0, 1.0 }; // sizeLimits: 800, 400, 600, 400, 2.0, 1.0
+    node->SetWindowUpdatedSizeLimits(sizeLimits);
+    layoutPolicy_->UpdateFloatingWindowSizeBySizeLimits(node, displayRect, winRect);
+
+    sizeLimits = { 800, 400, 800, 400, 2.0, 1.0 }; // sizeLimits: 800, 400, 800, 400, 2.0, 1.0
+    node->SetWindowUpdatedSizeLimits(sizeLimits);
+    layoutPolicy_->UpdateFloatingWindowSizeBySizeLimits(node, displayRect, winRect);
+
+    sizeLimits = { 800, 800, 400, 400, 2.0, 1.0 }; // sizeLimits: 800, 800, 400, 400, 2.0, 1.0
+    node->SetWindowUpdatedSizeLimits(sizeLimits);
+    node->SetDragType(DragType::DRAG_BOTTOM_OR_TOP);
+    layoutPolicy_->UpdateFloatingWindowSizeBySizeLimits(node, displayRect, winRect);
+
+    node->SetDragType(DragType::DRAG_LEFT_OR_RIGHT);
+    layoutPolicy_->UpdateFloatingWindowSizeBySizeLimits(node, displayRect, winRect);
+
+    node->GetWindowProperty()->SetWindowType(WindowType::WINDOW_TYPE_DRAGGING_EFFECT);
+    layoutPolicy_->UpdateFloatingWindowSizeBySizeLimits(node, displayRect, winRect);
+}
+
+/**
+ * @tc.name: LimitFloatingWindowSize
+ * @tc.desc: test LimitFloatingWindowSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, LimitFloatingWindowSize, Function | SmallTest | Level2)
+{
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
+
+    sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node != nullptr);
+    Rect winRect = { 0, 0, 400, 400 }; // width/height: 400
+    layoutPolicy_->LimitFloatingWindowSize(node, displayRect, winRect);
+
+    node->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
+    node->SetWindowRect(winRect);
+    layoutPolicy_->LimitFloatingWindowSize(node, displayRect, winRect);
+
+    Rect newRect = { 10, 0, 400, 400 }; // window rect: 10, 0, 400, 400
+    layoutPolicy_->LimitFloatingWindowSize(node, displayRect, newRect);
+
+    newRect = { 0, 10, 400, 400 }; // window rect: 0, 10, 400, 400
+    layoutPolicy_->LimitFloatingWindowSize(node, displayRect, newRect);
+
+    newRect = { 10, 10, 400, 400 }; // window rect: 10, 10, 400, 400
+    layoutPolicy_->LimitFloatingWindowSize(node, displayRect, newRect);
+
+    node->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    layoutPolicy_->LimitFloatingWindowSize(node, displayRect, winRect);
+
+    node->GetWindowProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
+    layoutPolicy_->LimitFloatingWindowSize(node, displayRect, winRect);
+}
+
+/**
+ * @tc.name: LimitMainFloatingWindowPosition
+ * @tc.desc: test LimitMainFloatingWindowPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, LimitMainFloatingWindowPosition, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node != nullptr);
+    Rect winRect = { 0, 0, 400, 400 }; // width/height: 400
+    node->SetWindowRect(winRect);
+    node->SetRequestRect(winRect);
+    winRect.posX_ = 20; // posX: 20
+    layoutPolicy_->LimitMainFloatingWindowPosition(node, winRect);
+
+    node->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
+    node->SetWindowRect(winRect);
+    layoutPolicy_->LimitMainFloatingWindowPosition(node, winRect);
+
+    node->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    layoutPolicy_->LimitMainFloatingWindowPosition(node, winRect);
+}
+
+/**
+ * @tc.name: LimitWindowPositionWhenDrag
+ * @tc.desc: test LimitWindowPositionWhenDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, LimitWindowPositionWhenDrag, Function | SmallTest | Level2)
+{
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
+
+    sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node != nullptr);
+    Rect winRect = { 0, 0, 400, 400 }; // width/height: 400
+    node->SetWindowRect(winRect);
+
+    windowInfo_.winType_ = WindowType::WINDOW_TYPE_LAUNCHER_DOCK;
+    sptr<WindowNode> dockNode = CreateWindowNode(windowInfo_);
+    layoutPolicy_->displayGroupWindowTree_[0][WindowRootNodeType::ABOVE_WINDOW_NODE]->push_back(dockNode);
+
+    Rect dockWinRect = { 200, 200, 50, 20 };  // 200, 200, 50, 20
+    dockNode->SetWindowRect(dockWinRect);
+    layoutPolicy_->LimitWindowPositionWhenDrag(node, winRect);
+
+    dockWinRect = { 200, 200, 50, (displayRect.height_ - static_cast<uint32_t>(200)) }; // param: 200 200 20
+    dockNode->SetWindowRect(dockWinRect);
+    layoutPolicy_->LimitWindowPositionWhenDrag(node, winRect);
+
+    dockWinRect = { 200, 200, 20, 50 };   // 200, 200, 20, 50
+    dockNode->SetWindowRect(dockWinRect);
+    layoutPolicy_->LimitWindowPositionWhenDrag(node, winRect);
+
+    dockWinRect = { 0, 200, 20, 50 };     // 200, 200, 20, 50
+    dockNode->SetWindowRect(dockWinRect);
+    layoutPolicy_->LimitWindowPositionWhenDrag(node, winRect);
+}
+
+/**
+ * @tc.name: LimitWindowPositionWhenDrag01
+ * @tc.desc: test LimitWindowPositionWhenDrag01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, LimitWindowPositionWhenDrag01, Function | SmallTest | Level2)
+{
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
+
+    sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node != nullptr);
+    Rect winRect = { 0, 0, 400, 400 }; // width/height: 400
+    node->SetWindowRect(winRect);
+
+    layoutPolicy_->limitRectMap_[node->GetDisplayId()] = displayRect;
+    float virtualPixelRatio = displayGroupInfo_->GetDisplayVirtualPixelRatio(node->GetDisplayId());
+    uint32_t windowTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
+    int32_t limitMinPosX = displayRect.posX_ + static_cast<int32_t>(windowTitleBarH);
+    int32_t limitMaxPosX = displayRect.posX_ + static_cast<int32_t>(displayRect.width_ - windowTitleBarH);
+    int32_t limitMinPosY = displayRect.posY_;
+    int32_t limitMaxPosY = displayRect.posY_ + static_cast<int32_t>(displayRect.height_ - windowTitleBarH);
+
+    Rect newRect = winRect;
+    newRect.posX_ = limitMinPosX - newRect.width_ - 1;
+    layoutPolicy_->LimitWindowPositionWhenDrag(node, newRect);
+
+    newRect.width_ -= 1;
+    layoutPolicy_->LimitWindowPositionWhenDrag(node, newRect);
+
+    winRect.posX_ = limitMaxPosX + 1;
+    layoutPolicy_->LimitWindowPositionWhenDrag(node, newRect);
+
+    newRect.width_ = winRect.width_;
+    layoutPolicy_->LimitWindowPositionWhenDrag(node, newRect);
+
+    newRect.posY_ = limitMaxPosY + 1;
+    layoutPolicy_->LimitWindowPositionWhenDrag(node, newRect);
+
+    newRect.height_ += 1;
+    layoutPolicy_->LimitWindowPositionWhenDrag(node, newRect);
+
+    newRect.posY_ = limitMinPosY - 1;
+    layoutPolicy_->LimitWindowPositionWhenDrag(node, newRect);
+
+    newRect.height_ = winRect.height_;
+    layoutPolicy_->LimitWindowPositionWhenDrag(node, newRect);
+}
+
+/**
+ * @tc.name: LimitWindowPositionWhenInitRectOrMove
+ * @tc.desc: test LimitWindowPositionWhenInitRectOrMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, LimitWindowPositionWhenInitRectOrMove, Function | SmallTest | Level2)
+{
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
+
+    sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node != nullptr);
+    Rect winRect = { 0, 0, 400, 400 }; // width/height: 400
+    node->SetWindowRect(winRect);
+
+    windowInfo_.winType_ = WindowType::WINDOW_TYPE_LAUNCHER_DOCK;
+    sptr<WindowNode> dockNode = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(dockNode != nullptr);
+    layoutPolicy_->displayGroupWindowTree_[0][WindowRootNodeType::ABOVE_WINDOW_NODE]->push_back(dockNode);
+
+    Rect dockWinRect = { 200, 200, 50, 20 }; // rect : 200, 200, 50, 20
+    dockNode->SetWindowRect(dockWinRect);
+    layoutPolicy_->LimitWindowPositionWhenInitRectOrMove(node, winRect);
+
+    dockWinRect = { 200, 200, 50, (displayRect.height_ - static_cast<uint32_t>(200)) }; // param: 200, 50
+    dockNode->SetWindowRect(dockWinRect);
+    layoutPolicy_->LimitWindowPositionWhenInitRectOrMove(node, winRect);
+
+    dockWinRect = { 200, 200, 20, 50 }; // rect : 200, 200, 20, 50
+    dockNode->SetWindowRect(dockWinRect);
+    layoutPolicy_->LimitWindowPositionWhenInitRectOrMove(node, winRect);
+
+    dockWinRect = { 0, 200, 20, 50 };   // rect : 0, 200, 20, 50
+    dockNode->SetWindowRect(dockWinRect);
+    layoutPolicy_->LimitWindowPositionWhenInitRectOrMove(node, winRect);
+
+    node->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    layoutPolicy_->LimitWindowPositionWhenInitRectOrMove(node, winRect);
+}
+
+/**
+ * @tc.name: GetDockWindowShowState
+ * @tc.desc: test GetDockWindowShowState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, GetDockWindowShowState, Function | SmallTest | Level2)
+{
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
+
+    Rect dockWinRect = { 200, 200, 50, 20 };  // rect : 200, 200, 50, 20
+    layoutPolicy_->GetDockWindowShowState(0, dockWinRect);
+
+    windowInfo_.winType_ = WindowType::WINDOW_TYPE_LAUNCHER_DOCK;
+    sptr<WindowNode> dockNode = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(dockNode != nullptr);
+    layoutPolicy_->displayGroupWindowTree_[0][WindowRootNodeType::ABOVE_WINDOW_NODE]->push_back(dockNode);
+
+    dockNode->SetWindowRect(dockWinRect);
+    layoutPolicy_->GetDockWindowShowState(0, dockWinRect);
+
+    dockWinRect = { 200, 200, 50, (displayRect.height_ - static_cast<uint32_t>(200)) };  // param : 200, 50
+    dockNode->SetWindowRect(dockWinRect);
+    layoutPolicy_->GetDockWindowShowState(0, dockWinRect);
+
+    dockWinRect = { 200, 200, 20, 50 };  // rect : 200, 200, 20, 50
+    dockNode->SetWindowRect(dockWinRect);
+    layoutPolicy_->GetDockWindowShowState(0, dockWinRect);
+
+    dockWinRect = { 0, 200, 20, 50 };    // rect : 0, 200, 20, 50
+    dockNode->SetWindowRect(dockWinRect);
+    layoutPolicy_->GetDockWindowShowState(0, dockWinRect);
+}
+
+/**
+ * @tc.name: GetAvoidPosType
+ * @tc.desc: test GetAvoidPosType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, GetAvoidPosType, Function | SmallTest | Level2)
+{
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
+
+    Rect winRect = { 200, 200, 50, 20 }; // rect : 200, 200, 50, 20
+    layoutPolicy_->GetAvoidPosType(winRect, 0);
+
+    layoutPolicy_->GetAvoidPosType(winRect, 1);
+
+    winRect.width_ = displayRect.width_;
+    layoutPolicy_->GetAvoidPosType(winRect, 0);
+
+    winRect.posY_ = displayRect.posY_;
+    layoutPolicy_->GetAvoidPosType(winRect, 0);
+
+    winRect.height_ = displayRect.height_;
+    layoutPolicy_->GetAvoidPosType(winRect, 0);
+
+    winRect.posY_ = displayRect.posY_;
+    layoutPolicy_->GetAvoidPosType(winRect, 0);
+}
+
+/**
+ * @tc.name: UpdateDisplayLimitRect
+ * @tc.desc: test UpdateDisplayLimitRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, UpdateDisplayLimitRect, Function | SmallTest | Level2)
+{
+    auto displayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
+
+    Rect limitRect = displayRect;
+
+    sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node != nullptr);
+    Rect avoidRect = { 200, 200, 50, 20 }; // rect : 200, 200, 50, 20
+    node->SetWindowRect(avoidRect);
+    layoutPolicy_->UpdateDisplayLimitRect(node, limitRect);
+
+    node->GetWindowProperty()->SetWindowType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    layoutPolicy_->UpdateDisplayLimitRect(node, limitRect);
+
+    avoidRect.width_ = displayRect.width_;
+    node->SetWindowRect(avoidRect);
+    layoutPolicy_->UpdateDisplayLimitRect(node, limitRect);
+
+    avoidRect.posY_ = displayRect.posY_;
+    node->SetWindowRect(avoidRect);
+    layoutPolicy_->UpdateDisplayLimitRect(node, limitRect);
+
+    avoidRect.height_ = displayRect.height_;
+    node->SetWindowRect(avoidRect);
+    layoutPolicy_->UpdateDisplayLimitRect(node, limitRect);
+
+    avoidRect.posY_ = displayRect.posY_;
+    node->SetWindowRect(avoidRect);
+    layoutPolicy_->UpdateDisplayLimitRect(node, limitRect);
+}
+
+/**
+ * @tc.name: UpdateSurfaceBounds
+ * @tc.desc: test UpdateSurfaceBounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, UpdateSurfaceBounds, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node != nullptr);
+    Rect winRect = { 0, 0, 20, 50 }; // rect : 0, 0, 20, 50
+    Rect preRect = { 0, 0, 20, 60 }; // rect : 0, 0, 20, 60
+    layoutPolicy_->UpdateSurfaceBounds(node, winRect, preRect);
+
+    node->SetWindowSizeChangeReason(WindowSizeChangeReason::MAXIMIZE);
+    layoutPolicy_->UpdateSurfaceBounds(node, winRect, preRect);
+
+    node->SetWindowSizeChangeReason(WindowSizeChangeReason::RECOVER);
+    layoutPolicy_->UpdateSurfaceBounds(node, winRect, preRect);
+
+    node->SetWindowSizeChangeReason(WindowSizeChangeReason::ROTATION);
+    layoutPolicy_->UpdateSurfaceBounds(node, winRect, preRect);
+
+    node->SetWindowSizeChangeReason(WindowSizeChangeReason::UNDEFINED);
+    layoutPolicy_->UpdateSurfaceBounds(node, winRect, preRect);
 }
 }
 }
