@@ -393,7 +393,7 @@ void WindowManagerService::ConfigureWindowManagerService()
     item = config["defaultFloatingWindow"];
     if (item.IsInts()) {
         auto numbers = *item.intsValue_;
-        if (numbers.size() == 4) {
+        if (numbers.size() == 4) { // Rect attr
             WindowLayoutPolicyCascade::SetDefaultFloatingWindow(numbers);
         }
     }
