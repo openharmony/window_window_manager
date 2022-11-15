@@ -37,8 +37,8 @@ public:
     Rect GetDividerRect(DisplayId displayId) const override;
     void SetSplitDividerWindowRects(std::map<DisplayId, Rect> dividerWindowRects) override;
     void PerformWindowLayout(const sptr<WindowNode>& node, WindowUpdateType updateType) override;
-    void SetFloatingBottomPosY(uint32_t floatingBottomPosY);
-    void SetDefaultFloatingWindow(const std::vector<int>& numbers);
+    static void SetFloatingBottomPosY(uint32_t floatingBottomPosY);
+    static void SetDefaultFloatingWindow(const std::vector<int>& numbers);
 
 private:
     /*
