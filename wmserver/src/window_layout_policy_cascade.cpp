@@ -273,10 +273,10 @@ bool WindowLayoutPolicyCascade::InitCascadeRectCfg(DisplayId displayId)
 {
     Rect resRect = defaultFloatingWindow_;
     auto vpr = displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
-    resRect.width_ = static_cast<uint32_t>(virtualPixelRatio * resRect.width_);
-    resRect.height_ = static_cast<uint32_t>(virtualPixelRatio * resRect.height_);
-    resRect.posX_ = static_cast<int32_t>(virtualPixelRatio * resRect.posX_);
-    resRect.posY_ = static_cast<int32_t>(virtualPixelRatio * resRect.posY_);
+    resRect.width_ = static_cast<uint32_t>(vpr * resRect.width_);
+    resRect.height_ = static_cast<uint32_t>(vpr * resRect.height_);
+    resRect.posX_ = static_cast<int32_t>(vpr * resRect.posX_);
+    resRect.posY_ = static_cast<int32_t>(vpr * resRect.posY_);
 
     if (resRect.width_ != 0 && resRect.height_ != 0) {
         WLOGFI("Init CascadeRect Cfg:[%{public}d, %{public}d, %{public}d, %{public}d]",
@@ -504,7 +504,7 @@ Rect WindowLayoutPolicyCascade::StepCascadeRect(Rect rect, DisplayId displayId) 
     if ((floatingBottomPosY_ != 0) && (cascadeRect.posY_ + static_cast<int32_t>(cascadeRect.height_) >= bottomPosY)) {
         cascadeRect.posY_ = limitRect.posY_;
     }
-    WLOGFD("Step cascadeRect :[%{public}d, %{public}d, %{public}u], bottomPosY:%{public}u",
+    WLOGFD("Step cascadeRect :[%{public}d, %{public}d, %{public}u, %{public}u], bottomPosY:%{public}u",
         cascadeRect.posX_, cascadeRect.posY_, cascadeRect.width_, cascadeRect.height_, bottomPosY);
     return cascadeRect;
 }
@@ -583,10 +583,11 @@ void WindowLayoutPolicyCascade::SetFloatingBottomPosY(uint32_t floatingBottomPos
 
 void WindowLayoutPolicyCascade::SetDefaultFloatingWindow(const std::vector<int>& numbers)
 {
-    defaultFloatingWindow_.posX_ = static_cast<uint32_t>(numbers[0]);
-    defaultFloatingWindow_.posY_ = static_cast<uint32_t>(numbers[1]);
-    defaultFloatingWindow_.width_ = static_cast<uint32_t>(numbers[2]);
-    defaultFloatingWindow_.height_ = static_cast<uint32_t>(numbers[3]);
+    uint32_t idx = 0;
+    defaultFloatingWindow_.posX_ = static_cast<uint32_t>(numbers[idx++]);
+    defaultFloatingWindow_.posY_ = static_cast<uint32_t>(numbers[idx++]);
+    defaultFloatingWindow_.width_ = static_cast<uint32_t>(numbers[idx++]);
+    defaultFloatingWindow_.height_ = static_cast<uint32_t>(numbers[idx]);
 }
 } // Rosen
 } // OHOS
