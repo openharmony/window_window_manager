@@ -20,6 +20,7 @@ group("unittest") {
 
   deps = [
     ":dmserver_abstract_display_test",
+    ":dmserver_abstract_screen_controller_test",
     ":dmserver_abstract_screen_test",
     ":dmserver_display_cutout_controller_test",
     ":dmserver_display_dumper_test",
@@ -28,6 +29,14 @@ group("unittest") {
     ":dmserver_display_manager_service_test",
     ":dmserver_screen_rotation_controller_test",
   ]
+}
+
+ohos_unittest("dmserver_abstract_screen_controller_test") {
+  module_out_path = module_out_path
+
+  sources = [ "abstract_screen_controller_test.cpp" ]
+
+  deps = [ ":dmserver_unittest_common" ]
 }
 
 ohos_unittest("dmserver_display_manager_agent_controller_test") {
