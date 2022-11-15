@@ -773,6 +773,9 @@ sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::CreateShowAnimationFini
 
 static void ProcessAbility(const sptr<WindowNode>& srcNode, TransitionEvent event)
 {
+    if (srcNode == nullptr) {
+        return;
+    }
     switch (event) {
         case TransitionEvent::CLOSE: {
             WLOGFI("close windowId: %{public}u, name:%{public}s",
