@@ -118,6 +118,15 @@
               ],
               "header_base": "//foundation/window/window_manager/interfaces/innerkits/extension"
             }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/window_scene:window_scene",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/window_scene/include"
+            }
           }
         ],
         "test": [
