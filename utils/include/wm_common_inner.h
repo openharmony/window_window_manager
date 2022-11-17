@@ -342,7 +342,7 @@ namespace {
     constexpr uint32_t MIN_FLOATING_HEIGHT = 240;
     constexpr uint32_t MIN_VERTICAL_SPLIT_HEIGHT = 240;
     constexpr uint32_t MIN_HORIZONTAL_SPLIT_WIDTH = 320;
-    constexpr uint32_t MAX_FLOATING_SIZE = 2560;
+    constexpr uint32_t MAX_FLOATING_SIZE = 1920;
     constexpr unsigned int WMS_WATCHDOG_CHECK_INTERVAL = 6; // actual check interval is 3000ms(6 * 500)
     const Rect INVALID_EMPTY_RECT = {0, 0, 0, 0};
     const Rect DEFAULT_PLACE_HOLDER_RECT = {0, 0, 512, 512};
