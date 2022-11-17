@@ -133,9 +133,12 @@ WMError WindowDumper::DumpAllWindowInfo(std::string& dumpInfo) const
     std::map<ScreenId, sptr<WindowNodeContainer>> windowNodeContainers;
     std::vector<DisplayId> displayIds = DisplayManagerServiceInner::GetInstance().GetAllDisplayIds();
     for (DisplayId displayId : displayIds) {
-        ScreenId screenGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(displayId);
         auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
-        if (windowNodeContainers.count(screenGroupId) == 0 && windowNodeContainer != nullptr) {
+        if (!windowNodeContainer) {
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        ScreenId screenGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(displayId);
+        if (windowNodeContainers.count(screenGroupId) == 0) {
             windowNodeContainers.insert(std::make_pair(screenGroupId, windowNodeContainer));
         }
     }
@@ -223,29 +226,14 @@ WMError WindowDumper::DumpWindowInfo(const std::vector<std::string>& args, std::
     if (args.empty()) {
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    DumpType dumpType = DumpType::DUMP_NONE;
-    uint32_t windowId = INVALID_WINDOW_ID;
     if (args.size() == 1 && args[0] == ARG_DUMP_ALL) { // 1: params num
-        dumpType = DumpType::DUMP_ALL;
+        return DumpAllWindowInfo(dumpInfo);
     } else if (args.size() >= 2 && args[0] == ARG_DUMP_WINDOW && IsValidDigitString(args[1])) { // 2: params num
-        windowId = std::stoul(args[1]);
-        dumpType = DumpType::DUMP_WINDOW;
+        uint32_t windowId = std::stoul(args[1]);
+        return DumpSpecifiedWindowInfo(windowId, args, dumpInfo);
     } else {
-        // do nothing
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
-    WMError ret = WMError::WM_OK;
-    switch (dumpType) {
-        case DumpType::DUMP_ALL:
-            ret = DumpAllWindowInfo(dumpInfo);
-            break;
-        case DumpType::DUMP_WINDOW:
-            ret = DumpSpecifiedWindowInfo(windowId, args, dumpInfo);
-            break;
-        default:
-            ret = WMError::WM_ERROR_INVALID_PARAM;
-            break;
-    }
-    return ret;
 }
 
 void WindowDumper::ShowIllegalArgsInfo(std::string& dumpInfo, WMError errCode) const
