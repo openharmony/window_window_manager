@@ -334,22 +334,26 @@ HWTEST_F(RemoteAnimationTest, CreateShowAnimationFinishedCallback01, Function | 
     auto finishCallback = RemoteAnimation::CreateShowAnimationFinishedCallback(node_, node_, true);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished(); // not animation playing
+    usleep(SLEEP_TIME_IN_US);
 
     node_->stateMachine_.TransitionTo(WindowNodeState::SHOW_ANIMATION_PLAYING);
     finishCallback = RemoteAnimation::CreateShowAnimationFinishedCallback(node_, node_, true);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished(); // leashSurfaceNode is not nullptr
+    usleep(SLEEP_TIME_IN_US);
 
     sptr<WindowNode> dstNode = nullptr;
     finishCallback = RemoteAnimation::CreateShowAnimationFinishedCallback(node_, dstNode, true);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished(); // dstNode is nullptr
+    usleep(SLEEP_TIME_IN_US);
 
     dstNode = new WindowNode(CreateWindowProperty(1)); // leashSurfaceNode is nullptr
     dstNode->stateMachine_.TransitionTo(WindowNodeState::HIDE_ANIMATION_PLAYING);
     finishCallback = RemoteAnimation::CreateShowAnimationFinishedCallback(node_, dstNode, true);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished();
+    usleep(SLEEP_TIME_IN_US);
 }
 
 /**
@@ -363,17 +367,20 @@ HWTEST_F(RemoteAnimationTest, CreateShowAnimationFinishedCallback02, Function | 
     auto finishCallback = RemoteAnimation::CreateShowAnimationFinishedCallback(node_, dstNode, true);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished(); // dstNode is nullptr
+    usleep(SLEEP_TIME_IN_US);
 
     sptr<WindowNode> srcNode = nullptr;
     finishCallback = RemoteAnimation::CreateShowAnimationFinishedCallback(srcNode, node_, true);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished(); // process srcNode state task with nullptr, node task count < 0
+    usleep(SLEEP_TIME_IN_US);
 
     srcNode = nullptr;
     node_->stateMachine_.ResetAnimationTaskCount(2); // 2 is animationCount
     finishCallback = RemoteAnimation::CreateShowAnimationFinishedCallback(srcNode, node_, false);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished(); // process srcNode state task with nullptr, node task count > 0
+    usleep(SLEEP_TIME_IN_US);
 }
 
 /**
@@ -388,22 +395,26 @@ HWTEST_F(RemoteAnimationTest, CreateHideAnimationFinishedCallback01, Function | 
     auto finishCallback = RemoteAnimation::CreateHideAnimationFinishedCallback(srcNode, TransitionEvent::MINIMIZE);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished(); // srcNode is nullptr
+    usleep(SLEEP_TIME_IN_US);
 
     finishCallback = RemoteAnimation::CreateHideAnimationFinishedCallback(node_, TransitionEvent::MINIMIZE);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished(); // not hide animation playing
+    usleep(SLEEP_TIME_IN_US);
     EXPECT_NE(WindowNodeState::HIDE_ANIMATION_DONE, node_->stateMachine_.currState_);
 
     node_->stateMachine_.TransitionTo(WindowNodeState::HIDE_ANIMATION_PLAYING);
     finishCallback = RemoteAnimation::CreateHideAnimationFinishedCallback(node_, TransitionEvent::CLOSE);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished(); // hide animation playing and with close
+    usleep(SLEEP_TIME_IN_US);
     EXPECT_EQ(WindowNodeState::HIDE_ANIMATION_DONE, node_->stateMachine_.currState_);
 
     node_->stateMachine_.TransitionTo(WindowNodeState::HIDE_ANIMATION_PLAYING);
     finishCallback = RemoteAnimation::CreateHideAnimationFinishedCallback(node_, TransitionEvent::MINIMIZE);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished(); // hide animation playing and with MINIMIZE
+    usleep(SLEEP_TIME_IN_US);
     EXPECT_EQ(WindowNodeState::HIDE_ANIMATION_DONE, node_->stateMachine_.currState_);
 
     node_->stateMachine_.TransitionTo(WindowNodeState::STARTING_CREATED);
@@ -411,6 +422,7 @@ HWTEST_F(RemoteAnimationTest, CreateHideAnimationFinishedCallback01, Function | 
     finishCallback = RemoteAnimation::CreateHideAnimationFinishedCallback(node_, TransitionEvent::MINIMIZE);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished(); // abilityToken is nullptr
+    usleep(SLEEP_TIME_IN_US);
     EXPECT_EQ(WindowNodeState::STARTING_CREATED, node_->stateMachine_.currState_);
 }
 
@@ -425,31 +437,37 @@ HWTEST_F(RemoteAnimationTest, CreateHideAnimationFinishedCallback02, Function | 
     auto finishCallback = RemoteAnimation::CreateHideAnimationFinishedCallback(srcNode, TransitionEvent::CLOSE);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished(); // srcNode is nullptr
+    usleep(SLEEP_TIME_IN_US);
 
     finishCallback = RemoteAnimation::CreateHideAnimationFinishedCallback(node_, TransitionEvent::MINIMIZE);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished(); // with minimize
+    usleep(SLEEP_TIME_IN_US);
 
     node_->firstFrameAvaliable_ = true;
     finishCallback = RemoteAnimation::CreateHideAnimationFinishedCallback(node_, TransitionEvent::CLOSE);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished(); // create hide callback with firstFrameAvaliable_ true
+    usleep(SLEEP_TIME_IN_US);
 
     node_->firstFrameAvaliable_ = false;
     finishCallback = RemoteAnimation::CreateHideAnimationFinishedCallback(node_, TransitionEvent::CLOSE);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished(); // create hide callback with surfaceNode null
+    usleep(SLEEP_TIME_IN_US);
 
     node_->firstFrameAvaliable_ = false;
     node_->surfaceNode_ = CreateRSSurfaceNode(1);
     finishCallback = RemoteAnimation::CreateHideAnimationFinishedCallback(node_, TransitionEvent::CLOSE);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished(); // create hide callback with surfaceNode not null
+    usleep(SLEEP_TIME_IN_US);
 
     node_->leashWinSurfaceNode_ = CreateRSSurfaceNode(1);
     finishCallback = RemoteAnimation::CreateHideAnimationFinishedCallback(node_, TransitionEvent::CLOSE);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished(); // create hide callback with leashWinSurfaceNode_ null
+    usleep(SLEEP_TIME_IN_US);
 }
 
 /**
@@ -484,18 +502,18 @@ HWTEST_F(RemoteAnimationTest, ProcessNodeStateTask01, Function | SmallTest | Lev
     usleep(SLEEP_TIME_IN_US);
     EXPECT_EQ(WindowNodeState::SHOW_ANIMATION_DONE, node_->stateMachine_.currState_);
 
-    RemoteAnimation::windowRoot_ = nullptr;
-    node_->stateMachine_.ResetAnimationTaskCount(1);
-    RemoteAnimation::ProcessNodeStateTask(node_); // show animation playing and windowRoot is nullptr
-    usleep(SLEEP_TIME_IN_US);
-    EXPECT_EQ(WindowNodeState::SHOW_ANIMATION_DONE, node_->stateMachine_.currState_);
-
     bool taskExecute = false;
     node_->stateMachine_.SetDestroyTask([&taskExecute] {taskExecute = true;});
     node_->stateMachine_.ResetAnimationTaskCount(1);
     RemoteAnimation::ProcessNodeStateTask(node_); // execute destroy task
     usleep(SLEEP_TIME_IN_US);
     EXPECT_EQ(true, taskExecute);
+
+    RemoteAnimation::windowRoot_ = nullptr;
+    node_->stateMachine_.ResetAnimationTaskCount(1);
+    RemoteAnimation::ProcessNodeStateTask(node_); // show animation playing and windowRoot is nullptr
+    usleep(SLEEP_TIME_IN_US);
+    EXPECT_EQ(WindowNodeState::SHOW_ANIMATION_DONE, node_->stateMachine_.currState_);
 
     wmsTaskHandler_ = nullptr;
     RemoteAnimation::wmsTaskHandler_ = wmsTaskHandler_;
@@ -525,23 +543,6 @@ HWTEST_F(RemoteAnimationTest, PostProcessShowCallback01, Function | SmallTest | 
     EXPECT_EQ(expectRect, actualRect);
     node_->leashWinSurfaceNode_ = nullptr;
     RemoteAnimation::PostProcessShowCallback(node_);
-}
-
-/**
- * @tc.name: PostProcessShowCallback02
- * @tc.desc: PostProcessShowCallback with handler is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(RemoteAnimationTest, PostProcessShowCallback02, Function | SmallTest | Level2)
-{
-    wmsTaskHandler_ = nullptr;
-    RemoteAnimation::wmsTaskHandler_ = wmsTaskHandler_;
-    Rect expectRect = {0, 0, 100, 100}; // 100 is test data
-    node_->SetWindowRect(expectRect);
-    RemoteAnimation::PostProcessShowCallback(node_);
-    usleep(SLEEP_TIME_IN_US);
-    Rect actualRect = GetSurfaceBoundsRect(node_);
-    EXPECT_NE(expectRect, actualRect);
 }
 
 /**
@@ -805,6 +806,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationBackTransition02, Function | SmallT
         animationController_.GetRefPtr());
     EXPECT_NE(nullptr, testController->finishedCallback_);
     testController->finishedCallback_->OnAnimationFinished();
+    usleep(SLEEP_TIME_IN_US);
 
     RemoteAnimation::windowController_ = nullptr;
     ret = RemoteAnimation::NotifyAnimationBackTransition(transitionInfo_, transitionInfo_, srcNode, node_);
@@ -813,6 +815,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationBackTransition02, Function | SmallT
         animationController_.GetRefPtr());
     EXPECT_NE(nullptr, testController->finishedCallback_);
     testController->finishedCallback_->OnAnimationFinished();
+    usleep(SLEEP_TIME_IN_US);
 }
 
 /**
@@ -839,6 +842,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationByHome01, Function | SmallTest | Le
         animationController_.GetRefPtr());
     EXPECT_NE(nullptr, testController->finishedCallback_);
     testController->finishedCallback_->OnAnimationFinished();
+    usleep(SLEEP_TIME_IN_US);
     EXPECT_NE(WindowNodeState::HIDE_ANIMATION_DONE, srcNode->stateMachine_.currState_);
 
     srcNode->stateMachine_.TransitionTo(WindowNodeState::HIDE_ANIMATION_PLAYING);
@@ -868,6 +872,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationByHome02, Function | SmallTest | Le
         animationController_.GetRefPtr());
     EXPECT_NE(nullptr, testController->finishedCallback_);
     testController->finishedCallback_->OnAnimationFinished();
+    usleep(SLEEP_TIME_IN_US);
     EXPECT_EQ(WindowNodeState::HIDE_ANIMATION_DONE, srcNode->stateMachine_.currState_);
 }
 
@@ -885,10 +890,12 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationByHome03, Function | SmallTest | Le
     WMError ret = RemoteAnimation::NotifyAnimationByHome();
     EXPECT_EQ(WMError::WM_OK, ret);
     EXPECT_EQ(0, MinimizeApp::GetNeedMinimizeAppNodesWithReason(MinimizeReason::MINIMIZE_ALL).size());
+
     RSIWindowAnimationControllerMocker* testController = reinterpret_cast<RSIWindowAnimationControllerMocker*>(
         animationController_.GetRefPtr());
     EXPECT_NE(nullptr, testController->finishedCallback_);
     testController->finishedCallback_->OnAnimationFinished();
+    usleep(SLEEP_TIME_IN_US);
     EXPECT_EQ(WindowNodeState::HIDE_ANIMATION_DONE, srcNode->stateMachine_.currState_);
 }
 
@@ -971,6 +978,10 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationScreenUnlock01, Function | SmallTes
 {
     std::function<void(void)> callback = nullptr;
     WMError ret = RemoteAnimation::NotifyAnimationScreenUnlock(callback);
+    EXPECT_EQ(WMError::WM_ERROR_NO_MEM, ret);
+
+    callback = []() {};
+    ret = RemoteAnimation::NotifyAnimationScreenUnlock(callback);
     EXPECT_EQ(WMError::WM_OK, ret);
 
     RemoteAnimation::windowAnimationController_ = nullptr;
@@ -1011,6 +1022,7 @@ HWTEST_F(RemoteAnimationTest, CreateAnimationFinishedCallback01, Function | Smal
     auto finishCallback = RemoteAnimation::CreateAnimationFinishedCallback(callback);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished();
+    usleep(SLEEP_TIME_IN_US);
     EXPECT_EQ(true, testFlag);
 
     wmsTaskHandler_ = nullptr;
@@ -1019,6 +1031,7 @@ HWTEST_F(RemoteAnimationTest, CreateAnimationFinishedCallback01, Function | Smal
     finishCallback = RemoteAnimation::CreateAnimationFinishedCallback(callback);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished();
+    usleep(SLEEP_TIME_IN_US);
     EXPECT_EQ(false, testFlag);
 }
 }
