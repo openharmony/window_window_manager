@@ -142,9 +142,6 @@ WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& src
     auto transitionEvent = RemoteAnimation::GetTransitionEvent(srcInfo, dstInfo, srcNode, dstNode);
     switch (transitionEvent) {
         case TransitionEvent::APP_TRANSITION: {
-            if (dstNode->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-                windowRoot_->MinimizeStructuredAppWindowsExceptSelf(dstNode); // avoid split/float mode minimize
-            }
             return RemoteAnimation::NotifyAnimationTransition(srcInfo, dstInfo, srcNode, dstNode);
         }
         case TransitionEvent::MINIMIZE:
@@ -1385,10 +1382,8 @@ void WindowController::MinimizeWindowsByLauncher(std::vector<uint32_t>& windowId
     if (!isAnimated) {
         func();
     } else {
-        finishCallback = new(std::nothrow) RSWindowAnimationFinishedCallback(func);
+        finishCallback = RemoteAnimation::CreateAnimationFinishedCallback(func);
         if (finishCallback == nullptr) {
-            WLOGFE("New RSIWindowAnimationFinishedCallback failed");
-            func();
             return;
         }
     }
