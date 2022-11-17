@@ -334,7 +334,7 @@ void WindowLayoutPolicy::LayoutWindowTree(DisplayId displayId)
 void WindowLayoutPolicy::LayoutWindowNode(const sptr<WindowNode>& node)
 {
     if (node == nullptr || node->parent_ == nullptr) {
-        WLOGFE("Node or it's parent is nullptr, windowId: [%{public}u]", node->GetWindowId());
+        WLOGFE("Node or it's parent is nullptr");
         return;
     }
     if (!node->currentVisibility_) {
