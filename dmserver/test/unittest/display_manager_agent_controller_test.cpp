@@ -57,7 +57,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenConnect, Function | SmallTes
     sptr<ScreenInfo> screenInfo = nullptr;
     DisplayManagerAgentController::GetInstance().OnScreenConnect(screenInfo);
     ASSERT_EQ(0, DisplayManagerAgentController::GetInstance().
-                dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
+        dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
 }
 /**
  * @tc.name: OnScreenChange
@@ -69,7 +69,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenChange, Function | SmallTest
     sptr<ScreenInfo> screenInfo = nullptr;
     DisplayManagerAgentController::GetInstance().OnScreenChange(screenInfo, ScreenChangeEvent::UPDATE_ROTATION);
     ASSERT_EQ(0, DisplayManagerAgentController::GetInstance().
-                dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
+        dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
 }
 /**
  * @tc.name: OnScreenGroupChange
@@ -80,12 +80,14 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenGroupChange, Function | Smal
 {
     sptr<ScreenInfo> screenInfo = nullptr;
     std::string trigger;
-    DisplayManagerAgentController::GetInstance().OnScreenGroupChange(trigger, screenInfo, ScreenGroupChangeEvent::ADD_TO_GROUP);
+    DisplayManagerAgentController::GetInstance().OnScreenGroupChange(trigger,
+        screenInfo, ScreenGroupChangeEvent::ADD_TO_GROUP);
     ASSERT_EQ(0, DisplayManagerAgentController::GetInstance().
-                dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
+        dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
     std::vector<sptr<ScreenInfo>> screenInfos;
     screenInfos.push_back(screenInfo);
-    DisplayManagerAgentController::GetInstance().OnScreenGroupChange(trigger, screenInfos, ScreenGroupChangeEvent::ADD_TO_GROUP);
+    DisplayManagerAgentController::GetInstance().OnScreenGroupChange(trigger,
+        screenInfos, ScreenGroupChangeEvent::ADD_TO_GROUP);
 }
 /**
  * @tc.name: OnDisplayCreate
@@ -97,7 +99,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayCreate, Function | SmallTes
     sptr<DisplayInfo> displayInfo;
     DisplayManagerAgentController::GetInstance().OnDisplayCreate(displayInfo);
     ASSERT_EQ(0, DisplayManagerAgentController::GetInstance().
-                dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
+        dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
 }
 /**
  * @tc.name: OnDisplayDestroy
@@ -109,7 +111,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayDestroy, Function | SmallTe
     DisplayId displayId = 0;
     DisplayManagerAgentController::GetInstance().OnDisplayDestroy(displayId);
     ASSERT_EQ(0, DisplayManagerAgentController::GetInstance().
-                dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
+        dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
 }
 /**
  * @tc.name: OnDisplayChange
@@ -121,11 +123,11 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayChange, Function | SmallTes
     sptr<DisplayInfo> displayInfo = nullptr;
     DisplayManagerAgentController::GetInstance().OnDisplayChange(displayInfo, DisplayChangeEvent::UNKNOWN);
     ASSERT_EQ(0, DisplayManagerAgentController::GetInstance().
-                dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
+        dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
     displayInfo = new DisplayInfo();
     DisplayManagerAgentController::GetInstance().OnDisplayChange(displayInfo, DisplayChangeEvent::UNKNOWN);
     ASSERT_EQ(0, DisplayManagerAgentController::GetInstance().
-                dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
+        dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
 }
 /**
  * @tc.name: OnScreenshot
@@ -137,7 +139,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenshot, Function | SmallTest |
     sptr<ScreenshotInfo> info = nullptr;
     DisplayManagerAgentController::GetInstance().OnScreenshot(info);
     ASSERT_EQ(0, DisplayManagerAgentController::GetInstance().
-                dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
+        dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
 }
 }
 } // namespace Rosen
