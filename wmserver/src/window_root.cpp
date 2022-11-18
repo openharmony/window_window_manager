@@ -1324,6 +1324,10 @@ std::map<DisplayId, Rect> WindowRoot::GetAllDisplayRectsByDMS(sptr<DisplayInfo> 
 {
     std::map<DisplayId, Rect> displayRectMap;
 
+    if (displayInfo == nullptr) {
+        return displayRectMap;
+    }
+
     for (auto& displayId : displayIdMap_[displayInfo->GetScreenGroupId()]) {
         auto info = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
         Rect displayRect = { info->GetOffsetX(), info->GetOffsetY(), info->GetWidth(), info->GetHeight() };
