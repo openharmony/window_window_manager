@@ -56,13 +56,13 @@ public:
 
     ScreenId MakeExpand(const std::vector<ExpandOption>& options);
     ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
-    void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens);
+    DMError RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens);
     ScreenId CreateVirtualScreen(VirtualScreenOption option);
     DMError DestroyVirtualScreen(ScreenId screenId);
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
     ScreenPowerState GetScreenPower(ScreenId screenId);
-    void SetScreenRotationLocked(bool isLocked);
+    DMError SetScreenRotationLocked(bool isLocked);
     bool IsScreenRotationLocked();
 
     bool RegisterScreenListener(sptr<IScreenListener> listener);
