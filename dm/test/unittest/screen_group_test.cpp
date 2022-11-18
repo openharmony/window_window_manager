@@ -101,6 +101,22 @@ HWTEST_F(ScreenGroupTest, UpdateScreenGroupInfo03, Function | SmallTest | Level2
     std::vector<Point> pos = screenGroup->GetChildPositions();
     ASSERT_EQ(position.size(), pos.size());
 }
+/**
+ * @tc.name: GetChildIds
+ * @tc.desc: for interface coverage & check GetChildIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenGroupTest, GetChildIds, Function | SmallTest | Level2)
+{
+    sptr<ScreenGroupInfo> screenGroupInfo = new(std::nothrow) ScreenGroupInfo();
+    sptr<ScreenGroup> screenGroup = new ScreenGroup(screenGroupInfo);
+    auto result = screenGroup->GetChildIds();
+    ASSERT_TRUE(result.empty());
+
+    screenGroupInfo->children_.emplace_back(1);
+    result = screenGroup->GetChildIds();
+    ASSERT_EQ(result.size(), 1);
+}
 }
 }
 }

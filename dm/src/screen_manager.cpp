@@ -462,18 +462,19 @@ ScreenId ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> 
     return group;
 }
 
-void ScreenManager::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
+DMError ScreenManager::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
 {
     WLOGFI("screens.size=%{public}llu", (unsigned long long)screens.size());
     if (screens.empty()) {
         WLOGFW("RemoveVirtualScreenFromGroup failed. screens is empty.");
-        return;
+        return DMError::DM_ERROR_INVALID_PARAM;
     }
     if (screens.size() > MAX_SCREEN_SIZE) {
         WLOGFW("RemoveVirtualScreenFromGroup failed. The screens size is bigger than %{public}u.", MAX_SCREEN_SIZE);
-        return;
+        return DMError::DM_ERROR_INVALID_PARAM;
     }
     SingletonContainer::Get<ScreenManagerAdapter>().RemoveVirtualScreenFromGroup(screens);
+    return DMError::DM_OK;
 }
 
 ScreenId ScreenManager::CreateVirtualScreen(VirtualScreenOption option)
@@ -511,9 +512,10 @@ ScreenPowerState ScreenManager::GetScreenPower(ScreenId dmsScreenId)
     return SingletonContainer::Get<ScreenManagerAdapter>().GetScreenPower(dmsScreenId);
 }
 
-void ScreenManager::SetScreenRotationLocked(bool isLocked)
+DMError ScreenManager::SetScreenRotationLocked(bool isLocked)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().SetScreenRotationLocked(isLocked);
+    return DMError::DM_OK;
 }
 
 bool ScreenManager::IsScreenRotationLocked()
