@@ -97,6 +97,28 @@ HWTEST_F(WmMathTest, TransformMatrix, Function | SmallTest | Level2)
     ASSERT_EQ(true, MathHelper::NearZero((scale - scaleComp).Length()));
     ASSERT_EQ(true, MathHelper::NearZero((translation - translationComp).Length()));
 }
+/**
+ * @tc.name: TransformWithPerspDiv
+ * @tc.desc: Create transform matrix
+ *           Get scale component from transform matrix
+ *           Get translation component from transform matrix
+ * @tc.type: FUNC
+ */
+HWTEST_F(WmMathTest, TransformWithPerspDiv, Function | SmallTest | Level2)
+{
+    Vector3 vec(1.0, 1.0, 1.0);
+    Matrix4 mat = Matrix4::Identity;
+    auto result = TransformWithPerspDiv(vec, mat, 1);
+    auto expect = vec * 0.5;
+    ASSERT_EQ(expect.x_, result.x_);
+    ASSERT_EQ(expect.y_, result.y_);
+    ASSERT_EQ(expect.z_, result.z_);
+
+    result = TransformWithPerspDiv(vec, mat, 0);
+    ASSERT_EQ(vec.x_, result.x_);
+    ASSERT_EQ(vec.y_, result.y_);
+    ASSERT_EQ(vec.z_, result.z_);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
