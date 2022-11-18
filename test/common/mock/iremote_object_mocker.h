@@ -121,6 +121,7 @@ public:
     }
 
     int sendRequestResult_ = 0;
+    int count_ = 0;
 };
 }
 }
