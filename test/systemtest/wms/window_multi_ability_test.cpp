@@ -15,7 +15,6 @@
 
 // gtest
 #include <gtest/gtest.h>
-#include <thread>
 #include "window_test_utils.h"
 
 using namespace testing;
@@ -46,45 +45,6 @@ void WindowMultiAbilityTest::SetUp()
 
 void WindowMultiAbilityTest::TearDown()
 {
-}
-
-const int SLEEP_MS = 20;
-
-static void ShowHideWindowSceneCallable(int i)
-{
-    unsigned int sleepTimeMs = i * SLEEP_MS;
-    usleep(sleepTimeMs);
-    sptr<WindowScene> scene = Utils::CreateWindowScene();
-    const int loop = 10;
-    int j = 0;
-    for (; j < loop; j++) {
-        usleep(sleepTimeMs);
-        ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
-        usleep(sleepTimeMs);
-        ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
-        usleep(sleepTimeMs);
-    }
-    ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
-}
-
-static void CreateDestroyWindowSceneCallable(int i)
-{
-    unsigned int sleepTimeMs = i * SLEEP_MS;
-    const int loop = 10;
-    int j = 0;
-    for (; j < loop; j++) {
-        usleep(sleepTimeMs);
-        sptr<WindowScene> scene = Utils::CreateWindowScene();
-        usleep(sleepTimeMs);
-        ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
-        usleep(sleepTimeMs);
-        ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
-        usleep(sleepTimeMs);
-        ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
-        usleep(sleepTimeMs);
-        scene.clear();
-        usleep(sleepTimeMs);
-    }
 }
 
 /**
@@ -118,49 +78,11 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow01, Function | MediumTest | L
 }
 
 /**
- * @tc.name: MultiAbilityWindow02
- * @tc.desc: Five scene process show/hide in five threads
- * @tc.type: FUNC
- */
-HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, Function | MediumTest | Level2)
-{
-    std::thread th1(ShowHideWindowSceneCallable, 1);
-    std::thread th2(ShowHideWindowSceneCallable, 2);
-    std::thread th3(ShowHideWindowSceneCallable, 3);
-    std::thread th4(ShowHideWindowSceneCallable, 4);
-    std::thread th5(ShowHideWindowSceneCallable, 5);
-    th1.join();
-    th2.join();
-    th3.join();
-    th4.join();
-    th5.join();
-}
-
-/**
- * @tc.name: MultiAbilityWindow03
- * @tc.desc: Five scene process create/destroy in five threads
- * @tc.type: FUNC
- */
-HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, Function | MediumTest | Level2)
-{
-    std::thread th1(CreateDestroyWindowSceneCallable, 1);
-    std::thread th2(CreateDestroyWindowSceneCallable, 2);
-    std::thread th3(CreateDestroyWindowSceneCallable, 3);
-    std::thread th4(CreateDestroyWindowSceneCallable, 4);
-    std::thread th5(CreateDestroyWindowSceneCallable, 5);
-    th1.join();
-    th2.join();
-    th3.join();
-    th4.join();
-    th5.join();
-}
-
-/**
  * @tc.name: MultiAbilityWindow04
  * @tc.desc: Five scene process in one thread, create/show/hide/destroy in order
  * @tc.type: FUNC
  */
-HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow04, Function | MediumTest | Level3)
+HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, Function | MediumTest | Level3)
 {
     sptr<WindowScene> scene1 = Utils::CreateWindowScene();
     ASSERT_EQ(WMError::WM_OK, scene1->GoForeground());
@@ -193,7 +115,7 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow04, Function | MediumTest | L
  * @tc.desc: Five scene process in one thread, create/show/hide/destroy out of order
  * @tc.type: FUNC
  */
-HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow05, Function | MediumTest | Level3)
+HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, Function | MediumTest | Level3)
 {
     sptr<WindowScene> scene1 = Utils::CreateWindowScene();
     ASSERT_EQ(WMError::WM_OK, scene1->GoForeground());
