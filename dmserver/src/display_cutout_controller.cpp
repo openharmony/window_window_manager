@@ -75,7 +75,7 @@ void DisplayCutoutController::SetCutoutSvgPath(DisplayId displayId, const std::s
 
 sptr<CutoutInfo> DisplayCutoutController::GetCutoutInfo(DisplayId displayId)
 {
-    WLOGFI("Get Cutout Info");
+    WLOGFD("Get Cutout Info");
     std::vector<DMRect> boundingRects;
     WaterfallDisplayAreaRects waterfallDisplayAreaRects;
     if (boundingRects_.count(displayId) == 1) {
@@ -124,18 +124,19 @@ DMRect DisplayCutoutController::CalcCutoutBoundingRect(std::string svgPath)
     }
     SkRect skRect = skCutoutSvgPath.computeTightBounds();
     if (skRect.isEmpty()) {
-        WLOGFI("Get empty skRect");
+        WLOGFW("Get empty skRect");
         return emptyRect;
     }
     SkIRect skiRect = skRect.roundOut();
     if (skiRect.isEmpty()) {
-        WLOGFI("Get empty skiRect");
+        WLOGFW("Get empty skiRect");
         return emptyRect;
     }
     int32_t left = static_cast<int32_t>(skiRect.left());
     int32_t top = static_cast<int32_t>(skiRect.top());
     uint32_t width = static_cast<uint32_t>(skiRect.width());
     uint32_t height = static_cast<uint32_t>(skiRect.height());
+    WLOGFI("calc rect from path,[%{public}d, %{public}d, %{public}u, %{public}u]", left, top, width, height);
     DMRect cutoutMinOuterRect = {.posX_ = left, .posY_ = top, .width_ = width, .height_ = height};
     return cutoutMinOuterRect;
 }
@@ -166,6 +167,7 @@ void DisplayCutoutController::CalcBuiltInDisplayWaterfallRects()
             DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId());
     if (!modes) {
         WLOGE("support screen modes get failed");
+        waterfallDisplayAreaRects_ = emptyRects;
         return;
     }
     uint32_t displayHeight = modes->height_;
