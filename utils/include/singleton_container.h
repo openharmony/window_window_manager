@@ -37,6 +37,11 @@ public:
 
     void* DependOn(const std::string& instance, const std::string& name);
 
+    static bool IsDestroyed()
+    {
+        return SingletonContainer::GetInstance().destroyed_;
+    }
+
     template<class T>
     static T& Get()
     {
@@ -70,6 +75,7 @@ private:
     std::map<std::string, int32_t> stringMap;
     std::map<int32_t, SingletonContainer::Singleton> singletonMap;
     std::map<int32_t, std::set<int32_t>> dependencySetMap;
+    bool destroyed_ { false };
 };
 } // namespace Rosen
 } // namespace OHOS
