@@ -50,11 +50,13 @@ ohos_shared_library("previewer_window") {
     "../wm/include",
     "../utils/include",
     "../../../../commonlibrary/c_utils/base/include",
+    "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf",
   ]
 
   deps = [
     "//foundation/arkui/napi:ace_napi",
     "//foundation/arkui/napi:ace_napi_ark",
+    "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf:frame_trace_intf",
   ]
 
   cflags = [ "-std=c++11" ]
