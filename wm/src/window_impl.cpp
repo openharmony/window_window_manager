@@ -517,7 +517,8 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
         Rect rect = GetRect();
         config.SetSize(rect.width_, rect.height_);
         config.SetPosition(rect.posX_, rect.posY_);
-        auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
+        auto display = SingletonContainer::IsDestroyed() ? nullptr :
+            SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
         if (display == nullptr) {
             WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
                 property_->GetWindowId());
@@ -856,7 +857,8 @@ bool WindowImpl::IsAppMainOrSubOrFloatingWindow()
 
 WMError WindowImpl::SetWindowCornerRadiusAccordingToSystemConfig()
 {
-    auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
+    auto display = SingletonContainer::IsDestroyed() ? nullptr :
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
         WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
             property_->GetWindowId());
@@ -899,7 +901,8 @@ WMError WindowImpl::UpdateWindowShadowAccordingToSystemConfig()
         return WMError::WM_OK;
     }
 
-    auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
+    auto display = SingletonContainer::IsDestroyed() ? nullptr :
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
         WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
             property_->GetWindowId());
@@ -1993,7 +1996,8 @@ void WindowImpl::SetModeSupportInfo(uint32_t modeSupportInfo)
 
 void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason)
 {
-    auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
+    auto display = SingletonContainer::IsDestroyed() ? nullptr :
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
         WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
             property_->GetWindowId());
@@ -2280,7 +2284,8 @@ void WindowImpl::ReadyToMoveOrDragWindow(const std::shared_ptr<MMI::PointerEvent
     moveDragProperty_->pointEventStarted_ = true;
 
     // calculate window inner rect except frame
-    auto display = DisplayManager::GetInstance().GetDisplayById(moveDragProperty_->targetDisplayId_);
+    auto display = SingletonContainer::IsDestroyed() ? nullptr :
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr || display->GetDisplayInfo() == nullptr) {
         WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
             property_->GetWindowId());
@@ -2414,7 +2419,8 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
         return;
     }
     if (WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
-        auto display = DisplayManager::GetInstance().GetDisplayById(moveDragProperty_->targetDisplayId_);
+        auto display = SingletonContainer::IsDestroyed() ? nullptr :
+            SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
         if (display == nullptr || display->GetDisplayInfo() == nullptr) {
             WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u",
                 property_->GetDisplayId(), property_->GetWindowId());
@@ -2510,7 +2516,9 @@ void WindowImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallbac
         WLOGFE("[WM] Receive Vsync Request failed, window is destroyed");
         return;
     }
-    VsyncStation::GetInstance().RequestVsync(vsyncCallback);
+    if (!SingletonContainer::IsDestroyed()) {
+        SingletonContainer::Get<VsyncStation>().RequestVsync(vsyncCallback);
+    }
 }
 
 void WindowImpl::UpdateFocusStatus(bool focused)
@@ -2802,7 +2810,8 @@ void WindowImpl::SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChann
 
 Rect WindowImpl::GetSystemAlarmWindowDefaultSize(Rect defaultRect)
 {
-    auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
+    auto display = SingletonContainer::IsDestroyed() ? nullptr :
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
         WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
             property_->GetWindowId());
@@ -3087,7 +3096,8 @@ WMError WindowImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
     if (blurStyle == WindowBlurStyle::WINDOW_BLUR_OFF) {
         surfaceNode_->SetBackgroundFilter(nullptr);
     } else {
-        auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
+        auto display = SingletonContainer::IsDestroyed() ? nullptr :
+            SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
         if (display == nullptr) {
             WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
                 property_->GetWindowId());
