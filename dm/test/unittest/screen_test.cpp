@@ -194,6 +194,40 @@ HWTEST_F(ScreenTest, SetScreenColorTransform01, Function | SmallTest | Level2)
     auto res = screen_->SetScreenColorTransform();
     ASSERT_EQ(DMError::DM_OK, res);
 }
+
+/**
+ * @tc.name: IsGroup
+ * @tc.desc: for interface coverage and check IsGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenTest, IsGroup, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<ScreenInfo> screenInfo = screen_->GetScreenInfo();
+    screenInfo->SetIsScreenGroup(true);
+    EXPECT_CALL(m->Mock(), GetScreenInfo(_)).Times(1).WillOnce(Return(screenInfo));
+    ASSERT_EQ(true, screen_->IsGroup());
+    screenInfo->SetIsScreenGroup(false);
+    EXPECT_CALL(m->Mock(), GetScreenInfo(_)).Times(1).WillOnce(Return(screenInfo));
+    ASSERT_EQ(false, screen_->IsGroup());
+}
+
+/**
+ * @tc.name: GetParentId
+ * @tc.desc: for interface coverage and check GetParentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenTest, GetParentId, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<ScreenInfo> screenInfo = screen_->GetScreenInfo();
+    screenInfo->SetParentId(0);
+    EXPECT_CALL(m->Mock(), GetScreenInfo(_)).Times(1).WillOnce(Return(screenInfo));
+    ASSERT_EQ(0, screen_->GetParentId());
+    screenInfo->SetParentId(SCREEN_ID_INVALID);
+    EXPECT_CALL(m->Mock(), GetScreenInfo(_)).Times(1).WillOnce(Return(screenInfo));
+    ASSERT_EQ(SCREEN_ID_INVALID, screen_->GetParentId());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
