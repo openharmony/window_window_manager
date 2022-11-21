@@ -19,6 +19,7 @@ group("unittest") {
   testonly = true
 
   deps = [
+    ":utils_all_test",
     ":utils_cutout_info_test",
     ":utils_display_info_test",
     ":utils_perform_reporter_test",
@@ -131,6 +132,19 @@ ohos_unittest("utils_cutout_info_test") {
   sources = [ "cutout_info_test.cpp" ]
 
   deps = [ ":utils_unittest_common" ]
+}
+
+ohos_unittest("utils_all_test") {
+  module_out_path = module_out_path
+
+  sources = [ "utils_all_test.cpp" ]
+
+  deps = [ ":utils_unittest_common" ]
+
+  external_deps = [
+    "ability_runtime:ability_manager",
+    "ipc:ipc_core",
+  ]
 }
 
 ohos_unittest("utils_wm_occlusion_region_test") {
