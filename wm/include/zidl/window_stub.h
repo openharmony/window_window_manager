@@ -28,6 +28,21 @@ public:
 
     virtual int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
         MessageOption &option) override;
+private:
+    static inline const class StaticDestroyMonitor {
+    public:
+        StaticDestroyMonitor() : destroyed_(false) {}
+        ~StaticDestroyMonitor()
+        {
+            destroyed_ = true;
+        }
+        bool IsDestroyed() const
+        {
+            return destroyed_;
+        }
+    private:
+        bool destroyed_;
+    } staticDestroyMonitor_;
 };
 } // namespace Rosen
 } // namespace OHOS
