@@ -32,9 +32,11 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "RemoteAnimation"};
+    const std::string ANIMATION_TIME_OUT_TASK = "remote_animation_time_out_task";
+    constexpr int64_t ANIMATION_TIME_OUT_MILLISECONDS = 3000; // 3000 is max time
 }
 bool RemoteAnimation::isRemoteAnimationEnable_ = true;
-
+std::atomic<uint32_t> RemoteAnimation::allocationId_ = 0;
 sptr<RSIWindowAnimationController> RemoteAnimation::windowAnimationController_ = nullptr;
 std::weak_ptr<AppExecFwk::EventHandler> RemoteAnimation::wmsTaskHandler_;
 wptr<WindowRoot> RemoteAnimation::windowRoot_;
@@ -727,8 +729,14 @@ void RemoteAnimation::ProcessNodeStateTask(sptr<WindowNode>& node)
         WLOGFI("node is nullptr!");
         return;
     }
-    node->stateMachine_.UpdateAnimationTaskCount(false);
     int32_t taskCount = node->stateMachine_.GetAnimationCount();
+    if (taskCount <= 0) { // no animation task but finishCallback come
+        WLOGFE("ProcessNodeStateTask failed with windowId: %{public}u, name:%{public}s taskCount:%{public}d",
+            node->GetWindowId(), node->GetWindowName().c_str(), taskCount);
+        return;
+    }
+    node->stateMachine_.UpdateAnimationTaskCount(false);
+    taskCount = node->stateMachine_.GetAnimationCount();
     WLOGFI("ProcessNodeStateTask windowId: %{public}u, name:%{public}s state: %{public}u, taskCount:%{public}d",
         node->GetWindowId(), node->GetWindowName().c_str(),
         static_cast<uint32_t>(node->stateMachine_.GetCurrentState()), taskCount);
@@ -866,15 +874,24 @@ sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::CreateAnimationFinished
         WLOGFE("callback is null!");
         return nullptr;
     }
-    auto func = [callback]() {
+    auto currentId = allocationId_.fetch_add(1);
+    std::string timeOutTaskName = ANIMATION_TIME_OUT_TASK + std::to_string(currentId);
+    auto func = [callback, timeOutTaskName]() {
         auto handler = wmsTaskHandler_.lock();
         if (handler != nullptr) {
+            handler->RemoveTask(timeOutTaskName);
+            WLOGFD("remove task %{public}s since animationCallback Come", timeOutTaskName.c_str());
             handler->PostTask(callback, AppExecFwk::EventQueue::Priority::IMMEDIATE);
         } else {
             WLOGFW("callback execute not on main wms thread since handler is null!");
             callback();
         }
     };
+    auto handlerSptr = wmsTaskHandler_.lock();
+    if (handlerSptr != nullptr) {
+        handlerSptr->PostTask(func, timeOutTaskName, ANIMATION_TIME_OUT_MILLISECONDS);
+        WLOGFD("PostTask task %{public}s", timeOutTaskName.c_str());
+    }
     sptr<RSWindowAnimationFinishedCallback> finishCallback = new(std::nothrow) RSWindowAnimationFinishedCallback(
         func);
     if (finishCallback == nullptr) {
