@@ -576,8 +576,15 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
     if (node->EnableDefaultAnimation(animationPlayed)) {
         WLOGFI("remove window with animation");
         StartTraceArgs(HITRACE_TAG_WINDOW_MANAGER, "Animate(%u)", node->GetWindowId());
+        if (node->surfaceNode_) {
+            node->surfaceNode_->SetAppFreeze(true);
+        }
         RSNode::Animate(animationConfig_.windowAnimationConfig_.animationTiming_.timingProtocol_,
-            animationConfig_.windowAnimationConfig_.animationTiming_.timingCurve_, updateRSTreeFunc);
+            animationConfig_.windowAnimationConfig_.animationTiming_.timingCurve_, updateRSTreeFunc, [node]() {
+            if (node->surfaceNode_) {
+                node->surfaceNode_->SetAppFreeze(false);
+            }
+        });
         FinishTrace(HITRACE_TAG_WINDOW_MANAGER);
     } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         !animationPlayed) { // remove keyboard with animation
