@@ -108,8 +108,8 @@ HWTEST_F(WmMathTest, TransformWithPerspDiv, Function | SmallTest | Level2)
 {
     Vector3 vec(1.0, 1.0, 1.0);
     Matrix4 mat = Matrix4::Identity;
-    auto result = TransformWithPerspDiv(vec, mat, 1);
-    auto expect = vec * 0.5;
+    auto result = TransformWithPerspDiv(vec, mat, 0.5);
+    auto expect = vec * 2;
     ASSERT_EQ(expect.x_, result.x_);
     ASSERT_EQ(expect.y_, result.y_);
     ASSERT_EQ(expect.z_, result.z_);

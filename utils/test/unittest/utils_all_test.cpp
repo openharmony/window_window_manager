@@ -201,10 +201,10 @@ HWTEST_F(UtilsAllTest, SRHResetFlag, Function | SmallTest | Level2)
     sptr<SurfaceReaderHandlerImpl> surfaceReaderHandlerImpl = new (std::nothrow)SurfaceReaderHandlerImpl();
     surfaceReaderHandlerImpl->flag_ = false;
     surfaceReaderHandlerImpl->ResetFlag();
-    ASSERT_EQ(true, surfaceReaderHandlerImpl->flag_);
+    ASSERT_EQ(false, surfaceReaderHandlerImpl->flag_);
     surfaceReaderHandlerImpl->flag_ = true;
     surfaceReaderHandlerImpl->ResetFlag();
-    ASSERT_EQ(true, surfaceReaderHandlerImpl->flag_);
+    ASSERT_EQ(false, surfaceReaderHandlerImpl->flag_);
 }
 }
 } // namespace Rosen
