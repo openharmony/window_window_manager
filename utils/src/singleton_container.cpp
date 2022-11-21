@@ -26,6 +26,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SingletonContainer)
 
 SingletonContainer::~SingletonContainer()
 {
+    destroyed_ = true;
     while (singletonMap.empty() == false) {
         auto it = singletonMap.begin();
         while (it != singletonMap.end()) {
