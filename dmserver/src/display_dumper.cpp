@@ -110,23 +110,44 @@ void DisplayDumper::ShowIllegalArgsInfo(std::string& dumpInfo, DMError errCode) 
 
 DMError DisplayDumper::DumpInfo(const std::vector<std::string>& args, std::string& dumpInfo) const
 {
-    if (args.size() != 2) { // 2: params num
+    if (args.empty()) {
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    
-    if (args[0] == ARG_DUMP_SCREEN && args[1] == ARG_DUMP_ALL) {
-        return DumpAllScreenInfo(dumpInfo);
-    } else if (args[0] == ARG_DUMP_DISPLAY && args[1] == ARG_DUMP_ALL) {
-        return DumpAllDisplayInfo(dumpInfo);
-    } else if (args[0] == ARG_DUMP_SCREEN && IsValidDigitString(args[1])) {
-        ScreenId screenId = std::stoull(args[1]);
-        return DumpSpecifiedScreenInfo(screenId, dumpInfo);
-    } else if (args[0] == ARG_DUMP_DISPLAY && IsValidDigitString(args[1])) {
-        DisplayId displayId = std::stoull(args[1]);
-        return DumpSpecifiedDisplayInfo(displayId, dumpInfo);
+    DumpType dumpType = DumpType::DUMP_NONE;
+    ScreenId screenId = SCREEN_ID_INVALID;
+    DisplayId displayId = DISPLAY_ID_INVALID;
+    if (args.size() == 2 && args[0] == ARG_DUMP_SCREEN && args[1] == ARG_DUMP_ALL) { // 2: params num
+        dumpType = DumpType::DUMP_ALL_SCREEN;
+    } else if (args.size() == 2 && args[0] == ARG_DUMP_DISPLAY && args[1] == ARG_DUMP_ALL) { // 2: params num
+        dumpType = DumpType::DUMP_ALL_DISPLAY;
+    } else if (args.size() == 2 && args[0] == ARG_DUMP_SCREEN && IsValidDigitString(args[1])) { // 2: params num
+        screenId = std::stoull(args[1]);
+        dumpType = DumpType::DUMP_SCREEN;
+    } else if (args.size() == 2 && args[0] == ARG_DUMP_DISPLAY && IsValidDigitString(args[1])) { // 2: params num
+        displayId = std::stoull(args[1]);
+        dumpType = DumpType::DUMP_DISPLAY;
     } else {
-        return DMError::DM_ERROR_INVALID_PARAM;
+        // do nothing
     }
+    DMError ret = DMError::DM_OK;
+    switch (dumpType) {
+        case DumpType::DUMP_ALL_SCREEN:
+            ret = DumpAllScreenInfo(dumpInfo);
+            break;
+        case DumpType::DUMP_ALL_DISPLAY:
+            ret = DumpAllDisplayInfo(dumpInfo);
+            break;
+        case DumpType::DUMP_SCREEN:
+            ret = DumpSpecifiedScreenInfo(screenId, dumpInfo);
+            break;
+        case DumpType::DUMP_DISPLAY:
+            ret = DumpSpecifiedDisplayInfo(displayId, dumpInfo);
+            break;
+        default:
+            ret = DMError::DM_ERROR_INVALID_PARAM;
+            break;
+    }
+    return ret;
 }
 
 DMError DisplayDumper::DumpAllScreenInfo(std::string& dumpInfo) const
