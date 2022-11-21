@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <parameters.h>
 
 #include "common_test_utils.h"
 #include "display_test_utils.h"
@@ -456,6 +457,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager08, Function | MediumTest | Level2)
  */
 HWTEST_F(ScreenManagerTest, ScreenManager09, Function | MediumTest | Level2)
 {
+    system::SetParameter("rosen.uni.partialrender.enabled", "0");
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
     defaultOption_.surface_ = utils.psurface_;
@@ -491,6 +493,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager09, Function | MediumTest | Level2)
     sleep(TEST_SLEEP_S_LONG);
     window->Destroy();
     sleep(TEST_SLEEP_S); // Wait for the window object to be destructed
+    system::SetParameter("rosen.uni.partialrender.enabled", "4");
 }
 
 /**
