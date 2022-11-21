@@ -58,7 +58,7 @@ HWTEST_F(DisplayDumperTest, Dump01, Function | SmallTest | Level1)
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
         DisplayManagerService::GetInstance().abstractScreenController_,
         DisplayManagerService::GetInstance().mutex_);
-    int fd = 1;
+    int fd = 0;
     std::vector<std::u16string> args;
     DMError ret = displayDumper->Dump(fd, args);
     ASSERT_EQ(ret, DMError::DM_OK);
@@ -92,12 +92,12 @@ HWTEST_F(DisplayDumperTest, Dump03, Function | SmallTest | Level1)
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
         DisplayManagerService::GetInstance().abstractScreenController_,
         DisplayManagerService::GetInstance().mutex_);
-    int fd = 3;
+    int fd = 1;
     std::vector<std::u16string> args;
     const std::u16string DUMP_HELP = u"-h";
     args.emplace_back(DUMP_HELP);
     DMError ret = displayDumper->Dump(fd, args);
-    ASSERT_TRUE(ret == DMError::DM_OK || ret == DMError::DM_ERROR_UNKNOWN);
+    ASSERT_EQ(ret, DMError::DM_OK);
 }
 
 /**
@@ -111,12 +111,12 @@ HWTEST_F(DisplayDumperTest, Dump04, Function | SmallTest | Level1)
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
         DisplayManagerService::GetInstance().abstractScreenController_,
         DisplayManagerService::GetInstance().mutex_);
-    int fd = 4;
+    int fd = 2;
     std::vector<std::u16string> args;
     const std::u16string DUMP_HELP = u"-x";
     args.emplace_back(DUMP_HELP);
     DMError ret = displayDumper->Dump(fd, args);
-    ASSERT_TRUE(ret == DMError::DM_OK || ret == DMError::DM_ERROR_UNKNOWN);
+    ASSERT_EQ(ret, DMError::DM_OK);
 }
 
 /**
@@ -130,14 +130,13 @@ HWTEST_F(DisplayDumperTest, Dump05, Function | SmallTest | Level1)
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
         DisplayManagerService::GetInstance().abstractScreenController_,
         DisplayManagerService::GetInstance().mutex_);
-    int fd = 5;
+    int fd = 3;
     std::vector<std::u16string> args;
     const std::u16string DUMP_SCREEN = u"-s";
     const std::u16string DUMP_ALL = u"-a";
     args.emplace_back(DUMP_SCREEN);
     args.emplace_back(DUMP_ALL);
-    DMError ret = displayDumper->Dump(fd, args);
-    ASSERT_EQ(ret, DMError::DM_ERROR_UNKNOWN);
+    displayDumper->Dump(fd, args);
 }
 
 /**
@@ -151,40 +150,18 @@ HWTEST_F(DisplayDumperTest, Dump06, Function | SmallTest | Level1)
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
         DisplayManagerService::GetInstance().abstractScreenController_,
         DisplayManagerService::GetInstance().mutex_);
-    int fd = 6;
+    int fd = 4;
     std::vector<std::u16string> args;
     const std::u16string DUMP_DISPLAY = u"-d";
     const std::u16string DUMP_ALL = u"-a";
     args.emplace_back(DUMP_DISPLAY);
     args.emplace_back(DUMP_ALL);
-    DMError ret = displayDumper->Dump(fd, args);
-    ASSERT_TRUE(ret == DMError::DM_OK || ret == DMError::DM_ERROR_UNKNOWN);
+    displayDumper->Dump(fd, args);
 }
 
 /**
  * @tc.name: Dump07
  * @tc.desc: Dump two param with '-s 1'
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayDumperTest, Dump071, Function | SmallTest | Level1)
-{
-    sptr<DisplayDumper> displayDumper;
-    displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
-        DisplayManagerService::GetInstance().abstractScreenController_,
-        DisplayManagerService::GetInstance().mutex_);
-    int fd = 71;
-    std::vector<std::u16string> args;
-    const std::u16string DUMP_SCREEN = u"-s";
-    const std::u16string DUMP_NUMBER = u"0";
-    args.emplace_back(DUMP_SCREEN);
-    args.emplace_back(DUMP_NUMBER);
-    DMError ret = displayDumper->Dump(fd, args);
-    ASSERT_EQ(ret, DMError::DM_ERROR_UNKNOWN);
-}
-
-/**
- * @tc.name: Dump07
- * @tc.desc: Dump two param with '-s -1'
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayDumperTest, Dump07, Function | SmallTest | Level1)
@@ -193,14 +170,33 @@ HWTEST_F(DisplayDumperTest, Dump07, Function | SmallTest | Level1)
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
         DisplayManagerService::GetInstance().abstractScreenController_,
         DisplayManagerService::GetInstance().mutex_);
-    int fd = 7;
+    int fd = 5;
+    std::vector<std::u16string> args;
+    const std::u16string DUMP_SCREEN = u"-s";
+    const std::u16string DUMP_NUMBER = u"1";
+    args.emplace_back(DUMP_SCREEN);
+    args.emplace_back(DUMP_NUMBER);
+    displayDumper->Dump(fd, args);
+}
+
+/**
+ * @tc.name: Dump07
+ * @tc.desc: Dump two param with '-s -1'
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayDumperTest, Dump071, Function | SmallTest | Level1)
+{
+    sptr<DisplayDumper> displayDumper;
+    displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
+        DisplayManagerService::GetInstance().abstractScreenController_,
+        DisplayManagerService::GetInstance().mutex_);
+    int fd = 5;
     std::vector<std::u16string> args;
     const std::u16string DUMP_SCREEN = u"-s";
     const std::u16string DUMP_NUMBER = u"-1";
     args.emplace_back(DUMP_SCREEN);
     args.emplace_back(DUMP_NUMBER);
-    DMError ret = displayDumper->Dump(fd, args);
-    ASSERT_EQ(ret, DMError::DM_ERROR_UNKNOWN);
+    displayDumper->Dump(fd, args);
 }
 
 /**
@@ -214,14 +210,13 @@ HWTEST_F(DisplayDumperTest, Dump08, Function | SmallTest | Level1)
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
         DisplayManagerService::GetInstance().abstractScreenController_,
         DisplayManagerService::GetInstance().mutex_);
-    int fd = 8;
+    int fd = 6;
     std::vector<std::u16string> args;
     const std::u16string DUMP_DISPLAY = u"-d";
     const std::u16string DUMP_NUMBER = u"1";
     args.emplace_back(DUMP_DISPLAY);
     args.emplace_back(DUMP_NUMBER);
-    DMError ret = displayDumper->Dump(fd, args);
-    ASSERT_EQ(ret, DMError::DM_ERROR_UNKNOWN);
+    displayDumper->Dump(fd, args);
 }
 
 /**
@@ -235,14 +230,13 @@ HWTEST_F(DisplayDumperTest, Dump09, Function | SmallTest | Level1)
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
         DisplayManagerService::GetInstance().abstractScreenController_,
         DisplayManagerService::GetInstance().mutex_);
-    int fd = 9;
+    int fd = 6;
     std::vector<std::u16string> args;
     const std::u16string DUMP_DISPLAY = u"-d";
     const std::u16string DUMP_NUMBER = u"-1";
     args.emplace_back(DUMP_DISPLAY);
     args.emplace_back(DUMP_NUMBER);
-    DMError ret = displayDumper->Dump(fd, args);
-    ASSERT_EQ(ret, DMError::DM_ERROR_UNKNOWN);
+    displayDumper->Dump(fd, args);
 }
 
 /**
@@ -256,7 +250,7 @@ HWTEST_F(DisplayDumperTest, Dump10, Function | SmallTest | Level1)
     displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
         DisplayManagerService::GetInstance().abstractScreenController_,
         DisplayManagerService::GetInstance().mutex_);
-    int fd = 10;
+    int fd = 7;
     std::vector<std::u16string> args;
     const std::u16string DUMP_DISPLAY = u"-d";
     const std::u16string DUMP_ALL = u"-a";
@@ -264,8 +258,7 @@ HWTEST_F(DisplayDumperTest, Dump10, Function | SmallTest | Level1)
     args.emplace_back(DUMP_DISPLAY);
     args.emplace_back(DUMP_ALL);
     args.emplace_back(DUMP_NUMBER);
-    DMError ret = displayDumper->Dump(fd, args);
-    ASSERT_EQ(ret, DMError::DM_ERROR_UNKNOWN);
+    displayDumper->Dump(fd, args);
 }
 
 /**
@@ -345,6 +338,7 @@ HWTEST_F(DisplayDumperTest, GetDisplayInfo01, Function | SmallTest | Level1)
     std::ostringstream oss;
     displayDumper->GetDisplayInfo(nullptr, oss);
 }
+
 }
 }
 }

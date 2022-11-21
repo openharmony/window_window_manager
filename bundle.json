@@ -127,8 +127,7 @@
           "//foundation/window/window_manager/utils:test",
           "//foundation/window/window_manager/wm:test",
           "//foundation/window/window_manager/wmserver:test",
-          "//foundation/window/window_manager/test:test",
-          "//foundation/window/window_manager/extension/window_extension:test"
+          "//foundation/window/window_manager/test:test"
         ]
       }
     }

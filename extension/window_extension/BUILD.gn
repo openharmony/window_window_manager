@@ -96,8 +96,3 @@ ohos_shared_library("window_extension_module") {
   subsystem_name = "window"
   part_name = "window_manager"
 }
-
-group("test") {
-  testonly = true
-  deps = [ "test:test" ]
-}
