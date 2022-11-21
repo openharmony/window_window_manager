@@ -16,9 +16,9 @@
 #include <gtest/gtest.h>
 #include <transaction/rs_transaction.h>
 #include "iremote_object_mocker.h"
+#include "mock_RSIWindowAnimationController.h"
 #include "remote_animation.h"
 #include "starting_window.h"
-
 #include "window_helper.h"
 #include "window_transition_info.h"
 using namespace testing;
@@ -56,7 +56,13 @@ void StartingWindowTest::TearDownTestCase()
 void StartingWindowTest::SetUp()
 {
     transitionInfo_ = new WindowTransitionInfo();
-    animationController_ = RemoteAnimation::windowAnimationController_;
+    animationController_ = new RSIWindowAnimationControllerMocker();
+    ASSERT_EQ(WMError::WM_OK, RemoteAnimation::SetWindowAnimationController(animationController_));
+    transitionInfo_->supportWindowModes_ = {
+        AppExecFwk::SupportWindowMode::FULLSCREEN,
+        AppExecFwk::SupportWindowMode::SPLIT,
+        AppExecFwk::SupportWindowMode::FLOATING
+    };
     node_ = StartingWindow::CreateWindowNode(transitionInfo_, 101); // 101 is windowId
     node_->SetWindowRect({0, 0, 100, 100});
 }
@@ -64,7 +70,6 @@ void StartingWindowTest::SetUp()
 void StartingWindowTest::TearDown()
 {
     transitionInfo_ = nullptr;
-    RemoteAnimation::SetWindowAnimationController(animationController_);
     node_ = nullptr;
 }
 
@@ -315,7 +320,7 @@ HWTEST_F(StartingWindowTest, HandleClientWindowCreateAndRelease03, Function | Sm
 HWTEST_F(StartingWindowTest, AddNodeOnRSTree01, Function | SmallTest | Level2)
 {
     sptr<RSIWindowAnimationController> testController = nullptr;
-    RemoteAnimation::SetWindowAnimationController(testController);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, RemoteAnimation::SetWindowAnimationController(testController));
     AnimationConfig config;
     StartingWindow::AddNodeOnRSTree(node_, config, true);
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, nullptr, 0x66FFFFFF, false));
@@ -333,7 +338,7 @@ HWTEST_F(StartingWindowTest, AddNodeOnRSTree02, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, surfaceNode);
     node_->surfaceNode_ = surfaceNode;
     sptr<RSIWindowAnimationController> testController = nullptr;
-    RemoteAnimation::SetWindowAnimationController(testController);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, RemoteAnimation::SetWindowAnimationController(testController));
     AnimationConfig config;
     StartingWindow::AddNodeOnRSTree(node_, config, true);
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, nullptr, 0x66FFFFFF, false));
@@ -352,7 +357,7 @@ HWTEST_F(StartingWindowTest, AddNodeOnRSTree03, Function | SmallTest | Level2)
     node_->surfaceNode_ = surfaceNode;
     node_->leashWinSurfaceNode_ = nullptr;
     sptr<RSIWindowAnimationController> testController = nullptr;
-    RemoteAnimation::SetWindowAnimationController(testController);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, RemoteAnimation::SetWindowAnimationController(testController));
     AnimationConfig config;
     StartingWindow::AddNodeOnRSTree(node_, config, true);
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, nullptr, 0x66FFFFFF, false));
@@ -366,9 +371,8 @@ HWTEST_F(StartingWindowTest, AddNodeOnRSTree03, Function | SmallTest | Level2)
  */
 HWTEST_F(StartingWindowTest, AddNodeOnRSTree04, Function | SmallTest | Level2)
 {
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    sptr<RSIWindowAnimationController> testController = iface_cast<RSIWindowAnimationController>(iRemoteObjectMocker);
-    RemoteAnimation::SetWindowAnimationController(testController);
+    sptr<RSIWindowAnimationController> testController = new RSIWindowAnimationControllerMocker();
+    ASSERT_EQ(WMError::WM_OK, RemoteAnimation::SetWindowAnimationController(testController));
     AnimationConfig config;
     StartingWindow::AddNodeOnRSTree(node_, config, true);
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, nullptr, 0x66FFFFFF, false));
@@ -385,9 +389,8 @@ HWTEST_F(StartingWindowTest, AddNodeOnRSTree05, Function | SmallTest | Level2)
     auto surfaceNode = CreateRSSurfaceNode();
     ASSERT_NE(nullptr, surfaceNode);
     node_->surfaceNode_ = surfaceNode;
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    sptr<RSIWindowAnimationController> testController = iface_cast<RSIWindowAnimationController>(iRemoteObjectMocker);
-    RemoteAnimation::SetWindowAnimationController(testController);
+    sptr<RSIWindowAnimationController> testController = new RSIWindowAnimationControllerMocker();
+    ASSERT_EQ(WMError::WM_OK, RemoteAnimation::SetWindowAnimationController(testController));
     AnimationConfig config;
     StartingWindow::AddNodeOnRSTree(node_, config, true);
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, nullptr, 0x66FFFFFF, false));
@@ -405,9 +408,8 @@ HWTEST_F(StartingWindowTest, AddNodeOnRSTree06, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, surfaceNode);
     node_->surfaceNode_ = surfaceNode;
     node_->leashWinSurfaceNode_ = nullptr;
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    sptr<RSIWindowAnimationController> testController = iface_cast<RSIWindowAnimationController>(iRemoteObjectMocker);
-    RemoteAnimation::SetWindowAnimationController(testController);
+    sptr<RSIWindowAnimationController> testController = new RSIWindowAnimationControllerMocker();
+    ASSERT_EQ(WMError::WM_OK, RemoteAnimation::SetWindowAnimationController(testController));
     AnimationConfig config;
     StartingWindow::AddNodeOnRSTree(node_, config, true);
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, nullptr, 0x66FFFFFF, false));

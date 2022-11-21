@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifndef FRAMEWORKS_WM_TEST_UT_MOCK_RSIWINDOWANIMATIONCONTROLLER_H
+#define FRAMEWORKS_WM_TEST_UT_MOCK_RSIWINDOWANIMATIONCONTROLLER_H
 
 #include <vector>
 #include <iremote_broker.h>
@@ -25,29 +26,77 @@ namespace OHOS {
 namespace Rosen {
 class RSIWindowAnimationControllerMocker : public RSIWindowAnimationController {
 public:
-    RSIWindowAnimationControllerMocker() {};
+    RSIWindowAnimationControllerMocker()
+    {
+        remoteObject_ = new IRemoteObjectMocker();
+    }
+
     ~RSIWindowAnimationControllerMocker() {};
-    MOCK_METHOD3(OnStartApp, void(StartingAppType type, const sptr<RSWindowAnimationTarget>& startingWindowTarget,
-        const sptr<RSIWindowAnimationFinishedCallback>& finishedCallback));
-    MOCK_METHOD3(OnAppTransition, void(const sptr<RSWindowAnimationTarget>& from, const sptr<RSWindowAnimationTarget>& to,
-        const sptr<RSIWindowAnimationFinishedCallback>& finishedCallback));
-    MOCK_METHOD3(OnAppBackTransition, void(const sptr<RSWindowAnimationTarget>& from, const sptr<RSWindowAnimationTarget>& to,
-        const sptr<RSIWindowAnimationFinishedCallback>& finishedCallback));
-    MOCK_METHOD2(OnMinimizeWindow, void(const sptr<RSWindowAnimationTarget>& minimizingWindow,
-        const sptr<RSIWindowAnimationFinishedCallback>& finishedCallback));
-    MOCK_METHOD2(OnMinimizeAllWindow, void(std::vector<sptr<RSWindowAnimationTarget>> minimizingWindows,
-        const sptr<RSIWindowAnimationFinishedCallback>& finishedCallback));
-    MOCK_METHOD2(OnCloseWindow, void(const sptr<RSWindowAnimationTarget>& closingWindow,
-        const sptr<RSIWindowAnimationFinishedCallback>& finishedCallback));
-    MOCK_METHOD1(OnScreenUnlock, void(const sptr<RSIWindowAnimationFinishedCallback>& finishedCallback));
-    MOCK_METHOD2(OnWindowAnimationTargetsUpdate, void(const sptr<RSWindowAnimationTarget>& fullScreenWindowTarget,
-        const std::vector<sptr<RSWindowAnimationTarget>>& floatingWindowTargets));
-    MOCK_METHOD1(OnWallpaperUpdate, void(const sptr<RSWindowAnimationTarget>& wallpaperTarget));
+    void OnWindowAnimationTargetsUpdate(const sptr<RSWindowAnimationTarget>& fullScreenWindowTarget,
+        const std::vector<sptr<RSWindowAnimationTarget>>& floatingWindowTargets) override
+    {
+        animationTarget_ = fullScreenWindowTarget;
+        floatingWindowTargets_ = floatingWindowTargets;
+        return;
+    }
+
+    void OnWallpaperUpdate(const sptr<RSWindowAnimationTarget>& wallpaperTarget) override
+    {
+        animationTarget_ = wallpaperTarget;
+        return;
+    }
+
+    void OnStartApp(StartingAppType type, const sptr<RSWindowAnimationTarget>& startingWindowTarget,
+        const sptr<RSIWindowAnimationFinishedCallback>& finishedCallback) override
+    {
+        finishedCallback_ = finishedCallback;
+    }
+
+    void OnAppTransition(const sptr<RSWindowAnimationTarget>& from, const sptr<RSWindowAnimationTarget>& to,
+        const sptr<RSIWindowAnimationFinishedCallback>& finishedCallback)
+    {
+        finishedCallback_ = finishedCallback;
+    }
+
+    void OnAppBackTransition(const sptr<RSWindowAnimationTarget>& from, const sptr<RSWindowAnimationTarget>& to,
+        const sptr<RSIWindowAnimationFinishedCallback>& finishedCallback)
+    {
+        finishedCallback_ = finishedCallback;
+    }
+
+    void OnMinimizeWindow(const sptr<RSWindowAnimationTarget>& minimizingWindow,
+        const sptr<RSIWindowAnimationFinishedCallback>& finishedCallback)
+    {
+        finishedCallback_ = finishedCallback;
+    }
+
+    void OnMinimizeAllWindow(std::vector<sptr<RSWindowAnimationTarget>> minimizingWindows,
+        const sptr<RSIWindowAnimationFinishedCallback>& finishedCallback)
+    {
+        finishedCallback_ = finishedCallback;
+    }
+
+    void OnCloseWindow(const sptr<RSWindowAnimationTarget>& closingWindow,
+        const sptr<RSIWindowAnimationFinishedCallback>& finishedCallback)
+    {
+        finishedCallback_ = finishedCallback;
+    }
+
+    void OnScreenUnlock(const sptr<RSIWindowAnimationFinishedCallback>& finishedCallback)
+    {
+        finishedCallback_ = finishedCallback;
+    }
+
     sptr<IRemoteObject> AsObject() override
     {
-        sptr<IRemoteObject> remote = new IRemoteObjectMocker();
-        return remote;
+        return remoteObject_;
     };
+
+    sptr<RSIWindowAnimationFinishedCallback> finishedCallback_ = nullptr;
+    sptr<IRemoteObject> remoteObject_ = nullptr;
+    sptr<RSWindowAnimationTarget> animationTarget_ = nullptr;
+    std::vector<sptr<RSWindowAnimationTarget>> floatingWindowTargets_;
 };
 } // namespace Rosen
 } // namespace OHOS
+#endif // FRAMEWORKS_WM_TEST_UT_MOCK_RSIWINDOWANIMATIONCONTROLLER_H
