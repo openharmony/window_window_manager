@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_DISPLAY_DUMPER_H
-#define OHOS_ROSEN_DISPLAY_DUMPER_H
+#ifndef OHOS_ROSEN_WINDOW_DUMPER_H
+#define OHOS_ROSEN_WINDOW_DUMPER_H
 
 #include "dm_common.h"
 #include "abstract_display_controller.h"
@@ -57,4 +57,4 @@ private:
 };
 }
 }
-#endif // OHOS_ROSEN_DISPLAY_DUMPER_H
+#endif // OHOS_ROSEN_WINDOW_DUMPER_H

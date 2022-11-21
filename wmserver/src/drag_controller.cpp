@@ -141,7 +141,7 @@ bool DragController::GetHitPoint(uint32_t windowId, PointInfo& point)
     return true;
 }
 
-void DragInputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
+void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
 {
     if (keyEvent == nullptr) {
         WLOGFE("KeyEvent is nullptr");
@@ -152,7 +152,7 @@ void DragInputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEven
     keyEvent->MarkProcessed();
 }
 
-void DragInputEventListener::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const
+void InputEventListener::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const
 {
     if (axisEvent == nullptr) {
         WLOGFE("AxisEvent is nullptr");
@@ -162,7 +162,7 @@ void DragInputEventListener::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEv
     axisEvent->MarkProcessed();
 }
 
-void DragInputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
+void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
     if (pointerEvent == nullptr) {
         WLOGFE("PointerEvent is nullptr");
@@ -182,7 +182,7 @@ bool MoveDragController::Init()
     if (inputEventHandler_ == nullptr) {
         return false;
     }
-    inputListener_ = std::make_shared<DragInputEventListener>(DragInputEventListener());
+    inputListener_ = std::make_shared<InputEventListener>(InputEventListener());
     MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(inputListener_, inputEventHandler_);
     VsyncStation::GetInstance().SetIsMainHandlerAvailable(false);
     VsyncStation::GetInstance().SetVsyncEventHandler(inputEventHandler_);
