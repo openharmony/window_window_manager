@@ -84,6 +84,10 @@ HWTEST_F(SnapshotUtilsTest, Check03, Function | SmallTest | Level3)
     ASSERT_EQ(false, SnapShotUtils::CheckFileNameValid(fileName1));
     std::string fileName2 = "";
     ASSERT_EQ(false, SnapShotUtils::CheckFileNameValid(fileName2));
+    std::string fileName3 = "3.png";
+    ASSERT_EQ(false, SnapShotUtils::CheckFileNameValid(fileName3));
+    std::string fileName4 = "/data/test.jpeg";
+    ASSERT_EQ(false, SnapShotUtils::CheckFileNameValid(fileName4));
 }
 
 /**
@@ -149,6 +153,57 @@ HWTEST_F(SnapshotUtilsTest, Write04, Function | MediumTest | Level3)
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenshot(id);
     ASSERT_EQ(true, SnapShotUtils::WriteToPngWithPixelMap(0, *pixelMap));
+}
+
+/**
+ * @tc.name: Write05
+ * @tc.desc: Write custom png using invalid file names and valid WriteToPngParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotUtilsTest, Write05, Function | MediumTest | Level3)
+{
+    WriteToPngParam param = {
+        .width = 256,
+        .height = 256,
+        .stride = 256 * BPP,
+        .bitDepth = 0,
+        .data = new uint8_t
+    };
+    ASSERT_FALSE(SnapShotUtils::WriteToPng("", param));
+}
+
+/**
+ * @tc.name: Write06
+ * @tc.desc: Write custom png using valid file names and invalid WriteToPngParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotUtilsTest, Write06, Function | MediumTest | Level3)
+{
+    WriteToPngParam param = {
+        .width = 256,
+        .height = 256,
+        .stride = 256 * BPP,
+        .bitDepth = 0,
+        .data = nullptr
+    };
+    ASSERT_FALSE(SnapShotUtils::WriteToPng(defaultFile_, param));
+}
+
+/**
+ * @tc.name: Write07
+ * @tc.desc: Write custom png using valid fd and invalid WriteToPngParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotUtilsTest, Write07, Function | MediumTest | Level3)
+{
+    WriteToPngParam param = {
+        .width = 256,
+        .height = 256,
+        .stride = 256 * BPP,
+        .bitDepth = 0,
+        .data = nullptr
+    };
+    ASSERT_FALSE(SnapShotUtils::WriteToPng(1, param));
 }
 
 /**

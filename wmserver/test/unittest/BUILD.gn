@@ -18,8 +18,10 @@ module_out_path = "window_manager/wmserver"
 group("unittest") {
   testonly = true
   deps = [
+    ":wmserver_accessibility_connection_test",
     ":wmserver_avoid_area_controller_test",
     ":wmserver_display_group_controller_test",
+    ":wmserver_display_group_info_test",
     ":wmserver_input_window_monitor_test",
     ":wmserver_minimize_app_test",
     ":wmserver_remote_animation_test",
@@ -249,6 +251,26 @@ ohos_unittest("wmserver_window_manager_proxy_test") {
   module_out_path = module_out_path
   configs = test_public_config
   sources = [ "window_manager_proxy_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wmserver_display_group_info_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "display_group_info_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wmserver_accessibility_connection_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "accessibility_connection_test.cpp" ]
 
   deps = test_inner_deps
   public_deps = test_public_deps
