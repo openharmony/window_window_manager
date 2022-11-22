@@ -386,6 +386,17 @@ HWTEST_F(WindowManagerTest, UnregisterSystemBarChangedListener01, Function | Sma
     windowManager.pImpl_->systemBarChangedListenerAgent_ = oldWindowManagerAgent;
     windowManager.pImpl_->systemBarChangedListeners_ = oldListeners;
 }
+/**
+ * @tc.name: ToggleShownStateForAllAppWindows
+ * @tc.desc: ToggleShownStateForAllAppWindows ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, ToggleShownStateForAllAppWindows, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), ToggleShownStateForAllAppWindows()).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, WindowManager::GetInstance().ToggleShownStateForAllAppWindows());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
