@@ -74,6 +74,7 @@ public:
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     uint32_t GetActiveWindowId() const;
     void HandleDisplayChange(const std::map<DisplayId, Rect>& displayRectMap);
+    void SetInputEventConsumer();
 
 private:
     void SetDragProperty(const sptr<MoveDragProperty>& moveDragProperty);
