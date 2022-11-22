@@ -119,6 +119,20 @@ HWTEST_F(WmMathTest, TransformWithPerspDiv, Function | SmallTest | Level2)
     ASSERT_EQ(vec.y_, result.y_);
     ASSERT_EQ(vec.z_, result.z_);
 }
+
+/**
+ * @tc.name: Invert
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WmMathTest, Invert, Function | SmallTest | Level2)
+{
+    Matrix4 mat;
+    mat.mat_[0][0] = 0.f;
+    mat.mat_[1][0] = -1.0f;
+    mat.Invert();
+    ASSERT_EQ(false, MathHelper::NearZero(0.f - mat.mat_[1][0]));
+}
 }
 } // namespace Rosen
 } // namespace OHOS
