@@ -70,21 +70,21 @@ int DisplayManagerService::Dump(int fd, const std::vector<std::u16string>& args)
 
 void DisplayManagerService::OnStart()
 {
-    WLOGFI("DisplayManagerService::OnStart start");
+    WLOGFI("start");
     if (!Init()) {
-        WLOGFW("Init failed");
+        WLOGFE("Init failed");
         return;
     }
+
+    if (!Publish(this)) {
+        WLOGFE("Publish failed");
+    }
+    WLOGFI("end");
 }
 
 bool DisplayManagerService::Init()
 {
     WLOGFI("DisplayManagerService::Init start");
-    bool ret = Publish(this);
-    if (!ret) {
-        WLOGFW("DisplayManagerService::Init failed");
-        return false;
-    }
     if (DisplayManagerConfig::LoadConfigXml()) {
         DisplayManagerConfig::DumpConfig();
         ConfigureDisplayManagerService();

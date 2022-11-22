@@ -137,9 +137,8 @@ protected:
 private:
     std::string name_ = "WindowManagerService";
     bool Init();
-    void RegisterSnapshotHandler();
-    void RegisterWindowManagerServiceHandler();
-    void RegisterWindowVisibilityChangeCallback();
+    void InitWithAbilityManagerServiceAdded();
+    void InitWithRanderServiceAdded();
     void WindowVisibilityChangeCallback(std::shared_ptr<RSOcclusionData> occlusionData);
     void OnWindowEvent(Event event, const sptr<IRemoteObject>& remoteObject);
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
