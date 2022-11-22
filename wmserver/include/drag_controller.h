@@ -46,9 +46,9 @@ private:
     uint64_t hitWindowId_ = 0;
 };
 
-class InputEventListener : public MMI::IInputEventConsumer {
+class DragInputEventListener : public MMI::IInputEventConsumer {
 public:
-    InputEventListener() = default;
+    DragInputEventListener() = default;
     void OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const override;
     void OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const override;
     void OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const override;
