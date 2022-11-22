@@ -249,6 +249,14 @@ pid_t WindowInnerManager::GetPid()
     return pid_;
 }
 
+void WindowInnerManager::SetInputEventConsumer()
+{
+    if (moveDragController_ == nullptr) {
+        return;
+    }
+    moveDragController_->SetInputEventConsumer();
+}
+
 void WindowInnerManager::NotifyDisplayChange(const std::map<DisplayId, Rect>& displayRectMap)
 {
     if (moveDragController_ == nullptr) {
