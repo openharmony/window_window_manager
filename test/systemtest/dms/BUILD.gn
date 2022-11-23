@@ -73,6 +73,8 @@ ohos_systemtest("dms_screen_manager_test") {
   sources = [ "screen_manager_test.cpp" ]
 
   deps = [ ":dms_systemtest_common" ]
+
+  external_deps = [ "init:libbegetutil" ]
 }
 
 ohos_systemtest("dms_screen_gamut_test") {

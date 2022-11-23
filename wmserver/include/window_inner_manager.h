@@ -59,6 +59,7 @@ public:
     void NotifyWindowEndUpMovingOrDragging(uint32_t windowId);
     void NotifyWindowRemovedOrDestroyed(uint32_t windowId);
     pid_t GetPid();
+    void SetInputEventConsumer();
 
 protected:
     WindowInnerManager();
