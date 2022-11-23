@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "display_cutout_controller.h"
 #include "display_manager_service_inner.h"
+#include "display_manager_service.h"
 #include "dm_common.h"
 
 using namespace testing;
@@ -107,12 +108,14 @@ HWTEST_F(DisplayCutoutControllerTest, CalcBuiltInDisplayWaterfallRects, Function
     std::vector<int> curvedScreenBoundary;
     controller->SetCurvedScreenBoundary(curvedScreenBoundary);
     controller->CalcBuiltInDisplayWaterfallRects();
+    ASSERT_TRUE(controller->waterfallDisplayAreaRects_.isUninitialized());
     curvedScreenBoundary.emplace_back(1);
     curvedScreenBoundary.emplace_back(2);
     curvedScreenBoundary.emplace_back(3);
     curvedScreenBoundary.emplace_back(4);
     controller->SetCurvedScreenBoundary(curvedScreenBoundary);
     controller->CalcBuiltInDisplayWaterfallRects();
+    ASSERT_TRUE(controller->waterfallDisplayAreaRects_.isUninitialized());
 }
 
 
@@ -137,8 +140,118 @@ HWTEST_F(DisplayCutoutControllerTest, CalcBuiltInDisplayWaterfallRectsByRotation
     controller->CalcBuiltInDisplayWaterfallRectsByRotation(Rotation::ROTATION_90, displayHeight, displayWidth);
     controller->CalcBuiltInDisplayWaterfallRectsByRotation(Rotation::ROTATION_0, displayHeight, displayWidth);
     controller->CalcBuiltInDisplayWaterfallRectsByRotation(static_cast<Rotation>(10), displayHeight, displayWidth);
+    ASSERT_FALSE(controller->waterfallDisplayAreaRects_.isUninitialized());
 }
 
+/**
+ * @tc.name: CheckBoundingRectsBoundary
+ * @tc.desc: CheckBoundingRectsBoundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayCutoutControllerTest, CheckBoundingRectsBoundary, Function | SmallTest | Level1)
+{
+    sptr<DisplayCutoutController> controller = new DisplayCutoutController();
+    DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    std::vector<DMRect> boundingRects;
+    controller->CheckBoundingRectsBoundary(displayId, boundingRects);
+    ASSERT_TRUE(boundingRects.empty());
+}
+
+/**
+ * @tc.name: CalcCutoutBoundingRect
+ * @tc.desc: CalcCutoutBoundingRect success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayCutoutControllerTest, CalcCutoutBoundingRect, Function | SmallTest | Level1)
+{
+    sptr<DisplayCutoutController> controller = new DisplayCutoutController();
+    std::string svgPath = "M 100,100 m -75,0 a 75,75 0 1,0 150,0 a 75,75 0 1,0 -150,0 z";
+    DMRect rect = controller->CalcCutoutBoundingRect(svgPath);
+    DMRect emptyRect = {0, 0, 0, 0};
+    ASSERT_NE(rect, emptyRect);
+}
+
+/**
+ * @tc.name: TransferBoundingRectsByRotation01
+ * @tc.desc: TransferBoundingRectsByRotation empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayCutoutControllerTest, TransferBoundingRectsByRotation01, Function | SmallTest | Level1)
+{
+    sptr<DisplayCutoutController> controller = new DisplayCutoutController();
+    DisplayId id = 10;
+    std::vector<DMRect> boundingRects;
+    controller->TransferBoundingRectsByRotation(id, boundingRects);
+    ASSERT_TRUE(boundingRects.empty());
+}
+
+/**
+ * @tc.name: TransferBoundingRectsByRotation02
+ * @tc.desc: TransferBoundingRectsByRotation empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayCutoutControllerTest, TransferBoundingRectsByRotation02, Function | SmallTest | Level1)
+{
+    sptr<DisplayCutoutController> controller = new DisplayCutoutController();
+    DisplayId id = 10;
+    std::vector<DMRect> emptyRects;
+    controller->boundingRects_[id] = emptyRects;
+    std::vector<DMRect> boundingRects;
+    controller->TransferBoundingRectsByRotation(id, boundingRects);
+    ASSERT_TRUE(boundingRects.empty());
+}
+
+/**
+ * @tc.name: TransferBoundingRectsByRotation03
+ * @tc.desc: TransferBoundingRectsByRotation success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayCutoutControllerTest, TransferBoundingRectsByRotation03, Function | SmallTest | Level1)
+{
+    DisplayId id = 11;
+    ScreenId sid = 12;
+    std::string name = "abstract_display_test";
+    SupportedScreenModes modesInfo;
+    modesInfo.width_ = 2160;
+    modesInfo.height_ = 1600;
+    modesInfo.refreshRate_ = 60;
+    sptr<SupportedScreenModes> info = new SupportedScreenModes(modesInfo);
+    sptr<AbstractScreenController> absScreenController;
+    sptr<AbstractScreen> absScreen;
+    absScreenController = nullptr;
+    absScreen = new AbstractScreen(absScreenController, name, sid, 1);
+    auto displayController = DisplayManagerService::GetInstance().abstractDisplayController_;
+
+    sptr<AbstractDisplay> absDisplay = new AbstractDisplay(id, name, info, absScreen);
+    absDisplay->RequestRotation(Rotation::ROTATION_0);
+    displayController->abstractDisplayMap_.insert((std::make_pair(id, absDisplay)));
+
+    sptr<DisplayCutoutController> controller = new DisplayCutoutController();
+    std::vector<DMRect> dmRects;
+    DMRect rect = {1, 1, 100, 100};
+    dmRects.emplace_back(rect);
+    controller->boundingRects_[id] = dmRects;
+    ASSERT_FALSE(controller->boundingRects_.count(id) == 0);
+    ASSERT_FALSE(controller->boundingRects_[id].empty());
+    ASSERT_NE(DisplayManagerServiceInner::GetInstance().GetDisplayById(id), nullptr);
+    std::vector<DMRect> boundingRects;
+    controller->TransferBoundingRectsByRotation(id, boundingRects);
+
+    absScreenController = DisplayManagerService::GetInstance().abstractScreenController_;
+    absScreenController->dmsScreenMap_.insert(std::make_pair(sid, absScreen));
+    absScreen->modes_.emplace_back(info);
+    absDisplay->RequestRotation(Rotation::ROTATION_180);
+    controller->TransferBoundingRectsByRotation(id, boundingRects);
+
+    absDisplay->RequestRotation(Rotation::ROTATION_90);
+    controller->TransferBoundingRectsByRotation(id, boundingRects);
+
+    absDisplay->RequestRotation(Rotation::ROTATION_270);
+    controller->TransferBoundingRectsByRotation(id, boundingRects);
+    ASSERT_FALSE(boundingRects.empty());
+    displayController->abstractDisplayMap_.clear();
+    absScreenController->dmsScreenMap_.clear();
+}
 }
 } // Rosen
 } // OHOS

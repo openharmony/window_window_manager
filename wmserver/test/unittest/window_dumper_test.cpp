@@ -16,6 +16,8 @@
 #include <gtest/gtest.h>
 #include "window_dumper.h"
 #include "window_manager_service.h"
+#include "window_impl.h"
+#include "window_agent.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -124,7 +126,8 @@ HWTEST_F(WindowDumperTest, Dump05, Function | SmallTest | Level1)
     std::vector<std::u16string> args;
     const std::u16string DUMP_ALL = u"-a";
     args.emplace_back(DUMP_ALL);
-    windowDumper->Dump(fd, args);
+    WMError ret = windowDumper->Dump(fd, args);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
 }
 
 /**
@@ -139,10 +142,11 @@ HWTEST_F(WindowDumperTest, Dump06, Function | SmallTest | Level1)
     int fd = 4;
     std::vector<std::u16string> args;
     const std::u16string DUMP_WINDOW = u"-w";
-    const std::u16string DUMP_WINDOW_ID = u"1";
+    const std::u16string DUMP_WINDOW_ID = u"3";
     args.emplace_back(DUMP_WINDOW);
     args.emplace_back(DUMP_WINDOW_ID);
-    windowDumper->Dump(fd, args);
+    WMError ret = windowDumper->Dump(fd, args);
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 
 /**
@@ -160,7 +164,52 @@ HWTEST_F(WindowDumperTest, Dump07, Function | SmallTest | Level1)
     const std::u16string DUMP_WINDOW_ID = u"n";
     args.emplace_back(DUMP_WINDOW);
     args.emplace_back(DUMP_WINDOW_ID);
-    windowDumper->Dump(fd, args);
+    WMError ret = windowDumper->Dump(fd, args);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: ShowAceDumpHelp01
+ * @tc.desc: ShowAceDumpHelp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowDumperTest, ShowAceDumpHelp01, Function | SmallTest | Level1)
+{
+    sptr<WindowDumper> windowDumper;
+    sptr<WindowNode> node = new WindowNode();
+    uint32_t id = 101;
+    node->property_->SetWindowId(id);
+    node->property_->SetWindowType(WindowType::WINDOW_TYPE_KEYGUARD);
+    sptr<WindowOption> windowOption = new WindowOption();
+    sptr<WindowImpl> windowImpl = new WindowImpl(windowOption);
+    sptr<IWindow> window = new WindowAgent(windowImpl);
+    node->SetWindowToken(window);
+    WindowManagerService::GetInstance().windowRoot_->windowNodeMap_.insert(std::make_pair(id, node));
+    windowDumper = new WindowDumper(WindowManagerService::GetInstance().windowRoot_);
+    std::string dumpInfo;
+    windowDumper->ShowAceDumpHelp(dumpInfo);
+    WindowManagerService::GetInstance().windowRoot_->windowNodeMap_.clear();
+    ASSERT_FALSE(dumpInfo.empty());
+}
+
+/**
+ * @tc.name: ShowAceDumpHelp02
+ * @tc.desc: ShowAceDumpHelp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowDumperTest, ShowAceDumpHelp02, Function | SmallTest | Level1)
+{
+    sptr<WindowDumper> windowDumper;
+    sptr<WindowNode> node = new WindowNode();
+    uint32_t id = 102;
+    node->property_->SetWindowId(id);
+    node->property_->SetWindowType(WindowType::WINDOW_TYPE_KEYGUARD);
+    WindowManagerService::GetInstance().windowRoot_->windowNodeMap_.insert(std::make_pair(id, node));
+    windowDumper = new WindowDumper(WindowManagerService::GetInstance().windowRoot_);
+    std::string dumpInfo;
+    windowDumper->ShowAceDumpHelp(dumpInfo);
+    WindowManagerService::GetInstance().windowRoot_->windowNodeMap_.clear();
+    ASSERT_TRUE(dumpInfo.empty());
 }
 }
 }
