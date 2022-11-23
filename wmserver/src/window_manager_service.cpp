@@ -895,6 +895,11 @@ void WindowManagerService::NotifyDisplayStateChange(DisplayId defaultDisplayId, 
         freezeDisplayController_->FreezeDisplay(displayId);
     } else if (type == DisplayStateChangeType::UNFREEZE) {
         freezeDisplayController_->UnfreezeDisplay(displayId);
+        /*
+         * Set 'InnerInputManager Listener' to MMI, ensure that the listener
+         * for move/drag won't be replaced by freeze-display-window
+         */
+        WindowInnerManager::GetInstance().SetInputEventConsumer();
     } else {
         PostAsyncTask([this, defaultDisplayId, displayInfo, displayInfoMap, type]() mutable {
             windowController_->NotifyDisplayStateChange(defaultDisplayId, displayInfo, displayInfoMap, type);
