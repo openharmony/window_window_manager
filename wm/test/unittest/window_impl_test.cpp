@@ -2878,7 +2878,7 @@ HWTEST_F(WindowImplTest, MoveDrag, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Show();
-    EXPECT_CALL(m->Mock(), NotifyServerReadyToMoveOrDrag(_, _, _));
+    EXPECT_CALL(m->Mock(), NotifyServerReadyToMoveOrDrag(_, _, _)).Times(2);
     TraverseAllIfConditions([&window]() {
         window->StartMove();
     }, window->moveDragProperty_->startDragFlag_, window->moveDragProperty_->pointEventStarted_);
