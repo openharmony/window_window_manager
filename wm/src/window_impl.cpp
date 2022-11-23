@@ -2517,7 +2517,7 @@ void WindowImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallbac
         return;
     }
     if (!SingletonContainer::IsDestroyed()) {
-        SingletonContainer::Get<VsyncStation>().RequestVsync(vsyncCallback);
+        VsyncStation::GetInstance().RequestVsync(vsyncCallback);
     }
 }
 
