@@ -174,6 +174,15 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
     WindowInnerManager::GetInstance().ConsumePointerEvent(pointerEvent);
 }
 
+void MoveDragController::SetInputEventConsumer()
+{
+    if (!inputListener_ || !inputEventHandler_) {
+        WLOGFE("InputListener or inputEventHandler is nullptr");
+        return;
+    }
+    MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(inputListener_, inputEventHandler_);
+}
+
 bool MoveDragController::Init()
 {
     // create handler for input event
@@ -183,7 +192,7 @@ bool MoveDragController::Init()
         return false;
     }
     inputListener_ = std::make_shared<InputEventListener>(InputEventListener());
-    MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(inputListener_, inputEventHandler_);
+    SetInputEventConsumer();
     VsyncStation::GetInstance().SetIsMainHandlerAvailable(false);
     VsyncStation::GetInstance().SetVsyncEventHandler(inputEventHandler_);
     return true;
