@@ -49,13 +49,15 @@ void DragController::UpdateDragInfo(uint32_t windowId)
         WLOGFE("Get point failed %{public}d %{public}d", point.x, point.y);
         return;
     }
-    if (hitWindowNode->GetWindowId() == hitWindowId_) {
-        hitWindowNode->GetWindowToken()->UpdateWindowDragInfo(point, DragEvent::DRAG_EVENT_MOVE);
-        return;
+    if (auto token = hitWindowNode->GetWindowToken()) {
+        if (hitWindowNode->GetWindowId() == hitWindowId_) {
+            token->UpdateWindowDragInfo(point, DragEvent::DRAG_EVENT_MOVE);
+            return;
+        }
+        token->UpdateWindowDragInfo(point, DragEvent::DRAG_EVENT_IN);
     }
-    hitWindowNode->GetWindowToken()->UpdateWindowDragInfo(point, DragEvent::DRAG_EVENT_IN);
     sptr<WindowNode> oldHitWindow = windowRoot_->GetWindowNode(hitWindowId_);
-    if (oldHitWindow != nullptr) {
+    if (oldHitWindow != nullptr && oldHitWindow->GetWindowToken()) {
         oldHitWindow->GetWindowToken()->UpdateWindowDragInfo(point, DragEvent::DRAG_EVENT_OUT);
     }
     hitWindowId_ = hitWindowNode->GetWindowId();
@@ -77,7 +79,9 @@ void DragController::StartDrag(uint32_t windowId)
         WLOGFE("Get point failed %{public}d %{public}d", point.x, point.y);
         return;
     }
-    hitWindow->GetWindowToken()->UpdateWindowDragInfo(point, DragEvent::DRAG_EVENT_IN);
+    if (hitWindow->GetWindowToken()) {
+        hitWindow->GetWindowToken()->UpdateWindowDragInfo(point, DragEvent::DRAG_EVENT_IN);
+    }
     hitWindowId_ = windowId;
     WLOGFI("start Drag");
 }
@@ -98,7 +102,9 @@ void DragController::FinishDrag(uint32_t windowId)
         auto property = node->GetWindowProperty();
         PointInfo point = {property->GetWindowRect().posX_ + property->GetHitOffset().x,
             property->GetWindowRect().posY_ + property->GetHitOffset().y};
-        hitWindow->GetWindowToken()->UpdateWindowDragInfo(point, DragEvent::DRAG_EVENT_END);
+        if (hitWindow->GetWindowToken()) {
+            hitWindow->GetWindowToken()->UpdateWindowDragInfo(point, DragEvent::DRAG_EVENT_END);
+        }
     }
     WLOGFI("end drag");
 }
