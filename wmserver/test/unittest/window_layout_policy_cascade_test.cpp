@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include "display_group_controller.h"
 #include "display_group_info.h"
 #include "display_manager.h"
 #include "window_layout_policy.h"
@@ -36,11 +37,13 @@ public:
     static sptr<WindowNodeContainer> container_;
     static sptr<DisplayGroupInfo> displayGroupInfo_;
     static sptr<DisplayInfo> defaultDisplayInfo_;
+    static sptr<DisplayGroupController> displayGroupController_;
     static sptr<WindowLayoutPolicyCascade> layoutPolicyCascade_;
 };
 
 sptr<WindowNodeContainer> WindowLayoutPolicyCascadeTest::container_ = nullptr;
 sptr<DisplayGroupInfo> WindowLayoutPolicyCascadeTest::displayGroupInfo_ = nullptr;
+sptr<DisplayGroupController> WindowLayoutPolicyCascadeTest::displayGroupController_ = nullptr;
 sptr<DisplayInfo> WindowLayoutPolicyCascadeTest::defaultDisplayInfo_ = nullptr;
 sptr<WindowLayoutPolicyCascade> WindowLayoutPolicyCascadeTest::layoutPolicyCascade_ = nullptr;
 
@@ -54,7 +57,9 @@ void WindowLayoutPolicyCascadeTest::SetUpTestCase()
 
     container_ = new WindowNodeContainer(defaultDisplayInfo_, display->GetScreenId());
     displayGroupInfo_ = container_->displayGroupInfo_;
-    layoutPolicyCascade_ = static_cast<WindowLayoutPolicyCascade>(container_->GetLayoutPolicy());
+    displayGroupController_ = container_->displayGroupController_;
+    layoutPolicyCascade_ = new WindowLayoutPolicyCascade(displayGroupInfo_,
+        displayGroupController_->displayGroupWindowTree_);
 }
 
 void WindowLayoutPolicyCascadeTest::TearDownTestCase()
@@ -62,6 +67,8 @@ void WindowLayoutPolicyCascadeTest::TearDownTestCase()
     container_ = nullptr;
     displayGroupInfo_ = nullptr;
     defaultDisplayInfo_ = nullptr;
+    displayGroupController_ = nullptr;
+    layoutPolicyCascade_ = nullptr;
 }
 
 void WindowLayoutPolicyCascadeTest::SetUp()
