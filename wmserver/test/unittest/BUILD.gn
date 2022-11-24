@@ -22,6 +22,7 @@ group("unittest") {
     ":wmserver_avoid_area_controller_test",
     ":wmserver_display_group_controller_test",
     ":wmserver_display_group_info_test",
+    ":wmserver_drag_controller_test",
     ":wmserver_input_window_monitor_test",
     ":wmserver_minimize_app_test",
     ":wmserver_remote_animation_test",
@@ -332,6 +333,16 @@ ohos_unittest("wmserver_remote_animation_test") {
   module_out_path = module_out_path
   configs = test_public_config
   sources = [ "remote_animation_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wmserver_drag_controller_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "drag_controller_test.cpp" ]
 
   deps = test_inner_deps
   public_deps = test_public_deps
