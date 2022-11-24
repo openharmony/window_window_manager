@@ -97,6 +97,42 @@ HWTEST_F(WmMathTest, TransformMatrix, Function | SmallTest | Level2)
     ASSERT_EQ(true, MathHelper::NearZero((scale - scaleComp).Length()));
     ASSERT_EQ(true, MathHelper::NearZero((translation - translationComp).Length()));
 }
+/**
+ * @tc.name: TransformWithPerspDiv
+ * @tc.desc: Create transform matrix
+ *           Get scale component from transform matrix
+ *           Get translation component from transform matrix
+ * @tc.type: FUNC
+ */
+HWTEST_F(WmMathTest, TransformWithPerspDiv, Function | SmallTest | Level2)
+{
+    Vector3 vec(1.0, 1.0, 1.0);
+    Matrix4 mat = Matrix4::Identity;
+    auto result = TransformWithPerspDiv(vec, mat, 0.5);
+    auto expect = vec * 2;
+    ASSERT_EQ(expect.x_, result.x_);
+    ASSERT_EQ(expect.y_, result.y_);
+    ASSERT_EQ(expect.z_, result.z_);
+
+    result = TransformWithPerspDiv(vec, mat, 0);
+    ASSERT_EQ(vec.x_, result.x_);
+    ASSERT_EQ(vec.y_, result.y_);
+    ASSERT_EQ(vec.z_, result.z_);
+}
+
+/**
+ * @tc.name: Invert
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WmMathTest, Invert, Function | SmallTest | Level2)
+{
+    Matrix4 mat;
+    mat.mat_[0][0] = 0.f;
+    mat.mat_[1][0] = -1.0f;
+    mat.Invert();
+    ASSERT_EQ(false, MathHelper::NearZero(0.f - mat.mat_[1][0]));
+}
 }
 } // namespace Rosen
 } // namespace OHOS
