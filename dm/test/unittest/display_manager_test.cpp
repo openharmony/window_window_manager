@@ -331,17 +331,21 @@ HWTEST_F(DisplayManagerTest, ImplGetDefaultDisplay01, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: ImplGetDefaultDisplay02
- * @tc.desc: Impl GetDefaultDisplay nullptr
+ * @tc.name: GetDisplayByScreen
+ * @tc.desc: for interface coverage & check GetDisplayByScreen
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, ImplGetDefaultDisplay02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, GetDisplayByScreen, Function | SmallTest | Level1)
 {
+    auto& displayManager = DisplayManager::GetInstance();
+    sptr<Display> display = displayManager.GetDisplayByScreen(SCREEN_ID_INVALID);
+    ASSERT_EQ(display, nullptr);
+
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     displayInfo->SetDisplayId(DISPLAY_ID_INVALID);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(displayInfo));
-    sptr<Display> display = DisplayManager::GetInstance().pImpl_->GetDefaultDisplay();
+    EXPECT_CALL(m->Mock(), GetDisplayInfoByScreenId(_)).Times(1).WillOnce(Return(displayInfo));
+    display = displayManager.GetDisplayByScreen(1);
     ASSERT_EQ(display, nullptr);
 }
 }

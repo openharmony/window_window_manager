@@ -84,31 +84,36 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
 
 void WindowManagerService::OnStart()
 {
-    WLOGFI("WindowManagerService::OnStart start");
+    WLOGFI("start");
     if (!Init()) {
+        WLOGFE("Init failed");
         return;
     }
     WindowInnerManager::GetInstance().Start(system::GetParameter("persist.window.holder.enable", "0") == "1");
     sptr<IDisplayChangeListener> listener = new DisplayChangeListener();
     DisplayManagerServiceInner::GetInstance().RegisterDisplayChangeListener(listener);
+
     sptr<IWindowInfoQueriedListener> windowInfoQueriedListener = new WindowInfoQueriedListener();
     DisplayManagerServiceInner::GetInstance().RegisterWindowInfoQueriedListener(windowInfoQueriedListener);
-    RegisterSnapshotHandler();
-    RegisterWindowManagerServiceHandler();
-    RegisterWindowVisibilityChangeCallback();
+
+    PostAsyncTask([this]() {
+        sptr<IRSScreenChangeListener> rSScreenChangeListener = new IRSScreenChangeListener();
+        rSScreenChangeListener->onConnected_
+            = std::bind(&WindowManagerService::OnRSScreenConnected, this);
+        rSScreenChangeListener->onDisconnected_
+            = std::bind(&WindowManagerService::OnRSScreenDisconnected, this);
+        WLOGFI("RegisterRSScreenChangeListener");
+        DisplayManagerServiceInner::GetInstance().RegisterRSScreenChangeListener(rSScreenChangeListener);
+    });
+
+    AddSystemAbilityListener(RENDER_SERVICE);
+    AddSystemAbilityListener(ABILITY_MGR_SERVICE_ID);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
-    sptr<IRSScreenChangeListener> rSScreenChangeListener = new IRSScreenChangeListener();
-    rSScreenChangeListener->onConnected_
-        = std::bind(&WindowManagerService::OnRSScreenConnected, this);
-    rSScreenChangeListener->onDisconnected_
-        = std::bind(&WindowManagerService::OnRSScreenDisconnected, this);
-    DisplayManagerServiceInner::GetInstance().RegisterRSScreenChangeListener(rSScreenChangeListener);
-    RenderModeChangeCallback renderModeChangeCb
-        = std::bind(&WindowManagerService::OnRenderModeChanged, this, std::placeholders::_1);
-    rsInterface_.SetRenderModeChangeCallback(renderModeChangeCb);
-    if (windowRoot_->GetMaxUniRenderAppWindowNumber() <= 0) {
-        rsInterface_.UpdateRenderMode(false);
+
+    if (!Publish(this)) {
+        WLOGFE("Publish failed");
     }
+    WLOGFI("end");
 }
 
 void WindowManagerService::PostAsyncTask(Task task)
@@ -133,10 +138,25 @@ void WindowManagerService::PostVoidSyncTask(Task task)
 
 void WindowManagerService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
-    WLOGFI(" %{public}d", systemAbilityId);
-    if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
-        windowCommonEvent_->SubscriberEvent();
+    WLOGFI("systemAbilityId: %{public}d, start", systemAbilityId);
+    switch (systemAbilityId) {
+        case RENDER_SERVICE:
+            WLOGFI("RENDER_SERVICE");
+            InitWithRanderServiceAdded();
+            break;
+        case ABILITY_MGR_SERVICE_ID:
+            WLOGFI("ABILITY_MGR_SERVICE_ID");
+            InitWithAbilityManagerServiceAdded();
+            break;
+        case COMMON_EVENT_SERVICE_ID:
+            WLOGFI("COMMON_EVENT_SERVICE_ID");
+            windowCommonEvent_->SubscriberEvent();
+            break;
+        default:
+            WLOGFW("unhandled sysabilityId: %{public}d", systemAbilityId);
+            break;
     }
+    WLOGFI("systemAbilityId: %{public}d, end", systemAbilityId);
 }
 
 void WindowManagerService::OnAccountSwitched(int accountId)
@@ -161,88 +181,42 @@ void WindowManagerService::WindowVisibilityChangeCallback(std::shared_ptr<RSOccl
     });
 }
 
-void WindowManagerService::RegisterWindowVisibilityChangeCallback()
+void WindowManagerService::InitWithRanderServiceAdded()
 {
     auto windowVisibilityChangeCb = std::bind(&WindowManagerService::WindowVisibilityChangeCallback, this,
         std::placeholders::_1);
+    WLOGFI("RegisterWindowVisibilityChangeCallback");
     if (rsInterface_.RegisterOcclusionChangeCallback(windowVisibilityChangeCb) != WM_OK) {
-        WLOGFW("WindowManagerService::RegisterWindowVisibilityChangeCallback failed, create async thread!");
-        auto fun = [this, windowVisibilityChangeCb]() {
-            WLOGFI("WindowManagerService::RegisterWindowVisibilityChangeCallback async thread enter!");
-            int counter = 0;
-            while (rsInterface_.RegisterOcclusionChangeCallback(windowVisibilityChangeCb) != WM_OK) {
-                usleep(10000); // 10000us equals to 10ms
-                counter++;
-                if (counter >= 2000) { // wait for 2000 * 10ms = 20s
-                    WLOGFE("WindowManagerService::RegisterWindowVisibilityChangeCallback timeout!");
-                    return;
-                }
-            }
-            WLOGFI("WindowManagerService::RegisterWindowVisibilityChangeCallback async thread register handler"
-                " successfully!");
-        };
-        std::thread thread(fun);
-        thread.detach();
-        WLOGFI("WindowManagerService::RegisterWindowVisibilityChangeCallback async thread has been detached!");
-    } else {
-        WLOGFI("WindowManagerService::RegisterWindowVisibilityChangeCallback OnStart succeed!");
+        WLOGFE("RegisterWindowVisibilityChangeCallback failed");
+    }
+    RenderModeChangeCallback renderModeChangeCb
+        = std::bind(&WindowManagerService::OnRenderModeChanged, this, std::placeholders::_1);
+    WLOGFI("SetRenderModeChangeCallback");
+    if (rsInterface_.SetRenderModeChangeCallback(renderModeChangeCb) != WM_OK) {
+        WLOGFE("SetRenderModeChangeCallback failed");
+    }
+
+    if (windowRoot_->GetMaxUniRenderAppWindowNumber() <= 0) {
+        rsInterface_.UpdateRenderMode(false);
     }
 }
 
-void WindowManagerService::RegisterSnapshotHandler()
+void WindowManagerService::InitWithAbilityManagerServiceAdded()
 {
     if (snapshotController_ == nullptr) {
         snapshotController_ = new SnapshotController(windowRoot_, handler_);
     }
+    WLOGFI("RegisterSnapshotHandler");
     if (AAFwk::AbilityManagerClient::GetInstance()->RegisterSnapshotHandler(snapshotController_) != ERR_OK) {
-        WLOGFW("WindowManagerService::RegisterSnapshotHandler failed, create async thread!");
-        auto fun = [this]() {
-            WLOGFI("WindowManagerService::RegisterSnapshotHandler async thread enter!");
-            int counter = 0;
-            while (AAFwk::AbilityManagerClient::GetInstance()->RegisterSnapshotHandler(snapshotController_) != ERR_OK) {
-                usleep(10000); // 10000us equals to 10ms
-                counter++;
-                if (counter >= 2000) { // wait for 2000 * 10ms = 20s
-                    WLOGFE("WindowManagerService::RegisterSnapshotHandler timeout!");
-                    return;
-                }
-            }
-            WLOGFI("WindowManagerService::RegisterSnapshotHandler async thread register handler successfully!");
-        };
-        std::thread thread(fun);
-        thread.detach();
-        WLOGFI("WindowManagerService::RegisterSnapshotHandler async thread has been detached!");
-    } else {
-        WLOGFI("WindowManagerService::RegisterSnapshotHandler OnStart succeed!");
+        WLOGFE("RegisterSnapshotHandler failed");
     }
-}
 
-void WindowManagerService::RegisterWindowManagerServiceHandler()
-{
     if (wmsHandler_ == nullptr) {
         wmsHandler_ = new WindowManagerServiceHandler();
     }
+    WLOGFI("RegisterWindowManagerServiceHandler");
     if (AAFwk::AbilityManagerClient::GetInstance()->RegisterWindowManagerServiceHandler(wmsHandler_) != ERR_OK) {
-        WLOGFW("RegisterWindowManagerServiceHandler failed, create async thread!");
-        auto fun = [this]() {
-            WLOGFI("RegisterWindowManagerServiceHandler async thread enter!");
-            int counter = 0;
-            while (AAFwk::AbilityManagerClient::GetInstance()->
-                RegisterWindowManagerServiceHandler(wmsHandler_) != ERR_OK) {
-                usleep(10000); // 10000us equals to 10ms
-                counter++;
-                if (counter >= 2000) { // wait for 2000 * 10ms = 20s
-                    WLOGFE("RegisterWindowManagerServiceHandler timeout!");
-                    return;
-                }
-            }
-            WLOGFI("RegisterWindowManagerServiceHandler async thread register handler successfully!");
-        };
-        std::thread thread(fun);
-        thread.detach();
-        WLOGFI("RegisterWindowManagerServiceHandler async thread has been detached!");
-    } else {
-        WLOGFI("RegisterWindowManagerServiceHandler OnStart succeed!");
+        WLOGFE("RegisterWindowManagerServiceHandler failed");
     }
 }
 
@@ -289,19 +263,14 @@ void WindowManagerServiceHandler::CancelStartingWindow(sptr<IRemoteObject> abili
 
 bool WindowManagerService::Init()
 {
-    WLOGFI("WindowManagerService::Init start");
-    bool ret = Publish(this);
-    if (!ret) {
-        WLOGFW("WindowManagerService::Init failed");
-        return false;
-    }
+    WLOGFI("Init start");
     if (WindowManagerConfig::LoadConfigXml()) {
         if (WindowManagerConfig::GetConfig().IsMap()) {
             WindowManagerConfig::DumpConfig(*WindowManagerConfig::GetConfig().mapValue_);
         }
         ConfigureWindowManagerService();
     }
-    WLOGFI("WindowManagerService::Init success");
+    WLOGFI("Init success");
     return true;
 }
 
@@ -910,6 +879,11 @@ void WindowManagerService::NotifyDisplayStateChange(DisplayId defaultDisplayId, 
         freezeDisplayController_->FreezeDisplay(displayId);
     } else if (type == DisplayStateChangeType::UNFREEZE) {
         freezeDisplayController_->UnfreezeDisplay(displayId);
+        /*
+         * Set 'InnerInputManager Listener' to MMI, ensure that the listener
+         * for move/drag won't be replaced by freeze-display-window
+         */
+        WindowInnerManager::GetInstance().SetInputEventConsumer();
     } else {
         PostAsyncTask([this, defaultDisplayId, displayInfo, displayInfoMap, type]() mutable {
             windowController_->NotifyDisplayStateChange(defaultDisplayId, displayInfo, displayInfoMap, type);

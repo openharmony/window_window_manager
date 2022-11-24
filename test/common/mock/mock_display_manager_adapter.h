@@ -70,6 +70,10 @@ public:
     MOCK_METHOD2(GetScreenGamutMap, DMError(ScreenId screenId, ScreenGamutMap& gamutMap));
     MOCK_METHOD2(SetScreenGamutMap, DMError(ScreenId screenId, ScreenGamutMap gamutMap));
     MOCK_METHOD1(SetScreenColorTransform, DMError(ScreenId screenId));
+
+    MOCK_METHOD1(RemoveVirtualScreenFromGroup, void(std::vector<ScreenId> screens));
+    MOCK_METHOD1(SetScreenRotationLocked, void(bool isLocked));
+    MOCK_METHOD0(IsScreenRotationLocked, bool());
 };
 }
 } // namespace OHOS

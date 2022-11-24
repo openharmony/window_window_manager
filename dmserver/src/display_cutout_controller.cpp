@@ -167,6 +167,7 @@ void DisplayCutoutController::CalcBuiltInDisplayWaterfallRects()
             DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId());
     if (!modes) {
         WLOGE("support screen modes get failed");
+        waterfallDisplayAreaRects_ = emptyRects;
         return;
     }
     uint32_t displayHeight = modes->height_;

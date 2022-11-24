@@ -101,6 +101,7 @@ private:
     static std::weak_ptr<AppExecFwk::EventHandler> wmsTaskHandler_;
     static wptr<WindowController> windowController_;
     static bool animationFirst_;
+    static std::atomic<uint32_t> allocationId_;
 };
 } // Rosen
 } // OHOS

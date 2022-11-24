@@ -19,7 +19,7 @@
 #include "window_manager_hilog.h"
 
 using namespace FRAME_TRACE;
-const std::string UI_INTERVAL_NAME = "ui";
+static const std::string UI_INTERVAL_NAME = "ui";
 static struct TraceHandle* g_handleUI = nullptr;
 static struct TidHandle* g_handleTid = nullptr;
 

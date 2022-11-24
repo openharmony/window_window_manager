@@ -126,7 +126,8 @@ HWTEST_F(WindowDumperTest, Dump05, Function | SmallTest | Level1)
     std::vector<std::u16string> args;
     const std::u16string DUMP_ALL = u"-a";
     args.emplace_back(DUMP_ALL);
-    windowDumper->Dump(fd, args);
+    WMError ret = windowDumper->Dump(fd, args);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
 }
 
 /**
@@ -141,10 +142,11 @@ HWTEST_F(WindowDumperTest, Dump06, Function | SmallTest | Level1)
     int fd = 4;
     std::vector<std::u16string> args;
     const std::u16string DUMP_WINDOW = u"-w";
-    const std::u16string DUMP_WINDOW_ID = u"1";
+    const std::u16string DUMP_WINDOW_ID = u"3";
     args.emplace_back(DUMP_WINDOW);
     args.emplace_back(DUMP_WINDOW_ID);
-    windowDumper->Dump(fd, args);
+    WMError ret = windowDumper->Dump(fd, args);
+    ASSERT_TRUE(ret == WMError::WM_OK || ret == WMError::WM_ERROR_INVALID_OPERATION);
 }
 
 /**
@@ -162,7 +164,8 @@ HWTEST_F(WindowDumperTest, Dump07, Function | SmallTest | Level1)
     const std::u16string DUMP_WINDOW_ID = u"n";
     args.emplace_back(DUMP_WINDOW);
     args.emplace_back(DUMP_WINDOW_ID);
-    windowDumper->Dump(fd, args);
+    WMError ret = windowDumper->Dump(fd, args);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
 }
 
 /**
@@ -186,6 +189,7 @@ HWTEST_F(WindowDumperTest, ShowAceDumpHelp01, Function | SmallTest | Level1)
     std::string dumpInfo;
     windowDumper->ShowAceDumpHelp(dumpInfo);
     WindowManagerService::GetInstance().windowRoot_->windowNodeMap_.clear();
+    ASSERT_FALSE(dumpInfo.empty());
 }
 
 /**
@@ -205,6 +209,7 @@ HWTEST_F(WindowDumperTest, ShowAceDumpHelp02, Function | SmallTest | Level1)
     std::string dumpInfo;
     windowDumper->ShowAceDumpHelp(dumpInfo);
     WindowManagerService::GetInstance().windowRoot_->windowNodeMap_.clear();
+    ASSERT_TRUE(dumpInfo.empty());
 }
 }
 }
