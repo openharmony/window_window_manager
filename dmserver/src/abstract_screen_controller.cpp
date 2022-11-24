@@ -1113,7 +1113,7 @@ bool AbstractScreenController::ScreenIdManager::ConvertToDmsScreenId(ScreenId rs
 ScreenId AbstractScreenController::ScreenIdManager::ConvertToDmsScreenId(ScreenId rsScreenId) const
 {
     ScreenId dmsScreenId = SCREEN_ID_INVALID;
-    ConvertToDmsScreenId(dmsScreenId, dmsScreenId);
+    ConvertToDmsScreenId(rsScreenId, dmsScreenId);
     return dmsScreenId;
 }
 
