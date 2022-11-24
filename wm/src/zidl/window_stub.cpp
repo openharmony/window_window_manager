@@ -27,6 +27,10 @@ namespace {
 
 int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
+    if (staticDestroyMonitor_.IsDestroyed()) {
+        WLOGFE("Main thread finished, static data has been destroyed");
+        return -1;
+    }
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed");
         return -1;

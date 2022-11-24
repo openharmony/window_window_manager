@@ -192,7 +192,6 @@ public:
     }
 
     static uint32_t ConvertSupportModesToSupportInfo(const std::vector<AppExecFwk::SupportWindowMode>& supportModes)
-
     {
         uint32_t modeSupportInfo = 0;
         for (auto& mode : supportModes) {

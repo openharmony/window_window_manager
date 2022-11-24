@@ -1324,6 +1324,10 @@ std::map<DisplayId, Rect> WindowRoot::GetAllDisplayRectsByDMS(sptr<DisplayInfo> 
 {
     std::map<DisplayId, Rect> displayRectMap;
 
+    if (displayInfo == nullptr) {
+        return displayRectMap;
+    }
+
     for (auto& displayId : displayIdMap_[displayInfo->GetScreenGroupId()]) {
         auto info = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
         Rect displayRect = { info->GetOffsetX(), info->GetOffsetY(), info->GetWidth(), info->GetHeight() };
@@ -1666,7 +1670,11 @@ void WindowRoot::OnRenderModeChanged(bool isUniRender)
 void WindowRoot::SwitchRenderModeIfNeeded()
 {
     uint32_t rsScreenNum = DisplayManagerServiceInner::GetInstance().GetRSScreenNum();
+    uint32_t displayNum = DisplayManagerServiceInner::GetInstance().GetAllDisplays().size();
     if (rsScreenNum > 1) {
+        if (displayNum == 1) {
+            return;
+        }
         // switch to sperate render mode
         ChangeRSRenderModeIfNeeded(false);
         return;

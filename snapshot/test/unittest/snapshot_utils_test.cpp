@@ -84,6 +84,42 @@ HWTEST_F(SnapshotUtilsTest, Check03, Function | SmallTest | Level3)
     ASSERT_EQ(false, SnapShotUtils::CheckFileNameValid(fileName1));
     std::string fileName2 = "";
     ASSERT_EQ(false, SnapShotUtils::CheckFileNameValid(fileName2));
+    std::string fileName3 = "/data/test.png";
+    ASSERT_EQ(false, SnapShotUtils::CheckFileNameValid(fileName3));
+}
+
+/**
+ * @tc.name: RGBA8888ToRGB88801
+ * @tc.desc: RGBA8888 to RGB888 using invalid params
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotUtilsTest, RGBA8888ToRGB88801, Function | SmallTest | Level3)
+{
+    ASSERT_FALSE(SnapShotUtils::RGBA8888ToRGB888(nullptr, nullptr, -1));
+}
+
+/**
+ * @tc.name: WriteRgb888ToJpeg01
+ * @tc.desc: write rgb888 to jpeg using invalid data
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotUtilsTest, WriteRgb888ToJpeg01, Function | SmallTest | Level3)
+{
+    uint8_t *data = nullptr;
+    FILE *file = fopen(defaultFile_.c_str(), "wb");
+    ASSERT_FALSE(SnapShotUtils::WriteRgb888ToJpeg(file, 100, 100, data));
+}
+
+/**
+ * @tc.name: WriteRgb888ToJpeg02
+ * @tc.desc: write rgb888 to jpeg using invalid file
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotUtilsTest, WriteRgb888ToJpeg02, Function | SmallTest | Level3)
+{
+    uint8_t *data = new uint8_t;
+    FILE *file = nullptr;
+    ASSERT_FALSE(SnapShotUtils::WriteRgb888ToJpeg(file, 100, 100, data));
 }
 
 /**
@@ -149,6 +185,57 @@ HWTEST_F(SnapshotUtilsTest, Write04, Function | MediumTest | Level3)
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenshot(id);
     ASSERT_EQ(true, SnapShotUtils::WriteToJpegWithPixelMap(0, *pixelMap));
+}
+
+/**
+ * @tc.name: Write05
+ * @tc.desc: Write custom jpeg using invalid file names and valid WriteToJpegParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotUtilsTest, Write05, Function | MediumTest | Level3)
+{
+    WriteToJpegParam param = {
+        .width = 256,
+        .height = 256,
+        .stride = 256 * BPP,
+        .bitDepth = 0,
+        .data = new uint8_t
+    };
+    ASSERT_FALSE(SnapShotUtils::WriteToJpeg("", param));
+}
+
+/**
+ * @tc.name: Write06
+ * @tc.desc: Write custom jpeg using valid file names and invalid WriteToJpegParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotUtilsTest, Write06, Function | MediumTest | Level3)
+{
+    WriteToJpegParam param = {
+        .width = 256,
+        .height = 256,
+        .stride = 256 * BPP,
+        .bitDepth = 0,
+        .data = nullptr
+    };
+    ASSERT_FALSE(SnapShotUtils::WriteToJpeg(defaultFile_, param));
+}
+
+/**
+ * @tc.name: Write07
+ * @tc.desc: Write custom jpeg using valid fd and invalid WriteToJpegParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotUtilsTest, Write07, Function | MediumTest | Level3)
+{
+    WriteToJpegParam param = {
+        .width = 256,
+        .height = 256,
+        .stride = 256 * BPP,
+        .bitDepth = 0,
+        .data = nullptr
+    };
+    ASSERT_FALSE(SnapShotUtils::WriteToJpeg(1, param));
 }
 
 /**

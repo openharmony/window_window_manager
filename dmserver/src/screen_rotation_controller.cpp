@@ -300,9 +300,6 @@ bool ScreenRotationController::IsSensorRelatedOrientation(Orientation orientatio
 void ScreenRotationController::ProcessSwitchToSensorRelatedOrientation(
     Orientation orientation, DeviceRotation sensorRotationConverted)
 {
-    if (lastOrientationType_ == orientation) {
-        return;
-    }
     lastOrientationType_ = orientation;
     switch (orientation) {
         case Orientation::AUTO_ROTATION_RESTRICTED: {
@@ -349,7 +346,6 @@ void ScreenRotationController::ProcessSwitchToAutoRotation(DeviceRotation rotati
     if (rotation != DeviceRotation::INVALID) {
         return;
     }
-    SetScreenRotation(lastSensorDecidedRotation_);
 }
 
 void ScreenRotationController::ProcessSwitchToAutoRotationPortrait(DeviceRotation rotation)
