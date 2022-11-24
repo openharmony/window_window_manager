@@ -49,7 +49,8 @@ void DragController::UpdateDragInfo(uint32_t windowId)
         WLOGFE("Get point failed %{public}d %{public}d", point.x, point.y);
         return;
     }
-    if (auto token = hitWindowNode->GetWindowToken()) {
+    auto token = hitWindowNode->GetWindowToken();
+    if (token) {
         if (hitWindowNode->GetWindowId() == hitWindowId_) {
             token->UpdateWindowDragInfo(point, DragEvent::DRAG_EVENT_MOVE);
             return;
