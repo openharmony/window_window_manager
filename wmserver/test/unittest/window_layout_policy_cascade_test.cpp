@@ -54,7 +54,7 @@ void WindowLayoutPolicyCascadeTest::SetUpTestCase()
 
     container_ = new WindowNodeContainer(defaultDisplayInfo_, display->GetScreenId());
     displayGroupInfo_ = container_->displayGroupInfo_;
-    layoutPolicyCascade_ = container_->GetLayoutPolicy();
+    layoutPolicyCascade_ = static_cast<WindowLayoutPolicyCascade>(container_->GetLayoutPolicy());
 }
 
 void WindowLayoutPolicyCascadeTest::TearDownTestCase()
@@ -84,8 +84,6 @@ HWTEST_F(WindowLayoutPolicyCascadeTest, InitCascadeRectCfg01, Function | SmallTe
 {
     std::vector<int> numbers {82, 121, 1068, 706};
     WindowLayoutPolicyCascade::SetDefaultFloatingWindow(numbers);
-    ASSERT_EQ(WindowLayoutPolicyCascade::defaultFloatingWindow_.posX_, static_cast<uint32_t>(numbers[0]));
-
     auto displayId = defaultDisplayInfo_->GetDisplayId();
     ASSERT_EQ(layoutPolicyCascade_->InitCascadeRectCfg(displayId), true);
 
