@@ -309,8 +309,8 @@ void WindowRoot::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>
         WLOGFE("Get Visible Window Permission Denied");
     }
     VisibleData& VisibleWindow = lastOcclusionData_->GetVisibleData();
-    for (auto surfaceId : VisibleWindow) {
-        auto iter = surfaceIdWindowNodeMap_.find(surfaceId);
+    for (auto visibleData : VisibleWindow) {
+        auto iter = surfaceIdWindowNodeMap_.find(visibleData.first);
         if (iter == surfaceIdWindowNodeMap_.end()) {
             continue;
         }
@@ -323,32 +323,38 @@ void WindowRoot::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>
     }
 }
 
-std::vector<std::pair<uint64_t, bool>> WindowRoot::GetWindowVisibilityChangeInfo(
+std::vector<std::tuple<uint64_t, uint8_t, bool>> WindowRoot::GetWindowVisibilityChangeInfo(
     std::shared_ptr<RSOcclusionData> occlusionData)
 {
-    std::vector<std::pair<uint64_t, bool>> visibilityChangeInfo;
+    std::vector<std::tuple<uint64_t, uint8_t, bool>> visibilityChangeInfo;
     VisibleData& currentVisibleWindow = occlusionData->GetVisibleData();
-    std::sort(currentVisibleWindow.begin(), currentVisibleWindow.end());
+    std::sort(currentVisibleWindow.begin(), currentVisibleWindow.end(),
+        [] (const std::pair<uint64_t, uint8_t>& pair1, const std::pair<uint64_t, uint8_t>& pair2) {
+            return pair1.first < pair2.first;
+    });
     VisibleData& lastVisibleWindow = lastOcclusionData_->GetVisibleData();
     uint32_t i, j;
     i = j = 0;
     for (; i < lastVisibleWindow.size() && j < currentVisibleWindow.size();) {
-        if (lastVisibleWindow[i] < currentVisibleWindow[j]) {
-            visibilityChangeInfo.emplace_back(lastVisibleWindow[i], false);
+        if (lastVisibleWindow[i].first < currentVisibleWindow[j].first) {
+            visibilityChangeInfo.emplace_back(lastVisibleWindow[i].first, lastVisibleWindow[i].second, false);
             i++;
-        } else if (lastVisibleWindow[i] > currentVisibleWindow[j]) {
-            visibilityChangeInfo.emplace_back(currentVisibleWindow[j], true);
+        } else if (lastVisibleWindow[i].first > currentVisibleWindow[j].first) {
+            visibilityChangeInfo.emplace_back(currentVisibleWindow[j].first, currentVisibleWindow[j].second, true);
             j++;
         } else {
+            if (lastVisibleWindow[i].second != currentVisibleWindow[j].second) {
+                visibilityChangeInfo.emplace_back(currentVisibleWindow[j].first, currentVisibleWindow[j].second, true);
+            }
             i++;
             j++;
         }
     }
     for (; i < lastVisibleWindow.size(); ++i) {
-        visibilityChangeInfo.emplace_back(lastVisibleWindow[i], false);
+        visibilityChangeInfo.emplace_back(lastVisibleWindow[i].first, lastVisibleWindow[i].second, false);
     }
     for (; j < currentVisibleWindow.size(); ++j) {
-        visibilityChangeInfo.emplace_back(currentVisibleWindow[j], true);
+        visibilityChangeInfo.emplace_back(currentVisibleWindow[j].first, currentVisibleWindow[j].second, true);
     }
     lastOcclusionData_ = occlusionData;
     return visibilityChangeInfo;
@@ -356,12 +362,12 @@ std::vector<std::pair<uint64_t, bool>> WindowRoot::GetWindowVisibilityChangeInfo
 
 void WindowRoot::NotifyWindowVisibilityChange(std::shared_ptr<RSOcclusionData> occlusionData)
 {
-    std::vector<std::pair<uint64_t, bool>> visibilityChangeInfo = GetWindowVisibilityChangeInfo(occlusionData);
+    std::vector<std::tuple<uint64_t, uint8_t, bool>> visibilityChangeInfo = GetWindowVisibilityChangeInfo(occlusionData);
     std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
     bool hasAppWindowChange = false;
     for (const auto& elem : visibilityChangeInfo) {
-        uint64_t surfaceId = elem.first;
-        bool isVisible = elem.second;
+        uint64_t surfaceId = std::get<0>(elem);
+        bool isVisible = std::get<2>(elem);
         auto iter = surfaceIdWindowNodeMap_.find(surfaceId);
         if (iter == surfaceIdWindowNodeMap_.end()) {
             continue;
@@ -371,6 +377,7 @@ void WindowRoot::NotifyWindowVisibilityChange(std::shared_ptr<RSOcclusionData> o
             continue;
         }
         node->isVisible_ = isVisible;
+        node->abilityBGAlpha_ = std::get<1>(elem);
         WindowType winType = node->GetWindowType();
         hasAppWindowChange = (winType >= WindowType::APP_WINDOW_BASE && winType < WindowType::APP_WINDOW_END);
         windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(node->GetWindowId(), node->GetCallingPid(),
@@ -1732,18 +1739,54 @@ void WindowRoot::ChangeRSRenderModeIfNeeded(bool isToUnified)
 bool WindowRoot::IsAppWindowExceed() const
 {
     uint32_t appWindowNum = 0;
-    for (const auto& it : windowNodeMap_) {
-        WindowType winType = it.second->GetWindowType();
-        WindowMode winMode = it.second->GetWindowMode();
-        if (winMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || winMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            return false;
+    auto displayInfoPtr = DisplayManagerServiceInner::GetInstance().GetDefaultDisplay();
+    if (displayInfoPtr) {
+        auto displayGroupId = displayInfoPtr->GetScreenGroupId();
+        auto iter = windowNodeContainerMap_.find(displayGroupId);
+        sptr<WindowNodeContainer> windowNodeContainer;
+        if (iter != windowNodeContainerMap_.end()) {
+            windowNodeContainer = iter->second;
         }
-        if (winType >= WindowType::APP_WINDOW_BASE && winType < WindowType::APP_WINDOW_END &&
-            it.second->currentVisibility_) {
+        Rect rect;
+        WindowNodeOperationFunc func = [&appWindowNum, &rect, this](sptr<WindowNode> node) {
+            auto windowMode = node->GetWindowMode();
+            if (windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+                windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+                return true;
+            }
+            if (appWindowNum > maxUniRenderAppWindowNumber_) {
+                return true;
+            }
+            auto windowType = node->GetWindowType();
+            bool needAvoid = (node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
+            bool visibleForeGroundAppWindow = windowType >= WindowType::APP_WINDOW_BASE &&
+                windowType < WindowType::APP_WINDOW_END && node->currentVisibility_;
+            if (!visibleForeGroundAppWindow) {
+                return false;
+            }
+            bool isOpaque = node->abilityBGAlpha_ == 255 &&
+                std::abs((node->GetWindowProperty()->GetAlpha()) - (1.0f)) <= (std::numeric_limits<float>::epsilon());
+            if (windowMode == WindowMode::WINDOW_MODE_FULLSCREEN && !needAvoid && node->isVisible_ && isOpaque) {
+                appWindowNum++;
+                return true;
+            }
+            if (windowMode == WindowMode::WINDOW_MODE_FULLSCREEN && needAvoid && isOpaque &&
+                !node->GetWindowRect().IsInsideOf(rect)) {
+                rect = node->GetWindowRect();
+                appWindowNum++;
+                return false;
+            }
+            if (node->GetWindowRect().IsInsideOf(rect)) {
+                return false;
+            }
             appWindowNum++;
-        }
+            return false;
+        };
+        windowNodeContainer->TraverseWindowTree(func, true);
+        WLOGFI("SwitchRender: the number of app window is %{public}u appWindowNum:%{public}u",
+            maxUniRenderAppWindowNumber_, appWindowNum);
+        return (appWindowNum > maxUniRenderAppWindowNumber_);
     }
-    WLOGFI("SwitchRender: the number of app window is %{public}u", maxUniRenderAppWindowNumber_);
     return (appWindowNum > maxUniRenderAppWindowNumber_);
 }
 
