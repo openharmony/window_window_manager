@@ -450,7 +450,6 @@ bool DisplayManagerService::SetDisplayState(DisplayState state)
         WLOGFE("set display state permission denied!");
         return false;
     }
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     ScreenId dmsScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
     sptr<AbstractDisplay> display = abstractDisplayController_->GetAbstractDisplayByScreen(dmsScreenId);
     if (display != nullptr) {
