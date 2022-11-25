@@ -18,6 +18,7 @@
 #include <ability_manager_client.h>
 #include <common/rs_rect.h>
 #include <hitrace_meter.h>
+#include <string>
 #include <transaction/rs_transaction.h>
 #include "minimize_app.h"
 #include "parameters.h"
@@ -25,6 +26,7 @@
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
+#include "zidl/ressched_report.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -330,6 +332,13 @@ WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> sr
         finishedCallback->OnAnimationFinished();
         return WMError::WM_ERROR_NO_MEM;
     }
+
+    std::unordered_map<std::string, std::string> payload;
+    if (srcNode) {
+        payload["srcPid"] = std::to_string(srcNode->GetCallingPid());
+    }
+    ResSchedReport::GetInstance().ResSchedDataReport(
+        Rosen::RES_TYPE_SHOW_REMOTE_ANIMATION, Rosen::REMOTE_ANIMATION_BEGIN, payload);
     // when exit immersive, startingWindow (0,0,w,h), but app need avoid
     GetExpectRect(dstNode, dstTarget);
     dstNode->isPlayAnimationShow_ = true;
@@ -767,6 +776,12 @@ sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::CreateShowAnimationFini
                 static_cast<uint32_t>(dstNodeSptr->stateMachine_.GetCurrentState()));
             FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
                 "wms:async:ShowRemoteAnimation");
+            std::unordered_map<std::string, std::string> payload;
+            if (srcNodeWptr != nullptr) {
+                payload["srcPid"] = std::to_string(srcNodeWptr->GetCallingPid());
+            }
+            ResSchedReport::GetInstance().ResSchedDataReport(
+                    Rosen::RES_TYPE_SHOW_REMOTE_ANIMATION, Rosen::REMOTE_ANIMATION_END, payload);
         };
     }
     return CreateAnimationFinishedCallback(func);
