@@ -30,7 +30,7 @@ namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManager"};
     const static uint32_t MAX_DISPLAY_SIZE = 32;
-    const static uint32_t MAX_INTERVAL_US = 3500;
+    const static uint32_t MAX_INTERVAL_US = 5000;
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
@@ -306,9 +306,10 @@ sptr<Display> DisplayManager::Impl::GetDefaultDisplaySync()
     static std::chrono::steady_clock::time_point lastRequestTime = std::chrono::steady_clock::now();
     auto currentTime = std::chrono::steady_clock::now();
     auto interval = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastRequestTime).count();
-    if (defaultDisplayId_ != DISPLAY_ID_INVALID) {
+    if (defaultDisplayId_ != DISPLAY_ID_INVALID && interval < MAX_INTERVAL_US) {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
         auto iter = displayMap_.find(defaultDisplayId_);
-        if (iter != displayMap_.end() && interval < MAX_INTERVAL_US) {
+        if (iter != displayMap_.end()) {
             return displayMap_[defaultDisplayId_];
         }
     }
