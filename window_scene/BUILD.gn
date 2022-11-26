@@ -13,14 +13,52 @@
 
 import("//build/ohos.gni")
 
+config("window_scene_private_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "session/container/include",
+    "session/host/include",
+  ]
+}
+
+config("window_scene_public_config") {
+  include_dirs = [
+    "interfaces/innerkits",
+    "utils/include",
+  ]
+}
+
 ohos_shared_library("window_scene") {
   sources = [
-    "src/rs_session.cpp",
+    "session/host/src/zidl/scene_session_proxy.cpp",
+    "session/host/src/zidl/scene_session_stub.cpp",
+    "session/host/src/session.cpp",
+    "session/host/src/scene_session.cpp",
+    "session/host/src/scene_session manager.cpp",
+    "session/container/src/zidl/scene_session_stage_proxy.cpp",
+    "session/container/src/zidl/scene_session_stage_stub.cpp",
+    "session/container/src/zidl/window_event_channel_proxy.cpp",
+    "session/container/src/zidl/window_event_channel_stub.cpp",
   ]
 
   cflags_cc = [ "-std=c++17" ]
+  configs = [
+    ":window_scene_private_config",
+  ]
 
-  public_deps = []
+  public_configs = [ ":window_scene_public_config" ]
+
+  deps = [
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+  ]
+
+  external_deps = [
+    "ipc:ipc_core",
+    "hilog_native:libhilog",
+    "input:libmmi-client",
+    "c_utils:utils",
+  ]
 
   relative_install_dir = "module"
   part_name = "window_manager"
