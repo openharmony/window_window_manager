@@ -2418,6 +2418,7 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
         pointerEvent->MarkProcessed();
         return;
     }
+    auto action = pointerEvent->GetPointerAction();
     if (WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
         auto display = SingletonContainer::IsDestroyed() ? nullptr :
             SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
@@ -2437,22 +2438,17 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
                     static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), mouseStyleID_);
             }
             isPointerStyleChanged_ = true;
-        } else {
-            int32_t currentStyleID;
-            MMI::InputManager::GetInstance()->GetPointerStyle(pointerEvent->GetAgentWindowId(), currentStyleID);
-            if (currentStyleID != MMI::MOUSE_ICON::DEFAULT) {
-                MMI::InputManager::GetInstance()->SetPointerStyle(
-                    static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), MMI::MOUSE_ICON::DEFAULT);
-            }
+        } else if (action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
+            MMI::InputManager::GetInstance()->SetPointerStyle(
+                static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), MMI::MOUSE_ICON::DEFAULT);
         }
     } else if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE && isPointerStyleChanged_ == false) {
         uint32_t mouseStyle = (GetRect().width_ > GetRect().height_) ?
-                                MMI::MOUSE_ICON::NORTH_SOUTH : MMI::MOUSE_ICON::WEST_EAST;
+            MMI::MOUSE_ICON::NORTH_SOUTH : MMI::MOUSE_ICON::WEST_EAST;
         MMI::InputManager::GetInstance()->SetPointerStyle(
             static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), mouseStyle);
         isPointerStyleChanged_ = true;
     }
-    auto action = pointerEvent->GetPointerAction();
     if (isPointerStyleChanged_ && (action == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW ||
         !IsPointInDragHotZone(pointerItem.GetDisplayX(), pointerItem.GetDisplayY()))) {
         MMI::InputManager::GetInstance()->SetPointerStyle(static_cast<uint32_t>(pointerEvent->GetAgentWindowId()),
