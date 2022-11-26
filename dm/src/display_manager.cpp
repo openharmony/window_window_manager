@@ -15,6 +15,7 @@
 
 #include "display_manager.h"
 
+#include <chrono>
 #include <cinttypes>
 #include <transaction/rs_interfaces.h>
 
@@ -29,6 +30,7 @@ namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManager"};
     const static uint32_t MAX_DISPLAY_SIZE = 32;
+    const static uint32_t MAX_INTERVAL_US = 5000;
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
@@ -39,6 +41,7 @@ public:
     bool CheckRectValid(const Media::Rect& rect, int32_t oriHeight, int32_t oriWidth) const;
     bool CheckSizeValid(const Media::Size& size, int32_t oriHeight, int32_t oriWidth) const;
     sptr<Display> GetDefaultDisplay();
+    sptr<Display> GetDefaultDisplaySync();
     sptr<Display> GetDisplayById(DisplayId displayId);
     DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
     bool RegisterDisplayListener(sptr<IDisplayListener> listener);
@@ -62,6 +65,7 @@ private:
     bool UpdateDisplayInfoLocked(sptr<DisplayInfo>);
     void Clear();
 
+    DisplayId defaultDisplayId_ = DISPLAY_ID_INVALID;
     std::map<DisplayId, sptr<Display>> displayMap_;
     DisplayStateCallback displayStateCallback_;
     std::recursive_mutex mutex_;
@@ -297,6 +301,34 @@ sptr<Display> DisplayManager::Impl::GetDefaultDisplay()
     return displayMap_[displayId];
 }
 
+sptr<Display> DisplayManager::Impl::GetDefaultDisplaySync()
+{
+    static std::chrono::steady_clock::time_point lastRequestTime = std::chrono::steady_clock::now();
+    auto currentTime = std::chrono::steady_clock::now();
+    auto interval = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastRequestTime).count();
+    if (defaultDisplayId_ != DISPLAY_ID_INVALID && interval < MAX_INTERVAL_US) {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        auto iter = displayMap_.find(defaultDisplayId_);
+        if (iter != displayMap_.end()) {
+            return displayMap_[defaultDisplayId_];
+        }
+    }
+
+    auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDefaultDisplayInfo();
+    if (displayInfo == nullptr) {
+        return nullptr;
+    }
+    auto displayId = displayInfo->GetDisplayId();
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!UpdateDisplayInfoLocked(displayInfo)) {
+        displayMap_.erase(displayId);
+        return nullptr;
+    }
+    lastRequestTime = currentTime;
+    defaultDisplayId_ = displayId;
+    return displayMap_[displayId];
+}
+
 sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
 {
     auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(displayId);
@@ -410,6 +442,11 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
 sptr<Display> DisplayManager::GetDefaultDisplay()
 {
     return pImpl_->GetDefaultDisplay();
+}
+
+sptr<Display> DisplayManager::GetDefaultDisplaySync()
+{
+    return pImpl_->GetDefaultDisplaySync();
 }
 
 std::vector<DisplayId> DisplayManager::GetAllDisplayIds()
