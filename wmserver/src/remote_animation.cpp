@@ -163,7 +163,7 @@ static void GetAndDrawSnapShot(const sptr<WindowNode>& srcNode)
         WLOGFD("srcNode or srcNode->leashWinSurfaceNode_ is empty");
         return;
     }
-    if (srcNode->firstFrameAvaliable_) {
+    if (srcNode->firstFrameAvailable_) {
         std::shared_ptr<Media::PixelMap> pixelMap;
         bool snapSucc = SurfaceDraw::GetSurfaceSnapshot(srcNode->surfaceNode_, pixelMap, SNAPSHOT_TIMEOUT_MS, 1.0, 1.0);
         if (!snapSucc) {
