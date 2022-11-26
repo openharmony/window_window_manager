@@ -131,7 +131,7 @@ NativeValue* OnGetDefaultDisplay(NativeEngine& engine, NativeCallbackInfo& info)
 NativeValue* OnGetDefaultDisplaySync(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("JsDisplayManager::OnGetDefaultDisplaySync is called");
-    sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
+    sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplaySync();
     if (display == nullptr) {
         WLOGFE("JsDisplayManager::OnGetDefaultDisplaySync, display is nullptr.");
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN)));
