@@ -45,6 +45,7 @@ public:
     std::vector<sptr<Display>> GetAllDisplays();
     DisplayId GetDefaultDisplayId();
     sptr<Display> GetDefaultDisplay();
+    sptr<Display> GetDefaultDisplaySync();
     sptr<Display> GetDisplayById(DisplayId displayId);
     sptr<Display> GetDisplayByScreen(ScreenId screenId);
     std::vector<DisplayId> GetAllDisplayIds();
