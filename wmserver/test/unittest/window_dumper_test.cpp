@@ -127,7 +127,7 @@ HWTEST_F(WindowDumperTest, Dump05, Function | SmallTest | Level1)
     const std::u16string DUMP_ALL = u"-a";
     args.emplace_back(DUMP_ALL);
     WMError ret = windowDumper->Dump(fd, args);
-    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
+    ASSERT_TRUE(ret == WMError::WM_OK || ret == WMError::WM_ERROR_INVALID_OPERATION);
 }
 
 /**
