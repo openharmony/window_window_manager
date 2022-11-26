@@ -160,7 +160,7 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
         weakNode->leashWinSurfaceNode_->RemoveChild(weakNode->startingWinSurfaceNode_);
         WindowInnerManager::GetInstance().CompleteFirstFrameDrawing(weakNode);
         RSTransaction::FlushImplicitTransaction();
-        weakNode->firstFrameAvaliable_ = true;
+        weakNode->firstFrameAvailable_ = true;
         weakNode->startingWinSurfaceNode_ = nullptr;
     };
     node->surfaceNode_->SetBufferAvailableCallback(firstFrameCompleteCallback);
