@@ -1676,16 +1676,8 @@ void WindowRoot::OnRenderModeChanged(bool isUniRender)
 
 void WindowRoot::SwitchRenderModeIfNeeded()
 {
-    if (displayIdMap_.empty()) {
-        WLOGFE("WindowRoot::SwitchRenderModeIfNeeded: displayIdMap_ is empty");
-        return;
-    }
-    if (displayIdMap_.size() != 1) {
-        WLOGFE("WindowRoot::SwitchRenderModeIfNeeded: invalid screenGroup number");
-        return;
-    }
-    uint32_t displayNum = displayIdMap_.begin()->second.size();
-    if (displayNum > 1) {
+    uint32_t rsScreenNum = DisplayManagerServiceInner::GetInstance().GetRSScreenNum();
+    if (rsScreenNum > 1) {
         // switch to sperate render mode
         ChangeRSRenderModeIfNeeded(false);
         return;
