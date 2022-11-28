@@ -82,12 +82,12 @@ sptr<WindowNodeContainer> WindowRoot::GetOrCreateWindowNodeContainer(DisplayId d
 sptr<WindowNodeContainer> WindowRoot::GetWindowNodeContainer(DisplayId displayId)
 {
     bool isRecordedDisplay;
-    sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
     ScreenId displayGroupId = GetScreenGroupId(displayId, isRecordedDisplay);
     auto iter = windowNodeContainerMap_.find(displayGroupId);
     if (iter != windowNodeContainerMap_.end()) {
         // if container exist for screenGroup and display is not be recorded, process expand display
         if (!isRecordedDisplay) {
+            sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
             // add displayId in displayId vector
             displayIdMap_[displayGroupId].push_back(displayId);
             auto displayRectMap = GetAllDisplayRectsByDMS(displayInfo);
