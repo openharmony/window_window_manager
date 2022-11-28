@@ -140,7 +140,6 @@ public:
     bool requestedVisibility_ { false };
     bool currentVisibility_ { false };
     bool isVisible_ { false };
-    uint8_t abilityBGAlpha_ { 255 };
     bool isAppCrash_ { false };
     bool isPlayAnimationShow_ { false }; // delete when enable state machine
     bool isPlayAnimationHide_ { false }; // delete when enable state machine
