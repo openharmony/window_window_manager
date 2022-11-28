@@ -117,6 +117,7 @@ public:
     void LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool afterAnimation = false);
     void GetAllAnimationPlayingNodes(std::vector<wptr<WindowNode>>& windowNodes);
     void GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const;
+    WMError NotifyDesktopUnfrozen();
 private:
     enum class RenderMode : uint8_t {
         SEPARATED,

@@ -1239,7 +1239,7 @@ bool WindowNodeContainer::CheckWindowNodeWhetherInWindowTree(const sptr<WindowNo
 void WindowNodeContainer::DumpScreenWindowTree()
 {
     WLOGFI("-------- dump window info begin---------");
-    WLOGFI("WindowName DisplayId WinId Type Mode Flag ZOrd Orientation abilityToken [   x    y    w    h]");
+    WLOGFI("WindowName DisplayId WinId Type Mode Flag ZOrd Orientation firstFrameCallback [   x    y    w    h]");
     uint32_t zOrder = zOrder_;
     WindowNodeOperationFunc func = [&zOrder](sptr<WindowNode> node) {
         Rect rect = node->GetWindowRect();
@@ -1249,7 +1249,7 @@ void WindowNodeContainer::DumpScreenWindowTree()
             "%{public}4u %{public}11u %{public}12d [%{public}4d %{public}4d %{public}4u %{public}4u]",
             windowName.c_str(), node->GetDisplayId(), node->GetWindowId(), node->GetWindowType(), node->GetWindowMode(),
             node->GetWindowFlags(), --zOrder, static_cast<uint32_t>(node->GetRequestedOrientation()),
-            node->abilityToken_ != nullptr, rect.posX_, rect.posY_, rect.width_, rect.height_);
+            node->firstFrameAvailable_, rect.posX_, rect.posY_, rect.width_, rect.height_);
         return false;
     };
     TraverseWindowTree(func, true);
