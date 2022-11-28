@@ -86,7 +86,7 @@ HWTEST_F(DisplayManagerTest, Freeze02, Function | SmallTest | Level1)
     for (uint32_t i = 0; i < 33; i++) { // MAX_DISPLAY_SIZE + 1
         displayIds.push_back(i);
     }
-    
+
     bool ret = DisplayManager::GetInstance().Freeze(displayIds);
     ASSERT_FALSE(ret);
 }
@@ -127,7 +127,7 @@ HWTEST_F(DisplayManagerTest, Unfreeze02, Function | SmallTest | Level1)
     for (uint32_t i = 0; i < 33; i++) { // MAX_DISPLAY_SIZE + 1
         displayIds.push_back(i);
     }
-    
+
     bool ret = DisplayManager::GetInstance().Unfreeze(displayIds);
     ASSERT_FALSE(ret);
 }
@@ -346,6 +346,19 @@ HWTEST_F(DisplayManagerTest, GetDisplayByScreen, Function | SmallTest | Level1)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), GetDisplayInfoByScreenId(_)).Times(1).WillOnce(Return(displayInfo));
     display = displayManager.GetDisplayByScreen(1);
+    ASSERT_EQ(display, nullptr);
+}
+
+/**
+ * @tc.name: ImplGetDefaultDisplaySync
+ * @tc.desc: Impl GetDefaultDisplaySync nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ImplGetDefaultDisplaySync, Function | SmallTest | Level1)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(nullptr));
+    sptr<Display> display = DisplayManager::GetInstance().GetDefaultDisplaySync();
     ASSERT_EQ(display, nullptr);
 }
 }
