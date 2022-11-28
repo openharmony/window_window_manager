@@ -146,7 +146,7 @@ private:
     void MoveNotShowingWindowToDefaultDisplay(DisplayId defaultDisplayId, DisplayId displayId);
     WMError PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode,
         sptr<WindowNodeContainer>& container);
-    std::vector<std::tuple<uint64_t, uint8_t, bool>> GetWindowVisibilityChangeInfo(
+    std::vector<std::pair<uint64_t, bool>> GetWindowVisibilityChangeInfo(
         std::shared_ptr<RSOcclusionData> occlusionData);
     bool NeedToStopAddingNode(sptr<WindowNode>& node, const sptr<WindowNodeContainer>& container);
     WMError BindDialogToParent(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
