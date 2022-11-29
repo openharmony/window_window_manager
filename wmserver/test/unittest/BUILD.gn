@@ -41,6 +41,7 @@ group("unittest") {
     ":wmserver_window_node_container_test",
     ":wmserver_window_node_test",
     ":wmserver_window_pair_test",
+    ":wmserver_window_root_test",
     ":wmserver_window_snapshot_test",
     ":wmserver_window_zorder_policy_test",
   ]
@@ -353,6 +354,17 @@ ohos_unittest("wmserver_window_inner_manager_test") {
   module_out_path = module_out_path
   configs = test_public_config
   sources = [ "window_inner_manager_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wmserver_window_root_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+
+  sources = [ "window_root_test.cpp" ]
 
   deps = test_inner_deps
   public_deps = test_public_deps
