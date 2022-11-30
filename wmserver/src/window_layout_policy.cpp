@@ -819,7 +819,7 @@ void WindowLayoutPolicy::LimitWindowPositionWhenInitRectOrMove(const sptr<Window
         }
         auto reason = node->GetWindowSizeChangeReason();
         // if init window on pc, limit position
-        if (floatingBottomPosY_ != 0 && reason != WindowSizeChangeReason::MOVE) {
+        if (floatingBottomPosY_ != 0 && reason == WindowSizeChangeReason::UNDEFINED) {
             uint32_t bottomPosY = static_cast<uint32_t>(floatingBottomPosY_ * virtualPixelRatio);
             if (winRect.posY_ + static_cast<int32_t>(winRect.height_) >= bottomPosY) {
                 winRect.posY_ = limitRect.posY_;

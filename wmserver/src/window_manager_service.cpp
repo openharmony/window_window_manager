@@ -362,7 +362,7 @@ void WindowManagerService::ConfigureWindowManagerService()
     }
     item = config["defaultFloatingWindow"];
     if (item.IsInts()) {
-        WindowLayoutPolicyCascade::InitDefaultCascadeRect(*item.intsValue_);
+        WindowLayoutPolicyCascade::SetCascadeRectCfg(*item.intsValue_);
     }
 }
 

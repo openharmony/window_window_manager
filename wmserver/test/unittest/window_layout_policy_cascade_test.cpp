@@ -83,24 +83,27 @@ void WindowLayoutPolicyCascadeTest::TearDown()
 
 namespace {
 /**
- * @tc.name: InitDefaultCascadeRect
- * @tc.desc: test InitDefaultCascadeRect
+ * @tc.name: InitCascadeRectCfg
+ * @tc.desc: test InitCascadeRectCfg
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyCascadeTest, InitDefaultCascadeRect, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyCascadeTest, InitCascadeRectCfg, Function | SmallTest | Level2)
 {
-    std::vector<int> numbers {82, 121, 1068, 706};
-    WindowLayoutPolicyCascade::InitDefaultCascadeRect(numbers);
-    auto displayId = defaultDisplayInfo_->GetDisplayId();
-    uint32_t idx = 0;
-    Rect rect = {0, 0, 0, 0};
-    auto vpr = displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
-    rect.posX_ = static_cast<int32_t>(vpr * numbers[idx++]);
-    rect.posY_ = static_cast<int32_t>(vpr * numbers[idx++]);
-    rect.width_ = static_cast<uint32_t>(vpr * numbers[idx++]);
-    rect.height_ = static_cast<uint32_t>(vpr * numbers[idx]);
+    std::vector<int> numbers = {82, 121, 1068, 706};
+    WindowLayoutPolicyCascade::SetCascadeRectCfg(numbers);
+    ASSERT_EQ(cascadeRectSetFromCfg_.posX_, static_cast<uint32_t>(numbers[0]));
 
-    ASSERT_EQ(layoutPolicyCascade_->cascadeRectsMap_[displayId].defaultCascadeRect_, rect);
+    auto displayId = defaultDisplayInfo_->GetDisplayId();
+    ASSERT_EQ(layoutPolicy_->InitCascadeRectCfg(displayId), true);
+
+    Rect resRect = cascadeRectSetFromCfg_;
+    auto vpr = displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
+    resRect.width_ = static_cast<uint32_t>(vpr * resRect.width_);
+    resRect.height_ = static_cast<uint32_t>(vpr * resRect.height_);
+    resRect.posX_ = static_cast<int32_t>(vpr * resRect.posX_);
+    resRect.posY_ = static_cast<int32_t>(vpr * resRect.posY_);
+
+    ASSERT_EQ(cascadeRectsMap_[displayId].defaultCascadeRect_, resRect);
 }
 }
 }
