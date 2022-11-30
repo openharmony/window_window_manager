@@ -26,6 +26,7 @@ group("unittest") {
     ":dmserver_display_cutout_controller_test",
     ":dmserver_display_dumper_test",
     ":dmserver_display_manager_agent_controller_test",
+    ":dmserver_display_manager_config_test",
     ":dmserver_display_manager_proxy_test",
     ":dmserver_display_manager_service_test",
     ":dmserver_screen_rotation_controller_test",
@@ -112,6 +113,20 @@ ohos_unittest("dmserver_abstract_display_controller_test") {
   sources = [ "abstract_display_controller_test.cpp" ]
 
   deps = [ ":dmserver_unittest_common" ]
+}
+
+ohos_unittest("dmserver_display_manager_config_test") {
+  module_out_path = module_out_path
+  include_dirs = [ "//foundation/window/window_manager/dmserver/src" ]
+
+  sources = [ "display_manager_config_test.cpp" ]
+
+  deps = [
+    ":dmserver_unittest_common",
+    "//third_party/libxml2:libxml2",
+  ]
+
+  external_deps = [ "config_policy:configpolicy_util" ]
 }
 
 ## Build dmserver_unittest_common.a {{{

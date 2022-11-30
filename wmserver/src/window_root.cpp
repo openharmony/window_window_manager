@@ -82,12 +82,12 @@ sptr<WindowNodeContainer> WindowRoot::GetOrCreateWindowNodeContainer(DisplayId d
 sptr<WindowNodeContainer> WindowRoot::GetWindowNodeContainer(DisplayId displayId)
 {
     bool isRecordedDisplay;
-    sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
     ScreenId displayGroupId = GetScreenGroupId(displayId, isRecordedDisplay);
     auto iter = windowNodeContainerMap_.find(displayGroupId);
     if (iter != windowNodeContainerMap_.end()) {
         // if container exist for screenGroup and display is not be recorded, process expand display
         if (!isRecordedDisplay) {
+            sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
             // add displayId in displayId vector
             displayIdMap_[displayGroupId].push_back(displayId);
             auto displayRectMap = GetAllDisplayRectsByDMS(displayInfo);
@@ -1669,16 +1669,8 @@ void WindowRoot::OnRenderModeChanged(bool isUniRender)
 
 void WindowRoot::SwitchRenderModeIfNeeded()
 {
-    if (displayIdMap_.empty()) {
-        WLOGFE("WindowRoot::SwitchRenderModeIfNeeded: displayIdMap_ is empty");
-        return;
-    }
-    if (displayIdMap_.size() != 1) {
-        WLOGFE("WindowRoot::SwitchRenderModeIfNeeded: invalid screenGroup number");
-        return;
-    }
-    uint32_t displayNum = displayIdMap_.begin()->second.size();
-    if (displayNum > 1) {
+    uint32_t rsScreenNum = DisplayManagerServiceInner::GetInstance().GetRSScreenNum();
+    if (rsScreenNum > 1) {
         // switch to sperate render mode
         ChangeRSRenderModeIfNeeded(false);
         return;
