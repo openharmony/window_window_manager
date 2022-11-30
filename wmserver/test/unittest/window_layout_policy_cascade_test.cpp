@@ -91,18 +91,15 @@ HWTEST_F(WindowLayoutPolicyCascadeTest, InitCascadeRectCfg, Function | SmallTest
 {
     std::vector<int> numbers = {82, 121, 1068, 706};
     WindowLayoutPolicyCascade::SetCascadeRectCfg(numbers);
-    ASSERT_EQ(cascadeRectSetFromCfg_.posX_, static_cast<uint32_t>(numbers[0]));
-
     auto displayId = defaultDisplayInfo_->GetDisplayId();
-    ASSERT_EQ(layoutPolicy_->InitCascadeRectCfg(displayId), true);
+    ASSERT_EQ(layoutPolicyCascade_->InitCascadeRectCfg(displayId), true);
 
-    Rect resRect = cascadeRectSetFromCfg_;
+    Rect resRect = WindowLayoutPolicyCascade::cascadeRectSetFromCfg_;
     auto vpr = displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
     resRect.width_ = static_cast<uint32_t>(vpr * resRect.width_);
     resRect.height_ = static_cast<uint32_t>(vpr * resRect.height_);
     resRect.posX_ = static_cast<int32_t>(vpr * resRect.posX_);
     resRect.posY_ = static_cast<int32_t>(vpr * resRect.posY_);
-
     ASSERT_EQ(cascadeRectsMap_[displayId].defaultCascadeRect_, resRect);
 }
 }
