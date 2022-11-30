@@ -444,19 +444,19 @@ HWTEST_F(RemoteAnimationTest, CreateHideAnimationFinishedCallback02, Function | 
     finishCallback->OnAnimationFinished(); // with minimize
     usleep(SLEEP_TIME_IN_US);
 
-    node_->firstFrameAvaliable_ = true;
+    node_->firstFrameAvailable_ = true;
     finishCallback = RemoteAnimation::CreateHideAnimationFinishedCallback(node_, TransitionEvent::CLOSE);
     EXPECT_NE(nullptr, finishCallback);
-    finishCallback->OnAnimationFinished(); // create hide callback with firstFrameAvaliable_ true
+    finishCallback->OnAnimationFinished(); // create hide callback with firstFrameAvailable_ true
     usleep(SLEEP_TIME_IN_US);
 
-    node_->firstFrameAvaliable_ = false;
+    node_->firstFrameAvailable_ = false;
     finishCallback = RemoteAnimation::CreateHideAnimationFinishedCallback(node_, TransitionEvent::CLOSE);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished(); // create hide callback with surfaceNode null
     usleep(SLEEP_TIME_IN_US);
 
-    node_->firstFrameAvaliable_ = false;
+    node_->firstFrameAvailable_ = false;
     node_->surfaceNode_ = CreateRSSurfaceNode(1);
     finishCallback = RemoteAnimation::CreateHideAnimationFinishedCallback(node_, TransitionEvent::CLOSE);
     EXPECT_NE(nullptr, finishCallback);
