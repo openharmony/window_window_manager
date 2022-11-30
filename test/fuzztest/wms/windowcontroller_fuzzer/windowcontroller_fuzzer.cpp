@@ -229,7 +229,7 @@ void WindowControllerFuzzTestPart3(sptr<WindowController> windowController,
 
     GetObject<uint32_t>(windowId, data + startPos, size - startPos);
     windowController->UpdateTransform(windowId);
-    windowController->AsyncFlushInputInfo(windowId);
+    windowController->FlushWindowInfo(windowId);
 }
 
 bool DoWindowControllerFuzzTest(const uint8_t* data, size_t size)
