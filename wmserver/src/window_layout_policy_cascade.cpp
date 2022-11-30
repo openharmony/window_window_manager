@@ -258,7 +258,7 @@ void WindowLayoutPolicyCascade::InitCascadeRect(DisplayId displayId)
 
         resRect.posY_ = limitRect.posY_ + static_cast<int32_t>((limitRect.height_ - defaultH) / half);
     }
-    WLOGFI("Init CascadeRect Default:[%{public}d, %{public}d, %{public}d, %{public}d]",
+    WLOGFI("Init CascadeRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
         resRect.posX_, resRect.posY_, resRect.width_, resRect.height_);
     cascadeRectsMap_[displayId].defaultCascadeRect_ = resRect;
 }

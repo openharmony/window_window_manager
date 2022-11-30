@@ -52,9 +52,6 @@ private:
     void SetDefaultCascadeRect(const sptr<WindowNode>& node);
     Rect StepCascadeRect(Rect rect, DisplayId displayId) const;
     Rect GetCurCascadeRect(const sptr<WindowNode>& node) const;
-    void InitCascadeRectDefault(DisplayId displayId);
-    // method for init cascade rect from configuration
-    bool InitCascadeRectCfg(DisplayId displayId);
 
     // methods for limit divider position by display and split ratio
     void UpdateDividerPosition(const sptr<WindowNode>& node) const;
