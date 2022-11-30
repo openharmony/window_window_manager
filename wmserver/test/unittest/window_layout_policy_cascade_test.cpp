@@ -83,25 +83,24 @@ void WindowLayoutPolicyCascadeTest::TearDown()
 
 namespace {
 /**
- * @tc.name: InitCascadeRectCfg01
- * @tc.desc: test InitCascadeRectCfg
+ * @tc.name: InitDefaultCascadeRect
+ * @tc.desc: test InitDefaultCascadeRect
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutPolicyCascadeTest, InitCascadeRectCfg01, Function | SmallTest | Level2)
+HWTEST_F(WindowLayoutPolicyCascadeTest, InitDefaultCascadeRect, Function | SmallTest | Level2)
 {
     std::vector<int> numbers {82, 121, 1068, 706};
-    WindowLayoutPolicyCascade::SetDefaultFloatingWindow(numbers);
+    WindowLayoutPolicyCascade::InitDefaultCascadeRect(numbers);
     auto displayId = defaultDisplayInfo_->GetDisplayId();
-    ASSERT_EQ(layoutPolicyCascade_->InitCascadeRectCfg(displayId), true);
-
-    Rect resRect = WindowLayoutPolicyCascade::defaultFloatingWindow_;
+    uint32_t idx = 0;
+    Rect rect = {0, 0, 0, 0};
     auto vpr = displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
-    resRect.width_ = static_cast<uint32_t>(vpr * resRect.width_);
-    resRect.height_ = static_cast<uint32_t>(vpr * resRect.height_);
-    resRect.posX_ = static_cast<int32_t>(vpr * resRect.posX_);
-    resRect.posY_ = static_cast<int32_t>(vpr * resRect.posY_);
+    rect.posX_ = static_cast<int32_t>(vpr * numbers[idx++]);
+    rect.posY_ = static_cast<int32_t>(vpr * numbers[idx++]);
+    rect.width_ = static_cast<uint32_t>(vpr * numbers[idx++]);
+    rect.height_ = static_cast<uint32_t>(vpr * numbers[idx]);
 
-    ASSERT_EQ(layoutPolicyCascade_->cascadeRectsMap_[displayId].defaultCascadeRect_, resRect);
+    ASSERT_EQ(layoutPolicyCascade_->cascadeRectsMap_[displayId].defaultCascadeRect_, rect);
 }
 }
 }
