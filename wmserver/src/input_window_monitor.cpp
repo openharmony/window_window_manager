@@ -22,6 +22,7 @@
 #include "dm_common.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
+#include "window_inner_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -55,27 +56,7 @@ void InputWindowMonitor::UpdateInputWindow(uint32_t windowId)
     UpdateInputWindowByDisplayId(displayId);
 }
 
-MMI::DisplayGroupInfo InputWindowMonitor::GetDisplayInfo(uint32_t windowId)
-{
-    if (windowRoot_ == nullptr) {
-        WLOGFE("windowRoot is null.");
-        return displayGroupInfo_;
-    }
-    sptr<WindowNode> windowNode = windowRoot_->GetWindowNode(windowId);
-    if (windowNode == nullptr) {
-        WLOGFE("window node could not be found.");
-        return displayGroupInfo_;
-    }
-    if (INPUT_WINDOW_TYPE_SKIPPED.find(windowNode->GetWindowProperty()->GetWindowType()) !=
-        INPUT_WINDOW_TYPE_SKIPPED.end()) {
-        return displayGroupInfo_;
-    }
-    DisplayId displayId = windowNode->GetDisplayId();
-    HandleDisplayInfo(displayId);
-    return displayGroupInfo_;
-}
-
-void InputWindowMonitor::HandleDisplayInfo(DisplayId displayId)
+void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
 {
     if (displayId == DISPLAY_ID_INVALID) {
         return;
@@ -85,24 +66,20 @@ void InputWindowMonitor::HandleDisplayInfo(DisplayId displayId)
         WLOGFE("can not get window node container.");
         return;
     }
-
     auto displayInfos = container->GetAllDisplayInfo();
     if (displayInfos.empty()) {
         return;
     }
-
     UpdateDisplayGroupInfo(container, displayGroupInfo_);
     UpdateDisplayInfo(displayInfos, displayGroupInfo_.displaysInfo);
     std::vector<sptr<WindowNode>> windowNodes;
     container->TraverseContainer(windowNodes);
     TraverseWindowNodes(windowNodes, displayGroupInfo_.windowsInfo);
-}
-
-void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
-{
-    HandleDisplayInfo(displayId);
     WLOGFI("update display info to IMS, displayId: %{public}" PRIu64"", displayId);
-    MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo_);
+    auto task = [this]() {
+        MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo_);
+    };
+    WindowInnerManager::GetInstance().PostTask(task, "UpdateDisplayInfoBydisplayId");
 }
 
 void InputWindowMonitor::UpdateDisplayGroupInfo(const sptr<WindowNodeContainer>& windowNodeContainer,

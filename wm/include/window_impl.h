@@ -468,7 +468,7 @@ private:
     void EndMoveOrDragWindow(int32_t posX, int32_t posY, int32_t pointId, int32_t sourceType);
     void ResetMoveOrDragState();
     bool IsPointerEventConsumed();
-    bool IsPointInDragHotZone(int32_t startPointPosX, int32_t startPointPosY);
+    bool IsPointInDragHotZone(int32_t startPointPosX, int32_t startPointPosY, int32_t sourceType);
     void AdjustWindowAnimationFlag(bool withAnimation = false);
     void MapFloatingWindowToAppIfNeeded();
     void MapDialogWindowToAppIfNeeded();
@@ -554,7 +554,6 @@ private:
     bool isAppFloatingWindow_ = false;
     bool isFocused_ = false;
     uint32_t mouseStyleID_ = 0;
-    bool isPointerStyleChanged_ = false;
     const std::map<DragType, uint32_t> STYLEID_MAP = {
         {DragType::DRAG_UNDEFINED, MMI::MOUSE_ICON::DEFAULT},
         {DragType::DRAG_BOTTOM_OR_TOP, MMI::MOUSE_ICON::NORTH_SOUTH},

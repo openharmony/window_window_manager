@@ -108,7 +108,6 @@ private:
     void SetDefaultDisplayInfo(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo);
     void ProcessDisplayCompression(DisplayId defaultDisplayId, const sptr<DisplayInfo>& displayInfo);
     void NotifyAfterAddWindow(sptr<WindowNode>& node);
-    void AsyncFlushInputInfo(uint32_t windowId);
     void RelayoutKeyboard(const sptr<WindowNode>& node);
 
     sptr<WindowRoot> windowRoot_;
