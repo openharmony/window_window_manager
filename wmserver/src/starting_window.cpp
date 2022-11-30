@@ -223,6 +223,7 @@ void StartingWindow::AddNodeOnRSTree(sptr<WindowNode>& node, const AnimationConf
             winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
         if (weak->leashWinSurfaceNode_) {
             weak->leashWinSurfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+            weak->leashWinSurfaceNode_->SetAnimationFinished();
         }
         RSTransaction::FlushImplicitTransaction();
     };
