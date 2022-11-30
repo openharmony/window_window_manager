@@ -57,6 +57,8 @@ public:
     Rect GetDisplayGroupRect() const;
     void SetSplitRatioPoints(DisplayId displayId, const std::vector<int32_t>& splitRatioPoints);
     void NotifyClientAndAnimation(const sptr<WindowNode>& node, const Rect& winRect, WindowSizeChangeReason reason);
+    // methods for setting bottom posY limit for cascade rect on pc
+    static void SetCascadeRectBottomPosYLimit(uint32_t floatingBottomPosY);
 
 protected:
     /*
@@ -125,6 +127,8 @@ protected:
     DisplayGroupWindowTree& displayGroupWindowTree_;
     std::map<DisplayId, Rect> restoringDividerWindowRects_;
     mutable std::map<DisplayId, std::vector<int32_t>> splitRatioPointsMap_;
+    // bottom posY limit for cascade rect on pc
+    static uint32_t floatingBottomPosY_;
 };
 }
 }

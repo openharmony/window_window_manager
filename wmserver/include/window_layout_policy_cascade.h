@@ -37,8 +37,8 @@ public:
     Rect GetDividerRect(DisplayId displayId) const override;
     void SetSplitDividerWindowRects(std::map<DisplayId, Rect> dividerWindowRects) override;
     void PerformWindowLayout(const sptr<WindowNode>& node, WindowUpdateType updateType) override;
-    static void SetFloatingBottomPosY(uint32_t floatingBottomPosY);
-    static void SetDefaultFloatingWindow(const std::vector<int>& numbers);
+    // methods for init size and position of default cascade rect on pc
+    static void InitDefaultCascadeRect(const std::vector<int>& numbers);
 
 private:
     /*
@@ -53,6 +53,7 @@ private:
     Rect StepCascadeRect(Rect rect, DisplayId displayId) const;
     Rect GetCurCascadeRect(const sptr<WindowNode>& node) const;
     void InitCascadeRectDefault(DisplayId displayId);
+    // method for init cascade rect from configuration
     bool InitCascadeRectCfg(DisplayId displayId);
 
     // methods for limit divider position by display and split ratio
@@ -78,8 +79,6 @@ private:
     };
     mutable std::map<DisplayId, CascadeRects> cascadeRectsMap_;
     std::map<DisplayId, Rect> restoringDividerWindowRects_;
-    static uint32_t floatingBottomPosY_;
-    static Rect defaultFloatingWindow_;
 };
 }
 }

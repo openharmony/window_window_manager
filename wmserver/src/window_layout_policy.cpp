@@ -26,6 +26,8 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowLayoutPolicy"};
 }
 
+uint32_t WindowLayoutPolicy::floatingBottomPosY_ = 0;
+
 WindowLayoutPolicy::WindowLayoutPolicy(const sptr<DisplayGroupInfo>& displayGroupInfo,
     DisplayGroupWindowTree& displayGroupWindowTree)
     : displayGroupInfo_(displayGroupInfo), displayGroupWindowTree_(displayGroupWindowTree)
@@ -815,6 +817,14 @@ void WindowLayoutPolicy::LimitWindowPositionWhenInitRectOrMove(const sptr<Window
             winRect.posX_ = std::min(dockWinRect.posX_ - static_cast<int32_t>(windowTitleBarH),
                                      winRect.posX_);
         }
+        auto reason = node->GetWindowSizeChangeReason();
+        // if init window on pc, limit position
+        if (floatingBottomPosY_ != 0 && reason != WindowSizeChangeReason::MOVE) {
+            uint32_t bottomPosY = static_cast<uint32_t>(floatingBottomPosY_ * virtualPixelRatio);
+            if (winRect.posY_ + static_cast<int32_t>(winRect.height_) >= bottomPosY) {
+                winRect.posY_ = limitRect.posY_;
+            }
+        }
     }
     WLOGFI("After limit by position if init or move, winRect: %{public}d %{public}d %{public}u %{public}u",
         winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
@@ -1015,5 +1025,11 @@ bool WindowLayoutPolicy::IsTileRectSatisfiedWithSizeLimits(const sptr<WindowNode
 {
     return true;
 }
+
+void WindowLayoutPolicy::SetCascadeRectBottomPosYLimit(uint32_t floatingBottomPosY)
+{
+    floatingBottomPosY_ = floatingBottomPosY;
+}
+
 }
 }
