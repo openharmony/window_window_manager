@@ -256,7 +256,7 @@ void ScreenRotationController::SetScreenRotation(Rotation targetRotation)
 bool ScreenRotationController::CheckCallbackTimeInterval()
 {
     std::chrono::milliseconds ms = std::chrono::time_point_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now()).time_since_epoch();
+        std::chrono::steady_clock::now()).time_since_epoch();
     long currentTimeInMillitm = ms.count();
     if (currentTimeInMillitm - lastCallbackTime_ < ORIENTATION_SENSOR_CALLBACK_TIME_INTERVAL) {
         return false;
