@@ -1838,7 +1838,7 @@ HWTEST_F(WindowImplTest, GetSubWindow, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
-    
+
     option = new WindowOption();
     option->SetWindowName("sub");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
@@ -1948,7 +1948,7 @@ HWTEST_F(WindowImplTest, SetWindowMode, Function | SmallTest | Level3)
 
     window->SetWindowState(WindowState::STATE_UNFROZEN);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN));
-    
+
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
@@ -2431,7 +2431,7 @@ HWTEST_F(WindowImplTest, ShowHide, Function | SmallTest | Level3)
     ASSERT_EQ(WindowState::STATE_SHOWN, window->GetWindowState());
 
     ASSERT_EQ(WMError::WM_OK, window->Show(static_cast<uint32_t>(WindowStateChangeReason::KEYGUARD)));
-    EXPECT_CALL(m->Mock(), ProcessPointDown(_));
+    EXPECT_CALL(m->Mock(), ProcessPointDown(_, _));
     ASSERT_EQ(WMError::WM_OK, window->Show());
 
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
@@ -2636,7 +2636,7 @@ HWTEST_F(WindowImplTest, NotifyTouchDialogTarget, Function | SmallTest | Level3)
     listener = new MockDialogTargetTouchListener;
     window->dialogTargetTouchListeners_.push_back(sptr<IDialogTargetTouchListener>(listener));
     EXPECT_CALL(*listener, OnDialogTargetTouch());
-    EXPECT_CALL(m->Mock(), ProcessPointDown(_));
+    EXPECT_CALL(m->Mock(), ProcessPointDown(_, _));
     window->NotifyTouchDialogTarget();
 }
 
@@ -2813,7 +2813,7 @@ HWTEST_F(WindowImplTest, ConsumePointerEvent, Function | SmallTest | Level3)
     item.SetDisplayX(5); // 5 : position x
     item.SetDisplayY(5); // 5 : position y
     pointerEvent->UpdatePointerItem(0, item);
-    EXPECT_CALL(m->Mock(), ProcessPointDown(_));
+    EXPECT_CALL(m->Mock(), ProcessPointDown(_, _));
     window->ConsumePointerEvent(pointerEvent);
 }
 
@@ -2961,7 +2961,7 @@ HWTEST_F(WindowImplTest, UpdateConfiguration, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
-    
+
     option = new WindowOption();
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     option->SetWindowName("subwindow");
@@ -2970,7 +2970,7 @@ HWTEST_F(WindowImplTest, UpdateConfiguration, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, subWindow->Create(window->GetWindowId()));
     std::shared_ptr<AppExecFwk::Configuration> configuration;
     window->UpdateConfiguration(configuration);
-    
+
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
     subWindow->uiContent_ = std::make_unique<Ace::UIContentMocker>();
