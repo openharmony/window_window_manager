@@ -304,7 +304,7 @@ bool WindowLayoutPolicyCascade::InitCascadeRectCfg(DisplayId displayId)
 
     WLOGFI("Init CascadeRect Cfg:[%{public}d, %{public}d, %{public}d, %{public}d]",
         resRect.posX_, resRect.posY_, resRect.width_, resRect.height_);
-    cascadeRectsMap_[displayId].defaultCascadeRect_ = resRect;
+    cascadeRectsMap_[displayId].firstCascadeRect_ = resRect;
     return true;
 }
 
