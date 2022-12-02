@@ -100,7 +100,7 @@ HWTEST_F(WindowLayoutPolicyCascadeTest, InitCascadeRectCfg, Function | SmallTest
     resRect.height_ = static_cast<uint32_t>(vpr * resRect.height_);
     resRect.posX_ = static_cast<int32_t>(vpr * resRect.posX_);
     resRect.posY_ = static_cast<int32_t>(vpr * resRect.posY_);
-    ASSERT_EQ(layoutPolicyCascade_->cascadeRectsMap_[displayId].defaultCascadeRect_, resRect);
+    ASSERT_EQ(layoutPolicyCascade_->cascadeRectsMap_[displayId].firstCascadeRect_, resRect);
 }
 }
 }
