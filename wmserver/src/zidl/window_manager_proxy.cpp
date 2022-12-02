@@ -316,7 +316,7 @@ void WindowManagerProxy::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<W
     }
 }
 
-void WindowManagerProxy::ProcessPointDown(uint32_t windowId)
+void WindowManagerProxy::ProcessPointDown(uint32_t windowId, bool isPointDown)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -327,6 +327,10 @@ void WindowManagerProxy::ProcessPointDown(uint32_t windowId)
     }
     if (!data.WriteUint32(windowId)) {
         WLOGFE("Write windowId failed");
+        return;
+    }
+    if (!data.WriteBool(isPointDown)) {
+        WLOGFE("Write isPointDown failed");
         return;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_PROCESS_POINT_DOWN),
