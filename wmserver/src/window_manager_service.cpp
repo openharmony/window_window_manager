@@ -41,6 +41,8 @@
 #include "ui/rs_ui_director.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
+#include "window_layout_policy.h"
+#include "window_layout_policy_cascade.h"
 #include "window_manager_agent_controller.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
