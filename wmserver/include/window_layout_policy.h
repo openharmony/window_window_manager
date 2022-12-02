@@ -64,6 +64,8 @@ public:
     void ProcessDisplaySizeChangeOrRotation(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap);
     void SetSplitRatioConfig(const SplitRatioConfig& splitRatioConfig);
     virtual bool IsTileRectSatisfiedWithSizeLimits(const sptr<WindowNode>& node);
+    // methods for setting bottom posY limit for cascade rect on pc
+    static void SetCascadeRectBottomPosYLimit(uint32_t floatingBottomPosY);
 
 protected:
     void UpdateFloatingLayoutRect(Rect& limitRect, Rect& winRect);
@@ -124,6 +126,8 @@ protected:
     Rect displayGroupLimitRect_;
     bool isMultiDisplay_ = false;
     SplitRatioConfig splitRatioConfig_;
+    // bottom posY limit for cascade rect on pc
+    static uint32_t floatingBottomPosY_;
 };
 }
 }
