@@ -128,7 +128,7 @@ void WindowControllerFuzzTestPart1(sptr<WindowController> windowController,
 
     startPos += GetObject<uint32_t>(mainWindowId, data + startPos, size - startPos);
     windowController->ProcessPointUp(mainWindowId);
-    windowController->ProcessPointDown(mainWindowId);
+    windowController->ProcessPointDown(mainWindowId, true);
 
     DisplayId displayId;
     startPos += GetObject<DisplayId>(displayId, data + startPos, size - startPos);
@@ -180,7 +180,7 @@ void WindowControllerFuzzTestPart2(sptr<WindowController> windowController,
     startPos += GetObject<int32_t>(y, data + startPos, size - startPos);
     startPos += GetObject<int32_t>(scale, data + startPos, size - startPos);
     windowController->SetAnchorAndScale(x, y, scale);
-       
+
     windowController->SetAnchorOffset(x, y);
     windowController->OffWindowZoom();
 

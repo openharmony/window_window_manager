@@ -903,7 +903,7 @@ WMError WindowController::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<
     return WMError::WM_OK;
 }
 
-WMError WindowController::ProcessPointDown(uint32_t windowId)
+WMError WindowController::ProcessPointDown(uint32_t windowId, bool isPointDown)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node == nullptr) {
@@ -915,10 +915,16 @@ WMError WindowController::ProcessPointDown(uint32_t windowId)
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
-    NotifyTouchOutside(node);
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        windowRoot_->TakeWindowPairSnapshot(node->GetDisplayId());
+    /*
+     * If not point down, no need to notify touch outside
+     */
+    if (isPointDown) {
+        NotifyTouchOutside(node);
+        if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+            windowRoot_->TakeWindowPairSnapshot(node->GetDisplayId());
+        }
     }
+
     WLOGFI("process point down, windowId: %{public}u", windowId);
     WMError zOrderRes = windowRoot_->RaiseZOrderForAppWindow(node);
     WMError focusRes = windowRoot_->RequestFocus(windowId);
