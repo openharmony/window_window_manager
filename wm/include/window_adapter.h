@@ -45,7 +45,7 @@ public:
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     virtual void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty);
-    virtual void ProcessPointDown(uint32_t windowId);
+    virtual void ProcessPointDown(uint32_t windowId, bool isPointDown = true);
     virtual void ProcessPointUp(uint32_t windowId);
     virtual void MinimizeAllAppWindows(DisplayId displayId);
     virtual WMError ToggleShownStateForAllAppWindows();

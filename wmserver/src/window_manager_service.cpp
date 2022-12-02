@@ -940,10 +940,10 @@ void WindowManagerService::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr
     });
 }
 
-void WindowManagerService::ProcessPointDown(uint32_t windowId)
+void WindowManagerService::ProcessPointDown(uint32_t windowId, bool isPointDown)
 {
-    PostAsyncTask([this, windowId]() {
-        windowController_->ProcessPointDown(windowId);
+    PostAsyncTask([this, windowId, isPointDown]() {
+        windowController_->ProcessPointDown(windowId, isPointDown);
     });
 }
 
