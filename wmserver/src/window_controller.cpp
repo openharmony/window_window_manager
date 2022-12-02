@@ -441,9 +441,9 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId, bool fromAnimation
     };
     WMError res = WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
-        if (RemoteAnimation::NotifyAnimationScreenUnlock(removeFunc) == WMError::WM_OK) {
+        if (windowRoot_->NotifyDesktopUnfrozen() == WMError::WM_OK) {
+            res = RemoteAnimation::NotifyAnimationScreenUnlock(removeFunc);
             WLOGFI("NotifyAnimationScreenUnlock with remote animation");
-            res = WMError::WM_OK;
         }
     }
     if (res != WMError::WM_OK) {
