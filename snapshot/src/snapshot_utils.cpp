@@ -35,17 +35,24 @@
 using namespace OHOS::Rosen;
 
 namespace OHOS {
-constexpr int BITMAP_DEPTH = 8;
 constexpr int MAX_TIME_STR_LEN = 40;
 constexpr int YEAR_SINCE = 1900;
+constexpr int32_t RGB565_PIXEL_BYTES = 2;
 constexpr int32_t RGB888_PIXEL_BYTES = 3;
 constexpr int32_t RGBA8888_PIXEL_BYTES = 4;
 constexpr uint8_t B_INDEX = 0;
 constexpr uint8_t G_INDEX = 1;
 constexpr uint8_t R_INDEX = 2;
+constexpr uint8_t SHIFT_2_BIT = 2;
+constexpr uint8_t SHITF_3_BIT = 3;
+constexpr uint8_t SHIFT_5_BIT = 5;
 constexpr uint8_t SHIFT_8_BIT = 8;
+constexpr uint8_t SHIFT_11_BIT = 11;
 constexpr uint8_t SHIFT_16_BIT = 16;
 
+constexpr uint16_t RGB565_MASK_BLUE = 0xF800;
+constexpr uint16_t RGB565_MASK_GREEN = 0x07E0;
+constexpr uint16_t RGB565_MASK_RED = 0x001F;
 constexpr uint32_t RGBA8888_MASK_BLUE = 0x000000FF;
 constexpr uint32_t RGBA8888_MASK_GREEN = 0x0000FF00;
 constexpr uint32_t RGBA8888_MASK_RED = 0x00FF0000;
@@ -145,10 +152,28 @@ bool SnapShotUtils::CheckWidthAndHeightValid(int32_t w, int32_t h)
 
 bool SnapShotUtils::CheckParamValid(const WriteToJpegParam &param)
 {
-    if (!CheckWidthAndHeightValid(param.width, param.height)) {
-        return false;
+    switch (param.format) {
+        case Media::PixelFormat::RGBA_8888:
+            if (param.stride != param.width * RGBA8888_PIXEL_BYTES) {
+                return false;
+            }
+            break;
+        case Media::PixelFormat::RGB_565:
+            if (param.stride != param.width * RGB565_PIXEL_BYTES) {
+                return false;
+            }
+            break;
+        case Media::PixelFormat::RGB_888:
+            if (param.stride != param.width * RGB888_PIXEL_BYTES) {
+                return false;
+            }
+            break;
+        default:
+            std::cout << __func__ << ": unsupported pixel format: " <<
+                static_cast<uint32_t>(param.format) << std::endl;
+            return false;
     }
-    if (param.stride < BPP * param.width) {
+    if (!CheckWidthAndHeightValid(param.width, param.height)) {
         return false;
     }
     if (param.data == nullptr) {
@@ -172,7 +197,25 @@ bool SnapShotUtils::RGBA8888ToRGB888(const uint8_t* rgba8888Buf, uint8_t *rgb888
     return true;
 }
 
-// The method will NOT release file after opration.
+bool SnapShotUtils::RGB565ToRGB888(const uint8_t* rgb565Buf, uint8_t *rgb888Buf, int32_t size)
+{
+    if (rgb565Buf == nullptr || rgb888Buf == nullptr || size <= 0) {
+        std::cout << __func__ << ": params are invalid." << std::endl;
+        return false;
+    }
+    const uint16_t* rgb565 = reinterpret_cast<const uint16_t*>(rgb565Buf);
+    for (int32_t i = 0; i < size; i++) {
+        rgb888Buf[i * RGB888_PIXEL_BYTES + R_INDEX] = (rgb565[i] & RGB565_MASK_RED);
+        rgb888Buf[i * RGB888_PIXEL_BYTES + G_INDEX] = (rgb565[i] & RGB565_MASK_GREEN) >> SHIFT_5_BIT;
+        rgb888Buf[i * RGB888_PIXEL_BYTES + B_INDEX] = (rgb565[i] & RGB565_MASK_BLUE) >> SHIFT_11_BIT;
+        rgb888Buf[i * RGB888_PIXEL_BYTES + R_INDEX] <<= SHITF_3_BIT;
+        rgb888Buf[i * RGB888_PIXEL_BYTES + G_INDEX] <<= SHIFT_2_BIT;
+        rgb888Buf[i * RGB888_PIXEL_BYTES + B_INDEX] <<= SHITF_3_BIT;
+    }
+    return true;
+}
+
+// The method will NOT release file.
 bool SnapShotUtils::WriteRgb888ToJpeg(FILE* file, uint32_t width, uint32_t height, const uint8_t* data)
 {
     if (data == nullptr) {
@@ -220,57 +263,92 @@ bool SnapShotUtils::WriteRgb888ToJpeg(FILE* file, uint32_t width, uint32_t heigh
 
 bool SnapShotUtils::WriteToJpeg(const std::string &fileName, const WriteToJpegParam &param)
 {
+    bool ret = false;
     if (!CheckFileNameValid(fileName)) {
-        return false;
+        return ret;
     }
     if (!CheckParamValid(param)) {
-        return false;
+        std::cout << "error: invalid param." << std::endl;
+        return ret;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "snapshot:WriteToJpeg(%s)", fileName.c_str());
 
     FILE *file = fopen(fileName.c_str(), "wb");
     if (file == nullptr) {
         std::cout << "error: open file [" << fileName.c_str() << "] error, " << errno << "!" << std::endl;
-        return false;
+        return ret;
     }
-
-    int32_t rgb888Size = param.stride * param.height * RGB888_PIXEL_BYTES / RGBA8888_PIXEL_BYTES;
-    uint8_t *rgb888 = new uint8_t[rgb888Size];
-    auto ret = RGBA8888ToRGB888(param.data, rgb888, rgb888Size / RGB888_PIXEL_BYTES);
-    if (ret) {
-        std::cout << "snapshot: convert rgba8888 to rgb888 successfully." << std::endl;
-        ret = WriteRgb888ToJpeg(file, param.width, param.height, rgb888);
+    std::cout << "snapshot: pixel format is: " << static_cast<uint32_t>(param.format) << std::endl;
+    if (param.format == Media::PixelFormat::RGBA_8888) {
+        int32_t rgb888Size = param.stride * param.height * RGB888_PIXEL_BYTES / RGBA8888_PIXEL_BYTES;
+        uint8_t *rgb888 = new uint8_t[rgb888Size];
+        ret = RGBA8888ToRGB888(param.data, rgb888, rgb888Size / RGB888_PIXEL_BYTES);
+        if (ret) {
+            std::cout << "snapshot: convert rgba8888 to rgb888 successfully." << std::endl;
+            ret = WriteRgb888ToJpeg(file, param.width, param.height, rgb888);
+        }
+        delete[] rgb888;
+    } else if (param.format == Media::PixelFormat::RGB_565) {
+        int32_t rgb888Size = param.stride * param.height * RGB888_PIXEL_BYTES / RGB565_PIXEL_BYTES;
+        uint8_t *rgb888 = new uint8_t[rgb888Size];
+        ret = RGB565ToRGB888(param.data, rgb888, rgb888Size / RGB888_PIXEL_BYTES);
+        if (ret) {
+            std::cout << "snapshot: convert rgb565 to rgb888 successfully." << std::endl;
+            ret = WriteRgb888ToJpeg(file, param.width, param.height, rgb888);
+        }
+        delete[] rgb888;
+    } else if (param.format == Media::PixelFormat::RGB_888) {
+        ret = WriteRgb888ToJpeg(file, param.width, param.height, param.data);
+    } else {
+        std::cout << "snapshot: invalid pixel format." << std::endl;
     }
     if (fclose(file) != 0) {
         std::cout << "error: close file failed!" << std::endl;
         ret = false;
     }
-    delete[] rgb888;
     return ret;
 }
 
 bool SnapShotUtils::WriteToJpeg(int fd, const WriteToJpegParam &param)
 {
+    bool ret = false;
     if (!CheckParamValid(param)) {
-        return false;
+        std::cout << "error: invalid param." << std::endl;
+        return ret;
     }
 
     FILE *file = fdopen(fd, "wb");
     if (file == nullptr) {
-        return false;
+        return ret;
     }
-    int32_t rgb888Size = param.stride * param.height * RGB888_PIXEL_BYTES / RGBA8888_PIXEL_BYTES;
-    uint8_t *rgb888 = new uint8_t[rgb888Size];
-    auto ret = RGBA8888ToRGB888(param.data, rgb888, rgb888Size / RGB888_PIXEL_BYTES);
-    if (ret) {
-        std::cout << "snapshot: convert rgba8888 to rgb888 successfully." << std::endl;
-        ret = WriteRgb888ToJpeg(file, param.width, param.height, rgb888);
+    std::cout << "snapshot: pixel format is: " << static_cast<uint32_t>(param.format) << std::endl;
+    if (param.format == Media::PixelFormat::RGBA_8888) {
+        int32_t rgb888Size = param.stride * param.height * RGB888_PIXEL_BYTES / RGBA8888_PIXEL_BYTES;
+        uint8_t *rgb888 = new uint8_t[rgb888Size];
+        ret = RGBA8888ToRGB888(param.data, rgb888, rgb888Size / RGB888_PIXEL_BYTES);
+        if (ret) {
+            std::cout << "snapshot: convert rgba8888 to rgb888 successfully." << std::endl;
+            ret = WriteRgb888ToJpeg(file, param.width, param.height, rgb888);
+        }
+        delete[] rgb888;
+    } else if (param.format == Media::PixelFormat::RGB_565) {
+        int32_t rgb888Size = param.stride * param.height * RGB888_PIXEL_BYTES / RGB565_PIXEL_BYTES;
+        uint8_t *rgb888 = new uint8_t[rgb888Size];
+        ret = RGB565ToRGB888(param.data, rgb888, rgb888Size / RGB888_PIXEL_BYTES);
+        if (ret) {
+            std::cout << "snapshot: convert rgb565 to rgb888 successfully." << std::endl;
+            ret = WriteRgb888ToJpeg(file, param.width, param.height, rgb888);
+        }
+        delete[] rgb888;
+    } else if (param.format == Media::PixelFormat::RGB_888) {
+        ret = WriteRgb888ToJpeg(file, param.width, param.height, param.data);
+    } else {
+        std::cout << "snapshot: invalid pixel format." << std::endl;
     }
     if (fclose(file) != 0) {
         std::cout << "error: close file failed!" << std::endl;
         ret = false;
     }
-    delete[] rgb888;
     return ret;
 }
 
@@ -281,7 +359,7 @@ bool SnapShotUtils::WriteToJpegWithPixelMap(const std::string &fileName, Media::
     param.height = static_cast<uint32_t>(pixelMap.GetHeight());
     param.data = pixelMap.GetPixels();
     param.stride = static_cast<uint32_t>(pixelMap.GetRowBytes());
-    param.bitDepth = BITMAP_DEPTH;
+    param.format = pixelMap.GetPixelFormat();
     return SnapShotUtils::WriteToJpeg(fileName, param);
 }
 
@@ -292,7 +370,7 @@ bool SnapShotUtils::WriteToJpegWithPixelMap(int fd, Media::PixelMap &pixelMap)
     param.height = static_cast<uint32_t>(pixelMap.GetHeight());
     param.data = pixelMap.GetPixels();
     param.stride = static_cast<uint32_t>(pixelMap.GetRowBytes());
-    param.bitDepth = BITMAP_DEPTH;
+    param.format = pixelMap.GetPixelFormat();
     return SnapShotUtils::WriteToJpeg(fd, param);
 }
 
