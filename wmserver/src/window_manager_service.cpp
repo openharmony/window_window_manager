@@ -382,6 +382,17 @@ void WindowManagerService::ConfigureWindowManagerService()
     if (item.IsMap()) {
         ConfigWindowEffect(item);
     }
+    item = config["floatingBottomPosY"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1 && numbers[0] > 0) {
+            WindowLayoutPolicy::SetCascadeRectBottomPosYLimit(static_cast<uint32_t>(numbers[0]));
+        }
+    }
+    item = config["defaultFloatingWindow"];
+    if (item.IsInts()) {
+        WindowLayoutPolicyCascade::SetCascadeRectCfg(*item.intsValue_);
+    }
 }
 
 void WindowManagerService::ConfigHotZones(const std::vector<int>& numbers)
