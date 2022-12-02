@@ -24,6 +24,9 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr int BPP = 4;
+}
 class SnapshotUtilsTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -149,7 +152,7 @@ HWTEST_F(SnapshotUtilsTest, Write02, Function | MediumTest | Level3)
         .width = pixelMap->GetWidth(),
         .height = pixelMap->GetHeight(),
         .stride = pixelMap->GetRowBytes(),
-        .bitDepth = defaultBitDepth_,
+        .format = pixelMap->GetPixelFormat(),
         .data = pixelMap->GetPixels()
     };
     ASSERT_EQ(true, SnapShotUtils::WriteToJpeg(defaultFile_, param));
@@ -169,10 +172,10 @@ HWTEST_F(SnapshotUtilsTest, Write03, Function | MediumTest | Level3)
         .width = (pixelMap->GetWidth() / 2),
         .height = (pixelMap->GetWidth() / 2),
         .stride = pixelMap->GetRowBytes(),
-        .bitDepth = defaultBitDepth_,
+        .format = pixelMap->GetPixelFormat(),
         .data = pixelMap->GetPixels()
     };
-    ASSERT_EQ(true, SnapShotUtils::WriteToJpeg(defaultFile_, param));
+    ASSERT_EQ(false, SnapShotUtils::WriteToJpeg(defaultFile_, param));
 }
 
 /**
@@ -198,7 +201,7 @@ HWTEST_F(SnapshotUtilsTest, Write05, Function | MediumTest | Level3)
         .width = 256,
         .height = 256,
         .stride = 256 * BPP,
-        .bitDepth = 0,
+        .format = Media::PixelFormat::UNKNOWN,
         .data = new uint8_t
     };
     ASSERT_FALSE(SnapShotUtils::WriteToJpeg("", param));
@@ -215,7 +218,7 @@ HWTEST_F(SnapshotUtilsTest, Write06, Function | MediumTest | Level3)
         .width = 256,
         .height = 256,
         .stride = 256 * BPP,
-        .bitDepth = 0,
+        .format = Media::PixelFormat::UNKNOWN,
         .data = nullptr
     };
     ASSERT_FALSE(SnapShotUtils::WriteToJpeg(defaultFile_, param));
@@ -232,7 +235,7 @@ HWTEST_F(SnapshotUtilsTest, Write07, Function | MediumTest | Level3)
         .width = 256,
         .height = 256,
         .stride = 256 * BPP,
-        .bitDepth = 0,
+        .format = Media::PixelFormat::UNKNOWN,
         .data = nullptr
     };
     ASSERT_FALSE(SnapShotUtils::WriteToJpeg(1, param));
@@ -261,7 +264,7 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid01, Function | SmallTest | Level3)
         .width = DisplayManager::MAX_RESOLUTION_SIZE_SCREENSHOT + 1,
         .height = 0,
         .stride = 0,
-        .bitDepth = 0,
+        .format = Media::PixelFormat::UNKNOWN,
         .data = nullptr
     };
     ASSERT_EQ(false, SnapShotUtils::CheckParamValid(paramInvalidWidth));
@@ -278,7 +281,7 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid02, Function | SmallTest | Level3)
         .width = DisplayManager::MAX_RESOLUTION_SIZE_SCREENSHOT,
         .height = 0,
         .stride = 0,
-        .bitDepth = 0,
+        .format = Media::PixelFormat::UNKNOWN,
         .data = nullptr
     };
     ASSERT_EQ(false, SnapShotUtils::CheckParamValid(paramInvalidHeight));
@@ -295,7 +298,7 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid03, Function | SmallTest | Level3)
         .width = 256,
         .height = 256,
         .stride = 1,
-        .bitDepth = 0,
+        .format = Media::PixelFormat::UNKNOWN,
         .data = nullptr
     };
     ASSERT_EQ(false, SnapShotUtils::CheckParamValid(paramInvalidStride));
@@ -312,7 +315,7 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid04, Function | SmallTest | Level3)
         .width = 256,
         .height = 256,
         .stride = 256 * BPP,
-        .bitDepth = 0,
+        .format = Media::PixelFormat::UNKNOWN,
         .data = nullptr
     };
     ASSERT_EQ(false, SnapShotUtils::CheckParamValid(paramInvalidData));
