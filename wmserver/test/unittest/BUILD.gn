@@ -33,6 +33,7 @@ group("unittest") {
     ":wmserver_window_freeze_controller_test",
     ":wmserver_window_inner_manager_test",
     ":wmserver_window_inner_window_test",
+    ":wmserver_window_layout_policy_cascade_test",
     ":wmserver_window_layout_policy_test",
     ":wmserver_window_manager_config_test",
     ":wmserver_window_manager_proxy_test",
@@ -361,10 +362,19 @@ ohos_unittest("wmserver_window_inner_manager_test") {
   external_deps = test_external_deps
 }
 
+ohos_unittest("wmserver_window_layout_policy_cascade_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "window_layout_policy_cascade_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
 ohos_unittest("wmserver_window_root_test") {
   module_out_path = module_out_path
   configs = test_public_config
-
   sources = [ "window_root_test.cpp" ]
 
   deps = test_inner_deps
