@@ -2554,6 +2554,19 @@ void WindowImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType
     NotifyAvoidAreaChange(avoidArea, type);
 }
 
+void WindowImpl::UpdateWindowStateUnfrozen()
+{
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    if (abilityContext != nullptr && windowTag_ == WindowTag::MAIN_WINDOW) {
+        WLOGFD("DoAbilityForeground KEYGUARD, id: %{public}u", GetWindowId());
+        AAFwk::AbilityManagerClient::GetInstance()->DoAbilityForeground(abilityContext->GetToken(),
+            static_cast<uint32_t>(WindowStateChangeReason::KEYGUARD));
+    } else if (state_ != WindowState::STATE_SHOWN) {
+        state_ = WindowState::STATE_SHOWN;
+        NotifyAfterForeground();
+    }
+}
+
 void WindowImpl::UpdateWindowState(WindowState state)
 {
     WLOGFI("[Client] Window %{public}u, %{public}s WindowState to set:%{public}u", GetWindowId(), name_.c_str(), state);
@@ -2574,14 +2587,7 @@ void WindowImpl::UpdateWindowState(WindowState state)
             break;
         }
         case WindowState::STATE_UNFROZEN: {
-            if (abilityContext != nullptr && windowTag_ == WindowTag::MAIN_WINDOW) {
-                WLOGFD("DoAbilityForeground KEYGUARD, id: %{public}u", GetWindowId());
-                AAFwk::AbilityManagerClient::GetInstance()->DoAbilityForeground(abilityContext->GetToken(),
-                    static_cast<uint32_t>(WindowStateChangeReason::KEYGUARD));
-            } else {
-                state_ = WindowState::STATE_SHOWN;
-                NotifyAfterForeground();
-            }
+            UpdateWindowStateUnfrozen();
             break;
         }
         case WindowState::STATE_SHOWN: {

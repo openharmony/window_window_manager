@@ -1119,6 +1119,20 @@ void WindowRoot::NotifySystemBarTints()
     }
 }
 
+WMError WindowRoot::NotifyDesktopUnfrozen()
+{
+    WLOGFD("notify desktop unfrozen");
+    for (const auto& it : windowNodeMap_) {
+        auto& node = it.second;
+        if (node && (node->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) && (node->GetWindowToken())) {
+            node->GetWindowToken()->UpdateWindowState(WindowState::STATE_UNFROZEN);
+            return WMError::WM_OK;
+        }
+    }
+    WLOGFD("notify desktop unfrozen failed, maybe no window node or windowToken!");
+    return WMError::WM_ERROR_INVALID_OPERATION;
+}
+
 WMError WindowRoot::RaiseZOrderForAppWindow(sptr<WindowNode>& node)
 {
     if (node == nullptr) {
