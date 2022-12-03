@@ -315,14 +315,23 @@ void WindowController::RelayoutKeyboard(const sptr<WindowNode>& node)
     }
 
     uint32_t navigationBarHeight = 0;
-    WindowNodeOperationFunc func = [&navigationBarHeight](sptr<WindowNode> windowNode) {
+    bool hasFullScreenKeyGuardWindow = false;
+    WindowNodeOperationFunc func = [&navigationBarHeight, &hasFullScreenKeyGuardWindow](sptr<WindowNode> windowNode) {
+        if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD &&
+            windowNode->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+                hasFullScreenKeyGuardWindow = true;
+        }
         if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR && windowNode->isVisible_) {
             navigationBarHeight = windowNode->GetWindowRect().height_;
+            if (hasFullScreenKeyGuardWindow) {
+                WLOGFW("RelayoutKeyboard: The navigation bar is overlaid by the keyguard window and is invisible");
+                navigationBarHeight = 0;
+            }
             return true;
         }
         return false;
     };
-    container->TraverseWindowTree(func, true);
+    container->TraverseWindowTree(func, true); // FromTopToBottom
 
     sptr<DisplayInfo> defaultDisplayInfo = DisplayManagerServiceInner::GetInstance().GetDefaultDisplay();
     if (defaultDisplayInfo == nullptr) {
@@ -331,7 +340,7 @@ void WindowController::RelayoutKeyboard(const sptr<WindowNode>& node)
     }
 
     auto previousRect = node->GetWindowRect();
-    WLOGFD("relayout keyboard window with navigationBarHeight: %{public}u", navigationBarHeight);
+    WLOGFI("relayout keyboard window with navigationBarHeight: %{public}u", navigationBarHeight);
     Rect requestedRect = { previousRect.posX_,
         static_cast<int32_t>(defaultDisplayInfo->GetHeight() - previousRect.height_ - navigationBarHeight),
         previousRect.width_, previousRect.height_ };
