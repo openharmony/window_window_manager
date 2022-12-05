@@ -1601,7 +1601,7 @@ void WindowImpl::RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError err
         << ", errCode: " << static_cast<int32_t>(errCode) << ";";
     std::string info = oss.str();
     WLOGFI("window life cycle exception: %{public}s", info.c_str());
-    int32_t ret = OHOS::HiviewDFX::HiSysEvent::Write(
+    int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
         "WINDOW_LIFE_CYCLE_EXCEPTION",
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,

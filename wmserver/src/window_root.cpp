@@ -1273,7 +1273,7 @@ void WindowRoot::FocusFaultDetection() const
     if (needReport) {
         std::string windowLog(GenAllWindowsLogInfo());
         WLOGFE("The focus window is faulty, focusWinId:%{public}u, %{public}s", focusWinId, windowLog.c_str());
-        int32_t ret = OHOS::HiviewDFX::HiSysEvent::Write(
+        int32_t ret = HiSysEventWrite(
             OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
             "NO_FOCUS_WINDOW",
             OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
