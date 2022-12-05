@@ -1323,7 +1323,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
             SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(property_->GetDisplayId());
         } else {
             WLOGFI("window is already shown id: %{public}u, raise to top", property_->GetWindowId());
-            SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId());
+            SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId(), false);
         }
         NotifyAfterForeground(false);
         return WMError::WM_OK;
