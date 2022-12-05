@@ -122,11 +122,11 @@ void WindowAdapter::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<Window
     return windowManagerServiceProxy_->NotifyServerReadyToMoveOrDrag(windowId, windowProperty, moveDragProperty);
 }
 
-void WindowAdapter::ProcessPointDown(uint32_t windowId)
+void WindowAdapter::ProcessPointDown(uint32_t windowId, bool isPointDown)
 {
     INIT_PROXY_CHECK_RETURN();
 
-    return windowManagerServiceProxy_->ProcessPointDown(windowId);
+    return windowManagerServiceProxy_->ProcessPointDown(windowId, isPointDown);
 }
 
 void WindowAdapter::ProcessPointUp(uint32_t windowId)
