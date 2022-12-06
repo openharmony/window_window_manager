@@ -506,6 +506,8 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     uiContent_ = std::move(uiContent);
 
     if (state_ == WindowState::STATE_SHOWN) {
+        // UIContent may be nullptr when show window, need to notify again when window is shown
+        uiContent_->Foreground();
         UpdateTitleButtonVisibility();
         Ace::ViewportConfig config;
         Rect rect = GetRect();
