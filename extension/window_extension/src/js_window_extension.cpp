@@ -47,6 +47,45 @@ public:
     }
 };
 
+NativeValue *AttachWindowExtensionContext(NativeEngine *engine, void *value, void *)
+{
+    WLOGFI("AttachWindowExtensionContext");
+    if (value == nullptr) {
+        WLOGFE("invalid parameter.");
+        return nullptr;
+    }
+    auto ptr = reinterpret_cast<std::weak_ptr<WindowExtensionContext> *>(value)->lock();
+    if (ptr == nullptr) {
+        WLOGFE("invalid context.");
+        return nullptr;
+    }
+    NativeValue* object = CreateJsWindowExtensionContext(*engine, ptr);
+    if (object == nullptr) {
+        WLOGFE("Failed to get js window extension context");
+        return nullptr;
+    }
+    auto contextObj = AbilityRuntime::JsRuntime::LoadSystemModuleByEngine(engine,
+        "application.WindowExtensionContext", &object, 1)->Get();
+    NativeObject* nObject = AbilityRuntime::ConvertNativeValueTo<NativeObject>(contextObj);
+    if (nObject == nullptr) {
+        WLOGFE("Failed to get context native object");
+        return nullptr;
+    }
+    nObject->ConvertToNativeBindingObject(engine, AbilityRuntime::DetachCallbackFunc, AttachWindowExtensionContext,
+        value, nullptr);
+    auto workContext = new (std::nothrow) std::weak_ptr<WindowExtensionContext>(ptr);
+    if (workContext == nullptr) {
+        WLOGFE("Failed to get window extension context");
+        return nullptr;
+    }
+    nObject->SetNativePointer(workContext,
+        [](NativeEngine *, void *data, void *) {
+            WLOGFI("Finalizer for weak_ptr service extension context is called");
+            delete static_cast<std::weak_ptr<WindowExtensionContext> *>(data);
+        }, nullptr);
+    return contextObj;
+}
+
 JsWindowExtension* JsWindowExtension::Create(const std::unique_ptr<AbilityRuntime::Runtime>& runtime)
 {
     WLOGFD("Create runtime");
@@ -81,12 +120,18 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalR
         return;
     }
     WLOGFI("JsWindowExtension::Init ConvertNativeValueTo.");
+    auto& engine = jsRuntime_.GetNativeEngine();
     NativeObject* obj = AbilityRuntime::ConvertNativeValueTo<NativeObject>(jsObj_->Get());
     if (obj == nullptr) {
         WLOGFE("Failed to get JsWindowExtension object");
         return;
     }
 
+    BindContext(engine, obj);
+}
+
+void JsWindowExtension::BindContext(NativeEngine& engine, NativeObject* obj)
+{
     auto context = GetContext();
     if (context == nullptr) {
         WLOGFE("Failed to get context");
@@ -94,23 +139,33 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalR
     }
 
     NativeValue* contextObj = CreateJsWindowExtensionContext(jsRuntime_.GetNativeEngine(), context);
+    if (contextObj == nullptr) {
+        WLOGFE("Failed to get js window extension context");
+        return;
+    }
     shellContextRef_ = jsRuntime_.LoadSystemModule("application.WindowExtensionContext", &contextObj, 1);
     contextObj = shellContextRef_->Get();
+    NativeObject* nativeObj = AbilityRuntime::ConvertNativeValueTo<NativeObject>(contextObj);
+    if (nativeObj == nullptr) {
+        WLOGFE("Failed to get context native object");
+        return;
+    }
+    auto workContext = new (std::nothrow) std::weak_ptr<WindowExtensionContext>(context);
+    if (workContext == nullptr) {
+        WLOGFE("Failed to get window extension context");
+        return;
+    }
+    nativeObj->ConvertToNativeBindingObject(&engine, AbilityRuntime::DetachCallbackFunc, AttachWindowExtensionContext,
+        workContext, nullptr);
     WLOGFI("JsWindowExtension::Init Bind.");
     context->Bind(jsRuntime_, shellContextRef_.get());
     WLOGFI("JsWindowExtension::SetProperty.");
     obj->SetProperty("context", contextObj);
 
-    auto nativeObj = AbilityRuntime::ConvertNativeValueTo<NativeObject>(contextObj);
-    if (nativeObj == nullptr) {
-        WLOGFE("Failed to get extension native object");
-        return;
-    }
-
-    nativeObj->SetNativePointer(new std::weak_ptr<AbilityRuntime::Context>(context),
-        [](NativeEngine*, void* data, void*) {
+    nativeObj->SetNativePointer(workContext,
+        [](NativeEngine *, void *data, void *) {
             WLOGFI("Finalizer for weak_ptr extension context is called");
-            delete static_cast<std::weak_ptr<AbilityRuntime::Context>*>(data);
+            delete static_cast<std::weak_ptr<WindowExtensionContext>*>(data);
         }, nullptr);
 
     WLOGFI("JsWindowExtension::Init end.");
@@ -263,7 +318,7 @@ NativeValue* JsWindowExtension::CallJsMethod(const char* name, NativeValue* cons
     WLOGFI("called (%{public}s), begin", name);
 
     if (!jsObj_) {
-        WLOGFW("Not found ServiceExtension.js");
+        WLOGFW("Not found WindowExtension.js");
         return nullptr;
     }
 
@@ -273,13 +328,13 @@ NativeValue* JsWindowExtension::CallJsMethod(const char* name, NativeValue* cons
     NativeValue* value = jsObj_->Get();
     NativeObject* obj = AbilityRuntime::ConvertNativeValueTo<NativeObject>(value);
     if (obj == nullptr) {
-        WLOGFE("Failed to get ServiceExtension object");
+        WLOGFE("Failed to get WindowExtension object");
         return nullptr;
     }
 
     NativeValue* method = obj->GetProperty(name);
     if (method == nullptr || method->TypeOf() != NATIVE_FUNCTION) {
-        WLOGFE("Failed to get '%{public}s' from ServiceExtension object", name);
+        WLOGFE("Failed to get '%{public}s' from WindowExtension object", name);
         return nullptr;
     }
     WLOGFI("(%{public}s), success", name);

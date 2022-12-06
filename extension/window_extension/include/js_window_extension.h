@@ -84,6 +84,7 @@ private:
     void GetSrcPath(std::string& srcPath) const;
     NativeValue* CallJsMethod(const char* name, NativeValue* const* argv = nullptr, size_t argc = 0) const;
     void OnWindowCreated() const;
+    void BindContext(NativeEngine& engine, NativeObject* obj);
 
     AbilityRuntime::JsRuntime& jsRuntime_;
     std::unique_ptr<NativeReference> jsObj_;

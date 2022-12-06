@@ -323,6 +323,8 @@ NativeValue* WindowErrorInit(NativeEngine* engine)
         static_cast<int32_t>(WMError::WM_ERROR_SAMGR)));
     object->SetProperty("WM_ERROR_IPC_FAILED", CreateJsValue(*engine,
         static_cast<int32_t>(WMError::WM_ERROR_IPC_FAILED)));
+    object->SetProperty("WM_ERROR_START_ABILITY_FAILED", CreateJsValue(*engine,
+        static_cast<int32_t>(WMError::WM_ERROR_START_ABILITY_FAILED)));
     return objValue;
 }
 
@@ -358,6 +360,8 @@ NativeValue* WindowErrorCodeInit(NativeEngine* engine)
         static_cast<int32_t>(WmErrorCode::WM_ERROR_STAGE_ABNORMALLY)));
     object->SetProperty("WM_ERROR_CONTEXT_ABNORMALLY", CreateJsValue(*engine,
         static_cast<int32_t>(WmErrorCode::WM_ERROR_CONTEXT_ABNORMALLY)));
+    object->SetProperty("WM_ERROR_START_ABILITY_FAILED", CreateJsValue(*engine,
+        static_cast<int32_t>(WmErrorCode::WM_ERROR_START_ABILITY_FAILED)));
     return objValue;
 }
 
