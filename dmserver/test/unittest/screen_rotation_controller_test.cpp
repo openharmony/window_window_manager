@@ -136,7 +136,7 @@ HWTEST_F(ScreenRotationControllerTest, DefaultDeviceRotationOffset, Function | S
 HWTEST_F(ScreenRotationControllerTest, CheckCallbackTimeInterval, Function | SmallTest | Level3)
 {
     std::chrono::milliseconds ms = std::chrono::time_point_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now()).time_since_epoch();
+        std::chrono::steady_clock::now()).time_since_epoch();
     long currentTimeInMillitm = ms.count();
 
     ScreenRotationController::lastCallbackTime_ = currentTimeInMillitm;
