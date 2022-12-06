@@ -81,7 +81,7 @@ bool PerformReporter::report()
     }
     oss << "ABOVE" << maxSplit << "(ms): " << timeSplitCount_[BARRIER];
 
-    int32_t ret = OHOS::HiviewDFX::HiSysEvent::Write(
+    int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER, tag_,
         OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC, "MSG", oss.str());
     WLOGFI("Write HiSysEvent ret:%{public}d", ret);
