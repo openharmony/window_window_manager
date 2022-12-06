@@ -184,6 +184,22 @@ void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
     RSTransaction::FlushImplicitTransaction();
 }
 
+static void GetFinishCallback(wptr<WindowNode> weakNode)
+{
+    auto weak = weakNode.promote();
+    if (weak == nullptr) {
+        return;
+    }
+    auto winRect = weak->GetWindowRect();
+    WLOGFI("before setBounds windowRect: %{public}d, %{public}d, %{public}d, %{public}d",
+        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+    if (weak->leashWinSurfaceNode_) {
+        weak->leashWinSurfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+        weak->leashWinSurfaceNode_->SetAnimationFinished();
+    }
+    RSTransaction::FlushImplicitTransaction();
+}
+
 void StartingWindow::AddNodeOnRSTree(sptr<WindowNode>& node, const AnimationConfig& animationConfig,
     bool isMultiDisplay)
 {
@@ -215,21 +231,16 @@ void StartingWindow::AddNodeOnRSTree(sptr<WindowNode>& node, const AnimationConf
     };
     wptr<WindowNode> weakNode = node;
     auto finishCallBack = [weakNode]() {
-        auto weak = weakNode.promote();
-        if (weak == nullptr) {
-            return;
-        }
-        auto winRect = weak->GetWindowRect();
-        WLOGFI("before setBounds windowRect: %{public}d, %{public}d, %{public}d, %{public}d",
-            winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
-        if (weak->leashWinSurfaceNode_) {
-            weak->leashWinSurfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
-            weak->leashWinSurfaceNode_->SetAnimationFinished();
-        }
-        RSTransaction::FlushImplicitTransaction();
+        GetFinishCallback(weakNode);
     };
     if (!RemoteAnimation::CheckAnimationController()) {
-        RSNode::Animate(animationConfig.windowAnimationConfig_.animationTiming_.timingProtocol_,
+        auto animationTime = animationConfig.windowAnimationConfig_.animationTiming_.timingProtocol_;
+        // delete after
+        if (node->abilityInfo_.bundleName_.find("callui") != std::string::npos) { // callui is Dial ui
+            WLOGFD("set call ui animationTime 100ms!");
+            animationTime = 100; // 100 is animationTime
+        }
+        RSNode::Animate(animationTime,
             animationConfig.windowAnimationConfig_.animationTiming_.timingCurve_, updateRSTreeFunc, finishCallBack);
     } else {
         // add or remove window without animation
