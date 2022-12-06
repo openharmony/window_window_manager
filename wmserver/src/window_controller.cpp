@@ -788,7 +788,7 @@ void WindowController::RecordBootAnimationEvent() const
     WLOGFI("boot animation done duration(s): %{public}" PRIu64"", time);
     std::ostringstream os;
     os << "boot animation done duration(s): " << time <<";";
-    int32_t ret = OHOS::HiviewDFX::HiSysEvent::Write(
+    int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
         "WINDOW_BOOT_ANIMATION_DONE",
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
