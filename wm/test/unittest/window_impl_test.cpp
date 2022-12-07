@@ -2867,6 +2867,8 @@ HWTEST_F(WindowImplTest, MoveDrag, Function | SmallTest | Level3)
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent =  std::make_shared<MockPointerEvent>();
     MMI::PointerEvent::PointerItem item;
+    pointerEvent->SetTargetDisplayId(0);
+
     window->moveDragProperty_->pointEventStarted_ = true;
     window->ReadyToMoveOrDragWindow(pointerEvent, item);
     window->moveDragProperty_->pointEventStarted_ = false;
