@@ -572,7 +572,7 @@ void WindowLayoutPolicyCascade::SetCascadeRectCfg(const std::vector<int>& number
         return;
     }
     uint32_t idx = 0;
-    Rect rect = cascadeRectSetFromCfg_;
+    Rect& rect = cascadeRectSetFromCfg_;
     rect.posX_ = numbers[idx++];
     rect.posY_ = numbers[idx++];
     rect.width_ = numbers[idx++];
