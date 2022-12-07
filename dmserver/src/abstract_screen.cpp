@@ -195,6 +195,7 @@ void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
     if (fabsf(virtualPixelRatio) < 1e-6) {
         virtualPixelRatio = 1.0f;
     }
+    info->name_ = name_;
     info->virtualPixelRatio_ = virtualPixelRatio;
     info->virtualHeight_ = height / virtualPixelRatio;
     info->virtualWidth_ = width / virtualPixelRatio;
