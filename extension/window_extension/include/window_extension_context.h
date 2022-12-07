@@ -16,7 +16,9 @@
 #ifndef WINDOW_EXTENSION_CONTEXT_H
 #define WINDOW_EXTENSION_CONTEXT_H
 
+#include <ability_manager_client.h>
 #include <extension_context.h>
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -24,6 +26,24 @@ class WindowExtensionContext : public AbilityRuntime::ExtensionContext {
 public:
     WindowExtensionContext() = default;
     ~WindowExtensionContext() = default;
+
+    /**
+     * @brief Starts a new ability.
+     * An ability using the AbilityInfo.AbilityType.SERVICE or AbilityInfo.AbilityType.PAGE template uses this method
+     * to start a specific ability. The system locates the target ability from installed abilities based on the value
+     * of the want parameter and the startOptions parameter and then starts it. You can specify the ability to start
+     * using the want parameter.
+     *
+     * @param want Indicates the Want containing information about the target ability to start.
+     * @param startOptions Indicates the startOptions containing information about WindowMode and displayId to start.
+     *
+     * @return errCode WM_OK on success, others on failure.
+     */
+    WMError StartAbility(const AAFwk::Want &want, const AAFwk::StartOptions &startOptions) const;
+
+    static const size_t CONTEXT_TYPE_ID;
+private:
+    static int ILLEGAL_REQUEST_CODE;
 };
 } // namespace Rosen
 } // namespace OHOS
