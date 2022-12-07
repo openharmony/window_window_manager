@@ -23,6 +23,7 @@
 
 #include "display_manager_service_inner.h"
 #include "window_helper.h"
+#include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "window_manager_service.h"
 #include "window_manager_agent_controller.h"
@@ -217,7 +218,7 @@ WMError WindowRoot::SaveWindow(const sptr<WindowNode>& node)
             WLOGFE("windowNode is nullptr");
             return;
         }
-        AAFwk::AbilityManagerClient::GetInstance()->CompleteFirstFrameDrawing(weakNode->abilityToken_);
+        WindowInnerManager::GetInstance().CompleteFirstFrameDrawing(weakNode);
     };
     if (node->surfaceNode_ && WindowHelper::IsMainWindow(node->GetWindowType())) {
         node->surfaceNode_->SetBufferAvailableCallback(firstFrameCompleteCallback);
