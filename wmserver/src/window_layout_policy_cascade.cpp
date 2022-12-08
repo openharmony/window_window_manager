@@ -344,7 +344,8 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
             break;
         }
         case WindowMode::WINDOW_MODE_FLOATING: {
-            if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+            if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE ||
+                node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
                 break;
             }
             UpdateWindowSizeLimits(node);
