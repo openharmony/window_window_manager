@@ -23,7 +23,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannelProxy"};
 }
 
-WSError WindowEventChannelProxy::NotifySizeChange(const Rect& rect)
+WSError WindowEventChannelProxy::NotifySizeChange(const WSRect& rect)
 {
     MessageParcel data;
     MessageParcel reply;

@@ -28,19 +28,19 @@ public:
 
     enum class SceneSessionMessage : uint32_t {
         TRANS_ID_CONNECT,
-        TRANS_ID_REQUEST_ACTIVATION,
+        TRANS_ID_START_SCENE,
         TRANS_ID_MINIMIZE,
         TRANS_ID_CLOSE,
         TRANS_ID_RECOVER,
         TRANS_ID_MAXIMUM,
     };
 
-    virtual WSError Connect(sptr<ISceneSessionStage>& sessionStage, sptr<IWindowEventChannel>& eventChannel) = 0;
+    virtual WSError Connect(const sptr<ISceneSessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel) = 0;
     virtual WSError Minimize() = 0;
     virtual WSError Close() = 0;
     virtual WSError Recover() = 0;
     virtual WSError Maximum() = 0;
-    virtual WSError RequestSceneSessionActivation(const AbilityInfo& info) = 0;
+    virtual WSError StartScene(const AbilityInfo& info, SessionOption sessionOption) = 0;
 };
 }
 #endif // OHOS_SCENE_SESSION_INTERFACE_H

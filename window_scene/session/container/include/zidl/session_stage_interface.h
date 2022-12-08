@@ -31,4 +31,4 @@ public:
     virtual WSError SetActive(bool active) = 0;
 };
 }
-#endif // OHOS_SESSION_INTERFACE_H
+#endif // OHOS_SESSION_STAGE_INTERFACE_H

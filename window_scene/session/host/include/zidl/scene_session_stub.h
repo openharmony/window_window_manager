@@ -43,7 +43,7 @@ private:
     int HandleClose(MessageParcel& data, MessageParcel& reply);
     int HandleRecover(MessageParcel& data, MessageParcel& reply);
     int HandleMaximum(MessageParcel& data, MessageParcel& reply);
-    int HandleRequestSceneSessionActivation(MessageParcel& data, MessageParcel& reply);
+    int HandleStartScene(MessageParcel& data, MessageParcel& reply);
 };
 }
 #endif // OHOS_SCENE_SESSION_STUB_H

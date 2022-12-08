@@ -33,9 +33,9 @@ public:
         TRANS_ID_TRANSFER_POINTER_EVENT,
     };
 
-    virtual WSError NotifySizeChange(const Rect& rect) = 0;
+    virtual WSError NotifySizeChange(const WSRect& rect) = 0;
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
     virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
 };
 }
-#endif // OHOS_SESSION_INTERFACE_H
+#endif // OHOS_WINDOW_EVENT_CHANNEL_INTERFACE_H

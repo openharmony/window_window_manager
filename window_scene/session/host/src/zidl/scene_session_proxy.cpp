@@ -80,7 +80,8 @@ WSError SceneSessionProxy::Disconnect()
     return static_cast<WSError>(ret);
 }
 
-WSError SceneSessionProxy::Connect(sptr<ISceneSessionStage>& sessionStage, sptr<IWindowEventChannel>& eventChannel)
+WSError SceneSessionProxy::Connect(const sptr<ISceneSessionStage>& sessionStage,
+    const sptr<IWindowEventChannel>& eventChannel)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -178,7 +179,7 @@ WSError SceneSessionProxy::Maximum()
     return static_cast<WSError>(ret);
 }
 
-WSError SceneSessionProxy::RequestSceneSessionActivation(const AbilityInfo& info)
+WSError SceneSessionProxy::StartScene(const AbilityInfo& info, SessionOption sessionOption)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -191,7 +192,11 @@ WSError SceneSessionProxy::RequestSceneSessionActivation(const AbilityInfo& info
         WLOGFE("Write ability info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionMessage::TRANS_ID_REQUEST_ACTIVATION),
+    if (!data.WriteUint32(static_cast<uint32_t>(sessionOption))) {
+        WLOGFE("Write session option failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionMessage::TRANS_ID_START_SCENE),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;

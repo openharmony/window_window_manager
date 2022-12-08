@@ -31,12 +31,13 @@ public:
     virtual WSError Foreground() override;
     virtual WSError Background() override;
     virtual WSError Disconnect() override;
-    virtual WSError Connect(sptr<ISceneSessionStage>& sessionStage, sptr<IWindowEventChannel>& eventChannel) override;
+    virtual WSError Connect(const sptr<ISceneSessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel) override;
     virtual WSError Minimize() override;
     virtual WSError Close() override;
     virtual WSError Recover() override;
     virtual WSError Maximum() override;
-    virtual WSError RequestSceneSessionActivation(const AbilityInfo& abilityInfo) override;
+    virtual WSError StartScene(const AbilityInfo& abilityInfo, SessionOption sessionOption) override;
 private:
     static inline BrokerDelegator<SceneSessionProxy> delegator_;
 };
