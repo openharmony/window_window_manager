@@ -666,6 +666,7 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
     }
     bool isNeedSystemPrivilege = property->GetWindowType() != WindowType::WINDOW_TYPE_DRAGGING_EFFECT &&
         property->GetWindowType() != WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW &&
+        property->GetWindowType() != WindowType::WINDOW_TYPE_TOAST &&
         WindowHelper::IsSystemWindow(property->GetWindowType());
     if (isNeedSystemPrivilege && !Permission::IsSystemCalling()) {
         WLOGFE("create system window permission denied!");
@@ -689,6 +690,7 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
     }
     bool isNeedSystemPrivilege = property->GetWindowType() != WindowType::WINDOW_TYPE_DRAGGING_EFFECT &&
         property->GetWindowType() != WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW &&
+        property->GetWindowType() != WindowType::WINDOW_TYPE_TOAST &&
         WindowHelper::IsSystemWindow(property->GetWindowType());
     if ((isNeedSystemPrivilege ||
         property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) &&
