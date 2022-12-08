@@ -18,22 +18,27 @@
 
 #include "zidl/scene_session_stage_stub.h"
 #include "session_stage.h"
-#include "zidl/scene_session_interface.h"
+#include "scene_session_interface.h"
 #include "window_scene_common.h"
 
 namespace OHOS::Rosen {
 class SceneSessionStage : public SceneSessionStageStub, public SessionStage{
 public:
-    explicit SceneSessionStage() = default;
+    explicit SceneSessionStage(const sptr<ISceneSession>& sceneSession);
     ~SceneSessionStage() = default;
 
     virtual WSError SetActive(bool active) override;
 
-    WSError RequestSceneSessionActivation(const AbilityInfo& info) override;
-    WSError Minimize() override;
-    WSError Close() override;
-    WSError Recover() override;
-    WSError Maximum() override;
+    virtual WSError Connect(const sptr<IWindowEventChannel>& eventChannel) override;
+    virtual WSError Foreground() override;
+    virtual WSError Background() override;
+    virtual WSError Disconnect() override;
+
+    WSError StartScene(const AbilityInfo& info, SessionOption sessionOption);
+    WSError Minimize();
+    WSError Close();
+    WSError Recover();
+    WSError Maximum();
 
 private:
     sptr<ISceneSession> sceneSession_;

@@ -31,8 +31,8 @@ const std::map<uint32_t, SceneSessionStubFunc> SceneSessionStub::stubFuncMap_{
     std::make_pair(static_cast<uint32_t>(SceneSessionMessage::TRANS_ID_CLOSE), &SceneSessionStub::HandleClose),
     std::make_pair(static_cast<uint32_t>(SceneSessionMessage::TRANS_ID_RECOVER), &SceneSessionStub::HandleRecover),
     std::make_pair(static_cast<uint32_t>(SceneSessionMessage::TRANS_ID_MAXIMUM), &SceneSessionStub::HandleMaximum),
-    std::make_pair(static_cast<uint32_t>(SceneSessionMessage::TRANS_ID_REQUEST_ACTIVATION),
-        &SceneSessionStub::HandleRequestSceneSessionActivation)
+    std::make_pair(static_cast<uint32_t>(SceneSessionMessage::TRANS_ID_START_SCENE),
+        &SceneSessionStub::HandleStartScene)
 };
 
 int SceneSessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -124,11 +124,12 @@ int SceneSessionStub::HandleMaximum(MessageParcel& data, MessageParcel& reply)
     return ERR_NONE;
 }
 
-int SceneSessionStub::HandleRequestSceneSessionActivation(MessageParcel& data, MessageParcel& reply)
+int SceneSessionStub::HandleStartScene(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("RequestActivation!");
     AbilityInfo info = { data.ReadString(), data.ReadString() };
-    WSError errCode = RequestSceneSessionActivation(info);
+    SessionOption sessionOption = static_cast<SessionOption>(data.ReadUint32());
+    WSError errCode = StartScene(info, sessionOption);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

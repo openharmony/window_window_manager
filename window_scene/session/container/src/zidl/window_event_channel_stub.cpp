@@ -51,7 +51,7 @@ int WindowEventChannelStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
 int WindowEventChannelStub::HandleNotifySizeChange(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("NotifySizeChange!");
-    Rect rect = { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
+    WSRect rect = { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
     WSError errCode = NotifySizeChange(rect);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;

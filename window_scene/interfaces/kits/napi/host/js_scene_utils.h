@@ -13,3 +13,18 @@
  * limitations under the License.
  */
 
+#ifndef OHOS_JS_SCENE_UTILS_H
+#define OHOS_JS_SCENE_UTILS_H
+
+#include <js_runtime_utils.h>
+#include <native_engine/native_value.h>
+#include <native_engine/native_engine.h>
+#include "scene_session.h"
+
+namespace OHOS::Rosen {
+    bool GetAbilityInfoFromJs(NativeEngine& engine, NativeObject* jsObject,
+        AbilityInfo& abilityInfo);
+    NativeValue* CreateJsAbilityInfo(NativeEngine& engine, const sptr<SceneSession>& session);
+}
+
+#endif // OHOS_JS_SCENE_UTILS_H

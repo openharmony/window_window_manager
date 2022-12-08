@@ -30,17 +30,20 @@ public:
     void SetPersistentId(uint32_t persistentId);
     uint32_t GetPersistentId() const;
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
-    SessionState GetSessionState() const;
+
     virtual WSError SetActive(bool active) = 0;
 
 protected:
+    SessionState GetSessionState() const;
     void UpdateSessionState(SessionState state);
+    bool IsSessionValid() const;
 
 private:
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name);
+
     uint32_t persistentId_ = INVALID_SESSION_ID;
     std::shared_ptr<RSSurfaceNode> surfaceNode_ = nullptr;
-    SessionState state_ = SessionState::STATE_INITIAL;
+    SessionState state_ = SessionState::STATE_DISCONNECT;
 };
 }
 #endif // OHOS_SESSION_H

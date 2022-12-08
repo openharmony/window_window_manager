@@ -56,6 +56,15 @@ void Session::UpdateSessionState(SessionState state)
     state_ = state;
 }
 
+bool Session::IsSessionValid() const
+{
+    bool res = state_ > SessionState::STATE_DISCONNECT;
+    if (!res) {
+        WLOGFI("session is already destroyed or not created! id: %{public}u", GetPersistentId());
+    }
+    return res;
+}
+
 RSSurfaceNode::SharedPtr Session::CreateSurfaceNode(std::string name)
 {
     if (name.empty()) {

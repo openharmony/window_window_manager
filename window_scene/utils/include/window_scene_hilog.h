@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_WM_INCLUDE_WINDOW_SCENE_HILOG_H
-#define OHOS_WM_INCLUDE_WINDOW_SCENE_HILOG_H
+#ifndef OHOS_WS_INCLUDE_WINDOW_SCENE_HILOG_H
+#define OHOS_WS_INCLUDE_WINDOW_SCENE_HILOG_H
 
 #include "hilog/log.h"
 namespace OHOS::Rosen {
@@ -47,4 +47,4 @@ static constexpr OHOS::HiviewDFX::HiLogLabel LOG_LABEL = {LOG_CORE, HILOG_DOMAIN
 #define WLOGFW(fmt, ...) WLOGW("%{public}s: " fmt, _W_FUNC, ##__VA_ARGS__)
 #define WLOGFE(fmt, ...) WLOGE("%{public}s: " fmt, _W_FUNC, ##__VA_ARGS__)
 }
-#endif // OHOS_WM_INCLUDE_WINDOW_SCENE_HILOG_H
+#endif // OHOS_WS_INCLUDE_WINDOW_SCENE_HILOG_H
