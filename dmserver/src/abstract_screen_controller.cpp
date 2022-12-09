@@ -718,6 +718,8 @@ void AbstractScreenController::SetScreenRotateAnimation(
 
 bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow)
 {
+    WLOGFI("Enter SetRotation, screenId: %{public}" PRIu64 ", rotation: %{public}u, isFromWindow: %{public}u",
+        screenId, rotationAfter, isFromWindow);
     auto screen = GetAbstractScreen(screenId);
     if (screen == nullptr) {
         WLOGFE("SetRotation error, cannot get screen with screenId: %{public}" PRIu64, screenId);
@@ -736,12 +738,10 @@ bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationA
         WLOGI("rotation not changed. screen %{public}" PRIu64" rotation %{public}u", screenId, rotationAfter);
     }
 
-    if (isFromWindow) {
-        NotifyScreenChanged(screen->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
-        // Notify rotation event to AbstractDisplayController
-        if (abstractScreenCallback_ != nullptr) {
-            abstractScreenCallback_->onChange_(screen, DisplayChangeEvent::UPDATE_ROTATION);
-        }
+    NotifyScreenChanged(screen->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
+    // Notify rotation event to AbstractDisplayController
+    if (abstractScreenCallback_ != nullptr) {
+        abstractScreenCallback_->onChange_(screen, DisplayChangeEvent::UPDATE_ROTATION);
     }
     return true;
 }
