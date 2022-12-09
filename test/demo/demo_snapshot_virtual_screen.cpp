@@ -84,10 +84,10 @@ int main(int argc, char *argv[])
             continue;
         }
         auto pixelMap = surfaceReaderHandler->GetPixelMap();
-        bool ret = SnapShotUtils::WriteToPngWithPixelMap(FILE_NAME + std::to_string(fileIndex) + ".png", *pixelMap);
+        bool ret = SnapShotUtils::WriteToJpegWithPixelMap(FILE_NAME + std::to_string(fileIndex) + ".jpeg", *pixelMap);
         if (ret) {
             std::cout << "snapshot "<< mainId << " write to " <<
-                (FILE_NAME + std::to_string(fileIndex)).c_str() << " as png" << std::endl;
+                (FILE_NAME + std::to_string(fileIndex)).c_str() << " as jpeg" << std::endl;
         } else {
             std::cout << "snapshot "<< mainId << " write to " <<
                 (FILE_NAME + std::to_string(fileIndex)).c_str() << " failed!" << std::endl;
