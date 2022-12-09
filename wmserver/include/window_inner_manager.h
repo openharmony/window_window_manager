@@ -51,6 +51,7 @@ public:
     void MinimizeAbility(const wptr<WindowNode> &node, bool isFromUser);
     void TerminateAbility(const wptr<WindowNode> &node);
     void CloseAbility(const wptr<WindowNode> &node);
+    void CompleteFirstFrameDrawing(const wptr<WindowNode> &node);
 
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void NotifyDisplayChange(const std::map<DisplayId, Rect>& displayRectMap);
