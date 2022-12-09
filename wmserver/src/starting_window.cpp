@@ -21,6 +21,7 @@
 #include <transaction/rs_transaction.h>
 #include "remote_animation.h"
 #include "window_helper.h"
+#include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -157,7 +158,7 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
         }
         WLOGFI("StartingWindow::Replace surfaceNode, id: %{public}u", weakNode->GetWindowId());
         weakNode->leashWinSurfaceNode_->RemoveChild(weakNode->startingWinSurfaceNode_);
-        AAFwk::AbilityManagerClient::GetInstance()->CompleteFirstFrameDrawing(weakNode->abilityToken_);
+        WindowInnerManager::GetInstance().CompleteFirstFrameDrawing(weakNode);
         RSTransaction::FlushImplicitTransaction();
         weakNode->firstFrameAvaliable_ = true;
         weakNode->startingWinSurfaceNode_ = nullptr;

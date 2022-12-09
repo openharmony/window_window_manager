@@ -2279,7 +2279,7 @@ void WindowImpl::ReadyToMoveOrDragWindow(const std::shared_ptr<MMI::PointerEvent
 
     // calculate window inner rect except frame
     auto display = SingletonContainer::IsDestroyed() ? nullptr :
-        SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(moveDragProperty_->targetDisplayId_);
     if (display == nullptr || display->GetDisplayInfo() == nullptr) {
         WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
             property_->GetWindowId());
@@ -2415,7 +2415,7 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
     auto action = pointerEvent->GetPointerAction();
     if (WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
         auto display = SingletonContainer::IsDestroyed() ? nullptr :
-            SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+            SingletonContainer::Get<DisplayManager>().GetDisplayById(moveDragProperty_->targetDisplayId_);
         if (display == nullptr || display->GetDisplayInfo() == nullptr) {
             WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u",
                 property_->GetDisplayId(), property_->GetWindowId());

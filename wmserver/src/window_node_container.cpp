@@ -1601,8 +1601,16 @@ void WindowNodeContainer::BackUpAllAppWindows()
         WLOGFD("minimize window, windowId:%{public}u", appNode->GetWindowId());
         backupWindowIds_.emplace_back(appNode->GetWindowId());
         WindowManagerService::GetInstance().RemoveWindow(appNode->GetWindowId());
-        AAFwk::AbilityManagerClient::GetInstance()->DoAbilityBackground(appNode->abilityToken_,
-            static_cast<uint32_t>(WindowStateChangeReason::TOGGLING));
+        wptr<IRemoteObject> abilityToken = appNode->abilityToken_;
+        WindowInnerManager::GetInstance().PostTask([abilityToken]() {
+            auto token = abilityToken.promote();
+            if (token == nullptr) {
+                WLOGFW("Ability token is null");
+                return;
+            }
+            AAFwk::AbilityManagerClient::GetInstance()->DoAbilityBackground(token,
+                static_cast<uint32_t>(WindowStateChangeReason::TOGGLING));
+        });
     }
     backupDividerWindowRect_.clear();
     for (auto displayId : displayIdSet) {
