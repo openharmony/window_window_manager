@@ -237,19 +237,19 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
 
 MMI::Direction InputWindowMonitor::GetDisplayDirectionForMmi(Rotation rotation)
 {
-    MMI::Direction direction = MMI::Direction0;
+    MMI::Direction direction = MMI::DIRECTION0;
     switch (rotation) {
         case Rotation::ROTATION_0:
-            direction = MMI::Direction0;
+            direction = MMI::DIRECTION0;
             break;
         case Rotation::ROTATION_90:
-            direction = MMI::Direction90;
+            direction = MMI::DIRECTION90;
             break;
         case Rotation::ROTATION_180:
-            direction = MMI::Direction180;
+            direction = MMI::DIRECTION180;
             break;
         case Rotation::ROTATION_270:
-            direction = MMI::Direction270;
+            direction = MMI::DIRECTION270;
             break;
         default:
             break;

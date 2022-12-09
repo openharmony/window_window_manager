@@ -77,7 +77,7 @@ HWTEST_F(InputWindowMonitorTest, UpdateInputWindow01, Function | SmallTest | Lev
 HWTEST_F(InputWindowMonitorTest, GetDisplayDirectionForMmi01, Function | SmallTest | Level2)
 {
     Rotation rotate = Rotation::ROTATION_0;
-    ASSERT_EQ(MMI::Direction0, input_monitor_->GetDisplayDirectionForMmi(rotate));
+    ASSERT_EQ(MMI::DIRECTION0, input_monitor_->GetDisplayDirectionForMmi(rotate));
 }
 /**
  * @tc.name: UpdateDisplayInfo
