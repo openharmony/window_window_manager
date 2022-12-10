@@ -780,9 +780,13 @@ NativeValue* JsWindow::OnHide(NativeEngine& engine, NativeCallbackInfo& info)
 NativeValue* JsWindow::OnHideWithAnimation(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
-    auto winType = windowToken_->GetType();
-    if (!WindowHelper::IsSystemWindow(winType)) {
-        WLOGFE("[NAPI]window Type %{public}u is not supported", static_cast<uint32_t>(winType));
+    if (windowToken_) {
+        auto winType = windowToken_->GetType();
+        if (!WindowHelper::IsSystemWindow(winType)) {
+            WLOGFE("[NAPI]window Type %{public}u is not supported", static_cast<uint32_t>(winType));
+            errCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
+        }
+    } else {
         errCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
     }
     wptr<Window> weakToken(windowToken_);
