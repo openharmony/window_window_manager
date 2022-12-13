@@ -148,20 +148,21 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
     // Register FirstFrame Callback to rs, replace startwin
     wptr<WindowNode> weak = node;
     auto firstFrameCompleteCallback = [weak]() {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::STARTING_WINDOW),
-            "wms:async:ShowStartingWindow");
-        auto weakNode = weak.promote();
-        if (weakNode == nullptr || weakNode->leashWinSurfaceNode_ == nullptr) {
-            WLOGFE("windowNode or leashWinSurfaceNode_ is nullptr");
-            return;
-        }
-        WLOGFI("StartingWindow::Replace surfaceNode, id: %{public}u", weakNode->GetWindowId());
-        weakNode->leashWinSurfaceNode_->RemoveChild(weakNode->startingWinSurfaceNode_);
-        WindowInnerManager::GetInstance().CompleteFirstFrameDrawing(weakNode);
-        RSTransaction::FlushImplicitTransaction();
-        weakNode->firstFrameAvaliable_ = true;
-        weakNode->startingWinSurfaceNode_ = nullptr;
+        WindowInnerManager::GetInstance().PostTask([weak]() {
+            FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::STARTING_WINDOW),
+                "wms:async:ShowStartingWindow");
+            auto weakNode = weak.promote();
+            if (weakNode == nullptr || weakNode->leashWinSurfaceNode_ == nullptr) {
+                WLOGFE("windowNode or leashWinSurfaceNode_ is nullptr");
+                return;
+            }
+            WLOGFI("StartingWindow::Replace surfaceNode, id: %{public}u", weakNode->GetWindowId());
+            weakNode->leashWinSurfaceNode_->RemoveChild(weakNode->startingWinSurfaceNode_);
+            WindowInnerManager::GetInstance().CompleteFirstFrameDrawing(weakNode);
+            RSTransaction::FlushImplicitTransaction();
+            weakNode->firstFrameAvaliable_ = true;
+            weakNode->startingWinSurfaceNode_ = nullptr;
+        });
     };
     node->surfaceNode_->SetBufferAvailableCallback(firstFrameCompleteCallback);
     RSTransaction::FlushImplicitTransaction();
