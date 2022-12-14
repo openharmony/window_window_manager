@@ -14,7 +14,6 @@
 group("window_resources") {
   deps = [
     "config:window_config",
-    "dialog_ui:dialog_ui",
     "media:window_resources_media",
   ]
 }
