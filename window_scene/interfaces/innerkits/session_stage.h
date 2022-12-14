@@ -20,7 +20,7 @@
 #include <mutex>
 #include <i_input_event_consumer.h>
 #include "window_scene_common.h"
-#include "zidl/window_event_channel_interface.h"
+#include "window_event_channel_interface.h"
 
 namespace OHOS::Rosen {
 class ISessionStateListener {

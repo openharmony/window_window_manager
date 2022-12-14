@@ -15,6 +15,9 @@
 
 #include "zidl/window_event_channel_stub.h"
 #include <ipc_types.h>
+#include <axis_event.h>
+#include <key_event.h>
+#include <pointer_event.h>
 #include "window_scene_hilog.h"
 
 namespace OHOS::Rosen {

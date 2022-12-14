@@ -21,7 +21,6 @@
 #include <map>
 #include <unistd.h>
 
-#include <native_engine/native_engine.h>
 #include "ws_single_instance.h"
 #include "window_scene_common.h"
 #include "scene_session.h"
@@ -30,12 +29,10 @@ namespace OHOS::Rosen {
 class SceneSessionManager {
 WS_DECLARE_SINGLE_INSTANCE(SceneSessionManager)
 public:
-    sptr<SceneSession> RequestSceneSession(const AbilityInfo& abilityInfo, SessionOption option, NativeEngine& engine);
+    sptr<SceneSession> RequestSceneSession(const AbilityInfo& abilityInfo, SessionOption option);
     WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession);
-
-    sptr<SceneSession> FindSceneSession(NativeValue* jsSceneSessionObj);
 
 private:
     uint32_t GenSessionId();
@@ -45,8 +42,6 @@ private:
     std::vector<sptr<SceneSession>> sessions_;
     int pid_ = getpid();
     std::atomic<uint32_t> sessionId_ = INVALID_SESSION_ID;
-
-    std::map<std::shared_ptr<NativeReference>, sptr<SceneSession>> jsSceneSessionMap_;
 };
 }
 #endif // OHOS_ROSEN_SCENE_SESSION_MANAGER_H

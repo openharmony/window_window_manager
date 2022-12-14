@@ -16,7 +16,7 @@
 #ifndef OHOS_SCEEN_SESSION_STAGE_INTERFACE_H
 #define OHOS_SCEEN_SESSION_STAGE_INTERFACE_H
 
-#include "zidl/session_stage_interface.h"
+#include "session_stage_interface.h"
 #include "window_scene_common.h"
 
 namespace OHOS::Rosen {

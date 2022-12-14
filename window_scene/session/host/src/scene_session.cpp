@@ -22,24 +22,14 @@ namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSession"};
 }
-SceneSession::SceneSession(const AbilityInfo& info, NativeEngine& engine) : Session(info.bundleName_),
-    abilityInfo_(info), engine_(engine)
+
+SceneSession::SceneSession(const AbilityInfo& info) : Session(info.bundleName_), abilityInfo_(info)
 {
-    std::shared_ptr<JsSceneSession> jsSceneSession = std::make_shared<JsSceneSession>(&engine);
-    sptr<SceneSession> sceneSession(this);
-    NativeValue* jsSceneSessionObj = CreateJsSceneSessionObject(engine_, sceneSession, jsSceneSession);
-    jsSceneSessionRef_ = std::unique_ptr<NativeReference>(engine_.CreateReference(jsSceneSessionObj, 1));
-    jsSceneSession_ = jsSceneSession;
 }
 
-std::shared_ptr<NativeReference> SceneSession::GetJsSceneSessionRef() const
+void SceneSession::RegisterStartSceneEventListener(const NotifyStartSceneFunc& func)
 {
-    return jsSceneSessionRef_;
-}
-
-std::shared_ptr<JsSceneSession> SceneSession::GetJsSceneSession() const
-{
-    return jsSceneSession_;
+    startSceneFunc_ = func;
 }
 
 WSError SceneSession::Connect(const sptr<ISceneSessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel)
@@ -157,13 +147,13 @@ WSError SceneSession::Maximum()
 
 WSError SceneSession::StartScene(const AbilityInfo& info, SessionOption sessionOption)
 {
-    auto sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info, sessionOption, engine_);
+    auto sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info, sessionOption);
     if (sceneSession == nullptr) {
         return WSError::WS_ERROR_NULLPTR;
     }
-    auto jsSceneSession = sceneSession->GetJsSceneSession();
-    // TODO: native->ts startScene
-    jsSceneSession->StartScene(sceneSession);
+    if (startSceneFunc_) {
+        startSceneFunc_(sceneSession);
+    }
     return WSError::WS_OK;
 }
 

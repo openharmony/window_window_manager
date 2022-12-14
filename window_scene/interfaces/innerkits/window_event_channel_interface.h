@@ -18,9 +18,12 @@
 
 #include <iremote_broker.h>
 #include "window_scene_common.h"
-#include "axis_event.h"
-#include "key_event.h"
-#include "pointer_event.h"
+
+namespace OHOS::MMI {
+    class PointerEvent;
+    class KeyEvent;
+    class AxisEvent;
+}
 
 namespace OHOS::Rosen {
 class IWindowEventChannel : public IRemoteBroker {

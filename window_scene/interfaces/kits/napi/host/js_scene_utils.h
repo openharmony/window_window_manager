@@ -19,8 +19,9 @@
 #include <js_runtime_utils.h>
 #include <native_engine/native_value.h>
 #include <native_engine/native_engine.h>
-#include "scene_session.h"
 
+#include "scene_session.h"
+#include "window_scene_common.h"
 namespace OHOS::Rosen {
     bool GetAbilityInfoFromJs(NativeEngine& engine, NativeObject* jsObject,
         AbilityInfo& abilityInfo);

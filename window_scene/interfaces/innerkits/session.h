@@ -18,10 +18,12 @@
 
 #include <string>
 #include <refbase.h>
-#include <ui/rs_surface_node.h>
+
 #include "window_scene_common.h"
 
 namespace OHOS::Rosen {
+class RSSurfaceNode;
+
 class Session {
 public:
     Session(const std::string& name);
@@ -39,7 +41,7 @@ protected:
     bool IsSessionValid() const;
 
 private:
-    RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name);
+    std::shared_ptr<RSSurfaceNode> CreateSurfaceNode(std::string name);
 
     uint32_t persistentId_ = INVALID_SESSION_ID;
     std::shared_ptr<RSSurfaceNode> surfaceNode_ = nullptr;

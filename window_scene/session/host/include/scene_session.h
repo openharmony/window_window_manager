@@ -17,18 +17,20 @@
 #define OHOS_SCENE_SESSION_H
 
 #include "zidl/scene_session_stub.h"
-#include "session.h"
-#include "js_scene_session.h"
-#include "zidl/scene_session_stage_interface.h"
+#include "foundation/window/window_manager/window_scene/interfaces/innerkits/session.h"
+#include "scene_session_stage_interface.h"
 #include "window_scene_common.h"
 
 namespace OHOS::Rosen {
-class SceneSession : public SceneSessionStub, public Session{
+class SceneSession;
+using NotifyStartSceneFunc = std::function<void(const sptr<SceneSession>& session)>;
+class SceneSession : public SceneSessionStub, public Session {
 public:
-    explicit SceneSession(const AbilityInfo& info, NativeEngine& engine);
+    explicit SceneSession(const AbilityInfo& info);
     ~SceneSession() = default;
 
-    virtual WSError Connect(const sptr<ISceneSessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel) override;
+    virtual WSError Connect(const sptr<ISceneSessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel) override;
     virtual WSError Foreground() override;
     virtual WSError Background() override;
     virtual WSError Disconnect() override;
@@ -41,18 +43,14 @@ public:
     virtual WSError SetActive(bool active) override;
 
     const AbilityInfo& GetAbilityInfo() const;
-    std::shared_ptr<NativeReference> GetJsSceneSessionRef() const;
-    std::shared_ptr<JsSceneSession> GetJsSceneSession() const;
+    void RegisterStartSceneEventListener(const NotifyStartSceneFunc& func);
 private:
     sptr<ISceneSessionStage> sceneSessionStage_;
     sptr<IWindowEventChannel> windowEventChannel_;
     AbilityInfo abilityInfo_;
     std::string sessionType_ = "";
     bool isActive_ = false;
-
-    NativeEngine& engine_;
-    std::shared_ptr<NativeReference> jsSceneSessionRef_;
-    std::shared_ptr<JsSceneSession> jsSceneSession_;
+    NotifyStartSceneFunc startSceneFunc_;
 };
 }
 #endif // OHOS_SCENE_SESSION_H

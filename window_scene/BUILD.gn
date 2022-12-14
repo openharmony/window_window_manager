@@ -25,8 +25,9 @@ config("window_scene_private_config") {
 config("window_scene_public_config") {
   include_dirs = [
     "interfaces/innerkits",
-    "interfaces/kits/napi/host",
     "utils/include",
+    "session/container/include",
+    "session/host/include",
   ]
 }
 
@@ -43,9 +44,6 @@ ohos_shared_library("window_scene") {
     "session/host/src/session.cpp",
     "session/host/src/zidl/scene_session_proxy.cpp",
     "session/host/src/zidl/scene_session_stub.cpp",
-    "interfaces/kits/napi/host/js_scene_session_manager.cpp",
-    "interfaces/kits/napi/host/js_scene_session.cpp",
-    "interfaces/kits/napi/host/js_scene_utils.cpp",
   ]
 
   cflags_cc = [ "-std=c++17" ]
@@ -60,11 +58,8 @@ ohos_shared_library("window_scene") {
     "hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
-    "napi:ace_napi",
-    "ability_runtime:runtime",
   ]
 
-  relative_install_dir = "module"
   part_name = "window_manager"
   subsystem_name = "window"
 }
