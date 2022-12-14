@@ -23,7 +23,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSession"};
 }
 
-SceneSession::SceneSession(const AbilityInfo& info) : Session(info.bundleName_), abilityInfo_(info)
+SceneSession::SceneSession(const SceneAbilityInfo& info) : Session(info.bundleName_), abilityInfo_(info)
 {
 }
 
@@ -145,7 +145,7 @@ WSError SceneSession::Maximum()
     return WSError::WS_OK;
 }
 
-WSError SceneSession::StartScene(const AbilityInfo& info, SessionOption sessionOption)
+WSError SceneSession::StartScene(const SceneAbilityInfo& info, SessionOption sessionOption)
 {
     auto sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info, sessionOption);
     if (sceneSession == nullptr) {
@@ -180,7 +180,7 @@ WSError SceneSession::SetActive(bool active)
     return WSError::WS_OK;
 }
 
-const AbilityInfo& SceneSession::GetAbilityInfo() const
+const SceneAbilityInfo& SceneSession::GetAbilityInfo() const
 {
     return abilityInfo_;
 }

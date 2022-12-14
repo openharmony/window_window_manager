@@ -101,13 +101,13 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
     }
-    AbilityInfo abilityInfo;
+    SceneAbilityInfo abilityInfo;
     SessionOption sessionOption = SessionOption::SESSION_MODE_FULLSCREEN;
     if (errCode == WSErrorCode::WS_OK) {
         // parse ability info
         NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
         if (nativeObj == nullptr) {
-            WLOGFE("[NAPI]Failed to convert object to AbilityInfo");
+            WLOGFE("[NAPI]Failed to convert object to SceneAbilityInfo");
             errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
         } else {
             if (!GetAbilityInfoFromJs(engine, nativeObj, abilityInfo)) {

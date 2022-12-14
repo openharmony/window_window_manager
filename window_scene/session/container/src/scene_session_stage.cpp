@@ -76,7 +76,7 @@ WSError SceneSessionStage::Disconnect()
     return WSError::WS_OK;
 }
 
-WSError SceneSessionStage::StartScene(const AbilityInfo& info, SessionOption sessionOption)
+WSError SceneSessionStage::StartScene(const SceneAbilityInfo& info, SessionOption sessionOption)
 {
     if (sceneSession_ == nullptr) {
         WLOGFE("sceneSession is invalid");

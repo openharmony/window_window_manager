@@ -179,7 +179,7 @@ WSError SceneSessionProxy::Maximum()
     return static_cast<WSError>(ret);
 }
 
-WSError SceneSessionProxy::StartScene(const AbilityInfo& info, SessionOption sessionOption)
+WSError SceneSessionProxy::StartScene(const SceneAbilityInfo& info, SessionOption sessionOption)
 {
     MessageParcel data;
     MessageParcel reply;

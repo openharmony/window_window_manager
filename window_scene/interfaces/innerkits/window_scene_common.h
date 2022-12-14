@@ -61,7 +61,7 @@ enum class SessionState : uint32_t {
     STATE_BACKGROUND,
 };
 
-struct AbilityInfo {
+struct SceneAbilityInfo {
     std::string bundleName_ = "";
     std::string abilityName_ = "";
 };

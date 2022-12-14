@@ -127,7 +127,7 @@ int SceneSessionStub::HandleMaximum(MessageParcel& data, MessageParcel& reply)
 int SceneSessionStub::HandleStartScene(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("RequestActivation!");
-    AbilityInfo info = { data.ReadString(), data.ReadString() };
+    SceneAbilityInfo info = { data.ReadString(), data.ReadString() };
     SessionOption sessionOption = static_cast<SessionOption>(data.ReadUint32());
     WSError errCode = StartScene(info, sessionOption);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
