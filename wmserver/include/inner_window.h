@@ -67,23 +67,6 @@ private:
     sptr<PlaceholderWindowListener> windowListener_;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
 };
-
-class DividerWindow : public IInnerWindow {
-WM_DECLARE_SINGLE_INSTANCE_BASE(DividerWindow);
-public:
-    virtual void Create(std::string name, DisplayId displayId, const Rect rect, WindowMode mode);
-    virtual void Destroy();
-    virtual void Update(uint32_t width, uint32_t height);
-
-protected:
-    DividerWindow() = default;
-    ~DividerWindow();
-
-private:
-    DisplayId displayId_;
-    std::string params_;
-    int32_t dialogId_ = IVALID_DIALOG_WINDOW_ID;
-};
 } // namespace Rosen
 } // namespace OHOS
 #endif // OHOS_ROSEN_INNER_WINDOW_H

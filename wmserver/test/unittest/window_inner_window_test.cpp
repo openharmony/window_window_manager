@@ -29,7 +29,6 @@ public:
     sptr<PlaceHolderWindow> holderWindow_;
     sptr<PlaceholderWindowListener> windowListener_;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
-    sptr<DividerWindow> dividerWindow_;
 };
 
 void WindowInnerWindowTest::SetUpTestCase()
@@ -45,7 +44,6 @@ void WindowInnerWindowTest::SetUp()
     holderWindow_ = new PlaceHolderWindow();
     windowListener_ = new PlaceholderWindowListener();
     inputEventConsumer_ = std::make_shared<PlaceholderInputEventConsumer> ();
-    dividerWindow_ = new DividerWindow();
 }
 
 void WindowInnerWindowTest::TearDown()
@@ -109,24 +107,6 @@ HWTEST_F(WindowInnerWindowTest, PlaceholderInputEventConsumer01, Function | Smal
     inputEventConsumer_->OnInputEvent(keyEvent);
     inputEventConsumer_->OnInputEvent(pointerEvent);
     inputEventConsumer_->OnInputEvent(axisEvent);
-
-    ASSERT_EQ(true, true);
-}
-
-/**
- * @tc.name: DividerWindow01
- * @tc.desc: test DividerWindow create/update/destroy
- * @tc.type: FUNC
- */
-HWTEST_F(WindowInnerWindowTest, DividerWindow01, Function | SmallTest | Level2)
-{
-    Rect rect = { 100, 100, 200, 200 };
-    dividerWindow_->Create("test04", 0, rect, WindowMode::WINDOW_MODE_FULLSCREEN);
-    dividerWindow_->Update(100, 100);
-    dividerWindow_->Destroy();
-
-    dividerWindow_->Update(100, 100);
-    dividerWindow_->Destroy();
 
     ASSERT_EQ(true, true);
 }
