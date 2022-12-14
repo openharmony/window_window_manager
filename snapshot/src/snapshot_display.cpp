@@ -72,16 +72,16 @@ int main(int argc, char *argv[])
 
     bool ret = false;
     if (pixelMap != nullptr) {
-        ret = SnapShotUtils::WriteToPngWithPixelMap(cmdArgments.fileName, *pixelMap);
+        ret = SnapShotUtils::WriteToJpegWithPixelMap(cmdArgments.fileName, *pixelMap);
     }
     if (!ret) {
         std::cout << "\nerror: snapshot display " << cmdArgments.displayId <<
-            ", write to " << cmdArgments.fileName.c_str() << " as png failed!" << std::endl;
+            ", write to " << cmdArgments.fileName.c_str() << " as jpeg failed!" << std::endl;
         return -1;
     }
 
     std::cout << "\nsuccess: snapshot display " << cmdArgments.displayId << " , write to " <<
-        cmdArgments.fileName.c_str() << " as png, width " << pixelMap->GetWidth() <<
+        cmdArgments.fileName.c_str() << " as jpeg, width " << pixelMap->GetWidth() <<
         ", height " << pixelMap->GetHeight() << std::endl;
     return 0;
 }
