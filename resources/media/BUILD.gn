@@ -12,13 +12,6 @@
 # limitations under the License.
 import("//build/ohos.gni")
 
-ohos_prebuilt_etc("window_divider_image") {
-  source = "//foundation/window/window_manager/resources/media/img/bg_split_handle.png"
-  part_name = "window_manager"
-  subsystem_name = "window"
-  relative_install_dir = "window/resources"
-}
-
 ohos_prebuilt_etc("window_place_holder_image") {
   source = "//foundation/window/window_manager/resources/media/img/bg_place_holder.png"
   part_name = "window_manager"
@@ -27,8 +20,5 @@ ohos_prebuilt_etc("window_place_holder_image") {
 }
 
 group("window_resources_media") {
-  deps = [
-    ":window_divider_image",
-    ":window_place_holder_image",
-  ]
+  deps = [ ":window_place_holder_image" ]
 }
