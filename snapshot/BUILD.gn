@@ -52,7 +52,7 @@ ohos_shared_library("libsnapshot_util") {
 
   deps = [
     "//foundation/window/window_manager/dm:libdm",
-    "//third_party/libpng:libpng",
+    "//third_party/libjpeg-turbo:turbojpeg_static",
   ]
 
   external_deps = [
