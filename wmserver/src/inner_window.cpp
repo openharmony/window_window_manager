@@ -15,7 +15,6 @@
 
 #include "inner_window.h"
 
-#include "ui_service_mgr_client.h"
 #include "window_manager_hilog.h"
 #include "surface_draw.h"
 
@@ -26,7 +25,6 @@ namespace {
     const std::string IMAGE_PLACE_HOLDER_PNG_PATH = "/etc/window/resources/bg_place_holder.png";
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(PlaceHolderWindow)
-WM_IMPLEMENT_SINGLE_INSTANCE(DividerWindow)
 
 void PlaceholderWindowListener::OnTouchOutside() const
 {
@@ -139,47 +137,6 @@ void PlaceHolderWindow::Destroy()
     }
     window_ = nullptr;
     WLOGFI("destroy place holder window end.");
-}
-
-DividerWindow::~DividerWindow()
-{
-    Destroy();
-}
-
-void DividerWindow::Create(std::string name, DisplayId displayId, const Rect rect, WindowMode mode)
-{
-    displayId_ = displayId;
-    WLOGFD("create divider dialog display id: %{public}" PRIu64"", displayId_);
-    auto dialogCallback = [this](int32_t id, const std::string& event, const std::string& params) {
-        WLOGFD("divider dialog window get param: %{public}s", params.c_str());
-    };
-    Ace::UIServiceMgrClient::GetInstance()->ShowDialog(name, params_, WindowType::WINDOW_TYPE_DOCK_SLICE,
-        rect.posX_, rect.posY_, rect.width_, rect.height_, dialogCallback, &dialogId_);
-    WLOGFD("create divider dialog window id: %{public}d success", dialogId_);
-}
-
-void DividerWindow::Destroy()
-{
-    if (dialogId_ == IVALID_DIALOG_WINDOW_ID) {
-        return;
-    }
-    WLOGFD("destroy divider dialog window id:: %{public}d.", dialogId_);
-    Ace::UIServiceMgrClient::GetInstance()->CancelDialog(dialogId_);
-    dialogId_ = IVALID_DIALOG_WINDOW_ID;
-}
-
-void DividerWindow::Update(uint32_t width, uint32_t height)
-{
-    if (dialogId_ == IVALID_DIALOG_WINDOW_ID) {
-        return;
-    }
-    WLOGFD("update divider dialog window dialog id:%{public}d width:%{public}u height:%{public}u.",
-        dialogId_, width, height);
-    std::stringstream sstream;
-    sstream << "{\"width\":" << std::to_string(width) << "," << "\"height\":" << std::to_string(height) << "}";
-    // data is json file format
-    std::string data = sstream.str();
-    Ace::UIServiceMgrClient::GetInstance()->UpdateDialog(dialogId_, data);
 }
 } // Rosen
 } // OHOS

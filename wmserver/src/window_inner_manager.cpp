@@ -16,7 +16,6 @@
 #include "window_inner_manager.h"
 
 #include "ability_manager_client.h"
-#include "ui_service_mgr_client.h"
 #include "window.h"
 #include "window_manager_hilog.h"
 #include "xcollie/watchdog.h"
@@ -101,20 +100,8 @@ void WindowInnerManager::CreateInnerWindow(std::string name, DisplayId displayId
 {
     bool recentHolderWindowFlag = isRecentHolderEnable_;
     auto task = [name, displayId, rect, mode, type, recentHolderWindowFlag]() {
-        switch (type) {
-            case WindowType::WINDOW_TYPE_PLACEHOLDER: {
-                if (recentHolderWindowFlag) {
-                    PlaceHolderWindow::GetInstance().Create(name, displayId, rect, mode);
-                }
-                break;
-            }
-            case WindowType::WINDOW_TYPE_DOCK_SLICE: {
-                DividerWindow::GetInstance().Create(name, displayId, rect, mode);
-                DividerWindow::GetInstance().Update(rect.width_, rect.height_);
-                break;
-            }
-            default:
-                break;
+        if (type == WindowType::WINDOW_TYPE_PLACEHOLDER && recentHolderWindowFlag) {
+            PlaceHolderWindow::GetInstance().Create(name, displayId, rect, mode);
         }
     };
     PostTask(task, "CreateInnerWindow");
@@ -125,19 +112,8 @@ void WindowInnerManager::DestroyInnerWindow(DisplayId displayId, WindowType type
 {
     bool recentHolderWindowFlag = isRecentHolderEnable_;
     auto task = [type, recentHolderWindowFlag]() {
-        switch (type) {
-            case WindowType::WINDOW_TYPE_PLACEHOLDER: {
-                if (recentHolderWindowFlag) {
-                    PlaceHolderWindow::GetInstance().Destroy();
-                }
-                break;
-            }
-            case WindowType::WINDOW_TYPE_DOCK_SLICE: {
-                DividerWindow::GetInstance().Destroy();
-                break;
-            }
-            default:
-                break;
+        if (type == WindowType::WINDOW_TYPE_PLACEHOLDER && recentHolderWindowFlag) {
+            PlaceHolderWindow::GetInstance().Destroy();
         }
     };
     PostTask(task, "DestroyInnerWindow");
@@ -148,19 +124,8 @@ void WindowInnerManager::UpdateInnerWindow(DisplayId displayId, WindowType type,
 {
     bool recentHolderWindowFlag = isRecentHolderEnable_;
     auto task = [type, width, height, recentHolderWindowFlag]() {
-        switch (type) {
-            case WindowType::WINDOW_TYPE_PLACEHOLDER: {
-                if (recentHolderWindowFlag) {
-                    PlaceHolderWindow::GetInstance().Update(width, height);
-                }
-                break;
-            }
-            case WindowType::WINDOW_TYPE_DOCK_SLICE: {
-                DividerWindow::GetInstance().Update(width, height);
-                break;
-            }
-            default:
-                break;
+        if (type == WindowType::WINDOW_TYPE_PLACEHOLDER && recentHolderWindowFlag) {
+            PlaceHolderWindow::GetInstance().Update(width, height);
         }
     };
     PostTask(task, "UpdateInnerWindow");
