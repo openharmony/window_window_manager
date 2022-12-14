@@ -29,15 +29,14 @@ namespace {
     const std::string START_SCENE_CB = "startScene";
 }
 
-NativeValue* CreateJsSceneSessionObject(NativeEngine& engine, const sptr<SceneSession>& session,
-    const std::shared_ptr<JsSceneSession>& jsSceneSession)
+NativeValue* CreateJsSceneSessionObject(NativeEngine& engine, const sptr<SceneSession>& session)
 {
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
 
     WLOGFI("[NAPI]CreateJsSceneSession");
-
-    object->SetNativePointer(new std::weak_ptr<JsSceneSession>(jsSceneSession), JsSceneSession::Finalizer, nullptr);
+    std::unique_ptr<JsSceneSession> jsSceneSession = std::make_unique<JsSceneSession>(&engine, session);
+    object->SetNativePointer(jsSceneSession.release(), JsSceneSession::Finalizer, nullptr);
     object->SetProperty("abilityInfo", CreateJsAbilityInfo(engine, session));
     object->SetProperty("persistentId", CreateJsValue(engine, session->GetPersistentId()));
     BindFunctions(engine, object, "JsSceneSession");
@@ -47,7 +46,7 @@ NativeValue* CreateJsSceneSessionObject(NativeEngine& engine, const sptr<SceneSe
 void JsSceneSession::Finalizer(NativeEngine* engine, void* data, void* hint)
 {
     WLOGFI("[NAPI]Finalizer");
-    delete static_cast<std::weak_ptr<JsSceneSession>*>(data);
+    std::unique_ptr<JsSceneSession>(static_cast<JsSceneSession*>(data));
 }
 
 void BindFunctions(NativeEngine& engine, NativeObject* object, const char *moduleName)
@@ -79,39 +78,60 @@ NativeValue* JsSceneSession::OnRegisterCallback(NativeEngine& engine, NativeCall
     }
     NativeValue* value = info.argv[1];
     if (!value->IsCallable()) {
-        WLOGFI("[NAPI]Callback(info->argv[1]) is not callable");
+        WLOGFE("[NAPI]Callback(info->argv[1]) is not callable");
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
+    if (IsCallbackRegistered(cbType, value)) {
+        return engine.CreateUndefined();
+    }
+    if (session_ == nullptr) {
+        WLOGFE("[NAPI]session_ is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+
+    std::weak_ptr<JsSceneSession> sessionWptr(shared_from_this());
+    NotifyStartSceneFunc func = [sessionWptr](const sptr<SceneSession>& session) {
+        auto jsSceneSession = sessionWptr.lock();
+        if (jsSceneSession == nullptr || session == nullptr) {
+            WLOGFE("[NAPI]this scene session or target session is nullptr");
+            return;
+        }
+        jsSceneSession->StartScene(session);
+    };
+    session_->RegisterStartSceneEventListener(func);
     std::shared_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
-    jsCbMap_.insert(std::make_pair(cbType, callbackRef));
+    jsCbMap_[cbType] = callbackRef;
     WLOGFI("[NAPI]Register end, type = %{public}s, callback = %{public}p", cbType.c_str(), value);
     return engine.CreateUndefined();
 }
 
 void JsSceneSession::StartScene(const sptr<SceneSession>& session)
 {
-    if (jsCbMap_.find(START_SCENE_CB) == jsCbMap_.end()) {
+    auto iter = jsCbMap_.find(START_SCENE_CB);
+    if (iter == jsCbMap_.end()) {
         return;
     }
-    jsCallBack_ = jsCbMap_[START_SCENE_CB];
+    jsCallBack_ = iter->second;
     WLOGFI("[NAPI]start scene: name = %{public}s, id = %{public}u", session->GetAbilityInfo().abilityName_.c_str(),
         session->GetPersistentId());
     std::weak_ptr<JsSceneSession> sessionWptr(shared_from_this());
     auto complete = std::make_unique<AsyncTask::CompleteCallback> (
         [sessionWptr, session, eng = engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
             auto jsSceneSession = sessionWptr.lock();
-            if (jsSceneSession == nullptr || eng == nullptr || session) {
+            if (jsSceneSession == nullptr || eng == nullptr || session == nullptr) {
                 WLOGFE("[NAPI]this scene session or target session or engine is nullptr");
                 return;
             }
-            auto jsSceneSessionRef = session->GetJsSceneSessionRef();
-            if (jsSceneSessionRef == nullptr) {
+            NativeValue* jsSceneSessionObj = CreateJsSceneSessionObject(*eng, session);
+            if (jsSceneSessionObj == nullptr) {
                 WLOGFE("[NAPI]this target session reference is nullptr");
             }
-            NativeValue* argv[] = { jsSceneSessionRef->Get() };
+            NativeValue* argv[] = { jsSceneSessionObj };
             jsSceneSession->CallJsMethod(START_SCENE_CB.c_str(), argv, ArraySize(argv));
         }
     );
@@ -135,5 +155,26 @@ void JsSceneSession::CallJsMethod(const char* methodName, NativeValue* const* ar
         return;
     }
     engine_->CallFunction(engine_->CreateUndefined(), method, argv, argc);
+}
+
+bool JsSceneSession::IsCallbackRegistered(std::string type, NativeValue* jsListenerObject)
+{
+    if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
+        WLOGFI("[NAPI]Method %{public}s has not been registered", type.c_str());
+        return false;
+    }
+
+    for (auto iter = jsCbMap_.begin(); iter != jsCbMap_.end(); ++iter) {
+        if (jsListenerObject->StrictEquals(iter->second->Get())) {
+            WLOGFE("[NAPI]Method %{public}s has already been registered", type.c_str());
+            return true;
+        }
+    }
+    return false;
+}
+
+sptr<SceneSession> JsSceneSession::GetNativeSession() const
+{
+    return session_;
 }
 }

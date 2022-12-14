@@ -18,7 +18,7 @@
 
 #include <iremote_proxy.h>
 
-#include "zidl/scene_session_stage_interface.h"
+#include "scene_session_stage_interface.h"
 #include "window_scene_common.h"
 
 namespace OHOS::Rosen {

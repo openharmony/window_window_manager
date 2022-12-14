@@ -17,6 +17,7 @@
 #define OHOS_WINDOW_EVENT_CHANNEL_H
 
 #include "zidl/window_event_channel_stub.h"
+
 #include "window_scene_common.h"
 
 namespace OHOS::Rosen {

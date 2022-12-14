@@ -16,6 +16,7 @@
 #include "js_scene_utils.h"
 
 #include <js_runtime_utils.h>
+
 #include "window_scene_hilog.h"
 #include "window_scene_common.h"
 

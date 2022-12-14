@@ -18,7 +18,7 @@
 
 #include <map>
 #include <iremote_stub.h>
-#include "zidl/window_event_channel_interface.h"
+#include "window_event_channel_interface.h"
 
 namespace OHOS::Rosen {
 class WindowEventChannelStub;

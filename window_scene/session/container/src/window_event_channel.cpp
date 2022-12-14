@@ -12,3 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "window_event_channel.h"
+
+#include <axis_event.h>
+#include <key_event.h>
+#include <pointer_event.h>

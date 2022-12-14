@@ -16,6 +16,9 @@
 #include <ipc_types.h>
 #include <message_option.h>
 #include <message_parcel.h>
+#include <axis_event.h>
+#include <key_event.h>
+#include <pointer_event.h>
 #include "window_scene_hilog.h"
 
 namespace OHOS::Rosen {

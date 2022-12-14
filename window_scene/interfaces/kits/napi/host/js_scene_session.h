@@ -16,6 +16,7 @@
 #ifndef OHOS_JS_SCENE_SESSION_H
 #define OHOS_JS_SCENE_SESSION_H
 
+#include <memory>
 #include <map>
 #include <string>
 #include <refbase.h>
@@ -27,25 +28,27 @@ namespace OHOS::Rosen {
 class SceneSession;
 class JsSceneSession final : public std::enable_shared_from_this<JsSceneSession> {
 public:
-    explicit JsSceneSession(NativeEngine* engine) : engine_(engine) {}
+    explicit JsSceneSession(NativeEngine* engine, sptr<SceneSession> session) : engine_(engine), session_(session) {}
     ~JsSceneSession() = default;
 
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
     static NativeValue* RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info);
 
     void StartScene(const sptr<SceneSession>& session);
+    sptr<SceneSession> GetNativeSession() const;
 
 private:
     NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
     void CallJsMethod(const char* methodName, NativeValue* const* argv, size_t argc);
+    bool IsCallbackRegistered(std::string type, NativeValue* jsListenerObject);
 
-    std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     NativeEngine* engine_ = nullptr;
+    sptr<SceneSession> session_ = nullptr;
+    std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     std::shared_ptr<NativeReference> jsCallBack_ = nullptr;
 };
 
-NativeValue* CreateJsSceneSessionObject(NativeEngine& engine, const sptr<SceneSession>& session,
-    const std::shared_ptr<JsSceneSession>& jsSceneSession);
+NativeValue* CreateJsSceneSessionObject(NativeEngine& engine, const sptr<SceneSession>& session);
 void BindFunctions(NativeEngine& engine, NativeObject* object, const char *moduleName);
 }
 #endif // OHOS_JS_SCENE_SESSION_H

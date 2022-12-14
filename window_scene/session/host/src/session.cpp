@@ -15,6 +15,8 @@
 
 #include "session.h"
 
+#include <ui/rs_surface_node.h>
+
 #include "window_scene_hilog.h"
 
 namespace OHOS::Rosen {
