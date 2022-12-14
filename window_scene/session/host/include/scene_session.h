@@ -26,7 +26,7 @@ class SceneSession;
 using NotifyStartSceneFunc = std::function<void(const sptr<SceneSession>& session)>;
 class SceneSession : public SceneSessionStub, public Session {
 public:
-    explicit SceneSession(const AbilityInfo& info);
+    explicit SceneSession(const SceneAbilityInfo& info);
     ~SceneSession() = default;
 
     virtual WSError Connect(const sptr<ISceneSessionStage>& sessionStage,
@@ -38,16 +38,16 @@ public:
     virtual WSError Close() override;
     virtual WSError Recover() override;
     virtual WSError Maximum() override;
-    virtual WSError StartScene(const AbilityInfo& info, SessionOption sessionOption) override;
+    virtual WSError StartScene(const SceneAbilityInfo& info, SessionOption sessionOption) override;
 
     virtual WSError SetActive(bool active) override;
 
-    const AbilityInfo& GetAbilityInfo() const;
+    const SceneAbilityInfo& GetAbilityInfo() const;
     void RegisterStartSceneEventListener(const NotifyStartSceneFunc& func);
 private:
     sptr<ISceneSessionStage> sceneSessionStage_;
     sptr<IWindowEventChannel> windowEventChannel_;
-    AbilityInfo abilityInfo_;
+    SceneAbilityInfo abilityInfo_;
     std::string sessionType_ = "";
     bool isActive_ = false;
     NotifyStartSceneFunc startSceneFunc_;

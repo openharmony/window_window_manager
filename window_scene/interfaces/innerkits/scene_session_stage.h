@@ -34,7 +34,7 @@ public:
     virtual WSError Background() override;
     virtual WSError Disconnect() override;
 
-    WSError StartScene(const AbilityInfo& info, SessionOption sessionOption);
+    WSError StartScene(const SceneAbilityInfo& info, SessionOption sessionOption);
     WSError Minimize();
     WSError Close();
     WSError Recover();

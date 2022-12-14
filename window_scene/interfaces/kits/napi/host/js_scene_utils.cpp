@@ -27,7 +27,7 @@ namespace {
 }
 
 bool GetAbilityInfoFromJs(NativeEngine& engine, NativeObject* jsObject,
-    AbilityInfo& abilityInfo)
+    SceneAbilityInfo& abilityInfo)
 {
     NativeValue* jsBundleName = jsObject->GetProperty("bundleName");
     NativeValue* jsAbilityName = jsObject->GetProperty("abilityName");

@@ -37,7 +37,7 @@ public:
     virtual WSError Close() override;
     virtual WSError Recover() override;
     virtual WSError Maximum() override;
-    virtual WSError StartScene(const AbilityInfo& abilityInfo, SessionOption sessionOption) override;
+    virtual WSError StartScene(const SceneAbilityInfo& abilityInfo, SessionOption sessionOption) override;
 private:
     static inline BrokerDelegator<SceneSessionProxy> delegator_;
 };

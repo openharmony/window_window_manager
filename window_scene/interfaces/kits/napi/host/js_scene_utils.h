@@ -24,7 +24,7 @@
 #include "window_scene_common.h"
 namespace OHOS::Rosen {
     bool GetAbilityInfoFromJs(NativeEngine& engine, NativeObject* jsObject,
-        AbilityInfo& abilityInfo);
+        SceneAbilityInfo& abilityInfo);
     NativeValue* CreateJsAbilityInfo(NativeEngine& engine, const sptr<SceneSession>& session);
 }
 
