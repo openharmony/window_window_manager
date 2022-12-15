@@ -179,7 +179,7 @@ sptr<WindowNode> WindowRoot::FindWindowNodeWithToken(const sptr<IRemoteObject>& 
 void WindowRoot::AddDeathRecipient(sptr<WindowNode> node)
 {
     if (node == nullptr) {
-        WLOGFE("AddDeathRecipient failed, node is nullptr");
+        WLOGFE("failed, node is nullptr");
         return;
     }
 
@@ -460,7 +460,7 @@ WMError WindowRoot::ToggleShownStateForAllAppWindows()
 
 void WindowRoot::DestroyLeakStartingWindow()
 {
-    WLOGFI("DestroyLeakStartingWindow is called");
+    WLOGFD("DestroyLeakStartingWindow is called");
     std::vector<uint32_t> destroyIds;
     for (auto& iter : windowNodeMap_) {
         if (iter.second->startingWindowShown_ && !iter.second->GetWindowToken()) {
@@ -543,7 +543,7 @@ Rect WindowRoot::GetDisplayRectWithoutSystemBarAreas(DisplayId displayId)
     }
     auto container = GetOrCreateWindowNodeContainer(displayId);
     if (container == nullptr) {
-        WLOGFE("GetDisplayRectWithoutSystemBarAreas failed, window container could not be found");
+        WLOGFE("failed, window container could not be found");
         return {0, 0, 0, 0}; // empty rect
     }
     auto displayRect = container->GetDisplayRect(displayId);
@@ -588,7 +588,7 @@ void WindowRoot::GetAllAnimationPlayingNodes(std::vector<wptr<WindowNode>>& wind
 void WindowRoot::LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool afterAnimation)
 {
     if (node == nullptr) {
-        WLOGFE("LayoutWhenAddWindowNode failed, node is nullptr");
+        WLOGFE("failed, node is nullptr");
         return;
     }
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
@@ -626,13 +626,13 @@ WMError WindowRoot::BindDialogToParent(sptr<WindowNode>& node, sptr<WindowNode>&
 WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, bool fromStartingWin)
 {
     if (node == nullptr) {
-        WLOGFE("add window failed, node is nullptr");
+        WLOGFE("failed, node is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
 
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
-        WLOGFE("add window failed, window container could not be found");
+        WLOGFE("failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
 
@@ -673,7 +673,7 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
 
     res = container->AddWindowNode(node, parentNode);
     if (res != WMError::WM_OK) {
-        WLOGFE("AddWindowNode failed with ret: %{public}u", static_cast<uint32_t>(res));
+        WLOGFE("failed with ret: %{public}u", static_cast<uint32_t>(res));
         return res;
     }
     SwitchRenderModeIfNeeded();
@@ -689,7 +689,7 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId, bool fromAnimation)
     }
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
-        WLOGFE("remove window failed, window container could not be found");
+        WLOGFE("failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
     container->DropShowWhenLockedWindowIfNeeded(node);
@@ -742,7 +742,7 @@ WMError WindowRoot::UpdateSizeChangeReason(uint32_t windowId, WindowSizeChangeRe
     }
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
-        WLOGFE("update window size change reason failed, window container could not be found");
+        WLOGFE("failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
     container->UpdateSizeChangeReason(node, reason);
@@ -758,7 +758,7 @@ void WindowRoot::SetBrightness(uint32_t windowId, float brightness)
     }
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
-        WLOGFE("set brightness failed, window container could not be found");
+        WLOGFE("failed, window container could not be found");
         return;
     }
     if (!WindowHelper::IsAppWindow(node->GetWindowType())) {
@@ -767,7 +767,7 @@ void WindowRoot::SetBrightness(uint32_t windowId, float brightness)
     }
     if (windowId == container->GetActiveWindow()) {
         if (container->GetDisplayBrightness() != brightness) {
-            WLOGFI("set brightness with value: %{public}u", container->ToOverrideBrightness(brightness));
+            WLOGFI("value: %{public}u", container->ToOverrideBrightness(brightness));
             DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
                 container->ToOverrideBrightness(brightness));
             container->SetDisplayBrightness(brightness);
@@ -785,7 +785,7 @@ void WindowRoot::HandleKeepScreenOn(uint32_t windowId, bool requireLock)
     }
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
-        WLOGFE("handle keep screen on failed, window container could not be found");
+        WLOGFE("failed, window container could not be found");
         return;
     }
     container->HandleKeepScreenOn(node, requireLock);
@@ -800,7 +800,7 @@ void WindowRoot::UpdateFocusableProperty(uint32_t windowId)
     }
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
-        WLOGFE("handle focusable failed, window container could not be found");
+        WLOGFE("failed, window container could not be found");
         return;
     }
 
@@ -818,7 +818,7 @@ WMError WindowRoot::SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode)
 {
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
-        WLOGFE("set window mode failed, window container could not be found");
+        WLOGFE("failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
     WindowMode curWinMode = node->GetWindowMode();
@@ -880,13 +880,13 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
 {
     auto node = GetWindowNode(windowId);
     if (node == nullptr) {
-        WLOGFE("destroy window failed, because window node is not exist.");
+        WLOGFE("failed, because window node is not exist.");
         return WMError::WM_ERROR_NULLPTR;
     }
-    WLOGFI("destroy window %{public}u, onlySelf:%{public}u.", windowId, onlySelf);
+    WLOGFI("windowId %{public}u, onlySelf:%{public}u.", windowId, onlySelf);
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (!container) {
-        WLOGFW("destroy window failed, window container could not be found");
+        WLOGFW("failed, window container could not be found");
         return DestroyWindowInner(node);
     }
 
@@ -1318,10 +1318,10 @@ void WindowRoot::ProcessExpandDisplayCreate(DisplayId defaultDisplayId, sptr<Dis
         return;
     }
 
-    WLOGFI("[Display Create] before add new display, displayId: %{public}" PRIu64"", displayId);
+    WLOGFI("before add new display, displayId: %{public}" PRIu64"", displayId);
     container->GetDisplayGroupController()->ProcessDisplayCreate(defaultDisplayId, displayInfo, displayRectMap);
     container->GetDisplayGroupController()->SetSplitRatioConfig(splitRatioConfig_);
-    WLOGFI("[Display Create] Container exist, add new display, displayId: %{public}" PRIu64"", displayId);
+    WLOGFI("Container exist, add new display, displayId: %{public}" PRIu64"", displayId);
 }
 
 std::map<DisplayId, sptr<DisplayInfo>> WindowRoot::GetAllDisplayInfos(const std::vector<DisplayId>& displayIdVec)
@@ -1379,11 +1379,11 @@ void WindowRoot::ProcessDisplayCreate(DisplayId defaultDisplayId, sptr<DisplayIn
     auto iter = windowNodeContainerMap_.find(displayGroupId);
     if (iter == windowNodeContainerMap_.end()) {
         CreateWindowNodeContainer(displayInfo);
-        WLOGFI("[Display Create] Create new container for display, displayId: %{public}" PRIu64"", displayId);
+        WLOGFI("Create new container for display, displayId: %{public}" PRIu64"", displayId);
     } else {
         auto& displayIdVec = displayIdMap_[displayGroupId];
         if (std::find(displayIdVec.begin(), displayIdVec.end(), displayId) != displayIdVec.end()) {
-            WLOGFI("[Display Create] Current display is already exist, displayId: %{public}" PRIu64"", displayId);
+            WLOGFI("Current display is already exist, displayId: %{public}" PRIu64"", displayId);
             return;
         }
         // add displayId in displayId vector
@@ -1420,7 +1420,7 @@ void WindowRoot::ProcessDisplayDestroy(DisplayId defaultDisplayId, sptr<DisplayI
     if (iter == windowNodeContainerMap_.end() ||
         std::find(displayIdVec.begin(), displayIdVec.end(), displayId) == displayIdVec.end() ||
         displayInfoMap.find(displayId) == displayInfoMap.end()) {
-        WLOGFE("[Display Destroy] could not find display, destroy failed, displayId: %{public}" PRIu64"", displayId);
+        WLOGFE("could not find display, destroy failed, displayId: %{public}" PRIu64"", displayId);
         return;
     }
 
@@ -1434,7 +1434,7 @@ void WindowRoot::ProcessDisplayDestroy(DisplayId defaultDisplayId, sptr<DisplayI
         WLOGFE("window node container is nullptr, displayId :%{public}" PRIu64 "", displayId);
         return;
     }
-    WLOGFI("[Display Destroy] displayId: %{public}" PRIu64"", displayId);
+    WLOGFI("displayId: %{public}" PRIu64"", displayId);
 
     std::vector<uint32_t> needDestroyWindows;
     auto displayRectMap = GetAllDisplayRectsByDisplayInfo(displayInfoMap);
