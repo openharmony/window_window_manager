@@ -1739,6 +1739,7 @@ NativeValue* JsWindow::OnSetSystemBarProperties(NativeEngine& engine, NativeCall
             if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 WLOGFE("[NAPI]window is nullptr or get invalid param");
+                return;
             }
             WMError ret = weakWindow->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR,
                 systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR));
@@ -1791,6 +1792,7 @@ NativeValue* JsWindow::OnSetWindowSystemBarProperties(NativeEngine& engine, Nati
             if (weakWindow == nullptr) {
                 task.Reject(engine,
                     CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+                return;
             }
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
                 weakWindow->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR,
