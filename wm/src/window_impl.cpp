@@ -1418,7 +1418,7 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y)
     Rect moveRect = { x, y, rect.width_, rect.height_ }; // must keep w/h, which may maintain stashed resize info
     property_->SetRequestRect(moveRect);
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
-        WLOGFI("window is hidden or created! id: %{public}u, oriPos: [%{public}d, %{public}d, "
+        WLOGFD("window is hidden or created! id: %{public}u, oriPos: [%{public}d, %{public}d, "
                "movePos: [%{public}d, %{public}d]", property_->GetWindowId(), rect.posX_, rect.posY_, x, y);
         return WMError::WM_OK;
     }
@@ -1445,7 +1445,7 @@ WMError WindowImpl::Resize(uint32_t width, uint32_t height)
     property_->SetRequestRect(resizeRect);
     property_->SetDecoStatus(false);
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
-        WLOGFI("window is hidden or created! id: %{public}u, oriRect: [%{public}u, %{public}u], "
+        WLOGFD("window is hidden or created! id: %{public}u, oriRect: [%{public}u, %{public}u], "
                "resizeRect: [%{public}u, %{public}u]", property_->GetWindowId(), rect.width_,
                rect.height_, width, height);
         return WMError::WM_OK;

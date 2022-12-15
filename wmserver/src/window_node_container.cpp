@@ -44,7 +44,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowNodeContainer"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WNC"};
     constexpr int WINDOW_NAME_MAX_LENGTH = 10;
     constexpr uint32_t MAX_BRIGHTNESS = 255;
     constexpr uint32_t SPLIT_WINDOWS_CNT = 2;
@@ -244,7 +244,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     AssignZOrder();
     LayoutWhenAddWindowNode(node, afterAnimation);
     NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_ADD);
-    DumpScreenWindowTree();
+    DumpScreenWindowTreeByWinId(node->GetWindowId());
     UpdateCameraFloatWindowStatus(node, true);
     if (WindowHelper::IsAppWindow(node->GetWindowType())) {
         backupWindowIds_.clear();
@@ -300,8 +300,7 @@ WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node, WindowUpda
     // Get current displayId and showing displays, update RSTree and displayGroupWindowTree
     UpdateRSTreeWhenShowingDisplaysChange(node, lastShowingDisplays);
     NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_UPDATE);
-    DumpScreenWindowTree();
-    WLOGFI("UpdateWindowNode windowId: %{public}u end", node->GetWindowId());
+    WLOGFI("windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }
 
@@ -359,7 +358,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node, bool fromA
         NotifyDockWindowStateChanged(node, true);
     }
     NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_REMOVE);
-    DumpScreenWindowTree();
+    DumpScreenWindowTreeByWinId(node->GetWindowId());
     RecoverScreenDefaultOrientationIfNeed(node->GetDisplayId());
     UpdateCameraFloatWindowStatus(node, false);
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
@@ -368,7 +367,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node, bool fromA
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_BOOT_ANIMATION) {
         DisplayManagerServiceInner::GetInstance().SetGravitySensorSubscriptionEnabled();
     }
-    WLOGFI("RemoveWindowNode windowId: %{public}u end", node->GetWindowId());
+    WLOGFI("windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }
 
@@ -508,7 +507,7 @@ bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId disp
         return true;
     }
     bool isMultiDisplay = layoutPolicy_->IsMultiDisplay();
-    WLOGFI("AddNodeOnRSTree windowId: %{public}d, displayId: %{public}" PRIu64", parentDisplayId: %{public}" PRIu64", "
+    WLOGFI("windowId: %{public}d, displayId: %{public}" PRIu64", parentDisplayId: %{public}" PRIu64", "
         "isMultiDisplay: %{public}d, animationPlayed: %{public}d",
         node->GetWindowId(), displayId, parentDisplayId, isMultiDisplay, animationPlayed);
     auto updateRSTreeFunc = [&]() {
@@ -558,7 +557,7 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
         return true;
     }
     bool isMultiDisplay = layoutPolicy_->IsMultiDisplay();
-    WLOGFI("RemoveNodeFromRSTree  windowId: %{public}d, displayId: %{public}" PRIu64", isMultiDisplay: %{public}d, "
+    WLOGFI("windowId: %{public}d, displayId: %{public}" PRIu64", isMultiDisplay: %{public}d, "
         "parentDisplayId: %{public}" PRIu64", animationPlayed: %{public}d",
         node->GetWindowId(), displayId, isMultiDisplay, parentDisplayId, animationPlayed);
     auto updateRSTreeFunc = [&]() {
@@ -1247,6 +1246,33 @@ bool WindowNodeContainer::CheckWindowNodeWhetherInWindowTree(const sptr<WindowNo
     return isInWindowTree;
 }
 
+void WindowNodeContainer::DumpScreenWindowTreeByWinId(uint32_t winid)
+{
+    WLOGFI("-------- dump window info begin---------");
+    WLOGFI("WindowName WinId Type Mode ZOrd [   x    y    w    h]");
+    uint32_t zOrder = zOrder_;
+    WindowNodeOperationFunc func = [&zOrder, &winid](sptr<WindowNode> node) {
+        Rect rect = node->GetWindowRect();
+        uint32_t windowId = node->GetWindowId();
+        const std::string& windowName = node->GetWindowName().size() < WINDOW_NAME_MAX_LENGTH ?
+            node->GetWindowName() : node->GetWindowName().substr(0, WINDOW_NAME_MAX_LENGTH);
+        if(winid == windowId) {
+            WLOGI("DumpScreenWindowTree: %{public}10s  %{public}5u %{public}4u %{public}4u "
+            "%{public}4u [%{public}4d %{public}4d %{public}4u %{public}4u]",
+            windowName.c_str(), node->GetWindowId(), node->GetWindowType(), node->GetWindowMode(),
+            --zOrder, rect.posX_, rect.posY_, rect.width_, rect.height_);
+        } else {
+            WLOGD("DumpScreenWindowTree: %{public}10s  %{public}5u %{public}4u %{public}4u "
+            "%{public}4u [%{public}4d %{public}4d %{public}4u %{public}4u]",
+            windowName.c_str(), node->GetWindowId(), node->GetWindowType(), node->GetWindowMode(),
+            --zOrder, rect.posX_, rect.posY_, rect.width_, rect.height_);
+        }
+        return false;
+    };
+    TraverseWindowTree(func, true);
+    WLOGFI("-------- dump window info end  ---------");
+}
+
 void WindowNodeContainer::DumpScreenWindowTree()
 {
     WLOGFI("-------- dump window info begin---------");
@@ -1401,7 +1427,7 @@ WMError WindowNodeContainer::RaiseZOrderForAppWindow(sptr<WindowNode>& node, spt
     }
     AssignZOrder();
     WLOGFI("RaiseZOrderForAppWindow finished");
-    DumpScreenWindowTree();
+    DumpScreenWindowTreeByWinId(node->GetWindowId());
     return WMError::WM_OK;
 }
 

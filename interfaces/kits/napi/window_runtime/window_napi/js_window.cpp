@@ -3570,10 +3570,10 @@ NativeValue* JsWindow::OnSetBackdropBlurStyle(NativeEngine& engine, NativeCallba
 
 std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
 {
-    WLOGFI("[NAPI]Try to find window %{public}s in g_jsWindowMap", windowName.c_str());
+    WLOGFD("[NAPI]Try to find window %{public}s in g_jsWindowMap", windowName.c_str());
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     if (g_jsWindowMap.find(windowName) == g_jsWindowMap.end()) {
-        WLOGFI("[NAPI]Can not find window %{public}s in g_jsWindowMap", windowName.c_str());
+        WLOGFD("[NAPI]Can not find window %{public}s in g_jsWindowMap", windowName.c_str());
         return nullptr;
     }
     return g_jsWindowMap[windowName];

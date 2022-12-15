@@ -30,7 +30,7 @@ JsWindowListener::~JsWindowListener()
 
 void JsWindowListener::CallJsMethod(const char* methodName, NativeValue* const* argv, size_t argc)
 {
-    WLOGFI("[NAPI]CallJsMethod methodName = %{public}s", methodName);
+    WLOGFD("[NAPI]CallJsMethod methodName = %{public}s", methodName);
     if (engine_ == nullptr || jsCallBack_ == nullptr) {
         WLOGFE("[NAPI]engine_ nullptr or jsCallBack_ is nullptr");
         return;
@@ -81,7 +81,7 @@ void JsWindowListener::OnModeChange(WindowMode mode)
 
 void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints)
 {
-    WLOGFI("[NAPI]OnSystemBarPropertyChange");
+    WLOGFD("[NAPI]OnSystemBarPropertyChange");
     // js callback should run in js thread
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [self = weakRef_, displayId, tints, eng = engine_] (NativeEngine &engine,
@@ -112,7 +112,7 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
 
 void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)
 {
-    WLOGFI("[NAPI]OnAvoidAreaChanged");
+    WLOGFD("[NAPI]OnAvoidAreaChanged");
     // js callback should run in js thread
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [self = weakRef_, avoidArea, type, eng = engine_] (NativeEngine &engine,

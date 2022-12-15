@@ -25,7 +25,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowLayoutPolicyCascade"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WLP_Cascade"};
 }
 
 Rect WindowLayoutPolicyCascade::cascadeRectSetFromCfg_ = {0, 0, 0, 0};
@@ -338,7 +338,7 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
     auto mode = node->GetWindowMode();
     Rect winRect = property->GetRequestRect();
     auto displayId = node->GetDisplayId();
-    WLOGFI("[Before CascadeLayout] windowId: %{public}u, mode: %{public}u, type: %{public}u requestRect: [%{public}d, "
+    WLOGFD("[Before CascadeLayout] windowId: %{public}u, mode: %{public}u, type: %{public}u requestRect: [%{public}d, "
         "%{public}d, %{public}u, %{public}u]", node->GetWindowId(), mode, node->GetWindowType(), winRect.posX_,
         winRect.posY_, winRect.width_, winRect.height_);
     switch (mode) {
@@ -367,7 +367,7 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
         default:
             WLOGFW("Layout invalid mode, winId: %{public}u, mode: %{public}u", node->GetWindowId(), mode);
     }
-    WLOGFI("[After CascadeLayout] windowId: %{public}u, isDecor: %{public}u, winRect: [%{public}d, %{public}d, "
+    WLOGFD("[After CascadeLayout] windowId: %{public}u, isDecor: %{public}u, winRect: [%{public}d, %{public}d, "
         "%{public}u, %{public}u]", node->GetWindowId(), node->GetDecoStatus(), winRect.posX_, winRect.posY_,
         winRect.width_, winRect.height_);
 
