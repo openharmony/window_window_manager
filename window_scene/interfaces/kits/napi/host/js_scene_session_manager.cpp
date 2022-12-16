@@ -167,11 +167,12 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionActivation(NativeEngine
             WLOGFE("[NAPI]Failed to get js scene session object");
             errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
         } else {
-            sceneSession = static_cast<SceneSession*>(jsSceneSessionObj->GetNativePointer());
-            if (sceneSession == nullptr) {
+            auto jsSceneSession = static_cast<JsSceneSession*>(jsSceneSessionObj->GetNativePointer());
+            if (jsSceneSession == nullptr) {
                 WLOGFE("[NAPI]Failed to find scene session From Js Object");
                 errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
             }
+            sceneSession = jsSceneSession->GetNativeSession().GetRefPtr();
         }
     }
 
@@ -229,11 +230,12 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackground(NativeEngine
             WLOGFE("[NAPI]Failed to get js scene session object");
             errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
         } else {
-            sceneSession = static_cast<SceneSession*>(jsSceneSessionObj->GetNativePointer());
-            if (sceneSession == nullptr) {
+            auto jsSceneSession = static_cast<JsSceneSession*>(jsSceneSessionObj->GetNativePointer());
+            if (jsSceneSession == nullptr) {
                 WLOGFE("[NAPI]Failed to find scene session From Js Object");
                 errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
             }
+            sceneSession = jsSceneSession->GetNativeSession().GetRefPtr();
         }
     }
 
@@ -291,11 +293,12 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
             WLOGFE("[NAPI]Failed to get js scene session object");
             errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
         } else {
-            sceneSession = static_cast<SceneSession*>(jsSceneSessionObj->GetNativePointer());
-            if (sceneSession == nullptr) {
+            auto jsSceneSession = static_cast<JsSceneSession*>(jsSceneSessionObj->GetNativePointer());
+            if (jsSceneSession == nullptr) {
                 WLOGFE("[NAPI]Failed to find scene session From Js Object");
                 errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
             }
+            sceneSession = jsSceneSession->GetNativeSession().GetRefPtr();
         }
     }
 
