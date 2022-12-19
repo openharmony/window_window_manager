@@ -56,8 +56,17 @@ std::map<std::string, std::pair<uint32_t, sptr<Window>>> WindowImpl::windowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::subWindowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::appFloatingWindowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::appDialogWindowMap_;
-static int constructorCnt = 0;
-static int deConstructorCnt = 0;
+std::vector<uint32_t> WindowImpl::deadWindows_;
+std::map<uint32_t, std::vector<sptr<IScreenshotListener>>> WindowImpl::screenshotListeners_;
+std::map<uint32_t, std::vector<sptr<ITouchOutsideListener>>> WindowImpl::touchOutsideListeners_;
+std::map<uint32_t, std::vector<sptr<IDialogTargetTouchListener>>> WindowImpl::dialogTargetTouchListeners_;
+std::map<uint32_t, std::vector<sptr<IWindowLifeCycle>>> WindowImpl::lifecycleListeners_;
+std::map<uint32_t, std::vector<sptr<IWindowChangeListener>>> WindowImpl::windowChangeListeners_;
+std::map<uint32_t, std::vector<sptr<IAvoidAreaChangedListener>>> WindowImpl::avoidAreaChangeListeners_;
+std::map<uint32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowImpl::occupiedAreaChangeListeners_;
+std::map<uint32_t, sptr<IDialogDeathRecipientListener>> WindowImpl::dialogDeathRecipientListener_;
+int constructorCnt = 0;
+int deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
     property_ = new (std::nothrow) WindowProperty();
@@ -1052,6 +1061,7 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
     MapFloatingWindowToAppIfNeeded();
 
     MapDialogWindowToAppIfNeeded();
+    DealWithDeadWindows();
 
     state_ = WindowState::STATE_CREATED;
     InputTransferStation::GetInstance().AddInputWindow(self);
@@ -1226,6 +1236,7 @@ WMError WindowImpl::Destroy(bool needNotifyServer)
     DestroyDialogWindow();
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
+        deadWindows_.emplace_back(property_->GetWindowId());
         state_ = WindowState::STATE_DESTROYED;
     }
     return ret;
@@ -1801,28 +1812,33 @@ void WindowImpl::SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer
 
 bool WindowImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
 {
-    return RegisterListenerLocked(lifecycleListeners_, listener);
+    WLOGFD("Start register");
+    return RegisterListenerLocked(lifecycleListeners_[GetWindowId()], listener);
 }
 
 bool WindowImpl::UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
 {
-    return UnregisterListenerLocked(lifecycleListeners_, listener);
+    WLOGFD("Start unregister");
+    return UnregisterListenerLocked(lifecycleListeners_[GetWindowId()], listener);
 }
 
 bool WindowImpl::RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
 {
-    return RegisterListenerLocked(windowChangeListeners_, listener);
+    WLOGFD("Start register");
+    return RegisterListenerLocked(windowChangeListeners_[GetWindowId()], listener);
 }
 
 bool WindowImpl::UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
 {
-    return UnregisterListenerLocked(windowChangeListeners_, listener);
+    WLOGFD("Start register");
+    return UnregisterListenerLocked(windowChangeListeners_[GetWindowId()], listener);
 }
 
 bool WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    bool ret = RegisterListenerLocked(avoidAreaChangeListeners_, listener);
-    if (avoidAreaChangeListeners_.size() == 1) {
+    WLOGFD("Start register");
+    bool ret = RegisterListenerLocked(avoidAreaChangeListeners_[GetWindowId()], listener);
+    if (avoidAreaChangeListeners_[GetWindowId()].size() == 1) {
         SingletonContainer::Get<WindowAdapter>().UpdateAvoidAreaListener(property_->GetWindowId(), true);
     }
     return ret;
@@ -1830,8 +1846,9 @@ bool WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>
 
 bool WindowImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    bool ret = UnregisterListenerLocked(avoidAreaChangeListeners_, listener);
-    if (avoidAreaChangeListeners_.empty()) {
+    WLOGFD("Start unregister");
+    bool ret = UnregisterListenerLocked(avoidAreaChangeListeners_[GetWindowId()], listener);
+    if (avoidAreaChangeListeners_[GetWindowId()].empty()) {
         SingletonContainer::Get<WindowAdapter>().UpdateAvoidAreaListener(property_->GetWindowId(), false);
     }
     return ret;
@@ -1839,48 +1856,56 @@ bool WindowImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListene
 
 bool WindowImpl::RegisterDragListener(const sptr<IWindowDragListener>& listener)
 {
+    WLOGFD("Start register");
     return RegisterListenerLocked(windowDragListeners_, listener);
 }
 
 bool WindowImpl::UnregisterDragListener(const sptr<IWindowDragListener>& listener)
 {
+    WLOGFD("Start unregister");
     return UnregisterListenerLocked(windowDragListeners_, listener);
 }
 
 bool WindowImpl::RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
 {
+    WLOGFD("Start register");
     return RegisterListenerLocked(displayMoveListeners_, listener);
 }
 
 bool WindowImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
 {
+    WLOGFD("Start unregister");
     return UnregisterListenerLocked(displayMoveListeners_, listener);
 }
 
 void WindowImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func)
 {
-    WLOGFD("called");
+    WLOGFD("Start register");
     notifyNativefunc_ = std::move(func);
 }
 
 bool WindowImpl::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
 {
-    return RegisterListenerLocked(occupiedAreaChangeListeners_, listener);
+    WLOGFD("Start register");
+    return RegisterListenerLocked(occupiedAreaChangeListeners_[GetWindowId()], listener);
 }
 
 bool WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
 {
-    return UnregisterListenerLocked(occupiedAreaChangeListeners_, listener);
+    WLOGFD("Start unregister");
+    return UnregisterListenerLocked(occupiedAreaChangeListeners_[GetWindowId()], listener);
 }
 
 bool WindowImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
-    return RegisterListenerLocked(touchOutsideListeners_, listener);
+    WLOGFD("Start register");
+    return RegisterListenerLocked(touchOutsideListeners_[GetWindowId()], listener);
 }
 
 bool WindowImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
-    return UnregisterListenerLocked(touchOutsideListeners_, listener);
+    WLOGFD("Start unregister");
+    return UnregisterListenerLocked(touchOutsideListeners_[GetWindowId()], listener);
 }
 
 bool WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener)
@@ -1911,38 +1936,44 @@ bool WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTran
 
 bool WindowImpl::RegisterScreenshotListener(const sptr<IScreenshotListener>& listener)
 {
-    return RegisterListenerLocked(screenshotListeners_, listener);
+    WLOGFD("Start register");
+    return RegisterListenerLocked(screenshotListeners_[GetWindowId()], listener);
 }
 
 bool WindowImpl::UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener)
 {
-    return UnregisterListenerLocked(screenshotListeners_, listener);
+    WLOGFD("Start unregister");
+    return UnregisterListenerLocked(screenshotListeners_[GetWindowId()], listener);
 }
 
 bool WindowImpl::RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
 {
-    return RegisterListenerLocked(dialogTargetTouchListeners_, listener);
+    WLOGFD("Start register");
+    return RegisterListenerLocked(dialogTargetTouchListeners_[GetWindowId()], listener);
 }
 
 bool WindowImpl::UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
 {
-    return UnregisterListenerLocked(dialogTargetTouchListeners_, listener);
+    WLOGFD("Start unregister");
+    return UnregisterListenerLocked(dialogTargetTouchListeners_[GetWindowId()], listener);
 }
 
 void WindowImpl::RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener)
 {
+    WLOGFD("Start register");
     if (listener == nullptr) {
         WLOGFE("listener is nullptr");
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    dialogDeathRecipientListener_ = listener;
+    dialogDeathRecipientListener_[GetWindowId()] = listener;
 }
 
 void WindowImpl::UnregisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener)
 {
+    WLOGFD("start unregister");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    dialogDeathRecipientListener_ = nullptr;
+    dialogDeathRecipientListener_[GetWindowId()] = nullptr;
 }
 
 template<typename T>
@@ -1998,6 +2029,10 @@ void WindowImpl::SetModeSupportInfo(uint32_t modeSupportInfo)
 
 void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason)
 {
+    if (state_ == WindowState::STATE_DESTROYED) {
+        WLOGFW("invalid window state");
+        return;
+    }
     auto display = SingletonContainer::IsDestroyed() ? nullptr :
         SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
@@ -2024,9 +2059,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
     Rect rectToAce = rect;
     // update rectToAce for stretchable window
     if (windowSystemConfig_.isStretchable_ && WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
-        if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END ||
-            reason == WindowSizeChangeReason::DRAG_START || reason == WindowSizeChangeReason::RECOVER ||
-            reason == WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::UNDEFINED) {
+        if (IsStretchableReason(reason)) {
             rectToAce = property_->GetOriginRect();
         } else {
             property_->SetOriginRect(rect);
@@ -2037,19 +2070,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
         NotifySizeChange(rectToAce, reason);
         lastSizeChangeReason_ = reason;
     }
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        if (uiContent_ == nullptr) {
-            return;
-        }
-        Ace::ViewportConfig config;
-        config.SetSize(rectToAce.width_, rectToAce.height_);
-        config.SetPosition(rectToAce.posX_, rectToAce.posY_);
-        config.SetDensity(display->GetVirtualPixelRatio());
-        uiContent_->UpdateViewportConfig(config, reason);
-        WLOGFD("UpdateViewportConfig Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
-            property_->GetWindowId(), rectToAce.posX_, rectToAce.posY_, rectToAce.width_, rectToAce.height_);
-    }
+    UpdateViewportConfig(rectToAce, display, reason);
 }
 
 void WindowImpl::UpdateMode(WindowMode mode)
@@ -2556,6 +2577,23 @@ void WindowImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType
     NotifyAvoidAreaChange(avoidArea, type);
 }
 
+void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& display, WindowSizeChangeReason reason)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (uiContent_ == nullptr) {
+        return;
+    }
+    Ace::ViewportConfig config;
+    config.SetSize(rect.width_, rect.height_);
+    config.SetPosition(rect.posX_, rect.posY_);
+    if (display) {
+        config.SetDensity(display->GetVirtualPixelRatio());
+    }
+    uiContent_->UpdateViewportConfig(config, reason);
+    WLOGFD("UpdateViewportConfig Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+        property_->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+}
+
 void WindowImpl::UpdateWindowStateUnfrozen()
 {
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
@@ -2755,6 +2793,22 @@ void WindowImpl::UpdateZoomTransform(const Transform& trans, bool isDisplayZoomO
         trans.rotationY_, trans.rotationZ_);
     property_->SetZoomTransform(trans);
     property_->SetDisplayZoomState(isDisplayZoomOn);
+}
+
+void WindowImpl::DealWithDeadWindows()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!deadWindows_.empty()) {
+        ClearUselessListeners(screenshotListeners_);
+        ClearUselessListeners(touchOutsideListeners_);
+        ClearUselessListeners(dialogTargetTouchListeners_);
+        ClearUselessListeners(lifecycleListeners_);
+        ClearUselessListeners(windowChangeListeners_);
+        ClearUselessListeners(avoidAreaChangeListeners_);
+        ClearUselessListeners(occupiedAreaChangeListeners_);
+        ClearUselessListeners(dialogDeathRecipientListener_);
+        deadWindows_.clear();
+    }
 }
 
 void WindowImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reason)
