@@ -93,23 +93,6 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
     void CreateStretchableWindow(sptr<WindowImpl>& window, const Rect& rect);
-    template <typename Func, typename First, typename... Rest>
-    void TraverseAllIfConditions(Func f, First& first, Rest&... rest)
-    {
-        first = false;
-        TraverseAllIfConditions(f, rest...);
-        first = true;
-        TraverseAllIfConditions(f, rest...);
-    }
-
-    template<typename Func, typename Last>
-    void TraverseAllIfConditions(Func f, Last& last)
-    {
-        last = false;
-        f();
-        last = true;
-        f();
-    }
 
     static inline std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
@@ -2596,9 +2579,9 @@ HWTEST_F(WindowImplTest, NotifyScreenshot, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
 
     sptr<MockScreenshotListener> listener;
-    window->screenshotListeners_.push_back(sptr<IScreenshotListener>(listener));
+    window->screenshotListeners_[window->GetWindowId()].push_back(sptr<IScreenshotListener>(listener));
     listener = new MockScreenshotListener;
-    window->screenshotListeners_.push_back(sptr<IScreenshotListener>(listener));
+    window->screenshotListeners_[window->GetWindowId()].push_back(sptr<IScreenshotListener>(listener));
     EXPECT_CALL(*listener, OnScreenshot()).Times(1);
     window->NotifyScreenshot();
 }
@@ -2614,9 +2597,9 @@ HWTEST_F(WindowImplTest, NotifyTouchDialogTarget, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
 
     sptr<MockDialogTargetTouchListener> listener;
-    window->dialogTargetTouchListeners_.push_back(sptr<IDialogTargetTouchListener>(listener));
+    window->dialogTargetTouchListeners_[window->GetWindowId()].push_back(sptr<IDialogTargetTouchListener>(listener));
     listener = new MockDialogTargetTouchListener;
-    window->dialogTargetTouchListeners_.push_back(sptr<IDialogTargetTouchListener>(listener));
+    window->dialogTargetTouchListeners_[window->GetWindowId()].push_back(sptr<IDialogTargetTouchListener>(listener));
     EXPECT_CALL(*listener, OnDialogTargetTouch());
     EXPECT_CALL(m->Mock(), ProcessPointDown(_, _));
     window->NotifyTouchDialogTarget();
@@ -2633,12 +2616,13 @@ HWTEST_F(WindowImplTest, NotifySizeChange, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
 
     sptr<MockWindowChangeListener> listener;
-    window->windowChangeListeners_.push_back(sptr<IWindowChangeListener>(listener));
+    window->windowChangeListeners_[window->GetWindowId()].push_back(sptr<IWindowChangeListener>(listener));
     listener = new MockWindowChangeListener;
-    window->windowChangeListeners_.push_back(sptr<IWindowChangeListener>(listener));
+    window->windowChangeListeners_[window->GetWindowId()].push_back(sptr<IWindowChangeListener>(listener));
     EXPECT_CALL(*listener, OnSizeChange(_, _));
     Rect rect;
     window->NotifySizeChange(rect, WindowSizeChangeReason::UNDEFINED);
+    window->windowChangeListeners_[window->GetWindowId()].clear();
 }
 
 /*
@@ -2652,11 +2636,12 @@ HWTEST_F(WindowImplTest, NotifyModeChange, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
 
     sptr<MockWindowChangeListener> listener;
-    window->windowChangeListeners_.push_back(sptr<IWindowChangeListener>(listener));
+    window->windowChangeListeners_[window->GetWindowId()].push_back(sptr<IWindowChangeListener>(listener));
     listener = new MockWindowChangeListener;
-    window->windowChangeListeners_.push_back(sptr<IWindowChangeListener>(listener));
+    window->windowChangeListeners_[window->GetWindowId()].push_back(sptr<IWindowChangeListener>(listener));
     EXPECT_CALL(*listener, OnModeChange(_));
     window->NotifyModeChange(WindowMode::WINDOW_MODE_UNDEFINED);
+    window->windowChangeListeners_[window->GetWindowId()].clear();
 }
 
 /*
@@ -2670,9 +2655,9 @@ HWTEST_F(WindowImplTest, NotifyAvoidAreaChange, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
 
     sptr<MockAvoidAreaChangedListener> listener;
-    window->avoidAreaChangeListeners_.push_back(sptr<IAvoidAreaChangedListener>(listener));
+    window->avoidAreaChangeListeners_[window->GetWindowId()].push_back(sptr<IAvoidAreaChangedListener>(listener));
     listener = new MockAvoidAreaChangedListener;
-    window->avoidAreaChangeListeners_.push_back(sptr<IAvoidAreaChangedListener>(listener));
+    window->avoidAreaChangeListeners_[window->GetWindowId()].push_back(sptr<IAvoidAreaChangedListener>(listener));
     EXPECT_CALL(*listener, OnAvoidAreaChanged(_, _));
     sptr<AvoidArea> avoidArea = new AvoidArea;
     window->NotifyAvoidAreaChange(avoidArea, AvoidAreaType::TYPE_CUTOUT);
@@ -2860,20 +2845,23 @@ HWTEST_F(WindowImplTest, MoveDrag, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Show();
-    EXPECT_CALL(m->Mock(), NotifyServerReadyToMoveOrDrag(_, _, _)).Times(2);
-    TraverseAllIfConditions([&window]() {
-        window->StartMove();
-    }, window->moveDragProperty_->startDragFlag_, window->moveDragProperty_->pointEventStarted_);
+    window->moveDragProperty_->startDragFlag_ = false;
+    window->moveDragProperty_->pointEventStarted_ = true;
+    EXPECT_CALL(m->Mock(), NotifyServerReadyToMoveOrDrag(_, _, _));
+    window->StartMove();
+    window->moveDragProperty_->pointEventStarted_ = false;
+    window->StartMove();
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent =  std::make_shared<MockPointerEvent>();
     MMI::PointerEvent::PointerItem item;
     pointerEvent->SetTargetDisplayId(0);
+    item.SetDisplayX(10000);
+    item.SetDisplayY(10000);
 
     window->moveDragProperty_->pointEventStarted_ = true;
     window->ReadyToMoveOrDragWindow(pointerEvent, item);
-    window->moveDragProperty_->pointEventStarted_ = false;
-    window->ReadyToMoveOrDragWindow(pointerEvent, item);
     window->moveDragProperty_->startMoveFlag_ = true;
+    window->moveDragProperty_->startDragFlag_ = true;
     EXPECT_CALL(m->Mock(), ProcessPointUp(_)).Times(2);
     EXPECT_CALL(m->Mock(), GetModeChangeHotZones(_, _));
     window->EndMoveOrDragWindow(uint32_t(), uint32_t(),
