@@ -673,7 +673,7 @@ sptr<WindowNode> WindowNodeContainer::FindWindowNodeById(uint32_t id) const
     return nullptr;
 }
 
-void WindowNodeContainer::UpdateFocusStatus(uint32_t id, bool focused) const
+void WindowNodeContainer::UpdateFocusStatus(uint32_t id, bool focused)
 {
     auto node = FindWindowNodeById(id);
     if (node == nullptr) {
@@ -681,6 +681,7 @@ void WindowNodeContainer::UpdateFocusStatus(uint32_t id, bool focused) const
         return;
     }
     if (focused && node->GetWindowProperty() != nullptr) {
+        focusedPid_ = node->GetCallingPid();
         AbilityInfo info = node->GetWindowProperty()->GetAbilityInfo();
         WLOGFW("current focus window: windowId: %{public}d, windowName: %{public}s, bundleName: %{public}s,"
             " abilityName: %{public}s, pid: %{public}d, uid: %{public}d", id,
@@ -779,6 +780,16 @@ WMError WindowNodeContainer::SetFocusWindow(uint32_t windowId)
 {
     if (focusedWindow_ == windowId) {
         WLOGFI("focused window do not change, id: %{public}u", windowId);
+        if (focusedPid_ == 0) {
+            auto node = FindWindowNodeById(windowId);
+            if (node && node->GetWindowProperty() != nullptr) {
+                focusedPid_ = node->GetCallingPid();
+                WLOGFI("reset focus app info , pid: %{public}d", focusedPid_);
+                AbilityInfo info = node->GetWindowProperty()->GetAbilityInfo();
+                FocusAppInfo appInfo = { node->GetCallingPid(), node->GetCallingUid(), info.bundleName_, info.abilityName_ };
+                RSInterfaces::GetInstance().SetFocusAppInfo(appInfo);
+            }
+        }
         return WMError::WM_DO_NOTHING;
     }
     UpdateFocusStatus(focusedWindow_, false);
