@@ -105,19 +105,29 @@ void WindowLayoutPolicyCascade::InitAllRects()
 
 void WindowLayoutPolicyCascade::LayoutSplitNodes(DisplayId displayId, WindowUpdateType type, bool layoutByDivider)
 {
-    const auto& appWindowNodeVec = *(displayGroupWindowTree_[displayId][WindowRootNodeType::APP_WINDOW_NODE]);
-    for (auto& childNode : appWindowNodeVec) {
-        if (type == WindowUpdateType::WINDOW_UPDATE_REMOVED) {
-            /*
-             * If updateType is remove we need to layout all appNodes, cause remove split node or
-             * divider means exit split mode, split node may change to other mode
-             */
-            LayoutWindowNode(childNode);
-        } else if (childNode->IsSplitMode()) { // add or update type, layout split node
-            if (layoutByDivider && type == WindowUpdateType::WINDOW_UPDATE_ACTIVE) {
-                childNode->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
+    std::vector<WindowRootNodeType> rootNodeType = {
+        WindowRootNodeType::ABOVE_WINDOW_NODE,
+        WindowRootNodeType::APP_WINDOW_NODE,
+        WindowRootNodeType::BELOW_WINDOW_NODE
+    };
+    for (const auto& rootType : rootNodeType) {
+        if (displayGroupWindowTree_[displayId].find(rootType) == displayGroupWindowTree_[displayId].end()) {
+            continue;
+        }
+        auto appWindowNodeVec = *(displayGroupWindowTree_[displayId][rootType]);
+        for (const auto& childNode : appWindowNodeVec) {
+            if (type == WindowUpdateType::WINDOW_UPDATE_REMOVED) {
+                /*
+                * If updateType is remove we need to layout all appNodes, cause remove split node or
+                * divider means exit split mode, split node may change to other mode
+                */
+                LayoutWindowNode(childNode);
+            } else if (childNode->IsSplitMode()) { // add or update type, layout split node
+                if (layoutByDivider && type == WindowUpdateType::WINDOW_UPDATE_ACTIVE) {
+                    childNode->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
+                }
+                LayoutWindowNode(childNode);
             }
-            LayoutWindowNode(childNode);
         }
     }
 }
