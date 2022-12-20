@@ -1035,6 +1035,9 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
         return ret;
     }
     property_->SetWindowId(windowId);
+    if (surfaceNode_) {
+        surfaceNode_->SetWindowId(windowId);
+    }
     sptr<Window> self(this);
     windowMap_.insert(std::make_pair(name_, std::pair<uint32_t, sptr<Window>>(windowId, self)));
     if (parentId != INVALID_WINDOW_ID) {
