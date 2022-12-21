@@ -16,7 +16,6 @@
 #include "scene_session.h"
 
 #include "window_scene_hilog.h"
-#include "scene_session_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -147,12 +146,8 @@ WSError SceneSession::Maximum()
 
 WSError SceneSession::StartScene(const SceneAbilityInfo& info, SessionOption sessionOption)
 {
-    auto sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info, sessionOption);
-    if (sceneSession == nullptr) {
-        return WSError::WS_ERROR_NULLPTR;
-    }
     if (startSceneFunc_) {
-        startSceneFunc_(sceneSession);
+        startSceneFunc_(info, sessionOption);
     }
     return WSError::WS_OK;
 }

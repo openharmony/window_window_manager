@@ -15,6 +15,12 @@
 
 #include "scene_session_manager.h"
 
+#include <ability_manager_client.h>
+#include <want.h>
+#include <start_options.h>
+#include <scene_session_info.h>
+
+#include "scene_session.h"
 #include "window_scene_hilog.h"
 
 namespace OHOS::Rosen {
@@ -28,7 +34,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SceneAbilityIn
 {
     WLOGFI("abilityInfo: bundleName: %{public}s, abilityName: %{public}s", abilityInfo.bundleName_.c_str(),
         abilityInfo.abilityName_.c_str());
-    sptr<SceneSession> session = new SceneSession(abilityInfo);
+    sptr<SceneSession> session = new (std::nothrow) SceneSession(abilityInfo);
     uint32_t persistentId = pid_ + GenSessionId();
     session->SetPersistentId(persistentId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -42,7 +48,14 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         WLOGFE("session is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }
-    // TODO:AMS
+    AAFwk::Want want;
+    auto abilityInfo = sceneSession->GetAbilityInfo();
+    want.SetElementName(abilityInfo.bundleName_, abilityInfo.abilityName_);
+    AAFwk::StartOptions startOptions;
+    sptr<AAFwk::SceneSessionInfo> sceneSessionInfo = new (std::nothrow) AAFwk::SceneSessionInfo();
+    sceneSessionInfo->sceneSessionToken_ = sceneSession;
+    sceneSessionInfo->surfaceNode_ = sceneSession->GetSurfaceNode();
+    AAFwk::AbilityManagerClient::GetInstance()->StartAbilityByLauncher(want, startOptions, nullptr, sceneSessionInfo);
     return WSError::WS_OK;
 }
 
@@ -52,6 +65,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         WLOGFE("session is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }
+    sceneSession->Background();
     // TODO:AMS
     return WSError::WS_OK;
 }
@@ -62,6 +76,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         WLOGFE("session is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }
+    sceneSession->Disconnect();
     // TODO:AMS
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(sessions_.begin(), sessions_.end(), sceneSession);

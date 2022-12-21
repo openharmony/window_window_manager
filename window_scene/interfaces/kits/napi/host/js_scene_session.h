@@ -24,6 +24,8 @@
 #include <native_engine/native_engine.h>
 #include <native_engine/native_value.h>
 
+#include "window_scene_common.h"
+
 namespace OHOS::Rosen {
 class SceneSession;
 class JsSceneSession final : public std::enable_shared_from_this<JsSceneSession> {
@@ -34,7 +36,7 @@ public:
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
     static NativeValue* RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info);
 
-    void StartScene(const sptr<SceneSession>& session);
+    void StartScene(const SceneAbilityInfo& info, SessionOption sessionOption);
     sptr<SceneSession> GetNativeSession() const;
 
 private:

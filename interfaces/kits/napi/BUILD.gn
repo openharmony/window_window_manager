@@ -24,6 +24,5 @@ group("napi_packages") {
     "window_runtime:window_napi",
     "window_runtime:window_native_kit",
     "window_runtime:windowstage_kit",
-    "//foundation/window/window_manager/window_scene/interfaces/kits/napi/host:window_scene_napi",
   ]
 }

@@ -17,9 +17,9 @@
 #define OHOS_SCENE_SESSION_INTERFACE_H
 
 #include "zidl/session_interface.h"
-#include "scene_session_stage_interface.h"
+#include "zidl/scene_session_stage_interface.h"
 #include "window_scene_common.h"
-#include "window_event_channel_interface.h"
+#include "zidl/window_event_channel_interface.h"
 
 namespace OHOS::Rosen {
 class ISceneSession : public ISession {

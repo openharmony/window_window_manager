@@ -71,7 +71,8 @@
             "//foundation/window/window_manager/extension/window_extension:window_extension_module",
             "//foundation/window/window_manager/wm:libwm",
             "//foundation/window/window_manager/utils:libwmutil",
-            "//foundation/window/window_manager/window_scene:window_scene"
+            "//foundation/window/window_manager/window_scene:window_session",
+            "//foundation/window/window_manager/window_scene:window_session_manager"
           ],
           "service_group": [
             "//foundation/window/window_manager/sa_profile:wms_sa_profile",
@@ -123,11 +124,20 @@
           },
           {
             "type": "so",
-            "name": "//foundation/window/window_manager/window_scene:window_scene",
+            "name": "//foundation/window/window_manager/window_scene:window_session",
             "header": {
               "header_files": [
               ],
-              "header_base": "//foundation/window/window_manager/window_scene/include"
+              "header_base": "//foundation/window/window_manager/window_scene/session"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/window_scene:window_session_manager",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/window_scene/session_manager/include"
             }
           }
         ],

@@ -18,7 +18,7 @@
 
 #include <map>
 #include <iremote_stub.h>
-#include "scene_session_stage_interface.h"
+#include "zidl/scene_session_stage_interface.h"
 
 namespace OHOS::Rosen {
 class SceneSessionStageStub;
