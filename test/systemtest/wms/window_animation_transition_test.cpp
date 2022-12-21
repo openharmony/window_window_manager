@@ -52,14 +52,14 @@ public:
 
 void TestAnimationTransitionController::AnimationForShown()
 {
-    WLOGFI("TestAnimationTransitionController AnimationForShown");
+    WLOGI("TestAnimationTransitionController AnimationForShown");
     Transform trans;
     window_->SetTransform(trans);
 }
 
 void TestAnimationTransitionController::AnimationForHidden()
 {
-    WLOGFI("TestAnimationTransitionController AnimationForHidden");
+    WLOGI("TestAnimationTransitionController AnimationForHidden");
     Transform trans;
     trans.pivotX_ = 1.0f;
     trans.pivotY_ = 0.6f;

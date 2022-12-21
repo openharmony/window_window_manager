@@ -155,7 +155,7 @@ void AccessibilityConnection::UpdateFocusChangeEvent(const sptr<WindowNodeContai
         }
         std::vector<sptr<WindowNode>> focusNodes;
         focusNodes.emplace_back(focusWindowNode);
-        WLOGFI("notify accessibility window info: focus change, focusWindowId: %{public}u", focusWindowId);
+        WLOGFD("notify accessibility window info: focus change, focusWindowId: %{public}u", focusWindowId);
         NotifyAccessibilityWindowInfo(focusNodes, focusWindowId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
     }
 }

@@ -41,7 +41,7 @@ namespace {
 
 WMError WindowDumper::Dump(int fd, const std::vector<std::u16string>& args) const
 {
-    WLOGFI("Dump begin fd: %{public}d", fd);
+    WLOGI("Dump begin fd: %{public}d", fd);
     if (fd < 0) {
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -69,7 +69,7 @@ WMError WindowDumper::Dump(int fd, const std::vector<std::u16string>& args) cons
         WLOGFE("dprintf error");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
-    WLOGFI("Dump end");
+    WLOGI("Dump end");
     return WMError::WM_OK;
 }
 
@@ -209,7 +209,7 @@ WMError WindowDumper::DumpSpecifiedWindowInfo(uint32_t windowId, const std::vect
         std::vector<std::string> resetParams;
         resetParams.assign(params.begin() + 2, params.end()); // 2: params num
         if (resetParams.empty()) {
-            WLOGFI("do not dump ui info");
+            WLOGI("do not dump ui info");
             return WMError::WM_OK;
         }
         std::vector<std::string> infos;

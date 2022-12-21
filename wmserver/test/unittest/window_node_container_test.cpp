@@ -53,7 +53,7 @@ void WindowNodeContainerTest::SetUpTestCase()
 {
     defaultDisplay_ = DisplayManager::GetInstance().GetDefaultDisplay();
     ASSERT_TRUE((defaultDisplay_ != nullptr));
-    WLOGFI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
+    WLOGI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
         defaultDisplay_->GetId(), defaultDisplay_->GetWidth(), defaultDisplay_->GetHeight(),
         defaultDisplay_->GetRefreshRate());
 

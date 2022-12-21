@@ -51,7 +51,7 @@ bool WindowNodeStateMachine::GetDestroyTask(StateTask& task)
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (destroyTask_ != nullptr) {
         task = destroyTask_;
-        WLOGFI("GetDestroyTask success:%{public}u", windowId_);
+        WLOGI("GetDestroyTask success:%{public}u", windowId_);
         return true;
     }
     return false;
@@ -67,7 +67,7 @@ void WindowNodeStateMachine::TransitionTo(WindowNodeState state)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (WindowHelper::IsSystemWindow(type_)) {
-        WLOGFI("system window no need to use stateMachine");
+        WLOGFD("system window no need to use stateMachine");
         return;
     }
     currState_ = state;
@@ -76,7 +76,7 @@ void WindowNodeStateMachine::TransitionTo(WindowNodeState state)
 void WindowNodeStateMachine::UpdateAnimationTaskCount(bool isAdd)
 {
     if (!RemoteAnimation::IsAnimationFirst()) {
-        WLOGFI("not animation first!");
+        WLOGI("not animation first!");
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);

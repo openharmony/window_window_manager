@@ -95,10 +95,10 @@ void WindowExtensionConnection::Impl::WindowExtensionClientRecipient::OnRemoteDi
     }
 
     if (callback_ != nullptr) {
-        WLOGFI("on extension disconnected");
+        WLOGI("on extension disconnected");
         callback_->OnExtensionDisconnected();
     }
-    WLOGFI("Remote died");
+    WLOGI("Remote died");
 }
 
 int WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::ElementName& element,
@@ -118,7 +118,7 @@ int WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::ElementN
     if (ret == ERR_OK) {
         componentCallback_ = callback;
     }
-    WLOGFI("Connection extension end ret = %{public}d windowId = %{public}u", ret, windowId);
+    WLOGI("Connection extension end ret = %{public}d windowId = %{public}u", ret, windowId);
     return ret;
 }
 
@@ -126,7 +126,7 @@ void WindowExtensionConnection::Impl::Show() const
 {
     if (proxy_ != nullptr) {
         proxy_->Show();
-        WLOGFI("show window");
+        WLOGI("show window");
     }
 }
 
@@ -134,7 +134,7 @@ void WindowExtensionConnection::Impl::Hide() const
 {
     if (proxy_ != nullptr) {
         proxy_->Hide();
-        WLOGFI("hide window");
+        WLOGI("hide window");
     }
 }
 
@@ -187,9 +187,9 @@ void WindowExtensionConnection::Impl::OnAbilityConnectDone(const AppExecFwk::Ele
     sptr<IWindowExtensionClient> clientToken(new WindowExtensionClientStubImpl(componentCallback_));
     if (clientToken != nullptr) {
         proxy_->GetExtensionWindow(clientToken);
-        WLOGFI("GetExtensionWindow");
+        WLOGI("GetExtensionWindow");
     }
-    WLOGFI("call end");
+    WLOGI("call end");
     FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::CONNECT_EXTENSION),
         "WindowExtension %s-%s", element.GetBundleName().c_str(), element.GetAbilityName().c_str());
 }
@@ -199,7 +199,7 @@ void WindowExtensionConnection::Impl::OnAbilityDisconnectDone(const AppExecFwk::
     if (componentCallback_ != nullptr) {
         componentCallback_->OnExtensionDisconnected();
     }
-    WLOGFI("end");
+    WLOGI("end");
 }
 
 int WindowExtensionConnection::ConnectExtension(const AppExecFwk::ElementName& element,

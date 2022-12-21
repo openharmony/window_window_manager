@@ -48,7 +48,7 @@ WindowLayoutPolicyCascade::WindowLayoutPolicyCascade(const sptr<DisplayGroupInfo
 void WindowLayoutPolicyCascade::Launch()
 {
     InitAllRects();
-    WLOGFI("WindowLayoutPolicyCascade::Launch");
+    WLOGI("WindowLayoutPolicyCascade::Launch");
 }
 
 void WindowLayoutPolicyCascade::Reorder()
@@ -89,7 +89,7 @@ void WindowLayoutPolicyCascade::Reorder()
         }
         LayoutWindowTree(displayId);
     }
-    WLOGFI("Cascade Reorder end");
+    WLOGI("Cascade Reorder end");
 }
 
 void WindowLayoutPolicyCascade::InitAllRects()
@@ -158,7 +158,7 @@ void WindowLayoutPolicyCascade::PerformWindowLayout(const sptr<WindowNode>& node
     HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     const auto& windowType = node->GetWindowType();
     const auto& requestRect = node->GetRequestRect();
-    WLOGFI("[PerformWindowLayout] windowId: %{public}u, windowType: %{public}u, updateType: %{public}u, requestRect: "
+    WLOGFD("windowId: %{public}u, windowType: %{public}u, updateType: %{public}u, requestRect: "
         "requestRect: [%{public}d, %{public}d, %{public}u, %{public}u]", node->GetWindowId(), windowType, updateType,
         requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_);
     SetDefaultCascadeRect(node);
@@ -269,7 +269,7 @@ void WindowLayoutPolicyCascade::InitCascadeRect(DisplayId displayId)
 
         resRect.posY_ = limitRect.posY_ + static_cast<int32_t>((limitRect.height_ - defaultH) / half);
     }
-    WLOGFI("Init CascadeRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
+    WLOGI("Init CascadeRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
         resRect.posX_, resRect.posY_, resRect.width_, resRect.height_);
     cascadeRectsMap_[displayId].defaultCascadeRect_ = resRect;
 }
@@ -286,7 +286,7 @@ bool WindowLayoutPolicyCascade::InitCascadeRectCfg(DisplayId displayId)
     resRect.posX_ = static_cast<int32_t>(vpr * resRect.posX_);
     resRect.posY_ = static_cast<int32_t>(vpr * resRect.posY_);
 
-    WLOGFI("Init CascadeRect Cfg:[%{public}d, %{public}d, %{public}d, %{public}d]",
+    WLOGI("Init CascadeRect Cfg:[%{public}d, %{public}d, %{public}d, %{public}d]",
         resRect.posX_, resRect.posY_, resRect.width_, resRect.height_);
     cascadeRectsMap_[displayId].defaultCascadeRect_ = resRect;
     return true;

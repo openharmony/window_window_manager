@@ -22,13 +22,13 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerAgentStub"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WMAS"};
 }
 
 int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
     MessageParcel& reply, MessageOption& option)
 {
-    WLOGFI("code is %{public}u", code);
+    WLOGFD("code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed");
         return -1;

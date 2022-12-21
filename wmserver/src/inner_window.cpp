@@ -128,15 +128,15 @@ void PlaceHolderWindow::SetInputEventConsumer()
 
 void PlaceHolderWindow::Destroy()
 {
-    WLOGFI("destroy place holder window begin.");
+    WLOGI("destroy place holder window begin.");
     if (window_ != nullptr) {
-        WLOGFI("destroy place holder window not nullptr.");
+        WLOGI("destroy place holder window not nullptr.");
         UnRegisterWindowListener();
         window_->SetInputEventConsumer(nullptr);
         window_->Destroy();
     }
     window_ = nullptr;
-    WLOGFI("destroy place holder window end.");
+    WLOGI("destroy place holder window end.");
 }
 } // Rosen
 } // OHOS

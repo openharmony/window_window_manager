@@ -38,12 +38,12 @@ JsScreen::JsScreen(const sptr<Screen>& screen) : screen_(screen)
 
 JsScreen::~JsScreen()
 {
-    WLOGFI("JsScreen::~JsScreen is called");
+    WLOGI("JsScreen::~JsScreen is called");
 }
 
 void JsScreen::Finalizer(NativeEngine* engine, void* data, void* hint)
 {
-    WLOGFI("JsScreen::Finalizer is called");
+    WLOGI("JsScreen::Finalizer is called");
     auto jsScreen = std::unique_ptr<JsScreen>(static_cast<JsScreen*>(data));
     if (jsScreen == nullptr) {
         WLOGFE("jsScreen::Finalizer jsScreen is null");
@@ -55,10 +55,10 @@ void JsScreen::Finalizer(NativeEngine* engine, void* data, void* hint)
         return;
     }
     ScreenId screenId = screen->GetId();
-    WLOGFI("JsScreen::Finalizer screenId : %{public}" PRIu64"", screenId);
+    WLOGI("JsScreen::Finalizer screenId : %{public}" PRIu64"", screenId);
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     if (g_JsScreenMap.find(screenId) != g_JsScreenMap.end()) {
-        WLOGFI("JsScreen::Finalizer screen is destroyed: %{public}" PRIu64"", screenId);
+        WLOGI("JsScreen::Finalizer screen is destroyed: %{public}" PRIu64"", screenId);
         g_JsScreenMap.erase(screenId);
     }
 }
@@ -71,7 +71,7 @@ NativeValue* JsScreen::SetOrientation(NativeEngine* engine, NativeCallbackInfo* 
 
 NativeValue* JsScreen::OnSetOrientation(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("OnSetOrientation is called");
+    WLOGI("OnSetOrientation is called");
     bool paramValidFlag = true;
     Orientation orientation = Orientation::UNSPECIFIED;
     if (info.argc < ARGC_ONE) {
@@ -99,7 +99,7 @@ NativeValue* JsScreen::OnSetOrientation(NativeEngine& engine, NativeCallbackInfo
             bool res = screen_->SetOrientation(orientation);
             if (res) {
                 task.Resolve(engine, engine.CreateUndefined());
-                WLOGFI("OnSetOrientation success");
+                WLOGI("OnSetOrientation success");
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL),
                                                   "JsScreen::OnSetOrientation failed."));
@@ -120,14 +120,14 @@ NativeValue* JsScreen::OnSetOrientation(NativeEngine& engine, NativeCallbackInfo
 
 NativeValue* JsScreen::SetScreenActiveMode(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("SetScreenActiveMode is called");
+    WLOGI("SetScreenActiveMode is called");
     JsScreen* me = CheckParamsAndGetThis<JsScreen>(engine, info);
     return (me != nullptr) ? me->OnSetScreenActiveMode(*engine, *info) : nullptr;
 }
 
 NativeValue* JsScreen::OnSetScreenActiveMode(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("OnSetScreenActiveMode is called");
+    WLOGI("OnSetScreenActiveMode is called");
     bool paramValidFlag = true;
     uint32_t modeId = 0;
     if (info.argc < ARGC_ONE) {
@@ -150,7 +150,7 @@ NativeValue* JsScreen::OnSetScreenActiveMode(NativeEngine& engine, NativeCallbac
             bool res = screen_->SetScreenActiveMode(modeId);
             if (res) {
                 task.Resolve(engine, engine.CreateUndefined());
-                WLOGFI("OnSetScreenActiveMode success");
+                WLOGI("OnSetScreenActiveMode success");
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL),
                                                 "JsScreen::OnSetScreenActiveMode failed."));
@@ -170,14 +170,14 @@ NativeValue* JsScreen::OnSetScreenActiveMode(NativeEngine& engine, NativeCallbac
 
 NativeValue* JsScreen::SetDensityDpi(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("SetDensityDpi is called");
+    WLOGI("SetDensityDpi is called");
     JsScreen* me = CheckParamsAndGetThis<JsScreen>(engine, info);
     return (me != nullptr) ? me->OnSetDensityDpi(*engine, *info) : nullptr;
 }
 
 NativeValue* JsScreen::OnSetDensityDpi(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("OnSetDensityDpi is called");
+    WLOGI("OnSetDensityDpi is called");
     bool paramValidFlag = true;
     uint32_t densityDpi = 0;
     if (info.argc < ARGC_ONE) {
@@ -200,7 +200,7 @@ NativeValue* JsScreen::OnSetDensityDpi(NativeEngine& engine, NativeCallbackInfo&
             bool res = screen_->SetDensityDpi(densityDpi);
             if (res) {
                 task.Resolve(engine, engine.CreateUndefined());
-                WLOGFI("OnSetDensityDpi success");
+                WLOGI("OnSetDensityDpi success");
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL),
                                                 "JsScreen::OnSetDensityDpi failed."));
@@ -220,10 +220,10 @@ NativeValue* JsScreen::OnSetDensityDpi(NativeEngine& engine, NativeCallbackInfo&
 
 std::shared_ptr<NativeReference> FindJsDisplayObject(ScreenId screenId)
 {
-    WLOGFI("[NAPI]Try to find screen %{public}" PRIu64" in g_JsScreenMap", screenId);
+    WLOGI("[NAPI]Try to find screen %{public}" PRIu64" in g_JsScreenMap", screenId);
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     if (g_JsScreenMap.find(screenId) == g_JsScreenMap.end()) {
-        WLOGFI("[NAPI]Can not find screen %{public}" PRIu64" in g_JsScreenMap", screenId);
+        WLOGI("[NAPI]Can not find screen %{public}" PRIu64" in g_JsScreenMap", screenId);
         return nullptr;
     }
     return g_JsScreenMap[screenId];
@@ -231,11 +231,11 @@ std::shared_ptr<NativeReference> FindJsDisplayObject(ScreenId screenId)
 
 NativeValue* CreateJsScreenObject(NativeEngine& engine, sptr<Screen>& screen)
 {
-    WLOGFI("JsScreen::CreateJsScreen is called");
+    WLOGI("JsScreen::CreateJsScreen is called");
     NativeValue* objValue = nullptr;
     std::shared_ptr<NativeReference> jsScreenObj = FindJsDisplayObject(screen->GetId());
     if (jsScreenObj != nullptr && jsScreenObj->Get() != nullptr) {
-        WLOGFI("[NAPI]FindJsScreenObject %{public}" PRIu64"", screen->GetId());
+        WLOGI("[NAPI]FindJsScreenObject %{public}" PRIu64"", screen->GetId());
         objValue = jsScreenObj->Get();
     }
     if (objValue == nullptr) {
@@ -290,7 +290,7 @@ NativeValue* CreateJsScreenModeArrayObject(NativeEngine& engine, std::vector<spt
 
 NativeValue* CreateJsScreenModeObject(NativeEngine& engine, const sptr<SupportedScreenModes>& mode)
 {
-    WLOGFI("JsScreen::CreateJsScreenMode is called");
+    WLOGI("JsScreen::CreateJsScreenMode is called");
     NativeValue* objValue = engine.CreateObject();
     NativeObject* optionObject = ConvertNativeValueTo<NativeObject>(objValue);
     if (optionObject == nullptr) {

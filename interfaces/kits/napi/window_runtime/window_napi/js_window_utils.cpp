@@ -256,7 +256,7 @@ NativeValue* WindowLayoutModeInit(NativeEngine* engine)
 
 NativeValue* BlurStyleInit(NativeEngine* engine)
 {
-    WLOGFI("[NAPI]BlurStyleInit");
+    WLOGI("[NAPI]BlurStyleInit");
     if (engine == nullptr) {
         WLOGFE("[NAPI]Engine is nullptr");
         return nullptr;
@@ -382,7 +382,7 @@ NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect& rect)
 
 NativeValue* CreateJsWindowPropertiesObject(NativeEngine& engine, sptr<Window>& window)
 {
-    WLOGFI("[NAPI]CreateJsWindowPropertiesObject");
+    WLOGI("[NAPI]CreateJsWindowPropertiesObject");
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
     if (object == nullptr) {
@@ -534,7 +534,7 @@ static uint32_t GetColorFromJs(NativeEngine& engine, NativeObject* jsObject,
         uint32_t hexColor;
         ss << std::hex << color;
         ss >> hexColor;
-        WLOGFI("[NAPI]Origin %{public}s, process %{public}s, final %{public}x",
+        WLOGI("[NAPI]Origin %{public}s, process %{public}s, final %{public}x",
             colorStr.c_str(), color.c_str(), hexColor);
         return hexColor;
     }
@@ -607,7 +607,7 @@ NativeValue* ConvertAvoidAreaToJsValue(NativeEngine& engine, const AvoidArea& av
 
 bool CheckCallingPermission(std::string permission)
 {
-    WLOGFI("[NAPI]Permission: %{public}s", permission.c_str());
+    WLOGD("[NAPI]Permission: %{public}s", permission.c_str());
     if (!permission.empty() &&
         Security::AccessToken::AccessTokenKit::VerifyAccessToken(IPCSkeleton::GetCallingTokenID(), permission)
         != AppExecFwk::Constants::PERMISSION_GRANTED) {
@@ -622,24 +622,24 @@ bool GetAPI7Ability(NativeEngine& engine, AppExecFwk::Ability* &ability)
     napi_value global;
     auto env = reinterpret_cast<napi_env>(&engine);
     if (napi_get_global(env, &global) != napi_ok) {
-        WLOGFI("[NAPI]Get global failed");
+        WLOGI("[NAPI]Get global failed");
         return false;
     }
     napi_value jsAbility;
     napi_status status = napi_get_named_property(env, global, "ability", &jsAbility);
     if (status != napi_ok || jsAbility == nullptr) {
-        WLOGFI("[NAPI]Get ability property failed");
+        WLOGI("[NAPI]Get ability property failed");
         return false;
     }
 
     if (napi_get_value_external(env, jsAbility, reinterpret_cast<void **>(&ability)) != napi_ok) {
-        WLOGFI("[NAPI]Get ability external failed");
+        WLOGI("[NAPI]Get ability external failed");
         return false;
     }
     if (ability == nullptr) {
         return false;
     } else {
-        WLOGFI("[NAPI]Get ability");
+        WLOGI("[NAPI]Get ability");
     }
     return true;
 }

@@ -58,10 +58,10 @@ void VisibilityChangedListenerImpl::OnWindowVisibilityChanged(
     const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfo)
 {
     std::unique_lock<std::mutex> lock(mutex_);
-    WLOGFI("size:%{public}zu", windowVisibilityInfo.size());
+    WLOGI("size:%{public}zu", windowVisibilityInfo.size());
     windowVisibilityInfos_ = std::move(windowVisibilityInfo);
     for (auto& info : windowVisibilityInfos_) {
-        WLOGFI("windowId:%{public}u, isVisible_:%{public}d, pid:%{public}d, uid:%{public}d, windowType:%{public}u",
+        WLOGI("windowId:%{public}u, isVisible_:%{public}d, pid:%{public}d, uid:%{public}d, windowType:%{public}u",
             info->windowId_, info->isVisible_, info->pid_, info->uid_, static_cast<uint32_t>(info->windowType_));
     }
     isCallbackCalled_ = true;
@@ -117,7 +117,7 @@ void WindowVisibilityInfoTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_TRUE((display != nullptr));
-    WLOGFI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
+    WLOGI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
         display->GetId(), display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
     Rect displayRect = {0, 0,
                         static_cast<uint32_t>(display->GetWidth()), static_cast<uint32_t>(display->GetHeight())};
@@ -178,7 +178,7 @@ void WindowVisibilityInfoTest::WaitForCallback()
     auto now = std::chrono::system_clock::now();
     if (!cv_.wait_until(lock, now + std::chrono::milliseconds(WAIT_ASYNC_MS_TIME_OUT),
         []() { return visibilityChangedListener_->isCallbackCalled_; })) {
-        WLOGFI("wait_until time out");
+        WLOGI("wait_until time out");
     }
 }
 

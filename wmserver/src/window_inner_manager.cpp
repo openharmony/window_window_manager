@@ -58,7 +58,7 @@ bool WindowInnerManager::Init()
         return false;
     }
 
-    WLOGFI("init window inner manager service success.");
+    WLOGI("init window inner manager service success.");
     return true;
 }
 
@@ -66,22 +66,22 @@ void WindowInnerManager::Start(bool enableRecentholder)
 {
     isRecentHolderEnable_ = enableRecentholder;
     if (state_ == InnerWMRunningState::STATE_RUNNING) {
-        WLOGFI("window inner manager service has already started.");
+        WLOGI("window inner manager service has already started.");
     }
     if (!Init()) {
-        WLOGFI("failed to init window inner manager service.");
+        WLOGI("failed to init window inner manager service.");
         return;
     }
     state_ = InnerWMRunningState::STATE_RUNNING;
     eventLoop_->Run();
 
     pid_ = getpid();
-    WLOGFI("window inner manager service start success.");
+    WLOGI("window inner manager service start success.");
 }
 
 void WindowInnerManager::Stop()
 {
-    WLOGFI("stop window inner manager service.");
+    WLOGI("stop window inner manager service.");
     if (eventLoop_ != nullptr) {
         eventLoop_->Stop();
         eventLoop_.reset();
@@ -263,7 +263,7 @@ bool WindowInnerManager::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<W
         return false;
     }
     moveDragController_->HandleReadyToMoveOrDrag(windowId, windowProperty, moveDragProperty);
-    WLOGFI("NotifyServerReadyToMoveOrDrag, windowId: %{public}u", windowId);
+    WLOGI("NotifyServerReadyToMoveOrDrag, windowId: %{public}u", windowId);
     return true;
 }
 
@@ -273,7 +273,7 @@ void WindowInnerManager::NotifyWindowEndUpMovingOrDragging(uint32_t windowId)
         return;
     }
     moveDragController_->HandleEndUpMovingOrDragging(windowId);
-    WLOGFI("NotifyWindowEndUpMovingOrDragging, windowId: %{public}u", windowId);
+    WLOGI("NotifyWindowEndUpMovingOrDragging, windowId: %{public}u", windowId);
 }
 
 void WindowInnerManager::NotifyWindowRemovedOrDestroyed(uint32_t windowId)
@@ -282,7 +282,7 @@ void WindowInnerManager::NotifyWindowRemovedOrDestroyed(uint32_t windowId)
         return;
     }
     moveDragController_->HandleWindowRemovedOrDestroyed(windowId);
-    WLOGFI("NotifyWindowRemovedOrDestroyed, windowId: %{public}u", windowId);
+    WLOGI("NotifyWindowRemovedOrDestroyed, windowId: %{public}u", windowId);
 }
 
 void WindowInnerManager::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)

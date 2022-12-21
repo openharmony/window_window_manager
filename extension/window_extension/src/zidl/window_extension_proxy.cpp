@@ -95,7 +95,7 @@ void WindowExtensionProxy::GetExtensionWindow(sptr<IWindowExtensionClient>& toke
 
 void WindowExtensionProxy::RequestFocus()
 {
-    WLOGFI("called.");
+    WLOGI("called.");
 }
 } // namespace Rosen
 } // namespace OHOS

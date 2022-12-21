@@ -41,7 +41,7 @@ public:
 
     static void Finalizer(NativeEngine* engine, void* data, void* hint)
     {
-        WLOGFI("JsWindowExtensionContext::Finalizer is called");
+        WLOGI("JsWindowExtensionContext::Finalizer is called");
         std::unique_ptr<JsWindowExtensionContext>(static_cast<JsWindowExtensionContext*>(data));
     }
 
@@ -65,7 +65,7 @@ private:
             return false;
         }
         if (info.argc > 1 && info.argv[1]->TypeOf() == NATIVE_OBJECT) {
-            WLOGFI("OnStartAbility start options is used.");
+            WLOGI("OnStartAbility start options is used.");
             AppExecFwk::UnwrapStartOptions(reinterpret_cast<napi_env>(&engine),
                 reinterpret_cast<napi_value>(info.argv[1]), startOptions);
         }
@@ -79,7 +79,7 @@ private:
             WLOGFE("The input want is invalid.");
             return false;
         }
-        WLOGFI("UnwrapWant, BundleName: %{public}s, AbilityName: %{public}s.",
+        WLOGI("UnwrapWant, BundleName: %{public}s, AbilityName: %{public}s.",
             want.GetBundle().c_str(),
             want.GetElement().GetAbilityName().c_str());
         return true;
@@ -87,7 +87,7 @@ private:
 
     NativeValue* OnStartAbility(NativeEngine& engine, NativeCallbackInfo& info)
     {
-        WLOGFI("OnStartAbility is called");
+        WLOGI("OnStartAbility is called");
         if (info.argc < 2) {// at least two argc
             WLOGFE("Start ability failed, not enough params.");
             engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
@@ -103,7 +103,7 @@ private:
 
         AsyncTask::CompleteCallback complete =
             [weak = context_, want, startOptions](NativeEngine& engine, AsyncTask& task, int32_t status) {
-                WLOGFI("startAbility begin");
+                WLOGI("startAbility begin");
                 auto context = weak.lock();
                 if (!context) {
                     WLOGFW("context is released");
@@ -131,18 +131,18 @@ private:
 void JsWindowConnectCallback::OnAbilityConnectDone(const AppExecFwk::ElementName& element,
                                                    const sptr<IRemoteObject>& remoteObject, int resultCode)
 {
-    WLOGFI("called");
+    WLOGI("called");
 }
 
 void JsWindowConnectCallback::OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode)
 {
-    WLOGFI("called");
+    WLOGI("called");
 }
 
 NativeValue* CreateJsWindowExtensionContext(NativeEngine& engine,
                                             const std::shared_ptr<WindowExtensionContext>& context)
 {
-    WLOGFI("CreateJsWindowExtensionContext begin");
+    WLOGI("CreateJsWindowExtensionContext begin");
     NativeValue* objValue = CreateJsExtensionContext(engine, context);
     NativeObject* object = AbilityRuntime::ConvertNativeValueTo<NativeObject>(objValue);
 

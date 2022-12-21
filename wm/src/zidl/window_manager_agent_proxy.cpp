@@ -44,7 +44,7 @@ void WindowManagerAgentProxy::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>&
     }
 
     if (!data.WriteRemoteObject(focusChangeInfo->abilityToken_)) {
-        WLOGFI("Write abilityToken failed");
+        WLOGI("Write abilityToken failed");
     }
 
     if (!data.WriteBool(focused)) {

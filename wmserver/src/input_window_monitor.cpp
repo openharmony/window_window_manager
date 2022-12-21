@@ -75,7 +75,7 @@ void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
     std::vector<sptr<WindowNode>> windowNodes;
     container->TraverseContainer(windowNodes);
     TraverseWindowNodes(windowNodes, displayGroupInfo_.windowsInfo);
-    WLOGFI("update display info to IMS, displayId: %{public}" PRIu64"", displayId);
+    WLOGI("update display info to IMS, displayId: %{public}" PRIu64"", displayId);
     auto task = [this]() {
         MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo_);
     };
@@ -153,10 +153,10 @@ void InputWindowMonitor::TransformWindowRects(const sptr<WindowNode>& windowNode
         for (Rect& rect : pointerHotAreas) {
             rect = WindowHelper::TransformRect(windowNode->GetWindowProperty()->GetTransformMat(), rect);
         }
-        WLOGFI("Area rect before tranform: [%{public}d, %{public}d, %{public}u, %{public}u]",
+        WLOGI("Area rect before tranform: [%{public}d, %{public}d, %{public}u, %{public}u]",
             areaRect.posX_, areaRect.posY_, areaRect.width_, areaRect.height_);
         areaRect = WindowHelper::TransformRect(windowNode->GetWindowProperty()->GetTransformMat(), areaRect);
-        WLOGFI("Area rect after tranform: [%{public}d, %{public}d, %{public}u, %{public}u]",
+        WLOGI("Area rect after tranform: [%{public}d, %{public}d, %{public}u, %{public}u]",
             areaRect.posX_, areaRect.posY_, areaRect.width_, areaRect.height_);
     }
 }
@@ -174,7 +174,7 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
     }
     for (const auto& windowNode: windowNodes) {
         if (INPUT_WINDOW_TYPE_SKIPPED.find(windowNode->GetWindowType()) != INPUT_WINDOW_TYPE_SKIPPED.end()) {
-            WLOGFI("skip node[id:%{public}u, type:%{public}d]", windowNode->GetWindowId(), windowNode->GetWindowType());
+            WLOGI("skip node[id:%{public}u, type:%{public}d]", windowNode->GetWindowId(), windowNode->GetWindowType());
             continue;
         }
 
@@ -205,7 +205,7 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
         convertRectsToMmiRects(touchHotAreas, windowInfo.defaultHotAreas);
         convertRectsToMmiRects(pointerHotAreas, windowInfo.pointerHotAreas);
         if (!windowNode->GetWindowProperty()->GetTouchable()) {
-            WLOGFI("window is not touchable: %{public}u", windowNode->GetWindowId());
+            WLOGI("window is not touchable: %{public}u", windowNode->GetWindowId());
             windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE;
         }
         windowsInfo.emplace_back(windowInfo);

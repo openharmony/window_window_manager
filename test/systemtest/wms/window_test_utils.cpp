@@ -244,7 +244,7 @@ uint32_t WindowTestUtils::GetMaxTileWinNum()
     uint32_t minFloatingW = static_cast<uint32_t>(MIN_FLOATING_WIDTH * virtualPixelRatio);
     uint32_t drawableW = limitDisplayRect_.width_ - edgeIntervalVp + midIntervalVp;
     uint32_t maxNum = static_cast<uint32_t>(drawableW / (minFloatingW + midIntervalVp));
-    WLOGFI("maxNum: %{public}d", maxNum);
+    WLOGI("maxNum: %{public}d", maxNum);
     return maxNum;
 }
 
@@ -267,19 +267,19 @@ void WindowTestUtils::InitTileWindowRects(const sptr<Window>& window)
     int x = limitDisplayRect_.posX_ + ((limitDisplayRect_.width_ - w) / half);
     int y = limitDisplayRect_.posY_ + ((limitDisplayRect_.height_ - h) / half);
     singleTileRect_ = { x, y, w, h };
-    WLOGFI("singleRect_: %{public}d %{public}d %{public}d %{public}d", x, y, w, h);
+    WLOGI("singleRect_: %{public}d %{public}d %{public}d %{public}d", x, y, w, h);
     x = edgeInterval;
     w = (limitDisplayRect_.width_ - edgeInterval * half - midInterval) / half;
     // calc doubleRect
     doubleTileRects_[0] = {x, y, w, h};
     doubleTileRects_[1] = {x + w + midInterval, y, w, h};
-    WLOGFI("doubleRects_: %{public}d %{public}d %{public}d %{public}d", x, y, w, h);
+    WLOGI("doubleRects_: %{public}d %{public}d %{public}d %{public}d", x, y, w, h);
     // calc tripleRect
     w = (limitDisplayRect_.width_ - edgeInterval * half - midInterval * half) / 3; // 3 is triple rects num
     tripleTileRects_[0] = {x, y, w, h};
     tripleTileRects_[1] = {x + w + midInterval, y, w, h};
     tripleTileRects_[2] = {x + w * half + midInterval * half, y, w, h}; // 2 is third index
-    WLOGFI("tripleRects_: %{public}d %{public}d %{public}d %{public}d", x, y, w, h);
+    WLOGI("tripleRects_: %{public}d %{public}d %{public}d %{public}d", x, y, w, h);
 }
 
 bool WindowTestUtils::RectEqualTo(const sptr<Window>& window, const Rect& r)
@@ -326,7 +326,7 @@ bool WindowTestUtils::InitSplitRects()
         WLOGFE("GetDefaultDisplay: failed!");
         return false;
     }
-    WLOGFI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
+    WLOGI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
         display->GetId(), display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
 
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
@@ -466,7 +466,7 @@ float WindowTestUtils::GetVirtualPixelRatio(DisplayId displayId)
         return 1.0;  // Use DefaultVPR 1.0
     }
 
-    WLOGFI("GetVirtualPixel success. displayId:%{public}" PRIu64", vpr:%{public}f", displayId, virtualPixelRatio);
+    WLOGI("GetVirtualPixel success. displayId:%{public}" PRIu64", vpr:%{public}f", displayId, virtualPixelRatio);
     return virtualPixelRatio;
 }
 } // namespace ROSEN
