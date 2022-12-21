@@ -13,25 +13,16 @@
 
 import("//build/ohos.gni")
 
-config("window_scene_private_config") {
-  visibility = [ ":*" ]
-
+config("window_session_public_config") {
   include_dirs = [
-    "session/container/include",
-    "session/host/include",
-  ]
-}
-
-config("window_scene_public_config") {
-  include_dirs = [
-    "interfaces/innerkits",
+    # "interfaces/innerkits",
     "utils/include",
     "session/container/include",
     "session/host/include",
   ]
 }
 
-ohos_shared_library("window_scene") {
+ohos_shared_library("window_session") {
   sources = [
     "session/container/src/scene_session_stage.cpp",
     "session/container/src/session_stage.cpp",
@@ -40,16 +31,14 @@ ohos_shared_library("window_scene") {
     "session/container/src/zidl/window_event_channel_proxy.cpp",
     "session/container/src/zidl/window_event_channel_stub.cpp",
     "session/host/src/scene_session.cpp",
-    "session/host/src/scene_session_manager.cpp",
     "session/host/src/session.cpp",
     "session/host/src/zidl/scene_session_proxy.cpp",
     "session/host/src/zidl/scene_session_stub.cpp",
   ]
 
   cflags_cc = [ "-std=c++17" ]
-  configs = [ ":window_scene_private_config" ]
 
-  public_configs = [ ":window_scene_public_config" ]
+  public_configs = [ ":window_session_public_config" ]
 
   deps = [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
 
@@ -58,6 +47,37 @@ ohos_shared_library("window_scene") {
     "hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
+  ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
+config("window_session_manager_public_config") {
+  include_dirs = [
+    # "interfaces/innerkits",
+    "utils/include",
+    "session_manager/include",
+  ]
+}
+
+ohos_shared_library("window_session_manager") {
+  sources = [ "session_manager/src/scene_session_manager.cpp" ]
+
+  cflags_cc = [ "-std=c++17" ]
+
+  public_configs = [ ":window_session_manager_public_config" ]
+
+  deps = [
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/window/window_manager/window_scene:window_session",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:ability_manager",
+    "c_utils:utils",
+    "hilog_native:libhilog",
   ]
 
   part_name = "window_manager"

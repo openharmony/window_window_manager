@@ -16,8 +16,9 @@ import("//build/ohos.gni")
 config("window_scene_napi_private_config") {
   visibility = [ ":*" ]
 
-  include_dirs =
-      [ "//foundation/window/window_manager/window_scene/interfaces/kits/napi/host", ]
+  include_dirs = [
+    "//foundation/window/window_manager/window_scene/interfaces/kits/napi/host",
+  ]
 }
 
 ohos_shared_library("window_scene_napi") {
@@ -31,12 +32,13 @@ ohos_shared_library("window_scene_napi") {
   configs = [ ":window_scene_napi_private_config" ]
 
   deps = [
-    "//foundation/window/window_manager/window_scene:window_scene"
+    "//foundation/window/window_manager/window_scene:window_session",
+    "//foundation/window/window_manager/window_scene:window_session_manager",
   ]
 
   external_deps = [
-    "c_utils:utils",
     "ability_runtime:runtime",
+    "c_utils:utils",
     "hilog_native:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",

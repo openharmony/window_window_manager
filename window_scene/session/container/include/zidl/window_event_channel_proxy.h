@@ -18,7 +18,7 @@
 
 #include <iremote_proxy.h>
 
-#include "window_event_channel_interface.h"
+#include "zidl/window_event_channel_interface.h"
 #include "window_scene_common.h"
 
 namespace OHOS::Rosen {

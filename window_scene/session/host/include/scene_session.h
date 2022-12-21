@@ -17,13 +17,13 @@
 #define OHOS_SCENE_SESSION_H
 
 #include "zidl/scene_session_stub.h"
-#include "foundation/window/window_manager/window_scene/interfaces/innerkits/session.h"
-#include "scene_session_stage_interface.h"
+#include "foundation/window/window_manager/window_scene/session/host/include/session.h"
+#include "zidl/scene_session_stage_interface.h"
 #include "window_scene_common.h"
 
 namespace OHOS::Rosen {
 class SceneSession;
-using NotifyStartSceneFunc = std::function<void(const sptr<SceneSession>& session)>;
+using NotifyStartSceneFunc = std::function<void(const SceneAbilityInfo& info, SessionOption sessionOption)>;
 class SceneSession : public SceneSessionStub, public Session {
 public:
     explicit SceneSession(const SceneAbilityInfo& info);

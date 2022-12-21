@@ -16,16 +16,18 @@
 #ifndef OHOS_ROSEN_SCENE_SESSION_MANAGER_H
 #define OHOS_ROSEN_SCENE_SESSION_MANAGER_H
 
-#include <memory>
+#include <mutex>
 #include <vector>
 #include <map>
 #include <unistd.h>
 
+#include <refbase.h>
 #include "ws_single_instance.h"
 #include "window_scene_common.h"
-#include "scene_session.h"
 
 namespace OHOS::Rosen {
+class SceneSession;
+
 class SceneSessionManager {
 WS_DECLARE_SINGLE_INSTANCE(SceneSessionManager)
 public:

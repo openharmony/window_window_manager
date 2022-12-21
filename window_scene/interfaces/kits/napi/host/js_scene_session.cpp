@@ -21,6 +21,7 @@
 
 #include "js_scene_utils.h"
 #include "scene_session.h"
+#include "scene_session_manager.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
@@ -94,13 +95,13 @@ NativeValue* JsSceneSession::OnRegisterCallback(NativeEngine& engine, NativeCall
     }
 
     std::weak_ptr<JsSceneSession> sessionWptr(shared_from_this());
-    NotifyStartSceneFunc func = [sessionWptr](const sptr<SceneSession>& session) {
+    NotifyStartSceneFunc func = [sessionWptr](const SceneAbilityInfo& info, SessionOption sessionOption) {
         auto jsSceneSession = sessionWptr.lock();
-        if (jsSceneSession == nullptr || session == nullptr) {
-            WLOGFE("[NAPI]this scene session or target session is nullptr");
+        if (jsSceneSession == nullptr) {
+            WLOGFE("[NAPI]this scene session");
             return;
         }
-        jsSceneSession->StartScene(session);
+        jsSceneSession->StartScene(info, sessionOption);
     };
     session_->RegisterStartSceneEventListener(func);
     std::shared_ptr<NativeReference> callbackRef;
@@ -110,8 +111,14 @@ NativeValue* JsSceneSession::OnRegisterCallback(NativeEngine& engine, NativeCall
     return engine.CreateUndefined();
 }
 
-void JsSceneSession::StartScene(const sptr<SceneSession>& session)
+void JsSceneSession::StartScene(const SceneAbilityInfo& info, SessionOption sessionOption)
 {
+    auto session = SceneSessionManager::GetInstance().RequestSceneSession(info, sessionOption);
+    if (session == nullptr) {
+        WLOGFE("[NAPI]target session is nullptr");
+        return;
+    }
+
     auto iter = jsCbMap_.find(START_SCENE_CB);
     if (iter == jsCbMap_.end()) {
         return;
