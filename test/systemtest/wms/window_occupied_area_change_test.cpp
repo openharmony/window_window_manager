@@ -52,7 +52,7 @@ sptr<TestOccupiedAreaChangeListener> WindowOccupiedAreaChangeTest::testOccupiedA
 
 void TestOccupiedAreaChangeListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info)
 {
-    WLOGFI("OccupiedAreaChangeInfo: [%{public}u, {%{public}u, %{public}u}]",
+    WLOGI("OccupiedAreaChangeInfo: [%{public}u, {%{public}u, %{public}u}]",
         info->type_, info->rect_.width_, info->rect_.height_);
     type_ = info->type_;
     rect_ = info->rect_;
@@ -62,7 +62,7 @@ void WindowOccupiedAreaChangeTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_TRUE((display != nullptr));
-    WLOGFI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
+    WLOGI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
         display->GetId(), display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
     Utils::InitByDisplayRect(displayRect);

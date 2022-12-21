@@ -33,7 +33,10 @@ config("libwm_public_config") {
 
 ## Build libwm.so
 ohos_shared_library("libwm") {
-  include_dirs = [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf" ]
+  include_dirs = [
+    "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf",
+    "../utils/include",
+  ]
 
   sources = [
     "../wmserver/src/zidl/window_manager_proxy.cpp",

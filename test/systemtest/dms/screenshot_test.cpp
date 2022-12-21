@@ -57,7 +57,7 @@ void ScreenshotTest::SetUpTestCase()
         WLOGFE("GetDefaultDisplay: failed!\n");
         return;
     }
-    WLOGFI("GetDefaultDisplay: id %" PRIu64", w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
+    WLOGI("GetDefaultDisplay: id %" PRIu64", w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
         display->GetHeight(), display->GetRefreshRate());
 
     defaultId_ = display->GetId();

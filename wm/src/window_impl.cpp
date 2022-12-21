@@ -95,7 +95,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     if (moveDragProperty_ == nullptr) {
         WLOGFE("MoveDragProperty is null");
     }
-    WLOGFI("WindowImpl constructorCnt: %{public}d name: %{public}s",
+    WLOGI("WindowImpl constructorCnt: %{public}d name: %{public}s",
         ++constructorCnt, property_->GetWindowName().c_str());
 }
 
@@ -118,7 +118,7 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
 
 WindowImpl::~WindowImpl()
 {
-    WLOGFI("windowName: %{public}s, windowId: %{public}d, deConstructorCnt: %{public}d, surfaceNode:%{public}d",
+    WLOGI("windowName: %{public}s, windowId: %{public}d, deConstructorCnt: %{public}d, surfaceNode:%{public}d",
         GetWindowName().c_str(), GetWindowId(), ++deConstructorCnt, static_cast<uint32_t>(surfaceNode_.use_count()));
     Destroy();
 }
@@ -145,7 +145,7 @@ sptr<Window> WindowImpl::FindTopWindow(uint32_t topWinId)
     }
     for (auto iter = windowMap_.begin(); iter != windowMap_.end(); iter++) {
         if (topWinId == iter->second.first) {
-            WLOGFI("FindTopWindow id: %{public}u", topWinId);
+            WLOGI("FindTopWindow id: %{public}u", topWinId);
             return iter->second.second;
         }
     }
@@ -175,11 +175,11 @@ sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRu
         auto win = iter->second.second;
         if (context.get() == win->GetContext().get() && WindowHelper::IsMainWindow(win->GetType())) {
             mainWinId = win->GetWindowId();
-            WLOGFI("GetTopWindow Find MainWinId:%{public}u.", mainWinId);
+            WLOGI("GetTopWindow Find MainWinId:%{public}u.", mainWinId);
             break;
         }
     }
-    WLOGFI("GetTopWindowfinal MainWinId:%{public}u!", mainWinId);
+    WLOGI("GetTopWindowfinal MainWinId:%{public}u!", mainWinId);
     if (mainWinId == INVALID_WINDOW_ID) {
         WLOGFE("Cannot find topWindow!");
         return nullptr;
@@ -317,7 +317,7 @@ SystemBarProperty WindowImpl::GetSystemBarPropertyByType(WindowType type) const
 
 WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 {
-    WLOGFI("GetAvoidAreaByType Search Type: %{public}u", static_cast<uint32_t>(type));
+    WLOGI("GetAvoidAreaByType Search Type: %{public}u", static_cast<uint32_t>(type));
     uint32_t windowId = property_->GetWindowId();
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetAvoidAreaByType(windowId, type, avoidArea);
     if (ret != WMError::WM_OK) {
@@ -357,13 +357,13 @@ WMError WindowImpl::SetWindowType(WindowType type)
 
 WMError WindowImpl::SetWindowMode(WindowMode mode)
 {
-    WLOGFI("[Client] Window %{public}u mode %{public}u", property_->GetWindowId(), static_cast<uint32_t>(mode));
+    WLOGI("Window %{public}u mode %{public}u", property_->GetWindowId(), static_cast<uint32_t>(mode));
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (!WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), mode)) {
-        WLOGFI("window %{public}u do not support window mode: %{public}u",
-               property_->GetWindowId(), static_cast<uint32_t>(mode));
+        WLOGI("window %{public}u do not support window mode: %{public}u",
+            property_->GetWindowId(), static_cast<uint32_t>(mode));
         return WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
     }
     if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
@@ -388,7 +388,7 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
 
 void WindowImpl::SetAlpha(float alpha)
 {
-    WLOGFI("[Client] Window %{public}u alpha %{public}f", property_->GetWindowId(), alpha);
+    WLOGI("Window %{public}u alpha %{public}f", property_->GetWindowId(), alpha);
     if (!Permission::IsSystemCalling()) {
         WLOGFE("set alpha permission denied!");
         return;
@@ -403,7 +403,7 @@ void WindowImpl::SetAlpha(float alpha)
 
 void WindowImpl::SetTransform(const Transform& trans)
 {
-    WLOGFI("[Client] Window %{public}u SetTransform", property_->GetWindowId());
+    WLOGI("Window %{public}u", property_->GetWindowId());
     if (!IsWindowValid()) {
         return;
     }
@@ -456,7 +456,7 @@ WMError WindowImpl::RemoveWindowFlag(WindowFlag flag)
 
 WMError WindowImpl::SetWindowFlags(uint32_t flags)
 {
-    WLOGFI("[Client] Window %{public}u flags %{public}u", property_->GetWindowId(), flags);
+    WLOGI("Window %{public}u flags %{public}u", property_->GetWindowId(), flags);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -479,7 +479,7 @@ WMError WindowImpl::SetWindowFlags(uint32_t flags)
 
 void WindowImpl::OnNewWant(const AAFwk::Want& want)
 {
-    WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] OnNewWant", name_.c_str(), property_->GetWindowId());
+    WLOGI("Window [name:%{public}s, id:%{public}u]", name_.c_str(), property_->GetWindowId());
     if (uiContent_ != nullptr) {
         uiContent_->OnNewWant(want);
     }
@@ -488,7 +488,7 @@ void WindowImpl::OnNewWant(const AAFwk::Want& want)
 WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     NativeEngine* engine, NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability)
 {
-    WLOGFI("SetUIContent contentInfo: %{public}s", contentInfo.c_str());
+    WLOGI("SetUIContent: %{public}s", contentInfo.c_str());
     std::unique_ptr<Ace::UIContent> uiContent;
     if (ability != nullptr) {
         uiContent = Ace::UIContent::Create(ability);
@@ -500,7 +500,7 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
         return WMError::WM_ERROR_NULLPTR;
     }
     if (!isAppDecorEnable_ || !windowSystemConfig_.isSystemDecorEnable_) {
-        WLOGFI("app set decor enable false");
+        WLOGI("app set decor enable false");
         property_->SetDecorEnable(false);
     }
     if (isdistributed) {
@@ -529,7 +529,7 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
         float virtualPixelRatio = display->GetVirtualPixelRatio();
         config.SetDensity(virtualPixelRatio);
         uiContent_->UpdateViewportConfig(config, WindowSizeChangeReason::UNDEFINED);
-        WLOGFI("notify uiContent window size change end");
+        WLOGFD("notify uiContent window size change end");
     }
     return WMError::WM_OK;
 }
@@ -541,7 +541,7 @@ Ace::UIContent* WindowImpl::GetUIContent() const
 
 std::string WindowImpl::GetContentInfo()
 {
-    WLOGFI("GetContentInfo");
+    WLOGFD("GetContentInfo");
     if (uiContent_ == nullptr) {
         WLOGFE("fail to GetContentInfo id: %{public}u", property_->GetWindowId());
         return "";
@@ -588,12 +588,11 @@ ColorSpace WindowImpl::GetColorSpace()
 
 std::shared_ptr<Media::PixelMap> WindowImpl::Snapshot()
 {
-    WLOGFI("WMS-Client Snapshot");
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
     RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
     std::shared_ptr<Media::PixelMap> pixelMap = callback->GetResult(2000); // wait for <= 2000ms
     if (pixelMap != nullptr) {
-        WLOGFI("WMS-Client Save WxH = %{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
+        WLOGFD("WMS-Client Save WxH = %{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
     } else {
         WLOGFE("Failed to get pixelmap, return nullptr!");
     }
@@ -603,11 +602,11 @@ std::shared_ptr<Media::PixelMap> WindowImpl::Snapshot()
 void WindowImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     if (params.size() == 1 && params[0] == PARAM_DUMP_HELP) { // 1: params num
-        WLOGFI("Dump ArkUI help Info");
+        WLOGFD("Dump ArkUI help Info");
         Ace::UIContent::ShowDumpHelp(info);
         return;
     }
-    WLOGFI("ArkUI:DumpInfo");
+    WLOGFD("ArkUI:DumpInfo");
     if (uiContent_ != nullptr) {
         uiContent_->DumpInfo(params, info);
     }
@@ -615,8 +614,7 @@ void WindowImpl::DumpInfo(const std::vector<std::string>& params, std::vector<st
 
 WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
 {
-    WLOGFI("[Client] Window %{public}u SetSystemBarProperty type %{public}u " \
-        "enable:%{public}u, backgroundColor:%{public}x, contentColor:%{public}x ",
+    WLOGI("Window %{public}u type %{public}u enable:%{public}u, bgColor:%{public}x, Color:%{public}x ",
         property_->GetWindowId(), static_cast<uint32_t>(type), property.enable_,
         property.backgroundColor_, property.contentColor_);
     if (!IsWindowValid()) {
@@ -679,7 +677,7 @@ WMError WindowImpl::UpdateSystemBarProperty(bool status)
 
 WMError WindowImpl::SetLayoutFullScreen(bool status)
 {
-    WLOGFI("[Client] Window %{public}u SetLayoutFullScreen: %{public}u", property_->GetWindowId(), status);
+    WLOGI("Window %{public}u status: %{public}u", property_->GetWindowId(), status);
     if (!IsWindowValid() ||
         !WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
         WLOGFE("invalid window or fullscreen mode is not be supported, winId:%{public}u", property_->GetWindowId());
@@ -711,7 +709,7 @@ WMError WindowImpl::SetLayoutFullScreen(bool status)
 
 WMError WindowImpl::SetFullScreen(bool status)
 {
-    WLOGFI("[Client] Window %{public}u SetFullScreen: %{public}d", property_->GetWindowId(), status);
+    WLOGI("Window %{public}u status: %{public}d", property_->GetWindowId(), status);
     if (!IsWindowValid() ||
         !WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
         WLOGFE("invalid window or fullscreen mode is not be supported, winId:%{public}u", property_->GetWindowId());
@@ -742,7 +740,7 @@ void WindowImpl::MapFloatingWindowToAppIfNeeded()
             context_.get() == win->GetContext().get()) {
             sptr<WindowImpl> selfImpl(this);
             appFloatingWindowMap_[win->GetWindowId()].push_back(selfImpl);
-            WLOGFI("Map FloatingWindow %{public}u to AppMainWindow %{public}u, type is %{public}u",
+            WLOGFD("Map FloatingWindow %{public}u to AppMainWindow %{public}u, type is %{public}u",
                 GetWindowId(), win->GetWindowId(), GetType());
             return;
         }
@@ -761,7 +759,7 @@ void WindowImpl::MapDialogWindowToAppIfNeeded()
             context_.get() == win->GetContext().get()) {
             sptr<WindowImpl> selfImpl(this);
             appDialogWindowMap_[win->GetWindowId()].push_back(selfImpl);
-            WLOGFI("Map DialogWindow %{public}u to AppMainWindow %{public}u", GetWindowId(), win->GetWindowId());
+            WLOGFD("Map DialogWindow %{public}u to AppMainWindow %{public}u", GetWindowId(), win->GetWindowId());
             return;
         }
     }
@@ -832,7 +830,7 @@ void WindowImpl::UpdateTitleButtonVisibility()
         (GetMode() == WindowMode::WINDOW_MODE_FLOATING || WindowHelper::IsSplitWindowMode(GetMode()))) ||
         (!(modeSupportInfo & WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING) &&
         GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
-    WLOGFI("[Client] [hideSplit, hideMaximize]: [%{public}d, %{public}d]", hideSplitButton, hideMaximizeButton);
+    WLOGD("[Client] [hideSplit, hideMaximize]: [%{public}d, %{public}d]", hideSplitButton, hideMaximizeButton);
     uiContent_->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, false);
 }
 
@@ -899,7 +897,7 @@ WMError WindowImpl::UpdateWindowShadowAccordingToSystemConfig()
 
     if (!WindowHelper::IsFloatingWindow(GetMode())) {
         surfaceNode_->SetShadowElevation(0.f);
-        WLOGFI("[WEffect][%{public}s]close shadow", name_.c_str());
+        WLOGI("[WEffect][%{public}s]close shadow", name_.c_str());
         return WMError::WM_OK;
     }
 
@@ -918,7 +916,7 @@ WMError WindowImpl::UpdateWindowShadowAccordingToSystemConfig()
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
-    WLOGFI("[WEffect][%{public}s]focused: %{public}u, [%{public}f, %{public}s, %{public}f, %{public}f, %{public}f]",
+    WLOGI("[WEffect][%{public}s]focused: %{public}u, [%{public}f, %{public}s, %{public}f, %{public}f, %{public}f]",
         name_.c_str(), isFocused_, shadow.elevation_, shadow.color_.c_str(),
         shadow.offsetX_, shadow.offsetY_, shadow.alpha_);
 
@@ -1005,7 +1003,7 @@ bool WindowImpl::WindowCreateCheck(uint32_t parentId)
 
 WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRuntime::Context>& context)
 {
-    WLOGFI("[Client] Window [name:%{public}s] Create", name_.c_str());
+    WLOGI("Window[%{public}s] Create", name_.c_str());
     if (!WindowCreateCheck(parentId)) {
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -1199,7 +1197,7 @@ WMError WindowImpl::Destroy(bool needNotifyServer)
         return WMError::WM_OK;
     }
 
-    WLOGFI("[Client] Window %{public}u Destroy", property_->GetWindowId());
+    WLOGI("Window %{public}u Destroy", property_->GetWindowId());
     WMError ret = WMError::WM_OK;
     if (needNotifyServer) {
         NotifyBeforeDestroy(GetWindowName());
@@ -1217,7 +1215,7 @@ WMError WindowImpl::Destroy(bool needNotifyServer)
             }
         }
     } else {
-        WLOGFI("Do not need to notify server to destroy window");
+        WLOGI("no need to destroy");
     }
 
     if (needRemoveWindowInputChannel_) {
@@ -1252,8 +1250,8 @@ bool WindowImpl::NeedToStopShowing()
 
 WMError WindowImpl::UpdateSurfaceNodeAfterCustomAnimation(bool isAdd)
 {
-    WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] UpdateRsTree, isAdd:%{public}u",
-        name_.c_str(), property_->GetWindowId(), isAdd);
+    WLOGI("id: %{public}u UpdateRsTree, isAdd:%{public}u",
+          property_->GetWindowId(), isAdd);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1318,7 +1316,7 @@ WMError WindowImpl::PreProcessShow(uint32_t reason, bool withAnimation)
 
 WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
 {
-    WLOGFD("[Client] Window Show [name:%{public}s, id:%{public}u, mode: %{public}u], reason:%{public}u, "
+    WLOGFD("Window Show [name:%{public}s, id:%{public}u, mode: %{public}u], reason:%{public}u, "
         "withAnimation:%{public}d", name_.c_str(), property_->GetWindowId(), GetMode(), reason, withAnimation);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1332,10 +1330,10 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
     }
     if (state_ == WindowState::STATE_SHOWN) {
         if (property_->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
-            WLOGFI("desktop window [id:%{public}u] is shown, minimize all app windows", property_->GetWindowId());
+            WLOGI("desktop window [id:%{public}u] is shown, minimize all app windows", property_->GetWindowId());
             SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(property_->GetDisplayId());
         } else {
-            WLOGFI("window is already shown id: %{public}u, raise to top", property_->GetWindowId());
+            WLOGI("window is already shown id: %{public}u, raise to top", property_->GetWindowId());
             SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId(), false);
         }
         NotifyAfterForeground(false);
@@ -1362,8 +1360,8 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
 
 WMError WindowImpl::Hide(uint32_t reason, bool withAnimation)
 {
-    WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] Hide, reason:%{public}u, withAnimation:%{public}d",
-        name_.c_str(), property_->GetWindowId(), reason, withAnimation);
+    WLOGI("id:%{public}u Hide, reason:%{public}u, Animation:%{public}d",
+        property_->GetWindowId(), reason, withAnimation);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1376,7 +1374,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation)
         return WMError::WM_OK;
     }
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
-        WLOGFI("window is already hidden id: %{public}u", property_->GetWindowId());
+        WLOGI("already hidden, id: %{public}u", property_->GetWindowId());
         return WMError::WM_OK;
     }
     WMError ret = WMError::WM_OK;
@@ -1407,8 +1405,8 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation)
 
 WMError WindowImpl::MoveTo(int32_t x, int32_t y)
 {
-    WLOGFI("[Client] Window [name:%{public}s, id:%{public}d] MoveTo %{public}d %{public}d",
-        name_.c_str(), property_->GetWindowId(), x, y);
+    WLOGI("id:%{public}d] MoveTo %{public}d %{public}d",
+          property_->GetWindowId(), x, y);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1433,8 +1431,8 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y)
 
 WMError WindowImpl::Resize(uint32_t width, uint32_t height)
 {
-    WLOGFI("[Client] Window [name:%{public}s, id:%{public}d] Resize %{public}u %{public}u",
-        name_.c_str(), property_->GetWindowId(), width, height);
+    WLOGI("id:%{public}d] Resize %{public}u %{public}u",
+          property_->GetWindowId(), width, height);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1499,12 +1497,12 @@ WMError WindowImpl::SetBackgroundColor(uint32_t color)
         uiContent_->SetBackgroundColor(color);
         return WMError::WM_OK;
     }
-    WLOGFI("uiContent is nullptr, windowId: %{public}u, use FA mode", GetWindowId());
+    WLOGI("ace is null, Id: %{public}u", GetWindowId());
     if (aceAbilityHandler_ != nullptr) {
         aceAbilityHandler_->SetBackgroundColor(color);
         return WMError::WM_OK;
     }
-    WLOGFE("FA mode could not set background color: %{public}u", GetWindowId());
+    WLOGFE("FA mode could not set bg color: %{public}u", GetWindowId());
     return WMError::WM_ERROR_INVALID_OPERATION;
 }
 
@@ -1513,11 +1511,11 @@ uint32_t WindowImpl::GetBackgroundColor() const
     if (uiContent_ != nullptr) {
         return uiContent_->GetBackgroundColor();
     }
-    WLOGFI("uiContent is nullptr, windowId: %{public}u, use FA mode", GetWindowId());
+    WLOGD("uiContent is nullptr, windowId: %{public}u, use FA mode", GetWindowId());
     if (aceAbilityHandler_ != nullptr) {
         return aceAbilityHandler_->GetBackgroundColor();
     }
-    WLOGFE("FA mode does not get background color: %{public}u", GetWindowId());
+    WLOGFE("FA mode does not get bg color: %{public}u", GetWindowId());
     return 0xffffffff; // means no background color been set, default color is white
 }
 
@@ -1528,7 +1526,7 @@ WMError WindowImpl::SetBackgroundColor(const std::string& color)
     }
     uint32_t colorValue;
     if (ColorParser::Parse(color, colorValue)) {
-        WLOGFI("SetBackgroundColor: window: %{public}s, value: [%{public}s, %{public}u]",
+        WLOGD("SetBackgroundColor: window: %{public}s, value: [%{public}s, %{public}u]",
             name_.c_str(), color.c_str(), colorValue);
         return SetBackgroundColor(colorValue);
     }
@@ -1560,7 +1558,7 @@ bool WindowImpl::IsTransparent() const
 {
     ColorParam backgroundColor;
     backgroundColor.value = GetBackgroundColor();
-    WLOGFI("color: %{public}u, alpha: %{public}u", backgroundColor.value, backgroundColor.argb.alpha);
+    WLOGI("color: %{public}u, alpha: %{public}u", backgroundColor.value, backgroundColor.argb.alpha);
     return backgroundColor.argb.alpha == 0x00; // 0x00: completely transparent
 }
 
@@ -1608,7 +1606,7 @@ void WindowImpl::RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError err
         << ", id:" << GetWindowId() << ", event: " << TransferLifeCycleEventToString(event)
         << ", errCode: " << static_cast<int32_t>(errCode) << ";";
     std::string info = oss.str();
-    WLOGFI("window life cycle exception: %{public}s", info.c_str());
+    WLOGI("window life cycle exception: %{public}s", info.c_str());
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
         "WINDOW_LIFE_CYCLE_EXCEPTION",
@@ -1681,7 +1679,7 @@ void WindowImpl::DisableAppWindowDecor()
         WLOGFE("window decoration is invalid on sub window");
         return;
     }
-    WLOGFI("disable app window decoration.");
+    WLOGI("disable app window decoration.");
     isAppDecorEnable_ = false;
 }
 
@@ -1693,14 +1691,14 @@ bool WindowImpl::IsDecorEnable() const
 
 WMError WindowImpl::Maximize()
 {
-    WLOGFI("[Client] Window %{public}u Maximize", property_->GetWindowId());
+    WLOGI("id: %{public}u Maximize", property_->GetWindowId());
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
         return SetFullScreen(true);
     } else {
-        WLOGFI("Maximize Window failed. The window is not main window");
+        WLOGI("Maximize fail, not main window");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 }
@@ -1710,7 +1708,7 @@ WMError WindowImpl::NotifyWindowTransition(TransitionReason reason)
     sptr<WindowTransitionInfo> fromInfo = new(std::nothrow) WindowTransitionInfo();
     sptr<WindowTransitionInfo> toInfo = new(std::nothrow) WindowTransitionInfo();
     if (fromInfo == nullptr || toInfo == nullptr) {
-        WLOGFE("client new windowTransitionInfo failed");
+        WLOGFE("new windowTransitionInfo failed");
         return WMError::WM_ERROR_NO_MEM;
     }
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
@@ -1735,7 +1733,7 @@ WMError WindowImpl::NotifyWindowTransition(TransitionReason reason)
 
 WMError WindowImpl::Minimize()
 {
-    WLOGFI("[Client] Window %{public}u Minimize", property_->GetWindowId());
+    WLOGI("id: %{public}u Minimize", property_->GetWindowId());
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1743,8 +1741,7 @@ WMError WindowImpl::Minimize()
         if (context_ != nullptr) {
             WMError ret = NotifyWindowTransition(TransitionReason::MINIMIZE);
             if (ret != WMError::WM_OK) {
-                WLOGFI("[Client] Window %{public}u Minimize without remote animation ret:%{public}u",
-                    property_->GetWindowId(), static_cast<uint32_t>(ret));
+                WLOGI("Minimize without animation ret:%{public}u", static_cast<uint32_t>(ret));
                 AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(context_->GetToken(), true);
             }
         } else {
@@ -1756,7 +1753,7 @@ WMError WindowImpl::Minimize()
 
 WMError WindowImpl::Recover()
 {
-    WLOGFI("[Client] Window %{public}u Normalize", property_->GetWindowId());
+    WLOGI("id: %{public}u Normalize", property_->GetWindowId());
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1768,7 +1765,7 @@ WMError WindowImpl::Recover()
 
 WMError WindowImpl::Close()
 {
-    WLOGFI("[Client] Window %{public}u Close", property_->GetWindowId());
+    WLOGI("id: %{public}u Close", property_->GetWindowId());
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1777,8 +1774,7 @@ WMError WindowImpl::Close()
         if (abilityContext != nullptr) {
             WMError ret = NotifyWindowTransition(TransitionReason::CLOSE);
             if (ret != WMError::WM_OK) {
-                WLOGFI("[Client] Window %{public}u Close without remote animation ret:%{public}u",
-                    property_->GetWindowId(), static_cast<uint32_t>(ret));
+                WLOGI("Close without animation ret:%{public}u", static_cast<uint32_t>(ret));
                 abilityContext->CloseAbility();
             }
         } else {
@@ -1982,7 +1978,7 @@ bool WindowImpl::UnregisterListenerLocked(std::vector<sptr<T>>& holder, const sp
 void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
 {
     if (handler == nullptr) {
-        WLOGFI("ace ability handler is nullptr");
+        WLOGI("ace ability handler is nullptr");
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     aceAbilityHandler_ = handler;
@@ -2063,7 +2059,7 @@ void WindowImpl::UpdateMode(WindowMode mode)
     NotifyModeChange(mode);
     if (uiContent_ != nullptr) {
         uiContent_->UpdateWindowMode(mode);
-        WLOGFI("notify uiContent window mode change end");
+        WLOGFD("notify uiContent window mode change end");
     }
     // different modes have different corner radius settings
     SetWindowCornerRadiusAccordingToSystemConfig();
@@ -2073,7 +2069,7 @@ void WindowImpl::UpdateMode(WindowMode mode)
 
 void WindowImpl::UpdateModeSupportInfo(uint32_t modeSupportInfo)
 {
-    WLOGI("modeSupportInfo: %{public}u, winId: %{public}u", modeSupportInfo, GetWindowId());
+    WLOGFD("modeSupportInfo: %{public}u, winId: %{public}u", modeSupportInfo, GetWindowId());
     SetModeSupportInfo(modeSupportInfo);
     UpdateTitleButtonVisibility();
 }
@@ -2087,16 +2083,16 @@ void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>&
     }
     bool isConsumed = false;
     if (inputEventConsumer != nullptr) {
-        WLOGFI("Transfer back key event to inputEventConsumer");
+        WLOGI("Transfer back key event to inputEventConsumer");
         isConsumed = inputEventConsumer->OnInputEvent(keyEvent);
     } else if (uiContent_ != nullptr) {
-        WLOGFI("Transfer back key event to uiContent");
+        WLOGI("Transfer back key event to uiContent");
         isConsumed = uiContent_->ProcessBackPressed();
     } else {
         WLOGFE("There is no back key event consumer");
     }
     if (isConsumed || !WindowHelper::IsMainWindow(property_->GetWindowType())) {
-        WLOGFI("Back key event is consumed or it is not a main window");
+        WLOGI("Back key event is consumed or it is not a main window");
         return;
     }
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
@@ -2114,7 +2110,7 @@ void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>&
             abilityContext->CloseAbility();
         }
     }
-    WLOGFI("Window %{public}u will be closed, shouldTerminateAbility: %{public}u",
+    WLOGI("id: %{public}u closed, to kill Ability: %{public}u",
         property_->GetWindowId(), static_cast<uint32_t>(shouldTerminateAbility));
 }
 
@@ -2122,7 +2118,7 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     int32_t keyCode = keyEvent->GetKeyCode();
     int32_t keyAction = keyEvent->GetKeyAction();
-    WLOGFI("KeyCode: %{public}d, action: %{public}d", keyCode, keyAction);
+    WLOGI("KeyCode: %{public}d, action: %{public}d", keyCode, keyAction);
     if (keyCode == MMI::KeyEvent::KEYCODE_BACK && keyAction == MMI::KeyEvent::KEY_ACTION_UP) {
         HandleBackKeyPressedEvent(keyEvent);
     } else {
@@ -2132,10 +2128,10 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
             inputEventConsumer = inputEventConsumer_;
         }
         if (inputEventConsumer != nullptr) {
-            WLOGFI("Transfer key event to inputEventConsumer");
+            WLOGI("Transfer key event to inputEventConsumer");
             (void)inputEventConsumer->OnInputEvent(keyEvent);
         } else if (uiContent_ != nullptr) {
-            WLOGFI("Transfer key event to uiContent");
+            WLOGI("Transfer key event to uiContent");
             (void)uiContent_->ProcessKeyEvent(keyEvent);
         } else {
             WLOGFE("There is no key event consumer");
@@ -2151,13 +2147,13 @@ void WindowImpl::HandleModeChangeHotZones(int32_t posX, int32_t posY)
 
     ModeChangeHotZones hotZones;
     auto res = SingletonContainer::Get<WindowAdapter>().GetModeChangeHotZones(property_->GetDisplayId(), hotZones);
-    WLOGFI("[HotZone] Window %{public}u, Pointer[%{public}d, %{public}d]", GetWindowId(), posX, posY);
+    WLOGI("[HotZone] Window %{public}u, Pointer[%{public}d, %{public}d]", GetWindowId(), posX, posY);
     if (res == WMError::WM_OK) {
-        WLOGFI("[HotZone] Fullscreen [%{public}d, %{public}d, %{public}u, %{public}u]", hotZones.fullscreen_.posX_,
+        WLOGI("[HotZone] Fullscreen [%{public}d, %{public}d, %{public}u, %{public}u]", hotZones.fullscreen_.posX_,
             hotZones.fullscreen_.posY_, hotZones.fullscreen_.width_, hotZones.fullscreen_.height_);
-        WLOGFI("[HotZone] Primary [%{public}d, %{public}d, %{public}u, %{public}u]", hotZones.primary_.posX_,
+        WLOGI("[HotZone] Primary [%{public}d, %{public}d, %{public}u, %{public}u]", hotZones.primary_.posX_,
             hotZones.primary_.posY_, hotZones.primary_.width_, hotZones.primary_.height_);
-        WLOGFI("[HotZone] Secondary [%{public}d, %{public}d, %{public}u, %{public}u]", hotZones.secondary_.posX_,
+        WLOGI("[HotZone] Secondary [%{public}d, %{public}d, %{public}u, %{public}u]", hotZones.secondary_.posX_,
             hotZones.secondary_.posY_, hotZones.secondary_.width_, hotZones.secondary_.height_);
 
         if (WindowHelper::IsPointInTargetRectWithBound(posX, posY, hotZones.fullscreen_)) {
@@ -2262,17 +2258,17 @@ bool WindowImpl::IsPointInDragHotZone(int32_t startPointPosX, int32_t startPoint
 void WindowImpl::StartMove()
 {
     if (!WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
-        WLOGFE("[StartMove] current window can not be moved, windowId %{public}u", GetWindowId());
+        WLOGE("[StartMove] current window can not be moved, windowId %{public}u", GetWindowId());
         return;
     }
     if (!moveDragProperty_->pointEventStarted_ || moveDragProperty_->startDragFlag_) {
-        WLOGFE("[StartMove] pointerEvent has not been started, or is dragging now");
+        WLOGE("[StartMove] pointerEvent has not been started, or is dragging now");
         return;
     }
     moveDragProperty_->startMoveFlag_ = true;
     SingletonContainer::Get<WindowAdapter>().NotifyServerReadyToMoveOrDrag(property_->GetWindowId(),
         property_, moveDragProperty_);
-    WLOGFI("[StartMove] windowId %{public}u", GetWindowId());
+    WLOGI("[StartMove] windowId %{public}u", GetWindowId());
 }
 
 void WindowImpl::ResetMoveOrDragState()
@@ -2369,12 +2365,12 @@ void WindowImpl::ConsumeMoveOrDragEvent(const std::shared_ptr<MMI::PointerEvent>
             if (IsPointerEventConsumed()) {
                 ResSchedReport::GetInstance().TrigClick();
             }
-            WLOGFI("[Client Point Down]: windowId: %{public}u, pointId: %{public}d, sourceType: %{public}d, "
-                   "hasPointStarted: %{public}d, startMove: %{public}d, startDrag: %{public}d, targetDisplayId: "
-                   "%{public}d, pointPos: [%{public}d, %{public}d], winRect: [%{public}d, %{public}d, %{public}u, "
-                   "%{public}u]", GetWindowId(), pointId, sourceType, moveDragProperty_->pointEventStarted_,
-                   moveDragProperty_->startMoveFlag_, moveDragProperty_->startDragFlag_, targetDisplayId,
-                   pointDisplayX, pointDisplayY, rect.posX_, rect.posY_, rect.width_, rect.height_);
+            WLOGFD("[Point Down]: windowId: %{public}u, pointId: %{public}d, sourceType: %{public}d, "
+                  "hasPointStarted: %{public}d, startMove: %{public}d, startDrag: %{public}d, targetDisplayId: "
+                  "%{public}d, pointPos: [%{public}d, %{public}d], winRect: [%{public}d, %{public}d, %{public}u, "
+                  "%{public}u]", GetWindowId(), pointId, sourceType, moveDragProperty_->pointEventStarted_,
+                  moveDragProperty_->startMoveFlag_, moveDragProperty_->startDragFlag_, targetDisplayId,
+                  pointDisplayX, pointDisplayY, rect.posX_, rect.posY_, rect.width_, rect.height_);
             break;
         }
         // End move or drag
@@ -2382,7 +2378,7 @@ void WindowImpl::ConsumeMoveOrDragEvent(const std::shared_ptr<MMI::PointerEvent>
         case MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
         case MMI::PointerEvent::POINTER_ACTION_CANCEL: {
             EndMoveOrDragWindow(pointDisplayX, pointDisplayY, pointId, sourceType);
-            WLOGFI("[Client Point Up/Cancel]: windowId: %{public}u, action: %{public}d, sourceType: %{public}d, "
+            WLOGFD("[Client Point Up/Cancel]: windowId: %{public}u, action: %{public}d, sourceType: %{public}d, "
                 "startMove: %{public}d, startDrag: %{public}d", GetWindowId(), action, sourceType,
                 moveDragProperty_->startMoveFlag_, moveDragProperty_->startDragFlag_);
             break;
@@ -2408,7 +2404,7 @@ void WindowImpl::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         inputEventConsumer = inputEventConsumer_;
     }
     if (inputEventConsumer != nullptr) {
-        WLOGFI("Transfer pointer event to inputEventConsumer");
+        WLOGI("Transfer pointer event to inputEventConsumer");
         (void)inputEventConsumer->OnInputEvent(pointerEvent);
     } else if (uiContent_ != nullptr) {
         WLOGFD("Transfer pointer event to uiContent");
@@ -2490,8 +2486,7 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
         HandlePointerStyle(pointerEvent);
     }
     if (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-        WLOGI("WMS process point down, window: [name:%{public}s, id:%{public}u], action: %{public}d",
-            name_.c_str(), GetWindowId(), action);
+        WLOGI("WMS process point down, id:%{public}u, action: %{public}d", GetWindowId(), action);
         if (GetType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) {
             MMI::PointerEvent::PointerItem pointerItem;
             if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
@@ -2570,7 +2565,7 @@ void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configura
 
 void WindowImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
-    WLOGFI("Window Update AvoidArea, id: %{public}u", property_->GetWindowId());
+    WLOGI("Update AvoidArea, id: %{public}u", property_->GetWindowId());
     NotifyAvoidAreaChange(avoidArea, type);
 }
 
@@ -2589,7 +2584,7 @@ void WindowImpl::UpdateWindowStateUnfrozen()
 
 void WindowImpl::UpdateWindowState(WindowState state)
 {
-    WLOGFI("[Client] Window %{public}u, %{public}s WindowState to set:%{public}u", GetWindowId(), name_.c_str(), state);
+    WLOGI("id: %{public}u, State to set:%{public}u", GetWindowId(), state);
     if (!IsWindowValid()) {
         return;
     }
@@ -2624,7 +2619,7 @@ void WindowImpl::UpdateWindowState(WindowState state)
         case WindowState::STATE_HIDDEN: {
             if (abilityContext != nullptr && windowTag_ == WindowTag::MAIN_WINDOW &&
                 state_ == WindowState::STATE_SHOWN) {
-                WLOGFI("WindowState: STATE_SHOWN, id: %{public}u", GetWindowId());
+                WLOGFD("WindowState: STATE_SHOWN, id: %{public}u", GetWindowId());
                 AAFwk::AbilityManagerClient::GetInstance()->DoAbilityBackground(abilityContext->GetToken(),
                     static_cast<uint32_t>(WindowStateChangeReason::NORMAL));
             } else {
@@ -2641,7 +2636,6 @@ void WindowImpl::UpdateWindowState(WindowState state)
 
 sptr<WindowProperty> WindowImpl::GetWindowProperty()
 {
-    WLOGFI("[Client] Window %{public}u, %{public}s", GetWindowId(), name_.c_str());
     if (!IsWindowValid()) {
         return nullptr;
     }
@@ -2684,7 +2678,7 @@ void WindowImpl::UpdateDisplayId(DisplayId from, DisplayId to)
 
 void WindowImpl::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info)
 {
-    WLOGFI("Window Update OccupiedArea, id: %{public}u", property_->GetWindowId());
+    WLOGFD("Update OccupiedArea, id: %{public}u", property_->GetWindowId());
     NotifyOccupiedAreaChange(info);
 }
 
@@ -2841,7 +2835,7 @@ Rect WindowImpl::GetSystemAlarmWindowDefaultSize(Rect defaultRect)
     }
     uint32_t width = static_cast<uint32_t>(display->GetWidth());
     uint32_t height = static_cast<uint32_t>(display->GetHeight());
-    WLOGFI("width:%{public}u, height:%{public}u, displayId:%{public}" PRIu64"",
+    WLOGFD("width:%{public}u, height:%{public}u, displayId:%{public}" PRIu64"",
         width, height, property_->GetDisplayId());
     uint32_t alarmWidth = static_cast<uint32_t>((static_cast<float>(width) *
         SYSTEM_ALARM_WINDOW_WIDTH_RATIO));
@@ -2913,7 +2907,7 @@ bool WindowImpl::IsWindowValid() const
 {
     bool res = ((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM));
     if (!res) {
-        WLOGFI("window is already destroyed or not created! id: %{public}u", GetWindowId());
+        WLOGI("already destroyed or not created! id: %{public}u", GetWindowId());
     }
     return res;
 }
@@ -3004,7 +2998,7 @@ bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)
     }
     uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
     property_->SetAccessTokenId(accessTokenId);
-    WLOGFI("Create camera float window, accessTokenId = %{public}u", accessTokenId);
+    WLOGI("Create camera float window, TokenId = %{public}u", accessTokenId);
     return false;
 }
 
@@ -3014,7 +3008,7 @@ WMError WindowImpl::SetCornerRadius(float cornerRadius)
         WLOGFE("set corner radius permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    WLOGFI("[Client] Window %{public}s set corner radius %{public}f", name_.c_str(), cornerRadius);
+    WLOGI("Window %{public}s set corner radius %{public}f", name_.c_str(), cornerRadius);
     if (MathHelper::LessNotEqual(cornerRadius, 0.0)) {
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -3029,7 +3023,7 @@ WMError WindowImpl::SetShadowRadius(float radius)
         WLOGFE("set shadow radius permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    WLOGFI("[Client] Window %{public}s set shadow radius %{public}f", name_.c_str(), radius);
+    WLOGI("Window %{public}s set shadow radius %{public}f", name_.c_str(), radius);
     if (MathHelper::LessNotEqual(radius, 0.0)) {
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -3044,7 +3038,7 @@ WMError WindowImpl::SetShadowColor(std::string color)
         WLOGFE("set shadow color permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    WLOGFI("[Client] Window %{public}s set shadow color %{public}s", name_.c_str(), color.c_str());
+    WLOGI("Window %{public}s set shadow color %{public}s", name_.c_str(), color.c_str());
     uint32_t colorValue;
     if (!ColorParser::Parse(color, colorValue)) {
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -3060,7 +3054,7 @@ void WindowImpl::SetShadowOffsetX(float offsetX)
         WLOGFE("set shadow offset x permission denied!");
         return;
     }
-    WLOGFI("[Client] Window %{public}s set shadow offsetX %{public}f", name_.c_str(), offsetX);
+    WLOGI("Window %{public}s set shadow offsetX %{public}f", name_.c_str(), offsetX);
     surfaceNode_->SetShadowOffsetX(offsetX);
     RSTransaction::FlushImplicitTransaction();
 }
@@ -3071,7 +3065,7 @@ void WindowImpl::SetShadowOffsetY(float offsetY)
         WLOGFE("set shadow offset y permission denied!");
         return;
     }
-    WLOGFI("[Client] Window %{public}s set shadow offsetY %{public}f", name_.c_str(), offsetY);
+    WLOGI("Window %{public}s set shadow offsetY %{public}f", name_.c_str(), offsetY);
     surfaceNode_->SetShadowOffsetY(offsetY);
     RSTransaction::FlushImplicitTransaction();
 }
@@ -3082,7 +3076,7 @@ WMError WindowImpl::SetBlur(float radius)
         WLOGFE("set blur permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    WLOGFI("[Client] Window %{public}s set blur radius %{public}f", name_.c_str(), radius);
+    WLOGI("Window %{public}s set blur radius %{public}f", name_.c_str(), radius);
     if (MathHelper::LessNotEqual(radius, 0.0)) {
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -3097,7 +3091,7 @@ WMError WindowImpl::SetBackdropBlur(float radius)
         WLOGFE("set backdrop blur permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    WLOGFI("[Client] Window %{public}s set backdrop blur radius %{public}f", name_.c_str(), radius);
+    WLOGI("Window %{public}s set backdrop blur radius %{public}f", name_.c_str(), radius);
     if (MathHelper::LessNotEqual(radius, 0.0)) {
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -3112,7 +3106,7 @@ WMError WindowImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
         WLOGFE("set backdrop blur style permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    WLOGFI("[Client] Window %{public}s set backdrop blur style %{public}u", name_.c_str(), blurStyle);
+    WLOGI("Window %{public}s set backdrop blur style %{public}u", name_.c_str(), blurStyle);
     if (blurStyle < WindowBlurStyle::WINDOW_BLUR_OFF || blurStyle > WindowBlurStyle::WINDOW_BLUR_THICK) {
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -3136,9 +3130,9 @@ WMError WindowImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
 
 WMError WindowImpl::NotifyMemoryLevel(int32_t level) const
 {
-    WLOGFI("[Client] Window id: %{public}u, notify memory level: %{public}d", property_->GetWindowId(), level);
+    WLOGI("id: %{public}u, notify memory level: %{public}d", property_->GetWindowId(), level);
     if (uiContent_ == nullptr) {
-        WLOGFE("[Client] Window %{public}s notify memory level failed, because uicontent is null.", name_.c_str());
+        WLOGFE("Window %{public}s notify memory level failed, ace is null.", name_.c_str());
         return WMError::WM_ERROR_NULLPTR;
     }
     // notify memory level
@@ -3152,7 +3146,7 @@ bool WindowImpl::IsAllowHaveSystemSubWindow()
     if (WindowHelper::IsSystemSubWindow(windowType) ||
         WindowHelper::IsSubWindow(windowType) ||
         windowType == WindowType::WINDOW_TYPE_DIALOG) {
-        WLOGFI("the window of type %{public}u is limited to add a system sub window", windowType);
+        WLOGI("type %{public}u not allowed to add subwindow", windowType);
         return false;
     }
     return true;

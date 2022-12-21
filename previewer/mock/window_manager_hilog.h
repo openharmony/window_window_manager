@@ -41,6 +41,10 @@ static constexpr unsigned int HILOG_DOMAIN_WINDOW = 0xD004200;
 #define WLOGFI(...)
 #define WLOGFW(...)
 #define WLOGFE(...)
+#define WLOGD(...)
+#define WLOGI(...)
+#define WLOGW(...)
+#define WLOGE(...)
 } // namespace Rosen
 } // namespace OHOS
 #endif // FRAMEWORKS_WM_INCLUDE_WINDOW_MANAGER_HILOG_H

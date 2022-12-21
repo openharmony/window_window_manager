@@ -42,7 +42,7 @@ JsWindowStage::~JsWindowStage()
 
 void JsWindowStage::Finalizer(NativeEngine* engine, void* data, void* hint)
 {
-    WLOGFI("[NAPI]Finalizer");
+    WLOGI("[NAPI]Finalizer");
     std::unique_ptr<JsWindowStage>(static_cast<JsWindowStage*>(data));
 }
 
@@ -166,7 +166,7 @@ NativeValue* JsWindowStage::OnGetMainWindow(NativeEngine& engine, NativeCallback
             auto window = weakScene->GetMainWindow();
             if (window != nullptr) {
                 task.Resolve(engine, OHOS::Rosen::CreateJsWindowObject(engine, window));
-                WLOGFI("[NAPI]Get main window [%{public}u, %{public}s]",
+                WLOGI("[NAPI]Get main window [%{public}u, %{public}s]",
                     window->GetWindowId(), window->GetWindowName().c_str());
             } else {
                 task.Reject(engine, CreateJsError(engine,
@@ -236,7 +236,7 @@ NativeValue* JsWindowStage::OnEvent(NativeEngine& engine, NativeCallbackInfo& in
         return engine.CreateUndefined();
     }
     g_listenerManager->RegisterListener(window, eventString, CaseType::CASE_STAGE, engine, value);
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] register event %{public}s, callback %{public}p",
+    WLOGI("[NAPI]Window [%{public}u, %{public}s] register event %{public}s, callback %{public}p",
         window->GetWindowId(), window->GetWindowName().c_str(), eventString.c_str(), value);
 
     return engine.CreateUndefined();
@@ -287,7 +287,7 @@ NativeValue* JsWindowStage::OffEvent(NativeEngine& engine, NativeCallbackInfo& i
             g_listenerManager->UnregisterListener(window, eventString, CaseType::CASE_STAGE, nullptr);
         }
     }
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] unregister event %{public}s, callback %{public}p",
+    WLOGI("[NAPI]Window [%{public}u, %{public}s] unregister event %{public}s, callback %{public}p",
         window->GetWindowId(), window->GetWindowName().c_str(), eventString.c_str(), value);
 
     return engine.CreateUndefined();
@@ -303,7 +303,7 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     } else {
         task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window load content failed"));
     }
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] load content end, ret = %{public}d",
+    WLOGI("[NAPI]Window [%{public}u, %{public}s] load content end, ret = %{public}d",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
     return;
 }
@@ -380,7 +380,7 @@ NativeValue* JsWindowStage::OnGetWindowMode(NativeEngine& engine, NativeCallback
             Rosen::WindowMode mode = window->GetMode();
             if (NATIVE_TO_JS_WINDOW_MODE_MAP.count(mode) != 0) {
                 task.Resolve(engine, CreateJsValue(engine, NATIVE_TO_JS_WINDOW_MODE_MAP.at(mode)));
-                WLOGFI("[NAPI]Window [%{public}u, %{public}s] get mode %{public}u, api mode %{public}u",
+                WLOGI("[NAPI]Window [%{public}u, %{public}s] get mode %{public}u, api mode %{public}u",
                     window->GetWindowId(), window->GetWindowName().c_str(),
                     mode, NATIVE_TO_JS_WINDOW_MODE_MAP.at(mode));
             } else {
@@ -428,7 +428,7 @@ NativeValue* JsWindowStage::OnCreateSubWindow(NativeEngine& engine, NativeCallba
                 return;
             }
             task.Resolve(engine, CreateJsWindowObject(engine, window));
-            WLOGFI("[NAPI]Create sub widdow %{public}s end", windowName.c_str());
+            WLOGI("[NAPI]Create sub widdow %{public}s end", windowName.c_str());
         };
     NativeValue* callback = (info.argv[1] != nullptr && info.argv[1]->TypeOf() == NATIVE_FUNCTION) ?
         info.argv[1] : nullptr;
@@ -467,7 +467,7 @@ NativeValue* JsWindowStage::OnGetSubWindow(NativeEngine& engine, NativeCallbackI
             }
             std::vector<sptr<Window>> subWindowVec = weakScene->GetSubWindow();
             task.Resolve(engine, CreateJsSubWindowArrayObject(engine, subWindowVec));
-            WLOGFI("[NAPI]Get sub windows, size = %{public}zu", subWindowVec.size());
+            WLOGI("[NAPI]Get sub windows, size = %{public}zu", subWindowVec.size());
         };
     NativeValue* callback = (info.argv[0] != nullptr && info.argv[0]->TypeOf() == NATIVE_FUNCTION) ?
         info.argv[0] : nullptr;
@@ -515,7 +515,7 @@ NativeValue* JsWindowStage::OnSetShowOnLockScreen(NativeEngine& engine, NativeCa
         ret = WM_JS_TO_ERROR_CODE_MAP.at(
             window->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
     }
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] SetShowOnLockScreen %{public}u, ret = %{public}u",
+    WLOGI("[NAPI]Window [%{public}u, %{public}s] SetShowOnLockScreen %{public}u, ret = %{public}u",
         window->GetWindowId(), window->GetWindowName().c_str(), showOnLockScreen, ret);
 
     return CreateJsValue(engine, static_cast<int32_t>(ret));
@@ -535,7 +535,7 @@ NativeValue* JsWindowStage::OnDisableWindowDecor(NativeEngine& engine, NativeCal
         return CreateJsValue(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
     }
     window->DisableAppWindowDecor();
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] disable app window decor end",
+    WLOGI("[NAPI]Window [%{public}u, %{public}s] disable app window decor end",
         window->GetWindowId(), window->GetWindowName().c_str());
     return engine.CreateUndefined();
 }

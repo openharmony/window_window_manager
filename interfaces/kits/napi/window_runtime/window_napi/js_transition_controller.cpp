@@ -34,23 +34,23 @@ static int jsTransCtrlDtorCnt = 0;
 JsTransitionContext::JsTransitionContext(sptr<Window> window, bool isShownTransContext)
     : windowToken_(window), isShownTransContext_(isShownTransContext)
 {
-    WLOGFI("[NAPI] JsTransitionContext constructorCnt: %{public}d", ++jsTransCxtCtorCnt);
+    WLOGI("[NAPI] JsTransitionContext constructorCnt: %{public}d", ++jsTransCxtCtorCnt);
 }
 
 JsTransitionContext::~JsTransitionContext()
 {
-    WLOGFI("[NAPI] ~JsTransitionContext deConstructorCnt: %{public}d", ++jsTransCxtDtorCnt);
+    WLOGI("[NAPI] ~JsTransitionContext deConstructorCnt: %{public}d", ++jsTransCxtDtorCnt);
 }
 
 void JsTransitionContext::Finalizer(NativeEngine* engine, void* data, void* hint)
 {
-    WLOGFI("[NAPI]JsTransitionContext::Finalizer");
+    WLOGI("[NAPI]JsTransitionContext::Finalizer");
     std::unique_ptr<JsTransitionContext>(static_cast<JsTransitionContext*>(data));
 }
 
 NativeValue* JsTransitionContext::CompleteTransition(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]CompleteTransition");
+    WLOGI("[NAPI]CompleteTransition");
     JsTransitionContext* me = CheckParamsAndGetThis<JsTransitionContext>(engine, info);
     return (me != nullptr) ? me->OnCompleteTransition(*engine, *info) : nullptr;
 }
@@ -73,7 +73,7 @@ NativeValue* JsTransitionContext::OnCompleteTransition(NativeEngine& engine, Nat
     auto state = windowToken_->GetWindowState();
     if (!isShownTransContext_) {
         if (state != WindowState::STATE_HIDDEN) {
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] Hidden context called but window is not hidden: %{public}u",
+            WLOGI("[NAPI]Window [%{public}u, %{public}s] Hidden context called but window is not hidden: %{public}u",
                 windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), static_cast<uint32_t>(state));
             return engine.CreateUndefined();
         }
@@ -83,7 +83,7 @@ NativeValue* JsTransitionContext::OnCompleteTransition(NativeEngine& engine, Nat
         }
     } else {
         if (state != WindowState::STATE_SHOWN) {
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] shown context called but window is not shown: %{public}u",
+            WLOGI("[NAPI]Window [%{public}u, %{public}s] shown context called but window is not shown: %{public}u",
                 windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), static_cast<uint32_t>(state));
             return engine.CreateUndefined();
         }
@@ -95,7 +95,7 @@ NativeValue* JsTransitionContext::OnCompleteTransition(NativeEngine& engine, Nat
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(ret))));
         return engine.CreateUndefined();
     }
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] CompleteTransition %{public}d end",
+    WLOGI("[NAPI]Window [%{public}u, %{public}s] CompleteTransition %{public}d end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), transitionCompleted);
     return engine.CreateUndefined();
 }
@@ -103,7 +103,7 @@ NativeValue* JsTransitionContext::OnCompleteTransition(NativeEngine& engine, Nat
 static NativeValue* CreateJsTransitionContextObject(NativeEngine& engine, std::shared_ptr<NativeReference> jsWin,
     sptr<Window> window, bool isShownTransContext)
 {
-    WLOGFI("[NAPI]CreateJsTransitionContextObject");
+    WLOGI("[NAPI]CreateJsTransitionContextObject");
     NativeValue *objValue = engine.CreateObject();
     NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
     if (object == nullptr) {
@@ -129,17 +129,17 @@ JsTransitionController::JsTransitionController(NativeEngine& engine, std::shared
     sptr<Window> window)
     : engine_(engine), jsWin_(jsWin), windowToken_(window), weakRef_(wptr<JsTransitionController> (this))
 {
-    WLOGFI("[NAPI] JsTransitionController constructorCnt: %{public}d", ++jsTransCtrlCtorCnt);
+    WLOGI("[NAPI] JsTransitionController constructorCnt: %{public}d", ++jsTransCtrlCtorCnt);
 }
 
 JsTransitionController::~JsTransitionController()
 {
-    WLOGFI("[NAPI] ~JsTransitionController deConstructorCnt: %{public}d", ++jsTransCtrlDtorCnt);
+    WLOGI("[NAPI] ~JsTransitionController deConstructorCnt: %{public}d", ++jsTransCtrlDtorCnt);
 }
 
 void JsTransitionController::AnimationForShown()
 {
-    WLOGFI("[NAPI]AnimationForShown");
+    WLOGI("[NAPI]AnimationForShown");
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [self = weakRef_](NativeEngine&, AsyncTask&, int32_t) {
             auto thisController = self.promote();
@@ -179,7 +179,7 @@ void JsTransitionController::AnimationForShown()
 
 void JsTransitionController::AnimationForHidden()
 {
-    WLOGFI("[NAPI]AnimationForHidden");
+    WLOGI("[NAPI]AnimationForHidden");
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [self = weakRef_](NativeEngine&, AsyncTask&, int32_t) {
             auto thisController = self.promote();
@@ -217,7 +217,7 @@ void JsTransitionController::AnimationForHidden()
 
 void JsTransitionController::CallJsMethod(const std::string& methodName, NativeValue* const* argv, size_t argc)
 {
-    WLOGFI("Call js function:%{public}s.", methodName.c_str());
+    WLOGI("Call js function:%{public}s.", methodName.c_str());
     auto self = jsTransControllerObj_.lock();
     if (self == nullptr) {
         WLOGFE("JsController is null!");

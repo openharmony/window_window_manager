@@ -25,7 +25,7 @@ namespace {
 
 JsWindowListener::~JsWindowListener()
 {
-    WLOGFI("[NAPI]~JsWindowListener");
+    WLOGI("[NAPI]~JsWindowListener");
 }
 
 void JsWindowListener::CallJsMethod(const char* methodName, NativeValue* const* argv, size_t argc)
@@ -45,7 +45,7 @@ void JsWindowListener::CallJsMethod(const char* methodName, NativeValue* const* 
 
 void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason)
 {
-    WLOGFI("[NAPI]OnSizeChange, wh[%{public}u, %{public}u], reason = %{public}u", rect.width_, rect.height_, reason);
+    WLOGI("[NAPI]OnSizeChange, wh[%{public}u, %{public}u], reason = %{public}u", rect.width_, rect.height_, reason);
     // js callback should run in js thread
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [self = weakRef_, rect, eng = engine_] (NativeEngine &engine,
@@ -76,7 +76,7 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason)
 
 void JsWindowListener::OnModeChange(WindowMode mode)
 {
-    WLOGFI("[NAPI]OnModeChange %{public}u", mode);
+    WLOGI("[NAPI]OnModeChange %{public}u", mode);
 }
 
 void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints)
@@ -152,7 +152,7 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
 
 void JsWindowListener::LifeCycleCallBack(LifeCycleEventType eventType)
 {
-    WLOGFI("[NAPI]LifeCycleCallBack, envent type: %{public}u", eventType);
+    WLOGI("[NAPI]LifeCycleCallBack, envent type: %{public}u", eventType);
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>(
         [self = weakRef_, eventType, eng = engine_] (NativeEngine &engine,
             AsyncTask &task, int32_t status) {
@@ -193,7 +193,7 @@ void JsWindowListener::AfterUnfocused()
 
 void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info)
 {
-    WLOGFI("[NAPI]OccupiedAreaChangeInfo, type: %{public}u, " \
+    WLOGI("[NAPI]OccupiedAreaChangeInfo, type: %{public}u, " \
         "input rect: [%{public}d, %{public}d, %{public}u, %{public}u]", static_cast<uint32_t>(info->type_),
         info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_);
     // js callback should run in js thread
@@ -218,7 +218,7 @@ void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info)
 
 void JsWindowListener::OnTouchOutside() const
 {
-    WLOGFI("CALLED");
+    WLOGI("CALLED");
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [self = weakRef_] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
@@ -238,7 +238,7 @@ void JsWindowListener::OnTouchOutside() const
 
 void JsWindowListener::OnScreenshot()
 {
-    WLOGFI("CALLED");
+    WLOGI("CALLED");
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [self = wptr<JsWindowListener>(this)] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             auto thisListener = self.promote();

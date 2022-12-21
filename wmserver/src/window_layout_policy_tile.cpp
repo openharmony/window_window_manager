@@ -55,7 +55,7 @@ void WindowLayoutPolicyTile::Launch()
         LayoutWindowNodesByRootType(*(displayWindowTree[WindowRootNodeType::BELOW_WINDOW_NODE]));
         WLOGFD("[Launch TileLayout], displayId: %{public}" PRIu64"", displayId);
     }
-    WLOGFI("[Launch TileLayout Finished]");
+    WLOGI("[Launch TileLayout Finished]");
 }
 
 uint32_t WindowLayoutPolicyTile::GetMaxTileWinNum(DisplayId displayId) const
@@ -160,7 +160,7 @@ void WindowLayoutPolicyTile::PerformWindowLayout(const sptr<WindowNode>& node, W
     HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     const auto& windowType = node->GetWindowType();
     const auto& requestRect = node->GetRequestRect();
-    WLOGFI("[PerformWindowLayout] windowId: %{public}u, windowType: %{public}u, updateType: %{public}u, requestRect: "
+    WLOGI("[PerformWindowLayout] windowId: %{public}u, windowType: %{public}u, updateType: %{public}u, requestRect: "
         "requestRect: [%{public}d, %{public}d, %{public}u, %{public}u]", node->GetWindowId(), windowType, updateType,
         requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_);
     switch (updateType) {
@@ -347,7 +347,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
     bool needAvoid = (node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     Rect lastRect = node->GetWindowRect();
     Rect winRect = node->GetRequestRect();
-    WLOGFI("[Before TileLayout] windowId: %{public}u, mode: %{public}u, type: %{public}u requestRect: [%{public}d, "
+    WLOGI("[Before TileLayout] windowId: %{public}u, mode: %{public}u, type: %{public}u requestRect: [%{public}d, "
         "%{public}d, %{public}u, %{public}u]", node->GetWindowId(), node->GetWindowMode(), node->GetWindowType(),
         winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
 
@@ -357,7 +357,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
         winRect = needAvoid ? limitDisplayRect : displayRect;
     }
 
-    WLOGFI("[After TileLayout] windowId: %{public}u, isDecor: %{public}u, winRect: [%{public}d, %{public}d, "
+    WLOGI("[After TileLayout] windowId: %{public}u, isDecor: %{public}u, winRect: [%{public}d, %{public}d, "
         "%{public}u, %{public}u]", node->GetWindowId(), node->GetDecoStatus(), winRect.posX_, winRect.posY_,
         winRect.width_, winRect.height_);
     node->SetWindowRect(winRect);

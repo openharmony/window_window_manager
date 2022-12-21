@@ -72,17 +72,17 @@ class ScreenChangeListener : public ScreenManager::IScreenListener {
 public:
     virtual void OnConnect(ScreenId screenId) override
     {
-        WLOGFI("OnConnect, screenId:%{public}" PRIu64"", screenId);
+        WLOGI("OnConnect, screenId:%{public}" PRIu64"", screenId);
         connectFuture_.SetValue(screenId);
     }
     virtual void OnDisconnect(ScreenId screenId) override
     {
-        WLOGFI("OnDisconnect, screenId:%{public}" PRIu64"", screenId);
+        WLOGI("OnDisconnect, screenId:%{public}" PRIu64"", screenId);
         disconnectFuture_.SetValue(screenId);
     }
     virtual void OnChange(ScreenId screenId) override
     {
-        WLOGFI("OnChange, screenId:%{public}" PRIu64"", screenId);
+        WLOGI("OnChange, screenId:%{public}" PRIu64"", screenId);
         changeFuture_.SetValue(screenId);
     }
     RunnableFuture<ScreenId> connectFuture_;
@@ -153,7 +153,7 @@ bool ScreenManagerTest::DrawWindowColor(const sptr<Window>& window, uint32_t col
     Rect rect = window->GetRequestRect();
     uint32_t windowWidth = rect.width_;
     uint32_t windowHeight = rect.height_;
-    WLOGFI("windowWidth: %{public}u, windowHeight: %{public}u", windowWidth, windowHeight);
+    WLOGI("windowWidth: %{public}u, windowHeight: %{public}u", windowWidth, windowHeight);
     SurfaceDraw::DrawColor(surfaceNode, windowWidth, windowHeight, color);
     return true;
 }

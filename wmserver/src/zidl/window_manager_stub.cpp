@@ -45,7 +45,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             if (windowProperty && windowProperty->GetTokenState()) {
                 token = data.ReadRemoteObject();
             } else {
-                WLOGFI("accept token is nullptr");
+                WLOGI("accept token is nullptr");
             }
             WMError errCode = CreateWindow(windowProxy, windowProperty, surfaceNode, windowId, token);
             reply.WriteUint32(windowId);

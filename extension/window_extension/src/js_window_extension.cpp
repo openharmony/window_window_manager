@@ -39,17 +39,17 @@ class DispatchInputEventListener : public IDispatchInputEventListener {
 public:
     void OnDispatchPointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent) override
     {
-        WLOGFI("called");
+        WLOGI("called");
     }
     void OnDispatchKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) override
     {
-        WLOGFI("called");
+        WLOGI("called");
     }
 };
 
 NativeValue *AttachWindowExtensionContext(NativeEngine *engine, void *value, void *)
 {
-    WLOGFI("AttachWindowExtensionContext");
+    WLOGI("AttachWindowExtensionContext");
     if (value == nullptr) {
         WLOGFE("invalid parameter.");
         return nullptr;
@@ -80,7 +80,7 @@ NativeValue *AttachWindowExtensionContext(NativeEngine *engine, void *value, voi
     }
     nObject->SetNativePointer(workContext,
         [](NativeEngine *, void *data, void *) {
-            WLOGFI("Finalizer for weak_ptr service extension context is called");
+            WLOGI("Finalizer for weak_ptr service extension context is called");
             delete static_cast<std::weak_ptr<WindowExtensionContext> *>(data);
         }, nullptr);
     return contextObj;
@@ -111,7 +111,7 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalR
 
     std::string moduleName(Extension::abilityInfo_->moduleName);
     moduleName.append("::").append(abilityInfo_->name);
-    WLOGFI("JsWindowExtension::Init module:%{public}s,srcPath:%{public}s.", moduleName.c_str(), srcPath.c_str());
+    WLOGI("JsWindowExtension::Init module:%{public}s,srcPath:%{public}s.", moduleName.c_str(), srcPath.c_str());
     AbilityRuntime::HandleScope handleScope(jsRuntime_);
 
     jsObj_ = jsRuntime_.LoadModule(moduleName, srcPath, abilityInfo_->hapPath);
@@ -119,7 +119,7 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalR
         WLOGFE("Failed to get jsObj_");
         return;
     }
-    WLOGFI("JsWindowExtension::Init ConvertNativeValueTo.");
+    WLOGI("JsWindowExtension::Init ConvertNativeValueTo.");
     auto& engine = jsRuntime_.GetNativeEngine();
     NativeObject* obj = AbilityRuntime::ConvertNativeValueTo<NativeObject>(jsObj_->Get());
     if (obj == nullptr) {
@@ -157,18 +157,18 @@ void JsWindowExtension::BindContext(NativeEngine& engine, NativeObject* obj)
     }
     nativeObj->ConvertToNativeBindingObject(&engine, AbilityRuntime::DetachCallbackFunc, AttachWindowExtensionContext,
         workContext, nullptr);
-    WLOGFI("JsWindowExtension::Init Bind.");
+    WLOGI("JsWindowExtension::Init Bind.");
     context->Bind(jsRuntime_, shellContextRef_.get());
-    WLOGFI("JsWindowExtension::SetProperty.");
+    WLOGI("JsWindowExtension::SetProperty.");
     obj->SetProperty("context", contextObj);
 
     nativeObj->SetNativePointer(workContext,
         [](NativeEngine *, void *data, void *) {
-            WLOGFI("Finalizer for weak_ptr extension context is called");
+            WLOGI("Finalizer for weak_ptr extension context is called");
             delete static_cast<std::weak_ptr<WindowExtensionContext>*>(data);
         }, nullptr);
 
-    WLOGFI("JsWindowExtension::Init end.");
+    WLOGI("JsWindowExtension::Init end.");
 }
 
 void JsWindowExtension::GetSrcPath(std::string& srcPath) const
@@ -200,7 +200,7 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WindowExtension OnConnect %s-%s",
         want.GetElement().GetAbilityName().c_str(), want.GetElement().GetAbilityName().c_str());
-    WLOGFI("called.");
+    WLOGI("called.");
     Extension::OnConnect(want);
     NativeEngine& engine = jsRuntime_.GetNativeEngine();
     std::unique_ptr<AbilityRuntime::AsyncTask::CompleteCallback> complete =
@@ -248,9 +248,9 @@ void JsWindowExtension::OnDisconnect(const AAFwk::Want& want)
     auto window = stub_ != nullptr ? stub_->GetWindow() : nullptr;
     if (window != nullptr) {
         window->Destroy();
-        WLOGFI("Destroy window.");
+        WLOGI("Destroy window.");
     }
-    WLOGFI("called.");
+    WLOGI("called.");
 }
 
 void JsWindowExtension::OnStart(const AAFwk::Want& want)
@@ -263,7 +263,7 @@ void JsWindowExtension::OnStart(const AAFwk::Want& want)
     std::string windowName = elementName.GetBundleName();
 
     stub_ = new(std::nothrow) WindowExtensionStubImpl(windowName);
-    WLOGFI("JsWindowExtension OnStart begin..");
+    WLOGI("JsWindowExtension OnStart begin..");
     Rect rect { want.GetIntParam(RECT_FORM_KEY_POS_X, 0),
     want.GetIntParam(RECT_FORM_KEY_POS_Y, 0),
     want.GetIntParam(RECT_FORM_KEY_WIDTH, 0),
@@ -281,7 +281,7 @@ void JsWindowExtension::OnStart(const AAFwk::Want& want)
             return;
         }
         OnWindowCreated();
-        WLOGFI("ability context onWindowReady rect x =%{public}d y=%{public}d w=%{public}d h=%{public}d ",
+        WLOGI("ability context onWindowReady rect x =%{public}d y=%{public}d w=%{public}d h=%{public}d ",
             rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
 }
@@ -315,7 +315,7 @@ void JsWindowExtension::OnWindowCreated() const
 
 NativeValue* JsWindowExtension::CallJsMethod(const char* name, NativeValue* const* argv, size_t argc) const
 {
-    WLOGFI("called (%{public}s), begin", name);
+    WLOGI("called (%{public}s), begin", name);
 
     if (!jsObj_) {
         WLOGFW("Not found WindowExtension.js");
@@ -337,7 +337,7 @@ NativeValue* JsWindowExtension::CallJsMethod(const char* name, NativeValue* cons
         WLOGFE("Failed to get '%{public}s' from WindowExtension object", name);
         return nullptr;
     }
-    WLOGFI("(%{public}s), success", name);
+    WLOGI("(%{public}s), success", name);
     return nativeEngine.CallFunction(value, method, argv, argc);
 }
 } // namespace Rosen

@@ -45,12 +45,12 @@ JsDisplay::JsDisplay(const sptr<Display>& display) : display_(display)
 
 JsDisplay::~JsDisplay()
 {
-    WLOGFI("JsDisplay::~JsDisplay is called");
+    WLOGI("JsDisplay::~JsDisplay is called");
 }
 
 void JsDisplay::Finalizer(NativeEngine* engine, void* data, void* hint)
 {
-    WLOGFI("JsDisplay::Finalizer is called");
+    WLOGI("JsDisplay::Finalizer is called");
     auto jsDisplay = std::unique_ptr<JsDisplay>(static_cast<JsDisplay*>(data));
     if (jsDisplay == nullptr) {
         WLOGFE("JsDisplay::Finalizer jsDisplay is null");
@@ -62,30 +62,30 @@ void JsDisplay::Finalizer(NativeEngine* engine, void* data, void* hint)
         return;
     }
     DisplayId displayId = display->GetId();
-    WLOGFI("JsDisplay::Finalizer displayId : %{public}" PRIu64"", displayId);
+    WLOGI("JsDisplay::Finalizer displayId : %{public}" PRIu64"", displayId);
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     if (g_JsDisplayMap.find(displayId) != g_JsDisplayMap.end()) {
-        WLOGFI("JsDisplay::Finalizer Display is destroyed: %{public}" PRIu64"", displayId);
+        WLOGI("JsDisplay::Finalizer Display is destroyed: %{public}" PRIu64"", displayId);
         g_JsDisplayMap.erase(displayId);
     }
 }
 
 NativeValue* JsDisplay::GetCutoutInfo(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("GetCutoutInfo is called");
+    WLOGI("GetCutoutInfo is called");
     JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(engine, info);
     return (me != nullptr) ? me->OnGetCutoutInfo(*engine, *info) : nullptr;
 }
 
 NativeValue* JsDisplay::OnGetCutoutInfo(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("OnGetCutoutInfo is called");
+    WLOGI("OnGetCutoutInfo is called");
     AsyncTask::CompleteCallback complete =
         [this](NativeEngine& engine, AsyncTask& task, int32_t status) {
             sptr<CutoutInfo> cutoutInfo = display_->GetCutoutInfo();
             if (cutoutInfo != nullptr) {
                 task.Resolve(engine, CreateJsCutoutInfoObject(engine, cutoutInfo));
-                WLOGFI("JsDisplay::OnGetCutoutInfo success");
+                WLOGI("JsDisplay::OnGetCutoutInfo success");
             } else {
                 task.Reject(engine, CreateJsError(engine,
                     static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "JsDisplay::OnGetCutoutInfo failed."));
@@ -104,10 +104,10 @@ NativeValue* JsDisplay::OnGetCutoutInfo(NativeEngine& engine, NativeCallbackInfo
 
 std::shared_ptr<NativeReference> FindJsDisplayObject(DisplayId displayId)
 {
-    WLOGFI("[NAPI]Try to find display %{public}" PRIu64" in g_JsDisplayMap", displayId);
+    WLOGI("[NAPI]Try to find display %{public}" PRIu64" in g_JsDisplayMap", displayId);
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     if (g_JsDisplayMap.find(displayId) == g_JsDisplayMap.end()) {
-        WLOGFI("[NAPI]Can not find display %{public}" PRIu64" in g_JsDisplayMap", displayId);
+        WLOGI("[NAPI]Can not find display %{public}" PRIu64" in g_JsDisplayMap", displayId);
         return nullptr;
     }
     return g_JsDisplayMap[displayId];
@@ -115,7 +115,7 @@ std::shared_ptr<NativeReference> FindJsDisplayObject(DisplayId displayId)
 
 NativeValue* CreateJsCutoutInfoObject(NativeEngine& engine, sptr<CutoutInfo> cutoutInfo)
 {
-    WLOGFI("JsDisplay::CreateJsCutoutInfoObject is called");
+    WLOGI("JsDisplay::CreateJsCutoutInfoObject is called");
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
     if (object == nullptr) {
@@ -170,11 +170,11 @@ NativeValue* CreateJsBoundingRectsArrayObject(NativeEngine& engine, std::vector<
 
 NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& display)
 {
-    WLOGFI("JsDisplay::CreateJsDisplay is called");
+    WLOGI("JsDisplay::CreateJsDisplay is called");
     NativeValue* objValue = nullptr;
     std::shared_ptr<NativeReference> jsDisplayObj = FindJsDisplayObject(display->GetId());
     if (jsDisplayObj != nullptr && jsDisplayObj->Get() != nullptr) {
-        WLOGFI("[NAPI]FindJsDisplayObject %{public}" PRIu64"", display->GetId());
+        WLOGI("[NAPI]FindJsDisplayObject %{public}" PRIu64"", display->GetId());
         objValue = jsDisplayObj->Get();
     }
     if (objValue == nullptr) {

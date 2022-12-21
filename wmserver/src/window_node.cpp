@@ -25,7 +25,7 @@ namespace {
 
 WindowNode::~WindowNode()
 {
-    WLOGFI("~WindowNode id:%{public}u", GetWindowId());
+    WLOGI("~WindowNode id:%{public}u", GetWindowId());
 }
 
 void WindowNode::SetDisplayId(DisplayId displayId)
