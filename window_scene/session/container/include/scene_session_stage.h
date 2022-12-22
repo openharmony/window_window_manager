@@ -19,6 +19,7 @@
 #include "zidl/scene_session_stage_stub.h"
 #include "session_stage.h"
 #include "zidl/scene_session_interface.h"
+#include "zidl/window_event_channel_interface.h"
 #include "window_scene_common.h"
 
 namespace OHOS::Rosen {
@@ -29,7 +30,7 @@ public:
 
     virtual WSError SetActive(bool active) override;
 
-    virtual WSError Connect(const sptr<IWindowEventChannel>& eventChannel) override;
+    virtual WSError Connect() override;
     virtual WSError Foreground() override;
     virtual WSError Background() override;
     virtual WSError Disconnect() override;

@@ -26,12 +26,13 @@ SceneSession::SceneSession(const SceneAbilityInfo& info) : Session(info.bundleNa
 {
 }
 
-void SceneSession::RegisterStartSceneEventListener(const NotifyStartSceneFunc& func)
+void SceneSession::SetStartSceneEventListener(const NotifyStartSceneFunc& func)
 {
     startSceneFunc_ = func;
 }
 
-WSError SceneSession::Connect(const sptr<ISceneSessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel)
+WSError SceneSession::Connect(const sptr<ISceneSessionStage>& sessionStage,
+    const sptr<IWindowEventChannel>& eventChannel)
 {
     WLOGFI("Connect session, id: %{public}u, state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()));

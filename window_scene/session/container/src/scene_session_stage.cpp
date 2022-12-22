@@ -15,6 +15,7 @@
 #include "scene_session_stage.h"
 
 #include "window_scene_hilog.h"
+#include "window_event_channel.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -35,13 +36,14 @@ WSError SceneSessionStage::SetActive(bool active)
     return WSError::WS_OK;
 }
 
-WSError SceneSessionStage::Connect(const sptr<IWindowEventChannel>& eventChannel)
+WSError SceneSessionStage::Connect()
 {
     if (sceneSession_ == nullptr) {
         WLOGFE("sceneSession is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }
-    sptr<ISceneSessionStage> sceneSessionStage(this);
+    sptr<SceneSessionStage> sceneSessionStage(this);
+    sptr<IWindowEventChannel> eventChannel(new WindowEventChannel(sceneSessionStage));
     return sceneSession_->Connect(sceneSessionStage, eventChannel);
 }
 

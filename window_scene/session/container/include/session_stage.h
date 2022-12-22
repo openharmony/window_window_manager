@@ -18,9 +18,10 @@
 
 #include <memory>
 #include <mutex>
-#include <i_input_event_consumer.h>
+#include <vector>
+
+// #include <i_input_event_consumer.h>
 #include "window_scene_common.h"
-#include "zidl/window_event_channel_interface.h"
 
 namespace OHOS::Rosen {
 class ISessionStateListener {
@@ -45,13 +46,13 @@ public:
     SessionStage() = default;
     ~SessionStage() = default;
 
-    virtual WSError Connect(const sptr<IWindowEventChannel>& eventChannel) = 0;
+    virtual WSError Connect() = 0;
     virtual WSError Foreground() = 0;
     virtual WSError Background() = 0;
     virtual WSError Disconnect() = 0;
 
     bool RegisterSessionStateListener(const std::shared_ptr<ISessionStateListener>& listener);
-    bool UnregisterLifeCycleListener(const std::shared_ptr<ISessionStateListener>& listener);
+    bool UnregisterSessionStateListener(const std::shared_ptr<ISessionStateListener>& listener);
     // bool RegisterInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer);
 
 protected:

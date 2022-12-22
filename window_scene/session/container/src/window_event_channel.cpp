@@ -18,3 +18,32 @@
 #include <axis_event.h>
 #include <key_event.h>
 #include <pointer_event.h>
+
+#include "window_scene_hilog.h"
+
+namespace OHOS::Rosen {
+namespace {
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannel"};
+}
+
+WSError WindowEventChannel::NotifySizeChange(const WSRect& rect)
+{
+    WLOGFI("update size");
+    // TODO:notify session stage size change
+    return WSError::WS_OK;
+}
+
+WSError WindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    WLOGFI("receive key event");
+    // TODO:notify session stage receive key event
+    return WSError::WS_OK;
+}
+
+WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    WLOGFI("receive pointer event");
+    // TODO:notify session stage receive pointer event
+    return WSError::WS_OK;
+}
+}

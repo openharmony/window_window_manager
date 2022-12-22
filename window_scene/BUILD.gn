@@ -26,6 +26,7 @@ ohos_shared_library("window_session") {
   sources = [
     "session/container/src/scene_session_stage.cpp",
     "session/container/src/session_stage.cpp",
+    "session/container/src/window_event_channel.cpp",
     "session/container/src/zidl/scene_session_stage_proxy.cpp",
     "session/container/src/zidl/scene_session_stage_stub.cpp",
     "session/container/src/zidl/window_event_channel_proxy.cpp",
