@@ -103,7 +103,7 @@ NativeValue* JsSceneSession::OnRegisterCallback(NativeEngine& engine, NativeCall
         }
         jsSceneSession->StartScene(info, sessionOption);
     };
-    session_->RegisterStartSceneEventListener(func);
+    session_->SetStartSceneEventListener(func);
     std::shared_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
     jsCbMap_[cbType] = callbackRef;

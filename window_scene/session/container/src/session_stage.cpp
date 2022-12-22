@@ -26,7 +26,7 @@ bool SessionStage::RegisterSessionStateListener(const std::shared_ptr<ISessionSt
     return RegisterListenerLocked(sessionStateListeners_, listener);
 }
 
-bool SessionStage::UnregisterLifeCycleListener(const std::shared_ptr<ISessionStateListener>& listener)
+bool SessionStage::UnregisterSessionStateListener(const std::shared_ptr<ISessionStateListener>& listener)
 {
     return UnregisterListenerLocked(sessionStateListeners_, listener);
 }

@@ -18,18 +18,21 @@
 
 #include "zidl/window_event_channel_stub.h"
 
+#include "scene_session_stage.h"
 #include "window_scene_common.h"
 
 namespace OHOS::Rosen {
-class WidnowEventChannel : public WindowEventChannelStub {
+class WindowEventChannel : public WindowEventChannelStub {
 public:
-    explicit WidnowEventChannel() = default;
-    ~WidnowEventChannel() = default;
+    explicit WindowEventChannel(sptr<SceneSessionStage>& sessionStage) : sessionStage_(sessionStage) {}
+    ~WindowEventChannel() = default;
 
-    virtual WSError NotifySizeChange() override;
+    virtual WSError NotifySizeChange(const WSRect& rect) override;
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
-    virtual WSError TransferAxisEvent(const std::shared_ptr<MMI::AxisEvent>& pointerEvent) override;
+
+private:
+    sptr<SceneSessionStage> sessionStage_;
 };
 }
 #endif // OHOS_WINDOW_EVENT_CHANNEL_H

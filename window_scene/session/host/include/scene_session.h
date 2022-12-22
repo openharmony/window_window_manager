@@ -43,7 +43,7 @@ public:
     virtual WSError SetActive(bool active) override;
 
     const SceneAbilityInfo& GetAbilityInfo() const;
-    void RegisterStartSceneEventListener(const NotifyStartSceneFunc& func);
+    void SetStartSceneEventListener(const NotifyStartSceneFunc& func);
 private:
     sptr<ISceneSessionStage> sceneSessionStage_;
     sptr<IWindowEventChannel> windowEventChannel_;
