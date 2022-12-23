@@ -878,15 +878,26 @@ AvoidArea WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType 
 WMError WindowController::ChangeMouseStyle(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
+    int32_t mouseStyle = 0;
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         if (node->GetWindowRect().width_ > node->GetWindowRect().height_) {
-            MMI::InputManager::GetInstance()->SetPointerStyle(windowId, MMI::MOUSE_ICON::NORTH_SOUTH);
+            mouseStyle = MMI::MOUSE_ICON::NORTH_SOUTH;
         } else {
-            MMI::InputManager::GetInstance()->SetPointerStyle(windowId, MMI::MOUSE_ICON::WEST_EAST);
+            mouseStyle = MMI::MOUSE_ICON::WEST_EAST;
+        }
+        int32_t res = MMI::InputManager::GetInstance()->SetPointerStyle(windowId, mouseStyle);
+        if (res != 0) {
+            WLOGFE("set pointer style failed");
+            return WMError::WM_ERROR_INVALID_OPERATION;
         }
         return WMError::WM_OK;
     }
-    MMI::InputManager::GetInstance()->SetPointerStyle(windowId, STYLEID_MAP.at(moveDragProperty->dragType_));
+    int32_t res = MMI::InputManager::GetInstance()->SetPointerStyle(windowId,
+        STYLEID_MAP.at(moveDragProperty->dragType_));
+    if (res != 0) {
+        WLOGFE("set pointer style failed");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     return WMError::WM_OK;
 }
 
@@ -1007,27 +1018,18 @@ WMError WindowController::RecoverInputEventToClient(uint32_t windowId)
 
     node->SetInputEventCallingPid(node->GetCallingPid());
     RecoverDefaultMouseStyle(windowId);
-    AsyncFlushInputInfo(windowId);
+    FlushWindowInfo(windowId);
     return WMError::WM_OK;
-}
-
-void WindowController::AsyncFlushInputInfo(uint32_t windowId)
-{
-    WLOGFD("AsyncFlushWindowInfo");
-    displayZoomController_->UpdateWindowZoomInfo(windowId);
-    RSTransaction::FlushImplicitTransaction();
-    MMI::DisplayGroupInfo displayInfo_ = inputWindowMonitor_->GetDisplayInfo(windowId);
-    auto task = [this, displayInfo_]() {
-        MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayInfo_);
-    };
-    WindowInnerManager::GetInstance().PostTask(task, "UpdateDisplayInfo");
 }
 
 void WindowController::RecoverDefaultMouseStyle(uint32_t windowId)
 {
     // asynchronously calls SetMouseStyle of MultiModalInput
     auto task = [this, windowId]() {
-        MMI::InputManager::GetInstance()->SetPointerStyle(windowId, MMI::MOUSE_ICON::DEFAULT);
+        int32_t res = MMI::InputManager::GetInstance()->SetPointerStyle(windowId, MMI::MOUSE_ICON::DEFAULT);
+        if (res != 0) {
+            WLOGFE("set pointer style failed");
+        }
     };
     WindowInnerManager::GetInstance().PostTask(task, "RecoverDefaultMouseStyle");
 }
@@ -1078,7 +1080,7 @@ void WindowController::FlushWindowInfo(uint32_t windowId)
 
 void WindowController::FlushWindowInfoWithDisplayId(DisplayId displayId)
 {
-    WLOGFI("FlushWindowInfoWithDisplayId, displayId: %{public}" PRIu64"", displayId);
+    WLOGFD("FlushWindowInfoWithDisplayId, displayId: %{public}" PRIu64"", displayId);
     RSTransaction::FlushImplicitTransaction();
     inputWindowMonitor_->UpdateInputWindowByDisplayId(displayId);
 }

@@ -2238,10 +2238,20 @@ void WindowImpl::CalculateStartRectExceptHotZone(float vpr)
         static_cast<uint32_t>((WINDOW_FRAME_CORNER_WIDTH + WINDOW_FRAME_CORNER_WIDTH) * vpr / hotZoneScale.y_);
 }
 
-bool WindowImpl::IsPointInDragHotZone(int32_t startPointPosX, int32_t startPointPosY)
+bool WindowImpl::IsPointInDragHotZone(int32_t startPointPosX, int32_t startPointPosY, int32_t sourceType)
 {
-    if (!WindowHelper::IsPointInTargetRect(startPointPosX,
-        startPointPosY, moveDragProperty_->startRectExceptFrame_) ||
+    // calculate rect with hotzone
+    Rect rectWithHotzone;
+    rectWithHotzone.posX_ = GetRect().posX_ - static_cast<int32_t>(HOTZONE_POINTER);
+    rectWithHotzone.posY_ = GetRect().posY_ - static_cast<int32_t>(HOTZONE_POINTER);
+    rectWithHotzone.width_ = GetRect().width_ + static_cast<int32_t>(HOTZONE_POINTER)*2;
+    rectWithHotzone.height_ = GetRect().height_ + static_cast<int32_t>(HOTZONE_POINTER)*2;
+
+    if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+        !WindowHelper::IsPointInTargetRectWithBound(startPointPosX, startPointPosY, rectWithHotzone)) {
+        return false;
+    } else if ((!WindowHelper::IsPointInTargetRect(startPointPosX,
+        startPointPosY, moveDragProperty_->startRectExceptFrame_)) ||
         (!WindowHelper::IsPointInWindowExceptCorner(startPointPosX,
         startPointPosY, moveDragProperty_->startRectExceptCorner_))) {
         return true;
@@ -2306,7 +2316,7 @@ void WindowImpl::ReadyToMoveOrDragWindow(const std::shared_ptr<MMI::PointerEvent
         moveDragProperty_->startMoveFlag_ = true;
         SingletonContainer::Get<WindowAdapter>().NotifyServerReadyToMoveOrDrag(property_->GetWindowId(),
             property_, moveDragProperty_);
-    } else if (IsPointInDragHotZone(startPointPosX, startPointPosY)) {
+    } else if (IsPointInDragHotZone(startPointPosX, startPointPosY, moveDragProperty_->sourceType_)) {
         moveDragProperty_->startDragFlag_ = true;
         UpdateDragType(startPointPosX, startPointPosY);
         SingletonContainer::Get<WindowAdapter>().NotifyServerReadyToMoveOrDrag(property_->GetWindowId(),
@@ -2424,9 +2434,15 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
         return;
     }
     auto action = pointerEvent->GetPointerAction();
+    uint32_t windowId = pointerEvent->GetAgentWindowId();
+    int32_t mousePointX = pointerItem.GetDisplayX();
+    int32_t mousePointY = pointerItem.GetDisplayY();
+    int32_t sourceType = pointerEvent->GetSourceType();
+    uint32_t oldStyleID = mouseStyleID_;
+    uint32_t newStyleID = 0;
     if (WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
         auto display = SingletonContainer::IsDestroyed() ? nullptr :
-            SingletonContainer::Get<DisplayManager>().GetDisplayById(moveDragProperty_->targetDisplayId_);
+            SingletonContainer::Get<DisplayManager>().GetDisplayById(pointerEvent->GetTargetDisplayId());
         if (display == nullptr || display->GetDisplayInfo() == nullptr) {
             WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u",
                 property_->GetDisplayId(), property_->GetWindowId());
@@ -2434,32 +2450,31 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
         }
         float vpr = display->GetVirtualPixelRatio();
         CalculateStartRectExceptHotZone(vpr);
-        if (IsPointInDragHotZone(pointerItem.GetDisplayX(), pointerItem.GetDisplayY())) {
-            uint32_t tempStyleID = mouseStyleID_;
-            // calculate pointer style
-            mouseStyleID_ = CalculatePointerDirection(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
-            if (tempStyleID != mouseStyleID_) {
-                MMI::InputManager::GetInstance()->SetPointerStyle(
-                    static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), mouseStyleID_);
-            }
-            isPointerStyleChanged_ = true;
+        if (IsPointInDragHotZone(mousePointX, mousePointY, sourceType)) {
+            newStyleID = CalculatePointerDirection(mousePointX, mousePointY);
         } else if (action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
-            MMI::InputManager::GetInstance()->SetPointerStyle(
-                static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), MMI::MOUSE_ICON::DEFAULT);
+            newStyleID = MMI::MOUSE_ICON::DEFAULT;
         }
-    } else if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE && isPointerStyleChanged_ == false) {
-        uint32_t mouseStyle = (GetRect().width_ > GetRect().height_) ?
+    } else if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        newStyleID = (GetRect().width_ > GetRect().height_) ?
             MMI::MOUSE_ICON::NORTH_SOUTH : MMI::MOUSE_ICON::WEST_EAST;
-        MMI::InputManager::GetInstance()->SetPointerStyle(
-            static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), mouseStyle);
-        isPointerStyleChanged_ = true;
+        // when receive up event, set default style
+        if (action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
+            newStyleID = MMI::MOUSE_ICON::DEFAULT;
+        }
     }
-    if (isPointerStyleChanged_ && (action == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW ||
-        !IsPointInDragHotZone(pointerItem.GetDisplayX(), pointerItem.GetDisplayY()))) {
-        MMI::InputManager::GetInstance()->SetPointerStyle(static_cast<uint32_t>(pointerEvent->GetAgentWindowId()),
-            MMI::MOUSE_ICON::DEFAULT);
-        isPointerStyleChanged_ = false;
-        mouseStyleID_ = 0;
+    WLOGD("winId : %{public}u, Mouse posX : %{public}u, posY %{public}u, Pointer action : %{public}u, "
+           "winRect posX : %{public}u, posY : %{public}u, W : %{public}u, H : %{public}u, "
+           "newStyle : %{public}u, oldStyle : %{public}u",
+           windowId, mousePointX, mousePointY, action, GetRect().posX_,
+           GetRect().posY_, GetRect().width_, GetRect().height_, newStyleID, oldStyleID);
+    if (oldStyleID != newStyleID) {
+        int32_t res = MMI::InputManager::GetInstance()->SetPointerStyle(windowId, newStyleID);
+        if (res != 0) {
+            WLOGFE("set pointer style failed, res is %{public}u", res);
+            return;
+        }
+        mouseStyleID_ = newStyleID;
     }
 }
 
@@ -2958,6 +2973,7 @@ WMError WindowImpl::SetAPPWindowLabel(const std::string& label)
         return WMError::WM_ERROR_NULLPTR;
     }
     uiContent_->SetAppWindowTitle(label);
+    WLOGI("Set app window label success, label : %{public}s", label.c_str());
     return WMError::WM_OK;
 }
 
@@ -2972,6 +2988,7 @@ WMError WindowImpl::SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& ico
         return WMError::WM_ERROR_NULLPTR;
     }
     uiContent_->SetAppWindowIcon(icon);
+    WLOGI("Set app window icon success");
     return WMError::WM_OK;
 }
 bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)

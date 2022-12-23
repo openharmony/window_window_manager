@@ -323,7 +323,6 @@ void CheckWindowImplFunctionsPart5(sptr<WindowImpl> window, const uint8_t* data,
     startPos += GetObject(pointId, data + startPos, size - startPos);
     startPos += GetObject(sourceType, data + startPos, size - startPos);
     window->EndMoveOrDragWindow(posX, posY, pointId, sourceType);
-    window->IsPointInDragHotZone(posX, posY);
 
     bool boolVal;
     startPos += GetObject(boolVal, data + startPos, size - startPos);
