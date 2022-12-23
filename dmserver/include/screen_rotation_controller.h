@@ -46,29 +46,24 @@ class ScreenRotationController : public RefBase {
 public:
     ScreenRotationController() = delete;
     ~ScreenRotationController() = default;
-    static void SubscribeGravitySensor();
-    static void UnsubscribeGravitySensor();
     static void Init();
+    static void HandleSensorEventInput(DeviceRotation deviceRotation);
     static bool IsScreenRotationLocked();
     static void SetScreenRotationLocked(bool isLocked);
     static void SetDefaultDeviceRotationOffset(uint32_t defaultDeviceRotationOffset);
-    static bool IsGravitySensorEnabled();
     static void ProcessOrientationSwitch(Orientation orientation);
 
     static bool IsDisplayRotationVertical(Rotation rotation);
     static bool IsDisplayRotationHorizontal(Rotation rotation);
+    static DeviceRotation ConvertSensorToDeviceRotation(SensorRotation sensorRotation);
 private:
     static void HandleGravitySensorEventCallback(SensorEvent *event);
-    static bool CheckCallbackTimeInterval();
     static Rotation GetCurrentDisplayRotation();
     static Orientation GetPreferredOrientation();
     static void SetScreenRotation(Rotation targetRotation);
-    static int CalcRotationDegree(GravityData* gravityData);
     static Rotation CalcTargetDisplayRotation(Orientation requestedOrientation,
         DeviceRotation sensorRotationConverted);
     static DeviceRotation CalcDeviceRotation(SensorRotation sensorRotation);
-    static SensorRotation CalcSensorRotation(int sensorDegree);
-    static DeviceRotation ConvertSensorToDeviceRotation(SensorRotation sensorRotation);
     static Rotation ConvertDeviceToDisplayRotation(DeviceRotation sensorRotationConverted);
 
     static bool IsDeviceRotationVertical(DeviceRotation deviceRotation);
@@ -89,17 +84,14 @@ private:
     static Rotation ProcessAutoRotationLandscapeOrientation(DeviceRotation sensorRotationConveted);
 
     static DisplayId defaultDisplayId_;
-    static SensorUser user_;
     static uint32_t defaultDeviceRotationOffset_;
     static uint32_t defaultDeviceRotation_;
     static std::map<SensorRotation, DeviceRotation> sensorToDeviceRotationMap_;
     static std::map<DeviceRotation, Rotation> deviceToDisplayRotationMap_;
-    static long lastCallbackTime_;
     static Orientation lastOrientationType_;
     static Rotation currentDisplayRotation_;
     static Rotation lastSensorDecidedRotation_;
     static Rotation rotationLockedRotation_;
-    static bool isGravitySensorSubscribed_;
     static bool isScreenRotationLocked_;
     static DeviceRotation lastSensorRotationConverted_;
 };
