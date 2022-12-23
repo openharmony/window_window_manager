@@ -90,17 +90,10 @@ ohos_shared_library("libwm") {
     defines += [ "EFFICIENCY_MANAGER_ENABLE" ]
   }
 
-  if (!defined(global_parts_info) ||
+  if (defined(global_parts_info) &&
       defined(global_parts_info.resourceschedule_resource_schedule_service)) {
-    soc_perf_enable = true
-  } else {
-    soc_perf_enable = false
-  }
-  print("soc_perf_enable: ", soc_perf_enable)
-
-  if (soc_perf_enable == true) {
     external_deps += [ "resource_schedule_service:ressched_client" ]
-    defines += [ "SOC_PERF_ENABLE" ]
+    defines += [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
   }
 
   if (!defined(global_parts_info) ||
