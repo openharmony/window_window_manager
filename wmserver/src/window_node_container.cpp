@@ -325,12 +325,12 @@ void WindowNodeContainer::RemoveFromRsTreeWhenRemoveWindowNode(sptr<WindowNode>&
             return;
     }
     // When RemoteAnimation exists, remove node from rs tree after animation
-    WLOGFD("remove from rs tree id:%{public}u", node->GetWindowId());
+    WLOGFD("remove from rs tree id:%{public}u, node->isPlayAnimationHide_:%{public}u", node->GetWindowId(),
+        static_cast<uint32_t>(node->isPlayAnimationHide_));
     // subwindow or no remote animation also exit with animation
-    bool isAnimationPlayed = RemoteAnimation::CheckAnimationController() &&
-        WindowHelper::IsMainWindow(node->GetWindowType());
     for (auto& displayId : node->GetShowingDisplays()) {
-        RemoveNodeFromRSTree(node, displayId, displayId, WindowUpdateType::WINDOW_UPDATE_REMOVED, isAnimationPlayed);
+        RemoveNodeFromRSTree(node, displayId, displayId, WindowUpdateType::WINDOW_UPDATE_REMOVED,
+            node->isPlayAnimationHide_);
     }
 }
 
@@ -349,6 +349,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node, bool fromA
     node->requestedVisibility_ = false;
     node->currentVisibility_ = false;
     RemoveFromRsTreeWhenRemoveWindowNode(node, fromAnimation);
+    node->isPlayAnimationHide_ = false;
     displayGroupController_->UpdateDisplayGroupWindowTree();
     layoutPolicy_->PerformWindowLayout(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
     WindowMode lastMode = node->GetWindowMode();
