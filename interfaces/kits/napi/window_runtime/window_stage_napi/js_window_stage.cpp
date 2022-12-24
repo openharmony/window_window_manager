@@ -31,8 +31,9 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindo
 } // namespace
 
 std::unique_ptr<JsWindowRegisterManager> g_listenerManager = std::make_unique<JsWindowRegisterManager>();
-JsWindowStage::JsWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene)
-    : windowScene_(windowScene)
+JsWindowStage::JsWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene,
+    const std::shared_ptr<Ace::UIContent>& uiContent)
+    : windowScene_(windowScene), uiContent_(uiContent)
 {
 }
 
@@ -148,7 +149,12 @@ NativeValue* JsWindowStage::OnSetUIContent(NativeEngine& engine, NativeCallbackI
         WLOGFE("[NAPI]Failed to convert parameter to url");
         return engine.CreateUndefined();
     }
-    weakScene->GetMainWindow()->SetUIContent(contextUrl, &engine, info.argv[CONTENT_STORAGE_ARG]);
+    auto uiContent = uiContent_.lock();
+    if (uiContent) {
+        uiContent->Initialize(contextUrl, info.argv[CONTENT_STORAGE_ARG]);
+    }
+
+    // weakScene->GetMainWindow()->SetUIContent(contextUrl, &engine, info.argv[CONTENT_STORAGE_ARG]);
     return engine.CreateUndefined();
 }
 
@@ -541,13 +547,13 @@ NativeValue* JsWindowStage::OnDisableWindowDecor(NativeEngine& engine, NativeCal
 }
 
 NativeValue* CreateJsWindowStage(NativeEngine& engine,
-    std::shared_ptr<Rosen::WindowScene> windowScene)
+    std::shared_ptr<Rosen::WindowScene> windowScene, std::shared_ptr<Ace::UIContent> uiContent)
 {
     WLOGFD("[NAPI]CreateJsWindowStage");
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
 
-    std::unique_ptr<JsWindowStage> jsWindowStage = std::make_unique<JsWindowStage>(windowScene);
+    std::unique_ptr<JsWindowStage> jsWindowStage = std::make_unique<JsWindowStage>(windowScene, uiContent);
     object->SetNativePointer(jsWindowStage.release(), JsWindowStage::Finalizer, nullptr);
 
     const char *moduleName = "JsWindowStage";
