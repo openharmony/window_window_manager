@@ -185,16 +185,43 @@ WMError WindowController::GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken)
     return res;
 }
 
+bool WindowController::CheckParentWindowValid(const sptr<WindowProperty>& property)
+{
+    if (WindowHelper::IsSubWindow(property->GetWindowType())) {
+        if (property->GetParentId() == INVALID_WINDOW_ID) {
+            WLOGFE("failed, sub window parent type is invalid");
+            return false;
+        }
+        sptr<WindowNode> parentWindow = windowRoot_->GetWindowNode(property->GetParentId());
+        if (parentWindow == nullptr || !WindowHelper::IsMainWindow(parentWindow->GetWindowType())) {
+            WLOGFE("failed, sub window parent type is error");
+            return false;
+        }
+    } else if (WindowHelper::IsSystemSubWindow(property->GetWindowType())) {
+        if (property->GetParentId() == INVALID_WINDOW_ID) {
+            WLOGFE("failed, sub system window parent type is invalid");
+            return false;
+        }
+        sptr<WindowNode> parentWindow = windowRoot_->GetWindowNode(property->GetParentId());
+        if (parentWindow == nullptr || !WindowHelper::IsSystemWindow(parentWindow->GetWindowType())) {
+            WLOGFE("failed, sub system window parent type is error");
+            return false;
+        }
+    } else {
+        if (property->GetParentId() != INVALID_WINDOW_ID) {
+            WLOGFE("failed, type is error");
+            return false;
+        }
+    }
+    return true;
+}
+
 WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId, sptr<IRemoteObject> token,
     int32_t pid, int32_t uid)
 {
-    uint32_t parentId = property->GetParentId();
-    if ((parentId != INVALID_WINDOW_ID) &&
-        !WindowHelper::IsSubWindow(property->GetWindowType()) &&
-        !WindowHelper::IsSystemSubWindow(property->GetWindowType())) {
-        WLOGFE("create window failed, type is error");
-        return WMError::WM_ERROR_INVALID_TYPE;
+    if (!CheckParentWindowValid(property)) {
+        return WMError::WM_ERROR_INVALID_PARENT;
     }
 
     if (windowRoot_->CheckMultiDialogWindows(property->GetWindowType(), token)) {

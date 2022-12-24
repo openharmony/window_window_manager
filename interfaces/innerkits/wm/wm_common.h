@@ -125,6 +125,10 @@ enum class WMError : int32_t {
     WM_ERROR_INVALID_OPERATION,
     WM_ERROR_INVALID_PERMISSION,
     WM_ERROR_NO_REMOTE_ANIMATION,
+    WM_ERROR_INVALID_DISPLAY,
+    WM_ERROR_INVALID_PARENT,
+    WM_ERROR_OPER_FULLSCREEN_FAILED,
+    WM_ERROR_REPEAT_OPERATION,
 
     WM_ERROR_DEVICE_NOT_SUPPORT = 801, // the value do not change.It is defined on all system
 
@@ -150,6 +154,9 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_STAGE_ABNORMALLY = 1300005,
     WM_ERROR_CONTEXT_ABNORMALLY = 1300006,
     WM_ERROR_START_ABILITY_FAILED = 1300007,
+    WM_ERROR_INVALID_DISPLAY = 1300008,
+    WM_ERROR_INVALID_PARENT = 1300009,
+    WM_ERROR_OPER_FULLSCREEN_FAILED = 1300010,
 };
 
 const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
@@ -166,6 +173,10 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_ERROR_IPC_FAILED,                     WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY    },
     {WMError::WM_ERROR_NO_MEM,                         WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY    },
     {WMError::WM_ERROR_NO_REMOTE_ANIMATION,            WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY    },
+    {WMError::WM_ERROR_INVALID_DISPLAY,                WmErrorCode::WM_ERROR_INVALID_DISPLAY      },
+    {WMError::WM_ERROR_INVALID_PARENT,                 WmErrorCode::WM_ERROR_INVALID_PARENT       },
+    {WMError::WM_ERROR_OPER_FULLSCREEN_FAILED,         WmErrorCode::WM_ERROR_OPER_FULLSCREEN_FAILED     },
+    {WMError::WM_ERROR_REPEAT_OPERATION,               WmErrorCode::WM_ERROR_REPEAT_OPERATION      },
     {WMError::WM_ERROR_NULLPTR,                        WmErrorCode::WM_ERROR_STATE_ABNORMALLY     },
     {WMError::WM_ERROR_SAMGR,                          WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY    },
     {WMError::WM_ERROR_START_ABILITY_FAILED,           WmErrorCode::WM_ERROR_START_ABILITY_FAILED },
