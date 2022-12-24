@@ -147,7 +147,8 @@ WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& src
         case TransitionEvent::MINIMIZE:
             return RemoteAnimation::NotifyAnimationMinimize(srcInfo, srcNode);
         case TransitionEvent::CLOSE:
-            return RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode, TransitionEvent::CLOSE);
+        case TransitionEvent::CLOSE_BUTTON:
+            return RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode, transitionEvent);
         case TransitionEvent::BACK_TRANSITION:
             return RemoteAnimation::NotifyAnimationBackTransition(srcInfo, dstInfo, srcNode, dstNode);
         default:
