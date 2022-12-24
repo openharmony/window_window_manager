@@ -46,7 +46,8 @@ wptr<WindowController> RemoteAnimation::windowController_ = nullptr;
 std::map<TransitionReason, TransitionEvent> eventMap_ = {
     {TransitionReason::CLOSE, TransitionEvent::CLOSE},
     {TransitionReason::MINIMIZE, TransitionEvent::MINIMIZE},
-    {TransitionReason::BACK_TRANSITION, TransitionEvent::BACK_TRANSITION}
+    {TransitionReason::BACK_TRANSITION, TransitionEvent::BACK_TRANSITION},
+    {TransitionReason::CLOSE_BUTTON, TransitionEvent::CLOSE_BUTTON}
 };
 
 void RemoteAnimation::SetAnimationFirst(bool animationFirst)
@@ -194,8 +195,8 @@ TransitionEvent RemoteAnimation::GetTransitionEvent(sptr<WindowTransitionInfo> s
 {
     auto transitionReason = srcInfo->GetTransitionReason(); // src reason same as dst reason
     if (srcNode != nullptr && eventMap_.find(transitionReason) != eventMap_.end()) {
-        WLOGFI("current window:%{public}u state: %{public}u", srcNode->GetWindowId(),
-            static_cast<uint32_t>(srcNode->stateMachine_.GetCurrentState()));
+        WLOGFI("current window:%{public}u state: %{public}u transitionReason:%{public}u", srcNode->GetWindowId(),
+            static_cast<uint32_t>(srcNode->stateMachine_.GetCurrentState()), static_cast<uint32_t>(transitionReason));
         if (srcNode->stateMachine_.IsWindowNodeHiddenOrHiding()) {
             WLOGFE("srcNode is hiding or hidden id: %{public}u!", srcNode->GetWindowId());
             return TransitionEvent::UNKNOWN;
@@ -804,7 +805,7 @@ static void ProcessAbility(const sptr<WindowNode>& srcNode, TransitionEvent even
         return;
     }
     switch (event) {
-        case TransitionEvent::CLOSE: {
+        case TransitionEvent::CLOSE_BUTTON: {
             WLOGFI("close windowId: %{public}u, name:%{public}s",
                 srcNode->GetWindowId(), srcNode->GetWindowName().c_str());
             WindowInnerManager::GetInstance().CloseAbility(srcNode);
@@ -816,6 +817,7 @@ static void ProcessAbility(const sptr<WindowNode>& srcNode, TransitionEvent even
             WindowInnerManager::GetInstance().MinimizeAbility(srcNode, true);
             break;
         }
+        case TransitionEvent::CLOSE: // close by back
         default:
             break;
     }
