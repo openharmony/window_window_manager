@@ -513,7 +513,7 @@ private:
     WMError SetWindowCornerRadiusAccordingToSystemConfig();
     bool IsAppMainOrSubOrFloatingWindow();
     WMError UpdateWindowShadowAccordingToSystemConfig();
-    bool WindowCreateCheck(uint32_t parentId);
+    WMError WindowCreateCheck(uint32_t parentId);
     uint32_t CalculatePointerDirection(int32_t pointerX, int32_t pointerY);
     void HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);

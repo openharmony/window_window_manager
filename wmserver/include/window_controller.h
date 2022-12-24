@@ -109,6 +109,7 @@ private:
     void ProcessDisplayCompression(DisplayId defaultDisplayId, const sptr<DisplayInfo>& displayInfo);
     void NotifyAfterAddWindow(sptr<WindowNode>& node);
     void RelayoutKeyboard(const sptr<WindowNode>& node);
+    bool CheckParentWindowValid(const sptr<WindowProperty>& property);
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;

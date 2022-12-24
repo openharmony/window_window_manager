@@ -629,7 +629,7 @@ void WindowManagerService::StartingWindow(sptr<WindowTransitionInfo> info, std::
 
 void WindowManagerService::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
 {
-    WLOGI("begin CancelStartingWindow!");
+    WLOGI("begin");
     if (!startingOpen_) {
         WLOGI("startingWindow not open!");
         return;

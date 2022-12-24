@@ -149,7 +149,7 @@ private:
         sptr<WindowNodeContainer>& container);
     std::vector<std::pair<uint64_t, bool>> GetWindowVisibilityChangeInfo(
         std::shared_ptr<RSOcclusionData> occlusionData);
-    bool NeedToStopAddingNode(sptr<WindowNode>& node, const sptr<WindowNodeContainer>& container);
+    bool CheckAddingModeAndSize(sptr<WindowNode>& node, const sptr<WindowNodeContainer>& container);
     WMError BindDialogToParent(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     void ChangeRSRenderModeIfNeeded(bool isToUnified);
     bool IsAppWindowExceed() const;
