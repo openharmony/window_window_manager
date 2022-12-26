@@ -24,7 +24,7 @@ namespace {
 
 void JsDisplayListener::AddCallback(const std::string& type, NativeValue* jsListenerObject)
 {
-    WLOGFI("JsDisplayListener::AddCallback is called");
+    WLOGI("JsDisplayListener::AddCallback is called");
     std::unique_ptr<NativeReference> callbackRef;
     if (engine_ == nullptr) {
         WLOGFE("engine_ nullptr");
@@ -33,7 +33,7 @@ void JsDisplayListener::AddCallback(const std::string& type, NativeValue* jsList
     callbackRef.reset(engine_->CreateReference(jsListenerObject, 1));
     std::lock_guard<std::mutex> lock(mtx_);
     jsCallBack_[type].emplace_back(std::move(callbackRef));
-    WLOGFI("JsDisplayListener::AddCallback success jsCallBack_ size: %{public}u!",
+    WLOGI("JsDisplayListener::AddCallback success jsCallBack_ size: %{public}u!",
         static_cast<uint32_t>(jsCallBack_[type].size()));
 }
 
@@ -59,7 +59,7 @@ void JsDisplayListener::RemoveCallback(const std::string& type, NativeValue* jsL
             iter++;
         }
     }
-    WLOGFI("JsDisplayListener::RemoveCallback success jsCallBack_ size: %{public}u!",
+    WLOGI("JsDisplayListener::RemoveCallback success jsCallBack_ size: %{public}u!",
         static_cast<uint32_t>(listeners.size()));
 }
 
@@ -69,7 +69,7 @@ void JsDisplayListener::CallJsMethod(const std::string& methodName, NativeValue*
         WLOGFE("empty method name str, call method failed");
         return;
     }
-    WLOGFI("CallJsMethod methodName = %{public}s", methodName.c_str());
+    WLOGI("CallJsMethod methodName = %{public}s", methodName.c_str());
     if (engine_ == nullptr) {
         WLOGFE("engine_ nullptr");
         return;
@@ -87,7 +87,7 @@ void JsDisplayListener::CallJsMethod(const std::string& methodName, NativeValue*
 void JsDisplayListener::OnCreate(DisplayId id)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    WLOGFI("JsDisplayListener::OnCreate is called, displayId: %{public}d", static_cast<uint32_t>(id));
+    WLOGI("JsDisplayListener::OnCreate is called, displayId: %{public}d", static_cast<uint32_t>(id));
     if (jsCallBack_.empty()) {
         WLOGFE("JsDisplayListener::OnCreate not register!");
         return;
@@ -113,7 +113,7 @@ void JsDisplayListener::OnCreate(DisplayId id)
 void JsDisplayListener::OnDestroy(DisplayId id)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    WLOGFI("JsDisplayListener::OnDestroy is called, displayId: %{public}d", static_cast<uint32_t>(id));
+    WLOGI("JsDisplayListener::OnDestroy is called, displayId: %{public}d", static_cast<uint32_t>(id));
     if (jsCallBack_.empty()) {
         WLOGFE("JsDisplayListener::OnDestroy not register!");
         return;
@@ -139,7 +139,7 @@ void JsDisplayListener::OnDestroy(DisplayId id)
 void JsDisplayListener::OnChange(DisplayId id)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    WLOGFI("JsDisplayListener::OnChange is called, displayId: %{public}d", static_cast<uint32_t>(id));
+    WLOGI("JsDisplayListener::OnChange is called, displayId: %{public}d", static_cast<uint32_t>(id));
     if (jsCallBack_.empty()) {
         WLOGFE("JsDisplayListener::OnChange not register!");
         return;

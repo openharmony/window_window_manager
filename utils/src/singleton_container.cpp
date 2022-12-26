@@ -59,7 +59,7 @@ void SingletonContainer::AddSingleton(const std::string& name, void* instance)
         static int32_t nextId = 0;
         singletonMap[nextId].value = instance;
         singletonMap[nextId].refCount = 0;
-        WLOGFI("add %{public}s", name.c_str());
+        WLOGI("add %{public}s", name.c_str());
         stringMap[name] = nextId++;
     } else {
         WLOGFE("add failed: %{public}s", name.c_str());
@@ -71,7 +71,7 @@ void SingletonContainer::SetSingleton(const std::string& name, void* instance)
     if (stringMap.find(name) == stringMap.end()) {
         AddSingleton(name, instance);
     } else {
-        WLOGFI("set %{public}s", name.c_str());
+        WLOGI("set %{public}s", name.c_str());
         singletonMap[stringMap[name]].value = instance;
     }
 }

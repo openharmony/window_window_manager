@@ -350,7 +350,7 @@ void DisplayGroupController::ProcessNotCrossNodesOnDestroyedDisplay(DisplayId di
         WLOGFE("displayId: %{public}" PRIu64" not in display group window tree", displayId);
         return;
     }
-    WLOGFI("move window nodes for display destroy, displayId: %{public}" PRIu64"", displayId);
+    WLOGI("move window nodes for display destroy, displayId: %{public}" PRIu64"", displayId);
 
     std::vector<WindowRootNodeType> rootNodeType = {
         WindowRootNodeType::ABOVE_WINDOW_NODE,
@@ -393,7 +393,7 @@ void DisplayGroupController::ProcessDisplayCreate(DisplayId defaultDisplayId, sp
 {
     WindowInnerManager::GetInstance().NotifyDisplayChange(displayRectMap);
     defaultDisplayId_ = defaultDisplayId;
-    WLOGFI("defaultDisplay, displayId: %{public}" PRIu64"", defaultDisplayId);
+    WLOGI("defaultDisplay, displayId: %{public}" PRIu64"", defaultDisplayId);
 
     DisplayId displayId = displayInfo->GetDisplayId();
 
@@ -483,7 +483,7 @@ void DisplayGroupController::ProcessDisplayChange(DisplayId defaultDisplayId, sp
 {
     WindowInnerManager::GetInstance().NotifyDisplayChange(displayRectMap);
     DisplayId displayId = displayInfo->GetDisplayId();
-    WLOGFI("display change, displayId: %{public}" PRIu64", type: %{public}d", displayId, type);
+    WLOGI("display change, displayId: %{public}" PRIu64", type: %{public}d", displayId, type);
     switch (type) {
         case DisplayStateChangeType::UPDATE_ROTATION: {
             displayGroupInfo_->SetDisplayRotation(displayId, displayInfo->GetRotation());

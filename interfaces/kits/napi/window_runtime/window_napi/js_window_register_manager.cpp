@@ -150,7 +150,7 @@ bool JsWindowRegisterManager::ProcessSystemBarChangeRegister(sptr<JsWindowListen
 bool JsWindowRegisterManager::ProcessTouchOutsideRegister(sptr<JsWindowListener> listener,
     sptr<Window> window, bool isRegister)
 {
-    WLOGFI("called");
+    WLOGI("called");
     if (window == nullptr) {
         return false;
     }
@@ -166,7 +166,7 @@ bool JsWindowRegisterManager::ProcessTouchOutsideRegister(sptr<JsWindowListener>
 bool JsWindowRegisterManager::ProcessScreenshotRegister(sptr<JsWindowListener> listener,
     sptr<Window> window, bool isRegister)
 {
-    WLOGFI("called");
+    WLOGI("called");
     if (window == nullptr) {
         WLOGFE("%{public}sregister screenshot listener failed. window is null", isRegister? "" : "un");
         return false;
@@ -213,7 +213,7 @@ bool JsWindowRegisterManager::ProcessDialogDeathRecipientRegister(sptr<JsWindowL
 bool JsWindowRegisterManager::IsCallbackRegistered(std::string type, NativeValue* jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGFI("[NAPI]Method %{public}s has not been registerted", type.c_str());
+        WLOGI("[NAPI]Method %{public}s has not been registerted", type.c_str());
         return false;
     }
 
@@ -249,7 +249,7 @@ void JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::string 
         return;
     }
     jsCbMap_[type][callbackRef] = windowManagerListener;
-    WLOGFI("[NAPI]Register type %{public}s success! callback map size: %{public}zu",
+    WLOGI("[NAPI]Register type %{public}s success! callback map size: %{public}zu",
         type.c_str(), jsCbMap_[type].size());
 }
 
@@ -292,7 +292,7 @@ void JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std::strin
             return;
         }
     }
-    WLOGFI("[NAPI]Unregister type %{public}s success! callback map size: %{public}zu",
+    WLOGI("[NAPI]Unregister type %{public}s success! callback map size: %{public}zu",
         type.c_str(), jsCbMap_[type].size());
     // erase type when there is no callback in one type
     if (jsCbMap_[type].empty()) {

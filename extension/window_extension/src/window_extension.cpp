@@ -30,10 +30,10 @@ WindowExtension* WindowExtension::Create(const std::unique_ptr<AbilityRuntime::R
     if (!runtime) {
         return new WindowExtension();
     }
-    WLOGFI("create window extension");
+    WLOGI("create window extension");
     switch (runtime->GetLanguage()) {
         case AbilityRuntime::Runtime::Language::JS: {
-            WLOGFI("create js windowExtension");
+            WLOGI("create js windowExtension");
             return JsWindowExtension::Create(runtime);
         }
         default: {
@@ -49,7 +49,7 @@ void WindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRec
     const sptr<IRemoteObject>& token)
 {
     ExtensionBase<WindowExtensionContext>::Init(record, application, handler, token);
-    WLOGFI("WindowExtension begin init");
+    WLOGI("WindowExtension begin init");
 }
 
 std::shared_ptr<WindowExtensionContext> WindowExtension::CreateAndInitContext(

@@ -30,7 +30,7 @@ WindowInputChannel::WindowInputChannel(const sptr<Window>& window): window_(wind
 
 WindowInputChannel::~WindowInputChannel()
 {
-    WLOGFI("windowName: %{public}s, windowId: %{public}d", window_->GetWindowName().c_str(), window_->GetWindowId());
+    WLOGI("windowName: %{public}s, windowId: %{public}d", window_->GetWindowName().c_str(), window_->GetWindowId());
     window_->SetNeedRemoveWindowInputChannel(false);
 }
 
@@ -40,7 +40,7 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
         WLOGFE("keyEvent is nullptr");
         return;
     }
-    WLOGFI("Receive key event, windowId: %{public}u, keyCode: %{public}d",
+    WLOGI("Receive key event, windowId: %{public}u, keyCode: %{public}d",
         window_->GetWindowId(), keyEvent->GetKeyCode());
     if (window_->GetType() == WindowType::WINDOW_TYPE_DIALOG) {
         if (keyEvent->GetAgentWindowId() != keyEvent->GetTargetWindowId()) {
@@ -63,7 +63,7 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
     }
 #endif // IMF_ENABLE
     if (!inputMethodHasProcessed) {
-        WLOGFI("dispatch keyEvent to ACE");
+        WLOGI("dispatch keyEvent to ACE");
         window_->ConsumeKeyEvent(keyEvent);
     }
 }
@@ -74,7 +74,7 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
         WLOGFE("pointerEvent is nullptr");
         return;
     }
-    WLOGFI("Receive pointer event, windowId: %{public}u, action: %{public}d",
+    WLOGI("Receive pointer event, windowId: %{public}u, action: %{public}d",
         window_->GetWindowId(), pointerEvent->GetPointerAction());
     if ((window_->GetType() == WindowType::WINDOW_TYPE_DIALOG) &&
         (pointerEvent->GetAgentWindowId() != pointerEvent->GetTargetWindowId())) {
@@ -93,7 +93,7 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
 void WindowInputChannel::Destroy()
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    WLOGFI("Destroy WindowInputChannel, windowId:%{public}u", window_->GetWindowId());
+    WLOGI("Destroy WindowInputChannel, windowId:%{public}u", window_->GetWindowId());
     isAvailable_ = false;
 }
 
@@ -102,7 +102,7 @@ bool WindowInputChannel::IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& k
     int32_t keyCode = keyEvent->GetKeyCode();
     bool isKeyFN = (keyCode == MMI::KeyEvent::KEYCODE_FN);
     bool isKeyboard = (keyCode >= MMI::KeyEvent::KEYCODE_0 && keyCode <= MMI::KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN);
-    WLOGFI("isKeyFN: %{public}d, isKeyboard: %{public}d", isKeyFN, isKeyboard);
+    WLOGI("isKeyFN: %{public}d, isKeyboard: %{public}d", isKeyFN, isKeyboard);
     return (isKeyFN || isKeyboard);
 }
 }

@@ -84,7 +84,7 @@ void DragController::StartDrag(uint32_t windowId)
         hitWindow->GetWindowToken()->UpdateWindowDragInfo(point, DragEvent::DRAG_EVENT_IN);
     }
     hitWindowId_ = windowId;
-    WLOGFI("start Drag");
+    WLOGI("start Drag");
 }
 
 void DragController::FinishDrag(uint32_t windowId)
@@ -107,7 +107,7 @@ void DragController::FinishDrag(uint32_t windowId)
             hitWindow->GetWindowToken()->UpdateWindowDragInfo(point, DragEvent::DRAG_EVENT_END);
         }
     }
-    WLOGFI("end drag");
+    WLOGI("end drag");
 }
 
 sptr<WindowNode> DragController::GetHitWindow(DisplayId id, PointInfo point)

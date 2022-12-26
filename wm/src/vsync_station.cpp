@@ -57,10 +57,10 @@ void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallb
         if (!hasInitVsyncReceiver_ || !vsyncHandler_) {
             auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
             if (mainEventRunner != nullptr && isMainHandlerAvailable_) {
-                WLOGFI("MainEventRunner is available");
+                WLOGI("MainEventRunner is available");
                 vsyncHandler_ = std::make_shared<AppExecFwk::EventHandler>(mainEventRunner);
             } else {
-                WLOGFI("MainEventRunner is not available");
+                WLOGI("MainEventRunner is not available");
                 if (!vsyncHandler_) {
                     vsyncHandler_ = std::make_shared<AppExecFwk::EventHandler>(
                         AppExecFwk::EventRunner::Create(VSYNC_THREAD_ID));
@@ -95,7 +95,7 @@ void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallb
 
 void VsyncStation::RemoveCallback()
 {
-    WLOGFI("Remove Vsync callback");
+    WLOGI("Remove Vsync callback");
     std::lock_guard<std::mutex> lock(mtx_);
     vsyncCallbacks_.clear();
 }
@@ -128,7 +128,7 @@ void VsyncStation::OnVsync(int64_t timestamp, void* client)
 
 void VsyncStation::OnVsyncTimeOut()
 {
-    WLOGFI("Vsync time out");
+    WLOGI("Vsync time out");
     std::lock_guard<std::mutex> lock(mtx_);
     hasRequestedVsync_ = false;
 }

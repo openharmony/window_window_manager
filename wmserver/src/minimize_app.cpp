@@ -50,11 +50,11 @@ void MinimizeApp::AddNeedMinimizeApp(const sptr<WindowNode>& node, MinimizeReaso
                                     return weakSrcNode->GetWindowId() == windowId;
                                 });
         if (iter != appNodes.second.end()) {
-            WLOGFI("[Minimize] Window %{public}u is already in minimize list", node->GetWindowId());
+            WLOGI("[Minimize] Window %{public}u is already in minimize list", node->GetWindowId());
             return;
         }
     }
-    WLOGFI("[Minimize] Add Window %{public}u to minimize list, reason %{public}u", node->GetWindowId(), reason);
+    WLOGI("[Minimize] Add Window %{public}u to minimize list, reason %{public}u", node->GetWindowId(), reason);
     needMinimizeAppNodes_[reason].emplace_back(weakNode);
 }
 
@@ -75,7 +75,7 @@ void MinimizeApp::ExecuteMinimizeAll()
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (auto& appNodes: needMinimizeAppNodes_) {
         bool isFromUser = IsFromUser(appNodes.first);
-        WLOGFI("[Minimize] ExecuteMinimizeAll with size: %{public}zu, reason: %{public}u",
+        WLOGI("[Minimize] ExecuteMinimizeAll with size: %{public}zu, reason: %{public}u",
             appNodes.second.size(), appNodes.first);
         for (auto& node : appNodes.second) {
             WindowInnerManager::GetInstance().MinimizeAbility(node, isFromUser);
@@ -87,7 +87,7 @@ void MinimizeApp::ExecuteMinimizeAll()
 
 void MinimizeApp::ClearNodesWithReason(MinimizeReason reason)
 {
-    WLOGFI("[Minimize] ClearNodesWithReason reason %{public}u", reason);
+    WLOGI("[Minimize] ClearNodesWithReason reason %{public}u", reason);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (needMinimizeAppNodes_.find(reason) != needMinimizeAppNodes_.end()) {
         needMinimizeAppNodes_.at(reason).clear();
@@ -96,7 +96,7 @@ void MinimizeApp::ClearNodesWithReason(MinimizeReason reason)
 
 sptr<WindowNode> MinimizeApp::GetRecoverdNodeFromMinimizeList()
 {
-    WLOGFI("[Minimize] RevertMinimizedNodeForTile");
+    WLOGI("[Minimize] RevertMinimizedNodeForTile");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (needMinimizeAppNodes_.find(MinimizeReason::LAYOUT_TILE) != needMinimizeAppNodes_.end()) {
         auto& tileNodesForMinimize = needMinimizeAppNodes_.at(MinimizeReason::LAYOUT_TILE);
@@ -137,7 +137,7 @@ bool MinimizeApp::IsNodeNeedMinimizeWithReason(const sptr<WindowNode>& node, Min
     }
     auto nodes = needMinimizeAppNodes_.at(reason);
     if (std::find(nodes.begin(), nodes.end(), node) != nodes.end()) {
-        WLOGFI("[Minimize] id:%{public}u need to minimize with reason:%{public}u",
+        WLOGI("[Minimize] id:%{public}u need to minimize with reason:%{public}u",
             node->GetWindowId(), reason);
         return true;
     }
@@ -159,7 +159,7 @@ void MinimizeApp::ExecuteMinimizeTargetReasons(uint32_t reasons)
     while (reasons) {
         MinimizeReason reason = static_cast<MinimizeReason>(reasons & (~reasons + 1));
         if (needMinimizeAppNodes_.find(reason) != needMinimizeAppNodes_.end()) {
-            WLOGFI("[Minimize] ExecuteMinimizeTargetReason with size: %{public}zu, reason: %{public}u",
+            WLOGI("[Minimize] ExecuteMinimizeTargetReason with size: %{public}zu, reason: %{public}u",
                 needMinimizeAppNodes_.at(reason).size(), reason);
             bool isFromUser = IsFromUser(reason);
             for (auto& node : needMinimizeAppNodes_.at(reason)) {

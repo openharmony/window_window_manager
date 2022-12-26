@@ -28,7 +28,7 @@ WindowExtensionModuleLoader::~WindowExtensionModuleLoader() = default;
 AbilityRuntime::Extension *WindowExtensionModuleLoader::Create(
     const std::unique_ptr<AbilityRuntime::Runtime>& runtime) const
 {
-    WLOGFI("called");
+    WLOGI("called");
     return WindowExtension::Create(runtime);
 }
 
@@ -39,13 +39,13 @@ std::map<std::string, std::string> WindowExtensionModuleLoader::GetParams()
     params.insert(std::pair<std::string, std::string>("type", "10"));
     // extension name
     params.insert(std::pair<std::string, std::string>("name", "WindowExtension"));
-    WLOGFI("called");
+    WLOGI("called");
     return params;
 }
 
 extern "C" __attribute__((visibility("default"))) void* OHOS_EXTENSION_GetExtensionModule()
 {
-    WLOGFI("called");
+    WLOGI("called");
     return &WindowExtensionModuleLoader::GetInstance();
 }
 } // namespace OHOS::Window

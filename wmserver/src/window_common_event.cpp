@@ -59,7 +59,7 @@ void WindowCommonEvent::SubscriberEventInner(int retry)
         return;
     }
     retry--;
-    WLOGFI("called action = %{public}d", retry);
+    WLOGI("called action = %{public}d", retry);
     if (EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_)) {
         return;
     }
@@ -78,10 +78,10 @@ void WindowCommonEvent::UnSubscriberEvent()
 
 void WindowCommonEvent::OnReceiveEvent(const EventFwk::CommonEventData& data)
 {
-    WLOGFI("receive common event, action = %{public}s", data.GetWant().GetAction().c_str());
+    WLOGI("receive common event, action = %{public}s", data.GetWant().GetAction().c_str());
     auto task = [this, data] {
         std::string action = data.GetWant().GetAction();
-        WLOGFI("called action = %{public}s", action.c_str());
+        WLOGI("called action = %{public}s", action.c_str());
         if (handleCommonEventFuncs_.count(action)) {
             (this->*handleCommonEventFuncs_[action])(data);
         }
@@ -92,7 +92,7 @@ void WindowCommonEvent::OnReceiveEvent(const EventFwk::CommonEventData& data)
 void WindowCommonEvent::HandleAccountSwitched(const EventFwk::CommonEventData& data) const
 {
     int accountId = data.GetCode();
-    WLOGFI("handle account switch, account id = %{public}d", accountId);
+    WLOGI("handle account switch, account id = %{public}d", accountId);
     WindowManagerService::GetInstance().OnAccountSwitched(accountId);
 }
 } // Rosen

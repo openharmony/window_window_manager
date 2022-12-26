@@ -92,7 +92,7 @@ WMError StartingWindow::CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node
         node->leashWinSurfaceNode_ = nullptr;
         return WMError::WM_ERROR_NULLPTR;
     }
-    WLOGFI("Create leashWinSurfaceNode and startingWinSurfaceNode success with id:%{public}u!", node->GetWindowId());
+    WLOGI("Create leashWinSurfaceNode and startingWinSurfaceNode success with id:%{public}u!", node->GetWindowId());
     return WMError::WM_OK;
 }
 
@@ -142,7 +142,7 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
     // test
     node->stateMachine_.SetWindowId(windowId);
     node->stateMachine_.SetWindowType(property->GetWindowType());
-    WLOGFI("after set Id:%{public}u, requestRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+    WLOGI("after set Id:%{public}u, requestRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         node->GetWindowId(), node->GetRequestRect().posX_, node->GetRequestRect().posY_,
         node->GetRequestRect().width_, node->GetRequestRect().height_);
     // Register FirstFrame Callback to rs, replace startwin
@@ -156,7 +156,7 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
                 WLOGFE("windowNode or leashWinSurfaceNode_ is nullptr");
                 return;
             }
-            WLOGFI("StartingWindow::Replace surfaceNode, id: %{public}u", weakNode->GetWindowId());
+            WLOGI("StartingWindow::Replace surfaceNode, id: %{public}u", weakNode->GetWindowId());
             weakNode->leashWinSurfaceNode_->RemoveChild(weakNode->startingWinSurfaceNode_);
             WindowInnerManager::GetInstance().CompleteFirstFrameDrawing(weakNode);
             RSTransaction::FlushImplicitTransaction();
@@ -172,14 +172,14 @@ void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!node->leashWinSurfaceNode_) {
-        WLOGFI("cannot release leashwindow since leash is null, id:%{public}u", node->GetWindowId());
+        WLOGI("cannot release leashwindow since leash is null, id:%{public}u", node->GetWindowId());
         return;
     }
     node->leashWinSurfaceNode_->RemoveChild(node->startingWinSurfaceNode_);
     node->leashWinSurfaceNode_->RemoveChild(node->surfaceNode_);
     node->leashWinSurfaceNode_ = nullptr;
     node->startingWinSurfaceNode_ = nullptr;
-    WLOGFI("Release startwindow surfaceNode end id: %{public}u, [leashWinSurface]: use_count: %{public}ld, \
+    WLOGI("Release startwindow surfaceNode end id: %{public}u, [leashWinSurface]: use_count: %{public}ld, \
         [startWinSurface]: use_count: %{public}ld ", node->GetWindowId(),
         node->leashWinSurfaceNode_.use_count(), node->startingWinSurfaceNode_.use_count());
     RSTransaction::FlushImplicitTransaction();
@@ -221,7 +221,7 @@ void StartingWindow::AddNodeOnRSTree(sptr<WindowNode>& node, const AnimationConf
             return;
         }
         auto winRect = weak->GetWindowRect();
-        WLOGFI("before setBounds windowRect: %{public}d, %{public}d, %{public}d, %{public}d",
+        WLOGI("before setBounds windowRect: %{public}d, %{public}d, %{public}d, %{public}d",
             winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
         if (weak->leashWinSurfaceNode_) {
             weak->leashWinSurfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);

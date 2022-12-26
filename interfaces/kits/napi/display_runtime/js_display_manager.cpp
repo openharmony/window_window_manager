@@ -44,7 +44,7 @@ explicit JsDisplayManager(NativeEngine* engine) {
 
 static void Finalizer(NativeEngine* engine, void* data, void* hint)
 {
-    WLOGFI("JsDisplayManager::Finalizer is called");
+    WLOGI("JsDisplayManager::Finalizer is called");
     std::unique_ptr<JsDisplayManager>(static_cast<JsDisplayManager*>(data));
 }
 
@@ -96,7 +96,7 @@ std::mutex mtx_;
 
 NativeValue* OnGetDefaultDisplay(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsDisplayManager::OnGetDefaultDisplay is called");
+    WLOGI("JsDisplayManager::OnGetDefaultDisplay is called");
     DMError errCode = DMError::DM_OK;
     if (info.argc != 0 && info.argc != ARGC_ONE) {
         WLOGFE("JsDisplayManager::OnGetDefaultDisplay params not match");
@@ -112,7 +112,7 @@ NativeValue* OnGetDefaultDisplay(NativeEngine& engine, NativeCallbackInfo& info)
             sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
             if (display != nullptr) {
                 task.Resolve(engine, CreateJsDisplayObject(engine, display));
-                WLOGFI("JsDisplayManager::OnGetDefaultDisplay success");
+                WLOGI("JsDisplayManager::OnGetDefaultDisplay success");
             } else {
                 task.Reject(engine, CreateJsError(engine,
                     static_cast<int32_t>(DMError::DM_ERROR_NULLPTR), "JsDisplayManager::OnGetDefaultDisplay failed."));
@@ -130,7 +130,7 @@ NativeValue* OnGetDefaultDisplay(NativeEngine& engine, NativeCallbackInfo& info)
 
 NativeValue* OnGetDefaultDisplaySync(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsDisplayManager::OnGetDefaultDisplaySync is called");
+    WLOGI("JsDisplayManager::OnGetDefaultDisplaySync is called");
     sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplaySync();
     if (display == nullptr) {
         WLOGFE("JsDisplayManager::OnGetDefaultDisplaySync, display is nullptr.");
@@ -142,7 +142,7 @@ NativeValue* OnGetDefaultDisplaySync(NativeEngine& engine, NativeCallbackInfo& i
 
 NativeValue* OnGetAllDisplay(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsDisplayManager::OnGetAllDisplay is called");
+    WLOGI("JsDisplayManager::OnGetAllDisplay is called");
     DMError errCode = DMError::DM_OK;
     if (info.argc != 0 && info.argc != ARGC_ONE) {
         WLOGFE("JsDisplayManager::OnGetAllDisplay params not match");
@@ -158,7 +158,7 @@ NativeValue* OnGetAllDisplay(NativeEngine& engine, NativeCallbackInfo& info)
             std::vector<sptr<Display>> displays = SingletonContainer::Get<DisplayManager>().GetAllDisplays();
             if (!displays.empty()) {
                 task.Resolve(engine, CreateJsDisplayArrayObject(engine, displays));
-                WLOGFI("JsDisplayManager::GetAllDisplays success");
+                WLOGI("JsDisplayManager::GetAllDisplays success");
             } else {
                 task.Reject(engine, CreateJsError(engine,
                     static_cast<int32_t>(DMError::DM_ERROR_NULLPTR), "JsDisplayManager::OnGetAllDisplay failed."));
@@ -177,14 +177,14 @@ NativeValue* OnGetAllDisplay(NativeEngine& engine, NativeCallbackInfo& info)
 
 NativeValue* OnGetAllDisplays(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsDisplayManager::OnGetAllDisplays is called");
+    WLOGI("JsDisplayManager::OnGetAllDisplays is called");
 
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             std::vector<sptr<Display>> displays = SingletonContainer::Get<DisplayManager>().GetAllDisplays();
             if (!displays.empty()) {
                 task.Resolve(engine, CreateJsDisplayArrayObject(engine, displays));
-                WLOGFI("JsDisplayManager::GetAllDisplays success");
+                WLOGI("JsDisplayManager::GetAllDisplays success");
             } else {
                 task.Reject(engine, CreateJsError(engine,
                     static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN),
@@ -218,7 +218,7 @@ void RegisterDisplayListenerWithType(NativeEngine& engine, const std::string& ty
     }
     if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
         SingletonContainer::Get<DisplayManager>().RegisterDisplayListener(displayListener);
-        WLOGFI("JsDisplayManager::RegisterDisplayListenerWithType success");
+        WLOGI("JsDisplayManager::RegisterDisplayListenerWithType success");
     } else {
         WLOGFE("JsDisplayManager::RegisterDisplayListenerWithType failed method: %{public}s not support!",
                type.c_str());
@@ -231,7 +231,7 @@ void RegisterDisplayListenerWithType(NativeEngine& engine, const std::string& ty
 bool IfCallbackRegistered(const std::string& type, NativeValue* jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGFI("JsDisplayManager::IfCallbackRegistered methodName %{public}s not registered!", type.c_str());
+        WLOGI("JsDisplayManager::IfCallbackRegistered methodName %{public}s not registered!", type.c_str());
         return false;
     }
 
@@ -247,8 +247,8 @@ bool IfCallbackRegistered(const std::string& type, NativeValue* jsListenerObject
 void UnregisterAllDisplayListenerWithType(const std::string& type)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGFI("JsDisplayManager::UnregisterAllDisplayListenerWithType methodName %{public}s not registered!",
-               type.c_str());
+        WLOGI("JsDisplayManager::UnregisterAllDisplayListenerWithType methodName %{public}s not registered!",
+            type.c_str());
         return;
     }
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
@@ -256,7 +256,7 @@ void UnregisterAllDisplayListenerWithType(const std::string& type)
         if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
             sptr<DisplayManager::IDisplayListener> thisListener(it->second);
             SingletonContainer::Get<DisplayManager>().UnregisterDisplayListener(thisListener);
-            WLOGFI("JsDisplayManager::UnregisterAllDisplayListenerWithType success");
+            WLOGI("JsDisplayManager::UnregisterAllDisplayListenerWithType success");
         }
         jsCbMap_[type].erase(it++);
     }
@@ -266,8 +266,8 @@ void UnregisterAllDisplayListenerWithType(const std::string& type)
 void UnRegisterDisplayListenerWithType(const std::string& type, NativeValue* value)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGFI("JsDisplayManager::UnRegisterDisplayListenerWithType methodName %{public}s not registered!",
-               type.c_str());
+        WLOGI("JsDisplayManager::UnRegisterDisplayListenerWithType methodName %{public}s not registered!",
+            type.c_str());
         return;
     }
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
@@ -276,7 +276,7 @@ void UnRegisterDisplayListenerWithType(const std::string& type, NativeValue* val
             if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
                 sptr<DisplayManager::IDisplayListener> thisListener(it->second);
                 SingletonContainer::Get<DisplayManager>().UnregisterDisplayListener(thisListener);
-                WLOGFI("JsDisplayManager::UnRegisterDisplayListenerWithType success");
+                WLOGI("JsDisplayManager::UnRegisterDisplayListenerWithType success");
             }
             jsCbMap_[type].erase(it++);
             break;
@@ -291,7 +291,7 @@ void UnRegisterDisplayListenerWithType(const std::string& type, NativeValue* val
 
 NativeValue* OnRegisterDisplayManagerCallback(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsDisplayManager::OnRegisterDisplayManagerCallback is called");
+    WLOGI("JsDisplayManager::OnRegisterDisplayManagerCallback is called");
     if (info.argc < ARGC_TWO) {
         WLOGFE("JsDisplayManager Params not match: %{public}zu", info.argc);
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
@@ -305,12 +305,12 @@ NativeValue* OnRegisterDisplayManagerCallback(NativeEngine& engine, NativeCallba
     }
     NativeValue* value = info.argv[INDEX_ONE];
     if (value == nullptr) {
-        WLOGFI("JsDisplayManager::OnRegisterDisplayManagerCallback info->argv[1] is nullptr");
+        WLOGI("JsDisplayManager::OnRegisterDisplayManagerCallback info->argv[1] is nullptr");
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     if (!value->IsCallable()) {
-        WLOGFI("JsDisplayManager::OnRegisterDisplayManagerCallback info->argv[1] is not callable");
+        WLOGI("JsDisplayManager::OnRegisterDisplayManagerCallback info->argv[1] is not callable");
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
@@ -321,7 +321,7 @@ NativeValue* OnRegisterDisplayManagerCallback(NativeEngine& engine, NativeCallba
 
 NativeValue* OnUnregisterDisplayManagerCallback(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsDisplayManager::OnUnregisterDisplayCallback is called");
+    WLOGI("JsDisplayManager::OnUnregisterDisplayCallback is called");
     if (info.argc < ARGC_ONE) {
         WLOGFE("JsDisplayManager Params not match %{public}zu", info.argc);
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
@@ -366,7 +366,7 @@ NativeValue* OnHasPrivateWindow(NativeEngine& engine, NativeCallbackInfo& info)
     }
     DmErrorCode errCode = DM_JS_TO_ERROR_CODE_MAP.at(
         SingletonContainer::Get<DisplayManager>().HasPrivateWindow(displayId, hasPrivateWindow));
-    WLOGFI("[NAPI]Display id = %{public}" PRIu64", hasPrivateWindow = %{public}u err = %{public}d",
+    WLOGI("[NAPI]Display id = %{public}" PRIu64", hasPrivateWindow = %{public}u err = %{public}d",
         static_cast<uint64_t>(displayId), hasPrivateWindow, errCode);
     if (errCode != DmErrorCode::DM_OK) {
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(errCode)));
@@ -377,7 +377,7 @@ NativeValue* OnHasPrivateWindow(NativeEngine& engine, NativeCallbackInfo& info)
 
 NativeValue* CreateJsDisplayArrayObject(NativeEngine& engine, std::vector<sptr<Display>>& displays)
 {
-    WLOGFI("JsDisplayManager::CreateJsDisplayArrayObject is called");
+    WLOGI("JsDisplayManager::CreateJsDisplayArrayObject is called");
     NativeValue* arrayValue = engine.CreateArray(displays.size());
     NativeArray* array = ConvertNativeValueTo<NativeArray>(arrayValue);
     if (array == nullptr) {
@@ -397,7 +397,7 @@ NativeValue* CreateJsDisplayArrayObject(NativeEngine& engine, std::vector<sptr<D
 
 NativeValue* InitDisplayState(NativeEngine* engine)
 {
-    WLOGFI("JsDisplayManager::InitDisplayState called");
+    WLOGI("JsDisplayManager::InitDisplayState called");
 
     if (engine == nullptr) {
         WLOGFE("engine is nullptr");
@@ -427,7 +427,7 @@ NativeValue* InitDisplayState(NativeEngine* engine)
 
 NativeValue* InitDisplayErrorCode(NativeEngine* engine)
 {
-    WLOGFI("JsDisplayManager::InitDisplayErrorCode called");
+    WLOGI("JsDisplayManager::InitDisplayErrorCode called");
 
     if (engine == nullptr) {
         WLOGFE("engine is nullptr");
@@ -459,7 +459,7 @@ NativeValue* InitDisplayErrorCode(NativeEngine* engine)
 
 NativeValue* InitDisplayError(NativeEngine* engine)
 {
-    WLOGFI("JsDisplayManager::InitDisplayError called");
+    WLOGI("JsDisplayManager::InitDisplayError called");
 
     if (engine == nullptr) {
         WLOGFE("engine is nullptr");
@@ -505,7 +505,7 @@ NativeValue* InitDisplayError(NativeEngine* engine)
 
 NativeValue* JsDisplayManagerInit(NativeEngine* engine, NativeValue* exportObj)
 {
-    WLOGFI("JsDisplayManagerInit is called");
+    WLOGI("JsDisplayManagerInit is called");
 
     if (engine == nullptr || exportObj == nullptr) {
         WLOGFE("JsDisplayManagerInit engine or exportObj is nullptr");

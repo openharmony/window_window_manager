@@ -156,7 +156,7 @@ void AvoidAreaControllerTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     ASSERT_TRUE((display != nullptr));
-    WLOGFI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
+    WLOGI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
         display->GetId(), display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
     screenRect = { 0, 0, static_cast<uint32_t>(display->GetWidth()), static_cast<uint32_t>(display->GetHeight()) };
     auto barHeight = static_cast<uint32_t>(screenRect.height_ * BARRATIO);

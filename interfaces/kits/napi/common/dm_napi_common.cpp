@@ -51,14 +51,14 @@ napi_status SetMemberUndefined(napi_env env, napi_value result, const char *key)
 
 bool CheckCallingPermission(const std::string &permission)
 {
-    WLOGFI("CheckCallingPermission, permission:%{public}s", permission.c_str());
+    WLOGI("CheckCallingPermission, permission:%{public}s", permission.c_str());
     if (!permission.empty() &&
         Security::AccessToken::AccessTokenKit::VerifyAccessToken(IPCSkeleton::GetCallingTokenID(), permission)
         != AppExecFwk::Constants::PERMISSION_GRANTED) {
         WLOGFE("%{public}s permission not granted.", permission.c_str());
         return false;
     }
-    WLOGFI("CheckCallingPermission end.");
+    WLOGI("CheckCallingPermission end.");
     return true;
 }
 

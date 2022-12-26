@@ -88,7 +88,7 @@ std::string WindowManagerConfig::GetConfigPath(const std::string& configFileName
     char* configPath = GetOneCfgFile(configFileName.c_str(), buf, PATH_MAX + 1);
     char tmpPath[PATH_MAX + 1] = { 0 };
     if (!configPath || strlen(configPath) == 0 || strlen(configPath) > PATH_MAX || !realpath(configPath, tmpPath)) {
-        WLOGFI("[WmConfig] can not get customization config file");
+        WLOGI("[WmConfig] can not get customization config file");
         return "/system/" + configFileName;
     }
     return std::string(tmpPath);
@@ -150,7 +150,7 @@ bool WindowManagerConfig::LoadConfigXml()
 {
     auto configFilePath = GetConfigPath("etc/window/resources/window_manager_config.xml");
     xmlDocPtr docPtr = xmlReadFile(configFilePath.c_str(), nullptr, XML_PARSE_NOBLANKS);
-    WLOGFI("[WmConfig] filePath: %{public}s", configFilePath.c_str());
+    WLOGI("[WmConfig] filePath: %{public}s", configFilePath.c_str());
     if (docPtr == nullptr) {
         WLOGFE("[WmConfig] load xml error!");
         return false;
@@ -240,7 +240,7 @@ void WindowManagerConfig::ReadStringConfigInfo(const xmlNodePtr& currNode, std::
 void WindowManagerConfig::DumpConfig(const std::map<std::string, ConfigItem>& config)
 {
     for (auto& conf : config) {
-        WLOGFI("[WmConfig] %{public}s", conf.first.c_str());
+        WLOGI("[WmConfig] %{public}s", conf.first.c_str());
         std::map<std::string, ConfigItem> propMap;
         if (conf.second.property_) {
             propMap = *conf.second.property_;
@@ -248,10 +248,10 @@ void WindowManagerConfig::DumpConfig(const std::map<std::string, ConfigItem>& co
         for (auto prop : propMap) {
             switch (prop.second.type_) {
                 case ValueType::BOOL:
-                    WLOGFI("[WmConfig] Prop: %{public}s %{public}u", prop.first.c_str(), prop.second.boolValue_);
+                    WLOGI("[WmConfig] Prop: %{public}s %{public}u", prop.first.c_str(), prop.second.boolValue_);
                     break;
                 case ValueType::STRING:
-                    WLOGFI("[WmConfig] Prop: %{public}s %{public}s", prop.first.c_str(),
+                    WLOGI("[WmConfig] Prop: %{public}s %{public}s", prop.first.c_str(),
                         prop.second.stringValue_.c_str());
                     break;
                 default:
@@ -265,19 +265,19 @@ void WindowManagerConfig::DumpConfig(const std::map<std::string, ConfigItem>& co
                 }
                 break;
             case ValueType::BOOL:
-                WLOGFI("[WmConfig] %{public}u", conf.second.boolValue_);
+                WLOGI("[WmConfig] %{public}u", conf.second.boolValue_);
                 break;
             case ValueType::STRING:
-                WLOGFI("[WmConfig] %{public}s", conf.second.stringValue_.c_str());
+                WLOGI("[WmConfig] %{public}s", conf.second.stringValue_.c_str());
                 break;
             case ValueType::INTS:
                 for (auto& num : *conf.second.intsValue_) {
-                    WLOGFI("[WmConfig] Num: %{public}d", num);
+                    WLOGI("[WmConfig] Num: %{public}d", num);
                 }
                 break;
             case ValueType::FLOATS:
                 for (auto& num : *conf.second.floatsValue_) {
-                    WLOGFI("[WmConfig] Num: %{public}f", num);
+                    WLOGI("[WmConfig] Num: %{public}f", num);
                 }
                 break;
             default:

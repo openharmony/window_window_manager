@@ -46,11 +46,11 @@ void AvoidAreaController::ProcessWindowChange(const sptr<WindowNode>& windowNode
     const std::function<bool(sptr<WindowNode>)>& checkFunc)
 {
     if (isForbidProcessingWindowChange_) {
-        WLOGFI("do not process window change.");
+        WLOGI("do not process window change.");
         return;
     }
     if (windowNode == nullptr || windowNode->GetWindowToken() == nullptr) {
-        WLOGFE("invalid WindowNode.");
+        WLOGE("invalid WindowNode.");
         return;
     }
     switch (avoidType) {
@@ -69,7 +69,7 @@ void AvoidAreaController::ProcessWindowChange(const sptr<WindowNode>& windowNode
 void AvoidAreaController::AddOrRemoveOverlayWindowIfNeed(const sptr<WindowNode>& overlayNode, bool isAdding)
 {
     if (!WindowHelper::IsOverlayWindow(overlayNode->GetWindowType())) {
-        WLOGFE("IsOverlayWindow Failed.");
+        WLOGE("IsOverlayWindow Failed.");
         return;
     }
     HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
@@ -77,7 +77,7 @@ void AvoidAreaController::AddOrRemoveOverlayWindowIfNeed(const sptr<WindowNode>&
     uint32_t overlayId = overlayNode->GetWindowId();
     bool isRecorded = (overlayWindowMap_.find(overlayId) != overlayWindowMap_.end());
     if (isAdding == isRecorded) {
-        WLOGFE("error occured in overlay. overlayId %{public}u isAdding %{public}d record flag %{public}d",
+        WLOGE("error occured in overlay. overlayId %{public}u isAdding %{public}d record flag %{public}d",
             overlayId, isAdding, isRecorded);
         return;
     }
@@ -165,7 +165,7 @@ void AvoidAreaController::UpdateOverlayWindowIfNeed(const sptr<WindowNode>& node
         }
     } else {
         if (avoidAreaListenerNodes_.find(node) == avoidAreaListenerNodes_.end()) {
-            WLOGE("window: %{public}u is not in avoidAreaListenerNodes, don't update avoid area.", node->GetWindowId());
+            WLOGD("window: %{public}u is not in avoidAreaListenerNodes, don't update avoid area.", node->GetWindowId());
             return;
         }
         uint32_t start = static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM);
@@ -260,14 +260,14 @@ void AvoidAreaController::SetAvoidAreaRect(AvoidArea& avoidArea, const Rect& rec
             break;
         }
         default : {
-            WLOGFI("default type: %{public}u", type);
+            WLOGI("default type: %{public}u", type);
         }
     }
 }
 
 AvoidArea AvoidAreaController::GetAvoidAreaByType(const sptr<WindowNode>& node, AvoidAreaType avoidAreaType) const
 {
-    WLOGFI("avoidAreaType: %{public}u", avoidAreaType);
+    WLOGI("avoidAreaType: %{public}u", avoidAreaType);
     if (node == nullptr) {
         WLOGFE("invalid WindowNode.");
         return {};
@@ -277,7 +277,7 @@ AvoidArea AvoidAreaController::GetAvoidAreaByType(const sptr<WindowNode>& node, 
         windowMode != WindowMode::WINDOW_MODE_FULLSCREEN &&
         windowMode != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
         windowMode != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        WLOGFI("avoidAreaType: %{public}u, windowMode: %{public}u, return default avoid area.",
+        WLOGI("avoidAreaType: %{public}u, windowMode: %{public}u, return default avoid area.",
             avoidAreaType, windowMode);
         return {};
     }
@@ -310,7 +310,7 @@ AvoidArea AvoidAreaController::GetAvoidAreaByType(const sptr<WindowNode>& node, 
             return avoidArea;
         }
         default : {
-            WLOGFI("cannot find avoidAreaType: %{public}u", avoidAreaType);
+            WLOGI("cannot find avoidAreaType: %{public}u", avoidAreaType);
             return {};
         }
     }
@@ -345,8 +345,8 @@ AvoidArea AvoidAreaController::GetAvoidAreaKeyboardType(const sptr<WindowNode>& 
             iter.second->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
             const uint32_t callingWindowId = iter.second->GetCallingWindow();
             if (callingWindowId != node->GetWindowId() && focusedWindow_ != node->GetWindowId()) {
-                WLOGFI("windowId: %{public}u is not focusedWindow: %{public}u or callingWindow: %{public}u",
-                       node->GetWindowId(), focusedWindow_, callingWindowId);
+                WLOGI("windowId: %{public}u is not focusedWindow: %{public}u or callingWindow: %{public}u",
+                    node->GetWindowId(), focusedWindow_, callingWindowId);
                 continue;
             }
             Rect avoidAreaRect { 0, 0, 0, 0 };

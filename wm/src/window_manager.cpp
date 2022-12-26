@@ -384,7 +384,7 @@ bool WindowManager::RegisterWindowUpdateListener(const sptr<IWindowUpdateListene
     } else {
         auto iter = std::find(pImpl_->windowUpdateListeners_.begin(), pImpl_->windowUpdateListeners_.end(), listener);
         if (iter != pImpl_->windowUpdateListeners_.end()) {
-            WLOGFI("Listener is already registered.");
+            WLOGI("Listener is already registered.");
             return true;
         }
         pImpl_->windowUpdateListeners_.emplace_back(listener);
@@ -582,7 +582,7 @@ void WindowManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool i
 
 void WindowManager::OnRemoteDied() const
 {
-    WLOGFI("wms is died");
+    WLOGI("wms is died");
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     pImpl_->focusChangedListenerAgent_ = nullptr;
     pImpl_->systemBarChangedListenerAgent_ = nullptr;

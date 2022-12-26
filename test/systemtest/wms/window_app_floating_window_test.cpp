@@ -58,7 +58,7 @@ sptr<TestCameraFloatWindowChangedListener> WindowAppFloatingWindowTest::testCame
 
 void TestCameraFloatWindowChangedListener::OnCameraFloatWindowChange(uint32_t accessTokenId, bool isShowing)
 {
-    WLOGFI("TestCameraFloatWindowChangedListener [%{public}u, %{public}u]", accessTokenId, isShowing);
+    WLOGI("TestCameraFloatWindowChangedListener [%{public}u, %{public}u]", accessTokenId, isShowing);
     accessTokenId_ = accessTokenId;
     isShowing_ = isShowing;
 }

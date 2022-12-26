@@ -64,7 +64,7 @@ bool SurfaceReader::Init()
 
 void SurfaceReader::OnVsync()
 {
-    WLOGFI("SurfaceReader::OnVsync");
+    WLOGI("SurfaceReader::OnVsync");
 
     sptr<SurfaceBuffer> cbuffer = nullptr;
     int32_t fence = -1;
