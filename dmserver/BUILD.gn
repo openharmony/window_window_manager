@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/window/window_manager/windowmanager_aafwk.gni")
 
 ## Build libdms.so
 config("libdms_private_config") {
@@ -41,6 +42,7 @@ ohos_shared_library("libdms") {
     "src/display_manager_stub.cpp",
     "src/display_power_controller.cpp",
     "src/screen_rotation_controller.cpp",
+    "src/sensor_connector.cpp",
   ]
 
   configs = [
@@ -71,6 +73,10 @@ ohos_shared_library("libdms") {
   include_dirs = [ "//third_party/flutter/skia/src" ]
 
   defines = []
+  if (window_manager_feature_subscribe_motion) {
+    external_deps += [ "motion:motion_interface_native" ]
+    defines += [ "WM_SUBSCRIBE_MOTION_ENABLE" ]
+  }
 
   if (is_standard_system) {
     external_deps += [ "init:libbegetutil" ]

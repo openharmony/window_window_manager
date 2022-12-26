@@ -3086,6 +3086,8 @@ WMError WindowImpl::SetBlur(float radius)
     if (MathHelper::LessNotEqual(radius, 0.0)) {
         return WMError::WM_ERROR_INVALID_PARAM;
     }
+    radius = ConvertRadiusToSigma(radius);
+    WLOGFI("[Client] Window %{public}s set blur radius after conversion %{public}f", name_.c_str(), radius);
     surfaceNode_->SetFilter(RSFilter::CreateBlurFilter(radius, radius));
     RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
@@ -3101,6 +3103,8 @@ WMError WindowImpl::SetBackdropBlur(float radius)
     if (MathHelper::LessNotEqual(radius, 0.0)) {
         return WMError::WM_ERROR_INVALID_PARAM;
     }
+    radius = ConvertRadiusToSigma(radius);
+    WLOGFI("[Client] Window %{public}s set backdrop blur radius after conversion %{public}f", name_.c_str(), radius);
     surfaceNode_->SetBackgroundFilter(RSFilter::CreateBlurFilter(radius, radius));
     RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;

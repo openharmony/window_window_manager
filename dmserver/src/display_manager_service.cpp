@@ -26,7 +26,7 @@
 #include "dm_common.h"
 #include "parameters.h"
 #include "permission.h"
-#include "screen_rotation_controller.h"
+#include "sensor_connector.h"
 #include "transaction/rs_interfaces.h"
 #include "window_manager_hilog.h"
 
@@ -694,7 +694,7 @@ void DisplayManagerService::SetGravitySensorSubscriptionEnabled()
         ScreenRotationController::Init();
         return;
     }
-    ScreenRotationController::SubscribeGravitySensor();
+    SensorConnector::SubscribeRotationSensor();
 }
 
 sptr<CutoutInfo> DisplayManagerService::GetCutoutInfo(DisplayId displayId)
