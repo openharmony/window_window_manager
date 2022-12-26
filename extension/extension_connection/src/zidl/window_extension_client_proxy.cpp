@@ -43,7 +43,7 @@ void WindowExtensionClientProxy::OnWindowReady(const std::shared_ptr<RSSurfaceNo
     if (Remote()->SendRequest(TRANS_ID_ON_WINDOW_READY, data, replay, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
-    WLOGFI("end");
+    WLOGI("end");
 }
 
 void WindowExtensionClientProxy::OnBackPress()
@@ -51,7 +51,7 @@ void WindowExtensionClientProxy::OnBackPress()
     MessageParcel data;
     MessageParcel replay;
     MessageOption option(MessageOption::TF_SYNC);
-    WLOGFI("call");
+    WLOGI("call");
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("write token failed");
         return;
@@ -59,7 +59,7 @@ void WindowExtensionClientProxy::OnBackPress()
     if (Remote()->SendRequest(TRANS_ID_ON_BACK_PRESS, data, replay, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
-    WLOGFI("end");
+    WLOGI("end");
 }
 
 void WindowExtensionClientProxy::OnKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -80,7 +80,7 @@ void WindowExtensionClientProxy::OnKeyEvent(const std::shared_ptr<MMI::KeyEvent>
     if (Remote()->SendRequest(TRANS_ID_ON_KEY_EVENT, data, replay, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
-    WLOGFI("end");
+    WLOGI("end");
 }
 
 void WindowExtensionClientProxy::OnPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -101,7 +101,7 @@ void WindowExtensionClientProxy::OnPointerEvent(const std::shared_ptr<MMI::Point
     if (Remote()->SendRequest(TRANS_ID_ON_POINTER_EVENT, data, replay, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
-    WLOGFI("end");
+    WLOGI("end");
 }
 } // namespace Rosen
 } // namespace OHOS

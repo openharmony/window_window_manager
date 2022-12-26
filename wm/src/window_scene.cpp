@@ -31,7 +31,7 @@ const std::string WindowScene::MAIN_WINDOW_ID = "main window";
 
 WindowScene::~WindowScene()
 {
-    WLOGFI("~WindowScene");
+    WLOGI("~WindowScene");
     if (mainWindow_ != nullptr) {
         mainWindow_->Destroy();
         mainWindow_ = nullptr;
@@ -101,7 +101,7 @@ std::vector<sptr<Window>> WindowScene::GetSubWindow()
 
 WMError WindowScene::GoForeground(uint32_t reason)
 {
-    WLOGFI("reason:%{public}u", reason);
+    WLOGI("reason:%{public}u", reason);
     if (mainWindow_ == nullptr) {
         WLOGFE("Go foreground failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;
@@ -111,7 +111,7 @@ WMError WindowScene::GoForeground(uint32_t reason)
 
 WMError WindowScene::GoBackground(uint32_t reason)
 {
-    WLOGFI("reason:%{public}u", reason);
+    WLOGI("reason:%{public}u", reason);
     if (mainWindow_ == nullptr) {
         WLOGFE("Go background failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;
@@ -168,7 +168,7 @@ void WindowScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configur
         WLOGFE("Update configuration failed, because main window is null");
         return;
     }
-    WLOGFI("notify mainWindow winId:%{public}u", mainWindow_->GetWindowId());
+    WLOGI("notify mainWindow winId:%{public}u", mainWindow_->GetWindowId());
     mainWindow_->UpdateConfiguration(configuration);
 }
 
@@ -183,7 +183,7 @@ std::string WindowScene::GetContentInfo() const
 
 WMError WindowScene::NotifyMemoryLevel(int32_t level) const
 {
-    WLOGFI("Notify memory level: %{public}d", level);
+    WLOGI("Notify memory level: %{public}d", level);
     if (mainWindow_ == nullptr) {
         WLOGFE("Notify memory level failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;

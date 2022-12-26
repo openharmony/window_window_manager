@@ -49,7 +49,7 @@ sptr<Window> WindowExtensionStubImpl::CreateWindow(
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
     option->SetWindowRect(rect);
     option->SetParentId(parentWindowId);
-    WLOGFI("Window::Create");
+    WLOGI("Window::Create");
     window_ = Window::Create(windowName_, option, context);
     return window_;
 }
@@ -103,7 +103,7 @@ void WindowExtensionStubImpl::GetExtensionWindow(sptr<IWindowExtensionClient>& t
         return;
     }
     token_->OnWindowReady(node);
-    WLOGFI("called");
+    WLOGI("called");
 }
 
 sptr<Window> WindowExtensionStubImpl::GetWindow() const

@@ -25,7 +25,7 @@ bool SurfaceReaderHandlerImpl::OnImageAvailable(sptr<Media::PixelMap> pixelMap)
     if (!flag_) {
         flag_ = true;
         pixelMap_ = pixelMap;
-        WLOGFI("Get an Image!");
+        WLOGI("Get an Image!");
     }
     return true;
 }

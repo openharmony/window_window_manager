@@ -75,7 +75,7 @@ bool PerformReporterTest::PerformDataCmp(const PerformReporter& pr,
         if (iter.second != splitCount[i]) {
             std::ostringstream oss;
             oss << "pr.timeSplitCount_[" << iter.first << "]=" << iter.second << ", but expect=" << splitCount[i];
-            WLOGFI("%{public}s", oss.str().c_str());
+            WLOGI("%{public}s", oss.str().c_str());
             return false;
         }
         i++;

@@ -51,7 +51,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerService"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WMS"};
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerService)
 
@@ -85,7 +85,7 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
 
 void WindowManagerService::OnStart()
 {
-    WLOGFI("start");
+    WLOGI("start");
     if (!Init()) {
         WLOGFE("Init failed");
         return;
@@ -103,7 +103,7 @@ void WindowManagerService::OnStart()
             = std::bind(&WindowManagerService::OnRSScreenConnected, this);
         rSScreenChangeListener->onDisconnected_
             = std::bind(&WindowManagerService::OnRSScreenDisconnected, this);
-        WLOGFI("RegisterRSScreenChangeListener");
+        WLOGI("RegisterRSScreenChangeListener");
         DisplayManagerServiceInner::GetInstance().RegisterRSScreenChangeListener(rSScreenChangeListener);
     });
 
@@ -114,7 +114,7 @@ void WindowManagerService::OnStart()
     if (!Publish(this)) {
         WLOGFE("Publish failed");
     }
-    WLOGFI("end");
+    WLOGI("end");
 }
 
 void WindowManagerService::PostAsyncTask(Task task)
@@ -139,25 +139,25 @@ void WindowManagerService::PostVoidSyncTask(Task task)
 
 void WindowManagerService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
-    WLOGFI("systemAbilityId: %{public}d, start", systemAbilityId);
+    WLOGI("systemAbilityId: %{public}d, start", systemAbilityId);
     switch (systemAbilityId) {
         case RENDER_SERVICE:
-            WLOGFI("RENDER_SERVICE");
+            WLOGI("RENDER_SERVICE");
             InitWithRanderServiceAdded();
             break;
         case ABILITY_MGR_SERVICE_ID:
-            WLOGFI("ABILITY_MGR_SERVICE_ID");
+            WLOGI("ABILITY_MGR_SERVICE_ID");
             InitWithAbilityManagerServiceAdded();
             break;
         case COMMON_EVENT_SERVICE_ID:
-            WLOGFI("COMMON_EVENT_SERVICE_ID");
+            WLOGI("COMMON_EVENT_SERVICE_ID");
             windowCommonEvent_->SubscriberEvent();
             break;
         default:
             WLOGFW("unhandled sysabilityId: %{public}d", systemAbilityId);
             break;
     }
-    WLOGFI("systemAbilityId: %{public}d, end", systemAbilityId);
+    WLOGI("systemAbilityId: %{public}d, end", systemAbilityId);
 }
 
 void WindowManagerService::OnAccountSwitched(int accountId)
@@ -165,7 +165,7 @@ void WindowManagerService::OnAccountSwitched(int accountId)
     PostAsyncTask([this, accountId]() {
         windowRoot_->RemoveSingleUserWindowNodes(accountId);
     });
-    WLOGFI("called");
+    WLOGI("called");
 }
 
 void WindowManagerService::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclusionData> occlusionData)
@@ -186,13 +186,13 @@ void WindowManagerService::InitWithRanderServiceAdded()
 {
     auto windowVisibilityChangeCb = std::bind(&WindowManagerService::WindowVisibilityChangeCallback, this,
         std::placeholders::_1);
-    WLOGFI("RegisterWindowVisibilityChangeCallback");
+    WLOGI("RegisterWindowVisibilityChangeCallback");
     if (rsInterface_.RegisterOcclusionChangeCallback(windowVisibilityChangeCb) != WM_OK) {
         WLOGFE("RegisterWindowVisibilityChangeCallback failed");
     }
     RenderModeChangeCallback renderModeChangeCb
         = std::bind(&WindowManagerService::OnRenderModeChanged, this, std::placeholders::_1);
-    WLOGFI("SetRenderModeChangeCallback");
+    WLOGI("SetRenderModeChangeCallback");
     if (rsInterface_.SetRenderModeChangeCallback(renderModeChangeCb) != WM_OK) {
         WLOGFE("SetRenderModeChangeCallback failed");
     }
@@ -207,7 +207,7 @@ void WindowManagerService::InitWithAbilityManagerServiceAdded()
     if (snapshotController_ == nullptr) {
         snapshotController_ = new SnapshotController(windowRoot_, handler_);
     }
-    WLOGFI("RegisterSnapshotHandler");
+    WLOGI("RegisterSnapshotHandler");
     if (AAFwk::AbilityManagerClient::GetInstance()->RegisterSnapshotHandler(snapshotController_) != ERR_OK) {
         WLOGFE("RegisterSnapshotHandler failed");
     }
@@ -215,7 +215,7 @@ void WindowManagerService::InitWithAbilityManagerServiceAdded()
     if (wmsHandler_ == nullptr) {
         wmsHandler_ = new WindowManagerServiceHandler();
     }
-    WLOGFI("RegisterWindowManagerServiceHandler");
+    WLOGI("RegisterWindowManagerServiceHandler");
     if (AAFwk::AbilityManagerClient::GetInstance()->RegisterWindowManagerServiceHandler(wmsHandler_) != ERR_OK) {
         WLOGFE("RegisterWindowManagerServiceHandler failed");
     }
@@ -244,7 +244,7 @@ void WindowManagerServiceHandler::StartingWindow(
     sptr<AAFwk::AbilityTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap)
 {
     sptr<WindowTransitionInfo> windowInfo = new WindowTransitionInfo(info);
-    WLOGFI("hot start is called");
+    WLOGI("hot start is called");
     WindowManagerService::GetInstance().StartingWindow(windowInfo, pixelMap, false);
 }
 
@@ -252,26 +252,26 @@ void WindowManagerServiceHandler::StartingWindow(
     sptr<AAFwk::AbilityTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap, uint32_t bgColor)
 {
     sptr<WindowTransitionInfo> windowInfo = new WindowTransitionInfo(info);
-    WLOGFI("cold start is called");
+    WLOGI("cold start is called");
     WindowManagerService::GetInstance().StartingWindow(windowInfo, pixelMap, true, bgColor);
 }
 
 void WindowManagerServiceHandler::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
 {
-    WLOGFI("WindowManagerServiceHandler CancelStartingWindow!");
+    WLOGI("WindowManagerServiceHandler CancelStartingWindow!");
     WindowManagerService::GetInstance().CancelStartingWindow(abilityToken);
 }
 
 bool WindowManagerService::Init()
 {
-    WLOGFI("Init start");
+    WLOGI("Init start");
     if (WindowManagerConfig::LoadConfigXml()) {
         if (WindowManagerConfig::GetConfig().IsMap()) {
             WindowManagerConfig::DumpConfig(*WindowManagerConfig::GetConfig().mapValue_);
         }
         ConfigureWindowManagerService();
     }
-    WLOGFI("Init success");
+    WLOGI("Init success");
     return true;
 }
 
@@ -588,20 +588,20 @@ void WindowManagerService::OnStop()
 {
     windowCommonEvent_->UnSubscriberEvent();
     WindowInnerManager::GetInstance().Stop();
-    WLOGFI("ready to stop service.");
+    WLOGI("ready to stop service.");
 }
 
 WMError WindowManagerService::NotifyWindowTransition(
     sptr<WindowTransitionInfo>& fromInfo, sptr<WindowTransitionInfo>& toInfo, bool isFromClient)
 {
     if (!isFromClient) {
-        WLOGFI("NotifyWindowTransition asynchronously.");
+        WLOGI("NotifyWindowTransition asynchronously.");
         PostAsyncTask([this, fromInfo, toInfo]() mutable {
             return windowController_->NotifyWindowTransition(fromInfo, toInfo);
         });
         return WMError::WM_OK;
     } else {
-        WLOGFI("NotifyWindowTransition synchronously.");
+        WLOGI("NotifyWindowTransition synchronously.");
         return PostSyncTask([this, &fromInfo, &toInfo]() {
             return windowController_->NotifyWindowTransition(fromInfo, toInfo);
         });
@@ -619,7 +619,7 @@ void WindowManagerService::StartingWindow(sptr<WindowTransitionInfo> info, std::
     bool isColdStart, uint32_t bkgColor)
 {
     if (!startingOpen_) {
-        WLOGFI("startingWindow not open!");
+        WLOGI("startingWindow not open!");
         return;
     }
     PostAsyncTask([this, info, pixelMap, isColdStart, bkgColor]() {
@@ -629,9 +629,9 @@ void WindowManagerService::StartingWindow(sptr<WindowTransitionInfo> info, std::
 
 void WindowManagerService::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
 {
-    WLOGFI("begin CancelStartingWindow!");
+    WLOGI("begin CancelStartingWindow!");
     if (!startingOpen_) {
-        WLOGFI("startingWindow not open!");
+        WLOGI("startingWindow not open!");
         return;
     }
     PostAsyncTask([this, abilityToken]() {
@@ -684,7 +684,7 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
         windowShowPerformReport_->start();
         Rect rect = property->GetRequestRect();
         uint32_t windowId = property->GetWindowId();
-        WLOGFI("[WMS] Add: %{public}5d %{public}4d %{public}4d %{public}4d [%{public}4d %{public}4d " \
+        WLOGI("[WMS] Add: %{public}5d %{public}4d %{public}4d %{public}4d [%{public}4d %{public}4d " \
             "%{public}4d %{public}4d]", windowId, property->GetWindowType(), property->GetWindowMode(),
             property->GetWindowFlags(), rect.posX_, rect.posY_, rect.width_, rect.height_);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:AddWindow(%u)", windowId);
@@ -702,7 +702,7 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
 WMError WindowManagerService::RemoveWindow(uint32_t windowId)
 {
     return PostSyncTask([this, windowId]() {
-        WLOGFI("[WMS] Remove: %{public}u", windowId);
+        WLOGI("[WMS] Remove: %{public}u", windowId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:RemoveWindow(%u)", windowId);
         WindowInnerManager::GetInstance().NotifyWindowRemovedOrDestroyed(windowId);
         WMError res = windowController_->RecoverInputEventToClient(windowId);
@@ -716,7 +716,7 @@ WMError WindowManagerService::RemoveWindow(uint32_t windowId)
 WMError WindowManagerService::DestroyWindow(uint32_t windowId, bool onlySelf)
 {
     if (!accessTokenIdMaps_.isExistAndRemove(windowId, IPCSkeleton::GetCallingTokenID())) {
-        WLOGFI("Operation rejected");
+        WLOGI("Operation rejected");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     return PostSyncTask([this, windowId, onlySelf]() {
@@ -726,7 +726,7 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId, bool onlySelf)
         }
         node->stateMachine_.SetDestroyTaskParam(onlySelf);
         auto func = [this, windowId]() {
-            WLOGFI("[WMS] Destroy: %{public}u", windowId);
+            WLOGI("[WMS] Destroy: %{public}u", windowId);
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:DestroyWindow(%u)", windowId);
             WindowInnerManager::GetInstance().NotifyWindowRemovedOrDestroyed(windowId);
             auto node = windowRoot_->GetWindowNode(windowId);
@@ -740,11 +740,11 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId, bool onlySelf)
         };
         if (RemoteAnimation::IsRemoteAnimationEnabledAndFirst(node->GetDisplayId()) &&
             node->stateMachine_.IsRemoteAnimationPlaying()) {
-            WLOGFI("SetDestroyTask id:%{public}u", node->GetWindowId());
+            WLOGI("SetDestroyTask id:%{public}u", node->GetWindowId());
             node->stateMachine_.SetDestroyTask(func);
             return WMError::WM_OK;
         }
-        WLOGFI("DestroyWindow windowId: %{public}u, name:%{public}s state: %{public}u",
+        WLOGI("DestroyWindow windowId: %{public}u, name:%{public}s state: %{public}u",
             node->GetWindowId(), node->GetWindowName().c_str(),
             static_cast<uint32_t>(node->stateMachine_.GetCurrentState()));
         return func();
@@ -754,7 +754,7 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId, bool onlySelf)
 WMError WindowManagerService::RequestFocus(uint32_t windowId)
 {
     return PostSyncTask([this, windowId]() {
-        WLOGFI("[WMS] RequestFocus: %{public}u", windowId);
+        WLOGI("[WMS] RequestFocus: %{public}u", windowId);
         return windowController_->RequestFocus(windowId);
     });
 }
@@ -762,7 +762,7 @@ WMError WindowManagerService::RequestFocus(uint32_t windowId)
 AvoidArea WindowManagerService::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
 {
     return PostSyncTask([this, windowId, avoidAreaType]() {
-        WLOGFI("[WMS] GetAvoidAreaByType: %{public}u, Type: %{public}u", windowId,
+        WLOGI("[WMS] GetAvoidAreaByType: %{public}u, Type: %{public}u", windowId,
             static_cast<uint32_t>(avoidAreaType));
         return windowController_->GetAvoidAreaByType(windowId, avoidAreaType);
     });
@@ -860,7 +860,7 @@ void WindowManagerService::OnWindowEvent(Event event, const sptr<IRemoteObject>&
             }
             if (RemoteAnimation::IsRemoteAnimationEnabledAndFirst(node->GetDisplayId()) &&
                 node->stateMachine_.IsRemoteAnimationPlaying()) {
-                WLOGFI("set destroy task windowId:%{public}u", node->GetWindowId());
+                WLOGI("set destroy task windowId:%{public}u", node->GetWindowId());
                 node->stateMachine_.SetDestroyTask(func);
                 handler_->PostTask(func, "destroyTimeOutTask", 6000); // 6000 is time out 6s
                 return;
@@ -956,7 +956,7 @@ void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
     }
     PostAsyncTask([this, displayId]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:MinimizeAllAppWindows(%" PRIu64")", displayId);
-        WLOGFI("displayId %{public}" PRIu64"", displayId);
+        WLOGI("displayId %{public}" PRIu64"", displayId);
         windowController_->MinimizeAllAppWindows(displayId);
     });
 }
@@ -988,7 +988,7 @@ WMError WindowManagerService::SetWindowLayoutMode(WindowLayoutMode mode)
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     return PostSyncTask([this, mode]() {
-        WLOGFI("layoutMode: %{public}u", mode);
+        WLOGI("layoutMode: %{public}u", mode);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:SetWindowLayoutMode");
         return windowController_->SetWindowLayoutMode(mode);
     });
@@ -1152,12 +1152,12 @@ void WindowManagerService::HasPrivateWindow(DisplayId displayId, bool& hasPrivat
     PostVoidSyncTask([this, displayId, &hasPrivateWindow]() mutable {
         hasPrivateWindow = windowRoot_->HasPrivateWindow(displayId);
     });
-    WLOGFI("called %{public}u", hasPrivateWindow);
+    WLOGI("called %{public}u", hasPrivateWindow);
 }
 
 void WindowInfoQueriedListener::HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow)
 {
-    WLOGFI("called");
+    WLOGI("called");
     WindowManagerService::GetInstance().HasPrivateWindow(displayId, hasPrivateWindow);
 }
 

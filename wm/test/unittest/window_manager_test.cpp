@@ -30,7 +30,7 @@ class TestCameraFloatWindowChangedListener : public ICameraFloatWindowChangedLis
 public:
     void OnCameraFloatWindowChange(uint32_t accessTokenId, bool isShowing) override
     {
-        WLOGFI("TestCameraFloatWindowChangedListener [%{public}u, %{public}u]", accessTokenId, isShowing);
+        WLOGI("TestCameraFloatWindowChangedListener [%{public}u, %{public}u]", accessTokenId, isShowing);
     };
 };
 
@@ -38,7 +38,7 @@ class TestVisibilityChangedListener : public IVisibilityChangedListener {
 public:
     void OnWindowVisibilityChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfo) override
     {
-        WLOGFI("TestVisibilityChangedListener");
+        WLOGI("TestVisibilityChangedListener");
     };
 };
 
@@ -46,7 +46,7 @@ class TestSystemBarChangedListener : public ISystemBarChangedListener {
 public:
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override
     {
-        WLOGFI("TestSystemBarChangedListener");
+        WLOGI("TestSystemBarChangedListener");
     };
 };
 
@@ -54,7 +54,7 @@ class TestWindowUpdateListener : public IWindowUpdateListener {
 public:
     void OnWindowUpdate(const std::vector<sptr<AccessibilityWindowInfo>>& infos, WindowUpdateType type) override
     {
-        WLOGFI("TestWindowUpdateListener");
+        WLOGI("TestWindowUpdateListener");
     };
 };
 

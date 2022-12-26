@@ -35,7 +35,7 @@ void AgentDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
         return;
     }
     if (callback_ != nullptr) {
-        WLOGFI("call OnRemoteDied callback");
+        WLOGI("call OnRemoteDied callback");
         callback_(object);
     }
 }

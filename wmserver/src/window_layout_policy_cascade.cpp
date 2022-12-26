@@ -25,7 +25,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowLayoutPolicyCascade"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WLP_Cascade"};
 }
 
 Rect WindowLayoutPolicyCascade::cascadeRectSetFromCfg_ = {0, 0, 0, 0};
@@ -48,7 +48,7 @@ WindowLayoutPolicyCascade::WindowLayoutPolicyCascade(const sptr<DisplayGroupInfo
 void WindowLayoutPolicyCascade::Launch()
 {
     InitAllRects();
-    WLOGFI("WindowLayoutPolicyCascade::Launch");
+    WLOGI("WindowLayoutPolicyCascade::Launch");
 }
 
 void WindowLayoutPolicyCascade::Reorder()
@@ -89,7 +89,7 @@ void WindowLayoutPolicyCascade::Reorder()
         }
         LayoutWindowTree(displayId);
     }
-    WLOGFI("Cascade Reorder end");
+    WLOGI("Cascade Reorder end");
 }
 
 void WindowLayoutPolicyCascade::InitAllRects()
@@ -158,7 +158,7 @@ void WindowLayoutPolicyCascade::PerformWindowLayout(const sptr<WindowNode>& node
     HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     const auto& windowType = node->GetWindowType();
     const auto& requestRect = node->GetRequestRect();
-    WLOGFI("[PerformWindowLayout] windowId: %{public}u, windowType: %{public}u, updateType: %{public}u, requestRect: "
+    WLOGFD("windowId: %{public}u, windowType: %{public}u, updateType: %{public}u, requestRect: "
         "requestRect: [%{public}d, %{public}d, %{public}u, %{public}u]", node->GetWindowId(), windowType, updateType,
         requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_);
     SetDefaultCascadeRect(node);
@@ -269,7 +269,7 @@ void WindowLayoutPolicyCascade::InitCascadeRect(DisplayId displayId)
 
         resRect.posY_ = limitRect.posY_ + static_cast<int32_t>((limitRect.height_ - defaultH) / half);
     }
-    WLOGFI("Init CascadeRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
+    WLOGI("Init CascadeRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
         resRect.posX_, resRect.posY_, resRect.width_, resRect.height_);
     cascadeRectsMap_[displayId].defaultCascadeRect_ = resRect;
 }
@@ -286,7 +286,7 @@ bool WindowLayoutPolicyCascade::InitCascadeRectCfg(DisplayId displayId)
     resRect.posX_ = static_cast<int32_t>(vpr * resRect.posX_);
     resRect.posY_ = static_cast<int32_t>(vpr * resRect.posY_);
 
-    WLOGFI("Init CascadeRect Cfg:[%{public}d, %{public}d, %{public}d, %{public}d]",
+    WLOGI("Init CascadeRect Cfg:[%{public}d, %{public}d, %{public}d, %{public}d]",
         resRect.posX_, resRect.posY_, resRect.width_, resRect.height_);
     cascadeRectsMap_[displayId].defaultCascadeRect_ = resRect;
     return true;
@@ -338,7 +338,7 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
     auto mode = node->GetWindowMode();
     Rect winRect = property->GetRequestRect();
     auto displayId = node->GetDisplayId();
-    WLOGFI("[Before CascadeLayout] windowId: %{public}u, mode: %{public}u, type: %{public}u requestRect: [%{public}d, "
+    WLOGFD("[Before CascadeLayout] windowId: %{public}u, mode: %{public}u, type: %{public}u requestRect: [%{public}d, "
         "%{public}d, %{public}u, %{public}u]", node->GetWindowId(), mode, node->GetWindowType(), winRect.posX_,
         winRect.posY_, winRect.width_, winRect.height_);
     switch (mode) {
@@ -367,7 +367,7 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
         default:
             WLOGFW("Layout invalid mode, winId: %{public}u, mode: %{public}u", node->GetWindowId(), mode);
     }
-    WLOGFI("[After CascadeLayout] windowId: %{public}u, isDecor: %{public}u, winRect: [%{public}d, %{public}d, "
+    WLOGFD("[After CascadeLayout] windowId: %{public}u, isDecor: %{public}u, winRect: [%{public}d, %{public}d, "
         "%{public}u, %{public}u]", node->GetWindowId(), node->GetDecoStatus(), winRect.posX_, winRect.posY_,
         winRect.width_, winRect.height_);
 

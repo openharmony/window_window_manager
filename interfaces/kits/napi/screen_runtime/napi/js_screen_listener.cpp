@@ -26,12 +26,12 @@ inline uint32_t SCREEN_CONNECT_TYPE = 1;
 
 void JsScreenListener::AddCallback(const std::string& type, NativeValue* jsListenerObject)
 {
-    WLOGFI("JsScreenListener::AddCallback is called");
+    WLOGI("JsScreenListener::AddCallback is called");
     std::lock_guard<std::mutex> lock(mtx_);
     std::unique_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine_->CreateReference(jsListenerObject, 1));
     jsCallBack_[type].emplace_back(std::move(callbackRef));
-    WLOGFI("JsScreenListener::AddCallback success jsCallBack_ size: %{public}u!",
+    WLOGI("JsScreenListener::AddCallback success jsCallBack_ size: %{public}u!",
         static_cast<uint32_t>(jsCallBack_[type].size()));
 }
 
@@ -57,7 +57,7 @@ void JsScreenListener::RemoveCallback(const std::string& type, NativeValue* jsLi
             iter++;
         }
     }
-    WLOGFI("JsScreenListener::RemoveCallback success jsCallBack_ size: %{public}u!",
+    WLOGI("JsScreenListener::RemoveCallback success jsCallBack_ size: %{public}u!",
         static_cast<uint32_t>(listeners.size()));
 }
 
@@ -67,7 +67,7 @@ void JsScreenListener::CallJsMethod(const std::string& methodName, NativeValue* 
         WLOGFE("empty method name str, call method failed");
         return;
     }
-    WLOGFI("CallJsMethod methodName = %{public}s", methodName.c_str());
+    WLOGI("CallJsMethod methodName = %{public}s", methodName.c_str());
     if (engine_ == nullptr) {
         WLOGFE("engine_ nullptr");
         return;
@@ -85,7 +85,7 @@ void JsScreenListener::CallJsMethod(const std::string& methodName, NativeValue* 
 void JsScreenListener::OnConnect(ScreenId id)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    WLOGFI("JsScreenListener::OnConnect is called");
+    WLOGI("JsScreenListener::OnConnect is called");
     if (jsCallBack_.empty()) {
         WLOGFE("JsScreenListener::OnConnect not register!");
         return;
@@ -111,7 +111,7 @@ void JsScreenListener::OnConnect(ScreenId id)
 void JsScreenListener::OnDisconnect(ScreenId id)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    WLOGFI("JsScreenListener::OnDisconnect is called");
+    WLOGI("JsScreenListener::OnDisconnect is called");
     if (jsCallBack_.empty()) {
         WLOGFE("JsScreenListener::OnDisconnect not register!");
         return;
@@ -137,7 +137,7 @@ void JsScreenListener::OnDisconnect(ScreenId id)
 void JsScreenListener::OnChange(ScreenId id)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    WLOGFI("JsScreenListener::OnChange is called");
+    WLOGI("JsScreenListener::OnChange is called");
     if (jsCallBack_.empty()) {
         WLOGFE("JsScreenListener::OnChange not register!");
         return;

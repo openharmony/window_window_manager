@@ -64,7 +64,7 @@ void DisplayGroupInfo::UpdateLeftAndRightDisplayId()
             rightDisplayId_ = elem.first;
         }
     }
-    WLOGFI("max posX displayId: %{public}" PRIu64", min posX displayId: %{public}" PRIu64"",
+    WLOGI("max posX displayId: %{public}" PRIu64", min posX displayId: %{public}" PRIu64"",
         rightDisplayId_, leftDisplayId_);
 }
 

@@ -148,6 +148,7 @@ private:
     void RaiseOrderedWindowToTop(std::vector<sptr<WindowNode>>& orderedNodes,
         std::vector<sptr<WindowNode>>& windowNodes);
     void DumpScreenWindowTree();
+    void DumpScreenWindowTreeByWinId(uint32_t winid);
     void RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const;
     void ReZOrderShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node);
     void RaiseShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node);

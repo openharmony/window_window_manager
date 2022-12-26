@@ -84,7 +84,7 @@ bool PerformReporter::report()
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER, tag_,
         OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC, "MSG", oss.str());
-    WLOGFI("Write HiSysEvent ret:%{public}d", ret);
+    WLOGI("Write HiSysEvent ret:%{public}d", ret);
     return ret == 0;
 }
 
@@ -100,7 +100,7 @@ void PerformReporter::count(int64_t costTime)
 
     std::ostringstream oss;
     oss << tag_ << " cost " << costTime << "ms, total count " << totalCount_;
-    WLOGFI("%{public}s", oss.str().c_str());
+    WLOGI("%{public}s", oss.str().c_str());
 }
 
 void PerformReporter::clear()

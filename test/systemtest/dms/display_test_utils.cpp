@@ -30,7 +30,7 @@ DisplayTestUtils::~DisplayTestUtils()
                 WLOGFE("buffer release failed");
                 return;
             }
-            WLOGFI("prevBuffer_ release success");
+            WLOGI("prevBuffer_ release success");
         }
         csurface_->UnregisterConsumerListener();
     }
@@ -90,7 +90,7 @@ bool DisplayTestUtils::CreateSurface()
 void DisplayTestUtils::OnVsync()
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    WLOGFI("DisplayTestUtils::OnVsync");
+    WLOGI("DisplayTestUtils::OnVsync");
     sptr<SurfaceBuffer> cbuffer = nullptr;
     int32_t fence = -1;
     int64_t timestamp = 0;
@@ -113,7 +113,7 @@ void DisplayTestUtils::OnVsync()
     if (defaultWidth_ == static_cast<uint32_t>(bufferHandle_->width) &&
         defaultHeight_ == static_cast<uint32_t>(bufferHandle_->height)) {
         successCount_++;
-        WLOGFI("compareWH is successful in onVsync: %d", successCount_);
+        WLOGI("compareWH is successful in onVsync: %d", successCount_);
     } else {
         failCount_++;
     }

@@ -55,13 +55,13 @@ sptr<TestFocusChangedListener> WindowFocusTest::testFocusChangedListener_ =
 
 void TestFocusChangedListener::OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
-    WLOGFI("TestFocusChangedListener Focused ID: %{public}u", focusChangeInfo->windowId_);
+    WLOGI("TestFocusChangedListener Focused ID: %{public}u", focusChangeInfo->windowId_);
     focusedWindow_ = focusChangeInfo->windowId_;
 }
 
 void TestFocusChangedListener::OnUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
-    WLOGFI("TestFocusChangedListener Unfocused ID: %{public}u", focusChangeInfo->windowId_);
+    WLOGI("TestFocusChangedListener Unfocused ID: %{public}u", focusChangeInfo->windowId_);
     unfocusedWindow_ = focusChangeInfo->windowId_;
 }
 
@@ -69,7 +69,7 @@ void WindowFocusTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_TRUE((display != nullptr));
-    WLOGFI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
+    WLOGI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
         display->GetId(), display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
     Utils::InitByDisplayRect(displayRect);

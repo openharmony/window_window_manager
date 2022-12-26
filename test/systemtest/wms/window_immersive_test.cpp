@@ -105,15 +105,15 @@ void WindowImmersiveTest::SetWindowSystemProps(const sptr<Window>& window, const
 void WindowImmersiveTest::DumpFailedInfo(const SystemBarRegionTints& expect)
 {
     auto act = testSystemBarChangedListener_->tints_;
-    WLOGFI("WindowImmersiveTest Expected:");
+    WLOGI("WindowImmersiveTest Expected:");
     for (auto tint : expect) {
-        WLOGFI("WindowType: %{public}4d, Enable: %{public}4d, Color: %{public}x | %{public}x",
+        WLOGI("WindowType: %{public}4d, Enable: %{public}4d, Color: %{public}x | %{public}x",
             static_cast<uint32_t>(tint.type_), tint.prop_.enable_,
             tint.prop_.backgroundColor_, tint.prop_.contentColor_);
     }
-    WLOGFI("WindowImmersiveTest Act: ");
+    WLOGI("WindowImmersiveTest Act: ");
     for (auto tint : act) {
-        WLOGFI("WindowType: %{public}4d, Enable: %{public}4d, Color: %{public}x | %{public}x",
+        WLOGI("WindowType: %{public}4d, Enable: %{public}4d, Color: %{public}x | %{public}x",
             static_cast<uint32_t>(tint.type_), tint.prop_.enable_,
             tint.prop_.backgroundColor_, tint.prop_.contentColor_);
     }
@@ -122,11 +122,11 @@ void WindowImmersiveTest::DumpFailedInfo(const SystemBarRegionTints& expect)
 void WindowImmersiveTest::DumpFailedInfo(bool expectStatus, bool expectNav)
 {
     auto act = testSystemBarChangedListener_->tints_;
-    WLOGFI("WindowImmersiveTest Expected:");
-    WLOGFI("expectStatus: %{public}4d, expectNav: %{public}4d", expectStatus, expectNav);
-    WLOGFI("WindowImmersiveTest Act: ");
+    WLOGI("WindowImmersiveTest Expected:");
+    WLOGI("expectStatus: %{public}4d, expectNav: %{public}4d", expectStatus, expectNav);
+    WLOGI("WindowImmersiveTest Act: ");
     for (auto tint : act) {
-        WLOGFI("WindowType: %{public}4d, Enable: %{public}4d, Color: %{public}x | %{public}x",
+        WLOGI("WindowType: %{public}4d, Enable: %{public}4d, Color: %{public}x | %{public}x",
             static_cast<uint32_t>(tint.type_), tint.prop_.enable_,
             tint.prop_.backgroundColor_, tint.prop_.contentColor_);
     }
@@ -178,7 +178,7 @@ bool WindowImmersiveTest::SystemBarEnableState(bool expectStatus, bool expectNav
 
 void TestSystemBarChangedListener::OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints)
 {
-    WLOGFI("TestSystemBarChangedListener Display ID: %{public}" PRIu64"", displayId);
+    WLOGI("TestSystemBarChangedListener Display ID: %{public}" PRIu64"", displayId);
     for (auto tint : tints) {
         auto type = tint.type_;
         for (uint32_t i = 0; i < tints_.size(); i++) {
@@ -198,7 +198,7 @@ void WindowImmersiveTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_TRUE((display != nullptr));
-    WLOGFI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
+    WLOGI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
         display->GetId(), display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
     Utils::InitByDisplayRect(displayRect);

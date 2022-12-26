@@ -206,7 +206,7 @@ void WMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
         WLOGFE("object is null");
         return;
     }
-    WLOGFI("wms OnRemoteDied");
+    WLOGI("wms OnRemoteDied");
     SingletonContainer::Get<WindowAdapter>().ClearWindowAdapter();
     SingletonContainer::Get<WindowManager>().OnRemoteDied();
 }
