@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "display_manager_service.h"
+#include "sensor_connector.h"
 #include "screen_rotation_controller.h"
 
 using namespace testing;
@@ -81,18 +82,18 @@ namespace {
  */
 HWTEST_F(ScreenRotationControllerTest, GravitySensor, Function | SmallTest | Level3)
 {
-    ScreenRotationController::isGravitySensorSubscribed_ = true;
-    ScreenRotationController::SubscribeGravitySensor();
-    ASSERT_EQ(true, ScreenRotationController::isGravitySensorSubscribed_);
+    GravitySensorSubscriber::isGravitySensorSubscribed_ = true;
+    GravitySensorSubscriber::SubscribeGravitySensor();
+    ASSERT_EQ(true, GravitySensorSubscriber::isGravitySensorSubscribed_);
 
-    ScreenRotationController::isGravitySensorSubscribed_ = false;
-    ScreenRotationController::SubscribeGravitySensor();
+    GravitySensorSubscriber::isGravitySensorSubscribed_ = false;
+    GravitySensorSubscriber::SubscribeGravitySensor();
 
-    ScreenRotationController::isGravitySensorSubscribed_ = false;
-    ScreenRotationController::UnsubscribeGravitySensor();
+    GravitySensorSubscriber::isGravitySensorSubscribed_ = false;
+    GravitySensorSubscriber::UnsubscribeGravitySensor();
 
-    ScreenRotationController::isGravitySensorSubscribed_ = true;
-    ScreenRotationController::UnsubscribeGravitySensor();
+    GravitySensorSubscriber::isGravitySensorSubscribed_ = true;
+    GravitySensorSubscriber::UnsubscribeGravitySensor();
 }
 
 /**
@@ -139,11 +140,11 @@ HWTEST_F(ScreenRotationControllerTest, CheckCallbackTimeInterval, Function | Sma
         std::chrono::steady_clock::now()).time_since_epoch();
     long currentTimeInMillitm = ms.count();
 
-    ScreenRotationController::lastCallbackTime_ = currentTimeInMillitm;
-    ASSERT_EQ(false, ScreenRotationController::CheckCallbackTimeInterval());
+    GravitySensorSubscriber::lastCallbackTime_ = currentTimeInMillitm;
+    ASSERT_EQ(false, GravitySensorSubscriber::CheckCallbackTimeInterval());
 
-    ScreenRotationController::lastCallbackTime_ = currentTimeInMillitm - 200;
-    ASSERT_EQ(true, ScreenRotationController::CheckCallbackTimeInterval());
+    GravitySensorSubscriber::lastCallbackTime_ = currentTimeInMillitm - 200;
+    ASSERT_EQ(true, GravitySensorSubscriber::CheckCallbackTimeInterval());
 }
 
 /**
@@ -162,19 +163,19 @@ HWTEST_F(ScreenRotationControllerTest, HandleGravitySensorEventCallback, Functio
         std::chrono::system_clock::now()).time_since_epoch();
     long currentTimeInMillitm = ms.count();
 
-    ScreenRotationController::lastCallbackTime_ = currentTimeInMillitm;
-    ScreenRotationController::HandleGravitySensorEventCallback(&event);
+    GravitySensorSubscriber::lastCallbackTime_ = currentTimeInMillitm;
+    GravitySensorSubscriber::HandleGravitySensorEventCallback(&event);
 
-    ScreenRotationController::lastCallbackTime_ = currentTimeInMillitm - 200;
-    ScreenRotationController::HandleGravitySensorEventCallback(&event);
+    GravitySensorSubscriber::lastCallbackTime_ = currentTimeInMillitm - 200;
+    GravitySensorSubscriber::HandleGravitySensorEventCallback(&event);
 
     event.sensorTypeId = SENSOR_TYPE_ID_GRAVITY;
-    ScreenRotationController::lastCallbackTime_ = currentTimeInMillitm - 200;
-    ScreenRotationController::HandleGravitySensorEventCallback(&event);
+    GravitySensorSubscriber::lastCallbackTime_ = currentTimeInMillitm - 200;
+    GravitySensorSubscriber::HandleGravitySensorEventCallback(&event);
 
     data.z = 1.f;
-    ScreenRotationController::lastCallbackTime_ = currentTimeInMillitm - 200;
-    ScreenRotationController::HandleGravitySensorEventCallback(&event);
+    GravitySensorSubscriber::lastCallbackTime_ = currentTimeInMillitm - 200;
+    GravitySensorSubscriber::HandleGravitySensorEventCallback(&event);
     ASSERT_EQ(DeviceRotation::INVALID, ScreenRotationController::lastSensorRotationConverted_);
 }
 
@@ -186,13 +187,13 @@ HWTEST_F(ScreenRotationControllerTest, HandleGravitySensorEventCallback, Functio
 HWTEST_F(ScreenRotationControllerTest, CalcRotationDegree, Function | SmallTest | Level3)
 {
     GravityData data0 = {0.f, 0.f, 0.f};
-    ASSERT_EQ(270, ScreenRotationController::CalcRotationDegree(&data0));
+    ASSERT_EQ(270, GravitySensorSubscriber::CalcRotationDegree(&data0));
 
     GravityData data1 = {0.f, 0.f, 1.f};
-    ASSERT_EQ(-1, ScreenRotationController::CalcRotationDegree(&data1));
+    ASSERT_EQ(-1, GravitySensorSubscriber::CalcRotationDegree(&data1));
 
     GravityData data2 = {1.f, 1.f, 1.f};
-    ASSERT_EQ(315, ScreenRotationController::CalcRotationDegree(&data2));
+    ASSERT_EQ(315, GravitySensorSubscriber::CalcRotationDegree(&data2));
 }
 
 /**
@@ -418,13 +419,13 @@ HWTEST_F(ScreenRotationControllerTest, ProcessSwitchToAutoRotation, Function | S
  */
 HWTEST_F(ScreenRotationControllerTest, CalcSensorRotation, Function | SmallTest | Level3)
 {
-    ASSERT_EQ(SensorRotation::INVALID, ScreenRotationController::CalcSensorRotation(-30));
-    ASSERT_EQ(SensorRotation::ROTATION_0, ScreenRotationController::CalcSensorRotation(15));
-    ASSERT_EQ(SensorRotation::ROTATION_0, ScreenRotationController::CalcSensorRotation(345));
-    ASSERT_EQ(SensorRotation::ROTATION_90, ScreenRotationController::CalcSensorRotation(75));
-    ASSERT_EQ(SensorRotation::ROTATION_180, ScreenRotationController::CalcSensorRotation(180));
-    ASSERT_EQ(SensorRotation::ROTATION_270, ScreenRotationController::CalcSensorRotation(270));
-    ASSERT_EQ(SensorRotation::ROTATION_0, ScreenRotationController::CalcSensorRotation(600));
+    ASSERT_EQ(SensorRotation::INVALID, GravitySensorSubscriber::CalcSensorRotation(-30));
+    ASSERT_EQ(SensorRotation::ROTATION_0, GravitySensorSubscriber::CalcSensorRotation(15));
+    ASSERT_EQ(SensorRotation::ROTATION_0, GravitySensorSubscriber::CalcSensorRotation(345));
+    ASSERT_EQ(SensorRotation::ROTATION_90, GravitySensorSubscriber::CalcSensorRotation(75));
+    ASSERT_EQ(SensorRotation::ROTATION_180, GravitySensorSubscriber::CalcSensorRotation(180));
+    ASSERT_EQ(SensorRotation::ROTATION_270, GravitySensorSubscriber::CalcSensorRotation(270));
+    ASSERT_EQ(SensorRotation::ROTATION_0, GravitySensorSubscriber::CalcSensorRotation(600));
 }
 
 /**

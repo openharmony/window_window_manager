@@ -19,8 +19,13 @@ ability_runtime_napi_path = "${ability_runtime_path}/frameworks/js/napi"
 
 declare_args() {
   efficiency_manager_enable = true
+  window_manager_feature_subscribe_motion = false
+
   if (defined(global_parts_info) &&
       !defined(global_parts_info.resourceschedule_efficiency_manager)) {
     efficiency_manager_enable = false
   }
 }
+
+print(
+    "window_manager_feature_subscribe_motion = ${window_manager_feature_subscribe_motion}")
