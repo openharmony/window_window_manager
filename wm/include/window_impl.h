@@ -561,6 +561,11 @@ private:
         {DragType::DRAG_LEFT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_WEST_SOUTH_EAST},
         {DragType::DRAG_RIGHT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_EAST_SOUTH_WEST}
     };
+    static float ConvertRadiusToSigma(float radius)
+    {
+        constexpr float BlurSigmaScale = 0.57735f;
+        return radius > 0.0f ? BlurSigmaScale * radius + SK_ScalarHalf : 0.0f;
+    }
 };
 } // namespace Rosen
 } // namespace OHOS
