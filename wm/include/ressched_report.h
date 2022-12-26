@@ -16,7 +16,7 @@
 #ifndef OHOS_ROSEN_RESSCHED_REPORT_H
 #define OHOS_ROSEN_RESSCHED_REPORT_H
 
-#ifdef SOC_PERF_ENABLE
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "res_sched_client.h"
 #endif
 #include "window_helper.h"
@@ -25,7 +25,7 @@
 
 namespace OHOS {
 namespace Rosen {
-#ifdef SOC_PERF_ENABLE
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
 namespace {
     constexpr int64_t PERF_TIME_OUT = 200;
     constexpr int32_t PERF_CLICK_NORMAL_CODE = 9;
@@ -39,7 +39,7 @@ class ResSchedReport {
     public:
     void StopPerfIfNeed()
     {
-#ifdef SOC_PERF_ENABLE
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
         if (windowDragBoost_) {
             ClosePerf(PERF_DRAG_CODE);
             windowDragBoost_ = false;
@@ -53,7 +53,7 @@ class ResSchedReport {
 
     void TrigClick()
     {
-#ifdef SOC_PERF_ENABLE
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
         std::unordered_map<std::string, std::string> mapPayload;
         // 2 means click event.
         OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(PERF_CLICK_NORMAL_CODE, 2, mapPayload);
@@ -62,7 +62,7 @@ class ResSchedReport {
 
     void RequestPerfIfNeed(WindowSizeChangeReason reason, WindowType type, WindowMode mode)
     {
-#ifdef SOC_PERF_ENABLE
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
         if (WindowHelper::IsMainFloatingWindow(type, mode) || WindowHelper::IsSplitWindowMode(mode)) {
             switch (reason) {
                 case WindowSizeChangeReason::DRAG_END: {
@@ -93,7 +93,7 @@ class ResSchedReport {
     }
 
 private:
-#ifdef SOC_PERF_ENABLE
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     void RequestPerf(int32_t code, int64_t timeOut)
     {
         auto currentTime = std::chrono::steady_clock::now();
