@@ -162,6 +162,7 @@ private:
     bool CheckWindowNodeWhetherInWindowTree(const sptr<WindowNode>& node) const;
     void UpdateModeSupportInfoWhenKeyguardChange(const sptr<WindowNode>& node, bool up);
     void RemoveFromRsTreeWhenRemoveWindowNode(sptr<WindowNode>& node, bool fromAnimation);
+    void ProcessInputMethodWindowAddAnimation(sptr<WindowNode>& node, std::function<void()> updateRSTreeFunc);
 
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     uint32_t brightnessWindow_ = INVALID_WINDOW_ID;
