@@ -67,7 +67,6 @@ struct SceneAbilityInfo {
 };
 
 enum class SessionOption : uint32_t {
-    SESSION_MODE_UNDEFINED = 0,
     SESSION_MODE_FULLSCREEN,
     SESSION_MODE_FLOATING,
 };
