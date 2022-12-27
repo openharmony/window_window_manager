@@ -31,7 +31,7 @@ namespace {
 
 NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* exportObj)
 {
-    WLOGFD("[NAPI]JsSceneSessionManager Init");
+    WLOGFI("[NAPI]JsSceneSessionManager Init");
     if (engine == nullptr || exportObj == nullptr) {
         WLOGFE("Engine or exportObj is null!");
         return nullptr;
@@ -319,7 +319,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
                 return;
             }
             WSErrorCode ret = WS_JS_TO_ERROR_CODE_MAP.at(
-                    SceneSessionManager::GetInstance().RequestSceneSessionBackground(sceneSession));
+                    SceneSessionManager::GetInstance().RequestSceneSessionDestruction(sceneSession));
             if (ret == WSErrorCode::WS_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
