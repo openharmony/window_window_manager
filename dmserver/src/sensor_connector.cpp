@@ -30,9 +30,9 @@ namespace {
     constexpr int VALID_INCLINATION_ANGLE_THRESHOLD_COEFFICIENT = 3;
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
     constexpr int32_t MOTION_ACTION_PORTRAIT = 0;
-    constexpr int32_t MOTION_ACTION_LANDSCAPE = 1;
+    constexpr int32_t MOTION_ACTION_LEFT_LANDSCAPE = 1;
     constexpr int32_t MOTION_ACTION_PORTRAIT_INVERTED = 2;
-    constexpr int32_t MOTION_ACTION_LANDSCAPE_INVERTED = 3;
+    constexpr int32_t MOTION_ACTION_RIGHT_LANDSCAPE = 3;
 #endif
 }
 
@@ -212,16 +212,18 @@ void RotationMotionEventCallback::OnMotionChanged(const MotionData& motionData)
             motionRotation = DeviceRotation::ROTATION_PORTRAIT;
             break;
         }
-        case MOTION_ACTION_LANDSCAPE: {
-            motionRotation = DeviceRotation::ROTATION_LANDSCAPE;
+        case MOTION_ACTION_LEFT_LANDSCAPE: {
+            motionRotation = ScreenRotationController::IsDefaultDisplayRotationPortrait() ?
+                DeviceRotation::ROTATION_LANDSCAPE_INVERTED : DeviceRotation::ROTATION_LANDSCAPE;
             break;
         }
         case MOTION_ACTION_PORTRAIT_INVERTED: {
             motionRotation = DeviceRotation::ROTATION_PORTRAIT_INVERTED;
             break;
         }
-        case MOTION_ACTION_LANDSCAPE_INVERTED: {
-            motionRotation = DeviceRotation::ROTATION_LANDSCAPE_INVERTED;
+        case MOTION_ACTION_RIGHT_LANDSCAPE: {
+            motionRotation = ScreenRotationController::IsDefaultDisplayRotationPortrait() ?
+                DeviceRotation::ROTATION_LANDSCAPE : DeviceRotation::ROTATION_LANDSCAPE_INVERTED;
             break;
         }
         default: {
