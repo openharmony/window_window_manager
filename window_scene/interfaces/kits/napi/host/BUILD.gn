@@ -21,11 +21,12 @@ config("window_scene_napi_private_config") {
   ]
 }
 
-ohos_shared_library("window_scene_napi") {
+ohos_shared_library("scenesessionmanager_napi") {
   sources = [
     "js_scene_session.cpp",
     "js_scene_session_manager.cpp",
     "js_scene_utils.cpp",
+    "scene_session_manager_module.cpp",
   ]
 
   cflags_cc = [ "-std=c++17" ]

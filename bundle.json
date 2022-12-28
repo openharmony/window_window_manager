@@ -61,7 +61,7 @@
             "//foundation/window/window_manager/interfaces/kits/napi/window_runtime/window_stage_napi:windowstage",
             "//foundation/window/window_manager/interfaces/kits/napi:napi_packages",
             "//foundation/window/window_manager/resources:window_resources",
-            "//foundation/window/window_manager/window_scene/interfaces/kits/napi/host:window_scene_napi"
+            "//foundation/window/window_manager/window_scene/interfaces/kits/napi/host:scenesessionmanager_napi"
           ],
           "fwk_group": [
             "//foundation/window/window_manager/interfaces/kits/js/declaration:window",
