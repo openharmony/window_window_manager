@@ -375,6 +375,11 @@ bool ScreenRotationController::IsCurrentDisplayHorizontal()
     return IsDisplayRotationHorizontal(GetCurrentDisplayRotation());
 }
 
+bool ScreenRotationController::IsDefaultDisplayRotationPortrait()
+{
+    return Rotation::ROTATION_0 == ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_PORTRAIT);
+}
+
 bool ScreenRotationController::IsDisplayRotationVertical(Rotation rotation)
 {
     return (rotation == ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_PORTRAIT)) ||
