@@ -130,6 +130,7 @@ public:
     void SetAnchorAndScale(int32_t x, int32_t y, float scale) override;
     void SetAnchorOffset(int32_t deltaX, int32_t deltaY) override;
     void OffWindowZoom() override;
+    void PostAsyncTask(Task task);
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;
@@ -145,7 +146,6 @@ private:
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     WMError GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken);
     void ConfigureWindowManagerService();
-    void PostAsyncTask(Task task);
     void PostVoidSyncTask(Task task);
     template<typename SyncTask, typename Return = std::invoke_result_t<SyncTask>>
     Return PostSyncTask(SyncTask&& task)
