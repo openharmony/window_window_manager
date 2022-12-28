@@ -22,7 +22,7 @@ extern "C" __attribute__((constructor)) void NAPI_sceneSessionManager_AutoRegist
     auto moduleManager = NativeModuleManager::GetInstance();
     NativeModule newModuleInfo = {
         .name = "sceneSessionManager",
-        .fileName = "libwindow_scene_napi.so/sceneSessionManager.js",
+        .fileName = "libscenesessionmanager_napi.so/sceneSessionManager.js",
         .registerCallback = OHOS::Rosen::JsSceneSessionManager::Init,
     };
     moduleManager->Register(&newModuleInfo);
