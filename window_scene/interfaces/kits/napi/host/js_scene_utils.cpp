@@ -42,7 +42,7 @@ bool GetAbilityInfoFromJs(NativeEngine& engine, NativeObject* jsObject,
     if (jsAbilityName->TypeOf() != NATIVE_UNDEFINED) {
         std::string abilityName;
         if (!ConvertFromJsValue(engine, jsAbilityName, abilityName)) {
-            WLOGFE("[NAPI]Failed to convert parameter to bundleName");
+            WLOGFE("[NAPI]Failed to convert parameter to abilityName");
             return false;
         }
         abilityInfo.abilityName_ = abilityName;
