@@ -131,7 +131,8 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
-    WLOGFI("[NAPI]Ability name = %{public}s, option = %{public}u, err = %{public}d", abilityInfo.abilityName_.c_str(),
+    WLOGFI("[NAPI]SceneInfo [%{public}s, %{public}s], option = %{public}u, err = %{public}d",
+        abilityInfo.bundleName_.c_str(), abilityInfo.abilityName_.c_str(),
         static_cast<uint32_t>(sessionOption), errCode);
     sptr<SceneSession> sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(abilityInfo, sessionOption);
     if (sceneSession == nullptr) {
@@ -141,7 +142,8 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
     } else {
         NativeValue* jsSceneSessionObj = CreateJsSceneSessionObject(engine, sceneSession);
         if (jsSceneSessionObj == nullptr) {
-            WLOGFE("[NAPI]Ability name = %{public}s, jsSceneSessionObj is nullptr", abilityInfo.abilityName_.c_str());
+            WLOGFE("[NAPI]SceneInfo [%{public}s, %{public}s], jsSceneSessionObj is nullptr",
+            abilityInfo.bundleName_.c_str(), abilityInfo.abilityName_.c_str());
             engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
                 "System is abnormal"));
         }
@@ -182,8 +184,8 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionActivation(NativeEngine
         return engine.CreateUndefined();
     }
 
-    WLOGFI("[NAPI]RequestSceneSessionActivation: ability name = %{public}s",
-        sceneSession->GetAbilityInfo().abilityName_.c_str());
+    WLOGFI("[NAPI]RequestSceneSessionActivation: SceneInfo [%{public}s, %{public}s]",
+        sceneSession->GetAbilityInfo().bundleName_.c_str(), sceneSession->GetAbilityInfo().abilityName_.c_str());
     AsyncTask::CompleteCallback complete =
         [sceneSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (sceneSession == nullptr) {
@@ -245,8 +247,8 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackground(NativeEngine
         return engine.CreateUndefined();
     }
 
-    WLOGFI("[NAPI]RequestSceneSessionBackground: ability name = %{public}s",
-        sceneSession->GetAbilityInfo().abilityName_.c_str());
+    WLOGFI("[NAPI]RequestSceneSessionBackground: SceneInfo [%{public}s, %{public}s]",
+        sceneSession->GetAbilityInfo().bundleName_.c_str(), sceneSession->GetAbilityInfo().abilityName_.c_str());
     AsyncTask::CompleteCallback complete =
         [sceneSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (sceneSession == nullptr) {
@@ -308,8 +310,8 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
         return engine.CreateUndefined();
     }
 
-    WLOGFI("[NAPI]OnRequestSceneSessionDestruction: ability name = %{public}s",
-        sceneSession->GetAbilityInfo().abilityName_.c_str());
+    WLOGFI("[NAPI]RequestSceneSessionDestruction: SceneInfo [%{public}s, %{public}s]",
+        sceneSession->GetAbilityInfo().bundleName_.c_str(), sceneSession->GetAbilityInfo().abilityName_.c_str());
     AsyncTask::CompleteCallback complete =
         [sceneSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (sceneSession == nullptr) {
