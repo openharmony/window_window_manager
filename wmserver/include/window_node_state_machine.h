@@ -22,7 +22,6 @@
 #include <mutex>
 #include <vector>
 #include "wm_common.h"
-
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -74,6 +73,7 @@ public:
 
     void ResetAnimationTaskCount(int32_t taskCount);
 
+    std::string GenStateMachineInfo();
     // test
     void SetWindowId(uint32_t id)
     {
