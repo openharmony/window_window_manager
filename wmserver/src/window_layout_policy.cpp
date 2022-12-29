@@ -750,7 +750,8 @@ void WindowLayoutPolicy::LimitFloatingWindowSize(const sptr<WindowNode>& node,
                                                  const Rect& displayRect,
                                                  Rect& winRect) const
 {
-    if (node->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
+    if (node->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING
+        || node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
         return;
     }
     Rect oriWinRect = winRect;
