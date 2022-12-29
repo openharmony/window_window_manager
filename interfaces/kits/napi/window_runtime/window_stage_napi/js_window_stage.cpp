@@ -152,6 +152,13 @@ NativeValue* JsWindowStage::OnSetUIContent(NativeEngine& engine, NativeCallbackI
     auto uiContent = uiContent_.lock();
     if (uiContent) {
         uiContent->Initialize(contextUrl, info.argv[CONTENT_STORAGE_ARG]);
+        // TODO: get window rect and display density
+        Ace::ViewportConfig config;
+        Rect rect = Rect({ 0, 0, 720, 1136 });
+        config.SetSize(rect.width_, rect.height_);
+        config.SetPosition(rect.posX_, rect.posY_);
+        config.SetDensity(1.5);
+        uiContent->UpdateViewportConfig(config, WindowSizeChangeReason::UNDEFINED);
     }
 
     // weakScene->GetMainWindow()->SetUIContent(contextUrl, &engine, info.argv[CONTENT_STORAGE_ARG]);
