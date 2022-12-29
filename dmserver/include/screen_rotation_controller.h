@@ -53,6 +53,7 @@ public:
     static void SetDefaultDeviceRotationOffset(uint32_t defaultDeviceRotationOffset);
     static void ProcessOrientationSwitch(Orientation orientation);
 
+    static bool IsDefaultDisplayRotationPortrait();
     static bool IsDisplayRotationVertical(Rotation rotation);
     static bool IsDisplayRotationHorizontal(Rotation rotation);
     static DeviceRotation ConvertSensorToDeviceRotation(SensorRotation sensorRotation);
