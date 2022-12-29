@@ -35,6 +35,7 @@ ohos_shared_library("libwindow_extension") {
     "src/js_window_extension.cpp",
     "src/js_window_extension_context.cpp",
     "src/window_extension.cpp",
+    "src/window_extension_context.cpp",
     "src/window_extension_stub_impl.cpp",
     "src/zidl/window_extension_stub.cpp",
   ]
