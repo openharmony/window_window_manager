@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
+import("//foundation/window/window_manager/windowmanager_aafwk.gni")
 
 module_out_path = "window_manager/dmserver"
 
@@ -81,6 +82,13 @@ ohos_unittest("dmserver_screen_rotation_controller_test") {
   sources = [ "screen_rotation_controller_test.cpp" ]
 
   deps = [ ":dmserver_unittest_common" ]
+
+  if (window_manager_feature_subscribe_motion) {
+    if (defined(global_parts_info) && defined(global_parts_info.msdp_motion)) {
+      external_deps = [ "motion:motion_interface_native" ]
+      defines = [ "WM_SUBSCRIBE_MOTION_ENABLE" ]
+    }
+  }
 }
 
 ohos_unittest("dmserver_display_dumper_test") {
