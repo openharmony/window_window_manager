@@ -2465,7 +2465,9 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
            windowId, mousePointX, mousePointY, action, GetRect().posX_,
            GetRect().posY_, GetRect().width_, GetRect().height_, newStyleID, oldStyleID);
     if (oldStyleID != newStyleID) {
-        int32_t res = MMI::InputManager::GetInstance()->SetPointerStyle(windowId, newStyleID);
+        MMI::PointerStyle pointerStyle;
+        pointerStyle.id = newStyleID;
+        int32_t res = MMI::InputManager::GetInstance()->SetPointerStyle(windowId, pointerStyle);
         if (res != 0) {
             WLOGFE("set pointer style failed, res is %{public}u", res);
             return;
