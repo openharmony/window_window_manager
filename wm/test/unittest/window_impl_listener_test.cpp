@@ -81,21 +81,21 @@ HWTEST_F(WindowImplListenerTest, InterfacesRegisterUnregister, Function | SmallT
 {
     sptr<IWindowLifeCycle> windowLifeCycle = new IWindowLifeCycle();
     window_->RegisterLifeCycleListener(windowLifeCycle);
-    ASSERT_EQ(window_->lifecycleListeners_.size(), 1);
+    ASSERT_EQ(window_->lifecycleListeners_[window_->GetWindowId()].size(), 1);
     window_->UnregisterLifeCycleListener(windowLifeCycle);
-    ASSERT_EQ(window_->lifecycleListeners_.size(), 0);
+    ASSERT_EQ(window_->lifecycleListeners_[window_->GetWindowId()].size(), 0);
 
     sptr<IWindowChangeListener> windowChangeListener = new IWindowChangeListener();
     window_->RegisterWindowChangeListener(windowChangeListener);
-    ASSERT_EQ(window_->windowChangeListeners_.size(), 1);
+    ASSERT_EQ(window_->windowChangeListeners_[window_->GetWindowId()].size(), 1);
     window_->UnregisterWindowChangeListener(windowChangeListener);
-    ASSERT_EQ(window_->windowChangeListeners_.size(), 0);
+    ASSERT_EQ(window_->windowChangeListeners_[window_->GetWindowId()].size(), 0);
 
     sptr<IAvoidAreaChangedListener> avoidAreaChangedListener = new IAvoidAreaChangedListener();
     window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener);
-    ASSERT_EQ(window_->avoidAreaChangeListeners_.size(), 1);
+    ASSERT_EQ(window_->avoidAreaChangeListeners_[window_->GetWindowId()].size(), 1);
     window_->UnregisterAvoidAreaChangeListener(avoidAreaChangedListener);
-    ASSERT_EQ(window_->avoidAreaChangeListeners_.size(), 0);
+    ASSERT_EQ(window_->avoidAreaChangeListeners_[window_->GetWindowId()].size(), 0);
 
     sptr<IWindowDragListener> windowDragListener = new IWindowDragListener();
     window_->RegisterDragListener(windowDragListener);
@@ -111,27 +111,27 @@ HWTEST_F(WindowImplListenerTest, InterfacesRegisterUnregister, Function | SmallT
 
     sptr<IOccupiedAreaChangeListener> occupiedAreaChangeListener = new IOccupiedAreaChangeListener();
     window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener);
-    ASSERT_EQ(window_->occupiedAreaChangeListeners_.size(), 1);
+    ASSERT_EQ(window_->occupiedAreaChangeListeners_[window_->GetWindowId()].size(), 1);
     window_->UnregisterOccupiedAreaChangeListener(occupiedAreaChangeListener);
-    ASSERT_EQ(window_->occupiedAreaChangeListeners_.size(), 0);
+    ASSERT_EQ(window_->occupiedAreaChangeListeners_[window_->GetWindowId()].size(), 0);
 
     sptr<ITouchOutsideListener> touchOutsideListener = new ITouchOutsideListener();
     window_->RegisterTouchOutsideListener(touchOutsideListener);
-    ASSERT_EQ(window_->touchOutsideListeners_.size(), 1);
+    ASSERT_EQ(window_->touchOutsideListeners_[window_->GetWindowId()].size(), 1);
     window_->UnregisterTouchOutsideListener(touchOutsideListener);
-    ASSERT_EQ(window_->touchOutsideListeners_.size(), 0);
+    ASSERT_EQ(window_->touchOutsideListeners_[window_->GetWindowId()].size(), 0);
 
     sptr<IScreenshotListener> screenshotListener = new IScreenshotListener();
     window_->RegisterScreenshotListener(screenshotListener);
-    ASSERT_EQ(window_->screenshotListeners_.size(), 1);
+    ASSERT_EQ(window_->screenshotListeners_[window_->GetWindowId()].size(), 1);
     window_->UnregisterScreenshotListener(screenshotListener);
-    ASSERT_EQ(window_->screenshotListeners_.size(), 0);
+    ASSERT_EQ(window_->screenshotListeners_[window_->GetWindowId()].size(), 0);
 
     sptr<IDialogTargetTouchListener> dialogTargetTouchListener = new IDialogTargetTouchListener();
     window_->RegisterDialogTargetTouchListener(dialogTargetTouchListener);
-    ASSERT_EQ(window_->dialogTargetTouchListeners_.size(), 1);
+    ASSERT_EQ(window_->dialogTargetTouchListeners_[window_->GetWindowId()].size(), 1);
     window_->UnregisterDialogTargetTouchListener(dialogTargetTouchListener);
-    ASSERT_EQ(window_->dialogTargetTouchListeners_.size(), 0);
+    ASSERT_EQ(window_->dialogTargetTouchListeners_[window_->GetWindowId()].size(), 0);
 }
 }
 } // namespace Rosen
