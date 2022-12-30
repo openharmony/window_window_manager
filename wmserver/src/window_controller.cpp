@@ -878,21 +878,23 @@ WMError WindowController::ChangeMouseStyle(uint32_t windowId, sptr<MoveDragPrope
 {
     auto node = windowRoot_->GetWindowNode(windowId);
     int32_t mouseStyle = 0;
+    MMI::PointerStyle pointerStyle;
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         if (node->GetWindowRect().width_ > node->GetWindowRect().height_) {
             mouseStyle = MMI::MOUSE_ICON::NORTH_SOUTH;
         } else {
             mouseStyle = MMI::MOUSE_ICON::WEST_EAST;
         }
-        int32_t res = MMI::InputManager::GetInstance()->SetPointerStyle(windowId, mouseStyle);
+        pointerStyle.id = mouseStyle;
+        int32_t res = MMI::InputManager::GetInstance()->SetPointerStyle(windowId, pointerStyle);
         if (res != 0) {
             WLOGFE("set pointer style failed");
             return WMError::WM_ERROR_INVALID_OPERATION;
         }
         return WMError::WM_OK;
     }
-    int32_t res = MMI::InputManager::GetInstance()->SetPointerStyle(windowId,
-        STYLEID_MAP.at(moveDragProperty->dragType_));
+    pointerStyle.id = STYLEID_MAP.at(moveDragProperty->dragType_);
+    int32_t res = MMI::InputManager::GetInstance()->SetPointerStyle(windowId, pointerStyle);
     if (res != 0) {
         WLOGFE("set pointer style failed");
         return WMError::WM_ERROR_INVALID_OPERATION;
@@ -1024,8 +1026,10 @@ WMError WindowController::RecoverInputEventToClient(uint32_t windowId)
 void WindowController::RecoverDefaultMouseStyle(uint32_t windowId)
 {
     // asynchronously calls SetMouseStyle of MultiModalInput
-    auto task = [this, windowId]() {
-        int32_t res = MMI::InputManager::GetInstance()->SetPointerStyle(windowId, MMI::MOUSE_ICON::DEFAULT);
+    MMI::PointerStyle pointerStyle;
+    pointerStyle.id = MMI::MOUSE_ICON::DEFAULT;
+    auto task = [this, windowId, pointerStyle]() {
+        int32_t res = MMI::InputManager::GetInstance()->SetPointerStyle(windowId, pointerStyle);
         if (res != 0) {
             WLOGFE("set pointer style failed");
         }
