@@ -49,6 +49,7 @@ ohos_shared_library("libwmutil") {
     "src/window_transition_info.cpp",
     "src/wm_math.cpp",
     "src/wm_occlusion_region.cpp",
+    "src/xml_config_base.cpp",
   ]
 
   configs = [
