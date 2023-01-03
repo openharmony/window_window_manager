@@ -29,6 +29,7 @@ public:
     ~SceneSessionStageProxy() {};
 
     virtual WSError SetActive(bool active) override;
+    virtual WSError UpdateSessionRect(const WSRect& rect, SessionSizeChangeReason reason) override;
 private:
     static inline BrokerDelegator<SceneSessionStageProxy> delegator_;
 };

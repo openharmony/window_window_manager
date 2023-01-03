@@ -26,9 +26,11 @@ public:
 
     enum class SessionStageMessage : uint32_t {
         TRANS_ID_SET_ACTIVE,
+        TRANS_ID_NOTIFY_SIZE_CHANGE,
     };
 
     virtual WSError SetActive(bool active) = 0;
+    virtual WSError UpdateSessionRect(const WSRect& rect, SessionSizeChangeReason reason) = 0;
 };
 }
 #endif // OHOS_SESSION_STAGE_INTERFACE_H

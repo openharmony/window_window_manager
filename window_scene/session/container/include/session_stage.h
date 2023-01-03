@@ -24,12 +24,17 @@
 #include "window_scene_common.h"
 
 namespace OHOS::Rosen {
-class ISessionStateListener {
+class ISessionStageStateListener {
 public:
     virtual void AfterForeground() = 0;
     virtual void AfterBackground() = 0;
     virtual void AfterActive() = 0;
     virtual void AfterInactive() = 0;
+};
+
+class ISessionChangeListener {
+public:
+    virtual void OnSizeChange(WSRect rect, SessionSizeChangeReason reason) {};
 };
 
 class SessionStage {
@@ -51,32 +56,35 @@ public:
     virtual WSError Background() = 0;
     virtual WSError Disconnect() = 0;
 
-    bool RegisterSessionStateListener(const std::shared_ptr<ISessionStateListener>& listener);
-    bool UnregisterSessionStateListener(const std::shared_ptr<ISessionStateListener>& listener);
+    bool RegisterSessionStageStateListener(const std::shared_ptr<ISessionStageStateListener>& listener);
+    bool UnregisterSessionStageStateListener(const std::shared_ptr<ISessionStageStateListener>& listener);
+    bool RegisterSessionChangeListener(const std::shared_ptr<ISessionChangeListener>& listener);
+    bool UnregisterSessionSizeChangeListener(const std::shared_ptr<ISessionChangeListener>& listener);
     // bool RegisterInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer);
 
 protected:
+    void NotifySizeChange(const WSRect& rect, SessionSizeChangeReason reason);
     inline void NotifyAfterForeground()
     {
-        auto sessionStateListeners = GetListeners<ISessionStateListener>();
+        auto sessionStateListeners = GetListeners<ISessionStageStateListener>();
         CALL_SESSION_STATE_LISTENER(AfterForeground, sessionStateListeners);
     }
 
     inline void NotifyAfterBackground()
     {
-        auto sessionStateListeners = GetListeners<ISessionStateListener>();
+        auto sessionStateListeners = GetListeners<ISessionStageStateListener>();
         CALL_SESSION_STATE_LISTENER(AfterBackground, sessionStateListeners);
     }
 
     inline void NotifyAfterActive()
     {
-        auto sessionStateListeners = GetListeners<ISessionStateListener>();
+        auto sessionStateListeners = GetListeners<ISessionStageStateListener>();
         CALL_SESSION_STATE_LISTENER(AfterActive, sessionStateListeners);
     }
 
     inline void NotifyAfterInactive(bool needNotifyUiContent = true)
     {
-        auto sessionStateListeners = GetListeners<ISessionStateListener>();
+        auto sessionStateListeners = GetListeners<ISessionStageStateListener>();
         CALL_SESSION_STATE_LISTENER(AfterInactive, sessionStateListeners);
     }
 
@@ -85,22 +93,38 @@ private:
         const std::shared_ptr<T>& listener);
     template<typename T> bool UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder,
         const std::shared_ptr<T>& listener);
+    
     template<typename T1, typename T2, typename Ret>
     using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
     template<typename T>
-    inline EnableIfSame<T, ISessionStateListener, std::vector<std::weak_ptr<ISessionStateListener>>> GetListeners()
+    inline EnableIfSame<T, ISessionStageStateListener,
+        std::vector<std::weak_ptr<ISessionStageStateListener>>> GetListeners()
     {
-        std::vector<std::weak_ptr<ISessionStateListener>> sessionStateListeners;
+        std::vector<std::weak_ptr<ISessionStageStateListener>> sessionStageStateListeners;
         {
             std::lock_guard<std::recursive_mutex> lock(mutex_);
-            for (auto& listener : sessionStateListeners_) {
-                sessionStateListeners.push_back(listener);
+            for (auto& listener : sessionStageStateListeners_) {
+                sessionStageStateListeners.push_back(listener);
             }
         }
-        return sessionStateListeners;
+        return sessionStageStateListeners;
+    }
+
+    template<typename T>
+    inline EnableIfSame<T, ISessionChangeListener, std::vector<std::weak_ptr<ISessionChangeListener>>> GetListeners()
+    {
+        std::vector<std::weak_ptr<ISessionChangeListener>> sessionChangeListeners;
+        {
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            for (auto& listener : sessionChangeListeners_) {
+                sessionChangeListeners.push_back(listener);
+            }
+        }
+        return sessionChangeListeners;
     }
     std::recursive_mutex mutex_;
-    std::vector<std::shared_ptr<ISessionStateListener>> sessionStateListeners_;
+    std::vector<std::shared_ptr<ISessionStageStateListener>> sessionStageStateListeners_;
+    std::vector<std::shared_ptr<ISessionChangeListener>> sessionChangeListeners_;
 };
 }
 #endif // OHOS_SESSION_STAGE_H

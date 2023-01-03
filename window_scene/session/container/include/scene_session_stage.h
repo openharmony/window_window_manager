@@ -29,6 +29,7 @@ public:
     ~SceneSessionStage() = default;
 
     virtual WSError SetActive(bool active) override;
+    virtual WSError UpdateSessionRect(const WSRect& rect, SessionSizeChangeReason reason) override;
 
     virtual WSError Connect() override;
     virtual WSError Foreground() override;

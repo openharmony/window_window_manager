@@ -34,6 +34,7 @@ public:
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
 
     virtual WSError SetActive(bool active) = 0;
+    virtual WSError UpdateSessionRect(const WSRect& rect, SessionSizeChangeReason reason) = 0;
 
 protected:
     SessionState GetSessionState() const;
