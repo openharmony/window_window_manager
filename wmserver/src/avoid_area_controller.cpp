@@ -260,14 +260,14 @@ void AvoidAreaController::SetAvoidAreaRect(AvoidArea& avoidArea, const Rect& rec
             break;
         }
         default : {
-            WLOGI("default type: %{public}u", type);
+            WLOGFD("default type: %{public}u", type);
         }
     }
 }
 
 AvoidArea AvoidAreaController::GetAvoidAreaByType(const sptr<WindowNode>& node, AvoidAreaType avoidAreaType) const
 {
-    WLOGI("avoidAreaType: %{public}u", avoidAreaType);
+    WLOGFD("avoidAreaType: %{public}u", avoidAreaType);
     if (node == nullptr) {
         WLOGFE("invalid WindowNode.");
         return {};
@@ -310,7 +310,7 @@ AvoidArea AvoidAreaController::GetAvoidAreaByType(const sptr<WindowNode>& node, 
             return avoidArea;
         }
         default : {
-            WLOGI("cannot find avoidAreaType: %{public}u", avoidAreaType);
+            WLOGFD("cannot find avoidAreaType: %{public}u", avoidAreaType);
             return {};
         }
     }
