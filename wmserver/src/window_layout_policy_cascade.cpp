@@ -227,17 +227,6 @@ void WindowLayoutPolicyCascade::UpdateDividerPosition(const sptr<WindowNode>& no
     if (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::DRAG_END) {
         LimitDividerPositionBySplitRatio(displayId, rect);
     }
-    /*
-     * use the layout orientation of the window and the layout orientation of the screen
-     * to determine whether the screen is rotating
-     */
-    if ((!WindowHelper::IsLandscapeRect(rect) && IsVerticalDisplay(displayId)) ||
-        (WindowHelper::IsLandscapeRect(rect) && !IsVerticalDisplay(displayId))) {
-        // resets the rect of the divider window when the screen is rotating
-        WLOGFD("Reset divider when display rotate rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
-            rect.posX_, rect.posY_, rect.width_, rect.height_);
-        rect = cascadeRectsMap_[displayId].dividerRect_;
-    }
     node->SetRequestRect(rect);
 }
 
@@ -322,8 +311,23 @@ void WindowLayoutPolicyCascade::ApplyWindowRectConstraints(const sptr<WindowNode
 {
     WLOGFD("[Before constraints] windowId: %{public}u, winRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         node->GetWindowId(), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
-    LimitFloatingWindowSize(node, displayGroupInfo_->GetDisplayRect(node->GetDisplayId()), winRect);
+    auto displayId = node->GetDisplayId();
+    LimitFloatingWindowSize(node, displayGroupInfo_->GetDisplayRect(displayId), winRect);
     LimitMainFloatingWindowPosition(node, winRect);
+    
+    /*
+     * Use the orientation of the window and display to determine
+     * whether the screen is rotating, then rotate the divider
+     */
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE &&
+        ((!WindowHelper::IsLandscapeRect(winRect) && IsVerticalDisplay(displayId)) ||
+        (WindowHelper::IsLandscapeRect(winRect) && !IsVerticalDisplay(displayId)))) {
+        winRect = cascadeRectsMap_[displayId].dividerRect_;
+        node->SetRequestRect(winRect);
+        WLOGFD("Reset divider when display rotation, divRect: [%{public}d, %{public}d, %{public}u, %{public}u]",
+            winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+    }
+
     WLOGFD("[After constraints] windowId: %{public}u, winRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         node->GetWindowId(), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
 }
@@ -354,8 +358,7 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
             break;
         }
         case WindowMode::WINDOW_MODE_FLOATING: {
-            if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE ||
-                node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
+            if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
                 break;
             }
             UpdateWindowSizeLimits(node);
