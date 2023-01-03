@@ -28,7 +28,6 @@ public:
 
     ~WindowEventChannelProxy() {};
 
-    virtual WSError NotifySizeChange(const WSRect& rect) override;
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 private:

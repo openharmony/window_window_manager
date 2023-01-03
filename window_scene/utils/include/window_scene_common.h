@@ -71,6 +71,17 @@ enum class SessionOption : uint32_t {
     SESSION_MODE_FLOATING,
 };
 
+enum class SessionSizeChangeReason : uint32_t {
+    SHOW = 0,
+    HIDE,
+    MAXIMIZE,
+    MINIMIZE,
+    RECOVER,
+    ROTATION,
+    RESIZE,
+    MOVE,
+};
+
 struct WSRect {
     int32_t posX_;
     int32_t posY_;

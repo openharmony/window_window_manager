@@ -24,7 +24,9 @@ namespace {
 
 const std::map<uint32_t, SceneSessionStageStubFunc> SceneSessionStageStub::stubFuncMap_{
     std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_SET_ACTIVE),
-        &SceneSessionStageStub::HandleSetActive)
+        &SceneSessionStageStub::HandleSetActive),
+    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_SIZE_CHANGE),
+        &SceneSessionStageStub::HandleUpdateSessionRect),
 };
 
 int SceneSessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -49,6 +51,16 @@ int SceneSessionStageStub::HandleSetActive(MessageParcel& data, MessageParcel& r
     WLOGFD("SetActive!");
     bool active = data.ReadBool();
     WSError errCode = SetActive(active);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionStageStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("UpdateSessionRect!");
+    WSRect rect = { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
+    SessionSizeChangeReason reason = static_cast<SessionSizeChangeReason>(data.ReadUint32());
+    WSError errCode = UpdateSessionRect(rect, reason);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

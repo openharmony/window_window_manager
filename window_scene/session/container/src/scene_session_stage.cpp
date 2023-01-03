@@ -36,6 +36,14 @@ WSError SceneSessionStage::SetActive(bool active)
     return WSError::WS_OK;
 }
 
+WSError SceneSessionStage::UpdateSessionRect(const WSRect& rect, SessionSizeChangeReason reason)
+{
+    WLOGFI("update rect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u",
+        rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
+    NotifySizeChange(rect, reason);
+    return WSError::WS_OK;
+}
+
 WSError SceneSessionStage::Connect()
 {
     if (sceneSession_ == nullptr) {
@@ -59,6 +67,7 @@ WSError SceneSessionStage::Foreground()
     }
     return res;
 }
+
 WSError SceneSessionStage::Background()
 {
     if (sceneSession_ == nullptr) {

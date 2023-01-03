@@ -36,6 +36,7 @@ private:
     static const std::map<uint32_t, SceneSessionStageStubFunc> stubFuncMap_;
 
     int HandleSetActive(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply);
 };
 }
 #endif // OHOS_SCENE_SESSION_STAGE_STUB_H

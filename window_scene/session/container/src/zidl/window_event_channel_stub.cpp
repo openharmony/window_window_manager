@@ -26,8 +26,6 @@ namespace {
 }
 
 const std::map<uint32_t, WindowEventChannelStubFunc> WindowEventChannelStub::stubFuncMap_{
-    std::make_pair(static_cast<uint32_t>(WindowEventChannelMessage::TRANS_ID_NOTIFY_SIZE_CHANGE),
-        &WindowEventChannelStub::HandleNotifySizeChange),
     std::make_pair(static_cast<uint32_t>(WindowEventChannelMessage::TRANS_ID_TRANSFER_KEY_EVENT),
         &WindowEventChannelStub::HandleTransferKeyEvent),
     std::make_pair(static_cast<uint32_t>(WindowEventChannelMessage::TRANS_ID_TRANSFER_POINTER_EVENT),
@@ -49,15 +47,6 @@ int WindowEventChannelStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
     }
 
     return (this->*(func->second))(data, reply);
-}
-
-int WindowEventChannelStub::HandleNotifySizeChange(MessageParcel& data, MessageParcel& reply)
-{
-    WLOGFD("NotifySizeChange!");
-    WSRect rect = { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
-    WSError errCode = NotifySizeChange(rect);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
-    return ERR_NONE;
 }
 
 int WindowEventChannelStub::HandleTransferKeyEvent(MessageParcel& data, MessageParcel& reply)

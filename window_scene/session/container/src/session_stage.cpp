@@ -21,14 +21,24 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStage"};
 }
 
-bool SessionStage::RegisterSessionStateListener(const std::shared_ptr<ISessionStateListener>& listener)
+bool SessionStage::RegisterSessionStageStateListener(const std::shared_ptr<ISessionStageStateListener>& listener)
 {
-    return RegisterListenerLocked(sessionStateListeners_, listener);
+    return RegisterListenerLocked(sessionStageStateListeners_, listener);
 }
 
-bool SessionStage::UnregisterSessionStateListener(const std::shared_ptr<ISessionStateListener>& listener)
+bool SessionStage::UnregisterSessionStageStateListener(const std::shared_ptr<ISessionStageStateListener>& listener)
 {
-    return UnregisterListenerLocked(sessionStateListeners_, listener);
+    return UnregisterListenerLocked(sessionStageStateListeners_, listener);
+}
+
+bool SessionStage::RegisterSessionChangeListener(const std::shared_ptr<ISessionChangeListener>& listener)
+{
+    return RegisterListenerLocked(sessionChangeListeners_, listener);
+}
+
+bool SessionStage::UnregisterSessionSizeChangeListener(const std::shared_ptr<ISessionChangeListener>& listener)
+{
+    return UnregisterListenerLocked(sessionChangeListeners_, listener);
 }
 
 template<typename T>
@@ -60,5 +70,15 @@ bool SessionStage::UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& hol
             return registeredListener == listener;
         }), holder.end());
     return true;
+}
+
+void SessionStage::NotifySizeChange(const WSRect& rect, SessionSizeChangeReason reason)
+{
+    auto sessionChangeListeners = GetListeners<ISessionChangeListener>();
+    for (auto& listener : sessionChangeListeners) {
+        if (!listener.expired()) { 
+            listener.lock()->OnSizeChange(rect, reason);
+        }
+    }
 }
 }

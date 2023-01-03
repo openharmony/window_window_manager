@@ -41,6 +41,7 @@ public:
     virtual WSError StartScene(const SceneAbilityInfo& info, SessionOption sessionOption) override;
 
     virtual WSError SetActive(bool active) override;
+    virtual WSError UpdateSessionRect(const WSRect& rect, SessionSizeChangeReason reason) override;
 
     const SceneAbilityInfo& GetAbilityInfo() const;
     void SetStartSceneEventListener(const NotifyStartSceneFunc& func);

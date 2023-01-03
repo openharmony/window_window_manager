@@ -31,12 +31,10 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IWindowEventChannel");
 
     enum class WindowEventChannelMessage : uint32_t {
-        TRANS_ID_NOTIFY_SIZE_CHANGE,
         TRANS_ID_TRANSFER_KEY_EVENT,
         TRANS_ID_TRANSFER_POINTER_EVENT,
     };
 
-    virtual WSError NotifySizeChange(const WSRect& rect) = 0;
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
     virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
 };

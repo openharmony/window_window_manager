@@ -35,7 +35,6 @@ public:
 private:
     static const std::map<uint32_t, WindowEventChannelStubFunc> stubFuncMap_;
 
-    int HandleNotifySizeChange(MessageParcel& data, MessageParcel& reply);
     int HandleTransferKeyEvent(MessageParcel& data, MessageParcel& reply);
     int HandleTransferPointerEvent(MessageParcel& data, MessageParcel& reply);
 };

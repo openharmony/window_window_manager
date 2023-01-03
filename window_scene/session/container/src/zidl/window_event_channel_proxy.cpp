@@ -26,31 +26,6 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannelProxy"};
 }
 
-WSError WindowEventChannelProxy::NotifySizeChange(const WSRect& rect)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (!(data.WriteInt32(rect.posX_) && data.WriteInt32(rect.posY_) &&
-        data.WriteUint32(rect.width_) && data.WriteUint32(rect.height_))) {
-        WLOGFE("Write WindowRect failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventChannelMessage::TRANS_ID_NOTIFY_SIZE_CHANGE),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    int32_t ret = reply.ReadUint32();
-    return static_cast<WSError>(ret);
-}
-
 WSError WindowEventChannelProxy::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     MessageParcel data;

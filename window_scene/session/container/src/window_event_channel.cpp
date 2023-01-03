@@ -26,13 +26,6 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannel"};
 }
 
-WSError WindowEventChannel::NotifySizeChange(const WSRect& rect)
-{
-    WLOGFI("update size");
-    // TODO:notify session stage size change
-    return WSError::WS_OK;
-}
-
 WSError WindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     WLOGFI("receive key event");
