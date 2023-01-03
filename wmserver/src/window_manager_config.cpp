@@ -25,7 +25,6 @@ namespace {
 }
 
 WindowManagerConfig::ConfigItem WindowManagerConfig::config_;
-const WindowManagerConfig::ConfigItem WindowManagerConfig::ConfigItem::DEFAULT;
 const std::map<std::string, WindowManagerConfig::ValueType> WindowManagerConfig::configItemTypeMap_ = {
     { "maxAppWindowNumber",     WindowManagerConfig::ValueType::INTS },
     { "maxUniRenderAppWindowNumber", WindowManagerConfig::ValueType::INTS },
@@ -149,7 +148,11 @@ void WindowManagerConfig::ReadConfig(const xmlNodePtr& rootPtr, std::map<std::st
 bool WindowManagerConfig::LoadConfigXml()
 {
     auto configFilePath = GetConfigPath("etc/window/resources/window_manager_config.xml");
-    xmlDocPtr docPtr = xmlReadFile(configFilePath.c_str(), nullptr, XML_PARSE_NOBLANKS);
+    xmlDocPtr docPtr = nullptr;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        docPtr = xmlReadFile(configFilePath.c_str(), nullptr, XML_PARSE_NOBLANKS);
+    }
     WLOGI("[WmConfig] filePath: %{public}s", configFilePath.c_str());
     if (docPtr == nullptr) {
         WLOGFE("[WmConfig] load xml error!");
