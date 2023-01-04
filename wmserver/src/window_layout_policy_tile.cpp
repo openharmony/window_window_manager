@@ -163,6 +163,7 @@ void WindowLayoutPolicyTile::PerformWindowLayout(const sptr<WindowNode>& node, W
     WLOGI("[PerformWindowLayout] windowId: %{public}u, windowType: %{public}u, updateType: %{public}u, requestRect: "
         "requestRect: [%{public}d, %{public}d, %{public}u, %{public}u]", node->GetWindowId(), windowType, updateType,
         requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_);
+    FixWindowRectWithinDisplay(node);
     switch (updateType) {
         case WindowUpdateType::WINDOW_UPDATE_ADDED: {
             if (WindowHelper::IsMainWindow(windowType)) {

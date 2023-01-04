@@ -68,6 +68,7 @@ protected:
     void LayoutWindowTree(DisplayId displayId);
     void LayoutWindowNode(const sptr<WindowNode>& node);
     void LayoutWindowNodesByRootType(const std::vector<sptr<WindowNode>>& nodeVec);
+    void FixWindowRectWithinDisplay(const sptr<WindowNode>& node) const;
 
     /*
      * methods for get/update display information or limit information
