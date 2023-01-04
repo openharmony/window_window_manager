@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #ifndef OHOS_SESSION_INTERFACE_H
 #define OHOS_SESSION_INTERFACE_H
 
@@ -25,7 +25,7 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISession");
 
     enum class SessionMessage : uint32_t {
-        TRANS_ID_FOREGROUND,
+        TRANS_ID_FOREGROUND = 0,
         TRANS_ID_BACKGROUND,
         TRANS_ID_DISCONNECT,
     };

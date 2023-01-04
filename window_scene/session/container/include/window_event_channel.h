@@ -31,7 +31,7 @@ public:
     virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 
 private:
-    sptr<SceneSessionStage> sessionStage_;
+    sptr<SceneSessionStage> sessionStage_ = nullptr;
 };
 }
 #endif // OHOS_WINDOW_EVENT_CHANNEL_H
