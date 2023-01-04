@@ -27,7 +27,7 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISceneSession");
 
     enum class SceneSessionMessage : uint32_t {
-        TRANS_ID_CONNECT,
+        TRANS_ID_CONNECT = 100,
         TRANS_ID_START_SCENE,
         TRANS_ID_MINIMIZE,
         TRANS_ID_CLOSE,
