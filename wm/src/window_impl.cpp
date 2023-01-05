@@ -104,7 +104,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     if (moveDragProperty_ == nullptr) {
         WLOGFE("MoveDragProperty is null");
     }
-    WLOGI("WindowImpl constructorCnt: %{public}d name: %{public}s",
+    WLOGI("constructorCnt: %{public}d name: %{public}s",
         ++constructorCnt, property_->GetWindowName().c_str());
 }
 
@@ -1417,7 +1417,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation)
 
 WMError WindowImpl::MoveTo(int32_t x, int32_t y)
 {
-    WLOGI("id:%{public}d] MoveTo %{public}d %{public}d",
+    WLOGI("id:%{public}d MoveTo %{public}d %{public}d",
           property_->GetWindowId(), x, y);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1443,7 +1443,7 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y)
 
 WMError WindowImpl::Resize(uint32_t width, uint32_t height)
 {
-    WLOGI("id:%{public}d] Resize %{public}u %{public}u",
+    WLOGI("id:%{public}d Resize %{public}u %{public}u",
           property_->GetWindowId(), width, height);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
