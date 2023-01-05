@@ -820,13 +820,15 @@ WMError WindowNodeContainer::SetFocusWindow(uint32_t windowId)
 {
     if (focusedWindow_ == windowId) {
         WLOGI("focused window no change, id: %{public}u", windowId);
+        // StarttingWindow can be focused and this pid is 0, then notify rs in UpdateFocusStatus, rs can not deal this.
+        // So we must notify rs again when first frame callback.
         if (focusedPid_ == 0) {
             auto node = FindWindowNodeById(windowId);
             if (node && node->GetWindowProperty() != nullptr) {
                 focusedPid_ = node->GetCallingPid();
                 WLOGI("reset focus app info , pid: %{public}d", focusedPid_);
                 AbilityInfo info = node->GetWindowProperty()->GetAbilityInfo();
-                FocusAppInfo appInfo = { node->GetCallingPid(), node->GetCallingUid(), info.bundleName_, info.abilityName_ };
+                FocusAppInfo appInfo = { focusedPid_, node->GetCallingUid(), info.bundleName_, info.abilityName_ };
                 RSInterfaces::GetInstance().SetFocusAppInfo(appInfo);
             }
         }
