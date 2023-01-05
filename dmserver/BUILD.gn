@@ -74,8 +74,10 @@ ohos_shared_library("libdms") {
 
   defines = []
   if (window_manager_feature_subscribe_motion) {
-    external_deps += [ "motion:motion_interface_native" ]
-    defines += [ "WM_SUBSCRIBE_MOTION_ENABLE" ]
+    if (defined(global_parts_info) && defined(global_parts_info.msdp_motion)) {
+      external_deps += [ "motion:motion_interface_native" ]
+      defines += [ "WM_SUBSCRIBE_MOTION_ENABLE" ]
+    }
   }
 
   if (is_standard_system) {
