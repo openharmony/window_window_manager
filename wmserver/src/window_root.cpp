@@ -178,7 +178,7 @@ sptr<WindowNode> WindowRoot::FindWindowNodeWithToken(const sptr<IRemoteObject>& 
 
 void WindowRoot::AddDeathRecipient(sptr<WindowNode> node)
 {
-    if (node == nullptr) {
+    if (node == nullptr || node->GetWindowToken() == nullptr) {
         WLOGFE("failed, node is nullptr");
         return;
     }
@@ -206,23 +206,21 @@ WMError WindowRoot::SaveWindow(const sptr<WindowNode>& node)
     windowNodeMap_.insert(std::make_pair(node->GetWindowId(), node));
     if (node->surfaceNode_ != nullptr) {
         surfaceIdWindowNodeMap_.insert(std::make_pair(node->surfaceNode_->GetId(), node));
-    }
-    if (node->GetWindowToken()) {
-        AddDeathRecipient(node);
-    }
-    // Register FirstFrame Callback to rs, inform ability to get snapshot
-    wptr<WindowNode> weak = node;
-    auto firstFrameCompleteCallback = [weak]() {
-        auto weakNode = weak.promote();
-        if (weakNode == nullptr) {
-            WLOGFE("windowNode is nullptr");
-            return;
+        if (WindowHelper::IsMainWindow(node->GetWindowType())) {
+            // Register FirstFrame Callback to rs, inform ability to get snapshot
+            wptr<WindowNode> weak = node;
+            auto firstFrameCompleteCallback = [weak]() {
+                auto weakNode = weak.promote();
+                if (weakNode == nullptr) {
+                    WLOGFE("windowNode is nullptr");
+                    return;
+                }
+                WindowInnerManager::GetInstance().CompleteFirstFrameDrawing(weakNode);
+            };
+            node->surfaceNode_->SetBufferAvailableCallback(firstFrameCompleteCallback);
         }
-        WindowInnerManager::GetInstance().CompleteFirstFrameDrawing(weakNode);
-    };
-    if (node->surfaceNode_ && WindowHelper::IsMainWindow(node->GetWindowType())) {
-        node->surfaceNode_->SetBufferAvailableCallback(firstFrameCompleteCallback);
     }
+    AddDeathRecipient(node);
     return WMError::WM_OK;
 }
 
@@ -513,7 +511,7 @@ WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<Window
     return WMError::WM_OK;
 }
 
-bool WindowRoot::NeedToStopAddingNode(sptr<WindowNode>& node, const sptr<WindowNodeContainer>& container)
+bool WindowRoot::CheckAddingModeAndSize(sptr<WindowNode>& node, const sptr<WindowNodeContainer>& container)
 {
     if (!WindowHelper::IsMainWindow(node->GetWindowType())) {
         return false;
@@ -633,10 +631,10 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
         WLOGFE("failed, window container could not be found");
-        return WMError::WM_ERROR_NULLPTR;
+        return WMError::WM_ERROR_INVALID_DISPLAY;
     }
 
-    if (NeedToStopAddingNode(node, container)) { // true means stop adding
+    if (CheckAddingModeAndSize(node, container)) { // true means stop adding
         return WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
     }
 
@@ -690,7 +688,7 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId, bool fromAnimation)
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
         WLOGFE("failed, window container could not be found");
-        return WMError::WM_ERROR_NULLPTR;
+        return WMError::WM_ERROR_INVALID_DISPLAY;
     }
     container->DropShowWhenLockedWindowIfNeeded(node);
     UpdateFocusWindowWithWindowRemoved(node, container);
@@ -728,7 +726,7 @@ WMError WindowRoot::UpdateWindowNode(uint32_t windowId, WindowUpdateReason reaso
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
         WLOGFE("update window failed, window container could not be found");
-        return WMError::WM_ERROR_NULLPTR;
+        return WMError::WM_ERROR_INVALID_DISPLAY;
     }
     return container->UpdateWindowNode(node, reason);
 }
@@ -743,7 +741,7 @@ WMError WindowRoot::UpdateSizeChangeReason(uint32_t windowId, WindowSizeChangeRe
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
         WLOGFE("failed, window container could not be found");
-        return WMError::WM_ERROR_NULLPTR;
+        return WMError::WM_ERROR_INVALID_DISPLAY;
     }
     container->UpdateSizeChangeReason(node, reason);
     return WMError::WM_OK;
@@ -819,7 +817,7 @@ WMError WindowRoot::SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode)
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
         WLOGFE("failed, window container could not be found");
-        return WMError::WM_ERROR_NULLPTR;
+        return WMError::WM_ERROR_INVALID_DISPLAY;
     }
     WindowMode curWinMode = node->GetWindowMode();
     auto res = container->SetWindowMode(node, dstMode);

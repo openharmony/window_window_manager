@@ -2286,8 +2286,8 @@ HWTEST_F(WindowImplTest, WindowCreateCheck, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
 
     ASSERT_EQ(WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW, window->GetType());
-    ASSERT_EQ(false, window->WindowCreateCheck(INVALID_WINDOW_ID));
-    ASSERT_EQ(false, window->WindowCreateCheck(static_cast<uint32_t>(-1)));
+    ASSERT_NE(WMError::WM_OK, window->WindowCreateCheck(INVALID_WINDOW_ID));
+    ASSERT_NE(WMError::WM_OK, window->WindowCreateCheck(static_cast<uint32_t>(-1)));
 }
 
 /*

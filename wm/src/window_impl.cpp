@@ -963,23 +963,23 @@ void WindowImpl::SetSystemConfig()
     UpdateWindowShadowAccordingToSystemConfig();
 }
 
-bool WindowImpl::WindowCreateCheck(uint32_t parentId)
+WMError WindowImpl::WindowCreateCheck(uint32_t parentId)
 {
     // check window name, same window names are forbidden
     if (windowMap_.find(name_) != windowMap_.end()) {
         WLOGFE("WindowName(%{public}s) already exists.", name_.c_str());
-        return false;
+        return WMError::WM_ERROR_REPEAT_OPERATION;
     }
     if (CheckCameraFloatingWindowMultiCreated(property_->GetWindowType())) {
         WLOGFE("Camera Floating Window already exists.");
-        return false;
+        return WMError::WM_ERROR_REPEAT_OPERATION;
     }
     if (parentId == INVALID_WINDOW_ID) {
         if (WindowHelper::IsSystemSubWindow(property_->GetWindowType()) ||
             WindowHelper::IsSubWindow(property_->GetWindowType())) {
-            return false;
+            return WMError::WM_ERROR_INVALID_PARENT;
         }
-        return true;
+        return WMError::WM_OK;
     }
 
     if (property_->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
@@ -995,26 +995,27 @@ bool WindowImpl::WindowCreateCheck(uint32_t parentId)
         }
         if (WindowHelper::IsSystemSubWindow(property_->GetWindowType())) {
             if (parentWindow == nullptr) {
-                return false;
+                return WMError::WM_ERROR_INVALID_PARENT;
             }
             if (!parentWindow->IsAllowHaveSystemSubWindow()) {
-                return false;
+                return WMError::WM_ERROR_INVALID_PARENT;
             }
         }
     }
     if (property_->GetParentId() != parentId) {
         WLOGFE("Parent Window does not exist. ParentId is %{public}u", parentId);
-        return false;
+        return WMError::WM_ERROR_INVALID_PARENT;
     }
 
-    return true;
+    return WMError::WM_OK;
 }
 
 WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRuntime::Context>& context)
 {
     WLOGI("Window[%{public}s] Create", name_.c_str());
-    if (!WindowCreateCheck(parentId)) {
-        return WMError::WM_ERROR_INVALID_PARAM;
+    WMError ret = WindowCreateCheck(parentId);
+    if (ret != WMError::WM_OK) {
+        return ret;
     }
 
     context_ = context;
@@ -1042,7 +1043,7 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
         surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
     }
 
-    WMError ret = SingletonContainer::Get<WindowAdapter>().CreateWindow(windowAgent, property_, surfaceNode_,
+    ret = SingletonContainer::Get<WindowAdapter>().CreateWindow(windowAgent, property_, surfaceNode_,
         windowId, token);
     RecordLifeCycleExceptionEvent(LifeCycleEvent::CREATE_EVENT, ret);
     if (ret != WMError::WM_OK) {
@@ -1434,7 +1435,7 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y)
 
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
         WLOGFE("fullscreen window could not resize, winId: %{public}u", GetWindowId());
-        return WMError::WM_ERROR_INVALID_OPERATION;
+        return WMError::WM_ERROR_OPER_FULLSCREEN_FAILED;
     }
     property_->SetWindowSizeChangeReason(WindowSizeChangeReason::MOVE);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
@@ -1462,7 +1463,7 @@ WMError WindowImpl::Resize(uint32_t width, uint32_t height)
 
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
         WLOGFE("fullscreen window could not resize, winId: %{public}u", GetWindowId());
-        return WMError::WM_ERROR_INVALID_OPERATION;
+        return WMError::WM_ERROR_OPER_FULLSCREEN_FAILED;
     }
     property_->SetWindowSizeChangeReason(WindowSizeChangeReason::RESIZE);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
