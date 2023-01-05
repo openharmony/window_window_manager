@@ -852,6 +852,7 @@ void WindowManagerService::OnWindowEvent(Event event, const sptr<IRemoteObject>&
                 if (node->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
                     dragController_->FinishDrag(windowId);
                 }
+                WindowInnerManager::GetInstance().NotifyWindowRemovedOrDestroyed(windowId);
                 windowController_->DestroyWindow(windowId, node->stateMachine_.GetDestroyTaskParam());
             };
 
