@@ -221,13 +221,13 @@ NativeValue* WindowStageEventTypeInit(NativeEngine* engine)
         return nullptr;
     }
 
-    object->SetProperty("FOREGROUND", CreateJsValue(*engine,
+    object->SetProperty("SHOWN", CreateJsValue(*engine,
         static_cast<int32_t>(LifeCycleEventType::FOREGROUND)));
     object->SetProperty("ACTIVE", CreateJsValue(*engine,
         static_cast<int32_t>(LifeCycleEventType::ACTIVE)));
     object->SetProperty("INACTIVE", CreateJsValue(*engine,
         static_cast<int32_t>(LifeCycleEventType::INACTIVE)));
-    object->SetProperty("BACKGROUND", CreateJsValue(*engine,
+    object->SetProperty("HIDDEN", CreateJsValue(*engine,
         static_cast<int32_t>(LifeCycleEventType::BACKGROUND)));
     return objValue;
 }
