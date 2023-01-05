@@ -75,7 +75,7 @@ void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
     std::vector<sptr<WindowNode>> windowNodes;
     container->TraverseContainer(windowNodes);
     TraverseWindowNodes(windowNodes, displayGroupInfo_.windowsInfo);
-    WLOGI("update display info to IMS, displayId: %{public}" PRIu64"", displayId);
+    WLOGFD("update display info to IMS, displayId: %{public}" PRIu64"", displayId);
     auto task = [this]() {
         MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo_);
     };
@@ -205,7 +205,7 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
         convertRectsToMmiRects(touchHotAreas, windowInfo.defaultHotAreas);
         convertRectsToMmiRects(pointerHotAreas, windowInfo.pointerHotAreas);
         if (!windowNode->GetWindowProperty()->GetTouchable()) {
-            WLOGI("window is not touchable: %{public}u", windowNode->GetWindowId());
+            WLOGFD("window is not touchable: %{public}u", windowNode->GetWindowId());
             windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE;
         }
         windowsInfo.emplace_back(windowInfo);
