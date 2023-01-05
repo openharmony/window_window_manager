@@ -136,7 +136,6 @@ protected:
     virtual ~WindowManagerService() = default;
 
 private:
-    std::string name_ = "WindowManagerService";
     bool Init();
     void InitWithAbilityManagerServiceAdded();
     void InitWithRanderServiceAdded();
@@ -145,6 +144,8 @@ private:
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     WMError GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken);
+    bool CheckSystemWindowPermission(const sptr<WindowProperty>& property) const;
+    bool CheckAnimationPermission(const sptr<WindowProperty>& property) const;
     void ConfigureWindowManagerService();
     void PostVoidSyncTask(Task task);
     template<typename SyncTask, typename Return = std::invoke_result_t<SyncTask>>
@@ -170,6 +171,7 @@ private:
     void OnRenderModeChanged(bool isUniRender);
 
     static inline SingletonDelegator<WindowManagerService> delegator;
+    std::string name_ = "WindowManagerService";
     AtomicMap<uint32_t, uint32_t> accessTokenIdMaps_;
     sptr<WindowRoot> windowRoot_;
     sptr<WindowController> windowController_;
