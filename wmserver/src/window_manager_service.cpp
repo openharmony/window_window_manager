@@ -271,6 +271,7 @@ bool WindowManagerService::Init()
         }
         ConfigureWindowManagerService();
     }
+    StartingWindow::SetWindowRoot(windowRoot_);
     WLOGI("Init success");
     return true;
 }
@@ -363,6 +364,10 @@ void WindowManagerService::ConfigureWindowManagerService()
     item = config["defaultFloatingWindow"];
     if (item.IsInts()) {
         WindowLayoutPolicyCascade::SetCascadeRectCfg(*item.intsValue_);
+    }
+    item = config["startWindowTransitionAnimation"].GetProp("enable");
+    if (item.IsBool()) {
+        StartingWindow::transAnimateEnable_ = item.boolValue_;
     }
 }
 
@@ -549,6 +554,7 @@ void WindowManagerService::ConfigWindowEffect(const WindowManagerConfig::ConfigI
             systemConfig_.effectConfig_.unfocusedShadow_ = config.unfocusedShadow_;
         }
     }
+    StartingWindow::SetWindowSystemEffectConfig(systemConfig_.effectConfig_);
 }
 
 RSAnimationTimingCurve WindowManagerService::CreateCurve(const WindowManagerConfig::ConfigItem& curveConfig)
