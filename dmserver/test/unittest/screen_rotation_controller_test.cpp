@@ -485,6 +485,73 @@ HWTEST_F(ScreenRotationControllerTest, ProcessOrientationSwitch, Function | Smal
     ScreenRotationController::ProcessOrientationSwitch(Orientation::LOCKED);
     ASSERT_EQ(Orientation::LOCKED, ScreenRotationController::lastOrientationType_);
 }
+#ifdef WM_SUBSCRIBE_MOTION_ENABLE
+/**
+ * @tc.name: SubscribeMotionSensor
+ * @tc.desc: check function MotionSubscriber::SubscribeMotionSensor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationControllerTest, SubscribeMotionSensor, Function | SmallTest | Level3)
+{
+    MotionSubscriber::isMotionSensorSubscribed_ = true;
+    MotionSubscriber::SubscribeMotionSensor();
+    ASSERT_EQ(true, MotionSubscriber::isMotionSensorSubscribed_);
+
+    MotionSubscriber::isMotionSensorSubscribed_ = false;
+    MotionSubscriber::SubscribeMotionSensor();
+    ASSERT_EQ(true, MotionSubscriber::isMotionSensorSubscribed_);
+
+    MotionSubscriber::isMotionSensorSubscribed_ = false;
+    MotionSubscriber::UnsubscribeMotionSensor();
+    ASSERT_EQ(false, MotionSubscriber::isMotionSensorSubscribed_);
+
+    MotionSubscriber::isMotionSensorSubscribed_ = true;
+    MotionSubscriber::UnsubscribeMotionSensor();
+    ASSERT_EQ(false, MotionSubscriber::isMotionSensorSubscribed_);
+}
+
+/**
+ * @tc.name: OnMotionChanged
+ * @tc.desc: check function RotationMotionEventCallback->SubscribeMotionSensor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationControllerTest, OnMotionChanged, Function | SmallTest | Level3)
+{
+    DeviceRotation currentRotation = ScreenRotationController::lastSensorRotationConverted_;
+    DeviceRotation motionRotation = DeviceRotation::INVALID;
+
+    MotionData motionData;
+    motionData.result = OHOS::Msdp::MotionStatusResult::VALUE_INVALID;
+    motionData.rotateAction = 1;
+    MotionSubscriber::motionEventCallback_->OnMotionChanged(motionData);
+    ASSERT_EQ(currentRotation, ScreenRotationController::lastSensorRotationConverted_);
+
+    motionData.result = OHOS::Msdp::MotionStatusResult::VALUE_ENTER;
+    motionData.rotateAction = 0;
+    motionRotation = DeviceRotation::ROTATION_PORTRAIT;
+    MotionSubscriber::motionEventCallback_->OnMotionChanged(motionData);
+    ASSERT_EQ(motionRotation, ScreenRotationController::lastSensorRotationConverted_);
+
+    motionData.rotateAction = 1;
+    MotionSubscriber::motionEventCallback_->OnMotionChanged(motionData);
+    motionRotation = ScreenRotationController::IsDefaultDisplayRotationPortrait() ?
+        DeviceRotation::ROTATION_LANDSCAPE_INVERTED : DeviceRotation::ROTATION_LANDSCAPE;
+    ASSERT_EQ(motionRotation, ScreenRotationController::lastSensorRotationConverted_);
+
+    motionData.rotateAction = 2;
+    MotionSubscriber::motionEventCallback_->OnMotionChanged(motionData);
+    motionRotation = DeviceRotation::ROTATION_PORTRAIT_INVERTED;
+    ASSERT_EQ(motionRotation, ScreenRotationController::lastSensorRotationConverted_);
+
+    motionData.rotateAction = 3;
+    MotionSubscriber::motionEventCallback_->OnMotionChanged(motionData);
+    motionRotation = ScreenRotationController::IsDefaultDisplayRotationPortrait() ?
+        DeviceRotation::ROTATION_LANDSCAPE : DeviceRotation::ROTATION_LANDSCAPE_INVERTED;
+    ASSERT_EQ(motionRotation, ScreenRotationController::lastSensorRotationConverted_);
+
+    ScreenRotationController::HandleSensorEventInput(currentRotation);
+}
+#endif
 }
 } // namespace Rosen
 } // namespace OHOS
