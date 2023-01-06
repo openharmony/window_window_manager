@@ -1125,7 +1125,10 @@ WMError WindowRoot::NotifyDesktopUnfrozen()
     WLOGFD("notify desktop unfrozen");
     for (const auto& it : windowNodeMap_) {
         auto& node = it.second;
-        if (node && (node->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) && (node->GetWindowToken())) {
+        // just need notify desktop unfrozen when desktop shown
+        // since unfrozen will change window state to shown
+        if (node && (node->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP)
+            && (node->GetWindowToken()) && node->currentVisibility_) {
             node->GetWindowToken()->UpdateWindowState(WindowState::STATE_UNFROZEN);
             return WMError::WM_OK;
         }
