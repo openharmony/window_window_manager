@@ -66,7 +66,6 @@ private:
     void LayoutDivider(const sptr<WindowNode>& node, WindowUpdateType type);
     void LayoutSplitNodes(DisplayId displayId, WindowUpdateType type, bool layoutByDivider = false);
     void UpdateLayoutRect(const sptr<WindowNode>& node) override;
-    void FixWindowRectWithinDisplay(const sptr<WindowNode>& node) const;
     void ComputeDecoratedRequestRect(const sptr<WindowNode>& node) const;
     void ApplyWindowRectConstraints(const sptr<WindowNode>& node, Rect& winRect) const;
 

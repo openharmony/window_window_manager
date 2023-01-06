@@ -443,7 +443,7 @@ void DisplayGroupController::ProcessSystemBarRotation(const sptr<WindowNode>& no
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR) {
         rect.width_ = displayRect.width_;
     } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
-        rect.posY_ = static_cast<int32_t>(displayRect.height_ - rect.height_);
+        rect.posY_ = static_cast<int32_t>(displayRect.height_ - rect.height_) + displayRect.posY_;
         rect.width_ = displayRect.width_;
     }
 

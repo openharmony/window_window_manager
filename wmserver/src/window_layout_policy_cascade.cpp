@@ -553,33 +553,6 @@ Rect WindowLayoutPolicyCascade::GetDividerRect(DisplayId displayId) const
     return dividerRect;
 }
 
-void WindowLayoutPolicyCascade::FixWindowRectWithinDisplay(const sptr<WindowNode>& node) const
-{
-    auto displayId = node->GetDisplayId();
-    const Rect& displayRect = displayGroupInfo_->GetDisplayRect(displayId);
-    auto displayInfo = displayGroupInfo_->GetDisplayInfo(displayId);
-    auto type = node->GetWindowType();
-    Rect rect = node->GetRequestRect();
-    switch (type) {
-        case WindowType::WINDOW_TYPE_STATUS_BAR:
-            rect.posY_ = displayRect.posY_;
-            break;
-        case WindowType::WINDOW_TYPE_NAVIGATION_BAR:
-            rect.posY_ = static_cast<int32_t>(displayRect.height_) + displayRect.posY_ -
-                static_cast<int32_t>(rect.height_);
-            break;
-        default:
-            if (!displayInfo->GetWaterfallDisplayCompressionStatus()) {
-                return;
-            }
-            rect.posY_ = std::max(rect.posY_, displayRect.posY_);
-            rect.posY_ = std::min(rect.posY_, displayRect.posY_ + static_cast<int32_t>(displayRect.height_));
-    }
-    node->SetRequestRect(rect);
-    WLOGFD("[After fix rect], winId: %{public}d, requestRect: [%{public}d, %{public}d, %{public}u, %{public}u]",
-        node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
-}
-
 void WindowLayoutPolicyCascade::SetCascadeRectCfg(const std::vector<int>& numbers)
 {
     if (numbers.size() != 4 || numbers[2] == 0) { // 4 is rect's size and 2 is rect's width
