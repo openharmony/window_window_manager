@@ -321,6 +321,8 @@ HWTEST_F(RemoteAnimationTest, CreateWindowAnimationTarget01, Function | SmallTes
     srcNode->GetWindowProperty()->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
     EXPECT_EQ(nullptr, RemoteAnimation::CreateWindowAnimationTarget(transitionInfo_, srcNode)); // no surfaceNode
     EXPECT_NE(nullptr, RemoteAnimation::CreateWindowAnimationTarget(transitionInfo_, node_));
+    node_->startingWinSurfaceNode_ = nullptr;
+    EXPECT_NE(nullptr, RemoteAnimation::CreateWindowAnimationTarget(transitionInfo_, node_)); // start win null
 }
 
 /**

@@ -92,4 +92,6 @@
             </shadow>
         </appWindows>
     </windowEffect>
+    <!--startWindowTransitionAnimation enable is true means startWindow replace with alpha animation-->
+    <startWindowTransitionAnimation enable="false"></startWindowTransitionAnimation>
 </Configs>
