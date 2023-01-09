@@ -233,9 +233,19 @@ HWTEST_F(WindowControllerTest, FocusWindow, Function | SmallTest | Level3)
  */
 HWTEST_F(WindowControllerTest, CreateWindow, Function | SmallTest | Level3)
 {
+    windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
     sptr<WindowProperty> property = new WindowProperty();
     std::shared_ptr<RSSurfaceNode> surfaceNode;
+
+    sptr<WindowProperty> property2 = new WindowProperty();
+    property2->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowNode> windowNode = new WindowNode(property2);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(1,windowNode));
+    sptr<WindowProperty> property3 = new WindowProperty();
+    property3->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
+    sptr<WindowNode> windowNode2 = new WindowNode(property3);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(2,windowNode2));
 
     uint32_t windowId;
     property->SetParentId(INVALID_WINDOW_ID);
@@ -243,12 +253,13 @@ HWTEST_F(WindowControllerTest, CreateWindow, Function | SmallTest | Level3)
 
     property->SetParentId(1);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE,
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARENT,
         windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
 
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ASSERT_EQ(WMError::WM_OK, windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
 
+    property->SetParentId(2);
     property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
     ASSERT_EQ(WMError::WM_OK, windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
     windowRoot_->windowNodeMap_.clear();
@@ -262,7 +273,7 @@ HWTEST_F(WindowControllerTest, CreateWindow, Function | SmallTest | Level3)
         windowController_->CreateWindow(window, property, surfaceNode, windowId, abilityTokenMocker, 0, 0));
 
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    ASSERT_EQ(WMError::WM_OK,
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARENT,
         windowController_->CreateWindow(window, property, surfaceNode, windowId, abilityTokenMocker, 0, 0));
 
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
