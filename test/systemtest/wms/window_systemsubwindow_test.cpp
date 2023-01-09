@@ -16,6 +16,8 @@
 // gtest
 #include <gtest/gtest.h>
 #include <ability_context.h>
+
+#include "window_test_utils.h"
 #include "window.h"
 #include "window_option.h"
 #include "window_scene.h"
@@ -184,11 +186,12 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow02, Function | MediumTest | L
 
 /**
  * @tc.name: SystemSubWindow03
- * @tc.desc: create sub windows with app main Windows
+ * @tc.desc: create sub windows with app main Windows, no allow to add as app_main_window's subwindow
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow03, Function | MediumTest | Level2)
 {
+
     std::vector<WindowType> windowTypes = { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
     for (auto itor = windowTypes.begin(); itor != windowTypes.end(); itor++) {
         struct Rect baseRect = {0, 0, 100, 200};
@@ -199,16 +202,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow03, Function | MediumTest | L
         struct Rect rect = {0, 0, 100, 200};
         uint32_t flags = 0;
         sptr<Window> subWindow = CreateSystemSubWindow(baseWindow, rect, flags);
-        ASSERT_NE(nullptr, subWindow);
-
-        ASSERT_EQ(WMError::WM_OK, baseWindow->Show());
-        ASSERT_EQ(WMError::WM_OK, subWindow->Show());
-
-        ASSERT_EQ(WMError::WM_OK, subWindow->Hide());
-        ASSERT_EQ(WMError::WM_OK, baseWindow->Hide());
-
-        ASSERT_EQ(WMError::WM_OK, subWindow->Destroy());
-        ASSERT_EQ(WMError::WM_OK, baseWindow->Destroy());
+        ASSERT_EQ(nullptr, subWindow);
     }
 }
 
