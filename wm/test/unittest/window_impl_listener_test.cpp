@@ -60,15 +60,15 @@ HWTEST_F(WindowImplListenerTest, BasicRegisterUnregister, Function | SmallTest |
 {
     std::vector<sptr<IWindowLifeCycle>> holder;
     sptr<IWindowLifeCycle> listener = nullptr;
-    window_->RegisterListenerLocked(holder, listener);
+    window_->RegisterListener(holder, listener);
     ASSERT_EQ(holder.size(), 0);
 
     listener = new IWindowLifeCycle();
-    window_->RegisterListenerLocked(holder, listener);
+    window_->RegisterListener(holder, listener);
     ASSERT_EQ(holder.size(), 1);
-    window_->RegisterListenerLocked(holder, listener);
+    window_->RegisterListener(holder, listener);
     ASSERT_EQ(holder.size(), 1);
-    window_->UnregisterListenerLocked(holder, listener);
+    window_->UnregisterListener(holder, listener);
     ASSERT_EQ(holder.size(), 0);
 }
 
