@@ -62,7 +62,8 @@ bool Session::IsSessionValid() const
 {
     bool res = state_ > SessionState::STATE_DISCONNECT;
     if (!res) {
-        WLOGFI("session is already destroyed or not created! id: %{public}u", GetPersistentId());
+        WLOGFI("session is already destroyed or not created! id: %{public}u state: %{public}u",
+            GetPersistentId(), state_);
     }
     return res;
 }

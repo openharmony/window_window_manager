@@ -22,6 +22,7 @@
 #include <unistd.h>
 
 #include <refbase.h>
+#include "iremote_object.h"
 #include "ws_single_instance.h"
 #include "window_scene_common.h"
 
@@ -44,6 +45,7 @@ private:
     std::vector<sptr<SceneSession>> sessions_;
     int pid_ = getpid();
     std::atomic<uint32_t> sessionId_ = INVALID_SESSION_ID;
+    std::map<uint32_t, sptr<IRemoteObject>> abilitySceneMap_;
 };
 }
 #endif // OHOS_ROSEN_SCENE_SESSION_MANAGER_H

@@ -55,7 +55,16 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
     sptr<AAFwk::SceneSessionInfo> sceneSessionInfo = new (std::nothrow) AAFwk::SceneSessionInfo();
     sceneSessionInfo->sceneSessionToken_ = sceneSession;
     sceneSessionInfo->surfaceNode_ = sceneSession->GetSurfaceNode();
+    sceneSessionInfo->persistentId_ = sceneSession->GetPersistentId();
     AAFwk::AbilityManagerClient::GetInstance()->StartAbilityByLauncher(want, startOptions, nullptr, sceneSessionInfo);
+
+    auto abilityToken = AAFwk::AbilityManagerClient::GetInstance()->GetTokenBySceneSession(
+        sceneSessionInfo->persistentId_);
+    if (abilityToken) {
+        WLOGFW("abilityToken is not null");
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    abilitySceneMap_.insert(std::make_pair(sceneSession->GetPersistentId(), abilityToken));
     return WSError::WS_OK;
 }
 
@@ -67,6 +76,14 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
     }
     sceneSession->Background();
     // TODO:AMS
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto persistentId = sceneSession->GetPersistentId();
+    if (abilitySceneMap_.count(persistentId) == 0) {
+        WLOGFE("persistentId:%{public}u not find ability.", persistentId);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    auto abilityToken = abilitySceneMap_[persistentId];
+    AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(abilityToken);
     return WSError::WS_OK;
 }
 
@@ -79,6 +96,14 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
     sceneSession->Disconnect();
     // TODO:AMS
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto persistentId = sceneSession->GetPersistentId();
+    if (abilitySceneMap_.count(persistentId) == 0) {
+        WLOGFE("persistentId:%{public}u not find ability.", persistentId);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    auto abilityToken = abilitySceneMap_[persistentId];
+    AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(abilityToken, -1);
+    abilitySceneMap_.erase(persistentId);
     auto iter = std::find(sessions_.begin(), sessions_.end(), sceneSession);
     if (iter == sessions_.end()) {
         WLOGFW("could not find session");
