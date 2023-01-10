@@ -129,7 +129,7 @@ private:
     sptr<WindowNode> FindRoot(WindowType type) const;
     sptr<WindowNode> FindWindowNodeById(uint32_t id) const;
     void UpdateFocusStatus(uint32_t id, bool focused);
-    void UpdateActiveStatus(uint32_t id, bool isActive) const;
+    void UpdateActiveStatus(uint32_t id, bool isActive);
     void NotifyIfAvoidAreaChanged(const sptr<WindowNode>& node, const AvoidControlType avoidType) const;
     void NotifyIfSystemBarTintChanged(DisplayId displayId) const;
     void NotifyIfSystemBarRegionChanged(DisplayId displayId) const;
@@ -170,6 +170,7 @@ private:
     uint32_t focusedWindow_ { INVALID_WINDOW_ID };
     int32_t focusedPid_ = -1;
     uint32_t activeWindow_ = INVALID_WINDOW_ID;
+    int32_t activePid_ = -1;
     bool isScreenLocked_ = false;
 
     std::vector<uint32_t> backupWindowIds_;

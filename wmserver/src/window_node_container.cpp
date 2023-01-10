@@ -718,8 +718,16 @@ void WindowNodeContainer::UpdateFocusStatus(uint32_t id, bool focused)
         WLOGFW("cannot find focused window id:%{public}d", id);
         return;
     }
-    if (focused && node->GetWindowProperty() != nullptr) {
+    if (focused) {
         focusedPid_ = node->GetCallingPid();
+    }
+
+    if (node->GetCallingPid() == 0) {
+        WLOGFW("focused window is starting window, no need notify");
+        return;
+    }
+
+    if (focused && node->GetWindowProperty() != nullptr) {
         AbilityInfo info = node->GetWindowProperty()->GetAbilityInfo();
         WLOGFW("current focus window: windowId: %{public}d, windowName: %{public}s, bundleName: %{public}s,"
             " abilityName: %{public}s, pid: %{public}d, uid: %{public}d", id,
@@ -740,12 +748,15 @@ void WindowNodeContainer::UpdateFocusStatus(uint32_t id, bool focused)
         focusChangeInfo, focused);
 }
 
-void WindowNodeContainer::UpdateActiveStatus(uint32_t id, bool isActive) const
+void WindowNodeContainer::UpdateActiveStatus(uint32_t id, bool isActive)
 {
     auto node = FindWindowNodeById(id);
     if (node == nullptr) {
         WLOGFE("cannot find active window id: %{public}d", id);
         return;
+    }
+    if (isActive) {
+        activePid_ = node->GetCallingPid();
     }
     if (node->GetWindowToken()) {
         node->GetWindowToken()->UpdateActiveStatus(isActive);
@@ -817,16 +828,11 @@ void WindowNodeContainer::AssignZOrder()
 WMError WindowNodeContainer::SetFocusWindow(uint32_t windowId)
 {
     if (focusedWindow_ == windowId) {
-        WLOGFI("focused window do not change, id: %{public}u", windowId);
+        WLOGFI("focused window no change, id: %{public}u, %{public}d", windowId, focusedPid_);
+        // StartingWindow can be focused and this pid is 0, then notify info in UpdateFocusStatus.
+        // This info is invalid, so we must notify again when first frame callback.
         if (focusedPid_ == 0) {
-            auto node = FindWindowNodeById(windowId);
-            if (node && node->GetWindowProperty() != nullptr) {
-                focusedPid_ = node->GetCallingPid();
-                WLOGFI("reset focus app info , pid: %{public}d", focusedPid_);
-                AbilityInfo info = node->GetWindowProperty()->GetAbilityInfo();
-                FocusAppInfo appInfo = { node->GetCallingPid(), node->GetCallingUid(), info.bundleName_, info.abilityName_ };
-                RSInterfaces::GetInstance().SetFocusAppInfo(appInfo);
-            }
+            UpdateFocusStatus(windowId, true);
         }
         return WMError::WM_DO_NOTHING;
     }
@@ -844,7 +850,10 @@ uint32_t WindowNodeContainer::GetFocusWindow() const
 WMError WindowNodeContainer::SetActiveWindow(uint32_t windowId, bool byRemoved)
 {
     if (activeWindow_ == windowId) {
-        WLOGFI("active window do not change, id: %{public}u", windowId);
+        WLOGI("active window not change, id: %{public}u, %{public}d", windowId, activePid_);
+        if (activePid_ == 0) {
+            UpdateActiveStatus(windowId, true);
+        }
         return WMError::WM_DO_NOTHING;
     }
     UpdateActiveStatus(activeWindow_, false);
