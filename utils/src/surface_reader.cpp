@@ -14,6 +14,7 @@
  */
 
 #include "surface_reader.h"
+#include "sync_fence.h"
 #include "window_manager_hilog.h"
 #include "unique_fd.h"
 
@@ -71,6 +72,8 @@ void SurfaceReader::OnVsync()
     int64_t timestamp = 0;
     Rect damage;
     auto sret = csurface_->AcquireBuffer(cbuffer, fence, timestamp, damage);
+    sptr<SyncFence> acquireFence = new SyncFence(fence);
+    acquireFence->Wait(3000); // 3000ms
     if (cbuffer == nullptr || sret != OHOS::SURFACE_ERROR_OK) {
         WLOGFE("SurfaceReader::OnVsync: surface buffer is null");
         return;
