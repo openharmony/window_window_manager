@@ -152,6 +152,7 @@ NativeValue* JsWindowStage::OnSetUIContent(NativeEngine& engine, NativeCallbackI
     auto uiContent = uiContent_.lock();
     if (uiContent) {
         uiContent->Initialize(contextUrl, info.argv[CONTENT_STORAGE_ARG]);
+        uiContent->Connect();
     }
 
     // weakScene->GetMainWindow()->SetUIContent(contextUrl, &engine, info.argv[CONTENT_STORAGE_ARG]);
