@@ -46,6 +46,7 @@ WSError SceneSession::Connect(const sptr<ISceneSessionStage>& sessionStage,
         return WSError::WS_ERROR_NULLPTR;
     }
     UpdateSessionState(SessionState::STATE_CONNECT);
+    UpdateSessionRect(winRect_, SessionSizeChangeReason::SHOW);
     return WSError::WS_OK;
 }
 
@@ -181,9 +182,11 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, SessionSizeChangeRea
     WLOGFI("session update rect: id: %{public}u, rect[%{public}d, %{public}d, %{public}u, %{public}u], "\
         "reason:%{public}u", GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
     if (!IsSessionValid()) {
+        winRect_ = rect;
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     sceneSessionStage_->UpdateSessionRect(rect, reason);
+    winRect_ = rect;
     return WSError::WS_OK;
 }
 

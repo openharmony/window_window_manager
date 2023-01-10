@@ -52,6 +52,7 @@ private:
     std::string sessionType_ = "";
     bool isActive_ = false;
     NotifyStartSceneFunc startSceneFunc_;
+    WSRect winRect_;
 };
 }
 #endif // OHOS_SCENE_SESSION_H

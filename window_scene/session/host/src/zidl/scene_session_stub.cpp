@@ -78,7 +78,7 @@ int SceneSessionStub::HandleDisconnect(MessageParcel& data, MessageParcel& reply
 
 int SceneSessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("Background!");
+    WLOGFD("Connect!");
     sptr<IRemoteObject> sceneSessionStageObject = data.ReadRemoteObject();
     sptr<ISceneSessionStage> sceneSessionStageProxy = iface_cast<ISceneSessionStage>(sceneSessionStageObject);
     sptr<IRemoteObject> eventChannelObject = data.ReadRemoteObject();
@@ -86,7 +86,7 @@ int SceneSessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
     if (sceneSessionStageProxy == nullptr || eventChannelProxy == nullptr) {
         WLOGFE("Failed to read scene session stage object or event channel object!");
         return ERR_INVALID_DATA;
-    } 
+    }
     WSError errCode = Connect(sceneSessionStageProxy, eventChannelProxy);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
