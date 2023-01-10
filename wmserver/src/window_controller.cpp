@@ -193,7 +193,7 @@ bool WindowController::CheckParentWindowValid(const sptr<WindowProperty>& proper
             return false;
         }
         sptr<WindowNode> parentWindow = windowRoot_->GetWindowNode(property->GetParentId());
-        if (parentWindow == nullptr || !WindowHelper::IsMainWindow(parentWindow->GetWindowType())) {
+        if (parentWindow == nullptr) {
             WLOGFE("failed, sub window parent type is error");
             return false;
         }
