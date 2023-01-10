@@ -13,13 +13,9 @@
 
 import("//build/ohos.gni")
 
-group("window_scene") {
+group("window_scene_napi_packages") {
   public_deps = [
-    "interfaces/kits/napi/scene_session_manager:scenesessionmanager_napi",
-    "interfaces/kits/napi/screen_session_manager:screensessionmanager_napi",
-    "session/scene:scene_session",
-    "session/screen:screen_session",
-    "session_manager/scene:scene_session_manager",
-    "session_manager/screen:screen_session_manager",
+    "scene_session_manager:scenesessionmanager_napi",
+    "screen_session_manager:screensessionmanager_napi",
   ]
 }

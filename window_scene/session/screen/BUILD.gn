@@ -13,13 +13,24 @@
 
 import("//build/ohos.gni")
 
-group("window_scene") {
-  public_deps = [
-    "interfaces/kits/napi/scene_session_manager:scenesessionmanager_napi",
-    "interfaces/kits/napi/screen_session_manager:screensessionmanager_napi",
-    "session/scene:scene_session",
-    "session/screen:screen_session",
-    "session_manager/scene:scene_session_manager",
-    "session_manager/screen:screen_session_manager",
+config("screen_session_public_config") {
+  include_dirs = [
+    "//foundation/window/window_manager/window_scene",
   ]
+}
+
+ohos_shared_library("screen_session") {
+  sources = [
+    "src/screen_property.cpp",
+    "src/screen_session.cpp",
+  ]
+
+  cflags_cc = [ "-std=c++17" ]
+
+  public_configs = [ ":screen_session_public_config" ]
+
+  deps = [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
 }
