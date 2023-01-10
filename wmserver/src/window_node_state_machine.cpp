@@ -154,5 +154,16 @@ WindowNodeState WindowNodeStateMachine::GetCurrentState()
 {
     return currState_;
 }
+
+std::string WindowNodeStateMachine::GenStateMachineInfo()
+{
+    std::ostringstream oss;
+    oss << "windowId: " << windowId_
+        << ", animationTask: " << count1 << ", callbackTaskCount: " << count2++
+        << ", totalCount: " << taskCount_
+        << ", currentState: " << static_cast<int32_t>(currState_) << ";";
+    std::string info(oss.str());
+    return info;
+}
 } // Rosen
 } // OHOS

@@ -17,6 +17,7 @@
 
 #include <ability_manager_client.h>
 #include <common/rs_rect.h>
+#include <hisysevent.h>
 #include <hitrace_meter.h>
 #include <string>
 #include <transaction/rs_transaction.h>
@@ -485,6 +486,8 @@ void RemoteAnimation::GetAnimationTargetsForHome(std::vector<sptr<RSWindowAnimat
             WLOGFE("srcNode is already hiding or hidden id: %{public}d!", srcNode->GetWindowId());
             continue;
         }
+        StartAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION_HOME),
+            "wms:async:RemoteAnimationHome");
         srcNode->isPlayAnimationHide_ = true;
         srcNode->stateMachine_.TransitionTo(WindowNodeState::HIDE_ANIMATION_PLAYING);
         srcNode->stateMachine_.UpdateAnimationTaskCount(true);
@@ -528,17 +531,16 @@ WMError RemoteAnimation::NotifyAnimationByHome()
     std::function<void(void)> func;
     if (animationFirst_) {
         MinimizeApp::ExecuteMinimizeTargetReasons(MinimizeReason::MINIMIZE_ALL);
-        FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
-            "wms:async:ShowRemoteAnimation");
         func = [needMinimizeAppNodes]() {
             WLOGFI("NotifyAnimationByHome in animation callback in animationFirst with size:%{public}u",
                 static_cast<uint32_t>(needMinimizeAppNodes.size()));
             for (auto& weakNode : needMinimizeAppNodes) {
                 auto srcNode = weakNode.promote();
                 ProcessNodeStateTask(srcNode);
+                FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER,
+                    static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION_HOME),
+                    "wms:async:RemoteAnimationHome");
             }
-            FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
-                "wms:async:ShowRemoteAnimation");
         };
     } else {
         GetAnimationHomeFinishCallback(func, needMinimizeAppNodes);
@@ -722,6 +724,26 @@ void RemoteAnimation::CallbackTimeOutProcess()
     }
 }
 
+static void ReportWindowAnimationAbnormalInfo(sptr<WindowNode>& node)
+{
+    std::ostringstream oss;
+    oss << "animation callback more than task: " << "window_name: " << node->GetWindowName() << ";";
+    std::string info = oss.str();
+    info += node->stateMachine_.GenStateMachineInfo();
+    int32_t ret = OHOS::HiviewDFX::HiSysEvent::Write(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "WINDOW_ANIMATION_ABNORMAL",
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        "PID", node->GetCallingPid(),
+        "UID", node->GetCallingUid(),
+        "PACKAGE_NAME", node->abilityInfo_.abilityName_,
+        "PROCESS_NAME", node->abilityInfo_.bundleName_,
+        "MSG", info);
+    if (ret != 0) {
+        WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
+    }
+}
+
 void RemoteAnimation::ProcessNodeStateTask(sptr<WindowNode>& node)
 {
     // when callback come, node maybe destroyed
@@ -733,6 +755,7 @@ void RemoteAnimation::ProcessNodeStateTask(sptr<WindowNode>& node)
     if (taskCount <= 0) { // no animation task but finishCallback come
         WLOGFE("ProcessNodeStateTask failed with windowId: %{public}u, name:%{public}s taskCount:%{public}d",
             node->GetWindowId(), node->GetWindowName().c_str(), taskCount);
+        ReportWindowAnimationAbnormalInfo(node);
         return;
     }
     node->stateMachine_.UpdateAnimationTaskCount(false);
