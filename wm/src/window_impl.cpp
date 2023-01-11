@@ -1355,7 +1355,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
     if (ret != WMError::WM_OK) {
         return ret;
     }
-
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     ret = SingletonContainer::Get<WindowAdapter>().AddWindow(property_);
     RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
     if (ret == WMError::WM_OK) {
@@ -1427,10 +1427,13 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y)
         GetRect() : property_->GetRequestRect();
     Rect moveRect = { x, y, rect.width_, rect.height_ }; // must keep w/h, which may maintain stashed resize info
     property_->SetRequestRect(moveRect);
-    if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         WLOGFD("window is hidden or created! id: %{public}u, oriPos: [%{public}d, %{public}d, "
                "movePos: [%{public}d, %{public}d]", property_->GetWindowId(), rect.posX_, rect.posY_, x, y);
         return WMError::WM_OK;
+        }
     }
 
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
@@ -1454,11 +1457,14 @@ WMError WindowImpl::Resize(uint32_t width, uint32_t height)
     Rect resizeRect = { rect.posX_, rect.posY_, width, height };
     property_->SetRequestRect(resizeRect);
     property_->SetDecoStatus(false);
-    if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         WLOGFD("window is hidden or created! id: %{public}u, oriRect: [%{public}u, %{public}u], "
                "resizeRect: [%{public}u, %{public}u]", property_->GetWindowId(), rect.width_,
                rect.height_, width, height);
         return WMError::WM_OK;
+        }
     }
 
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
