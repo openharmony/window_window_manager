@@ -48,6 +48,67 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
     return surfaceNode_;
 }
 
+bool Session::RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener)
+{
+    return RegisterListenerLocked(lifecycleListeners_, listener);
+}
+
+bool Session::UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener)
+{
+    return RegisterListenerLocked(lifecycleListeners_, listener);
+}
+
+template<typename T>
+bool Session::RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return false;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        WLOGFE("Listener already registered");
+        return true;
+    }
+    holder.emplace_back(listener);
+    return true;
+}
+
+template<typename T>
+bool Session::UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return false;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    holder.erase(std::remove_if(holder.begin(), holder.end(),
+        [listener](std::shared_ptr<T> registeredListener) {
+            return registeredListener == listener;
+        }), holder.end());
+    return true;
+}
+
+void Session::NotifyForeground()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (!listener.expired()) { 
+            listener.lock()->OnForeground();
+        }
+    }
+}
+
+void Session::NotifyBackground()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (!listener.expired()) { 
+            listener.lock()->OnBackground();
+        }
+    }
+}
+
 SessionState Session::GetSessionState() const
 {
     return state_;
