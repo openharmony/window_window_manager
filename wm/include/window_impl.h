@@ -262,20 +262,18 @@ public:
 private:
     template<typename T1, typename T2, typename Ret>
     using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
-    template<typename T> bool RegisterListenerLocked(std::vector<sptr<T>>& holder, const sptr<T>& listener);
-    template<typename T> void ClearUselessListeners(std::map<uint32_t, T>& listeners)
+    template<typename T> bool RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
+    template<typename T> bool UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
+    template<typename T> void ClearUselessListeners(std::map<uint32_t, T>& listeners, uint32_t winId)
     {
-        for (auto winId : deadWindows_) {
-            listeners.erase(winId);
-        }
+        listeners.erase(winId);
     }
-    template<typename T> bool UnregisterListenerLocked(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T>
     inline EnableIfSame<T, IWindowLifeCycle, std::vector<wptr<IWindowLifeCycle>>> GetListeners()
     {
         std::vector<wptr<IWindowLifeCycle>> lifecycleListeners;
         {
-            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            std::lock_guard<std::recursive_mutex> lock(globalMutex_);
             for (auto& listener : lifecycleListeners_[GetWindowId()]) {
                 lifecycleListeners.push_back(listener);
             }
@@ -287,7 +285,7 @@ private:
     {
         std::vector<wptr<IWindowChangeListener>> windowChangeListeners;
         {
-            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            std::lock_guard<std::recursive_mutex> lock(globalMutex_);
             for (auto& listener : windowChangeListeners_[GetWindowId()]) {
                 windowChangeListeners.push_back(listener);
             }
@@ -299,7 +297,7 @@ private:
     {
         std::vector<wptr<IAvoidAreaChangedListener>> avoidAreaChangeListeners;
         {
-            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            std::lock_guard<std::recursive_mutex> lock(globalMutex_);
             for (auto& listener : avoidAreaChangeListeners_[GetWindowId()]) {
                 avoidAreaChangeListeners.push_back(listener);
             }
@@ -323,7 +321,7 @@ private:
     {
         std::vector<wptr<IScreenshotListener>> screenshotListeners;
         {
-            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            std::lock_guard<std::recursive_mutex> lock(globalMutex_);
             for (auto& listener : screenshotListeners_[GetWindowId()]) {
                 screenshotListeners.push_back(listener);
             }
@@ -335,7 +333,7 @@ private:
     {
         std::vector<wptr<ITouchOutsideListener>> touchOutsideListeners;
         {
-            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            std::lock_guard<std::recursive_mutex> lock(globalMutex_);
             for (auto& listener : touchOutsideListeners_[GetWindowId()]) {
                 touchOutsideListeners.push_back(listener);
             }
@@ -347,7 +345,7 @@ private:
     {
         std::vector<wptr<IDialogTargetTouchListener>> dialogTargetTouchListeners;
         {
-            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            std::lock_guard<std::recursive_mutex> lock(globalMutex_);
             for (auto& listener : dialogTargetTouchListeners_[GetWindowId()]) {
                 dialogTargetTouchListeners.push_back(listener);
             }
@@ -371,7 +369,7 @@ private:
     {
         std::vector<wptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListeners;
         {
-            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            std::lock_guard<std::recursive_mutex> lock(globalMutex_);
             for (auto& listener : occupiedAreaChangeListeners_[GetWindowId()]) {
                 occupiedAreaChangeListeners.push_back(listener);
             }
@@ -381,7 +379,7 @@ private:
     template<typename T>
     inline EnableIfSame<T, IDialogDeathRecipientListener, wptr<IDialogDeathRecipientListener>> GetListener()
     {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
         return dialogDeathRecipientListener_[GetWindowId()];
     }
     inline void NotifyAfterForeground(bool needNotifyUiContent = true)
@@ -461,7 +459,7 @@ private:
             reason == WindowSizeChangeReason::DRAG_START || reason == WindowSizeChangeReason::RECOVER ||
             reason == WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::UNDEFINED;
     }
-    void DealWithDeadWindows();
+    void ClearListenersById(uint32_t winId);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void NotifyDisplayMoveChange(DisplayId from, DisplayId to);
@@ -486,7 +484,7 @@ private:
     void MapFloatingWindowToAppIfNeeded();
     void MapDialogWindowToAppIfNeeded();
     WMError UpdateProperty(PropertyChangeAction action);
-    WMError Destroy(bool needNotifyServer);
+    WMError Destroy(bool needNotifyServer, bool needClearListener = true);
     WMError SetBackgroundColor(uint32_t color);
     uint32_t GetBackgroundColor() const;
     void InitAbilityInfo();
@@ -533,7 +531,6 @@ private:
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> subWindowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> appFloatingWindowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> appDialogWindowMap_;
-    static std::vector<uint32_t> deadWindows_;
     sptr<WindowProperty> property_;
     WindowState state_ { WindowState::STATE_INITIAL };
     WindowTag windowTag_;
@@ -556,6 +553,7 @@ private:
     std::unique_ptr<Ace::UIContent> uiContent_;
     std::shared_ptr<AbilityRuntime::Context> context_;
     std::recursive_mutex mutex_;
+    static std::recursive_mutex globalMutex_;
     const float SYSTEM_ALARM_WINDOW_WIDTH_RATIO = 0.8;
     const float SYSTEM_ALARM_WINDOW_HEIGHT_RATIO = 0.3;
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
