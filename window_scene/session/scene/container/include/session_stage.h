@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <mutex>
+#include <refbase.h>
 #include <vector>
 
 // #include <i_input_event_consumer.h>
@@ -37,7 +38,7 @@ public:
     virtual void OnSizeChange(WSRect rect, SessionSizeChangeReason reason) = 0;
 };
 
-class SessionStage {
+class SessionStage : public virtual RefBase {
 #define CALL_SESSION_STATE_LISTENER(sessionStateCb, listeners) \
     do {                                                       \
         for (auto& listener : (listeners)) {                   \

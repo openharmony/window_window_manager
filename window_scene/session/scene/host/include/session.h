@@ -33,7 +33,7 @@ public:
     virtual void OnBackground() = 0;
 };
 
-class Session {
+class Session : public virtual RefBase {
 public:
     Session(const std::string& name);
     ~Session() = default;
