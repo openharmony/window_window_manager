@@ -232,6 +232,33 @@ NativeValue* WindowStageEventTypeInit(NativeEngine* engine)
     return objValue;
 }
 
+NativeValue* WindowEventTypeInit(NativeEngine* engine)
+{
+    WLOGFD("WindowEventTypeInit");
+
+    if (engine == nullptr) {
+        WLOGFE("Engine is nullptr");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("WINDOW_SHOWN", CreateJsValue(*engine,
+        static_cast<int32_t>(LifeCycleEventType::FOREGROUND)));
+    object->SetProperty("WINDOW_ACTIVE", CreateJsValue(*engine,
+        static_cast<int32_t>(LifeCycleEventType::ACTIVE)));
+    object->SetProperty("WINDOW_INACTIVE", CreateJsValue(*engine,
+        static_cast<int32_t>(LifeCycleEventType::INACTIVE)));
+    object->SetProperty("WINDOW_HIDDEN", CreateJsValue(*engine,
+        static_cast<int32_t>(LifeCycleEventType::BACKGROUND)));
+    return objValue;
+}
+
 NativeValue* WindowLayoutModeInit(NativeEngine* engine)
 {
     WLOGFD("WindowLayoutModeInit");

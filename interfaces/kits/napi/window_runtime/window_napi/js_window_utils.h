@@ -176,6 +176,7 @@ const std::map<ApiOrientation, Orientation> JS_TO_NATIVE_ORIENTATION_MAP {
     NativeValue* ColorSpaceInit(NativeEngine* engine);
     NativeValue* OrientationInit(NativeEngine* engine);
     NativeValue* WindowStageEventTypeInit(NativeEngine* engine);
+    NativeValue* WindowEventTypeInit(NativeEngine* engine);
     NativeValue* WindowLayoutModeInit(NativeEngine* engine);
     NativeValue* BlurStyleInit(NativeEngine* engine);
     NativeValue* WindowErrorCodeInit(NativeEngine* engine);
