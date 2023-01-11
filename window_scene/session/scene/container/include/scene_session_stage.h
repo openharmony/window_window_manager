@@ -23,7 +23,7 @@
 #include "zidl/window_event_channel_interface.h"
 
 namespace OHOS::Rosen {
-class SceneSessionStage : public SceneSessionStageStub, public SessionStage{
+class SceneSessionStage : public SceneSessionStageStub, public SessionStage {
 public:
     explicit SceneSessionStage(const sptr<ISceneSession>& sceneSession);
     ~SceneSessionStage() = default;
