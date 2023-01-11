@@ -484,7 +484,7 @@ private:
     void MapFloatingWindowToAppIfNeeded();
     void MapDialogWindowToAppIfNeeded();
     WMError UpdateProperty(PropertyChangeAction action);
-    WMError Destroy(bool needNotifyServer, bool needClearListener = false);
+    WMError Destroy(bool needNotifyServer, bool needClearListener = true);
     WMError SetBackgroundColor(uint32_t color);
     uint32_t GetBackgroundColor() const;
     void InitAbilityInfo();
