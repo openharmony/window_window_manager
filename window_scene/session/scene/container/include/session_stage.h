@@ -34,7 +34,7 @@ public:
 
 class ISessionChangeListener {
 public:
-    virtual void OnSizeChange(WSRect rect, SessionSizeChangeReason reason) {};
+    virtual void OnSizeChange(WSRect rect, SessionSizeChangeReason reason) = 0;
 };
 
 class SessionStage {

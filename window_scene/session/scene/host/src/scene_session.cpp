@@ -62,6 +62,7 @@ WSError SceneSession::Foreground()
         sceneSessionStage_->SetActive(true);
         UpdateSessionState(SessionState::STATE_ACTIVE);
     }
+    NotifyForeground();
     return WSError::WS_OK;
 }
 
@@ -84,6 +85,7 @@ WSError SceneSession::Background()
     if (state == SessionState::STATE_INACTIVE) {
         UpdateSessionState(SessionState::STATE_BACKGROUND);
     }
+    NotifyBackground();
     return WSError::WS_OK;
 }
 

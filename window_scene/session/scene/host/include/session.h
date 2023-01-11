@@ -16,7 +16,9 @@
 #ifndef OHOS_ORSEN_WINDOW_SCENE_SESSION_H
 #define OHOS_ORSEN_WINDOW_SCENE_SESSION_H
 
+#include <mutex>
 #include <string>
+#include <vector>
 
 #include <refbase.h>
 
@@ -24,6 +26,12 @@
 
 namespace OHOS::Rosen {
 class RSSurfaceNode;
+
+class ILifecycleListener {
+public:
+    virtual void OnForeground() = 0;
+    virtual void OnBackground() = 0;
+};
 
 class Session {
 public:
@@ -37,17 +45,49 @@ public:
     virtual WSError SetActive(bool active) = 0;
     virtual WSError UpdateSessionRect(const WSRect& rect, SessionSizeChangeReason reason) = 0;
 
+    bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
+    bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
+
 protected:
     SessionState GetSessionState() const;
     void UpdateSessionState(SessionState state);
     bool IsSessionValid() const;
 
+    void NotifyForeground();
+    void NotifyBackground();
+
 private:
+    template<typename T>
+    bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder,
+        const std::shared_ptr<T>& listener);
+    template<typename T>
+    bool UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder,
+        const std::shared_ptr<T>& listener);
+
+    template<typename T1, typename T2, typename Ret>
+    using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
+    template<typename T>
+    inline EnableIfSame<T, ILifecycleListener,
+        std::vector<std::weak_ptr<ILifecycleListener>>> GetListeners()
+    {
+        std::vector<std::weak_ptr<ILifecycleListener>> lifecycleListeners;
+        {
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            for (auto& listener : lifecycleListeners_) {
+                lifecycleListeners.push_back(listener);
+            }
+        }
+        return lifecycleListeners;
+    }
+
     std::shared_ptr<RSSurfaceNode> CreateSurfaceNode(std::string name);
 
     uint32_t persistentId_ = INVALID_SESSION_ID;
     std::shared_ptr<RSSurfaceNode> surfaceNode_ = nullptr;
     SessionState state_ = SessionState::STATE_DISCONNECT;
+
+    std::recursive_mutex mutex_;
+    std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;
 };
 }
 #endif // OHOS_ORSEN_WINDOW_SCENE_SESSION_H
