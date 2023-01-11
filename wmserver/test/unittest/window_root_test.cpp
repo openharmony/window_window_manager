@@ -442,7 +442,7 @@ HWTEST_F(WindowRootTest, WindowRootTest22, Function | SmallTest | Level2)
 
     windowRoot_->windowNodeMap_.insert(std::make_pair(node->GetWindowId(), node));
     ret = windowRoot_->RemoveWindowNode(node->GetWindowId(), true);
-    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_DISPLAY);
 }
 
 /**
@@ -460,7 +460,7 @@ HWTEST_F(WindowRootTest, WindowRootTest23, Function | SmallTest | Level2)
     sptr<WindowNode> node = new WindowNode();
     windowRoot_->windowNodeMap_.insert(std::make_pair(node->GetWindowId(), node));
     ret = windowRoot_->UpdateWindowNode(node->GetWindowId(), WindowUpdateReason::UPDATE_MODE);
-    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_DISPLAY);
 }
 
 /**
@@ -478,7 +478,7 @@ HWTEST_F(WindowRootTest, WindowRootTest24, Function | SmallTest | Level2)
     sptr<WindowNode> node = new WindowNode();
     windowRoot_->windowNodeMap_.insert(std::make_pair(node->GetWindowId(), node));
     ret = windowRoot_->UpdateSizeChangeReason(node->GetWindowId(), WindowSizeChangeReason::UNDEFINED);
-    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_DISPLAY);
 }
 
 /**
