@@ -3060,10 +3060,6 @@ bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)
 
 WMError WindowImpl::SetCornerRadius(float cornerRadius)
 {
-    if (!Permission::IsSystemCalling()) {
-        WLOGFE("set corner radius permission denied!");
-        return WMError::WM_ERROR_INVALID_PERMISSION;
-    }
     WLOGFI("[Client] Window %{public}s set corner radius %{public}f", name_.c_str(), cornerRadius);
     if (MathHelper::LessNotEqual(cornerRadius, 0.0)) {
         return WMError::WM_ERROR_INVALID_PARAM;

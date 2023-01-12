@@ -3368,6 +3368,11 @@ NativeValue* JsWindow::OnGetTransitionController(NativeEngine& engine, NativeCal
 
 NativeValue* JsWindow::OnSetCornerRadius(NativeEngine& engine, NativeCallbackInfo& info)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set corner radius permission denied!");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
+        return engine.CreateUndefined();
+    }
     if (info.argc < 1) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
