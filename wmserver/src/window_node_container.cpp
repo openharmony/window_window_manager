@@ -2051,15 +2051,22 @@ WMError WindowNodeContainer::SetWindowMode(sptr<WindowNode>& node, WindowMode ds
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
-    WMError res = WMError::WM_OK;
-    UpdateSizeChangeReason(node, srcMode, dstMode);
-    node->SetWindowMode(dstMode);
     auto windowPair = displayGroupController_->GetWindowPairByDisplayId(node->GetDisplayId());
     if (windowPair == nullptr) {
         WLOGFE("Window pair is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
+    WindowPairStatus status = windowPair->GetPairStatus();
+    // when status is single primary or single secondary, split node is abandoned to set mode
+    if (node->IsSplitMode() && (status == WindowPairStatus::SINGLE_PRIMARY ||
+        status == WindowPairStatus::SINGLE_SECONDARY)) {
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    WMError res = WMError::WM_OK;
+    UpdateSizeChangeReason(node, srcMode, dstMode);
+    node->SetWindowMode(dstMode);
     windowPair->UpdateIfSplitRelated(node);
+
     if (WindowHelper::IsMainWindow(node->GetWindowType())) {
         if (WindowHelper::IsFloatingWindow(node->GetWindowMode())) {
             NotifyDockWindowStateChanged(node, true);
