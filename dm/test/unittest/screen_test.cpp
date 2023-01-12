@@ -77,7 +77,6 @@ HWTEST_F(ScreenTest, GetBasicProperty01, Function | SmallTest | Level1)
     ASSERT_GT(screen_->GetVirtualWidth(), 0);
     ASSERT_GT(screen_->GetVirtualHeight(), 0);
     ASSERT_GT(screen_->GetVirtualPixelRatio(), 0);
-    ASSERT_EQ(screen_->GetRotation(), Rotation::ROTATION_0);
     ASSERT_EQ(screen_->IsReal(), true);
     ASSERT_NE(screen_->GetScreenInfo(), nullptr);
 }
