@@ -105,6 +105,16 @@ bool WindowPair::IsPaired() const
     return false;
 }
 
+bool WindowPair::IsAbnormalStatus() const
+{
+    if (status_ == WindowPairStatus::SINGLE_SPLIT || status_ == WindowPairStatus::PRIMARY_AND_DIVIDER ||
+        status_ == WindowPairStatus::SECONDARY_AND_DIVIDER) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 void WindowPair::SetSplitRatio(float ratio)
 {
     ratio_ = ratio;
@@ -127,7 +137,7 @@ sptr<WindowNode> WindowPair::GetDividerWindow() const
 
 bool WindowPair::IsForbidDockSliceMove() const
 {
-    if (status_ != WindowPairStatus::STATUS_PAIRED_DONE) {
+    if (status_ != WindowPairStatus::PAIRED_DONE) {
         return false;
     }
     uint32_t flag = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE);
@@ -223,7 +233,7 @@ void WindowPair::Clear()
         NotifyCreateOrDestroyDivider(divider_, true);
         divider_ = nullptr;
     }
-    status_ = WindowPairStatus::STATUS_EMPTY;
+    status_ = WindowPairStatus::EMPTY;
 }
 
 bool WindowPair::IsSplitRelated(sptr<WindowNode>& node) const
@@ -270,10 +280,23 @@ std::vector<sptr<WindowNode>> WindowPair::GetPairedWindows()
 {
     WLOGD("Get primary and secondary of window pair");
     std::vector<sptr<WindowNode>> pairWindows;
-    if (status_ == WindowPairStatus::STATUS_PAIRED_DONE && primary_ != nullptr && secondary_ != nullptr) {
+    if (status_ == WindowPairStatus::PAIRED_DONE && primary_ != nullptr && secondary_ != nullptr) {
         pairWindows = {primary_, secondary_};
     }
     return pairWindows;
+}
+
+bool WindowPair::StatusSupprtedWhenRecentUpdate(sptr<WindowNode>& node)
+{
+    WindowMode recentMode_ = node->GetWindowMode();
+    if (recentMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
+       (status_ == WindowPairStatus::SINGLE_SECONDARY || status_ == WindowPairStatus::SECONDARY_AND_DIVIDER)) {
+        return true;
+    } else if (recentMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY &&
+        (status_ == WindowPairStatus::SINGLE_PRIMARY || status_ == WindowPairStatus::PRIMARY_AND_DIVIDER)) {
+        return true;
+    }
+    return false;
 }
 
 void WindowPair::UpdateIfSplitRelated(sptr<WindowNode>& node)
@@ -293,7 +316,13 @@ void WindowPair::UpdateIfSplitRelated(sptr<WindowNode>& node)
     }
     WLOGI("Current status: %{public}u, window id: %{public}u mode: %{public}u",
         status_, node->GetWindowId(), node->GetWindowMode());
-    if (status_ == WindowPairStatus::STATUS_EMPTY) {
+    // when status not support to start recent, clear split node and return
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT && node->IsSplitMode() &&
+        !StatusSupprtedWhenRecentUpdate(node)) {
+        Clear();
+        return;
+    }
+    if (status_ == WindowPairStatus::EMPTY) {
         Insert(node);
         if (!isAllSplitAppWindowsRestoring_) {
             WindowMode holderMode = node->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ?
@@ -319,24 +348,29 @@ void WindowPair::UpdateWindowPairStatus()
     WLOGI("Update window pair status.");
     WindowPairStatus prevStatus = status_;
     if (primary_ != nullptr && secondary_ != nullptr && divider_ != nullptr) {
-        status_ = WindowPairStatus::STATUS_PAIRED_DONE;
+        status_ = WindowPairStatus::PAIRED_DONE;
     } else if (primary_ != nullptr && secondary_ != nullptr && divider_ == nullptr) {
-        status_ = WindowPairStatus::STATUS_PAIRING;
-    } else if (primary_ != nullptr && secondary_ == nullptr) {
-        status_ = WindowPairStatus::STATUS_SINGLE_PRIMARY;
-    } else if (primary_ == nullptr && secondary_ != nullptr) {
-        status_ = WindowPairStatus::STATUS_SINGLE_SECONDARY;
+        status_ = WindowPairStatus::PRIMARY_AND_SECONDARY;
+    } else if (primary_ != nullptr && secondary_ == nullptr && divider_ == nullptr) {
+        status_ = WindowPairStatus::SINGLE_PRIMARY;
+    } else if (primary_ != nullptr && secondary_ == nullptr && divider_ != nullptr) {
+        status_ = WindowPairStatus::PRIMARY_AND_DIVIDER;
+    } else if (primary_ == nullptr && secondary_ != nullptr && divider_ == nullptr) {
+        status_ = WindowPairStatus::SINGLE_SECONDARY;
+    } else if (primary_ == nullptr && secondary_ != nullptr && divider_ != nullptr) {
+        status_ = WindowPairStatus::SECONDARY_AND_DIVIDER;
+    } else if (primary_ == nullptr && secondary_ == nullptr && divider_ != nullptr) {
+        status_ = WindowPairStatus::SINGLE_SPLIT;
     } else {
-        status_ = WindowPairStatus::STATUS_EMPTY;
+        status_ = WindowPairStatus::EMPTY;
     }
-    if ((prevStatus == WindowPairStatus::STATUS_SINGLE_PRIMARY ||
-        prevStatus == WindowPairStatus::STATUS_SINGLE_SECONDARY || prevStatus == WindowPairStatus::STATUS_EMPTY) &&
-        status_ == WindowPairStatus::STATUS_PAIRING) {
+    if ((prevStatus == WindowPairStatus::SINGLE_PRIMARY ||
+        prevStatus == WindowPairStatus::SINGLE_SECONDARY || prevStatus == WindowPairStatus::EMPTY) &&
+        status_ == WindowPairStatus::PRIMARY_AND_SECONDARY) {
         // notify systemui to create divider
         NotifyCreateOrDestroyDivider(primary_, false);
-    } else if ((prevStatus == WindowPairStatus::STATUS_PAIRED_DONE || prevStatus == WindowPairStatus::STATUS_PAIRING) &&
-        (status_ != WindowPairStatus::STATUS_PAIRED_DONE && status_ != WindowPairStatus::STATUS_PAIRING)) {
-        // clear pair
+    } else if ((prevStatus == WindowPairStatus::PAIRED_DONE || prevStatus == WindowPairStatus::PRIMARY_AND_SECONDARY) &&
+        (status_ != WindowPairStatus::PAIRED_DONE && status_ != WindowPairStatus::PRIMARY_AND_SECONDARY)) {
         Clear();
     }
     DumpPairInfo();
@@ -388,6 +422,9 @@ void WindowPair::HandlePairedNodesChange()
         SwitchPosition();
     }
     UpdateWindowPairStatus();
+    if (IsAbnormalStatus()) {
+        Clear();
+    }
 }
 
 void WindowPair::Insert(sptr<WindowNode>& node)
@@ -412,6 +449,9 @@ void WindowPair::Insert(sptr<WindowNode>& node)
         MinimizeApp::AddNeedMinimizeApp(pairedNode, MinimizeReason::SPLIT_REPLACE);
     }
     UpdateWindowPairStatus();
+    if (IsAbnormalStatus()) {
+        Clear();
+    }
 }
 
 void WindowPair::DumpPairInfo()
@@ -469,7 +509,7 @@ void WindowPair::SetDividerRect(const Rect& rect)
 
 bool WindowPair::TakePairSnapshot()
 {
-    if (status_ == WindowPairStatus::STATUS_PAIRED_DONE && primary_ != nullptr && secondary_ != nullptr) {
+    if (status_ == WindowPairStatus::PAIRED_DONE && primary_ != nullptr && secondary_ != nullptr) {
         WLOGD("Take pair snapshot id:[%{public}u, %{public}u]", primary_->GetWindowId(), secondary_->GetWindowId());
         std::shared_ptr<Media::PixelMap> pixelMap;
         // get pixelmap time out 2000ms
