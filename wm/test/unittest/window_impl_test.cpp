@@ -176,7 +176,7 @@ HWTEST_F(WindowImplTest, CreateWindow03, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("CreateWindow03");
     sptr<WindowImpl> window = new WindowImpl(option);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->Create(1234));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARENT, window->Create(1234));
 }
 
 /**
@@ -197,7 +197,7 @@ HWTEST_F(WindowImplTest, CreateWindow04, Function | SmallTest | Level2)
     option_other->SetWindowName("CreateWindow04");
     sptr<WindowImpl> window_other = new WindowImpl(option_other);
 
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window_other->Create(INVALID_WINDOW_ID));
+    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window_other->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
     ASSERT_EQ(WMError::WM_OK, window_other->Destroy());
