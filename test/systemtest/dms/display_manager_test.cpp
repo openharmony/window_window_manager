@@ -31,7 +31,7 @@ using namespace testing::ext;
 namespace OHOS::Rosen {
 namespace  {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DisplayManagerTest"};
-    const int WAIT_FOR_SYNC_US = 1000 * 500;  // 500ms
+    const int WAIT_FOR_SYNC_US = 1;  // 1s
 }
 
 class DisplayChangeEventListener : public DisplayManager::IDisplayListener {
@@ -98,7 +98,7 @@ sptr<Window> DisplayManagerTest::CreateWindow(std::string name, WindowMode mode,
     sptr<Window> window = Window::Create(option->GetWindowName(), option);
     window->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     window->Show();
-    usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
+    sleep(WAIT_FOR_SYNC_US); // wait for rect updated
     width = window->GetRect().width_;
     height = window->GetRect().height_;
     DrawWindowColor(window, 0x66000000, width, height); // 0x66000000 color_black
@@ -129,14 +129,14 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindow, Function | SmallTest | Level2)
 {
     sptr<Window> window = CreateWindow("test", WindowMode::WINDOW_MODE_FULLSCREEN, Rect {0, 0, 0, 0});
     window->SetPrivacyMode(true);
-    usleep(WAIT_FOR_SYNC_US);
+    sleep(WAIT_FOR_SYNC_US);
     bool hasPrivateWindow = false;
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     DisplayManager::GetInstance().HasPrivateWindow(id, hasPrivateWindow);
     ASSERT_TRUE(hasPrivateWindow);
 
     window->SetPrivacyMode(false);
-    usleep(WAIT_FOR_SYNC_US);
+    sleep(WAIT_FOR_SYNC_US);
     DisplayManager::GetInstance().HasPrivateWindow(id, hasPrivateWindow);
     window->Destroy();
     ASSERT_TRUE(!hasPrivateWindow);
@@ -159,7 +159,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered, Function | SmallTest | Lev
     ASSERT_NE(nullptr, window1);
     ASSERT_NE(nullptr, window2);
     ASSERT_NE(nullptr, window3);
-    usleep(WAIT_FOR_SYNC_US);
+    sleep(WAIT_FOR_SYNC_US);
     bool hasPrivateWindow = false;
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     DisplayManager::GetInstance().HasPrivateWindow(id, hasPrivateWindow);
@@ -186,7 +186,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered01, Function | SmallTest | L
     ASSERT_NE(nullptr, window1);
     ASSERT_NE(nullptr, window2);
     ASSERT_NE(nullptr, window3);
-    usleep(WAIT_FOR_SYNC_US);
+    sleep(WAIT_FOR_SYNC_US);
     bool hasPrivateWindow = false;
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     DisplayManager::GetInstance().HasPrivateWindow(id, hasPrivateWindow);
@@ -224,7 +224,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered02, Function | SmallTest | L
     ASSERT_NE(nullptr, window2);
     ASSERT_NE(nullptr, window3);
     ASSERT_NE(nullptr, window4);
-    usleep(WAIT_FOR_SYNC_US);
+    sleep(WAIT_FOR_SYNC_US);
     bool hasPrivateWindow = false;
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     DisplayManager::GetInstance().HasPrivateWindow(id, hasPrivateWindow);
@@ -255,7 +255,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered03, Function | SmallTest | L
     ASSERT_NE(nullptr, window2);
     ASSERT_NE(nullptr, window3);
     ASSERT_NE(nullptr, window4);
-    usleep(WAIT_FOR_SYNC_US);
+    sleep(WAIT_FOR_SYNC_US);
     bool hasPrivateWindow = false;
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     DisplayManager::GetInstance().HasPrivateWindow(id, hasPrivateWindow);
@@ -280,7 +280,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowSkipSnapShot, Function | SmallTest 
     ASSERT_NE(nullptr, window1);
     ASSERT_NE(nullptr, window2);
     window2->SetSnapshotSkip(true);
-    usleep(WAIT_FOR_SYNC_US);
+    sleep(WAIT_FOR_SYNC_US);
     bool hasPrivateWindow = false;
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     DisplayManager::GetInstance().HasPrivateWindow(id, hasPrivateWindow);
