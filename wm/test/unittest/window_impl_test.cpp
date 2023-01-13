@@ -176,7 +176,7 @@ HWTEST_F(WindowImplTest, CreateWindow03, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("CreateWindow03");
     sptr<WindowImpl> window = new WindowImpl(option);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARENT, window->Create(1234))
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARENT, window->Create(1234));
 }
 
 /**
