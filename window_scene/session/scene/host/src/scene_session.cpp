@@ -54,7 +54,7 @@ WSError SceneSession::Foreground()
 {
     WLOGFI("Foreground session, id: %{public}u, state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()));
-    if (GetSessionState() != SessionState::STATE_CONNECT) {
+    if (GetSessionState() == SessionState::STATE_DISCONNECT) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_FOREGROUND);
