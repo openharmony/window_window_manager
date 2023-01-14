@@ -102,7 +102,8 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         return WSError::WS_ERROR_NULLPTR;
     }
     auto abilityToken = abilitySceneMap_[persistentId];
-    AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(abilityToken, -1);
+    AAFwk::Want resultWant;
+    AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(abilityToken, -1, &resultWant);
     abilitySceneMap_.erase(persistentId);
     auto iter = std::find(sessions_.begin(), sessions_.end(), sceneSession);
     if (iter == sessions_.end()) {
