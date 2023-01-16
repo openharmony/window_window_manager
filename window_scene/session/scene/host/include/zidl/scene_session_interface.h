@@ -40,7 +40,7 @@ public:
     virtual WSError Close() = 0;
     virtual WSError Recover() = 0;
     virtual WSError Maximum() = 0;
-    virtual WSError StartScene(const SceneAbilityInfo& info, SessionOption sessionOption) = 0;
+    virtual WSError StartScene(const SceneAbilityInfo& info) = 0;
 };
 }
 

@@ -33,7 +33,7 @@ class SceneSession;
 class SceneSessionManager {
 WS_DECLARE_SINGLE_INSTANCE(SceneSessionManager)
 public:
-    sptr<SceneSession> RequestSceneSession(const SceneAbilityInfo& abilityInfo, SessionOption option);
+    sptr<SceneSession> RequestSceneSession(const SceneAbilityInfo& abilityInfo);
     WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession);

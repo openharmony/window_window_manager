@@ -98,12 +98,11 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
 {
     WLOGFI("[NAPI]OnRequestSceneSession");
     WSErrorCode errCode = WSErrorCode::WS_OK;
-    if (info.argc < 2) { // 2: params num
+    if (info.argc < 1) { // 1: params num
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
     }
     SceneAbilityInfo abilityInfo;
-    SessionOption sessionOption = SessionOption::SESSION_MODE_FULLSCREEN;
     if (errCode == WSErrorCode::WS_OK) {
         // parse ability info
         NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
@@ -116,15 +115,6 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
                 errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
             }
         }
-
-        // parse scene option
-        NativeNumber* nativeOption = ConvertNativeValueTo<NativeNumber>(info.argv[1]);
-        if (nativeOption == nullptr) {
-            WLOGFE("[NAPI]Failed to convert parameter to session option");
-            errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
-        } else {
-            sessionOption = static_cast<SessionOption>(static_cast<uint32_t>(*nativeOption));
-        }
     }
 
     if (errCode == WSErrorCode::WS_ERROR_INVALID_PARAM) {
@@ -132,10 +122,9 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
-    WLOGFI("[NAPI]SceneInfo [%{public}s, %{public}s], option = %{public}u, err = %{public}d",
-        abilityInfo.bundleName_.c_str(), abilityInfo.abilityName_.c_str(),
-        static_cast<uint32_t>(sessionOption), errCode);
-    sptr<SceneSession> sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(abilityInfo, sessionOption);
+    WLOGFI("[NAPI]SceneInfo [%{public}s, %{public}s], err = %{public}d",
+        abilityInfo.bundleName_.c_str(), abilityInfo.abilityName_.c_str(), errCode);
+    sptr<SceneSession> sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(abilityInfo);
     if (sceneSession == nullptr) {
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
             "System is abnormal"));

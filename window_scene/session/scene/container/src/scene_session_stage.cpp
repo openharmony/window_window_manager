@@ -88,13 +88,13 @@ WSError SceneSessionStage::Disconnect()
     return WSError::WS_OK;
 }
 
-WSError SceneSessionStage::StartScene(const SceneAbilityInfo& info, SessionOption sessionOption)
+WSError SceneSessionStage::StartScene(const SceneAbilityInfo& info)
 {
     if (sceneSession_ == nullptr) {
         WLOGFE("sceneSession is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }
-    return sceneSession_->StartScene(info, sessionOption);
+    return sceneSession_->StartScene(info);
 }
 
 // TODO: may be delete

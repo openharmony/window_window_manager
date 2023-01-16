@@ -130,8 +130,7 @@ int SceneSessionStub::HandleStartScene(MessageParcel& data, MessageParcel& reply
 {
     WLOGFD("RequestActivation!");
     SceneAbilityInfo info = { data.ReadString(), data.ReadString() };
-    SessionOption sessionOption = static_cast<SessionOption>(data.ReadUint32());
-    WSError errCode = StartScene(info, sessionOption);
+    WSError errCode = StartScene(info);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

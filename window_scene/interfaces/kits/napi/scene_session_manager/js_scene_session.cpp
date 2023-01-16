@@ -94,13 +94,13 @@ NativeValue* JsSceneSession::OnRegisterCallback(NativeEngine& engine, NativeCall
     }
 
     std::weak_ptr<JsSceneSession> sessionWptr(shared_from_this());
-    NotifyStartSceneFunc func = [sessionWptr](const SceneAbilityInfo& info, SessionOption sessionOption) {
+    NotifyStartSceneFunc func = [sessionWptr](const SceneAbilityInfo& info) {
         auto jsSceneSession = sessionWptr.lock();
         if (jsSceneSession == nullptr) {
             WLOGFE("[NAPI]this scene session");
             return;
         }
-        jsSceneSession->StartScene(info, sessionOption);
+        jsSceneSession->StartScene(info);
     };
     session_->SetStartSceneEventListener(func);
     std::shared_ptr<NativeReference> callbackRef;
@@ -110,9 +110,9 @@ NativeValue* JsSceneSession::OnRegisterCallback(NativeEngine& engine, NativeCall
     return engine.CreateUndefined();
 }
 
-void JsSceneSession::StartScene(const SceneAbilityInfo& info, SessionOption sessionOption)
+void JsSceneSession::StartScene(const SceneAbilityInfo& info)
 {
-    auto session = SceneSessionManager::GetInstance().RequestSceneSession(info, sessionOption);
+    auto session = SceneSessionManager::GetInstance().RequestSceneSession(info);
     if (session == nullptr) {
         WLOGFE("[NAPI]target session is nullptr");
         return;

@@ -30,7 +30,7 @@ namespace {
 
 WS_IMPLEMENT_SINGLE_INSTANCE(SceneSessionManager)
 
-sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SceneAbilityInfo& abilityInfo, SessionOption option)
+sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SceneAbilityInfo& abilityInfo)
 {
     WLOGFI("abilityInfo: bundleName: %{public}s, abilityName: %{public}s", abilityInfo.bundleName_.c_str(),
         abilityInfo.abilityName_.c_str());
