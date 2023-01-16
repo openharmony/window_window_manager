@@ -682,7 +682,7 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
         WLOGFE("window is invalid");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if(!CheckSystemWindowPermission(property)) {
+    if (!CheckSystemWindowPermission(property)) {
         WLOGFE("create system window permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
