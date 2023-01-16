@@ -185,6 +185,10 @@ void WindowNodeContainer::LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool a
 {
     if (afterAnimation) {
         layoutPolicy_->PerformWindowLayout(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
+        // tile layout will change window mode from fullscreen to float
+        // notify systembar window to change color
+        NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_ADD);
+        DumpScreenWindowTreeByWinId(node->GetWindowId());
         return;
     }
     WLOGI("AddWindowNode Id:%{public}u, currState:%{public}u",
@@ -206,6 +210,10 @@ void WindowNodeContainer::LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool a
                 node->SetWindowSizeChangeReason(WindowSizeChangeReason::CUSTOM_ANIMATION_SHOW);
         }
         layoutPolicy_->PerformWindowLayout(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
+        // tile layout will change window mode from fullscreen to float
+        // notify systembar window to change color
+        NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_ADD);
+        DumpScreenWindowTreeByWinId(node->GetWindowId());
     }
 }
 
@@ -242,8 +250,6 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     }
     AssignZOrder();
     LayoutWhenAddWindowNode(node, afterAnimation);
-    NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_ADD);
-    DumpScreenWindowTreeByWinId(node->GetWindowId());
     UpdateCameraFloatWindowStatus(node, true);
     if (WindowHelper::IsAppWindow(node->GetWindowType())) {
         backupWindowIds_.clear();
