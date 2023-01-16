@@ -66,11 +66,6 @@ struct SceneAbilityInfo {
     std::string abilityName_ = "";
 };
 
-enum class SessionOption : uint32_t {
-    SESSION_MODE_FULLSCREEN,
-    SESSION_MODE_FLOATING,
-};
-
 enum class SessionSizeChangeReason : uint32_t {
     SHOW = 0,
     HIDE,

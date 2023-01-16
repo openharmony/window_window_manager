@@ -23,7 +23,7 @@
 
 namespace OHOS::Rosen {
 class SceneSession;
-using NotifyStartSceneFunc = std::function<void(const SceneAbilityInfo& info, SessionOption sessionOption)>;
+using NotifyStartSceneFunc = std::function<void(const SceneAbilityInfo& info)>;
 class SceneSession : public SceneSessionStub, public Session {
 public:
     explicit SceneSession(const SceneAbilityInfo& info);
@@ -38,7 +38,7 @@ public:
     virtual WSError Close() override;
     virtual WSError Recover() override;
     virtual WSError Maximum() override;
-    virtual WSError StartScene(const SceneAbilityInfo& info, SessionOption sessionOption) override;
+    virtual WSError StartScene(const SceneAbilityInfo& info) override;
 
     virtual WSError SetActive(bool active) override;
     virtual WSError UpdateSessionRect(const WSRect& rect, SessionSizeChangeReason reason) override;

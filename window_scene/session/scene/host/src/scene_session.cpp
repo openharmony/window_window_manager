@@ -148,10 +148,10 @@ WSError SceneSession::Maximum()
     return WSError::WS_OK;
 }
 
-WSError SceneSession::StartScene(const SceneAbilityInfo& info, SessionOption sessionOption)
+WSError SceneSession::StartScene(const SceneAbilityInfo& info)
 {
     if (startSceneFunc_) {
-        startSceneFunc_(info, sessionOption);
+        startSceneFunc_(info);
     }
     return WSError::WS_OK;
 }

@@ -182,7 +182,7 @@ WSError SceneSessionProxy::Maximum()
     return static_cast<WSError>(ret);
 }
 
-WSError SceneSessionProxy::StartScene(const SceneAbilityInfo& info, SessionOption sessionOption)
+WSError SceneSessionProxy::StartScene(const SceneAbilityInfo& info)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -193,10 +193,6 @@ WSError SceneSessionProxy::StartScene(const SceneAbilityInfo& info, SessionOptio
     }
     if (!(data.WriteString(info.bundleName_) && data.WriteString(info.abilityName_))) {
         WLOGFE("Write ability info failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteUint32(static_cast<uint32_t>(sessionOption))) {
-        WLOGFE("Write session option failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionMessage::TRANS_ID_START_SCENE),
