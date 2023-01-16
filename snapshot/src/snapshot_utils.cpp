@@ -245,7 +245,7 @@ bool SnapShotUtils::WriteRgb888ToJpeg(FILE* file, uint32_t width, uint32_t heigh
     jpeg.in_color_space = JCS_RGB;
     jpeg_set_defaults(&jpeg);
 
-    constexpr int32_t quality = 100;
+    constexpr int32_t quality = 75;
     jpeg_set_quality(&jpeg, quality, TRUE);
 
     jpeg_stdio_dest(&jpeg, file);
