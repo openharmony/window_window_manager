@@ -182,7 +182,7 @@ void WindowRoot::AddDeathRecipient(sptr<WindowNode> node)
         WLOGFE("failed, node is nullptr");
         return;
     }
-    WLOGFI("Add for window: %{public}u", node->GetWindowId());
+    WLOGI("Add for window: %{public}u", node->GetWindowId());
 
     auto remoteObject = node->GetWindowToken()->AsObject();
     windowIdMap_.insert(std::make_pair(remoteObject, node->GetWindowId()));
