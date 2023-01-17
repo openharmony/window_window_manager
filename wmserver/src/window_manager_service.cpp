@@ -899,7 +899,7 @@ void WindowManagerService::OnWindowEvent(Event event, const sptr<IRemoteObject>&
                 WLOGFD("window node is nullptr, REMOTE_DIED no need to destroy");
                 return;
             }
-            WLOGI("window %{public}% received REMOTE_DIED", windowId);
+            WLOGI("window %{public}u received REMOTE_DIED", windowId);
             node->stateMachine_.SetDestroyTaskParam(true);
             auto func = [this, windowId]() {
                 auto node = windowRoot_->GetWindowNode(windowId);
