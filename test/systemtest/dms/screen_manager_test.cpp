@@ -485,6 +485,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager08, Function | MediumTest | Level2)
 HWTEST_F(ScreenManagerTest, ScreenManager09, Function | MediumTest | Level2)
 {
     (void)system("param set rosen.uni.partialrender.enabled 0");
+
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
     defaultOption_.surface_ = utils.psurface_;
@@ -523,6 +524,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager09, Function | MediumTest | Level2)
     window->Show();
     sleep(TEST_SLEEP_S_LONG);
     window->Destroy();
+
     (void)system("param set rosen.uni.partialrender.enabled 4");
 }
 
@@ -877,15 +879,18 @@ HWTEST_F(ScreenManagerTest, VirtualExpandScreen01, Function | MediumTest | Level
     ASSERT_TRUE(utils.CreateSurface());
     defaultOption_.surface_ = utils.psurface_;
     defaultOption_.isForShot_ = true;
+
     CHECK_TEST_INIT_SCREEN_STATE
     ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
     sleep(TEST_SLEEP_S);
+
     CHECK_SCREEN_STATE_AFTER_CREATE_VIRTUAL_SCREEN
     CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
     sleep(TEST_SLEEP_S);
     std::vector<ExpandOption> options = {{defaultScreenId_, 0, 0}, {virtualScreenId, defaultWidth_, 0}};
     ScreenId expansionId = ScreenManager::GetInstance().MakeExpand(options);
     sleep(TEST_SLEEP_S);
+
     CheckScreenGroupState(ScreenCombination::SCREEN_EXPAND, ScreenGroupChangeEvent::ADD_TO_GROUP,
         virtualScreenId, group, screenGroupChangeListener);
     CheckScreenStateInGroup(true, group, groupId, virtualScreen, virtualScreenId);
@@ -908,6 +913,7 @@ HWTEST_F(ScreenManagerTest, VirtualExpandScreen01, Function | MediumTest | Level
     ASSERT_TRUE(screen);
     auto display = DisplayManager::GetInstance().GetDisplayByScreen(virtualScreenId);
     ASSERT_TRUE(display);
+
     uint32_t orientation = static_cast<uint32_t>(Orientation::VERTICAL);
     uint32_t end = static_cast<uint32_t>(Orientation::REVERSE_HORIZONTAL);
     ASSERT_TRUE(screenListener);
@@ -928,8 +934,8 @@ HWTEST_F(ScreenManagerTest, VirtualExpandScreen01, Function | MediumTest | Level
     window->Destroy();
     DMError res = ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
     sleep(TEST_SLEEP_S);
-
     ASSERT_EQ(DMError::DM_OK, res);
+
     ScreenManager::GetInstance().UnregisterScreenListener(screenListener);
     ScreenManager::GetInstance().UnregisterScreenGroupListener(screenGroupChangeListener);
     ScreenManager::GetInstance().UnregisterVirtualScreenGroupListener(virtualScreenGroupChangeListener);
