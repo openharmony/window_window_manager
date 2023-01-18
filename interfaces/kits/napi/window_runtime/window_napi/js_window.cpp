@@ -32,6 +32,7 @@
 #include "pixel_map_napi.h"
 #include "napi_remote_object.h"
 #include "permission.h"
+#include "request_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -1268,6 +1269,12 @@ NativeValue* JsWindow::OnBindDialogTarget(NativeEngine& engine, NativeCallbackIn
     sptr<IRemoteObject> token = nullptr;
     token = NAPI_ohos_rpc_getNativeRemoteObject(
         reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(info.argv[0]));
+    if (token == nullptr) {
+        std::shared_ptr<AbilityRuntime::RequestInfo> requestInfo = AbilityRuntime::RequestInfo::UnwrapRequestInfo(engine, info.argv[0]);
+        if (requestInfo != nullptr) {
+            token = requestInfo->GetToken();
+        }
+    }
     if (token == nullptr) {
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
