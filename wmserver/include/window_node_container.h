@@ -163,6 +163,7 @@ private:
     void RemoveFromRsTreeWhenRemoveWindowNode(sptr<WindowNode>& node, bool fromAnimation);
     void UpdateSizeChangeReason(sptr<WindowNode>& node, WindowMode srcMode, WindowMode dstMode);
     void ProcessInputMethodWindowAddAnimation(sptr<WindowNode>& node, std::function<void()> updateRSTreeFunc);
+    uint32_t GetAppWindowNum();
 
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     uint32_t brightnessWindow_ = INVALID_WINDOW_ID;
