@@ -250,6 +250,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
         RemoteAnimation::NotifyAnimationUpdateWallpaper(node);
     }
     WLOGFI("AddWindowNode windowId: %{public}u end", node->GetWindowId());
+    RSInterfaces::GetInstance().SetAppWindowNum(GetAppWindowNum());
     return WMError::WM_OK;
 }
 
@@ -364,7 +365,19 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node, bool fromA
         DisplayManagerServiceInner::GetInstance().SetGravitySensorSubscriptionEnabled();
     }
     WLOGFI("RemoveWindowNode windowId: %{public}u end", node->GetWindowId());
+    RSInterfaces::GetInstance().SetAppWindowNum(GetAppWindowNum());
     return WMError::WM_OK;
+}
+
+uint32_t WindowNodeContainer::GetAppWindowNum()
+{
+    uint32_t num = 0;
+    for (auto& child : appWindowNode_->children_) {
+        if (WindowHelper::IsAppWindow(child->GetWindowType())) {
+            num++;
+        }
+    }
+    return num;
 }
 
 WMError WindowNodeContainer::HandleRemoveWindow(sptr<WindowNode>& node)
