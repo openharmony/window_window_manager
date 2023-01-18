@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@ struct DMRect {
         return !this->operator==(a);
     }
 
-    bool isUninitializedRect() const
+    bool IsUninitializedRect() const
     {
         return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
     }
@@ -59,8 +59,8 @@ struct WaterfallDisplayAreaRects {
 
     bool isUninitialized() const
     {
-        return (left.isUninitializedRect() && top.isUninitializedRect() && right.isUninitializedRect() &&
-            bottom.isUninitializedRect());
+        return (left.IsUninitializedRect() && top.IsUninitializedRect() && right.IsUninitializedRect() &&
+            bottom.IsUninitializedRect());
     }
 };
 

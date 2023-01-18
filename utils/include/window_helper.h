@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -521,6 +521,33 @@ public:
 
         if ((!IsWindowModeSupported(modeSupportInfo, winMode)) ||
             (IsOnlySupportSplitAndShowWhenLocked(info->GetShowFlagWhenLocked(), modeSupportInfo))) {
+            return false;
+        }
+        return true;
+    }
+
+    static bool IsAspectRatioSatisfiedWithSizeLimits(const WindowSizeLimits& sizeLimits, float ratio, float vpr)
+    {
+        /*
+         * 1) Usually the size limits won't be empty after show window.
+         *    In case of SetAspectRatio is called befor show (size limits may be empty at that time) or the
+         *    sizeLimits is empty, there is no need to check ratio (layout will check), return true directly.
+         * 2) ratio : 0.0 means unset aspect ratio
+         */
+        if (sizeLimits.IsEmpty() || MathHelper::NearZero(ratio)) {
+            return true;
+        }
+
+        uint32_t winFrameW = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * vpr) * 2; // 2 mean double decor width
+        uint32_t winFrameH = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * vpr) +
+            static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * vpr); // decor height
+        uint32_t maxWidth = sizeLimits.maxWidth_ - winFrameW;
+        uint32_t minWidth = sizeLimits.minWidth_ - winFrameW;
+        uint32_t maxHeight = sizeLimits.maxHeight_ - winFrameH;
+        uint32_t minHeight = sizeLimits.minHeight_ - winFrameH;
+        float maxRatio = static_cast<float>(maxWidth) / static_cast<float>(minHeight);
+        float minRatio = static_cast<float>(minWidth) / static_cast<float>(maxHeight);
+        if (maxRatio < ratio || ratio < minRatio) {
             return false;
         }
         return true;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,12 +27,14 @@
 
 #include "display_manager_service_inner.h"
 #include "minimize_app.h"
+#include "persistent_storage.h"
 #include "remote_animation.h"
 #include "starting_window.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
 #include "wm_common.h"
+#include "wm_math.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -289,9 +291,8 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         property->SetDecoStatus(true);
     }
     node->GetWindowProperty()->CopyFrom(property);
-    // Need 'check permission'
-    // Need 'adjust property'
     UpdateWindowAnimation(node);
+
     WMError res = windowRoot_->AddWindowNode(property->GetParentId(), node);
     if (res != WMError::WM_OK) {
         MinimizeApp::ClearNodesWithReason(MinimizeReason::OTHER_WINDOW);
@@ -321,6 +322,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     } else if (WindowHelper::IsMainWindow(node->GetWindowType())) {
         MinimizeApp::ExecuteMinimizeTargetReasons(~MinimizeReason::OTHER_WINDOW);
     }
+
     return WMError::WM_OK;
 }
 
@@ -1323,10 +1325,53 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             node->GetWindowProperty()->SetPrivacyMode(property->GetPrivacyMode());
             break;
         }
+        case PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO: {
+            ret = SetAspectRatio(windowId, property->GetAspectRatio());
+            break;
+        }
         default:
             break;
     }
     return ret;
+}
+
+WMError WindowController::SetAspectRatio(uint32_t windowId, float ratio)
+{
+    WLOGI("SetAspectRatio, windowId: %{public}u, %{public}f", windowId, ratio);
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return WMError::WM_OK;
+    }
+    if (!WindowHelper::IsAspectRatioSatisfiedWithSizeLimits(node->GetWindowUpdatedSizeLimits(), ratio,
+        windowRoot_->GetVirtualPixelRatio(node->GetDisplayId()))) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    node->SetAspectRatio(ratio);
+
+    // perserve aspect ratio
+    std::vector<std::string> nameVector;
+    if (node->abilityInfo_.abilityName_.size() > 0) {
+        nameVector = WindowHelper::Split(node->abilityInfo_.abilityName_, ".");
+    }
+    std::string keyName = nameVector.empty() ? node->abilityInfo_.bundleName_ :
+                                               node->abilityInfo_.bundleName_ + "." + nameVector.back();
+    if (MathHelper::NearZero(ratio)) { // If ratio is 0.0, need to unset aspect and delete storage
+        if (PersistentStorage::HasKey(keyName, PersistentStorageType::ASPECT_RATIO)) {
+            PersistentStorage::Delete(keyName, PersistentStorageType::ASPECT_RATIO);
+        }
+        return WMError::WM_OK;
+    }
+    PersistentStorage::Insert(keyName, ratio, PersistentStorageType::ASPECT_RATIO);
+
+    WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_ASPECT_RATIO);
+    if (res != WMError::WM_OK) {
+        return res;
+    }
+    FlushWindowInfo(windowId);
+    return WMError::WM_OK;
 }
 
 WMError WindowController::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const
