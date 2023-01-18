@@ -1440,7 +1440,7 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y)
 
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
         WLOGFE("fullscreen window could not resize, winId: %{public}u", GetWindowId());
-        return WMError::WM_ERROR_OPER_FULLSCREEN_FAILED;
+        return WMError::WM_ERROR_INVALID_OPERATION;
     }
     property_->SetWindowSizeChangeReason(WindowSizeChangeReason::MOVE);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
@@ -1472,7 +1472,7 @@ WMError WindowImpl::Resize(uint32_t width, uint32_t height)
 
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
         WLOGFE("fullscreen window could not resize, winId: %{public}u", GetWindowId());
-        return WMError::WM_ERROR_OPER_FULLSCREEN_FAILED;
+        return WMError::WM_ERROR_INVALID_OPERATION;
     }
     property_->SetWindowSizeChangeReason(WindowSizeChangeReason::RESIZE);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
