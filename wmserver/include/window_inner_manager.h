@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,7 +54,8 @@ public:
     void CompleteFirstFrameDrawing(const wptr<WindowNode> &node);
 
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void NotifyDisplayChange(const std::map<DisplayId, Rect>& displayRectMap);
+    void SetDisplayGroupInfo(sptr<DisplayGroupInfo> displayGroupInfo);
+    void NotifyDisplayLimitRectChange(const std::map<DisplayId, Rect>& limitRectMap);
     bool NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty);
     void NotifyWindowEndUpMovingOrDragging(uint32_t windowId);

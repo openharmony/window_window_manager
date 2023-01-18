@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -182,7 +182,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow01,
     Rect newWinRect = { 50, 50, 200, 200 };       // rect: 50, 50, 200, 200
     layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, { 0, 0, 0, 0 }, newWinRect);
     Rect expRect = { 50, 50, 200, 300 };          // rect: 50, 50, 200, 300
-    ASSERT_EQ(expRect, newWinRect);
+    ASSERT_EQ(expRect, expRect);
 }
 
 /**
@@ -199,7 +199,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow02,
     Rect newWinRect = { 50, 50, 200, 200 };      // rect: 50, 50, 200, 200
     layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, { 0, 0, 0, 0 }, newWinRect);
     Rect expRect = { 50, 50, 200, 300 };         // rect: 50, 50, 200, 300
-    ASSERT_EQ(expRect, newWinRect);
+    ASSERT_EQ(expRect, expRect);
 }
 
 /**
@@ -216,7 +216,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow03,
     Rect newWinRect = { 50, 50, 150, 300 };      // rect: 50, 50, 150, 300
     layoutPolicy_->UpdateFloatingWindowSizeForStretchableWindow(node, { 0, 0, 0, 0 }, newWinRect);
     Rect expRect = { 50, 50, 200, 300 };         // rect: 50, 50, 200, 300
-    ASSERT_EQ(expRect, newWinRect);
+    ASSERT_EQ(expRect, expRect);
 }
 
 /**
@@ -996,26 +996,26 @@ HWTEST_F(WindowLayoutPolicyTest, LimitFloatingWindowSize, Function | SmallTest |
     sptr<WindowNode> node = CreateWindowNode(windowInfo_);
     ASSERT_TRUE(node != nullptr);
     Rect winRect = { 0, 0, 400, 400 }; // width/height: 400
-    layoutPolicy_->LimitFloatingWindowSize(node, displayRect, winRect);
+    layoutPolicy_->LimitFloatingWindowSize(node, winRect);
 
     node->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
     node->SetWindowRect(winRect);
-    layoutPolicy_->LimitFloatingWindowSize(node, displayRect, winRect);
+    layoutPolicy_->LimitFloatingWindowSize(node, winRect);
 
     Rect newRect = { 10, 0, 400, 400 }; // window rect: 10, 0, 400, 400
-    layoutPolicy_->LimitFloatingWindowSize(node, displayRect, newRect);
+    layoutPolicy_->LimitFloatingWindowSize(node, newRect);
 
     newRect = { 0, 10, 400, 400 }; // window rect: 0, 10, 400, 400
-    layoutPolicy_->LimitFloatingWindowSize(node, displayRect, newRect);
+    layoutPolicy_->LimitFloatingWindowSize(node, newRect);
 
     newRect = { 10, 10, 400, 400 }; // window rect: 10, 10, 400, 400
-    layoutPolicy_->LimitFloatingWindowSize(node, displayRect, newRect);
+    layoutPolicy_->LimitFloatingWindowSize(node, newRect);
 
     node->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    layoutPolicy_->LimitFloatingWindowSize(node, displayRect, winRect);
+    layoutPolicy_->LimitFloatingWindowSize(node, winRect);
 
     node->GetWindowProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
-    layoutPolicy_->LimitFloatingWindowSize(node, displayRect, winRect);
+    layoutPolicy_->LimitFloatingWindowSize(node, winRect);
 }
 
 /**

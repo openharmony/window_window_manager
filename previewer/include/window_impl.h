@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -189,6 +189,8 @@ public:
     virtual WMError NotifyMemoryLevel(int32_t level) const override;
     virtual bool IsAllowHaveSystemSubWindow() override;
     WmErrorCode RaiseToAppTop() override;
+    virtual WMError SetAspectRatio(float ratio) override;
+    virtual WMError UnsetAspectRatio() override;
 
 private:
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;

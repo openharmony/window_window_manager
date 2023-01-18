@@ -36,6 +36,7 @@ ohos_shared_library("libwmutil") {
     "src/display_info.cpp",
     "src/perform_reporter.cpp",
     "src/permission.cpp",
+    "src/persistent_storage.cpp",
     "src/screen_group_info.cpp",
     "src/screen_info.cpp",
     "src/screenshot_info.cpp",
@@ -76,6 +77,7 @@ ohos_shared_library("libwmutil") {
     "input:libmmi-client",
     "ipc:ipc_core",
     "multimedia_image_framework:image_native",
+    "preferences:native_preferences",
     "samgr:samgr_proxy",
   ]
   part_name = "window_manager"

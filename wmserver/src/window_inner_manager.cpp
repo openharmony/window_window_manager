@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -247,12 +247,20 @@ void WindowInnerManager::SetInputEventConsumer()
     moveDragController_->SetInputEventConsumer();
 }
 
-void WindowInnerManager::NotifyDisplayChange(const std::map<DisplayId, Rect>& displayRectMap)
+void WindowInnerManager::SetDisplayGroupInfo(sptr<DisplayGroupInfo> displayGroupInfo)
+{
+    if (moveDragController_ == nullptr || displayGroupInfo == nullptr) {
+        return;
+    }
+    moveDragController_->SetDisplayGroupInfo(displayGroupInfo);
+}
+
+void WindowInnerManager::NotifyDisplayLimitRectChange(const std::map<DisplayId, Rect>& limitRectMap)
 {
     if (moveDragController_ == nullptr) {
         return;
     }
-    moveDragController_->HandleDisplayChange(displayRectMap);
+    moveDragController_->HandleDisplayLimitRectChange(limitRectMap);
 }
 
 bool WindowInnerManager::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,

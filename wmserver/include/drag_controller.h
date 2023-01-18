@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,8 @@
 
 #include <refbase.h>
 
+#include "display_group_info.h"
+#include "display_info.h"
 #include "event_handler.h"
 #include "event_runner.h"
 #include "input_manager.h"
@@ -73,7 +75,8 @@ public:
     void HandleWindowRemovedOrDestroyed(uint32_t windowId);
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     uint32_t GetActiveWindowId() const;
-    void HandleDisplayChange(const std::map<DisplayId, Rect>& displayRectMap);
+    void SetDisplayGroupInfo(sptr<DisplayGroupInfo> displayGroupInfo);
+    void HandleDisplayLimitRectChange(const std::map<DisplayId, Rect>& limitRectMap);
     void SetInputEventConsumer();
 
 private:
@@ -86,18 +89,21 @@ private:
     void ConvertPointerPosToDisplayGroupPos(DisplayId displayId, int32_t& posX, int32_t& posY);
 
     void HandlePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void HandleDragEvent(int32_t posX, int32_t posY, int32_t pointId, int32_t sourceType);
-    void HandleMoveEvent(int32_t posX, int32_t posY, int32_t pointId, int32_t sourceType);
+    void HandleDragEvent(DisplayId displayId, int32_t posX, int32_t posY, int32_t pointId, int32_t sourceType);
+    void HandleMoveEvent(DisplayId displayId, int32_t posX, int32_t posY, int32_t pointId, int32_t sourceType);
     void OnReceiveVsync(int64_t timeStamp);
     void ResetMoveOrDragState();
+    bool CheckWindowRect(DisplayId displayId, float vpr, const Rect& rect);
+    void CalculateNewWindowRect(Rect& newRect, DisplayId displayId, int32_t posX, int32_t posY);
 
     sptr<WindowProperty> windowProperty_;
     sptr<MoveDragProperty> moveDragProperty_;
+    sptr<DisplayGroupInfo> displayGroupInfo_;
     uint32_t activeWindowId_ = INVALID_WINDOW_ID;
     std::shared_ptr<MMI::PointerEvent> moveEvent_ = nullptr;
     std::shared_ptr<MMI::IInputEventConsumer> inputListener_ = nullptr;
     std::shared_ptr<VsyncCallback> vsyncCallback_ = std::make_shared<VsyncCallback>(VsyncCallback());
-    std::map<DisplayId, Rect> displayRectMap_;
+    std::map<DisplayId, Rect> limitRectMap_;
 
     // event handler for input event
     std::shared_ptr<EventHandler> inputEventHandler_;

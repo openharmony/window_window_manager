@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,6 @@
 
 #include "display.h"
 #include "vsync_station.h"
-#include "wm_common.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
@@ -26,6 +25,8 @@
 #include "window_node.h"
 #include "window_node_container.h"
 #include "window_property.h"
+#include "wm_common.h"
+#include "wm_math.h"
 #include "xcollie/watchdog.h"
 
 namespace OHOS {
@@ -248,24 +249,21 @@ void MoveDragController::HandleWindowRemovedOrDestroyed(uint32_t windowId)
 
 void MoveDragController::ConvertPointerPosToDisplayGroupPos(DisplayId displayId, int32_t& posX, int32_t& posY)
 {
-    if (displayRectMap_.size() <= 1) {
-        return;
-    }
-
-    auto iter = displayRectMap_.find(displayId);
-    if (iter == displayRectMap_.end()) {
-        return;
-    }
-    auto displayRect = iter->second;
+    auto displayRect = displayGroupInfo_->GetDisplayRect(displayId);
     posX += displayRect.posX_;
     posY += displayRect.posY_;
 }
 
-void MoveDragController::HandleDisplayChange(const std::map<DisplayId, Rect>& displayRectMap)
+void MoveDragController::SetDisplayGroupInfo(sptr<DisplayGroupInfo> displayGroupInfo)
 {
-    displayRectMap_.clear();
-    for (auto& elem : displayRectMap) {
-        displayRectMap_.insert(elem);
+    displayGroupInfo_ = displayGroupInfo;
+}
+
+void MoveDragController::HandleDisplayLimitRectChange(const std::map<DisplayId, Rect>& limitRectMap)
+{
+    limitRectMap_.clear();
+    for (auto& elem : limitRectMap) {
+        limitRectMap_.insert(elem);
     }
 }
 
@@ -318,49 +316,87 @@ Rect MoveDragController::GetHotZoneRect()
     return hotZoneRect;
 }
 
-void MoveDragController::HandleDragEvent(int32_t posX, int32_t posY, int32_t pointId, int32_t sourceType)
+bool MoveDragController::CheckWindowRect(DisplayId displayId, float vpr, const Rect& rect)
 {
-    if (moveDragProperty_ == nullptr) {
-        return;
+    uint32_t titleBarHeight = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * vpr);
+    auto iter = limitRectMap_.find(displayId);
+    Rect limitRect;
+    if (iter != limitRectMap_.end()) {
+        limitRect = iter->second;
     }
-    if (!moveDragProperty_->startDragFlag_ ||
-        (pointId != moveDragProperty_->startPointerId_) ||
-        (sourceType != moveDragProperty_->sourceType_)) {
-        return;
+    if (WindowHelper::IsEmptyRect(limitRect) || MathHelper::NearZero(vpr)) {
+        return true; // If limitRect is empty, we can't use limitRect to check window rect
     }
+
+    if ((rect.posX_ > static_cast<int32_t>(limitRect.posX_ + limitRect.width_ - titleBarHeight)) ||
+        (rect.posX_ + static_cast<int32_t>(rect.width_) <
+         static_cast<int32_t>(limitRect.posX_ + titleBarHeight)) ||
+        (rect.posY_ < limitRect.posY_) ||
+        (rect.posY_ > static_cast<int32_t>(limitRect.posY_ + limitRect.height_ - titleBarHeight))) {
+        WLOGFD("[WMS] Invalid window rect, id: %{public}u, rect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+            windowProperty_->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+        return false;
+    }
+    return true;
+}
+
+void MoveDragController::CalculateNewWindowRect(Rect& newRect, DisplayId displayId, int32_t posX, int32_t posY)
+{
     auto startPointPosX = moveDragProperty_->startPointPosX_;
     auto startPointPosY = moveDragProperty_->startPointPosY_;
     ConvertPointerPosToDisplayGroupPos(moveDragProperty_->targetDisplayId_, startPointPosX, startPointPosY);
     const auto& startPointRect = moveDragProperty_->startPointRect_;
-    Rect newRect = startPointRect;
     Rect hotZoneRect = GetHotZoneRect();
     int32_t diffX = posX - startPointPosX;
     int32_t diffY = posY - startPointPosY;
 
+    float vpr = displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
+    if (MathHelper::NearZero(vpr)) {
+        return;
+    }
+    uint32_t minWidth = static_cast<uint32_t>(MIN_FLOATING_WIDTH * vpr);
+    uint32_t minHeight = static_cast<uint32_t>(MIN_FLOATING_HEIGHT * vpr);
     if (startPointPosX <= hotZoneRect.posX_) {
-        if (diffX > static_cast<int32_t>(startPointRect.width_)) {
-            diffX = static_cast<int32_t>(startPointRect.width_);
+        if (diffX > static_cast<int32_t>(startPointRect.width_ - minWidth)) {
+            diffX = static_cast<int32_t>(startPointRect.width_ - minWidth);
         }
         newRect.posX_ += diffX;
         newRect.width_ = static_cast<uint32_t>(static_cast<int32_t>(newRect.width_) - diffX);
     } else if (startPointPosX >= hotZoneRect.posX_ + static_cast<int32_t>(hotZoneRect.width_)) {
-        if (diffX < 0 && (-diffX > static_cast<int32_t>(startPointRect.width_))) {
-            diffX = -(static_cast<int32_t>(startPointRect.width_));
+        if (diffX < 0 && (-diffX > static_cast<int32_t>(startPointRect.width_ - minWidth))) {
+            diffX = -(static_cast<int32_t>(startPointRect.width_ - minWidth));
         }
         newRect.width_ = static_cast<uint32_t>(static_cast<int32_t>(newRect.width_) + diffX);
     }
     if (startPointPosY <= hotZoneRect.posY_) {
-        if (diffY > static_cast<int32_t>(startPointRect.height_)) {
-            diffY = static_cast<int32_t>(startPointRect.height_);
+        if (diffY > static_cast<int32_t>(startPointRect.height_ - minHeight)) {
+            diffY = static_cast<int32_t>(startPointRect.height_ - minHeight);
         }
         newRect.posY_ += diffY;
         newRect.height_ = static_cast<uint32_t>(static_cast<int32_t>(newRect.height_) - diffY);
     } else if (startPointPosY >= hotZoneRect.posY_ + static_cast<int32_t>(hotZoneRect.height_)) {
-        if (diffY < 0 && (-diffY > static_cast<int32_t>(startPointRect.height_))) {
-            diffY = -(static_cast<int32_t>(startPointRect.height_));
+        if (diffY < 0 && (-diffY > static_cast<int32_t>(startPointRect.height_ - minHeight))) {
+            diffY = -(static_cast<int32_t>(startPointRect.height_ - minHeight));
         }
         newRect.height_ = static_cast<uint32_t>(static_cast<int32_t>(newRect.height_) + diffY);
     }
+}
+
+void MoveDragController::HandleDragEvent(DisplayId displayId, int32_t posX, int32_t posY,
+                                         int32_t pointId, int32_t sourceType)
+{
+    if (moveDragProperty_ == nullptr || !moveDragProperty_->startDragFlag_ ||
+        (pointId != moveDragProperty_->startPointerId_) || (sourceType != moveDragProperty_->sourceType_)) {
+        return;
+    }
+
+    Rect newRect = moveDragProperty_->startPointRect_;
+    CalculateNewWindowRect(newRect, displayId, posX, posY);
+
+    if (!CheckWindowRect(displayId, displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId), newRect)) {
+        return;
+    }
+
     WLOGFD("[WMS] HandleDragEvent, id: %{public}u, newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
         windowProperty_->GetWindowId(), newRect.posX_, newRect.posY_, newRect.width_, newRect.height_);
     windowProperty_->SetRequestRect(newRect);
@@ -369,7 +405,8 @@ void MoveDragController::HandleDragEvent(int32_t posX, int32_t posY, int32_t poi
     WindowManagerService::GetInstance().UpdateProperty(windowProperty_, PropertyChangeAction::ACTION_UPDATE_RECT, true);
 }
 
-void MoveDragController::HandleMoveEvent(int32_t posX, int32_t posY, int32_t pointId, int32_t sourceType)
+void MoveDragController::HandleMoveEvent(DisplayId displayId, int32_t posX, int32_t posY,
+                                         int32_t pointId, int32_t sourceType)
 {
     if (moveDragProperty_ == nullptr) {
         return;
@@ -385,8 +422,12 @@ void MoveDragController::HandleMoveEvent(int32_t posX, int32_t posY, int32_t poi
     int32_t targetX = moveDragProperty_->startPointRect_.posX_ + (posX - startPointPosX);
     int32_t targetY = moveDragProperty_->startPointRect_.posY_ + (posY - startPointPosY);
 
-    const Rect& oriRect = windowProperty_->GetRequestRect();
+    const Rect& oriRect = moveDragProperty_->startPointRect_;
     Rect newRect = { targetX, targetY, oriRect.width_, oriRect.height_ };
+    float vpr = displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
+    if (!CheckWindowRect(displayId, vpr, newRect)) {
+        return;
+    }
     WLOGFD("[WMS] HandleMoveEvent, id: %{public}u, newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
         windowProperty_->GetWindowId(), newRect.posX_, newRect.posY_, newRect.width_, newRect.height_);
     windowProperty_->SetRequestRect(newRect);
@@ -430,8 +471,8 @@ void MoveDragController::HandlePointerEvent(const std::shared_ptr<MMI::PointerEv
         }
         // ready to move or drag
         case MMI::PointerEvent::POINTER_ACTION_MOVE: {
-            HandleMoveEvent(pointPosX, pointPosY, pointId, sourceType);
-            HandleDragEvent(pointPosX, pointPosY, pointId, sourceType);
+            HandleMoveEvent(targetDisplayId, pointPosX, pointPosY, pointId, sourceType);
+            HandleDragEvent(targetDisplayId, pointPosX, pointPosY, pointId, sourceType);
             break;
         }
         // End move or drag

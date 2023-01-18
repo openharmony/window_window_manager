@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,12 +22,13 @@
 #include <transaction/rs_transaction.h>
 
 #include "display_manager_service_inner.h"
+#include "permission.h"
+#include "persistent_storage.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "window_manager_service.h"
 #include "window_manager_agent_controller.h"
-#include "permission.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -622,6 +623,26 @@ WMError WindowRoot::BindDialogToParent(sptr<WindowNode>& node, sptr<WindowNode>&
     return WMError::WM_OK;
 }
 
+void WindowRoot::GetStoragedAspectRatio(const sptr<WindowNode>& node)
+{
+    if (!WindowHelper::IsMainWindow(node->GetWindowType())) {
+        return;
+    }
+
+    std::string abilityName = node->abilityInfo_.abilityName_;
+    std::vector<std::string> nameVector;
+    if (abilityName.size() > 0) {
+        nameVector = WindowHelper::Split(abilityName, ".");
+    }
+    std::string keyName = nameVector.empty() ? node->abilityInfo_.bundleName_ :
+                                                node->abilityInfo_.bundleName_ + "." + nameVector.back();
+    if (PersistentStorage::HasKey(keyName, PersistentStorageType::ASPECT_RATIO)) {
+        float ratio = 0.0;
+        PersistentStorage::Get(keyName, ratio, PersistentStorageType::ASPECT_RATIO);
+        node->SetAspectRatio(ratio);
+    }
+}
+
 WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, bool fromStartingWin)
 {
     if (node == nullptr) {
@@ -669,6 +690,9 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
     if (res != WMError::WM_OK) {
         return res;
     }
+
+    // Get aspect ratio from persistent storage
+    GetStoragedAspectRatio(node);
 
     res = container->AddWindowNode(node, parentNode);
     if (res != WMError::WM_OK) {
