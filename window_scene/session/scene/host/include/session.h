@@ -45,6 +45,9 @@ public:
     virtual WSError SetActive(bool active) = 0;
     virtual WSError UpdateSessionRect(const WSRect& rect, SessionSizeChangeReason reason) = 0;
 
+    void NotifyForeground();
+    void NotifyBackground();
+
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
 
@@ -52,9 +55,6 @@ protected:
     SessionState GetSessionState() const;
     void UpdateSessionState(SessionState state);
     bool IsSessionValid() const;
-
-    void NotifyForeground();
-    void NotifyBackground();
 
 private:
     template<typename T>
