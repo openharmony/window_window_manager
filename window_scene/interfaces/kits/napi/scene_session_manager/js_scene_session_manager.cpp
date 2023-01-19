@@ -65,7 +65,6 @@ void JsSceneSessionManager::Finalizer(NativeEngine* engine, void* data, void* hi
     std::unique_ptr<JsSceneSessionManager>(static_cast<JsSceneSessionManager*>(data));
 }
 
-
 NativeValue* JsSceneSessionManager::RequestSceneSession(NativeEngine* engine, NativeCallbackInfo* info)
 {
     WLOGFI("[NAPI]RequestSceneSession");
@@ -115,6 +114,15 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
                 errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
             }
         }
+
+        // // parse scene option
+        // NativeNumber* nativeOption = ConvertNativeValueTo<NativeNumber>(info.argv[1]);
+        // if (nativeOption == nullptr) {
+        //     WLOGFE("[NAPI]Failed to convert parameter to session option");
+        //     errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
+        // } else {
+        //     sessionOption = static_cast<SessionOption>(static_cast<uint32_t>(*nativeOption));
+        // }
     }
 
     if (errCode == WSErrorCode::WS_ERROR_INVALID_PARAM) {
@@ -140,7 +148,6 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
         return jsSceneSessionObj;
     }
 }
-
 
 NativeValue* JsSceneSessionManager::OnRequestSceneSessionActivation(NativeEngine& engine, NativeCallbackInfo& info)
 {

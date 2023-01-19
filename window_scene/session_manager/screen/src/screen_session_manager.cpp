@@ -138,9 +138,10 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     }
 
     auto screenMode = rsInterface_.GetScreenActiveMode(screenId);
+    auto screenBounds = RRect({0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight()}, 0.0f, 0.0f);
     ScreenProperty property;
     property.SetRotation(0.0f);
-    property.SetSize({0.0f, 0.0f, screenMode.GetScreenWidth(), screenMode.GetScreenHeight()});
+    property.SetBounds(screenBounds);
     sptr<ScreenSession> session = new ScreenSession(screenId, property);
     screenSessionMap_[screenId] = session;
     return session;

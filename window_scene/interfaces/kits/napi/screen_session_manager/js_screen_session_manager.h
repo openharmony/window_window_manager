@@ -13,4 +13,28 @@
  * limitations under the License.
  */
 
+#ifndef OHOS_WINDOW_SCENE_JS_SCREEN_SESSION_MANAGER_H
+#define OHOS_WINDOW_SCENE_JS_SCREEN_SESSION_MANAGER_H
 
+#include <native_engine/native_engine.h>
+#include <native_engine/native_value.h>
+#include <refbase.h>
+
+namespace OHOS::Rosen {
+class JsScreenSessionManager final {
+public:
+    JsScreenSessionManager() = default;
+    ~JsScreenSessionManager() = default;
+
+    static NativeValue* Init(NativeEngine* engine, NativeValue* exportObj);
+    static void Finalizer(NativeEngine* engine, void* data, void* hint);
+
+private:
+    static NativeValue* RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info);
+
+    NativeValue* OnRegisterCallback(NativeEngine& engine, const NativeCallbackInfo& info);
+    void ProcessRegisterScreenConnection(NativeEngine& engine, const std::shared_ptr<NativeReference>& callback);
+};
+} // namespace OHOS::Rosen
+
+#endif // OHOS_WINDOW_SCENE_JS_SCREEN_SESSION_MANAGER_H
