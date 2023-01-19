@@ -13,4 +13,17 @@
  * limitations under the License.
  */
 
+#include <native_engine/native_engine.h>
 
+#include "js_screen_session_manager.h"
+
+extern "C" __attribute__((constructor)) void NAPI_screenSessionManager_AutoRegister()
+{
+    auto moduleManager = NativeModuleManager::GetInstance();
+    NativeModule newModuleInfo = {
+        .name = "screenSessionManager",
+        .fileName = "libscreensessionmanager_napi.so/screenSessionManager.js",
+        .registerCallback = OHOS::Rosen::JsScreenSessionManager::Init,
+    };
+    moduleManager->Register(&newModuleInfo);
+}

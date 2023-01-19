@@ -21,18 +21,18 @@ void ScreenProperty::SetRotation(float rotation)
     rotation_ = rotation;
 }
 
-float ScreenProperty::GetRotation()
+float ScreenProperty::GetRotation() const
 {
     return rotation_;
 }
 
-void ScreenProperty::SetSize(const RectF& size)
+void ScreenProperty::SetBounds(const RRect& bounds)
 {
-    size_ = size;
+    bounds_ = bounds;
 }
 
-RectF ScreenProperty::GetSize()
+RRect ScreenProperty::GetBounds() const
 {
-    return size_;
+    return bounds_;
 }
 } // namespace OHOS::Rosen

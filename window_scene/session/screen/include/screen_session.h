@@ -22,11 +22,21 @@
 #include "screen_property.h"
 
 namespace OHOS::Rosen {
-class ScreenChangeListener : public RefBase {
+
+class IScreenChangeListener : public RefBase {
 public:
+    IScreenChangeListener() = default;
+    virtual ~IScreenChangeListener() = default;
+
     virtual void OnConnect() = 0;
     virtual void OnDisconnect() = 0;
     virtual void OnPropertyChange(const ScreenProperty& newProperty) = 0;
+};
+
+enum class ScreenState : int32_t {
+    INIT,
+    CONNECTION,
+    DISCONNECTION,
 };
 
 class ScreenSession : public RefBase {
@@ -34,21 +44,19 @@ public:
     explicit ScreenSession(ScreenId screenId, const ScreenProperty& property);
     ~ScreenSession() = default;
 
-    void SetScreenChangeListener(sptr<ScreenChangeListener>& screenChangeListener);
+    void SetScreenChangeListener(sptr<IScreenChangeListener>& screenChangeListener);
+
+    ScreenId GetScreenId();
+    ScreenProperty GetScreenProperty() const;
 
     void Connect();
     void Disconnect();
 
-    void SetRotation(float rotation);
-    float GetRotation();
-
-    void SetSize(const RectF& size);
-    RectF GetSize();
-
 private:
     ScreenId screenId_;
     ScreenProperty property_;
-    sptr<ScreenChangeListener> screenChangeListener_;
+    ScreenState screenState_{ScreenState::INIT};
+    sptr<IScreenChangeListener> screenChangeListener_;
 };
 } // namespace OHOS::Rosen
 

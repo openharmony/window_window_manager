@@ -13,27 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ORSEN_WINDOW_SCENE_SCREEN_PROPERTY_H
-#define OHOS_ORSEN_WINDOW_SCENE_SCREEN_PROPERTY_H
+#ifndef OHOS_WINDOW_SCENE_JS_SCREEN_UTILS_H
+#define OHOS_WINDOW_SCENE_JS_SCREEN_UTILS_H
 
-#include "common/rs_rect.h"
+#include <native_engine/native_engine.h>
+#include <native_engine/native_value.h>
+
+#include "session/screen/include/screen_property.h"
 
 namespace OHOS::Rosen {
-class ScreenProperty {
+class JsScreenUtils {
 public:
-    ScreenProperty() = default;
-    ~ScreenProperty() = default;
-
-    void SetRotation(float rotation);
-    float GetRotation() const;
-
-    void SetBounds(const RRect& bounds);
-    RRect GetBounds() const;
-
-private:
-    float rotation_{0.0f};
-    RRect bounds_;
+    static NativeValue* CreateJsScreenProperty(NativeEngine& engine, const ScreenProperty& screenProperty);
+    static NativeValue* CreateJsRRect(NativeEngine& engine, const RRect& rrect);
 };
 } // namespace OHOS::Rosen
 
-#endif // OHOS_ORSEN_WINDOW_SCENE_SCREEN_PROPERTY_H
+#endif // OHOS_WINDOW_SCENE_JS_SCREEN_UTILS_H

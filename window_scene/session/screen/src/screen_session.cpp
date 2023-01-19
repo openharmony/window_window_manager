@@ -15,15 +15,52 @@
 
 #include "session/screen/include/screen_session.h"
 
+#include "utils/include/window_scene_hilog.h"
+
 namespace OHOS::Rosen {
+namespace {
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSession"};
+}
 
 ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property)
     : screenId_(screenId), property_(property)
 {
 }
 
+void ScreenSession::SetScreenChangeListener(sptr<IScreenChangeListener>& screenChangeListener)
+{
+    if (screenChangeListener == nullptr) {
+        WLOGFE("Failed to set screen change listener, listener is null!");
+        return;
+    }
+
+    if (screenChangeListener_ != nullptr) {
+        WLOGFE("Repeat to set screen change listener!");
+        return;
+    }
+
+    screenChangeListener_ = screenChangeListener;
+    if (screenState_ == ScreenState::CONNECTION) {
+        screenChangeListener_->OnConnect();
+    } else if (screenState_ == ScreenState::DISCONNECTION) {
+        screenChangeListener_->OnConnect();
+        screenChangeListener_->OnDisconnect();
+    }
+}
+
+ScreenId ScreenSession::GetScreenId()
+{
+    return screenId_;
+}
+
+ScreenProperty ScreenSession::GetScreenProperty() const
+{
+    return property_;
+}
+
 void ScreenSession::Connect()
 {
+    screenState_ = ScreenState::CONNECTION;
     if (screenChangeListener_ != nullptr) {
         screenChangeListener_->OnConnect();
     }
@@ -31,29 +68,10 @@ void ScreenSession::Connect()
 
 void ScreenSession::Disconnect()
 {
+    screenState_ = ScreenState::DISCONNECTION;
     if (screenChangeListener_ != nullptr) {
         screenChangeListener_->OnDisconnect();
     }
-}
-
-void ScreenSession::SetRotation(float rotation)
-{
-    property_.SetRotation(rotation);
-}
-
-float ScreenSession::GetRotation()
-{
-    return property_.GetRotation();
-}
-
-void ScreenSession::SetSize(const RectF& size)
-{
-    property_.SetSize(size);
-}
-
-RectF ScreenSession::GetSize()
-{
-    return property_.GetSize();
 }
 
 } // namespace OHOS::Rosen

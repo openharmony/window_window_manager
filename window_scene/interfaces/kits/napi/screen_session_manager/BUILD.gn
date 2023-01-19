@@ -16,16 +16,24 @@ import("//build/ohos.gni")
 ohos_shared_library("screensessionmanager_napi") {
   sources = [
     "js_screen_session_manager.cpp",
+    "js_screen_session.cpp",
+    "js_screen_utils.cpp",
     "screen_session_manager_module.cpp",
   ]
 
   cflags_cc = [ "-std=c++17" ]
 
   deps = [
-
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/window/window_manager/window_scene/session/screen:screen_session",
+    "//foundation/window/window_manager/window_scene/session_manager/screen:screen_session_manager",
   ]
 
-
+  external_deps = [
+    "ability_runtime:runtime",
+    "hilog_native:libhilog",
+    "napi:ace_napi",
+  ]
 
   relative_install_dir = "module"
   part_name = "window_manager"
