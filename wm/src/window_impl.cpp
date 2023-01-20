@@ -812,8 +812,9 @@ void WindowImpl::GetConfigurationFromAbilityInfo()
     property_->SetSizeLimits(sizeLimits);
 
     // get orientation configuration
-    DisplayOrientation displayOrientation = static_cast<DisplayOrientation>(
-        static_cast<uint32_t>(abilityInfo->orientation));
+    OHOS::AppExecFwk::DisplayOrientation displayOrientation =
+        static_cast<OHOS::AppExecFwk::DisplayOrientation>(
+            static_cast<uint32_t>(abilityInfo->orientation));
     if (ABILITY_TO_WMS_ORIENTATION_MAP.count(displayOrientation) == 0) {
         WLOGFE("id:%{public}u Do not support this Orientation type", property_->GetWindowId());
         return;

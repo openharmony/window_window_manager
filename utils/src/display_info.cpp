@@ -31,7 +31,7 @@ bool DisplayInfo::Marshalling(Parcel &parcel) const
         parcel.WriteInt32(offsetX_) && parcel.WriteInt32(offsetY_) &&
         parcel.WriteUint32(static_cast<uint32_t>(displayState_)) &&
         parcel.WriteBool(waterfallDisplayCompressionStatus_) &&
-        parcel.WriteInt32(dpi_);
+        parcel.WriteInt32(dpi_) && parcel.WriteUint32(static_cast<uint32_t>(displayOrientation_));
 }
 
 DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
@@ -44,6 +44,7 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
     uint32_t rotation;
     uint32_t orientation;
     uint32_t displayState;
+    uint32_t displayOrientation;
     bool res = parcel.ReadString(displayInfo->name_) &&
         parcel.ReadUint64(displayInfo->id_) && parcel.ReadUint32(type) &&
         parcel.ReadInt32(displayInfo->width_) && parcel.ReadInt32(displayInfo->height_) &&
@@ -53,7 +54,7 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
         parcel.ReadUint32(rotation) && parcel.ReadUint32(orientation) &&
         parcel.ReadInt32(displayInfo->offsetX_) && parcel.ReadInt32(displayInfo->offsetY_) &&
         parcel.ReadUint32(displayState) && parcel.ReadBool(displayInfo->waterfallDisplayCompressionStatus_) &&
-        parcel.ReadInt32(displayInfo->dpi_);
+        parcel.ReadInt32(displayInfo->dpi_) && parcel.ReadUint32(displayOrientation);
     if (!res) {
         delete displayInfo;
         return nullptr;
@@ -62,6 +63,7 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
     displayInfo->rotation_ = static_cast<Rotation>(rotation);
     displayInfo->orientation_ = static_cast<Orientation>(orientation);
     displayInfo->displayState_ = static_cast<DisplayState>(displayState);
+    displayInfo->displayOrientation_ = static_cast<DisplayOrientation>(displayOrientation);
     return displayInfo;
 }
 } // namespace OHOS::Rosen
