@@ -30,6 +30,16 @@ namespace {
 
 WS_IMPLEMENT_SINGLE_INSTANCE(SceneSessionManager)
 
+sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
+{
+    if (rootSceneSession_ != nullptr) {
+        return rootSceneSession_;
+    }
+
+    rootSceneSession_ = new RootSceneSession();
+    return rootSceneSession_;
+}
+
 sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SceneAbilityInfo& abilityInfo)
 {
     WLOGFI("abilityInfo: bundleName: %{public}s, abilityName: %{public}s", abilityInfo.bundleName_.c_str(),

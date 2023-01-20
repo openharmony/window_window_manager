@@ -26,7 +26,7 @@ namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSession"};
-    const std::string START_SCENE_CB = "startScene";
+    const std::string START_SCENE_CB = "requestSceneSessionActivation";
 }
 
 NativeValue* CreateJsSceneSessionObject(NativeEngine& engine, const sptr<SceneSession>& session)
@@ -35,7 +35,7 @@ NativeValue* CreateJsSceneSessionObject(NativeEngine& engine, const sptr<SceneSe
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
 
     WLOGFI("[NAPI]CreateJsSceneSession");
-    std::unique_ptr<JsSceneSession> jsSceneSession = std::make_unique<JsSceneSession>(&engine, session);
+    std::unique_ptr<JsSceneSession> jsSceneSession = std::make_unique<JsSceneSession>(engine, session);
     object->SetNativePointer(jsSceneSession.release(), JsSceneSession::Finalizer, nullptr);
     object->SetProperty("abilityInfo", CreateJsAbilityInfo(engine, session));
     object->SetProperty("persistentId", CreateJsValue(engine, session->GetPersistentId()));
@@ -127,13 +127,13 @@ void JsSceneSession::StartScene(const SceneAbilityInfo& info)
         session->GetPersistentId());
     std::weak_ptr<JsSceneSession> sessionWptr(shared_from_this());
     auto complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [sessionWptr, session, eng = engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [sessionWptr, session](NativeEngine& engine, AsyncTask& task, int32_t status) {
             auto jsSceneSession = sessionWptr.lock();
-            if (jsSceneSession == nullptr || eng == nullptr || session == nullptr) {
+            if (jsSceneSession == nullptr || session == nullptr) {
                 WLOGFE("[NAPI]this scene session or target session or engine is nullptr");
                 return;
             }
-            NativeValue* jsSceneSessionObj = CreateJsSceneSessionObject(*eng, session);
+            NativeValue* jsSceneSessionObj = CreateJsSceneSessionObject(engine, session);
             if (jsSceneSessionObj == nullptr) {
                 WLOGFE("[NAPI]this target session reference is nullptr");
             }
@@ -144,15 +144,15 @@ void JsSceneSession::StartScene(const SceneAbilityInfo& info)
 
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsSceneSession::StartScene", *engine_,
+    AsyncTask::Schedule("JsSceneSession::StartScene", engine_,
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsSceneSession::CallJsMethod(const char* methodName, NativeValue* const* argv, size_t argc)
 {
     WLOGFI("[NAPI]CallJsMethod methodName = %{public}s", methodName);
-    if (engine_ == nullptr || jsCallBack_ == nullptr) {
-        WLOGFE("[NAPI]engine_ nullptr or jsCallBack_ is nullptr");
+    if (jsCallBack_ == nullptr) {
+        WLOGFE("[NAPI]jsCallBack_ is nullptr");
         return;
     }
     NativeValue* method = jsCallBack_->Get();
@@ -160,7 +160,7 @@ void JsSceneSession::CallJsMethod(const char* methodName, NativeValue* const* ar
         WLOGFE("[NAPI]Failed to get method callback from object");
         return;
     }
-    engine_->CallFunction(engine_->CreateUndefined(), method, argv, argc);
+    engine_.CallFunction(engine_.CreateUndefined(), method, argv, argc);
 }
 
 bool JsSceneSession::IsCallbackRegistered(std::string type, NativeValue* jsListenerObject)

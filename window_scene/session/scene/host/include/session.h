@@ -36,7 +36,7 @@ public:
 class Session : public virtual RefBase {
 public:
     Session(const std::string& name);
-    ~Session() = default;
+    virtual ~Session() = default;
 
     void SetPersistentId(uint32_t persistentId);
     uint32_t GetPersistentId() const;

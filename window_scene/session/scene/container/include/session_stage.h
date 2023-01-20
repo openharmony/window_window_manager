@@ -50,7 +50,7 @@ class SessionStage : public virtual RefBase {
 
 public:
     SessionStage() = default;
-    ~SessionStage() = default;
+    virtual ~SessionStage() = default;
 
     virtual WSError Connect() = 0;
     virtual WSError Foreground() = 0;
