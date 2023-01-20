@@ -29,9 +29,9 @@
 
 namespace OHOS::Rosen {
 class SceneSession;
-class JsSceneSession final : public std::enable_shared_from_this<JsSceneSession> {
+class JsSceneSession : public std::enable_shared_from_this<JsSceneSession> {
 public:
-    explicit JsSceneSession(NativeEngine* engine, sptr<SceneSession> session) : engine_(engine), session_(session) {}
+    explicit JsSceneSession(NativeEngine& engine, sptr<SceneSession> session) : engine_(engine), session_(session) {}
     ~JsSceneSession() = default;
 
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
@@ -45,8 +45,8 @@ private:
     void CallJsMethod(const char* methodName, NativeValue* const* argv, size_t argc);
     bool IsCallbackRegistered(std::string type, NativeValue* jsListenerObject);
 
-    NativeEngine* engine_ = nullptr;
-    sptr<SceneSession> session_ = nullptr;
+    NativeEngine& engine_;
+    sptr<SceneSession> session_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     std::shared_ptr<NativeReference> jsCallBack_ = nullptr;
 };

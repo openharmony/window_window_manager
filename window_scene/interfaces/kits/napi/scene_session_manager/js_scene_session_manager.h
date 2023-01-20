@@ -28,6 +28,7 @@ public:
     static NativeValue* Init(NativeEngine* engine, NativeValue* exportObj);
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
 
+    static NativeValue* GetRootSceneSession();
     static NativeValue* RequestSceneSession(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* RequestSceneSessionActivation(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* RequestSceneSessionBackground(NativeEngine* engine, NativeCallbackInfo* info);

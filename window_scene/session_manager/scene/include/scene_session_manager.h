@@ -24,6 +24,7 @@
 #include <refbase.h>
 #include <iremote_object.h>
 
+#include "session/scene/host/include/root_scene_session.h"
 #include "utils/include/ws_single_instance.h"
 #include "utils/include/window_scene_common.h"
 
@@ -33,6 +34,7 @@ class SceneSession;
 class SceneSessionManager {
 WS_DECLARE_SINGLE_INSTANCE(SceneSessionManager)
 public:
+    sptr<RootSceneSession> GetRootSceneSession();
     sptr<SceneSession> RequestSceneSession(const SceneAbilityInfo& abilityInfo);
     WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession);
@@ -41,12 +43,12 @@ public:
 private:
     uint32_t GenSessionId();
 
-    // static inline SingletonDelegator<SceneSessionManager> delegator_;
     std::recursive_mutex mutex_;
     std::vector<sptr<SceneSession>> sessions_;
     int pid_ = getpid();
     std::atomic<uint32_t> sessionId_ = INVALID_SESSION_ID;
     std::map<uint32_t, sptr<IRemoteObject>> abilitySceneMap_;
+    sptr<RootSceneSession> rootSceneSession_;
 };
 }
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_H
