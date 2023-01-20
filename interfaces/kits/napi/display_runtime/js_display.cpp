@@ -205,6 +205,7 @@ NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& display)
     }
 
     object->SetProperty("rotation", CreateJsValue(engine, info->GetRotation()));
+    object->SetProperty("orientation", CreateJsValue(engine, info->GetDisplayOrientation()));
     object->SetProperty("densityDPI", CreateJsValue(engine, info->GetVirtualPixelRatio() * DOT_PER_INCH));
     object->SetProperty("densityPixels", CreateJsValue(engine, info->GetVirtualPixelRatio()));
     object->SetProperty("scaledDensity", CreateJsValue(engine, info->GetVirtualPixelRatio()));
