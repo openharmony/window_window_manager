@@ -366,7 +366,6 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node, bool fromA
     }
     NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_REMOVE);
     DumpScreenWindowTreeByWinId(node->GetWindowId());
-    RecoverScreenDefaultOrientationIfNeed(node->GetDisplayId());
     UpdateCameraFloatWindowStatus(node, false);
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
         isScreenLocked_ = false;
@@ -654,31 +653,6 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
         updateRSTreeFunc();
     }
     return true;
-}
-
-void WindowNodeContainer::RecoverScreenDefaultOrientationIfNeed(DisplayId displayId)
-{
-    if (displayGroupController_->displayGroupWindowTree_[displayId][WindowRootNodeType::APP_WINDOW_NODE]->empty()) {
-        WLOGI("appWindowNode_ child empty in display %{public}" PRIu64"", displayId);
-        auto aboveWindows =
-            *displayGroupController_->displayGroupWindowTree_[displayId][WindowRootNodeType::ABOVE_WINDOW_NODE];
-        for (auto iter = aboveWindows.begin(); iter != aboveWindows.end(); iter++) {
-            auto windowMode = (*iter)->GetWindowMode();
-            if (WindowHelper::IsFullScreenWindow(windowMode) || WindowHelper::IsSplitWindowMode(windowMode)) {
-                return;
-            }
-        }
-        auto belowWindows =
-            *displayGroupController_->displayGroupWindowTree_[displayId][WindowRootNodeType::BELOW_WINDOW_NODE];
-        Orientation targetOrientation = Orientation::UNSPECIFIED;
-        for (auto iter = belowWindows.begin(); iter != belowWindows.end(); iter++) {
-            if ((*iter)->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
-                targetOrientation = (*iter)->GetRequestedOrientation();
-                break;
-            }
-        }
-        DisplayManagerServiceInner::GetInstance().SetOrientationFromWindow(displayId, targetOrientation);
-    }
 }
 
 const std::vector<uint32_t>& WindowNodeContainer::Destroy()
@@ -1513,6 +1487,22 @@ sptr<WindowNode> WindowNodeContainer::GetNextFocusableWindow(uint32_t windowId) 
     };
     TraverseWindowTree(func, true);
     return nextFocusableWindow;
+}
+
+sptr<WindowNode> WindowNodeContainer::GetNextRotatableWindow(uint32_t windowId) const
+{
+    sptr<WindowNode> nextRotatableWindow;
+    WindowNodeOperationFunc func = [windowId, &nextRotatableWindow](
+        sptr<WindowNode> node) {
+        if (windowId != node->GetWindowId() &&
+            WindowHelper::IsRotatableWindow(node->GetWindowType(), node->GetWindowMode())) {
+            nextRotatableWindow = node;
+            return true;
+        }
+        return false;
+    };
+    TraverseWindowTree(func, true);
+    return nextRotatableWindow;
 }
 
 sptr<WindowNode> WindowNodeContainer::GetNextActiveWindow(uint32_t windowId) const
