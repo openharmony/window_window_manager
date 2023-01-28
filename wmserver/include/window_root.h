@@ -131,7 +131,7 @@ private:
     WMError DestroyWindowWithChild(sptr<WindowNode>& node, const sptr<WindowNodeContainer>& container);
     void UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node,
         const sptr<WindowNodeContainer>& container) const;
-    sptr<WindowNode> UpdateActiveWindowWithWindowRemoved(const sptr<WindowNode>& node,
+    void UpdateActiveWindowWithWindowRemoved(const sptr<WindowNode>& node,
         const sptr<WindowNodeContainer>& container) const;
     void UpdateBrightnessWithWindowRemoved(uint32_t windowId, const sptr<WindowNodeContainer>& container) const;
     std::string GenAllWindowsLogInfo() const;
