@@ -730,7 +730,7 @@ static void ReportWindowAnimationAbnormalInfo(sptr<WindowNode>& node)
     oss << "animation callback more than task: " << "window_name: " << node->GetWindowName() << ";";
     std::string info = oss.str();
     info += node->stateMachine_.GenStateMachineInfo();
-    int32_t ret = OHOS::HiviewDFX::HiSysEvent::Write(
+    int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
         "WINDOW_ANIMATION_ABNORMAL",
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
