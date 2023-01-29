@@ -50,6 +50,7 @@ public:
     MOCK_METHOD1(GetVisibilityWindowInfo, WMError(std::vector<sptr<WindowVisibilityInfo>>& infos));
     MOCK_METHOD1(GetAccessibilityWindowInfo, WMError(std::vector<sptr<AccessibilityWindowInfo>>& infos));
     MOCK_METHOD1(RaiseToAppTop, WmErrorCode(uint32_t windowId));
+    MOCK_METHOD1(GetSystemConfig, WMError(SystemConfig& systemConfig));
 };
 }
 } // namespace OHOS

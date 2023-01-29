@@ -335,6 +335,11 @@ HWTEST_F(WindowNodeTest, SetDecoStatus01, Function | SmallTest | Level1)
     ASSERT_EQ(true, windowNode->GetDecoStatus());
     windowNode->SetDecoStatus(false);
     ASSERT_EQ(false, windowNode->GetDecoStatus());
+
+    windowNode->SetDecorEnable(true);
+    ASSERT_EQ(true, windowNode->GetWindowProperty()->GetDecorEnable());
+    windowNode->SetDecorEnable(false);
+    ASSERT_EQ(false, windowNode->GetWindowProperty()->GetDecorEnable());
 }
 /**
  * @tc.name: SetRequestRect01

@@ -756,7 +756,7 @@ bool WindowProperty::Write(Parcel& parcel, PropertyChangeAction action)
                 parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_));
             break;
         case PropertyChangeAction::ACTION_UPDATE_MODE:
-            ret = ret && parcel.WriteUint32(static_cast<uint32_t>(mode_));
+            ret = ret && parcel.WriteUint32(static_cast<uint32_t>(mode_)) && parcel.WriteBool(isDecorEnable_);
             break;
         case PropertyChangeAction::ACTION_UPDATE_FLAGS:
             ret = ret && parcel.WriteUint32(flags_);
@@ -819,6 +819,7 @@ void WindowProperty::Read(Parcel& parcel, PropertyChangeAction action)
             break;
         case PropertyChangeAction::ACTION_UPDATE_MODE:
             SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
+            SetDecorEnable(parcel.ReadBool());
             break;
         case PropertyChangeAction::ACTION_UPDATE_FLAGS:
             SetWindowFlags(parcel.ReadUint32());
