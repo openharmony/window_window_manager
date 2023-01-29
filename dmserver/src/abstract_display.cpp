@@ -39,6 +39,11 @@ AbstractDisplay::AbstractDisplay(DisplayId id, std::string name,
       orientation_(absScreen->orientation_)
 {
     RequestRotation(absScreen->rotation_);
+    if (width_ > height_) {
+        displayOrientation_ = DisplayOrientation::LANDSCAPE;
+    } else {
+        displayOrientation_ = DisplayOrientation::PORTRAIT;
+    }
     auto numbersConfig = DisplayManagerConfig::GetIntNumbersConfig();
     if (numbersConfig.count("dpi") != 0) {
         uint32_t densityDpi = static_cast<uint32_t>(numbersConfig["dpi"][0]);
@@ -141,6 +146,11 @@ void AbstractDisplay::SetOrientation(Orientation orientation)
     orientation_ = orientation;
 }
 
+void AbstractDisplay::SetDisplayOrientation(DisplayOrientation displayOrientation)
+{
+    displayOrientation_ = displayOrientation;
+}
+
 bool AbstractDisplay::RequestRotation(Rotation rotation)
 {
     WLOGD("request rotation from %{public}u to %{public}u, display %{public}" PRIu64"", rotation_, rotation, id_);
@@ -163,6 +173,11 @@ Rotation AbstractDisplay::GetRotation() const
 Orientation AbstractDisplay::GetOrientation() const
 {
     return orientation_;
+}
+
+DisplayOrientation AbstractDisplay::GetDisplayOrientation() const
+{
+    return displayOrientation_;
 }
 
 void AbstractDisplay::SetFreezeFlag(FreezeFlag freezeFlag)
@@ -231,6 +246,7 @@ sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
     displayInfo->SetDpi(virtualPixelRatio_ * DOT_PER_INCH);
     displayInfo->displayState_ = displayState_;
     displayInfo->SetWaterfallDisplayCompressionStatus(waterfallDisplayCompressionStatus_);
+    displayInfo->SetDisplayOrientation(displayOrientation_);
     return displayInfo;
 }
 } // namespace OHOS::Rosen
