@@ -161,6 +161,14 @@ enum class Orientation : uint32_t {
     END = LOCKED,
 };
 
+enum class DisplayOrientation : uint32_t {
+    PORTRAIT = 0,
+    LANDSCAPE,
+    PORTRAIT_INVERTED,
+    LANDSCAPE_INVERTED,
+    UNKNOWN,
+};
+
 enum class DisplayChangeEvent : uint32_t {
     UPDATE_ORIENTATION,
     UPDATE_ROTATION,

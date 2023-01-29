@@ -53,6 +53,7 @@ public:
     sptr<DisplayInfo> ConvertToDisplayInfo() const;
     Rotation GetRotation() const;
     Orientation GetOrientation() const;
+    DisplayOrientation GetDisplayOrientation() const;
     FreezeFlag GetFreezeFlag() const;
 
     void SetId(DisplayId displayId);
@@ -64,6 +65,7 @@ public:
     void SetRefreshRate(uint32_t refreshRate);
     void SetVirtualPixelRatio(float virtualPixelRatio);
     void SetOrientation(Orientation orientation);
+    void SetDisplayOrientation(DisplayOrientation displayOrientation);
     bool RequestRotation(Rotation rotation);
     void SetFreezeFlag(FreezeFlag);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(bool, WaterfallDisplayCompressionStatus, waterfallDisplayCompressionStatus, false);
@@ -80,6 +82,7 @@ private:
     float virtualPixelRatio_ { 1.0 };
     Rotation rotation_ { Rotation::ROTATION_0 };
     Orientation orientation_ { Orientation::UNSPECIFIED };
+    DisplayOrientation displayOrientation_ { DisplayOrientation::UNKNOWN };
     FreezeFlag freezeFlag_ { FreezeFlag::UNFREEZING };
     DEFINE_VAR_DEFAULT_FUNC_SET(DisplayState, DisplayState, displayState, DisplayState::UNKNOWN);
 };
