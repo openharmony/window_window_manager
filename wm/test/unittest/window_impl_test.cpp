@@ -347,20 +347,20 @@ HWTEST_F(WindowImplTest, FindWindow05, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: FindTopWindow01
+ * @tc.name: FindWindowById01
  * @tc.desc: Find one top window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest, FindTopWindow01, Function | SmallTest | Level2)
+HWTEST_F(WindowImplTest, FindWindowById01, Function | SmallTest | Level2)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
-    option->SetWindowName("FindTopWindow01");
+    option->SetWindowName("FindWindowById01");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
-    ASSERT_NE(nullptr, window->FindTopWindow(window->property_->GetWindowId()));
+    ASSERT_NE(nullptr, window->FindWindowById(window->property_->GetWindowId()));
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1787,19 +1787,19 @@ HWTEST_F(WindowImplTest, CalculatePointerDirection, Function | SmallTest | Level
 }
 
  /*
- * @tc.name: FindTopWindow
- * @tc.desc: FindTopWindow Test
+ * @tc.name: FindWindowById
+ * @tc.desc: FindWindowById Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest, FindTopWindow, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest, FindWindowById, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new WindowOption();
-    option->SetWindowName("FindTopWindow");
+    option->SetWindowName("FindWindowById");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
-    ASSERT_EQ(nullptr, window->FindTopWindow(INVALID_WINDOW_ID));
-    ASSERT_EQ(sptr<Window>(window), window->FindTopWindow(window->GetWindowId()));
+    ASSERT_EQ(nullptr, window->FindWindowById(INVALID_WINDOW_ID));
+    ASSERT_EQ(sptr<Window>(window), window->FindWindowById(window->GetWindowId()));
     EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(nullptr, sptr<Window>(window)->GetTopWindowWithId(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
@@ -3014,6 +3014,106 @@ HWTEST_F(WindowImplTest, IsFocused, Function | SmallTest | Level3)
     ASSERT_TRUE(window->IsFocused());
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/*
+ * @tc.name: UpdateSubWindowStateAndNotify
+ * @tc.desc: update subwindow state
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, UpdateSubWindowStateAndNotify, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("main");
+    sptr<WindowImpl> mainWindow = new WindowImpl(option);
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, mainWindow->Create(INVALID_WINDOW_ID));
+    ASSERT_EQ(WmErrorCode::WM_OK, mainWindow->UpdateSubWindowStateAndNotify(mainWindow->GetWindowId()));
+
+    option = new WindowOption();
+    option->SetWindowName("sub");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowImpl> subWindow = new WindowImpl(option);
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, subWindow->Create(mainWindow->GetWindowId()));
+
+    // main window hide
+    mainWindow->state_ = WindowState::STATE_HIDDEN;
+    subWindow->state_ = WindowState::STATE_SHOWN;
+    subWindow->subWindowState_ = WindowState::STATE_SHOWN;
+    mainWindow->UpdateSubWindowStateAndNotify(mainWindow->GetWindowId());
+    ASSERT_EQ(subWindow->subWindowState_, WindowState::STATE_HIDDEN);
+
+    // main window show
+    mainWindow->state_ = WindowState::STATE_SHOWN;
+    subWindow->state_ = WindowState::STATE_SHOWN;
+    subWindow->subWindowState_ = WindowState::STATE_HIDDEN;
+    mainWindow->UpdateSubWindowStateAndNotify(mainWindow->GetWindowId());
+    ASSERT_EQ(subWindow->subWindowState_, WindowState::STATE_SHOWN);
+
+    subWindow->state_ = WindowState::STATE_HIDDEN;
+    mainWindow->UpdateSubWindowStateAndNotify(mainWindow->GetWindowId());
+    ASSERT_EQ(subWindow->subWindowState_, WindowState::STATE_HIDDEN);
+
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, mainWindow->Destroy());
+}
+
+/*
+ * @tc.name: UpdateWindowStateWhenHide
+ * @tc.desc: UpdateWindowStateWhenHide test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, UpdateWindowStateWhenHide, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("main");
+    sptr<WindowImpl> mainWindow = new WindowImpl(option);
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, mainWindow->Create(INVALID_WINDOW_ID));
+    ASSERT_EQ(WmErrorCode::WM_OK, mainWindow->UpdateWindowStateWhenHide());
+    
+    option = new WindowOption();
+    option->SetWindowName("sub");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowImpl> subWindow = new WindowImpl(option);
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, subWindow->Create(mainWindow->GetWindowId()));
+    subWindow->subWindowState_ = WindowState::STATE_SHOWN;
+    subWindow->UpdateWindowStateWhenHide();
+    ASSERT_EQ(subWindow->subWindowState_, WindowState::STATE_HIDDEN);
+    subWindow->subWindowState_ = WindowState::STATE_HIDDEN;
+    subWindow->UpdateWindowStateWhenHide();
+    ASSERT_EQ(subWindow->subWindowState_, WindowState::STATE_HIDDEN);
+
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, mainWindow->Destroy());
+}
+
+/*
+ * @tc.name: UpdateWindowStateWhenShow
+ * @tc.desc: UpdateWindowStateWhenShow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, UpdateWindowStateWhenShow, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("main");
+    sptr<WindowImpl> mainWindow = new WindowImpl(option);
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, mainWindow->Create(INVALID_WINDOW_ID));
+    ASSERT_EQ(WmErrorCode::WM_OK, mainWindow->UpdateWindowStateWhenShow());
+
+    option = new WindowOption();
+    option->SetWindowName("sub");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowImpl> subWindow = new WindowImpl(option);
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, subWindow->Create(mainWindow->GetWindowId()));
+    ASSERT_EQ(WmErrorCode::WM_OK, subWindow->UpdateWindowStateWhenShow());
+
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, mainWindow->Destroy());
 }
 }
 } // namespace Rosen

@@ -224,6 +224,9 @@ public:
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void UpdateWindowState(WindowState state);
+    WmErrorCode UpdateSubWindowStateAndNotify(uint32_t parentId);
+    WmErrorCode UpdateWindowStateWhenShow();
+    WmErrorCode UpdateWindowStateWhenHide();
     sptr<WindowProperty> GetWindowProperty();
     void UpdateDragEvent(const PointInfo& point, DragEvent event);
     void UpdateDisplayId(DisplayId from, DisplayId to);
@@ -384,19 +387,25 @@ private:
         std::lock_guard<std::recursive_mutex> lock(globalMutex_);
         return dialogDeathRecipientListener_[GetWindowId()];
     }
-    inline void NotifyAfterForeground(bool needNotifyUiContent = true)
+    inline void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true)
     {
-        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER(AfterForeground, lifecycleListeners);
+        if (needNotifyListeners) {
+            auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+            CALL_LIFECYCLE_LISTENER(AfterForeground, lifecycleListeners);
+        }
         if (needNotifyUiContent) {
             CALL_UI_CONTENT(Foreground);
         }
     }
-    inline void NotifyAfterBackground()
+    inline void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true)
     {
-        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER(AfterBackground, lifecycleListeners);
-        CALL_UI_CONTENT(Background);
+        if (needNotifyListeners) {
+            auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+            CALL_LIFECYCLE_LISTENER(AfterBackground, lifecycleListeners);
+        }
+        if (needNotifyUiContent) {
+            CALL_UI_CONTENT(Background);
+        }
     }
     inline void NotifyAfterFocused()
     {
@@ -473,7 +482,7 @@ private:
     void DestroySubWindow();
     void SetDefaultOption(); // for api7
     bool IsWindowValid() const;
-    static sptr<Window> FindTopWindow(uint32_t topWinId);
+    static sptr<Window> FindWindowById(uint32_t WinId);
     void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void ConsumeMoveOrDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void ReadyToMoveOrDragWindow(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -535,6 +544,7 @@ private:
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> appDialogWindowMap_;
     sptr<WindowProperty> property_;
     WindowState state_ { WindowState::STATE_INITIAL };
+    WindowState subWindowState_ {WindowState::STATE_INITIAL};
     WindowTag windowTag_;
     sptr<IAceAbilityHandler> aceAbilityHandler_;
     static std::map<uint32_t, std::vector<sptr<IScreenshotListener>>> screenshotListeners_;
