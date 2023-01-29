@@ -146,19 +146,19 @@ const std::shared_ptr<AbilityRuntime::Context> WindowImpl::GetContext() const
     return context_;
 }
 
-sptr<Window> WindowImpl::FindTopWindow(uint32_t topWinId)
+sptr<Window> WindowImpl::FindWindowById(uint32_t WinId)
 {
     if (windowMap_.empty()) {
         WLOGFE("Please create mainWindow First!");
         return nullptr;
     }
     for (auto iter = windowMap_.begin(); iter != windowMap_.end(); iter++) {
-        if (topWinId == iter->second.first) {
-            WLOGI("FindTopWindow id: %{public}u", topWinId);
+        if (WinId == iter->second.first) {
+            WLOGI("FindWindow id: %{public}u", WinId);
             return iter->second.second;
         }
     }
-    WLOGFE("Cannot find topWindow!");
+    WLOGFE("Cannot find Window!");
     return nullptr;
 }
 
@@ -170,7 +170,7 @@ sptr<Window> WindowImpl::GetTopWindowWithId(uint32_t mainWinId)
         WLOGFE("GetTopWindowId failed with errCode:%{public}d", static_cast<int32_t>(ret));
         return nullptr;
     }
-    return FindTopWindow(topWinId);
+    return FindWindowById(topWinId);
 }
 
 sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
@@ -199,7 +199,7 @@ sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRu
         WLOGFE("GetTopWindowId failed with errCode:%{public}d", static_cast<int32_t>(ret));
         return nullptr;
     }
-    return FindTopWindow(topWinId);
+    return FindWindowById(topWinId);
 }
 
 std::vector<sptr<Window>> WindowImpl::GetSubWindow(uint32_t parentId)
@@ -1352,7 +1352,14 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
             WLOGI("window is already shown id: %{public}u, raise to top", property_->GetWindowId());
             SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId(), false);
         }
-        NotifyAfterForeground(false);
+        // when show sub window, check its parent state
+        sptr<Window> parent = FindWindowById(property_->GetParentId());
+        if (parent != nullptr && parent->GetWindowState() == WindowState::STATE_HIDDEN) {
+            WLOGFD("sub window can not show, because main window hide");
+            return WMError::WM_OK;
+        } else {
+            NotifyAfterForeground(true, false);
+        }
         return WMError::WM_OK;
     }
     WMError ret = PreProcessShow(reason, withAnimation);
@@ -1364,8 +1371,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
     ret = SingletonContainer::Get<WindowAdapter>().AddWindow(property_);
     RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
     if (ret == WMError::WM_OK) {
-        state_ = WindowState::STATE_SHOWN;
-        NotifyAfterForeground();
+        UpdateWindowStateWhenShow();
     } else if (ret == WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE) {
         NotifyForegroundInvalidWindowMode();
     } else {
@@ -1410,8 +1416,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation)
         WLOGFE("hide errCode:%{public}d for winId:%{public}u", static_cast<int32_t>(ret), property_->GetWindowId());
         return ret;
     }
-    state_ = WindowState::STATE_HIDDEN;
-    NotifyAfterBackground();
+    UpdateWindowStateWhenHide();
     uint32_t animationFlag = property_->GetAnimationFlag();
     if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
         animationTransitionController_->AnimationForHidden();
@@ -2667,7 +2672,7 @@ void WindowImpl::UpdateWindowState(WindowState state)
                     static_cast<uint32_t>(WindowStateChangeReason::KEYGUARD));
             } else {
                 state_ = WindowState::STATE_FROZEN;
-                NotifyAfterBackground();
+                NotifyAfterBackground(false, true);
             }
             break;
         }
@@ -2702,6 +2707,87 @@ void WindowImpl::UpdateWindowState(WindowState state)
             break;
         }
     }
+}
+
+WmErrorCode WindowImpl::UpdateWindowStateWhenShow()
+{
+    state_ = WindowState::STATE_SHOWN;
+    if (WindowHelper::IsMainWindow(property_->GetWindowType()) ||
+        WindowHelper::IsSystemMainWindow(property_->GetWindowType())) {
+        // update subwindow subWindowState_ and notify subwindow shown or not
+        UpdateSubWindowStateAndNotify(GetWindowId());
+        NotifyAfterForeground();
+    } else {
+        uint32_t parentId = property_->GetParentId();
+        sptr<Window> parentWindow = FindWindowById(parentId);
+        if (parentWindow == nullptr) {
+            WLOGE("parent window is null");
+            return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        }
+        if (parentWindow->GetWindowState() == WindowState::STATE_HIDDEN) {
+            // not notify user shown and update subwindowState_
+            subWindowState_ = WindowState::STATE_HIDDEN;
+        } else if (parentWindow->GetWindowState() == WindowState::STATE_SHOWN) {
+            NotifyAfterForeground();
+            subWindowState_ = WindowState::STATE_SHOWN;
+        }
+    }
+    return WmErrorCode::WM_OK;
+}
+
+WmErrorCode WindowImpl::UpdateWindowStateWhenHide()
+{
+    state_ = WindowState::STATE_HIDDEN;
+    if (WindowHelper::IsSystemMainWindow(property_->GetWindowType()) ||
+        WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        // main window need to update subwindow subWindowState_ and notify subwindow shown or not
+        UpdateSubWindowStateAndNotify(GetWindowId());
+        NotifyAfterBackground();
+    } else {
+        uint32_t parentId = property_->GetParentId();
+        sptr<Window> parentWindow = FindWindowById(parentId);
+        if (subWindowState_ == WindowState::STATE_SHOWN) {
+            NotifyAfterBackground();
+        }
+        subWindowState_ = WindowState::STATE_HIDDEN;
+    }
+    return WmErrorCode::WM_OK;
+}
+
+WmErrorCode WindowImpl::UpdateSubWindowStateAndNotify(uint32_t parentId)
+{
+    sptr<WindowProperty> property = GetWindowProperty();
+    if (subWindowMap_.find(parentId) == subWindowMap_.end()) {
+        WLOGFD("main window: %{public}u has no child node", parentId);
+        return WmErrorCode::WM_OK;
+    }
+    std::vector<sptr<WindowImpl>> subWindows = subWindowMap_[parentId];
+    if (subWindows.empty()) {
+        WLOGFD("main window: %{public}u, its subWindowMap is empty", parentId);
+        return WmErrorCode::WM_OK;
+    }
+    // when main window hide and subwindow whose state is shown should hide and notify user
+    if (state_ == WindowState::STATE_HIDDEN) {
+        for (auto subwindow : subWindows) {
+            if (subwindow->GetWindowState() == WindowState::STATE_SHOWN &&
+                subwindow->subWindowState_ == WindowState::STATE_SHOWN) {
+                subwindow->NotifyAfterBackground();
+            }
+            subwindow->subWindowState_ = WindowState::STATE_HIDDEN;
+        }
+    // when main window show and subwindow whose state is shown should show and notify user
+    } else if (state_ == WindowState::STATE_SHOWN) {
+        for (auto subwindow : subWindows) {
+            if (subwindow->GetWindowState() == WindowState::STATE_SHOWN &&
+                subwindow->subWindowState_ == WindowState::STATE_HIDDEN) {
+                subwindow->NotifyAfterForeground();
+                subwindow->subWindowState_ = WindowState::STATE_SHOWN;
+            } else {
+                subwindow->subWindowState_ = WindowState::STATE_HIDDEN;
+            }
+        }
+    }
+    return WmErrorCode::WM_OK;
 }
 
 sptr<WindowProperty> WindowImpl::GetWindowProperty()

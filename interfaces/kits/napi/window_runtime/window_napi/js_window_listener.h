@@ -36,6 +36,7 @@ const std::string SYSTEM_AVOID_AREA_CHANGE_CB = "systemAvoidAreaChange";
 const std::string AVOID_AREA_CHANGE_CB = "avoidAreaChange";
 const std::string LIFECYCLE_EVENT_CB = "lifeCycleEvent";
 const std::string WINDOW_STAGE_EVENT_CB = "windowStageEvent";
+const std::string WINDOW_EVENT_CB = "windowEvent";
 const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
 const std::string TOUCH_OUTSIDE_CB = "touchOutside";
 const std::string SCREENSHOT_EVENT_CB = "screenshot";
@@ -70,6 +71,7 @@ public:
     void OnDialogDeathRecipient() const override;
     void CallJsMethod(const char* methodName, NativeValue* const* argv = nullptr, size_t argc = 0);
 private:
+    WindowState state_ {WindowState::STATE_INITIAL};
     void LifeCycleCallBack(LifeCycleEventType eventType);
     NativeEngine* engine_ = nullptr;
     std::shared_ptr<NativeReference> jsCallBack_ = nullptr;

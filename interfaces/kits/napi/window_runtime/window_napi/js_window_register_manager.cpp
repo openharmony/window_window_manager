@@ -34,6 +34,7 @@ JsWindowRegisterManager::JsWindowRegisterManager()
         { SYSTEM_AVOID_AREA_CHANGE_CB, &JsWindowRegisterManager::ProcessSystemAvoidAreaChangeRegister },
         { AVOID_AREA_CHANGE_CB,        &JsWindowRegisterManager::ProcessAvoidAreaChangeRegister       },
         { LIFECYCLE_EVENT_CB,          &JsWindowRegisterManager::ProcessLifeCycleEventRegister        },
+        { WINDOW_EVENT_CB,             &JsWindowRegisterManager::ProcessLifeCycleEventRegister        },
         { KEYBOARD_HEIGHT_CHANGE_CB,   &JsWindowRegisterManager::ProcessOccupiedAreaChangeRegister    },
         { TOUCH_OUTSIDE_CB,            &JsWindowRegisterManager::ProcessTouchOutsideRegister          },
         { SCREENSHOT_EVENT_CB,         &JsWindowRegisterManager::ProcessScreenshotRegister            },

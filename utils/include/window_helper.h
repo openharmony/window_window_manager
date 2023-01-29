@@ -66,6 +66,11 @@ public:
         return (type >= WindowType::SYSTEM_SUB_WINDOW_BASE && type < WindowType::SYSTEM_SUB_WINDOW_END);
     }
 
+    static inline bool IsSystemMainWindow(WindowType type)
+    {
+        return IsBelowSystemWindow(type) || IsAboveSystemWindow(type);
+    }
+
     static inline bool IsSystemWindow(WindowType type)
     {
         return (IsBelowSystemWindow(type) || IsAboveSystemWindow(type) || IsSystemSubWindow(type));
