@@ -881,12 +881,15 @@ WMError WindowImpl::SetWindowCornerRadiusAccordingToSystemConfig()
 
     WLOGFD("[WEffect] [name:%{public}s] mode: %{public}u, vpr: %{public}f, [%{public}f, %{public}f, %{public}f]",
         name_.c_str(), GetMode(), vpr, fullscreenRadius, splitRadius, floatRadius);
-
-    if (WindowHelper::IsFullScreenWindow(GetMode()) && MathHelper::GreatNotEqual(fullscreenRadius, 0.0)) {
+    if (MathHelper::NearZero(fullscreenRadius) && MathHelper::NearZero(splitRadius) &&
+        MathHelper::NearZero(floatRadius)) {
+        return WMError::WM_DO_NOTHING;
+    }
+    if (WindowHelper::IsFullScreenWindow(GetMode())) {
         return SetCornerRadius(fullscreenRadius);
-    } else if (WindowHelper::IsSplitWindowMode(GetMode()) && MathHelper::GreatNotEqual(splitRadius, 0.0)) {
+    } else if (WindowHelper::IsSplitWindowMode(GetMode())) {
         return SetCornerRadius(splitRadius);
-    } else if (WindowHelper::IsFloatingWindow(GetMode()) && MathHelper::GreatNotEqual(floatRadius, 0.0)) {
+    } else if (WindowHelper::IsFloatingWindow(GetMode())) {
         return SetCornerRadius(floatRadius);
     }
     return WMError::WM_DO_NOTHING;
@@ -3085,9 +3088,6 @@ bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)
 WMError WindowImpl::SetCornerRadius(float cornerRadius)
 {
     WLOGI("Window %{public}s set corner radius %{public}f", name_.c_str(), cornerRadius);
-    if (MathHelper::LessNotEqual(cornerRadius, 0.0)) {
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
     surfaceNode_->SetCornerRadius(cornerRadius);
     RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;

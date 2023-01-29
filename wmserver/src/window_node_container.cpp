@@ -497,7 +497,7 @@ bool WindowNodeContainer::AddAppSurfaceNodeOnRSTree(sptr<WindowNode>& node)
      * Starting Window has already update leashWindowSurfaceNode and starting window surfaceNode on RSTree
      * Just need add appSurface Node as child of leashWindowSurfaceNode
      */
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "AddAppSurfaceNodeOnRSTree");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "AddAppSurfaceNodeOnRSTree(%u)", node->GetWindowId());
     if (!WindowHelper::IsMainWindow(node->GetWindowType())) {
         WLOGFE("id:%{public}u not main app window but has start window", node->GetWindowId());
         return false;

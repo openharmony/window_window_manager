@@ -23,6 +23,7 @@
 #include <transaction/rs_transaction.h>
 #include "minimize_app.h"
 #include "parameters.h"
+#include "starting_window.h"
 #include "surface_draw.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
@@ -65,7 +66,7 @@ WMError RemoteAnimation::SetWindowAnimationController(const sptr<RSIWindowAnimat
 {
     WLOGFI("RSWindowAnimation: set window animation controller!");
     if (!isRemoteAnimationEnable_) {
-        WLOGE("RSWindowAnimation: failed to set window animation controller, remote animation is not enabled");
+        WLOGFE("RSWindowAnimation: failed to set window animation controller, remote animation is not enabled");
         return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     }
     if (controller == nullptr) {
@@ -180,6 +181,7 @@ static void GetAndDrawSnapShot(const sptr<WindowNode>& srcNode)
         srcNode->startingWinSurfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);
         SurfaceDraw::DrawImageRect(srcNode->startingWinSurfaceNode_, srcNode->GetWindowRect(),
             pixelMap, 0x00ffffff, true);
+        StartingWindow::SetStartingWindowEffect(srcNode, false);
         srcNode->leashWinSurfaceNode_->RemoveChild(srcNode->surfaceNode_);
         srcNode->leashWinSurfaceNode_->AddChild(srcNode->startingWinSurfaceNode_, -1);
         RSTransaction::FlushImplicitTransaction();
@@ -653,11 +655,15 @@ sptr<RSWindowAnimationTarget> RemoteAnimation::CreateWindowAnimationTarget(sptr<
         return nullptr;
     }
 
-    auto& stagingProperties = windowAnimationTarget->surfaceNode_->GetStagingProperties();
     auto rect = windowNode->GetWindowRect();
     // 0, 1, 2, 3: convert bounds to RectF
     auto boundsRect = RectF(rect.posX_, rect.posY_, rect.width_, rect.height_);
-    windowAnimationTarget->windowBounds_ = RRect(boundsRect, stagingProperties.GetCornerRadius());
+    auto& stagingProperties = windowAnimationTarget->surfaceNode_->GetStagingProperties();
+    auto radius = stagingProperties.GetCornerRadius();
+    if (windowNode->startingWinSurfaceNode_ != nullptr) {
+        radius = windowNode->startingWinSurfaceNode_->GetStagingProperties().GetCornerRadius();
+    }
+    windowAnimationTarget->windowBounds_ = RRect(boundsRect, radius);
     return windowAnimationTarget;
 }
 
