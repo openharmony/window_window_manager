@@ -74,7 +74,7 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason)
         *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsWindowListener::OnModeChange(WindowMode mode)
+void JsWindowListener::OnModeChange(WindowMode mode, bool hasDeco)
 {
     WLOGI("[NAPI]OnModeChange %{public}u", mode);
 }

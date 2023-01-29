@@ -160,6 +160,7 @@ private:
         return ret;
     }
     void ConfigHotZones(const std::vector<int>& hotZones);
+    void ConfigDecor(const WindowManagerConfig::ConfigItem& decorConfig);
     void ConfigWindowAnimation(const WindowManagerConfig::ConfigItem& animeConfig);
     void ConfigKeyboardAnimation(const WindowManagerConfig::ConfigItem& animeConfig);
     RSAnimationTimingCurve CreateCurve(const WindowManagerConfig::ConfigItem& curveConfig);
