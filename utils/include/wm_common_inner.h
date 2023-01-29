@@ -217,6 +217,7 @@ enum class TraceTaskId : int32_t {
     REMOTE_ANIMATION,
     CONNECT_EXTENSION,
     REMOTE_ANIMATION_HOME,
+    START_WINDOW_ANIMATION,
 };
 
 struct MoveDragProperty : public Parcelable {

@@ -22,6 +22,7 @@
 #include "surface_draw.h"
 #include "wm_common.h"
 #include "window_node.h"
+#include "window_root.h"
 #include "window_transition_info.h"
 
 namespace OHOS {
@@ -40,12 +41,21 @@ public:
     static void AddNodeOnRSTree(sptr<WindowNode>& node, const AnimationConfig& animationConfig, bool isMultiDisplay);
     static void ReleaseStartWinSurfaceNode(sptr<WindowNode>& node);
     static void SetDefaultWindowMode(WindowMode defaultMode);
-
+    static void SetWindowSystemEffectConfig(AppWindowEffectConfig config);
+    static void SetWindowRoot(const sptr<WindowRoot>& windowRoot);
+    static WMError SetStartingWindowEffect(const sptr<WindowNode>& node, bool isFocus = true);
+    static bool transAnimateEnable_;
 private:
     static WMError CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node);
-    static SurfaceDraw surfaceDraw_;
+    // window effect
+    static WMError SetCornerRadius(const sptr<WindowNode>& node);
+    static WMError SetWindowShadow(const sptr<WindowNode>& node, bool isFocus);
+    static WMError SetStartingWindowAnimation(wptr<WindowNode> weak);
+
     static std::recursive_mutex mutex_;
     static WindowMode defaultMode_;
+    static wptr<WindowRoot> windowRoot_;
+    static AppWindowEffectConfig windowSystemEffectConfig_;
 };
 } // Rosen
 } // OHOS
