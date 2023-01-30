@@ -80,7 +80,7 @@ public:
     WMError NotifyWindowClientPointUp(uint32_t windowId, const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     WMError ChangeMouseStyle(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty);
     void RecoverDefaultMouseStyle(uint32_t windowId);
-
+    WmErrorCode RaiseToAppTop(uint32_t windowId);
 private:
     uint32_t GenWindowId();
     void FlushWindowInfo(uint32_t windowId);
@@ -110,6 +110,8 @@ private:
     void NotifyAfterAddWindow(sptr<WindowNode>& node);
     void RelayoutKeyboard(const sptr<WindowNode>& node);
     bool CheckParentWindowValid(const sptr<WindowProperty>& property);
+
+    void UpdateFocusIfNeededWhenRaiseWindow(const sptr<WindowNode>& node);
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;

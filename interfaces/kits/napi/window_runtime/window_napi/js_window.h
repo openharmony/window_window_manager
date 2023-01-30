@@ -90,6 +90,7 @@ public:
     static NativeValue* SetPreferredOrientation(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* DisableWindowDecor(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetSnapshotSkip(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* RaiseToAppTop(NativeEngine* engine, NativeCallbackInfo* info);
     // colorspace, gamut
     static NativeValue* IsSupportWideGamut(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* IsWindowSupportWideGamut(NativeEngine* engine, NativeCallbackInfo* info);
@@ -153,6 +154,7 @@ private:
     NativeValue* OnIsShowing(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnIsWindowShowingSync(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetPreferredOrientation(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnRaiseToAppTop(NativeEngine& engine, NativeCallbackInfo& info);
 
     // colorspace, gamut
     NativeValue* OnIsSupportWideGamut(NativeEngine& engine, NativeCallbackInfo& info);

@@ -785,5 +785,29 @@ void WindowManagerProxy::OffWindowZoom()
         WLOGFE("SendRequest failed");
     }
 }
+
+WmErrorCode WindowManagerProxy::RaiseToAppTop(uint32_t windowId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+
+    if (!data.WriteUint32(windowId)) {
+        WLOGFE("Write anchor delatX failed");
+        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_RAISE_WINDOW_Z_ORDER),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+    return WmErrorCode::WM_OK;
+}
+
 } // namespace Rosen
 } // namespace OHOS
