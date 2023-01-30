@@ -16,6 +16,7 @@ group("fuzztest") {
 
   deps = [
     "displaymanager_fuzzer:fuzztest",
+    "displaymanageripc_fuzzer:fuzztest",
     "screen_fuzzer:fuzztest",
     "screenmanager_fuzzer:fuzztest",
   ]
