@@ -569,8 +569,8 @@ void WindowNodeContainer::ProcessInputMethodWindowAddAnimation(sptr<WindowNode>&
 {
     static sptr<WindowNode> imeNode = nullptr;
     if (imeNode == node && imeNode != nullptr && imeNode->surfaceNode_ != nullptr) {
-        WLOGFI("imeNode SetAppFreeze(true)");
-        imeNode->surfaceNode_->SetAppFreeze(true);
+        WLOGFI("imeNode SetFreeze(true)");
+        imeNode->surfaceNode_->SetFreeze(true);
     }
     sptr<WindowNode> launcherNode = nullptr;
     for (auto& windowNode : belowAppWindowNode_->children_) {
@@ -580,19 +580,19 @@ void WindowNodeContainer::ProcessInputMethodWindowAddAnimation(sptr<WindowNode>&
         }
     }
     if (launcherNode != nullptr && launcherNode->surfaceNode_ != nullptr) {
-        WLOGFI("launcherNode SetAppFreeze(true)");
-        launcherNode->surfaceNode_->SetAppFreeze(true);
+        WLOGFI("launcherNode SetFreeze(true)");
+        launcherNode->surfaceNode_->SetFreeze(true);
     }
     auto timingProtocol = animationConfig_.keyboardAnimationConfig_.durationIn_;
     RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationConfig_.curve_, updateRSTreeFunc,
         [ime = imeNode, node, launcherNode]() {
         if (ime == node && ime != nullptr && ime->surfaceNode_ != nullptr) {
-            WLOGFI("imeNode SetAppFreeze(false)");
-            ime->surfaceNode_->SetAppFreeze(false);
+            WLOGFI("imeNode SetFreeze(false)");
+            ime->surfaceNode_->SetFreeze(false);
         }
         if (launcherNode != nullptr && launcherNode->surfaceNode_ != nullptr) {
-            WLOGFI("launcherNode SetAppFreeze(false)");
-            launcherNode->surfaceNode_->SetAppFreeze(false);
+            WLOGFI("launcherNode SetFreeze(false)");
+            launcherNode->surfaceNode_->SetFreeze(false);
         }
         auto transactionProxy = RSTransactionProxy::GetInstance();
         if (transactionProxy != nullptr) {
@@ -635,12 +635,12 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
         WLOGI("remove with animation");
         StartTraceArgs(HITRACE_TAG_WINDOW_MANAGER, "Animate(%u)", node->GetWindowId());
         if (node->surfaceNode_) {
-            node->surfaceNode_->SetAppFreeze(true);
+            node->surfaceNode_->SetFreeze(true);
         }
         RSNode::Animate(animationConfig_.windowAnimationConfig_.animationTiming_.timingProtocol_,
             animationConfig_.windowAnimationConfig_.animationTiming_.timingCurve_, updateRSTreeFunc, [node]() {
             if (node->surfaceNode_) {
-                node->surfaceNode_->SetAppFreeze(false);
+                node->surfaceNode_->SetFreeze(false);
             }
         });
         FinishTrace(HITRACE_TAG_WINDOW_MANAGER);
