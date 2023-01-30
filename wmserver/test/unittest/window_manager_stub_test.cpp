@@ -495,6 +495,25 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest20, Function | SmallTest | Level2
     EXPECT_EQ(res, 0);
 }
 
+/**
+ * @tc.name: OnRemoteRequest20
+ * @tc.desc: test TRANS_ID_RAISE_WINDOW_Z_ORDER success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest21, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(WindowManagerStub::GetDescriptor());
+    data.WriteUint32(100);
+
+    uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_RAISE_WINDOW_Z_ORDER);
+
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
 }
 }
 }

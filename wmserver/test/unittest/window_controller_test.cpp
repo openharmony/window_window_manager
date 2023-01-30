@@ -14,6 +14,8 @@
  */
 
 #include <gtest/gtest.h>
+#include <map>
+#include "display_manager.h"
 #include "iremote_object_mocker.h"
 #include "mock_rs_iwindow_animation_controller.h"
 #include "remote_animation.h"
@@ -511,6 +513,36 @@ HWTEST_F(WindowControllerTest, BindDialogTarget, Function | SmallTest | Level3)
     windowRoot_->windowNodeMap_.insert(std::make_pair(node_->GetWindowId(), node_));
     id = node_->GetWindowId();
     ASSERT_EQ(WMError::WM_OK, windowController_->BindDialogTarget(id, abilityTokenMocker));
+    windowRoot_->windowNodeMap_.clear();
+}
+
+/**
+ * @tc.name: RaiseToAppTop
+ * @tc.desc: check app subwindow raise to top
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, RaiseToAppTop, Function | SmallTest | Level3)
+{
+    windowRoot_->windowNodeMap_.clear();
+
+    sptr<WindowNode> windowNode = new (std::nothrow)WindowNode();
+    windowNode->property_->windowId_ = 100;
+    windowNode->SetDisplayId(DISPLAY_ID_INVALID);
+
+    uint32_t windowId = windowNode->GetWindowId();
+    ASSERT_EQ(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, windowController_->RaiseToAppTop(windowId));
+
+    windowRoot_->windowNodeMap_.insert(std::make_pair(windowNode->GetWindowId(), windowNode));
+    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_PARENT, windowController_->RaiseToAppTop(windowId));
+
+    sptr<WindowNode> parentWindow = new (std::nothrow)WindowNode();
+    parentWindow->property_->windowId_ = 90;
+    parentWindow->SetDisplayId(DISPLAY_ID_INVALID);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(parentWindow->GetWindowId(), parentWindow));
+
+    windowNode->parent_ = parentWindow;
+    ASSERT_EQ(WmErrorCode::WM_ERROR_STAGE_ABNORMALLY, windowController_->RaiseToAppTop(windowId));
+
     windowRoot_->windowNodeMap_.clear();
 }
 }
