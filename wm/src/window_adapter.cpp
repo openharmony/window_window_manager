@@ -277,5 +277,12 @@ void WindowAdapter::OffWindowZoom()
     INIT_PROXY_CHECK_RETURN();
     windowManagerServiceProxy_->OffWindowZoom();
 }
+
+WmErrorCode WindowAdapter::RaiseToAppTop(uint32_t windowId)
+{
+    INIT_PROXY_CHECK_RETURN(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    return windowManagerServiceProxy_->RaiseToAppTop(windowId);
+}
+
 } // namespace Rosen
 } // namespace OHOS

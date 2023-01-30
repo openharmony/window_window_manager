@@ -1063,6 +1063,50 @@ void WindowController::RecoverDefaultMouseStyle(uint32_t windowId)
     };
     WindowInnerManager::GetInstance().PostTask(task, "RecoverDefaultMouseStyle");
 }
+WmErrorCode WindowController::RaiseToAppTop(uint32_t windowId)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFW("could not find window");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+
+    auto parentNode = node->parent_;
+    if (parentNode == nullptr) {
+        WLOGFW("could not find parent");
+        return WmErrorCode::WM_ERROR_INVALID_PARENT;
+    }
+
+    WMError zOrderRes = windowRoot_->RaiseZOrderForAppWindow(node);
+    if (zOrderRes != WMError::WM_OK) {
+        WLOGFE("raise subwindow zorder faile with error code [%{public}d]", zOrderRes);
+        return  WmErrorCode::WM_ERROR_STAGE_ABNORMALLY;
+    }
+
+    UpdateFocusIfNeededWhenRaiseWindow(node);
+    FlushWindowInfo(windowId);
+    return WmErrorCode::WM_OK;
+}
+
+void WindowController::UpdateFocusIfNeededWhenRaiseWindow(const sptr<WindowNode>& node)
+{
+    auto property = node->GetWindowProperty();
+    if (!property->GetFocusable()) {
+        return;
+    }
+    uint32_t windowId = node->GetWindowId();
+    sptr<WindowNode> focusWindow = nullptr;
+    WMError res = GetFocusWindowNode(node->GetDisplayId(), focusWindow);
+    if (res != WMError::WM_OK || focusWindow == nullptr) {
+        return;
+    }
+    if (node->parent_->GetWindowId() == focusWindow->GetWindowId() ||
+        node->parent_->GetWindowId() == focusWindow->GetParentId()) {
+        windowRoot_->RequestFocus(windowId);
+        windowRoot_->RequestActiveWindow(windowId);
+        windowRoot_->FocusFaultDetection();
+    }
+}
 
 WMError WindowController::NotifyWindowClientPointUp(uint32_t windowId,
     const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
