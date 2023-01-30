@@ -746,6 +746,7 @@ bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationA
         screen->rotation_ = rotationAfter;
     } else {
         WLOGI("rotation not changed. screen %{public}" PRIu64" rotation %{public}u", screenId, rotationAfter);
+        return false;
     }
 
     NotifyScreenChanged(screen->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);

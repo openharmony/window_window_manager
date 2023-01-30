@@ -424,7 +424,6 @@ void AbstractDisplayController::ProcessDisplayUpdateOrientation(sptr<AbstractScr
     if (abstractDisplay->RequestRotation(absScreen->rotation_)) {
         // Notify rotation event to WMS
         SetDisplayStateChangeListener(abstractDisplay, DisplayStateChangeType::UPDATE_ROTATION);
-        ProcessDisplayCompression(absScreen);
     }
 }
 
