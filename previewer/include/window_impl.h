@@ -188,6 +188,7 @@ public:
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
     virtual WMError NotifyMemoryLevel(int32_t level) const override;
     virtual bool IsAllowHaveSystemSubWindow() override;
+    WmErrorCode RaiseToAppTop() override;
 
 private:
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;

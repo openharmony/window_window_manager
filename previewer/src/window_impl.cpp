@@ -758,5 +758,10 @@ bool WindowImpl::IsAllowHaveSystemSubWindow()
 {
     return true;
 }
+
+WmErrorCode WindowImpl::RaiseToAppTop()
+{
+    return WmErrorCode::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS

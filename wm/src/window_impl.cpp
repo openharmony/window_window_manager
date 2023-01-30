@@ -1699,6 +1699,27 @@ void WindowImpl::SetSnapshotSkip(bool isSkip)
     surfaceNode_->SetSecurityLayer(isSkip || property_->GetSystemPrivacyMode());
 }
 
+WmErrorCode WindowImpl::RaiseToAppTop()
+{
+    auto parentId = property_->GetParentId();
+    if (parentId == INVALID_WINDOW_ID) {
+        WLOGFE("Only the children of the main window can be raised!");
+        return WmErrorCode::WM_ERROR_INVALID_PARENT;
+    }
+
+    if (!WindowHelper::IsSubWindow(property_->GetWindowType())) {
+        WLOGFE("Must be app sub window window!");
+        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+    }
+
+    if (state_ != WindowState::STATE_SHOWN) {
+        WLOGFE("The sub window must be shown!");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+
+    return SingletonContainer::Get<WindowAdapter>().RaiseToAppTop(GetWindowId());
+}
+
 void WindowImpl::DisableAppWindowDecor()
 {
     if (!Permission::IsSystemCalling()) {

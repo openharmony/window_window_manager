@@ -168,6 +168,7 @@ public:
     virtual void DisableAppWindowDecor() override;
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
     virtual void SetSnapshotSkip(bool isSkip) override;
+    WmErrorCode RaiseToAppTop() override;
 
     // window effect
     virtual WMError SetCornerRadius(float cornerRadius) override;

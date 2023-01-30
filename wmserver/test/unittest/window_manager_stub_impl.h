@@ -123,6 +123,10 @@ WMError BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken)
 void SetAnchorAndScale(int32_t x, int32_t y, float scale){};
 void SetAnchorOffset(int32_t deltaX, int32_t deltaY){};
 void OffWindowZoom(){};
+WmErrorCode RaiseToAppTop(uint32_t windowId)
+{
+    return WmErrorCode::WM_OK;
+};
 };
 }
 }
