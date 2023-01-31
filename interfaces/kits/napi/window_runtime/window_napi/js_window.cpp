@@ -3114,7 +3114,9 @@ NativeValue* JsWindow::OnRaiseToAppTop(NativeEngine& engine, NativeCallbackInfo&
             WLOGI("Window [%{public}u, %{public}s] zorder raise success",
                 window->GetWindowId(), window->GetWindowName().c_str());
         };
-    NativeValue* lastParam = nullptr;
+    NativeValue* lastParam = (info.argc == 0) ? nullptr :
+        ((info.argv[0] != nullptr && info.argv[0]->TypeOf() == NATIVE_FUNCTION) ?
+        info.argv[0] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule("JsWindow::OnRaiseToAppTop",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
