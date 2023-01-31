@@ -306,9 +306,8 @@ void RemoteAnimation::GetExpectRect(const sptr<WindowNode>& dstNode, const sptr<
             dstNode->GetWindowName().c_str(), dstNode->GetWindowId(),
             avoidRect.posX_, avoidRect.posY_, avoidRect.width_, avoidRect.height_);
         if (WindowHelper::IsMainFullScreenWindow(dstNode->GetWindowType(), dstNode->GetWindowMode())) {
-            auto& stagingProperties = dstTarget->surfaceNode_->GetStagingProperties();
             auto boundsRect = RectF(avoidRect.posX_, avoidRect.posY_, avoidRect.width_, avoidRect.height_);
-            dstTarget->windowBounds_ = RRect(boundsRect, stagingProperties.GetCornerRadius());
+            dstTarget->windowBounds_.rect_ = boundsRect;
             if (dstNode->leashWinSurfaceNode_) {
                 dstNode->leashWinSurfaceNode_->SetBounds(avoidRect.posX_, avoidRect.posY_,
                     avoidRect.width_, avoidRect.height_);
