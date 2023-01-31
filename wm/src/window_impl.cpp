@@ -2738,6 +2738,9 @@ WmErrorCode WindowImpl::UpdateWindowStateWhenShow()
         // update subwindow subWindowState_ and notify subwindow shown or not
         UpdateSubWindowStateAndNotify(GetWindowId());
         NotifyAfterForeground();
+    } else if (GetType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
+        subWindowState_ = WindowState::STATE_SHOWN;
+        NotifyAfterForeground();
     } else {
         uint32_t parentId = property_->GetParentId();
         sptr<Window> parentWindow = FindWindowById(parentId);
@@ -2764,9 +2767,16 @@ WmErrorCode WindowImpl::UpdateWindowStateWhenHide()
         // main window need to update subwindow subWindowState_ and notify subwindow shown or not
         UpdateSubWindowStateAndNotify(GetWindowId());
         NotifyAfterBackground();
+    } else if (GetType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
+        subWindowState_ = WindowState::STATE_HIDDEN;
+        NotifyAfterBackground();
     } else {
         uint32_t parentId = property_->GetParentId();
         sptr<Window> parentWindow = FindWindowById(parentId);
+        if (parentWindow == nullptr) {
+            WLOGE("parent window is null");
+            return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        }
         if (subWindowState_ == WindowState::STATE_SHOWN) {
             NotifyAfterBackground();
         }
