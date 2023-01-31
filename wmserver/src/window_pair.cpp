@@ -282,7 +282,7 @@ void WindowPair::UpdateIfSplitRelated(sptr<WindowNode>& node)
         return;
     }
     if (Find(node) == nullptr && !IsSplitRelated(node)) {
-        WLOGI("Window id: %{public}u is not split related and paired.", node->GetWindowId());
+        WLOGFD("Window id: %{public}u is not split related and paired.", node->GetWindowId());
         return;
     }
     if ((node->GetWindowType() == WindowType::WINDOW_TYPE_PLACEHOLDER) &&

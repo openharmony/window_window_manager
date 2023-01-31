@@ -110,7 +110,7 @@ void WindowLayoutPolicy::UpdateDisplayGroupLimitRect()
         newDisplayGroupLimitRect.height_ = static_cast<uint32_t>(maxHeight - newDisplayGroupLimitRect.posY_);
     }
     displayGroupLimitRect_ = newDisplayGroupLimitRect;
-    WLOGI("Update displayGroupLimitRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+    WLOGFD("Update displayGroupLimitRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
         displayGroupLimitRect_.posX_, displayGroupLimitRect_.posY_,
         displayGroupLimitRect_.width_, displayGroupLimitRect_.height_);
 }
@@ -910,7 +910,7 @@ void WindowLayoutPolicy::UpdateDisplayLimitRect(const sptr<WindowNode>& node, Re
     }
     limitRect.height_ = static_cast<uint32_t>(limitH < 0 ? 0 : limitH);
     limitRect.width_ = static_cast<uint32_t>(limitW < 0 ? 0 : limitW);
-    WLOGI("[Update limit displayRect], avoidNodeId: %{public}d, avoidNodeRect: [%{public}d %{public}d "
+    WLOGFD("[Update limit displayRect], avoidNodeId: %{public}d, avoidNodeRect: [%{public}d %{public}d "
         "%{public}u %{public}u], limitDisplayRect: [%{public}d %{public}d, %{public}u %{public}u]",
         node->GetWindowId(), layoutRect.posX_, layoutRect.posY_, layoutRect.width_, layoutRect.height_,
         limitRect.posX_, limitRect.posY_, limitRect.width_, limitRect.height_);

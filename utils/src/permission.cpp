@@ -80,14 +80,14 @@ bool Permission::IsSystemCalling()
 
 bool Permission::CheckCallingPermission(const std::string& permission)
 {
-    WLOGI("permission:%{public}s", permission.c_str());
+    WLOGFD("permission:%{public}s", permission.c_str());
 
     if (Security::AccessToken::AccessTokenKit::VerifyAccessToken(IPCSkeleton::GetCallingTokenID(), permission) !=
         AppExecFwk::Constants::PERMISSION_GRANTED) {
         WLOGI("permission denied!");
         return false;
     }
-    WLOGI("permission ok!");
+    WLOGFD("permission ok!");
     return true;
 }
 

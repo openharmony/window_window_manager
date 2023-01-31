@@ -104,7 +104,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     if (moveDragProperty_ == nullptr) {
         WLOGFE("MoveDragProperty is null");
     }
-    WLOGI("constructorCnt: %{public}d name: %{public}s",
+    WLOGFD("constructorCnt: %{public}d name: %{public}s",
         ++constructorCnt, property_->GetWindowName().c_str());
 }
 
@@ -497,7 +497,7 @@ void WindowImpl::OnNewWant(const AAFwk::Want& want)
 WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     NativeEngine* engine, NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability)
 {
-    WLOGI("SetUIContent: %{public}s", contentInfo.c_str());
+    WLOGFD("SetUIContent: %{public}s", contentInfo.c_str());
     std::unique_ptr<Ace::UIContent> uiContent;
     if (ability != nullptr) {
         uiContent = Ace::UIContent::Create(ability);
@@ -1016,7 +1016,7 @@ WMError WindowImpl::WindowCreateCheck(uint32_t parentId)
 
 WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRuntime::Context>& context)
 {
-    WLOGI("Window[%{public}s] Create", name_.c_str());
+    WLOGFD("Window[%{public}s] Create", name_.c_str());
     WMError ret = WindowCreateCheck(parentId);
     if (ret != WMError::WM_OK) {
         return ret;
@@ -1427,7 +1427,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation)
 
 WMError WindowImpl::MoveTo(int32_t x, int32_t y)
 {
-    WLOGI("id:%{public}d MoveTo %{public}d %{public}d",
+    WLOGFD("id:%{public}d MoveTo %{public}d %{public}d",
           property_->GetWindowId(), x, y);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1457,7 +1457,7 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y)
 
 WMError WindowImpl::Resize(uint32_t width, uint32_t height)
 {
-    WLOGI("id:%{public}d Resize %{public}u %{public}u",
+    WLOGFD("id:%{public}d Resize %{public}u %{public}u",
           property_->GetWindowId(), width, height);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1588,7 +1588,7 @@ bool WindowImpl::IsTransparent() const
 {
     ColorParam backgroundColor;
     backgroundColor.value = GetBackgroundColor();
-    WLOGI("color: %{public}u, alpha: %{public}u", backgroundColor.value, backgroundColor.argb.alpha);
+    WLOGFD("color: %{public}u, alpha: %{public}u", backgroundColor.value, backgroundColor.argb.alpha);
     return backgroundColor.argb.alpha == 0x00; // 0x00: completely transparent
 }
 
@@ -2565,7 +2565,7 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
         HandlePointerStyle(pointerEvent);
     }
     if (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-        WLOGI("WMS process point down, id:%{public}u, action: %{public}d", GetWindowId(), action);
+        WLOGFD("WMS process point down, id:%{public}u, action: %{public}d", GetWindowId(), action);
         if (GetType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) {
             MMI::PointerEvent::PointerItem pointerItem;
             if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
@@ -3327,7 +3327,7 @@ WMError WindowImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
 
 WMError WindowImpl::NotifyMemoryLevel(int32_t level) const
 {
-    WLOGI("id: %{public}u, notify memory level: %{public}d", property_->GetWindowId(), level);
+    WLOGFD("id: %{public}u, notify memory level: %{public}d", property_->GetWindowId(), level);
     if (uiContent_ == nullptr) {
         WLOGFE("Window %{public}s notify memory level failed, ace is null.", name_.c_str());
         return WMError::WM_ERROR_NULLPTR;
