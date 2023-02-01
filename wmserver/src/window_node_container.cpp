@@ -191,7 +191,7 @@ void WindowNodeContainer::LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool a
         DumpScreenWindowTreeByWinId(node->GetWindowId());
         return;
     }
-    WLOGI("AddWindowNode Id:%{public}u, currState:%{public}u",
+    WLOGFD("AddWindowNode Id:%{public}u, currState:%{public}u",
         node->GetWindowId(), static_cast<uint32_t>(node->stateMachine_.GetCurrentState()));
     if (WindowHelper::IsMainWindow(node->GetWindowType()) &&
         RemoteAnimation::IsRemoteAnimationEnabledAndFirst(node->GetDisplayId()) &&
@@ -525,7 +525,7 @@ bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId disp
         return true;
     }
     bool isMultiDisplay = layoutPolicy_->IsMultiDisplay();
-    WLOGI("add on RsTree id: %{public}d, displayId: %{public}" PRIu64", parentDisplayId: %{public}" PRIu64", "
+    WLOGFD("add on RsTree id: %{public}d, displayId: %{public}" PRIu64", parentDisplayId: %{public}" PRIu64", "
         "isMultiDisplay: %{public}d, animationPlayed: %{public}d",
         node->GetWindowId(), displayId, parentDisplayId, isMultiDisplay, animationPlayed);
     auto updateRSTreeFunc = [&]() {
@@ -558,7 +558,7 @@ bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId disp
         !animationPlayed) { // add keyboard with animation
         ProcessInputMethodWindowAddAnimation(node, updateRSTreeFunc);
     } else {
-        WLOGI("add node without animation");
+        WLOGFD("add node without animation");
         updateRSTreeFunc();
     }
     return true;
@@ -612,7 +612,7 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
         return true;
     }
     bool isMultiDisplay = layoutPolicy_->IsMultiDisplay();
-    WLOGI("Remove on RsTree Id: %{public}d, displayId: %{public}" PRIu64", isMultiDisplay: %{public}d, "
+    WLOGFD("Remove on RsTree Id: %{public}d, displayId: %{public}" PRIu64", isMultiDisplay: %{public}d, "
         "parentDisplayId: %{public}" PRIu64", animationPlayed: %{public}d",
         node->GetWindowId(), displayId, isMultiDisplay, parentDisplayId, animationPlayed);
     auto updateRSTreeFunc = [&]() {
@@ -632,7 +632,7 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
     }
 
     if (node->EnableDefaultAnimation(animationPlayed)) {
-        WLOGI("remove with animation");
+        WLOGFD("remove with animation");
         StartTraceArgs(HITRACE_TAG_WINDOW_MANAGER, "Animate(%u)", node->GetWindowId());
         if (node->surfaceNode_) {
             node->surfaceNode_->SetAppFreeze(true);
@@ -649,7 +649,7 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
         auto timingProtocol = animationConfig_.keyboardAnimationConfig_.durationOut_;
         RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationConfig_.curve_, updateRSTreeFunc);
     } else {
-        WLOGI("remove without animation");
+        WLOGFD("remove without animation");
         updateRSTreeFunc();
     }
     return true;
@@ -994,7 +994,7 @@ std::unordered_map<WindowType, SystemBarProperty> WindowNodeContainer::GetExpect
         }
     }
 
-    WLOGI("No immersive window on top. Use default systembar Property");
+    WLOGFD("No immersive window on top. Use default systembar Property");
     return sysBarPropMap;
 }
 
@@ -1043,7 +1043,7 @@ void WindowNodeContainer::NotifyIfSystemBarTintChanged(DisplayId displayId) cons
         if (it.second.prop_ == expectProp) {
             continue;
         }
-        WLOGI("System bar prop update, Type: %{public}d, Visible: %{public}d, Color: %{public}x | %{public}x",
+        WLOGFD("System bar prop update, Type: %{public}d, Visible: %{public}d, Color: %{public}x | %{public}x",
             static_cast<int32_t>(it.first), expectProp.enable_, expectProp.backgroundColor_, expectProp.contentColor_);
         sysBarTintMap[it.first].prop_ = expectProp;
         sysBarTintMap[it.first].type_ = it.first;
@@ -1144,7 +1144,7 @@ void WindowNodeContainer::NotifySystemBarTints(std::vector<DisplayId> displayIdV
 void WindowNodeContainer::NotifyDockWindowStateChanged(sptr<WindowNode>& node, bool isEnable)
 {
     HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
-    WLOGI("[Immersive] begin isEnable: %{public}d", isEnable);
+    WLOGFD("[Immersive] begin isEnable: %{public}d", isEnable);
     if (isEnable) {
         for (auto& windowNode : appWindowNode_->children_) {
             if (windowNode->GetWindowId() == node->GetWindowId()) {
@@ -1512,7 +1512,7 @@ sptr<WindowNode> WindowNodeContainer::GetNextActiveWindow(uint32_t windowId) con
         WLOGFE("cannot find window id: %{public}u by tree", windowId);
         return nullptr;
     }
-    WLOGI("current window: [%{public}u, %{public}u]", windowId, static_cast<uint32_t>(currentNode->GetWindowType()));
+    WLOGFD("current window: [%{public}u, %{public}u]", windowId, static_cast<uint32_t>(currentNode->GetWindowType()));
     if (WindowHelper::IsSystemWindow(currentNode->GetWindowType())) {
         for (auto& node : appWindowNode_->children_) {
             if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {

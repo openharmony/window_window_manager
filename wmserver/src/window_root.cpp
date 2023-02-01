@@ -182,7 +182,7 @@ void WindowRoot::AddDeathRecipient(sptr<WindowNode> node)
         WLOGFE("failed, node is nullptr");
         return;
     }
-    WLOGI("Add for window: %{public}u", node->GetWindowId());
+    WLOGFD("Add for window: %{public}u", node->GetWindowId());
 
     auto remoteObject = node->GetWindowToken()->AsObject();
     windowIdMap_.insert(std::make_pair(remoteObject, node->GetWindowId()));
@@ -203,7 +203,7 @@ WMError WindowRoot::SaveWindow(const sptr<WindowNode>& node)
         return WMError::WM_ERROR_NULLPTR;
     }
 
-    WLOGI("save windowId %{public}u", node->GetWindowId());
+    WLOGFD("save windowId %{public}u", node->GetWindowId());
     windowNodeMap_.insert(std::make_pair(node->GetWindowId(), node));
     if (node->surfaceNode_ != nullptr) {
         surfaceIdWindowNodeMap_.insert(std::make_pair(node->surfaceNode_->GetId(), node));
@@ -963,7 +963,7 @@ void WindowRoot::UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node
     }
     uint32_t windowId = node->GetWindowId();
     uint32_t focusedWindowId = container->GetFocusWindow();
-    WLOGI("current window: %{public}u, focus window: %{public}u", windowId, focusedWindowId);
+    WLOGFD("current window: %{public}u, focus window: %{public}u", windowId, focusedWindowId);
     if (WindowHelper::IsMainWindow(node->GetWindowType())) {
         if (windowId != focusedWindowId) {
             auto iter = std::find_if(node->children_.begin(), node->children_.end(),
@@ -987,7 +987,7 @@ void WindowRoot::UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node
     }
     auto nextFocusableWindow = container->GetNextFocusableWindow(windowId);
     if (nextFocusableWindow != nullptr) {
-        WLOGI("adjust focus window, next focus window id: %{public}u", nextFocusableWindow->GetWindowId());
+        WLOGFD("adjust focus window, next focus window id: %{public}u", nextFocusableWindow->GetWindowId());
         container->SetFocusWindow(nextFocusableWindow->GetWindowId());
     }
 }
@@ -1001,7 +1001,7 @@ void WindowRoot::UpdateActiveWindowWithWindowRemoved(const sptr<WindowNode>& nod
     }
     uint32_t windowId = node->GetWindowId();
     uint32_t activeWindowId = container->GetActiveWindow();
-    WLOGI("current window: %{public}u, active window: %{public}u", windowId, activeWindowId);
+    WLOGFD("current window: %{public}u, active window: %{public}u", windowId, activeWindowId);
     if (WindowHelper::IsMainWindow(node->GetWindowType())) {
         if (windowId != activeWindowId) {
             auto iter = std::find_if(node->children_.begin(), node->children_.end(),
@@ -1091,7 +1091,7 @@ WMError WindowRoot::RequestActiveWindow(uint32_t windowId)
         return WMError::WM_ERROR_NULLPTR;
     }
     auto res = container->SetActiveWindow(windowId, false);
-    WLOGI("windowId:%{public}u, name:%{public}s, orientation:%{public}u, type:%{public}u, isMainWindow:%{public}d",
+    WLOGFD("windowId:%{public}u, name:%{public}s, orientation:%{public}u, type:%{public}u, isMainWindow:%{public}d",
         windowId, node->GetWindowName().c_str(), static_cast<uint32_t>(node->GetRequestedOrientation()),
         node->GetWindowType(), WindowHelper::IsMainWindow(node->GetWindowType()));
     if (res == WMError::WM_OK &&
