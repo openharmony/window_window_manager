@@ -35,6 +35,8 @@ public:
     static NativeValue* Create(NativeEngine& engine, const sptr<ScreenSession>& session);
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
 
+    sptr<ScreenSession> GetNativeSession() const;
+
 private:
     static NativeValue* RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info);
     NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
