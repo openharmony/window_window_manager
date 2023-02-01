@@ -157,7 +157,7 @@ void JsScreenSession::OnConnect()
             return {};
         }
 
-        NativeValue* argv[] = { CreateJsValue(engine, std::make_signed_t<unsigned long>(screenSession->GetScreenId())),
+        NativeValue* argv[] = { CreateJsValue(engine, static_cast<int64_t>(screenSession->GetScreenId())),
             JsScreenUtils::CreateJsScreenProperty(engine, screenSession->GetScreenProperty()) };
         return {argv, ArraySize(argv)};
     };
@@ -188,5 +188,10 @@ void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty)
     };
 
     CallJsCallback(ON_PROPERTY_CHANGE_CALLBACK, valueFun);
+}
+
+sptr<ScreenSession> JsScreenSession::GetNativeSession() const
+{
+    return screenSession_;
 }
 } // namespace OHOS::Rosen
