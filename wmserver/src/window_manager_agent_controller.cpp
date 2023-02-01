@@ -45,7 +45,7 @@ void WindowManagerAgentController::UpdateFocusChangeInfo(const sptr<FocusChangeI
 
 void WindowManagerAgentController::UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints)
 {
-    WLOGI("tints size: %{public}u", static_cast<uint32_t>(tints.size()));
+    WLOGFD("tints size: %{public}u", static_cast<uint32_t>(tints.size()));
     if (tints.empty()) {
         return;
     }

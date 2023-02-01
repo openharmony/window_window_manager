@@ -243,7 +243,7 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     node->abilityToken_ = token;
     node->dialogTargetToken_ = token;
     UpdateWindowAnimation(node);
-    WLOGI("createWindow id:%{public}u", windowId);
+    WLOGFD("createWindow id:%{public}u", windowId);
     // test
     node->stateMachine_.SetWindowId(windowId);
     node->stateMachine_.SetWindowType(property->GetWindowType());
@@ -973,7 +973,7 @@ WMError WindowController::ProcessPointDown(uint32_t windowId, bool isPointDown)
         }
     }
 
-    WLOGI("process point down, windowId: %{public}u", windowId);
+    WLOGFD("process point down, windowId: %{public}u", windowId);
     WMError zOrderRes = windowRoot_->RaiseZOrderForAppWindow(node);
     WMError focusRes = windowRoot_->RequestFocus(windowId);
     windowRoot_->RequestActiveWindow(windowId);
@@ -1169,7 +1169,7 @@ void WindowController::UpdateWindowAnimation(const sptr<WindowNode>& node)
 
     uint32_t animationFlag = node->GetWindowProperty()->GetAnimationFlag();
     uint32_t windowId = node->GetWindowProperty()->GetWindowId();
-    WLOGI("Id: %{public}u, anim_Flag: %{public}u", windowId, animationFlag);
+    WLOGFD("Id: %{public}u, anim_Flag: %{public}u", windowId, animationFlag);
     std::shared_ptr<const RSTransitionEffect> effect = nullptr;
     if (animationFlag == static_cast<uint32_t>(WindowAnimation::DEFAULT)) {
         effect = RSTransitionEffect::Create()
