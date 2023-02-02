@@ -610,15 +610,6 @@ WMError WindowRoot::BindDialogToParent(sptr<WindowNode>& node, sptr<WindowNode>&
         node->GetWindowToken()->NotifyDestroy();
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    auto position = parentNode->children_.end();
-    for (auto iter = parentNode->children_.begin(); iter < parentNode->children_.end(); ++iter) {
-        if ((*iter)->priority_ > node->priority_) {
-            position = iter;
-            break;
-        }
-    }
-    parentNode->children_.insert(position, node);
-    node->parent_ = parentNode;
     return WMError::WM_OK;
 }
 
