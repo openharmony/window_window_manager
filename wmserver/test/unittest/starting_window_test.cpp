@@ -484,11 +484,11 @@ HWTEST_F(StartingWindowTest, SetWindowShadow01, Function | SmallTest | Level2)
     StartingWindow::windowSystemEffectConfig_.focusedShadow_.color_ = "";
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, StartingWindow::SetWindowShadow(node_, true));
 
-    StartingWindow::SetWindowRoot(nullptr);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, StartingWindow::SetWindowShadow(node_, true));
-
     StartingWindow::windowSystemEffectConfig_.focusedShadow_.elevation_ = 0.0001f;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, StartingWindow::SetWindowShadow(node_, true));
+
+    StartingWindow::SetWindowRoot(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, StartingWindow::SetWindowShadow(node_, true));
 }
 
 /**
