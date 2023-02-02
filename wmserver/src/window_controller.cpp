@@ -1105,6 +1105,9 @@ void WindowController::UpdateFocusIfNeededWhenRaiseWindow(const sptr<WindowNode>
         windowRoot_->RequestFocus(windowId);
         windowRoot_->RequestActiveWindow(windowId);
         windowRoot_->FocusFaultDetection();
+
+        accessibilityConnection_->NotifyAccessibilityWindowInfo(windowRoot_->GetWindowNode(windowId),
+            WindowUpdateType::WINDOW_UPDATE_FOCUSED);
     }
 }
 
