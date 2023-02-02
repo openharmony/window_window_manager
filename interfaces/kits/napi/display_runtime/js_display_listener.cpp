@@ -161,5 +161,31 @@ void JsDisplayListener::OnChange(DisplayId id)
     AsyncTask::Schedule("JsDisplayListener::OnChange", *engine_, std::make_unique<AsyncTask>(
             callback, std::move(execute), std::move(complete)));
 }
+
+void JsDisplayListener::OnPrivateWindow(bool hasPrivate)
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    WLOGI("OnPrivateWindow is called, private status: %{public}u", static_cast<uint32_t>(hasPrivate));
+    if (jsCallBack_.empty()) {
+        WLOGFE("OnPrivateWindow not register!");
+        return;
+    }
+    if (jsCallBack_.find(EVENT_PRIVATE_WINDOW) == jsCallBack_.end()) {
+        WLOGE("OnPrivateWindow not this event, return");
+        return;
+    }
+
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
+        [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            NativeValue* argv[] = {CreateJsValue(*engine_, hasPrivate)};
+            CallJsMethod(EVENT_PRIVATE_WINDOW, argv, ArraySize(argv));
+        }
+    );
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsDisplayListener::OnPrivateWindow", *engine_, std::make_unique<AsyncTask>(
+            callback, std::move(execute), std::move(complete)));
+}
 } // namespace Rosen
 } // namespace OHOS

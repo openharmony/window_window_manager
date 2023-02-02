@@ -266,6 +266,10 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     }
     WLOGI("AddWindowNode Id: %{public}u end", node->GetWindowId());
     RSInterfaces::GetInstance().SetAppWindowNum(GetAppWindowNum());
+    // update private window count and notify dms private status changed
+    if (node->GetWindowProperty()->GetPrivacyMode()) {
+        UpdatePrivateStateAndNotify();
+    }
     return WMError::WM_OK;
 }
 
@@ -407,7 +411,38 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node, bool fromA
     }
     WLOGI("Remove Id: %{public}u end", node->GetWindowId());
     RSInterfaces::GetInstance().SetAppWindowNum(GetAppWindowNum());
+
+    // update private window count and notify dms private status changed
+    if (node->GetWindowProperty()->GetPrivacyMode()) {
+        UpdatePrivateStateAndNotify();
+    }
     return WMError::WM_OK;
+}
+
+void WindowNodeContainer::UpdatePrivateStateAndNotify()
+{
+    uint32_t prePrivateWindowCount = privateWindowCount_;
+    WLOGFD("before update : privateWindow count: %{public}u", prePrivateWindowCount);
+    UpdatePrivateWindowCount();
+    if (prePrivateWindowCount == 0 && privateWindowCount_ == 1) {
+        DisplayManagerServiceInner::GetInstance().NotifyPrivateWindowStateChanged(true);
+    } else if (prePrivateWindowCount == 1 && privateWindowCount_ == 0) {
+        DisplayManagerServiceInner::GetInstance().NotifyPrivateWindowStateChanged(false);
+    }
+}
+
+void WindowNodeContainer::UpdatePrivateWindowCount()
+{
+    std::vector<sptr<WindowNode>> windowNodes;
+    TraverseContainer(windowNodes);
+    uint32_t count = 0;
+    for (const auto& node : windowNodes) {
+        if (node->GetWindowProperty()->GetPrivacyMode()) {
+            ++count;
+        }
+    }
+    privateWindowCount_ = count;
+    WLOGFD("after update : privateWindow count: %{public}u", privateWindowCount_);
 }
 
 uint32_t WindowNodeContainer::GetAppWindowNum()

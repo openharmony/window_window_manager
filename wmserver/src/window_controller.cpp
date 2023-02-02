@@ -1328,6 +1328,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         }
         case PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
             node->GetWindowProperty()->SetPrivacyMode(property->GetPrivacyMode());
+            UpdatePrivateStateAndNotify(node);
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO: {
@@ -1338,6 +1339,16 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             break;
     }
     return ret;
+}
+
+void WindowController::UpdatePrivateStateAndNotify(const sptr<WindowNode>& node)
+{
+    auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (windowNodeContainer == nullptr) {
+        WLOGFE("window node container is null");
+        return;
+    }
+    windowNodeContainer->UpdatePrivateStateAndNotify();
 }
 
 WMError WindowController::SetAspectRatio(uint32_t windowId, float ratio)

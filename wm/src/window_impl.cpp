@@ -1492,7 +1492,7 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y)
     }
 
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
-        WLOGFE("fullscreen window could not resize, winId: %{public}u", GetWindowId());
+        WLOGFE("fullscreen window could not moveto, winId: %{public}u", GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     property_->SetWindowSizeChangeReason(WindowSizeChangeReason::MOVE);
@@ -1718,6 +1718,7 @@ std::string WindowImpl::TransferLifeCycleEventToString(LifeCycleEvent type) cons
 
 WMError WindowImpl::SetPrivacyMode(bool isPrivacyMode)
 {
+    WLOGFD("id : %{public}u, SetPrivacyMode", GetWindowId());
     property_->SetPrivacyMode(isPrivacyMode);
     surfaceNode_->SetSecurityLayer(isPrivacyMode || property_->GetSystemPrivacyMode());
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);

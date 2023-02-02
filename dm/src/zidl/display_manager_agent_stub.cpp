@@ -120,6 +120,11 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
             OnScreenshot(snapshotInfo);
             break;
         }
+        case TRANS_ID_ON_PRIVATE_WINDOW: {
+            bool hasPrivate = data.ReadBool();
+            NotifyPrivateWindowStateChanged(hasPrivate);
+            break;
+        }
         default:
             break;
     }

@@ -36,6 +36,7 @@ public:
     void OnDisplayDestroy(DisplayId) override {};
     void OnDisplayChange(const sptr<DisplayInfo>, DisplayChangeEvent) override {};
     void OnScreenshot(sptr<ScreenshotInfo>) override {};
+    void NotifyPrivateWindowStateChanged(bool hasPrivate) override {};
 };
 }
 }

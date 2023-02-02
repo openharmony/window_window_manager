@@ -219,6 +219,9 @@ void RegisterDisplayListenerWithType(NativeEngine& engine, const std::string& ty
     if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
         SingletonContainer::Get<DisplayManager>().RegisterDisplayListener(displayListener);
         WLOGI("RegisterDisplayListenerWithType success");
+    } else if (type == EVENT_PRIVATE_WINDOW) {
+        SingletonContainer::Get<DisplayManager>().RegisterPrivateWindowListener(displayListener);
+        WLOGI("RegisterPrivateWindowListenerWithType success");
     } else {
         WLOGFE("RegisterDisplayListenerWithType failed method: %{public}s not support!",
                type.c_str());
@@ -256,7 +259,11 @@ void UnregisterAllDisplayListenerWithType(const std::string& type)
         if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
             sptr<DisplayManager::IDisplayListener> thisListener(it->second);
             SingletonContainer::Get<DisplayManager>().UnregisterDisplayListener(thisListener);
-            WLOGI("UnregisterAllDisplayListenerWithType success");
+            WLOGFD("unregister all displayListener success");
+        } else if (type == EVENT_PRIVATE_WINDOW) {
+            sptr<DisplayManager::IPrivateWindowListener> thisListener(it->second);
+            SingletonContainer::Get<DisplayManager>().UnregisterPrivateWindowListener(thisListener);
+            WLOGFD("unregister all privateWindowListener success");
         }
         jsCbMap_[type].erase(it++);
     }
@@ -276,7 +283,11 @@ void UnRegisterDisplayListenerWithType(const std::string& type, NativeValue* val
             if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
                 sptr<DisplayManager::IDisplayListener> thisListener(it->second);
                 SingletonContainer::Get<DisplayManager>().UnregisterDisplayListener(thisListener);
-                WLOGI("UnRegisterDisplayListenerWithType success");
+                WLOGFD("unregister displayListener success");
+            } else if (type == EVENT_PRIVATE_WINDOW) {
+                sptr<DisplayManager::IPrivateWindowListener> thisListener(it->second);
+                SingletonContainer::Get<DisplayManager>().UnregisterPrivateWindowListener(thisListener);
+                WLOGFD("unRegister privateWindowListener success");
             }
             jsCbMap_[type].erase(it++);
             break;

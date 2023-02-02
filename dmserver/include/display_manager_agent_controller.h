@@ -44,6 +44,7 @@ public:
     void OnDisplayDestroy(DisplayId);
     void OnDisplayChange(sptr<DisplayInfo>, DisplayChangeEvent);
     void OnScreenshot(sptr<ScreenshotInfo>);
+    void NotifyPrivateWindowStateChanged(bool hasPrivate);
 
 private:
     DisplayManagerAgentController() {}

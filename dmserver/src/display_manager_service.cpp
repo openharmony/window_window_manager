@@ -714,4 +714,9 @@ void DisplayManagerService::RegisterRSScreenChangeListener(const sptr<IRSScreenC
 {
     abstractScreenController_->RegisterRSScreenChangeListener(listener);
 }
+
+void DisplayManagerService::NotifyPrivateWindowStateChanged(bool hasPrivate)
+{
+    DisplayManagerAgentController::GetInstance().NotifyPrivateWindowStateChanged(hasPrivate);
+}
 } // namespace OHOS::Rosen
