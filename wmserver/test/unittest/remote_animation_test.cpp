@@ -218,7 +218,7 @@ HWTEST_F(RemoteAnimationTest, CheckTransition01, Function | SmallTest | Level2)
     EXPECT_EQ(false, RemoteAnimation::CheckTransition(transitionInfo_, srcNode, transitionInfo_, srcNode));
     srcNode->surfaceNode_ = CreateRSSurfaceNode(0); // leash is null, but surfaceNode is not
     EXPECT_EQ(true, RemoteAnimation::CheckTransition(transitionInfo_, srcNode, transitionInfo_, srcNode));
-    srcNode = StartingWindow::CreateWindowNode(transitionInfo_, 0);// leash and app surfaceNode both not nullptr
+    srcNode = StartingWindow::CreateWindowNode(transitionInfo_, 0); // leash and app surfaceNode both not nullptr
     ASSERT_NE(nullptr, srcNode);
     sptr<WindowNode> dstNode = StartingWindow::CreateWindowNode(transitionInfo_, 1);
     ASSERT_NE(nullptr, dstNode);
