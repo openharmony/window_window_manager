@@ -42,6 +42,11 @@ public:
         virtual void OnScreenshot(const ScreenshotInfo info) {}
     };
 
+    class IPrivateWindowListener : public virtual RefBase {
+    public:
+        virtual void OnPrivateWindow(bool hasPrivate) {};
+    };
+
     std::vector<sptr<Display>> GetAllDisplays();
     DisplayId GetDefaultDisplayId();
     sptr<Display> GetDefaultDisplay();
@@ -72,6 +77,8 @@ public:
     DMError UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
     DMError RegisterScreenshotListener(sptr<IScreenshotListener> listener);
     DMError UnregisterScreenshotListener(sptr<IScreenshotListener> listener);
+    DMError RegisterPrivateWindowListener(sptr<IPrivateWindowListener> listener);
+    DMError UnregisterPrivateWindowListener(sptr<IPrivateWindowListener> listener);
 
     constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 3840; // max resolution, 4K
 

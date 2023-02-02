@@ -191,5 +191,17 @@ void DisplayManagerAgentController::OnScreenshot(sptr<ScreenshotInfo> info)
         agent->OnScreenshot(info);
     }
 }
+
+void DisplayManagerAgentController::NotifyPrivateWindowStateChanged(bool hasPrivate)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    WLOGI("PrivateWindow status : %{public}u", hasPrivate);
+    for (auto& agent : agents) {
+        agent->NotifyPrivateWindowStateChanged(hasPrivate);
+    }
+}
 }
 }

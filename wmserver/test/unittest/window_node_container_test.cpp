@@ -319,9 +319,11 @@ HWTEST_F(WindowNodeContainerTest, AddWindowNode01, Function | SmallTest | Level2
     sptr<WindowProperty> property = CreateWindowProperty(111u, "test1", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    node->GetWindowProperty()->SetPrivacyMode(true);
     sptr<WindowNode> parentNode = nullptr;
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(node, parentNode));
     node->startingWindowShown_ = true;
+    node->GetWindowProperty()->SetPrivacyMode(false);
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(node, parentNode));
 }
 
@@ -405,7 +407,9 @@ HWTEST_F(WindowNodeContainerTest, RemoveWindowNode01, Function | SmallTest | Lev
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     node = new WindowNode(property, nullptr, nullptr);
     sptr<WindowNode> parentNode = nullptr;
+    node->GetWindowProperty()->SetPrivacyMode(true);
     ASSERT_EQ(WMError::WM_OK, container->AddWindowNode(node, parentNode));
+    node->GetWindowProperty()->SetPrivacyMode(false);
     ASSERT_EQ(WMError::WM_OK, container->RemoveWindowNode(node));
 }
 
@@ -796,6 +800,28 @@ HWTEST_F(WindowNodeContainerTest, TakeWindowPairSnapshot, Function | SmallTest |
 HWTEST_F(WindowNodeContainerTest, Destroy, Function | SmallTest | Level2)
 {
     ASSERT_EQ(0, container_->Destroy().size());
+}
+/**
+ * @tc.name: UpdatePrivateStateAndNotify
+ * @tc.desc: update private window count
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowNodeContainerTest, UpdatePrivateStateAndNotify, Function | SmallTest | Level2)
+{
+    container_->belowAppWindowNode_->children_.clear();
+    container_->appWindowNode_->children_.clear();
+    container_->aboveAppWindowNode_->children_.clear();
+    container_->privateWindowCount_ = 0;
+    // private window count : from 0 to 1
+    sptr<WindowNode> node = new WindowNode();
+    node->GetWindowProperty()->SetPrivacyMode(true);
+    container_->appWindowNode_->children_.emplace_back(node);
+    container_->UpdatePrivateStateAndNotify();
+    ASSERT_EQ(1, container_->privateWindowCount_);
+    // private window count : from 1 to 0
+    container_->appWindowNode_->children_.clear();
+    container_->UpdatePrivateStateAndNotify();
+    ASSERT_EQ(0, container_->privateWindowCount_);
 }
 }
 }

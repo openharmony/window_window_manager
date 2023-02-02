@@ -126,6 +126,7 @@ public:
     void ClearWindowPairSnapshot(DisplayId displayId);
     bool IsScreenLocked();
     void LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool afterAnimation = false);
+    void UpdatePrivateStateAndNotify();
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
     sptr<WindowNode> FindRoot(WindowType type) const;
@@ -164,6 +165,7 @@ private:
     void UpdateModeSupportInfoWhenKeyguardChange(const sptr<WindowNode>& node, bool up);
     void RemoveFromRsTreeWhenRemoveWindowNode(sptr<WindowNode>& node, bool fromAnimation);
     void UpdateSizeChangeReason(sptr<WindowNode>& node, WindowMode srcMode, WindowMode dstMode);
+    void UpdatePrivateWindowCount();
     uint32_t GetAppWindowNum();
 
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
@@ -174,6 +176,7 @@ private:
     uint32_t activeWindow_ = INVALID_WINDOW_ID;
     int32_t activePid_ = -1;
     bool isScreenLocked_ = false;
+    uint32_t privateWindowCount_ = 0;
 
     std::vector<uint32_t> backupWindowIds_;
     std::map<uint32_t, WindowMode> backupWindowMode_;

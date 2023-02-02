@@ -37,6 +37,7 @@ public:
     virtual void OnDisplayDestroy(DisplayId) override;
     virtual void OnDisplayChange(sptr<DisplayInfo>, DisplayChangeEvent) override;
     virtual void OnScreenshot(sptr<ScreenshotInfo>) override;
+    virtual void NotifyPrivateWindowStateChanged(bool hasPrivate) override;
 private:
     static inline BrokerDelegator<DisplayManagerAgentProxy> delegator_;
 };

@@ -112,7 +112,7 @@ private:
     void NotifyAfterAddWindow(sptr<WindowNode>& node);
     void RelayoutKeyboard(const sptr<WindowNode>& node);
     bool CheckParentWindowValid(const sptr<WindowProperty>& property);
-
+    void UpdatePrivateStateAndNotify(const sptr<WindowNode>& node);
     void UpdateFocusIfNeededWhenRaiseWindow(const sptr<WindowNode>& node);
 
     sptr<WindowRoot> windowRoot_;
