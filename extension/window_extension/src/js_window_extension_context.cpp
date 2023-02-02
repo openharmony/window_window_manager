@@ -88,7 +88,7 @@ private:
     NativeValue* OnStartAbility(NativeEngine& engine, NativeCallbackInfo& info)
     {
         WLOGI("OnStartAbility is called");
-        if (info.argc < 2) {// at least two argc
+        if (info.argc < 2) { // at least two argc
             WLOGFE("Start ability failed, not enough params.");
             engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
             return engine.CreateUndefined();
@@ -120,7 +120,7 @@ private:
                 }
             };
 
-        NativeValue* lastParam = (info.argc <= 2) ? nullptr : info.argv[2];// at least two argc
+        NativeValue* lastParam = (info.argc <= 2) ? nullptr : info.argv[2]; // at least two argc
         NativeValue* result = nullptr;
         AsyncTask::Schedule("JSServiceExtensionContext::OnStartAbility",
             engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
