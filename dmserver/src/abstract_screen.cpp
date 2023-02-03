@@ -70,7 +70,7 @@ void AbstractScreen::UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, b
         WLOGFE("node is nullptr");
         return;
     }
-    WLOGFI("%{public}s surface: %{public}s, %{public}" PRIu64"", (isAdd ? "add" : "remove"),
+    WLOGFD("%{public}s surface: %{public}s, %{public}" PRIu64"", (isAdd ? "add" : "remove"),
         surfaceNode->GetName().c_str(), surfaceNode->GetId());
 
     if (isAdd) {
