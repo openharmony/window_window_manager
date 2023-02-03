@@ -290,9 +290,9 @@ int WindowManagerService::Dump(int fd, const std::vector<std::u16string>& args)
 void WindowManagerService::ConfigureWindowManagerService()
 {
     const auto& config = WindowManagerConfig::GetConfig();
-    WindowManagerConfig::ConfigItem item = config["decor"].GetProp("enable");
-    if (item.IsBool()) {
-        systemConfig_.isSystemDecorEnable_ = item.boolValue_;
+    WindowManagerConfig::ConfigItem item = config["decor"];
+    if (item.IsMap()) {
+        ConfigDecor(item);
     }
     item = config["minimizeByOther"].GetProp("enable");
     if (item.IsBool()) {
@@ -378,6 +378,36 @@ void WindowManagerService::ConfigHotZones(const std::vector<int>& numbers)
         hotZonesConfig_.primaryRange_ = static_cast<uint32_t>(numbers[1]);    // 1 primary
         hotZonesConfig_.secondaryRange_ = static_cast<uint32_t>(numbers[2]);  // 2 secondary
         hotZonesConfig_.isModeChangeHotZoneConfigured_ = true;
+    }
+}
+
+void WindowManagerService::ConfigDecor(const WindowManagerConfig::ConfigItem& decorConfig)
+{
+    WindowManagerConfig::ConfigItem item = decorConfig.GetProp("enable");
+    if (item.IsBool()) {
+        systemConfig_.isSystemDecorEnable_ = item.boolValue_;
+        std::vector<std::string> supportedModes;
+        item = decorConfig["supportedMode"];
+        if (item.IsStrings()) {
+            systemConfig_.decorModeSupportInfo_ = 0;
+            supportedModes = *item.stringsValue_;
+        }
+        for (auto mode : supportedModes) {
+            if (mode == "fullscreen") {
+                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN;
+            } else if (mode == "floating") {
+                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
+            } else if (mode == "pip") {
+                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_PIP;
+            } else if (mode == "split") {
+                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                    WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY;
+            } else {
+                WLOGFW("Invalid supporedMode");
+                systemConfig_.decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+                break;
+            }
+        }
     }
 }
 

@@ -476,7 +476,7 @@ private:
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void NotifyDisplayMoveChange(DisplayId from, DisplayId to);
     void NotifyOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info);
-    void NotifyModeChange(WindowMode mode);
+    void NotifyModeChange(WindowMode mode, bool hasDeco = true);
     void NotifyDragEvent(const PointInfo& point, DragEvent event);
     void DestroyDialogWindow();
     void DestroyFloatingWindow();
@@ -529,7 +529,7 @@ private:
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
     void UpdateWindowStateUnfrozen();
     void UpdateViewportConfig(const Rect& rect, const sptr<class Display>& display, WindowSizeChangeReason reason);
-
+    void UpdateDecorEnable(bool needNotify = false);
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
         ColorSpace colorSpace;
@@ -573,7 +573,6 @@ private:
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
 
     sptr<MoveDragProperty> moveDragProperty_;
-    bool isAppDecorEnable_ = true;
     SystemConfig windowSystemConfig_ ;
     bool isOriginRectSet_ = false;
     bool needRemoveWindowInputChannel_ = false;

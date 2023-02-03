@@ -48,6 +48,11 @@ void WindowNode::SetWindowRect(const Rect& rect)
     property_->SetWindowRect(rect);
 }
 
+void WindowNode::SetDecorEnable(bool decorEnable)
+{
+    property_->SetDecorEnable(decorEnable);
+}
+
 void WindowNode::SetDecoStatus(bool decoStatus)
 {
     property_->SetDecoStatus(decoStatus);

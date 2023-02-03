@@ -40,13 +40,14 @@ private:
     static const std::map<std::string, ValueType> configItemTypeMap_;
 
     static bool IsValidNode(const xmlNode& currNode);
-    static void ReadProperty(const xmlNodePtr& currNode, std::map<std::string, ConfigItem>& property);
-    static void ReadIntNumbersConfigInfo(const xmlNodePtr& currNode, std::vector<int>& intsValue);
-    static void ReadFloatNumbersConfigInfo(const xmlNodePtr& currNode, std::vector<float>& floatsValue, bool allowNeg);
-    static void ReadStringConfigInfo(const xmlNodePtr& currNode, std::string& stringValue);
+    static std::map<std::string, ConfigItem> ReadProperty(const xmlNodePtr& currNode);
+    static std::vector<int> ReadIntNumbersConfigInfo(const xmlNodePtr& currNode);
+    static std::vector<std::string> ReadStringsConfigInfo(const xmlNodePtr& currNode);
+    static std::vector<float> ReadFloatNumbersConfigInfo(const xmlNodePtr& currNode, bool allowNeg);
+    static std::string ReadStringConfigInfo(const xmlNodePtr& currNode);
     static void ReadConfig(const xmlNodePtr& rootPtr, std::map<std::string, ConfigItem>& mapValue);
     static std::string GetConfigPath(const std::string& configFileName);
-    static std::vector<std::string> ReadNumberStrings(const xmlNodePtr& node);
+    static std::vector<std::string> SplitNodeContent(const xmlNodePtr& node, const std::string& pattern = " ");
 };
 } // namespace Rosen
 } // namespace OHOS

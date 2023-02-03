@@ -92,6 +92,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     property_->SetKeepScreenOn(option->IsKeepScreenOn());
     property_->SetBrightness(option->GetBrightness());
     AdjustWindowAnimationFlag();
+    UpdateDecorEnable();
     auto& sysBarPropMap = option->GetSystemBarProperty();
     for (auto it : sysBarPropMap) {
         property_->SetSystemBarProperty(it.first, it.second);
@@ -352,9 +353,7 @@ WMError WindowImpl::SetWindowType(WindowType type)
             return WMError::WM_ERROR_INVALID_PARAM;
         }
         property_->SetWindowType(type);
-        if (isAppDecorEnable_ && windowSystemConfig_.isSystemDecorEnable_) {
-            property_->SetDecorEnable(WindowHelper::IsMainWindow(property_->GetWindowType()));
-        }
+        UpdateDecorEnable();
         AdjustWindowAnimationFlag();
         return WMError::WM_OK;
     }
@@ -508,10 +507,6 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
         WLOGFE("fail to SetUIContent id: %{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (!isAppDecorEnable_ || !windowSystemConfig_.isSystemDecorEnable_) {
-        WLOGI("app set decor enable false");
-        property_->SetDecorEnable(false);
-    }
     if (isdistributed) {
         uiContent->Restore(this, contentInfo, storage);
     } else {
@@ -519,6 +514,7 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     }
     // make uiContent available after Initialize/Restore
     uiContent_ = std::move(uiContent);
+    UpdateDecorEnable(true);
 
     if (state_ == WindowState::STATE_SHOWN) {
         // UIContent may be nullptr when show window, need to notify again when window is shown
@@ -830,7 +826,7 @@ void WindowImpl::GetConfigurationFromAbilityInfo()
 void WindowImpl::UpdateTitleButtonVisibility()
 {
     WLOGFD("[Client] UpdateTitleButtonVisibility");
-    if (uiContent_ == nullptr || !isAppDecorEnable_) {
+    if (uiContent_ == nullptr || !IsDecorEnable()) {
         return;
     }
     auto modeSupportInfo = GetModeSupportInfo();
@@ -1027,12 +1023,9 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
     sptr<IWindow> windowAgent(new WindowAgent(window));
     static std::atomic<uint32_t> tempWindowId = 0;
     uint32_t windowId = tempWindowId++; // for test
-    sptr<IRemoteObject> token = nullptr;
-    if (context_ != nullptr) {
-        token = context_->GetToken();
-        if (token != nullptr) {
-            property_->SetTokenState(true);
-        }
+    sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
+    if (token) {
+        property_->SetTokenState(true);
     }
     InitAbilityInfo();
     SetSystemConfig();
@@ -1066,6 +1059,7 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
 
     MapFloatingWindowToAppIfNeeded();
     MapDialogWindowToAppIfNeeded();
+    UpdateDecorEnable();
 
     state_ = WindowState::STATE_CREATED;
     InputTransferStation::GetInstance().AddInputWindow(self);
@@ -1337,9 +1331,9 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    WindowStateChangeReason stateChangeReason = static_cast<WindowStateChangeReason>(reason);
-    if (stateChangeReason == WindowStateChangeReason::KEYGUARD ||
-        stateChangeReason == WindowStateChangeReason::TOGGLING) {
+    UpdateDecorEnable(true);
+    if (static_cast<WindowStateChangeReason>(reason) == WindowStateChangeReason::KEYGUARD ||
+        static_cast<WindowStateChangeReason>(reason) == WindowStateChangeReason::TOGGLING) {
         state_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
         return WMError::WM_OK;
@@ -1731,13 +1725,15 @@ void WindowImpl::DisableAppWindowDecor()
         return;
     }
     WLOGI("disable app window decoration.");
-    isAppDecorEnable_ = false;
+    property_->SetDecorEnable(false);
 }
 
 bool WindowImpl::IsDecorEnable() const
 {
-    WLOGFD("get decor enable %{public}d", property_->GetDecorEnable());
-    return property_->GetDecorEnable();
+    bool enable = windowSystemConfig_.isSystemDecorEnable_ &&
+        WindowHelper::IsMainWindow(property_->GetWindowType());
+    WLOGFD("get decor enable %{public}d", enable);
+    return enable;
 }
 
 WMError WindowImpl::Maximize()
@@ -2132,12 +2128,9 @@ void WindowImpl::UpdateMode(WindowMode mode)
 {
     WLOGI("UpdateMode %{public}u", mode);
     property_->SetWindowMode(mode);
+    UpdateDecorEnable(true);
     UpdateTitleButtonVisibility();
-    NotifyModeChange(mode);
-    if (uiContent_ != nullptr) {
-        uiContent_->UpdateWindowMode(mode);
-        WLOGFD("notify uiContent window mode change end");
-    }
+
     // different modes have different corner radius settings
     SetWindowCornerRadiusAccordingToSystemConfig();
     // fullscreen and split have no shadow, float has shadow
@@ -2665,6 +2658,26 @@ void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& dis
         property_->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
 
+void WindowImpl::UpdateDecorEnable(bool needNotify)
+{
+    WLOGFD("Start");
+    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        bool enable = windowSystemConfig_.isSystemDecorEnable_ &&
+            WindowHelper::IsWindowModeSupported(windowSystemConfig_.decorModeSupportInfo_, GetMode());
+        WLOGFD("Decor enable: %{public}d", static_cast<int32_t>(enable));
+        property_->SetDecorEnable(enable);
+    } else {
+        property_->SetDecorEnable(false);
+    }
+    if (needNotify) {
+        if (uiContent_ != nullptr) {
+            uiContent_->UpdateWindowMode(GetMode(), property_->GetDecorEnable());
+            WLOGFD("Notify uiContent window mode change end");
+        }
+        NotifyModeChange(GetMode(), property_->GetDecorEnable());
+    }
+}
+
 void WindowImpl::UpdateWindowStateUnfrozen()
 {
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
@@ -2999,12 +3012,12 @@ void WindowImpl::NotifyDisplayMoveChange(DisplayId from, DisplayId to)
     }
 }
 
-void WindowImpl::NotifyModeChange(WindowMode mode)
+void WindowImpl::NotifyModeChange(WindowMode mode, bool hasDeco)
 {
     auto windowChangeListeners = GetListeners<IWindowChangeListener>();
     for (auto& listener : windowChangeListeners) {
         if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnModeChange(mode);
+            listener.GetRefPtr()->OnModeChange(mode, hasDeco);
         }
     }
 }

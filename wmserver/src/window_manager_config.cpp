@@ -44,6 +44,7 @@ const std::map<std::string, WindowManagerConfig::ValueType> WindowManagerConfig:
     { "shadow",                                  WindowManagerConfig::ValueType::MAP },
     { "focused",                                 WindowManagerConfig::ValueType::MAP },
     { "unfocused",                               WindowManagerConfig::ValueType::MAP },
+    { "decor",                                   WindowManagerConfig::ValueType::MAP },
     { "curve",                                   WindowManagerConfig::ValueType::POSITIVE_FLOATS },
     { "splitRatios",                             WindowManagerConfig::ValueType::POSITIVE_FLOATS },
     { "exitSplitRatios",                         WindowManagerConfig::ValueType::POSITIVE_FLOATS },
@@ -59,27 +60,27 @@ const std::map<std::string, WindowManagerConfig::ValueType> WindowManagerConfig:
     { "split",                                   WindowManagerConfig::ValueType::STRING },
     { "float",                                   WindowManagerConfig::ValueType::STRING },
     { "color",                                   WindowManagerConfig::ValueType::STRING },
-    { "decor",                                   WindowManagerConfig::ValueType::UNDIFINED },
+    { "supportedMode",                           WindowManagerConfig::ValueType::STRINGS },
     { "minimizeByOther",                         WindowManagerConfig::ValueType::UNDIFINED },
     { "stretchable",                             WindowManagerConfig::ValueType::UNDIFINED },
     { "remoteAnimation",                         WindowManagerConfig::ValueType::UNDIFINED },
     { "startWindowTransitionAnimation",          WindowManagerConfig::ValueType::UNDIFINED },
 };
 
-std::vector<std::string> WindowManagerConfig::ReadNumberStrings(const xmlNodePtr& node)
+std::vector<std::string> WindowManagerConfig::SplitNodeContent(const xmlNodePtr& node, const std::string& pattern)
 {
-    xmlChar* context = xmlNodeGetContent(node);
-    if (context == nullptr) {
+    xmlChar* content = xmlNodeGetContent(node);
+    if (content == nullptr) {
         WLOGFE("[WmConfig] read xml node error: nodeName:(%{public}s)", node->name);
         return std::vector<std::string>();
     }
 
-    std::string numbersStr = reinterpret_cast<const char*>(context);
-    xmlFree(context);
-    if (numbersStr.size() == 0) {
+    std::string contentStr = reinterpret_cast<const char*>(content);
+    xmlFree(content);
+    if (contentStr.size() == 0) {
         return std::vector<std::string>();
     }
-    return WindowHelper::Split(numbersStr, " ");
+    return WindowHelper::Split(contentStr, pattern);
 }
 
 std::string WindowManagerConfig::GetConfigPath(const std::string& configFileName)
@@ -103,27 +104,23 @@ void WindowManagerConfig::ReadConfig(const xmlNodePtr& rootPtr, std::map<std::st
         }
         std::string nodeName = reinterpret_cast<const char*>(curNodePtr->name);
         if (configItemTypeMap_.count(nodeName)) {
-            std::map<std::string, ConfigItem> p;
-            ReadProperty(curNodePtr, p);
+            std::map<std::string, ConfigItem> p = ReadProperty(curNodePtr);
             if (p.size() > 0) {
                 mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetProperty(p);
             }
             switch (configItemTypeMap_.at(nodeName)) {
                 case ValueType::INTS: {
-                    std::vector<int> v;
-                    ReadIntNumbersConfigInfo(curNodePtr, v);
+                    std::vector<int> v = ReadIntNumbersConfigInfo(curNodePtr);
                     mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetValue(v);
                     break;
                 }
                 case ValueType::POSITIVE_FLOATS: {
-                    std::vector<float> v;
-                    ReadFloatNumbersConfigInfo(curNodePtr, v, false);
+                    std::vector<float> v = ReadFloatNumbersConfigInfo(curNodePtr, false);
                     mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetValue(v);
                     break;
                 }
                 case ValueType::FLOATS: {
-                    std::vector<float> v;
-                    ReadFloatNumbersConfigInfo(curNodePtr, v, true);
+                    std::vector<float> v = ReadFloatNumbersConfigInfo(curNodePtr, true);
                     mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetValue(v);
                     break;
                 }
@@ -134,8 +131,12 @@ void WindowManagerConfig::ReadConfig(const xmlNodePtr& rootPtr, std::map<std::st
                     break;
                 }
                 case ValueType::STRING: {
-                    std::string v;
-                    ReadStringConfigInfo(curNodePtr, v);
+                    std::string v = ReadStringConfigInfo(curNodePtr);
+                    mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetValue(v);
+                    break;
+                }
+                case ValueType::STRINGS: {
+                    std::vector<std::string> v = ReadStringsConfigInfo(curNodePtr);
                     mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetValue(v);
                     break;
                 }
@@ -184,9 +185,9 @@ bool WindowManagerConfig::IsValidNode(const xmlNode& currNode)
     return true;
 }
 
-void WindowManagerConfig::ReadProperty(const xmlNodePtr& currNode,
-    std::map<std::string, ConfigItem>& property)
+std::map<std::string, XmlConfigBase::ConfigItem> WindowManagerConfig::ReadProperty(const xmlNodePtr& currNode)
 {
+    std::map<std::string, ConfigItem> property;
     xmlChar* prop = xmlGetProp(currNode, reinterpret_cast<const xmlChar*>("enable"));
     if (prop != nullptr) {
         if (!xmlStrcmp(prop, reinterpret_cast<const xmlChar*>("true"))) {
@@ -202,43 +203,55 @@ void WindowManagerConfig::ReadProperty(const xmlNodePtr& currNode,
         property["name"].SetValue(std::string(reinterpret_cast<const char*>(prop)));
         xmlFree(prop);
     }
+
+    return property;
 }
 
-void WindowManagerConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode, std::vector<int>& intsValue)
+std::vector<int> WindowManagerConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode)
 {
-    auto numbers = ReadNumberStrings(currNode);
+    std::vector<int> intsValue;
+    auto numbers = SplitNodeContent(currNode);
     for (auto& num : numbers) {
         if (!WindowHelper::IsNumber(num)) {
             WLOGFE("[WmConfig] read int number error: nodeName:(%{public}s)", currNode->name);
-            return;
+            return {};
         }
         intsValue.push_back(std::stoi(num));
     }
+    return intsValue;
 }
 
-void WindowManagerConfig::ReadFloatNumbersConfigInfo(const xmlNodePtr& currNode,
-    std::vector<float>& floatsValue, bool allowNeg)
+std::vector<std::string> WindowManagerConfig::ReadStringsConfigInfo(const xmlNodePtr& currNode)
 {
-    auto numbers = ReadNumberStrings(currNode);
+    return SplitNodeContent(currNode);
+}
+
+std::vector<float> WindowManagerConfig::ReadFloatNumbersConfigInfo(const xmlNodePtr& currNode, bool allowNeg)
+{
+    std::vector<float> floatsValue;
+    auto numbers = SplitNodeContent(currNode);
     for (auto& num : numbers) {
         if (!WindowHelper::IsFloatingNumber(num, allowNeg)) {
             WLOGFE("[WmConfig] read float number error: nodeName:(%{public}s)", currNode->name);
-            return;
+            return {};
         }
         floatsValue.push_back(std::stof(num));
     }
+    return floatsValue;
 }
 
-void WindowManagerConfig::ReadStringConfigInfo(const xmlNodePtr& currNode, std::string& stringValue)
+std::string WindowManagerConfig::ReadStringConfigInfo(const xmlNodePtr& currNode)
 {
+    std::string stringValue;
     xmlChar* context = xmlNodeGetContent(currNode);
     if (context == nullptr) {
         WLOGFE("[WmConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
-        return;
+        return {};
     }
 
     stringValue = std::string(reinterpret_cast<const char*>(context));
     xmlFree(context);
+    return stringValue;
 }
 
 void WindowManagerConfig::DumpConfig(const std::map<std::string, ConfigItem>& config)
