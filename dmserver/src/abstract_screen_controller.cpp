@@ -648,7 +648,7 @@ bool AbstractScreenController::SetOrientation(ScreenId screenId, Orientation new
         screen->screenRequestedOrientation_ = newOrientation;
     }
     if (screen->orientation_ == newOrientation) {
-        WLOGI("skip setting orientation. screen %{public}" PRIu64" orientation %{public}u", screenId, newOrientation);
+        WLOGFD("skip setting orientation. screen %{public}" PRIu64" orientation %{public}u", screenId, newOrientation);
         return true;
     }
     if (isFromWindow) {
