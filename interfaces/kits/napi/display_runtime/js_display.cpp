@@ -170,7 +170,7 @@ NativeValue* CreateJsBoundingRectsArrayObject(NativeEngine& engine, std::vector<
 
 NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& display)
 {
-    WLOGI("JsDisplay::CreateJsDisplay is called");
+    WLOGI("CreateJsDisplay is called");
     NativeValue* objValue = nullptr;
     std::shared_ptr<NativeReference> jsDisplayObj = FindJsDisplayObject(display->GetId());
     if (jsDisplayObj != nullptr && jsDisplayObj->Get() != nullptr) {
