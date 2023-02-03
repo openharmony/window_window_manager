@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,7 +105,7 @@ void DisplayCutoutController::CheckBoundingRectsBoundary(DisplayId displayId, st
             static_cast<int32_t>(boundingRect.width_) + boundingRect.posX_ > static_cast<int32_t>(displayWidth) ||
             static_cast<int32_t>(boundingRect.height_) + boundingRect.posY_ > static_cast<int32_t>(displayHeight) ||
             boundingRect.width_ > displayWidth || boundingRect.height_ > displayHeight ||
-            boundingRect.isUninitializedRect()) {
+            boundingRect.IsUninitializedRect()) {
             WLOGFE("boundingRect boundary is invalid");
             iter = boundingRects.erase(iter);
         } else {
@@ -260,7 +260,7 @@ void DisplayCutoutController::TransferBoundingRectsByRotation(DisplayId displayI
     }
     uint32_t displayHeight = modes->height_;
     uint32_t displayWidth = modes->width_;
-    
+
     switch (currentRotation) {
         case Rotation::ROTATION_90: {
             for (DMRect rect : displayBoundingRects) {

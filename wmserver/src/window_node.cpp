@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -400,6 +400,16 @@ void WindowNode::SetSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
 std::shared_ptr<Media::PixelMap> WindowNode::GetSnapshot()
 {
     return snapshot_;
+}
+
+void WindowNode::SetAspectRatio(float ratio)
+{
+    property_->SetAspectRatio(ratio);
+}
+
+float WindowNode::GetAspectRatio() const
+{
+    return property_->GetAspectRatio();
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
+#include "wm_math.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -281,6 +282,69 @@ bool WindowLayoutPolicyCascade::InitCascadeRectCfg(DisplayId displayId)
     return true;
 }
 
+void WindowLayoutPolicyCascade::ComputeRectByAspectRatio(const sptr<WindowNode>& node) const
+{
+    float aspectRatio = node->GetAspectRatio();
+    if (!WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode()) ||
+        node->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE || MathHelper::NearZero(aspectRatio)) {
+        return;
+    }
+
+    // get new limit config with the settings of system and app
+    const auto& sizeLimits = node->GetWindowUpdatedSizeLimits();
+    float vpr = displayGroupInfo_->GetDisplayVirtualPixelRatio(node->GetDisplayId());
+    uint32_t winFrameW = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * vpr) * 2; // 2 mean double decor width
+    uint32_t winFrameH = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * vpr) +
+        static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * vpr); // decor height
+
+    uint32_t maxWidth = sizeLimits.maxWidth_ - winFrameW;
+    uint32_t minWidth = sizeLimits.minWidth_ - winFrameW;
+    uint32_t maxHeight = sizeLimits.maxHeight_ - winFrameH;
+    uint32_t minHeight = sizeLimits.minHeight_ - winFrameH;
+    float maxRatio = static_cast<float>(maxWidth) / static_cast<float>(minHeight);
+    float minRatio = static_cast<float>(minWidth) / static_cast<float>(maxHeight);
+    if (maxRatio < aspectRatio || aspectRatio < minRatio) {
+        return;
+    }
+    uint32_t newMaxWidth = static_cast<uint32_t>(static_cast<float>(maxHeight) * aspectRatio);
+    maxWidth = std::min(newMaxWidth, maxWidth);
+    uint32_t newMinWidth = static_cast<uint32_t>(static_cast<float>(minHeight) * aspectRatio);
+    minWidth = std::max(newMinWidth, minWidth);
+    uint32_t newMaxHeight = static_cast<uint32_t>(static_cast<float>(maxWidth) / aspectRatio);
+    maxHeight = std::min(newMaxHeight, maxHeight);
+    uint32_t newMinHeight = static_cast<uint32_t>(static_cast<float>(minWidth) / aspectRatio);
+    minHeight = std::max(newMinHeight, minHeight);
+
+    // use rect without decor to calculate new rect which is satisfied width aspect ratio
+    auto newRect = node->GetRequestRect();
+    newRect.width_ -= winFrameW;
+    newRect.height_ -= winFrameH;
+    auto oriRect = newRect;
+
+    // limit window rect by limit size of current ratio
+    newRect.width_ = std::max(minWidth, newRect.width_);
+    newRect.height_ = std::max(minHeight, newRect.height_);
+    newRect.width_ = std::min(maxWidth, newRect.width_);
+    newRect.height_ = std::min(maxHeight, newRect.height_);
+
+    float curRatio = static_cast<float>(newRect.width_) / static_cast<float>(newRect.height_);
+    if (std::abs(curRatio - aspectRatio) > 0.0001f) {
+        if (node->GetDragType() == DragType::DRAG_BOTTOM_OR_TOP) {
+            // if drag height, use height to fix size.
+            newRect.width_ = static_cast<uint32_t>(static_cast<float>(newRect.height_) * aspectRatio);
+        } else {
+            // if drag width or corner, use width to fix size.
+            newRect.height_ = static_cast<uint32_t>(static_cast<float>(newRect.width_) / aspectRatio);
+        }
+    }
+    // fix window pos in case of moving window when dragging
+    FixWindowRectWhenDrag(node, oriRect, newRect);
+    node->SetRequestRect(newRect);
+    node->SetDecoStatus(false); // newRect is not rect with decor, reset decor status
+    WLOGI("ComputeRectByAspectRatio, winId: %{public}u, newRect: %{public}d %{public}d %{public}u %{public}u",
+        node->GetWindowId(), newRect.posX_, newRect.posY_, newRect.width_, newRect.height_);
+}
+
 void WindowLayoutPolicyCascade::ComputeDecoratedRequestRect(const sptr<WindowNode>& node) const
 {
     auto property = node->GetWindowProperty();
@@ -293,6 +357,7 @@ void WindowLayoutPolicyCascade::ComputeDecoratedRequestRect(const sptr<WindowNod
         node->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {
         return;
     }
+
     float virtualPixelRatio = displayGroupInfo_->GetDisplayVirtualPixelRatio(node->GetDisplayId());
     uint32_t winFrameW = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio);
     uint32_t winTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
@@ -311,18 +376,20 @@ void WindowLayoutPolicyCascade::ApplyWindowRectConstraints(const sptr<WindowNode
 {
     WLOGFD("[Before constraints] windowId: %{public}u, winRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         node->GetWindowId(), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
-    auto displayId = node->GetDisplayId();
-    LimitFloatingWindowSize(node, displayGroupInfo_->GetDisplayRect(displayId), winRect);
+    ComputeRectByAspectRatio(node);
+    ComputeDecoratedRequestRect(node);
+    winRect = node->GetRequestRect();
+    LimitFloatingWindowSize(node, winRect);
     LimitMainFloatingWindowPosition(node, winRect);
-    
+
     /*
      * Use the orientation of the window and display to determine
      * whether the screen is rotating, then rotate the divider
      */
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE &&
-        ((!WindowHelper::IsLandscapeRect(winRect) && IsVerticalDisplay(displayId)) ||
-        (WindowHelper::IsLandscapeRect(winRect) && !IsVerticalDisplay(displayId)))) {
-        winRect = cascadeRectsMap_[displayId].dividerRect_;
+        ((!WindowHelper::IsLandscapeRect(winRect) && IsVerticalDisplay(node->GetDisplayId())) ||
+        (WindowHelper::IsLandscapeRect(winRect) && !IsVerticalDisplay(node->GetDisplayId())))) {
+        winRect = cascadeRectsMap_[node->GetDisplayId()].dividerRect_;
         node->SetRequestRect(winRect);
         WLOGFD("Reset divider when display rotation, divRect: [%{public}d, %{public}d, %{public}u, %{public}u]",
             winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
@@ -362,7 +429,6 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
                 break;
             }
             UpdateWindowSizeLimits(node);
-            ComputeDecoratedRequestRect(node);
             winRect = property->GetRequestRect();
             ApplyWindowRectConstraints(node, winRect);
             break;

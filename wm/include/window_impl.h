@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -169,6 +169,8 @@ public:
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
     virtual void SetSnapshotSkip(bool isSkip) override;
     WmErrorCode RaiseToAppTop() override;
+    virtual WMError SetAspectRatio(float ratio) override;
+    virtual WMError UnsetAspectRatio() override;
 
     // window effect
     virtual WMError SetCornerRadius(float cornerRadius) override;
