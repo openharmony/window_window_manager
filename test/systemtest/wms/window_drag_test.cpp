@@ -24,7 +24,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using Utils = WindowTestUtils;
-const int WAIT_CALLBACK_US = 100000;  // 100000 us
+const int WAIT_CALLBACK_US = 1;  // 1s
 
 class TestDragListener : public IWindowDragListener {
 public:
@@ -52,6 +52,7 @@ public:
     Utils::TestWindowInfo dragWindowInfo_;
     Utils::TestWindowInfo firstWindowInfo_;
     Utils::TestWindowInfo secondWindowInfo_;
+    std::vector<sptr<Window>> activeWindows_;
 };
 
 sptr<TestDragListener> WindowDragTest::firstWindowDragListener_ =
@@ -94,9 +95,15 @@ void WindowDragTest::SetUp()
         .parentLimit = false,
         .parentId = INVALID_WINDOW_ID,
     };
+    activeWindows_.clear();
 }
 
-void WindowDragTest::TearDown() {}
+void WindowDragTest::TearDown() {
+    while (!activeWindows_.empty()) {
+        ASSERT_EQ(WMError::WM_OK, activeWindows_.back()->Destroy());
+        activeWindows_.pop_back();
+    }
+}
 
 namespace {
 /**
@@ -113,14 +120,16 @@ HWTEST_F(WindowDragTest, DragIn, Function | MediumTest | Level3) {
     const sptr<Window> &dragWindow = Utils::CreateTestWindow(dragWindowInfo_);
     dragWindow->Show();
     dragWindow->MoveTo(300, 300);
-    usleep(WAIT_CALLBACK_US);
+    sleep(WAIT_CALLBACK_US);
+
+    activeWindows_.push_back(firstWindow);
+    activeWindows_.push_back(dragWindow);
+
     ASSERT_EQ(300, firstWindowDragListener_->point_.x);
     ASSERT_EQ(300, firstWindowDragListener_->point_.y);
     ASSERT_EQ(DragEvent::DRAG_EVENT_IN, firstWindowDragListener_->event_);
 
-    dragWindow->Destroy();
     firstWindow->UnregisterDragListener(firstWindowDragListener_);
-    firstWindow->Destroy();
 }
 
 /**
@@ -137,20 +146,22 @@ HWTEST_F(WindowDragTest, DragMove, Function | MediumTest | Level3) {
     const sptr<Window> &dragWindow = Utils::CreateTestWindow(dragWindowInfo_);
     dragWindow->Show();
     dragWindow->MoveTo(300, 300);
-    usleep(WAIT_CALLBACK_US);
+
+    activeWindows_.push_back(firstWindow);
+    activeWindows_.push_back(dragWindow);
+
+    sleep(WAIT_CALLBACK_US);
     ASSERT_EQ(300, firstWindowDragListener_->point_.x);
     ASSERT_EQ(300, firstWindowDragListener_->point_.y);
     ASSERT_EQ(DragEvent::DRAG_EVENT_IN, firstWindowDragListener_->event_);
 
     dragWindow->MoveTo(400, 400);
-    usleep(WAIT_CALLBACK_US);
+    sleep(WAIT_CALLBACK_US);
     ASSERT_EQ(400, firstWindowDragListener_->point_.x);
     ASSERT_EQ(400, firstWindowDragListener_->point_.y);
     ASSERT_EQ(DragEvent::DRAG_EVENT_MOVE, firstWindowDragListener_->event_);
 
-    dragWindow->Destroy();
     firstWindow->UnregisterDragListener(firstWindowDragListener_);
-    firstWindow->Destroy();
 }
 
 /**
@@ -172,29 +183,31 @@ HWTEST_F(WindowDragTest, DragOut, Function | MediumTest | Level3) {
     const sptr<Window> &dragWindow = Utils::CreateTestWindow(dragWindowInfo_);
     dragWindow->Show();
     dragWindow->MoveTo(300, 300);
-    usleep(WAIT_CALLBACK_US);
+
+    activeWindows_.push_back(firstWindow);
+    activeWindows_.push_back(secondWindow);
+    activeWindows_.push_back(dragWindow);
+    
+    sleep(WAIT_CALLBACK_US);
     ASSERT_EQ(300, firstWindowDragListener_->point_.x);
     ASSERT_EQ(300, firstWindowDragListener_->point_.y);
     ASSERT_EQ(DragEvent::DRAG_EVENT_IN, firstWindowDragListener_->event_);
 
     dragWindow->MoveTo(400, 400);
-    usleep(WAIT_CALLBACK_US);
+    sleep(WAIT_CALLBACK_US);
     ASSERT_EQ(400, firstWindowDragListener_->point_.x);
     ASSERT_EQ(400, firstWindowDragListener_->point_.y);
     ASSERT_EQ(DragEvent::DRAG_EVENT_MOVE, firstWindowDragListener_->event_);
 
     dragWindow->MoveTo(600, 600);
-    usleep(WAIT_CALLBACK_US);
+    sleep(WAIT_CALLBACK_US);
     ASSERT_EQ(100, secondWindowDragListener_->point_.x);
     ASSERT_EQ(100, secondWindowDragListener_->point_.y);
     ASSERT_EQ(DragEvent::DRAG_EVENT_IN, secondWindowDragListener_->event_);
     ASSERT_EQ(DragEvent::DRAG_EVENT_OUT, firstWindowDragListener_->event_);
 
-    dragWindow->Destroy();
     firstWindow->UnregisterDragListener(firstWindowDragListener_);
     secondWindow->UnregisterDragListener(secondWindowDragListener_);
-    firstWindow->Destroy();
-    secondWindow->Destroy();
 }
 
 /**
@@ -203,18 +216,23 @@ HWTEST_F(WindowDragTest, DragOut, Function | MediumTest | Level3) {
  * @tc.type: FUNC
  */
 HWTEST_F(WindowDragTest, DragEnd, Function | MediumTest | Level3) {
-    const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
+    const sptr<Window> firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
+    ASSERT_NE(nullptr, firstWindow);
     firstWindow->RegisterDragListener(firstWindowDragListener_);
     firstWindow->SetTurnScreenOn(true);
     firstWindow->Show();
 
-    const sptr<Window> &dragWindow = Utils::CreateTestWindow(dragWindowInfo_);
+    const sptr<Window> dragWindow = Utils::CreateTestWindow(dragWindowInfo_);
+    ASSERT_NE(nullptr, dragWindow);
     dragWindow->Show();
     dragWindow->MoveTo(199, 199);
-    usleep(WAIT_CALLBACK_US);
+
+
+    sleep(WAIT_CALLBACK_US);
     dragWindow->Destroy();
-    usleep(WAIT_CALLBACK_US);
+    sleep(WAIT_CALLBACK_US);
     ASSERT_EQ(DragEvent::DRAG_EVENT_END, firstWindowDragListener_->event_);
+
     firstWindow->UnregisterDragListener(firstWindowDragListener_);
     firstWindow->Destroy();
 }
