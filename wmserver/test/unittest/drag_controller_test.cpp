@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 
 #include <gtest/gtest.h>
+
+#include "display_manager.h"
 #include "drag_controller.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
@@ -42,6 +44,12 @@ void DragControllerTest::SetUpTestCase()
 {
     WindowInnerManager::GetInstance().Init();
     moveDragController_ = WindowInnerManager::GetInstance().moveDragController_;
+
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_TRUE((display != nullptr));
+    ASSERT_TRUE((display->GetDisplayInfo() != nullptr));
+    moveDragController_->SetDisplayGroupInfo(new DisplayGroupInfo(display->GetDisplayInfo()->GetScreenGroupId(),
+        display->GetDisplayInfo()));
     ASSERT_TRUE(moveDragController_);
     inputListener_ = moveDragController_->inputListener_;
     ASSERT_TRUE(inputListener_);
@@ -176,15 +184,22 @@ HWTEST_F(DragControllerTest, HandleWindowRemovedOrDestroyed, Function | SmallTes
 HWTEST_F(DragControllerTest, ConvertPointerPosToDisplayGroupPos, Function | SmallTest | Level2)
 {
     ASSERT_TRUE(moveDragController_);
+
+    auto displayInfo = new DisplayInfo();
+    displayInfo->SetDisplayId(0);
+    displayInfo->SetWidth(720);   // displayWidth: 720
+    displayInfo->SetHeight(1280); // displayHeight: 1280
+    displayInfo->SetOffsetX(0);
+    displayInfo->SetOffsetY(0);
+    moveDragController_->displayGroupInfo_->AddDisplayInfo(displayInfo);
+
     int32_t posX = 0;
     int32_t posY = 0;
     moveDragController_->ConvertPointerPosToDisplayGroupPos(0, posX, posY);
-    Rect displayRect = { 0, 0, 720, 1280 }; // displayRect: 0, 0, 720, 1280
 
-    moveDragController_->displayRectMap_.insert(std::make_pair(0, displayRect));
     moveDragController_->ConvertPointerPosToDisplayGroupPos(1, posX, posY);
     moveDragController_->ConvertPointerPosToDisplayGroupPos(0, posX, posY);
-    moveDragController_->displayRectMap_.clear();
+    moveDragController_->displayGroupInfo_->RemoveDisplayInfo(0);
 }
 
 /**
@@ -227,8 +242,14 @@ HWTEST_F(DragControllerTest, OnReceiveVsync, Function | SmallTest | Level2)
 HWTEST_F(DragControllerTest, GetHotZoneRect, Function | SmallTest | Level2)
 {
     ASSERT_TRUE(moveDragController_);
-    Rect displayRect = { 0, 0, 720, 1280 }; // displayRect: 0, 0, 720, 1280
-    moveDragController_->displayRectMap_.insert(std::make_pair(0, displayRect));
+
+    auto displayInfo = new DisplayInfo();
+    displayInfo->SetDisplayId(0);
+    displayInfo->SetWidth(720);   // displayWidth: 720
+    displayInfo->SetHeight(1280); // displayHeight: 1280
+    displayInfo->SetOffsetX(0);
+    displayInfo->SetOffsetY(0);
+    moveDragController_->displayGroupInfo_->AddDisplayInfo(displayInfo);
     moveDragController_->moveDragProperty_ = new MoveDragProperty();
     moveDragController_->moveDragProperty_->targetDisplayId_ = 0;
     moveDragController_->moveDragProperty_->startRectExceptCorner_ = { 0, 0, 40, 40 };
@@ -275,25 +296,25 @@ HWTEST_F(DragControllerTest, HandleDragEvent01, Function | SmallTest | Level2)
     int32_t posY = 0;
     int32_t pointId = 0;
     int32_t sourceType = 0;
-    moveDragController_->HandleDragEvent(posX, posY, pointId, sourceType);
+    moveDragController_->HandleDragEvent(0, posX, posY, pointId, sourceType);
 
     moveDragController_->moveDragProperty_ = new MoveDragProperty();
-    moveDragController_->HandleDragEvent(posX, posY, pointId, sourceType);
+    moveDragController_->HandleDragEvent(0, posX, posY, pointId, sourceType);
 
     moveDragController_->moveDragProperty_->startDragFlag_ = true;
-    moveDragController_->HandleDragEvent(posX, posY, pointId, sourceType);
+    moveDragController_->HandleDragEvent(0, posX, posY, pointId, sourceType);
 
     pointId = 1;
-    moveDragController_->HandleDragEvent(posX, posY, pointId, sourceType);
+    moveDragController_->HandleDragEvent(0, posX, posY, pointId, sourceType);
 
     pointId = 0;
-    moveDragController_->HandleDragEvent(posX, posY, pointId, sourceType);
+    moveDragController_->HandleDragEvent(0, posX, posY, pointId, sourceType);
 
     sourceType = 1;
-    moveDragController_->HandleDragEvent(posX, posY, pointId, sourceType);
+    moveDragController_->HandleDragEvent(0, posX, posY, pointId, sourceType);
 
     sourceType = 0;
-    moveDragController_->HandleDragEvent(posX, posY, pointId, sourceType);
+    moveDragController_->HandleDragEvent(0, posX, posY, pointId, sourceType);
 
     moveDragController_->moveDragProperty_ = nullptr;
 }
@@ -310,10 +331,10 @@ HWTEST_F(DragControllerTest, HandleDragEvent02, Function | SmallTest | Level2)
     int32_t posY = 0;
     int32_t pointId = 0;
     int32_t sourceType = 0;
-    moveDragController_->HandleDragEvent(posX, posY, pointId, sourceType);
+    moveDragController_->HandleDragEvent(0, posX, posY, pointId, sourceType);
 
     moveDragController_->moveDragProperty_ = new MoveDragProperty();
-    moveDragController_->HandleDragEvent(posX, posY, pointId, sourceType);
+    moveDragController_->HandleDragEvent(0, posX, posY, pointId, sourceType);
 
     moveDragController_->moveDragProperty_->startDragFlag_ = true;
     moveDragController_->moveDragProperty_->targetDisplayId_ = 0;
@@ -321,19 +342,19 @@ HWTEST_F(DragControllerTest, HandleDragEvent02, Function | SmallTest | Level2)
 
     moveDragController_->moveDragProperty_->startPointPosX_ = -1; // startPointPosX: -1
     moveDragController_->moveDragProperty_->startPointPosY_ = -1; // startPointPosY: -1
-    moveDragController_->HandleDragEvent(posX, posY, pointId, sourceType);
+    moveDragController_->HandleDragEvent(0, posX, posY, pointId, sourceType);
 
     moveDragController_->moveDragProperty_->startPointPosX_ = 45; // startPointPosX: 45
     moveDragController_->moveDragProperty_->startPointPosY_ = -1; // startPointPosY: -1
-    moveDragController_->HandleDragEvent(posX, posY, pointId, sourceType);
+    moveDragController_->HandleDragEvent(0, posX, posY, pointId, sourceType);
 
     moveDragController_->moveDragProperty_->startPointPosX_ = -1; // startPointPosX: -1
     moveDragController_->moveDragProperty_->startPointPosY_ = 45; // startPointPosY: 45
-    moveDragController_->HandleDragEvent(posX, posY, pointId, sourceType);
+    moveDragController_->HandleDragEvent(0, posX, posY, pointId, sourceType);
 
     moveDragController_->moveDragProperty_->startPointPosX_ = 45; // startPointPosX: 45
     moveDragController_->moveDragProperty_->startPointPosY_ = 45; // startPointPosY: 45
-    moveDragController_->HandleDragEvent(posX, posY, pointId, sourceType);
+    moveDragController_->HandleDragEvent(0, posX, posY, pointId, sourceType);
 
     moveDragController_->moveDragProperty_ = nullptr;
 }
@@ -350,25 +371,25 @@ HWTEST_F(DragControllerTest, HandleMoveEvent, Function | SmallTest | Level2)
     int32_t posY = 0;
     int32_t pointId = 0;
     int32_t sourceType = 0;
-    moveDragController_->HandleMoveEvent(posX, posY, pointId, sourceType);
+    moveDragController_->HandleMoveEvent(0, posX, posY, pointId, sourceType);
 
     moveDragController_->moveDragProperty_ = new MoveDragProperty();
-    moveDragController_->HandleMoveEvent(posX, posY, pointId, sourceType);
+    moveDragController_->HandleMoveEvent(0, posX, posY, pointId, sourceType);
 
         moveDragController_->moveDragProperty_->startMoveFlag_ = true;
-    moveDragController_->HandleMoveEvent(posX, posY, pointId, sourceType);
+    moveDragController_->HandleMoveEvent(0, posX, posY, pointId, sourceType);
 
     pointId = 1;
-    moveDragController_->HandleMoveEvent(posX, posY, pointId, sourceType);
+    moveDragController_->HandleMoveEvent(0, posX, posY, pointId, sourceType);
 
     pointId = 0;
-    moveDragController_->HandleMoveEvent(posX, posY, pointId, sourceType);
+    moveDragController_->HandleMoveEvent(0, posX, posY, pointId, sourceType);
 
     sourceType = 1;
-    moveDragController_->HandleMoveEvent(posX, posY, pointId, sourceType);
+    moveDragController_->HandleMoveEvent(0, posX, posY, pointId, sourceType);
 
     sourceType = 0;
-    moveDragController_->HandleMoveEvent(posX, posY, pointId, sourceType);
+    moveDragController_->HandleMoveEvent(0, posX, posY, pointId, sourceType);
 
     moveDragController_->moveDragProperty_ = nullptr;
 }

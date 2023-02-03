@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,8 +17,10 @@
 #include "display_manager_service_inner.h"
 #include "remote_animation.h"
 #include "window_helper.h"
+#include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
+#include "wm_math.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -32,6 +34,9 @@ WindowLayoutPolicy::WindowLayoutPolicy(const sptr<DisplayGroupInfo>& displayGrou
     DisplayGroupWindowTree& displayGroupWindowTree)
     : displayGroupInfo_(displayGroupInfo), displayGroupWindowTree_(displayGroupWindowTree)
 {
+    if (displayGroupInfo) {
+        limitRectMap_ = displayGroupInfo->GetAllDisplayRects();
+    }
 }
 
 void WindowLayoutPolicy::Launch()
@@ -352,6 +357,7 @@ void WindowLayoutPolicy::LayoutWindowNode(const sptr<WindowNode>& node)
     if (WindowHelper::IsSystemBarWindow(node->GetWindowType())) {
         UpdateDisplayLimitRect(node, limitRectMap_[node->GetDisplayId()]);
         UpdateDisplayGroupLimitRect();
+        WindowInnerManager::GetInstance().NotifyDisplayLimitRectChange(limitRectMap_);
     }
     for (auto& childNode : node->children_) {
         LayoutWindowNode(childNode);
@@ -437,14 +443,15 @@ void WindowLayoutPolicy::CalcAndSetNodeHotZone(const Rect& winRect, const sptr<W
 
 void WindowLayoutPolicy::FixWindowSizeByRatioIfDragBeyondLimitRegion(const sptr<WindowNode>& node, Rect& winRect)
 {
+    if (!MathHelper::NearZero(node->GetAspectRatio())) {
+        return;
+    }
     const auto& sizeLimits = node->GetWindowUpdatedSizeLimits();
-    if (sizeLimits.maxWidth_ == sizeLimits.minWidth_ &&
-        sizeLimits.maxHeight_ == sizeLimits.minHeight_) {
+    if (sizeLimits.maxWidth_ == sizeLimits.minWidth_ && sizeLimits.maxHeight_ == sizeLimits.minHeight_) {
         WLOGFD("window rect can not be changed");
         return;
     }
     if (winRect.height_ == 0) {
-        WLOGFE("the height of window is zero");
         return;
     }
     float curRatio = static_cast<float>(winRect.width_) / static_cast<float>(winRect.height_);
@@ -589,6 +596,9 @@ void WindowLayoutPolicy::UpdateWindowSizeLimits(const sptr<WindowNode>& node)
 void WindowLayoutPolicy::UpdateFloatingWindowSizeForStretchableWindow(const sptr<WindowNode>& node,
     const Rect& displayRect, Rect& winRect) const
 {
+    if (!node->GetStretchable() || !WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
+        return;
+    }
     if (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::DRAG) {
         const Rect &originRect = node->GetOriginRect();
         if (originRect.height_ == 0 || originRect.width_ == 0) {
@@ -646,6 +656,9 @@ void WindowLayoutPolicy::UpdateFloatingWindowSizeBySizeLimits(const sptr<WindowN
         return;
     }
 
+    if (!MathHelper::NearZero(node->GetAspectRatio())) {
+        return;
+    }
     float curRatio = static_cast<float>(winRect.width_) / static_cast<float>(winRect.height_);
     // there is no need to fix size by ratio if this is not main floating window
     if (!WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode()) ||
@@ -677,21 +690,9 @@ void WindowLayoutPolicy::UpdateFloatingWindowSizeBySizeLimits(const sptr<WindowN
         winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
 }
 
-void WindowLayoutPolicy::LimitFloatingWindowSize(const sptr<WindowNode>& node,
-                                                 const Rect& displayRect,
-                                                 Rect& winRect) const
+void WindowLayoutPolicy::FixWindowRectWhenDrag(const sptr<WindowNode>& node,
+    const Rect& oriWinRect, Rect& winRect) const
 {
-    if (node->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
-        return;
-    }
-    Rect oriWinRect = winRect;
-    UpdateFloatingWindowSizeBySizeLimits(node, displayRect, winRect);
-
-    if (node->GetStretchable() &&
-        WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
-        UpdateFloatingWindowSizeForStretchableWindow(node, displayRect, winRect);
-    }
-
     // fix size in case of moving window when dragging
     const auto& lastWinRect = node->GetWindowRect();
     if (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::DRAG) {
@@ -706,6 +707,20 @@ void WindowLayoutPolicy::LimitFloatingWindowSize(const sptr<WindowNode>& node,
     }
 }
 
+void WindowLayoutPolicy::LimitFloatingWindowSize(const sptr<WindowNode>& node, Rect& winRect) const
+{
+    if (node->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
+        return;
+    }
+    Rect oriWinRect = winRect;
+    const Rect& displayRect = displayGroupInfo_->GetDisplayRect(node->GetDisplayId());
+    UpdateFloatingWindowSizeBySizeLimits(node, displayRect, winRect);
+    UpdateFloatingWindowSizeForStretchableWindow(node, displayRect, winRect);
+
+    // fix size in case of moving window when dragging
+    FixWindowRectWhenDrag(node, oriWinRect, winRect);
+}
+
 void WindowLayoutPolicy::LimitMainFloatingWindowPosition(const sptr<WindowNode>& node, Rect& winRect) const
 {
     if (!WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
@@ -716,9 +731,7 @@ void WindowLayoutPolicy::LimitMainFloatingWindowPosition(const sptr<WindowNode>&
     // if drag or move window, limit size and position
     if (reason == WindowSizeChangeReason::DRAG) {
         LimitWindowPositionWhenDrag(node, winRect);
-        if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
-            const_cast<WindowLayoutPolicy*>(this)->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, winRect);
-        }
+        const_cast<WindowLayoutPolicy*>(this)->FixWindowSizeByRatioIfDragBeyondLimitRegion(node, winRect);
     } else {
         // Limit window position, such as init window rect when show
         LimitWindowPositionWhenInitRectOrMove(node, winRect);
@@ -820,7 +833,7 @@ void WindowLayoutPolicy::LimitWindowPositionWhenInitRectOrMove(const sptr<Window
         auto reason = node->GetWindowSizeChangeReason();
         // if init window on pc, limit position
         if (floatingBottomPosY_ != 0 && reason == WindowSizeChangeReason::UNDEFINED) {
-            uint32_t bottomPosY = static_cast<uint32_t>(floatingBottomPosY_ * virtualPixelRatio);
+            int32_t bottomPosY = static_cast<int32_t>(floatingBottomPosY_ * virtualPixelRatio);
             if (winRect.posY_ + static_cast<int32_t>(winRect.height_) >= bottomPosY) {
                 winRect.posY_ = limitRect.posY_;
             }

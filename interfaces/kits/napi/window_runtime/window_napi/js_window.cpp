@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -579,6 +579,20 @@ NativeValue* JsWindow::SetBackdropBlurStyle(NativeEngine* engine, NativeCallback
     WLOGI("SetBackdropBlurStyle");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetBackdropBlurStyle(*engine, *info) : nullptr;
+}
+
+NativeValue* JsWindow::SetAspectRatio(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGI("[NAPI]SetAspectRatio");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnSetAspectRatio(*engine, *info) : nullptr;
+}
+
+NativeValue* JsWindow::UnsetAspectRatio(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGI("[NAPI]UnsetAspectRatio");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnUnsetAspectRatio(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::OnShow(NativeEngine& engine, NativeCallbackInfo& info)
@@ -3101,7 +3115,7 @@ NativeValue* JsWindow::OnRaiseToAppTop(NativeEngine& engine, NativeCallbackInfo&
                     static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
                 return;
             }
-            
+
             WmErrorCode errCode = window->RaiseToAppTop();
             if (errCode != WmErrorCode::WM_OK) {
                 WLOGFE("raise window zorder failed");
@@ -3616,6 +3630,105 @@ NativeValue* JsWindow::OnSetBackdropBlurStyle(NativeEngine& engine, NativeCallba
     return engine.CreateUndefined();
 }
 
+NativeValue* JsWindow::OnSetAspectRatio(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WMError errCode = WMError::WM_OK;
+    if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
+        WLOGFE("[NAPI]SetAspectRatio is not allowed since window is main window");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
+        return engine.CreateUndefined();
+    }
+
+    float aspectRatio = 0.0;
+    if (errCode == WMError::WM_OK) {
+        NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
+        if (nativeVal == nullptr) {
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            aspectRatio = static_cast<double>(*nativeVal);
+        }
+    }
+
+    if (errCode == WMError::WM_ERROR_INVALID_PARAM || aspectRatio <= 0.0) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+
+    wptr<Window> weakToken(windowToken_);
+    AsyncTask::CompleteCallback complete =
+        [weakToken, aspectRatio](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr) {
+                task.Reject(engine,
+                    CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                    "OnSetAspectRatio failed."));
+                return;
+            }
+            WMError ret = weakWindow->SetAspectRatio(aspectRatio);
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+            } else {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "SetAspectRatio failed."));
+            }
+            WLOGI("[NAPI]Window [%{public}u, %{public}s] set aspect ratio end, ret = %{public}d",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+        };
+
+    NativeValue* lastParam = (info.argc == 1) ? nullptr :
+        (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsWindow::SetAspectRatio",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* JsWindow::OnUnsetAspectRatio(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    if (info.argc >= 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+
+    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
+        WLOGFE("[NAPI]UnsetAspectRatio is not allowed since window is main window");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
+        return engine.CreateUndefined();
+    }
+
+    wptr<Window> weakToken(windowToken_);
+    AsyncTask::CompleteCallback complete =
+        [weakToken](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr) {
+                task.Reject(engine,
+                    CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                    "OnUnsetAspectRatio failed."));
+                return;
+            }
+            WMError ret = weakWindow->UnsetAspectRatio();
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+            } else {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "UnsetAspectRatio failed."));
+            }
+            WLOGI("[NAPI]Window [%{public}u, %{public}s] unset aspect ratio end, ret = %{public}d",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+        };
+
+    NativeValue* lastParam = (info.argc == 0) ? nullptr :
+        (info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsWindow::OnUnsetAspectRatio",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
 {
     WLOGFD("Try to find window %{public}s in g_jsWindowMap", windowName.c_str());
@@ -3726,6 +3839,8 @@ void BindFunctions(NativeEngine& engine, NativeObject* object, const char *modul
     BindNativeFunction(engine, *object, "setBlur", moduleName, JsWindow::SetBlur);
     BindNativeFunction(engine, *object, "setBackdropBlur", moduleName, JsWindow::SetBackdropBlur);
     BindNativeFunction(engine, *object, "setBackdropBlurStyle", moduleName, JsWindow::SetBackdropBlurStyle);
+    BindNativeFunction(engine, *object, "setAspectRatio", moduleName, JsWindow::SetAspectRatio);
+    BindNativeFunction(engine, *object, "unsetAspectRatio", moduleName, JsWindow::UnsetAspectRatio);
 }
 }  // namespace Rosen
 }  // namespace OHOS

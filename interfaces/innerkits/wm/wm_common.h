@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -349,7 +349,7 @@ struct Rect {
         return !this->operator==(a);
     }
 
-    bool isUninitializedRect() const
+    bool IsUninitializedRect() const
     {
         return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
     }
@@ -404,8 +404,8 @@ public:
 
     bool isEmptyAvoidArea() const
     {
-        return topRect_.isUninitializedRect() && leftRect_.isUninitializedRect() &&
-            rightRect_.isUninitializedRect() && bottomRect_.isUninitializedRect();
+        return topRect_.IsUninitializedRect() && leftRect_.IsUninitializedRect() &&
+            rightRect_.IsUninitializedRect() && bottomRect_.IsUninitializedRect();
     }
 
     static inline bool WriteParcel(Parcel& parcel, const Rect& rect)

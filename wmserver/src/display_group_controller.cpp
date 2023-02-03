@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -391,7 +391,6 @@ void DisplayGroupController::ProcessNotCrossNodesOnDestroyedDisplay(DisplayId di
 void DisplayGroupController::ProcessDisplayCreate(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
                                                   const std::map<DisplayId, Rect>& displayRectMap)
 {
-    WindowInnerManager::GetInstance().NotifyDisplayChange(displayRectMap);
     defaultDisplayId_ = defaultDisplayId;
     WLOGI("defaultDisplay, displayId: %{public}" PRIu64"", defaultDisplayId);
 
@@ -417,7 +416,6 @@ void DisplayGroupController::ProcessDisplayDestroy(DisplayId defaultDisplayId, s
                                                    const std::map<DisplayId, Rect>& displayRectMap,
                                                    std::vector<uint32_t>& windowIds)
 {
-    WindowInnerManager::GetInstance().NotifyDisplayChange(displayRectMap);
     DisplayId displayId = displayInfo->GetDisplayId();
 
     // delete nodes and map element of deleted display
@@ -481,7 +479,6 @@ void DisplayGroupController::ProcessDisplayChange(DisplayId defaultDisplayId, sp
                                                   const std::map<DisplayId, Rect>& displayRectMap,
                                                   DisplayStateChangeType type)
 {
-    WindowInnerManager::GetInstance().NotifyDisplayChange(displayRectMap);
     DisplayId displayId = displayInfo->GetDisplayId();
     WLOGI("display change, displayId: %{public}" PRIu64", type: %{public}d", displayId, type);
     switch (type) {

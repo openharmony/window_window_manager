@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -731,6 +731,45 @@ WMError WindowImpl::SetFullScreen(bool status)
             static_cast<int32_t>(ret), property_->GetWindowId());
     }
     return ret;
+}
+
+WMError WindowImpl::SetAspectRatio(float ratio)
+{
+    WLOGFI("windowId: %{public}u, ratio: %{public}f", GetWindowId(), ratio);
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        WLOGFE("Invalid operation, windowId: %{public}u", GetWindowId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    if (MathHelper::NearZero(ratio) || ratio < 0.0f) {
+        WLOGFE("Invalid param, ratio: %{public}f", ratio);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (std::abs(property_->GetAspectRatio() - ratio) < 0.0001f) {
+        return WMError::WM_OK;
+    }
+    property_->SetAspectRatio(ratio);
+    if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
+        WLOGFD("window is hidden or created! id: %{public}u, ratio: %{public}f ", property_->GetWindowId(), ratio);
+        return WMError::WM_OK;
+    }
+    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO);
+    return WMError::WM_OK;
+}
+
+WMError WindowImpl::UnsetAspectRatio()
+{
+    WLOGFI("windowId: %{public}u", GetWindowId());
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        WLOGFE("Invalid operation, windowId: %{public}u", GetWindowId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    property_->SetAspectRatio(0.0);
+    if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
+        WLOGFD("window is hidden or created! id: %{public}u", property_->GetWindowId());
+        return WMError::WM_OK;
+    }
+    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO);
+    return WMError::WM_OK;
 }
 
 void WindowImpl::MapFloatingWindowToAppIfNeeded()
