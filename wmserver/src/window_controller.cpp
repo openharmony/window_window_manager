@@ -1243,6 +1243,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_MODE: {
+            node->SetDecorEnable(property->GetDecorEnable());
             ret = SetWindowMode(windowId, property->GetWindowMode());
             break;
         }

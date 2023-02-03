@@ -15,7 +15,10 @@
  -->
 <Configs>
     <!--decor enable is true means app main window show decoration-->
-    <decor enable="false"></decor>
+    <decor enable="false">
+        <!--supportedMode could be configed as fullscreen, floating, split or the combination of them-->
+        <supportedMode>floating fullscreen</supportedMode>
+    </decor>
     <!--max number of main window that could be shown on display-->
     <maxAppWindowNumber>100</maxAppWindowNumber>
     <!--maximum number of windows supported by unified rendering -->

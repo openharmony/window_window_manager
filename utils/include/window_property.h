@@ -184,7 +184,7 @@ private:
         { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty() },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
     };
-    bool isDecorEnable_ { false };
+    bool isDecorEnable_ { true };
     Rect originRect_ = { 0, 0, 0, 0 };
     bool isStretchable_ {false};
     DragType dragType_ = DragType::DRAG_UNDEFINED;

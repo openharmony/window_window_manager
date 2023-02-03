@@ -69,7 +69,7 @@ public:
 class IWindowChangeListener : virtual public RefBase {
 public:
     virtual void OnSizeChange(Rect rect, WindowSizeChangeReason reason) {}
-    virtual void OnModeChange(WindowMode mode) {}
+    virtual void OnModeChange(WindowMode mode, bool hasDeco = true) {}
 };
 
 class IAvoidAreaChangedListener : virtual public RefBase {
