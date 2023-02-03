@@ -725,7 +725,7 @@ HWTEST_F(WindowPairTest, UpdateWindowPairStatus04, Function | SmallTest | Level2
     sptr<WindowNode> node1 = windowPair->secondary_;
     sptr<WindowNode> node2 = windowPair->divider_;
     windowPair->UpdateWindowPairStatus();
-    ASSERT_EQ(WindowPairStatus::SINGLE_SECONDARY, windowPair->status_);
+    ASSERT_EQ(WindowPairStatus::SECONDARY_AND_DIVIDER, windowPair->status_);
     ASSERT_EQ(nullptr, windowPair->primary_);
     ASSERT_EQ(node1, windowPair->secondary_);
     ASSERT_EQ(node2, windowPair->divider_);
@@ -751,7 +751,7 @@ HWTEST_F(WindowPairTest, UpdateWindowPairStatus05, Function | SmallTest | Level2
 
     sptr<WindowNode> node1 = windowPair->divider_;
     windowPair->UpdateWindowPairStatus();
-    ASSERT_EQ(WindowPairStatus::EMPTY, windowPair->status_);
+    ASSERT_EQ(WindowPairStatus::SINGLE_SPLIT, windowPair->status_);
     ASSERT_EQ(nullptr, windowPair->primary_);
     ASSERT_EQ(nullptr, windowPair->secondary_);
     ASSERT_EQ(node1, windowPair->divider_);
