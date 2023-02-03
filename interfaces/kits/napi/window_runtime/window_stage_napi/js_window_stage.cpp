@@ -32,8 +32,8 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindo
 
 std::unique_ptr<JsWindowRegisterManager> g_listenerManager = std::make_unique<JsWindowRegisterManager>();
 JsWindowStage::JsWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene,
-    const std::shared_ptr<Ace::UIContent>& uiContent)
-    : windowScene_(windowScene), uiContent_(uiContent)
+    const std::shared_ptr<Ace::NG::UIWindow>& uiWindow)
+    : windowScene_(windowScene), uiWindow_(uiWindow)
 {
 }
 
@@ -149,10 +149,11 @@ NativeValue* JsWindowStage::OnSetUIContent(NativeEngine& engine, NativeCallbackI
         WLOGFE("[NAPI]Failed to convert parameter to url");
         return engine.CreateUndefined();
     }
-    auto uiContent = uiContent_.lock();
-    if (uiContent) {
-        uiContent->Initialize(contextUrl, info.argv[CONTENT_STORAGE_ARG]);
-        uiContent->Connect();
+
+    auto uiWindow = uiWindow_.lock();
+    if (uiWindow) {
+        uiWindow->InitUIContent(contextUrl, &engine, info.argv[CONTENT_STORAGE_ARG]);
+        uiWindow->Connect();
     }
 
     // weakScene->GetMainWindow()->SetUIContent(contextUrl, &engine, info.argv[CONTENT_STORAGE_ARG]);
@@ -548,13 +549,13 @@ NativeValue* JsWindowStage::OnDisableWindowDecor(NativeEngine& engine, NativeCal
 }
 
 NativeValue* CreateJsWindowStage(NativeEngine& engine,
-    std::shared_ptr<Rosen::WindowScene> windowScene, std::shared_ptr<Ace::UIContent> uiContent)
+    std::shared_ptr<Rosen::WindowScene> windowScene, std::shared_ptr<Ace::NG::UIWindow> uiWindow)
 {
     WLOGFD("[NAPI]CreateJsWindowStage");
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
 
-    std::unique_ptr<JsWindowStage> jsWindowStage = std::make_unique<JsWindowStage>(windowScene, uiContent);
+    std::unique_ptr<JsWindowStage> jsWindowStage = std::make_unique<JsWindowStage>(windowScene, uiWindow);
     object->SetNativePointer(jsWindowStage.release(), JsWindowStage::Finalizer, nullptr);
 
     const char *moduleName = "JsWindowStage";
