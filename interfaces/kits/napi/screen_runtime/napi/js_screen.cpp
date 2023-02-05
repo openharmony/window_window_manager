@@ -260,6 +260,7 @@ NativeValue* CreateJsScreenObject(NativeEngine& engine, sptr<Screen>& screen)
     object->SetProperty("parent",
         CreateJsValue(engine, parentId == SCREEN_ID_INVALID ? -1 : static_cast<int64_t>(parentId)));
     object->SetProperty("orientation", CreateJsValue(engine, info->GetOrientation()));
+    object->SetProperty("sourceMode", CreateJsValue(engine, info->GetSourceMode()));
     object->SetProperty("activeModeIndex", CreateJsValue(engine, info->GetModeId()));
     object->SetProperty("supportedModeInfo", CreateJsScreenModeArrayObject(engine, info->GetModes()));
     object->SetProperty("densityDpi", CreateJsValue(engine,

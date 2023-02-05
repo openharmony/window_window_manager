@@ -178,6 +178,13 @@ enum class DisplayChangeEvent : uint32_t {
     DISPLAY_VIRTUAL_PIXEL_RATIO_CHANGED,
     UNKNOWN,
 };
+
+enum class ScreenSourceMode: uint32_t {
+    SCREEN_MAIN = 0,
+    SCREEN_MIRROR = 1,
+    SCREEN_EXTEND = 2,
+    SCREEN_ALONE = 3,
+};
 }
 }
 #endif // OHOS_ROSEN_DM_COMMON_H
