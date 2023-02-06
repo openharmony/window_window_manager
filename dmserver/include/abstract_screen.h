@@ -47,6 +47,8 @@ public:
     Rotation CalcRotation(Orientation orientation) const;
     bool SetVirtualPixelRatio(float virtualPixelRatio);
     float GetVirtualPixelRatio() const;
+    bool SetSourceMode(ScreenSourceMode sourceMode);
+    ScreenSourceMode GetSourceMode() const;
 
     void UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
     void UpdateDisplayGroupRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, NodeId parentNodeId, bool isAdd);
@@ -98,6 +100,7 @@ public:
     Point GetChildPosition(ScreenId screenId) const;
     size_t GetChildCount() const;
     sptr<ScreenGroupInfo> ConvertToScreenGroupInfo() const;
+    ScreenCombination GetScreenCombination() const;
 
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     ScreenId mirrorScreenId_ { SCREEN_ID_INVALID };
