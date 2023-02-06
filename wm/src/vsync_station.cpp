@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <unistd.h>
 #include "vsync_station.h"
 #include "frame_trace.h"
 #include "transaction/rs_interfaces.h"
@@ -23,8 +24,17 @@ static const std::string UI_INTERVAL_NAME = "ui";
 static struct TraceHandle* g_handleUI = nullptr;
 static struct TidHandle* g_handleTid = nullptr;
 
+#ifdef __aarch64__
+#define FRAME_TRACE_SO_PATH "/system/lib64/libframe_trace_intf.z.so"
+#else
+#define FRAME_TRACE_SO_PATH "/system/lib/libframe_trace_intf.z.so"
+#endif
+
 static void VsyncStartTrace()
 {
+    if (access(FRAME_TRACE_SO_PATH, 0) != 0) {
+        return;
+    }
     if (FrameAwareTraceEnable(UI_INTERVAL_NAME)) {
         if (g_handleUI == nullptr) {
             g_handleUI = CreateTraceTag(UI_INTERVAL_NAME);
@@ -82,12 +92,14 @@ void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallb
             vsyncHandler_->PostTask(vsyncTimeoutCallback_, VSYNC_TIME_OUT_TASK, VSYNC_TIME_OUT_MILLISECONDS);
         }
     }
-    if (FrameAwareTraceEnable(UI_INTERVAL_NAME)) {
-        if (g_handleUI == nullptr) {
-            g_handleUI = CreateTraceTag(UI_INTERVAL_NAME);
-        }
-        if (g_handleUI != nullptr) {
-            StopFrameTrace(g_handleUI);
+    if (access(FRAME_TRACE_SO_PATH, 0) == 0) {
+        if (FrameAwareTraceEnable(UI_INTERVAL_NAME)) {
+            if (g_handleUI == nullptr) {
+                g_handleUI = CreateTraceTag(UI_INTERVAL_NAME);
+            }
+            if (g_handleUI != nullptr) {
+                StopFrameTrace(g_handleUI);
+            }
         }
     }
     receiver_->RequestNextVSync(frameCallback_);
