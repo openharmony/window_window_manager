@@ -84,6 +84,15 @@ class WindowImpl : public Window {
         }                                                     \
     } while (0)
 
+#define CALL_LIFECYCLE_LISTENER_WITH_PARAM(windowLifecycleCb, listeners, param) \
+    do {                                                                        \
+        for (auto& listener : (listeners)) {                                    \
+            if (listener.GetRefPtr() != nullptr) {                              \
+                listener.GetRefPtr()->windowLifecycleCb(param);                 \
+            }                                                                   \
+        }                                                                       \
+    } while (0)
+
 #define CALL_UI_CONTENT(uiContentCb)                          \
     do {                                                      \
         if (uiContent_ != nullptr) {                          \
@@ -443,15 +452,10 @@ private:
         auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
         CALL_LIFECYCLE_LISTENER(AfterInactive, lifecycleListeners);
     }
-    inline void NotifyForegroundFailed()
+    inline void NotifyForegroundFailed(WMError ret)
     {
         auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER(ForegroundFailed, lifecycleListeners);
-    }
-    inline void NotifyForegroundInvalidWindowMode()
-    {
-        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER(ForegroundInvalidMode, lifecycleListeners);
+        CALL_LIFECYCLE_LISTENER_WITH_PARAM(ForegroundFailed, lifecycleListeners, static_cast<int32_t>(ret));
     }
     inline bool IsStretchableReason(WindowSizeChangeReason reason)
     {

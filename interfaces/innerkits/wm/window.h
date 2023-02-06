@@ -60,8 +60,7 @@ public:
     virtual void AfterBackground() {}
     virtual void AfterFocused() {}
     virtual void AfterUnfocused() {}
-    virtual void ForegroundFailed() {}
-    virtual void ForegroundInvalidMode() {}
+    virtual void ForegroundFailed(int32_t ret) {}
     virtual void AfterActive() {}
     virtual void AfterInactive() {}
 };
