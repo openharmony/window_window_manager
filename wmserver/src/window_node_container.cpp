@@ -239,7 +239,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_ADD);
     DumpScreenWindowTree();
     UpdateCameraFloatWindowStatus(node, true);
-    if (WindowHelper::IsAppWindow(node->GetWindowType())) {
+    if (WindowHelper::IsMainWindow(node->GetWindowType())) {
         backupWindowIds_.clear();
     }
 
