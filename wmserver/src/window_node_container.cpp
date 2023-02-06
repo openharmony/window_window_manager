@@ -253,7 +253,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     AssignZOrder();
     LayoutWhenAddWindowNode(node, afterAnimation);
     UpdateCameraFloatWindowStatus(node, true);
-    if (WindowHelper::IsAppWindow(node->GetWindowType())) {
+    if (WindowHelper::IsMainWindow(node->GetWindowType())) {
         backupWindowIds_.clear();
     }
 
