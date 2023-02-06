@@ -204,7 +204,9 @@ HWTEST_F(WindowRotationTest, WindowRotationTest3, Function | MediumTest | Level3
 
     ASSERT_EQ(Orientation::REVERSE_HORIZONTAL, fullWindow->GetRequestedOrientation());
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
-    auto screen = ScreenManager::GetInstance().GetAllScreens()[0];
+    std::vector<sptr<Screen>> screens;
+    ScreenManager::GetInstance().GetAllScreens(screens);
+    auto screen = screens[0];
     ASSERT_EQ(Orientation::UNSPECIFIED, screen->GetOrientation());
     ASSERT_EQ(Orientation::UNSPECIFIED, display->GetOrientation());
     sleep(SPLIT_TEST_SLEEP_S);

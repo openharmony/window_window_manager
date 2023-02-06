@@ -73,12 +73,14 @@ enum class DMError : int32_t {
     DM_ERROR_UNREGISTER_AGENT_FAILED = 190,
     DM_ERROR_INVALID_CALLING = 200,
     DM_ERROR_INVALID_PERMISSION = 201,
+    DM_ERROR_NOT_SYSTEM_APP = 202,
     DM_ERROR_UNKNOWN = -1,
 };
 
 enum class DmErrorCode : int32_t {
     DM_OK = 0,
     DM_ERROR_NO_PERMISSION = 201,
+    DM_ERROR_NOT_SYSTEM_APP = 202,
     DM_ERROR_INVALID_PARAM = 401,
     DM_ERROR_DEVICE_NOT_SUPPORT = 801,
     DM_ERROR_INVALID_SCREEN = 1400001,
@@ -101,6 +103,7 @@ const std::map<DMError, DmErrorCode> DM_JS_TO_ERROR_CODE_MAP {
     {DMError::DM_ERROR_RENDER_SERVICE_FAILED,           DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
     {DMError::DM_ERROR_UNREGISTER_AGENT_FAILED,         DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
     {DMError::DM_ERROR_INVALID_CALLING,                 DmErrorCode::DM_ERROR_INVALID_CALLING       },
+    {DMError::DM_ERROR_NOT_SYSTEM_APP,                  DmErrorCode::DM_ERROR_NOT_SYSTEM_APP        },
     {DMError::DM_ERROR_UNKNOWN,                         DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
 };
 

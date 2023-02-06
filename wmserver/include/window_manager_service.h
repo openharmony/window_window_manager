@@ -98,7 +98,7 @@ public:
     void ProcessPointDown(uint32_t windowId, bool isPointDown) override;
     void ProcessPointUp(uint32_t windowId) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
-    void MinimizeAllAppWindows(DisplayId displayId) override;
+    WMError MinimizeAllAppWindows(DisplayId displayId) override;
     WMError ToggleShownStateForAllAppWindows() override;
     WMError SetWindowLayoutMode(WindowLayoutMode mode) override;
     WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
@@ -107,9 +107,9 @@ public:
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     WmErrorCode RaiseToAppTop(uint32_t windowId) override;
 
-    bool RegisterWindowManagerAgent(WindowManagerAgentType type,
+    WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
-    bool UnregisterWindowManagerAgent(WindowManagerAgentType type,
+    WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
 
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) override;
@@ -145,8 +145,8 @@ private:
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     WMError GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken);
-    bool CheckSystemWindowPermission(const sptr<WindowProperty>& property) const;
-    bool CheckAnimationPermission(const sptr<WindowProperty>& property) const;
+    WMError CheckSystemWindowPermission(const sptr<WindowProperty>& property) const;
+    WMError CheckAnimationPermission(const sptr<WindowProperty>& property) const;
     void ConfigureWindowManagerService();
     void PostVoidSyncTask(Task task);
     template<typename SyncTask, typename Return = std::invoke_result_t<SyncTask>>

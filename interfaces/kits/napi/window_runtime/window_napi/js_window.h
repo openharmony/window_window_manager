@@ -196,7 +196,7 @@ private:
     NativeValue* OnRotate(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnTranslate(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetTransitionController(NativeEngine& engine, NativeCallbackInfo& info);
-    void CreateTransitionController(NativeEngine& engine);
+    WmErrorCode CreateTransitionController(NativeEngine& engine);
 
     // window effect
     NativeValue* OnSetCornerRadius(NativeEngine& engine, NativeCallbackInfo& info);

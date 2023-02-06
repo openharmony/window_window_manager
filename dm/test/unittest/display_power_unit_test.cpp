@@ -77,14 +77,14 @@ HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_001, Functi
     Mocker m;
 
     EXPECT_CALL(m.Mock(), RegisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER))
-        .Times(1).WillOnce(Return(true));
-    bool ret  = DisplayManager::GetInstance().RegisterDisplayPowerEventListener(listener_);
-    ASSERT_EQ(true, ret);
+        .Times(1).WillOnce(Return(DMError::DM_OK));
+    DMError ret  = DisplayManager::GetInstance().RegisterDisplayPowerEventListener(listener_);
+    ASSERT_EQ(DMError::DM_OK, ret);
 
     EXPECT_CALL(m.Mock(), UnregisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER))
-        .Times(1).WillOnce(Return(true));
-    ret  = DisplayManager::GetInstance().UnregisterDisplayPowerEventListener(listener_);
-    ASSERT_EQ(true, ret);
+        .Times(1).WillOnce(Return(DMError::DM_OK));
+    ret = DisplayManager::GetInstance().UnregisterDisplayPowerEventListener(listener_);
+    ASSERT_EQ(DMError::DM_OK, ret);
 }
 
 /**
@@ -97,13 +97,13 @@ HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_002, Functi
     Mocker m;
     EXPECT_CALL(m.Mock(), RegisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER))
         .Times(0);
-    bool ret  = DisplayManager::GetInstance().RegisterDisplayPowerEventListener(nullptr);
-    ASSERT_EQ(false, ret);
+    DMError ret  = DisplayManager::GetInstance().RegisterDisplayPowerEventListener(nullptr);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
 
     EXPECT_CALL(m.Mock(), UnregisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER))
         .Times(0);
-    ret  = DisplayManager::GetInstance().UnregisterDisplayPowerEventListener(nullptr);
-    ASSERT_EQ(false, ret);
+    ret = DisplayManager::GetInstance().UnregisterDisplayPowerEventListener(nullptr);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -115,14 +115,14 @@ HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_003, Functi
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), RegisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER))
-        .Times(1).WillOnce(Return(false));
-    bool ret  = DisplayManager::GetInstance().RegisterDisplayPowerEventListener(listener_);
-    ASSERT_EQ(false, ret);
+        .Times(1).WillOnce(Return(DMError::DM_ERROR_NULLPTR));
+    DMError ret  = DisplayManager::GetInstance().RegisterDisplayPowerEventListener(listener_);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
 
     EXPECT_CALL(m.Mock(), UnregisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER))
         .Times(0);
     ret  = DisplayManager::GetInstance().UnregisterDisplayPowerEventListener(listener_);
-    ASSERT_EQ(false, ret);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -135,8 +135,8 @@ HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_001, Func
     Mocker m;
     EXPECT_CALL(m.Mock(), UnregisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER))
         .Times(0);
-    bool ret  = DisplayManager::GetInstance().UnregisterDisplayPowerEventListener(listener_);
-    ASSERT_EQ(false, ret);
+    DMError ret  = DisplayManager::GetInstance().UnregisterDisplayPowerEventListener(listener_);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -149,8 +149,8 @@ HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_002, Func
     Mocker m;
     EXPECT_CALL(m.Mock(), UnregisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER))
         .Times(0);
-    bool ret  = DisplayManager::GetInstance().UnregisterDisplayPowerEventListener(nullptr);
-    ASSERT_EQ(false, ret);
+    DMError ret  = DisplayManager::GetInstance().UnregisterDisplayPowerEventListener(nullptr);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -262,7 +262,7 @@ HWTEST_F(DisplayPowerUnitTest, set_display_state_001, Function | MediumTest | Le
     DisplayState stateToSet = (initialState_ == DisplayState::OFF ? DisplayState::ON : DisplayState::OFF);
     Mocker m;
     EXPECT_CALL(m.Mock(), RegisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_STATE_LISTENER))
-        .Times(1).WillOnce(Return(true));
+        .Times(1).WillOnce(Return(DMError::DM_OK));
     EXPECT_CALL(m.Mock(), SetDisplayState(stateToSet)).Times(1).WillOnce(Return(true));
     DisplayStateCallback callback = [](DisplayState state) {};
     bool ret = DisplayManager::GetInstance().SetDisplayState(stateToSet, callback);

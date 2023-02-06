@@ -140,7 +140,7 @@ HWTEST_F(AbstractScreenControllerTest, SetScreenRotateAnimation01, Function | Sm
 HWTEST_F(AbstractScreenControllerTest, MakeMirror01, Function | SmallTest | Level3)
 {
     std::vector<ScreenId> screens;
-    ASSERT_EQ(false, absController_->MakeMirror(5, screens));
+    ASSERT_TRUE(DMError::DM_OK != absController_->MakeMirror(5, screens));
 }
 /**
  * @tc.name: MakeMirror
@@ -151,7 +151,7 @@ HWTEST_F(AbstractScreenControllerTest, MakeMirror02, Function | SmallTest | Leve
 {
     std::vector<ScreenId> screens;
     absController_->dmsScreenMap_[2]->type_ = ScreenType::UNDEFINED;
-    ASSERT_EQ(false, absController_->MakeMirror(2, screens));
+    ASSERT_TRUE(DMError::DM_OK != absController_->MakeMirror(2, screens));
 }
 /**
  * @tc.name: MakeMirror
@@ -164,7 +164,7 @@ HWTEST_F(AbstractScreenControllerTest, MakeMirror03, Function | SmallTest | Leve
     absController_->dmsScreenMap_[2]->type_ = ScreenType::REAL;
     absController_->dmsScreenMap_[2]->groupDmsId_ = 5;
     absController_->abstractScreenCallback_ = nullptr;
-    ASSERT_EQ(false, absController_->MakeMirror(2, screens));
+    ASSERT_TRUE(DMError::DM_OK != absController_->MakeMirror(2, screens));
 }
 /**
  * @tc.name: MakeMirror
@@ -177,7 +177,7 @@ HWTEST_F(AbstractScreenControllerTest, MakeMirror04, Function | SmallTest | Leve
     absController_->dmsScreenMap_[2]->type_ = ScreenType::REAL;
     absController_->dmsScreenMap_[2]->groupDmsId_ = 5;
     absController_->abstractScreenCallback_ = new AbstractScreenController::AbstractScreenCallback;
-    ASSERT_EQ(false, absController_->MakeMirror(2, screens));
+    ASSERT_TRUE(DMError::DM_OK != absController_->MakeMirror(2, screens));
 }
 /**
  * @tc.name: ProcessScreenConnected
@@ -436,7 +436,7 @@ HWTEST_F(AbstractScreenControllerTest, SetOrientation01, Function | SmallTest | 
 {
     absController_->dmsScreenMap_[1]->isScreenGroup_ = true;
     Orientation orientation = Orientation::BEGIN;
-    ASSERT_EQ(false, absController_->SetOrientation(1, orientation, true));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, absController_->SetOrientation(1, orientation, true));
 }
 /**
  * @tc.name: SetRotation
@@ -456,7 +456,7 @@ HWTEST_F(AbstractScreenControllerTest, SetRotation01, Function | SmallTest | Lev
  */
 HWTEST_F(AbstractScreenControllerTest, SetScreenActiveMode01, Function | SmallTest | Level3)
 {
-    ASSERT_EQ(false, absController_->SetScreenActiveMode(5, 0));
+    ASSERT_TRUE(DMError::DM_OK != absController_->SetScreenActiveMode(5, 0));
 }
 /**
  * @tc.name: SetScreenActiveMode
@@ -466,7 +466,7 @@ HWTEST_F(AbstractScreenControllerTest, SetScreenActiveMode01, Function | SmallTe
 HWTEST_F(AbstractScreenControllerTest, SetScreenActiveMode02, Function | SmallTest | Level3)
 {
     absController_->screenIdManager_.dms2RsScreenIdMap_.erase(1);
-    ASSERT_EQ(false, absController_->SetScreenActiveMode(1, 0));
+    ASSERT_TRUE(DMError::DM_OK != absController_->SetScreenActiveMode(1, 0));
 }
 /**
  * @tc.name: ProcessScreenModeChanged
@@ -719,7 +719,7 @@ HWTEST_F(AbstractScreenControllerTest, SetVirtualPixelRatio01, Function | SmallT
     ScreenId id = 0;
     float ratio = 1.0;
     screen->isScreenGroup_ = true;
-    ASSERT_EQ(false, absController_->SetVirtualPixelRatio(id, ratio));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, absController_->SetVirtualPixelRatio(id, ratio));
 }
 /**
  * @tc.name: SetVirtualPixelRatio
@@ -731,7 +731,7 @@ HWTEST_F(AbstractScreenControllerTest, SetVirtualPixelRatio02, Function | SmallT
     ScreenId id = 0;
     float ratio = 1.0;
     absController_->abstractScreenCallback_ = nullptr;
-    ASSERT_EQ(true, absController_->SetVirtualPixelRatio(id, ratio));
+    ASSERT_EQ(DMError::DM_OK, absController_->SetVirtualPixelRatio(id, ratio));
 }
 }
 } // namespace Rosen

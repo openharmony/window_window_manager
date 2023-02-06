@@ -219,14 +219,14 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
     return WMError::WM_OK;
 }
 
-void WindowImpl::SetAlpha(float alpha)
+WMError WindowImpl::SetAlpha(float alpha)
 {
-    return;
+    return WMError::WM_OK;
 }
 
-void WindowImpl::SetTransform(const Transform& trans)
+WMError WindowImpl::SetTransform(const Transform& trans)
 {
-    return;
+    return WMError::WM_OK;
 }
 
 const Transform& WindowImpl::GetTransform() const
@@ -427,9 +427,9 @@ WMError WindowImpl::SetCallingWindow(uint32_t windowId)
     return WMError::WM_OK;
 }
 
-void WindowImpl::SetPrivacyMode(bool isPrivacyMode)
+WMError WindowImpl::SetPrivacyMode(bool isPrivacyMode)
 {
-    return;
+    return WMError::WM_OK;
 }
 
 bool WindowImpl::IsPrivacyMode() const
@@ -442,14 +442,14 @@ void WindowImpl::SetSystemPrivacyMode(bool isSystemPrivacyMode)
     return;
 }
 
-void WindowImpl::SetSnapshotSkip(bool isSkip)
+WMError WindowImpl::SetSnapshotSkip(bool isSkip)
 {
-    return;
+    return WMError::WM_OK;
 }
 
-void WindowImpl::DisableAppWindowDecor()
+WMError WindowImpl::DisableAppWindowDecor()
 {
-    return;
+    return WMError::WM_OK;
 }
 
 bool WindowImpl::IsDecorEnable() const
@@ -497,54 +497,54 @@ void WindowImpl::SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer
     return;
 }
 
-bool WindowImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
+WMError WindowImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
 {
-    return true;
+    return WMError::WM_OK;
 }
 
-bool WindowImpl::RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
+WMError WindowImpl::RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
 {
-    return true;
+    return WMError::WM_OK;
 }
 
-bool WindowImpl::UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
+WMError WindowImpl::UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
 {
-    return true;
+    return WMError::WM_OK;
 }
 
-bool WindowImpl::UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
+WMError WindowImpl::UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
 {
-    return true;
+    return WMError::WM_OK;
 }
 
-bool WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+WMError WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    return true;
+    return WMError::WM_OK;
 }
 
-bool WindowImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+WMError WindowImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    return true;
+    return WMError::WM_OK;
 }
 
-bool WindowImpl::RegisterDragListener(const sptr<IWindowDragListener>& listener)
+WMError WindowImpl::RegisterDragListener(const sptr<IWindowDragListener>& listener)
 {
-    return true;
+    return WMError::WM_OK;
 }
 
-bool WindowImpl::UnregisterDragListener(const sptr<IWindowDragListener>& listener)
+WMError WindowImpl::UnregisterDragListener(const sptr<IWindowDragListener>& listener)
 {
-    return true;
+    return WMError::WM_OK;
 }
 
-bool WindowImpl::RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
+WMError WindowImpl::RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
 {
-    return true;
+    return WMError::WM_OK;
 }
 
-bool WindowImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
+WMError WindowImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
 {
-    return true;
+    return WMError::WM_OK;
 }
 
 void WindowImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func)
@@ -552,49 +552,49 @@ void WindowImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFun
     return;
 }
 
-bool WindowImpl::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
+WMError WindowImpl::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
 {
-    return true;
+    return WMError::WM_OK;
 }
 
-bool WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
+WMError WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
 {
-    return true;
+    return WMError::WM_OK;
 }
 
-bool WindowImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
+WMError WindowImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
-    return true;
+    return WMError::WM_OK;
 }
 
-bool WindowImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
+WMError WindowImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
-    return true;
+    return WMError::WM_OK;
 }
 
-bool WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener)
+WMError WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener)
 {
-    return true;
+    return WMError::WM_OK;
 }
 
-bool WindowImpl::RegisterScreenshotListener(const sptr<IScreenshotListener>& listener)
+WMError WindowImpl::RegisterScreenshotListener(const sptr<IScreenshotListener>& listener)
 {
-    return true;
+    return WMError::WM_OK;
 }
 
-bool WindowImpl::UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener)
+WMError WindowImpl::UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener)
 {
-    return true;
+    return WMError::WM_OK;
 }
 
-bool WindowImpl::RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
+WMError WindowImpl::RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
 {
-    return true;
+    return WMError::WM_OK;
 }
 
-bool WindowImpl::UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
+WMError WindowImpl::UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
 {
-    return true;
+    return WMError::WM_OK;
 }
 
 void WindowImpl::RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener)
@@ -724,14 +724,14 @@ WMError WindowImpl::SetShadowColor(std::string color)
     return WMError::WM_OK;
 }
 
-void WindowImpl::SetShadowOffsetX(float offsetX)
+WMError WindowImpl::SetShadowOffsetX(float offsetX)
 {
-    return;
+    return WMError::WM_OK;
 }
 
-void WindowImpl::SetShadowOffsetY(float offsetY)
+WMError WindowImpl::SetShadowOffsetY(float offsetY)
 {
-    return;
+    return WMError::WM_OK;
 }
 
 WMError WindowImpl::SetBlur(float radius)

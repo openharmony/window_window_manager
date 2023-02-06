@@ -87,10 +87,10 @@ public:
         const sptr<IRemoteObject>& displayManagerAgent) = 0;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) = 0;
-    virtual bool SetOrientation(ScreenId screenId, Orientation orientation) = 0;
+    virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId) = 0;
-    virtual void SetScreenRotationLocked(bool isLocked) = 0;
-    virtual bool IsScreenRotationLocked() = 0;
+    virtual DMError SetScreenRotationLocked(bool isLocked) = 0;
+    virtual DMError IsScreenRotationLocked(bool& isLocked) = 0;
 
     // colorspace, gamut
     virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts) = 0;
@@ -100,9 +100,9 @@ public:
     virtual DMError SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap) = 0;
     virtual DMError SetScreenColorTransform(ScreenId screenId) = 0;
 
-    virtual bool RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+    virtual DMError RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) = 0;
-    virtual bool UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+    virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) = 0;
     virtual bool WakeUpBegin(PowerStateChangeReason reason) = 0;
     virtual bool WakeUpEnd() = 0;
@@ -118,12 +118,14 @@ public:
     virtual bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze) = 0;
     virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) = 0;
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) = 0;
-    virtual std::vector<sptr<ScreenInfo>> GetAllScreenInfos() = 0;
-    virtual ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) = 0;
-    virtual ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) = 0;
+    virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) = 0;
+    virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+        ScreenId& screenGroupId) = 0;
+    virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoints,
+        ScreenId& screenGroupId) = 0;
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) = 0;
-    virtual bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId) = 0;
-    virtual bool SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) = 0;
+    virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) = 0;
+    virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) = 0;
 };
 } // namespace OHOS::Rosen
 

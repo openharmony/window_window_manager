@@ -47,7 +47,7 @@ public:
         sptr<MoveDragProperty>& moveDragProperty);
     virtual void ProcessPointDown(uint32_t windowId, bool isPointDown = true);
     virtual void ProcessPointUp(uint32_t windowId);
-    virtual void MinimizeAllAppWindows(DisplayId displayId);
+    virtual WMError MinimizeAllAppWindows(DisplayId displayId);
     virtual WMError ToggleShownStateForAllAppWindows();
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode);
     virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action);
@@ -55,9 +55,9 @@ public:
     virtual WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones);
     virtual WMError UpdateRsTree(uint32_t windowId, bool isAdd);
     virtual WMError BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken);
-    virtual bool RegisterWindowManagerAgent(WindowManagerAgentType type,
+    virtual WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
-    virtual bool UnregisterWindowManagerAgent(WindowManagerAgentType type,
+    virtual WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
 
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);

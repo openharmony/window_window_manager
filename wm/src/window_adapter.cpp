@@ -66,17 +66,17 @@ WMError WindowAdapter::RequestFocus(uint32_t windowId)
     return windowManagerServiceProxy_->RequestFocus(windowId);
 }
 
-bool WindowAdapter::RegisterWindowManagerAgent(WindowManagerAgentType type,
+WMError WindowAdapter::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    INIT_PROXY_CHECK_RETURN(false);
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     return windowManagerServiceProxy_->RegisterWindowManagerAgent(type, windowManagerAgent);
 }
 
-bool WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
+WMError WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    INIT_PROXY_CHECK_RETURN(false);
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     return windowManagerServiceProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
 }
 
@@ -124,10 +124,10 @@ void WindowAdapter::ProcessPointUp(uint32_t windowId)
     return windowManagerServiceProxy_->ProcessPointUp(windowId);
 }
 
-void WindowAdapter::MinimizeAllAppWindows(DisplayId displayId)
+WMError WindowAdapter::MinimizeAllAppWindows(DisplayId displayId)
 {
-    INIT_PROXY_CHECK_RETURN();
-    windowManagerServiceProxy_->MinimizeAllAppWindows(displayId);
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    return windowManagerServiceProxy_->MinimizeAllAppWindows(displayId);
 }
 
 WMError WindowAdapter::ToggleShownStateForAllAppWindows()
