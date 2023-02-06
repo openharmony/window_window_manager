@@ -40,7 +40,7 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
         WLOGFE("keyEvent is nullptr");
         return;
     }
-    WLOGFI("Receive key event, windowId: %{public}u, keyCode: %{public}d",
+    WLOGFD("Receive key event, windowId: %{public}u, keyCode: %{public}d",
         window_->GetWindowId(), keyEvent->GetKeyCode());
     if (window_->GetType() == WindowType::WINDOW_TYPE_DIALOG) {
         if (keyEvent->GetAgentWindowId() != keyEvent->GetTargetWindowId()) {
@@ -74,7 +74,7 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
         WLOGFE("pointerEvent is nullptr");
         return;
     }
-    WLOGFI("Receive pointer event, windowId: %{public}u, action: %{public}d",
+    WLOGFD("Receive pointer event, windowId: %{public}u, action: %{public}d",
         window_->GetWindowId(), pointerEvent->GetPointerAction());
     if ((window_->GetType() == WindowType::WINDOW_TYPE_DIALOG) &&
         (pointerEvent->GetAgentWindowId() != pointerEvent->GetTargetWindowId())) {
@@ -85,8 +85,6 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
         pointerEvent->MarkProcessed();
         return;
     }
-    WLOGFD("Dispatch move event, windowId: %{public}u, action: %{public}d",
-        window_->GetWindowId(), pointerEvent->GetPointerAction());
     window_->ConsumePointerEvent(pointerEvent);
 }
 
