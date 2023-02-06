@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_RESSCHED_REPORT_H
 
 #ifdef SOC_PERF_ENABLE
+#include "event_handler.h"
 #include "res_sched_client.h"
 #endif
 #include "window_helper.h"
@@ -28,9 +29,12 @@ namespace Rosen {
 #ifdef SOC_PERF_ENABLE
 namespace {
     constexpr int64_t PERF_TIME_OUT = 200;
+    constexpr int64_t SLIDE_PERF_TIME_OUT = 1000;
     constexpr int32_t PERF_CLICK_NORMAL_CODE = 9;
     constexpr int32_t PERF_DRAG_CODE = 31;
     constexpr int32_t PERF_MOVE_CODE = 32;
+    constexpr int32_t PERF_SLIDE_CODE = 34;
+    const std::string TASK_NAME = "SlideOff";
 }
 #endif
 
@@ -92,6 +96,34 @@ class ResSchedReport {
 #endif
     }
 
+    void TrigSlide(WindowType type, bool isOn)
+    {
+#ifdef SOC_PERF_ENABLE
+        if (type != WindowType::WINDOW_TYPE_STATUS_BAR) {
+            return;
+        }
+        static auto lastRequestPerfTime = std::chrono::steady_clock::now();
+        static auto eventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
+        static auto handler = std::make_shared<AppExecFwk::EventHandler>(eventRunner);
+        static auto task = []() {
+            std::unordered_map<std::string, std::string> mapPayload;
+            OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(PERF_SLIDE_CODE, 1, mapPayload);
+        };
+        auto current = std::chrono::steady_clock::now();
+        bool isTimeOut = std::chrono::duration_cast<std::chrono::milliseconds>(current - lastRequestPerfTime).
+            count() > SLIDE_PERF_TIME_OUT;
+        if (isTimeOut && isOn) {
+            handler->RemoveTask(TASK_NAME);
+            lastRequestPerfTime = current;
+            std::unordered_map<std::string, std::string> mapPayload;
+            OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(PERF_SLIDE_CODE, 0, mapPayload);
+        }
+        if (!isTimeOut && !isOn) {
+            // 500 is the animation duration.
+            handler->PostTask(task, TASK_NAME, 500, AppExecFwk::EventQueue::Priority::HIGH);
+        }
+#endif
+    }
 private:
 #ifdef SOC_PERF_ENABLE
     void RequestPerf(int32_t code, int64_t timeOut)
