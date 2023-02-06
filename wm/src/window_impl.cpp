@@ -2592,6 +2592,14 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
         property_->UpdatePointerEvent(pointerEvent);
     }
     int32_t action = pointerEvent->GetPointerAction();
+    if (action == MMI::PointerEvent::POINTER_ACTION_MOVE || action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        ResSchedReport::GetInstance().TrigSlide(GetType(), true);
+    }
+    if (action == MMI::PointerEvent::POINTER_ACTION_UP || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
+        action == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
+        ResSchedReport::GetInstance().TrigSlide(GetType(), false);
+    }
     if ((action == MMI::PointerEvent::POINTER_ACTION_MOVE || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) &&
         pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         HandlePointerStyle(pointerEvent);
