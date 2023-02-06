@@ -47,6 +47,7 @@ public:
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(bool, IsScreenGroup, isScreenGroup, false);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Rotation, Rotation, rotation, Rotation::ROTATION_0);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, Orientation, orientation, Orientation::UNSPECIFIED);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(ScreenSourceMode, SourceMode, sourceMode, ScreenSourceMode::SCREEN_ALONE);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(ScreenType, Type, type, ScreenType::UNDEFINED);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(uint32_t, ModeId, modeId, 0);
     DEFINE_VAR_FUNC_GET(std::vector<sptr<SupportedScreenModes>>, Modes, modes);
