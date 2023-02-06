@@ -132,8 +132,8 @@ namespace {
 HWTEST_F(DisplayPowerTest, register_display_power_event_listener_001, Function | SmallTest | Level2)
 {
     sptr<IDisplayPowerEventListener> listener = new DisplayPowerEventListener();
-    bool ret = DisplayManager::GetInstance().RegisterDisplayPowerEventListener(listener);
-    ASSERT_EQ(true, ret);
+    DMError ret = DisplayManager::GetInstance().RegisterDisplayPowerEventListener(listener);
+    ASSERT_EQ(DMError::DM_OK, ret);
     DisplayManager::GetInstance().UnregisterDisplayPowerEventListener(listener);
 }
 
@@ -144,8 +144,8 @@ HWTEST_F(DisplayPowerTest, register_display_power_event_listener_001, Function |
  */
 HWTEST_F(DisplayPowerTest, register_display_power_event_listener_002, Function | SmallTest | Level2)
 {
-    bool ret = DisplayManager::GetInstance().RegisterDisplayPowerEventListener(nullptr);
-    ASSERT_EQ(false, ret);
+    DMError ret = DisplayManager::GetInstance().RegisterDisplayPowerEventListener(nullptr);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -157,8 +157,8 @@ HWTEST_F(DisplayPowerTest, unregister_display_power_event_listener_001, Function
 {
     sptr<IDisplayPowerEventListener> listener = new DisplayPowerEventListener();
     DisplayManager::GetInstance().RegisterDisplayPowerEventListener(listener);
-    bool ret = DisplayManager::GetInstance().UnregisterDisplayPowerEventListener(listener);
-    ASSERT_EQ(true, ret);
+    DMError ret = DisplayManager::GetInstance().UnregisterDisplayPowerEventListener(listener);
+    ASSERT_EQ(DMError::DM_OK, ret);
 }
 
 /**
@@ -168,8 +168,8 @@ HWTEST_F(DisplayPowerTest, unregister_display_power_event_listener_001, Function
 */
 HWTEST_F(DisplayPowerTest, unregister_display_power_event_listener_002, Function | SmallTest | Level2)
 {
-    bool ret = DisplayManager::GetInstance().UnregisterDisplayPowerEventListener(nullptr);
-    ASSERT_EQ(false, ret);
+    DMError ret = DisplayManager::GetInstance().UnregisterDisplayPowerEventListener(nullptr);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -180,8 +180,8 @@ HWTEST_F(DisplayPowerTest, unregister_display_power_event_listener_002, Function
 HWTEST_F(DisplayPowerTest, unregister_display_power_event_listener_003, Function | SmallTest | Level2)
 {
     sptr<IDisplayPowerEventListener> listener = new DisplayPowerEventListener();
-    bool ret = DisplayManager::GetInstance().UnregisterDisplayPowerEventListener(listener);
-    ASSERT_EQ(false, ret);
+    DMError ret = DisplayManager::GetInstance().UnregisterDisplayPowerEventListener(listener);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
 }
 
 /**

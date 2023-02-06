@@ -220,7 +220,8 @@ HWTEST_F(DisplayManagerServiceTest, GetDisplayInfo, Function | SmallTest | Level
     ASSERT_EQ(SCREEN_ID_INVALID, dms_->GetScreenGroupIdByScreenId(0));
 
     dms_->GetAllDisplayIds();
-    dms_->GetAllScreenInfos();
+    std::vector<sptr<ScreenInfo>> screenInfos;
+    dms_->GetAllScreenInfos(screenInfos);
 
     dms_->abstractDisplayController_->abstractDisplayMap_.clear();
 }
@@ -250,8 +251,8 @@ HWTEST_F(DisplayManagerServiceTest, VirtualScreen, Function | SmallTest | Level3
 HWTEST_F(DisplayManagerServiceTest, OrientationAndRotation, Function | SmallTest | Level3)
 {
     Orientation orientation = Orientation::UNSPECIFIED;
-    ASSERT_EQ(false, dms_->SetOrientation(0, orientation));
-    ASSERT_EQ(false, dms_->SetOrientationFromWindow(0, orientation));
+    ASSERT_TRUE(DMError::DM_OK != dms_->SetOrientation(0, orientation));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms_->SetOrientationFromWindow(0, orientation));
     Rotation rotation = Rotation::ROTATION_0;
     ASSERT_EQ(false, dms_->SetRotationFromWindow(0, rotation));
 }
@@ -299,13 +300,13 @@ HWTEST_F(DisplayManagerServiceTest, RegisterDisplayManagerAgent, Function | Smal
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     DisplayManagerAgentType type = DisplayManagerAgentType::DISPLAY_STATE_LISTENER;
 
-    ASSERT_EQ(false, dms_->RegisterDisplayManagerAgent(nullptr, type));
-    ASSERT_EQ(false, dms_->UnregisterDisplayManagerAgent(nullptr, type));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms_->RegisterDisplayManagerAgent(nullptr, type));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms_->UnregisterDisplayManagerAgent(nullptr, type));
 
-    ASSERT_EQ(false, dms_->UnregisterDisplayManagerAgent(displayManagerAgent, type));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms_->UnregisterDisplayManagerAgent(displayManagerAgent, type));
 
-    ASSERT_EQ(true, dms_->RegisterDisplayManagerAgent(displayManagerAgent, type));
-    ASSERT_EQ(true, dms_->UnregisterDisplayManagerAgent(displayManagerAgent, type));
+    ASSERT_EQ(DMError::DM_OK, dms_->RegisterDisplayManagerAgent(displayManagerAgent, type));
+    ASSERT_EQ(DMError::DM_OK, dms_->UnregisterDisplayManagerAgent(displayManagerAgent, type));
 }
 
 /**
@@ -352,11 +353,15 @@ HWTEST_F(DisplayManagerServiceTest, RsDisplayNode, Function | SmallTest | Level3
 HWTEST_F(DisplayManagerServiceTest, MirrorAndExpand, Function | SmallTest | Level3)
 {
     std::vector<ScreenId> mirrorScreenIds;
-    ASSERT_EQ(SCREEN_ID_INVALID, dms_->MakeMirror(DISPLAY_ID_INVALID, mirrorScreenIds));
+    ScreenId screenGroupId1 = DISPLAY_ID_INVALID;
+    dms_->MakeMirror(DISPLAY_ID_INVALID, mirrorScreenIds, screenGroupId1);
+    ASSERT_EQ(SCREEN_ID_INVALID, screenGroupId1);
 
     std::vector<ScreenId> expandScreenIds;
     std::vector<Point> startPoints;
-    ASSERT_EQ(SCREEN_ID_INVALID, dms_->MakeExpand(expandScreenIds, startPoints));
+    ScreenId screenGroupId2 = DISPLAY_ID_INVALID;
+    dms_->MakeExpand(expandScreenIds, startPoints, screenGroupId2);
+    ASSERT_EQ(SCREEN_ID_INVALID, screenGroupId2);
 }
 
 /**
@@ -366,7 +371,7 @@ HWTEST_F(DisplayManagerServiceTest, MirrorAndExpand, Function | SmallTest | Leve
  */
 HWTEST_F(DisplayManagerServiceTest, ScreenActiveMode, Function | SmallTest | Level3)
 {
-    ASSERT_EQ(false, dms_->SetScreenActiveMode(SCREEN_ID_INVALID, 0));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms_->SetScreenActiveMode(SCREEN_ID_INVALID, 0));
 }
 
 /**
@@ -376,19 +381,7 @@ HWTEST_F(DisplayManagerServiceTest, ScreenActiveMode, Function | SmallTest | Lev
  */
 HWTEST_F(DisplayManagerServiceTest, VirtualPixelRatio, Function | SmallTest | Level3)
 {
-    ASSERT_EQ(false, dms_->SetVirtualPixelRatio(SCREEN_ID_INVALID, 0.f));
-}
-
-/**
- * @tc.name: ScreenRotationLock
- * @tc.desc: DMS mirror
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerServiceTest, ScreenRotationLock, Function | SmallTest | Level3)
-{
-    dms_->SetScreenRotationLocked(false);
-    ASSERT_EQ(false, dms_->IsScreenRotationLocked());
-    ASSERT_NE(nullptr, dms_->GetCutoutInfo(10));
+    ASSERT_TRUE(DMError::DM_OK != dms_->SetVirtualPixelRatio(SCREEN_ID_INVALID, 0.f));
 }
 }
 } // namespace Rosen

@@ -44,13 +44,13 @@ public:
     sptr<Display> GetDefaultDisplaySync();
     sptr<Display> GetDisplayById(DisplayId displayId);
     DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
-    bool RegisterDisplayListener(sptr<IDisplayListener> listener);
-    bool UnregisterDisplayListener(sptr<IDisplayListener> listener);
+    DMError RegisterDisplayListener(sptr<IDisplayListener> listener);
+    DMError UnregisterDisplayListener(sptr<IDisplayListener> listener);
     bool SetDisplayState(DisplayState state, DisplayStateCallback callback);
-    bool RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
-    bool UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
-    bool RegisterScreenshotListener(sptr<IScreenshotListener> listener);
-    bool UnregisterScreenshotListener(sptr<IScreenshotListener> listener);
+    DMError RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
+    DMError UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
+    DMError RegisterScreenshotListener(sptr<IScreenshotListener> listener);
+    DMError UnregisterScreenshotListener(sptr<IScreenshotListener> listener);
     sptr<Display> GetDisplayByScreenId(ScreenId screenId);
     void OnRemoteDied();
 private:
@@ -243,22 +243,22 @@ void DisplayManager::Impl::ClearDisplayStateCallback()
 void DisplayManager::Impl::Clear()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    bool res = true;
+    DMError res = DMError::DM_OK;
     if (displayManagerListener_ != nullptr) {
         res = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
             displayManagerListener_, DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
     }
     displayManagerListener_ = nullptr;
-    if (!res) {
+    if (res != DMError::DM_OK) {
         WLOGFW("UnregisterDisplayManagerAgent DISPLAY_EVENT_LISTENER failed !");
     }
-    res = true;
+    res = DMError::DM_OK;
     if (powerEventListenerAgent_ != nullptr) {
         res = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
             powerEventListenerAgent_, DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER);
     }
     powerEventListenerAgent_ = nullptr;
-    if (!res) {
+    if (res != DMError::DM_OK) {
         WLOGFW("UnregisterDisplayManagerAgent DISPLAY_POWER_EVENT_LISTENER failed !");
     }
     ClearDisplayStateCallback();
@@ -479,17 +479,17 @@ DMError DisplayManager::Impl::HasPrivateWindow(DisplayId displayId, bool& hasPri
     return SingletonContainer::Get<DisplayManagerAdapter>().HasPrivateWindow(displayId, hasPrivateWindow);
 }
 
-bool DisplayManager::Impl::RegisterDisplayListener(sptr<IDisplayListener> listener)
+DMError DisplayManager::Impl::RegisterDisplayListener(sptr<IDisplayListener> listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    bool ret = true;
+    DMError ret = DMError::DM_OK;
     if (displayManagerListener_ == nullptr) {
         displayManagerListener_ = new DisplayManagerListener(this);
         ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
             displayManagerListener_,
             DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
     }
-    if (!ret) {
+    if (ret != DMError::DM_OK) {
         WLOGFW("RegisterDisplayManagerAgent failed !");
         displayManagerListener_ = nullptr;
     } else {
@@ -498,25 +498,25 @@ bool DisplayManager::Impl::RegisterDisplayListener(sptr<IDisplayListener> listen
     return ret;
 }
 
-bool DisplayManager::RegisterDisplayListener(sptr<IDisplayListener> listener)
+DMError DisplayManager::RegisterDisplayListener(sptr<IDisplayListener> listener)
 {
     if (listener == nullptr) {
         WLOGFE("RegisterDisplayListener listener is nullptr.");
-        return false;
+        return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterDisplayListener(listener);
 }
 
-bool DisplayManager::Impl::UnregisterDisplayListener(sptr<IDisplayListener> listener)
+DMError DisplayManager::Impl::UnregisterDisplayListener(sptr<IDisplayListener> listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(displayListeners_.begin(), displayListeners_.end(), listener);
     if (iter == displayListeners_.end()) {
         WLOGFE("could not find this listener");
-        return false;
+        return DMError::DM_ERROR_NULLPTR;
     }
     displayListeners_.erase(iter);
-    bool ret = true;
+    DMError ret = DMError::DM_OK;
     if (displayListeners_.empty() && displayManagerListener_ != nullptr) {
         ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
             displayManagerListener_,
@@ -526,26 +526,26 @@ bool DisplayManager::Impl::UnregisterDisplayListener(sptr<IDisplayListener> list
     return ret;
 }
 
-bool DisplayManager::UnregisterDisplayListener(sptr<IDisplayListener> listener)
+DMError DisplayManager::UnregisterDisplayListener(sptr<IDisplayListener> listener)
 {
     if (listener == nullptr) {
         WLOGFE("UnregisterDisplayListener listener is nullptr.");
-        return false;
+        return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterDisplayListener(listener);
 }
 
-bool DisplayManager::Impl::RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
+DMError DisplayManager::Impl::RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    bool ret = true;
+    DMError ret = DMError::DM_OK;
     if (powerEventListenerAgent_ == nullptr) {
         powerEventListenerAgent_ = new DisplayManagerAgent(this);
         ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
             powerEventListenerAgent_,
             DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER);
     }
-    if (!ret) {
+    if (ret != DMError::DM_OK) {
         WLOGFW("RegisterDisplayManagerAgent failed !");
         powerEventListenerAgent_ = nullptr;
     } else {
@@ -555,25 +555,25 @@ bool DisplayManager::Impl::RegisterDisplayPowerEventListener(sptr<IDisplayPowerE
     return ret;
 }
 
-bool DisplayManager::RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
+DMError DisplayManager::RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
 {
     if (listener == nullptr) {
         WLOGFE("listener is nullptr");
-        return false;
+        return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterDisplayPowerEventListener(listener);
 }
 
-bool DisplayManager::Impl::UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
+DMError DisplayManager::Impl::UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(powerEventListeners_.begin(), powerEventListeners_.end(), listener);
     if (iter == powerEventListeners_.end()) {
         WLOGFE("could not find this listener");
-        return false;
+        return DMError::DM_ERROR_NULLPTR;
     }
     powerEventListeners_.erase(iter);
-    bool ret = true;
+    DMError ret = DMError::DM_OK;
     if (powerEventListeners_.empty() && powerEventListenerAgent_ != nullptr) {
         ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
             powerEventListenerAgent_,
@@ -584,26 +584,26 @@ bool DisplayManager::Impl::UnregisterDisplayPowerEventListener(sptr<IDisplayPowe
     return ret;
 }
 
-bool DisplayManager::UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
+DMError DisplayManager::UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
 {
     if (listener == nullptr) {
         WLOGFE("listener is nullptr");
-        return false;
+        return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterDisplayPowerEventListener(listener);
 }
 
-bool DisplayManager::Impl::RegisterScreenshotListener(sptr<IScreenshotListener> listener)
+DMError DisplayManager::Impl::RegisterScreenshotListener(sptr<IScreenshotListener> listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    bool ret = true;
+    DMError ret = DMError::DM_OK;
     if (screenshotListenerAgent_ == nullptr) {
         screenshotListenerAgent_ = new DisplayManagerScreenshotAgent(this);
         ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
             screenshotListenerAgent_,
             DisplayManagerAgentType::SCREENSHOT_EVENT_LISTENER);
     }
-    if (!ret) {
+    if (ret != DMError::DM_OK) {
         WLOGFW("RegisterDisplayManagerAgent failed !");
         screenshotListenerAgent_ = nullptr;
     } else {
@@ -612,25 +612,25 @@ bool DisplayManager::Impl::RegisterScreenshotListener(sptr<IScreenshotListener> 
     return ret;
 }
 
-bool DisplayManager::RegisterScreenshotListener(sptr<IScreenshotListener> listener)
+DMError DisplayManager::RegisterScreenshotListener(sptr<IScreenshotListener> listener)
 {
     if (listener == nullptr) {
         WLOGFE("RegisterScreenshotListener listener is nullptr.");
-        return false;
+        return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterScreenshotListener(listener);
 }
 
-bool DisplayManager::Impl::UnregisterScreenshotListener(sptr<IScreenshotListener> listener)
+DMError DisplayManager::Impl::UnregisterScreenshotListener(sptr<IScreenshotListener> listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(screenshotListeners_.begin(), screenshotListeners_.end(), listener);
     if (iter == screenshotListeners_.end()) {
         WLOGFE("could not find this listener");
-        return false;
+        return DMError::DM_ERROR_NULLPTR;
     }
     screenshotListeners_.erase(iter);
-    bool ret = true;
+    DMError ret = DMError::DM_OK;
     if (screenshotListeners_.empty() && screenshotListenerAgent_ != nullptr) {
         ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
             screenshotListenerAgent_,
@@ -640,11 +640,11 @@ bool DisplayManager::Impl::UnregisterScreenshotListener(sptr<IScreenshotListener
     return ret;
 }
 
-bool DisplayManager::UnregisterScreenshotListener(sptr<IScreenshotListener> listener)
+DMError DisplayManager::UnregisterScreenshotListener(sptr<IScreenshotListener> listener)
 {
     if (listener == nullptr) {
         WLOGFE("UnregisterScreenshotListener listener is nullptr.");
-        return false;
+        return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterScreenshotListener(listener);
 }
@@ -776,7 +776,7 @@ bool DisplayManager::Impl::SetDisplayState(DisplayState state, DisplayStateCallb
             displayStateAgent_ = new DisplayManagerAgent(this);
             ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
                 displayStateAgent_,
-                DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
+                DisplayManagerAgentType::DISPLAY_STATE_LISTENER) == DMError::DM_OK;
         }
     }
     ret = ret && SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayState(state);

@@ -628,17 +628,17 @@ void AbstractScreenController::SetBuildInDefaultOrientation(Orientation orientat
     }
 }
 
-bool AbstractScreenController::SetOrientation(ScreenId screenId, Orientation newOrientation, bool isFromWindow)
+DMError AbstractScreenController::SetOrientation(ScreenId screenId, Orientation newOrientation, bool isFromWindow)
 {
     WLOGD("set orientation. screen %{public}" PRIu64" orientation %{public}u", screenId, newOrientation);
     auto screen = GetAbstractScreen(screenId);
     if (screen == nullptr) {
         WLOGFE("fail to set orientation, cannot find screen %{public}" PRIu64"", screenId);
-        return false;
+        return DMError::DM_ERROR_NULLPTR;
     }
     if (screen->isScreenGroup_) {
         WLOGE("cannot set orientation to the combination. screen: %{public}" PRIu64"", screenId);
-        return false;
+        return DMError::DM_ERROR_NULLPTR;
     }
     if (isFromWindow) {
         if (newOrientation == Orientation::UNSPECIFIED) {
@@ -649,7 +649,7 @@ bool AbstractScreenController::SetOrientation(ScreenId screenId, Orientation new
     }
     if (screen->orientation_ == newOrientation) {
         WLOGFD("skip setting orientation. screen %{public}" PRIu64" orientation %{public}u", screenId, newOrientation);
-        return true;
+        return DMError::DM_OK;
     }
     if (isFromWindow) {
         ScreenRotationController::ProcessOrientationSwitch(newOrientation);
@@ -660,7 +660,7 @@ bool AbstractScreenController::SetOrientation(ScreenId screenId, Orientation new
     }
     if (!screen->SetOrientation(newOrientation)) {
         WLOGE("fail to set rotation, screen %{public}" PRIu64"", screenId);
-        return false;
+        return DMError::DM_ERROR_NULLPTR;
     }
 
     // Notify rotation event to ScreenManager
@@ -669,7 +669,7 @@ bool AbstractScreenController::SetOrientation(ScreenId screenId, Orientation new
     if (abstractScreenCallback_ != nullptr) {
         abstractScreenCallback_->onChange_(screen, DisplayChangeEvent::UPDATE_ORIENTATION);
     }
-    return true;
+    return DMError::DM_OK;
 }
 
 void AbstractScreenController::SetScreenRotateAnimation(
@@ -812,12 +812,12 @@ DMError AbstractScreenController::SetScreenColorTransform(ScreenId screenId)
     return screen->SetScreenColorTransform();
 }
 
-bool AbstractScreenController::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
+DMError AbstractScreenController::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
 {
     WLOGI("SetScreenActiveMode: RsScreenId: %{public}" PRIu64", modeId: %{public}u", screenId, modeId);
     if (screenId == SCREEN_ID_INVALID) {
         WLOGFE("SetScreenActiveMode: invalid screenId");
-        return false;
+        return DMError::DM_ERROR_NULLPTR;
     }
     uint32_t usedModeId = 0;
     {
@@ -825,12 +825,12 @@ bool AbstractScreenController::SetScreenActiveMode(ScreenId screenId, uint32_t m
         auto screen = GetAbstractScreen(screenId);
         if (screen == nullptr) {
             WLOGFE("SetScreenActiveMode: Get AbstractScreen failed");
-            return false;
+            return DMError::DM_ERROR_NULLPTR;
         }
         ScreenId rsScreenId = SCREEN_ID_INVALID;
         if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
             WLOGFE("SetScreenActiveMode: No corresponding rsId");
-            return false;
+            return DMError::DM_ERROR_NULLPTR;
         }
         rsInterface_.SetScreenActiveMode(rsScreenId, modeId);
         usedModeId = static_cast<uint32_t>(screen->activeIdx_);
@@ -845,7 +845,7 @@ bool AbstractScreenController::SetScreenActiveMode(ScreenId screenId, uint32_t m
         };
         controllerHandler_->PostTask(func, AppExecFwk::EventQueue::Priority::HIGH);
     }
-    return true;
+    return DMError::DM_OK;
 }
 
 void AbstractScreenController::ProcessScreenModeChanged(ScreenId dmsScreenId)
@@ -874,13 +874,13 @@ void AbstractScreenController::ProcessScreenModeChanged(ScreenId dmsScreenId)
     NotifyScreenChanged(absScreen->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
 }
 
-bool AbstractScreenController::MakeMirror(ScreenId screenId, std::vector<ScreenId> screens)
+DMError AbstractScreenController::MakeMirror(ScreenId screenId, std::vector<ScreenId> screens)
 {
     WLOGI("MakeMirror, screenId:%{public}" PRIu64"", screenId);
     sptr<AbstractScreen> screen = GetAbstractScreen(screenId);
     if (screen == nullptr || screen->type_ != ScreenType::REAL) {
         WLOGFE("screen is nullptr, or screenType is not real.");
-        return false;
+        return DMError::DM_ERROR_NULLPTR;
     }
     WLOGFI("GetAbstractScreenGroup start");
     auto group = GetAbstractScreenGroup(screen->groupDmsId_);
@@ -889,7 +889,7 @@ bool AbstractScreenController::MakeMirror(ScreenId screenId, std::vector<ScreenI
         group = AddToGroupLocked(screen);
         if (group == nullptr) {
             WLOGFE("group is nullptr");
-            return false;
+            return DMError::DM_ERROR_NULLPTR;
         }
         NotifyScreenGroupChanged(screen->ConvertToScreenInfo(), ScreenGroupChangeEvent::ADD_TO_GROUP);
         if (group != nullptr && abstractScreenCallback_ != nullptr) {
@@ -905,7 +905,7 @@ bool AbstractScreenController::MakeMirror(ScreenId screenId, std::vector<ScreenI
     group->mirrorScreenId_ = screen->dmsId_;
     ChangeScreenGroup(group, screens, startPoints, filterMirroredScreen, ScreenCombination::SCREEN_MIRROR);
     WLOGFI("MakeMirror success");
-    return true;
+    return DMError::DM_OK;
 }
 
 void AbstractScreenController::ChangeScreenGroup(sptr<AbstractScreenGroup> group, const std::vector<ScreenId>& screens,
@@ -1251,22 +1251,22 @@ ScreenPowerState AbstractScreenController::GetScreenPower(ScreenId dmsScreenId) 
     return state;
 }
 
-bool AbstractScreenController::SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio)
+DMError AbstractScreenController::SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio)
 {
     WLOGD("set virtual pixel ratio. screen %{public}" PRIu64" virtualPixelRatio %{public}f",
         screenId, virtualPixelRatio);
     auto screen = GetAbstractScreen(screenId);
     if (screen == nullptr) {
         WLOGFE("fail to set virtual pixel ratio, cannot find screen %{public}" PRIu64"", screenId);
-        return false;
+        return DMError::DM_ERROR_NULLPTR;
     }
     if (screen->isScreenGroup_) {
         WLOGE("cannot set virtual pixel ratio to the combination. screen: %{public}" PRIu64"", screenId);
-        return false;
+        return DMError::DM_ERROR_NULLPTR;
     }
     if (fabs(screen->virtualPixelRatio_ - virtualPixelRatio) < 1e-6) {
         WLOGE("The density is equivalent to the original value, no update operation is required, aborted.");
-        return true;
+        return DMError::DM_OK;
     }
     screen->SetVirtualPixelRatio(virtualPixelRatio);
     // Notify rotation event to AbstractDisplayController
@@ -1274,6 +1274,6 @@ bool AbstractScreenController::SetVirtualPixelRatio(ScreenId screenId, float vir
         abstractScreenCallback_->onChange_(screen, DisplayChangeEvent::DISPLAY_VIRTUAL_PIXEL_RATIO_CHANGED);
     }
     NotifyScreenChanged(screen->ConvertToScreenInfo(), ScreenChangeEvent::VIRTUAL_PIXEL_RATIO_CHANGED);
-    return true;
+    return DMError::DM_OK;
 }
 } // namespace OHOS::Rosen

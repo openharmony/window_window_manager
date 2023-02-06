@@ -52,10 +52,10 @@ public:
 
     sptr<Screen> GetScreenById(ScreenId screenId);
     sptr<ScreenGroup> GetScreenGroup(ScreenId groupId);
-    std::vector<sptr<Screen>> GetAllScreens();
+    DMError GetAllScreens(std::vector<sptr<Screen>>& screens);
 
-    ScreenId MakeExpand(const std::vector<ExpandOption>& options);
-    ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
+    DMError MakeExpand(const std::vector<ExpandOption>& options, ScreenId& screenGroupId);
+    DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, ScreenId& screenGroupId);
     DMError RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens);
     ScreenId CreateVirtualScreen(VirtualScreenOption option);
     DMError DestroyVirtualScreen(ScreenId screenId);
@@ -63,14 +63,14 @@ public:
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
     ScreenPowerState GetScreenPower(ScreenId screenId);
     DMError SetScreenRotationLocked(bool isLocked);
-    bool IsScreenRotationLocked();
+    DMError IsScreenRotationLocked(bool& isLocked);
 
-    bool RegisterScreenListener(sptr<IScreenListener> listener);
-    bool UnregisterScreenListener(sptr<IScreenListener> listener);
-    bool RegisterScreenGroupListener(sptr<IScreenGroupListener> listener);
-    bool UnregisterScreenGroupListener(sptr<IScreenGroupListener> listener);
-    bool RegisterVirtualScreenGroupListener(sptr<IVirtualScreenGroupListener> listener);
-    bool UnregisterVirtualScreenGroupListener(sptr<IVirtualScreenGroupListener> listener);
+    DMError RegisterScreenListener(sptr<IScreenListener> listener);
+    DMError UnregisterScreenListener(sptr<IScreenListener> listener);
+    DMError RegisterScreenGroupListener(sptr<IScreenGroupListener> listener);
+    DMError UnregisterScreenGroupListener(sptr<IScreenGroupListener> listener);
+    DMError RegisterVirtualScreenGroupListener(sptr<IVirtualScreenGroupListener> listener);
+    DMError UnregisterVirtualScreenGroupListener(sptr<IVirtualScreenGroupListener> listener);
 private:
     ScreenManager();
     ~ScreenManager();

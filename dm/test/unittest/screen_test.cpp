@@ -91,9 +91,9 @@ HWTEST_F(ScreenTest, SetScreenActiveMode01, Function | SmallTest | Level1)
     auto supportedModes = screen_->GetSupportedModes();
     ASSERT_GT(supportedModes.size(), 0);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), SetScreenActiveMode(_, _)).Times(1).WillOnce(Return(true));
-    bool res = screen_->SetScreenActiveMode(supportedModes.size() - 1);
-    ASSERT_EQ(true, res);
+    EXPECT_CALL(m->Mock(), SetScreenActiveMode(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    DMError res = screen_->SetScreenActiveMode(supportedModes.size() - 1);
+    ASSERT_EQ(DMError::DM_OK, res);
 }
 
 /**
@@ -106,9 +106,9 @@ HWTEST_F(ScreenTest, SetScreenActiveMode02, Function | SmallTest | Level1)
     auto supportedModes = screen_->GetSupportedModes();
     ASSERT_GT(supportedModes.size(), 0);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), SetScreenActiveMode(_, _)).Times(1).WillOnce(Return(false));
-    bool res = screen_->SetScreenActiveMode(supportedModes.size() - 1);
-    ASSERT_EQ(false, res);
+    EXPECT_CALL(m->Mock(), SetScreenActiveMode(_, _)).Times(1).WillOnce(Return(DMError::DM_ERROR_NULLPTR));
+    DMError res = screen_->SetScreenActiveMode(supportedModes.size() - 1);
+    ASSERT_TRUE(DMError::DM_OK != res);
 }
 
 /**

@@ -139,19 +139,19 @@ HWTEST_F(WindowManagerTest, RegisterCameraFloatWindowChangedListener01, Function
     auto oldListeners = windowManager.pImpl_->cameraFloatWindowChangedListeners_;
     windowManager.pImpl_->cameraFloatWindowChangedListenerAgent_ = nullptr;
     windowManager.pImpl_->cameraFloatWindowChangedListeners_.clear();
-    ASSERT_EQ(false, windowManager.RegisterCameraFloatWindowChangedListener(nullptr));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterCameraFloatWindowChangedListener(nullptr));
 
     sptr<TestCameraFloatWindowChangedListener> listener = new TestCameraFloatWindowChangedListener();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(false));
-    ASSERT_EQ(false, windowManager.RegisterCameraFloatWindowChangedListener(listener));
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterCameraFloatWindowChangedListener(listener));
 
-    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(true));
-    ASSERT_EQ(true, windowManager.RegisterCameraFloatWindowChangedListener(listener));
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterCameraFloatWindowChangedListener(listener));
     ASSERT_EQ(1, windowManager.pImpl_->cameraFloatWindowChangedListeners_.size());
 
     // to check that the same listner can not be registered twice
-    ASSERT_EQ(true, windowManager.RegisterCameraFloatWindowChangedListener(listener));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterCameraFloatWindowChangedListener(listener));
     ASSERT_EQ(1, windowManager.pImpl_->cameraFloatWindowChangedListeners_.size());
 
     windowManager.pImpl_->cameraFloatWindowChangedListenerAgent_ = oldWindowManagerAgent;
@@ -171,24 +171,24 @@ HWTEST_F(WindowManagerTest, UnregisterCameraFloatWindowChangedListener01, Functi
     windowManager.pImpl_->cameraFloatWindowChangedListeners_.clear();
 
     // check nullpter
-    ASSERT_EQ(false, windowManager.UnregisterCameraFloatWindowChangedListener(nullptr));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterCameraFloatWindowChangedListener(nullptr));
 
     sptr<TestCameraFloatWindowChangedListener> listener1 = new TestCameraFloatWindowChangedListener();
     sptr<TestCameraFloatWindowChangedListener> listener2 = new TestCameraFloatWindowChangedListener();
-    ASSERT_EQ(true, windowManager.UnregisterCameraFloatWindowChangedListener(listener1));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterCameraFloatWindowChangedListener(listener1));
 
     windowManager.RegisterCameraFloatWindowChangedListener(listener1);
     windowManager.RegisterCameraFloatWindowChangedListener(listener2);
     ASSERT_EQ(2, windowManager.pImpl_->cameraFloatWindowChangedListeners_.size());
 
-    ASSERT_EQ(true, windowManager.UnregisterCameraFloatWindowChangedListener(listener1));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterCameraFloatWindowChangedListener(listener1));
 
-    ASSERT_EQ(false, windowManager.UnregisterCameraFloatWindowChangedListener(listener2));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterCameraFloatWindowChangedListener(listener2));
     ASSERT_EQ(0, windowManager.pImpl_->cameraFloatWindowChangedListeners_.size());
     ASSERT_EQ(nullptr, windowManager.pImpl_->cameraFloatWindowChangedListenerAgent_);
 
     windowManager.pImpl_->cameraFloatWindowChangedListeners_.emplace_back(listener1);
-    ASSERT_EQ(true, windowManager.UnregisterCameraFloatWindowChangedListener(listener1));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterCameraFloatWindowChangedListener(listener1));
     ASSERT_EQ(0, windowManager.pImpl_->cameraFloatWindowChangedListeners_.size());
 
     windowManager.pImpl_->cameraFloatWindowChangedListenerAgent_ = oldWindowManagerAgent;
@@ -207,20 +207,20 @@ HWTEST_F(WindowManagerTest, RegisterVisibilityChangedListener01, Function | Smal
     auto oldListeners = windowManager.pImpl_->windowVisibilityListeners_;
     windowManager.pImpl_->windowVisibilityListenerAgent_ = nullptr;
     windowManager.pImpl_->windowVisibilityListeners_.clear();
-    ASSERT_EQ(false, windowManager.RegisterVisibilityChangedListener(nullptr));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterVisibilityChangedListener(nullptr));
 
     sptr<TestVisibilityChangedListener> listener = new TestVisibilityChangedListener();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(false));
-    ASSERT_EQ(false, windowManager.RegisterVisibilityChangedListener(listener));
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterVisibilityChangedListener(listener));
     ASSERT_EQ(nullptr, windowManager.pImpl_->windowVisibilityListenerAgent_);
 
-    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(true));
-    ASSERT_EQ(true, windowManager.RegisterVisibilityChangedListener(listener));
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterVisibilityChangedListener(listener));
     ASSERT_EQ(1, windowManager.pImpl_->windowVisibilityListeners_.size());
 
     // to check that the same listner can not be registered twice
-    ASSERT_EQ(true, windowManager.RegisterVisibilityChangedListener(listener));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterVisibilityChangedListener(listener));
     ASSERT_EQ(1, windowManager.pImpl_->windowVisibilityListeners_.size());
 
     windowManager.pImpl_->windowVisibilityListenerAgent_ = oldWindowManagerAgent;
@@ -240,7 +240,7 @@ HWTEST_F(WindowManagerTest, UnregisterVisibilityChangedListener01, Function | Sm
     windowManager.pImpl_->windowVisibilityListeners_.clear();
 
     // check nullpter
-    ASSERT_EQ(false, windowManager.UnregisterVisibilityChangedListener(nullptr));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterVisibilityChangedListener(nullptr));
 
     sptr<TestVisibilityChangedListener> listener1 = new TestVisibilityChangedListener();
     sptr<TestVisibilityChangedListener> listener2 = new TestVisibilityChangedListener();
@@ -249,13 +249,13 @@ HWTEST_F(WindowManagerTest, UnregisterVisibilityChangedListener01, Function | Sm
     windowManager.RegisterVisibilityChangedListener(listener2);
     ASSERT_EQ(2, windowManager.pImpl_->windowVisibilityListeners_.size());
 
-    ASSERT_EQ(true, windowManager.UnregisterVisibilityChangedListener(listener1));
-    ASSERT_EQ(false, windowManager.UnregisterVisibilityChangedListener(listener2));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterVisibilityChangedListener(listener1));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterVisibilityChangedListener(listener2));
     ASSERT_EQ(0, windowManager.pImpl_->windowVisibilityListeners_.size());
     ASSERT_EQ(nullptr, windowManager.pImpl_->windowVisibilityListenerAgent_);
 
     windowManager.pImpl_->windowVisibilityListeners_.emplace_back(listener1);
-    ASSERT_EQ(true, windowManager.UnregisterVisibilityChangedListener(listener1));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterVisibilityChangedListener(listener1));
     ASSERT_EQ(0, windowManager.pImpl_->windowVisibilityListeners_.size());
 
     windowManager.pImpl_->windowVisibilityListenerAgent_ = oldWindowManagerAgent;
@@ -274,20 +274,20 @@ HWTEST_F(WindowManagerTest, RegisterWindowUpdateListener01, Function | SmallTest
     auto oldListeners = windowManager.pImpl_->windowUpdateListeners_;
     windowManager.pImpl_->windowUpdateListenerAgent_ = nullptr;
     windowManager.pImpl_->windowUpdateListeners_.clear();
-    ASSERT_EQ(false, windowManager.RegisterWindowUpdateListener(nullptr));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowUpdateListener(nullptr));
 
     sptr<TestWindowUpdateListener> listener = new TestWindowUpdateListener();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(false));
-    ASSERT_EQ(false, windowManager.RegisterWindowUpdateListener(listener));
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowUpdateListener(listener));
     ASSERT_EQ(nullptr, windowManager.pImpl_->windowUpdateListenerAgent_);
 
-    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(true));
-    ASSERT_EQ(true, windowManager.RegisterWindowUpdateListener(listener));
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterWindowUpdateListener(listener));
     ASSERT_EQ(1, windowManager.pImpl_->windowUpdateListeners_.size());
 
     // to check that the same listner can not be registered twice
-    ASSERT_EQ(true, windowManager.RegisterWindowUpdateListener(listener));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterWindowUpdateListener(listener));
     ASSERT_EQ(1, windowManager.pImpl_->windowUpdateListeners_.size());
 
     windowManager.pImpl_->windowUpdateListenerAgent_ = oldWindowManagerAgent;
@@ -307,24 +307,24 @@ HWTEST_F(WindowManagerTest, UnregisterWindowUpdateListener01, Function | SmallTe
     windowManager.pImpl_->windowUpdateListeners_.clear();
 
     // check nullpter
-    ASSERT_EQ(false, windowManager.UnregisterWindowUpdateListener(nullptr));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterWindowUpdateListener(nullptr));
 
     sptr<TestWindowUpdateListener> listener1 = new TestWindowUpdateListener();
     sptr<TestWindowUpdateListener> listener2 = new TestWindowUpdateListener();
-    ASSERT_EQ(true, windowManager.UnregisterWindowUpdateListener(listener1));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowUpdateListener(listener1));
 
     windowManager.RegisterWindowUpdateListener(listener1);
     windowManager.RegisterWindowUpdateListener(listener2);
     ASSERT_EQ(2, windowManager.pImpl_->windowUpdateListeners_.size());
 
-    ASSERT_EQ(true, windowManager.UnregisterWindowUpdateListener(listener1));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowUpdateListener(listener1));
 
-    ASSERT_EQ(false, windowManager.UnregisterWindowUpdateListener(listener2));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterWindowUpdateListener(listener2));
     ASSERT_EQ(0, windowManager.pImpl_->windowUpdateListeners_.size());
     ASSERT_EQ(nullptr, windowManager.pImpl_->windowUpdateListenerAgent_);
 
     windowManager.pImpl_->windowUpdateListeners_.emplace_back(listener1);
-    ASSERT_EQ(true, windowManager.UnregisterWindowUpdateListener(listener1));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowUpdateListener(listener1));
     ASSERT_EQ(0, windowManager.pImpl_->windowUpdateListeners_.size());
 
     windowManager.pImpl_->windowUpdateListenerAgent_ = oldWindowManagerAgent;
@@ -343,20 +343,20 @@ HWTEST_F(WindowManagerTest, RegisterSystemBarChangedListener01, Function | Small
     auto oldListeners = windowManager.pImpl_->systemBarChangedListeners_;
     windowManager.pImpl_->systemBarChangedListenerAgent_ = nullptr;
     windowManager.pImpl_->systemBarChangedListeners_.clear();
-    ASSERT_EQ(false, windowManager.RegisterSystemBarChangedListener(nullptr));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterSystemBarChangedListener(nullptr));
 
     sptr<ISystemBarChangedListener> listener = new TestSystemBarChangedListener();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(false));
-    ASSERT_EQ(false, windowManager.RegisterSystemBarChangedListener(listener));
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterSystemBarChangedListener(listener));
     ASSERT_EQ(nullptr, windowManager.pImpl_->systemBarChangedListenerAgent_);
 
-    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(true));
-    ASSERT_EQ(true, windowManager.RegisterSystemBarChangedListener(listener));
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterSystemBarChangedListener(listener));
     ASSERT_EQ(1, windowManager.pImpl_->systemBarChangedListeners_.size());
 
     // to check that the same listner can not be registered twice
-    ASSERT_EQ(true, windowManager.RegisterSystemBarChangedListener(listener));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterSystemBarChangedListener(listener));
     ASSERT_EQ(1, windowManager.pImpl_->systemBarChangedListeners_.size());
 
     windowManager.pImpl_->systemBarChangedListenerAgent_ = oldWindowManagerAgent;
@@ -375,24 +375,24 @@ HWTEST_F(WindowManagerTest, UnregisterSystemBarChangedListener01, Function | Sma
     windowManager.pImpl_->systemBarChangedListenerAgent_ = new WindowManagerAgent();
     windowManager.pImpl_->systemBarChangedListeners_.clear();
     // check nullpter
-    ASSERT_EQ(false, windowManager.UnregisterSystemBarChangedListener(nullptr));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterSystemBarChangedListener(nullptr));
 
     sptr<TestSystemBarChangedListener> listener1 = new TestSystemBarChangedListener();
     sptr<TestSystemBarChangedListener> listener2 = new TestSystemBarChangedListener();
-    ASSERT_EQ(true, windowManager.UnregisterSystemBarChangedListener(listener1));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterSystemBarChangedListener(listener1));
 
     windowManager.RegisterSystemBarChangedListener(listener1);
     windowManager.RegisterSystemBarChangedListener(listener2);
     ASSERT_EQ(2, windowManager.pImpl_->systemBarChangedListeners_.size());
 
 
-    ASSERT_EQ(true, windowManager.UnregisterSystemBarChangedListener(listener1));
-    ASSERT_EQ(false, windowManager.UnregisterSystemBarChangedListener(listener2));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterSystemBarChangedListener(listener1));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterSystemBarChangedListener(listener2));
     ASSERT_EQ(0, windowManager.pImpl_->systemBarChangedListeners_.size());
     ASSERT_EQ(nullptr, windowManager.pImpl_->systemBarChangedListenerAgent_);
 
     windowManager.pImpl_->systemBarChangedListeners_.push_back(listener1);
-    ASSERT_EQ(true, windowManager.UnregisterSystemBarChangedListener(listener1));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterSystemBarChangedListener(listener1));
     ASSERT_EQ(0, windowManager.pImpl_->systemBarChangedListeners_.size());
 
     windowManager.pImpl_->systemBarChangedListenerAgent_ = oldWindowManagerAgent;
