@@ -1354,7 +1354,6 @@ WMError WindowImpl::PreProcessShow(uint32_t reason, bool withAnimation)
     AdjustWindowAnimationFlag(withAnimation);
 
     if (NeedToStopShowing()) { // true means stop showing
-        NotifyForegroundInvalidWindowMode();
         return WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
     }
 
@@ -1397,6 +1396,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
     }
     WMError ret = PreProcessShow(reason, withAnimation);
     if (ret != WMError::WM_OK) {
+        NotifyForegroundFailed(ret);
         return ret;
     }
     // this lock solves the multithreading problem when reading WindowState
@@ -1405,10 +1405,8 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
     RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
     if (ret == WMError::WM_OK) {
         UpdateWindowStateWhenShow();
-    } else if (ret == WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE) {
-        NotifyForegroundInvalidWindowMode();
     } else {
-        NotifyForegroundFailed();
+        NotifyForegroundFailed(ret);
         WLOGFE("show window id:%{public}u errCode:%{public}d", property_->GetWindowId(), static_cast<int32_t>(ret));
     }
     return ret;
