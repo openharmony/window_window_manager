@@ -57,7 +57,10 @@ void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& wind
     sptr<MoveDragProperty>& moveDragProperty){};
 void ProcessPointDown(uint32_t windowId, bool isPointDown){};
 void ProcessPointUp(uint32_t windowId){};
-void MinimizeAllAppWindows(DisplayId displayId){};
+WMError MinimizeAllAppWindows(DisplayId displayId)
+{
+    return WMError::WM_OK;
+};
 WMError ToggleShownStateForAllAppWindows()
 {
     return WMError::WM_OK;
@@ -71,15 +74,15 @@ WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeActio
 {
     return WMError::WM_OK;
 };
-bool RegisterWindowManagerAgent(WindowManagerAgentType type,
+WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    return true;
+    return WMError::WM_OK;
 };
-bool UnregisterWindowManagerAgent(WindowManagerAgentType type,
+WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    return true;
+    return WMError::WM_OK;
 };
 WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
 {

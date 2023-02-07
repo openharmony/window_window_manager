@@ -30,9 +30,9 @@
 namespace OHOS::Rosen {
 class BaseAdapter {
 public:
-    virtual bool RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+    virtual DMError RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type);
-    virtual bool UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+    virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type);
     virtual void Clear();
 protected:
@@ -82,17 +82,17 @@ public:
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId);
-    virtual bool SetOrientation(ScreenId screenId, Orientation orientation);
+    virtual DMError SetOrientation(ScreenId screenId, Orientation orientation);
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId);
-    virtual std::vector<sptr<ScreenInfo>> GetAllScreenInfos();
-    virtual ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
-    virtual ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
+    virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos);
+    virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, ScreenId& screenGroupId);
+    virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint, ScreenId& screenGroupId);
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId>);
-    virtual bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
+    virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
     virtual sptr<ScreenInfo> GetScreenInfo(ScreenId screenId);
-    virtual bool SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio);
-    virtual void SetScreenRotationLocked(bool isLocked);
-    virtual bool IsScreenRotationLocked();
+    virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio);
+    virtual DMError SetScreenRotationLocked(bool isLocked);
+    virtual DMError IsScreenRotationLocked(bool& isLocked);
 
     // colorspace, gamut
     virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts);

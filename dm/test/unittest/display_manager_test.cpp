@@ -151,8 +151,8 @@ HWTEST_F(DisplayManagerTest, Unfreeze03, Function | SmallTest | Level1)
  */
 HWTEST_F(DisplayManagerTest, RegisterScreenshotListener01, Function | SmallTest | Level1)
 {
-    bool ret = DisplayManager::GetInstance().RegisterScreenshotListener(nullptr);
-    ASSERT_FALSE(ret);
+    DMError ret = DisplayManager::GetInstance().RegisterScreenshotListener(nullptr);
+    ASSERT_FALSE(DMError::DM_OK == ret);
 }
 
 /**
@@ -163,10 +163,10 @@ HWTEST_F(DisplayManagerTest, RegisterScreenshotListener01, Function | SmallTest 
 HWTEST_F(DisplayManagerTest, RegisterScreenshotListener02, Function | SmallTest | Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_ERROR_NULLPTR));
     sptr<DisplayManager::IScreenshotListener> listener = new DmMockScreenshotListener();
-    bool ret = DisplayManager::GetInstance().RegisterScreenshotListener(listener);
-    ASSERT_FALSE(ret);
+    DMError ret = DisplayManager::GetInstance().RegisterScreenshotListener(listener);
+    ASSERT_FALSE(DMError::DM_OK == ret);
 }
 
 /**
@@ -176,8 +176,8 @@ HWTEST_F(DisplayManagerTest, RegisterScreenshotListener02, Function | SmallTest 
  */
 HWTEST_F(DisplayManagerTest, UnregisterScreenshotListener01, Function | SmallTest | Level1)
 {
-    bool ret = DisplayManager::GetInstance().UnregisterScreenshotListener(nullptr);
-    ASSERT_FALSE(ret);
+    DMError ret = DisplayManager::GetInstance().UnregisterScreenshotListener(nullptr);
+    ASSERT_FALSE(DMError::DM_OK == ret);
 }
 
 /**
@@ -188,7 +188,7 @@ HWTEST_F(DisplayManagerTest, UnregisterScreenshotListener01, Function | SmallTes
 HWTEST_F(DisplayManagerTest, OnDisplayCreate01, Function | SmallTest | Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     sptr<DisplayManager::IDisplayListener> listener = new DmMockDisplayListener();
     DisplayManager::GetInstance().RegisterDisplayListener(listener);
     auto displayManagerListener = DisplayManager::GetInstance().pImpl_->displayManagerListener_;
@@ -213,7 +213,7 @@ HWTEST_F(DisplayManagerTest, OnDisplayCreate01, Function | SmallTest | Level1)
 HWTEST_F(DisplayManagerTest, OnDisplayDestroy, Function | SmallTest | Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     sptr<DisplayManager::IDisplayListener> listener = new DmMockDisplayListener();
     DisplayManager::GetInstance().RegisterDisplayListener(listener);
     auto displayManagerListener = DisplayManager::GetInstance().pImpl_->displayManagerListener_;
@@ -233,7 +233,7 @@ HWTEST_F(DisplayManagerTest, OnDisplayDestroy, Function | SmallTest | Level1)
 HWTEST_F(DisplayManagerTest, OnDisplayChange, Function | SmallTest | Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     sptr<DisplayManager::IDisplayListener> listener = new DmMockDisplayListener();
     DisplayManager::GetInstance().RegisterDisplayListener(listener);
     auto displayManagerListener = DisplayManager::GetInstance().pImpl_->displayManagerListener_;

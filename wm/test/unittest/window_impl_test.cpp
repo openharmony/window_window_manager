@@ -2017,7 +2017,7 @@ HWTEST_F(WindowImplTest, SetWindowMode, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN));
     window->SetWindowState(WindowState::STATE_FROZEN);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
-    
+
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
@@ -3166,7 +3166,7 @@ HWTEST_F(WindowImplTest, UpdateWindowStateWhenHide, Function | SmallTest | Level
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, mainWindow->Create(INVALID_WINDOW_ID));
     ASSERT_EQ(WmErrorCode::WM_OK, mainWindow->UpdateWindowStateWhenHide());
-    
+
     option = new WindowOption();
     option->SetWindowName("sub");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
@@ -3240,7 +3240,7 @@ HWTEST_F(WindowImplTest, RaiseToAppTop, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
- 
+
  /*
  * @tc.name: UpdateDecorEnable
  * @tc.desc: UpdateDecorEnable test

@@ -33,23 +33,26 @@ class JsWindowRegisterManager {
 public:
     JsWindowRegisterManager();
     ~JsWindowRegisterManager();
-    void RegisterListener(sptr<Window> window, std::string type,
+    WmErrorCode RegisterListener(sptr<Window> window, std::string type,
         CaseType caseType, NativeEngine& engine, NativeValue* value);
-    void UnregisterListener(sptr<Window> window, std::string type,
+    WmErrorCode UnregisterListener(sptr<Window> window, std::string type,
         CaseType caseType, NativeValue* value);
 private:
     bool IsCallbackRegistered(std::string type, NativeValue* jsListenerObject);
-    bool ProcessWindowChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
-    bool ProcessSystemAvoidAreaChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
-    bool ProcessAvoidAreaChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
-    bool ProcessLifeCycleEventRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
-    bool ProcessOccupiedAreaChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
-    bool ProcessSystemBarChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
-    bool ProcessTouchOutsideRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
-    bool ProcessScreenshotRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
-    bool ProcessDialogTargetTouchRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
-    bool ProcessDialogDeathRecipientRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
-    using Func_t = bool(JsWindowRegisterManager::*)(sptr<JsWindowListener>, sptr<Window> window, bool);
+    WmErrorCode ProcessWindowChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
+    WmErrorCode ProcessSystemAvoidAreaChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
+        bool isRegister);
+    WmErrorCode ProcessAvoidAreaChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
+    WmErrorCode ProcessLifeCycleEventRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
+    WmErrorCode ProcessOccupiedAreaChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
+        bool isRegister);
+    WmErrorCode ProcessSystemBarChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
+    WmErrorCode ProcessTouchOutsideRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
+    WmErrorCode ProcessScreenshotRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
+    WmErrorCode ProcessDialogTargetTouchRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
+    WmErrorCode ProcessDialogDeathRecipientRegister(sptr<JsWindowListener> listener, sptr<Window> window,
+        bool isRegister);
+    using Func_t = WmErrorCode(JsWindowRegisterManager::*)(sptr<JsWindowListener>, sptr<Window> window, bool);
     std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
     std::mutex mtx_;
     std::map<CaseType, std::map<std::string, Func_t>> listenerProcess_;

@@ -82,14 +82,14 @@ public:
         sptr<MoveDragProperty>& moveDragProperty) = 0;
     virtual void ProcessPointDown(uint32_t windowId, bool isPointDown) = 0;
     virtual void ProcessPointUp(uint32_t windowId) = 0;
-    virtual void MinimizeAllAppWindows(DisplayId displayId) = 0;
+    virtual WMError MinimizeAllAppWindows(DisplayId displayId) = 0;
     virtual WMError ToggleShownStateForAllAppWindows() = 0;
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode) = 0;
     virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
         bool isAsyncTask = false) = 0;
-    virtual bool RegisterWindowManagerAgent(WindowManagerAgentType type,
+    virtual WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
-    virtual bool UnregisterWindowManagerAgent(WindowManagerAgentType type,
+    virtual WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) = 0;
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) = 0;

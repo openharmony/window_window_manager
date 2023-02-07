@@ -42,14 +42,14 @@ public:
         sptr<MoveDragProperty>& moveDragProperty) override;
     void ProcessPointDown(uint32_t windowId, bool isPointDown) override;
     void ProcessPointUp(uint32_t windowId) override;
-    void MinimizeAllAppWindows(DisplayId displayId) override;
+    WMError MinimizeAllAppWindows(DisplayId displayId) override;
     WMError ToggleShownStateForAllAppWindows() override;
     WMError SetWindowLayoutMode(WindowLayoutMode mode) override;
     WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
         bool isAsyncTask = false) override;
-    bool RegisterWindowManagerAgent(WindowManagerAgentType type,
+    WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
-    bool UnregisterWindowManagerAgent(WindowManagerAgentType type,
+    WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) override;
 

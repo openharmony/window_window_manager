@@ -127,18 +127,18 @@ DMError ScreenManagerAdapter::SetVirtualScreenSurface(ScreenId screenId, sptr<Su
     return displayManagerServiceProxy_->SetVirtualScreenSurface(screenId, surface);
 }
 
-void ScreenManagerAdapter::SetScreenRotationLocked(bool isLocked)
+DMError ScreenManagerAdapter::SetScreenRotationLocked(bool isLocked)
 {
-    INIT_PROXY_CHECK_RETURN();
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
     WLOGFI("DisplayManagerAdapter::SetScreenRotationLocked");
-    displayManagerServiceProxy_->SetScreenRotationLocked(isLocked);
+    return displayManagerServiceProxy_->SetScreenRotationLocked(isLocked);
 }
 
-bool ScreenManagerAdapter::IsScreenRotationLocked()
+DMError ScreenManagerAdapter::IsScreenRotationLocked(bool& isLocked)
 {
-    INIT_PROXY_CHECK_RETURN(false);
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
     WLOGFI("DisplayManagerAdapter::IsScreenRotationLocked");
-    return displayManagerServiceProxy_->IsScreenRotationLocked();
+    return displayManagerServiceProxy_->IsScreenRotationLocked(isLocked);
 }
 
 bool ScreenManagerAdapter::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
@@ -153,25 +153,25 @@ ScreenPowerState ScreenManagerAdapter::GetScreenPower(ScreenId dmsScreenId)
     return displayManagerServiceProxy_->GetScreenPower(dmsScreenId);
 }
 
-bool ScreenManagerAdapter::SetOrientation(ScreenId screenId, Orientation orientation)
+DMError ScreenManagerAdapter::SetOrientation(ScreenId screenId, Orientation orientation)
 {
-    INIT_PROXY_CHECK_RETURN(false);
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->SetOrientation(screenId, orientation);
 }
 
-bool BaseAdapter::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+DMError BaseAdapter::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
-    INIT_PROXY_CHECK_RETURN(false);
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->RegisterDisplayManagerAgent(displayManagerAgent, type);
 }
 
-bool BaseAdapter::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+DMError BaseAdapter::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
-    INIT_PROXY_CHECK_RETURN(false);
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->UnregisterDisplayManagerAgent(displayManagerAgent, type);
 }
@@ -301,11 +301,12 @@ void BaseAdapter::Clear()
     isProxyValid_ = false;
 }
 
-ScreenId ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId)
+DMError ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
+                                         ScreenId& screenGroupId)
 {
-    INIT_PROXY_CHECK_RETURN(SCREEN_ID_INVALID);
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    return displayManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId);
+    return displayManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId, screenGroupId);
 }
 
 sptr<ScreenInfo> ScreenManagerAdapter::GetScreenInfo(ScreenId screenId)
@@ -367,18 +368,19 @@ sptr<ScreenGroupInfo> ScreenManagerAdapter::GetScreenGroupInfoById(ScreenId scre
     return displayManagerServiceProxy_->GetScreenGroupInfoById(screenId);
 }
 
-std::vector<sptr<ScreenInfo>> ScreenManagerAdapter::GetAllScreenInfos()
+DMError ScreenManagerAdapter::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos)
 {
-    INIT_PROXY_CHECK_RETURN(std::vector<sptr<ScreenInfo>>());
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    return displayManagerServiceProxy_->GetAllScreenInfos();
+    return displayManagerServiceProxy_->GetAllScreenInfos(screenInfos);
 }
 
-ScreenId ScreenManagerAdapter::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
+DMError ScreenManagerAdapter::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
+                                         ScreenId& screenGroupId)
 {
-    INIT_PROXY_CHECK_RETURN(SCREEN_ID_INVALID);
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    return displayManagerServiceProxy_->MakeExpand(screenId, startPoint);
+    return displayManagerServiceProxy_->MakeExpand(screenId, startPoint, screenGroupId);
 }
 
 void ScreenManagerAdapter::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
@@ -388,16 +390,16 @@ void ScreenManagerAdapter::RemoveVirtualScreenFromGroup(std::vector<ScreenId> sc
     displayManagerServiceProxy_->RemoveVirtualScreenFromGroup(screens);
 }
 
-bool ScreenManagerAdapter::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
+DMError ScreenManagerAdapter::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
 {
-    INIT_PROXY_CHECK_RETURN(false);
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->SetScreenActiveMode(screenId, modeId);
 }
 
-bool ScreenManagerAdapter::SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio)
+DMError ScreenManagerAdapter::SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio)
 {
-    INIT_PROXY_CHECK_RETURN(false);
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->SetVirtualPixelRatio(screenId, virtualPixelRatio);
 }

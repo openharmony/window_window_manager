@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_DISPLAY_MANAGER_AGENT_CONTROLLER_H
 
 #include <mutex>
+#include "dm_common.h"
 #include "wm_single_instance.h"
 #include "client_agent_container.h"
 #include "zidl/display_manager_agent_interface.h"
@@ -26,9 +27,9 @@ namespace Rosen {
 class DisplayManagerAgentController {
 WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerAgentController)
 public:
-    bool RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+    DMError RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type);
-    bool UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+    DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type);
 
     bool NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);

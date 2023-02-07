@@ -95,14 +95,14 @@ HWTEST_F(DisplayChangeUnitTest, RegisterDisplayChangeListener01, Function | Smal
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), RegisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_EVENT_LISTENER))
-        .Times(1).WillOnce(Return(true));
-    bool ret = DisplayManager::GetInstance().RegisterDisplayListener(listener_);
-    ASSERT_EQ(true, ret);
+        .Times(1).WillOnce(Return(DMError::DM_OK));
+    DMError ret = DisplayManager::GetInstance().RegisterDisplayListener(listener_);
+    ASSERT_EQ(DMError::DM_OK, ret);
 
     EXPECT_CALL(m.Mock(), UnregisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_EVENT_LISTENER))
-        .Times(1).WillOnce(Return(true));
-    ret  = DisplayManager::GetInstance().UnregisterDisplayListener(listener_);
-    ASSERT_EQ(true, ret);
+        .Times(1).WillOnce(Return(DMError::DM_OK));
+    ret = DisplayManager::GetInstance().UnregisterDisplayListener(listener_);
+    ASSERT_EQ(DMError::DM_OK, ret);
 }
 
 /**
@@ -115,13 +115,13 @@ HWTEST_F(DisplayChangeUnitTest, RegisterDisplayChangeListener02, Function | Smal
     Mocker m;
     EXPECT_CALL(m.Mock(), RegisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_EVENT_LISTENER))
         .Times(0);
-    bool ret = DisplayManager::GetInstance().RegisterDisplayListener(nullptr);
-    ASSERT_EQ(false, ret);
+    DMError ret = DisplayManager::GetInstance().RegisterDisplayListener(nullptr);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
 
     EXPECT_CALL(m.Mock(), UnregisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_EVENT_LISTENER))
         .Times(0);
     ret = DisplayManager::GetInstance().UnregisterDisplayListener(nullptr);
-    ASSERT_EQ(false, ret);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -133,14 +133,14 @@ HWTEST_F(DisplayChangeUnitTest, RegisterDisplayChangeListener03, Function | Smal
 {
     Mocker m;
     EXPECT_CALL(m.Mock(), RegisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_EVENT_LISTENER))
-        .Times(1).WillOnce(Return(false));
-    bool ret = DisplayManager::GetInstance().RegisterDisplayListener(listener_);
-    ASSERT_EQ(false, ret);
+        .Times(1).WillOnce(Return(DMError::DM_ERROR_NULLPTR));
+    DMError ret = DisplayManager::GetInstance().RegisterDisplayListener(listener_);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
 
     EXPECT_CALL(m.Mock(), UnregisterDisplayManagerAgent(_, DisplayManagerAgentType::DISPLAY_EVENT_LISTENER))
         .Times(0);
     ret  = DisplayManager::GetInstance().UnregisterDisplayListener(listener_);
-    ASSERT_EQ(false, ret);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
 }
 }
 } // namespace Rosen

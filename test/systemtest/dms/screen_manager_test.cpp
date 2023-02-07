@@ -174,7 +174,8 @@ sptr<Window> ScreenManagerTest::CreateWindowByDisplayId(DisplayId displayId)
 }
 
 #define CHECK_TEST_INIT_SCREEN_STATE \
-    std::vector<sptr<Screen>> allScreens = ScreenManager::GetInstance().GetAllScreens(); \
+    std::vector<sptr<Screen>> allScreens; \
+    ScreenManager::GetInstance().GetAllScreens(allScreens); \
     ASSERT_LT(0, allScreens.size()); \
     ScreenId groupId = SCREEN_ID_INVALID; \
     for (auto screen : allScreens) { \
@@ -281,10 +282,11 @@ HWTEST_F(ScreenManagerTest, ScreenManager02, Function | MediumTest | Level2)
     defaultOption_.surface_ = utils.psurface_;
     defaultOption_.isForShot_ = false;
     ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
+    ScreenId screenGroupId;
     sleep(TEST_SLEEP_S);
     std::vector<ScreenId> mirrorIds;
     mirrorIds.push_back(virtualScreenId);
-    ScreenManager::GetInstance().MakeMirror(defaultScreenId_, mirrorIds);
+    ScreenManager::GetInstance().MakeMirror(defaultScreenId_, mirrorIds, screenGroupId);
     sleep(TEST_SLEEP_S);
     ASSERT_NE(SCREEN_ID_INVALID, virtualScreenId);
     DMError res = ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
@@ -325,10 +327,11 @@ HWTEST_F(ScreenManagerTest, ScreenManager04, Function | MediumTest | Level2)
         ASSERT_TRUE(utils.CreateSurface());
         defaultOption_.surface_ = utils.psurface_;
         ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
+        ScreenId screenGroupId;
         sleep(TEST_SLEEP_S);
         std::vector<ScreenId> mirrorIds;
         mirrorIds.push_back(virtualScreenId);
-        ScreenManager::GetInstance().MakeMirror(defaultScreenId_, mirrorIds);
+        ScreenManager::GetInstance().MakeMirror(defaultScreenId_, mirrorIds, screenGroupId);
         sleep(TEST_SLEEP_S);
         ASSERT_NE(SCREEN_ID_INVALID, virtualScreenId);
         DMError res = ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
@@ -351,13 +354,14 @@ HWTEST_F(ScreenManagerTest, ScreenManager05, Function | MediumTest | Level2)
     defaultOption_.surface_ = utils.psurface_;
     defaultOption_.isForShot_ = true;
     ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
+    ScreenId screenGroupId;
     sleep(TEST_SLEEP_S);
 
     ASSERT_NE(SCREEN_ID_INVALID, virtualScreenId);
     uint32_t lastCount = -1u;
     std::vector<ScreenId> mirrorIds;
     mirrorIds.push_back(virtualScreenId);
-    ScreenManager::GetInstance().MakeMirror(defaultScreenId_, mirrorIds);
+    ScreenManager::GetInstance().MakeMirror(defaultScreenId_, mirrorIds, screenGroupId);
     sleep(TEST_SLEEP_S);
 
     while (utils.successCount_ < acquireFrames_ && waitCount_ <=  maxWaitCount_) {
@@ -388,6 +392,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager06, Function | MediumTest | Level2)
     defaultOption_.surface_ = nullptr;
     defaultOption_.isForShot_ = true;
     ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
+    ScreenId screenGroupId;
     sleep(TEST_SLEEP_S);
     ASSERT_NE(SCREEN_ID_INVALID, virtualScreenId);
 
@@ -397,7 +402,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager06, Function | MediumTest | Level2)
     uint32_t lastCount = -1u;
     std::vector<ScreenId> mirrorIds;
     mirrorIds.push_back(virtualScreenId);
-    ScreenManager::GetInstance().MakeMirror(defaultScreenId_, mirrorIds);
+    ScreenManager::GetInstance().MakeMirror(defaultScreenId_, mirrorIds, screenGroupId);
     sleep(TEST_SLEEP_S);
 
     while (utils.successCount_ < acquireFrames_ && waitCount_ <=  maxWaitCount_) {
@@ -429,12 +434,12 @@ HWTEST_F(ScreenManagerTest, ScreenManager07, Function | MediumTest | Level2)
     auto defaultModeId = screen->GetModeId();
     ASSERT_GT(modes.size(), 0);
     for (uint32_t modeIdx = 0; modeIdx < modes.size(); modeIdx++) {
-        ASSERT_EQ(true, screen->SetScreenActiveMode(modeIdx));
+        ASSERT_EQ(DMError::DM_OK, screen->SetScreenActiveMode(modeIdx));
         sleep(TEST_SLEEP_S);
         ASSERT_EQ(modeIdx, screen->GetModeId());
         sleep(TEST_SLEEP_S);
     }
-    ASSERT_EQ(true, screen->SetScreenActiveMode(defaultModeId));
+    ASSERT_EQ(DMError::DM_OK, screen->SetScreenActiveMode(defaultModeId));
 }
 
 /**
@@ -453,12 +458,14 @@ HWTEST_F(ScreenManagerTest, ScreenManager08, Function | MediumTest | Level2)
     sleep(TEST_SLEEP_S);
     CHECK_SCREEN_STATE_AFTER_CREATE_VIRTUAL_SCREEN
     CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
-    std::vector<sptr<Screen>> screens = ScreenManager::GetInstance().GetAllScreens();
+    std::vector<sptr<Screen>> screens;
+    ScreenManager::GetInstance().GetAllScreens(screens);
     sleep(TEST_SLEEP_S);
     sptr<Screen> defaultScreen = screens.front();
     ASSERT_TRUE(defaultScreen);
     std::vector<ExpandOption> options = {{defaultScreen->GetId(), 0, 0}, {virtualScreenId, defaultWidth_, 0}};
-    ScreenId expansionGroup = ScreenManager::GetInstance().MakeExpand(options);
+    ScreenId expansionGroup;
+    ScreenManager::GetInstance().MakeExpand(options, expansionGroup);
     sleep(TEST_SLEEP_S);
     ASSERT_NE(SCREEN_ID_INVALID, expansionGroup);
     CheckScreenGroupState(ScreenCombination::SCREEN_EXPAND, ScreenGroupChangeEvent::ADD_TO_GROUP,
@@ -497,7 +504,8 @@ HWTEST_F(ScreenManagerTest, ScreenManager09, Function | MediumTest | Level2)
     CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
     sleep(TEST_SLEEP_S);
     std::vector<ExpandOption> options = {{defaultScreenId_, 0, 0}, {virtualScreenId, defaultWidth_, 0}};
-    ScreenId expansionId = ScreenManager::GetInstance().MakeExpand(options);
+    ScreenId expansionId;
+    ScreenManager::GetInstance().MakeExpand(options, expansionId);
     sleep(TEST_SLEEP_S);
     CheckScreenGroupState(ScreenCombination::SCREEN_EXPAND, ScreenGroupChangeEvent::ADD_TO_GROUP,
         virtualScreenId, group, screenGroupChangeListener);
@@ -577,7 +585,8 @@ HWTEST_F(ScreenManagerTest, ScreenManager11, Function | MediumTest | Level2)
 
         std::vector<ScreenId> mirrorIds;
         mirrorIds.push_back(virtualScreenId);
-        auto mirrorGroup = ScreenManager::GetInstance().MakeMirror(defaultScreenId_, mirrorIds);
+        ScreenId mirrorGroup;
+        ScreenManager::GetInstance().MakeMirror(defaultScreenId_, mirrorIds, mirrorGroup);
         sleep(TEST_SLEEP_S);
         ASSERT_EQ(mirrorGroup, groupId);
         CheckScreenGroupState(ScreenCombination::SCREEN_MIRROR, ScreenGroupChangeEvent::ADD_TO_GROUP,
@@ -625,7 +634,8 @@ HWTEST_F(ScreenManagerTest, ScreenManager12, Function | MediumTest | Level2)
 
     std::vector<ScreenId> mirrorIds;
     mirrorIds.push_back(virtualScreenId);
-    auto mirrorGroup = ScreenManager::GetInstance().MakeMirror(defaultScreenId_, mirrorIds);
+    ScreenId mirrorGroup;
+    ScreenManager::GetInstance().MakeMirror(defaultScreenId_, mirrorIds, mirrorGroup);
     ASSERT_EQ(mirrorGroup, groupId);
     CheckScreenGroupState(ScreenCombination::SCREEN_MIRROR, ScreenGroupChangeEvent::ADD_TO_GROUP,
         virtualScreenId, group, screenGroupChangeListener);
@@ -667,12 +677,14 @@ HWTEST_F(ScreenManagerTest, ScreenManager13, Function | MediumTest | Level2)
     CHECK_SCREEN_STATE_AFTER_CREATE_VIRTUAL_SCREEN
     CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
 
-    std::vector<sptr<Screen>> screens = ScreenManager::GetInstance().GetAllScreens();
+    std::vector<sptr<Screen>> screens;
+    ScreenManager::GetInstance().GetAllScreens(screens);
     sleep(TEST_SLEEP_S);
     sptr<Screen> defaultScreen = screens.front();
     ASSERT_TRUE(defaultScreen);
     std::vector<ExpandOption> options = {{defaultScreen->GetId(), 0, 0}, {virtualScreenId, defaultWidth_, 0}};
-    ScreenId expansionGroup = ScreenManager::GetInstance().MakeExpand(options);
+    ScreenId expansionGroup;
+    ScreenManager::GetInstance().MakeExpand(options, expansionGroup);
     sleep(TEST_SLEEP_S);
     ASSERT_NE(SCREEN_ID_INVALID, expansionGroup);
     CheckScreenGroupState(ScreenCombination::SCREEN_EXPAND, ScreenGroupChangeEvent::ADD_TO_GROUP,
@@ -714,11 +726,13 @@ HWTEST_F(ScreenManagerTest, ScreenManager14, Function | MediumTest | Level2)
     CHECK_SCREEN_STATE_AFTER_CREATE_VIRTUAL_SCREEN
     CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
 
-    std::vector<sptr<Screen>> screens = ScreenManager::GetInstance().GetAllScreens();
+    std::vector<sptr<Screen>> screens;
+    ScreenManager::GetInstance().GetAllScreens(screens);
     sptr<Screen> defaultScreen = screens.front();
     ASSERT_TRUE(defaultScreen);
     std::vector<ExpandOption> options = {{defaultScreen->GetId(), 0, 0}, {virtualScreenId, defaultWidth_, 0}};
-    ScreenId expansionGroup = ScreenManager::GetInstance().MakeExpand(options);
+    ScreenId expansionGroup;
+    ScreenManager::GetInstance().MakeExpand(options, expansionGroup);
     sleep(TEST_SLEEP_S);
     ASSERT_EQ(expansionGroup, groupId);
     CheckScreenGroupState(ScreenCombination::SCREEN_EXPAND, ScreenGroupChangeEvent::ADD_TO_GROUP,
@@ -727,7 +741,8 @@ HWTEST_F(ScreenManagerTest, ScreenManager14, Function | MediumTest | Level2)
 
     std::vector<ScreenId> mirrorScreens;
     mirrorScreens.emplace_back(virtualScreenId);
-    auto mirrorGroup = ScreenManager::GetInstance().MakeMirror(defaultScreenId_, mirrorScreens);
+    ScreenId mirrorGroup;
+    ScreenManager::GetInstance().MakeMirror(defaultScreenId_, mirrorScreens, mirrorGroup);
     ASSERT_EQ(mirrorGroup, groupId);
     CheckScreenGroupState(ScreenCombination::SCREEN_MIRROR, ScreenGroupChangeEvent::CHANGE_GROUP,
         virtualScreenId, group, screenGroupChangeListener);
@@ -767,7 +782,8 @@ HWTEST_F(ScreenManagerTest, ScreenManager15, Function | MediumTest | Level2)
 
     std::vector<ScreenId> mirrorScreens;
     mirrorScreens.emplace_back(virtualScreenId);
-    auto mirrorGroup = ScreenManager::GetInstance().MakeMirror(defaultScreenId_, mirrorScreens);
+    ScreenId mirrorGroup;
+    ScreenManager::GetInstance().MakeMirror(defaultScreenId_, mirrorScreens, mirrorGroup);
     sleep(TEST_SLEEP_S);
     ASSERT_EQ(mirrorGroup, groupId);
     CheckScreenGroupState(ScreenCombination::SCREEN_MIRROR, ScreenGroupChangeEvent::ADD_TO_GROUP,
@@ -776,11 +792,13 @@ HWTEST_F(ScreenManagerTest, ScreenManager15, Function | MediumTest | Level2)
         virtualScreenGroupChangeListener);
     CheckScreenStateInGroup(true, group, groupId, virtualScreen, virtualScreenId);
 
-    std::vector<sptr<Screen>> screens = ScreenManager::GetInstance().GetAllScreens();
+    std::vector<sptr<Screen>> screens;
+    ScreenManager::GetInstance().GetAllScreens(screens);
     sptr<Screen> defaultScreen = screens.front();
     ASSERT_TRUE(defaultScreen);
     std::vector<ExpandOption> options = {{defaultScreen->GetId(), 0, 0}, {virtualScreenId, defaultWidth_, 0}};
-    ScreenId expansionGroup = ScreenManager::GetInstance().MakeExpand(options);
+    ScreenId expansionGroup;
+    ScreenManager::GetInstance().MakeExpand(options, expansionGroup);
     sleep(TEST_SLEEP_S);
     ASSERT_EQ(expansionGroup, groupId);
     CheckScreenGroupState(ScreenCombination::SCREEN_EXPAND, ScreenGroupChangeEvent::CHANGE_GROUP,
@@ -808,7 +826,8 @@ HWTEST_F(ScreenManagerTest, ScreenManager15, Function | MediumTest | Level2)
  */
 HWTEST_F(ScreenManagerTest, ScreenManager16, Function | MediumTest | Level2)
 {
-    auto screens = ScreenManager::GetInstance().GetAllScreens();
+    std::vector<sptr<Screen>> screens;
+    ScreenManager::GetInstance().GetAllScreens(screens);
     ASSERT_TRUE(screens[0]);
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     ASSERT_TRUE(display);
@@ -857,10 +876,12 @@ HWTEST_F(ScreenManagerTest, ScreenManager17, Function | MediumTest | Level2)
  */
 HWTEST_F(ScreenManagerTest, ScreenManager18, Function | SmallTest | Level1)
 {
-    bool originalLockStatus = ScreenManager::GetInstance().IsScreenRotationLocked();
+    bool originalLockStatus;
+    ScreenManager::GetInstance().IsScreenRotationLocked(originalLockStatus);
     ScreenManager::GetInstance().SetScreenRotationLocked(!originalLockStatus);
     sleep(TEST_SLEEP_S);
-    bool modifiedLockedStatus = ScreenManager::GetInstance().IsScreenRotationLocked();
+    bool modifiedLockedStatus;
+    ScreenManager::GetInstance().IsScreenRotationLocked(modifiedLockedStatus);
     ScreenManager::GetInstance().SetScreenRotationLocked(originalLockStatus);
     sleep(TEST_SLEEP_S);
     ASSERT_EQ(!originalLockStatus, modifiedLockedStatus);
@@ -888,7 +909,8 @@ HWTEST_F(ScreenManagerTest, VirtualExpandScreen01, Function | MediumTest | Level
     CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
     sleep(TEST_SLEEP_S);
     std::vector<ExpandOption> options = {{defaultScreenId_, 0, 0}, {virtualScreenId, defaultWidth_, 0}};
-    ScreenId expansionId = ScreenManager::GetInstance().MakeExpand(options);
+    ScreenId expansionId;
+    ScreenManager::GetInstance().MakeExpand(options, expansionId);
     sleep(TEST_SLEEP_S);
 
     CheckScreenGroupState(ScreenCombination::SCREEN_EXPAND, ScreenGroupChangeEvent::ADD_TO_GROUP,
@@ -917,7 +939,7 @@ HWTEST_F(ScreenManagerTest, VirtualExpandScreen01, Function | MediumTest | Level
     uint32_t orientation = static_cast<uint32_t>(Orientation::VERTICAL);
     uint32_t end = static_cast<uint32_t>(Orientation::REVERSE_HORIZONTAL);
     ASSERT_TRUE(screenListener);
-    
+
     for (; orientation <= end; ++orientation) {
         screen->SetOrientation(static_cast<Orientation>(orientation));
         screenListener->changeFuture_.GetResult(TIME_OUT);
