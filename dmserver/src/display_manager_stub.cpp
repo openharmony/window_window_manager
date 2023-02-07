@@ -32,7 +32,7 @@ namespace {
 int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
     MessageOption &option)
 {
-    WLOGFI("OnRemoteRequest code is %{public}u", code);
+    WLOGFD("OnRemoteRequest code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed");
         return -1;
@@ -105,7 +105,8 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         case DisplayManagerMessage::TRANS_ID_SET_ORIENTATION: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             Orientation orientation = static_cast<Orientation>(data.ReadUint32());
-            reply.WriteBool(SetOrientation(screenId, orientation));
+            DMError ret = SetOrientation(screenId, orientation);
+            reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT: {
@@ -117,13 +118,15 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         case DisplayManagerMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT: {
             auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
             auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
-            reply.WriteBool(RegisterDisplayManagerAgent(agent, type));
+            DMError ret = RegisterDisplayManagerAgent(agent, type);
+            reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT: {
             auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
             auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
-            reply.WriteBool(UnregisterDisplayManagerAgent(agent, type));
+            DMError ret = UnregisterDisplayManagerAgent(agent, type);
+            reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_WAKE_UP_BEGIN: {
@@ -187,8 +190,10 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
                 WLOGE("fail to receive mirror screen in stub. screen:%{public}" PRIu64"", mainScreenId);
                 break;
             }
-            ScreenId result = MakeMirror(mainScreenId, mirrorScreenId);
-            reply.WriteUint64(static_cast<uint64_t>(result));
+            ScreenId screenGroupId = INVALID_SCREEN_ID;
+            DMError ret = MakeMirror(mainScreenId, mirrorScreenId, screenGroupId);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            reply.WriteUint64(static_cast<uint64_t>(screenGroupId));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_SCREEN_INFO_BY_ID: {
@@ -204,7 +209,9 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_ALL_SCREEN_INFOS: {
-            std::vector<sptr<ScreenInfo>> screenInfos = GetAllScreenInfos();
+            std::vector<sptr<ScreenInfo>> screenInfos;
+            DMError ret  = GetAllScreenInfos(screenInfos);
+            reply.WriteInt32(static_cast<int32_t>(ret));
             if (!MarshallingHelper::MarshallingVectorParcelableObj<ScreenInfo>(reply, screenInfos)) {
                 WLOGE("fail to marshalling screenInfos in stub.");
             }
@@ -228,8 +235,10 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
                 WLOGE("fail to receive startPoint in stub.");
                 break;
             }
-            ScreenId result = MakeExpand(screenId, startPoint);
-            reply.WriteUint64(static_cast<uint64_t>(result));
+            ScreenId screenGroupId = INVALID_SCREEN_ID;
+            DMError ret = MakeExpand(screenId, startPoint, screenGroupId);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            reply.WriteUint64(static_cast<uint64_t>(screenGroupId));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_REMOVE_VIRTUAL_SCREEN_FROM_SCREEN_GROUP: {
@@ -244,15 +253,15 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_ACTIVE_MODE: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             uint32_t modeId = data.ReadUint32();
-            bool res = SetScreenActiveMode(screenId, modeId);
-            reply.WriteBool(res);
+            DMError ret = SetScreenActiveMode(screenId, modeId);
+            reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_PIXEL_RATIO: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             float virtualPixelRatio = data.ReadFloat();
-            bool res = SetVirtualPixelRatio(screenId, virtualPixelRatio);
-            reply.WriteBool(res);
+            DMError ret = SetVirtualPixelRatio(screenId, virtualPixelRatio);
+            reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_GAMUTS: {
@@ -313,13 +322,16 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             break;
         }
         case DisplayManagerMessage::TRANS_ID_IS_SCREEN_ROTATION_LOCKED: {
-            bool isLocked = IsScreenRotationLocked();
+            bool isLocked = false;
+            DMError ret = IsScreenRotationLocked(isLocked);
+            reply.WriteInt32(static_cast<int32_t>(ret));
             reply.WriteBool(isLocked);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_ROTATION_LOCKED: {
             bool isLocked = static_cast<bool>(data.ReadBool());
-            SetScreenRotationLocked(isLocked);
+            DMError ret = SetScreenRotationLocked(isLocked);
+            reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_HAS_PRIVATE_WINDOW: {

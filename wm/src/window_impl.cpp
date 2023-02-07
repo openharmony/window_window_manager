@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -92,6 +92,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     property_->SetKeepScreenOn(option->IsKeepScreenOn());
     property_->SetBrightness(option->GetBrightness());
     AdjustWindowAnimationFlag();
+    UpdateDecorEnable();
     auto& sysBarPropMap = option->GetSystemBarProperty();
     for (auto it : sysBarPropMap) {
         property_->SetSystemBarProperty(it.first, it.second);
@@ -104,7 +105,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     if (moveDragProperty_ == nullptr) {
         WLOGFE("MoveDragProperty is null");
     }
-    WLOGI("constructorCnt: %{public}d name: %{public}s",
+    WLOGFD("constructorCnt: %{public}d name: %{public}s",
         ++constructorCnt, property_->GetWindowName().c_str());
 }
 
@@ -146,19 +147,19 @@ const std::shared_ptr<AbilityRuntime::Context> WindowImpl::GetContext() const
     return context_;
 }
 
-sptr<Window> WindowImpl::FindTopWindow(uint32_t topWinId)
+sptr<Window> WindowImpl::FindWindowById(uint32_t WinId)
 {
     if (windowMap_.empty()) {
         WLOGFE("Please create mainWindow First!");
         return nullptr;
     }
     for (auto iter = windowMap_.begin(); iter != windowMap_.end(); iter++) {
-        if (topWinId == iter->second.first) {
-            WLOGI("FindTopWindow id: %{public}u", topWinId);
+        if (WinId == iter->second.first) {
+            WLOGI("FindWindow id: %{public}u", WinId);
             return iter->second.second;
         }
     }
-    WLOGFE("Cannot find topWindow!");
+    WLOGFE("Cannot find Window!");
     return nullptr;
 }
 
@@ -170,7 +171,7 @@ sptr<Window> WindowImpl::GetTopWindowWithId(uint32_t mainWinId)
         WLOGFE("GetTopWindowId failed with errCode:%{public}d", static_cast<int32_t>(ret));
         return nullptr;
     }
-    return FindTopWindow(topWinId);
+    return FindWindowById(topWinId);
 }
 
 sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
@@ -199,7 +200,7 @@ sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRu
         WLOGFE("GetTopWindowId failed with errCode:%{public}d", static_cast<int32_t>(ret));
         return nullptr;
     }
-    return FindTopWindow(topWinId);
+    return FindWindowById(topWinId);
 }
 
 std::vector<sptr<Window>> WindowImpl::GetSubWindow(uint32_t parentId)
@@ -339,9 +340,10 @@ WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 WMError WindowImpl::SetWindowType(WindowType type)
 {
     WLOGFD("window id: %{public}u, type:%{public}u.", property_->GetWindowId(), static_cast<uint32_t>(type));
-    if (type != WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW && !Permission::IsSystemCalling()) {
+    if (type != WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW && !Permission::IsSystemCalling() &&
+        !Permission::IsStartByHdcd()) {
         WLOGFE("set window type permission denied!");
-        return WMError::WM_ERROR_INVALID_PERMISSION;
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -352,9 +354,7 @@ WMError WindowImpl::SetWindowType(WindowType type)
             return WMError::WM_ERROR_INVALID_PARAM;
         }
         property_->SetWindowType(type);
-        if (isAppDecorEnable_ && windowSystemConfig_.isSystemDecorEnable_) {
-            property_->SetDecorEnable(WindowHelper::IsMainWindow(property_->GetWindowType()));
-        }
+        UpdateDecorEnable();
         AdjustWindowAnimationFlag();
         return WMError::WM_OK;
     }
@@ -395,26 +395,27 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
     return WMError::WM_OK;
 }
 
-void WindowImpl::SetAlpha(float alpha)
+WMError WindowImpl::SetAlpha(float alpha)
 {
     WLOGI("Window %{public}u alpha %{public}f", property_->GetWindowId(), alpha);
-    if (!Permission::IsSystemCalling()) {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("set alpha permission denied!");
-        return;
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     if (!IsWindowValid()) {
-        return;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     property_->SetAlpha(alpha);
     surfaceNode_->SetAlpha(alpha);
     RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
 }
 
-void WindowImpl::SetTransform(const Transform& trans)
+WMError WindowImpl::SetTransform(const Transform& trans)
 {
     WLOGI("Window %{public}u", property_->GetWindowId());
     if (!IsWindowValid()) {
-        return;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     Transform oriTrans = property_->GetTransform();
     property_->SetTransform(trans);
@@ -429,6 +430,7 @@ void WindowImpl::SetTransform(const Transform& trans)
     } else {
         TransformSurfaceNode(trans);
     }
+    return ret;
 }
 
 const Transform& WindowImpl::GetTransform() const
@@ -447,7 +449,10 @@ WMError WindowImpl::AddWindowFlag(WindowFlag flag)
         WLOGFE("Only support add show when locked when window create, id: %{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-
+    if (flag == WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE && !Permission::IsSystemCalling()) {
+        WLOGFE("set forbid split move permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
     uint32_t updateFlags = property_->GetWindowFlags() | (static_cast<uint32_t>(flag));
     return SetWindowFlags(updateFlags);
 }
@@ -458,7 +463,10 @@ WMError WindowImpl::RemoveWindowFlag(WindowFlag flag)
         WLOGFE("Only support remove show when locked when window create, id: %{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-
+    if (flag == WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE && !Permission::IsSystemCalling()) {
+        WLOGFE("set forbid split move permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
     uint32_t updateFlags = property_->GetWindowFlags() & (~(static_cast<uint32_t>(flag)));
     return SetWindowFlags(updateFlags);
 }
@@ -497,7 +505,7 @@ void WindowImpl::OnNewWant(const AAFwk::Want& want)
 WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     NativeEngine* engine, NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability)
 {
-    WLOGI("SetUIContent: %{public}s", contentInfo.c_str());
+    WLOGFD("SetUIContent: %{public}s", contentInfo.c_str());
     std::unique_ptr<Ace::UIContent> uiContent;
     if (ability != nullptr) {
         uiContent = Ace::UIContent::Create(ability);
@@ -508,10 +516,6 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
         WLOGFE("fail to SetUIContent id: %{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (!isAppDecorEnable_ || !windowSystemConfig_.isSystemDecorEnable_) {
-        WLOGI("app set decor enable false");
-        property_->SetDecorEnable(false);
-    }
     if (isdistributed) {
         uiContent->Restore(this, contentInfo, storage);
     } else {
@@ -519,6 +523,7 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     }
     // make uiContent available after Initialize/Restore
     uiContent_ = std::move(uiContent);
+    UpdateDecorEnable(true);
 
     if (state_ == WindowState::STATE_SHOWN) {
         // UIContent may be nullptr when show window, need to notify again when window is shown
@@ -737,6 +742,45 @@ WMError WindowImpl::SetFullScreen(bool status)
     return ret;
 }
 
+WMError WindowImpl::SetAspectRatio(float ratio)
+{
+    WLOGFI("windowId: %{public}u, ratio: %{public}f", GetWindowId(), ratio);
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        WLOGFE("Invalid operation, windowId: %{public}u", GetWindowId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    if (MathHelper::NearZero(ratio) || ratio < 0.0f) {
+        WLOGFE("Invalid param, ratio: %{public}f", ratio);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (std::abs(property_->GetAspectRatio() - ratio) < 0.0001f) {
+        return WMError::WM_OK;
+    }
+    property_->SetAspectRatio(ratio);
+    if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
+        WLOGFD("window is hidden or created! id: %{public}u, ratio: %{public}f ", property_->GetWindowId(), ratio);
+        return WMError::WM_OK;
+    }
+    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO);
+    return WMError::WM_OK;
+}
+
+WMError WindowImpl::UnsetAspectRatio()
+{
+    WLOGFI("windowId: %{public}u", GetWindowId());
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        WLOGFE("Invalid operation, windowId: %{public}u", GetWindowId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    property_->SetAspectRatio(0.0);
+    if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
+        WLOGFD("window is hidden or created! id: %{public}u", property_->GetWindowId());
+        return WMError::WM_OK;
+    }
+    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO);
+    return WMError::WM_OK;
+}
+
 void WindowImpl::MapFloatingWindowToAppIfNeeded()
 {
     if (!WindowHelper::IsAppFloatingWindow(GetType()) || context_.get() == nullptr) {
@@ -812,8 +856,9 @@ void WindowImpl::GetConfigurationFromAbilityInfo()
     property_->SetSizeLimits(sizeLimits);
 
     // get orientation configuration
-    DisplayOrientation displayOrientation = static_cast<DisplayOrientation>(
-        static_cast<uint32_t>(abilityInfo->orientation));
+    OHOS::AppExecFwk::DisplayOrientation displayOrientation =
+        static_cast<OHOS::AppExecFwk::DisplayOrientation>(
+            static_cast<uint32_t>(abilityInfo->orientation));
     if (ABILITY_TO_WMS_ORIENTATION_MAP.count(displayOrientation) == 0) {
         WLOGFE("id:%{public}u Do not support this Orientation type", property_->GetWindowId());
         return;
@@ -829,7 +874,7 @@ void WindowImpl::GetConfigurationFromAbilityInfo()
 void WindowImpl::UpdateTitleButtonVisibility()
 {
     WLOGFD("[Client] UpdateTitleButtonVisibility");
-    if (uiContent_ == nullptr || !isAppDecorEnable_) {
+    if (uiContent_ == nullptr || !IsDecorEnable()) {
         return;
     }
     auto modeSupportInfo = GetModeSupportInfo();
@@ -880,12 +925,15 @@ WMError WindowImpl::SetWindowCornerRadiusAccordingToSystemConfig()
 
     WLOGFD("[WEffect] [name:%{public}s] mode: %{public}u, vpr: %{public}f, [%{public}f, %{public}f, %{public}f]",
         name_.c_str(), GetMode(), vpr, fullscreenRadius, splitRadius, floatRadius);
-
-    if (WindowHelper::IsFullScreenWindow(GetMode()) && MathHelper::GreatNotEqual(fullscreenRadius, 0.0)) {
+    if (MathHelper::NearZero(fullscreenRadius) && MathHelper::NearZero(splitRadius) &&
+        MathHelper::NearZero(floatRadius)) {
+        return WMError::WM_DO_NOTHING;
+    }
+    if (WindowHelper::IsFullScreenWindow(GetMode())) {
         return SetCornerRadius(fullscreenRadius);
-    } else if (WindowHelper::IsSplitWindowMode(GetMode()) && MathHelper::GreatNotEqual(splitRadius, 0.0)) {
+    } else if (WindowHelper::IsSplitWindowMode(GetMode())) {
         return SetCornerRadius(splitRadius);
-    } else if (WindowHelper::IsFloatingWindow(GetMode()) && MathHelper::GreatNotEqual(floatRadius, 0.0)) {
+    } else if (WindowHelper::IsFloatingWindow(GetMode())) {
         return SetCornerRadius(floatRadius);
     }
     return WMError::WM_DO_NOTHING;
@@ -1012,7 +1060,7 @@ WMError WindowImpl::WindowCreateCheck(uint32_t parentId)
 
 WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRuntime::Context>& context)
 {
-    WLOGI("Window[%{public}s] Create", name_.c_str());
+    WLOGFD("Window[%{public}s] Create", name_.c_str());
     WMError ret = WindowCreateCheck(parentId);
     if (ret != WMError::WM_OK) {
         return ret;
@@ -1023,12 +1071,9 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
     sptr<IWindow> windowAgent(new WindowAgent(window));
     static std::atomic<uint32_t> tempWindowId = 0;
     uint32_t windowId = tempWindowId++; // for test
-    sptr<IRemoteObject> token = nullptr;
-    if (context_ != nullptr) {
-        token = context_->GetToken();
-        if (token != nullptr) {
-            property_->SetTokenState(true);
-        }
+    sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
+    if (token) {
+        property_->SetTokenState(true);
     }
     InitAbilityInfo();
     SetSystemConfig();
@@ -1062,6 +1107,7 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
 
     MapFloatingWindowToAppIfNeeded();
     MapDialogWindowToAppIfNeeded();
+    UpdateDecorEnable();
 
     state_ = WindowState::STATE_CREATED;
     InputTransferStation::GetInstance().AddInputWindow(self);
@@ -1317,7 +1363,6 @@ WMError WindowImpl::PreProcessShow(uint32_t reason, bool withAnimation)
     AdjustWindowAnimationFlag(withAnimation);
 
     if (NeedToStopShowing()) { // true means stop showing
-        NotifyForegroundInvalidWindowMode();
         return WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
     }
 
@@ -1333,9 +1378,9 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    WindowStateChangeReason stateChangeReason = static_cast<WindowStateChangeReason>(reason);
-    if (stateChangeReason == WindowStateChangeReason::KEYGUARD ||
-        stateChangeReason == WindowStateChangeReason::TOGGLING) {
+    UpdateDecorEnable(true);
+    if (static_cast<WindowStateChangeReason>(reason) == WindowStateChangeReason::KEYGUARD ||
+        static_cast<WindowStateChangeReason>(reason) == WindowStateChangeReason::TOGGLING) {
         state_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
         return WMError::WM_OK;
@@ -1348,11 +1393,19 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
             WLOGI("window is already shown id: %{public}u, raise to top", property_->GetWindowId());
             SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId(), false);
         }
-        NotifyAfterForeground(false);
+        // when show sub window, check its parent state
+        sptr<Window> parent = FindWindowById(property_->GetParentId());
+        if (parent != nullptr && parent->GetWindowState() == WindowState::STATE_HIDDEN) {
+            WLOGFD("sub window can not show, because main window hide");
+            return WMError::WM_OK;
+        } else {
+            NotifyAfterForeground(true, false);
+        }
         return WMError::WM_OK;
     }
     WMError ret = PreProcessShow(reason, withAnimation);
     if (ret != WMError::WM_OK) {
+        NotifyForegroundFailed(ret);
         return ret;
     }
     // this lock solves the multithreading problem when reading WindowState
@@ -1360,12 +1413,9 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
     ret = SingletonContainer::Get<WindowAdapter>().AddWindow(property_);
     RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
     if (ret == WMError::WM_OK) {
-        state_ = WindowState::STATE_SHOWN;
-        NotifyAfterForeground();
-    } else if (ret == WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE) {
-        NotifyForegroundInvalidWindowMode();
+        UpdateWindowStateWhenShow();
     } else {
-        NotifyForegroundFailed();
+        NotifyForegroundFailed(ret);
         WLOGFE("show window id:%{public}u errCode:%{public}d", property_->GetWindowId(), static_cast<int32_t>(ret));
     }
     return ret;
@@ -1406,8 +1456,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation)
         WLOGFE("hide errCode:%{public}d for winId:%{public}u", static_cast<int32_t>(ret), property_->GetWindowId());
         return ret;
     }
-    state_ = WindowState::STATE_HIDDEN;
-    NotifyAfterBackground();
+    UpdateWindowStateWhenHide();
     uint32_t animationFlag = property_->GetAnimationFlag();
     if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
         animationTransitionController_->AnimationForHidden();
@@ -1418,7 +1467,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation)
 
 WMError WindowImpl::MoveTo(int32_t x, int32_t y)
 {
-    WLOGI("id:%{public}d MoveTo %{public}d %{public}d",
+    WLOGFD("id:%{public}d MoveTo %{public}d %{public}d",
           property_->GetWindowId(), x, y);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1440,7 +1489,7 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y)
 
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
         WLOGFE("fullscreen window could not resize, winId: %{public}u", GetWindowId());
-        return WMError::WM_ERROR_OPER_FULLSCREEN_FAILED;
+        return WMError::WM_ERROR_INVALID_OPERATION;
     }
     property_->SetWindowSizeChangeReason(WindowSizeChangeReason::MOVE);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
@@ -1448,7 +1497,7 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y)
 
 WMError WindowImpl::Resize(uint32_t width, uint32_t height)
 {
-    WLOGI("id:%{public}d Resize %{public}u %{public}u",
+    WLOGFD("id:%{public}d Resize %{public}u %{public}u",
           property_->GetWindowId(), width, height);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1472,7 +1521,7 @@ WMError WindowImpl::Resize(uint32_t width, uint32_t height)
 
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
         WLOGFE("fullscreen window could not resize, winId: %{public}u", GetWindowId());
-        return WMError::WM_ERROR_OPER_FULLSCREEN_FAILED;
+        return WMError::WM_ERROR_INVALID_OPERATION;
     }
     property_->SetWindowSizeChangeReason(WindowSizeChangeReason::RESIZE);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
@@ -1579,7 +1628,7 @@ bool WindowImpl::IsTransparent() const
 {
     ColorParam backgroundColor;
     backgroundColor.value = GetBackgroundColor();
-    WLOGI("color: %{public}u, alpha: %{public}u", backgroundColor.value, backgroundColor.argb.alpha);
+    WLOGFD("color: %{public}u, alpha: %{public}u", backgroundColor.value, backgroundColor.argb.alpha);
     return backgroundColor.argb.alpha == 0x00; // 0x00: completely transparent
 }
 
@@ -1663,11 +1712,11 @@ std::string WindowImpl::TransferLifeCycleEventToString(LifeCycleEvent type) cons
     return event;
 }
 
-void WindowImpl::SetPrivacyMode(bool isPrivacyMode)
+WMError WindowImpl::SetPrivacyMode(bool isPrivacyMode)
 {
     property_->SetPrivacyMode(isPrivacyMode);
     surfaceNode_->SetSecurityLayer(isPrivacyMode || property_->GetSystemPrivacyMode());
-    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
+    return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
 }
 
 bool WindowImpl::IsPrivacyMode() const
@@ -1681,33 +1730,58 @@ void WindowImpl::SetSystemPrivacyMode(bool isSystemPrivacyMode)
     surfaceNode_->SetSecurityLayer(isSystemPrivacyMode || property_->GetPrivacyMode());
 }
 
-void WindowImpl::SetSnapshotSkip(bool isSkip)
+WMError WindowImpl::SetSnapshotSkip(bool isSkip)
 {
-    if (!Permission::IsSystemCalling()) {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("set snapshot skip permission denied!");
-        return;
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     surfaceNode_->SetSecurityLayer(isSkip || property_->GetSystemPrivacyMode());
+    return WMError::WM_OK;
 }
 
-void WindowImpl::DisableAppWindowDecor()
+WmErrorCode WindowImpl::RaiseToAppTop()
 {
-    if (!Permission::IsSystemCalling()) {
+    auto parentId = property_->GetParentId();
+    if (parentId == INVALID_WINDOW_ID) {
+        WLOGFE("Only the children of the main window can be raised!");
+        return WmErrorCode::WM_ERROR_INVALID_PARENT;
+    }
+
+    if (!WindowHelper::IsSubWindow(property_->GetWindowType())) {
+        WLOGFE("Must be app sub window window!");
+        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+    }
+
+    if (state_ != WindowState::STATE_SHOWN) {
+        WLOGFE("The sub window must be shown!");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+
+    return SingletonContainer::Get<WindowAdapter>().RaiseToAppTop(GetWindowId());
+}
+
+WMError WindowImpl::DisableAppWindowDecor()
+{
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("disable app window decor permission denied!");
-        return;
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     if (!WindowHelper::IsMainWindow(property_->GetWindowType())) {
         WLOGFE("window decoration is invalid on sub window");
-        return;
+        return WMError::WM_ERROR_INVALID_OPERATION;
     }
     WLOGI("disable app window decoration.");
-    isAppDecorEnable_ = false;
+    property_->SetDecorEnable(false);
+    return WMError::WM_OK;
 }
 
 bool WindowImpl::IsDecorEnable() const
 {
-    WLOGFD("get decor enable %{public}d", property_->GetDecorEnable());
-    return property_->GetDecorEnable();
+    bool enable = windowSystemConfig_.isSystemDecorEnable_ &&
+        WindowHelper::IsMainWindow(property_->GetWindowType());
+    WLOGFD("get decor enable %{public}d", enable);
+    return enable;
 }
 
 WMError WindowImpl::Maximize()
@@ -1819,78 +1893,78 @@ void WindowImpl::SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer
     inputEventConsumer_ = inputEventConsumer;
 }
 
-bool WindowImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
+WMError WindowImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
 {
     WLOGFD("Start register");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return RegisterListener(lifecycleListeners_[GetWindowId()], listener);
 }
 
-bool WindowImpl::UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
+WMError WindowImpl::UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
 {
     WLOGFD("Start unregister");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return UnregisterListener(lifecycleListeners_[GetWindowId()], listener);
 }
 
-bool WindowImpl::RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
+WMError WindowImpl::RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
 {
     WLOGFD("Start register");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return RegisterListener(windowChangeListeners_[GetWindowId()], listener);
 }
 
-bool WindowImpl::UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
+WMError WindowImpl::UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
 {
     WLOGFD("Start register");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return UnregisterListener(windowChangeListeners_[GetWindowId()], listener);
 }
 
-bool WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+WMError WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
     WLOGFD("Start register");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-    bool ret = RegisterListener(avoidAreaChangeListeners_[GetWindowId()], listener);
+    WMError ret = RegisterListener(avoidAreaChangeListeners_[GetWindowId()], listener);
     if (avoidAreaChangeListeners_[GetWindowId()].size() == 1) {
         SingletonContainer::Get<WindowAdapter>().UpdateAvoidAreaListener(property_->GetWindowId(), true);
     }
     return ret;
 }
 
-bool WindowImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+WMError WindowImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
     WLOGFD("Start unregister");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-    bool ret = UnregisterListener(avoidAreaChangeListeners_[GetWindowId()], listener);
+    WMError ret = UnregisterListener(avoidAreaChangeListeners_[GetWindowId()], listener);
     if (avoidAreaChangeListeners_[GetWindowId()].empty()) {
         SingletonContainer::Get<WindowAdapter>().UpdateAvoidAreaListener(property_->GetWindowId(), false);
     }
     return ret;
 }
 
-bool WindowImpl::RegisterDragListener(const sptr<IWindowDragListener>& listener)
+WMError WindowImpl::RegisterDragListener(const sptr<IWindowDragListener>& listener)
 {
     WLOGFD("Start register");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return RegisterListener(windowDragListeners_, listener);
 }
 
-bool WindowImpl::UnregisterDragListener(const sptr<IWindowDragListener>& listener)
+WMError WindowImpl::UnregisterDragListener(const sptr<IWindowDragListener>& listener)
 {
     WLOGFD("Start unregister");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return UnregisterListener(windowDragListeners_, listener);
 }
 
-bool WindowImpl::RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
+WMError WindowImpl::RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
 {
     WLOGFD("Start register");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return RegisterListener(displayMoveListeners_, listener);
 }
 
-bool WindowImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
+WMError WindowImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
 {
     WLOGFD("Start unregister");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -1903,39 +1977,51 @@ void WindowImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFun
     notifyNativefunc_ = std::move(func);
 }
 
-bool WindowImpl::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
+WMError WindowImpl::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
 {
     WLOGFD("Start register");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return RegisterListener(occupiedAreaChangeListeners_[GetWindowId()], listener);
 }
 
-bool WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
+WMError WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
 {
     WLOGFD("Start unregister");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return UnregisterListener(occupiedAreaChangeListeners_[GetWindowId()], listener);
 }
 
-bool WindowImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
+WMError WindowImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("register touch outside listener permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
     WLOGFD("Start register");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return RegisterListener(touchOutsideListeners_[GetWindowId()], listener);
 }
 
-bool WindowImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
+WMError WindowImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("register touch outside listener permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
     WLOGFD("Start unregister");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return UnregisterListener(touchOutsideListeners_[GetWindowId()], listener);
 }
 
-bool WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener)
+WMError WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener)
 {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("register animation transition controller permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
     if (listener == nullptr) {
         WLOGFE("listener is nullptr");
-        return false;
+        return WMError::WM_ERROR_NULLPTR;
     }
     animationTransitionController_ = listener;
     wptr<WindowProperty> propertyToken(property_);
@@ -1954,31 +2040,31 @@ bool WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTran
             }
         });
     }
-    return true;
+    return WMError::WM_OK;
 }
 
-bool WindowImpl::RegisterScreenshotListener(const sptr<IScreenshotListener>& listener)
+WMError WindowImpl::RegisterScreenshotListener(const sptr<IScreenshotListener>& listener)
 {
     WLOGFD("Start register");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return RegisterListener(screenshotListeners_[GetWindowId()], listener);
 }
 
-bool WindowImpl::UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener)
+WMError WindowImpl::UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener)
 {
     WLOGFD("Start unregister");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return UnregisterListener(screenshotListeners_[GetWindowId()], listener);
 }
 
-bool WindowImpl::RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
+WMError WindowImpl::RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
 {
     WLOGFD("Start register");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return RegisterListener(dialogTargetTouchListeners_[GetWindowId()], listener);
 }
 
-bool WindowImpl::UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
+WMError WindowImpl::UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
 {
     WLOGFD("Start unregister");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
@@ -2004,32 +2090,32 @@ void WindowImpl::UnregisterDialogDeathRecipientListener(const sptr<IDialogDeathR
 }
 
 template<typename T>
-bool WindowImpl::RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener)
+WMError WindowImpl::RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener)
 {
     if (listener == nullptr) {
         WLOGFE("listener is nullptr");
-        return false;
+        return WMError::WM_ERROR_NULLPTR;
     }
     if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
         WLOGFE("Listener already registered");
-        return true;
+        return WMError::WM_OK;
     }
     holder.emplace_back(listener);
-    return true;
+    return WMError::WM_OK;
 }
 
 template<typename T>
-bool WindowImpl::UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener)
+WMError WindowImpl::UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener)
 {
     if (listener == nullptr) {
         WLOGFE("listener could not be null");
-        return false;
+        return WMError::WM_ERROR_NULLPTR;
     }
     holder.erase(std::remove_if(holder.begin(), holder.end(),
         [listener](sptr<T> registeredListener) {
             return registeredListener == listener;
         }), holder.end());
-    return true;
+    return WMError::WM_OK;
 }
 
 void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
@@ -2102,12 +2188,9 @@ void WindowImpl::UpdateMode(WindowMode mode)
 {
     WLOGI("UpdateMode %{public}u", mode);
     property_->SetWindowMode(mode);
+    UpdateDecorEnable(true);
     UpdateTitleButtonVisibility();
-    NotifyModeChange(mode);
-    if (uiContent_ != nullptr) {
-        uiContent_->UpdateWindowMode(mode);
-        WLOGFD("notify uiContent window mode change end");
-    }
+
     // different modes have different corner radius settings
     SetWindowCornerRadiusAccordingToSystemConfig();
     // fullscreen and split have no shadow, float has shadow
@@ -2530,12 +2613,20 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
         property_->UpdatePointerEvent(pointerEvent);
     }
     int32_t action = pointerEvent->GetPointerAction();
+    if (action == MMI::PointerEvent::POINTER_ACTION_MOVE || action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        ResSchedReport::GetInstance().TrigSlide(GetType(), true);
+    }
+    if (action == MMI::PointerEvent::POINTER_ACTION_UP || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
+        action == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
+        ResSchedReport::GetInstance().TrigSlide(GetType(), false);
+    }
     if ((action == MMI::PointerEvent::POINTER_ACTION_MOVE || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) &&
         pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         HandlePointerStyle(pointerEvent);
     }
     if (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-        WLOGI("WMS process point down, id:%{public}u, action: %{public}d", GetWindowId(), action);
+        WLOGFD("WMS process point down, id:%{public}u, action: %{public}d", GetWindowId(), action);
         if (GetType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) {
             MMI::PointerEvent::PointerItem pointerItem;
             if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
@@ -2635,6 +2726,26 @@ void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& dis
         property_->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
 
+void WindowImpl::UpdateDecorEnable(bool needNotify)
+{
+    WLOGFD("Start");
+    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        bool enable = windowSystemConfig_.isSystemDecorEnable_ &&
+            WindowHelper::IsWindowModeSupported(windowSystemConfig_.decorModeSupportInfo_, GetMode());
+        WLOGFD("Decor enable: %{public}d", static_cast<int32_t>(enable));
+        property_->SetDecorEnable(enable);
+    } else {
+        property_->SetDecorEnable(false);
+    }
+    if (needNotify) {
+        if (uiContent_ != nullptr) {
+            uiContent_->UpdateWindowMode(GetMode(), property_->GetDecorEnable());
+            WLOGFD("Notify uiContent window mode change end");
+        }
+        NotifyModeChange(GetMode(), property_->GetDecorEnable());
+    }
+}
+
 void WindowImpl::UpdateWindowStateUnfrozen()
 {
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
@@ -2663,7 +2774,7 @@ void WindowImpl::UpdateWindowState(WindowState state)
                     static_cast<uint32_t>(WindowStateChangeReason::KEYGUARD));
             } else {
                 state_ = WindowState::STATE_FROZEN;
-                NotifyAfterBackground();
+                NotifyAfterBackground(false, true);
             }
             break;
         }
@@ -2698,6 +2809,97 @@ void WindowImpl::UpdateWindowState(WindowState state)
             break;
         }
     }
+}
+
+WmErrorCode WindowImpl::UpdateWindowStateWhenShow()
+{
+    state_ = WindowState::STATE_SHOWN;
+    if (WindowHelper::IsMainWindow(property_->GetWindowType()) ||
+        WindowHelper::IsSystemMainWindow(property_->GetWindowType())) {
+        // update subwindow subWindowState_ and notify subwindow shown or not
+        UpdateSubWindowStateAndNotify(GetWindowId());
+        NotifyAfterForeground();
+    } else if (GetType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
+        subWindowState_ = WindowState::STATE_SHOWN;
+        NotifyAfterForeground();
+    } else {
+        uint32_t parentId = property_->GetParentId();
+        sptr<Window> parentWindow = FindWindowById(parentId);
+        if (parentWindow == nullptr) {
+            WLOGE("parent window is null");
+            return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        }
+        if (parentWindow->GetWindowState() == WindowState::STATE_HIDDEN) {
+            // not notify user shown and update subwindowState_
+            subWindowState_ = WindowState::STATE_HIDDEN;
+        } else if (parentWindow->GetWindowState() == WindowState::STATE_SHOWN) {
+            NotifyAfterForeground();
+            subWindowState_ = WindowState::STATE_SHOWN;
+        }
+    }
+    return WmErrorCode::WM_OK;
+}
+
+WmErrorCode WindowImpl::UpdateWindowStateWhenHide()
+{
+    state_ = WindowState::STATE_HIDDEN;
+    if (WindowHelper::IsSystemMainWindow(property_->GetWindowType()) ||
+        WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        // main window need to update subwindow subWindowState_ and notify subwindow shown or not
+        UpdateSubWindowStateAndNotify(GetWindowId());
+        NotifyAfterBackground();
+    } else if (GetType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
+        subWindowState_ = WindowState::STATE_HIDDEN;
+        NotifyAfterBackground();
+    } else {
+        uint32_t parentId = property_->GetParentId();
+        sptr<Window> parentWindow = FindWindowById(parentId);
+        if (parentWindow == nullptr) {
+            WLOGE("parent window is null");
+            return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        }
+        if (subWindowState_ == WindowState::STATE_SHOWN) {
+            NotifyAfterBackground();
+        }
+        subWindowState_ = WindowState::STATE_HIDDEN;
+    }
+    return WmErrorCode::WM_OK;
+}
+
+WmErrorCode WindowImpl::UpdateSubWindowStateAndNotify(uint32_t parentId)
+{
+    sptr<WindowProperty> property = GetWindowProperty();
+    if (subWindowMap_.find(parentId) == subWindowMap_.end()) {
+        WLOGFD("main window: %{public}u has no child node", parentId);
+        return WmErrorCode::WM_OK;
+    }
+    std::vector<sptr<WindowImpl>> subWindows = subWindowMap_[parentId];
+    if (subWindows.empty()) {
+        WLOGFD("main window: %{public}u, its subWindowMap is empty", parentId);
+        return WmErrorCode::WM_OK;
+    }
+    // when main window hide and subwindow whose state is shown should hide and notify user
+    if (state_ == WindowState::STATE_HIDDEN) {
+        for (auto subwindow : subWindows) {
+            if (subwindow->GetWindowState() == WindowState::STATE_SHOWN &&
+                subwindow->subWindowState_ == WindowState::STATE_SHOWN) {
+                subwindow->NotifyAfterBackground();
+            }
+            subwindow->subWindowState_ = WindowState::STATE_HIDDEN;
+        }
+    // when main window show and subwindow whose state is shown should show and notify user
+    } else if (state_ == WindowState::STATE_SHOWN) {
+        for (auto subwindow : subWindows) {
+            if (subwindow->GetWindowState() == WindowState::STATE_SHOWN &&
+                subwindow->subWindowState_ == WindowState::STATE_HIDDEN) {
+                subwindow->NotifyAfterForeground();
+                subwindow->subWindowState_ = WindowState::STATE_SHOWN;
+            } else {
+                subwindow->subWindowState_ = WindowState::STATE_HIDDEN;
+            }
+        }
+    }
+    return WmErrorCode::WM_OK;
 }
 
 sptr<WindowProperty> WindowImpl::GetWindowProperty()
@@ -2878,12 +3080,12 @@ void WindowImpl::NotifyDisplayMoveChange(DisplayId from, DisplayId to)
     }
 }
 
-void WindowImpl::NotifyModeChange(WindowMode mode)
+void WindowImpl::NotifyModeChange(WindowMode mode, bool hasDeco)
 {
     auto windowChangeListeners = GetListeners<IWindowChangeListener>();
     for (auto& listener : windowChangeListeners) {
         if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnModeChange(mode);
+            listener.GetRefPtr()->OnModeChange(mode, hasDeco);
         }
     }
 }
@@ -3084,9 +3286,6 @@ bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)
 WMError WindowImpl::SetCornerRadius(float cornerRadius)
 {
     WLOGI("Window %{public}s set corner radius %{public}f", name_.c_str(), cornerRadius);
-    if (MathHelper::LessNotEqual(cornerRadius, 0.0)) {
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
     surfaceNode_->SetCornerRadius(cornerRadius);
     RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
@@ -3094,9 +3293,9 @@ WMError WindowImpl::SetCornerRadius(float cornerRadius)
 
 WMError WindowImpl::SetShadowRadius(float radius)
 {
-    if (!Permission::IsSystemCalling()) {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("set shadow radius permission denied!");
-        return WMError::WM_ERROR_INVALID_PERMISSION;
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     WLOGI("Window %{public}s set shadow radius %{public}f", name_.c_str(), radius);
     if (MathHelper::LessNotEqual(radius, 0.0)) {
@@ -3109,9 +3308,9 @@ WMError WindowImpl::SetShadowRadius(float radius)
 
 WMError WindowImpl::SetShadowColor(std::string color)
 {
-    if (!Permission::IsSystemCalling()) {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("set shadow color permission denied!");
-        return WMError::WM_ERROR_INVALID_PERMISSION;
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     WLOGI("Window %{public}s set shadow color %{public}s", name_.c_str(), color.c_str());
     uint32_t colorValue;
@@ -3123,33 +3322,35 @@ WMError WindowImpl::SetShadowColor(std::string color)
     return WMError::WM_OK;
 }
 
-void WindowImpl::SetShadowOffsetX(float offsetX)
+WMError WindowImpl::SetShadowOffsetX(float offsetX)
 {
-    if (!Permission::IsSystemCalling()) {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("set shadow offset x permission denied!");
-        return;
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     WLOGI("Window %{public}s set shadow offsetX %{public}f", name_.c_str(), offsetX);
     surfaceNode_->SetShadowOffsetX(offsetX);
     RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
 }
 
-void WindowImpl::SetShadowOffsetY(float offsetY)
+WMError WindowImpl::SetShadowOffsetY(float offsetY)
 {
-    if (!Permission::IsSystemCalling()) {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("set shadow offset y permission denied!");
-        return;
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     WLOGI("Window %{public}s set shadow offsetY %{public}f", name_.c_str(), offsetY);
     surfaceNode_->SetShadowOffsetY(offsetY);
     RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
 }
 
 WMError WindowImpl::SetBlur(float radius)
 {
-    if (!Permission::IsSystemCalling()) {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("set blur permission denied!");
-        return WMError::WM_ERROR_INVALID_PERMISSION;
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     WLOGI("Window %{public}s set blur radius %{public}f", name_.c_str(), radius);
     if (MathHelper::LessNotEqual(radius, 0.0)) {
@@ -3164,9 +3365,9 @@ WMError WindowImpl::SetBlur(float radius)
 
 WMError WindowImpl::SetBackdropBlur(float radius)
 {
-    if (!Permission::IsSystemCalling()) {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("set backdrop blur permission denied!");
-        return WMError::WM_ERROR_INVALID_PERMISSION;
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     WLOGI("Window %{public}s set backdrop blur radius %{public}f", name_.c_str(), radius);
     if (MathHelper::LessNotEqual(radius, 0.0)) {
@@ -3181,9 +3382,9 @@ WMError WindowImpl::SetBackdropBlur(float radius)
 
 WMError WindowImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
 {
-    if (!Permission::IsSystemCalling()) {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("set backdrop blur style permission denied!");
-        return WMError::WM_ERROR_INVALID_PERMISSION;
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     WLOGI("Window %{public}s set backdrop blur style %{public}u", name_.c_str(), blurStyle);
     if (blurStyle < WindowBlurStyle::WINDOW_BLUR_OFF || blurStyle > WindowBlurStyle::WINDOW_BLUR_THICK) {
@@ -3209,7 +3410,7 @@ WMError WindowImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
 
 WMError WindowImpl::NotifyMemoryLevel(int32_t level) const
 {
-    WLOGI("id: %{public}u, notify memory level: %{public}d", property_->GetWindowId(), level);
+    WLOGFD("id: %{public}u, notify memory level: %{public}d", property_->GetWindowId(), level);
     if (uiContent_ == nullptr) {
         WLOGFE("Window %{public}s notify memory level failed, ace is null.", name_.c_str());
         return WMError::WM_ERROR_NULLPTR;

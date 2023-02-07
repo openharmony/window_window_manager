@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,6 +90,9 @@ public:
     static NativeValue* SetPreferredOrientation(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* DisableWindowDecor(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetSnapshotSkip(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* RaiseToAppTop(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetAspectRatio(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* UnsetAspectRatio(NativeEngine* engine, NativeCallbackInfo* info);
     // colorspace, gamut
     static NativeValue* IsSupportWideGamut(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* IsWindowSupportWideGamut(NativeEngine* engine, NativeCallbackInfo* info);
@@ -153,6 +156,9 @@ private:
     NativeValue* OnIsShowing(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnIsWindowShowingSync(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetPreferredOrientation(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnRaiseToAppTop(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetAspectRatio(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnUnsetAspectRatio(NativeEngine& engine, NativeCallbackInfo& info);
 
     // colorspace, gamut
     NativeValue* OnIsSupportWideGamut(NativeEngine& engine, NativeCallbackInfo& info);
@@ -190,7 +196,7 @@ private:
     NativeValue* OnRotate(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnTranslate(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetTransitionController(NativeEngine& engine, NativeCallbackInfo& info);
-    void CreateTransitionController(NativeEngine& engine);
+    WmErrorCode CreateTransitionController(NativeEngine& engine);
 
     // window effect
     NativeValue* OnSetCornerRadius(NativeEngine& engine, NativeCallbackInfo& info);

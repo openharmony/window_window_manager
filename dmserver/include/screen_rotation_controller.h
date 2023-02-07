@@ -49,7 +49,7 @@ public:
     static void Init();
     static void HandleSensorEventInput(DeviceRotation deviceRotation);
     static bool IsScreenRotationLocked();
-    static void SetScreenRotationLocked(bool isLocked);
+    static DMError SetScreenRotationLocked(bool isLocked);
     static void SetDefaultDeviceRotationOffset(uint32_t defaultDeviceRotationOffset);
     static void ProcessOrientationSwitch(Orientation orientation);
 
@@ -57,6 +57,7 @@ public:
     static bool IsDisplayRotationVertical(Rotation rotation);
     static bool IsDisplayRotationHorizontal(Rotation rotation);
     static DeviceRotation ConvertSensorToDeviceRotation(SensorRotation sensorRotation);
+    static DisplayOrientation ConvertRotationToDisplayOrientation(Rotation rotation);
 private:
     static void HandleGravitySensorEventCallback(SensorEvent *event);
     static Rotation GetCurrentDisplayRotation();
@@ -72,7 +73,7 @@ private:
     static bool IsCurrentDisplayVertical();
     static bool IsCurrentDisplayHorizontal();
     static bool IsSensorRelatedOrientation(Orientation orientation);
-    
+
     static void ProcessRotationMapping();
     static void ProcessSwitchToAutoRotationPortrait(DeviceRotation rotation);
     static void ProcessSwitchToAutoRotationLandscape(DeviceRotation rotation);
@@ -89,6 +90,7 @@ private:
     static uint32_t defaultDeviceRotation_;
     static std::map<SensorRotation, DeviceRotation> sensorToDeviceRotationMap_;
     static std::map<DeviceRotation, Rotation> deviceToDisplayRotationMap_;
+    static std::map<Rotation, DisplayOrientation> displayToDisplayOrientationMap_;
     static Orientation lastOrientationType_;
     static Rotation currentDisplayRotation_;
     static Rotation lastSensorDecidedRotation_;

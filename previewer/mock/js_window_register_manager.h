@@ -32,9 +32,9 @@ class JsWindowRegisterManager {
 public:
     JsWindowRegisterManager();
     ~JsWindowRegisterManager();
-    void RegisterListener(sptr<Window> window, std::string type,
+    WmErrorCode RegisterListener(sptr<Window> window, std::string type,
         CaseType caseType, NativeEngine& engine, NativeValue* value);
-    void UnregisterListener(sptr<Window> window, std::string type,
+    WmErrorCode UnregisterListener(sptr<Window> window, std::string type,
         CaseType caseType, NativeValue* value);
 };
 } // namespace Rosen

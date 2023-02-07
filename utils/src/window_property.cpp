@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -557,6 +557,16 @@ void WindowProperty::GetTouchHotAreas(std::vector<Rect>& rects) const
     rects = touchHotAreas_;
 }
 
+void WindowProperty::SetAspectRatio(float ratio)
+{
+    aspectRatio_ = ratio;
+}
+
+float WindowProperty::GetAspectRatio() const
+{
+    return aspectRatio_;
+}
+
 uint32_t WindowProperty::GetAccessTokenId() const
 {
     return accessTokenId_;
@@ -756,7 +766,7 @@ bool WindowProperty::Write(Parcel& parcel, PropertyChangeAction action)
                 parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_));
             break;
         case PropertyChangeAction::ACTION_UPDATE_MODE:
-            ret = ret && parcel.WriteUint32(static_cast<uint32_t>(mode_));
+            ret = ret && parcel.WriteUint32(static_cast<uint32_t>(mode_)) && parcel.WriteBool(isDecorEnable_);
             break;
         case PropertyChangeAction::ACTION_UPDATE_FLAGS:
             ret = ret && parcel.WriteUint32(flags_);
@@ -800,6 +810,9 @@ bool WindowProperty::Write(Parcel& parcel, PropertyChangeAction action)
         case PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE:
             ret = ret && parcel.WriteBool(isPrivacyMode_);
             break;
+        case PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO:
+            ret = ret && parcel.WriteFloat(aspectRatio_);
+            break;
         default:
             break;
     }
@@ -819,6 +832,7 @@ void WindowProperty::Read(Parcel& parcel, PropertyChangeAction action)
             break;
         case PropertyChangeAction::ACTION_UPDATE_MODE:
             SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
+            SetDecorEnable(parcel.ReadBool());
             break;
         case PropertyChangeAction::ACTION_UPDATE_FLAGS:
             SetWindowFlags(parcel.ReadUint32());
@@ -862,6 +876,9 @@ void WindowProperty::Read(Parcel& parcel, PropertyChangeAction action)
         }
         case PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE:
             SetPrivacyMode(parcel.ReadBool());
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO:
+            SetAspectRatio(parcel.ReadFloat());
             break;
         default:
             break;

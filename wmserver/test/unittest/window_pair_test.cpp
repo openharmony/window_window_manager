@@ -232,9 +232,9 @@ HWTEST_F(WindowPairTest, GetSplitRatio01, Function | SmallTest | Level2)
 HWTEST_F(WindowPairTest, IsForbidDockSliceMove01, Function | SmallTest | Level2)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
-    windowPair->status_ = WindowPairStatus::STATUS_PAIRED_DONE;
+    windowPair->status_ = WindowPairStatus::PAIRED_DONE;
     ASSERT_EQ(true, windowPair->IsForbidDockSliceMove());
-    windowPair->status_ = WindowPairStatus::STATUS_EMPTY;
+    windowPair->status_ = WindowPairStatus::EMPTY;
     ASSERT_EQ(false, windowPair->IsForbidDockSliceMove());
 }
 
@@ -246,7 +246,7 @@ HWTEST_F(WindowPairTest, IsForbidDockSliceMove01, Function | SmallTest | Level2)
 HWTEST_F(WindowPairTest, IsForbidDockSliceMove02, Function | SmallTest | Level2)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
-    windowPair->status_ = WindowPairStatus::STATUS_PAIRED_DONE;
+    windowPair->status_ = WindowPairStatus::PAIRED_DONE;
     sptr<WindowProperty> property1 = new WindowProperty();
     property1->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     windowPair->primary_ = new WindowNode(property1);
@@ -262,7 +262,7 @@ HWTEST_F(WindowPairTest, IsForbidDockSliceMove02, Function | SmallTest | Level2)
 HWTEST_F(WindowPairTest, IsForbidDockSliceMove03, Function | SmallTest | Level2)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
-    windowPair->status_ = WindowPairStatus::STATUS_PAIRED_DONE;
+    windowPair->status_ = WindowPairStatus::PAIRED_DONE;
     sptr<WindowProperty> property1 = new WindowProperty();
     property1->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     windowPair->primary_ = nullptr;
@@ -278,7 +278,7 @@ HWTEST_F(WindowPairTest, IsForbidDockSliceMove03, Function | SmallTest | Level2)
 HWTEST_F(WindowPairTest, IsForbidDockSliceMove04, Function | SmallTest | Level2)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
-    windowPair->status_ = WindowPairStatus::STATUS_PAIRED_DONE;
+    windowPair->status_ = WindowPairStatus::PAIRED_DONE;
     sptr<WindowProperty> property1 = new WindowProperty();
     property1->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE));
     windowPair->primary_ = new WindowNode(property1);
@@ -294,7 +294,7 @@ HWTEST_F(WindowPairTest, IsForbidDockSliceMove04, Function | SmallTest | Level2)
 HWTEST_F(WindowPairTest, IsForbidDockSliceMove05, Function | SmallTest | Level2)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
-    windowPair->status_ = WindowPairStatus::STATUS_PAIRED_DONE;
+    windowPair->status_ = WindowPairStatus::PAIRED_DONE;
     sptr<WindowProperty> property1 = new WindowProperty();
     property1->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     windowPair->primary_ = new WindowNode(property1);
@@ -310,7 +310,7 @@ HWTEST_F(WindowPairTest, IsForbidDockSliceMove05, Function | SmallTest | Level2)
 HWTEST_F(WindowPairTest, IsForbidDockSliceMove06, Function | SmallTest | Level2)
 {
     sptr<WindowPair> windowPair = new WindowPair(0);
-    windowPair->status_ = WindowPairStatus::STATUS_PAIRED_DONE;
+    windowPair->status_ = WindowPairStatus::PAIRED_DONE;
     sptr<WindowProperty> property1 = new WindowProperty();
     property1->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     sptr<WindowProperty> property2 = new WindowProperty();
@@ -608,10 +608,10 @@ HWTEST_F(WindowPairTest, GetPairedWindows01, Function | SmallTest | Level2)
     windowPair->secondary_ = new WindowNode(property1);
 
     // define status_
-    windowPair->status_ = WindowPairStatus::STATUS_EMPTY;
+    windowPair->status_ = WindowPairStatus::EMPTY;
 
     ASSERT_EQ(0, windowPair->GetPairedWindows().size());
-    windowPair->status_ = WindowPairStatus::STATUS_PAIRED_DONE;
+    windowPair->status_ = WindowPairStatus::PAIRED_DONE;
     ASSERT_EQ(2, windowPair->GetPairedWindows().size());
     ASSERT_EQ(windowPair->secondary_, windowPair->GetPairedWindows().at(1));
     ASSERT_EQ(windowPair->primary_, windowPair->GetPairedWindows().at(0));
@@ -632,7 +632,7 @@ HWTEST_F(WindowPairTest, Clear01, Function | SmallTest | Level2)
     windowPair->divider_ = new WindowNode(property0);
     windowPair->Clear();
     ASSERT_EQ(nullptr, windowPair->divider_);
-    ASSERT_EQ(WindowPairStatus::STATUS_EMPTY, windowPair->status_);
+    ASSERT_EQ(WindowPairStatus::EMPTY, windowPair->status_);
 }
 
 /**
@@ -651,10 +651,10 @@ HWTEST_F(WindowPairTest, UpdateWindowPairStatus01, Function | SmallTest | Level2
     windowPair->divider_ = new WindowNode(property0);
 
     // define status_
-    windowPair->status_ = WindowPairStatus::STATUS_SINGLE_PRIMARY;
+    windowPair->status_ = WindowPairStatus::SINGLE_PRIMARY;
 
     windowPair->UpdateWindowPairStatus();
-    ASSERT_EQ(WindowPairStatus::STATUS_PAIRED_DONE, windowPair->status_);
+    ASSERT_EQ(WindowPairStatus::PAIRED_DONE, windowPair->status_);
 }
 
 /**
@@ -673,10 +673,10 @@ HWTEST_F(WindowPairTest, UpdateWindowPairStatus02, Function | SmallTest | Level2
     windowPair->divider_ = nullptr;
 
     // define status_
-    windowPair->status_ = WindowPairStatus::STATUS_SINGLE_PRIMARY;
+    windowPair->status_ = WindowPairStatus::SINGLE_PRIMARY;
 
     windowPair->UpdateWindowPairStatus();
-    ASSERT_EQ(WindowPairStatus::STATUS_PAIRING, windowPair->status_);
+    ASSERT_EQ(WindowPairStatus::PRIMARY_AND_SECONDARY, windowPair->status_);
 }
 
 /**
@@ -695,10 +695,10 @@ HWTEST_F(WindowPairTest, UpdateWindowPairStatus03, Function | SmallTest | Level2
     windowPair->divider_ = new WindowNode(property0);
 
     // define status_
-    windowPair->status_ = WindowPairStatus::STATUS_PAIRED_DONE;
+    windowPair->status_ = WindowPairStatus::PAIRED_DONE;
 
     windowPair->UpdateWindowPairStatus();
-    ASSERT_EQ(WindowPairStatus::STATUS_EMPTY, windowPair->status_);
+    ASSERT_EQ(WindowPairStatus::EMPTY, windowPair->status_);
     ASSERT_EQ(nullptr, windowPair->primary_);
     ASSERT_EQ(nullptr, windowPair->secondary_);
     ASSERT_EQ(nullptr, windowPair->divider_);
@@ -720,12 +720,12 @@ HWTEST_F(WindowPairTest, UpdateWindowPairStatus04, Function | SmallTest | Level2
     windowPair->divider_ = new WindowNode(property0);
 
     // define status_
-    windowPair->status_ = WindowPairStatus::STATUS_EMPTY;
+    windowPair->status_ = WindowPairStatus::EMPTY;
 
     sptr<WindowNode> node1 = windowPair->secondary_;
     sptr<WindowNode> node2 = windowPair->divider_;
     windowPair->UpdateWindowPairStatus();
-    ASSERT_EQ(WindowPairStatus::STATUS_SINGLE_SECONDARY, windowPair->status_);
+    ASSERT_EQ(WindowPairStatus::SECONDARY_AND_DIVIDER, windowPair->status_);
     ASSERT_EQ(nullptr, windowPair->primary_);
     ASSERT_EQ(node1, windowPair->secondary_);
     ASSERT_EQ(node2, windowPair->divider_);
@@ -747,11 +747,11 @@ HWTEST_F(WindowPairTest, UpdateWindowPairStatus05, Function | SmallTest | Level2
     windowPair->divider_ = new WindowNode(property0);
 
     // define status_
-    windowPair->status_ = WindowPairStatus::STATUS_SINGLE_PRIMARY;
+    windowPair->status_ = WindowPairStatus::SINGLE_PRIMARY;
 
     sptr<WindowNode> node1 = windowPair->divider_;
     windowPair->UpdateWindowPairStatus();
-    ASSERT_EQ(WindowPairStatus::STATUS_EMPTY, windowPair->status_);
+    ASSERT_EQ(WindowPairStatus::SINGLE_SPLIT, windowPair->status_);
     ASSERT_EQ(nullptr, windowPair->primary_);
     ASSERT_EQ(nullptr, windowPair->secondary_);
     ASSERT_EQ(node1, windowPair->divider_);
@@ -842,7 +842,7 @@ HWTEST_F(WindowPairTest, HandlePairedNodesChange01, Function | SmallTest | Level
     windowPair->HandlePairedNodesChange();
     ASSERT_EQ(nullptr, windowPair->primary_);
     ASSERT_EQ(nullptr, windowPair->secondary_);
-    ASSERT_EQ(WindowPairStatus::STATUS_EMPTY, windowPair->status_);
+    ASSERT_EQ(WindowPairStatus::EMPTY, windowPair->status_);
 }
 
 /**
@@ -866,7 +866,7 @@ HWTEST_F(WindowPairTest, HandlePairedNodesChange02, Function | SmallTest | Level
     windowPair->HandlePairedNodesChange();
     ASSERT_EQ(tmp_node, windowPair->primary_);
     ASSERT_EQ(nullptr, windowPair->secondary_);
-    ASSERT_EQ(WindowPairStatus::STATUS_SINGLE_PRIMARY, windowPair->status_);
+    ASSERT_EQ(WindowPairStatus::SINGLE_PRIMARY, windowPair->status_);
 }
 
 /**
@@ -887,7 +887,7 @@ HWTEST_F(WindowPairTest, HandlePairedNodesChange03, Function | SmallTest | Level
     windowPair->HandlePairedNodesChange();
     ASSERT_EQ(nullptr, windowPair->primary_);
     ASSERT_EQ(nullptr, windowPair->secondary_);
-    ASSERT_EQ(WindowPairStatus::STATUS_EMPTY, windowPair->status_);
+    ASSERT_EQ(WindowPairStatus::EMPTY, windowPair->status_);
 }
 
 /**
@@ -913,7 +913,7 @@ HWTEST_F(WindowPairTest, HandlePairedNodesChange04, Function | SmallTest | Level
     windowPair->HandlePairedNodesChange();
     ASSERT_EQ(nullptr, windowPair->primary_);
     ASSERT_EQ(tmp_node, windowPair->secondary_);
-    ASSERT_EQ(WindowPairStatus::STATUS_SINGLE_SECONDARY, windowPair->status_);
+    ASSERT_EQ(WindowPairStatus::SINGLE_SECONDARY, windowPair->status_);
 }
 
 /**
@@ -974,7 +974,7 @@ HWTEST_F(WindowPairTest, HandleRemoveWindow02, Function | SmallTest | Level2)
     windowPair->primary_ = nullptr;
     windowPair->secondary_ = nullptr;
     windowPair->divider_ = nullptr;
-    windowPair->status_ = WindowPairStatus::STATUS_PAIRING;
+    windowPair->status_ = WindowPairStatus::PRIMARY_AND_SECONDARY;
 
     IWindowMocker* w = new IWindowMocker;
     sptr<IWindow> window(w);
@@ -1008,7 +1008,7 @@ HWTEST_F(WindowPairTest, TakePairSnapshot01, Function | SmallTest | Level2)
     // define primary_, secondary_, status_
     windowPair->primary_ = node1;
     windowPair->secondary_ = node2;
-    windowPair->status_ = WindowPairStatus::STATUS_PAIRED_DONE;
+    windowPair->status_ = WindowPairStatus::PAIRED_DONE;
 
     ASSERT_EQ(true, windowPair->TakePairSnapshot());
     windowPair->primary_ = nullptr;
@@ -1016,7 +1016,7 @@ HWTEST_F(WindowPairTest, TakePairSnapshot01, Function | SmallTest | Level2)
     windowPair->primary_ = node1;
     windowPair->secondary_ = nullptr;
     ASSERT_EQ(false, windowPair->TakePairSnapshot());
-    windowPair->status_ = WindowPairStatus::STATUS_PAIRING;
+    windowPair->status_ = WindowPairStatus::PRIMARY_AND_SECONDARY;
     ASSERT_EQ(false, windowPair->TakePairSnapshot());
 }
 
@@ -1050,7 +1050,7 @@ HWTEST_F(WindowPairTest, ClearPairSnapshot01, Function | SmallTest | Level2)
     windowPair->primary_ = node1;
     windowPair->secondary_ = nullptr;
     ASSERT_EQ(false, windowPair->TakePairSnapshot());
-    windowPair->status_ = WindowPairStatus::STATUS_PAIRING;
+    windowPair->status_ = WindowPairStatus::PRIMARY_AND_SECONDARY;
     ASSERT_EQ(false, windowPair->TakePairSnapshot());
 }
 /**

@@ -30,6 +30,7 @@ public:
         MAP,
         BOOL,
         STRING,
+        STRINGS,
         INTS,
         FLOATS,
         POSITIVE_FLOATS,
@@ -43,6 +44,7 @@ public:
             std::string stringValue_;
             std::vector<int>* intsValue_;
             std::vector<float>* floatsValue_;
+            std::vector<std::string>* stringsValue_;
         };
         ConfigItem() {}
         ~ConfigItem()
@@ -75,6 +77,10 @@ public:
                     delete floatsValue_;
                     floatsValue_ = nullptr;
                     break;
+                case ValueType::STRINGS:
+                    delete stringsValue_;
+                    stringsValue_ = nullptr;
+                    break;
                 default:
                     break;
             }
@@ -101,6 +107,9 @@ public:
                     break;
                 case ValueType::FLOATS:
                     floatsValue_ = new std::vector<float>(*value.floatsValue_);
+                    break;
+                case ValueType::STRINGS:
+                    stringsValue_ = new std::vector<std::string>(*value.stringsValue_);
                     break;
                 default:
                     break;
@@ -136,6 +145,10 @@ public:
                 case ValueType::FLOATS:
                     floatsValue_ = value.floatsValue_;
                     value.floatsValue_ = nullptr;
+                    break;
+                case ValueType::STRINGS:
+                    stringsValue_ = value.stringsValue_;
+                    value.stringsValue_ = nullptr;
                     break;
                 default:
                     break;
@@ -188,6 +201,13 @@ public:
             type_ = ValueType::FLOATS;
             floatsValue_ = new std::vector<float>(value);
         }
+        // set strings value
+        void SetValue(const std::vector<std::string>& value)
+        {
+            ClearValue();
+            type_ = ValueType::STRINGS;
+            stringsValue_ = new std::vector<std::string>(value);
+        }
         bool IsInts() const
         {
             return type_ == ValueType::INTS;
@@ -199,6 +219,10 @@ public:
         bool IsString() const
         {
             return type_ == ValueType::STRING;
+        }
+        bool IsStrings() const
+        {
+            return type_ == ValueType::STRINGS;
         }
         bool IsBool() const
         {

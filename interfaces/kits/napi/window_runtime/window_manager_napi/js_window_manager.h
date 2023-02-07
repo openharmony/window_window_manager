@@ -49,7 +49,7 @@ private:
     static NativeValue* OnFindWindowSync(NativeEngine& engine, NativeCallbackInfo& info);
     static NativeValue* OnMinimizeAll(NativeEngine& engine, NativeCallbackInfo& info);
     static NativeValue* OnToggleShownStateForAllAppWindows(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnRegisterWindowMangerCallback(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnRegisterWindowManagerCallback(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnUnregisterWindowManagerCallback(NativeEngine& engine, NativeCallbackInfo& info);
     static NativeValue* OnGetTopWindow(NativeEngine& engine, NativeCallbackInfo& info);
     static NativeValue* OnGetLastWindow(NativeEngine& engine, NativeCallbackInfo& info);

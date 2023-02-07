@@ -29,13 +29,15 @@ namespace Rosen {
  * @brief Enumerates the status of window pair.
  */
 enum class WindowPairStatus : uint32_t {
-    STATUS_EMPTY,
-    STATUS_SINGLE_PRIMARY,
-    STATUS_SINGLE_SECONDARY,
-    STATUS_PAIRING,
-    STATUS_PAIRED_DONE
+    EMPTY,
+    SINGLE_PRIMARY,
+    SINGLE_SECONDARY,
+    SINGLE_SPLIT,
+    PRIMARY_AND_SECONDARY,
+    PRIMARY_AND_DIVIDER,
+    SECONDARY_AND_DIVIDER,
+    PAIRED_DONE
 };
-
 /**
  * @brief Enumerates the message of split event.
  */
@@ -82,12 +84,23 @@ public:
     float GetSplitRatio() const;
 
     /**
-     * @brief Get whether the window pair is paired..
+     * @brief Get whether the window pair is paired.
      *
      * @return the pair state of window pair
      */
     bool IsPaired() const;
 
+    /**
+     * @brief Get whether the window status_ is valid.
+     */
+    bool IsAbnormalStatus() const;
+
+    /**
+     * @brief Check pair status support recent update
+     *
+     * @param node trigger window node
+     */
+    bool StatusSupprtedWhenRecentUpdate(sptr<WindowNode>& node);
     /**
      * @brief Handle changes in the state of the window pair
      *
@@ -273,7 +286,7 @@ private:
     sptr<WindowNode> primary_;
     sptr<WindowNode> secondary_;
     sptr<WindowNode> divider_;
-    WindowPairStatus status_ = {WindowPairStatus::STATUS_EMPTY};
+    WindowPairStatus status_ = {WindowPairStatus::EMPTY};
     Rect dividerRect_ {0, 0, 0, 0};
     std::vector<int32_t> exitSplitPoints_; // 2 element, first element < second element
     std::vector<int32_t> splitRatioPoints_;

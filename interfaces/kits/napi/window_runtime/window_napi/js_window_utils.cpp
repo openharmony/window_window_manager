@@ -232,6 +232,33 @@ NativeValue* WindowStageEventTypeInit(NativeEngine* engine)
     return objValue;
 }
 
+NativeValue* WindowEventTypeInit(NativeEngine* engine)
+{
+    WLOGFD("WindowEventTypeInit");
+
+    if (engine == nullptr) {
+        WLOGFE("Engine is nullptr");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("WINDOW_SHOWN", CreateJsValue(*engine,
+        static_cast<int32_t>(LifeCycleEventType::FOREGROUND)));
+    object->SetProperty("WINDOW_ACTIVE", CreateJsValue(*engine,
+        static_cast<int32_t>(LifeCycleEventType::ACTIVE)));
+    object->SetProperty("WINDOW_INACTIVE", CreateJsValue(*engine,
+        static_cast<int32_t>(LifeCycleEventType::INACTIVE)));
+    object->SetProperty("WINDOW_HIDDEN", CreateJsValue(*engine,
+        static_cast<int32_t>(LifeCycleEventType::BACKGROUND)));
+    return objValue;
+}
+
 NativeValue* WindowLayoutModeInit(NativeEngine* engine)
 {
     WLOGFD("WindowLayoutModeInit");
@@ -344,6 +371,8 @@ NativeValue* WindowErrorCodeInit(NativeEngine* engine)
     }
     object->SetProperty("WM_ERROR_NO_PERMISSION", CreateJsValue(*engine,
         static_cast<int32_t>(WmErrorCode::WM_ERROR_NO_PERMISSION)));
+    object->SetProperty("WM_ERROR_NOT_SYSTEM_APP", CreateJsValue(*engine,
+        static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP)));
     object->SetProperty("WM_ERROR_INVALID_PARAM", CreateJsValue(*engine,
         static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
     object->SetProperty("WM_ERROR_DEVICE_NOT_SUPPORT", CreateJsValue(*engine,

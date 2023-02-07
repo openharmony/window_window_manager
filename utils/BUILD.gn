@@ -36,6 +36,7 @@ ohos_shared_library("libwmutil") {
     "src/display_info.cpp",
     "src/perform_reporter.cpp",
     "src/permission.cpp",
+    "src/persistent_storage.cpp",
     "src/screen_group_info.cpp",
     "src/screen_info.cpp",
     "src/screenshot_info.cpp",
@@ -67,6 +68,7 @@ ohos_shared_library("libwmutil") {
   external_deps = [
     "ability_runtime:ability_manager",
     "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "graphic_standard:surface",
@@ -76,6 +78,7 @@ ohos_shared_library("libwmutil") {
     "input:libmmi-client",
     "ipc:ipc_core",
     "multimedia_image_framework:image_native",
+    "preferences:native_preferences",
     "samgr:samgr_proxy",
   ]
   part_name = "window_manager"

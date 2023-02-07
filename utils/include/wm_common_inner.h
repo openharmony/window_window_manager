@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,7 @@ enum class WindowUpdateReason : uint32_t {
     UPDATE_RECT,
     UPDATE_FLAGS,
     UPDATE_TYPE,
+    UPDATE_ASPECT_RATIO,
     NEED_SWITCH_CASCADE_END,
     UPDATE_OTHER_PROPS,
     UPDATE_TRANSFORM,
@@ -79,6 +80,7 @@ enum class PropertyChangeAction : uint32_t {
     ACTION_UPDATE_TRANSFORM_PROPERTY = 1 << 13,
     ACTION_UPDATE_ANIMATION_FLAG = 1 << 14,
     ACTION_UPDATE_PRIVACY_MODE = 1 << 15,
+    ACTION_UPDATE_ASPECT_RATIO = 1 << 16,
 };
 
 struct ModeChangeHotZonesConfig {
@@ -114,13 +116,15 @@ struct AppWindowEffectConfig {
 
 struct SystemConfig : public Parcelable {
     bool isSystemDecorEnable_ = true;
+    uint32_t decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     bool isStretchable_ = false;
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     AppWindowEffectConfig effectConfig_;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
-        if (!parcel.WriteBool(isSystemDecorEnable_) || !parcel.WriteBool(isStretchable_)) {
+        if (!parcel.WriteBool(isSystemDecorEnable_) || !parcel.WriteBool(isStretchable_) ||
+            !parcel.WriteUint32(decorModeSupportInfo_)) {
             return false;
         }
 
@@ -157,6 +161,7 @@ struct SystemConfig : public Parcelable {
         SystemConfig* config = new SystemConfig();
         config->isSystemDecorEnable_ = parcel.ReadBool();
         config->isStretchable_ = parcel.ReadBool();
+        config->decorModeSupportInfo_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
         config->effectConfig_.fullScreenCornerRadius_ = parcel.ReadFloat();
         config->effectConfig_.splitCornerRadius_ = parcel.ReadFloat();
@@ -188,6 +193,11 @@ struct WindowSizeLimits {
         uint32_t minWidth, uint32_t minHeight, float maxRatio, float minRatio)
         : maxWidth_(maxWidth), maxHeight_(maxHeight),
         minWidth_(minWidth), minHeight_(minHeight), maxRatio_(maxRatio), minRatio_(minRatio) {}
+
+    bool IsEmpty() const
+    {
+        return (maxWidth_ == 0 || minWidth_ == 0 || maxHeight_ == 0 || minHeight_ == 0);
+    }
 };
 
 struct ModeChangeHotZones {
@@ -217,6 +227,12 @@ enum class TraceTaskId : int32_t {
     REMOTE_ANIMATION,
     CONNECT_EXTENSION,
     REMOTE_ANIMATION_HOME,
+    START_WINDOW_ANIMATION,
+};
+
+enum class PersistentStorageType : uint32_t {
+    UKNOWN = 0,
+    ASPECT_RATIO,
 };
 
 struct MoveDragProperty : public Parcelable {

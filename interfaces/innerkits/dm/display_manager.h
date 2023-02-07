@@ -66,12 +66,12 @@ public:
     bool Freeze(std::vector<DisplayId> displayIds);
     bool Unfreeze(std::vector<DisplayId> displayIds);
 
-    bool RegisterDisplayListener(sptr<IDisplayListener> listener);
-    bool UnregisterDisplayListener(sptr<IDisplayListener> listener);
-    bool RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
-    bool UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
-    bool RegisterScreenshotListener(sptr<IScreenshotListener> listener);
-    bool UnregisterScreenshotListener(sptr<IScreenshotListener> listener);
+    DMError RegisterDisplayListener(sptr<IDisplayListener> listener);
+    DMError UnregisterDisplayListener(sptr<IDisplayListener> listener);
+    DMError RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
+    DMError UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
+    DMError RegisterScreenshotListener(sptr<IScreenshotListener> listener);
+    DMError UnregisterScreenshotListener(sptr<IScreenshotListener> listener);
 
     constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 3840; // max resolution, 4K
 

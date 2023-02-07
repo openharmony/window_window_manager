@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,7 +98,7 @@ protected:
      * methods for floating window limitSize and position
      */
     DockWindowShowState GetDockWindowShowState(DisplayId displayId, Rect& dockWinRect) const;
-    void LimitFloatingWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect) const;
+    void LimitFloatingWindowSize(const sptr<WindowNode>& node, Rect& winRect) const;
     void LimitMainFloatingWindowPosition(const sptr<WindowNode>& node, Rect& winRect) const;
     void UpdateFloatingWindowSizeForStretchableWindow(const sptr<WindowNode>& node,
         const Rect& displayRect, Rect& winRect) const;
@@ -107,6 +107,7 @@ protected:
     void LimitWindowPositionWhenInitRectOrMove(const sptr<WindowNode>& node, Rect& winRect) const;
     void LimitWindowPositionWhenDrag(const sptr<WindowNode>& node, Rect& winRect) const;
     void FixWindowSizeByRatioIfDragBeyondLimitRegion(const sptr<WindowNode>& node, Rect& winRect);
+    void FixWindowRectWhenDrag(const sptr<WindowNode>& node, const Rect& oriWinRect, Rect& winRect) const;
 
     /*
      * methods for update node latest information, include:

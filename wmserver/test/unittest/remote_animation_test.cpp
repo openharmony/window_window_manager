@@ -218,7 +218,7 @@ HWTEST_F(RemoteAnimationTest, CheckTransition01, Function | SmallTest | Level2)
     EXPECT_EQ(false, RemoteAnimation::CheckTransition(transitionInfo_, srcNode, transitionInfo_, srcNode));
     srcNode->surfaceNode_ = CreateRSSurfaceNode(0); // leash is null, but surfaceNode is not
     EXPECT_EQ(true, RemoteAnimation::CheckTransition(transitionInfo_, srcNode, transitionInfo_, srcNode));
-    srcNode = StartingWindow::CreateWindowNode(transitionInfo_, 0);// leash and app surfaceNode both not nullptr
+    srcNode = StartingWindow::CreateWindowNode(transitionInfo_, 0); // leash and app surfaceNode both not nullptr
     ASSERT_NE(nullptr, srcNode);
     sptr<WindowNode> dstNode = StartingWindow::CreateWindowNode(transitionInfo_, 1);
     ASSERT_NE(nullptr, dstNode);
@@ -321,6 +321,8 @@ HWTEST_F(RemoteAnimationTest, CreateWindowAnimationTarget01, Function | SmallTes
     srcNode->GetWindowProperty()->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
     EXPECT_EQ(nullptr, RemoteAnimation::CreateWindowAnimationTarget(transitionInfo_, srcNode)); // no surfaceNode
     EXPECT_NE(nullptr, RemoteAnimation::CreateWindowAnimationTarget(transitionInfo_, node_));
+    node_->startingWinSurfaceNode_ = nullptr;
+    EXPECT_NE(nullptr, RemoteAnimation::CreateWindowAnimationTarget(transitionInfo_, node_)); // start win null
 }
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,6 +57,7 @@ public:
     void SetEntireWindowTouchHotArea(const Rect& rect);
     void SetEntireWindowPointerHotArea(const Rect& rect);
     void SetWindowRect(const Rect& rect);
+    void SetDecorEnable(bool decorEnable);
     void SetDecoStatus(bool decoStatus);
     void SetRequestRect(const Rect& rect);
     void SetWindowProperty(const sptr<WindowProperty>& property);
@@ -89,6 +90,7 @@ public:
     std::shared_ptr<Media::PixelMap> GetSnapshot();
     Transform GetZoomTransform() const;
     void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn);
+    void SetAspectRatio(float ratio);
 
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;
@@ -125,6 +127,7 @@ public:
     uint32_t GetAccessTokenId() const;
     WindowSizeLimits GetWindowSizeLimits() const;
     WindowSizeLimits GetWindowUpdatedSizeLimits() const;
+    float GetAspectRatio() const;
 
     bool EnableDefaultAnimation(bool animationPlayed);
     sptr<WindowNode> parent_;

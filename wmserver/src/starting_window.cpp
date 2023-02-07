@@ -19,6 +19,7 @@
 #include <display_manager_service_inner.h>
 #include <hitrace_meter.h>
 #include <transaction/rs_transaction.h>
+#include "color_parser.h"
 #include "remote_animation.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
@@ -33,6 +34,9 @@ namespace {
 
 std::recursive_mutex StartingWindow::mutex_;
 WindowMode StartingWindow::defaultMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+wptr<WindowRoot> StartingWindow::windowRoot_;
+AppWindowEffectConfig StartingWindow::windowSystemEffectConfig_;
+bool StartingWindow::transAnimateEnable_ = true;
 
 sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInfo>& info, uint32_t winId)
 {
@@ -117,6 +121,8 @@ WMError StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
         WLOGFE("no starting Window SurfaceNode!");
         return WMError::WM_ERROR_NULLPTR;
     }
+    // set window effect
+    SetStartingWindowEffect(node);
     if (pixelMap == nullptr) {
         SurfaceDraw::DrawColor(node->startingWinSurfaceNode_, rect.width_, rect.height_, bkgColor);
         return WMError::WM_OK;
@@ -124,6 +130,49 @@ WMError StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
 
     WLOGFD("draw background in sperate");
     SurfaceDraw::DrawImageRect(node->startingWinSurfaceNode_, rect, pixelMap, bkgColor);
+    return WMError::WM_OK;
+}
+
+WMError StartingWindow::SetStartingWindowAnimation(wptr<WindowNode> weak)
+{
+    auto weakNode = weak.promote();
+    if (weakNode == nullptr || !weakNode->startingWinSurfaceNode_) {
+        WLOGFE("windowNode or startingWinSurfaceNode_ is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    StartAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::START_WINDOW_ANIMATION),
+        "StartingWindowAnimate(%u)", weakNode->GetWindowId());
+    weakNode->startingWinSurfaceNode_->SetAlpha(1.0f);
+    auto execute = [weak]() {
+        auto weakNode = weak.promote();
+        if (weakNode == nullptr) {
+            WLOGFE("windowNode is nullptr");
+            return;
+        }
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "StartingWindow:ExecuteAnimate(%d)",
+            weakNode->GetWindowId());
+        weakNode->startingWinSurfaceNode_->SetAlpha(0.0f);
+    };
+
+    auto finish = [weak]() {
+        auto weakNode = weak.promote();
+        if (weakNode == nullptr || weakNode->leashWinSurfaceNode_ == nullptr) {
+            WLOGFE("windowNode or leashWinSurfaceNode_ is nullptr");
+            return;
+        }
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "StartingWindow:AnimateFinish(%d)",
+            weakNode->GetWindowId());
+        WLOGFI("StartingWindow::Replace surfaceNode, id: %{public}u", weakNode->GetWindowId());
+        weakNode->leashWinSurfaceNode_->RemoveChild(weakNode->startingWinSurfaceNode_);
+        weakNode->startingWinSurfaceNode_ = nullptr;
+        RSTransaction::FlushImplicitTransaction();
+        FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::START_WINDOW_ANIMATION),
+            "StartingWindowAnimate(%u)", weakNode->GetWindowId());
+    };
+    const RSAnimationTimingProtocol timingProtocol(300); // 300: animation time
+    RSNode::Animate(timingProtocol, RSAnimationTimingCurve::LINEAR, execute, finish);
+    RSTransaction::FlushImplicitTransaction();
+    FinishTrace(HITRACE_TAG_WINDOW_MANAGER);
     return WMError::WM_OK;
 }
 
@@ -157,12 +206,17 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
                 WLOGFE("windowNode or leashWinSurfaceNode_ is nullptr");
                 return;
             }
-            WLOGI("StartingWindow::Replace surfaceNode, id: %{public}u", weakNode->GetWindowId());
-            weakNode->leashWinSurfaceNode_->RemoveChild(weakNode->startingWinSurfaceNode_);
+            WLOGI("StartingWindow::FirstFrameCallback come, id: %{public}u", weakNode->GetWindowId());
+            if (transAnimateEnable_) {
+                SetStartingWindowAnimation(weakNode);
+            } else {
+                weakNode->leashWinSurfaceNode_->RemoveChild(weakNode->startingWinSurfaceNode_);
+                weakNode->startingWinSurfaceNode_ = nullptr;
+                RSTransaction::FlushImplicitTransaction();
+                WLOGFI("StartingWindow::Replace surfaceNode, id: %{public}u", weakNode->GetWindowId());
+            }
             WindowInnerManager::GetInstance().CompleteFirstFrameDrawing(weakNode);
-            RSTransaction::FlushImplicitTransaction();
             weakNode->firstFrameAvailable_ = true;
-            weakNode->startingWinSurfaceNode_ = nullptr;
         });
     };
     node->surfaceNode_->SetBufferAvailableCallback(firstFrameCompleteCallback);
@@ -242,6 +296,95 @@ void StartingWindow::AddNodeOnRSTree(sptr<WindowNode>& node, const AnimationConf
 void StartingWindow::SetDefaultWindowMode(WindowMode defaultMode)
 {
     defaultMode_ = defaultMode;
+}
+
+void StartingWindow::SetWindowSystemEffectConfig(AppWindowEffectConfig config)
+{
+    windowSystemEffectConfig_ = config;
+}
+
+void StartingWindow::SetWindowRoot(const sptr<WindowRoot>& windowRoot)
+{
+    windowRoot_ = windowRoot;
+}
+
+WMError StartingWindow::SetCornerRadius(const sptr<WindowNode>& node)
+{
+    auto winRoot = windowRoot_.promote();
+    if (winRoot == nullptr) {
+        WLOGFE("window root is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    auto vpr = winRoot->GetVirtualPixelRatio(node->GetDisplayId());
+    auto fullscreenRadius = windowSystemEffectConfig_.fullScreenCornerRadius_ * vpr;
+    auto splitRadius = windowSystemEffectConfig_.splitCornerRadius_ * vpr;
+    auto floatRadius = windowSystemEffectConfig_.floatCornerRadius_ * vpr;
+
+    WLOGFD("[WEffect] [id:%{public}d] mode: %{public}u, vpr: %{public}f, [%{public}f, %{public}f, %{public}f]",
+        node->GetWindowId(), node->GetWindowMode(), vpr, fullscreenRadius, splitRadius, floatRadius);
+    if (MathHelper::NearZero(fullscreenRadius) && MathHelper::NearZero(splitRadius) &&
+        MathHelper::NearZero(floatRadius)) {
+        return WMError::WM_DO_NOTHING;
+    }
+    if (WindowHelper::IsFullScreenWindow(node->GetWindowMode())) {
+        node->startingWinSurfaceNode_->SetCornerRadius(fullscreenRadius);
+    } else if (WindowHelper::IsSplitWindowMode(node->GetWindowMode())) {
+        node->startingWinSurfaceNode_->SetCornerRadius(splitRadius);
+    } else if (WindowHelper::IsFloatingWindow(node->GetWindowMode())) {
+        node->startingWinSurfaceNode_->SetCornerRadius(floatRadius);
+    }
+    return WMError::WM_OK;
+}
+
+WMError StartingWindow::SetWindowShadow(const sptr<WindowNode>& node, bool isFocus)
+{
+    auto winRoot = windowRoot_.promote();
+    if (winRoot == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    if (!WindowHelper::IsFloatingWindow(node->GetWindowMode())) {
+        WLOGFW("only float mode can set shadow, id: %{public}u!", node->GetWindowId());
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    auto& shadow = isFocus ? windowSystemEffectConfig_.focusedShadow_ :
+        windowSystemEffectConfig_.unfocusedShadow_;
+
+    if (MathHelper::NearZero(shadow.elevation_)) {
+        WLOGFD("set shadow elevation 0.0");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    uint32_t colorValue;
+    if (!ColorParser::Parse(shadow.color_, colorValue)) {
+        WLOGFE("[WEffect]invalid color string: %{public}s", shadow.color_.c_str());
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    WLOGFI("[WEffect][id:%{public}d] focused: %{public}u, [%{public}f, %{public}s, %{public}f, %{public}f, %{public}f]",
+        node->GetWindowId(), isFocus, shadow.elevation_, shadow.color_.c_str(),
+        shadow.offsetX_, shadow.offsetY_, shadow.alpha_);
+    auto vpr = winRoot->GetVirtualPixelRatio(node->GetDisplayId());
+    node->startingWinSurfaceNode_->SetShadowElevation(shadow.elevation_ * vpr);
+    node->startingWinSurfaceNode_->SetShadowColor(colorValue);
+    node->startingWinSurfaceNode_->SetShadowOffsetX(shadow.offsetX_);
+    node->startingWinSurfaceNode_->SetShadowOffsetY(shadow.offsetY_);
+    node->startingWinSurfaceNode_->SetShadowAlpha(shadow.alpha_);
+    return WMError::WM_OK;
+}
+
+WMError StartingWindow::SetStartingWindowEffect(const sptr<WindowNode>& node, bool isFocus)
+{
+    auto winRoot = windowRoot_.promote();
+    if ((!node) || (!node->startingWinSurfaceNode_)) {
+        WLOGFE("window root or node or startingWinSurfaceNode_ is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    SetCornerRadius(node);
+    SetWindowShadow(node, isFocus);
+    return WMError::WM_OK;
 }
 } // Rosen
 } // OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,6 +80,8 @@ public:
     WMError NotifyWindowClientPointUp(uint32_t windowId, const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     WMError ChangeMouseStyle(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty);
     void RecoverDefaultMouseStyle(uint32_t windowId);
+    WmErrorCode RaiseToAppTop(uint32_t windowId);
+    WMError SetAspectRatio(uint32_t windowId, float ratio);
 
 private:
     uint32_t GenWindowId();
@@ -110,6 +112,8 @@ private:
     void NotifyAfterAddWindow(sptr<WindowNode>& node);
     void RelayoutKeyboard(const sptr<WindowNode>& node);
     bool CheckParentWindowValid(const sptr<WindowProperty>& property);
+
+    void UpdateFocusIfNeededWhenRaiseWindow(const sptr<WindowNode>& node);
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,12 +27,14 @@
 
 #include "display_manager_service_inner.h"
 #include "minimize_app.h"
+#include "persistent_storage.h"
 #include "remote_animation.h"
 #include "starting_window.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
 #include "wm_common.h"
+#include "wm_math.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -243,7 +245,7 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     node->abilityToken_ = token;
     node->dialogTargetToken_ = token;
     UpdateWindowAnimation(node);
-    WLOGI("createWindow id:%{public}u", windowId);
+    WLOGFD("createWindow id:%{public}u", windowId);
     // test
     node->stateMachine_.SetWindowId(windowId);
     node->stateMachine_.SetWindowType(property->GetWindowType());
@@ -289,9 +291,8 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         property->SetDecoStatus(true);
     }
     node->GetWindowProperty()->CopyFrom(property);
-    // Need 'check permission'
-    // Need 'adjust property'
     UpdateWindowAnimation(node);
+
     WMError res = windowRoot_->AddWindowNode(property->GetParentId(), node);
     if (res != WMError::WM_OK) {
         MinimizeApp::ClearNodesWithReason(MinimizeReason::OTHER_WINDOW);
@@ -321,6 +322,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     } else if (WindowHelper::IsMainWindow(node->GetWindowType())) {
         MinimizeApp::ExecuteMinimizeTargetReasons(~MinimizeReason::OTHER_WINDOW);
     }
+
     return WMError::WM_OK;
 }
 
@@ -973,7 +975,7 @@ WMError WindowController::ProcessPointDown(uint32_t windowId, bool isPointDown)
         }
     }
 
-    WLOGI("process point down, windowId: %{public}u", windowId);
+    WLOGFD("process point down, windowId: %{public}u", windowId);
     WMError zOrderRes = windowRoot_->RaiseZOrderForAppWindow(node);
     WMError focusRes = windowRoot_->RequestFocus(windowId);
     windowRoot_->RequestActiveWindow(windowId);
@@ -1063,6 +1065,53 @@ void WindowController::RecoverDefaultMouseStyle(uint32_t windowId)
     };
     WindowInnerManager::GetInstance().PostTask(task, "RecoverDefaultMouseStyle");
 }
+WmErrorCode WindowController::RaiseToAppTop(uint32_t windowId)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFW("could not find window");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+
+    auto parentNode = node->parent_;
+    if (parentNode == nullptr) {
+        WLOGFW("could not find parent");
+        return WmErrorCode::WM_ERROR_INVALID_PARENT;
+    }
+
+    WMError zOrderRes = windowRoot_->RaiseZOrderForAppWindow(node);
+    if (zOrderRes != WMError::WM_OK) {
+        WLOGFE("raise subwindow zorder faile with error code [%{public}d]", zOrderRes);
+        return  WmErrorCode::WM_ERROR_STAGE_ABNORMALLY;
+    }
+
+    UpdateFocusIfNeededWhenRaiseWindow(node);
+    FlushWindowInfo(windowId);
+    return WmErrorCode::WM_OK;
+}
+
+void WindowController::UpdateFocusIfNeededWhenRaiseWindow(const sptr<WindowNode>& node)
+{
+    auto property = node->GetWindowProperty();
+    if (!property->GetFocusable()) {
+        return;
+    }
+    uint32_t windowId = node->GetWindowId();
+    sptr<WindowNode> focusWindow = nullptr;
+    WMError res = GetFocusWindowNode(node->GetDisplayId(), focusWindow);
+    if (res != WMError::WM_OK || focusWindow == nullptr) {
+        return;
+    }
+    if (node->parent_->GetWindowId() == focusWindow->GetWindowId() ||
+        node->parent_->GetWindowId() == focusWindow->GetParentId()) {
+        windowRoot_->RequestFocus(windowId);
+        windowRoot_->RequestActiveWindow(windowId);
+        windowRoot_->FocusFaultDetection();
+
+        accessibilityConnection_->NotifyAccessibilityWindowInfo(windowRoot_->GetWindowNode(windowId),
+            WindowUpdateType::WINDOW_UPDATE_FOCUSED);
+    }
+}
 
 WMError WindowController::NotifyWindowClientPointUp(uint32_t windowId,
     const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -1125,7 +1174,7 @@ void WindowController::UpdateWindowAnimation(const sptr<WindowNode>& node)
 
     uint32_t animationFlag = node->GetWindowProperty()->GetAnimationFlag();
     uint32_t windowId = node->GetWindowProperty()->GetWindowId();
-    WLOGI("Id: %{public}u, anim_Flag: %{public}u", windowId, animationFlag);
+    WLOGFD("Id: %{public}u, anim_Flag: %{public}u", windowId, animationFlag);
     std::shared_ptr<const RSTransitionEffect> effect = nullptr;
     if (animationFlag == static_cast<uint32_t>(WindowAnimation::DEFAULT)) {
         effect = RSTransitionEffect::Create()
@@ -1199,6 +1248,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_MODE: {
+            node->SetDecorEnable(property->GetDecorEnable());
             ret = SetWindowMode(windowId, property->GetWindowMode());
             break;
         }
@@ -1279,10 +1329,53 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             node->GetWindowProperty()->SetPrivacyMode(property->GetPrivacyMode());
             break;
         }
+        case PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO: {
+            ret = SetAspectRatio(windowId, property->GetAspectRatio());
+            break;
+        }
         default:
             break;
     }
     return ret;
+}
+
+WMError WindowController::SetAspectRatio(uint32_t windowId, float ratio)
+{
+    WLOGI("SetAspectRatio, windowId: %{public}u, %{public}f", windowId, ratio);
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return WMError::WM_OK;
+    }
+    if (!WindowHelper::IsAspectRatioSatisfiedWithSizeLimits(node->GetWindowUpdatedSizeLimits(), ratio,
+        windowRoot_->GetVirtualPixelRatio(node->GetDisplayId()))) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    node->SetAspectRatio(ratio);
+
+    // perserve aspect ratio
+    std::vector<std::string> nameVector;
+    if (node->abilityInfo_.abilityName_.size() > 0) {
+        nameVector = WindowHelper::Split(node->abilityInfo_.abilityName_, ".");
+    }
+    std::string keyName = nameVector.empty() ? node->abilityInfo_.bundleName_ :
+                                               node->abilityInfo_.bundleName_ + "." + nameVector.back();
+    if (MathHelper::NearZero(ratio)) { // If ratio is 0.0, need to unset aspect and delete storage
+        if (PersistentStorage::HasKey(keyName, PersistentStorageType::ASPECT_RATIO)) {
+            PersistentStorage::Delete(keyName, PersistentStorageType::ASPECT_RATIO);
+        }
+        return WMError::WM_OK;
+    }
+    PersistentStorage::Insert(keyName, ratio, PersistentStorageType::ASPECT_RATIO);
+
+    WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_ASPECT_RATIO);
+    if (res != WMError::WM_OK) {
+        return res;
+    }
+    FlushWindowInfo(windowId);
+    return WMError::WM_OK;
 }
 
 WMError WindowController::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const

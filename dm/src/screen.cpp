@@ -120,7 +120,7 @@ bool Screen::IsReal() const
     return pImpl_->GetScreenInfo()->GetType() == ScreenType::REAL;
 }
 
-bool Screen::SetOrientation(Orientation orientation) const
+DMError Screen::SetOrientation(Orientation orientation) const
 {
     WLOGFD("set orientation %{public}u", orientation);
     return SingletonContainer::Get<ScreenManagerAdapter>().SetOrientation(GetId(), orientation);
@@ -173,11 +173,11 @@ std::vector<sptr<SupportedScreenModes>> Screen::GetSupportedModes() const
     return pImpl_->GetScreenInfo()->GetModes();
 }
 
-bool Screen::SetScreenActiveMode(uint32_t modeId)
+DMError Screen::SetScreenActiveMode(uint32_t modeId)
 {
     ScreenId screenId = GetId();
     if (modeId >= GetSupportedModes().size()) {
-        return false;
+        return DMError::DM_ERROR_INVALID_PARAM;
     }
     return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenActiveMode(screenId, modeId);
 }
@@ -197,12 +197,12 @@ void Screen::UpdateScreenInfo() const
     UpdateScreenInfo(screenInfo);
 }
 
-bool Screen::SetDensityDpi(uint32_t dpi) const
+DMError Screen::SetDensityDpi(uint32_t dpi) const
 {
     if (dpi > DOT_PER_INCH_MAXIMUM_VALUE || dpi < DOT_PER_INCH_MINIMUM_VALUE) {
         WLOGE("Invalid input dpi value, valid input range for DPI is %{public}u ~ %{public}u",
             DOT_PER_INCH_MINIMUM_VALUE, DOT_PER_INCH_MAXIMUM_VALUE);
-        return false;
+        return DMError::DM_ERROR_INVALID_PARAM;
     }
     // Calculate display density, Density = Dpi / 160.
     float density = static_cast<float>(dpi) / 160; // 160 is the coefficient between density and dpi.
@@ -211,6 +211,7 @@ bool Screen::SetDensityDpi(uint32_t dpi) const
 
 sptr<ScreenInfo> Screen::GetScreenInfo() const
 {
+    UpdateScreenInfo();
     return pImpl_->GetScreenInfo();
 }
 } // namespace OHOS::Rosen
