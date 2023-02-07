@@ -49,7 +49,7 @@ public:
     static void Init();
     static void HandleSensorEventInput(DeviceRotation deviceRotation);
     static bool IsScreenRotationLocked();
-    static void SetScreenRotationLocked(bool isLocked);
+    static DMError SetScreenRotationLocked(bool isLocked);
     static void SetDefaultDeviceRotationOffset(uint32_t defaultDeviceRotationOffset);
     static void ProcessOrientationSwitch(Orientation orientation);
 
@@ -73,7 +73,7 @@ private:
     static bool IsCurrentDisplayVertical();
     static bool IsCurrentDisplayHorizontal();
     static bool IsSensorRelatedOrientation(Orientation orientation);
-    
+
     static void ProcessRotationMapping();
     static void ProcessSwitchToAutoRotationPortrait(DeviceRotation rotation);
     static void ProcessSwitchToAutoRotationLandscape(DeviceRotation rotation);

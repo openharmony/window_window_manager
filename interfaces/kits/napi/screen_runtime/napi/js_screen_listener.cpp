@@ -19,7 +19,7 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "JsScreenListener"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsScreenListener"};
 }
 inline uint32_t SCREEN_DISCONNECT_TYPE = 0;
 inline uint32_t SCREEN_CONNECT_TYPE = 1;

@@ -190,8 +190,8 @@ HWTEST_F(WindowManagerServiceTest, RegisterWindowManagerAgent01, Function | Smal
 {
     sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT;
-    ASSERT_EQ(false, wms->RegisterWindowManagerAgent(type, windowManagerAgent));
-    ASSERT_EQ(false, wms->UnregisterWindowManagerAgent(type, windowManagerAgent));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->RegisterWindowManagerAgent(type, windowManagerAgent));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->UnregisterWindowManagerAgent(type, windowManagerAgent));
 }
 /**
  * @tc.name: SetWindowAnimationController

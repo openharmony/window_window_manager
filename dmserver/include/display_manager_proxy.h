@@ -40,10 +40,10 @@ public:
         const sptr<IRemoteObject>& displayManagerAgent) override;
     DMError DestroyVirtualScreen(ScreenId screenId) override;
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) override;
-    bool SetOrientation(ScreenId screenId, Orientation orientation) override;
+    DMError SetOrientation(ScreenId screenId, Orientation orientation) override;
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId) override;
-    bool IsScreenRotationLocked() override;
-    void SetScreenRotationLocked(bool isLocked) override;
+    DMError IsScreenRotationLocked(bool& isLocked) override;
+    DMError SetScreenRotationLocked(bool isLocked) override;
 
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts) override;
@@ -53,9 +53,9 @@ public:
     DMError SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap) override;
     DMError SetScreenColorTransform(ScreenId screenId) override;
 
-    bool RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+    DMError RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
-    bool UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+    DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
     bool WakeUpBegin(PowerStateChangeReason reason) override;
     bool WakeUpEnd() override;
@@ -69,14 +69,14 @@ public:
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
     bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze) override;
-    ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) override;
+    DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, ScreenId& screenGroupId) override;
     sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
     sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
-    std::vector<sptr<ScreenInfo>> GetAllScreenInfos() override;
-    ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) override;
+    DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screens) override;
+    DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint, ScreenId& screenGroupId) override;
     void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
-    bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
-    bool SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
+    DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
+    DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
 
 private:
     static inline BrokerDelegator<DisplayManagerProxy> delegator_;

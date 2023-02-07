@@ -34,7 +34,7 @@ public:
     MOCK_METHOD3(GetAvoidAreaByType, WMError(uint32_t windowId, AvoidAreaType type, AvoidArea& avoidArea));
     MOCK_METHOD2(BindDialogTarget, WMError(uint32_t& windowId, sptr<IRemoteObject> targetToken));
     MOCK_METHOD2(UpdateRsTree, WMError(uint32_t windowId, bool isAdd));
-    MOCK_METHOD1(MinimizeAllAppWindows, void(DisplayId displayId));
+    MOCK_METHOD1(MinimizeAllAppWindows, WMError(DisplayId displayId));
     MOCK_METHOD0(ToggleShownStateForAllAppWindows, WMError());
     MOCK_METHOD2(ProcessPointDown, void(uint32_t windowId, bool isPointDown));
     MOCK_METHOD1(ProcessPointUp, void(uint32_t windowId));
@@ -43,9 +43,9 @@ public:
     MOCK_METHOD2(GetModeChangeHotZones, WMError(DisplayId displayId, ModeChangeHotZones& hotZones));
     MOCK_METHOD3(NotifyServerReadyToMoveOrDrag, void(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty));
-    MOCK_METHOD2(RegisterWindowManagerAgent, bool(WindowManagerAgentType type,
+    MOCK_METHOD2(RegisterWindowManagerAgent, WMError(WindowManagerAgentType type,
                                                 const sptr<IWindowManagerAgent>& windowManagerAgent));
-    MOCK_METHOD2(UnregisterWindowManagerAgent, bool(WindowManagerAgentType type,
+    MOCK_METHOD2(UnregisterWindowManagerAgent, WMError(WindowManagerAgentType type,
                                                 const sptr<IWindowManagerAgent>& windowManagerAgent));
     MOCK_METHOD1(GetVisibilityWindowInfo, WMError(std::vector<sptr<WindowVisibilityInfo>>& infos));
     MOCK_METHOD1(GetAccessibilityWindowInfo, WMError(std::vector<sptr<AccessibilityWindowInfo>>& infos));

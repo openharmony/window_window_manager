@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -209,18 +209,18 @@ HWTEST_F(DisplayManagerProxyTest, SetOrientation01, Function | SmallTest | Level
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     auto result1 = proxy1.SetOrientation(0, Orientation::VERTICAL);
-    ASSERT_EQ(false, result1);
+    ASSERT_TRUE(DMError::DM_OK != result1);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
 
     auto result2 = proxy2.SetOrientation(0, Orientation::VERTICAL);
-    ASSERT_EQ(false, result2);
+    ASSERT_TRUE(DMError::DM_OK == result2);
 
     remoteMocker->sendRequestResult_ = 1;
     auto result3 = proxy2.SetOrientation(0, Orientation::VERTICAL);
-    ASSERT_EQ(false, result3);
+    ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED, result3);
 }
 /**
  * @tc.name: GetDisplaySnapshot01

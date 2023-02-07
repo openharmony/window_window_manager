@@ -306,7 +306,7 @@ void WindowRoot::AddSurfaceNodeIdWindowNodePair(uint64_t surfaceNodeId, sptr<Win
 
 void WindowRoot::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
 {
-    if (!Permission::IsSystemCalling()) {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("Get Visible Window Permission Denied");
     }
     VisibleData& VisibleWindow = lastOcclusionData_->GetVisibleData();

@@ -20,6 +20,7 @@
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
 #include "screen_manager.cpp"
+#include "window_manager_hilog.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -136,10 +137,11 @@ HWTEST_F(ScreenManagerTest, MakeExpand_001, Function | SmallTest | Level1)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), CreateVirtualScreen(_, _)).Times(1).WillOnce(Return(virtualScreenId));
     EXPECT_CALL(m->Mock(), DestroyVirtualScreen(_)).Times(1).WillOnce(Return(DMError::DM_OK));
-    EXPECT_CALL(m->Mock(), MakeExpand(_, _)).Times(1).WillOnce(Return(0));
+    EXPECT_CALL(m->Mock(), MakeExpand(_, _, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     ScreenId vScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
     std::vector<ExpandOption> options = {{validId, 0, 0}, {vScreenId, defaultWidth_, 0}};
-    ScreenId expansionId = ScreenManager::GetInstance().MakeExpand(options);
+    ScreenId expansionId;
+    ScreenManager::GetInstance().MakeExpand(options, expansionId);
     ASSERT_EQ(expansionId, validId);
     DMError ret = ScreenManager::GetInstance().DestroyVirtualScreen(vScreenId);
     ASSERT_EQ(vScreenId, virtualScreenId);
@@ -155,7 +157,8 @@ HWTEST_F(ScreenManagerTest, MakeExpand_002, Function | SmallTest | Level1)
 {
     ScreenId invalidId = SCREEN_ID_INVALID;
     std::vector<ExpandOption> options = {};
-    ScreenId expansionId = ScreenManager::GetInstance().MakeExpand(options);
+    ScreenId expansionId = SCREEN_ID_INVALID;
+    ScreenManager::GetInstance().MakeExpand(options, expansionId);
     ASSERT_EQ(expansionId, invalidId);
 }
 
@@ -214,7 +217,7 @@ HWTEST_F(ScreenManagerTest, SetSurface02, Function | SmallTest | Level1)
 HWTEST_F(ScreenManagerTest, OnScreenConnect01, Function | SmallTest | Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     sptr<ScreenManager::IScreenListener> listener = new DmMockScreenListener();
     ScreenManager::GetInstance().RegisterScreenListener(listener);
     auto screenManagerListener = ScreenManager::GetInstance().pImpl_->screenManagerListener_;
@@ -239,7 +242,7 @@ HWTEST_F(ScreenManagerTest, OnScreenConnect01, Function | SmallTest | Level1)
 HWTEST_F(ScreenManagerTest, OnScreenDisconnect01, Function | SmallTest | Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     sptr<ScreenManager::IScreenListener> listener = new DmMockScreenListener();
     ScreenManager::GetInstance().RegisterScreenListener(listener);
     auto screenManagerListener = ScreenManager::GetInstance().pImpl_->screenManagerListener_;
@@ -259,7 +262,7 @@ HWTEST_F(ScreenManagerTest, OnScreenDisconnect01, Function | SmallTest | Level1)
 HWTEST_F(ScreenManagerTest, OnScreenChange01, Function | SmallTest | Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     sptr<ScreenManager::IScreenListener> listener = new DmMockScreenListener();
     ScreenManager::GetInstance().RegisterScreenListener(listener);
     auto screenManagerListener = ScreenManager::GetInstance().pImpl_->screenManagerListener_;
@@ -280,7 +283,7 @@ HWTEST_F(ScreenManagerTest, OnScreenChange01, Function | SmallTest | Level1)
 HWTEST_F(ScreenManagerTest, OnScreenGroupChange01, Function | SmallTest | Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     sptr<ScreenManager::IScreenListener> listener = new DmMockScreenListener();
     ScreenManager::GetInstance().RegisterScreenListener(listener);
     auto screenManagerListener = ScreenManager::GetInstance().pImpl_->screenManagerListener_;
@@ -344,12 +347,14 @@ HWTEST_F(ScreenManagerTest, IsScreenRotationLocked, Function | SmallTest | Level
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
-    EXPECT_CALL(m->Mock(), IsScreenRotationLocked()).Times(1).WillOnce(Return(true));
-    auto result = ScreenManager::GetInstance().IsScreenRotationLocked();
-    ASSERT_EQ(true, result);
-    EXPECT_CALL(m->Mock(), IsScreenRotationLocked()).Times(1).WillOnce(Return(false));
-    result = ScreenManager::GetInstance().IsScreenRotationLocked();
-    ASSERT_EQ(false, result);
+    EXPECT_CALL(m->Mock(), IsScreenRotationLocked(_)).Times(1).WillOnce(Return(DMError::DM_OK));
+    bool result;
+    DMError ret;
+    ret = ScreenManager::GetInstance().IsScreenRotationLocked(result);
+    ASSERT_EQ(DMError::DM_OK, ret);
+    EXPECT_CALL(m->Mock(), IsScreenRotationLocked(_)).Times(1).WillOnce(Return(DMError::DM_ERROR_NULLPTR));
+    ret = ScreenManager::GetInstance().IsScreenRotationLocked(result);
+    ASSERT_TRUE(DMError::DM_OK != ret);
 }
 
 /**
@@ -363,30 +368,30 @@ HWTEST_F(ScreenManagerTest, RegisterScreenGroupListener, Function | SmallTest | 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     auto& screenManager = ScreenManager::GetInstance();
     auto result = screenManager.RegisterScreenGroupListener(nullptr);
-    ASSERT_EQ(false, result);
+    ASSERT_TRUE(DMError::DM_OK != result);
 
     sptr<ScreenManager::IScreenGroupListener> listener = new (std::nothrow)TestScreenGroupListener();
     if (screenManager.pImpl_->screenManagerListener_ == nullptr) {
-        EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(true));
+        EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     }
     result = screenManager.RegisterScreenGroupListener(listener);
-    ASSERT_EQ(true, result);
+    ASSERT_EQ(DMError::DM_OK, result);
 
     result = screenManager.UnregisterScreenGroupListener(nullptr);
-    ASSERT_EQ(false, result);
+    ASSERT_TRUE(DMError::DM_OK != result);
 
     auto sizeScreen = screenManager.pImpl_->screenListeners_.size();
     auto sizeScreenGroup = screenManager.pImpl_->screenGroupListeners_.size();
     auto sizeVirtualScreen = screenManager.pImpl_->virtualScreenGroupListeners_.size();
     if (sizeScreenGroup > 1) {
         result = screenManager.UnregisterScreenGroupListener(listener);
-        ASSERT_EQ(true, result);
+        ASSERT_EQ(DMError::DM_OK, result);
     } else if (sizeScreenGroup == 1) {
         if (sizeScreen == 0 && sizeVirtualScreen == 0) {
-            EXPECT_CALL(m->Mock(), UnregisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(true));
+            EXPECT_CALL(m->Mock(), UnregisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
         }
         result = screenManager.UnregisterScreenGroupListener(listener);
-        ASSERT_EQ(true, result);
+        ASSERT_EQ(DMError::DM_OK, result);
     }
 }
 /**
@@ -400,17 +405,17 @@ HWTEST_F(ScreenManagerTest, RegisterVirtualScreenGroupListener, Function | Small
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     auto& screenManager = ScreenManager::GetInstance();
     auto result = screenManager.RegisterVirtualScreenGroupListener(nullptr);
-    ASSERT_EQ(false, result);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, result);
 
     sptr<ScreenManager::IVirtualScreenGroupListener> listener = new (std::nothrow)TestIVirtualScreenGroupListener();
     if (screenManager.pImpl_->screenManagerListener_ == nullptr) {
-        EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(true));
+        EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     }
     result = screenManager.RegisterVirtualScreenGroupListener(listener);
-    ASSERT_EQ(true, result);
+    ASSERT_EQ(DMError::DM_OK, result);
 
     result = screenManager.UnregisterVirtualScreenGroupListener(nullptr);
-    ASSERT_EQ(false, result);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, result);
 
     auto sizeScreen = screenManager.pImpl_->screenListeners_.size();
     auto sizeScreenGroup = screenManager.pImpl_->screenGroupListeners_.size();
@@ -418,13 +423,13 @@ HWTEST_F(ScreenManagerTest, RegisterVirtualScreenGroupListener, Function | Small
 
     if (sizeVirtualScreen > 1) {
         result = screenManager.UnregisterVirtualScreenGroupListener(listener);
-        ASSERT_EQ(true, result);
+        ASSERT_EQ(DMError::DM_OK, result);
     } else if (sizeVirtualScreen == 1) {
         if (sizeScreen == 0 && sizeScreenGroup == 0) {
-            EXPECT_CALL(m->Mock(), UnregisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(true));
+            EXPECT_CALL(m->Mock(), UnregisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
         }
         result = screenManager.UnregisterVirtualScreenGroupListener(listener);
-        ASSERT_EQ(true, result);
+        ASSERT_EQ(DMError::DM_OK, result);
     }
 }
 }

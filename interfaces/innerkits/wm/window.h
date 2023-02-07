@@ -151,6 +151,7 @@ public:
     virtual void OnDialogDeathRecipient() const = 0;
 };
 
+static WMError DefaultCreateErrCode = WMError::WM_OK;
 class Window : public RefBase {
 public:
     /**
@@ -162,7 +163,8 @@ public:
      * @return sptr<Window> If create window success,return window instance;Otherwise, return nullptr
      */
     static sptr<Window> Create(const std::string& windowName,
-        sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
+        sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context = nullptr,
+        WMError& errCode = DefaultCreateErrCode);
     /**
      * @brief find window by windowName
      *
@@ -252,8 +254,8 @@ public:
      * @return WMError
      */
     virtual WMError SetWindowMode(WindowMode mode) = 0;
-    virtual void SetAlpha(float alpha) = 0;
-    virtual void SetTransform(const Transform& trans) = 0;
+    virtual WMError SetAlpha(float alpha) = 0;
+    virtual WMError SetTransform(const Transform& trans) = 0;
     virtual const Transform& GetTransform() const = 0;
     virtual WMError AddWindowFlag(WindowFlag flag) = 0;
     virtual WMError RemoveWindowFlag(WindowFlag flag) = 0;
@@ -328,19 +330,19 @@ public:
     virtual WMError SetBrightness(float brightness) = 0;
     virtual float GetBrightness() const = 0;
     virtual WMError SetCallingWindow(uint32_t windowId) = 0;
-    virtual void SetPrivacyMode(bool isPrivacyMode) = 0;
+    virtual WMError SetPrivacyMode(bool isPrivacyMode) = 0;
     virtual bool IsPrivacyMode() const = 0;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) = 0;
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) = 0;
-    virtual void SetSnapshotSkip(bool isSkip) = 0;
     virtual WmErrorCode RaiseToAppTop() = 0;
+    virtual WMError SetSnapshotSkip(bool isSkip) = 0;
 
     // window effect
     virtual WMError SetCornerRadius(float cornerRadius) = 0;
     virtual WMError SetShadowRadius(float radius) = 0;
     virtual WMError SetShadowColor(std::string color) = 0;
-    virtual void SetShadowOffsetX(float offsetX) = 0;
-    virtual void SetShadowOffsetY(float offsetY) = 0;
+    virtual WMError SetShadowOffsetX(float offsetX) = 0;
+    virtual WMError SetShadowOffsetY(float offsetY) = 0;
     virtual WMError SetBlur(float radius) = 0;
     virtual WMError SetBackdropBlur(float radius) = 0;
     virtual WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) = 0;
@@ -358,26 +360,26 @@ public:
      *
      * @param listener
      */
-    virtual bool RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
-    virtual bool RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) = 0;
-    virtual bool UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
-    virtual bool UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) = 0;
-    virtual bool RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
-    virtual bool UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
-    virtual bool RegisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
-    virtual bool UnregisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
-    virtual bool RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
-    virtual bool UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
+    virtual WMError RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
+    virtual WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
+    virtual WMError RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) = 0;
+    virtual WMError UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) = 0;
+    virtual WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
+    virtual WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
+    virtual WMError RegisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
+    virtual WMError UnregisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
+    virtual WMError RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
+    virtual WMError UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) = 0;
-    virtual bool RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
-    virtual bool UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
-    virtual bool RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) = 0;
-    virtual bool UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) = 0;
-    virtual bool RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener) = 0;
-    virtual bool RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) = 0;
-    virtual bool UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) = 0;
-    virtual bool RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) = 0;
-    virtual bool UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) = 0;
+    virtual WMError RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
+    virtual WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
+    virtual WMError RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) = 0;
+    virtual WMError UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) = 0;
+    virtual WMError RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener) = 0;
+    virtual WMError RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) = 0;
+    virtual WMError UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) = 0;
+    virtual WMError RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) = 0;
+    virtual WMError UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) = 0;
     virtual void RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) = 0;
     virtual void UnregisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) = 0;
     virtual void NotifyTouchDialogTarget() = 0;
@@ -411,7 +413,7 @@ public:
      * @brief disable main window decoration. It must be callled before loadContent.
      *
      */
-    virtual void DisableAppWindowDecor() = 0;
+    virtual WMError DisableAppWindowDecor() = 0;
     /**
      * @brief return window decoration is enabled. It is called by ACE
      *

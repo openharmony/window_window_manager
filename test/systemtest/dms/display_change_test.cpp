@@ -91,7 +91,7 @@ void DisplayChangeTest::SetUpTestCase()
     defaultScreen_ = ScreenManager::GetInstance().GetScreenById(screenId);
     ASSERT_NE(nullptr, defaultScreen_);
 
-    ASSERT_EQ(true, DisplayManager::GetInstance().RegisterDisplayListener(listener_));
+    ASSERT_EQ(DMError::DM_OK, DisplayManager::GetInstance().RegisterDisplayListener(listener_));
 }
 
 void DisplayChangeTest::TearDownTestCase()
@@ -175,8 +175,8 @@ namespace {
 HWTEST_F(DisplayChangeTest, RegisterDisplayChangeListener01, Function | SmallTest | Level2)
 {
     sptr<DisplayChangeEventListener> listener = new DisplayChangeEventListener();
-    bool ret = DisplayManager::GetInstance().RegisterDisplayListener(listener);
-    ASSERT_EQ(true, ret);
+    DMError ret = DisplayManager::GetInstance().RegisterDisplayListener(listener);
+    ASSERT_EQ(DMError::DM_OK, ret);
 }
 
 /**
@@ -186,8 +186,8 @@ HWTEST_F(DisplayChangeTest, RegisterDisplayChangeListener01, Function | SmallTes
  */
 HWTEST_F(DisplayChangeTest, RegisterDisplayChangeListener02, Function | SmallTest | Level2)
 {
-    bool ret = DisplayManager::GetInstance().RegisterDisplayListener(nullptr);
-    ASSERT_EQ(false, ret);
+    DMError ret = DisplayManager::GetInstance().RegisterDisplayListener(nullptr);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -199,8 +199,8 @@ HWTEST_F(DisplayChangeTest, UnregisterDisplayChangeListener01, Function | SmallT
 {
     sptr<DisplayChangeEventListener> listener = new DisplayChangeEventListener();
     DisplayManager::GetInstance().RegisterDisplayListener(listener);
-    bool ret = DisplayManager::GetInstance().UnregisterDisplayListener(listener);
-    ASSERT_EQ(true, ret);
+    DMError ret = DisplayManager::GetInstance().UnregisterDisplayListener(listener);
+    ASSERT_EQ(DMError::DM_OK, ret);
 }
 
 /**
@@ -210,8 +210,8 @@ HWTEST_F(DisplayChangeTest, UnregisterDisplayChangeListener01, Function | SmallT
  */
 HWTEST_F(DisplayChangeTest, UnregisterDisplayChangeListener02, Function | SmallTest | Level2)
 {
-    bool ret = DisplayManager::GetInstance().UnregisterDisplayListener(nullptr);
-    ASSERT_EQ(false, ret);
+    DMError ret = DisplayManager::GetInstance().UnregisterDisplayListener(nullptr);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -222,8 +222,8 @@ HWTEST_F(DisplayChangeTest, UnregisterDisplayChangeListener02, Function | SmallT
 HWTEST_F(DisplayChangeTest, UnregisterDisplayChangeListener03, Function | SmallTest | Level2)
 {
     sptr<DisplayChangeEventListener> listener = new DisplayChangeEventListener();
-    bool ret = DisplayManager::GetInstance().UnregisterDisplayListener(listener);
-    ASSERT_EQ(false, ret);
+    DMError ret = DisplayManager::GetInstance().UnregisterDisplayListener(listener);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -334,7 +334,7 @@ HWTEST_F(DisplayChangeTest, CheckScreenDensityChange01, Function | SmallTest | L
         GetDisplayById(defaultDisplayId_)->GetVirtualPixelRatio() * BASELINE_DENSITY);
     ASSERT_NE(0, DisplayChangeTest::originalDisplayDpi);
     uint32_t densityDpi = 320;
-    ASSERT_EQ(true, defaultScreen_->SetDensityDpi(densityDpi));
+    ASSERT_EQ(DMError::DM_OK, defaultScreen_->SetDensityDpi(densityDpi));
     sleep(SPLIT_TEST_SLEEP_S);
 }
 
@@ -346,7 +346,7 @@ HWTEST_F(DisplayChangeTest, CheckScreenDensityChange01, Function | SmallTest | L
 HWTEST_F(DisplayChangeTest, CheckScreenDensityChange02, Function | SmallTest | Level2)
 {
     uint32_t densityDpi = 80;
-    ASSERT_EQ(true, defaultScreen_->SetDensityDpi(densityDpi));
+    ASSERT_EQ(DMError::DM_OK, defaultScreen_->SetDensityDpi(densityDpi));
     sleep(SPLIT_TEST_SLEEP_S);
 }
 
@@ -358,7 +358,7 @@ HWTEST_F(DisplayChangeTest, CheckScreenDensityChange02, Function | SmallTest | L
 HWTEST_F(DisplayChangeTest, CheckScreenDensityChange03, Function | SmallTest | Level2)
 {
     uint32_t densityDpi = 700;
-    ASSERT_EQ(false, defaultScreen_->SetDensityDpi(densityDpi));
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, defaultScreen_->SetDensityDpi(densityDpi));
 }
 
 /**
@@ -369,7 +369,7 @@ HWTEST_F(DisplayChangeTest, CheckScreenDensityChange03, Function | SmallTest | L
 HWTEST_F(DisplayChangeTest, CheckScreenDensityChange04, Function | SmallTest | Level2)
 {
     uint32_t densityDpi = 40;
-    ASSERT_EQ(false, defaultScreen_->SetDensityDpi(densityDpi));
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, defaultScreen_->SetDensityDpi(densityDpi));
 }
 
 /**
@@ -379,7 +379,7 @@ HWTEST_F(DisplayChangeTest, CheckScreenDensityChange04, Function | SmallTest | L
  */
 HWTEST_F(DisplayChangeTest, CheckScreenDensityChange05, Function | SmallTest | Level2)
 {
-    ASSERT_EQ(true, defaultScreen_->SetDensityDpi(DisplayChangeTest::originalDisplayDpi));
+    ASSERT_EQ(DMError::DM_OK, defaultScreen_->SetDensityDpi(DisplayChangeTest::originalDisplayDpi));
     sleep(SPLIT_TEST_SLEEP_S);
 }
 
@@ -399,7 +399,7 @@ HWTEST_F(DisplayChangeTest, CheckWaterfallCompression01, Function | SmallTest | 
     uint32_t originSize = DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal();
     uint32_t testSizeInVp = 24;
     DisplayCutoutController::SetWaterfallAreaCompressionSizeWhenHorizontal(testSizeInVp);
-    
+
     ASSERT_EQ(true, DisplayCutoutController::IsWaterfallAreaCompressionEnableWhenHorizontal());
     ASSERT_EQ(testSizeInVp, DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal());
 

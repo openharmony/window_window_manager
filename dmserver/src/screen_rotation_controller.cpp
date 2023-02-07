@@ -53,20 +53,21 @@ bool ScreenRotationController::IsScreenRotationLocked()
     return isScreenRotationLocked_;
 }
 
-void ScreenRotationController::SetScreenRotationLocked(bool isLocked)
+DMError ScreenRotationController::SetScreenRotationLocked(bool isLocked)
 {
     isScreenRotationLocked_ = isLocked;
     if (isLocked) {
         rotationLockedRotation_ = GetCurrentDisplayRotation();
-        return;
+        return DMError::DM_OK;
     }
     if (GetCurrentDisplayRotation() == ConvertDeviceToDisplayRotation(lastSensorRotationConverted_)) {
-        return;
+        return DMError::DM_OK;
     }
     Orientation currentOrientation = GetPreferredOrientation();
     if (IsSensorRelatedOrientation(currentOrientation)) {
         ProcessSwitchToSensorRelatedOrientation(currentOrientation, lastSensorRotationConverted_);
     }
+    return DMError::DM_OK;
 }
 
 void ScreenRotationController::SetDefaultDeviceRotationOffset(uint32_t defaultDeviceRotationOffset)
