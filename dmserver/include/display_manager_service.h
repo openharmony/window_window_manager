@@ -50,7 +50,7 @@ public:
     ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IRemoteObject>& displayManagerAgent) override;
     DMError DestroyVirtualScreen(ScreenId screenId) override;
-    DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) override;
+    DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) override;
     bool IsScreenRotationLocked() override;
     void SetScreenRotationLocked(bool isLocked) override;
 

@@ -23,7 +23,7 @@ namespace {
 
 bool ScreenManagerUtils::CreateSurface()
 {
-    csurface_ = Surface::CreateSurfaceAsConsumer();
+    csurface_ = IConsumerSurface::Create();
     if (csurface_ == nullptr) {
         WLOGFE("csurface create failed");
         return false;
