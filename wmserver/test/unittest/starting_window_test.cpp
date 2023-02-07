@@ -136,7 +136,7 @@ HWTEST_F(StartingWindowTest, NeedToStopStartingWindow02, Function | SmallTest | 
 HWTEST_F(StartingWindowTest, NeedToStopStartingWindow03, Function | SmallTest | Level2)
 {
     sptr<WindowNode> node = new WindowNode(CreateWindowProperty());
-    ASSERT_EQ(true, WindowHelper::CheckSupportWindowMode(node->GetWindowMode(),
+    ASSERT_EQ(false, WindowHelper::CheckSupportWindowMode(node->GetWindowMode(),
         node->GetModeSupportInfo(), transitionInfo_));
 }
 

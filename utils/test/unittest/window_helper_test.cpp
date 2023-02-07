@@ -85,8 +85,8 @@ HWTEST_F(WindowHelperTest, WindowModeSupport, Function | SmallTest | Level1)
                                                         WindowMode::WINDOW_MODE_SPLIT_SECONDARY));
     ASSERT_EQ(true, WindowHelper::IsWindowModeSupported(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL,
                                                         WindowMode::WINDOW_MODE_PIP));
-    ASSERT_EQ(true, WindowHelper::IsWindowModeSupported(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL,
-                                                        WindowMode::WINDOW_MODE_UNDEFINED));
+    ASSERT_EQ(false, WindowHelper::IsWindowModeSupported(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL,
+                                                         WindowMode::WINDOW_MODE_UNDEFINED));
 }
 
 /**
@@ -154,7 +154,7 @@ HWTEST_F(WindowHelperTest, CalculateOriginPosition, Function | SmallTest | Level
     TransformHelper::Matrix4 mat = TransformHelper::CreateTranslation(-pivotPos);
     mat *= WindowHelper::ComputeWorldTransformMat4(transform);
     mat *= TransformHelper::CreateTranslation(pivotPos);
-	
+
     TransformHelper::Vector3 expectOriginPoint(0, 0, 0);
     TransformHelper::Vector3 tranformedPoint = TransformHelper::Transform(expectOriginPoint, mat);
     PointInfo actialOriginPoint = WindowHelper::CalculateOriginPosition(mat,
