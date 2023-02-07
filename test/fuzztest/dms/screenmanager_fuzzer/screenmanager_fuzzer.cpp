@@ -73,7 +73,8 @@ bool ScreenPowerFuzzTest(const uint8_t *data, size_t size)
     startPos += GetObject<uint32_t>(powerStateChangeReason, data + startPos, size - startPos);
     screenManager.SetScreenPowerForAll(static_cast<ScreenPowerState>(screenPowerState),
         static_cast<PowerStateChangeReason>(startPos));
-    auto allScreen = screenManager.GetAllScreens();
+    std::vector<sptr<Screen>> allScreen;
+    screenManager.GetAllScreens(allScreen);
     for (auto screen: allScreen) {
         screenManager.GetScreenPower(screen->GetId());
     }
@@ -109,7 +110,8 @@ bool MakeMirrorWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
     screenManager.SetVirtualScreenSurface(screenId, nullptr);
 
     // make mirror
-    ScreenId groupId = screenManager.MakeMirror(0, { screenId });
+    ScreenId groupId;
+    screenManager.MakeMirror(0, { screenId }, groupId);
     if (groupId == SCREEN_ID_INVALID) {
         screenManager.DestroyVirtualScreen(screenId);
         return false;
@@ -153,7 +155,8 @@ bool MakeExpandWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
     screenManager.SetVirtualScreenSurface(screenId, nullptr);
     // make expand
     std::vector<ExpandOption> options = {{0, 0, 0}, {screenId, 0, 0}};
-    ScreenId groupId = screenManager.MakeExpand(options);
+    ScreenId groupId;
+    screenManager.MakeExpand(options, groupId);
     if (groupId == SCREEN_ID_INVALID) {
         screenManager.DestroyVirtualScreen(screenId);
         return false;
@@ -249,8 +252,9 @@ bool MakeMirrorFuzzTest(const uint8_t *data, size_t size)
         startPos += GetObject<ScreenId>(screenId, data + startPos, size - startPos);
         screenIds.emplace_back(screenId);
     }
+    ScreenId screenGroupId;
     GetObject<ScreenId>(screenId, data + startPos, size - startPos);
-    screenManager.MakeMirror(screenId, screenIds);
+    screenManager.MakeMirror(screenId, screenIds, screenGroupId);
     screenManager.UnregisterScreenGroupListener(screenGroupListener);
     screenManager.UnregisterScreenListener(screenListener);
     return true;
@@ -276,7 +280,8 @@ bool MakeExpandFuzzTest(const uint8_t *data, size_t size)
         ExpandOption option = {screenId, 0, 0};
         options.emplace_back(option);
     }
-    screenManager.MakeExpand(options);
+    ScreenId screenGroupId;
+    screenManager.MakeExpand(options, screenGroupId);
     screenManager.UnregisterScreenGroupListener(screenGroupListener);
     screenManager.UnregisterScreenListener(screenListener);
     return true;

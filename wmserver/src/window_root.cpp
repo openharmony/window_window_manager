@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,12 +22,13 @@
 #include <transaction/rs_transaction.h>
 
 #include "display_manager_service_inner.h"
+#include "permission.h"
+#include "persistent_storage.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "window_manager_service.h"
 #include "window_manager_agent_controller.h"
-#include "permission.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -182,6 +183,7 @@ void WindowRoot::AddDeathRecipient(sptr<WindowNode> node)
         WLOGFE("failed, node is nullptr");
         return;
     }
+    WLOGFD("Add for window: %{public}u", node->GetWindowId());
 
     auto remoteObject = node->GetWindowToken()->AsObject();
     windowIdMap_.insert(std::make_pair(remoteObject, node->GetWindowId()));
@@ -202,7 +204,7 @@ WMError WindowRoot::SaveWindow(const sptr<WindowNode>& node)
         return WMError::WM_ERROR_NULLPTR;
     }
 
-    WLOGI("save windowId %{public}u", node->GetWindowId());
+    WLOGFD("save windowId %{public}u", node->GetWindowId());
     windowNodeMap_.insert(std::make_pair(node->GetWindowId(), node));
     if (node->surfaceNode_ != nullptr) {
         surfaceIdWindowNodeMap_.insert(std::make_pair(node->surfaceNode_->GetId(), node));
@@ -304,7 +306,7 @@ void WindowRoot::AddSurfaceNodeIdWindowNodePair(uint64_t surfaceNodeId, sptr<Win
 
 void WindowRoot::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
 {
-    if (!Permission::IsSystemCalling()) {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("Get Visible Window Permission Denied");
     }
     VisibleData& VisibleWindow = lastOcclusionData_->GetVisibleData();
@@ -609,16 +611,27 @@ WMError WindowRoot::BindDialogToParent(sptr<WindowNode>& node, sptr<WindowNode>&
         node->GetWindowToken()->NotifyDestroy();
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    auto position = parentNode->children_.end();
-    for (auto iter = parentNode->children_.begin(); iter < parentNode->children_.end(); ++iter) {
-        if ((*iter)->priority_ > node->priority_) {
-            position = iter;
-            break;
-        }
-    }
-    parentNode->children_.insert(position, node);
-    node->parent_ = parentNode;
     return WMError::WM_OK;
+}
+
+void WindowRoot::GetStoragedAspectRatio(const sptr<WindowNode>& node)
+{
+    if (!WindowHelper::IsMainWindow(node->GetWindowType())) {
+        return;
+    }
+
+    std::string abilityName = node->abilityInfo_.abilityName_;
+    std::vector<std::string> nameVector;
+    if (abilityName.size() > 0) {
+        nameVector = WindowHelper::Split(abilityName, ".");
+    }
+    std::string keyName = nameVector.empty() ? node->abilityInfo_.bundleName_ :
+                                                node->abilityInfo_.bundleName_ + "." + nameVector.back();
+    if (PersistentStorage::HasKey(keyName, PersistentStorageType::ASPECT_RATIO)) {
+        float ratio = 0.0;
+        PersistentStorage::Get(keyName, ratio, PersistentStorageType::ASPECT_RATIO);
+        node->SetAspectRatio(ratio);
+    }
 }
 
 WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, bool fromStartingWin)
@@ -669,6 +682,9 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
         return res;
     }
 
+    // Get aspect ratio from persistent storage
+    GetStoragedAspectRatio(node);
+
     res = container->AddWindowNode(node, parentNode);
     if (res != WMError::WM_OK) {
         WLOGFE("failed with ret: %{public}u", static_cast<uint32_t>(res));
@@ -692,7 +708,7 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId, bool fromAnimation)
     }
     container->DropShowWhenLockedWindowIfNeeded(node);
     UpdateFocusWindowWithWindowRemoved(node, container);
-    auto nextOrientationWindow = UpdateActiveWindowWithWindowRemoved(node, container);
+    UpdateActiveWindowWithWindowRemoved(node, container);
     UpdateBrightnessWithWindowRemoved(windowId, container);
     WMError res = container->RemoveWindowNode(node, fromAnimation);
     if (res == WMError::WM_OK) {
@@ -705,13 +721,10 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId, bool fromAnimation)
         HandleKeepScreenOn(windowId, false);
         SwitchRenderModeIfNeeded();
     }
-    while (nextOrientationWindow != nullptr && !WindowHelper::IsMainWindow(nextOrientationWindow->GetWindowType())) {
-        nextOrientationWindow = nextOrientationWindow->parent_;
-    }
-    if (nextOrientationWindow != nullptr && WindowHelper::IsRotatableWindow(
-        nextOrientationWindow->GetWindowType(), nextOrientationWindow->GetWindowMode())) {
-        DisplayManagerServiceInner::GetInstance().SetOrientationFromWindow(nextOrientationWindow->GetDisplayId(),
-            nextOrientationWindow->GetRequestedOrientation());
+    auto nextRotatableWindow = container->GetNextRotatableWindow(windowId);
+    if (nextRotatableWindow != nullptr) {
+        DisplayManagerServiceInner::GetInstance().SetOrientationFromWindow(nextRotatableWindow->GetDisplayId(),
+            nextRotatableWindow->GetRequestedOrientation());
     }
     return res;
 }
@@ -829,6 +842,11 @@ WMError WindowRoot::SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode)
     if (WindowHelper::IsRotatableWindow(node->GetWindowType(), node->GetWindowMode())) {
         DisplayManagerServiceInner::GetInstance().
             SetOrientationFromWindow(node->GetDisplayId(), node->GetRequestedOrientation());
+    }
+    auto nextRotatableWindow = container->GetNextRotatableWindow(0);
+    if (nextRotatableWindow != nullptr) {
+        DisplayManagerServiceInner::GetInstance().SetOrientationFromWindow(nextRotatableWindow->GetDisplayId(),
+            nextRotatableWindow->GetRequestedOrientation());
     }
     return res;
 }
@@ -960,7 +978,7 @@ void WindowRoot::UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node
     }
     uint32_t windowId = node->GetWindowId();
     uint32_t focusedWindowId = container->GetFocusWindow();
-    WLOGI("current window: %{public}u, focus window: %{public}u", windowId, focusedWindowId);
+    WLOGFD("current window: %{public}u, focus window: %{public}u", windowId, focusedWindowId);
     if (WindowHelper::IsMainWindow(node->GetWindowType())) {
         if (windowId != focusedWindowId) {
             auto iter = std::find_if(node->children_.begin(), node->children_.end(),
@@ -984,21 +1002,21 @@ void WindowRoot::UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node
     }
     auto nextFocusableWindow = container->GetNextFocusableWindow(windowId);
     if (nextFocusableWindow != nullptr) {
-        WLOGI("adjust focus window, next focus window id: %{public}u", nextFocusableWindow->GetWindowId());
+        WLOGFD("adjust focus window, next focus window id: %{public}u", nextFocusableWindow->GetWindowId());
         container->SetFocusWindow(nextFocusableWindow->GetWindowId());
     }
 }
 
-sptr<WindowNode> WindowRoot::UpdateActiveWindowWithWindowRemoved(const sptr<WindowNode>& node,
+void WindowRoot::UpdateActiveWindowWithWindowRemoved(const sptr<WindowNode>& node,
     const sptr<WindowNodeContainer>& container) const
 {
     if (node == nullptr || container == nullptr) {
         WLOGFE("window is invalid");
-        return nullptr;
+        return;
     }
     uint32_t windowId = node->GetWindowId();
     uint32_t activeWindowId = container->GetActiveWindow();
-    WLOGI("current window: %{public}u, active window: %{public}u", windowId, activeWindowId);
+    WLOGFD("current window: %{public}u, active window: %{public}u", windowId, activeWindowId);
     if (WindowHelper::IsMainWindow(node->GetWindowType())) {
         if (windowId != activeWindowId) {
             auto iter = std::find_if(node->children_.begin(), node->children_.end(),
@@ -1006,7 +1024,7 @@ sptr<WindowNode> WindowRoot::UpdateActiveWindowWithWindowRemoved(const sptr<Wind
                                          return node->GetWindowId() == activeWindowId;
                                      });
             if (iter == node->children_.end()) {
-                return nullptr;
+                return;
             }
         }
         if (!node->children_.empty()) {
@@ -1017,7 +1035,7 @@ sptr<WindowNode> WindowRoot::UpdateActiveWindowWithWindowRemoved(const sptr<Wind
         }
     } else {
         if (windowId != activeWindowId) {
-            return nullptr;
+            return;
         }
     }
     auto nextActiveWindow = container->GetNextActiveWindow(windowId);
@@ -1025,7 +1043,6 @@ sptr<WindowNode> WindowRoot::UpdateActiveWindowWithWindowRemoved(const sptr<Wind
         WLOGI("adjust active window, next active window id: %{public}u", nextActiveWindow->GetWindowId());
         container->SetActiveWindow(nextActiveWindow->GetWindowId(), true);
     }
-    return nextActiveWindow;
 }
 
 void WindowRoot::UpdateBrightnessWithWindowRemoved(uint32_t windowId, const sptr<WindowNodeContainer>& container) const
@@ -1089,7 +1106,7 @@ WMError WindowRoot::RequestActiveWindow(uint32_t windowId)
         return WMError::WM_ERROR_NULLPTR;
     }
     auto res = container->SetActiveWindow(windowId, false);
-    WLOGI("windowId:%{public}u, name:%{public}s, orientation:%{public}u, type:%{public}u, isMainWindow:%{public}d",
+    WLOGFD("windowId:%{public}u, name:%{public}s, orientation:%{public}u, type:%{public}u, isMainWindow:%{public}d",
         windowId, node->GetWindowName().c_str(), static_cast<uint32_t>(node->GetRequestedOrientation()),
         node->GetWindowType(), WindowHelper::IsMainWindow(node->GetWindowType()));
     if (res == WMError::WM_OK &&

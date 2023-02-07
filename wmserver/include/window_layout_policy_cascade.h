@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,6 +68,8 @@ private:
     void UpdateLayoutRect(const sptr<WindowNode>& node) override;
     void ComputeDecoratedRequestRect(const sptr<WindowNode>& node) const;
     void ApplyWindowRectConstraints(const sptr<WindowNode>& node, Rect& winRect) const;
+    void ComputeRectByAspectRatio(const sptr<WindowNode>& node) const;
+    bool CheckAspectRatioBySizeLimits(const sptr<WindowNode>& node, WindowSizeLimits& newLimits) const;
 
     struct CascadeRects {
         Rect primaryRect_;

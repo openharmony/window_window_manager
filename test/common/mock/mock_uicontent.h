@@ -57,7 +57,7 @@ public:
     MOCK_METHOD1(ProcessVsyncEvent, bool(uint64_t timeStampNanos));
     MOCK_METHOD1(UpdateConfiguration, void(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config));
     MOCK_METHOD2(UpdateViewportConfig, void(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason));
-    MOCK_METHOD1(UpdateWindowMode, void(OHOS::Rosen::WindowMode mode));
+    MOCK_METHOD2(UpdateWindowMode, void(OHOS::Rosen::WindowMode mode, bool hasDeco));
     MOCK_METHOD3(HideWindowTitleButton, void(bool hideSplit, bool hideMaximize, bool hideMinimize));
     MOCK_METHOD0(GetBackgroundColor, uint32_t());
     MOCK_METHOD1(SetBackgroundColor, void(uint32_t color));
@@ -66,6 +66,13 @@ public:
     MOCK_METHOD1(NotifyMemoryLevel, void(int32_t level));
     MOCK_METHOD1(SetAppWindowTitle, void(const std::string& title));
     MOCK_METHOD1(SetAppWindowIcon, void(const std::shared_ptr<Media::PixelMap>& pixelMap));
+    MOCK_METHOD0(GetCardRootNode, std::shared_ptr<Rosen::RSSurfaceNode>());
+    MOCK_METHOD1(ProcessFormUpdate, void(const std::string& data));
+    MOCK_METHOD1(SetFormWidth, void(const float width));
+    MOCK_METHOD1(SetFormHeight, void(const float height));
+    MOCK_METHOD0(GetFormWidth, float());
+    MOCK_METHOD0(GetFormHeight, float());
+    MOCK_METHOD1(SetActionEventHandler, void(std::function<void(const std::string& action)>&& actionCallback));
 };
 } // namespace Ace
 } // namespace OHOS

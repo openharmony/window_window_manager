@@ -49,7 +49,8 @@
           "display_manager",
           "config_policy",
           "ace_engine",
-          "multimedia_image_framework"
+          "multimedia_image_framework",
+          "preferences"
         ],
         "third_party": [
           "flutter",

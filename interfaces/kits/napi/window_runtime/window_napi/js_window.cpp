@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@
 #include "pixel_map_napi.h"
 #include "napi_remote_object.h"
 #include "permission.h"
+#include "request_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -454,6 +455,13 @@ NativeValue* JsWindow::SetSnapshotSkip(NativeEngine* engine, NativeCallbackInfo*
     return (me != nullptr) ? me->OnSetSnapshotSkip(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindow::RaiseToAppTop(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGI("RaiseToAppTop");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnRaiseToAppTop(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindow::DisableWindowDecor(NativeEngine* engine, NativeCallbackInfo* info)
 {
     WLOGI("DisableWindowDecor");
@@ -573,6 +581,20 @@ NativeValue* JsWindow::SetBackdropBlurStyle(NativeEngine* engine, NativeCallback
     return (me != nullptr) ? me->OnSetBackdropBlurStyle(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindow::SetAspectRatio(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGI("[NAPI]SetAspectRatio");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnSetAspectRatio(*engine, *info) : nullptr;
+}
+
+NativeValue* JsWindow::UnsetAspectRatio(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGI("[NAPI]UnsetAspectRatio");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnUnsetAspectRatio(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindow::OnShow(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WMError errCode = WMError::WM_OK;
@@ -595,8 +617,7 @@ NativeValue* JsWindow::OnShow(NativeEngine& engine, NativeCallbackInfo& info)
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window show failed"));
             }
-            WLOGI("Window [%{public}u, %{public}s] show end, ret = %{public}d",
-                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+            WLOGI("Window [%{public}u] show end, ret = %{public}d", weakWindow->GetWindowId(), ret);
         };
     NativeValue* result = nullptr;
     NativeValue* lastParam = (info.argc == 0) ? nullptr :
@@ -764,8 +785,7 @@ NativeValue* JsWindow::OnHide(NativeEngine& engine, NativeCallbackInfo& info)
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window hide failed"));
             }
-            WLOGI("Window [%{public}u, %{public}s] hide end, ret = %{public}d",
-                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+            WLOGI("Window [%{public}u] hide end, ret = %{public}d", weakWindow->GetWindowId(), ret);
         };
 
     NativeValue* result = nullptr;
@@ -1061,8 +1081,8 @@ NativeValue* JsWindow::OnSetWindowType(NativeEngine& engine, NativeCallbackInfo&
                 WLOGFE("window is nullptr or get invalid param");
                 return;
             }
-            WMError ret = weakWindow->SetWindowType(winType);
-            if (ret == WMError::WM_OK) {
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetWindowType(winType));
+            if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set type failed"));
@@ -1081,9 +1101,9 @@ NativeValue* JsWindow::OnSetWindowType(NativeEngine& engine, NativeCallbackInfo&
 
 NativeValue* JsWindow::OnSetWindowMode(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    if (!Permission::IsSystemCalling()) {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("set window mode permission denied!");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP)));
         return engine.CreateUndefined();
     }
     WmErrorCode errCode = WmErrorCode::WM_OK;
@@ -1219,7 +1239,11 @@ NativeValue* JsWindow::OnRegisterWindowCallback(NativeEngine& engine, NativeCall
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
-    registerManager_->RegisterListener(windowToken_, cbType, CaseType::CASE_WINDOW, engine, value);
+    WmErrorCode ret = registerManager_->RegisterListener(windowToken_, cbType, CaseType::CASE_WINDOW, engine, value);
+    if (ret != WmErrorCode::WM_OK) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
+        return engine.CreateUndefined();
+    }
     WLOGI("Register end, window [%{public}u, %{public}s], type = %{public}s, callback = %{public}p",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), cbType.c_str(), value);
     return engine.CreateUndefined();
@@ -1240,17 +1264,22 @@ NativeValue* JsWindow::OnUnregisterWindowCallback(NativeEngine& engine, NativeCa
     }
 
     NativeValue* value = nullptr;
+    WmErrorCode ret = WmErrorCode::WM_OK;
     if (info.argc == 1) {
-        registerManager_->UnregisterListener(windowToken_, cbType, CaseType::CASE_WINDOW, value);
+        ret = registerManager_->UnregisterListener(windowToken_, cbType, CaseType::CASE_WINDOW, value);
     } else {
         value = info.argv[1];
         if (value == nullptr || !value->IsCallable()) {
-            registerManager_->UnregisterListener(windowToken_, cbType, CaseType::CASE_WINDOW, nullptr);
+            ret = registerManager_->UnregisterListener(windowToken_, cbType, CaseType::CASE_WINDOW, nullptr);
         } else {
-            registerManager_->UnregisterListener(windowToken_, cbType, CaseType::CASE_WINDOW, value);
+            ret = registerManager_->UnregisterListener(windowToken_, cbType, CaseType::CASE_WINDOW, value);
         }
     }
 
+    if (ret != WmErrorCode::WM_OK) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
+        return engine.CreateUndefined();
+    }
     WLOGI("Unregister end, window [%{public}u, %{public}s], type = %{public}s, callback = %{public}p",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), cbType.c_str(), value);
     return engine.CreateUndefined();
@@ -1267,6 +1296,12 @@ NativeValue* JsWindow::OnBindDialogTarget(NativeEngine& engine, NativeCallbackIn
     sptr<IRemoteObject> token = nullptr;
     token = NAPI_ohos_rpc_getNativeRemoteObject(
         reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(info.argv[0]));
+    if (token == nullptr) {
+        std::shared_ptr<AbilityRuntime::RequestInfo> requestInfo = AbilityRuntime::RequestInfo::UnwrapRequestInfo(engine, info.argv[0]);
+        if (requestInfo != nullptr) {
+            token = requestInfo->GetToken();
+        }
+    }
     if (token == nullptr) {
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
@@ -2451,9 +2486,9 @@ NativeValue* JsWindow::OnSetWindowKeepScreenOn(NativeEngine& engine, NativeCallb
 
 NativeValue* JsWindow::OnSetWakeUpScreen(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    if (!Permission::IsSystemCalling()) {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("set wake up screen permission denied!");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP)));
         return engine.CreateUndefined();
     }
     WmErrorCode errCode = WmErrorCode::WM_OK;
@@ -2771,7 +2806,12 @@ NativeValue* JsWindow::OnDisableWindowDecor(NativeEngine& engine, NativeCallback
     if (windowToken_ == nullptr) {
         return engine.CreateUndefined();
     }
-    windowToken_->DisableAppWindowDecor();
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->DisableAppWindowDecor());
+    if (ret != WmErrorCode::WM_OK) {
+        WLOGFE("Window DisableWindowDecor failed");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
+        return engine.CreateUndefined();
+    }
     WLOGI("Window [%{public}u, %{public}s] disable app window decor end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
     return engine.CreateUndefined();
@@ -3070,11 +3110,48 @@ NativeValue* JsWindow::OnSetSnapshotSkip(NativeEngine& engine, NativeCallbackInf
         return engine.CreateUndefined();
     }
 
-    window->SetSnapshotSkip(isSkip);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSnapshotSkip(isSkip));
+    if (ret != WmErrorCode::WM_OK) {
+        WLOGFE("Window SetSnapshotSkip failed");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
+        return engine.CreateUndefined();
+    }
     WLOGI("[%{public}u, %{public}s] set snapshotSkip end",
         window->GetWindowId(), window->GetWindowName().c_str());
 
     return engine.CreateUndefined();
+}
+
+NativeValue* JsWindow::OnRaiseToAppTop(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    AsyncTask::CompleteCallback complete =
+        [this](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            wptr<Window> weakToken(windowToken_);
+            auto window = weakToken.promote();
+            if (window == nullptr) {
+                WLOGFE("window is nullptr");
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+                return;
+            }
+
+            WmErrorCode errCode = window->RaiseToAppTop();
+            if (errCode != WmErrorCode::WM_OK) {
+                WLOGFE("raise window zorder failed");
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
+                return;
+            }
+            task.Resolve(engine, engine.CreateUndefined());
+            WLOGI("Window [%{public}u, %{public}s] zorder raise success",
+                window->GetWindowId(), window->GetWindowName().c_str());
+        };
+    NativeValue* lastParam = (info.argc == 0) ? nullptr :
+        ((info.argv[0] != nullptr && info.argv[0]->TypeOf() == NATIVE_FUNCTION) ?
+        info.argv[0] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsWindow::OnRaiseToAppTop",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
 }
 
 NativeValue* JsWindow::OnOpacity(NativeEngine& engine, NativeCallbackInfo& info)
@@ -3106,7 +3183,12 @@ NativeValue* JsWindow::OnOpacity(NativeEngine& engine, NativeCallbackInfo& info)
         return engine.CreateUndefined();
     }
     float alpha = static_cast<double>(*nativeVal);
-    windowToken_->SetAlpha(alpha);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetAlpha(alpha));
+    if (ret != WmErrorCode::WM_OK) {
+        WLOGFE("Window Opacity failed");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
+        return engine.CreateUndefined();
+    }
     WLOGI("Window [%{public}u, %{public}s] Opacity end, alpha = %{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), alpha);
     return engine.CreateUndefined();
@@ -3187,7 +3269,12 @@ NativeValue* JsWindow::OnScale(NativeEngine& engine, NativeCallbackInfo& info)
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
-    windowToken_->SetTransform(trans);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetTransform(trans));
+    if (ret != WmErrorCode::WM_OK) {
+        WLOGFE("Window Scale failed");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
+        return engine.CreateUndefined();
+    }
     WLOGI("Window [%{public}u, %{public}s] Scale end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
     WLOGI("scaleX = %{public}f, scaleY = %{public}f, pivotX = %{public}f pivotY = %{public}f",
@@ -3252,7 +3339,12 @@ NativeValue* JsWindow::OnRotate(NativeEngine& engine, NativeCallbackInfo& info)
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
-    windowToken_->SetTransform(trans);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetTransform(trans));
+    if (ret != WmErrorCode::WM_OK) {
+        WLOGFE("Window Rotate failed");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
+        return engine.CreateUndefined();
+    }
     WLOGI("Window [%{public}u, %{public}s] Rotate end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
     WLOGI("rotateX = %{public}f, rotateY = %{public}f," \
@@ -3304,7 +3396,12 @@ NativeValue* JsWindow::OnTranslate(NativeEngine& engine, NativeCallbackInfo& inf
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
-    windowToken_->SetTransform(trans);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetTransform(trans));
+    if (ret != WmErrorCode::WM_OK) {
+        WLOGFE("Window Translate failed");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
+        return engine.CreateUndefined();
+    }
     WLOGI("Window [%{public}u, %{public}s] Translate end," \
         "translateX = %{public}f, translateY = %{public}f, translateZ = %{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(),
@@ -3312,39 +3409,40 @@ NativeValue* JsWindow::OnTranslate(NativeEngine& engine, NativeCallbackInfo& inf
     return engine.CreateUndefined();
 }
 
-void JsWindow::CreateTransitionController(NativeEngine& engine)
+WmErrorCode JsWindow::CreateTransitionController(NativeEngine& engine)
 {
     if (windowToken_ == nullptr) {
         WLOGFE("windowToken_ is nullptr not match");
-        return;
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         WLOGFE("CreateTransitionController is not allowed since window is not system window");
-        return;
+        return WmErrorCode::WM_ERROR_INVALID_CALLING;
     }
     NativeValue* objValue = engine.CreateObject();
     auto name = GetWindowName();
     std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(name);
     if (jsWindowObj == nullptr || jsWindowObj->Get() == nullptr) {
-        return;
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<JsTransitionController> nativeController = new JsTransitionController(
         engine, jsWindowObj, windowToken_);
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
     if (object == nullptr) {
         WLOGFE("Failed to convert to TransitionController Object");
-        return;
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     object->SetNativePointer(new wptr<JsTransitionController>(nativeController),
         [](NativeEngine*, void* data, void*) {
             WLOGFE("Finalizer for wptr form native Transition Controller is called");
             delete static_cast<wptr<JsTransitionController>*>(data);
         }, nullptr);
-    windowToken_->RegisterAnimationTransitionController(nativeController);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->RegisterAnimationTransitionController(nativeController));
     jsTransControllerObj_.reset(engine.CreateReference(objValue, 1));
     nativeController->SetJsController(jsTransControllerObj_);
     WLOGI("Window [%{public}u, %{public}s] CreateTransitionController end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+    return ret;
 }
 
 NativeValue* JsWindow::OnGetTransitionController(NativeEngine& engine, NativeCallbackInfo& info)
@@ -3360,16 +3458,20 @@ NativeValue* JsWindow::OnGetTransitionController(NativeEngine& engine, NativeCal
         return engine.CreateUndefined();
     }
     if (jsTransControllerObj_ == nullptr || jsTransControllerObj_->Get() == nullptr) {
-        CreateTransitionController(engine);
+        WmErrorCode ret = CreateTransitionController(engine);
+        if (ret != WmErrorCode::WM_OK) {
+            WLOGFE("Window GetTransitionController failed");
+            engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
+        }
     }
     return jsTransControllerObj_ == nullptr ? nullptr : jsTransControllerObj_->Get();
 }
 
 NativeValue* JsWindow::OnSetCornerRadius(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    if (!Permission::IsSystemCalling()) {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("set corner radius permission denied!");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP)));
         return engine.CreateUndefined();
     }
     if (info.argc < 1) {
@@ -3439,28 +3541,28 @@ NativeValue* JsWindow::OnSetShadow(NativeEngine& engine, NativeCallbackInfo& inf
         ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowColor(color));
     }
 
-    if (ret != WmErrorCode::WM_OK) {
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
-        return engine.CreateUndefined();
-    }
-
-    if (info.argc >= 3) { // parse the 3rd param: offsetX
+    if ((ret == WmErrorCode::WM_OK) && info.argc >= 3) { // parse the 3rd param: offsetX
         NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[2]); // 2: the 3rd param
         if (nativeVal == nullptr) {
             engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
             return engine.CreateUndefined();
         }
-        windowToken_->SetShadowOffsetX(static_cast<double>(*nativeVal));
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowOffsetX(static_cast<double>(*nativeVal)));
     }
 
-    if (info.argc >= 4) { // parse the 4th param: offsetY
+    if ((ret == WmErrorCode::WM_OK) && info.argc >= 4) { // parse the 4th param: offsetY
         NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[3]); // 3: the 4th param
         if (nativeVal == nullptr) {
             engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
             return engine.CreateUndefined();
         }
-        windowToken_->SetShadowOffsetY(static_cast<double>(*nativeVal));
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowOffsetY(static_cast<double>(*nativeVal)));
     }
+
+    if (ret != WmErrorCode::WM_OK) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
+    }
+
     return engine.CreateUndefined();
 }
 
@@ -3572,6 +3674,105 @@ NativeValue* JsWindow::OnSetBackdropBlurStyle(NativeEngine& engine, NativeCallba
     return engine.CreateUndefined();
 }
 
+NativeValue* JsWindow::OnSetAspectRatio(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WMError errCode = WMError::WM_OK;
+    if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
+        WLOGFE("[NAPI]SetAspectRatio is not allowed since window is main window");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
+        return engine.CreateUndefined();
+    }
+
+    float aspectRatio = 0.0;
+    if (errCode == WMError::WM_OK) {
+        NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
+        if (nativeVal == nullptr) {
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            aspectRatio = static_cast<double>(*nativeVal);
+        }
+    }
+
+    if (errCode == WMError::WM_ERROR_INVALID_PARAM || aspectRatio <= 0.0) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+
+    wptr<Window> weakToken(windowToken_);
+    AsyncTask::CompleteCallback complete =
+        [weakToken, aspectRatio](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr) {
+                task.Reject(engine,
+                    CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                    "OnSetAspectRatio failed."));
+                return;
+            }
+            WMError ret = weakWindow->SetAspectRatio(aspectRatio);
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+            } else {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "SetAspectRatio failed."));
+            }
+            WLOGI("[NAPI]Window [%{public}u, %{public}s] set aspect ratio end, ret = %{public}d",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+        };
+
+    NativeValue* lastParam = (info.argc == 1) ? nullptr :
+        (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsWindow::SetAspectRatio",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* JsWindow::OnUnsetAspectRatio(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    if (info.argc >= 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+
+    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
+        WLOGFE("[NAPI]UnsetAspectRatio is not allowed since window is main window");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
+        return engine.CreateUndefined();
+    }
+
+    wptr<Window> weakToken(windowToken_);
+    AsyncTask::CompleteCallback complete =
+        [weakToken](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr) {
+                task.Reject(engine,
+                    CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                    "OnUnsetAspectRatio failed."));
+                return;
+            }
+            WMError ret = weakWindow->UnsetAspectRatio();
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+            } else {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "UnsetAspectRatio failed."));
+            }
+            WLOGI("[NAPI]Window [%{public}u, %{public}s] unset aspect ratio end, ret = %{public}d",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+        };
+
+    NativeValue* lastParam = (info.argc == 0) ? nullptr :
+        (info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsWindow::OnUnsetAspectRatio",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
 {
     WLOGFD("Try to find window %{public}s in g_jsWindowMap", windowName.c_str());
@@ -3666,6 +3867,7 @@ void BindFunctions(NativeEngine& engine, NativeObject* object, const char *modul
     BindNativeFunction(engine, *object, "setTransparent", moduleName, JsWindow::SetTransparent);
     BindNativeFunction(engine, *object, "setCallingWindow", moduleName, JsWindow::SetCallingWindow);
     BindNativeFunction(engine, *object, "setSnapshotSkip", moduleName, JsWindow::SetSnapshotSkip);
+    BindNativeFunction(engine, *object, "raiseToAppTop", moduleName, JsWindow::RaiseToAppTop);
     BindNativeFunction(engine, *object, "disableWindowDecor", moduleName, JsWindow::DisableWindowDecor);
     BindNativeFunction(engine, *object, "dump", moduleName, JsWindow::Dump);
     BindNativeFunction(engine, *object, "setForbidSplitMove", moduleName, JsWindow::SetForbidSplitMove);
@@ -3681,6 +3883,8 @@ void BindFunctions(NativeEngine& engine, NativeObject* object, const char *modul
     BindNativeFunction(engine, *object, "setBlur", moduleName, JsWindow::SetBlur);
     BindNativeFunction(engine, *object, "setBackdropBlur", moduleName, JsWindow::SetBackdropBlur);
     BindNativeFunction(engine, *object, "setBackdropBlurStyle", moduleName, JsWindow::SetBackdropBlurStyle);
+    BindNativeFunction(engine, *object, "setAspectRatio", moduleName, JsWindow::SetAspectRatio);
+    BindNativeFunction(engine, *object, "unsetAspectRatio", moduleName, JsWindow::UnsetAspectRatio);
 }
 }  // namespace Rosen
 }  // namespace OHOS

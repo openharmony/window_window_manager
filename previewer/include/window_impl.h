@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,8 +78,8 @@ public:
     virtual bool IsLayoutFullScreen() const override;
     virtual WMError SetWindowType(WindowType type) override;
     virtual WMError SetWindowMode(WindowMode mode) override;
-    virtual void SetAlpha(float alpha) override;
-    virtual void SetTransform(const Transform& trans) override;
+    virtual WMError SetAlpha(float alpha) override;
+    virtual WMError SetTransform(const Transform& trans) override;
     virtual WMError AddWindowFlag(WindowFlag flag) override;
     virtual WMError RemoveWindowFlag(WindowFlag flag) override;
     virtual WMError SetWindowFlags(uint32_t flags) override;
@@ -107,19 +107,19 @@ public:
     virtual WMError SetBrightness(float brightness) override;
     virtual float GetBrightness() const override;
     virtual WMError SetCallingWindow(uint32_t windowId) override;
-    virtual void SetPrivacyMode(bool isPrivacyMode) override;
+    virtual WMError SetPrivacyMode(bool isPrivacyMode) override;
     virtual bool IsPrivacyMode() const override;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
-    virtual void DisableAppWindowDecor() override;
+    virtual WMError DisableAppWindowDecor() override;
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
-    virtual void SetSnapshotSkip(bool isSkip) override;
+    virtual WMError SetSnapshotSkip(bool isSkip) override;
 
     // window effect
     virtual WMError SetCornerRadius(float cornerRadius) override;
     virtual WMError SetShadowRadius(float radius) override;
     virtual WMError SetShadowColor(std::string color) override;
-    virtual void SetShadowOffsetX(float offsetX) override;
-    virtual void SetShadowOffsetY(float offsetY) override;
+    virtual WMError SetShadowOffsetX(float offsetX) override;
+    virtual WMError SetShadowOffsetY(float offsetY) override;
     virtual WMError SetBlur(float radius) override;
     virtual WMError SetBackdropBlur(float radius) override;
     virtual WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) override;
@@ -135,26 +135,27 @@ public:
     virtual bool IsFocused() const override;
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
 
-    virtual bool RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
-    virtual bool RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
-    virtual bool UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
-    virtual bool UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
-    virtual bool RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
-    virtual bool UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
-    virtual bool RegisterDragListener(const sptr<IWindowDragListener>& listener) override;
-    virtual bool UnregisterDragListener(const sptr<IWindowDragListener>& listener) override;
-    virtual bool RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
-    virtual bool UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
+    virtual WMError RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
+    virtual WMError RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
+    virtual WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
+    virtual WMError UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
+    virtual WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
+    virtual WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
+    virtual WMError RegisterDragListener(const sptr<IWindowDragListener>& listener) override;
+    virtual WMError UnregisterDragListener(const sptr<IWindowDragListener>& listener) override;
+    virtual WMError RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
+    virtual WMError UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
-    virtual bool RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
-    virtual bool UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
-    virtual bool RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
-    virtual bool UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
-    virtual bool RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener) override;
-    virtual bool RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
-    virtual bool UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
-    virtual bool RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
-    virtual bool UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
+    virtual WMError RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
+    virtual WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
+    virtual WMError RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
+    virtual WMError UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
+    virtual WMError RegisterAnimationTransitionController(
+        const sptr<IAnimationTransitionController>& listener) override;
+    virtual WMError RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
+    virtual WMError UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
+    virtual WMError RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
+    virtual WMError UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
     virtual void RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) override;
     virtual void UnregisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) override;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
@@ -188,6 +189,9 @@ public:
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
     virtual WMError NotifyMemoryLevel(int32_t level) const override;
     virtual bool IsAllowHaveSystemSubWindow() override;
+    WmErrorCode RaiseToAppTop() override;
+    virtual WMError SetAspectRatio(float ratio) override;
+    virtual WMError UnsetAspectRatio() override;
 
 private:
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;

@@ -23,16 +23,18 @@ namespace {
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerAgentController)
 
-bool DisplayManagerAgentController::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+DMError DisplayManagerAgentController::RegisterDisplayManagerAgent(
+    const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
-    return dmAgentContainer_.RegisterAgent(displayManagerAgent, type);
+    return dmAgentContainer_.RegisterAgent(displayManagerAgent, type) ? DMError::DM_OK :DMError::DM_ERROR_NULLPTR;
 }
 
-bool DisplayManagerAgentController::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+DMError DisplayManagerAgentController::UnregisterDisplayManagerAgent(
+    const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
-    return dmAgentContainer_.UnregisterAgent(displayManagerAgent, type);
+    return dmAgentContainer_.UnregisterAgent(displayManagerAgent, type) ? DMError::DM_OK :DMError::DM_ERROR_NULLPTR;
 }
 
 bool DisplayManagerAgentController::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status)

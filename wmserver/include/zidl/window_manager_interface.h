@@ -67,6 +67,7 @@ public:
         TRANS_ID_SET_ANCHOR_AND_SCALE,
         TRANS_ID_SET_ANCHOR_OFFSET,
         TRANS_ID_OFF_WINDOW_ZOOM,
+        TRANS_ID_RAISE_WINDOW_Z_ORDER,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -81,14 +82,14 @@ public:
         sptr<MoveDragProperty>& moveDragProperty) = 0;
     virtual void ProcessPointDown(uint32_t windowId, bool isPointDown) = 0;
     virtual void ProcessPointUp(uint32_t windowId) = 0;
-    virtual void MinimizeAllAppWindows(DisplayId displayId) = 0;
+    virtual WMError MinimizeAllAppWindows(DisplayId displayId) = 0;
     virtual WMError ToggleShownStateForAllAppWindows() = 0;
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode) = 0;
     virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
         bool isAsyncTask = false) = 0;
-    virtual bool RegisterWindowManagerAgent(WindowManagerAgentType type,
+    virtual WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
-    virtual bool UnregisterWindowManagerAgent(WindowManagerAgentType type,
+    virtual WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) = 0;
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) = 0;
@@ -105,6 +106,7 @@ public:
     virtual void SetAnchorAndScale(int32_t x, int32_t y, float scale) = 0;
     virtual void SetAnchorOffset(int32_t deltaX, int32_t deltaY) = 0;
     virtual void OffWindowZoom() = 0;
+    virtual WmErrorCode RaiseToAppTop(uint32_t windowId) = 0;
 };
 }
 }

@@ -89,8 +89,8 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
             sptr<IWindowManagerAgent> windowManagerAgentProxy =
                 iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
-            bool ret = RegisterWindowManagerAgent(type, windowManagerAgentProxy);
-            reply.WriteBool(ret);
+            WMError errCode = RegisterWindowManagerAgent(type, windowManagerAgentProxy);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
         case WindowManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT: {
@@ -98,8 +98,8 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
             sptr<IWindowManagerAgent> windowManagerAgentProxy =
                 iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
-            bool ret = UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
-            reply.WriteBool(ret);
+            WMError errCode = UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
         case WindowManagerMessage::TRANS_ID_NOTIFY_READY_MOVE_OR_DRAG: {
@@ -129,7 +129,8 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_MINIMIZE_ALL_APP_WINDOWS: {
-            MinimizeAllAppWindows(data.ReadUint64());
+            WMError errCode = MinimizeAllAppWindows(data.ReadUint64());
+            reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
         case WindowManagerMessage::TRANS_ID_TOGGLE_SHOWN_STATE_FOR_ALL_APP_WINDOWS: {
@@ -270,6 +271,12 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
         }
         case WindowManagerMessage::TRANS_ID_OFF_WINDOW_ZOOM: {
             OffWindowZoom();
+            break;
+        }
+        case WindowManagerMessage::TRANS_ID_RAISE_WINDOW_Z_ORDER: {
+            uint32_t windowId = data.ReadUint32();
+            WmErrorCode errCode = RaiseToAppTop(windowId);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
         default:

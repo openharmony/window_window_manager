@@ -71,7 +71,7 @@ HWTEST_F(WindowEffectTest, WindowEffect01, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->SetCornerRadius(0.0));
     ASSERT_EQ(WMError::WM_OK, window->SetCornerRadius(16.0));
     ASSERT_EQ(WMError::WM_OK, window->SetCornerRadius(1000.0));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetCornerRadius(-1.0));
+    ASSERT_EQ(WMError::WM_OK, window->SetCornerRadius(-1.0));
 
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }

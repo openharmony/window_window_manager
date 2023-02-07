@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,20 +58,22 @@ union ColorParam {
     uint32_t value;
 };
 
-const std::map<DisplayOrientation, Orientation> ABILITY_TO_WMS_ORIENTATION_MAP {
-    {DisplayOrientation::UNSPECIFIED,                           Orientation::UNSPECIFIED                        },
-    {DisplayOrientation::LANDSCAPE,                             Orientation::HORIZONTAL                         },
-    {DisplayOrientation::PORTRAIT,                              Orientation::VERTICAL                           },
-    {DisplayOrientation::FOLLOWRECENT,                          Orientation::UNSPECIFIED                        },
-    {DisplayOrientation::LANDSCAPE_INVERTED,                    Orientation::REVERSE_HORIZONTAL                 },
-    {DisplayOrientation::PORTRAIT_INVERTED,                     Orientation::REVERSE_VERTICAL                   },
-    {DisplayOrientation::AUTO_ROTATION,                         Orientation::SENSOR                             },
-    {DisplayOrientation::AUTO_ROTATION_LANDSCAPE,               Orientation::SENSOR_HORIZONTAL                  },
-    {DisplayOrientation::AUTO_ROTATION_PORTRAIT,                Orientation::SENSOR_VERTICAL                    },
-    {DisplayOrientation::AUTO_ROTATION_RESTRICTED,              Orientation::AUTO_ROTATION_RESTRICTED           },
-    {DisplayOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED,    Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED },
-    {DisplayOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED,     Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED  },
-    {DisplayOrientation::LOCKED,                                Orientation::LOCKED                             },
+const std::map<OHOS::AppExecFwk::DisplayOrientation, Orientation> ABILITY_TO_WMS_ORIENTATION_MAP {
+    {OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED, Orientation::UNSPECIFIED},
+    {OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE, Orientation::HORIZONTAL},
+    {OHOS::AppExecFwk::DisplayOrientation::PORTRAIT, Orientation::VERTICAL},
+    {OHOS::AppExecFwk::DisplayOrientation::FOLLOWRECENT, Orientation::LOCKED},
+    {OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE_INVERTED, Orientation::REVERSE_HORIZONTAL},
+    {OHOS::AppExecFwk::DisplayOrientation::PORTRAIT_INVERTED, Orientation::REVERSE_VERTICAL},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION, Orientation::SENSOR},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE, Orientation::SENSOR_HORIZONTAL},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT, Orientation::SENSOR_VERTICAL},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_RESTRICTED, Orientation::AUTO_ROTATION_RESTRICTED},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED,
+        Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED,
+        Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED},
+    {OHOS::AppExecFwk::DisplayOrientation::LOCKED, Orientation::LOCKED},
 };
 
 class WindowImpl : public Window {
@@ -82,6 +84,15 @@ class WindowImpl : public Window {
                 listener.GetRefPtr()->windowLifecycleCb();    \
             }                                                 \
         }                                                     \
+    } while (0)
+
+#define CALL_LIFECYCLE_LISTENER_WITH_PARAM(windowLifecycleCb, listeners, param) \
+    do {                                                                        \
+        for (auto& listener : (listeners)) {                                    \
+            if (listener.GetRefPtr() != nullptr) {                              \
+                listener.GetRefPtr()->windowLifecycleCb(param);                 \
+            }                                                                   \
+        }                                                                       \
     } while (0)
 
 #define CALL_UI_CONTENT(uiContentCb)                          \
@@ -125,8 +136,8 @@ public:
     virtual bool IsLayoutFullScreen() const override;
     virtual WMError SetWindowType(WindowType type) override;
     virtual WMError SetWindowMode(WindowMode mode) override;
-    virtual void SetAlpha(float alpha) override;
-    virtual void SetTransform(const Transform& trans) override;
+    virtual WMError SetAlpha(float alpha) override;
+    virtual WMError SetTransform(const Transform& trans) override;
     virtual WMError AddWindowFlag(WindowFlag flag) override;
     virtual WMError RemoveWindowFlag(WindowFlag flag) override;
     virtual WMError SetWindowFlags(uint32_t flags) override;
@@ -160,19 +171,22 @@ public:
     virtual WMError SetBrightness(float brightness) override;
     virtual float GetBrightness() const override;
     virtual WMError SetCallingWindow(uint32_t windowId) override;
-    virtual void SetPrivacyMode(bool isPrivacyMode) override;
+    virtual WMError SetPrivacyMode(bool isPrivacyMode) override;
     virtual bool IsPrivacyMode() const override;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
-    virtual void DisableAppWindowDecor() override;
+    virtual WMError DisableAppWindowDecor() override;
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
-    virtual void SetSnapshotSkip(bool isSkip) override;
+    WmErrorCode RaiseToAppTop() override;
+    virtual WMError SetAspectRatio(float ratio) override;
+    virtual WMError UnsetAspectRatio() override;
+    virtual WMError SetSnapshotSkip(bool isSkip) override;
 
     // window effect
     virtual WMError SetCornerRadius(float cornerRadius) override;
     virtual WMError SetShadowRadius(float radius) override;
     virtual WMError SetShadowColor(std::string color) override;
-    virtual void SetShadowOffsetX(float offsetX) override;
-    virtual void SetShadowOffsetY(float offsetY) override;
+    virtual WMError SetShadowOffsetX(float offsetX) override;
+    virtual WMError SetShadowOffsetY(float offsetY) override;
     virtual WMError SetBlur(float radius) override;
     virtual WMError SetBackdropBlur(float radius) override;
     virtual WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) override;
@@ -187,26 +201,27 @@ public:
     virtual WMError RequestFocus() const override;
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
 
-    virtual bool RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
-    virtual bool RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
-    virtual bool UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
-    virtual bool UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
-    virtual bool RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
-    virtual bool UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
-    virtual bool RegisterDragListener(const sptr<IWindowDragListener>& listener) override;
-    virtual bool UnregisterDragListener(const sptr<IWindowDragListener>& listener) override;
-    virtual bool RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
-    virtual bool UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
+    virtual WMError RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
+    virtual WMError RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
+    virtual WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
+    virtual WMError UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
+    virtual WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
+    virtual WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
+    virtual WMError RegisterDragListener(const sptr<IWindowDragListener>& listener) override;
+    virtual WMError UnregisterDragListener(const sptr<IWindowDragListener>& listener) override;
+    virtual WMError RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
+    virtual WMError UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
-    virtual bool RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
-    virtual bool UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
-    virtual bool RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
-    virtual bool UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
-    virtual bool RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener) override;
-    virtual bool RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
-    virtual bool UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
-    virtual bool RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
-    virtual bool UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
+    virtual WMError RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
+    virtual WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
+    virtual WMError RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
+    virtual WMError UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
+    virtual WMError RegisterAnimationTransitionController(
+        const sptr<IAnimationTransitionController>& listener) override;
+    virtual WMError RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
+    virtual WMError UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
+    virtual WMError RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
+    virtual WMError UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
     virtual void RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) override;
     virtual void UnregisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) override;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
@@ -222,6 +237,9 @@ public:
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void UpdateWindowState(WindowState state);
+    WmErrorCode UpdateSubWindowStateAndNotify(uint32_t parentId);
+    WmErrorCode UpdateWindowStateWhenShow();
+    WmErrorCode UpdateWindowStateWhenHide();
     sptr<WindowProperty> GetWindowProperty();
     void UpdateDragEvent(const PointInfo& point, DragEvent event);
     void UpdateDisplayId(DisplayId from, DisplayId to);
@@ -262,8 +280,8 @@ public:
 private:
     template<typename T1, typename T2, typename Ret>
     using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
-    template<typename T> bool RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
-    template<typename T> bool UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
+    template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
+    template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> void ClearUselessListeners(std::map<uint32_t, T>& listeners, uint32_t winId)
     {
         listeners.erase(winId);
@@ -382,19 +400,25 @@ private:
         std::lock_guard<std::recursive_mutex> lock(globalMutex_);
         return dialogDeathRecipientListener_[GetWindowId()];
     }
-    inline void NotifyAfterForeground(bool needNotifyUiContent = true)
+    inline void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true)
     {
-        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER(AfterForeground, lifecycleListeners);
+        if (needNotifyListeners) {
+            auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+            CALL_LIFECYCLE_LISTENER(AfterForeground, lifecycleListeners);
+        }
         if (needNotifyUiContent) {
             CALL_UI_CONTENT(Foreground);
         }
     }
-    inline void NotifyAfterBackground()
+    inline void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true)
     {
-        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER(AfterBackground, lifecycleListeners);
-        CALL_UI_CONTENT(Background);
+        if (needNotifyListeners) {
+            auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+            CALL_LIFECYCLE_LISTENER(AfterBackground, lifecycleListeners);
+        }
+        if (needNotifyUiContent) {
+            CALL_UI_CONTENT(Background);
+        }
     }
     inline void NotifyAfterFocused()
     {
@@ -443,15 +467,10 @@ private:
         auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
         CALL_LIFECYCLE_LISTENER(AfterInactive, lifecycleListeners);
     }
-    inline void NotifyForegroundFailed()
+    inline void NotifyForegroundFailed(WMError ret)
     {
         auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER(ForegroundFailed, lifecycleListeners);
-    }
-    inline void NotifyForegroundInvalidWindowMode()
-    {
-        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER(ForegroundInvalidMode, lifecycleListeners);
+        CALL_LIFECYCLE_LISTENER_WITH_PARAM(ForegroundFailed, lifecycleListeners, static_cast<int32_t>(ret));
     }
     inline bool IsStretchableReason(WindowSizeChangeReason reason)
     {
@@ -464,14 +483,14 @@ private:
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void NotifyDisplayMoveChange(DisplayId from, DisplayId to);
     void NotifyOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info);
-    void NotifyModeChange(WindowMode mode);
+    void NotifyModeChange(WindowMode mode, bool hasDeco = true);
     void NotifyDragEvent(const PointInfo& point, DragEvent event);
     void DestroyDialogWindow();
     void DestroyFloatingWindow();
     void DestroySubWindow();
     void SetDefaultOption(); // for api7
     bool IsWindowValid() const;
-    static sptr<Window> FindTopWindow(uint32_t topWinId);
+    static sptr<Window> FindWindowById(uint32_t WinId);
     void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void ConsumeMoveOrDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void ReadyToMoveOrDragWindow(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -517,7 +536,7 @@ private:
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
     void UpdateWindowStateUnfrozen();
     void UpdateViewportConfig(const Rect& rect, const sptr<class Display>& display, WindowSizeChangeReason reason);
-
+    void UpdateDecorEnable(bool needNotify = false);
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
         ColorSpace colorSpace;
@@ -533,6 +552,7 @@ private:
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> appDialogWindowMap_;
     sptr<WindowProperty> property_;
     WindowState state_ { WindowState::STATE_INITIAL };
+    WindowState subWindowState_ {WindowState::STATE_INITIAL};
     WindowTag windowTag_;
     sptr<IAceAbilityHandler> aceAbilityHandler_;
     static std::map<uint32_t, std::vector<sptr<IScreenshotListener>>> screenshotListeners_;
@@ -560,7 +580,6 @@ private:
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
 
     sptr<MoveDragProperty> moveDragProperty_;
-    bool isAppDecorEnable_ = true;
     SystemConfig windowSystemConfig_ ;
     bool isOriginRectSet_ = false;
     bool needRemoveWindowInputChannel_ = false;

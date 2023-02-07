@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+* Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -1240,6 +1240,46 @@ declare namespace window {
       * @since 9
       */
     snapshot(): Promise<image.PixelMap>;
+
+    /**
+     * Sets the aspect ratio of window
+     * @param { number } ratio - The aspect ratio of window except decoration
+     * @param { AsyncCallback<void> } callback - The callback of setAspectRatio.
+     * @throws { BusinessError } 401 - If param is invalid
+     * @throws { BusinessError } 1300002 - If window state is abnormally
+     * @throws { BusinessError } 1300004 - If this window can not set aspect ratio
+     * @since 10
+     */
+    setAspectRatio(ratio: number, callback: AsyncCallback<void>): void;
+
+    /**
+     * Sets the aspect ratio of window
+     * @param { number } ratio - The aspect ratio of window except decoration
+     * @returns { Promise<void> } - The promise returned by the function.
+     * @throws { BusinessError } 401 - If param is invalid
+     * @throws { BusinessError } 1300002 - If window state is abnormally
+     * @throws { BusinessError } 1300004 - If this window can not set aspect ratio
+     * @since 10
+     */
+    setAspectRatio(ratio: number): Promise<void>;
+
+    /**
+     * Unsets the aspect ratio of window
+     * @param { AsyncCallback<void> } callback - The callback of setAspectRatio.
+     * @throws { BusinessError } 1300002 - If window state is abnormally
+     * @throws { BusinessError } 1300004 - If this window can not unset aspect ratio
+     * @since 10
+     */
+    unsetAspectRatio(callback: AsyncCallback<void>): void;
+
+    /**
+     * Unsets the aspect ratio of window
+     * @returns { Promise<void> } - The promise returned by the function.
+     * @throws { BusinessError } 1300002 - If window state is abnormally
+     * @throws { BusinessError } 1300004 - If this window can not unset aspect ratio
+     * @since 10
+     */
+    unsetAspectRatio(): Promise<void>;
   }
   /**
    * Transition Context

@@ -62,19 +62,19 @@ public:
     DMError DestroyVirtualScreen(ScreenId screenId);
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
     void SetBuildInDefaultOrientation(Orientation orientation);
-    bool SetOrientation(ScreenId screenId, Orientation orientation, bool isFromWindow);
+    DMError SetOrientation(ScreenId screenId, Orientation orientation, bool isFromWindow);
     bool SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow);
 
-    bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
+    DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
     const std::shared_ptr<RSDisplayNode>& GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const;
     void UpdateRSTree(ScreenId dmsScreenId, ScreenId parentScreenId, std::shared_ptr<RSSurfaceNode>& surfaceNode,
         bool isAdd, bool isMultiDisplay);
-    bool MakeMirror(ScreenId, std::vector<ScreenId> screens);
+    DMError MakeMirror(ScreenId, std::vector<ScreenId> screens);
     bool MakeExpand(std::vector<ScreenId> screenIds, std::vector<Point> startPoints);
     void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens);
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) const;
     ScreenPowerState GetScreenPower(ScreenId dmsScreenId) const;
-    bool SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio);
+    DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio);
 
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts);

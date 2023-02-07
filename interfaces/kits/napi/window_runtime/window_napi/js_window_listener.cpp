@@ -74,7 +74,7 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason)
         *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsWindowListener::OnModeChange(WindowMode mode)
+void JsWindowListener::OnModeChange(WindowMode mode, bool hasDeco)
 {
     WLOGI("[NAPI]OnModeChange %{public}u", mode);
 }
@@ -173,12 +173,22 @@ void JsWindowListener::LifeCycleCallBack(LifeCycleEventType eventType)
 
 void JsWindowListener::AfterForeground()
 {
-    LifeCycleCallBack(LifeCycleEventType::FOREGROUND);
+    if (state_ == WindowState::STATE_INITIAL || state_ == WindowState::STATE_HIDDEN) {
+        LifeCycleCallBack(LifeCycleEventType::FOREGROUND);
+        state_ = WindowState::STATE_SHOWN;
+    } else {
+        WLOGFD("[NAPI]window is already shown");
+    }
 }
 
 void JsWindowListener::AfterBackground()
 {
-    LifeCycleCallBack(LifeCycleEventType::BACKGROUND);
+    if (state_ == WindowState::STATE_INITIAL || state_ == WindowState::STATE_SHOWN) {
+        LifeCycleCallBack(LifeCycleEventType::BACKGROUND);
+        state_ = WindowState::STATE_HIDDEN;
+    } else {
+        WLOGFD("[NAPI]window is already hide");
+    }
 }
 
 void JsWindowListener::AfterFocused()

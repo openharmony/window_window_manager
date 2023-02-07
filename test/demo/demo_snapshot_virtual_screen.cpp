@@ -63,7 +63,8 @@ int main(int argc, char *argv[])
     ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(option);
     std::vector<ScreenId> mirrorIds;
     mirrorIds.push_back(virtualScreenId);
-    ScreenManager::GetInstance().MakeMirror(mainId, mirrorIds);
+    ScreenId screenGroupId = static_cast<ScreenId>(1);
+    ScreenManager::GetInstance().MakeMirror(mainId, mirrorIds, screenGroupId);
     int fileIndex = 1;
     auto startTime = time(nullptr);
     if (startTime < 0) {

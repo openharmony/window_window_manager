@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,6 +87,7 @@ public:
     void UpdatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool isNeedComputerTransform();
     void ClearTransformZAxisOffset(Transform& trans);
+    void SetAspectRatio(float ratio);
 
     const std::string& GetWindowName() const;
     const AbilityInfo& GetAbilityInfo() const;
@@ -132,6 +133,7 @@ public:
     WindowSizeLimits GetUpdatedSizeLimits() const;
     const TransformHelper::Matrix4& GetTransformMat() const;
     const TransformHelper::Matrix4& GetWorldTransformMat() const;
+    float GetAspectRatio() const;
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static WindowProperty* Unmarshalling(Parcel& parcel);
@@ -184,7 +186,7 @@ private:
         { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty() },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
     };
-    bool isDecorEnable_ { false };
+    bool isDecorEnable_ { true };
     Rect originRect_ = { 0, 0, 0, 0 };
     bool isStretchable_ {false};
     DragType dragType_ = DragType::DRAG_UNDEFINED;
@@ -201,6 +203,7 @@ private:
     // if scale of trans_ is less than 1.0, zoomTrans_ may be an identity matrix
     bool isDisplayZoomOn_ {false};
     bool isAnimateWindow_ {false};
+    float aspectRatio_ {0.0};
 
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
     WindowSizeLimits sizeLimits_;

@@ -75,7 +75,7 @@ HWTEST_F(AccessibilityConnectionTest, FillAccessibilityWindowInfo01, Function | 
     ASSERT_EQ(2, infos.size());
     ASSERT_TRUE(infos[0]->isDecorEnable_);
     ASSERT_TRUE(infos[0]->focused_);
-    ASSERT_FALSE(infos[1]->isDecorEnable_);
+    ASSERT_TRUE(infos[1]->isDecorEnable_);
     ASSERT_FALSE(infos[1]->focused_);
 }
 

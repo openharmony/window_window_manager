@@ -96,12 +96,12 @@ NativeValue* JsScreen::OnSetOrientation(NativeEngine& engine, NativeCallbackInfo
 
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            bool res = screen_->SetOrientation(orientation);
-            if (res) {
+            DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(screen_->SetOrientation(orientation));
+            if (ret == DmErrorCode::DM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
                 WLOGI("OnSetOrientation success");
             } else {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL),
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
                                                   "JsScreen::OnSetOrientation failed."));
                 WLOGFE("OnSetOrientation failed");
             }
@@ -147,12 +147,12 @@ NativeValue* JsScreen::OnSetScreenActiveMode(NativeEngine& engine, NativeCallbac
 
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            bool res = screen_->SetScreenActiveMode(modeId);
-            if (res) {
+            DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(screen_->SetScreenActiveMode(modeId));
+            if (ret == DmErrorCode::DM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
                 WLOGI("OnSetScreenActiveMode success");
             } else {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL),
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
                                                 "JsScreen::OnSetScreenActiveMode failed."));
                 WLOGFE("OnSetScreenActiveMode failed");
             }
@@ -197,12 +197,12 @@ NativeValue* JsScreen::OnSetDensityDpi(NativeEngine& engine, NativeCallbackInfo&
 
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            bool res = screen_->SetDensityDpi(densityDpi);
-            if (res) {
+            DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(screen_->SetDensityDpi(densityDpi));
+            if (ret == DmErrorCode::DM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
                 WLOGI("OnSetDensityDpi success");
             } else {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL),
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
                                                 "JsScreen::OnSetDensityDpi failed."));
                 WLOGFE("OnSetDensityDpi failed");
             }
@@ -260,6 +260,7 @@ NativeValue* CreateJsScreenObject(NativeEngine& engine, sptr<Screen>& screen)
     object->SetProperty("parent",
         CreateJsValue(engine, parentId == SCREEN_ID_INVALID ? -1 : static_cast<int64_t>(parentId)));
     object->SetProperty("orientation", CreateJsValue(engine, info->GetOrientation()));
+    object->SetProperty("sourceMode", CreateJsValue(engine, info->GetSourceMode()));
     object->SetProperty("activeModeIndex", CreateJsValue(engine, info->GetModeId()));
     object->SetProperty("supportedModeInfo", CreateJsScreenModeArrayObject(engine, info->GetModes()));
     object->SetProperty("densityDpi", CreateJsValue(engine,

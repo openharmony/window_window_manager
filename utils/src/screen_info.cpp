@@ -23,6 +23,7 @@ bool ScreenInfo::Marshalling(Parcel &parcel) const
         parcel.WriteFloat(virtualPixelRatio_) && parcel.WriteUint64(lastParent_) && parcel.WriteUint64(parent_) &&
         parcel.WriteBool(isScreenGroup_) && parcel.WriteUint32(static_cast<uint32_t>(rotation_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(orientation_)) &&
+        parcel.WriteUint32(static_cast<uint32_t>(sourceMode_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
         parcel.WriteUint32(modeId_) && parcel.WriteUint32(static_cast<uint32_t>(modes_.size()));
     if (!res) {
@@ -58,13 +59,14 @@ bool ScreenInfo::InnerUnmarshalling(Parcel& parcel)
     uint32_t size = 0;
     uint32_t rotation;
     uint32_t orientation;
+    uint32_t sourceMode;
     uint32_t type;
     name_ = parcel.ReadString();
     bool res1 = parcel.ReadUint64(id_) &&
         parcel.ReadUint32(virtualWidth_) && parcel.ReadUint32(virtualHeight_) &&
         parcel.ReadFloat(virtualPixelRatio_) && parcel.ReadUint64(lastParent_) && parcel.ReadUint64(parent_) &&
         parcel.ReadBool(isScreenGroup_) && parcel.ReadUint32(rotation) &&
-        parcel.ReadUint32(orientation) && parcel.ReadUint32(type) &&
+        parcel.ReadUint32(orientation) && parcel.ReadUint32(sourceMode) && parcel.ReadUint32(type) &&
         parcel.ReadUint32(modeId_) && parcel.ReadUint32(size);
     if (!res1) {
         return false;
@@ -85,6 +87,7 @@ bool ScreenInfo::InnerUnmarshalling(Parcel& parcel)
     }
     rotation_ = static_cast<Rotation>(rotation);
     orientation_ = static_cast<Orientation>(orientation);
+    sourceMode_ = static_cast<ScreenSourceMode>(sourceMode);
     type_ = static_cast<ScreenType>(type);
     return true;
 }

@@ -479,10 +479,10 @@ NativeValue* JsWindowStage::OnGetSubWindow(NativeEngine& engine, NativeCallbackI
 
 NativeValue* JsWindowStage::OnSetShowOnLockScreen(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    if (!Permission::IsSystemCalling()) {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("set show on lock screen permission denied!");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
-        return CreateJsValue(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING));
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP)));
+        return CreateJsValue(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP));
     }
     if (info.argc < 1) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
@@ -534,9 +534,13 @@ NativeValue* JsWindowStage::OnDisableWindowDecor(NativeEngine& engine, NativeCal
         WLOGFE("[NAPI]Window is null");
         return CreateJsValue(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
     }
-    window->DisableAppWindowDecor();
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->DisableAppWindowDecor());
+    if (ret != WmErrorCode::WM_OK) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
     WLOGI("[NAPI]Window [%{public}u, %{public}s] disable app window decor end",
         window->GetWindowId(), window->GetWindowName().c_str());
+        return engine.CreateUndefined();
+    }
     return engine.CreateUndefined();
 }
 

@@ -78,9 +78,9 @@ public:
     ScreenId GetParentId() const;
     uint32_t GetModeId() const;
     std::vector<sptr<SupportedScreenModes>> GetSupportedModes() const;
-    bool SetScreenActiveMode(uint32_t modeId);
-    bool SetOrientation(Orientation orientation) const;
-    bool SetDensityDpi(uint32_t dpi) const;
+    DMError SetScreenActiveMode(uint32_t modeId);
+    DMError SetOrientation(Orientation orientation) const;
+    DMError SetDensityDpi(uint32_t dpi) const;
     sptr<ScreenInfo> GetScreenInfo() const;
 
     // colorspace, gamut

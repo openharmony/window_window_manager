@@ -70,7 +70,7 @@ void AbstractScreen::UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, b
         WLOGFE("node is nullptr");
         return;
     }
-    WLOGFI("%{public}s surface: %{public}s, %{public}" PRIu64"", (isAdd ? "add" : "remove"),
+    WLOGFD("%{public}s surface: %{public}s, %{public}" PRIu64"", (isAdd ? "add" : "remove"),
         surfaceNode->GetName().c_str(), surfaceNode->GetId());
 
     if (isAdd) {
@@ -241,6 +241,7 @@ void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
     if (fabsf(virtualPixelRatio) < 1e-6) {
         virtualPixelRatio = 1.0f;
     }
+    ScreenSourceMode sourceMode = GetSourceMode();
     info->virtualPixelRatio_ = virtualPixelRatio;
     info->virtualHeight_ = height / virtualPixelRatio;
     info->virtualWidth_ = width / virtualPixelRatio;
@@ -249,6 +250,7 @@ void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
     info->isScreenGroup_ = isScreenGroup_;
     info->rotation_ = rotation_;
     info->orientation_ = orientation_;
+    info->sourceMode_ = sourceMode;
     info->type_ = type_;
     info->modeId_ = activeIdx_;
     info->modes_ = modes_;
@@ -269,6 +271,33 @@ bool AbstractScreen::SetVirtualPixelRatio(float virtualPixelRatio)
 float AbstractScreen::GetVirtualPixelRatio() const
 {
     return virtualPixelRatio_;
+}
+
+ScreenSourceMode AbstractScreen::GetSourceMode() const
+{
+    sptr<AbstractScreenGroup> abstractScreenGroup = GetGroup();
+    if (abstractScreenGroup == nullptr) {
+        return ScreenSourceMode::SCREEN_ALONE;
+    }
+    ScreenId defaultId = screenController_->GetDefaultAbstractScreenId();
+    if (dmsId_ == defaultId) {
+        return ScreenSourceMode::SCREEN_MAIN;
+    }
+    ScreenCombination combination = abstractScreenGroup->GetScreenCombination();
+    switch (combination) {
+        case ScreenCombination::SCREEN_MIRROR: {
+            return ScreenSourceMode::SCREEN_MIRROR;
+        }
+        case ScreenCombination::SCREEN_EXPAND: {
+            return ScreenSourceMode::SCREEN_EXTEND;
+        }
+        case ScreenCombination::SCREEN_ALONE: {
+            return ScreenSourceMode::SCREEN_ALONE;
+        }
+        default: {
+            return ScreenSourceMode::SCREEN_ALONE;
+        }
+    }
 }
 
 Rotation AbstractScreen::CalcRotation(Orientation orientation) const
@@ -466,5 +495,10 @@ Point AbstractScreenGroup::GetChildPosition(ScreenId screenId) const
 size_t AbstractScreenGroup::GetChildCount() const
 {
     return abstractScreenMap_.size();
+}
+
+ScreenCombination AbstractScreenGroup::GetScreenCombination() const
+{
+    return combination_;
 }
 } // namespace OHOS::Rosen

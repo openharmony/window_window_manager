@@ -64,13 +64,14 @@ ohos_shared_library("window_native_kit") {
 
   external_deps = [
     "ability_runtime:ability_manager",
+    "ability_runtime:dialog_request_info",
     "ability_runtime:runtime",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
-    "ipc_js:rpc",
+    "ipc:ipc_napi_common",
     "multimedia_image_framework:image",
     "multimedia_image_framework:image_native",
     "napi:ace_napi",

@@ -196,7 +196,7 @@ AvoidArea WindowManagerProxy::GetAvoidAreaByType(uint32_t windowId, AvoidAreaTyp
     return *area;
 }
 
-bool WindowManagerProxy::RegisterWindowManagerAgent(WindowManagerAgentType type,
+WMError WindowManagerProxy::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     MessageParcel data;
@@ -204,29 +204,29 @@ bool WindowManagerProxy::RegisterWindowManagerAgent(WindowManagerAgentType type,
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
-        return false;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
 
     if (!data.WriteUint32(static_cast<uint32_t>(type))) {
         WLOGFE("Write type failed");
-        return false;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
 
     if (!data.WriteRemoteObject(windowManagerAgent->AsObject())) {
         WLOGFE("Write IWindowManagerAgent failed");
-        return false;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
-        return false;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    return reply.ReadBool();
+    return static_cast<WMError>(reply.ReadInt32());
 }
 
-bool WindowManagerProxy::UnregisterWindowManagerAgent(WindowManagerAgentType type,
+WMError WindowManagerProxy::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     MessageParcel data;
@@ -234,26 +234,26 @@ bool WindowManagerProxy::UnregisterWindowManagerAgent(WindowManagerAgentType typ
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
-        return false;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
 
     if (!data.WriteUint32(static_cast<uint32_t>(type))) {
         WLOGFE("Write type failed");
-        return false;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
 
     if (!data.WriteRemoteObject(windowManagerAgent->AsObject())) {
         WLOGFE("Write IWindowManagerAgent failed");
-        return false;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
-        return false;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    return reply.ReadBool();
+    return static_cast<WMError>(reply.ReadInt32());
 }
 
 WMError WindowManagerProxy::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller)
@@ -358,23 +358,32 @@ void WindowManagerProxy::ProcessPointUp(uint32_t windowId)
     }
 }
 
-void WindowManagerProxy::MinimizeAllAppWindows(DisplayId displayId)
+WMError WindowManagerProxy::MinimizeAllAppWindows(DisplayId displayId)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
-        return;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteUint64(displayId)) {
         WLOGFE("Write displayId failed");
-        return;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_MINIMIZE_ALL_APP_WINDOWS),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
     }
+
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    WLOGFE("MinimizeAllAppWindows: %{public}u", ret);
+    return static_cast<WMError>(ret);
 }
 
 WMError WindowManagerProxy::ToggleShownStateForAllAppWindows()
@@ -785,5 +794,29 @@ void WindowManagerProxy::OffWindowZoom()
         WLOGFE("SendRequest failed");
     }
 }
+
+WmErrorCode WindowManagerProxy::RaiseToAppTop(uint32_t windowId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+
+    if (!data.WriteUint32(windowId)) {
+        WLOGFE("Write anchor delatX failed");
+        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_RAISE_WINDOW_Z_ORDER),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+    return WmErrorCode::WM_OK;
+}
+
 } // namespace Rosen
 } // namespace OHOS

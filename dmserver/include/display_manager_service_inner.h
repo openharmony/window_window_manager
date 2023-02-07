@@ -47,7 +47,7 @@ public:
     void UpdateRSTree(DisplayId displayId, DisplayId parentDisplayId, std::shared_ptr<RSSurfaceNode>& surfaceNode,
         bool isAdd, bool isMultiDisplay);
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
-    bool SetOrientationFromWindow(DisplayId displayId, Orientation orientation);
+    DMError SetOrientationFromWindow(DisplayId displayId, Orientation orientation);
     bool SetRotationFromWindow(DisplayId displayId, Rotation targetRotation);
     void SetGravitySensorSubscriptionEnabled();
     void RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener);

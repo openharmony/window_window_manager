@@ -23,14 +23,16 @@ JsWindowRegisterManager::~JsWindowRegisterManager()
 {
 }
 
-void JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::string type,
+WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::string type,
     CaseType caseType, NativeEngine& engine, NativeValue* value)
 {
+    return WmErrorCode::WM_OK;
 }
 
-void JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std::string type,
+WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std::string type,
     CaseType caseType, NativeValue* value)
 {
+    return WmErrorCode::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

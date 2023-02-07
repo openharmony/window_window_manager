@@ -290,6 +290,8 @@ void AbstractDisplayController::ProcessDisplayRotationChange(sptr<AbstractScreen
     if (abstractDisplay->RequestRotation(absScreen->rotation_)) {
         // Notify rotation event to WMS
         SetDisplayStateChangeListener(abstractDisplay, DisplayStateChangeType::UPDATE_ROTATION);
+        abstractDisplay->SetDisplayOrientation(
+            ScreenRotationController::ConvertRotationToDisplayOrientation(absScreen->rotation_));
     }
     sptr<DisplayInfo> displayInfo = abstractDisplay->ConvertToDisplayInfo();
     DisplayManagerAgentController::GetInstance().OnDisplayChange(displayInfo,
@@ -422,7 +424,6 @@ void AbstractDisplayController::ProcessDisplayUpdateOrientation(sptr<AbstractScr
     if (abstractDisplay->RequestRotation(absScreen->rotation_)) {
         // Notify rotation event to WMS
         SetDisplayStateChangeListener(abstractDisplay, DisplayStateChangeType::UPDATE_ROTATION);
-        ProcessDisplayCompression(absScreen);
     }
 }
 

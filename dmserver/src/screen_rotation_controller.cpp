@@ -36,12 +36,14 @@ Rotation ScreenRotationController::rotationLockedRotation_;
 uint32_t ScreenRotationController::defaultDeviceRotation_ = 0;
 std::map<SensorRotation, DeviceRotation> ScreenRotationController::sensorToDeviceRotationMap_;
 std::map<DeviceRotation, Rotation> ScreenRotationController::deviceToDisplayRotationMap_;
+std::map<Rotation, DisplayOrientation> ScreenRotationController::displayToDisplayOrientationMap_;
 DeviceRotation ScreenRotationController::lastSensorRotationConverted_ = DeviceRotation::INVALID;
 
 void ScreenRotationController::Init()
 {
     ProcessRotationMapping();
     currentDisplayRotation_ = GetCurrentDisplayRotation();
+    defaultDisplayId_ = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
     lastSensorDecidedRotation_ = currentDisplayRotation_;
     rotationLockedRotation_ = currentDisplayRotation_;
 }
@@ -51,12 +53,21 @@ bool ScreenRotationController::IsScreenRotationLocked()
     return isScreenRotationLocked_;
 }
 
-void ScreenRotationController::SetScreenRotationLocked(bool isLocked)
+DMError ScreenRotationController::SetScreenRotationLocked(bool isLocked)
 {
+    isScreenRotationLocked_ = isLocked;
     if (isLocked) {
         rotationLockedRotation_ = GetCurrentDisplayRotation();
+        return DMError::DM_OK;
     }
-    isScreenRotationLocked_ = isLocked;
+    if (GetCurrentDisplayRotation() == ConvertDeviceToDisplayRotation(lastSensorRotationConverted_)) {
+        return DMError::DM_OK;
+    }
+    Orientation currentOrientation = GetPreferredOrientation();
+    if (IsSensorRelatedOrientation(currentOrientation)) {
+        ProcessSwitchToSensorRelatedOrientation(currentOrientation, lastSensorRotationConverted_);
+    }
+    return DMError::DM_OK;
 }
 
 void ScreenRotationController::SetDefaultDeviceRotationOffset(uint32_t defaultDeviceRotationOffset)
@@ -255,16 +266,14 @@ void ScreenRotationController::ProcessSwitchToSensorRelatedOrientation(
 void ScreenRotationController::ProcessSwitchToAutoRotation(DeviceRotation rotation)
 {
     if (rotation != DeviceRotation::INVALID) {
-        return;
+        SetScreenRotation(ConvertDeviceToDisplayRotation(rotation));
     }
 }
 
 void ScreenRotationController::ProcessSwitchToAutoRotationPortrait(DeviceRotation rotation)
 {
-    if (IsCurrentDisplayVertical()) {
-        return;
-    }
     if (IsDeviceRotationVertical(rotation)) {
+        SetScreenRotation(ConvertDeviceToDisplayRotation(rotation));
         return;
     }
     SetScreenRotation(ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_PORTRAIT));
@@ -272,10 +281,8 @@ void ScreenRotationController::ProcessSwitchToAutoRotationPortrait(DeviceRotatio
 
 void ScreenRotationController::ProcessSwitchToAutoRotationLandscape(DeviceRotation rotation)
 {
-    if (IsCurrentDisplayHorizontal()) {
-        return;
-    }
     if (IsDeviceRotationHorizontal(rotation)) {
+        SetScreenRotation(ConvertDeviceToDisplayRotation(rotation));
         return;
     }
     SetScreenRotation(ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_LANDSCAPE));
@@ -313,6 +320,14 @@ DeviceRotation ScreenRotationController::ConvertSensorToDeviceRotation(SensorRot
     return sensorToDeviceRotationMap_.at(sensorRotation);
 }
 
+DisplayOrientation ScreenRotationController::ConvertRotationToDisplayOrientation(Rotation rotation)
+{
+    if (displayToDisplayOrientationMap_.empty()) {
+        ProcessRotationMapping();
+    }
+    return displayToDisplayOrientationMap_.at(rotation);
+}
+
 Rotation ScreenRotationController::ConvertDeviceToDisplayRotation(DeviceRotation deviceRotation)
 {
     if (deviceRotation == DeviceRotation::INVALID) {
@@ -340,6 +355,18 @@ void ScreenRotationController::ProcessRotationMapping()
                 defaultDeviceRotation_ == 0 ? Rotation::ROTATION_180 : Rotation::ROTATION_270},
             {DeviceRotation::ROTATION_LANDSCAPE_INVERTED,
                 defaultDeviceRotation_ == 1 ? Rotation::ROTATION_180 : Rotation::ROTATION_270},
+        };
+    }
+    if (displayToDisplayOrientationMap_.empty()) {
+        displayToDisplayOrientationMap_ = {
+            {defaultDeviceRotation_ == 0 ? Rotation::ROTATION_0 : Rotation::ROTATION_90,
+                DisplayOrientation::PORTRAIT},
+            {defaultDeviceRotation_ == 1 ? Rotation::ROTATION_0 : Rotation::ROTATION_90,
+                DisplayOrientation::LANDSCAPE},
+            {defaultDeviceRotation_ == 0 ? Rotation::ROTATION_180 : Rotation::ROTATION_270,
+                DisplayOrientation::PORTRAIT_INVERTED},
+            {defaultDeviceRotation_ == 1 ? Rotation::ROTATION_180 : Rotation::ROTATION_270,
+                DisplayOrientation::LANDSCAPE_INVERTED},
         };
     }
     if (sensorToDeviceRotationMap_.empty()) {
