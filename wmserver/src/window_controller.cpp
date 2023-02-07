@@ -1362,7 +1362,7 @@ WMError WindowController::SetAspectRatio(uint32_t windowId, float ratio)
     }
     std::string keyName = nameVector.empty() ? node->abilityInfo_.bundleName_ :
                                                node->abilityInfo_.bundleName_ + "." + nameVector.back();
-    if (MathHelper::NearZero(ratio)) { // If ratio is 0.0, need to unset aspect and delete storage
+    if (MathHelper::NearZero(ratio)) { // If ratio is 0.0, need to reset aspect and delete storage
         if (PersistentStorage::HasKey(keyName, PersistentStorageType::ASPECT_RATIO)) {
             PersistentStorage::Delete(keyName, PersistentStorageType::ASPECT_RATIO);
         }

@@ -191,7 +191,7 @@ public:
     virtual bool IsAllowHaveSystemSubWindow() override;
     WmErrorCode RaiseToAppTop() override;
     virtual WMError SetAspectRatio(float ratio) override;
-    virtual WMError UnsetAspectRatio() override;
+    virtual WMError ResetAspectRatio() override;
 
 private:
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;

@@ -534,7 +534,7 @@ public:
          * 1) Usually the size limits won't be empty after show window.
          *    In case of SetAspectRatio is called befor show (size limits may be empty at that time) or the
          *    sizeLimits is empty, there is no need to check ratio (layout will check), return true directly.
-         * 2) ratio : 0.0 means unset aspect ratio
+         * 2) ratio : 0.0 means reset aspect ratio
          */
         if (sizeLimits.IsEmpty() || MathHelper::NearZero(ratio)) {
             return true;
