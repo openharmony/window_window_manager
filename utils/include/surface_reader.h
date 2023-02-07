@@ -19,7 +19,7 @@
 #include "refbase.h"
 
 #include <surface.h>
-
+#include "iconsumer_surface.h"
 #include "surface_reader_handler.h"
 
 namespace OHOS {
@@ -55,7 +55,7 @@ private:
     bool ProcessBuffer(const sptr<SurfaceBuffer> &buf);
 
     sptr<IBufferConsumerListener> listener_ = nullptr;
-    sptr<Surface> csurface_ = nullptr; // cosumer surface
+    sptr<IConsumerSurface> csurface_ = nullptr; // cosumer surface
     sptr<Surface> psurface_ = nullptr; // producer surface
     sptr<SurfaceBuffer> prevBuffer_ = nullptr;
     sptr<SurfaceReaderHandler> handler_ = nullptr;

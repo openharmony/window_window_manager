@@ -252,13 +252,14 @@ DMError DisplayManagerService::DestroyVirtualScreen(ScreenId screenId)
     return abstractScreenController_->DestroyVirtualScreen(screenId);
 }
 
-DMError DisplayManagerService::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface)
+DMError DisplayManagerService::SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface)
 {
     WLOGFI("SetVirtualScreenSurface::ScreenId: %{public}" PRIu64 "", screenId);
     CHECK_SCREEN_AND_RETURN(screenId, DMError::DM_ERROR_INVALID_PARAM);
     if (Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION) ||
         Permission::IsStartByHdcd()) {
-        return abstractScreenController_->SetVirtualScreenSurface(screenId, surface);
+        sptr<Surface> pPurface = Surface::CreateSurfaceAsProducer(surface);
+        return abstractScreenController_->SetVirtualScreenSurface(screenId, pPurface);
     }
     WLOGFE("permission denied");
     return DMError::DM_ERROR_INVALID_CALLING;

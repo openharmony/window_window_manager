@@ -193,7 +193,7 @@ DMError DisplayManagerProxy::DestroyVirtualScreen(ScreenId screenId)
     return static_cast<DMError>(reply.ReadInt32());
 }
 
-DMError DisplayManagerProxy::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface)
+DMError DisplayManagerProxy::SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -209,10 +209,10 @@ DMError DisplayManagerProxy::SetVirtualScreenSurface(ScreenId screenId, sptr<Sur
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     bool res = data.WriteUint64(static_cast<uint64_t>(screenId));
-    if (surface != nullptr && surface->GetProducer() != nullptr) {
+    if (surface != nullptr) {
         res = res &&
             data.WriteBool(true) &&
-            data.WriteRemoteObject(surface->GetProducer()->AsObject());
+            data.WriteRemoteObject(surface->AsObject());
     } else {
         WLOGFW("SetVirtualScreenSurface: surface is nullptr");
         res = res && data.WriteBool(false);
