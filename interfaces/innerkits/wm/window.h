@@ -490,7 +490,7 @@ public:
      * @brief Unset aspect ratio
      * @return WMError
      */
-    virtual WMError UnsetAspectRatio() = 0;
+    virtual WMError ResetAspectRatio() = 0;
 };
 }
 }
