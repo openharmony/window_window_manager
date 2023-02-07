@@ -170,6 +170,8 @@ public:
                 return WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY & modeSupportInfo;
             case WindowMode::WINDOW_MODE_PIP:
                 return WindowModeSupport::WINDOW_MODE_SUPPORT_PIP & modeSupportInfo;
+            case WindowMode::WINDOW_MODE_UNDEFINED:
+                return false;
             default:
                 return true;
         }
