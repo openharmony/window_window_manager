@@ -130,11 +130,11 @@ NativeValue* JsWindowStage::OnSetUIContent(NativeEngine& engine, NativeCallbackI
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         return engine.CreateUndefined();
     }
-    // auto weakScene = windowScene_.lock();
-    // if (weakScene == nullptr || weakScene->GetMainWindow() == nullptr) {
-    //     WLOGFE("[NAPI]WindowScene is null or window is null");
-    //     return engine.CreateUndefined();
-    // }
+    auto weakScene = windowScene_.lock();
+    if (weakScene == nullptr || weakScene->GetMainWindow() == nullptr) {
+        WLOGFE("[NAPI]WindowScene is null or window is null");
+        return engine.CreateUndefined();
+    }
 
     // Parse info->argv[0] as abilitycontext
     auto objContext = ConvertNativeValueTo<NativeObject>(info.argv[0]);
@@ -149,14 +149,7 @@ NativeValue* JsWindowStage::OnSetUIContent(NativeEngine& engine, NativeCallbackI
         WLOGFE("[NAPI]Failed to convert parameter to url");
         return engine.CreateUndefined();
     }
-
-    auto uiWindow = uiWindow_.lock();
-    if (uiWindow) {
-        uiWindow->InitUIContent(contextUrl, &engine, info.argv[CONTENT_STORAGE_ARG]);
-        uiWindow->Connect();
-    }
-
-    // weakScene->GetMainWindow()->SetUIContent(contextUrl, &engine, info.argv[CONTENT_STORAGE_ARG]);
+    weakScene->GetMainWindow()->SetUIContent(contextUrl, &engine, info.argv[CONTENT_STORAGE_ARG]);
     return engine.CreateUndefined();
 }
 
@@ -344,8 +337,16 @@ NativeValue* JsWindowStage::OnLoadContent(NativeEngine& engine, NativeCallbackIn
     std::shared_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
         std::shared_ptr<NativeReference>(engine.CreateReference(storage, 1));
     AsyncTask::CompleteCallback complete =
-        [weak = windowScene_, contentStorage, contextUrl, errCode](
+        [weak = windowScene_, contentStorage, contextUrl, weakUIWindow = uiWindow_](
             NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto uiWindow = weakUIWindow.lock();
+            if (uiWindow) {
+                NativeValue* nativeStorage = contentStorage ? contentStorage->Get() : nullptr;
+                uiWindow->InitUIContent(contextUrl, &engine, nativeStorage);
+                uiWindow->Connect();
+                return;
+            }
+
             auto weakScene = weak.lock();
             if (weakScene == nullptr) {
                 WLOGFE("[NAPI]Window scene is null");
