@@ -51,6 +51,9 @@ std::vector<sptr<SupportedScreenModes>> AbstractScreen::GetAbstractScreenModes()
 
 sptr<AbstractScreenGroup> AbstractScreen::GetGroup() const
 {
+    if (screenController_ == nullptr) {
+        return nullptr;
+    }
     return screenController_->GetAbstractScreenGroup(groupDmsId_);
 }
 
@@ -276,7 +279,7 @@ float AbstractScreen::GetVirtualPixelRatio() const
 ScreenSourceMode AbstractScreen::GetSourceMode() const
 {
     sptr<AbstractScreenGroup> abstractScreenGroup = GetGroup();
-    if (abstractScreenGroup == nullptr) {
+    if (abstractScreenGroup == nullptr || screenController_ == nullptr) {
         return ScreenSourceMode::SCREEN_ALONE;
     }
     ScreenId defaultId = screenController_->GetDefaultAbstractScreenId();
@@ -377,6 +380,9 @@ bool AbstractScreenGroup::GetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen
             if (GetChildCount() == 0 || mirrorScreenId_ == dmsScreen->dmsId_) {
                 WLOGI("AddChild, SCREEN_MIRROR, config is not mirror");
                 break;
+            }
+            if (screenController_ == nullptr) {
+                return false;
             }
             if (mirrorScreenId_ == SCREEN_ID_INVALID || !HasChild(mirrorScreenId_)) {
                 WLOGI("AddChild, mirrorScreenId_ is invalid, use default screen");
