@@ -765,7 +765,7 @@ WMError WindowImpl::SetAspectRatio(float ratio)
     return WMError::WM_OK;
 }
 
-WMError WindowImpl::UnsetAspectRatio()
+WMError WindowImpl::ResetAspectRatio()
 {
     WLOGFI("windowId: %{public}u", GetWindowId());
     if (!WindowHelper::IsMainWindow(GetType())) {

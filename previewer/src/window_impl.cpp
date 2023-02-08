@@ -769,7 +769,7 @@ WMError WindowImpl::SetAspectRatio(float ratio)
     return WMError::WM_OK;
 }
 
-WMError WindowImpl::UnsetAspectRatio()
+WMError WindowImpl::ResetAspectRatio()
 {
     return WMError::WM_OK;
 }

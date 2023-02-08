@@ -1264,22 +1264,22 @@ declare namespace window {
     setAspectRatio(ratio: number): Promise<void>;
 
     /**
-     * Unsets the aspect ratio of window
+     * Resets the aspect ratio of window
      * @param { AsyncCallback<void> } callback - The callback of setAspectRatio.
      * @throws { BusinessError } 1300002 - If window state is abnormally
-     * @throws { BusinessError } 1300004 - If this window can not unset aspect ratio
+     * @throws { BusinessError } 1300004 - If this window can not reset aspect ratio
      * @since 10
      */
-    unsetAspectRatio(callback: AsyncCallback<void>): void;
+    resetAspectRatio(callback: AsyncCallback<void>): void;
 
     /**
-     * Unsets the aspect ratio of window
+     * Resets the aspect ratio of window
      * @returns { Promise<void> } - The promise returned by the function.
      * @throws { BusinessError } 1300002 - If window state is abnormally
-     * @throws { BusinessError } 1300004 - If this window can not unset aspect ratio
+     * @throws { BusinessError } 1300004 - If this window can not reset aspect ratio
      * @since 10
      */
-    unsetAspectRatio(): Promise<void>;
+    resetAspectRatio(): Promise<void>;
   }
   /**
    * Transition Context
