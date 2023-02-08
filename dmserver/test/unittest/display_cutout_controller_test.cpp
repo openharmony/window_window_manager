@@ -221,6 +221,7 @@ HWTEST_F(DisplayCutoutControllerTest, TransferBoundingRectsByRotation03, Functio
     absScreenController = nullptr;
     absScreen = new AbstractScreen(absScreenController, name, sid, 1);
     auto displayController = DisplayManagerService::GetInstance().abstractDisplayController_;
+    ASSERT_NE(displayController, nullptr);
 
     sptr<AbstractDisplay> absDisplay = new AbstractDisplay(id, name, info, absScreen);
     absDisplay->RequestRotation(Rotation::ROTATION_0);
@@ -238,6 +239,7 @@ HWTEST_F(DisplayCutoutControllerTest, TransferBoundingRectsByRotation03, Functio
     controller->TransferBoundingRectsByRotation(id, boundingRects);
 
     absScreenController = DisplayManagerService::GetInstance().abstractScreenController_;
+    ASSERT_NE(absScreenController, nullptr);
     absScreenController->dmsScreenMap_.insert(std::make_pair(sid, absScreen));
     absScreen->modes_.emplace_back(info);
     absDisplay->RequestRotation(Rotation::ROTATION_180);

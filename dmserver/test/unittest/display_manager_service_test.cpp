@@ -383,6 +383,22 @@ HWTEST_F(DisplayManagerServiceTest, VirtualPixelRatio, Function | SmallTest | Le
 {
     ASSERT_TRUE(DMError::DM_OK != dms_->SetVirtualPixelRatio(SCREEN_ID_INVALID, 0.f));
 }
+
+/**
+ * @tc.name: ScreenRotationLock
+ * @tc.desc: DMS mirror
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, ScreenRotationLock, Function | SmallTest | Level3)
+{
+    dms_->SetScreenRotationLocked(false);
+
+    bool isLocked = false;
+    dms_->IsScreenRotationLocked(isLocked);
+    ASSERT_EQ(false, isLocked);
+
+    ASSERT_NE(nullptr, dms_->GetCutoutInfo(10));
+}
 }
 } // namespace Rosen
 } // namespace OHOS
