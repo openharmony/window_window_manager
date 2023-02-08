@@ -343,8 +343,9 @@ void ScreenRotationController::ProcessRotationMapping()
 {
     sptr<SupportedScreenModes> modes =
         DisplayManagerServiceInner::GetInstance().GetScreenModesByDisplayId(defaultDisplayId_);
+
     // 0 means PORTRAIT, 1 means LANDSCAPE.
-    defaultDeviceRotation_ = modes->width_ < modes->height_ ? 0 : 1;
+    defaultDeviceRotation_ = (modes == nullptr || modes->width_ < modes->height_) ? 0 : 1;
     if (deviceToDisplayRotationMap_.empty()) {
         deviceToDisplayRotationMap_ = {
             {DeviceRotation::ROTATION_PORTRAIT,
