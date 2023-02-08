@@ -588,11 +588,11 @@ NativeValue* JsWindow::SetAspectRatio(NativeEngine* engine, NativeCallbackInfo* 
     return (me != nullptr) ? me->OnSetAspectRatio(*engine, *info) : nullptr;
 }
 
-NativeValue* JsWindow::UnsetAspectRatio(NativeEngine* engine, NativeCallbackInfo* info)
+NativeValue* JsWindow::ResetAspectRatio(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGI("[NAPI]UnsetAspectRatio");
+    WLOGI("[NAPI]ResetAspectRatio");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
-    return (me != nullptr) ? me->OnUnsetAspectRatio(*engine, *info) : nullptr;
+    return (me != nullptr) ? me->OnResetAspectRatio(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::OnShow(NativeEngine& engine, NativeCallbackInfo& info)
@@ -3731,7 +3731,7 @@ NativeValue* JsWindow::OnSetAspectRatio(NativeEngine& engine, NativeCallbackInfo
     return result;
 }
 
-NativeValue* JsWindow::OnUnsetAspectRatio(NativeEngine& engine, NativeCallbackInfo& info)
+NativeValue* JsWindow::OnResetAspectRatio(NativeEngine& engine, NativeCallbackInfo& info)
 {
     if (info.argc >= 1) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
@@ -3740,7 +3740,7 @@ NativeValue* JsWindow::OnUnsetAspectRatio(NativeEngine& engine, NativeCallbackIn
     }
 
     if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
-        WLOGFE("[NAPI]UnsetAspectRatio is not allowed since window is main window");
+        WLOGFE("[NAPI]ResetAspectRatio is not allowed since window is main window");
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
         return engine.CreateUndefined();
     }
@@ -3752,23 +3752,23 @@ NativeValue* JsWindow::OnUnsetAspectRatio(NativeEngine& engine, NativeCallbackIn
             if (weakWindow == nullptr) {
                 task.Reject(engine,
                     CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-                    "OnUnsetAspectRatio failed."));
+                    "OnResetAspectRatio failed."));
                 return;
             }
-            WMError ret = weakWindow->UnsetAspectRatio();
+            WMError ret = weakWindow->ResetAspectRatio();
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "UnsetAspectRatio failed."));
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "ResetAspectRatio failed."));
             }
-            WLOGI("[NAPI]Window [%{public}u, %{public}s] unset aspect ratio end, ret = %{public}d",
+            WLOGI("[NAPI]Window [%{public}u, %{public}s] reset aspect ratio end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
     NativeValue* lastParam = (info.argc == 0) ? nullptr :
         (info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr);
     NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsWindow::OnUnsetAspectRatio",
+    AsyncTask::Schedule("JsWindow::OnResetAspectRatio",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -3884,7 +3884,7 @@ void BindFunctions(NativeEngine& engine, NativeObject* object, const char *modul
     BindNativeFunction(engine, *object, "setBackdropBlur", moduleName, JsWindow::SetBackdropBlur);
     BindNativeFunction(engine, *object, "setBackdropBlurStyle", moduleName, JsWindow::SetBackdropBlurStyle);
     BindNativeFunction(engine, *object, "setAspectRatio", moduleName, JsWindow::SetAspectRatio);
-    BindNativeFunction(engine, *object, "unsetAspectRatio", moduleName, JsWindow::UnsetAspectRatio);
+    BindNativeFunction(engine, *object, "resetAspectRatio", moduleName, JsWindow::ResetAspectRatio);
 }
 }  // namespace Rosen
 }  // namespace OHOS

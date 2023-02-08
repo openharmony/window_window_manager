@@ -178,9 +178,8 @@ public:
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
     WmErrorCode RaiseToAppTop() override;
     virtual WMError SetAspectRatio(float ratio) override;
-    virtual WMError UnsetAspectRatio() override;
+    virtual WMError ResetAspectRatio() override;
     virtual WMError SetSnapshotSkip(bool isSkip) override;
-
     // window effect
     virtual WMError SetCornerRadius(float cornerRadius) override;
     virtual WMError SetShadowRadius(float radius) override;
