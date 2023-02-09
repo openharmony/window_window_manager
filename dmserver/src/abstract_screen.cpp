@@ -124,6 +124,12 @@ void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& start
         height = abstractScreenModes->height_;
         width = abstractScreenModes->width_;
     }
+    RSScreenType screenType;
+    auto ret = RSInterfaces::GetInstance().GetScreenType(rsId_, screenType);
+    if (ret == StatusCode::SUCCESS && screenType == RSScreenType::VIRTUAL_TYPE_SCREEN) {
+        rsDisplayNode_->SetSecurityDisplay(true);
+        WLOGFI("virtualScreen SetSecurityDisplay success");
+    }
     // If setDisplayOffset is not valid for SetFrame/SetBounds
     rsDisplayNode_->SetFrame(0, 0, width, height);
     rsDisplayNode_->SetBounds(0, 0, width, height);
