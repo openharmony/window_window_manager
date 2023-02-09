@@ -65,6 +65,21 @@
             <curve name="cubic">0.2 0.0 0.2 1.0</curve>
         </timing>
     </keyboardAnimation>
+    <!--startWindowTransitionAnimation enable is true means startWindow replace with alpha animation-->
+    <startWindowTransitionAnimation enable="false">
+        <timing>
+            <!--duration of animation when add/remove window, unit is ms-->
+            <duration>200</duration>
+            <!--timing curve of animation, config it as below:
+            name=ease, easeIn, easeOut, easeInOut, default, linear,
+            spring, interactiveSpring, cubic(float float float float)-->
+            <curve name="linear"></curve>
+        </timing>
+        <!--opacity of animation start state-->
+        <opacityStart>1</opacityStart>
+        <!--opacity of animation end state-->
+        <opacityEnd>0</opacityEnd>
+    </startWindowTransitionAnimation>
     <!--enable/disable remote animation-->
     <remoteAnimation enable="true"></remoteAnimation>
     <!--window effect config-->
@@ -95,6 +110,4 @@
             </shadow>
         </appWindows>
     </windowEffect>
-    <!--startWindowTransitionAnimation enable is true means startWindow replace with alpha animation-->
-    <startWindowTransitionAnimation enable="false"></startWindowTransitionAnimation>
 </Configs>
