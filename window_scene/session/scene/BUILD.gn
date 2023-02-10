@@ -21,7 +21,6 @@ config("scene_session_public_config") {
 
 ohos_shared_library("scene_session") {
   sources = [
-    "container/src/root_scene_session_stage.cpp",
     "container/src/scene_session_stage.cpp",
     "container/src/session_stage.cpp",
     "container/src/window_event_channel.cpp",

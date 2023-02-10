@@ -18,13 +18,27 @@
 
 #include "scene_session.h"
 
+namespace OHOS::AbilityRuntime {
+class Context;
+}
+
+class NativeEngine;
+class NativeValue;
+
 namespace OHOS::Rosen {
 class RootSceneSession : public SceneSession {
 public:
+    using LoadContentFunc = std::function<void(const std::string&, NativeEngine*, NativeValue*,
+        AbilityRuntime::Context*)>;
     RootSceneSession();
     ~RootSceneSession() = default;
 
-    void LoadContent(const std::string& path);
+    void SetLoadContentFunc(const LoadContentFunc& loadContentFunc);
+    void LoadContent(const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
+        AbilityRuntime::Context* context);
+
+private:
+    LoadContentFunc loadContentFunc_;
 };
 } // namespace OHOS::Rosen
 
