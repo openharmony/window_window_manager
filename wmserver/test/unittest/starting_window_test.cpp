@@ -40,6 +40,7 @@ private:
     static sptr<RSIWindowAnimationController> animationController_;
     static sptr<WindowNode> node_;
     AppWindowEffectConfig effectConfig_;
+    AnimationConfig animationConfig_;
     sptr<WindowRoot> windowRoot_;
 };
 
@@ -73,6 +74,7 @@ void StartingWindowTest::SetUp()
     effectConfig_.focusedShadow_ = {80, "#000000", 0, 5, 0.45};
     effectConfig_.unfocusedShadow_ = {55, "#000000", 0, 10, 0.25};
     StartingWindow::SetWindowSystemEffectConfig(effectConfig_);
+    StartingWindow::SetAnimationConfig(animationConfig_);
     windowRoot_ = new WindowRoot([](Event event, const sptr<IRemoteObject>& remoteObject) {});
     ASSERT_NE(nullptr, windowRoot_);
     StartingWindow::SetWindowRoot(windowRoot_);
@@ -342,8 +344,7 @@ HWTEST_F(StartingWindowTest, AddNodeOnRSTree01, Function | SmallTest | Level2)
 {
     sptr<RSIWindowAnimationController> testController = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, RemoteAnimation::SetWindowAnimationController(testController));
-    AnimationConfig config;
-    StartingWindow::AddNodeOnRSTree(node_, config, true);
+    StartingWindow::AddNodeOnRSTree(node_, true);
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, nullptr, 0x66FFFFFF, false));
     usleep(200000);
 }
@@ -360,8 +361,7 @@ HWTEST_F(StartingWindowTest, AddNodeOnRSTree02, Function | SmallTest | Level2)
     node_->surfaceNode_ = surfaceNode;
     sptr<RSIWindowAnimationController> testController = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, RemoteAnimation::SetWindowAnimationController(testController));
-    AnimationConfig config;
-    StartingWindow::AddNodeOnRSTree(node_, config, true);
+    StartingWindow::AddNodeOnRSTree(node_, true);
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, nullptr, 0x66FFFFFF, false));
     usleep(200000);
 }
@@ -379,8 +379,7 @@ HWTEST_F(StartingWindowTest, AddNodeOnRSTree03, Function | SmallTest | Level2)
     node_->leashWinSurfaceNode_ = nullptr;
     sptr<RSIWindowAnimationController> testController = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, RemoteAnimation::SetWindowAnimationController(testController));
-    AnimationConfig config;
-    StartingWindow::AddNodeOnRSTree(node_, config, true);
+    StartingWindow::AddNodeOnRSTree(node_, true);
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, nullptr, 0x66FFFFFF, false));
     usleep(200000);
 }
@@ -394,8 +393,7 @@ HWTEST_F(StartingWindowTest, AddNodeOnRSTree04, Function | SmallTest | Level2)
 {
     sptr<RSIWindowAnimationController> testController = new RSIWindowAnimationControllerMocker();
     ASSERT_EQ(WMError::WM_OK, RemoteAnimation::SetWindowAnimationController(testController));
-    AnimationConfig config;
-    StartingWindow::AddNodeOnRSTree(node_, config, true);
+    StartingWindow::AddNodeOnRSTree(node_, true);
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, nullptr, 0x66FFFFFF, false));
     usleep(200000);
 }
@@ -413,7 +411,7 @@ HWTEST_F(StartingWindowTest, AddNodeOnRSTree05, Function | SmallTest | Level2)
     sptr<RSIWindowAnimationController> testController = new RSIWindowAnimationControllerMocker();
     ASSERT_EQ(WMError::WM_OK, RemoteAnimation::SetWindowAnimationController(testController));
     AnimationConfig config;
-    StartingWindow::AddNodeOnRSTree(node_, config, true);
+    StartingWindow::AddNodeOnRSTree(node_, true);
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, nullptr, 0x66FFFFFF, false));
     usleep(200000);
 }
@@ -431,8 +429,7 @@ HWTEST_F(StartingWindowTest, AddNodeOnRSTree06, Function | SmallTest | Level2)
     node_->leashWinSurfaceNode_ = nullptr;
     sptr<RSIWindowAnimationController> testController = new RSIWindowAnimationControllerMocker();
     ASSERT_EQ(WMError::WM_OK, RemoteAnimation::SetWindowAnimationController(testController));
-    AnimationConfig config;
-    StartingWindow::AddNodeOnRSTree(node_, config, true);
+    StartingWindow::AddNodeOnRSTree(node_, true);
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, nullptr, 0x66FFFFFF, false));
     usleep(200000);
 }

@@ -270,6 +270,7 @@ bool WindowManagerService::Init()
             WindowManagerConfig::DumpConfig(*WindowManagerConfig::GetConfig().mapValue_);
         }
         ConfigureWindowManagerService();
+        StartingWindow::SetAnimationConfig(WindowNodeContainer::GetAnimationConfigRef());
     }
     StartingWindow::SetWindowRoot(windowRoot_);
     WLOGI("Init success");
@@ -350,6 +351,10 @@ void WindowManagerService::ConfigureWindowManagerService()
     if (item.IsMap()) {
         ConfigKeyboardAnimation(item);
     }
+    item = config["startWindowTransitionAnimation"];
+    if (item.IsMap()) {
+        ConfigStartingWindowAnimation(item);
+    }
     item = config["windowEffect"];
     if (item.IsMap()) {
         ConfigWindowEffect(item);
@@ -364,10 +369,6 @@ void WindowManagerService::ConfigureWindowManagerService()
     item = config["defaultFloatingWindow"];
     if (item.IsInts()) {
         WindowLayoutPolicyCascade::SetCascadeRectCfg(*item.intsValue_);
-    }
-    item = config["startWindowTransitionAnimation"].GetProp("enable");
-    if (item.IsBool()) {
-        StartingWindow::transAnimateEnable_ = item.boolValue_;
     }
 }
 
@@ -484,6 +485,36 @@ void WindowManagerService::ConfigKeyboardAnimation(const WindowManagerConfig::Co
             animationConfig.keyboardAnimationConfig_.durationOut_ =
                 RSAnimationTimingProtocol(numbers[0]);
         }
+    }
+}
+
+void WindowManagerService::ConfigStartingWindowAnimation(const WindowManagerConfig::ConfigItem& animeConfig)
+{
+    WindowManagerConfig::ConfigItem item = animeConfig.GetProp("enable");
+    if (item.IsBool()) {
+        StartingWindow::transAnimateEnable_ = item.boolValue_;
+    }
+    auto& startWinAnimationConfig = WindowNodeContainer::GetAnimationConfigRef().startWinAnimationConfig_;
+    item = animeConfig["timing"];
+    if (item.IsMap() && item.mapValue_->count("curve")) {
+        startWinAnimationConfig.timingCurve_ = CreateCurve(item["curve"]);
+    }
+    item = animeConfig["timing"]["duration"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1) { // duration
+            startWinAnimationConfig.timingProtocol_ = RSAnimationTimingProtocol(numbers[0]);
+        }
+    }
+    item = animeConfig["opacityStart"];
+    if (item.IsFloats()) {
+        auto numbers = *item.floatsValue_;
+        numbers.size() == 1 ? (startWinAnimationConfig.opacityStart_ = numbers[0]) : float();
+    }
+    item = animeConfig["opacityEnd"];
+    if (item.IsFloats()) {
+        auto numbers = *item.floatsValue_;
+        numbers.size() == 1 ? (startWinAnimationConfig.opacityEnd_ = numbers[0]) : float();
     }
 }
 

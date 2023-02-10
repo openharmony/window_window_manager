@@ -163,6 +163,7 @@ private:
     void ConfigDecor(const WindowManagerConfig::ConfigItem& decorConfig);
     void ConfigWindowAnimation(const WindowManagerConfig::ConfigItem& animeConfig);
     void ConfigKeyboardAnimation(const WindowManagerConfig::ConfigItem& animeConfig);
+    void ConfigStartingWindowAnimation(const WindowManagerConfig::ConfigItem& animeConfig);
     RSAnimationTimingCurve CreateCurve(const WindowManagerConfig::ConfigItem& curveConfig);
     void RecordShowTimeEvent(int64_t costTime);
     void ConfigWindowEffect(const WindowManagerConfig::ConfigItem& effectConfig);

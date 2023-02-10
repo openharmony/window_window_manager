@@ -38,12 +38,13 @@ public:
         int32_t pid, int32_t uid);
     static WMError DrawStartingWindow(sptr<WindowNode>& node, std::shared_ptr<Media::PixelMap> pixelMap,
         uint32_t bkgColor, bool isColdStart);
-    static void AddNodeOnRSTree(sptr<WindowNode>& node, const AnimationConfig& animationConfig, bool isMultiDisplay);
+    static void AddNodeOnRSTree(sptr<WindowNode>& node, bool isMultiDisplay);
     static void ReleaseStartWinSurfaceNode(sptr<WindowNode>& node);
     static void SetDefaultWindowMode(WindowMode defaultMode);
     static void SetWindowSystemEffectConfig(AppWindowEffectConfig config);
     static void SetWindowRoot(const sptr<WindowRoot>& windowRoot);
     static WMError SetStartingWindowEffect(const sptr<WindowNode>& node, bool isFocus = true);
+    static void SetAnimationConfig(AnimationConfig config);
     static bool transAnimateEnable_;
 private:
     static WMError CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node);
@@ -56,6 +57,7 @@ private:
     static WindowMode defaultMode_;
     static wptr<WindowRoot> windowRoot_;
     static AppWindowEffectConfig windowSystemEffectConfig_;
+    static AnimationConfig animationConfig_;
 };
 } // Rosen
 } // OHOS
