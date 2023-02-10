@@ -28,6 +28,10 @@
 #include "utils/include/ws_single_instance.h"
 #include "utils/include/window_scene_common.h"
 
+namespace OHOS::Ace::NG {
+class UIWindow;
+}
+
 namespace OHOS::Rosen {
 class SceneSession;
 
@@ -49,6 +53,7 @@ private:
     std::atomic<uint32_t> sessionId_ = INVALID_SESSION_ID;
     std::map<uint32_t, sptr<IRemoteObject>> abilitySceneMap_;
     sptr<RootSceneSession> rootSceneSession_;
+    std::shared_ptr<Ace::NG::UIWindow> rootScene_;
 };
 }
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_H

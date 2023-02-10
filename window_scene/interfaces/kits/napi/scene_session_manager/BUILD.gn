@@ -13,14 +13,6 @@
 
 import("//build/ohos.gni")
 
-config("scene_session_manager_napi_private_config") {
-  visibility = [ ":*" ]
-
-  include_dirs = [
-    "//foundation/window/window_manager/window_scene/interfaces/kits/napi/host",
-  ]
-}
-
 config("scene_session_manager_napi_public_config") {
   include_dirs = [
     "//foundation/window/window_manager/window_scene/interfaces/kits/napi",
@@ -29,6 +21,7 @@ config("scene_session_manager_napi_public_config") {
 
 ohos_shared_library("scenesessionmanager_napi") {
   sources = [
+    "js_root_scene_session.cpp",
     "js_scene_session.cpp",
     "js_scene_session_manager.cpp",
     "js_scene_utils.cpp",
@@ -36,7 +29,7 @@ ohos_shared_library("scenesessionmanager_napi") {
   ]
 
   cflags_cc = [ "-std=c++17" ]
-  configs = [ ":scene_session_manager_napi_private_config" ]
+
   public_configs = [ ":scene_session_manager_napi_public_config" ]
 
   deps = [
@@ -45,6 +38,8 @@ ohos_shared_library("scenesessionmanager_napi") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
+    "ability_runtime:ability_context_native",
     "ability_runtime:runtime",
     "c_utils:utils",
     "hilog_native:libhilog",

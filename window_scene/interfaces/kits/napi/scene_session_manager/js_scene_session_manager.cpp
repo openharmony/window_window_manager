@@ -20,6 +20,7 @@
 #include <js_runtime_utils.h>
 
 #include "js_scene_utils.h"
+#include "js_root_scene_session.h"
 #include "js_scene_session.h"
 #include "session_manager/scene/include/scene_session_manager.h"
 #include "utils/include/window_scene_hilog.h"
@@ -48,6 +49,8 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
     object->SetNativePointer(jsSceneSessionManager.release(), JsSceneSessionManager::Finalizer, nullptr);
 
     const char *moduleName = "JsSceneSessionManager";
+    BindNativeFunction(*engine, *object, "getRootSceneSession", moduleName,
+        JsSceneSessionManager::GetRootSceneSession);
     BindNativeFunction(*engine, *object, "requestSceneSession", moduleName,
         JsSceneSessionManager::RequestSceneSession);
     BindNativeFunction(*engine, *object, "requestSceneSessionActivation", moduleName,
@@ -63,6 +66,13 @@ void JsSceneSessionManager::Finalizer(NativeEngine* engine, void* data, void* hi
 {
     WLOGFI("[NAPI]Finalizer");
     std::unique_ptr<JsSceneSessionManager>(static_cast<JsSceneSessionManager*>(data));
+}
+
+NativeValue* JsSceneSessionManager::GetRootSceneSession(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("[NAPI]GetRootSceneSession");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
+    return (me != nullptr) ? me->OnGetRootSceneSession(*engine, *info) : nullptr;
 }
 
 NativeValue* JsSceneSessionManager::RequestSceneSession(NativeEngine* engine, NativeCallbackInfo* info)
@@ -91,6 +101,25 @@ NativeValue* JsSceneSessionManager::RequestSceneSessionDestruction(NativeEngine*
     WLOGFI("[NAPI]RequestSceneSession");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
     return (me != nullptr) ? me->OnRequestSceneSessionDestruction(*engine, *info) : nullptr;
+}
+
+NativeValue* JsSceneSessionManager::OnGetRootSceneSession(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("[NAPI]OnGetRootSceneSession");
+    sptr<RootSceneSession> rootSceneSession = SceneSessionManager::GetInstance().GetRootSceneSession();
+    if (rootSceneSession == nullptr) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+            "System is abnormal"));
+        return engine.CreateUndefined();
+    } else {
+        NativeValue* jsRootSceneSessionObj = JsRootSceneSession::Create(engine, rootSceneSession);
+        if (jsRootSceneSessionObj == nullptr) {
+            WLOGFE("[NAPI]jsRootSceneSessionObj is nullptr");
+            engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+                "System is abnormal"));
+        }
+        return jsRootSceneSessionObj;
+    }
 }
 
 NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, NativeCallbackInfo& info)

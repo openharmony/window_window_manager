@@ -19,6 +19,7 @@
 #include <want.h>
 #include <start_options.h>
 #include <scene_session_info.h>
+#include <ui_window.h>
 
 #include "session/scene/host/include/scene_session.h"
 #include "utils/include/window_scene_hilog.h"
@@ -37,6 +38,11 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
     }
 
     rootSceneSession_ = new RootSceneSession();
+    rootScene_ = Ace::NG::UIWindow::CreateRootScene();
+    rootSceneSession_->SetLoadContentFunc([rootScene = rootScene_](const std::string& contentUrl,
+        NativeEngine* engine, NativeValue* storage, AbilityRuntime::Context* context) {
+        rootScene->LoadContent(contentUrl, engine, storage, context);
+    });
     return rootSceneSession_;
 }
 

@@ -19,22 +19,25 @@
 #include <native_engine/native_engine.h>
 #include <native_engine/native_value.h>
 
-#include "js_scene_session.h"
 #include "session/scene/host/include/root_scene_session.h"
 
 namespace OHOS::Rosen {
-class JsRootSceneSession : public JsSceneSession {
+class JsRootSceneSession {
 public:
-    explicit JsRootSceneSession(NativeEngine& engine, sptr<RootSceneSession> session);
+    JsRootSceneSession(NativeEngine& engine, const sptr<RootSceneSession>& rootSceneSession);
     ~JsRootSceneSession() = default;
 
-    static NativeValue* Create(NativeEngine& engine, const sptr<RootSceneSession>& session);
+    static NativeValue* Create(NativeEngine& engine, const sptr<RootSceneSession>& rootSceneSession);
+    static void Finalizer(NativeEngine* engine, void* data, void* hint);
+
+    // static NativeValue* RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* LoadContent(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
+    // NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info);
 
-    NativeEngine& engine_;
+    // NativeEngine& engine_;
     sptr<RootSceneSession> rootSceneSession_;
 };
 } // namespace OHOS::Rosen

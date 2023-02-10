@@ -342,7 +342,7 @@ NativeValue* JsWindowStage::OnLoadContent(NativeEngine& engine, NativeCallbackIn
             auto uiWindow = weakUIWindow.lock();
             if (uiWindow) {
                 NativeValue* nativeStorage = contentStorage ? contentStorage->Get() : nullptr;
-                uiWindow->InitUIContent(contextUrl, &engine, nativeStorage);
+                uiWindow->LoadContent(contextUrl, &engine, nativeStorage);
                 uiWindow->Connect();
                 return;
             }

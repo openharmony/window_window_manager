@@ -28,13 +28,14 @@ public:
     static NativeValue* Init(NativeEngine* engine, NativeValue* exportObj);
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
 
-    static NativeValue* GetRootSceneSession();
+    static NativeValue* GetRootSceneSession(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* RequestSceneSession(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* RequestSceneSessionActivation(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* RequestSceneSessionBackground(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* RequestSceneSessionDestruction(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
+    NativeValue* OnGetRootSceneSession(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnRequestSceneSession(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnRequestSceneSessionActivation(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnRequestSceneSessionBackground(NativeEngine& engine, NativeCallbackInfo& info);
