@@ -160,7 +160,7 @@ WMError WindowNodeContainer::ShowStartingWindow(sptr<WindowNode>& node)
     }
     UpdateWindowTree(node);
     displayGroupController_->PreProcessWindowNode(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
-    StartingWindow::AddNodeOnRSTree(node, animationConfig_, layoutPolicy_->IsMultiDisplay());
+    StartingWindow::AddNodeOnRSTree(node, layoutPolicy_->IsMultiDisplay());
     AssignZOrder();
     layoutPolicy_->PerformWindowLayout(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
     WLOGI("ShowStartingWindow windowId: %{public}u end", node->GetWindowId());

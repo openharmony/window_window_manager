@@ -37,6 +37,7 @@ WindowMode StartingWindow::defaultMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
 wptr<WindowRoot> StartingWindow::windowRoot_;
 AppWindowEffectConfig StartingWindow::windowSystemEffectConfig_;
 bool StartingWindow::transAnimateEnable_ = true;
+AnimationConfig StartingWindow::animationConfig_;
 
 sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInfo>& info, uint32_t winId)
 {
@@ -142,7 +143,7 @@ WMError StartingWindow::SetStartingWindowAnimation(wptr<WindowNode> weak)
     }
     StartAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::START_WINDOW_ANIMATION),
         "StartingWindowAnimate(%u)", weakNode->GetWindowId());
-    weakNode->startingWinSurfaceNode_->SetAlpha(1.0f);
+    weakNode->startingWinSurfaceNode_->SetAlpha(animationConfig_.startWinAnimationConfig_.opacityStart_);
     auto execute = [weak]() {
         auto weakNode = weak.promote();
         if (weakNode == nullptr) {
@@ -151,7 +152,7 @@ WMError StartingWindow::SetStartingWindowAnimation(wptr<WindowNode> weak)
         }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "StartingWindow:ExecuteAnimate(%d)",
             weakNode->GetWindowId());
-        weakNode->startingWinSurfaceNode_->SetAlpha(0.0f);
+        weakNode->startingWinSurfaceNode_->SetAlpha(animationConfig_.startWinAnimationConfig_.opacityEnd_);
     };
 
     auto finish = [weak]() {
@@ -169,8 +170,8 @@ WMError StartingWindow::SetStartingWindowAnimation(wptr<WindowNode> weak)
         FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::START_WINDOW_ANIMATION),
             "StartingWindowAnimate(%u)", weakNode->GetWindowId());
     };
-    const RSAnimationTimingProtocol timingProtocol(300); // 300: animation time
-    RSNode::Animate(timingProtocol, RSAnimationTimingCurve::LINEAR, execute, finish);
+    RSNode::Animate(animationConfig_.startWinAnimationConfig_.timingProtocol_,
+        animationConfig_.startWinAnimationConfig_.timingCurve_, execute, finish);
     RSTransaction::FlushImplicitTransaction();
     FinishTrace(HITRACE_TAG_WINDOW_MANAGER);
     return WMError::WM_OK;
@@ -240,8 +241,7 @@ void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
     RSTransaction::FlushImplicitTransaction();
 }
 
-void StartingWindow::AddNodeOnRSTree(sptr<WindowNode>& node, const AnimationConfig& animationConfig,
-    bool isMultiDisplay)
+void StartingWindow::AddNodeOnRSTree(sptr<WindowNode>& node, bool isMultiDisplay)
 {
     auto updateRSTreeFunc = [&]() {
         auto& dms = DisplayManagerServiceInner::GetInstance();
@@ -285,8 +285,9 @@ void StartingWindow::AddNodeOnRSTree(sptr<WindowNode>& node, const AnimationConf
         RSTransaction::FlushImplicitTransaction();
     };
     if (!RemoteAnimation::CheckAnimationController()) {
-        RSNode::Animate(animationConfig.windowAnimationConfig_.animationTiming_.timingProtocol_,
-            animationConfig.windowAnimationConfig_.animationTiming_.timingCurve_, updateRSTreeFunc, finishCallBack);
+        RSNode::Animate(animationConfig_.windowAnimationConfig_.animationTiming_.timingProtocol_,
+            animationConfig_.windowAnimationConfig_.animationTiming_.timingCurve_,
+            updateRSTreeFunc, finishCallBack);
     } else {
         // add or remove window without animation
         updateRSTreeFunc();
@@ -301,6 +302,11 @@ void StartingWindow::SetDefaultWindowMode(WindowMode defaultMode)
 void StartingWindow::SetWindowSystemEffectConfig(AppWindowEffectConfig config)
 {
     windowSystemEffectConfig_ = config;
+}
+
+void StartingWindow::SetAnimationConfig(AnimationConfig config)
+{
+    animationConfig_ = config;
 }
 
 void StartingWindow::SetWindowRoot(const sptr<WindowRoot>& windowRoot)

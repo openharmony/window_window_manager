@@ -38,6 +38,13 @@ struct AnimationConfig {
         RSAnimationTimingProtocol durationIn_ = 500;
         RSAnimationTimingProtocol durationOut_ = 300;
     } keyboardAnimationConfig_;
+
+    struct StartWindowTransitionAnimationConfig {
+        RSAnimationTimingProtocol timingProtocol_ = 200;
+        RSAnimationTimingCurve timingCurve_ = RSAnimationTimingCurve::LINEAR;
+        float opacityStart_ = 1.0;
+        float opacityEnd_ = 0.0;
+    } startWinAnimationConfig_;
 };
 } // namespace Rosen
 } // namespace OHOS
