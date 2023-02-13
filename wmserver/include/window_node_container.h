@@ -77,6 +77,8 @@ public:
     void BackUpAllAppWindows();
     void RestoreAllAppWindows(std::function<bool(uint32_t, WindowMode)> restoreFunc);
     bool IsAppWindowsEmpty() const;
+    void SetSurfaceNodeVisible(sptr<WindowNode>& node, int32_t topPriority, bool visible);
+    void SetBelowScreenlockVisible(sptr<WindowNode>& node, bool visible);
     void ProcessWindowStateChange(WindowState state, WindowStateChangeReason reason);
     void NotifySystemBarTints(std::vector<DisplayId> displayIdVec);
     WMError MinimizeAppNodeExceptOptions(MinimizeReason reason, const std::vector<uint32_t> &exceptionalIds = {},
