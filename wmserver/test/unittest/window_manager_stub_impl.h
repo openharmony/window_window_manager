@@ -32,7 +32,7 @@ WMError AddWindow(sptr<WindowProperty>& property)
 {
     return WMError::WM_OK;
 };
-WMError RemoveWindow(uint32_t windowId)
+WMError RemoveWindow(uint32_t windowId, bool isFromInnerkits)
 {
     return WMError::WM_OK;
 };

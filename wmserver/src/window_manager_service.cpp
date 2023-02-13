@@ -793,9 +793,9 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
     });
 }
 
-WMError WindowManagerService::RemoveWindow(uint32_t windowId)
+WMError WindowManagerService::RemoveWindow(uint32_t windowId, bool isFromInnerkits)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!isFromInnerkits && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("remove window permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }

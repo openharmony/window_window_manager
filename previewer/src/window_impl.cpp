@@ -362,7 +362,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
     return WMError::WM_OK;
 }
 
-WMError WindowImpl::Hide(uint32_t reason, bool withAnimation)
+WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
     return WMError::WM_OK;
 }

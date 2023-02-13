@@ -1723,7 +1723,7 @@ void WindowNodeContainer::BackUpAllAppWindows()
         // minimize window
         WLOGFD("minimize window, windowId:%{public}u", appNode->GetWindowId());
         backupWindowIds_.emplace_back(appNode->GetWindowId());
-        WindowManagerService::GetInstance().RemoveWindow(appNode->GetWindowId());
+        WindowManagerService::GetInstance().RemoveWindow(appNode->GetWindowId(), true);
         wptr<IRemoteObject> abilityToken = appNode->abilityToken_;
         WindowInnerManager::GetInstance().PostTask([abilityToken]() {
             auto token = abilityToken.promote();

@@ -92,7 +92,7 @@ WMError WindowManagerProxy::AddWindow(sptr<WindowProperty>& property)
     return static_cast<WMError>(ret);
 }
 
-WMError WindowManagerProxy::RemoveWindow(uint32_t windowId)
+WMError WindowManagerProxy::RemoveWindow(uint32_t windowId, bool isFromInnerkits)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -104,6 +104,11 @@ WMError WindowManagerProxy::RemoveWindow(uint32_t windowId)
 
     if (!data.WriteUint32(windowId)) {
         WLOGFE("Write windowId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteBool(isFromInnerkits)) {
+        WLOGFE("Write isFromInnerkits failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
