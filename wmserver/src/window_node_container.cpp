@@ -259,6 +259,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
 
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
         isScreenLocked_ = true;
+        SetBelowScreenlockVisible(node, false);
     }
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER) {
         RemoteAnimation::NotifyAnimationUpdateWallpaper(node);
@@ -341,6 +342,34 @@ void WindowNodeContainer::RemoveFromRsTreeWhenRemoveWindowNode(sptr<WindowNode>&
     }
 }
 
+void WindowNodeContainer::SetSurfaceNodeVisible(sptr<WindowNode>& node, int32_t topPriority, bool visible)
+{
+    if (node == nullptr) {
+        return;
+    }
+    if (node->parent_ != nullptr && node->currentVisibility_) {
+        if (node->priority_ < topPriority && !WindowHelper::IsShowWhenLocked(node->GetWindowFlags()) &&
+            !WindowHelper::IsShowWhenLocked(node->parent_->GetWindowFlags())) {
+            auto surfaceNode = node->surfaceNode_;
+            if (surfaceNode) {
+                surfaceNode->SetVisible(visible);
+            }
+        }
+    }
+    for (auto& childNode : node->children_) {
+        SetSurfaceNodeVisible(childNode, topPriority, visible);
+    }
+}
+
+void WindowNodeContainer::SetBelowScreenlockVisible(sptr<WindowNode>& node, bool visible)
+{
+    int32_t topPriority = zorderPolicy_->GetWindowPriority(WindowType::WINDOW_TYPE_KEYGUARD);
+    std::vector<sptr<WindowNode>> rootNodes = { belowAppWindowNode_, appWindowNode_, aboveAppWindowNode_ };
+    for (auto& node : rootNodes) {
+        SetSurfaceNodeVisible(node, topPriority, visible);
+    }
+}
+
 WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node, bool fromAnimation)
 {
     if (node == nullptr) {
@@ -371,6 +400,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node, bool fromA
     UpdateCameraFloatWindowStatus(node, false);
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
         isScreenLocked_ = false;
+        SetBelowScreenlockVisible(node, true);
     }
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_BOOT_ANIMATION) {
         DisplayManagerServiceInner::GetInstance().SetGravitySensorSubscriptionEnabled();
@@ -1363,7 +1393,6 @@ void WindowNodeContainer::TraverseAndUpdateWindowState(WindowState state, int32_
     for (auto& node : rootNodes) {
         UpdateWindowState(node, topPriority, state);
     }
-    RSTransaction::FlushImplicitTransaction();
 }
 
 void WindowNodeContainer::UpdateWindowState(sptr<WindowNode> node, int32_t topPriority, WindowState state)
@@ -1378,10 +1407,6 @@ void WindowNodeContainer::UpdateWindowState(sptr<WindowNode> node, int32_t topPr
                 node->GetWindowToken()->UpdateWindowState(state);
             }
             HandleKeepScreenOn(node, state);
-            auto surfaceNode = node->surfaceNode_;
-            if (surfaceNode && node->GetWindowType() != WindowType::WINDOW_TYPE_APP_COMPONENT) {
-                surfaceNode->SetVisible(state == WindowState::STATE_FROZEN ? false : true);
-            }
         }
     }
     for (auto& childNode : node->children_) {
