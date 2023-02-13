@@ -48,10 +48,10 @@ WMError WindowAdapter::AddWindow(sptr<WindowProperty>& windowProperty)
     return windowManagerServiceProxy_->AddWindow(windowProperty);
 }
 
-WMError WindowAdapter::RemoveWindow(uint32_t windowId)
+WMError WindowAdapter::RemoveWindow(uint32_t windowId, bool isFromInnerkits)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-    return windowManagerServiceProxy_->RemoveWindow(windowId);
+    return windowManagerServiceProxy_->RemoveWindow(windowId, isFromInnerkits);
 }
 
 WMError WindowAdapter::DestroyWindow(uint32_t windowId)

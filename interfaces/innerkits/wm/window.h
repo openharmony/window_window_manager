@@ -297,7 +297,7 @@ public:
      */
     virtual WMError Destroy() = 0;
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) = 0;
-    virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false) = 0;
+    virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) = 0;
     /**
      * @brief move the window to (x, y)
      *

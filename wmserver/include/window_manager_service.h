@@ -87,7 +87,7 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         uint32_t& windowId, sptr<IRemoteObject> token) override;
     WMError AddWindow(sptr<WindowProperty>& property) override;
-    WMError RemoveWindow(uint32_t windowId) override;
+    WMError RemoveWindow(uint32_t windowId, bool isFromInnerkits) override;
     WMError NotifyWindowTransition(sptr<WindowTransitionInfo>& from, sptr<WindowTransitionInfo>& to,
         bool isFromClient = false) override;
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override;

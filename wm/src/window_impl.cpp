@@ -1421,7 +1421,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
     return ret;
 }
 
-WMError WindowImpl::Hide(uint32_t reason, bool withAnimation)
+WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
     WLOGI("id:%{public}u Hide, reason:%{public}u, Animation:%{public}d",
         property_->GetWindowId(), reason, withAnimation);
@@ -1450,7 +1450,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation)
             return ret;
         }
     }
-    ret = SingletonContainer::Get<WindowAdapter>().RemoveWindow(property_->GetWindowId());
+    ret = SingletonContainer::Get<WindowAdapter>().RemoveWindow(property_->GetWindowId(), isFromInnerkits);
     RecordLifeCycleExceptionEvent(LifeCycleEvent::HIDE_EVENT, ret);
     if (ret != WMError::WM_OK) {
         WLOGFE("hide errCode:%{public}d for winId:%{public}u", static_cast<int32_t>(ret), property_->GetWindowId());
