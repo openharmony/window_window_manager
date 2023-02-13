@@ -126,6 +126,10 @@ void ScreenManagerTest::SetUpTestCase()
     defaultOption_.height_ = defaultHeight_;
 
     CommonTestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
+
+    const char** perms = new const char *[1];
+    perms[0] = "ohos.permission.CAPTURE_SCREEN";
+    CommonTestUtils::SetAceessTokenPermission("DisplayManagerServiceTest", perms, 1);
 }
 
 void ScreenManagerTest::TearDownTestCase()
@@ -828,13 +832,13 @@ HWTEST_F(ScreenManagerTest, ScreenManager16, Function | MediumTest | Level2)
 {
     std::vector<sptr<Screen>> screens;
     ScreenManager::GetInstance().GetAllScreens(screens);
-    ASSERT_TRUE(screens[0]);
+    ASSERT_GE(screens.size(), 1);
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
-    ASSERT_TRUE(display);
+    ASSERT_NE(display, nullptr);
     uint32_t orientation = static_cast<uint32_t>(Orientation::VERTICAL);
     uint32_t end = static_cast<uint32_t>(Orientation::REVERSE_HORIZONTAL);
     sptr<ScreenChangeListener> screenListener = new ScreenChangeListener();
-    ASSERT_TRUE(screenListener);
+    ASSERT_NE(screenListener, nullptr);
     ScreenManager::GetInstance().RegisterScreenListener(screenListener);
     for (; orientation <= end; ++orientation) {
         screens[0]->SetOrientation(static_cast<Orientation>(orientation));
