@@ -3733,7 +3733,7 @@ NativeValue* JsWindow::OnSetAspectRatio(NativeEngine& engine, NativeCallbackInfo
 
 NativeValue* JsWindow::OnResetAspectRatio(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    if (info.argc >= 1) {
+    if (info.argc > 1) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
