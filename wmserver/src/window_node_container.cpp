@@ -588,50 +588,13 @@ bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId disp
         FinishTrace(HITRACE_TAG_WINDOW_MANAGER);
     } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         !animationPlayed) { // add keyboard with animation
-        ProcessInputMethodWindowAddAnimation(node, updateRSTreeFunc);
+        auto timingProtocol = animationConfig_.keyboardAnimationConfig_.durationIn_;
+        RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationConfig_.curve_, updateRSTreeFunc);
     } else {
         WLOGFD("add node without animation");
         updateRSTreeFunc();
     }
     return true;
-}
-
-void WindowNodeContainer::ProcessInputMethodWindowAddAnimation(sptr<WindowNode>& node,
-    std::function<void()> updateRSTreeFunc)
-{
-    static sptr<WindowNode> imeNode = nullptr;
-    if (imeNode == node && imeNode != nullptr && imeNode->surfaceNode_ != nullptr) {
-        WLOGFI("imeNode SetFreeze(true)");
-        imeNode->surfaceNode_->SetFreeze(true);
-    }
-    sptr<WindowNode> launcherNode = nullptr;
-    for (auto& windowNode : belowAppWindowNode_->children_) {
-        if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
-            launcherNode = windowNode;
-            break;
-        }
-    }
-    if (launcherNode != nullptr && launcherNode->surfaceNode_ != nullptr) {
-        WLOGFI("launcherNode SetFreeze(true)");
-        launcherNode->surfaceNode_->SetFreeze(true);
-    }
-    auto timingProtocol = animationConfig_.keyboardAnimationConfig_.durationIn_;
-    RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationConfig_.curve_, updateRSTreeFunc,
-        [ime = imeNode, node, launcherNode]() {
-        if (ime == node && ime != nullptr && ime->surfaceNode_ != nullptr) {
-            WLOGFI("imeNode SetFreeze(false)");
-            ime->surfaceNode_->SetFreeze(false);
-        }
-        if (launcherNode != nullptr && launcherNode->surfaceNode_ != nullptr) {
-            WLOGFI("launcherNode SetFreeze(false)");
-            launcherNode->surfaceNode_->SetFreeze(false);
-        }
-        auto transactionProxy = RSTransactionProxy::GetInstance();
-        if (transactionProxy != nullptr) {
-            transactionProxy->FlushImplicitTransaction();
-        }
-    });
-    imeNode = node;
 }
 
 bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId displayId, DisplayId parentDisplayId,
