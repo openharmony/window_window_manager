@@ -60,7 +60,8 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
         }
         case WindowManagerMessage::TRANS_ID_REMOVE_WINDOW: {
             uint32_t windowId = data.ReadUint32();
-            WMError errCode = RemoveWindow(windowId);
+            bool isFromInnerkits = data.ReadBool();
+            WMError errCode = RemoveWindow(windowId, isFromInnerkits);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }

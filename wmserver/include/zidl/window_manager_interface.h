@@ -73,7 +73,7 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         uint32_t& windowId, sptr<IRemoteObject> token) = 0;
     virtual WMError AddWindow(sptr<WindowProperty>& property) = 0;
-    virtual WMError RemoveWindow(uint32_t windowId) = 0;
+    virtual WMError RemoveWindow(uint32_t windowId, bool isFromInnerkits) = 0;
     virtual WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) = 0;
     virtual WMError RequestFocus(uint32_t windowId) = 0;
     virtual AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) = 0;
