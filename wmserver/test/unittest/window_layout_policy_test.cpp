@@ -52,13 +52,13 @@ public:
     static sptr<DisplayGroupInfo> displayGroupInfo_;
     static sptr<DisplayInfo> defaultDisplayInfo_;
     static sptr<DisplayGroupController> displayGroupController_;
-    static sptr<WindowLayoutPolicy> layoutPolicy_;
+    static sptr<WindowLayoutPolicyCascade> layoutPolicy_;
 };
 
 sptr<WindowNodeContainer> WindowLayoutPolicyTest::container_ = nullptr;
 sptr<DisplayGroupInfo> WindowLayoutPolicyTest::displayGroupInfo_ = nullptr;
 sptr<DisplayGroupController> WindowLayoutPolicyTest::displayGroupController_ = nullptr;
-sptr<WindowLayoutPolicy> WindowLayoutPolicyTest::layoutPolicy_ = nullptr;
+sptr<WindowLayoutPolicyCascade> WindowLayoutPolicyTest::layoutPolicy_ = nullptr;
 sptr<DisplayInfo> WindowLayoutPolicyTest::defaultDisplayInfo_ = nullptr;
 WindowInfo WindowLayoutPolicyTest::windowInfo_ = {
     .winRect_ = { 0, 0, 0, 0 },
@@ -89,7 +89,7 @@ void WindowLayoutPolicyTest::SetUpTestCase()
     container_ = new WindowNodeContainer(defaultDisplayInfo_, display->GetScreenId());
     displayGroupInfo_ = container_->displayGroupInfo_;
     displayGroupController_ = container_->displayGroupController_;
-    layoutPolicy_ = container_->GetLayoutPolicy();
+    layoutPolicy_ = static_cast<WindowLayoutPolicyCascade*>(container_->GetLayoutPolicy().GetRefPtr());
 }
 
 void WindowLayoutPolicyTest::TearDownTestCase()

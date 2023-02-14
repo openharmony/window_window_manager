@@ -95,21 +95,6 @@ protected:
     void UpdateDisplayRectAndDisplayGroupInfo(const std::map<DisplayId, Rect>& displayRectMap);
 
     /*
-     * methods for floating window limitSize and position
-     */
-    DockWindowShowState GetDockWindowShowState(DisplayId displayId, Rect& dockWinRect) const;
-    void LimitFloatingWindowSize(const sptr<WindowNode>& node, Rect& winRect) const;
-    void LimitMainFloatingWindowPosition(const sptr<WindowNode>& node, Rect& winRect) const;
-    void UpdateFloatingWindowSizeForStretchableWindow(const sptr<WindowNode>& node,
-        const Rect& displayRect, Rect& winRect) const;
-    void UpdateFloatingWindowSizeBySizeLimits(const sptr<WindowNode>& node,
-        const Rect& displayRect, Rect& winRect) const;
-    void LimitWindowPositionWhenInitRectOrMove(const sptr<WindowNode>& node, Rect& winRect) const;
-    void LimitWindowPositionWhenDrag(const sptr<WindowNode>& node, Rect& winRect) const;
-    void FixWindowSizeByRatioIfDragBeyondLimitRegion(const sptr<WindowNode>& node, Rect& winRect);
-    void FixWindowRectWhenDrag(const sptr<WindowNode>& node, const Rect& oriWinRect, Rect& winRect) const;
-
-    /*
      * methods for update node latest information, include:
      * 1. notify client and animation
      * 2. update hot zone
@@ -120,6 +105,8 @@ protected:
     Rect CalcEntireWindowHotZone(const sptr<WindowNode>& node, const Rect& winRect, uint32_t hotZone,
         float vpr, TransformHelper::Vector2 hotZoneScale) const;
     void UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect);
+
+    void GetStoragedAspectRatio(const sptr<WindowNode>& node);
 
     Rect displayGroupRect_;
     Rect displayGroupLimitRect_;
