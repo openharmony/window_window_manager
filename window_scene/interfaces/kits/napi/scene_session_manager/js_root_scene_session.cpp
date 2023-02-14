@@ -83,18 +83,19 @@ NativeValue* JsRootSceneSession::OnLoadContent(NativeEngine& engine, NativeCallb
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
         return engine.CreateUndefined();
     }
-    auto contextNativePointer = static_cast<AbilityRuntime::Context*>(contextObj->GetNativePointer());
+    auto contextNativePointer = static_cast<std::weak_ptr<Context>*>(contextObj->GetNativePointer());
     if (contextNativePointer == nullptr) {
         WLOGFE("[NAPI]Failed to get context pointer from js object");
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
         return engine.CreateUndefined();
     }
+    auto contextWeakPtr = *contextNativePointer;
 
     std::shared_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
         std::shared_ptr<NativeReference>(engine.CreateReference(storage, 1));
     NativeValue* nativeStorage = contentStorage ? contentStorage->Get() : nullptr;
     AsyncTask::CompleteCallback complete =
-        [rootSceneSession = rootSceneSession_, contentUrl, contextNativePointer, nativeStorage](
+        [rootSceneSession = rootSceneSession_, contentUrl, contextWeakPtr, nativeStorage](
             NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (rootSceneSession == nullptr) {
                 WLOGFE("[NAPI]rootSceneSession is nullptr");
@@ -102,7 +103,7 @@ NativeValue* JsRootSceneSession::OnLoadContent(NativeEngine& engine, NativeCallb
                     static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
                 return;
             }
-            rootSceneSession->LoadContent(contentUrl, &engine, nativeStorage, contextNativePointer);
+            rootSceneSession->LoadContent(contentUrl, &engine, nativeStorage, contextWeakPtr.lock().get());
         };
     NativeValue* lastParam = nullptr;
     NativeValue* result = nullptr;

@@ -30,12 +30,12 @@ namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScreenSessionManager"};
-    const std::string SCREEN_CONNECTION_CALLBACK = "ScreenConnect";
+    const std::string SCREEN_CONNECTION_CALLBACK = "screenConnect";
 }
 
 NativeValue* JsScreenSessionManager::Init(NativeEngine* engine, NativeValue* exportObj)
 {
-    WLOGFD("Init.");
+    WLOGFI("Init.");
     if (engine == nullptr || exportObj == nullptr) {
         WLOGFE("Failed to init, engine or exportObj is null!");
         return nullptr;
@@ -57,22 +57,22 @@ NativeValue* JsScreenSessionManager::Init(NativeEngine* engine, NativeValue* exp
 
 void JsScreenSessionManager::Finalizer(NativeEngine* engine, void* data, void* hint)
 {
-    WLOGFD("Finalizer.");
+    WLOGFI("Finalizer.");
     std::unique_ptr<JsScreenSessionManager>(static_cast<JsScreenSessionManager*>(data));
 }
 
 NativeValue* JsScreenSessionManager::RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFD("Register callback.");
+    WLOGFI("Register callback.");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(engine, info);
     return (me != nullptr) ? me->OnRegisterCallback(*engine, *info) : nullptr;
 }
 
 NativeValue* JsScreenSessionManager::OnRegisterCallback(NativeEngine& engine, const NativeCallbackInfo& info)
 {
-    WLOGFD("On register callback.");
-    if  (info.argc < 2) { // 2: params num
-        WLOGFD("Argc is invalid: %{public}zu", info.argc);
+    WLOGFI("On register callback.");
+    if (info.argc < 2) { // 2: params num
+        WLOGFE("Argc is invalid: %{public}zu", info.argc);
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
@@ -102,7 +102,7 @@ NativeValue* JsScreenSessionManager::OnRegisterCallback(NativeEngine& engine, co
 void JsScreenSessionManager::ProcessRegisterScreenConnection(NativeEngine& engine,
     const std::shared_ptr<NativeReference>& callback)
 {
-    WLOGFD("Process register screen connection.");
+    WLOGFI("Process register screen connection.");
     auto screenConnectionCallback = [&engine, callback](sptr<ScreenSession> screenSession) {
         wptr<ScreenSession> screenSessionWeak(screenSession);
         std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
