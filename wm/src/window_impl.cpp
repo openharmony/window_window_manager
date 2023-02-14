@@ -760,9 +760,6 @@ WMError WindowImpl::SetAspectRatio(float ratio)
         WLOGFE("Invalid param, ratio: %{public}f", ratio);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    if (std::abs(property_->GetAspectRatio() - ratio) < 0.0001f) {
-        return WMError::WM_OK;
-    }
     property_->SetAspectRatio(ratio);
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         WLOGFD("window is hidden or created! id: %{public}u, ratio: %{public}f ", property_->GetWindowId(), ratio);

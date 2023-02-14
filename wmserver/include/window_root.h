@@ -154,7 +154,6 @@ private:
     WMError BindDialogToParent(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     void ChangeRSRenderModeIfNeeded(bool isToUnified);
     bool IsAppWindowExceed() const;
-    void GetStoragedAspectRatio(const sptr<WindowNode>& node);
     void SetDisplayOrientationFromWindow(sptr<WindowNode>& node, bool withAnimation);
 
     std::map<uint32_t, sptr<WindowNode>> windowNodeMap_;

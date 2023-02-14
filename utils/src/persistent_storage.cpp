@@ -33,7 +33,8 @@ bool PersistentStorage::HasKey(const std::string& key, PersistentStorageType sto
         return res;
     }
     res = pref->HasKey(key);
-    WLOGD("[PersistentStorage] Key: %{public}s, hasKey: %{public}d", key.c_str(), res);
+    WLOGD("[PersistentStorage] %{public}s %{public}s", key.c_str(),
+        (res ? "Has persisted key:" : "Don't have persisted key:"));
     return res;
 }
 
