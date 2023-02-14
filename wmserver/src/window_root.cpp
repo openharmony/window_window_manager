@@ -596,6 +596,8 @@ void WindowRoot::LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool afterAnima
         WLOGFE("add window failed, window container could not be found");
         return;
     }
+    // Get aspect ratio from persistent storage
+    GetStoragedAspectRatio(node);
     container->LayoutWhenAddWindowNode(node, afterAnimation);
     return;
 }
@@ -662,6 +664,8 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
                 return res;
             }
         }
+        // Get aspect ratio from persistent storage
+        GetStoragedAspectRatio(node);
         WMError res = container->ShowStartingWindow(node);
         if (res != WMError::WM_OK) {
             MinimizeApp::ClearNodesWithReason(MinimizeReason::OTHER_WINDOW);
