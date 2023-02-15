@@ -1153,6 +1153,54 @@ HWTEST_F(WindowPairTest, ExitSplitMode03, Function | SmallTest | Level2)
     ASSERT_EQ(0, vec2.size());
     windowPair->Clear();
 }
+
+
+/**
+ * @tc.name: IsDuringSplit
+ * @tc.desc: check function IsDuringSplit
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, IsDuringSplit, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    auto result = windowPair->IsDuringSplit();
+    ASSERT_EQ(result, false);
+
+    windowPair->status_ = WindowPairStatus::EMPTY;
+    result = windowPair->IsDuringSplit();
+    ASSERT_EQ(result, false);
+
+    windowPair->status_ = WindowPairStatus::SINGLE_PRIMARY;
+    result = windowPair->IsDuringSplit();
+    ASSERT_EQ(result, true);
+
+    windowPair->status_ = WindowPairStatus::PAIRED_DONE;
+    windowPair->primary_ = nullptr;
+    windowPair->secondary_ = nullptr;
+    result = windowPair->IsDuringSplit();
+    ASSERT_EQ(result, true);
+
+    sptr<WindowNode> node1 = new WindowNode();
+    node1->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    windowPair->primary_ = node1;
+    result = windowPair->IsDuringSplit();
+    ASSERT_EQ(result, true);
+
+    sptr<WindowNode> node2 = new WindowNode();
+    node2->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    windowPair->secondary_ = node2;
+    result = windowPair->IsDuringSplit();
+    ASSERT_EQ(result, false);
+
+    windowPair->primary_->property_->SetWindowType(WindowType::WINDOW_TYPE_LAUNCHER_RECENT);
+    windowPair->secondary_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    result = windowPair->IsDuringSplit();
+    ASSERT_EQ(result, true);
+
+    windowPair->primary_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    windowPair->secondary_->property_->SetWindowType(WindowType::WINDOW_TYPE_LAUNCHER_RECENT);
+    ASSERT_EQ(result, true);
+}
 }
 }
 }

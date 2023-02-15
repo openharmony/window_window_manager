@@ -34,20 +34,20 @@ private:
     const std::map<WindowType, int32_t> windowPriorityMap_ {
         // sub-windows types
         { WindowType::WINDOW_TYPE_MEDIA,                 -1 },
-        { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,         1 },
-        { WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW,      1 },
-        { WindowType::WINDOW_TYPE_APP_COMPONENT,          1 },
+        { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,         2 },
+        { WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW,      2 },
+        { WindowType::WINDOW_TYPE_APP_COMPONENT,          2 },
 
         // main window
-        { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,        0 },
+        { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,        1 },
 
         // system-specific window
         { WindowType::WINDOW_TYPE_WALLPAPER,            0 },
         { WindowType::WINDOW_TYPE_DESKTOP,              1 },
-        { WindowType::WINDOW_TYPE_DIALOG,               2 },
+        { WindowType::WINDOW_TYPE_DIALOG,               3 },
         { WindowType::WINDOW_TYPE_APP_LAUNCHING,        101 },
-        { WindowType::WINDOW_TYPE_DOCK_SLICE,           0 },
-        { WindowType::WINDOW_TYPE_PLACEHOLDER,          0 },
+        { WindowType::WINDOW_TYPE_DOCK_SLICE,           1 },
+        { WindowType::WINDOW_TYPE_PLACEHOLDER,          1 },
         { WindowType::WINDOW_TYPE_LAUNCHER_RECENT,      102 },
         { WindowType::WINDOW_TYPE_LAUNCHER_DOCK,        103 },
         { WindowType::WINDOW_TYPE_INCOMING_CALL,        104 },

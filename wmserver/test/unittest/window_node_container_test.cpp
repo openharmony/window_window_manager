@@ -86,6 +86,15 @@ sptr<WindowProperty> CreateWindowProperty(uint32_t windowId, const std::string& 
     return property;
 }
 
+RSSurfaceNode::SharedPtr CreateSFNode(const std::string& nodeName)
+{
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    rsSurfaceNodeConfig.SurfaceNodeName = "name1";
+    RSSurfaceNodeType rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
+
+    return RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType);
+}
+
 namespace {
 /**
  * @tc.name: AddWindowNodeOnWindowTree01
@@ -822,6 +831,234 @@ HWTEST_F(WindowNodeContainerTest, UpdatePrivateStateAndNotify, Function | SmallT
     container_->appWindowNode_->children_.clear();
     container_->UpdatePrivateStateAndNotify();
     ASSERT_EQ(0, container_->privateWindowCount_);
+}
+/**
+ * @tc.name: MinimizeOldestMainFloatingWindow
+ * @tc.desc: check function MinimizeOldestMainFloatingWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowNodeContainerTest, MinimizeOldestMainFloatingWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
+        defaultDisplay_->GetScreenId());
+
+    sptr<WindowProperty> property1 = CreateWindowProperty(110u, "test1",
+        WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
+    sptr<WindowNode> window1 = new WindowNode(property1, nullptr, nullptr);
+
+    sptr<WindowProperty> property2 = CreateWindowProperty(111u, "test2",
+        WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
+    sptr<WindowNode> window2 = new WindowNode(property2, nullptr, nullptr);
+
+    container->appWindowNode_->children_.push_back(window1);
+    container->appWindowNode_->children_.push_back(window2);
+
+    window1->parent_ = container->appWindowNode_;
+    window2->parent_ = container->appWindowNode_;
+
+    auto oldInfo = MinimizeApp::needMinimizeAppNodes_[MinimizeReason::MAX_APP_COUNT];
+    MinimizeApp::ClearNodesWithReason(MinimizeReason::MAX_APP_COUNT);
+
+    container->maxMainFloatingWindowNumber_ = -1;
+    container->MinimizeOldestMainFloatingWindow(110u);
+    auto needMinimizeNum = MinimizeApp::GetNeedMinimizeAppNodesWithReason(MinimizeReason::MAX_APP_COUNT);
+    ASSERT_EQ(needMinimizeNum.size(), 0);
+    MinimizeApp::ClearNodesWithReason(MinimizeReason::MAX_APP_COUNT);
+
+    container->maxMainFloatingWindowNumber_ = 3;
+    container->MinimizeOldestMainFloatingWindow(110u);
+    needMinimizeNum = MinimizeApp::GetNeedMinimizeAppNodesWithReason(MinimizeReason::MAX_APP_COUNT);
+    ASSERT_EQ(needMinimizeNum.size(), 0);
+    MinimizeApp::ClearNodesWithReason(MinimizeReason::MAX_APP_COUNT);
+
+    container->maxMainFloatingWindowNumber_ = 1;
+    container->MinimizeOldestMainFloatingWindow(110u);
+    needMinimizeNum = MinimizeApp::GetNeedMinimizeAppNodesWithReason(MinimizeReason::MAX_APP_COUNT);
+    ASSERT_EQ(needMinimizeNum.size(), 1);
+    MinimizeApp::ClearNodesWithReason(MinimizeReason::MAX_APP_COUNT);
+
+    sptr<WindowProperty> property3 = CreateWindowProperty(112u, "test3",
+        WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
+    sptr<WindowNode> window3 = new WindowNode(property3, nullptr, nullptr);
+    container->appWindowNode_->children_.push_back(window3);
+    window3->parent_ = container->appWindowNode_;
+
+    container->maxMainFloatingWindowNumber_ = 1;
+    container->MinimizeOldestMainFloatingWindow(110u);
+    needMinimizeNum = MinimizeApp::GetNeedMinimizeAppNodesWithReason(MinimizeReason::MAX_APP_COUNT);
+    ASSERT_EQ(needMinimizeNum.size(), 1);
+    MinimizeApp::ClearNodesWithReason(MinimizeReason::MAX_APP_COUNT);
+
+    auto headItor = MinimizeApp::needMinimizeAppNodes_[MinimizeReason::MAX_APP_COUNT].end();
+    MinimizeApp::needMinimizeAppNodes_[MinimizeReason::MAX_APP_COUNT].insert(headItor, oldInfo.begin(), oldInfo.end());
+}
+
+/**
+ * @tc.name: GetMainFloatingWindowCount
+ * @tc.desc: check GetMainFloatingWindowCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowNodeContainerTest, GetMainFloatingWindowCount, Function | SmallTest | Level2)
+{
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
+        defaultDisplay_->GetScreenId());
+
+    sptr<WindowProperty> property1 = CreateWindowProperty(110u, "test1",
+        WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
+    sptr<WindowNode> window1 = new WindowNode(property1, nullptr, nullptr);
+
+    sptr<WindowProperty> property2 = CreateWindowProperty(111u, "test2",
+        WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
+    sptr<WindowNode> window2 = new WindowNode(property2, nullptr, nullptr);
+    window2->startingWindowShown_ = true;
+
+    sptr<WindowProperty> property3 = CreateWindowProperty(112u, "test3",
+        WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
+    sptr<WindowNode> window3 = new WindowNode(property3, nullptr, nullptr);
+
+    sptr<WindowProperty> property4 = CreateWindowProperty(112u, "test3",
+        WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
+    sptr<WindowNode> window4 = new WindowNode(property4, nullptr, nullptr);
+
+    container->appWindowNode_->children_.push_back(window1);
+    container->aboveAppWindowNode_->children_.push_back(window2);
+    container->appWindowNode_->children_.push_back(window3);
+    container->aboveAppWindowNode_->children_.push_back(window4);
+
+    auto result = container->GetMainFloatingWindowCount();
+    ASSERT_EQ(result, 2);
+}
+
+/**
+ * @tc.name: ResetWindowZOrderPriorityWhenSetMode
+ * @tc.desc: check function ResetWindowZOrderPriorityWhenSetMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowNodeContainerTest, ResetWindowZOrderPriorityWhenSetMode, Function | SmallTest | Level2)
+{
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
+        defaultDisplay_->GetScreenId());
+
+    sptr<WindowProperty> property1 = CreateWindowProperty(110u, "test1",
+        WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
+    sptr<WindowNode> window1 = new WindowNode(property1, nullptr, nullptr);
+    window1->parent_ = container->appWindowNode_;
+
+    sptr<WindowProperty> property2 = CreateWindowProperty(111u, "test2",
+        WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
+    sptr<WindowNode> window2 = new WindowNode(property2, nullptr, nullptr);
+    window2->parent_ = container->appWindowNode_;
+
+    container->appWindowNode_->children_.push_back(window1);
+    container->appWindowNode_->children_.push_back(window2);
+
+    container->isFloatWindowAboveFullWindow_ = false;
+    container->ResetWindowZOrderPriorityWhenSetMode(window1, WindowMode::WINDOW_MODE_FLOATING,
+        WindowMode::WINDOW_MODE_FULLSCREEN);
+    ASSERT_EQ(window1->priority_, 0);
+
+    container->isFloatWindowAboveFullWindow_ = true;
+    std::map<std::pair<WindowMode, WindowMode>, uint32_t> pairMode = {
+        {{WindowMode::WINDOW_MODE_FLOATING, WindowMode::WINDOW_MODE_FULLSCREEN}, 2},
+        {{WindowMode::WINDOW_MODE_FULLSCREEN, WindowMode::WINDOW_MODE_FLOATING}, 2},
+        {{WindowMode::WINDOW_MODE_UNDEFINED, WindowMode::WINDOW_MODE_FULLSCREEN}, 0},
+        {{WindowMode::WINDOW_MODE_FULLSCREEN, WindowMode::WINDOW_MODE_SPLIT_PRIMARY}, 2},
+        {{WindowMode::WINDOW_MODE_SPLIT_PRIMARY, WindowMode::WINDOW_MODE_SPLIT_SECONDARY}, 2},
+        {{WindowMode::WINDOW_MODE_SPLIT_SECONDARY, WindowMode::WINDOW_MODE_SPLIT_PRIMARY}, 2},
+    };
+    container->focusedWindow_ = 111u;
+    for (auto itor = pairMode.begin(); itor != pairMode.end(); itor++) {
+        auto pair = itor->first;
+        auto priority = itor->second;
+        container->ResetWindowZOrderPriorityWhenSetMode(window1, pair.first, pair.second);
+        ASSERT_EQ(window1->priority_, priority);
+        window1->priority_ = 0;
+    }
+
+    window1->zOrder_ = 0;
+    window1->surfaceNode_ = CreateSFNode("sfNode1");
+    window2->surfaceNode_ = CreateSFNode("sfNode2");
+    container->focusedWindow_ = window1->GetWindowId();
+    container->ResetWindowZOrderPriorityWhenSetMode(window1, WindowMode::WINDOW_MODE_FLOATING,
+        WindowMode::WINDOW_MODE_FULLSCREEN);
+    ASSERT_EQ(window1->zOrder_, 2);
+}
+
+/**
+ * @tc.name: ResetMainFloatingWindowPriorityIfNeeded
+ * @tc.desc: check function ResetMainFloatingWindowPriorityIfNeeded
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowNodeContainerTest, ResetMainFloatingWindowPriorityIfNeeded, Function | SmallTest | Level2)
+{
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
+        defaultDisplay_->GetScreenId());
+
+    sptr<WindowProperty> property1 = CreateWindowProperty(110u, "test1",
+        WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
+    sptr<WindowNode> window1 = new WindowNode(property1, nullptr, nullptr);
+    window1->parent_ = container->appWindowNode_;
+
+    sptr<WindowProperty> property2 = CreateWindowProperty(111u, "test2",
+        WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
+    sptr<WindowNode> window2 = new WindowNode(property2, nullptr, nullptr);
+    window2->parent_ = container->appWindowNode_;
+
+    container->appWindowNode_->children_.push_back(window1);
+    container->appWindowNode_->children_.push_back(window2);
+
+    container->isFloatWindowAboveFullWindow_ = false;
+    auto zorderPolicy = container->zorderPolicy_;
+    const auto baseZOrderPolicy = zorderPolicy->GetWindowPriority(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    container->ResetMainFloatingWindowPriorityIfNeeded(window1);
+    ASSERT_EQ(window1->priority_, 0);
+
+    container->isFloatWindowAboveFullWindow_ = true;
+    container->ResetMainFloatingWindowPriorityIfNeeded(window1);
+    ASSERT_EQ(window1->priority_, baseZOrderPolicy + 1);
+
+    container->ResetMainFloatingWindowPriorityIfNeeded(window2);
+    ASSERT_EQ(window2->priority_, 0);
+
+    auto displayGroupControl = container->displayGroupController_;
+    auto defaultDisplayId = defaultDisplay_->GetId();
+    sptr<WindowPair> windowPair = displayGroupControl->GetWindowPairByDisplayId(defaultDisplayId);
+    windowPair->status_ = WindowPairStatus::SINGLE_PRIMARY;
+    window1->SetDisplayId(defaultDisplayId);
+    container->ResetMainFloatingWindowPriorityIfNeeded(window1);
+    ASSERT_EQ(window1->priority_, baseZOrderPolicy - 1);
+}
+
+/**
+ * @tc.name: Destroy
+ * @tc.desc: check function ResetAllMainFloatingWindowZOrder
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowNodeContainerTest, ResetAllMainFloatingWindowZOrder, Function | SmallTest | Level2)
+{
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
+        defaultDisplay_->GetScreenId());
+
+    sptr<WindowProperty> property1 = CreateWindowProperty(110u, "test1",
+        WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FLOATING, windowRect_);
+    sptr<WindowNode> window1 = new WindowNode(property1, nullptr, nullptr);
+    window1->parent_ = container->appWindowNode_;
+
+    sptr<WindowProperty> property2 = CreateWindowProperty(111u, "test2",
+        WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
+    sptr<WindowNode> window2 = new WindowNode(property2, nullptr, nullptr);
+    window2->parent_ = container->appWindowNode_;
+
+    container->appWindowNode_->children_.push_back(window1);
+    container->appWindowNode_->children_.push_back(window2);
+
+    container->isFloatWindowAboveFullWindow_ = false;
+    container->ResetAllMainFloatingWindowZOrder(container->appWindowNode_);
+    ASSERT_EQ(window1->priority_, 0);
+
+    container->isFloatWindowAboveFullWindow_ = true;
+    container->ResetAllMainFloatingWindowZOrder(container->appWindowNode_);
+    ASSERT_EQ(window1->priority_, 2);
 }
 }
 }

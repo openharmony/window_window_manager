@@ -62,6 +62,7 @@ public:
     Rect GetDisplayRect(DisplayId displayId) const;
     std::unordered_map<WindowType, SystemBarProperty> GetExpectImmersiveProperty() const;
     uint32_t GetWindowCountByType(WindowType windowType);
+    uint32_t GetMainFloatingWindowCount();
     bool IsForbidDockSliceMove(DisplayId displayId) const;
     bool IsDockSliceInExitSplitModeArea(DisplayId displayId) const;
     void ExitSplitMode(DisplayId displayId);
@@ -73,6 +74,7 @@ public:
     sptr<WindowNode> GetNextActiveWindow(uint32_t windowId) const;
     void MinimizeAllAppWindows(DisplayId displayId);
     void MinimizeOldestAppWindow();
+    void MinimizeOldestMainFloatingWindow(uint32_t windowId);
     WMError ToggleShownStateForAllAppWindows(std::function<bool(uint32_t, WindowMode)> restoreFunc, bool restore);
     void BackUpAllAppWindows();
     void RestoreAllAppWindows(std::function<bool(uint32_t, WindowMode)> restoreFunc);
@@ -127,6 +129,8 @@ public:
     bool IsScreenLocked();
     void LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool afterAnimation = false);
     void UpdatePrivateStateAndNotify();
+    static void SetConfigMainFloatingWindowAbove(bool isAbove);
+    static void SetMaxMainFloatingWindowNumber(uint32_t maxNumber);
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
     sptr<WindowNode> FindRoot(WindowType type) const;
@@ -167,6 +171,10 @@ private:
     void UpdateSizeChangeReason(sptr<WindowNode>& node, WindowMode srcMode, WindowMode dstMode);
     void UpdatePrivateWindowCount();
     uint32_t GetAppWindowNum();
+    void ResetMainFloatingWindowPriorityIfNeeded(sptr<WindowNode>& node);
+    void ResetWindowZOrderPriorityWhenSetMode(sptr<WindowNode>& node,
+        const WindowMode& dstMode, const WindowMode& srcMode);
+    void ResetAllMainFloatingWindowZOrder(sptr<WindowNode>& rootNode);
 
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     uint32_t brightnessWindow_ = INVALID_WINDOW_ID;
@@ -197,6 +205,10 @@ private:
     sptr<AvoidAreaController> avoidController_;
     sptr<DisplayGroupController> displayGroupController_;
     sptr<DisplayGroupInfo> displayGroupInfo_;
+
+    // if isFloatWindowHigher_ is true, FloatWindow should be above the full screen window.
+    static bool isFloatWindowAboveFullWindow_;
+    static uint32_t maxMainFloatingWindowNumber_;
 };
 } // namespace Rosen
 } // namespace OHOS
