@@ -30,7 +30,7 @@ class JsScreenSession : public IScreenChangeListener {
 using ValueFunction = std::function<std::pair<NativeValue* const*, size_t>(NativeEngine& engine)>;
 public:
     JsScreenSession(NativeEngine& engine, const sptr<ScreenSession> screenSession);
-    ~JsScreenSession() = default;
+    ~JsScreenSession();
 
     static NativeValue* Create(NativeEngine& engine, const sptr<ScreenSession>& session);
     static void Finalizer(NativeEngine* engine, void* data, void* hint);

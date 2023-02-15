@@ -27,25 +27,36 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property)
 {
 }
 
-void ScreenSession::SetScreenChangeListener(sptr<IScreenChangeListener>& screenChangeListener)
+void ScreenSession::RegisterScreenChangeListener(sptr<IScreenChangeListener>& screenChangeListener)
 {
     if (screenChangeListener == nullptr) {
-        WLOGFE("Failed to set screen change listener, listener is null!");
+        WLOGFE("Failed to register screen change listener, listener is null!");
         return;
     }
 
-    if (screenChangeListener_ != nullptr) {
-        WLOGFE("Repeat to set screen change listener!");
+    if (std::find(screenChangeListenerList_.begin(), screenChangeListenerList_.end(), screenChangeListener)
+        != screenChangeListenerList_.end()) {
+        WLOGFE("Repeat to register screen change listener!");
         return;
     }
 
-    screenChangeListener_ = screenChangeListener;
+    screenChangeListenerList_.emplace_back(screenChangeListener);
     if (screenState_ == ScreenState::CONNECTION) {
-        screenChangeListener_->OnConnect();
-    } else if (screenState_ == ScreenState::DISCONNECTION) {
-        screenChangeListener_->OnConnect();
-        screenChangeListener_->OnDisconnect();
+        screenChangeListener->OnConnect();
     }
+}
+
+void ScreenSession::UnregisterScreenChangeListener(sptr<IScreenChangeListener>& screenChangeListener)
+{
+    if (screenChangeListener == nullptr) {
+        WLOGFE("Failed to unregister screen change listener, listener is null!");
+        return;
+    }
+
+    screenChangeListenerList_.erase(std::remove_if(screenChangeListenerList_.begin(), screenChangeListenerList_.end(),
+        [screenChangeListener](sptr<IScreenChangeListener> listener) {
+            return screenChangeListener == listener;
+        }), screenChangeListenerList_.end());
 }
 
 ScreenId ScreenSession::GetScreenId()
@@ -61,16 +72,16 @@ ScreenProperty ScreenSession::GetScreenProperty() const
 void ScreenSession::Connect()
 {
     screenState_ = ScreenState::CONNECTION;
-    if (screenChangeListener_ != nullptr) {
-        screenChangeListener_->OnConnect();
+    for (auto& listener : screenChangeListenerList_) {
+        listener->OnConnect();
     }
 }
 
 void ScreenSession::Disconnect()
 {
     screenState_ = ScreenState::DISCONNECTION;
-    if (screenChangeListener_ != nullptr) {
-        screenChangeListener_->OnDisconnect();
+    for (auto& listener : screenChangeListenerList_) {
+        listener->OnDisconnect();
     }
 }
 

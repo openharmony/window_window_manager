@@ -16,6 +16,8 @@
 #ifndef OHOS_ROSEN_WINDOW_SESSION_SCREEN_SESSION_H
 #define OHOS_ROSEN_WINDOW_SESSION_SCREEN_SESSION_H
 
+#include <vector>
+
 #include <refbase.h>
 #include <screen_manager/screen_types.h>
 
@@ -44,7 +46,8 @@ public:
     explicit ScreenSession(ScreenId screenId, const ScreenProperty& property);
     ~ScreenSession() = default;
 
-    void SetScreenChangeListener(sptr<IScreenChangeListener>& screenChangeListener);
+    void RegisterScreenChangeListener(sptr<IScreenChangeListener>& screenChangeListener);
+    void UnregisterScreenChangeListener(sptr<IScreenChangeListener>& screenChangeListener);
 
     ScreenId GetScreenId();
     ScreenProperty GetScreenProperty() const;
@@ -56,7 +59,7 @@ private:
     ScreenId screenId_;
     ScreenProperty property_;
     ScreenState screenState_{ScreenState::INIT};
-    sptr<IScreenChangeListener> screenChangeListener_;
+    std::vector<sptr<IScreenChangeListener>> screenChangeListenerList_;
 };
 } // namespace OHOS::Rosen
 

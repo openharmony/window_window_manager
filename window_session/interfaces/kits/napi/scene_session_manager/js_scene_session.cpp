@@ -37,7 +37,6 @@ NativeValue* CreateJsSceneSessionObject(NativeEngine& engine, const sptr<SceneSe
     WLOGFI("[NAPI]CreateJsSceneSession");
     std::unique_ptr<JsSceneSession> jsSceneSession = std::make_unique<JsSceneSession>(engine, session);
     object->SetNativePointer(jsSceneSession.release(), JsSceneSession::Finalizer, nullptr);
-    object->SetProperty("abilityInfo", CreateJsAbilityInfo(engine, session));
     object->SetProperty("persistentId", CreateJsValue(engine, session->GetPersistentId()));
     BindFunctions(engine, object, "JsSceneSession");
     return objValue;

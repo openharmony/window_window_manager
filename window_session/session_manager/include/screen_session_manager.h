@@ -25,8 +25,17 @@
 #include "screen_session.h"
 
 namespace OHOS::Rosen {
+
+class IScreenConnectionListener : public RefBase {
+public:
+    IScreenConnectionListener() = default;
+    virtual ~IScreenConnectionListener() = default;
+
+    virtual void OnScreenConnect(sptr<ScreenSession>&) = 0;
+    virtual void OnScreenDisconnect(sptr<ScreenSession>&) = 0;
+};
+
 class ScreenSessionManager : public RefBase {
-using ScreenConnectionCallback = std::function<void(sptr<ScreenSession>)>;
 public:
     static ScreenSessionManager& GetInstance();
     ScreenSessionManager(const ScreenSessionManager&) = delete;
@@ -34,7 +43,8 @@ public:
     ScreenSessionManager& operator=(const ScreenSessionManager&) = delete;
     ScreenSessionManager& operator=(ScreenSessionManager&&) = delete;
 
-    void RegisterScreenConnectionCallback(const ScreenConnectionCallback& screenConnectionCallback);
+    void RegisterScreenConnectionListener(sptr<IScreenConnectionListener>& screenConnectionListener);
+    void UnregisterScreenConnectionListener(sptr<IScreenConnectionListener>& screenConnectionListener);
 
 protected:
     ScreenSessionManager();
@@ -51,7 +61,7 @@ private:
     std::unique_ptr<AppExecFwk::EventHandler> handler_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
 
-    ScreenConnectionCallback screenConnectionCallback_;
+    std::vector<sptr<IScreenConnectionListener>> screenConnectionListenerList_;
 };
 } // namespace OHOS::Rosen
 
