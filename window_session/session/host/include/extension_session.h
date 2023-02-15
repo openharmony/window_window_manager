@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ORSEN_WINDOW_EXTENSION_SESSION_H
-#define OHOS_ORSEN_WINDOW_EXTENSION_SESSION_H
+#ifndef OHOS_ROSEN_WINDOW_EXTENSION_SESSION_H
+#define OHOS_ROSEN_WINDOW_EXTENSION_SESSION_H
 
 #include "session.h"
 #include "zidl/session_stage_interface.h"
@@ -29,4 +29,4 @@ public:
 private:
 };
 }
-#endif // OHOS_ORSEN_WINDOW_EXTENSION_SESSION_H
+#endif // OHOS_ROSEN_WINDOW_EXTENSION_SESSION_H

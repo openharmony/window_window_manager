@@ -44,4 +44,3 @@ ohos_shared_library("screensessionmanager_napi") {
   part_name = "window_manager"
   subsystem_name = "window"
 }
-

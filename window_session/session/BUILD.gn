@@ -20,6 +20,7 @@ config("session_public_config") {
     "//foundation/window/window_manager/window_session/session/host/include",
     "//foundation/window/window_manager/window_session/session/container/include",
     "//foundation/window/window_manager/window_session/session/screen/include",
+
     # for window_manager_hilog
     "//foundation/window/window_manager/utils/include",
   ]
