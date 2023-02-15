@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ORSEN_WINDOW_SESSION_STUB_H
-#define OHOS_ORSEN_WINDOW_SESSION_STUB_H
+#ifndef OHOS_ROSEN_WINDOW_SESSION_STUB_H
+#define OHOS_ROSEN_WINDOW_SESSION_STUB_H
 
 #include <map>
 
@@ -47,4 +47,4 @@ private:
     int HandleMaximum(MessageParcel& data, MessageParcel& reply);
 };
 }
-#endif // OHOS_ORSEN_WINDOW_SCENE_SCENE_SESSION_STUB_H
+#endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_STUB_H

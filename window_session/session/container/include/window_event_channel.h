@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ORSEN_WINDOW_WINDOW_EVENT_CHANNEL_H
-#define OHOS_ORSEN_WINDOW_WINDOW_EVENT_CHANNEL_H
+#ifndef OHOS_ROSEN_WINDOW_WINDOW_EVENT_CHANNEL_H
+#define OHOS_ROSEN_WINDOW_WINDOW_EVENT_CHANNEL_H
 
 #include "session_stage.h"
 #include "zidl/window_event_channel_stub.h"
@@ -33,4 +33,4 @@ private:
     sptr<SessionStage> sessionStage_ = nullptr;
 };
 }
-#endif // OHOS_WINDOW_WINDOW_EVENT_CHANNEL_H
+#endif // OHOS_ROSEN_WINDOW_WINDOW_EVENT_CHANNEL_H

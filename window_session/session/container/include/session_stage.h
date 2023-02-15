@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ORSEN_WINDOW_SESSION_STAGE_H
-#define OHOS_ORSEN_WINDOW_SESSION_STAGE_H
+#ifndef OHOS_ROSEN_WINDOW_SESSION_STAGE_H
+#define OHOS_ROSEN_WINDOW_SESSION_STAGE_H
 
 #include <memory>
 #include <mutex>
@@ -61,8 +61,8 @@ public:
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
 
     // for scene session stage
-    virtual WSError Recover() = 0;
-    virtual WSError Maximum() = 0;
+    virtual WSError Recover();
+    virtual WSError Maximum();
 
     bool RegisterSessionStageStateListener(const std::shared_ptr<ISessionStageStateListener>& listener);
     bool UnregisterSessionStageStateListener(const std::shared_ptr<ISessionStageStateListener>& listener);
@@ -135,4 +135,4 @@ private:
     std::vector<std::shared_ptr<ISizeChangeListener>> sizeChangeListeners_;
 };
 }
-#endif // OHOS_ORSEN_WINDOW_SESSION_STAGE_H
+#endif // OHOS_ROSEN_WINDOW_SESSION_STAGE_H

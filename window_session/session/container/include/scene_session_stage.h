@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ORSEN_WINDOW_SCENE_SESSION_STAGE_H
-#define OHOS_ORSEN_WINDOW_SCENE_SESSION_STAGE_H
+#ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_STAGE_H
+#define OHOS_ROSEN_WINDOW_SCENE_SESSION_STAGE_H
 
 #include "session_stage.h"
 #include "ws_common.h"
@@ -30,4 +30,4 @@ public:
     virtual WSError Maximum() override;
 };
 }
-#endif // OHOS_ORSEN_WINDOW_SCENE_SESSION_STAGE_H
+#endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_STAGE_H
