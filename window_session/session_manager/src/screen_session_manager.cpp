@@ -37,22 +37,38 @@ ScreenSessionManager::ScreenSessionManager()
     Init();
 }
 
-void ScreenSessionManager::RegisterScreenConnectionCallback(const ScreenConnectionCallback& screenConnectionCallback)
+void ScreenSessionManager::RegisterScreenConnectionListener(sptr<IScreenConnectionListener>& screenConnectionListener)
 {
-    if (screenConnectionCallback == nullptr) {
+    if (screenConnectionListener == nullptr) {
         WLOGFE("Failed to register screen connection callback, callback is null!");
         return;
     }
 
-    if (screenConnectionCallback_ != nullptr) {
+    if (std::find(screenConnectionListenerList_.begin(), screenConnectionListenerList_.end(), screenConnectionListener)
+        != screenConnectionListenerList_.end()) {
         WLOGFE("Repeat to register screen connection callback!");
         return;
     }
 
-    screenConnectionCallback_ = screenConnectionCallback;
+    screenConnectionListenerList_.emplace_back(screenConnectionListener);
     for (auto sessionIt : screenSessionMap_) {
-        screenConnectionCallback_(sessionIt.second);
+        screenConnectionListener->OnScreenConnect(sessionIt.second);
     }
+}
+
+void ScreenSessionManager::UnregisterScreenConnectionListener(
+    sptr<IScreenConnectionListener>& screenConnectionListener)
+{
+    if (screenConnectionListener == nullptr) {
+        WLOGFE("Failed to unregister screen connection listener, listener is null!");
+        return;
+    }
+
+    screenConnectionListenerList_.erase(std::remove_if(screenConnectionListenerList_.begin(),
+        screenConnectionListenerList_.end(),
+        [screenConnectionListener](sptr<IScreenConnectionListener> listener) {
+            return screenConnectionListener == listener;
+        }), screenConnectionListenerList_.end());
 }
 
 void ScreenSessionManager::Init()
@@ -118,13 +134,16 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     auto screenSession = GetOrCreateScreenSession(screenId);
 
     if (screenEvent == ScreenEvent::CONNECTED) {
-        if (screenConnectionCallback_ != nullptr) {
-            screenConnectionCallback_(screenSession);
+        for (auto listener : screenConnectionListenerList_) {
+            listener->OnScreenConnect(screenSession);
         }
         screenSession->Connect();
     } else if (screenEvent == ScreenEvent::DISCONNECTED) {
-        screenSessionMap_.erase(screenId);
         screenSession->Disconnect();
+        for (auto listener : screenConnectionListenerList_) {
+            listener->OnScreenDisconnect(screenSession);
+        }
+        screenSessionMap_.erase(screenId);
     } else {
         WLOGE("Unknown message:%{public}ud", static_cast<uint8_t>(screenEvent));
     }

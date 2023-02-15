@@ -51,6 +51,7 @@ NativeValue* JsScreenSession::Create(NativeEngine& engine, const sptr<ScreenSess
 
     auto jsScreenSession = std::make_unique<JsScreenSession>(engine, session);
     const char* moduleName = "JsScreenSession";
+    object->SetProperty("screenId", CreateJsValue(engine, static_cast<int64_t>(session->GetScreenId())));
     BindNativeFunction(engine, *object, "on", moduleName, JsScreenSession::RegisterCallback);
 
     return objValue;
@@ -65,6 +66,12 @@ void JsScreenSession::Finalizer(NativeEngine* engine, void* data, void* hint)
 JsScreenSession::JsScreenSession(NativeEngine& engine, const sptr<ScreenSession> screenSession)
     : engine_(engine), screenSession_(screenSession)
 {
+}
+
+JsScreenSession::~JsScreenSession()
+{
+    sptr<IScreenChangeListener> screenChangeListener(this);
+    screenSession_->UnregisterScreenChangeListener(screenChangeListener);
 }
 
 NativeValue* JsScreenSession::RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info)
@@ -144,7 +151,7 @@ void JsScreenSession::RegisterScreenChangeListener()
     };
 
     sptr<IScreenChangeListener> screenChangeListener(this);
-    screenSession_->SetScreenChangeListener(screenChangeListener);
+    screenSession_->RegisterScreenChangeListener(screenChangeListener);
 }
 
 void JsScreenSession::OnConnect()

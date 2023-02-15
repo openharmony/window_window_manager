@@ -33,6 +33,17 @@ namespace {
     const std::string SCREEN_CONNECTION_CALLBACK = "screenConnect";
 }
 
+JsScreenSessionManager::JsScreenSessionManager(NativeEngine& engine)
+    :engine_(engine)
+{
+}
+
+JsScreenSessionManager::~JsScreenSessionManager()
+{
+    sptr<IScreenConnectionListener> screenConnectionListener(this);
+    ScreenSessionManager::GetInstance().UnregisterScreenConnectionListener(screenConnectionListener);
+}
+
 NativeValue* JsScreenSessionManager::Init(NativeEngine* engine, NativeValue* exportObj)
 {
     WLOGFI("Init.");
@@ -47,7 +58,7 @@ NativeValue* JsScreenSessionManager::Init(NativeEngine* engine, NativeValue* exp
         return nullptr;
     }
 
-    auto jsScreenSessionManager = std::make_unique<JsScreenSessionManager>();
+    auto jsScreenSessionManager = std::make_unique<JsScreenSessionManager>(*engine);
     object->SetNativePointer(jsScreenSessionManager.release(), JsScreenSessionManager::Finalizer, nullptr);
 
     const char* moduleName = "JsScreenSessionManager";
@@ -61,6 +72,60 @@ void JsScreenSessionManager::Finalizer(NativeEngine* engine, void* data, void* h
     std::unique_ptr<JsScreenSessionManager>(static_cast<JsScreenSessionManager*>(data));
 }
 
+void JsScreenSessionManager::OnScreenConnect(sptr<ScreenSession>& screenSession)
+{
+    if (screenConnectionCallback_ == nullptr) {
+        return;
+    }
+
+    std::shared_ptr<NativeReference> callback_ = screenConnectionCallback_;
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
+        [callback_, screenSession] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            auto jsScreenSession = JsScreenSession::Create(engine, screenSession);
+            NativeValue* argv[] = { jsScreenSession,  CreateJsValue(engine, 1) };
+            NativeValue* method = callback_->Get();
+            if (method == nullptr) {
+                WLOGFE("Failed to get method callback from object!");
+                return;
+            }
+
+            engine.CallFunction(engine.CreateUndefined(), method, argv, ArraySize(argv));
+        }
+    );
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsScreenSessionManager::OnScreenConnect",
+        engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsScreenSessionManager::OnScreenDisconnect(sptr<ScreenSession>& screenSession)
+{
+    if (screenConnectionCallback_ == nullptr) {
+        return;
+    }
+
+    std::shared_ptr<NativeReference> callback_ = screenConnectionCallback_;
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
+        [callback_, screenSession] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            auto jsScreenSession = JsScreenSession::Create(engine, screenSession);
+            NativeValue* argv[] = { jsScreenSession,  CreateJsValue(engine, 2) };
+            NativeValue* method = callback_->Get();
+            if (method == nullptr) {
+                WLOGFE("Failed to get method callback from object!");
+                return;
+            }
+
+            engine.CallFunction(engine.CreateUndefined(), method, argv, ArraySize(argv));
+        }
+    );
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsScreenSessionManager::OnScreenConnect",
+        engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
 NativeValue* JsScreenSessionManager::RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info)
 {
     WLOGFI("Register callback.");
@@ -70,6 +135,10 @@ NativeValue* JsScreenSessionManager::RegisterCallback(NativeEngine* engine, Nati
 
 NativeValue* JsScreenSessionManager::OnRegisterCallback(NativeEngine& engine, const NativeCallbackInfo& info)
 {
+    if (screenConnectionCallback_ != nullptr) {
+        return engine.CreateUndefined();
+    }
+
     WLOGFI("On register callback.");
     if (info.argc < 2) { // 2: params num
         WLOGFE("Argc is invalid: %{public}zu", info.argc);
@@ -92,45 +161,9 @@ NativeValue* JsScreenSessionManager::OnRegisterCallback(NativeEngine& engine, co
     }
 
     std::shared_ptr<NativeReference> callbackRef(engine.CreateReference(value, 1));
-    if (callbackType == SCREEN_CONNECTION_CALLBACK) {
-        ProcessRegisterScreenConnection(engine, callbackRef);
-    }
-
+    screenConnectionCallback_ = callbackRef;
+    sptr<IScreenConnectionListener> screenConnectionListener(this);
+    ScreenSessionManager::GetInstance().RegisterScreenConnectionListener(screenConnectionListener);
     return engine.CreateUndefined();
-}
-
-void JsScreenSessionManager::ProcessRegisterScreenConnection(NativeEngine& engine,
-    const std::shared_ptr<NativeReference>& callback)
-{
-    WLOGFI("Process register screen connection.");
-    auto screenConnectionCallback = [&engine, callback](sptr<ScreenSession> screenSession) {
-        wptr<ScreenSession> screenSessionWeak(screenSession);
-        std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-            [callback, screenSessionWeak] (NativeEngine &engine, AsyncTask &task, int32_t status) {
-                auto screenSession = screenSessionWeak.promote();
-                if (screenSession == nullptr) {
-                    WLOGFE("Failed to call screen connection callback, screen session is null!");
-                    return;
-                }
-
-                auto jsScreenSession = JsScreenSession::Create(engine, screenSession);
-                NativeValue* argv[] = { jsScreenSession };
-                NativeValue* method = callback->Get();
-                if (method == nullptr) {
-                    WLOGFE("Failed to get method callback from object!");
-                    return;
-                }
-
-                engine.CallFunction(engine.CreateUndefined(), method, argv, ArraySize(argv));
-            }
-        );
-
-        NativeReference* callback = nullptr;
-        std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-        AsyncTask::Schedule("JsScreenSessionManager::OnScreenConnect",
-            engine, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
-    };
-
-    ScreenSessionManager::GetInstance().RegisterScreenConnectionCallback(screenConnectionCallback);
 }
 } // namespace OHOS::Rosen

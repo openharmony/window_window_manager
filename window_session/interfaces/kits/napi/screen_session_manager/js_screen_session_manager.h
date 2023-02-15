@@ -20,20 +20,27 @@
 #include <native_engine/native_value.h>
 #include <refbase.h>
 
+#include "screen_session_manager.h"
+
 namespace OHOS::Rosen {
-class JsScreenSessionManager final {
+class JsScreenSessionManager final : public IScreenConnectionListener {
 public:
-    JsScreenSessionManager() = default;
-    ~JsScreenSessionManager() = default;
+    JsScreenSessionManager(NativeEngine& engine);
+    ~JsScreenSessionManager();
 
     static NativeValue* Init(NativeEngine* engine, NativeValue* exportObj);
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
+
+    void OnScreenConnect(sptr<ScreenSession>& screenSession) override;
+    void OnScreenDisconnect(sptr<ScreenSession>& screenSession) override;
 
 private:
     static NativeValue* RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info);
 
     NativeValue* OnRegisterCallback(NativeEngine& engine, const NativeCallbackInfo& info);
-    void ProcessRegisterScreenConnection(NativeEngine& engine, const std::shared_ptr<NativeReference>& callback);
+
+    std::shared_ptr<NativeReference> screenConnectionCallback_;
+    NativeEngine& engine_;
 };
 } // namespace OHOS::Rosen
 
