@@ -104,19 +104,19 @@ public:
     virtual void SetAppWindowIcon(const std::shared_ptr<OHOS::Media::PixelMap>& pixelMap) = 0;
 
     // ArkTS Form
-    virtual std::shared_ptr<Rosen::RSSurfaceNode> GetCardRootNode()
-    {
-        return nullptr;
-    }
+    virtual std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() = 0;
 
-    virtual void ProcessFormUpdate(const std::string& data) = 0;
+    virtual void UpdateFormDate(const std::string& data) = 0;
+
     virtual void SetFormWidth(const float width) = 0;
     virtual void SetFormHeight(const float height) = 0;
     virtual float GetFormWidth() = 0;
     virtual float GetFormHeight() = 0;
 
     virtual void SetActionEventHandler(
-        std::function<void(const std::string& action)>&& actionCallback) = 0;
+        std::function<void(const std::string&)>&& actionCallback) = 0;
+    virtual void SetErrorEventHandler(
+        std::function<void(const std::string&, const std::string&)>&& errorCallback) = 0;
 };
 } // namespace OHOS::Ace
 
