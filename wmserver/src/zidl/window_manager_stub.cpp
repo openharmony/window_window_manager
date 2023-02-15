@@ -18,6 +18,7 @@
 #include <rs_iwindow_animation_controller.h>
 
 #include "marshalling_helper.h"
+#include "memory_guard.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -29,6 +30,7 @@ namespace {
 int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
     MessageOption &option)
 {
+    MemoryGuard cacheGuard;
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed");
         return -1;

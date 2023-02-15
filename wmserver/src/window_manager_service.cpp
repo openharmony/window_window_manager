@@ -33,6 +33,7 @@
 #include "display_manager_service_inner.h"
 #include "dm_common.h"
 #include "drag_controller.h"
+#include "memory_guard.h"
 #include "minimize_app.h"
 #include "permission.h"
 #include "remote_animation.h"
@@ -77,6 +78,7 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
     if (ret != 0) {
         WLOGFE("Add watchdog thread failed");
     }
+    handler_->PostTask([]() { MemoryGuard cacheGuard; }, AppExecFwk::EventQueue::Priority::IMMEDIATE);
     // init RSUIDirector, it will handle animation callback
     rsUiDirector_ = RSUIDirector::Create();
     rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task) { PostAsyncTask(task); });

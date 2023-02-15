@@ -16,6 +16,7 @@
 #include "window_inner_manager.h"
 
 #include "ability_manager_client.h"
+#include "memory_guard.h"
 #include "window.h"
 #include "window_manager_hilog.h"
 #include "xcollie/watchdog.h"
@@ -52,6 +53,7 @@ bool WindowInnerManager::Init()
     if (ret != 0) {
         WLOGFE("Add watchdog thread failed");
     }
+    eventHandler_->PostTask([]() { MemoryGuard cacheGuard; }, AppExecFwk::EventQueue::Priority::IMMEDIATE);
     moveDragController_ = new MoveDragController();
     if (!moveDragController_->Init()) {
         WLOGFE("Init window drag controller failed");
@@ -224,9 +226,7 @@ void WindowInnerManager::PostTask(InnerTask &&task, std::string name, EventPrior
         WLOGFE("listener handler is nullptr");
         return;
     }
-    bool ret = eventHandler_->PostTask([task]() {
-            task();
-        }, name, 0, priority); // 0 is task delay time
+    bool ret = eventHandler_->PostTask(task, name, 0, priority); // 0 is task delay time
     if (!ret) {
         WLOGFE("post listener callback task failed.");
         return;
