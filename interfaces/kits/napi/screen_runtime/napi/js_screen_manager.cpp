@@ -760,6 +760,33 @@ NativeValue* InitScreenOrientation(NativeEngine* engine)
     return objValue;
 }
 
+NativeValue* InitScreenSourceMode(NativeEngine* engine)
+{
+    WLOGI("JsScreenManager::InitScreenSourceMode called");
+
+    if (engine == nullptr) {
+        WLOGFE("engine is nullptr");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("SCREEN_MAIN",
+        CreateJsValue(*engine, static_cast<uint32_t>(ScreenSourceMode::SCREEN_MAIN)));
+    object->SetProperty("SCREEN_MIRROR",
+        CreateJsValue(*engine, static_cast<uint32_t>(ScreenSourceMode::SCREEN_MIRROR)));
+    object->SetProperty("SCREEN_EXTEND",
+        CreateJsValue(*engine, static_cast<uint32_t>(ScreenSourceMode::SCREEN_EXTEND)));
+    object->SetProperty("SCREEN_ALONE",
+        CreateJsValue(*engine, static_cast<uint32_t>(ScreenSourceMode::SCREEN_ALONE)));
+    return objValue;
+}
+
 NativeValue* InitDisplayErrorCode(NativeEngine* engine)
 {
     WLOGI("JsDisplayManager::InitDisplayErrorCode called");
@@ -857,6 +884,7 @@ NativeValue* JsScreenManagerInit(NativeEngine* engine, NativeValue* exportObj)
     object->SetNativePointer(jsScreenManager.release(), JsScreenManager::Finalizer, nullptr);
 
     object->SetProperty("Orientation", InitScreenOrientation(engine));
+    object->SetProperty("ScreenSourceMode", InitScreenSourceMode(engine));
     object->SetProperty("DmErrorCode", InitDisplayErrorCode(engine));
     object->SetProperty("DMError", InitDisplayError(engine));
 
