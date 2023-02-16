@@ -40,8 +40,6 @@ JsScreenSessionManager::JsScreenSessionManager(NativeEngine& engine)
 
 JsScreenSessionManager::~JsScreenSessionManager()
 {
-    sptr<IScreenConnectionListener> screenConnectionListener(this);
-    ScreenSessionManager::GetInstance().UnregisterScreenConnectionListener(screenConnectionListener);
 }
 
 NativeValue* JsScreenSessionManager::Init(NativeEngine* engine, NativeValue* exportObj)
