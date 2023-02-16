@@ -425,6 +425,31 @@ NativeValue* InitDisplayState(NativeEngine* engine)
     return objValue;
 }
 
+NativeValue* InitOrientation(NativeEngine* engine)
+{
+    WLOGI("InitOrientation called");
+
+    if (engine == nullptr) {
+        WLOGFE("engine is nullptr");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("PORTRAIT", CreateJsValue(*engine, static_cast<uint32_t>(DisplayOrientation::PORTRAIT)));
+    object->SetProperty("LANDSCAPE", CreateJsValue(*engine, static_cast<uint32_t>(DisplayOrientation::LANDSCAPE)));
+    object->SetProperty("PORTRAIT_INVERTED",
+        CreateJsValue(*engine, static_cast<uint32_t>(DisplayOrientation::PORTRAIT_INVERTED)));
+    object->SetProperty("LANDSCAPE_INVERTED",
+        CreateJsValue(*engine, static_cast<uint32_t>(DisplayOrientation::LANDSCAPE_INVERTED)));
+    return objValue;
+}
+
 NativeValue* InitDisplayErrorCode(NativeEngine* engine)
 {
     WLOGI("InitDisplayErrorCode called");
@@ -522,6 +547,7 @@ NativeValue* JsDisplayManagerInit(NativeEngine* engine, NativeValue* exportObj)
     object->SetNativePointer(jsDisplayManager.release(), JsDisplayManager::Finalizer, nullptr);
 
     object->SetProperty("DisplayState", InitDisplayState(engine));
+    object->SetProperty("Orientation", InitOrientation(engine));
     object->SetProperty("DmErrorCode", InitDisplayErrorCode(engine));
     object->SetProperty("DMError", InitDisplayError(engine));
 
