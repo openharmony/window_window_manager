@@ -61,7 +61,7 @@
             "//foundation/window/window_manager/interfaces/kits/napi/window_runtime/window_stage_napi:windowstage",
             "//foundation/window/window_manager/interfaces/kits/napi:napi_packages",
             "//foundation/window/window_manager/resources:window_resources",
-            "//foundation/window/window_manager/window_session/interfaces/kits/napi:window_session_napi_packages"
+            "//foundation/window/window_manager/window_scene/interfaces/kits/napi:window_scene_napi_packages"
           ],
           "fwk_group": [
             "//foundation/window/window_manager/interfaces/kits/js/declaration:window",
@@ -122,55 +122,46 @@
           },
           {
             "type": "so",
-            "name": "//foundation/window/window_manager/window_session/session:ui_session",
+            "name": "//foundation/window/window_manager/window_scene/session:scene_session",
             "header": {
               "header_files": [
-                "host/include/zidl/session_interface.h",
-                "host/include/session.h",
-                "container/include/zidl/session_stage_interface.h",
-                "container/include/zidl/window_event_channel_interface.h",
-                "container/include/session_stage.h"
               ],
-              "header_base": "//foundation/window/window_manager/window_session/session"
+              "header_base": "//foundation/window/window_manager/window_scene"
             }
           },
           {
             "type": "so",
-            "name": "//foundation/window/window_manager/window_session/session:screen_session",
+            "name": "//foundation/window/window_manager/window_scene/session:screen_session",
             "header": {
               "header_files": [
               ],
-              "header_base": "//foundation/window/window_manager/window_session/session/screen/include"
+              "header_base": "//foundation/window/window_manager/window_scene"
             }
           },
           {
             "type": "so",
-            "name": "//foundation/window/window_manager/window_session/session_manager:ui_session_manager",
+            "name": "//foundation/window/window_manager/window_scene/session_manager:scene_session_manager",
             "header": {
               "header_files": [
               ],
-              "header_base": "//foundation/window/window_manager/window_session/session_manager/include"
+              "header_base": "//foundation/window/window_manager/window_scene"
             }
           },
           {
             "type": "so",
-            "name": "//foundation/window/window_manager/window_session/session_manager:screen_session_manager",
+            "name": "//foundation/window/window_manager/window_scene/session_manager:screen_session_manager",
             "header": {
               "header_files": [
               ],
-              "header_base": "//foundation/window/window_manager/window_session/session_manager/include"
+              "header_base": "//foundation/window/window_manager/window_scene"
             }
           },
           {
             "type": "none",
-            "name": "//foundation/window/window_manager/window_session/interfaces/kits/napi:window_session_napi_packages",
+            "name": "//foundation/window/window_manager/window_scene/interfaces/kits/napi:window_scene_napi_packages",
             "header": {
-              "header_base": "//foundation/window/window_manager/window_session/interfaces/kits",
+              "header_base": "//foundation/window/window_manager/window_scene/interfaces/kits/napi",
               "header_files": [
-                "napi/scene_session_manager/js_scene_session.h",
-                "napi/scene_session_manager/js_scene_session_manager.h",
-                "napi/screen_session_manager/js_screen_session.h",
-                "napi/screen_session_manager/js_screen_session_manager.h"
               ]
             }
           }
