@@ -27,9 +27,10 @@ namespace OHOS {
 namespace Rosen {
 enum class TransitionReason : uint32_t {
     MINIMIZE = 0,
-    CLOSE,
+    CLOSE, // BACK when only close self
     ABILITY_TRANSITION,
-    BACK_TRANSITION,
+    BACK_TRANSITION, // BACK need start last one
+    CLOSE_BUTTON, // close button on decor
 };
 
 class WindowTransitionInfo : public Parcelable {

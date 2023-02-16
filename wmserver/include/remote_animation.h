@@ -34,8 +34,9 @@ enum class TransitionEvent : uint32_t {
     HOME,
     MINIMIZE,
     CLOSE,
-    UNKNOWN,
     BACK_TRANSITION,
+    CLOSE_BUTTON,
+    UNKNOWN,
 };
 
 class RemoteAnimation : public RefBase {

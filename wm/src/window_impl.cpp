@@ -1871,7 +1871,7 @@ WMError WindowImpl::Close()
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
         auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
         if (abilityContext != nullptr) {
-            WMError ret = NotifyWindowTransition(TransitionReason::CLOSE);
+            WMError ret = NotifyWindowTransition(TransitionReason::CLOSE_BUTTON);
             if (ret != WMError::WM_OK) {
                 WLOGI("Close without animation ret:%{public}u", static_cast<uint32_t>(ret));
                 abilityContext->CloseAbility();
@@ -2239,10 +2239,7 @@ void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>&
     if (shouldTerminateAbility) {
         abilityContext->TerminateSelf();
     } else {
-        WMError ret = NotifyWindowTransition(TransitionReason::CLOSE);
-        if (ret != WMError::WM_OK) {
-            abilityContext->CloseAbility();
-        }
+        abilityContext->CloseAbility();
     }
     WLOGI("id: %{public}u closed, to kill Ability: %{public}u",
         property_->GetWindowId(), static_cast<uint32_t>(shouldTerminateAbility));
