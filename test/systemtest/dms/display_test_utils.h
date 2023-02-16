@@ -26,6 +26,7 @@
 #include "display_info.h"
 #include "wm_common.h"
 #include "dm_common.h"
+#include "iconsumer_surface.h"
 #include "window_manager_hilog.h"
 #include "unique_fd.h"
 #include "ui/rs_surface_node.h"
@@ -63,7 +64,7 @@ public:
     uint32_t defaultWidth_ = 0;
     uint32_t defaultHeight_ = 0;
     sptr<IBufferConsumerListener> listener_ = nullptr;
-    sptr<Surface> csurface_ = nullptr; // cosumer surface
+    sptr<IConsumerSurface> csurface_ = nullptr; // cosumer surface
     sptr<Surface> psurface_ = nullptr; // producer surface
     sptr<SurfaceBuffer> prevBuffer_ = nullptr;
     BufferHandle *bufferHandle_ = nullptr;

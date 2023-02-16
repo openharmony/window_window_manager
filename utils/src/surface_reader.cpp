@@ -44,7 +44,7 @@ SurfaceReader::~SurfaceReader()
 
 bool SurfaceReader::Init()
 {
-    csurface_ = Surface::CreateSurfaceAsConsumer();
+    csurface_ = IConsumerSurface::Create();
     if (csurface_ == nullptr) {
         return false;
     }

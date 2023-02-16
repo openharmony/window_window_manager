@@ -21,12 +21,14 @@
 #include <string>
 #include <surface.h>
 
+#include "iconsumer_surface.h"
+
 namespace OHOS::Rosen {
 class ScreenManagerUtils {
 public:
     bool CreateSurface();
 
-    sptr<Surface> csurface_ = nullptr; // cosumer surface
+    sptr<IConsumerSurface> csurface_ = nullptr; // cosumer surface
     sptr<Surface> psurface_ = nullptr; // producer surface
 };
 } // namespace OHOS::Rosen
