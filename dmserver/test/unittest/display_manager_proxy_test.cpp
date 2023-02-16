@@ -20,6 +20,7 @@
 #include "display_manager_proxy.h"
 #include "iremote_object_mocker.h"
 
+#include "iconsumer_surface.h"
 #include <surface.h>
 
 using namespace testing;
@@ -191,12 +192,12 @@ HWTEST_F(DisplayManagerProxyTest, SetVirtualScreenSurface01, Function | SmallTes
 
     auto result2 = proxy2.SetVirtualScreenSurface(0, nullptr);
     ASSERT_EQ(DMError::DM_OK, result2);
-    sptr<Surface> surface = OHOS::Surface::CreateSurfaceAsConsumer();
-    auto result3 = proxy2.SetVirtualScreenSurface(0, surface);
+    sptr<IConsumerSurface> surface = OHOS::IConsumerSurface::Create();
+    auto result3 = proxy2.SetVirtualScreenSurface(0, surface->GetProducer());
     ASSERT_EQ(DMError::DM_OK, result3);
 
     remoteMocker->sendRequestResult_ = 1;
-    auto result4 = proxy2.SetVirtualScreenSurface(0, surface);
+    auto result4 = proxy2.SetVirtualScreenSurface(0, surface->GetProducer());
     ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED, result4);
 }
 /**

@@ -93,13 +93,12 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             bool isSurfaceValid = data.ReadBool();
-            sptr<Surface> surface = nullptr;
+            sptr<IBufferProducer> bp = nullptr;
             if (isSurfaceValid) {
                 sptr<IRemoteObject> surfaceObject = data.ReadRemoteObject();
-                sptr<IBufferProducer> bp = iface_cast<IBufferProducer>(surfaceObject);
-                surface = Surface::CreateSurfaceAsProducer(bp);
+                bp = iface_cast<IBufferProducer>(surfaceObject);
             }
-            DMError result = SetVirtualScreenSurface(screenId, surface);
+            DMError result = SetVirtualScreenSurface(screenId, bp);
             reply.WriteInt32(static_cast<int32_t>(result));
             break;
         }

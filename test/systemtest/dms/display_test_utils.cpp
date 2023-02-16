@@ -65,7 +65,7 @@ bool DisplayTestUtils::SizeEqual(const Media::Size dst, const Media::Size cur)
 
 bool DisplayTestUtils::CreateSurface()
 {
-    csurface_ = Surface::CreateSurfaceAsConsumer();
+    csurface_ = IConsumerSurface::Create();
     if (csurface_ == nullptr) {
         WLOGFE("csurface create failed");
         return false;
