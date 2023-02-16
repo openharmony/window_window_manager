@@ -75,7 +75,7 @@ void ScreenSessionManager::Init()
 {
     WLOGFI("Screen session manager init.");
     auto runner = AppExecFwk::EventRunner::Create(SCREEN_SESSION_MANAGER_THREAD);
-    handler_ = std::make_unique<AppExecFwk::EventHandler>(runner);
+    handler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     RegisterScreenChangeListener();
 }
 

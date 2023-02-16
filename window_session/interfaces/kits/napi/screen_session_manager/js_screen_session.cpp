@@ -70,8 +70,6 @@ JsScreenSession::JsScreenSession(NativeEngine& engine, const sptr<ScreenSession>
 
 JsScreenSession::~JsScreenSession()
 {
-    sptr<IScreenChangeListener> screenChangeListener(this);
-    screenSession_->UnregisterScreenChangeListener(screenChangeListener);
 }
 
 NativeValue* JsScreenSession::RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info)

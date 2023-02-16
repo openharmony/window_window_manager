@@ -58,7 +58,7 @@ private:
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
 
     RSInterfaces& rsInterface_;
-    std::unique_ptr<AppExecFwk::EventHandler> handler_;
+    std::shared_ptr<AppExecFwk::EventHandler> handler_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
 
     std::vector<sptr<IScreenConnectionListener>> screenConnectionListenerList_;
