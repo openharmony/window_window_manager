@@ -92,37 +92,14 @@ void ScreenSessionManager::PostTask(AppExecFwk::EventHandler::Callback callback,
 void ScreenSessionManager::RegisterScreenChangeListener()
 {
     WLOGFD("Register screen change listener.");
-    wptr<ScreenSessionManager> weakScreenSessionManager = this;
-    auto res = rsInterface_.SetScreenChangeCallback(
-        [weakScreenSessionManager](ScreenId screenId, ScreenEvent screenEvent) {
-            auto screenSessionManager = weakScreenSessionManager.promote();
-            if (screenSessionManager == nullptr) {
-                WLOGFE("Failed to set screen change callback, screen session manager is null!");
-                return;
-            }
-
-            auto task = [weakScreenSessionManager, screenId, screenEvent] {
-                auto screenSessionManager = weakScreenSessionManager.promote();
-                if (screenSessionManager != nullptr) {
-                    screenSessionManager->OnScreenChange(screenId, screenEvent);
-                }
-            };
-
-            screenSessionManager->PostTask(task);
-        }
-    );
+    auto res = rsInterface_.SetScreenChangeCallback([this](ScreenId screenId, ScreenEvent screenEvent) {
+        OnScreenChange(screenId, screenEvent);
+    });
 
     if (res != StatusCode::SUCCESS) {
-        auto task = [weakScreenSessionManager] {
-            auto screenSessionManager = weakScreenSessionManager.promote();
-            if (screenSessionManager == nullptr) {
-                WLOGFE("Failed to register screen change listener, screen session manager is null!");
-                return;
-            }
-
-            screenSessionManager->RegisterScreenChangeListener();
+        auto task = [this]() {
+            RegisterScreenChangeListener();
         };
-
         // Retry after 50 ms.
         PostTask(task, 50);
     }
@@ -130,7 +107,7 @@ void ScreenSessionManager::RegisterScreenChangeListener()
 
 void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenEvent)
 {
-    WLOGFI("On screen change. id:%{public}" PRIu64", event:%{public}u", screenId, static_cast<uint32_t>(screenEvent));
+    WLOGFI("On screen change. ScreenId: %{public}" PRIu64", ScreenEvent: %{public}d", screenId, static_cast<int>(screenEvent));
     auto screenSession = GetOrCreateScreenSession(screenId);
 
     if (screenEvent == ScreenEvent::CONNECTED) {
@@ -145,7 +122,7 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
         }
         screenSessionMap_.erase(screenId);
     } else {
-        WLOGE("Unknown message:%{public}ud", static_cast<uint8_t>(screenEvent));
+        WLOGE("Unknown ScreenEvent: %{public}d", static_cast<int>(screenEvent));
     }
 }
 

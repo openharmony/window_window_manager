@@ -29,7 +29,7 @@ namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScreenSessionManager"};
-    const std::string SCREEN_CONNECTION_CALLBACK = "screenConnect";
+    const std::string ON_SCREEN_CONNECTION_CHANGE_CALLBACK = "screenConnectChange";
 }
 
 JsScreenSessionManager::JsScreenSessionManager(NativeEngine& engine)
@@ -79,7 +79,7 @@ void JsScreenSessionManager::OnScreenConnect(sptr<ScreenSession>& screenSession)
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [callback_, screenSession] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             auto jsScreenSession = JsScreenSession::Create(engine, screenSession);
-            NativeValue* argv[] = { jsScreenSession,  CreateJsValue(engine, 1) };
+            NativeValue* argv[] = { jsScreenSession, CreateJsValue(engine, 0) };
             NativeValue* method = callback_->Get();
             if (method == nullptr) {
                 WLOGFE("Failed to get method callback from object!");
@@ -106,7 +106,7 @@ void JsScreenSessionManager::OnScreenDisconnect(sptr<ScreenSession>& screenSessi
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [callback_, screenSession] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             auto jsScreenSession = JsScreenSession::Create(engine, screenSession);
-            NativeValue* argv[] = { jsScreenSession,  CreateJsValue(engine, 2) };
+            NativeValue* argv[] = { jsScreenSession, CreateJsValue(engine, 1) };
             NativeValue* method = callback_->Get();
             if (method == nullptr) {
                 WLOGFE("Failed to get method callback from object!");
@@ -119,7 +119,7 @@ void JsScreenSessionManager::OnScreenDisconnect(sptr<ScreenSession>& screenSessi
 
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsScreenSessionManager::OnScreenConnect",
+    AsyncTask::Schedule("JsScreenSessionManager::OnScreenDisconnect",
         engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
@@ -146,6 +146,12 @@ NativeValue* JsScreenSessionManager::OnRegisterCallback(NativeEngine& engine, co
     std::string callbackType;
     if (!ConvertFromJsValue(engine, info.argv[0], callbackType)) {
         WLOGFE("Failed to convert parameter to callback type.");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+
+    if (callbackType != ON_SCREEN_CONNECTION_CHANGE_CALLBACK) {
+        WLOGFE("Unsupported callback type: %{public}s.", callbackType.c_str());
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
