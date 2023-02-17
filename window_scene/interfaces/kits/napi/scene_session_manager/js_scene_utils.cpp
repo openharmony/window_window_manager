@@ -26,7 +26,7 @@ namespace {
 }
 
 bool GetAbilityInfoFromJs(NativeEngine& engine, NativeObject* jsObject,
-    WindowSession::AbilityInfo& abilityInfo)
+    SessionInfo& sessionInfo)
 {
     NativeValue* jsBundleName = jsObject->GetProperty("bundleName");
     NativeValue* jsAbilityName = jsObject->GetProperty("abilityName");
@@ -36,7 +36,7 @@ bool GetAbilityInfoFromJs(NativeEngine& engine, NativeObject* jsObject,
             WLOGFE("[NAPI]Failed to convert parameter to bundleName");
             return false;
         }
-        abilityInfo.bundleName_ = bundleName;
+        sessionInfo.bundleName_ = bundleName;
     }
     if (jsAbilityName->TypeOf() != NATIVE_UNDEFINED) {
         std::string abilityName;
@@ -44,7 +44,7 @@ bool GetAbilityInfoFromJs(NativeEngine& engine, NativeObject* jsObject,
             WLOGFE("[NAPI]Failed to convert parameter to abilityName");
             return false;
         }
-        abilityInfo.abilityName_ = abilityName;
+        sessionInfo.abilityName_ = abilityName;
     }
     return true;
 }
@@ -58,8 +58,8 @@ NativeValue* CreateJsAbilityInfo(NativeEngine& engine, const sptr<SceneSession>&
         WLOGFE("[NAPI]Failed to convert abilityInfo to jsObject");
         return nullptr;
     }
-    object->SetProperty("bundleName", CreateJsValue(engine, session->GetAbilityInfo().bundleName_));
-    object->SetProperty("abilityName", CreateJsValue(engine, session->GetAbilityInfo().abilityName_));
+    object->SetProperty("bundleName", CreateJsValue(engine, session->GetSessionInfo().bundleName_));
+    object->SetProperty("abilityName", CreateJsValue(engine, session->GetSessionInfo().abilityName_));
     return objValue;
 }
 }

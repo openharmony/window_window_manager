@@ -45,11 +45,11 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
     return rootSceneSession_;
 }
 
-sptr<SceneSession> SceneSessionManager::RequestSceneSession(const WindowSession::AbilityInfo& abilityInfo)
+sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo)
 {
-    WLOGFI("abilityInfo: bundleName: %{public}s, abilityName: %{public}s", abilityInfo.bundleName_.c_str(),
-        abilityInfo.abilityName_.c_str());
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(abilityInfo);
+    WLOGFI("sessionInfo: bundleName: %{public}s, abilityName: %{public}s", sessionInfo.bundleName_.c_str(),
+        sessionInfo.abilityName_.c_str());
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo);
     ++sessionId_;
     uint32_t persistentId = pid_ + sessionId_;
     sceneSession->SetPersistentId(persistentId);
@@ -72,8 +72,8 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     AAFwk::Want want;
-    auto abilityInfo = sceneSession->GetAbilityInfo();
-    want.SetElementName(abilityInfo.bundleName_, abilityInfo.abilityName_);
+    auto sessionInfo = sceneSession->GetSessionInfo();
+    want.SetElementName(sessionInfo.bundleName_, sessionInfo.abilityName_);
     AAFwk::StartOptions startOptions;
     sptr<AAFwk::SceneSessionInfo> sceneSessionInfo = new (std::nothrow) AAFwk::SceneSessionInfo();
     sceneSessionInfo->sceneSessionToken_ = sceneSession;

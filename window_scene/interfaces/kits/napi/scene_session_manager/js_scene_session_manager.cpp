@@ -130,7 +130,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
     }
-    WindowSession::AbilityInfo abilityInfo;
+    SessionInfo sessionInfo;
     if (errCode == WSErrorCode::WS_OK) {
         // parse ability info
         NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
@@ -138,7 +138,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
             WLOGFE("[NAPI]Failed to convert object to AbilityInfo");
             errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
         } else {
-            if (!GetAbilityInfoFromJs(engine, nativeObj, abilityInfo)) {
+            if (!GetAbilityInfoFromJs(engine, nativeObj, sessionInfo)) {
                 WLOGFE("[NAPI]Failed to GetSystemBarProperties From Js Object");
                 errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
             }
@@ -160,8 +160,8 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
         return engine.CreateUndefined();
     }
     WLOGFI("[NAPI]SceneInfo [%{public}s, %{public}s], err = %{public}d",
-        abilityInfo.bundleName_.c_str(), abilityInfo.abilityName_.c_str(), errCode);
-    sptr<SceneSession> sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(abilityInfo);
+        sessionInfo.bundleName_.c_str(), sessionInfo.abilityName_.c_str(), errCode);
+    sptr<SceneSession> sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(sessionInfo);
     if (sceneSession == nullptr) {
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
             "System is abnormal"));
@@ -170,7 +170,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
         NativeValue* jsSceneSessionObj = CreateJsSceneSessionObject(engine, sceneSession);
         if (jsSceneSessionObj == nullptr) {
             WLOGFE("[NAPI]SceneInfo [%{public}s, %{public}s], jsSceneSessionObj is nullptr",
-            abilityInfo.bundleName_.c_str(), abilityInfo.abilityName_.c_str());
+            sessionInfo.bundleName_.c_str(), sessionInfo.abilityName_.c_str());
             engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
                 "System is abnormal"));
         }
@@ -213,7 +213,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionActivation(NativeEngine
     sceneSession->NotifyForeground();
 
     WLOGFI("[NAPI]RequestSceneSessionActivation: SceneInfo [%{public}s, %{public}s]",
-        sceneSession->GetAbilityInfo().bundleName_.c_str(), sceneSession->GetAbilityInfo().abilityName_.c_str());
+        sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetSessionInfo().abilityName_.c_str());
     AsyncTask::CompleteCallback complete =
         [sceneSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (sceneSession == nullptr) {
@@ -231,7 +231,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionActivation(NativeEngine
                     "Request scene session activation failed"));
             }
             WLOGFI("[NAPI]Session [%{public}s] request scene session activation end",
-                sceneSession->GetAbilityInfo().abilityName_.c_str());
+                sceneSession->GetSessionInfo().abilityName_.c_str());
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -278,7 +278,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackground(NativeEngine
     sceneSession->NotifyBackground();
 
     WLOGFI("[NAPI]RequestSceneSessionBackground: SceneInfo [%{public}s, %{public}s]",
-        sceneSession->GetAbilityInfo().bundleName_.c_str(), sceneSession->GetAbilityInfo().abilityName_.c_str());
+        sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetSessionInfo().abilityName_.c_str());
     AsyncTask::CompleteCallback complete =
         [sceneSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (sceneSession == nullptr) {
@@ -296,7 +296,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackground(NativeEngine
                     "Request scene session background failed"));
             }
             WLOGFI("[NAPI]Session [%{public}s] request scene session background end",
-                sceneSession->GetAbilityInfo().abilityName_.c_str());
+                sceneSession->GetSessionInfo().abilityName_.c_str());
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -341,7 +341,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
     }
 
     WLOGFI("[NAPI]RequestSceneSessionDestruction: SceneInfo [%{public}s, %{public}s]",
-        sceneSession->GetAbilityInfo().bundleName_.c_str(), sceneSession->GetAbilityInfo().abilityName_.c_str());
+        sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetSessionInfo().abilityName_.c_str());
     AsyncTask::CompleteCallback complete =
         [sceneSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (sceneSession == nullptr) {
@@ -359,7 +359,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
                     "Request scene session destruction failed"));
             }
             WLOGFI("[NAPI]Session [%{public}s] request scene session destruction end",
-                sceneSession->GetAbilityInfo().abilityName_.c_str());
+                sceneSession->GetSessionInfo().abilityName_.c_str());
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :

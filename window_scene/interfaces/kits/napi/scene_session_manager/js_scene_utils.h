@@ -25,7 +25,7 @@
 
 namespace OHOS::Rosen {
     bool GetAbilityInfoFromJs(NativeEngine& engine, NativeObject* jsObject,
-        WindowSession::AbilityInfo& abilityInfo);
+        SessionInfo& sessionInfo);
     NativeValue* CreateJsAbilityInfo(NativeEngine& engine, const sptr<SceneSession>& session);
 }
 

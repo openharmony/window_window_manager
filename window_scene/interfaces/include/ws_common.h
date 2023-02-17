@@ -19,15 +19,6 @@
 #include <string>
 #include "iremote_broker.h"
 namespace OHOS::Rosen {
-namespace WindowSession { // delete when wm_common.h not exist
-    struct AbilityInfo {
-        std::string bundleName_ = "";
-        std::string abilityName_ = "";
-        sptr<IRemoteObject> callerToken_ = nullptr;
-        bool isExtension_ = false;
-        uint32_t extensionType_ = 0;
-    };
-}
 namespace {
     constexpr uint32_t INVALID_SESSION_ID = 0;
 }
@@ -68,6 +59,13 @@ enum class SessionState : uint32_t {
     STATE_ACTIVE,
     STATE_INACTIVE,
     STATE_BACKGROUND,
+};
+
+struct SessionInfo {
+    std::string bundleName_ = "";
+    std::string abilityName_ = "";
+    sptr<IRemoteObject> callerToken_ = nullptr;
+    uint32_t extensionType_ = 0;
 };
 
 enum class SizeChangeReason : uint32_t {

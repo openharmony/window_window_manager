@@ -24,7 +24,7 @@
 namespace OHOS::Rosen {
 class ExtensionSession : public Session {
 public:
-    ExtensionSession(const WindowSession::AbilityInfo& info);
+    ExtensionSession(const SessionInfo& info);
     ~ExtensionSession();
 private:
 };

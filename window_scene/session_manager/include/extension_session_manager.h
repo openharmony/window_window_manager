@@ -30,7 +30,7 @@ class ExtensionSession;
 class ExtensionSessionManager {
 WM_DECLARE_SINGLE_INSTANCE(ExtensionSessionManager)
 public:
-    sptr<ExtensionSession> RequestExtensionSession(const WindowSession::AbilityInfo& abilityInfo);
+    sptr<ExtensionSession> RequestExtensionSession(const SessionInfo& sessionInfo);
     WSError RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession);
     WSError RequestExtensionSessionBackground(const sptr<ExtensionSession>& extensionSession);
     WSError RequestExtensionSessionDestruction(const sptr<ExtensionSession>& extensionSession);
