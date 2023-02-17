@@ -27,7 +27,7 @@
 
 namespace OHOS::Rosen {
 class RSSurfaceNode;
-using NotifyStartSceneFunc = std::function<void(const WindowSession::AbilityInfo& info)>;
+using NotifyStartPendingSessionActivationFunc = std::function<void(const SessionInfo& info)>;
 
 class ILifecycleListener {
 public:
@@ -37,7 +37,7 @@ public:
 
 class Session : public SessionStub, public virtual RefBase {
 public:
-    Session(const WindowSession::AbilityInfo& info);
+    Session(const SessionInfo& info);
     virtual ~Session() = default;
 
     void SetPersistentId(uint32_t persistentId);
@@ -52,7 +52,7 @@ public:
     virtual WSError Foreground() override;
     virtual WSError Background() override;
     virtual WSError Disconnect() override;
-    virtual WSError StartAbility(const WindowSession::AbilityInfo& info) override;
+    virtual WSError StartPendingSessionActivation(const SessionInfo& info) override;
 
     virtual WSError Recover() override;
     virtual WSError Maximum() override;
@@ -63,8 +63,8 @@ public:
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
 
-    const WindowSession::AbilityInfo& GetAbilityInfo() const;
-    void SetStartSceneEventListener(const NotifyStartSceneFunc& func);
+    const SessionInfo& GetSessionInfo() const;
+    void SetStartPendingSessionActivationEventListener(const NotifyStartPendingSessionActivationFunc& func);
 protected:
     SessionState GetSessionState() const;
     void UpdateSessionState(SessionState state);
@@ -72,8 +72,8 @@ protected:
     bool isActive_ = false;
     WSRect winRect_;
     sptr<ISessionStage> sessionStage_;
-    WindowSession::AbilityInfo abilityInfo_;
-    NotifyStartSceneFunc startSceneFunc_;
+    SessionInfo sessionInfo_;
+    NotifyStartPendingSessionActivationFunc startPendingSessionActivationFunc_;
 
 private:
     template<typename T>

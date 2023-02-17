@@ -21,7 +21,7 @@ namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSession"};
 }
-ExtensionSession::ExtensionSession(const WindowSession::AbilityInfo& info) : Session(info)
+ExtensionSession::ExtensionSession(const SessionInfo& info) : Session(info)
 {
     WLOGFD("Init extensionSession : %{public}s", info.bundleName_.c_str());
 }

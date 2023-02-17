@@ -20,7 +20,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSession"};
 }
 
-SceneSession::SceneSession(const WindowSession::AbilityInfo& info) : Session(info)
+SceneSession::SceneSession(const SessionInfo& info) : Session(info)
 {
 }
 

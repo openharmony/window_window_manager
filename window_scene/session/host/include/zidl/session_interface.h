@@ -32,7 +32,7 @@ public:
         TRANS_ID_FOREGROUND,
         TRANS_ID_BACKGROUND,
         TRANS_ID_DISCONNECT,
-        TRANS_ID_START_ABILITY,
+        TRANS_ID_ACTIVE_PENDING_SESSION,
 
         // Scene
         TRANS_ID_RECOVER = 100,
@@ -42,7 +42,7 @@ public:
     virtual WSError Foreground() = 0;
     virtual WSError Background() = 0;
     virtual WSError Disconnect() = 0;
-    virtual WSError StartAbility(const WindowSession::AbilityInfo& info) = 0;
+    virtual WSError StartPendingSessionActivation(const SessionInfo& info) = 0;
 
     // scene session
     virtual WSError Recover() = 0;

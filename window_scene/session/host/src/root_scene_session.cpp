@@ -17,7 +17,7 @@
 
 namespace OHOS::Rosen {
 RootSceneSession::RootSceneSession()
-    : SceneSession(WindowSession::AbilityInfo())
+    : SceneSession(SessionInfo())
 {
 }
 

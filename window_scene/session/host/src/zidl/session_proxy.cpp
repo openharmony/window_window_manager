@@ -109,7 +109,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::StartAbility(const WindowSession::AbilityInfo& info)
+WSError SessionProxy::StartPendingSessionActivation(const SessionInfo& info)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -133,7 +133,7 @@ WSError SessionProxy::StartAbility(const WindowSession::AbilityInfo& info)
             return WSError::WS_ERROR_IPC_FAILED;;
         }
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_START_ABILITY),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_ACTIVE_PENDING_SESSION),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;

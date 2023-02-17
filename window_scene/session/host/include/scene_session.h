@@ -22,7 +22,7 @@
 namespace OHOS::Rosen {
 class SceneSession : public Session {
 public:
-    SceneSession(const WindowSession::AbilityInfo& info);
+    SceneSession(const SessionInfo& info);
     ~SceneSession() = default;
 
     virtual WSError Recover() override;

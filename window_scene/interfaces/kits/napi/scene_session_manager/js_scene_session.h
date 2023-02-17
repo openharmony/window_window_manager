@@ -37,7 +37,7 @@ public:
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
     static NativeValue* RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info);
 
-    void StartScene(const WindowSession::AbilityInfo& info);
+    void StartPendingSessionActivation(const SessionInfo& info);
     sptr<SceneSession> GetNativeSession() const;
 
 private:

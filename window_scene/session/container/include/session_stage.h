@@ -57,7 +57,7 @@ public:
     virtual WSError Foreground();
     virtual WSError Background();
     virtual WSError Disconnect();
-    virtual WSError StartAbility(const WindowSession::AbilityInfo& info);
+    virtual WSError StartPendingSessionActivation(const SessionInfo& info);
     virtual WSError SetActive(bool active) override;
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
 

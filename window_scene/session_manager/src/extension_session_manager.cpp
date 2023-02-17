@@ -29,11 +29,11 @@ namespace {
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ExtensionSessionManager)
 
-sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const WindowSession::AbilityInfo& abilityInfo)
+sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const SessionInfo& sessionInfo)
 {
-    WLOGFI("abilityInfo: bundleName: %{public}s, abilityName: %{public}s", abilityInfo.bundleName_.c_str(),
-        abilityInfo.abilityName_.c_str());
-    sptr<ExtensionSession> extensionSession = new (std::nothrow) ExtensionSession(abilityInfo);
+    WLOGFI("sessionInfo: bundleName: %{public}s, abilityName: %{public}s", sessionInfo.bundleName_.c_str(),
+        sessionInfo.abilityName_.c_str());
+    sptr<ExtensionSession> extensionSession = new (std::nothrow) ExtensionSession(sessionInfo);
     ++sessionId_;
     uint32_t persistentId = pid_ + sessionId_;
     extensionSession->SetPersistentId(persistentId);
@@ -56,8 +56,8 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     AAFwk::Want want;
-    auto abilityInfo = extensionSession->GetAbilityInfo();
-    want.SetElementName(abilityInfo.bundleName_, abilityInfo.abilityName_);
+    auto sessionInfo = extensionSession->GetSessionInfo();
+    want.SetElementName(sessionInfo.bundleName_, sessionInfo.abilityName_);
     AAFwk::StartOptions startOptions;
     // to start uiExtension ability with (want, callerToken, extensionSession, surfaceNode, extensionType)
     // TODO AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, startOptions, abilityInfo->callerToken_);

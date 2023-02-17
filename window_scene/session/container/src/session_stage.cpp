@@ -130,13 +130,13 @@ WSError SessionStage::Disconnect()
     return WSError::WS_OK;
 }
 
-WSError SessionStage::StartAbility(const WindowSession::AbilityInfo& info)
+WSError SessionStage::StartPendingSessionActivation(const SessionInfo& info)
 {
     if (session_ == nullptr) {
         WLOGFE("session is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }
-    return session_->StartAbility(info);
+    return session_->StartPendingSessionActivation(info);
 }
 
 WSError SessionStage::SetActive(bool active)

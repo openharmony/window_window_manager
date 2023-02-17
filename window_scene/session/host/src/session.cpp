@@ -25,7 +25,7 @@ namespace {
     const std::string UNDEFINED = "undefined";
 }
 
-Session::Session(const WindowSession::AbilityInfo& info) : abilityInfo_(info)
+Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
     surfaceNode_ = CreateSurfaceNode(info.bundleName_);
     if (surfaceNode_ == nullptr) {
@@ -48,9 +48,9 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
     return surfaceNode_;
 }
 
-const WindowSession::AbilityInfo& Session::GetAbilityInfo() const
+const SessionInfo& Session::GetSessionInfo() const
 {
-    return abilityInfo_;
+    return sessionInfo_;
 }
 
 bool Session::RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener)
@@ -251,17 +251,17 @@ WSError Session::SetActive(bool active)
     return WSError::WS_OK;
 }
 
-WSError Session::StartAbility(const WindowSession::AbilityInfo& info)
+WSError Session::StartPendingSessionActivation(const SessionInfo& info)
 {
-    if (startSceneFunc_) {
-        startSceneFunc_(info);
+    if (startPendingSessionActivationFunc_) {
+        startPendingSessionActivationFunc_(info);
     }
     return WSError::WS_OK;
 }
 
-void Session::SetStartSceneEventListener(const NotifyStartSceneFunc& func)
+void Session::SetStartPendingSessionActivationEventListener(const NotifyStartPendingSessionActivationFunc& func)
 {
-    startSceneFunc_ = func;
+    startPendingSessionActivationFunc_ = func;
 }
 
 WSError Session::Recover()

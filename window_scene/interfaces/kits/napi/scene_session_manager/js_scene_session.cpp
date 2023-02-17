@@ -93,15 +93,15 @@ NativeValue* JsSceneSession::OnRegisterCallback(NativeEngine& engine, NativeCall
     }
 
     std::weak_ptr<JsSceneSession> sessionWptr(shared_from_this());
-    NotifyStartSceneFunc func = [sessionWptr](const WindowSession::AbilityInfo& info) {
+    NotifyStartPendingSessionActivationFunc func = [sessionWptr](const SessionInfo& info) {
         auto jsSceneSession = sessionWptr.lock();
         if (jsSceneSession == nullptr) {
             WLOGFE("[NAPI]this scene session");
             return;
         }
-        jsSceneSession->StartScene(info);
+        jsSceneSession->StartPendingSessionActivation(info);
     };
-    session_->SetStartSceneEventListener(func);
+    session_->SetStartPendingSessionActivationEventListener(func);
     std::shared_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
     jsCbMap_[cbType] = callbackRef;
@@ -109,7 +109,7 @@ NativeValue* JsSceneSession::OnRegisterCallback(NativeEngine& engine, NativeCall
     return engine.CreateUndefined();
 }
 
-void JsSceneSession::StartScene(const WindowSession::AbilityInfo& info)
+void JsSceneSession::StartPendingSessionActivation(const SessionInfo& info)
 {
     auto session = SceneSessionManager::GetInstance().RequestSceneSession(info);
     if (session == nullptr) {
@@ -122,7 +122,7 @@ void JsSceneSession::StartScene(const WindowSession::AbilityInfo& info)
         return;
     }
     jsCallBack_ = iter->second;
-    WLOGFI("[NAPI]start scene: name = %{public}s, id = %{public}u", session->GetAbilityInfo().abilityName_.c_str(),
+    WLOGFI("[NAPI]start scene: name = %{public}s, id = %{public}u", session->GetSessionInfo().abilityName_.c_str(),
         session->GetPersistentId());
     std::weak_ptr<JsSceneSession> sessionWptr(shared_from_this());
     auto complete = std::make_unique<AsyncTask::CompleteCallback> (
@@ -143,7 +143,7 @@ void JsSceneSession::StartScene(const WindowSession::AbilityInfo& info)
 
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsSceneSession::StartScene", engine_,
+    AsyncTask::Schedule("JsSceneSession::StartPendingSessionActivation", engine_,
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
