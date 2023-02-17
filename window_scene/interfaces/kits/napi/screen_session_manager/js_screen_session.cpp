@@ -33,24 +33,17 @@ namespace {
     const std::string ON_PROPERTY_CHANGE_CALLBACK = "propertyChange";
 }
 
-NativeValue* JsScreenSession::Create(NativeEngine& engine, const sptr<ScreenSession>& session)
+NativeValue* JsScreenSession::Create(NativeEngine& engine, const sptr<ScreenSession>& screenSession)
 {
     WLOGFD("Create.");
-    if (session == nullptr) {
-        WLOGFE("Failed to create js screen session, session is null!");
-        return nullptr;
-    }
-
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
-        WLOGFE("Failed to convert native value to native object, Object is null!");
-        return nullptr;
-    }
 
-    auto jsScreenSession = std::make_unique<JsScreenSession>(engine, session);
+    auto jsScreenSession = std::make_unique<JsScreenSession>(engine, screenSession);
+    object->SetNativePointer(jsScreenSession.release(), JsScreenSession::Finalizer, nullptr);
+    object->SetProperty("screenId", CreateJsValue(engine, static_cast<int64_t>(screenSession->GetScreenId())));
+
     const char* moduleName = "JsScreenSession";
-    object->SetProperty("screenId", CreateJsValue(engine, static_cast<int64_t>(session->GetScreenId())));
     BindNativeFunction(engine, *object, "on", moduleName, JsScreenSession::RegisterCallback);
 
     return objValue;
@@ -62,9 +55,10 @@ void JsScreenSession::Finalizer(NativeEngine* engine, void* data, void* hint)
     std::unique_ptr<JsScreenSession>(static_cast<JsScreenSession*>(data));
 }
 
-JsScreenSession::JsScreenSession(NativeEngine& engine, const sptr<ScreenSession> screenSession)
+JsScreenSession::JsScreenSession(NativeEngine& engine, const sptr<ScreenSession>& screenSession)
     : engine_(engine), screenSession_(screenSession)
 {
+    RegisterScreenChangeListener();
 }
 
 JsScreenSession::~JsScreenSession()
@@ -81,8 +75,8 @@ NativeValue* JsScreenSession::RegisterCallback(NativeEngine* engine, NativeCallb
 NativeValue* JsScreenSession::OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFD("On register callback.");
-    if  (info.argc < 2) { // 2: params num
-        WLOGFD("Argc is invalid: %{public}zu", info.argc);
+    if (info.argc < 2) { // 2: params num
+        WLOGFE("Argc is invalid: %{public}zu", info.argc);
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
@@ -109,8 +103,9 @@ NativeValue* JsScreenSession::OnRegisterCallback(NativeEngine& engine, NativeCal
 
 void JsScreenSession::CallJsCallback(std::string callbackType, const ValueFunction& valueFun)
 {
+    WLOGFD("Call js callback: %{public}s.", callbackType.c_str());
     if (mCallback_.count(callbackType) == 0) {
-        WLOGFI("Callback is unregistered!");
+        WLOGFE("Callback is unregistered!");
         return;
     }
 

@@ -29,7 +29,7 @@ namespace OHOS::Rosen {
 class JsScreenSession : public IScreenChangeListener {
 using ValueFunction = std::function<std::pair<NativeValue* const*, size_t>(NativeEngine& engine)>;
 public:
-    JsScreenSession(NativeEngine& engine, const sptr<ScreenSession> screenSession);
+    JsScreenSession(NativeEngine& engine, const sptr<ScreenSession>& screenSession);
     ~JsScreenSession();
 
     static NativeValue* Create(NativeEngine& engine, const sptr<ScreenSession>& session);
