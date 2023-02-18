@@ -21,6 +21,7 @@
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
+#include "window_system_effect.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -314,6 +315,8 @@ void WindowLayoutPolicyTile::ApplyPresetRectForTileWindows(DisplayId displayId)
         auto& rect = (*rectIt);
         if (WindowHelper::IsRectSatisfiedWithSizeLimits(rect, node->GetWindowUpdatedSizeLimits())) {
             node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            // when change mode, need to reset shadow and radius
+            WindowSystemEffect::SetWindowEffect(node);
             if (node->GetWindowToken()) {
                 node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             }

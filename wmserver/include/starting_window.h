@@ -41,22 +41,13 @@ public:
     static void AddNodeOnRSTree(sptr<WindowNode>& node, bool isMultiDisplay);
     static void ReleaseStartWinSurfaceNode(sptr<WindowNode>& node);
     static void SetDefaultWindowMode(WindowMode defaultMode);
-    static void SetWindowSystemEffectConfig(AppWindowEffectConfig config);
-    static void SetWindowRoot(const sptr<WindowRoot>& windowRoot);
-    static WMError SetStartingWindowEffect(const sptr<WindowNode>& node, bool isFocus = true);
     static void SetAnimationConfig(AnimationConfig config);
     static bool transAnimateEnable_;
 private:
     static WMError CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node);
-    // window effect
-    static WMError SetCornerRadius(const sptr<WindowNode>& node);
-    static WMError SetWindowShadow(const sptr<WindowNode>& node, bool isFocus);
     static WMError SetStartingWindowAnimation(wptr<WindowNode> weak);
-
     static std::recursive_mutex mutex_;
     static WindowMode defaultMode_;
-    static wptr<WindowRoot> windowRoot_;
-    static AppWindowEffectConfig windowSystemEffectConfig_;
     static AnimationConfig animationConfig_;
 };
 } // Rosen

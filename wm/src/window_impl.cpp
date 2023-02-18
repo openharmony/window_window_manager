@@ -119,6 +119,9 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
         case WindowType::WINDOW_TYPE_POINTER:
             rsSurfaceNodeType = RSSurfaceNodeType::SELF_DRAWING_WINDOW_NODE;
             break;
+        case WindowType::WINDOW_TYPE_APP_MAIN_WINDOW:
+            rsSurfaceNodeType = RSSurfaceNodeType::APP_WINDOW_NODE;
+            break;
         default:
             rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
             break;
@@ -913,83 +916,6 @@ bool WindowImpl::IsAppMainOrSubOrFloatingWindow()
     return false;
 }
 
-WMError WindowImpl::SetWindowCornerRadiusAccordingToSystemConfig()
-{
-    auto display = SingletonContainer::IsDestroyed() ? nullptr :
-        SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr) {
-        WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
-            property_->GetWindowId());
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    auto vpr = display->GetVirtualPixelRatio();
-    auto fullscreenRadius = windowSystemConfig_.effectConfig_.fullScreenCornerRadius_ * vpr;
-    auto splitRadius = windowSystemConfig_.effectConfig_.splitCornerRadius_ * vpr;
-    auto floatRadius = windowSystemConfig_.effectConfig_.floatCornerRadius_ * vpr;
-
-    WLOGFD("[WEffect] [name:%{public}s] mode: %{public}u, vpr: %{public}f, [%{public}f, %{public}f, %{public}f]",
-        name_.c_str(), GetMode(), vpr, fullscreenRadius, splitRadius, floatRadius);
-    if (MathHelper::NearZero(fullscreenRadius) && MathHelper::NearZero(splitRadius) &&
-        MathHelper::NearZero(floatRadius)) {
-        return WMError::WM_DO_NOTHING;
-    }
-    if (WindowHelper::IsFullScreenWindow(GetMode())) {
-        return SetCornerRadius(fullscreenRadius);
-    } else if (WindowHelper::IsSplitWindowMode(GetMode())) {
-        return SetCornerRadius(splitRadius);
-    } else if (WindowHelper::IsFloatingWindow(GetMode())) {
-        return SetCornerRadius(floatRadius);
-    }
-    return WMError::WM_DO_NOTHING;
-}
-
-WMError WindowImpl::UpdateWindowShadowAccordingToSystemConfig()
-{
-    if (!WindowHelper::IsAppWindow(GetType()) && !isAppFloatingWindow_) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-
-    auto& shadow = isFocused_ ? windowSystemConfig_.effectConfig_.focusedShadow_ :
-        windowSystemConfig_.effectConfig_.unfocusedShadow_;
-
-    if (MathHelper::NearZero(shadow.elevation_)) {
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-
-    if (!WindowHelper::IsFloatingWindow(GetMode())) {
-        surfaceNode_->SetShadowElevation(0.f);
-        WLOGI("[WEffect][%{public}s]close shadow", name_.c_str());
-        return WMError::WM_OK;
-    }
-
-    auto display = SingletonContainer::IsDestroyed() ? nullptr :
-        SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr) {
-        WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
-            property_->GetWindowId());
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    auto vpr = display->GetVirtualPixelRatio();
-
-    uint32_t colorValue;
-    if (!ColorParser::Parse(shadow.color_, colorValue)) {
-        WLOGFE("[WEffect]invalid color string: %{public}s", shadow.color_.c_str());
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-
-    WLOGI("[WEffect][%{public}s]focused: %{public}u, [%{public}f, %{public}s, %{public}f, %{public}f, %{public}f]",
-        name_.c_str(), isFocused_, shadow.elevation_, shadow.color_.c_str(),
-        shadow.offsetX_, shadow.offsetY_, shadow.alpha_);
-
-    surfaceNode_->SetShadowElevation(shadow.elevation_ * vpr);
-    surfaceNode_->SetShadowColor(colorValue);
-    surfaceNode_->SetShadowOffsetX(shadow.offsetX_);
-    surfaceNode_->SetShadowOffsetY(shadow.offsetY_);
-    surfaceNode_->SetShadowAlpha(shadow.alpha_);
-    RSTransaction::FlushImplicitTransaction();
-    return WMError::WM_OK;
-}
-
 void WindowImpl::SetSystemConfig()
 {
     if (!IsAppMainOrSubOrFloatingWindow()) {
@@ -1010,9 +936,7 @@ void WindowImpl::SetSystemConfig()
                 property_->SetLastWindowMode(windowSystemConfig_.defaultWindowMode_);
             }
         }
-        SetWindowCornerRadiusAccordingToSystemConfig();
     }
-    UpdateWindowShadowAccordingToSystemConfig();
 }
 
 WMError WindowImpl::WindowCreateCheck(uint32_t parentId)
@@ -2195,11 +2119,6 @@ void WindowImpl::UpdateMode(WindowMode mode)
     property_->SetWindowMode(mode);
     UpdateDecorEnable(true);
     UpdateTitleButtonVisibility();
-
-    // different modes have different corner radius settings
-    SetWindowCornerRadiusAccordingToSystemConfig();
-    // fullscreen and split have no shadow, float has shadow
-    UpdateWindowShadowAccordingToSystemConfig();
 }
 
 void WindowImpl::UpdateModeSupportInfo(uint32_t modeSupportInfo)
@@ -2683,7 +2602,6 @@ void WindowImpl::UpdateFocusStatus(bool focused)
         NotifyAfterUnfocused();
     }
     isFocused_ = focused;
-    UpdateWindowShadowAccordingToSystemConfig();
 }
 
 bool WindowImpl::IsFocused() const

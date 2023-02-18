@@ -82,10 +82,10 @@ public:
     void RecoverDefaultMouseStyle(uint32_t windowId);
     WmErrorCode RaiseToAppTop(uint32_t windowId);
     WMError SetAspectRatio(uint32_t windowId, float ratio);
+    void FlushWindowInfo(uint32_t windowId);
 
 private:
     uint32_t GenWindowId();
-    void FlushWindowInfo(uint32_t windowId);
     void FlushWindowInfoWithDisplayId(DisplayId displayId);
     void UpdateWindowAnimation(const sptr<WindowNode>& node);
     void ProcessDisplayChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,

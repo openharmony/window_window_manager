@@ -21,6 +21,7 @@
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
+#include "window_system_effect.h"
 #include "wm_math.h"
 
 namespace OHOS {
@@ -81,6 +82,8 @@ void WindowLayoutPolicyCascade::Reorder()
             node->SetDecoStatus(true);
             if (node->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
                 node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+                // when change mode, need to reset shadow and radius
+                WindowSystemEffect::SetWindowEffect(node);
                 if (node->GetWindowToken()) {
                     node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
                 }
