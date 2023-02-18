@@ -12,12 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_COMMON_H
-#define OHOS_ROSEN_WINDOW_SCENE_SESSION_COMMON_H
 
+#ifndef OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
+#define OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
+
+#include "iremote_broker.h"
+
+#include <fstream>
 #include <map>
 #include <string>
-#include "iremote_broker.h"
+
 namespace OHOS::Rosen {
 namespace {
     constexpr uint32_t INVALID_SESSION_ID = 0;
@@ -103,5 +107,41 @@ struct WSRect {
             posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
     }
 };
-}
-#endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_COMMON_H
+
+class WindowSceneJudgement final {
+public:
+    // judge whether window scene is enabled
+    static inline bool IsWindowSceneEnabled()
+    {
+        static bool isWindowSceneEnabled = false;
+        static bool initialized = false;
+        if (!initialized) {
+            InitWindowSceneWithConfigFile(isWindowSceneEnabled);
+            initialized = true;
+        }
+        return isWindowSceneEnabled;
+    }
+
+private:
+    // dealing with Windows type end of line "\r\n"
+    static std::ifstream& SafeGetLine(std::ifstream& configFile, std::string& line)
+    {
+        std::getline(configFile, line);
+        if (line.size() && line[line.size() - 1] == '\r') {
+            line = line.substr(0, line.size() - 1);
+        }
+        return configFile;
+    }
+
+    static void InitWindowSceneWithConfigFile(bool& isWindowSceneEnabled)
+    {
+        std::ifstream configFile("/etc/windowscene.config");
+        std::string line;
+        if (configFile.is_open() && SafeGetLine(configFile, line) && line == "ENABLED") {
+            isWindowSceneEnabled = true;
+        }
+        configFile.close();
+    }
+};
+} // namespace OHOS::Rosen
+#endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

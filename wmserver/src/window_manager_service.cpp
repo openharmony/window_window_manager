@@ -28,6 +28,7 @@
 #include <system_ability_definition.h>
 #include <sstream>
 #include "xcollie/watchdog.h"
+#include "foundation/window/window_manager/window_scene/interfaces/include/ws_common.h"
 
 #include "color_parser.h"
 #include "display_manager_service_inner.h"
@@ -53,7 +54,8 @@ namespace {
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerService)
 
-const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<WindowManagerService>());
+const bool REGISTER_RESULT = WindowSceneJudgement::IsWindowSceneEnabled() ? false
+    : SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<WindowManagerService>());
 
 WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERVICE_ID, true),
     rsInterface_(RSInterfaces::GetInstance()),

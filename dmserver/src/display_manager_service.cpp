@@ -20,6 +20,7 @@
 #include <ipc_skeleton.h>
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
+#include "foundation/window/window_manager/window_scene/interfaces/include/ws_common.h"
 
 #include "display_manager_agent_controller.h"
 #include "display_manager_config.h"
@@ -36,7 +37,8 @@ namespace {
     const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerService)
-const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<DisplayManagerService>());
+const bool REGISTER_RESULT = WindowSceneJudgement::IsWindowSceneEnabled() ? false
+    : SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<DisplayManagerService>());
 
 #define CHECK_SCREEN_AND_RETURN(screenId, ret) \
     do { \
