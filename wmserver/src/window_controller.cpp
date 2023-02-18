@@ -33,6 +33,7 @@
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
+#include "window_system_effect.h"
 #include "wm_common.h"
 #include "wm_math.h"
 
@@ -246,6 +247,8 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     node->abilityToken_ = token;
     node->dialogTargetToken_ = token;
     UpdateWindowAnimation(node);
+    // for system and subwindow
+    WindowSystemEffect::SetWindowEffect(node);
     WLOGFD("createWindow id:%{public}u", windowId);
     // test
     node->stateMachine_.SetWindowId(windowId);

@@ -28,6 +28,7 @@
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
+#include "window_system_effect.h"
 #include "zidl/ressched_report.h"
 
 namespace OHOS {
@@ -182,7 +183,6 @@ static void GetAndDrawSnapShot(const sptr<WindowNode>& srcNode)
         srcNode->startingWinSurfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);
         SurfaceDraw::DrawImageRect(srcNode->startingWinSurfaceNode_, srcNode->GetWindowRect(),
             pixelMap, 0x00ffffff, true);
-        StartingWindow::SetStartingWindowEffect(srcNode, false);
         srcNode->leashWinSurfaceNode_->RemoveChild(srcNode->surfaceNode_);
         srcNode->leashWinSurfaceNode_->AddChild(srcNode->startingWinSurfaceNode_, -1);
         RSTransaction::FlushImplicitTransaction();
@@ -660,9 +660,6 @@ sptr<RSWindowAnimationTarget> RemoteAnimation::CreateWindowAnimationTarget(sptr<
     auto boundsRect = RectF(rect.posX_, rect.posY_, rect.width_, rect.height_);
     auto& stagingProperties = windowAnimationTarget->surfaceNode_->GetStagingProperties();
     auto radius = stagingProperties.GetCornerRadius();
-    if (windowNode->startingWinSurfaceNode_ != nullptr) {
-        radius = windowNode->startingWinSurfaceNode_->GetStagingProperties().GetCornerRadius();
-    }
     windowAnimationTarget->windowBounds_ = RRect(boundsRect, radius);
     return windowAnimationTarget;
 }
@@ -700,6 +697,11 @@ void RemoteAnimation::ExecuteFinalStateTask(sptr<WindowNode>& node)
     } else if (node->stateMachine_.IsWindowNodeShownOrShowing()) {
         WLOGFI("execute task layout after show animation id:%{public}u!", node->GetWindowId());
         winRoot->LayoutWhenAddWindowNode(node, true);
+        WindowSystemEffect::SetWindowEffect(node);
+        auto winController = windowController_.promote();
+        if (winController) {
+            winController->FlushWindowInfo(node->GetWindowId());
+        }
     } else {
         WLOGFD("current State:%{public}u invalid", static_cast<uint32_t>(node->stateMachine_.GetCurrentState()));
     }

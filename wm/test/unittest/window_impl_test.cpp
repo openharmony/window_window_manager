@@ -2290,66 +2290,6 @@ HWTEST_F(WindowImplTest, UpdateTitleButtonVisibility, Function | SmallTest | Lev
 }
 
 /*
- * @tc.name: SetWindowCornerRadiusAccordingToSystemConfig
- * @tc.desc: SetWindowCornerRadiusAccordingToSystemConfig test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowImplTest, SetWindowCornerRadiusAccordingToSystemConfig, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = new WindowOption();
-    sptr<WindowImpl> window = new WindowImpl(option);
-
-    EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
-
-    ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetWindowCornerRadiusAccordingToSystemConfig());
-    window->windowSystemConfig_.effectConfig_.fullScreenCornerRadius_ = 1.0f;
-    window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    ASSERT_EQ(WMError::WM_OK, window->SetWindowCornerRadiusAccordingToSystemConfig());
-    window->windowSystemConfig_.effectConfig_.fullScreenCornerRadius_ = 0.0f;
-    window->windowSystemConfig_.effectConfig_.splitCornerRadius_ = 1.0f;
-    window->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    ASSERT_EQ(WMError::WM_OK, window->SetWindowCornerRadiusAccordingToSystemConfig());
-    window->windowSystemConfig_.effectConfig_.splitCornerRadius_ = 0.0f;
-    window->windowSystemConfig_.effectConfig_.floatCornerRadius_ = 1.0f;
-    window->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    ASSERT_EQ(WMError::WM_OK, window->SetWindowCornerRadiusAccordingToSystemConfig());
-
-    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
-}
-
-/*
- * @tc.name: UpdateWindowShadowAccordingToSystemConfig
- * @tc.desc: UpdateWindowShadowAccordingToSystemConfig test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowImplTest, UpdateWindowShadowAccordingToSystemConfig, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = new WindowOption();
-    sptr<WindowImpl> window = new WindowImpl(option);
-
-    EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
-
-    window->windowSystemConfig_.effectConfig_.unfocusedShadow_.elevation_ = 1.0f;
-    window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    ASSERT_EQ(WMError::WM_OK, window->UpdateWindowShadowAccordingToSystemConfig());
-
-    window->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    window->windowSystemConfig_.effectConfig_.unfocusedShadow_.color_ = "????";
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->UpdateWindowShadowAccordingToSystemConfig());
-
-    window->windowSystemConfig_.effectConfig_.unfocusedShadow_.color_ = "#000000";
-    ASSERT_EQ(WMError::WM_OK, window->UpdateWindowShadowAccordingToSystemConfig());
-
-    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
-}
-
-/*
  * @tc.name: WindowCreateCheck
  * @tc.desc: WindowCreateCheck test
  * @tc.type: FUNC

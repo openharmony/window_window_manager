@@ -39,6 +39,7 @@
 #include "window_dumper.h"
 #include "window_manager_config.h"
 #include "window_root.h"
+#include "window_system_effect.h"
 #include "snapshot_controller.h"
 #include "perform_reporter.h"
 #include "struct_multimodal.h"
