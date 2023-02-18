@@ -28,6 +28,7 @@
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
+#include "window_manager_service_utils.h"
 #include "window_system_effect.h"
 #include "zidl/ressched_report.h"
 
@@ -299,7 +300,7 @@ void RemoteAnimation::GetExpectRect(const sptr<WindowNode>& dstNode, const sptr<
     bool needAvoid = (dstNode->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     auto winRoot = windowRoot_.promote();
     if (needAvoid && winRoot) {
-        auto avoidRect = winRoot->GetDisplayRectWithoutSystemBarAreas(dstNode->GetDisplayId());
+        auto avoidRect = winRoot->GetDisplayRectWithoutSystemBarAreas(dstNode);
         if (WindowHelper::IsEmptyRect(avoidRect)) {
             return;
         }
@@ -308,6 +309,12 @@ void RemoteAnimation::GetExpectRect(const sptr<WindowNode>& dstNode, const sptr<
             avoidRect.posX_, avoidRect.posY_, avoidRect.width_, avoidRect.height_);
         if (WindowHelper::IsMainFullScreenWindow(dstNode->GetWindowType(), dstNode->GetWindowMode())) {
             auto boundsRect = RectF(avoidRect.posX_, avoidRect.posY_, avoidRect.width_, avoidRect.height_);
+            auto displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(dstNode->GetDisplayId());
+            if (displayInfo && WmsUtils::IsExpectedRotatableWindow(dstNode->GetRequestedOrientation(),
+                displayInfo->GetDisplayOrientation())) {
+                WLOGFD("[FixOrientation] the window is expected rotatable, pre-calculate bounds");
+                boundsRect = RectF(avoidRect.posX_, avoidRect.posY_, avoidRect.height_, avoidRect.width_);
+            }
             dstTarget->windowBounds_.rect_ = boundsRect;
             if (dstNode->leashWinSurfaceNode_) {
                 dstNode->leashWinSurfaceNode_->SetBounds(avoidRect.posX_, avoidRect.posY_,
@@ -658,6 +665,14 @@ sptr<RSWindowAnimationTarget> RemoteAnimation::CreateWindowAnimationTarget(sptr<
     auto rect = windowNode->GetWindowRect();
     // 0, 1, 2, 3: convert bounds to RectF
     auto boundsRect = RectF(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    auto displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(windowNode->GetDisplayId());
+    if (displayInfo && WmsUtils::IsExpectedRotatableWindow(windowNode->GetRequestedOrientation(),
+        displayInfo->GetDisplayOrientation(), windowNode->GetWindowMode())) {
+        WLOGFD("[FixOrientation] the window %{public}u is expected rotatable, pre-calculate bounds, rect:"
+            " [%{public}d, %{public}d, %{public}d, %{public}d]", windowNode->GetWindowId(), rect.posX_, rect.posY_,
+            rect.height_, rect.width_);
+        boundsRect = RectF(rect.posX_, rect.posY_, rect.height_, rect.width_);
+    }
     auto& stagingProperties = windowAnimationTarget->surfaceNode_->GetStagingProperties();
     auto radius = stagingProperties.GetCornerRadius();
     windowAnimationTarget->windowBounds_ = RRect(boundsRect, radius);
@@ -680,6 +695,12 @@ void RemoteAnimation::PostProcessShowCallback(const sptr<WindowNode>& node)
         winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     node->leashWinSurfaceNode_->SetBounds(
         winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+    if (WindowHelper::IsRotatableWindow(node->GetWindowType(), node->GetWindowMode())) {
+        auto displayId = node->GetDisplayId();
+        auto requestOri = node->GetRequestedOrientation();
+        WLOGFD("[FixOrientation] show animation finished, update display orientation");
+        DisplayManagerServiceInner::GetInstance().SetOrientationFromWindow(displayId, requestOri, false);
+    }
     RSTransaction::FlushImplicitTransaction();
 }
 
@@ -783,6 +804,15 @@ void RemoteAnimation::ProcessNodeStateTask(sptr<WindowNode>& node)
         node->stateMachine_.TransitionTo(WindowNodeState::SHOW_ANIMATION_DONE);
     } else if (node->stateMachine_.IsWindowNodeHiddenOrHiding()) {
         node->stateMachine_.TransitionTo(WindowNodeState::HIDE_ANIMATION_DONE);
+        auto winRoot = windowRoot_.promote();
+        if (winRoot != nullptr) {
+            winRoot->UpdateDisplayOrientationWhenHideWindow(node);
+        }
+    } else if (node->stateMachine_.GetCurrentState() == WindowNodeState::DESTROYED) {
+        auto winRoot = windowRoot_.promote();
+        if (winRoot != nullptr) {
+            winRoot->UpdateDisplayOrientationWhenHideWindow(node);
+        }
     }
 }
 

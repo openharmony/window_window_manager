@@ -229,7 +229,7 @@ void WindowRootFuzzPart4(sptr<WindowRoot> windowRoot, sptr<WindowNode> windowNod
     DisplayId displayId;
     startPos += GetObject<DisplayId>(displayId, data + startPos, size - startPos);
     windowRoot->HasPrivateWindow(displayId);
-    windowRoot->GetDisplayRectWithoutSystemBarAreas(displayId);
+    windowRoot->GetDisplayRectWithoutSystemBarAreas(windowNode);
     windowRoot->GetSplitScreenWindowNodes(displayId);
     windowRoot->GetAllDisplayIds();
     windowRoot->GetTotalWindowNum();

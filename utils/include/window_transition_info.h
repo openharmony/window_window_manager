@@ -66,6 +66,8 @@ public:
     WindowSizeLimits GetWindowSizeLimits() const;
     void SetMissionId(int32_t missionId);
     int32_t GetMissionId() const;
+    void SetOrientation(AppExecFwk::DisplayOrientation orientation);
+    AppExecFwk::DisplayOrientation GetOrientation() const;
 private:
     std::string bundleName_;
     std::string abilityName_;
@@ -80,6 +82,7 @@ private:
     std::vector<AppExecFwk::SupportWindowMode> supportWindowModes_;
     WindowSizeLimits sizeLimits_;
     int32_t missionId_ = -1;
+    AppExecFwk::DisplayOrientation orientation_ = AppExecFwk::DisplayOrientation::UNSPECIFIED;
 };
 } // Rosen
 } // OHOS

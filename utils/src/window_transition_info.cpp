@@ -44,6 +44,7 @@ WindowTransitionInfo::WindowTransitionInfo(sptr<AAFwk::AbilityTransitionInfo> in
     sizeLimits_.maxHeight_ = info->maxWindowHeight_;
     sizeLimits_.minHeight_ = info->minWindowHeight_;
     reason_ = static_cast<TransitionReason>(info->reason_);
+    orientation_ = info->orientation_;
 }
 
 void WindowTransitionInfo::SetBundleName(std::string name)
@@ -171,6 +172,16 @@ int32_t WindowTransitionInfo::GetMissionId() const
     return missionId_;
 }
 
+void WindowTransitionInfo::SetOrientation(AppExecFwk::DisplayOrientation orientation)
+{
+    orientation_ = orientation;
+}
+
+AppExecFwk::DisplayOrientation WindowTransitionInfo::GetOrientation() const
+{
+    return orientation_;
+}
+
 bool WindowTransitionInfo::Marshalling(Parcel& parcel) const
 {
     if (!parcel.WriteString(bundleName_) || !parcel.WriteString(abilityName_)) {
@@ -219,6 +230,10 @@ bool WindowTransitionInfo::Marshalling(Parcel& parcel) const
     if (!parcel.WriteInt32(missionId_)) {
         return false;
     }
+
+    if (!parcel.WriteUint32(static_cast<uint32_t>(orientation_))) {
+        return false;
+    }
     return true;
 }
 
@@ -244,6 +259,7 @@ WindowTransitionInfo* WindowTransitionInfo::Unmarshalling(Parcel& parcel)
     windowTransitionInfo->isRecent_ = parcel.ReadBool();
     windowTransitionInfo->reason_ = static_cast<TransitionReason>(parcel.ReadUint32());
     windowTransitionInfo->missionId_ = parcel.ReadInt32();
+    windowTransitionInfo->orientation_ = static_cast<AppExecFwk::DisplayOrientation>(parcel.ReadUint32());
     return windowTransitionInfo;
 }
 } // Rosen

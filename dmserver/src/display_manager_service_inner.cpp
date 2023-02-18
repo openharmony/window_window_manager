@@ -133,24 +133,25 @@ void DisplayManagerServiceInner::RegisterDisplayChangeListener(sptr<IDisplayChan
     DisplayManagerService::GetInstance().RegisterDisplayChangeListener(listener);
 }
 
-DMError DisplayManagerServiceInner::SetOrientationFromWindow(DisplayId displayId, Orientation orientation)
+DMError DisplayManagerServiceInner::SetOrientationFromWindow(DisplayId displayId, Orientation orientation,
+    bool withAnimation)
 {
     auto displayInfo = GetDisplayById(displayId);
     if (displayInfo == nullptr) {
         return DMError::DM_ERROR_NULLPTR;
     }
     return DisplayManagerService::GetInstance().
-        SetOrientationFromWindow(displayInfo->GetScreenId(), orientation);
+        SetOrientationFromWindow(displayInfo->GetScreenId(), orientation, withAnimation);
 }
 
-bool DisplayManagerServiceInner::SetRotationFromWindow(DisplayId displayId, Rotation targetRotation)
+bool DisplayManagerServiceInner::SetRotationFromWindow(DisplayId displayId, Rotation targetRotation, bool withAnimation)
 {
     auto displayInfo = GetDisplayById(displayId);
     if (displayInfo == nullptr) {
         return false;
     }
     return DisplayManagerService::GetInstance().
-        SetRotationFromWindow(displayInfo->GetScreenId(), targetRotation);
+        SetRotationFromWindow(displayInfo->GetScreenId(), targetRotation, withAnimation);
 }
 
 void DisplayManagerServiceInner::SetGravitySensorSubscriptionEnabled()

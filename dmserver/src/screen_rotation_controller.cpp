@@ -177,14 +177,14 @@ Rotation ScreenRotationController::ProcessAutoRotationLandscapeOrientation(Devic
     return ConvertDeviceToDisplayRotation(sensorRotationConverted);
 }
 
-void ScreenRotationController::SetScreenRotation(Rotation targetRotation)
+void ScreenRotationController::SetScreenRotation(Rotation targetRotation, bool withAnimation)
 {
     if (targetRotation == GetCurrentDisplayRotation()) {
         return;
     }
     DisplayManagerServiceInner::GetInstance().GetDefaultDisplay()->SetRotation(targetRotation);
-    DisplayManagerServiceInner::GetInstance().SetRotationFromWindow(defaultDisplayId_, targetRotation);
-    WLOGFI("dms: Set screen rotation: %{public}u", targetRotation);
+    DisplayManagerServiceInner::GetInstance().SetRotationFromWindow(defaultDisplayId_, targetRotation, withAnimation);
+    WLOGFI("dms: Set screen rotation: %{public}u withAnimation: %{public}u", targetRotation, withAnimation);
 }
 
 DeviceRotation ScreenRotationController::CalcDeviceRotation(SensorRotation sensorRotation)
@@ -420,7 +420,7 @@ bool ScreenRotationController::IsDisplayRotationHorizontal(Rotation rotation)
         (rotation == ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_LANDSCAPE_INVERTED));
 }
 
-void ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(Orientation orientation)
+void ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(Orientation orientation, bool withAnimation)
 {
     if (lastOrientationType_ == orientation) {
         return;
@@ -428,23 +428,25 @@ void ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(Orienta
     lastOrientationType_ = orientation;
     switch (orientation) {
         case Orientation::UNSPECIFIED: {
-            SetScreenRotation(Rotation::ROTATION_0);
+            SetScreenRotation(Rotation::ROTATION_0, withAnimation);
             break;
         }
         case Orientation::VERTICAL: {
-            SetScreenRotation(ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_PORTRAIT));
+            SetScreenRotation(ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_PORTRAIT), withAnimation);
             break;
         }
         case Orientation::REVERSE_VERTICAL: {
-            SetScreenRotation(ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_PORTRAIT_INVERTED));
+            SetScreenRotation(ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_PORTRAIT_INVERTED),
+                withAnimation);
             break;
         }
         case Orientation::HORIZONTAL: {
-            SetScreenRotation(ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_LANDSCAPE));
+            SetScreenRotation(ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_LANDSCAPE), withAnimation);
             break;
         }
         case Orientation::REVERSE_HORIZONTAL: {
-            SetScreenRotation(ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_LANDSCAPE_INVERTED));
+            SetScreenRotation(ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_LANDSCAPE_INVERTED),
+                withAnimation);
             break;
         }
         default: {
@@ -453,10 +455,10 @@ void ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(Orienta
     }
 }
 
-void ScreenRotationController::ProcessOrientationSwitch(Orientation orientation)
+void ScreenRotationController::ProcessOrientationSwitch(Orientation orientation, bool withAnimation)
 {
     if (!IsSensorRelatedOrientation(orientation)) {
-        ProcessSwitchToSensorUnrelatedOrientation(orientation);
+        ProcessSwitchToSensorUnrelatedOrientation(orientation, withAnimation);
     } else {
         ProcessSwitchToSensorRelatedOrientation(orientation, lastSensorRotationConverted_);
     }
