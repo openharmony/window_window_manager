@@ -38,6 +38,7 @@
 #include "window_manager_agent_controller.h"
 #include "window_manager_hilog.h"
 #include "window_manager_service.h"
+#include "window_manager_service_utils.h"
 #include "window_system_effect.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
@@ -1090,7 +1091,7 @@ bool WindowNodeContainer::IsSplitImmersiveNode(sptr<WindowNode> node) const
     return node->IsSplitMode() || type == WindowType::WINDOW_TYPE_DOCK_SLICE;
 }
 
-std::unordered_map<WindowType, SystemBarProperty> WindowNodeContainer::GetExpectImmersiveProperty() const
+std::unordered_map<WindowType, SystemBarProperty> WindowNodeContainer::GetExpectImmersiveProperty(DisplayId id) const
 {
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap {
         { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty() },
@@ -1105,10 +1106,20 @@ std::unordered_map<WindowType, SystemBarProperty> WindowNodeContainer::GetExpect
                 continue;
             }
             if (WindowHelper::IsFullScreenWindow((*iter)->GetWindowMode())
-	        && (*iter)->GetWindowType() != WindowType::WINDOW_TYPE_PANEL) {
-                WLOGFD("Top immersive window id: %{public}d. Use full immersive prop", (*iter)->GetWindowId());
-                for (auto it : sysBarPropMap) {
-                    sysBarPropMap[it.first] = (sysBarPropMapNode.find(it.first))->second;
+                && (*iter)->GetWindowType() != WindowType::WINDOW_TYPE_PANEL) {
+                auto displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(id);
+                if (displayInfo && WmsUtils::IsExpectedRotateLandscapeWindow((*iter)->GetRequestedOrientation(),
+                    displayInfo->GetDisplayOrientation())) {
+                    WLOGFI("Horizontal window id: %{public}d make it immersive", (*iter)->GetWindowId());
+                    for (auto it : sysBarPropMap) {
+                        sysBarPropMap[it.first] = (sysBarPropMapNode.find(it.first))->second;
+                        sysBarPropMap[it.first].enable_ = false;
+                    }
+                } else {
+                    WLOGFD("Top immersive window id: %{public}d. Use full immersive prop", (*iter)->GetWindowId());
+                    for (auto it : sysBarPropMap) {
+                        sysBarPropMap[it.first] = (sysBarPropMapNode.find(it.first))->second;
+                    }
                 }
                 return sysBarPropMap;
             } else if (IsSplitImmersiveNode(*iter)) {
@@ -1163,7 +1174,7 @@ void WindowNodeContainer::ProcessWindowAvoidAreaChangeWhenDisplayChange() const
 void WindowNodeContainer::NotifyIfSystemBarTintChanged(DisplayId displayId) const
 {
     HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
-    auto expectSystemBarProp = GetExpectImmersiveProperty();
+    auto expectSystemBarProp = GetExpectImmersiveProperty(displayId);
     SystemBarRegionTints tints;
     SysBarTintMap& sysBarTintMap = displayGroupController_->sysBarTintMaps_[displayId];
     for (auto it : sysBarTintMap) {
@@ -2195,10 +2206,6 @@ WMError WindowNodeContainer::SetWindowMode(sptr<WindowNode>& node, WindowMode ds
         return WMError::WM_ERROR_NULLPTR;
     }
     WindowMode srcMode = node->GetWindowMode();
-    if (srcMode == dstMode) {
-        return WMError::WM_OK;
-    }
-
     if (WindowHelper::IsSplitWindowMode(dstMode) && isScreenLocked_ &&
         (node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED))) {
         return WMError::WM_ERROR_INVALID_PARAM;

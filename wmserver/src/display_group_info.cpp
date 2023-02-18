@@ -77,6 +77,15 @@ void DisplayGroupInfo::SetDisplayRotation(DisplayId displayId, Rotation rotation
     displayInfosMap_[displayId]->SetRotation(rotation);
 }
 
+void DisplayGroupInfo::SetDisplayOrientation(DisplayId displayId, DisplayOrientation orientation)
+{
+    if (displayInfosMap_.find(displayId) == displayInfosMap_.end()) {
+        WLOGFE("current display is not exits, displayId: %{public}" PRIu64"", displayId);
+        return;
+    }
+    displayInfosMap_[displayId]->SetDisplayOrientation(orientation);
+}
+
 void DisplayGroupInfo::SetDisplayVirtualPixelRatio(DisplayId displayId, float vpr)
 {
     if (displayInfosMap_.find(displayId) == displayInfosMap_.end()) {

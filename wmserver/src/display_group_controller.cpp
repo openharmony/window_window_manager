@@ -484,6 +484,7 @@ void DisplayGroupController::ProcessDisplayChange(DisplayId defaultDisplayId, sp
     switch (type) {
         case DisplayStateChangeType::UPDATE_ROTATION: {
             displayGroupInfo_->SetDisplayRotation(displayId, displayInfo->GetRotation());
+            displayGroupInfo_->SetDisplayOrientation(displayId, displayInfo->GetDisplayOrientation());
             [[fallthrough]];
         }
         case DisplayStateChangeType::DISPLAY_COMPRESS:

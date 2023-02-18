@@ -472,17 +472,17 @@ HWTEST_F(ScreenRotationControllerTest, IsDeviceRotationVerticalOrHorizontal, Fun
  */
 HWTEST_F(ScreenRotationControllerTest, ProcessOrientationSwitch, Function | SmallTest | Level3)
 {
-    ScreenRotationController::ProcessOrientationSwitch(Orientation::UNSPECIFIED);
-    ScreenRotationController::ProcessOrientationSwitch(Orientation::VERTICAL);
-    ScreenRotationController::ProcessOrientationSwitch(Orientation::HORIZONTAL);
-    ScreenRotationController::ProcessOrientationSwitch(Orientation::REVERSE_VERTICAL);
-    ScreenRotationController::ProcessOrientationSwitch(Orientation::SENSOR);
-    ScreenRotationController::ProcessOrientationSwitch(Orientation::SENSOR_VERTICAL);
-    ScreenRotationController::ProcessOrientationSwitch(Orientation::SENSOR_HORIZONTAL);
-    ScreenRotationController::ProcessOrientationSwitch(Orientation::AUTO_ROTATION_RESTRICTED);
-    ScreenRotationController::ProcessOrientationSwitch(Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED);
-    ScreenRotationController::ProcessOrientationSwitch(Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED);
-    ScreenRotationController::ProcessOrientationSwitch(Orientation::LOCKED);
+    ScreenRotationController::ProcessOrientationSwitch(Orientation::UNSPECIFIED, true);
+    ScreenRotationController::ProcessOrientationSwitch(Orientation::VERTICAL, true);
+    ScreenRotationController::ProcessOrientationSwitch(Orientation::HORIZONTAL, false);
+    ScreenRotationController::ProcessOrientationSwitch(Orientation::REVERSE_VERTICAL, true);
+    ScreenRotationController::ProcessOrientationSwitch(Orientation::SENSOR, true);
+    ScreenRotationController::ProcessOrientationSwitch(Orientation::SENSOR_VERTICAL, true);
+    ScreenRotationController::ProcessOrientationSwitch(Orientation::SENSOR_HORIZONTAL, true);
+    ScreenRotationController::ProcessOrientationSwitch(Orientation::AUTO_ROTATION_RESTRICTED, true);
+    ScreenRotationController::ProcessOrientationSwitch(Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED, true);
+    ScreenRotationController::ProcessOrientationSwitch(Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED, true);
+    ScreenRotationController::ProcessOrientationSwitch(Orientation::LOCKED, true);
     ASSERT_EQ(Orientation::LOCKED, ScreenRotationController::lastOrientationType_);
 }
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE

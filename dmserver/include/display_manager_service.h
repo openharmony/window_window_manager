@@ -59,8 +59,8 @@ public:
     sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
     DMError SetOrientation(ScreenId screenId, Orientation orientation) override;
-    DMError SetOrientationFromWindow(ScreenId screenId, Orientation orientation);
-    bool SetRotationFromWindow(ScreenId screenId, Rotation targetRotation);
+    DMError SetOrientationFromWindow(ScreenId screenId, Orientation orientation, bool withAnimation);
+    bool SetRotationFromWindow(ScreenId screenId, Rotation targetRotation, bool withAnimation);
     void SetGravitySensorSubscriptionEnabled();
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId) override;
     uint32_t GetRSScreenNum() const;

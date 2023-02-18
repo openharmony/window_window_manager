@@ -33,6 +33,7 @@ public:
     void UpdateLeftAndRightDisplayId();
 
     void SetDisplayRotation(DisplayId displayId, Rotation rotation);
+    void SetDisplayOrientation(DisplayId displayId, DisplayOrientation orientation);
     void SetDisplayVirtualPixelRatio(DisplayId displayId, float vpr);
     void SetDisplayRect(DisplayId displayId, Rect displayRect);
 
