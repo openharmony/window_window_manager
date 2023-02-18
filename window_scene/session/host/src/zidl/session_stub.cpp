@@ -117,7 +117,6 @@ int SessionStub::HandleStartPendingSessionActivation(MessageParcel& data, Messag
     if (data.ReadBool()) {
         info.callerToken_ = data.ReadRemoteObject();
     }
-    info.extensionType_ = data.ReadUint32();
     WSError errCode = StartPendingSessionActivation(info);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
