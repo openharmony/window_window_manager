@@ -18,7 +18,7 @@
 #include <ability_manager_client.h>
 #include <want.h>
 #include <start_options.h>
-
+#include "session_info.h"
 #include "session/host/include/extension_session.h"
 #include "window_manager_hilog.h"
 
@@ -59,8 +59,14 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
     auto sessionInfo = extensionSession->GetSessionInfo();
     want.SetElementName(sessionInfo.bundleName_, sessionInfo.abilityName_);
     AAFwk::StartOptions startOptions;
-    // to start uiExtension ability with (want, callerToken, extensionSession, surfaceNode, extensionType)
-    // TODO AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, startOptions, abilityInfo->callerToken_);
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = new (std::nothrow) AAFwk::SessionInfo();
+    abilitySessionInfo->sessionToken = extensionSession;
+    abilitySessionInfo->surfaceNode = extensionSession->GetSurfaceNode();
+    abilitySessionInfo->callerToken = sessionInfo.callerToken_;
+    abilitySessionInfo->persistentId = extensionSession->GetPersistentId();
+    AAFwk::AbilityManagerClient::GetInstance()->StartUIExtensionAbility(want, abilitySessionInfo,
+        AAFwk::DEFAULT_INVAL_VALUE,
+        AppExecFwk::ExtensionAbilityType::UIEXTENSION);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     sptr<IRemoteObject> newAbilityToken = nullptr;
     // replace with real token after start ability
@@ -83,7 +89,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     auto abilityToken = abilityExtensionMap_[persistentId].second;
-    AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(abilityToken);
+    AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIExtensionAbility(abilityToken);
     return WSError::WS_OK;
 }
 
@@ -103,7 +109,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
     }
     auto abilityToken = abilityExtensionMap_[persistentId].second;
     AAFwk::Want resultWant;
-    AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(abilityToken, -1, &resultWant);
+    AAFwk::AbilityManagerClient::GetInstance()->TerminateUIExtensionAbility(abilityToken, -1, &resultWant);
     abilityExtensionMap_.erase(persistentId);
     return WSError::WS_OK;
 }
