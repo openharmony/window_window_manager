@@ -19,7 +19,7 @@
 #include <want.h>
 #include <start_options.h>
 #include <ui_window.h>
-#include "scene_session_info.h"
+#include "session_info.h"
 #include "session/host/include/scene_session.h"
 #include "window_manager_hilog.h"
 
@@ -75,13 +75,13 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
     auto sessionInfo = sceneSession->GetSessionInfo();
     want.SetElementName(sessionInfo.bundleName_, sessionInfo.abilityName_);
     AAFwk::StartOptions startOptions;
-    sptr<AAFwk::SceneSessionInfo> sceneSessionInfo = new (std::nothrow) AAFwk::SceneSessionInfo();
-    sceneSessionInfo->sceneSessionToken_ = sceneSession;
-    sceneSessionInfo->surfaceNode_ = sceneSession->GetSurfaceNode();
-    sceneSessionInfo->persistentId_ = sceneSession->GetPersistentId();
-    AAFwk::AbilityManagerClient::GetInstance()->StartAbilityByLauncher(want, startOptions, nullptr, sceneSessionInfo);
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = new (std::nothrow) AAFwk::SessionInfo();
+    abilitySessionInfo->sessionToken = sceneSession;
+    abilitySessionInfo->surfaceNode = sceneSession->GetSurfaceNode();
+    abilitySessionInfo->persistentId = sceneSession->GetPersistentId();
+    AAFwk::AbilityManagerClient::GetInstance()->StartAbilityByLauncher(want, startOptions, nullptr, abilitySessionInfo);
     auto newAbilityToken = AAFwk::AbilityManagerClient::GetInstance()->GetTokenBySceneSession(
-        sceneSessionInfo->persistentId_);
+        abilitySessionInfo->persistentId);
     if (newAbilityToken) {
         WLOGFW("newAbilityToken is not null");
     }
