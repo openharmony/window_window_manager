@@ -20,10 +20,17 @@
 #include <mutex>
 #include <refbase.h>
 #include <vector>
+
 #include "interfaces/include/ws_common.h"
 #include "session/container/include/zidl/session_stage_stub.h"
 #include "session/container/include/zidl/window_event_channel_interface.h"
 #include "session/host/include/zidl/session_interface.h"
+
+namespace OHOS::MMI {
+    class PointerEvent;
+    class KeyEvent;
+    class AxisEvent;
+}
 
 namespace OHOS::Rosen {
 class ISessionStageStateListener {
@@ -37,6 +44,16 @@ public:
 class ISizeChangeListener {
 public:
     virtual void OnSizeChange(WSRect rect, SizeChangeReason reason) = 0;
+};
+
+class IPointerEventListener {
+public:
+    virtual void OnPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
+};
+
+class IKeyEventListener {
+public:
+    virtual void OnKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
 };
 
 class SessionStage : public SessionStageStub, public virtual RefBase {
@@ -69,6 +86,15 @@ public:
     bool UnregisterSessionStageStateListener(const std::shared_ptr<ISessionStageStateListener>& listener);
     bool RegisterSizeChangeListener(const std::shared_ptr<ISizeChangeListener>& listener);
     bool UnregisterSizeChangeListener(const std::shared_ptr<ISizeChangeListener>& listener);
+
+    bool RegisterPointerEventListener(const std::shared_ptr<IPointerEventListener>& listener);
+    bool UnregisterPointerEventListener(const std::shared_ptr<IPointerEventListener>& listener);
+    bool RegisterKeyEventListener(const std::shared_ptr<IKeyEventListener>& listener);
+    bool UnregisterKeyEventListener(const std::shared_ptr<IKeyEventListener>& listener);
+
+    // for window event
+    void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
 protected:
     void NotifySizeChange(const WSRect& rect, SizeChangeReason reason);
@@ -131,7 +157,36 @@ private:
         }
         return sizeChangeListeners;
     }
+
+    template<typename T>
+    inline EnableIfSame<T, IPointerEventListener, std::vector<std::weak_ptr<IPointerEventListener>>> GetListeners()
+    {
+        std::vector<std::weak_ptr<IPointerEventListener>> pointerEventListeners;
+        {
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            for (auto& listener : pointerEventListeners_) {
+                pointerEventListeners.push_back(listener);
+            }
+        }
+        return pointerEventListeners;
+    }
+
+    template<typename T>
+    inline EnableIfSame<T, IKeyEventListener, std::vector<std::weak_ptr<IKeyEventListener>>> GetListeners()
+    {
+        std::vector<std::weak_ptr<IKeyEventListener>> keyEventListeners;
+        {
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            for (auto& listener : keyEventListeners_) {
+                keyEventListeners.push_back(listener);
+            }
+        }
+        return keyEventListeners;
+    }
+
     std::recursive_mutex mutex_;
+    std::vector<std::shared_ptr<IPointerEventListener>> pointerEventListeners_;
+    std::vector<std::shared_ptr<IKeyEventListener>> keyEventListeners_;
     std::vector<std::shared_ptr<ISessionStageStateListener>> sessionStageStateListeners_;
     std::vector<std::shared_ptr<ISizeChangeListener>> sizeChangeListeners_;
 };

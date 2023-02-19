@@ -273,4 +273,27 @@ WSError Session::Maximum()
 {
     return WSError::WS_OK;
 }
+
+// for window event
+WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    WLOGFI("Session TransferPointEvent");
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    windowEventChannel_->TransferPointerEvent(pointerEvent);
+    return WSError::WS_OK;
+}
+
+WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    WLOGFI("Session TransferPointEvent");
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    windowEventChannel_->TransferKeyEvent(keyEvent);
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

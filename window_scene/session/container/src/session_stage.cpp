@@ -46,6 +46,26 @@ bool SessionStage::UnregisterSizeChangeListener(const std::shared_ptr<ISizeChang
     return UnregisterListenerLocked(sizeChangeListeners_, listener);
 }
 
+bool SessionStage::RegisterPointerEventListener(const std::shared_ptr<IPointerEventListener>& listener)
+{
+    return RegisterListenerLocked(pointerEventListeners_, listener);
+}
+
+bool SessionStage::UnregisterPointerEventListener(const std::shared_ptr<IPointerEventListener>& listener)
+{
+    return UnregisterListenerLocked(pointerEventListeners_, listener);
+}
+
+bool SessionStage::RegisterKeyEventListener(const std::shared_ptr<IKeyEventListener>& listener)
+{
+    return RegisterListenerLocked(keyEventListeners_, listener);
+}
+
+bool SessionStage::UnregisterKeyEventListener(const std::shared_ptr<IKeyEventListener>& listener)
+{
+    return UnregisterListenerLocked(keyEventListeners_, listener);
+}
+
 template<typename T>
 bool SessionStage::RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener)
 {
@@ -83,6 +103,26 @@ void SessionStage::NotifySizeChange(const WSRect& rect, SizeChangeReason reason)
     for (auto& listener : sizeChangeListeners) {
         if (!listener.expired()) {
             listener.lock()->OnSizeChange(rect, reason);
+        }
+    }
+}
+
+void SessionStage::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    auto pointerEventListeners = GetListeners<IPointerEventListener>();
+    for (auto& listener : pointerEventListeners) {
+        if (!listener.expired()) {
+            listener.lock()->OnPointerEvent(pointerEvent);
+        }
+    }
+}
+
+void SessionStage::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    auto keyEventListeners = GetListeners<IKeyEventListener>();
+    for (auto& listener : keyEventListeners) {
+        if (!listener.expired()) {
+            listener.lock()->OnKeyEvent(keyEvent);
         }
     }
 }
