@@ -25,6 +25,12 @@
 #include "session/container/include/zidl/session_stage_interface.h"
 #include "session/host/include/zidl/session_stub.h"
 
+namespace OHOS::MMI {
+    class PointerEvent;
+    class KeyEvent;
+    class AxisEvent;
+}
+
 namespace OHOS::Rosen {
 class RSSurfaceNode;
 using NotifyStartPendingSessionActivationFunc = std::function<void(const SessionInfo& info)>;
@@ -59,6 +65,10 @@ public:
 
     void NotifyForeground();
     void NotifyBackground();
+    
+    // for window event
+    WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);

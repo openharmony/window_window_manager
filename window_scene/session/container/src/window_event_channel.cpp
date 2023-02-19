@@ -27,15 +27,15 @@ namespace {
 
 WSError WindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    WLOGFI("receive key event");
-    // TODO:notify session stage receive key event
+    WLOGFI("WindowEventChannel receive key event");
+    sessionStage_->NotifyKeyEvent(keyEvent);
     return WSError::WS_OK;
 }
 
 WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    WLOGFI("receive pointer event");
-    // TODO:notify session stage receive pointer event
+    WLOGFI("WindowEventChannel receive pointer event");
+    sessionStage_->NotifyPointerEvent(pointerEvent);
     return WSError::WS_OK;
 }
 }
