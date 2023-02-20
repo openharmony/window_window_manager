@@ -252,6 +252,24 @@ void DisplayManagerAgentProxy::OnScreenshot(sptr<ScreenshotInfo> snapshotInfo)
         WLOGFE("SendRequest failed");
     }
 }
+
+void DisplayManagerAgentProxy::NotifyPrivateWindowStateChanged(bool hasPrivate)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteBool(hasPrivate)) {
+        WLOGFE("Write private info failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_ON_PRIVATE_WINDOW, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
 

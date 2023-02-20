@@ -167,4 +167,9 @@ sptr<CutoutInfo> DisplayManagerServiceInner::GetCutoutInfo(DisplayId displayId) 
 {
     return DisplayManagerService::GetInstance().GetCutoutInfo(displayId);
 }
+
+void DisplayManagerServiceInner::NotifyPrivateWindowStateChanged(bool hasPrivate)
+{
+    return DisplayManagerService::GetInstance().NotifyPrivateWindowStateChanged(hasPrivate);
+}
 } // namespace OHOS::Rosen

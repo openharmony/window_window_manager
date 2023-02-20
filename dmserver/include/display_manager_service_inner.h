@@ -53,6 +53,7 @@ public:
     void RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener);
     void RegisterRSScreenChangeListener(const sptr<IRSScreenChangeListener>& listener);
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) const;
+    void NotifyPrivateWindowStateChanged(bool hasPrivate);
 };
 } // namespace OHOS::Rosen
 
