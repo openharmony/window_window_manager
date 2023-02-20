@@ -51,10 +51,13 @@ public:
     DMError UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
     DMError RegisterScreenshotListener(sptr<IScreenshotListener> listener);
     DMError UnregisterScreenshotListener(sptr<IScreenshotListener> listener);
+    DMError RegisterPrivateWindowListener(sptr<IPrivateWindowListener> listener);
+    DMError UnregisterPrivateWindowListener(sptr<IPrivateWindowListener> listener);
     sptr<Display> GetDisplayByScreenId(ScreenId screenId);
     void OnRemoteDied();
 private:
     void ClearDisplayStateCallback();
+    void NotifyPrivateWindowStateChanged(bool hasPrivate);
     void NotifyScreenshot(sptr<ScreenshotInfo> info);
     void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
     void NotifyDisplayStateChanged(DisplayId id, DisplayState state);
@@ -72,6 +75,7 @@ private:
     std::set<sptr<IDisplayListener>> displayListeners_;
     std::set<sptr<IDisplayPowerEventListener>> powerEventListeners_;
     std::set<sptr<IScreenshotListener>> screenshotListeners_;
+    std::set<sptr<IPrivateWindowListener>> privateWindowListeners_;
     class DisplayManagerListener;
     sptr<DisplayManagerListener> displayManagerListener_;
     class DisplayManagerAgent;
@@ -79,6 +83,8 @@ private:
     sptr<DisplayManagerAgent> powerEventListenerAgent_;
     class DisplayManagerScreenshotAgent;
     sptr<DisplayManagerScreenshotAgent> screenshotListenerAgent_;
+    class DisplayManagerPrivateWindowAgent;
+    sptr<DisplayManagerPrivateWindowAgent> privateWindowListenerAgent_;
 };
 
 class DisplayManager::Impl::DisplayManagerListener : public DisplayManagerAgentDefault {
@@ -184,6 +190,21 @@ public:
     virtual void OnScreenshot(sptr<ScreenshotInfo> info) override
     {
         pImpl_->NotifyScreenshot(info);
+    }
+private:
+    sptr<Impl> pImpl_;
+};
+
+class DisplayManager::Impl::DisplayManagerPrivateWindowAgent : public DisplayManagerAgentDefault {
+public:
+    explicit DisplayManagerPrivateWindowAgent(sptr<Impl> impl) : pImpl_(impl)
+    {
+    }
+    ~DisplayManagerPrivateWindowAgent() = default;
+
+    virtual void NotifyPrivateWindowStateChanged(bool hasPrivate) override
+    {
+        pImpl_->NotifyPrivateWindowStateChanged(hasPrivate);
     }
 private:
     sptr<Impl> pImpl_;
@@ -498,6 +519,74 @@ DMError DisplayManager::Impl::RegisterDisplayListener(sptr<IDisplayListener> lis
     return ret;
 }
 
+void DisplayManager::Impl::NotifyPrivateWindowStateChanged(bool hasPrivate)
+{
+    std::set<sptr<IPrivateWindowListener>> privateWindowListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        privateWindowListeners = privateWindowListeners_;
+    }
+    for (auto& listener : privateWindowListeners) {
+        listener->OnPrivateWindow(hasPrivate);
+    }
+}
+
+DMError DisplayManager::RegisterPrivateWindowListener(sptr<IPrivateWindowListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("RegisterPrivateWindowListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->RegisterPrivateWindowListener(listener);
+}
+
+DMError DisplayManager::UnregisterPrivateWindowListener(sptr<IPrivateWindowListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("UnregisterPrivateWindowListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->UnregisterPrivateWindowListener(listener);
+}
+
+DMError DisplayManager::Impl::RegisterPrivateWindowListener(sptr<IPrivateWindowListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    DMError ret = DMError::DM_OK;
+    if (privateWindowListenerAgent_ == nullptr) {
+        privateWindowListenerAgent_ = new DisplayManagerPrivateWindowAgent(this);
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
+            privateWindowListenerAgent_,
+            DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER);
+    }
+    if (ret != DMError::DM_OK) {
+        WLOGFW("RegisterDisplayManagerAgent failed !");
+        privateWindowListenerAgent_ = nullptr;
+    } else {
+        WLOGI("privateWindowListener register success");
+        privateWindowListeners_.insert(listener);
+    }
+    return ret;
+}
+
+DMError DisplayManager::Impl::UnregisterPrivateWindowListener(sptr<IPrivateWindowListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto iter = std::find(privateWindowListeners_.begin(), privateWindowListeners_.end(), listener);
+    if (iter == privateWindowListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    privateWindowListeners_.erase(iter);
+    DMError ret = DMError::DM_OK;
+    if (privateWindowListeners_.empty() && displayManagerListener_ != nullptr) {
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
+            displayManagerListener_,
+            DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER);
+        displayManagerListener_ = nullptr;
+    }
+    return ret;
+}
 DMError DisplayManager::RegisterDisplayListener(sptr<IDisplayListener> listener)
 {
     if (listener == nullptr) {
@@ -853,6 +942,7 @@ void DisplayManager::Impl::OnRemoteDied()
     displayStateAgent_ = nullptr;
     powerEventListenerAgent_ = nullptr;
     screenshotListenerAgent_ = nullptr;
+    privateWindowListenerAgent_ = nullptr;
 }
 
 void DisplayManager::OnRemoteDied()

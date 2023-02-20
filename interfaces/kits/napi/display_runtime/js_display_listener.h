@@ -24,7 +24,8 @@
 
 namespace OHOS {
 namespace Rosen {
-class JsDisplayListener : public DisplayManager::IDisplayListener {
+class JsDisplayListener : public DisplayManager::IDisplayListener,
+                          public DisplayManager::IPrivateWindowListener {
 public:
     explicit JsDisplayListener(NativeEngine* engine) : engine_(engine) {}
     ~JsDisplayListener() override = default;
@@ -34,6 +35,7 @@ public:
     void OnCreate(DisplayId id) override;
     void OnDestroy(DisplayId id) override;
     void OnChange(DisplayId id) override;
+    void OnPrivateWindow(bool hasPrivate) override;
 
 private:
     void CallJsMethod(const std::string& methodName, NativeValue* const* argv = nullptr, size_t argc = 0);
@@ -45,6 +47,7 @@ private:
 const std::string EVENT_ADD = "add";
 const std::string EVENT_REMOVE = "remove";
 const std::string EVENT_CHANGE = "change";
+const std::string EVENT_PRIVATE_WINDOW = "privateWindow";
 }  // namespace Rosen
 }  // namespace OHOS
 #endif /* OHOS_JS_DISPLAY_LISTENER_H */

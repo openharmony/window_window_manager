@@ -106,6 +106,7 @@ public:
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     void RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener);
     void RegisterRSScreenChangeListener(const sptr<IRSScreenChangeListener>& listener);
+    void NotifyPrivateWindowStateChanged(bool hasPrivate);
 private:
     DisplayManagerService();
     ~DisplayManagerService() = default;

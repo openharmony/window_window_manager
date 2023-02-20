@@ -29,7 +29,7 @@ int WindowExtensionStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
         WLOGFE("InterfaceToken check failed");
         return -1;
     }
-    WLOGI("code is %{public}u", code);
+    WLOGFD("code is %{public}u", code);
     switch (code) {
         case TRANS_ID_SETBOUNDS: {
             Rect rect {data.ReadInt32(), data.ReadInt32(),
