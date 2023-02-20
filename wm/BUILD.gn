@@ -33,7 +33,6 @@ config("libwm_public_config") {
 
 ## Build libwm.so
 ohos_shared_library("libwm") {
-  include_dirs = [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf" ]
 
   sources = [
     "../wmserver/src/zidl/window_manager_proxy.cpp",
@@ -45,6 +44,7 @@ ohos_shared_library("libwm") {
     "src/window_accessibility_controller.cpp",
     "src/window_adapter.cpp",
     "src/window_agent.cpp",
+    "src/window_frame_trace_impl.cpp",
     "src/window_impl.cpp",
     "src/window_input_channel.cpp",
     "src/window_manager.cpp",
@@ -64,7 +64,6 @@ ohos_shared_library("libwm") {
 
   deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf:frame_trace_intf",
     "//foundation/window/window_manager/dm:libdm",
     "//foundation/window/window_manager/utils:libwmutil",
   ]
@@ -90,6 +89,15 @@ ohos_shared_library("libwm") {
     defines += [ "EFFICIENCY_MANAGER_ENABLE" ]
   }
 
+  if (defined(global_parts_info)) {
+    if (defined(global_parts_info.resourceschedule_frame_aware_sched) ||
+        defined(global_parts_info.hmosresourceschedule_resourceschedule_frame_aware_sched_override)) {
+      defines += [ "FRAEM_TRACE_ENABLE" ]
+      deps += [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf:frame_trace_intf" ]
+      include_dirs = [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf" ]
+    }
+  }
+  
   if (!defined(global_parts_info) ||
       defined(global_parts_info.resourceschedule_resource_schedule_service)) {
     soc_perf_enable = true
