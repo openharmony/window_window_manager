@@ -350,7 +350,7 @@ void WindowNodeContainer::SetSurfaceNodeVisible(sptr<WindowNode>& node, int32_t 
     if (node->parent_ != nullptr && node->currentVisibility_) {
         if (node->priority_ < topPriority && !WindowHelper::IsShowWhenLocked(node->GetWindowFlags()) &&
             !WindowHelper::IsShowWhenLocked(node->parent_->GetWindowFlags())) {
-            auto surfaceNode = node->surfaceNode_;
+            auto surfaceNode = node->leashWinSurfaceNode_ != nullptr ? node->leashWinSurfaceNode_ : node->surfaceNode_;
             if (surfaceNode) {
                 surfaceNode->SetVisible(visible);
             }
