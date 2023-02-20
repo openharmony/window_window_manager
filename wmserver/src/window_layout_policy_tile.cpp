@@ -26,7 +26,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowLayoutPolicyTile"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Tile"};
     constexpr uint32_t EDGE_INTERVAL = 48;
     constexpr uint32_t MID_INTERVAL = 24;
 }

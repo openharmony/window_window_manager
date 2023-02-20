@@ -196,7 +196,7 @@ sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRu
             break;
         }
     }
-    WLOGI("GetTopWindowfinal MainWinId:%{public}u!", mainWinId);
+    WLOGI("GetTopWindowfinal winId:%{public}u!", mainWinId);
     if (mainWinId == INVALID_WINDOW_ID) {
         WLOGFE("Cannot find topWindow!");
         return nullptr;
@@ -378,7 +378,7 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (!WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), mode)) {
-        WLOGI("window %{public}u do not support window mode: %{public}u",
+        WLOGE("window %{public}u do not support mode: %{public}u",
             property_->GetWindowId(), static_cast<uint32_t>(mode));
         return WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
     }
@@ -1318,7 +1318,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
             WLOGI("desktop window [id:%{public}u] is shown, minimize all app windows", property_->GetWindowId());
             SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(property_->GetDisplayId());
         } else {
-            WLOGI("window is already shown id: %{public}u, raise to top", property_->GetWindowId());
+            WLOGI("window is already shown id: %{public}u", property_->GetWindowId());
             SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId(), false);
         }
         // when show sub window, check its parent state
@@ -2137,16 +2137,16 @@ void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>&
     }
     bool isConsumed = false;
     if (inputEventConsumer != nullptr) {
-        WLOGI("Transfer back key event to inputEventConsumer");
+        WLOGD("Transfer back key event to inputEventConsumer");
         isConsumed = inputEventConsumer->OnInputEvent(keyEvent);
     } else if (uiContent_ != nullptr) {
-        WLOGI("Transfer back key event to uiContent");
+        WLOGD("Transfer back key event to uiContent");
         isConsumed = uiContent_->ProcessBackPressed();
     } else {
         WLOGFE("There is no back key event consumer");
     }
     if (isConsumed || !WindowHelper::IsMainWindow(property_->GetWindowType())) {
-        WLOGI("Back key event is consumed or it is not a main window");
+        WLOGD("Back key event is consumed or it is not a main window");
         return;
     }
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
@@ -2161,7 +2161,7 @@ void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>&
     } else {
         abilityContext->CloseAbility();
     }
-    WLOGI("id: %{public}u closed, to kill Ability: %{public}u",
+    WLOGD("id: %{public}u closed, to kill Ability: %{public}u",
         property_->GetWindowId(), static_cast<uint32_t>(shouldTerminateAbility));
 }
 
@@ -2169,7 +2169,7 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     int32_t keyCode = keyEvent->GetKeyCode();
     int32_t keyAction = keyEvent->GetKeyAction();
-    WLOGI("KeyCode: %{public}d, action: %{public}d", keyCode, keyAction);
+    WLOGFD("KeyCode: %{public}d, action: %{public}d", keyCode, keyAction);
     if (keyCode == MMI::KeyEvent::KEYCODE_BACK && keyAction == MMI::KeyEvent::KEY_ACTION_UP) {
         HandleBackKeyPressedEvent(keyEvent);
     } else {
@@ -2179,10 +2179,10 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
             inputEventConsumer = inputEventConsumer_;
         }
         if (inputEventConsumer != nullptr) {
-            WLOGI("Transfer key event to inputEventConsumer");
+            WLOGD("Transfer key event to inputEventConsumer");
             (void)inputEventConsumer->OnInputEvent(keyEvent);
         } else if (uiContent_ != nullptr) {
-            WLOGI("Transfer key event to uiContent");
+            WLOGD("Transfer key event to uiContent");
             (void)uiContent_->ProcessKeyEvent(keyEvent);
         } else {
             WLOGFE("There is no key event consumer");
@@ -2198,13 +2198,13 @@ void WindowImpl::HandleModeChangeHotZones(int32_t posX, int32_t posY)
 
     ModeChangeHotZones hotZones;
     auto res = SingletonContainer::Get<WindowAdapter>().GetModeChangeHotZones(property_->GetDisplayId(), hotZones);
-    WLOGI("[HotZone] Window %{public}u, Pointer[%{public}d, %{public}d]", GetWindowId(), posX, posY);
+    WLOGD("[HotZone] Window %{public}u, Pointer[%{public}d, %{public}d]", GetWindowId(), posX, posY);
     if (res == WMError::WM_OK) {
-        WLOGI("[HotZone] Fullscreen [%{public}d, %{public}d, %{public}u, %{public}u]", hotZones.fullscreen_.posX_,
+        WLOGD("[HotZone] Fullscreen [%{public}d, %{public}d, %{public}u, %{public}u]", hotZones.fullscreen_.posX_,
             hotZones.fullscreen_.posY_, hotZones.fullscreen_.width_, hotZones.fullscreen_.height_);
-        WLOGI("[HotZone] Primary [%{public}d, %{public}d, %{public}u, %{public}u]", hotZones.primary_.posX_,
+        WLOGD("[HotZone] Primary [%{public}d, %{public}d, %{public}u, %{public}u]", hotZones.primary_.posX_,
             hotZones.primary_.posY_, hotZones.primary_.width_, hotZones.primary_.height_);
-        WLOGI("[HotZone] Secondary [%{public}d, %{public}d, %{public}u, %{public}u]", hotZones.secondary_.posX_,
+        WLOGD("[HotZone] Secondary [%{public}d, %{public}d, %{public}u, %{public}u]", hotZones.secondary_.posX_,
             hotZones.secondary_.posY_, hotZones.secondary_.width_, hotZones.secondary_.height_);
 
         if (WindowHelper::IsPointInTargetRectWithBound(posX, posY, hotZones.fullscreen_)) {
@@ -2455,13 +2455,13 @@ void WindowImpl::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         inputEventConsumer = inputEventConsumer_;
     }
     if (inputEventConsumer != nullptr) {
-        WLOGI("Transfer pointer event to inputEventConsumer");
+        WLOGFD("Transfer pointer event to inputEventConsumer");
         (void)inputEventConsumer->OnInputEvent(pointerEvent);
     } else if (uiContent_ != nullptr) {
         WLOGFD("Transfer pointer event to uiContent");
         (void)uiContent_->ProcessPointerEvent(pointerEvent);
     } else {
-        WLOGE("pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
+        WLOGFW("pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
         pointerEvent->MarkProcessed();
     }
 }
@@ -2595,7 +2595,7 @@ void WindowImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallbac
 
 void WindowImpl::UpdateFocusStatus(bool focused)
 {
-    WLOGFD("window focus status: %{public}d, id: %{public}u", focused, property_->GetWindowId());
+    WLOGFD("IsFocused: %{public}d, id: %{public}u", focused, property_->GetWindowId());
     if (focused) {
         NotifyAfterFocused();
     } else {
@@ -2642,7 +2642,7 @@ void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& dis
         config.SetDensity(display->GetVirtualPixelRatio());
     }
     uiContent_->UpdateViewportConfig(config, reason);
-    WLOGFD("UpdateViewportConfig Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+    WLOGFD("Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         property_->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
 
@@ -2681,7 +2681,7 @@ void WindowImpl::UpdateWindowStateUnfrozen()
 
 void WindowImpl::UpdateWindowState(WindowState state)
 {
-    WLOGI("id: %{public}u, State to set:%{public}u", GetWindowId(), state);
+    WLOGFI("id: %{public}u, State to set:%{public}u", GetWindowId(), state);
     if (!IsWindowValid()) {
         return;
     }
@@ -3108,7 +3108,7 @@ bool WindowImpl::IsWindowValid() const
 {
     bool res = ((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM));
     if (!res) {
-        WLOGI("already destroyed or not created! id: %{public}u", GetWindowId());
+        WLOGW("already destroyed or not created! id: %{public}u", GetWindowId());
     }
     return res;
 }
