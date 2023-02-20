@@ -11,14 +11,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import("//build/ohos.gni")
-import("//foundation/window/window_manager/resources/config/windowmanager_resources.gni")
+import(
+    "//foundation/window/window_manager/resources/config/windowmanager_resources.gni")
 
 ohos_prebuilt_etc("window_manager_config") {
   if (device_name == "rk3568") {
     source = "//foundation/window/window_manager/resources/config/rk3568/window_manager_config.xml"
     install_enable = true
   } else if (window_manager_dayu210_resource_config) {
-    source = "//foundation/window/window_manager/resources/config/rk3588/window_manager_config.xml"
+    source = "./rk3588/window_manager_config.xml"
     install_enable = true
   } else {
     source = "//foundation/window/window_manager/resources/config/other/window_manager_config.xml"
@@ -34,7 +35,7 @@ ohos_prebuilt_etc("display_manager_config") {
     source = "//foundation/window/window_manager/resources/config/rk3568/display_manager_config.xml"
     install_enable = true
   } else if (window_manager_dayu210_resource_config) {
-    source = "//foundation/window/window_manager/resources/config/rk3588/display_manager_config.xml"
+    source = "./rk3588/display_manager_config.xml"
     install_enable = true
   } else {
     source = "//foundation/window/window_manager/resources/config/other/display_manager_config.xml"
