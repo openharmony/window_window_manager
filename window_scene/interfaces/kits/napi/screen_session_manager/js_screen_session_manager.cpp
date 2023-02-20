@@ -78,8 +78,13 @@ void JsScreenSessionManager::OnScreenConnect(sptr<ScreenSession>& screenSession)
     std::shared_ptr<NativeReference> callback_ = screenConnectionCallback_;
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [callback_, screenSession] (NativeEngine &engine, AsyncTask &task, int32_t status) {
-            auto jsScreenSession = JsScreenSession::Create(engine, screenSession);
-            NativeValue* argv[] = { jsScreenSession, CreateJsValue(engine, 0) };
+            NativeValue* objValue = engine.CreateObject();
+            NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
+
+            object->SetProperty("screenSession", JsScreenSession::Create(engine, screenSession));
+            object->SetProperty("screenConnectChangeType", CreateJsValue(engine, 0));
+
+            NativeValue* argv[] = { objValue };
             NativeValue* method = callback_->Get();
             if (method == nullptr) {
                 WLOGFE("Failed to get method callback from object!");
@@ -105,8 +110,13 @@ void JsScreenSessionManager::OnScreenDisconnect(sptr<ScreenSession>& screenSessi
     std::shared_ptr<NativeReference> callback_ = screenConnectionCallback_;
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [callback_, screenSession] (NativeEngine &engine, AsyncTask &task, int32_t status) {
-            auto jsScreenSession = JsScreenSession::Create(engine, screenSession);
-            NativeValue* argv[] = { jsScreenSession, CreateJsValue(engine, 1) };
+            NativeValue* objValue = engine.CreateObject();
+            NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
+
+            object->SetProperty("screenSession", JsScreenSession::Create(engine, screenSession));
+            object->SetProperty("screenConnectChangeType", CreateJsValue(engine, 1));
+
+            NativeValue* argv[] = { objValue };
             NativeValue* method = callback_->Get();
             if (method == nullptr) {
                 WLOGFE("Failed to get method callback from object!");

@@ -46,8 +46,8 @@ public:
     explicit ScreenSession(ScreenId screenId, const ScreenProperty& property);
     ~ScreenSession() = default;
 
-    void RegisterScreenChangeListener(sptr<IScreenChangeListener>& screenChangeListener);
-    void UnregisterScreenChangeListener(sptr<IScreenChangeListener>& screenChangeListener);
+    void RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
+    void UnregisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
 
     ScreenId GetScreenId();
     ScreenProperty GetScreenProperty() const;
@@ -58,8 +58,8 @@ public:
 private:
     ScreenId screenId_;
     ScreenProperty property_;
-    ScreenState screenState_{ScreenState::INIT};
-    std::vector<sptr<IScreenChangeListener>> screenChangeListenerList_;
+    ScreenState screenState_  { ScreenState::INIT };
+    std::vector<IScreenChangeListener*> screenChangeListenerList_;
 };
 } // namespace OHOS::Rosen
 

@@ -15,14 +15,11 @@
 
 #include "js_screen_session.h"
 
-#include <memory>
-#include <string>
-#include <type_traits>
-
 #include <js_runtime_utils.h>
-#include "js_screen_utils.h"
-#include "interfaces/include/ws_common.h"
 #include "window_manager_hilog.h"
+
+#include "interfaces/include/ws_common.h"
+#include "js_screen_utils.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
@@ -58,11 +55,20 @@ void JsScreenSession::Finalizer(NativeEngine* engine, void* data, void* hint)
 JsScreenSession::JsScreenSession(NativeEngine& engine, const sptr<ScreenSession>& screenSession)
     : engine_(engine), screenSession_(screenSession)
 {
-    RegisterScreenChangeListener();
 }
 
 JsScreenSession::~JsScreenSession()
 {
+}
+
+void JsScreenSession::RegisterScreenChangeListener()
+{
+    if (screenSession_ == nullptr) {
+        WLOGFE("Failed to register screen change listener, session is null!");
+        return;
+    }
+
+    screenSession_->RegisterScreenChangeListener(this);
 }
 
 NativeValue* JsScreenSession::RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info)
@@ -88,20 +94,27 @@ NativeValue* JsScreenSession::OnRegisterCallback(NativeEngine& engine, NativeCal
         return engine.CreateUndefined();
     }
 
-    NativeValue* value = info.argv[1];
-    if (!value->IsCallable()) {
+    NativeValue* callback = info.argv[1];
+    if (!callback->IsCallable()) {
         WLOGFE("Failed to register callback, callback is not callable!");
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
 
-    std::shared_ptr<NativeReference> callbackRef(engine.CreateReference(value, 1));
+    if (mCallback_.count(callbackType)) {
+        WLOGFE("Failed to register callback, callback is already existed!");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_REPEAT_OPERATION)));
+        return engine.CreateUndefined();
+    }
+
+    std::shared_ptr<NativeReference> callbackRef(engine.CreateReference(callback, 1));
     mCallback_[callbackType] = callbackRef;
+    RegisterScreenChangeListener();
 
     return engine.CreateUndefined();
 }
 
-void JsScreenSession::CallJsCallback(std::string callbackType, const ValueFunction& valueFun)
+void JsScreenSession::CallJsCallback(const std::string& callbackType)
 {
     WLOGFD("Call js callback: %{public}s.", callbackType.c_str());
     if (mCallback_.count(callbackType) == 0) {
@@ -109,84 +122,55 @@ void JsScreenSession::CallJsCallback(std::string callbackType, const ValueFuncti
         return;
     }
 
-    if (valueFun == nullptr) {
-        WLOGFE("Failed to call js callback, value function is null!");
-        return;
-    }
-
     auto jsCallbackRef = mCallback_[callbackType];
     wptr<ScreenSession> screenSessionWeak(screenSession_);
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [jsCallbackRef, valueFun] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [jsCallbackRef, callbackType, screenSessionWeak](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (jsCallbackRef == nullptr) {
+                WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
+                return;
+            }
             auto method = jsCallbackRef->Get();
-            auto value = valueFun(engine);
             if (method == nullptr) {
-                WLOGFE("Failed to get method callback from object!");
+                WLOGFE("Call js callback %{public}s failed, method is null!", callbackType.c_str());
                 return;
             }
 
-            engine.CallFunction(engine.CreateUndefined(), method, value.first, value.second);
+            if (callbackType == ON_CONNECTION_CALLBACK || callbackType == ON_DISCONNECTION_CALLBACK) {
+                auto screenSession = screenSessionWeak.promote();
+                if (screenSession == nullptr) {
+                    WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
+                    return;
+                }
+                NativeValue* argv[] =
+                    { JsScreenUtils::CreateJsScreenProperty(engine, screenSession->GetScreenProperty()) };
+                engine.CallFunction(engine.CreateUndefined(), method, argv, ArraySize(argv));
+            } else {
+                NativeValue* argv[] = { };
+                engine.CallFunction(engine.CreateUndefined(), method, argv, 0);
+            }
         }
     );
 
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsScreenSessionManager::" + callbackType,
-        engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
-}
-
-void JsScreenSession::RegisterScreenChangeListener()
-{
-    if (screenSession_ == nullptr) {
-        WLOGFE("Failed to register screen change listener, session is null!");
-        return;
-    };
-
-    sptr<IScreenChangeListener> screenChangeListener(this);
-    screenSession_->RegisterScreenChangeListener(screenChangeListener);
+    AsyncTask::Schedule("JsScreenSession::" + callbackType, engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsScreenSession::OnConnect()
 {
-    wptr<ScreenSession> screenSessionWeak(screenSession_);
-    auto valueFun = [screenSessionWeak](NativeEngine& engine) -> std::pair<NativeValue* const*, size_t> {
-        auto screenSession = screenSessionWeak.promote();
-        if (screenSession == nullptr) {
-            WLOGFE("Failed to call on connect callback, session is null!");
-            return {};
-        }
-
-        NativeValue* argv[] = { CreateJsValue(engine, static_cast<int64_t>(screenSession->GetScreenId())),
-            JsScreenUtils::CreateJsScreenProperty(engine, screenSession->GetScreenProperty()) };
-        return {argv, ArraySize(argv)};
-    };
-
-    CallJsCallback(ON_CONNECTION_CALLBACK, valueFun);
+    CallJsCallback(ON_CONNECTION_CALLBACK);
 }
 
 void JsScreenSession::OnDisconnect()
 {
-    auto valueFun = [](NativeEngine& engine) -> std::pair<NativeValue* const*, size_t> {
-        return {};
-    };
-
-    CallJsCallback(ON_DISCONNECTION_CALLBACK, valueFun);
+    CallJsCallback(ON_DISCONNECTION_CALLBACK);
 }
 
 void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty)
 {
-    wptr<ScreenSession> screenSessionWeak(screenSession_);
-    auto valueFun = [screenSessionWeak](NativeEngine& engine) -> std::pair<NativeValue* const*, size_t> {
-        auto screenSession = screenSessionWeak.promote();
-        if (screenSession == nullptr) {
-            return {};
-        }
-
-        NativeValue* argv[] = { JsScreenUtils::CreateJsScreenProperty(engine,screenSession->GetScreenProperty()) };
-        return {argv, ArraySize(argv)};
-    };
-
-    CallJsCallback(ON_PROPERTY_CHANGE_CALLBACK, valueFun);
+    CallJsCallback(ON_PROPERTY_CHANGE_CALLBACK);
 }
 
 sptr<ScreenSession> JsScreenSession::GetNativeSession() const

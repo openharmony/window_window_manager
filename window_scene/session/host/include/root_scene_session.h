@@ -16,7 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_ROOT_SCENE_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_ROOT_SCENE_SESSION_H
 
-#include "session/host/include/scene_session.h"
+#include "interfaces/include/ws_common.h"
 
 namespace OHOS::AbilityRuntime {
 class Context;
@@ -26,11 +26,11 @@ class NativeEngine;
 class NativeValue;
 
 namespace OHOS::Rosen {
-class RootSceneSession : public SceneSession {
+class RootSceneSession : public RefBase {
 public:
     using LoadContentFunc = std::function<void(const std::string&, NativeEngine*, NativeValue*,
         AbilityRuntime::Context*)>;
-    RootSceneSession();
+    RootSceneSession() = default;
     ~RootSceneSession() = default;
 
     void SetLoadContentFunc(const LoadContentFunc& loadContentFunc);
