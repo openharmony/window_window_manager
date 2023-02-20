@@ -26,7 +26,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowCommonEvent"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "CommonEvent"};
     constexpr int RETRY_MAX_COUNT = 3;
     const std::string THREAD_ID = "WindowCommonEventHandler";
 }

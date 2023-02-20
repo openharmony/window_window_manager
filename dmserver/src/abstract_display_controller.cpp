@@ -301,7 +301,7 @@ void AbstractDisplayController::ProcessDisplayRotationChange(sptr<AbstractScreen
 
 void AbstractDisplayController::ProcessDisplayCompression(sptr<AbstractScreen> absScreen)
 {
-    WLOGFI("Enter ProcessDisplayCompression");
+    WLOGFI("Enter");
     auto absDisplay = GetAbstractDisplayByAbsScreen(absScreen);
     DisplayId defaultDisplayId = GetDefaultDisplayId();
     if (absDisplay->GetId() != defaultDisplayId) {
@@ -325,7 +325,7 @@ void AbstractDisplayController::ProcessDisplayCompression(sptr<AbstractScreen> a
         WLOGFW("Invalid value for waterfall display curved area avoid size of each sides");
         return;
     }
-    WLOGFI("ProcessWaterfallCompression, sizeInPx: %{public}u", sizeInPx);
+    WLOGFI("SizeInPx: %{public}u", sizeInPx);
     Rotation rotation = absDisplay->GetRotation();
     bool isDefaultRotationVertical = mode->height_ > mode->width_ ? true : false;
     if (ScreenRotationController::IsDisplayRotationHorizontal(rotation)) {

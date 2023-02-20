@@ -27,7 +27,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WLP_Cascade"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Cascade"};
 }
 
 WindowLayoutPolicyCascade::WindowLayoutPolicyCascade(const sptr<DisplayGroupInfo>& displayGroupInfo,
@@ -346,7 +346,7 @@ void WindowLayoutPolicyCascade::ComputeRectByAspectRatio(const sptr<WindowNode>&
     }
     node->SetRequestRect(newRect);
     node->SetDecoStatus(false); // newRect is not rect with decor, reset decor status
-    WLOGI("ComputeRectByAspectRatio, winId: %{public}u, newRect: %{public}d %{public}d %{public}u %{public}u",
+    WLOGFD("WinId: %{public}u, newRect: %{public}d %{public}d %{public}u %{public}u",
         node->GetWindowId(), newRect.posX_, newRect.posY_, newRect.width_, newRect.height_);
 }
 

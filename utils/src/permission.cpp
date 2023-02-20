@@ -28,7 +28,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WMPermission"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Permission"};
 }
 
 bool Permission::IsSystemServiceCalling(bool needPrintLog)
@@ -61,7 +61,7 @@ bool Permission::CheckCallingPermission(const std::string& permission)
 
     if (Security::AccessToken::AccessTokenKit::VerifyAccessToken(IPCSkeleton::GetCallingTokenID(), permission) !=
         AppExecFwk::Constants::PERMISSION_GRANTED) {
-        WLOGI("permission denied!");
+        WLOGW("permission denied!");
         return false;
     }
     WLOGFD("permission ok!");

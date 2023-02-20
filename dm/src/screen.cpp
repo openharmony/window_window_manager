@@ -122,7 +122,7 @@ bool Screen::IsReal() const
 
 DMError Screen::SetOrientation(Orientation orientation) const
 {
-    WLOGFD("set orientation %{public}u", orientation);
+    WLOGFD("Orientation %{public}u", orientation);
     return SingletonContainer::Get<ScreenManagerAdapter>().SetOrientation(GetId(), orientation);
 }
 
