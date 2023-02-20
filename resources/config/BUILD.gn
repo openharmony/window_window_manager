@@ -12,7 +12,7 @@
 # limitations under the License.
 import("//build/ohos.gni")
 
-declares_arg() {
+declare_args() {
   window_manager_dayu210_resource_config = true
 }
 
