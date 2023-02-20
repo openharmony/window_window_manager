@@ -16,11 +16,6 @@
 #include "session/host/include/root_scene_session.h"
 
 namespace OHOS::Rosen {
-RootSceneSession::RootSceneSession()
-    : SceneSession(SessionInfo())
-{
-}
-
 void RootSceneSession::SetLoadContentFunc(const LoadContentFunc& loadContentFunc)
 {
     loadContentFunc_ = loadContentFunc;

@@ -12,11 +12,13 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+
 config("screen_session_manager_napi_public_config") {
   include_dirs = [
     "//foundation/window/window_manager/window_scene/interfaces/kits/napi",
   ]
 }
+
 ohos_shared_library("screensessionmanager_napi") {
   sources = [
     "js_screen_session_manager.cpp",
@@ -25,8 +27,9 @@ ohos_shared_library("screensessionmanager_napi") {
     "screen_session_manager_module.cpp",
   ]
 
-  public_configs = [ ":screen_session_manager_napi_public_config" ]
   cflags_cc = [ "-std=c++17" ]
+
+  public_configs = [ ":screen_session_manager_napi_public_config" ]
 
   deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",

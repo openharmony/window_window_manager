@@ -27,7 +27,6 @@
 
 namespace OHOS::Rosen {
 class JsScreenSession : public IScreenChangeListener {
-using ValueFunction = std::function<std::pair<NativeValue* const*, size_t>(NativeEngine& engine)>;
 public:
     JsScreenSession(NativeEngine& engine, const sptr<ScreenSession>& screenSession);
     ~JsScreenSession();
@@ -40,7 +39,9 @@ public:
 private:
     static NativeValue* RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info);
     NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
-    void CallJsCallback(std::string callbackType, const ValueFunction& valueFun);
+
+    void CallJsCallback(const std::string& callbackType);
+
     void RegisterScreenChangeListener();
 
     void OnConnect() override;

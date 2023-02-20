@@ -15,8 +15,6 @@
 
 #include "session_manager/include/screen_session_manager.h"
 
-#include <memory>
-
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {

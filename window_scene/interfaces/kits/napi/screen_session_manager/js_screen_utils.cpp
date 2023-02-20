@@ -16,7 +16,6 @@
 #include "js_screen_utils.h"
 
 #include <js_runtime_utils.h>
-
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -47,7 +46,7 @@ NativeValue* JsScreenUtils::CreateJsScreenProperty(NativeEngine& engine, const S
 
 NativeValue* JsScreenUtils::CreateJsRRect(NativeEngine& engine, const RRect& rrect)
 {
-    WLOGFD("Create!");
+    WLOGFD("Create.");
     auto objValue = engine.CreateObject();
     if (objValue == nullptr) {
         WLOGFE("Failed to create object!");

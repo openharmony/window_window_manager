@@ -27,7 +27,7 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property)
 {
 }
 
-void ScreenSession::RegisterScreenChangeListener(sptr<IScreenChangeListener>& screenChangeListener)
+void ScreenSession::RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener)
 {
     if (screenChangeListener == nullptr) {
         WLOGFE("Failed to register screen change listener, listener is null!");
@@ -46,7 +46,7 @@ void ScreenSession::RegisterScreenChangeListener(sptr<IScreenChangeListener>& sc
     }
 }
 
-void ScreenSession::UnregisterScreenChangeListener(sptr<IScreenChangeListener>& screenChangeListener)
+void ScreenSession::UnregisterScreenChangeListener(IScreenChangeListener* screenChangeListener)
 {
     if (screenChangeListener == nullptr) {
         WLOGFE("Failed to unregister screen change listener, listener is null!");
@@ -54,7 +54,7 @@ void ScreenSession::UnregisterScreenChangeListener(sptr<IScreenChangeListener>& 
     }
 
     screenChangeListenerList_.erase(std::remove_if(screenChangeListenerList_.begin(), screenChangeListenerList_.end(),
-        [screenChangeListener](sptr<IScreenChangeListener> listener) {
+        [screenChangeListener](IScreenChangeListener* listener) {
             return screenChangeListener == listener;
         }), screenChangeListenerList_.end());
 }
