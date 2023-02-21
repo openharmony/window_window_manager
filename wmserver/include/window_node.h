@@ -152,7 +152,7 @@ public:
     std::vector<DisplayId> showingDisplays_;
     AbilityInfo abilityInfo_;
     WindowNodeStateMachine stateMachine_;
-
+    bool isFocused_ { false };
 private:
     sptr<WindowProperty> property_ = nullptr;
     sptr<IWindow> windowToken_ = nullptr;

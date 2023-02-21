@@ -29,7 +29,7 @@
 #include "window_manager_hilog.h"
 #include "window_manager_service.h"
 #include "window_manager_agent_controller.h"
-
+#include "window_system_effect.h"
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -446,6 +446,8 @@ WMError WindowRoot::ToggleShownStateForAllAppWindows()
             if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
                 mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
                 property->SetWindowMode(mode);
+                // when change mode, need to reset shadow and radius
+                WindowSystemEffect::SetWindowEffect(windowNode);
                 windowNode->GetWindowToken()->RestoreSplitWindowMode(static_cast<uint32_t>(mode));
             }
             windowNode->GetWindowToken()->UpdateWindowState(WindowState::STATE_SHOWN);
@@ -607,7 +609,7 @@ WMError WindowRoot::BindDialogToParent(sptr<WindowNode>& node, sptr<WindowNode>&
     if (node->GetWindowType() != WindowType::WINDOW_TYPE_DIALOG) {
         return WMError::WM_OK;
     }
-    sptr<WindowNode> callerNode = FindDialogCallerNode(node->GetWindowType(), node->dialogTargetToken_);
+    sptr<WindowNode> callerNode = FindMainWindowWithToken(node->dialogTargetToken_);
     parentNode = (callerNode != nullptr) ? callerNode : nullptr;
     if (parentNode == nullptr) {
         node->GetWindowToken()->NotifyDestroy();
@@ -1179,7 +1181,7 @@ WMError WindowRoot::RaiseZOrderForAppWindow(sptr<WindowNode>& node)
             WLOGFW("window container could not be found");
             return WMError::WM_ERROR_NULLPTR;
         }
-        sptr<WindowNode> parentNode = FindDialogCallerNode(node->GetWindowType(), node->dialogTargetToken_);
+        sptr<WindowNode> parentNode = FindMainWindowWithToken(node->dialogTargetToken_);
         if (parentNode != nullptr) {
             container->RaiseZOrderForAppWindow(node, parentNode);
         }
@@ -1628,12 +1630,8 @@ WMError WindowRoot::UpdateRsTree(uint32_t windowId, bool isAdd)
     return WMError::WM_OK;
 }
 
-sptr<WindowNode> WindowRoot::FindDialogCallerNode(WindowType type, sptr<IRemoteObject> token)
+sptr<WindowNode> WindowRoot::FindMainWindowWithToken(sptr<IRemoteObject> token)
 {
-    if (type != WindowType::WINDOW_TYPE_DIALOG) {
-        return nullptr;
-    }
-
     auto iter = std::find_if(windowNodeMap_.begin(), windowNodeMap_.end(),
         [token](const std::map<uint32_t, sptr<WindowNode>>::value_type& pair) {
             if (WindowHelper::IsMainWindow(pair.second->GetWindowType())) {
@@ -1656,14 +1654,14 @@ bool WindowRoot::CheckMultiDialogWindows(WindowType type, sptr<IRemoteObject> to
 
     sptr<WindowNode> newCaller, oriCaller;
 
-    newCaller = FindDialogCallerNode(type, token);
+    newCaller = FindMainWindowWithToken(token);
     if (newCaller == nullptr) {
         return false;
     }
 
     for (auto& iter : windowNodeMap_) {
         if (iter.second->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
-            oriCaller = FindDialogCallerNode(iter.second->GetWindowType(), iter.second->dialogTargetToken_);
+            oriCaller = FindMainWindowWithToken(iter.second->dialogTargetToken_);
             if (oriCaller == newCaller) {
                 return true;
             }

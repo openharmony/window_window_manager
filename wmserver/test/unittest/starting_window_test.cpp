@@ -38,15 +38,12 @@ private:
     static sptr<WindowTransitionInfo> transitionInfo_;
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
     static sptr<RSIWindowAnimationController> animationController_;
-    static sptr<WindowNode> node_;
-    AppWindowEffectConfig effectConfig_;
+    sptr<WindowNode> node_;
     AnimationConfig animationConfig_;
-    sptr<WindowRoot> windowRoot_;
 };
 
 sptr<WindowTransitionInfo> StartingWindowTest::transitionInfo_ = nullptr;
 sptr<RSIWindowAnimationController> StartingWindowTest::animationController_ = nullptr;
-sptr<WindowNode> StartingWindowTest::node_ = nullptr;
 
 void StartingWindowTest::SetUpTestCase()
 {
@@ -68,16 +65,7 @@ void StartingWindowTest::SetUp()
     };
     node_ = StartingWindow::CreateWindowNode(transitionInfo_, 101); // 101 is windowId
     node_->SetWindowRect({0, 0, 100, 100}); // 100 test data
-    effectConfig_.fullScreenCornerRadius_ = 16.0f; // 16.f test data
-    effectConfig_.splitCornerRadius_ = 16.0f; // 16.f test data
-    effectConfig_.floatCornerRadius_ = 16.0f; // 16.f test data
-    effectConfig_.focusedShadow_ = {80, "#000000", 0, 5, 0.45};
-    effectConfig_.unfocusedShadow_ = {55, "#000000", 0, 10, 0.25};
-    StartingWindow::SetWindowSystemEffectConfig(effectConfig_);
     StartingWindow::SetAnimationConfig(animationConfig_);
-    windowRoot_ = new WindowRoot([](Event event, const sptr<IRemoteObject>& remoteObject) {});
-    ASSERT_NE(nullptr, windowRoot_);
-    StartingWindow::SetWindowRoot(windowRoot_);
     StartingWindow::transAnimateEnable_ = true;
 }
 
@@ -85,8 +73,6 @@ void StartingWindowTest::TearDown()
 {
     transitionInfo_ = nullptr;
     node_ = nullptr;
-    AppWindowEffectConfig config;
-    effectConfig_ = config;
 }
 
 RSSurfaceNode::SharedPtr StartingWindowTest::CreateRSSurfaceNode()
@@ -216,6 +202,7 @@ HWTEST_F(StartingWindowTest, DrawStartingWindow01, Function | SmallTest | Level2
     std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
     sptr<WindowNode> node = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, StartingWindow::DrawStartingWindow(node, pixelMap, 0x00FFFFFF, true));
+    usleep(10000);
 }
 
 /**
@@ -228,6 +215,7 @@ HWTEST_F(StartingWindowTest, DrawStartingWindow02, Function | SmallTest | Level2
     node_->leashWinSurfaceNode_ = nullptr;
     std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, pixelMap, 0x00FFFFFF, true));
+    usleep(10000);
 }
 
 /**
@@ -239,6 +227,7 @@ HWTEST_F(StartingWindowTest, DrawStartingWindow03, Function | SmallTest | Level2
 {
     std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, pixelMap, 0x00FFFFFF, false));
+    usleep(10000);
 }
 
 /**
@@ -251,6 +240,7 @@ HWTEST_F(StartingWindowTest, DrawStartingWindow04, Function | SmallTest | Level2
     node_->startingWinSurfaceNode_ = nullptr;
     std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, StartingWindow::DrawStartingWindow(node_, pixelMap, 0x00FFFFFF, true));
+    usleep(10000);
 }
 
 /**
@@ -261,6 +251,7 @@ HWTEST_F(StartingWindowTest, DrawStartingWindow04, Function | SmallTest | Level2
 HWTEST_F(StartingWindowTest, DrawStartingWindow05, Function | SmallTest | Level2)
 {
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, nullptr, 0x00FFFFFF, true));
+    usleep(10000);
 }
 
 /**
@@ -272,6 +263,7 @@ HWTEST_F(StartingWindowTest, DrawStartingWindow06, Function | SmallTest | Level2
 {
     std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, pixelMap, 0x00FFFFFF, true));
+    usleep(10000);
 }
 
 /**
@@ -432,60 +424,6 @@ HWTEST_F(StartingWindowTest, AddNodeOnRSTree06, Function | SmallTest | Level2)
     StartingWindow::AddNodeOnRSTree(node_, true);
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, nullptr, 0x66FFFFFF, false));
     usleep(200000);
-}
-
-/**
- * @tc.name: SetStartingWindowEffect01
- * @tc.desc: set starting window corner radius with different parameter
- * @tc.type: FUNC
- */
-HWTEST_F(StartingWindowTest, SetStartingWindowEffect01, Function | SmallTest | Level2)
-{
-    sptr<WindowNode> windowNode = nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, StartingWindow::SetStartingWindowEffect(windowNode));
-
-    // fullscreen
-    ASSERT_EQ(WMError::WM_OK, StartingWindow::SetStartingWindowEffect(node_));
-    StartingWindow::windowSystemEffectConfig_.fullScreenCornerRadius_ = -0.001f;
-    ASSERT_EQ(WMError::WM_OK, StartingWindow::SetStartingWindowEffect(node_));
-    node_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    //splitmode
-    ASSERT_EQ(WMError::WM_OK, StartingWindow::SetStartingWindowEffect(node_));
-    StartingWindow::windowSystemEffectConfig_.splitCornerRadius_ = -0.001f;
-    ASSERT_EQ(WMError::WM_OK, StartingWindow::SetStartingWindowEffect(node_));
-    //
-    node_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    ASSERT_EQ(WMError::WM_OK, StartingWindow::SetStartingWindowEffect(node_));
-    StartingWindow::windowSystemEffectConfig_.floatCornerRadius_ = -0.001f;
-    ASSERT_EQ(WMError::WM_OK, StartingWindow::SetStartingWindowEffect(node_));
-
-    node_->startingWinSurfaceNode_ = nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, StartingWindow::SetStartingWindowEffect(node_));
-    StartingWindow::SetWindowRoot(nullptr);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, StartingWindow::SetStartingWindowEffect(node_));
-}
-
-/**
- * @tc.name: SetWindowShadow
- * @tc.desc: set starting window shadow with different parameter
- * @tc.type: FUNC
- */
-HWTEST_F(StartingWindowTest, SetWindowShadow01, Function | SmallTest | Level2)
-{
-    // fullscreen
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, StartingWindow::SetWindowShadow(node_, true));
-    node_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    ASSERT_EQ(WMError::WM_OK, StartingWindow::SetWindowShadow(node_, true));
-    ASSERT_EQ(WMError::WM_OK, StartingWindow::SetWindowShadow(node_, false));
-
-    StartingWindow::windowSystemEffectConfig_.focusedShadow_.color_ = "";
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, StartingWindow::SetWindowShadow(node_, true));
-
-    StartingWindow::windowSystemEffectConfig_.focusedShadow_.elevation_ = 0.0001f;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, StartingWindow::SetWindowShadow(node_, true));
-
-    StartingWindow::SetWindowRoot(nullptr);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, StartingWindow::SetWindowShadow(node_, true));
 }
 
 /**

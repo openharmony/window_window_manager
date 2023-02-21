@@ -274,7 +274,7 @@ bool WindowManagerService::Init()
         ConfigureWindowManagerService();
         StartingWindow::SetAnimationConfig(WindowNodeContainer::GetAnimationConfigRef());
     }
-    StartingWindow::SetWindowRoot(windowRoot_);
+    WindowSystemEffect::SetWindowRoot(windowRoot_);
     WLOGI("Init success");
     return true;
 }
@@ -592,14 +592,14 @@ bool WindowManagerService::ConfigAppWindowShadow(const WindowManagerConfig::Conf
 void WindowManagerService::ConfigWindowEffect(const WindowManagerConfig::ConfigItem& effectConfig)
 {
     AppWindowEffectConfig config;
-
+    AppWindowEffectConfig systemEffectConfig;
     // config corner radius
     WindowManagerConfig::ConfigItem item = effectConfig["appWindows"]["cornerRadius"];
     if (item.IsMap()) {
         if (ConfigAppWindowCornerRadius(item["fullScreen"], config.fullScreenCornerRadius_) &&
             ConfigAppWindowCornerRadius(item["split"], config.splitCornerRadius_) &&
             ConfigAppWindowCornerRadius(item["float"], config.floatCornerRadius_)) {
-            systemConfig_.effectConfig_ = config;
+            systemEffectConfig = config;
         }
     }
 
@@ -607,17 +607,17 @@ void WindowManagerService::ConfigWindowEffect(const WindowManagerConfig::ConfigI
     item = effectConfig["appWindows"]["shadow"]["focused"];
     if (item.IsMap()) {
         if (ConfigAppWindowShadow(item, config.focusedShadow_)) {
-            systemConfig_.effectConfig_.focusedShadow_ = config.focusedShadow_;
+            systemEffectConfig.focusedShadow_ = config.focusedShadow_;
         }
     }
 
     item = effectConfig["appWindows"]["shadow"]["unfocused"];
     if (item.IsMap()) {
         if (ConfigAppWindowShadow(item, config.unfocusedShadow_)) {
-            systemConfig_.effectConfig_.unfocusedShadow_ = config.unfocusedShadow_;
+            systemEffectConfig.unfocusedShadow_ = config.unfocusedShadow_;
         }
     }
-    StartingWindow::SetWindowSystemEffectConfig(systemConfig_.effectConfig_);
+    WindowSystemEffect::SetWindowSystemEffectConfig(systemEffectConfig);
 }
 
 RSAnimationTimingCurve WindowManagerService::CreateCurve(const WindowManagerConfig::ConfigItem& curveConfig)

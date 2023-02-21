@@ -526,9 +526,7 @@ private:
     void SetSystemConfig();
     void TransformSurfaceNode(const Transform& trans);
     bool IsAppMainOrSunOrFloatingWindow();
-    WMError SetWindowCornerRadiusAccordingToSystemConfig();
     bool IsAppMainOrSubOrFloatingWindow();
-    WMError UpdateWindowShadowAccordingToSystemConfig();
     WMError WindowCreateCheck(uint32_t parentId);
     uint32_t CalculatePointerDirection(int32_t pointerX, int32_t pointerY);
     void HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);

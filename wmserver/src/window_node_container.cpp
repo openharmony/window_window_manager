@@ -38,6 +38,7 @@
 #include "window_manager_agent_controller.h"
 #include "window_manager_hilog.h"
 #include "window_manager_service.h"
+#include "window_system_effect.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
 
@@ -746,7 +747,9 @@ void WindowNodeContainer::UpdateFocusStatus(uint32_t id, bool focused)
     if (focused) {
         focusedPid_ = node->GetCallingPid();
     }
-
+    node->isFocused_ = focused;
+    // change focus window shadow
+    WindowSystemEffect::SetWindowShadow(node);
     if (node->GetCallingPid() == 0) {
         WLOGFW("focused window is starting window, no need notify");
         return;
@@ -1904,6 +1907,8 @@ void WindowNodeContainer::ReZOrderShowWhenLockedWindows(bool up)
         parentNode->children_.insert(position, needReZOrderNode);
         if (up && WindowHelper::IsSplitWindowMode(needReZOrderNode->GetWindowMode())) {
             needReZOrderNode->GetWindowProperty()->ResumeLastWindowMode();
+            // when change mode, need to reset shadow and radius
+            WindowSystemEffect::SetWindowEffect(needReZOrderNode);
             if (needReZOrderNode->GetWindowToken() != nullptr) {
                 needReZOrderNode->GetWindowToken()->UpdateWindowMode(needReZOrderNode->GetWindowMode());
             }
@@ -1948,6 +1953,8 @@ void WindowNodeContainer::RaiseShowWhenLockedWindowIfNeeded(const sptr<WindowNod
     node->parent_ = aboveAppWindowNode_;
     if (WindowHelper::IsSplitWindowMode(node->GetWindowMode())) {
         node->GetWindowProperty()->ResumeLastWindowMode();
+        // when change mode, need to reset shadow and radius
+        WindowSystemEffect::SetWindowEffect(node);
         if (node->GetWindowToken() != nullptr) {
             node->GetWindowToken()->UpdateWindowMode(node->GetWindowMode());
         }
@@ -2108,6 +2115,8 @@ WMError WindowNodeContainer::SetWindowMode(sptr<WindowNode>& node, WindowMode ds
             return res;
         }
     }
+    // when change mode, need to reset shadow and radius
+    WindowSystemEffect::SetWindowEffect(node);
     if (node->GetWindowToken() != nullptr) {
         node->GetWindowToken()->UpdateWindowMode(node->GetWindowMode());
     }
