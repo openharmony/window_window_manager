@@ -166,8 +166,11 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
 {
     std::map<uint32_t, sptr<WindowNode>> dialogWindowMap;
     for (const auto& windowNode: windowNodes) {
+        if (windowNode->GetWindowType() != WindowType::WINDOW_TYPE_DIALOG) {
+            continue;
+        }
         sptr<WindowNode> callerNode =
-            windowRoot_->FindDialogCallerNode(windowNode->GetWindowType(), windowNode->dialogTargetToken_);
+            windowRoot_->FindMainWindowWithToken(windowNode->dialogTargetToken_);
         if (callerNode != nullptr) {
             dialogWindowMap.insert(std::make_pair(callerNode->GetWindowId(), windowNode));
         }

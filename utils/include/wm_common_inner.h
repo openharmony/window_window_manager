@@ -90,36 +90,11 @@ struct ModeChangeHotZonesConfig {
     uint32_t secondaryRange_;
 };
 
-struct WindowShadowParameters {
-    float elevation_;
-    std::string color_;
-    float offsetX_;
-    float offsetY_;
-    float alpha_;
-};
-
-struct AppWindowEffectConfig {
-    float fullScreenCornerRadius_;
-    float splitCornerRadius_;
-    float floatCornerRadius_;
-
-    WindowShadowParameters focusedShadow_;
-    WindowShadowParameters unfocusedShadow_;
-
-    // defaultCornerRadiusL = 16.0vp
-    AppWindowEffectConfig() : fullScreenCornerRadius_(0.0), splitCornerRadius_(0.0), floatCornerRadius_(0.0)
-    {
-        focusedShadow_ = {0, "#000000", 0, 0, 0};
-        unfocusedShadow_ = {0, "#000000", 0, 0, 0};
-    }
-};
-
 struct SystemConfig : public Parcelable {
     bool isSystemDecorEnable_ = true;
     uint32_t decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     bool isStretchable_ = false;
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
-    AppWindowEffectConfig effectConfig_;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -132,27 +107,6 @@ struct SystemConfig : public Parcelable {
             return false;
         }
 
-        if (!parcel.WriteFloat(effectConfig_.fullScreenCornerRadius_) ||
-            !parcel.WriteFloat(effectConfig_.splitCornerRadius_) ||
-            !parcel.WriteFloat(effectConfig_.floatCornerRadius_)) {
-            return false;
-        }
-
-        if (!parcel.WriteFloat(effectConfig_.focusedShadow_.elevation_) ||
-            !parcel.WriteString(effectConfig_.focusedShadow_.color_) ||
-            !parcel.WriteFloat(effectConfig_.focusedShadow_.offsetX_) ||
-            !parcel.WriteFloat(effectConfig_.focusedShadow_.offsetY_) ||
-            !parcel.WriteFloat(effectConfig_.focusedShadow_.alpha_)) {
-            return false;
-        }
-
-        if (!parcel.WriteFloat(effectConfig_.unfocusedShadow_.elevation_) ||
-            !parcel.WriteString(effectConfig_.unfocusedShadow_.color_) ||
-            !parcel.WriteFloat(effectConfig_.unfocusedShadow_.offsetX_) ||
-            !parcel.WriteFloat(effectConfig_.unfocusedShadow_.offsetY_) ||
-            !parcel.WriteFloat(effectConfig_.unfocusedShadow_.alpha_)) {
-            return false;
-        }
         return true;
     }
 
@@ -163,19 +117,6 @@ struct SystemConfig : public Parcelable {
         config->isStretchable_ = parcel.ReadBool();
         config->decorModeSupportInfo_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
-        config->effectConfig_.fullScreenCornerRadius_ = parcel.ReadFloat();
-        config->effectConfig_.splitCornerRadius_ = parcel.ReadFloat();
-        config->effectConfig_.floatCornerRadius_ = parcel.ReadFloat();
-        config->effectConfig_.focusedShadow_.elevation_ = parcel.ReadFloat();
-        config->effectConfig_.focusedShadow_.color_ = parcel.ReadString();
-        config->effectConfig_.focusedShadow_.offsetX_ = parcel.ReadFloat();
-        config->effectConfig_.focusedShadow_.offsetY_ = parcel.ReadFloat();
-        config->effectConfig_.focusedShadow_.alpha_ = parcel.ReadFloat();
-        config->effectConfig_.unfocusedShadow_.elevation_ = parcel.ReadFloat();
-        config->effectConfig_.unfocusedShadow_.color_ = parcel.ReadString();
-        config->effectConfig_.unfocusedShadow_.offsetX_ = parcel.ReadFloat();
-        config->effectConfig_.unfocusedShadow_.offsetY_ = parcel.ReadFloat();
-        config->effectConfig_.unfocusedShadow_.alpha_ = parcel.ReadFloat();
         return config;
     }
 };

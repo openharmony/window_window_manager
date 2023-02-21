@@ -68,6 +68,7 @@ ohos_shared_library("libwms") {
     "src/window_snapshot/snapshot_controller.cpp",
     "src/window_snapshot/snapshot_proxy.cpp",
     "src/window_snapshot/snapshot_stub.cpp",
+    "src/window_system_effect.cpp",
     "src/window_zorder_policy.cpp",
     "src/zidl/ressched_report.cpp",
     "src/zidl/window_manager_stub.cpp",

@@ -21,6 +21,7 @@
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
+#include "window_system_effect.h"
 #include "surface_draw.h"
 
 namespace OHOS {
@@ -208,6 +209,8 @@ void WindowPair::Clear()
                 primary_->SetWindowSizeChangeReason(WindowSizeChangeReason::SPLIT_TO_FULL);
             }
             primary_->GetWindowProperty()->ResumeLastWindowMode();
+            // when change mode, need to reset shadow and radius
+            WindowSystemEffect::SetWindowEffect(primary_);
             primary_->GetWindowToken()->UpdateWindowMode(primary_->GetWindowMode());
         }
     }
@@ -223,6 +226,8 @@ void WindowPair::Clear()
                 secondary_->SetWindowSizeChangeReason(WindowSizeChangeReason::SPLIT_TO_FULL);
             }
             secondary_->GetWindowProperty()->ResumeLastWindowMode();
+            // when change mode, need to reset shadow and radius
+            WindowSystemEffect::SetWindowEffect(secondary_);
             secondary_->GetWindowToken()->UpdateWindowMode(secondary_->GetWindowMode());
         }
     }
@@ -386,6 +391,8 @@ void WindowPair::SwitchPosition()
     if (primary_->GetWindowMode() == secondary_->GetWindowMode() &&
         primary_->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
         primary_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+        // when change mode, need to reset shadow and radius
+        WindowSystemEffect::SetWindowEffect(primary_);
         if (primary_->GetWindowToken() != nullptr) {
             primary_->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
         }
@@ -393,6 +400,8 @@ void WindowPair::SwitchPosition()
     } else if (primary_->GetWindowMode() == secondary_->GetWindowMode() &&
         primary_->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         secondary_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+        // when change mode, need to reset shadow and radius
+        WindowSystemEffect::SetWindowEffect(secondary_);
         if (secondary_->GetWindowToken() != nullptr) {
             secondary_->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
         }
@@ -480,6 +489,8 @@ void WindowPair::HandleRemoveWindow(sptr<WindowNode>& node)
         WLOGI("Resume unpaired split related window id: %{public}u", node->GetWindowId());
         if (node->GetWindowProperty() != nullptr && node->GetWindowToken() != nullptr) {
             node->GetWindowProperty()->ResumeLastWindowMode();
+            // when change mode, need to reset shadow and radius
+            WindowSystemEffect::SetWindowEffect(node);
             node->GetWindowToken()->UpdateWindowMode(node->GetWindowMode());
         }
         // target node is not in window pair, need resume mode when remove
