@@ -16,8 +16,8 @@
 #ifndef OHOS_ROSEN_RESSCHED_REPORT_H
 #define OHOS_ROSEN_RESSCHED_REPORT_H
 
-#include "event_handler.h"
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+#include "event_handler.h"
 #include "res_sched_client.h"
 #endif
 #include "window_helper.h"
@@ -33,9 +33,19 @@ namespace {
     constexpr int32_t PERF_CLICK_NORMAL_CODE = 9;
     constexpr int32_t PERF_DRAG_CODE = 31;
     constexpr int32_t PERF_MOVE_CODE = 32;
-    constexpr int32_t PERF_SLIDE_CODE = 34;
+    constexpr int32_t PERF_SLIDE_CODE = 11;
     const std::string TASK_NAME = "SlideOff";
 }
+
+/**
+ * @brief Slide event status
+ */
+enum SlideEventStatus : int64_t {
+    SLIDE_EVENT_OFF = 0,
+    SLIDE_EVENT_ON = 1,
+    SLIDE_NORMAL_BEGIN = 3,
+    SLIDE_NORMAL_END = 4,
+};
 #endif
 
 class ResSchedReport {
@@ -99,15 +109,25 @@ class ResSchedReport {
     void TrigSlide(WindowType type, bool isOn)
     {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
-        if (type != WindowType::WINDOW_TYPE_STATUS_BAR) {
-            return;
+        if (type == WindowType::WINDOW_TYPE_STATUS_BAR) {
+            SlideNormal(isOn);
         }
+        if (type == WindowType::WINDOW_TYPE_DESKTOP) {
+            Slide(isOn);
+        }
+#endif
+    }
+private:
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    void SlideNormal(bool isOn)
+    {
         static auto lastRequestPerfTime = std::chrono::steady_clock::now();
         static auto eventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
         static auto handler = std::make_shared<AppExecFwk::EventHandler>(eventRunner);
         static auto task = []() {
             std::unordered_map<std::string, std::string> mapPayload;
-            OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(PERF_SLIDE_CODE, 1, mapPayload);
+            OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(PERF_SLIDE_CODE,
+                SlideEventStatus::SLIDE_NORMAL_END, mapPayload);
         };
         auto current = std::chrono::steady_clock::now();
         bool isTimeOut = std::chrono::duration_cast<std::chrono::milliseconds>(current - lastRequestPerfTime).
@@ -116,16 +136,37 @@ class ResSchedReport {
             handler->RemoveTask(TASK_NAME);
             lastRequestPerfTime = current;
             std::unordered_map<std::string, std::string> mapPayload;
-            OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(PERF_SLIDE_CODE, 0, mapPayload);
+            OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(PERF_SLIDE_CODE,
+                SlideEventStatus::SLIDE_NORMAL_BEGIN, mapPayload);
         }
-        if (!isTimeOut && !isOn) {
+        if (!isOn) {
+            std::unordered_map<std::string, std::string> mapPayload;
+            OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(PERF_SLIDE_CODE,
+                 SlideEventStatus::SLIDE_NORMAL_BEGIN, mapPayload);
             // 500 is the animation duration.
             handler->PostTask(task, TASK_NAME, 500, AppExecFwk::EventQueue::Priority::HIGH);
         }
-#endif
     }
-private:
-#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+
+    void Slide(bool isOn)
+    {
+        static auto lastRequestPerfTime = std::chrono::steady_clock::now();
+        auto current = std::chrono::steady_clock::now();
+        bool isTimeOut = std::chrono::duration_cast<std::chrono::milliseconds>(current - lastRequestPerfTime).
+            count() > SLIDE_PERF_TIME_OUT;
+        if (isTimeOut && isOn) {
+            lastRequestPerfTime = current;
+            std::unordered_map<std::string, std::string> mapPayload;
+            OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(PERF_SLIDE_CODE,
+                SlideEventStatus::SLIDE_EVENT_ON, mapPayload);
+        }
+        if (!isOn) {
+            std::unordered_map<std::string, std::string> mapPayload;
+            OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(PERF_SLIDE_CODE,
+                SlideEventStatus::SLIDE_EVENT_OFF, mapPayload);
+        }
+    }
+
     void RequestPerf(int32_t code, int64_t timeOut)
     {
         auto currentTime = std::chrono::steady_clock::now();
