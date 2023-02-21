@@ -708,40 +708,47 @@ void WindowManagerService::CancelStartingWindow(sptr<IRemoteObject> abilityToken
     });
 }
 
-WMError WindowManagerService::CheckAnimationPermission(const sptr<WindowProperty>& property) const
+bool WindowManagerService::CheckAnimationPermission(const sptr<WindowProperty>& property) const
 {
-    if (property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)
-        && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        WLOGFD("check animation permission failed");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    WindowType type = property->GetWindowType();
+    // If the animation type is NONE or the window type is WINDOW_TYPE_INPUT_METHOD_FLOAT
+    if (property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::NONE) ||
+        type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        return true;
     }
-    return WMError::WM_OK;
+    // If the animation type is DEFAULT and the window type is AppWindow
+    if (property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::DEFAULT) &&
+        WindowHelper::IsAppWindow(type)) {
+        return true;
+    }
+    WLOGFD("check animation permission failed");
+    return false;
 }
 
-WMError WindowManagerService::CheckSystemWindowPermission(const sptr<WindowProperty>& property) const
+bool WindowManagerService::CheckSystemWindowPermission(const sptr<WindowProperty>& property) const
 {
     WindowType type = property->GetWindowType();
     if (!WindowHelper::IsSystemWindow(type)) {
         // type is not system
-        return WMError::WM_OK;
+        return true;
     }
     if (type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT || type == WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW ||
         type == WindowType::WINDOW_TYPE_TOAST) {
         // some system types counld be created by normal app
-        return WMError::WM_OK;
+        return true;
     }
     if (type == WindowType::WINDOW_TYPE_FLOAT &&
         Permission::CheckCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
         // WINDOW_TYPE_FLOAT counld be created by normal app with the corresponding permission
         WLOGFD("check create permission success, normal app create float window with request permission.");
-        return WMError::WM_OK;
+        return true;
     }
     if (Permission::IsSystemCalling() || Permission::IsStartByHdcd()) {
         WLOGFD("check create permission success, create with system calling.");
-        return WMError::WM_OK;
+        return true;
     }
     WLOGFE("check system window permission failed.");
-    return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    return false;
 }
 
 WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
@@ -751,7 +758,7 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
         WLOGFE("window is invalid");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (CheckSystemWindowPermission(property) != WMError::WM_OK) {
+    if (!CheckSystemWindowPermission(property)) {
         WLOGFE("create system window permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -771,10 +778,9 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
         WLOGFE("property is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (CheckSystemWindowPermission(property) != WMError::WM_OK ||
-        CheckAnimationPermission(property) != WMError::WM_OK) {
+    if (!CheckSystemWindowPermission(property) || !CheckAnimationPermission(property)) {
         WLOGFE("add window permission denied!");
-        return WMError::WM_ERROR_INVALID_PERMISSION;
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     return PostSyncTask([this, &property]() {
         windowShowPerformReport_->start();

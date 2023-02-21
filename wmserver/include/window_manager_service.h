@@ -145,8 +145,8 @@ private:
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     WMError GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken);
-    WMError CheckSystemWindowPermission(const sptr<WindowProperty>& property) const;
-    WMError CheckAnimationPermission(const sptr<WindowProperty>& property) const;
+    bool CheckSystemWindowPermission(const sptr<WindowProperty>& property) const;
+    bool CheckAnimationPermission(const sptr<WindowProperty>& property) const;
     void ConfigureWindowManagerService();
     void PostVoidSyncTask(Task task);
     template<typename SyncTask, typename Return = std::invoke_result_t<SyncTask>>
