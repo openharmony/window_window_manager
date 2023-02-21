@@ -222,6 +222,22 @@ private:
     bool IsSplitRelated(sptr<WindowNode>& node) const;
 
     /**
+     * @brief Check Z order for window node form pair.
+     *
+     * @return the Z order of window form pair
+     */
+    void CheckOrderedPairZorder(
+        sptr<WindowNode>& node, bool& hasPrimaryDialog, bool& hasSecondaryDialog, bool& isPrimaryAbove);
+
+    /**
+     * @brief Create all window node form pair.
+     *
+     * @return the list window form pair
+     */
+    std::vector<sptr<WindowNode>> CreateOrderedPair(
+        sptr<WindowNode>& bottom, sptr<WindowNode>& mid, sptr<WindowNode>& top);
+
+    /**
      * @brief Replace paired window.
      *
      * @param node current node
