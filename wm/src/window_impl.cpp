@@ -1644,7 +1644,6 @@ WMError WindowImpl::SetPrivacyMode(bool isPrivacyMode)
 {
     WLOGFD("id : %{public}u, SetPrivacyMode", GetWindowId());
     property_->SetPrivacyMode(isPrivacyMode);
-    surfaceNode_->SetSecurityLayer(isPrivacyMode || property_->GetSystemPrivacyMode());
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
 }
 
@@ -1655,8 +1654,9 @@ bool WindowImpl::IsPrivacyMode() const
 
 void WindowImpl::SetSystemPrivacyMode(bool isSystemPrivacyMode)
 {
+    WLOGFD("id : %{public}u, SetSystemPrivacyMode", GetWindowId());
     property_->SetSystemPrivacyMode(isSystemPrivacyMode);
-    surfaceNode_->SetSecurityLayer(isSystemPrivacyMode || property_->GetPrivacyMode());
+    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
 }
 
 WMError WindowImpl::SetSnapshotSkip(bool isSkip)
@@ -1666,6 +1666,7 @@ WMError WindowImpl::SetSnapshotSkip(bool isSkip)
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     surfaceNode_->SetSecurityLayer(isSkip || property_->GetSystemPrivacyMode());
+    RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
 }
 

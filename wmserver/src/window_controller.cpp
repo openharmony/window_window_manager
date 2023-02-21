@@ -1337,7 +1337,11 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
-            node->GetWindowProperty()->SetPrivacyMode(property->GetPrivacyMode());
+            bool isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
+            node->GetWindowProperty()->SetPrivacyMode(isPrivacyMode);
+            node->GetWindowProperty()->SetSystemPrivacyMode(isPrivacyMode);
+            node->surfaceNode_->SetSecurityLayer(isPrivacyMode);
+            RSTransaction::FlushImplicitTransaction();
             UpdatePrivateStateAndNotify(node);
             break;
         }
