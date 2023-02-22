@@ -27,7 +27,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "InputWindowMonitor"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "InputMonitor"};
 }
 static inline void convertRectsToMmiRects(const std::vector<Rect>& rects, std::vector<MMI::Rect>& mmiRects)
 {
@@ -153,10 +153,10 @@ void InputWindowMonitor::TransformWindowRects(const sptr<WindowNode>& windowNode
         for (Rect& rect : pointerHotAreas) {
             rect = WindowHelper::TransformRect(windowNode->GetWindowProperty()->GetTransformMat(), rect);
         }
-        WLOGI("Area rect before tranform: [%{public}d, %{public}d, %{public}u, %{public}u]",
+        WLOGD("Area rect before tranform: [%{public}d, %{public}d, %{public}u, %{public}u]",
             areaRect.posX_, areaRect.posY_, areaRect.width_, areaRect.height_);
         areaRect = WindowHelper::TransformRect(windowNode->GetWindowProperty()->GetTransformMat(), areaRect);
-        WLOGI("Area rect after tranform: [%{public}d, %{public}d, %{public}u, %{public}u]",
+        WLOGD("Area rect after tranform: [%{public}d, %{public}d, %{public}u, %{public}u]",
             areaRect.posX_, areaRect.posY_, areaRect.width_, areaRect.height_);
     }
 }

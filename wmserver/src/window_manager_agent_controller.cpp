@@ -20,7 +20,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WMAC"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerAgentController"};
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerAgentController)
 
@@ -68,7 +68,7 @@ void WindowManagerAgentController::NotifyAccessibilityWindowInfo(
 void WindowManagerAgentController::UpdateWindowVisibilityInfo(
     const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos)
 {
-    WLOGFD("UpdateWindowVisibilityInfo size:%{public}zu", windowVisibilityInfos.size());
+    WLOGFD("Size:%{public}zu", windowVisibilityInfos.size());
     for (auto& agent : wmAgentContainer_.GetAgentsByType(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY)) {
         agent->UpdateWindowVisibilityInfo(windowVisibilityInfos);

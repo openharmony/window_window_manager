@@ -238,7 +238,6 @@ sptr<ScreenGroup> ScreenManager::Impl::GetScreenGroup(ScreenId screenId)
     }
     auto iter = screenGroupMap_.find(screenId);
     if (iter != screenGroupMap_.end() && iter->second != nullptr) {
-        WLOGFI("get screenGroup in screenGroup map");
         iter->second->UpdateScreenGroupInfo(screenGroupInfo);
         return iter->second;
     }
