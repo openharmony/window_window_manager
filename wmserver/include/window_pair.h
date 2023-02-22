@@ -212,6 +212,11 @@ public:
      */
     std::vector<int32_t> GetSplitRatioPoints();
 
+    /**
+     * @brief is during split.
+     * @return true means existing recent or status is not PARI_DONE.
+     */
+    bool IsDuringSplit();
 private:
     /**
      * @brief Gets whether the window is related to split window.

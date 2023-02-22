@@ -35,6 +35,7 @@ const std::map<std::string, WindowManagerConfig::ValueType> WindowManagerConfig:
     { "defaultWindowMode",                            WindowManagerConfig::ValueType::INTS },
     { "floatingBottomPosY",                           WindowManagerConfig::ValueType::INTS },
     { "defaultFloatingWindow",                        WindowManagerConfig::ValueType::INTS },
+    { "maxMainFloatingWindowNumber",                  WindowManagerConfig::ValueType::INTS },
     { "windowAnimation",                              WindowManagerConfig::ValueType::MAP },
     { "keyboardAnimation",                            WindowManagerConfig::ValueType::MAP },
     { "timing",                                       WindowManagerConfig::ValueType::MAP },
@@ -67,6 +68,7 @@ const std::map<std::string, WindowManagerConfig::ValueType> WindowManagerConfig:
     { "minimizeByOther",                              WindowManagerConfig::ValueType::UNDIFINED },
     { "stretchable",                                  WindowManagerConfig::ValueType::UNDIFINED },
     { "remoteAnimation",                              WindowManagerConfig::ValueType::UNDIFINED },
+    { "configMainFloatingWindowAbove",                WindowManagerConfig::ValueType::UNDIFINED },
 };
 
 std::vector<std::string> WindowManagerConfig::SplitNodeContent(const xmlNodePtr& node, const std::string& pattern)
