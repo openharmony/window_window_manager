@@ -1183,8 +1183,8 @@ NativeValue* JsWindow::OnGetProperties(NativeEngine& engine, NativeCallbackInfo&
                 task.Reject(engine, CreateJsError(engine,
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "Window get properties failed"));
             }
-            WLOGFD("Window [%{public}u, %{public}s] get properties end, objValue = %{public}p",
-                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), objValue);
+            WLOGFD("Window [%{public}u, %{public}s] get properties end",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
 
     NativeValue* lastParam = (info.argc == 0) ? nullptr :
@@ -1205,8 +1205,8 @@ NativeValue* JsWindow::OnGetWindowPropertiesSync(NativeEngine& engine, NativeCal
         return engine.CreateUndefined();
     }
     auto objValue = CreateJsWindowPropertiesObject(engine, window);
-    WLOGI("Window [%{public}u, %{public}s] get properties end, objValue = %{public}p",
-        window->GetWindowId(), window->GetWindowName().c_str(), objValue);
+    WLOGI("Window [%{public}u, %{public}s] get properties end",
+        window->GetWindowId(), window->GetWindowName().c_str());
     if (objValue != nullptr) {
         return objValue;
     } else {
@@ -1244,8 +1244,8 @@ NativeValue* JsWindow::OnRegisterWindowCallback(NativeEngine& engine, NativeCall
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
         return engine.CreateUndefined();
     }
-    WLOGI("Register end, window [%{public}u, %{public}s], type = %{public}s, callback = %{public}p",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), cbType.c_str(), value);
+    WLOGI("Register end, window [%{public}u, %{public}s], type = %{public}s",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), cbType.c_str());
     return engine.CreateUndefined();
 }
 
@@ -1280,8 +1280,8 @@ NativeValue* JsWindow::OnUnregisterWindowCallback(NativeEngine& engine, NativeCa
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
         return engine.CreateUndefined();
     }
-    WLOGI("Unregister end, window [%{public}u, %{public}s], type = %{public}s, callback = %{public}p",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), cbType.c_str(), value);
+    WLOGI("Unregister end, window [%{public}u, %{public}s], type = %{public}s",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), cbType.c_str());
     return engine.CreateUndefined();
 }
 

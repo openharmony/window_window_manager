@@ -658,7 +658,7 @@ NativeValue* JsWindowManager::OnRegisterWindowManagerCallback(NativeEngine& engi
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
         return engine.CreateUndefined();
     }
-    WLOGI("Register end, type = %{public}s, callback = %{public}p", cbType.c_str(), value);
+    WLOGI("Register end, type = %{public}s", cbType.c_str());
     return engine.CreateUndefined();
 }
 
@@ -693,7 +693,7 @@ NativeValue* JsWindowManager::OnUnregisterWindowManagerCallback(NativeEngine& en
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
         return engine.CreateUndefined();
     }
-    WLOGI("Unregister end, type = %{public}s, callback = %{public}p", cbType.c_str(), value);
+    WLOGI("Unregister end, type = %{public}s", cbType.c_str());
     return engine.CreateUndefined();
 }
 
@@ -760,7 +760,7 @@ NativeValue* JsWindowManager::OnGetTopWindow(NativeEngine& engine, NativeCallbac
         GetNativeContext(engine, nativeContext, contextPtr, errCode);
     }
 
-    WLOGI("Context %{public}p, err %{public}u", contextPtr, errCode);
+    WLOGI("err %{public}u", errCode);
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (errCode != WMError::WM_OK) {
