@@ -57,7 +57,7 @@ void WindowFrameTraceImpl::VsyncStartFrameTrace()
         }
     }
 }
- 
+
 void WindowFrameTraceImpl::VsyncStopFrameTrace()
 {
     if (!AccessFrameTrace()) {
