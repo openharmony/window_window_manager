@@ -236,8 +236,8 @@ NativeValue* JsWindowStage::OnEvent(NativeEngine& engine, NativeCallbackInfo& in
         return engine.CreateUndefined();
     }
     g_listenerManager->RegisterListener(window, eventString, CaseType::CASE_STAGE, engine, value);
-    WLOGI("[NAPI]Window [%{public}u, %{public}s] register event %{public}s, callback %{public}p",
-        window->GetWindowId(), window->GetWindowName().c_str(), eventString.c_str(), value);
+    WLOGI("[NAPI]Window [%{public}u, %{public}s] register event %{public}s",
+        window->GetWindowId(), window->GetWindowName().c_str(), eventString.c_str());
 
     return engine.CreateUndefined();
 }
@@ -287,8 +287,8 @@ NativeValue* JsWindowStage::OffEvent(NativeEngine& engine, NativeCallbackInfo& i
             g_listenerManager->UnregisterListener(window, eventString, CaseType::CASE_STAGE, nullptr);
         }
     }
-    WLOGI("[NAPI]Window [%{public}u, %{public}s] unregister event %{public}s, callback %{public}p",
-        window->GetWindowId(), window->GetWindowName().c_str(), eventString.c_str(), value);
+    WLOGI("[NAPI]Window [%{public}u, %{public}s] unregister event %{public}s",
+        window->GetWindowId(), window->GetWindowName().c_str(), eventString.c_str());
 
     return engine.CreateUndefined();
 }
