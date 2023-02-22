@@ -30,7 +30,7 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Js_WM"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowManager"};
 }
 
 JsWindowManager::JsWindowManager() : registerManager_(std::make_unique<JsWindowRegisterManager>())
@@ -863,7 +863,7 @@ NativeValue* JsWindowManager::OnSetWindowLayoutMode(NativeEngine& engine, Native
                 SingletonContainer::Get<WindowManager>().SetWindowLayoutMode(winLayoutMode));
             if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
-                WLOGI("SetWindowLayoutMode success");
+                WLOGD("SetWindowLayoutMode success");
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "SetWindowLayoutMode failed"));
             }

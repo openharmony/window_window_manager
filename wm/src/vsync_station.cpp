@@ -140,7 +140,7 @@ void VsyncStation::OnVsync(int64_t timestamp, void* client)
 
 void VsyncStation::OnVsyncTimeOut()
 {
-    WLOGI("Vsync time out");
+    WLOGW("Vsync time out");
     std::lock_guard<std::mutex> lock(mtx_);
     hasRequestedVsync_ = false;
 }

@@ -882,7 +882,7 @@ DMError AbstractScreenController::MakeMirror(ScreenId screenId, std::vector<Scre
         WLOGFE("screen is nullptr, or screenType is not real.");
         return DMError::DM_ERROR_NULLPTR;
     }
-    WLOGFI("GetAbstractScreenGroup start");
+    WLOGFD("GetAbstractScreenGroup start");
     auto group = GetAbstractScreenGroup(screen->groupDmsId_);
     if (group == nullptr) {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -896,7 +896,7 @@ DMError AbstractScreenController::MakeMirror(ScreenId screenId, std::vector<Scre
             abstractScreenCallback_->onConnect_(screen);
         }
     }
-    WLOGFI("GetAbstractScreenGroup end");
+    WLOGFD("GetAbstractScreenGroup end");
     Point point;
     std::vector<Point> startPoints;
     startPoints.insert(startPoints.begin(), screens.size(), point);
@@ -917,13 +917,13 @@ void AbstractScreenController::ChangeScreenGroup(sptr<AbstractScreenGroup> group
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (uint64_t i = 0; i != screens.size(); i++) {
         ScreenId screenId = screens[i];
-        WLOGFI("ChangeScreenGroup: screenId: %{public}" PRIu64"", screenId);
+        WLOGFI("ScreenId: %{public}" PRIu64"", screenId);
         auto screen = GetAbstractScreen(screenId);
         if (screen == nullptr) {
             WLOGFE("screen:%{public}" PRIu64" is nullptr", screenId);
             continue;
         }
-        WLOGFI("ChangeScreenGroup: screen->groupDmsId_: %{public}" PRIu64"", screen->groupDmsId_);
+        WLOGFI("Screen->groupDmsId_: %{public}" PRIu64"", screen->groupDmsId_);
         if (filterScreen && screen->groupDmsId_ == group->dmsId_ && group->HasChild(screen->dmsId_)) {
             continue;
         }
@@ -958,15 +958,15 @@ void AbstractScreenController::AddScreenToGroup(sptr<AbstractScreenGroup> group,
         bool addChildRes = group->AddChild(screen, expandPoint);
         if (removeChildResMap[screenId] && addChildRes) {
             changeGroup.emplace_back(screen->ConvertToScreenInfo());
-            WLOGFI("changeGroup");
+            WLOGFD("changeGroup");
         } else if (removeChildResMap[screenId]) {
-            WLOGFI("removeChild");
+            WLOGFD("removeChild");
             removeFromGroup.emplace_back(screen->ConvertToScreenInfo());
         } else if (addChildRes) {
-            WLOGFI("AddChild");
+            WLOGFD("AddChild");
             addToGroup.emplace_back(screen->ConvertToScreenInfo());
         } else {
-            WLOGFI("default, AddChild failed");
+            WLOGFD("default, AddChild failed");
         }
         if (abstractScreenCallback_ != nullptr) {
             abstractScreenCallback_->onConnect_(screen);

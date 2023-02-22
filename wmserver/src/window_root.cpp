@@ -33,7 +33,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowRoot"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Root"};
 }
 
 uint32_t WindowRoot::GetTotalWindowNum() const
@@ -171,7 +171,7 @@ sptr<WindowNode> WindowRoot::FindWindowNodeWithToken(const sptr<IRemoteObject>& 
             return false;
         });
     if (iter == windowNodeMap_.end()) {
-        WLOGI("cannot find windowNode");
+        WLOGE("cannot find windowNode");
         return nullptr;
     }
     return iter->second;
@@ -189,11 +189,11 @@ void WindowRoot::AddDeathRecipient(sptr<WindowNode> node)
     windowIdMap_.insert(std::make_pair(remoteObject, node->GetWindowId()));
 
     if (windowDeath_ == nullptr) {
-        WLOGI("failed to create death Recipient ptr WindowDeathRecipient");
+        WLOGE("failed to create death Recipient ptr WindowDeathRecipient");
         return;
     }
     if (!remoteObject->AddDeathRecipient(windowDeath_)) {
-        WLOGI("failed to add death recipient");
+        WLOGE("failed to add death recipient");
     }
 }
 
@@ -470,7 +470,7 @@ void WindowRoot::DestroyLeakStartingWindow()
         }
     }
     for (auto& id : destroyIds) {
-        WLOGI("Destroy Window id:%{public}u", id);
+        WLOGFD("Id:%{public}u", id);
         DestroyWindow(id, false);
     }
 }
@@ -479,7 +479,7 @@ WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<Window
     sptr<WindowNodeContainer>& container)
 {
     if (!node->currentVisibility_) {
-        WLOGI("window is invisible, do not need process");
+        WLOGW("window is invisible, do not need process");
         return WMError::WM_DO_NOTHING;
     }
     if (WindowHelper::IsSubWindow(node->GetWindowType())) {
@@ -577,7 +577,7 @@ void WindowRoot::GetAllAnimationPlayingNodes(std::vector<wptr<WindowNode>>& wind
             if (!WindowHelper::IsMainWindow(it.second->GetWindowType())) {
                 continue;
             }
-            WLOGI("id:%{public}u state:%{public}u",
+            WLOGFD("id:%{public}u state:%{public}u",
                 it.second->GetWindowId(), static_cast<uint32_t>(it.second->stateMachine_.GetCurrentState()));
             if (it.second->stateMachine_.IsRemoteAnimationPlaying() ||
                 it.second->stateMachine_.GetAnimationCount() > 0) {
@@ -779,12 +779,12 @@ void WindowRoot::SetBrightness(uint32_t windowId, float brightness)
         return;
     }
     if (!WindowHelper::IsAppWindow(node->GetWindowType())) {
-        WLOGI("non app window does not support set brightness");
+        WLOGW("Only app window support set brightness");
         return;
     }
     if (windowId == container->GetActiveWindow()) {
         if (container->GetDisplayBrightness() != brightness) {
-            WLOGI("value: %{public}u", container->ToOverrideBrightness(brightness));
+            WLOGFI("value: %{public}u", container->ToOverrideBrightness(brightness));
             DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
                 container->ToOverrideBrightness(brightness));
             container->SetDisplayBrightness(brightness);
@@ -826,7 +826,7 @@ void WindowRoot::UpdateFocusableProperty(uint32_t windowId)
     }
     auto nextFocusableWindow = container->GetNextFocusableWindow(windowId);
     if (nextFocusableWindow != nullptr) {
-        WLOGI("adjust focus window, next focus window id: %{public}u", nextFocusableWindow->GetWindowId());
+        WLOGI("Next focus window id: %{public}u", nextFocusableWindow->GetWindowId());
         container->SetFocusWindow(nextFocusableWindow->GetWindowId());
     }
 }
@@ -842,7 +842,7 @@ WMError WindowRoot::SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode)
     auto res = container->SetWindowMode(node, dstMode);
     if (res == WMError::WM_OK
         && (WindowHelper::IsSplitWindowMode(curWinMode) || WindowHelper::IsSplitWindowMode(dstMode))) {
-        WLOGI("SwitchRender: split mode changed");
+        WLOGD("SwitchRender, split mode changed");
         SwitchRenderModeIfNeeded();
     }
     if (WindowHelper::IsRotatableWindow(node->GetWindowType(), node->GetWindowMode())) {
@@ -957,7 +957,7 @@ WMError WindowRoot::DestroyWindowInner(sptr<WindowNode>& node)
     sptr<IWindow> window = node->GetWindowToken();
     if ((window != nullptr) && (window->AsObject() != nullptr)) {
         if (windowIdMap_.count(window->AsObject()) == 0) {
-            WLOGI("window remote object has been destroyed");
+            WLOGE("window remote object has been destroyed");
             return WMError::WM_ERROR_DESTROYED_OBJECT;
         }
 
@@ -967,7 +967,7 @@ WMError WindowRoot::DestroyWindowInner(sptr<WindowNode>& node)
         windowIdMap_.erase(window->AsObject());
     }
     windowNodeMap_.erase(node->GetWindowId());
-    WLOGI("destroy window node use_count:%{public}d", node->GetSptrRefCount());
+    WLOGI("destroy window use_count:%{public}d", node->GetSptrRefCount());
     return WMError::WM_OK;
 }
 
@@ -1046,7 +1046,7 @@ void WindowRoot::UpdateActiveWindowWithWindowRemoved(const sptr<WindowNode>& nod
     }
     auto nextActiveWindow = container->GetNextActiveWindow(windowId);
     if (nextActiveWindow != nullptr) {
-        WLOGI("adjust active window, next active window id: %{public}u", nextActiveWindow->GetWindowId());
+        WLOGI("Next active window id: %{public}u", nextActiveWindow->GetWindowId());
         container->SetActiveWindow(nextActiveWindow->GetWindowId(), true);
     }
 }
@@ -1058,7 +1058,7 @@ void WindowRoot::UpdateBrightnessWithWindowRemoved(uint32_t windowId, const sptr
         return;
     }
     if (windowId == container->GetBrightnessWindow()) {
-        WLOGI("adjust brightness window with active window: %{public}u", container->GetActiveWindow());
+        WLOGFD("winId: %{public}u", container->GetActiveWindow());
         container->UpdateBrightness(container->GetActiveWindow(), true);
     }
 }
@@ -1344,7 +1344,6 @@ void WindowRoot::ProcessExpandDisplayCreate(DisplayId defaultDisplayId, sptr<Dis
         return;
     }
 
-    WLOGI("before add new display, displayId: %{public}" PRIu64"", displayId);
     container->GetDisplayGroupController()->ProcessDisplayCreate(defaultDisplayId, displayInfo, displayRectMap);
     container->GetDisplayGroupController()->SetSplitRatioConfig(splitRatioConfig_);
     WLOGI("Container exist, add new display, displayId: %{public}" PRIu64"", displayId);
@@ -1600,7 +1599,7 @@ void WindowRoot::RemoveSingleUserWindowNodes(int accountId)
     for (auto id : displayIds) {
         sptr<WindowNodeContainer> container = GetOrCreateWindowNodeContainer(id);
         if (container == nullptr) {
-            WLOGI("get container failed %{public}" PRIu64"", id);
+            WLOGW("get container failed %{public}" PRIu64"", id);
             continue;
         }
         container->RemoveSingleUserWindowNodes(accountId);

@@ -140,7 +140,7 @@ void DisplayManagerService::ConfigureWaterfallDisplayCompressionParams()
 void DisplayManagerService::RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener)
 {
     displayChangeListener_ = listener;
-    WLOGFI("IDisplayChangeListener registered");
+    WLOGFD("IDisplayChangeListener registered");
 }
 
 void DisplayManagerService::RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener)
@@ -171,7 +171,7 @@ void DisplayManagerService::NotifyDisplayStateChange(DisplayId defaultDisplayId,
     const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
     DisplayId id = (displayInfo == nullptr) ? DISPLAY_ID_INVALID : displayInfo->GetDisplayId();
-    WLOGFI("DisplayId %{public}" PRIu64"", id);
+    WLOGFD("DisplayId %{public}" PRIu64"", id);
     if (displayChangeListener_ != nullptr) {
         displayChangeListener_->OnDisplayStateChange(defaultDisplayId, displayInfo, displayInfoMap, type);
     }
@@ -537,7 +537,7 @@ void DisplayManagerService::RemoveVirtualScreenFromGroup(std::vector<ScreenId> s
 void DisplayManagerService::UpdateRSTree(DisplayId displayId, DisplayId parentDisplayId,
     std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd, bool isMultiDisplay)
 {
-    WLOGFI("UpdateRSTree, currentDisplayId: %{public}" PRIu64", isAdd: %{public}d, isMultiDisplay: %{public}d, "
+    WLOGFD("UpdateRSTree, currentDisplayId: %{public}" PRIu64", isAdd: %{public}d, isMultiDisplay: %{public}d, "
         "parentDisplayId: %{public}" PRIu64"", displayId, isAdd, isMultiDisplay, parentDisplayId);
     ScreenId screenId = GetScreenIdByDisplayId(displayId);
     ScreenId parentScreenId = GetScreenIdByDisplayId(parentDisplayId);
@@ -607,7 +607,7 @@ DMError DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds,
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     if (expandScreenIds.empty() || startPoints.empty() || expandScreenIds.size() != startPoints.size()) {
-        WLOGFI("create expand fail, input params is invalid. "
+        WLOGFE("create expand fail, input params is invalid. "
             "screenId vector size :%{public}ud, startPoint vector size :%{public}ud",
             static_cast<uint32_t>(expandScreenIds.size()), static_cast<uint32_t>(startPoints.size()));
         return DMError::DM_ERROR_INVALID_PARAM;

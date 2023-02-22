@@ -22,7 +22,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowInputChannel"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "InputChannel"};
 }
 WindowInputChannel::WindowInputChannel(const sptr<Window>& window): window_(window), isAvailable_(true)
 {
@@ -58,12 +58,12 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
 #ifdef IMF_ENABLE
     bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
     if (isKeyboardEvent) {
-        WLOGFI("dispatch keyEvent to input method");
+        WLOGD("dispatch keyEvent to input method");
         inputMethodHasProcessed = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent);
     }
 #endif // IMF_ENABLE
     if (!inputMethodHasProcessed) {
-        WLOGI("dispatch keyEvent to ACE");
+        WLOGD("dispatch keyEvent to ACE");
         window_->ConsumeKeyEvent(keyEvent);
     }
 }
