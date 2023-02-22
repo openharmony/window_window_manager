@@ -367,6 +367,17 @@ void WindowManagerService::ConfigureWindowManagerService()
             WindowLayoutPolicy::SetCascadeRectBottomPosYLimit(static_cast<uint32_t>(numbers[0]));
         }
     }
+    item = config["configMainFloatingWindowAbove"].GetProp("enable");
+    if (item.IsBool()) {
+        WindowNodeContainer::SetConfigMainFloatingWindowAbove(item.boolValue_);
+    }
+    item = config["maxMainFloatingWindowNumber"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1 && numbers[0] > 0) {
+            WindowNodeContainer::SetMaxMainFloatingWindowNumber(static_cast<uint32_t>(numbers[0]));
+        }
+    }
 }
 
 void WindowManagerService::ConfigHotZones(const std::vector<int>& numbers)

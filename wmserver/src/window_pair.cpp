@@ -583,5 +583,25 @@ std::vector<int32_t> WindowPair::GetSplitRatioPoints()
 {
     return splitRatioPoints_;
 }
+
+bool WindowPair::IsDuringSplit()
+{
+    if (status_ == WindowPairStatus::EMPTY) {
+        return false;
+    }
+
+    if (status_ != WindowPairStatus::PAIRED_DONE || primary_ == nullptr || secondary_ == nullptr) {
+        WLOGFD("missing pairWindows or split status is %{public}u not done", status_);
+        return true;
+    }
+
+    if (primary_->GetWindowType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT ||
+        secondary_->GetWindowType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) {
+        WLOGFD("split is done, but there is recent");
+        return true;
+    }
+
+    return false;
+}
 } // namespace Rosen
 } // namespace OHOS
