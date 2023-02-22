@@ -503,6 +503,7 @@ WMError WindowController::DestroyWindow(uint32_t windowId, bool onlySelf)
 {
     DisplayId displayId = DISPLAY_ID_INVALID;
     auto node = windowRoot_->GetWindowNode(windowId);
+    sptr<WindowNode> parent = node->parent_;
     if (node == nullptr) {
         WLOGFE("Destroy window %{public}u failed.", windowId);
         return WMError::WM_ERROR_NULLPTR;
@@ -511,6 +512,12 @@ WMError WindowController::DestroyWindow(uint32_t windowId, bool onlySelf)
     WMError res = windowRoot_->DestroyWindow(windowId, onlySelf);
     if (res != WMError::WM_OK) {
         return res;
+    }
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+        if ((parent != nullptr) && WindowHelper::IsSplitWindowMode(parent->GetWindowMode())) {
+            auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
+            windowNodeContainer->RaiseSplitRelatedWindowToTop(parent);
+        }
     }
     windowRoot_->FocusFaultDetection();
     FlushWindowInfoWithDisplayId(displayId);

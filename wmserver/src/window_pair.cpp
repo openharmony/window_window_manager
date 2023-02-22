@@ -250,35 +250,89 @@ bool WindowPair::IsSplitRelated(sptr<WindowNode>& node) const
         (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE);
 }
 
+void WindowPair::CheckOrderedPairZorder(
+    sptr<WindowNode>& node, bool& hasPrimaryDialog, bool& hasSecondaryDialog, bool& isPrimaryAbove)
+{
+    if (primary_ != nullptr) {
+        for (auto& child : primary_->children_) {
+            if (child->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+                // secondary divider primary
+                hasPrimaryDialog = true;
+                isPrimaryAbove = true;
+                break;
+            }
+        }
+    }
+    if (secondary_ != nullptr) {
+        for (auto& child : secondary_->children_) {
+            if (child->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+                // primary divider secondary
+                hasSecondaryDialog = true;
+                isPrimaryAbove = false;
+                break;
+            }
+        }
+    }
+    if (node->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
+        node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        // primary secondary divider
+        isPrimaryAbove = false;
+    } else if (node->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
+        // secondary primary divider
+        isPrimaryAbove = true;
+    }
+
+    return;
+}
+
+std::vector<sptr<WindowNode>> WindowPair::CreateOrderedPair(
+    sptr<WindowNode>& bottom, sptr<WindowNode>& mid, sptr<WindowNode>& top)
+{
+    std::vector<sptr<WindowNode>> orderedPair;
+
+    if (bottom != nullptr) {
+        orderedPair.push_back(bottom);
+    }
+    if (mid != nullptr) {
+        orderedPair.push_back(mid);
+    }
+    if (top != nullptr) {
+        orderedPair.push_back(top);
+    }
+
+    return orderedPair;
+}
+
 std::vector<sptr<WindowNode>> WindowPair::GetOrderedPair(sptr<WindowNode>& node)
 {
     WLOGI("Get paired node in Z order");
     std::vector<sptr<WindowNode>> orderedPair;
+    bool hasPrimaryDialog_ = false;
+    bool hasSecondaryDialog_ = false;
+    bool isPrimaryAbove_ = false;
+
     if (node == nullptr || Find(node) == nullptr) {
         return orderedPair;
     }
-    if (node->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
-        node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        // primary secondary
-        if (primary_ != nullptr && WindowHelper::IsAppWindow(primary_->GetWindowType())) {
-            orderedPair.push_back(primary_);
+
+    CheckOrderedPairZorder(node, hasPrimaryDialog_, hasSecondaryDialog_, isPrimaryAbove_);
+
+    if (hasPrimaryDialog_ && hasSecondaryDialog_) {
+        return CreateOrderedPair(divider_, primary_, secondary_);
+    }
+    if (hasPrimaryDialog_ || hasSecondaryDialog_) {
+        if (isPrimaryAbove_) {
+            return CreateOrderedPair(secondary_, divider_, primary_);
+        } else {
+            return CreateOrderedPair(primary_, divider_, secondary_);
         }
-        if (secondary_ != nullptr && WindowHelper::IsAppWindow(secondary_->GetWindowType())) {
-            orderedPair.push_back(secondary_);
-        }
-    } else if (node->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
-        // secondary primary divider
-        if (secondary_ != nullptr && WindowHelper::IsAppWindow(secondary_->GetWindowType())) {
-            orderedPair.push_back(secondary_);
-        }
-        if (primary_ != nullptr && WindowHelper::IsAppWindow(primary_->GetWindowType())) {
-            orderedPair.push_back(primary_);
+    } else {
+        if (isPrimaryAbove_) {
+            return CreateOrderedPair(secondary_, primary_, divider_);
+        } else {
+            return CreateOrderedPair(primary_, secondary_, divider_);
         }
     }
-    if (divider_ != nullptr) {
-        orderedPair.push_back(divider_);
-    }
-    return orderedPair;
 }
 
 std::vector<sptr<WindowNode>> WindowPair::GetPairedWindows()
