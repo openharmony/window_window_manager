@@ -51,7 +51,7 @@ public:
     static bool IsScreenRotationLocked();
     static DMError SetScreenRotationLocked(bool isLocked);
     static void SetDefaultDeviceRotationOffset(uint32_t defaultDeviceRotationOffset);
-    static void ProcessOrientationSwitch(Orientation orientation);
+    static void ProcessOrientationSwitch(Orientation orientation, bool withAnimation);
 
     static bool IsDefaultDisplayRotationPortrait();
     static bool IsDisplayRotationVertical(Rotation rotation);
@@ -62,7 +62,7 @@ private:
     static void HandleGravitySensorEventCallback(SensorEvent *event);
     static Rotation GetCurrentDisplayRotation();
     static Orientation GetPreferredOrientation();
-    static void SetScreenRotation(Rotation targetRotation);
+    static void SetScreenRotation(Rotation targetRotation, bool withAnimation = true);
     static Rotation CalcTargetDisplayRotation(Orientation requestedOrientation,
         DeviceRotation sensorRotationConverted);
     static DeviceRotation CalcDeviceRotation(SensorRotation sensorRotation);
@@ -81,7 +81,7 @@ private:
     static void ProcessSwitchToAutoRotationPortraitRestricted();
     static void ProcessSwitchToAutoRotationLandscapeRestricted();
     static void ProcessSwitchToSensorRelatedOrientation(Orientation orientation, DeviceRotation deviceRotation);
-    static void ProcessSwitchToSensorUnrelatedOrientation(Orientation orientation);
+    static void ProcessSwitchToSensorUnrelatedOrientation(Orientation orientation, bool withAnimation);
     static Rotation ProcessAutoRotationPortraitOrientation(DeviceRotation sensorRotationConveted);
     static Rotation ProcessAutoRotationLandscapeOrientation(DeviceRotation sensorRotationConveted);
 

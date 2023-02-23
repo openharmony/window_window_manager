@@ -62,8 +62,8 @@ public:
     DMError DestroyVirtualScreen(ScreenId screenId);
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
     void SetBuildInDefaultOrientation(Orientation orientation);
-    DMError SetOrientation(ScreenId screenId, Orientation orientation, bool isFromWindow);
-    bool SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow);
+    DMError SetOrientation(ScreenId screenId, Orientation orientation, bool isFromWindow, bool withAnimation = true);
+    bool SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow, bool withAnimation = true);
 
     DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
     const std::shared_ptr<RSDisplayNode>& GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const;
@@ -89,7 +89,8 @@ private:
     {
         return (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180);
     }
-    void SetScreenRotateAnimation(sptr<AbstractScreen>& screen, ScreenId screenId, Rotation rotationAfter);
+    void SetScreenRotateAnimation(sptr<AbstractScreen>& screen, ScreenId screenId,
+        Rotation rotationAfter, bool withAnimation);
     void RegisterRsScreenConnectionChangeListener();
     void OnRsScreenConnectionChange(ScreenId rsScreenId, ScreenEvent screenEvent);
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);

@@ -119,6 +119,7 @@ sptr<WindowNode> WindowLayoutPolicyTest::CreateWindowNode(const WindowInfo& wind
     property->SetWindowRect(windowInfo.winRect_);
     property->SetOriginRect(windowInfo.winRect_);
     property->SetDecorEnable(windowInfo.decorEnable_);
+    property->SetDisplayId(0);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
     node->SetWindowSizeChangeReason(windowInfo.reason_);
     node->SetDragType(windowInfo.dragType_);

@@ -26,9 +26,6 @@
 
 namespace OHOS {
 namespace Rosen {
-namespace {
-    const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_animation";
-}
 class WindowHelper {
 public:
     static inline bool IsMainWindow(WindowType type)

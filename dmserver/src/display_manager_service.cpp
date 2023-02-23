@@ -279,16 +279,16 @@ DMError DisplayManagerService::SetOrientation(ScreenId screenId, Orientation ori
     return abstractScreenController_->SetOrientation(screenId, orientation, false);
 }
 
-DMError DisplayManagerService::SetOrientationFromWindow(ScreenId screenId, Orientation orientation)
+DMError DisplayManagerService::SetOrientationFromWindow(ScreenId screenId, Orientation orientation, bool withAnimation)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:SetOrientationFromWindow(%" PRIu64")", screenId);
-    return abstractScreenController_->SetOrientation(screenId, orientation, true);
+    return abstractScreenController_->SetOrientation(screenId, orientation, true, withAnimation);
 }
 
-bool DisplayManagerService::SetRotationFromWindow(ScreenId screenId, Rotation targetRotation)
+bool DisplayManagerService::SetRotationFromWindow(ScreenId screenId, Rotation targetRotation, bool withAnimation)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:SetRotationFromWindow(%" PRIu64")", screenId);
-    return abstractScreenController_->SetRotation(screenId, targetRotation, true);
+    return abstractScreenController_->SetRotation(screenId, targetRotation, true, withAnimation);
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(DisplayId displayId)

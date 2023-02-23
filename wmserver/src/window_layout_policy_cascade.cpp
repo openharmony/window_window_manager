@@ -21,6 +21,7 @@
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
+#include "window_manager_service_utils.h"
 #include "window_system_effect.h"
 #include "wm_math.h"
 
@@ -427,6 +428,12 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
         case WindowMode::WINDOW_MODE_FULLSCREEN: {
             bool needAvoid = (node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
             winRect = needAvoid ? limitRectMap_[displayId] : displayGroupInfo_->GetDisplayRect(displayId);
+            auto displayInfo = displayGroupInfo_->GetDisplayInfo(displayId);
+            if (displayInfo && WmsUtils::IsExpectedRotatableWindow(node->GetRequestedOrientation(),
+                displayInfo->GetDisplayOrientation())) {
+                WLOGFD("[FixOrientation] the window is expected rotatable, pre-calculated");
+                winRect = {winRect.posX_, winRect.posY_, winRect.height_, winRect.width_};
+            }
             break;
         }
         case WindowMode::WINDOW_MODE_FLOATING: {
@@ -442,8 +449,8 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
             WLOGFW("Layout invalid mode, winId: %{public}u, mode: %{public}u", node->GetWindowId(), mode);
     }
     WLOGFD("[After CascadeLayout] windowId: %{public}u, isDecor: %{public}u, winRect: [%{public}d, %{public}d, "
-        "%{public}u, %{public}u]", node->GetWindowId(), node->GetDecoStatus(), winRect.posX_, winRect.posY_,
-        winRect.width_, winRect.height_);
+        "%{public}u, %{public}u], reason: %{public}u", node->GetWindowId(), node->GetDecoStatus(), winRect.posX_,
+        winRect.posY_, winRect.width_, winRect.height_, node->GetWindowSizeChangeReason());
 
     const Rect& lastWinRect = node->GetWindowRect();
     node->SetWindowRect(winRect);

@@ -67,6 +67,7 @@ void RemoteAnimationTest::SetUp()
     transitionInfo_ = new WindowTransitionInfo();
     sptr<IRemoteObject> token = new IRemoteObjectMocker();
     transitionInfo_->SetAbilityToken(token);
+    transitionInfo_->displayId_ = 0;
     transitionInfo_->supportWindowModes_ = {
         AppExecFwk::SupportWindowMode::FULLSCREEN,
         AppExecFwk::SupportWindowMode::SPLIT,
@@ -79,8 +80,10 @@ void RemoteAnimationTest::SetUp()
 
 void RemoteAnimationTest::TearDown()
 {
-    windowController_->DestroyWindow(node_->GetWindowId(), false);
-    node_ = nullptr;
+    if (node_ != nullptr) {
+        windowController_->DestroyWindow(node_->GetWindowId(), false);
+        node_ = nullptr;
+    }
     animationController_ = nullptr;
     wmsTaskHandler_ = nullptr;
     windowRoot_ = nullptr;
@@ -623,7 +626,7 @@ HWTEST_F(RemoteAnimationTest, GetExpectRect01, Function | SmallTest | Level2)
     statusBar->SetWindowRect({0, 0, 100, 100});
     windowRoot_->windowNodeMap_[0] = statusBar;
 
-    Rect avoidRect = windowRoot_->GetDisplayRectWithoutSystemBarAreas(node_->GetDisplayId());
+    Rect avoidRect = windowRoot_->GetDisplayRectWithoutSystemBarAreas(node_);
     EXPECT_FALSE(WindowHelper::IsEmptyRect(avoidRect));
 
     RemoteAnimation::GetExpectRect(node_, target);

@@ -1346,6 +1346,11 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
         NotifyForegroundFailed(ret);
         WLOGFE("show window id:%{public}u errCode:%{public}d", property_->GetWindowId(), static_cast<int32_t>(ret));
     }
+    // systemui make startbar resident, when refactor immersive, this code can delete
+    if (property_->GetRequestedOrientation() == Orientation::HORIZONTAL
+        || property_->GetRequestedOrientation() == Orientation::REVERSE_HORIZONTAL) {
+        RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+    }
     return ret;
 }
 

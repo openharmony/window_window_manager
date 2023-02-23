@@ -27,6 +27,7 @@
 
 namespace OHOS {
 namespace Rosen {
+
 class StartingWindow : public RefBase {
 public:
     StartingWindow() = delete;

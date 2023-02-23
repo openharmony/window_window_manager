@@ -227,7 +227,7 @@ DMError DisplayDumper::DumpAllDisplayInfo(std::string& dumpInfo) const
     oss << "--------------------------------------Display Info"
         << "--------------------------------------"
         << std::endl;
-    oss << "DisplayId ScreenId RefreshRate VPR Rotation Orientation FreezeFlag [ x    y    w    h    ]"
+    oss << "DisplayId ScreenId RefreshRate VPR Rotation Orientation DisplayOrientation FreezeFlag [ x   y   w   h   ]"
         << std::endl;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (DisplayId displayId : displayIds) {
@@ -256,6 +256,7 @@ DMError DisplayDumper::DumpSpecifiedDisplayInfo(DisplayId displayId, std::string
     oss << "VPR: " << display->GetVirtualPixelRatio() << std::endl;
     oss << "Rotation: " << static_cast<uint32_t>(display->GetRotation()) << std::endl;
     oss << "Orientation: " << static_cast<uint32_t>(display->GetOrientation()) << std::endl;
+    oss << "DisplayOrientation: " << static_cast<uint32_t>(display->GetDisplayOrientation()) << std::endl;
     oss << "FreezeFlag: " << static_cast<uint32_t>(display->GetFreezeFlag()) << std::endl;
     oss << "DisplayRect: " << "[ "
         << display->GetOffsetX() << ", " << display->GetOffsetY() << ", "
@@ -338,6 +339,7 @@ void DisplayDumper::GetDisplayInfo(const sptr<AbstractDisplay>& display, std::os
         << std::left << std::setw(4) << display->GetVirtualPixelRatio()
         << std::left << std::setw(9) << static_cast<uint32_t>(display->GetRotation())
         << std::left << std::setw(12) << static_cast<uint32_t>(display->GetOrientation())
+        << std::left << std::setw(18) << static_cast<uint32_t>(display->GetDisplayOrientation())
         << std::left << std::setw(11) << static_cast<uint32_t>(display->GetFreezeFlag())
         << "[ "
         << std::left << std::setw(5) << display->GetOffsetX()

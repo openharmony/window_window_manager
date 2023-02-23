@@ -252,9 +252,9 @@ HWTEST_F(DisplayManagerServiceTest, OrientationAndRotation, Function | SmallTest
 {
     Orientation orientation = Orientation::UNSPECIFIED;
     ASSERT_TRUE(DMError::DM_OK != dms_->SetOrientation(0, orientation));
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms_->SetOrientationFromWindow(0, orientation));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms_->SetOrientationFromWindow(0, orientation, true));
     Rotation rotation = Rotation::ROTATION_0;
-    ASSERT_EQ(false, dms_->SetRotationFromWindow(0, rotation));
+    ASSERT_EQ(false, dms_->SetRotationFromWindow(0, rotation, true));
 }
 
 /**

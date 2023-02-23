@@ -104,7 +104,7 @@ public:
     sptr<WindowNode> FindMainWindowWithToken(sptr<IRemoteObject> token);
     bool CheckMultiDialogWindows(WindowType type, sptr<IRemoteObject> token);
     bool HasPrivateWindow(DisplayId displayId);
-    Rect GetDisplayRectWithoutSystemBarAreas(DisplayId displayId);
+    Rect GetDisplayRectWithoutSystemBarAreas(const sptr<WindowNode> destNode);
     void SwitchRenderModeIfNeeded();
     void OnRenderModeChanged(bool isUniRender);
     sptr<WindowNode> GetWindowNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken);
@@ -118,6 +118,7 @@ public:
     void GetAllAnimationPlayingNodes(std::vector<wptr<WindowNode>>& windowNodes);
     void GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const;
     WMError NotifyDesktopUnfrozen();
+    void UpdateDisplayOrientationWhenHideWindow(sptr<WindowNode>& node);
 private:
     enum class RenderMode : uint8_t {
         SEPARATED,
@@ -154,6 +155,7 @@ private:
     void ChangeRSRenderModeIfNeeded(bool isToUnified);
     bool IsAppWindowExceed() const;
     void GetStoragedAspectRatio(const sptr<WindowNode>& node);
+    void SetDisplayOrientationFromWindow(sptr<WindowNode>& node, bool withAnimation);
 
     std::map<uint32_t, sptr<WindowNode>> windowNodeMap_;
     std::map<sptr<IRemoteObject>, uint32_t> windowIdMap_;

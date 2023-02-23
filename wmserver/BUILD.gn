@@ -17,6 +17,7 @@ config("libwms_config") {
 
   include_dirs = [
     "include",
+    "include/utils",
     "include/window_snapshot",
     "//utils/system/safwk/native/include",
     "//foundation/window/window_manager/interfaces/innerkits/wm",
@@ -50,6 +51,7 @@ ohos_shared_library("libwms") {
     "src/minimize_app.cpp",
     "src/remote_animation.cpp",
     "src/starting_window.cpp",
+    "src/utils/window_manager_service_utils.cpp",
     "src/window_common_event.cpp",
     "src/window_controller.cpp",
     "src/window_dumper.cpp",

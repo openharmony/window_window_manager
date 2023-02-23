@@ -628,7 +628,8 @@ void AbstractScreenController::SetBuildInDefaultOrientation(Orientation orientat
     }
 }
 
-DMError AbstractScreenController::SetOrientation(ScreenId screenId, Orientation newOrientation, bool isFromWindow)
+DMError AbstractScreenController::SetOrientation(ScreenId screenId, Orientation newOrientation,
+    bool isFromWindow, bool withAnimation)
 {
     WLOGD("set orientation. screen %{public}" PRIu64" orientation %{public}u", screenId, newOrientation);
     auto screen = GetAbstractScreen(screenId);
@@ -643,6 +644,7 @@ DMError AbstractScreenController::SetOrientation(ScreenId screenId, Orientation 
     if (isFromWindow) {
         if (newOrientation == Orientation::UNSPECIFIED) {
             newOrientation = screen->screenRequestedOrientation_;
+            withAnimation = true;
         }
     } else {
         screen->screenRequestedOrientation_ = newOrientation;
@@ -652,7 +654,7 @@ DMError AbstractScreenController::SetOrientation(ScreenId screenId, Orientation 
         return DMError::DM_OK;
     }
     if (isFromWindow) {
-        ScreenRotationController::ProcessOrientationSwitch(newOrientation);
+        ScreenRotationController::ProcessOrientationSwitch(newOrientation, withAnimation);
     } else {
         Rotation rotationAfter = screen->CalcRotation(newOrientation);
         SetRotation(screenId, rotationAfter, false);
@@ -673,7 +675,7 @@ DMError AbstractScreenController::SetOrientation(ScreenId screenId, Orientation 
 }
 
 void AbstractScreenController::SetScreenRotateAnimation(
-    sptr<AbstractScreen>& screen, ScreenId screenId, Rotation rotationAfter)
+    sptr<AbstractScreen>& screen, ScreenId screenId, Rotation rotationAfter, bool withAnimation)
 {
     sptr<SupportedScreenModes> abstractScreenModes = screen->GetActiveScreenMode();
     float w = 0;
@@ -694,42 +696,53 @@ void AbstractScreenController::SetScreenRotateAnimation(
         return;
     }
     if (rotationAfter == Rotation::ROTATION_0 && screen->rotation_ == Rotation::ROTATION_270) {
+        WLOGFD("[FixOrientation] display rotate with animation");
         // avoid animation 270, 240, 210 ... 30, 0, should play from 90->0
         displayNode->SetRotation(90.f);
     } else if (rotationAfter == Rotation::ROTATION_270 && screen->rotation_ == Rotation::ROTATION_0) {
+        WLOGFD("[FixOrientation] display rotate with animation");
         // avoid animation 0, 30, 60 ... 270, should play from 360->270
         displayNode->SetRotation(-360.f);
     }
-    std::weak_ptr<RSDisplayNode> weakNode = GetRSDisplayNodeByScreenId(screenId);
-    static const RSAnimationTimingProtocol timingProtocol(600); // animation time
-    static const RSAnimationTimingCurve curve =
-        RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0); // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
-#ifdef SOC_PERF_ENABLE
-    // Increase frequency to improve windowRotation perf
-    // 10027 means "web_gesture" level that setting duration: 800, lit_cpu_min_freq: 1421000, mid_cpu_min_feq: 1882000
-    OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(10027, "");
-#endif
-    RSNode::Animate(timingProtocol, curve, [weakNode, x, y, w, h, rotationAfter]() {
-        auto displayNode = weakNode.lock();
-        if (displayNode == nullptr) {
-            WLOGFE("SetScreenRotateAnimation error, cannot get DisplayNode");
-            return;
-        }
+    if (withAnimation) {
+        WLOGFD("[FixOrientation] display rotate with animation %{public}u", rotationAfter);
+        std::weak_ptr<RSDisplayNode> weakNode = GetRSDisplayNodeByScreenId(screenId);
+        static const RSAnimationTimingProtocol timingProtocol(600); // animation time
+        static const RSAnimationTimingCurve curve =
+            RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0); // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
+    #ifdef SOC_PERF_ENABLE
+        // Increase frequency to improve windowRotation perf
+        // 10027 means "gesture" level that setting duration: 800, lit_cpu_min_freq: 1421000, mid_cpu_min_feq: 1882000
+        OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(10027, "");
+    #endif
+        RSNode::Animate(timingProtocol, curve, [weakNode, x, y, w, h, rotationAfter]() {
+            auto displayNode = weakNode.lock();
+            if (displayNode == nullptr) {
+                WLOGFE("error, cannot get DisplayNode");
+                return;
+            }
+            displayNode->SetRotation(-90.f * static_cast<uint32_t>(rotationAfter)); // 90.f is base degree
+            displayNode->SetFrame(x, y, w, h);
+            displayNode->SetBounds(x, y, w, h);
+        }, []() {
+    #ifdef SOC_PERF_ENABLE
+            // ClosePerf in finishCallBack
+            OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequestEx(10027, false, "");
+    #endif
+        });
+    } else {
+        WLOGFD("[FixOrientation] display rotate without animation %{public}u", rotationAfter);
         displayNode->SetRotation(-90.f * static_cast<uint32_t>(rotationAfter)); // 90.f is base degree
         displayNode->SetFrame(x, y, w, h);
         displayNode->SetBounds(x, y, w, h);
-    }, []() {
-#ifdef SOC_PERF_ENABLE
-        // ClosePerf in finishCallBack
-        OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequestEx(10027, false, "");
-#endif
-    });
+    }
 }
 
-bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow)
+bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationAfter,
+    bool isFromWindow, bool withAnimation)
 {
-    WLOGFI("Enter SetRotation, screenId: %{public}" PRIu64 ", rotation: %{public}u, isFromWindow: %{public}u",
-        screenId, rotationAfter, isFromWindow);
+    WLOGFI("Enter SetRotation, screenId: %{public}" PRIu64 ", rotation: %{public}u, isFromWindow: %{public}u,"
+        "animation: %{public}u", screenId, rotationAfter, isFromWindow, withAnimation);
     auto screen = GetAbstractScreen(screenId);
     if (screen == nullptr) {
         WLOGFE("SetRotation error, cannot get screen with screenId: %{public}" PRIu64, screenId);
@@ -742,7 +755,7 @@ bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationA
             WLOGE("Convert to RsScreenId fail. screenId: %{public}" PRIu64"", screenId);
             return false;
         }
-        SetScreenRotateAnimation(screen, screenId, rotationAfter);
+        SetScreenRotateAnimation(screen, screenId, rotationAfter, withAnimation);
         screen->rotation_ = rotationAfter;
     } else {
         WLOGI("rotation not changed. screen %{public}" PRIu64" rotation %{public}u", screenId, rotationAfter);

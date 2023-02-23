@@ -24,6 +24,7 @@
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "window_manager_service.h"
+#include "window_manager_service_utils.h"
 #include "window_system_effect.h"
 
 namespace OHOS {
@@ -31,6 +32,24 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "StartingWindow"};
 }
+
+const std::map<OHOS::AppExecFwk::DisplayOrientation, Orientation> ABILITY_TO_WMS_ORIENTATION_MAP {
+    {OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED, Orientation::UNSPECIFIED},
+    {OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE, Orientation::HORIZONTAL},
+    {OHOS::AppExecFwk::DisplayOrientation::PORTRAIT, Orientation::VERTICAL},
+    {OHOS::AppExecFwk::DisplayOrientation::FOLLOWRECENT, Orientation::LOCKED},
+    {OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE_INVERTED, Orientation::REVERSE_HORIZONTAL},
+    {OHOS::AppExecFwk::DisplayOrientation::PORTRAIT_INVERTED, Orientation::REVERSE_VERTICAL},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION, Orientation::SENSOR},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE, Orientation::SENSOR_HORIZONTAL},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT, Orientation::SENSOR_VERTICAL},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_RESTRICTED, Orientation::AUTO_ROTATION_RESTRICTED},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED,
+        Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED,
+        Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED},
+    {OHOS::AppExecFwk::DisplayOrientation::LOCKED, Orientation::LOCKED},
+};
 
 std::recursive_mutex StartingWindow::mutex_;
 WindowMode StartingWindow::defaultMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
@@ -51,9 +70,26 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInf
         property->SetWindowMode(defaultMode_);
     }
 
+    AppExecFwk::DisplayOrientation displayOrientation = info->GetOrientation();
+    if (ABILITY_TO_WMS_ORIENTATION_MAP.count(displayOrientation) == 0) {
+        WLOGFE("id:%{public}u Do not support this Orientation type", winId);
+        return nullptr;
+    }
+    Orientation orientation = ABILITY_TO_WMS_ORIENTATION_MAP.at(displayOrientation);
+    if (orientation < Orientation::BEGIN || orientation > Orientation::END) {
+        WLOGFE("Set orientation from ability failed");
+        return nullptr;
+    }
+    WLOGFD("orientation:%{public}u", orientation);
+    property->SetRequestedOrientation(orientation);
+
     property->SetDisplayId(info->GetDisplayId());
     property->SetWindowType(info->GetWindowType());
-    property->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+    auto displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(info->GetDisplayId());
+    if (!(displayInfo && WmsUtils::IsExpectedRotatableWindow(orientation,
+        displayInfo->GetDisplayOrientation(), property->GetWindowMode()))) {
+        property->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+    }
     if (info->GetShowFlagWhenLocked()) {
         property->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     }
@@ -206,6 +242,7 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
                 return;
             }
             WLOGI("StartingWindow::FirstFrameCallback come, id: %{public}u", weakNode->GetWindowId());
+            WmsUtils::AdjustFixedOrientationRSSurfaceNode(weakNode, weakNode->GetWindowRect(), weakNode->surfaceNode_);
             if (transAnimateEnable_) {
                 SetStartingWindowAnimation(weakNode);
             } else {
