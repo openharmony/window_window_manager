@@ -23,6 +23,8 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using Utils = WindowTestUtils;
+constexpr uint32_t SLEEP_SEC = 1;  // 1s
+
 class WindowEffectTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -74,6 +76,7 @@ HWTEST_F(WindowEffectTest, WindowEffect01, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->SetCornerRadius(-1.0));
 
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -92,6 +95,7 @@ HWTEST_F(WindowEffectTest, WindowEffect02, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowRadius(-1.0));
 
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -117,6 +121,7 @@ HWTEST_F(WindowEffectTest, WindowEffect03, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowColor("#ff"));
 
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -140,6 +145,7 @@ HWTEST_F(WindowEffectTest, WindowEffect04, Function | MediumTest | Level3)
     window->SetShadowOffsetY(-1.0);
 
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -158,6 +164,7 @@ HWTEST_F(WindowEffectTest, WindowEffect05, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBlur(-1.0));
 
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -176,6 +183,7 @@ HWTEST_F(WindowEffectTest, WindowEffect06, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlur(-1.0));
 
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -197,6 +205,7 @@ HWTEST_F(WindowEffectTest, WindowEffect07, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlurStyle(static_cast<WindowBlurStyle>(5)));
 
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    sleep(SLEEP_SEC);
 }
 } // namespace
 } // namespace Rosen
