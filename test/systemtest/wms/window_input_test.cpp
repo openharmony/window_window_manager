@@ -24,6 +24,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr uint32_t WAIT_ASYNC_US = 100000;  // 100ms
+    constexpr uint32_t SLEEP_SEC = 1;  // 1s
 }
 using Utils = WindowTestUtils;
 class WindowInputTest : public testing::Test {
@@ -112,6 +113,7 @@ HWTEST_F(WindowInputTest, SetTouchHotAreas01, Function | MediumTest | Level3)
     ASSERT_TRUE(requestedTouchHotAreas.empty());
 
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -167,6 +169,7 @@ HWTEST_F(WindowInputTest, SetTouchHotAreas02, Function | MediumTest | Level3)
     ASSERT_TRUE(requestedTouchHotAreas.empty());
 
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    sleep(SLEEP_SEC);
 }
 } // namespace
 } // namespace Rosen

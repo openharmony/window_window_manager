@@ -34,6 +34,7 @@ public:
     Utils::TestWindowInfo fullAppInfo_2_;
 private:
     static constexpr uint32_t WAIT_SYANC_US = 100000;
+    static constexpr uint32_t SLEEP_SEC = 1;
 };
 
 void WindowModeSupportInfoTest::SetUpTestCase()
@@ -87,6 +88,7 @@ HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo01, Function | MediumTe
     window->SetRequestModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
     ASSERT_EQ(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN, window->GetRequestModeSupportInfo());
     window->Destroy();
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -113,6 +115,7 @@ HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo02, Function | MediumTe
 
     ASSERT_EQ(WMError::WM_OK, window->Hide());
     window->Destroy();
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -143,6 +146,7 @@ HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo03, Function | MediumTe
 
     ASSERT_EQ(WMError::WM_OK, window->Hide());
     window->Destroy();
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -159,6 +163,7 @@ HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo04, Function | MediumTe
     ASSERT_NE(WMError::WM_OK, window->Show());
     ASSERT_EQ(WMError::WM_OK, window->Hide());
     window->Destroy();
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -182,6 +187,7 @@ HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo05, Function | MediumTe
 
     window1->Destroy();
     window2->Destroy();
+    sleep(SLEEP_SEC);
 }
 
 /**

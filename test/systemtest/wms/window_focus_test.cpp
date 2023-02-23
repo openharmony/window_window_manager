@@ -29,6 +29,7 @@ namespace {
 
 using Utils = WindowTestUtils;
 const int WAIT_ASYNC_US = 100000;  // 100000us
+constexpr uint32_t SLEEP_SEC = 1;  // 1s
 
 class TestFocusChangedListener : public IFocusChangedListener {
 public:
@@ -167,8 +168,11 @@ HWTEST_F(WindowFocusTest, FocusChangedTest01, Function | MediumTest | Level3)
     ASSERT_EQ(subWindow->GetWindowId(), testFocusChangedListener_->focusedWindow_);
 
     window1->Destroy();
+    sleep(SLEEP_SEC);
     window2->Destroy();
+    sleep(SLEEP_SEC);
     window3->Destroy();
+    sleep(SLEEP_SEC);
     subWindow->Destroy();
 }
 
@@ -200,7 +204,9 @@ HWTEST_F(WindowFocusTest, FocusChangedTest02, Function | MediumTest | Level3)
     ASSERT_EQ(mainWindow->GetWindowId(), testFocusChangedListener_->focusedWindow_);
 
     mainWindow->Destroy();
+    sleep(SLEEP_SEC);
     subWindow->Destroy();
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -238,8 +244,11 @@ HWTEST_F(WindowFocusTest, FocusChangedTest03, Function | MediumTest | Level3)
     ASSERT_EQ(aboveSubWindow->GetWindowId(), testFocusChangedListener_->focusedWindow_);
 
     mainWindow1->Destroy();
+    sleep(SLEEP_SEC);
     mainWindow2->Destroy();
+    sleep(SLEEP_SEC);
     aboveSubWindow->Destroy();
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -278,8 +287,11 @@ HWTEST_F(WindowFocusTest, FocusChangedTest04, Function | MediumTest | Level3)
     ASSERT_EQ(mainWindow1->GetWindowId(), testFocusChangedListener_->focusedWindow_);
 
     mainWindow1->Destroy();
+    sleep(SLEEP_SEC);
     mainWindow2->Destroy();
+    sleep(SLEEP_SEC);
     belowSubWindow->Destroy();
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -327,8 +339,11 @@ HWTEST_F(WindowFocusTest, FocusChangedTest05, Function | MediumTest | Level3)
     ASSERT_EQ(mainWindow1->GetWindowId(), testFocusChangedListener_->focusedWindow_);
 
     mainWindow1->Destroy();
+    sleep(SLEEP_SEC);
     mainWindow2->Destroy();
+    sleep(SLEEP_SEC);
     belowSubWindow->Destroy();
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -437,6 +452,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest07, Function | MediumTest | Level3)
     ASSERT_EQ(mainWindow2->GetWindowId(), testFocusChangedListener_->focusedWindow_);
 
     mainWindow2->Destroy();
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -474,6 +490,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest08, Function | MediumTest | Level3)
     ASSERT_EQ(belowSubWindow->GetWindowId(), testFocusChangedListener_->focusedWindow_);
 
     mainWindow1->Destroy();
+    sleep(SLEEP_SEC);
 }
 }
 } // namespace Rosen

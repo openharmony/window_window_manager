@@ -25,6 +25,7 @@ namespace Rosen {
 using Utils = WindowTestUtils;
 constexpr uint32_t MAX_WAIT_COUNT = 100;
 constexpr uint32_t WAIT_DUR = 10 * 1000;
+constexpr uint32_t SLEEP_SEC = 1;  // 1s
 
 class WindowGamutTest : public testing::Test {
 public:
@@ -73,6 +74,7 @@ HWTEST_F(WindowGamutTest, IsSupportWideGamut01, Function | MediumTest | Level3)
     ASSERT_EQ(true, window->IsSupportWideGamut());
 
     window->Destroy();
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -87,6 +89,7 @@ HWTEST_F(WindowGamutTest, GetColorSpace01, Function | MediumTest | Level3)
     ASSERT_EQ(ColorSpace::COLOR_SPACE_DEFAULT, window->GetColorSpace());
 
     window->Destroy();
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -122,6 +125,7 @@ HWTEST_F(WindowGamutTest, SetColorSpace01, Function | MediumTest | Level3)
     window->SetColorSpace(colorSpaceBackup); // restore
 
     window->Destroy();
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -142,6 +146,7 @@ HWTEST_F(WindowGamutTest, SetColorSpace02, Function | MediumTest | Level3)
     ASSERT_EQ(colorSpaceBackup, window->GetColorSpace());
 
     window->Destroy();
+    sleep(SLEEP_SEC);
 }
 } // namespace
 } // namespace Rosen
