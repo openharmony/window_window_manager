@@ -2117,8 +2117,8 @@ void WindowImpl::UpdateMode(WindowMode mode)
 {
     WLOGI("UpdateMode %{public}u", mode);
     property_->SetWindowMode(mode);
-    UpdateDecorEnable(true);
     UpdateTitleButtonVisibility();
+    UpdateDecorEnable(true);
 }
 
 void WindowImpl::UpdateModeSupportInfo(uint32_t modeSupportInfo)
