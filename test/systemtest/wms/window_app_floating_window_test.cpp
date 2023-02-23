@@ -31,6 +31,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowAppFloatingWindowTest"};
+    constexpr uint32_t SLEEP_SEC = 1;  // 1s
 }
 
 class TestCameraFloatWindowChangedListener : public ICameraFloatWindowChangedListener {
@@ -134,6 +135,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow01, Function | MediumTest
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
+    sleep(SLEEP_SEC);
     ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 }
 
@@ -160,6 +162,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow02, Function | MediumTest
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
+    sleep(SLEEP_SEC);
     ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 }
 
@@ -186,6 +189,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow03, Function | MediumTest
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
+    sleep(SLEEP_SEC);
     ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 }
 
@@ -210,6 +214,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow04, Function | MediumTest
     ASSERT_EQ(nullptr, scene->GetMainWindow());
     ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -234,6 +239,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow05, Function | MediumTest
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
+    sleep(SLEEP_SEC);
     ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 }
 
@@ -261,6 +267,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow06, Function | MediumTest
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
+    sleep(SLEEP_SEC);
     ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 }
 
@@ -288,6 +295,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow07, Function | MediumTest
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
+    sleep(SLEEP_SEC);
     ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 }
 
@@ -313,6 +321,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow08, Function | MediumTest
     ASSERT_EQ(nullptr, scene->GetMainWindow());
     ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -353,6 +362,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow09, Function | MediumTest
     ASSERT_TRUE(WindowTestUtils::RectEqualTo(fltWin, exceptRect));
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
+    sleep(SLEEP_SEC);
     ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 }
 
@@ -375,10 +385,12 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow10, Function | MediumTest
     ASSERT_EQ(nullptr, fltWin2);
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
+    sleep(SLEEP_SEC);
     sptr<Window> fltWin3 = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT_CAMERA, fltWindRect);
     ASSERT_NE(nullptr, fltWin3);
 
     ASSERT_EQ(WMError::WM_OK, fltWin3->Destroy());
+    sleep(SLEEP_SEC);
     ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 }
 
@@ -413,6 +425,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow11, Function | MediumTest
     ASSERT_EQ(false, testCameraFloatWindowChangedListener_->isShowing_);
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
+    sleep(SLEEP_SEC);
     ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 
     WindowManager::GetInstance().UnregisterCameraFloatWindowChangedListener(testCameraFloatWindowChangedListener_);

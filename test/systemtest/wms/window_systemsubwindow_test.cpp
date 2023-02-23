@@ -126,7 +126,9 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow01, Function | MediumTest | L
         ASSERT_EQ(WMError::WM_OK, baseWindow->Hide());
 
         ASSERT_EQ(WMError::WM_OK, subWindow->Destroy());
+        sleep(1);
         ASSERT_EQ(WMError::WM_OK, baseWindow->Destroy());
+        sleep(1);
     }
 }
 
@@ -180,7 +182,9 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow02, Function | MediumTest | L
         ASSERT_EQ(WMError::WM_OK, baseWindow->Hide());
 
         ASSERT_EQ(WMError::WM_OK, subWindow->Destroy());
+        sleep(1);
         ASSERT_EQ(WMError::WM_OK, baseWindow->Destroy());
+        sleep(1);
     }
 }
 
@@ -232,7 +236,9 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow04, Function | MediumTest | L
         sptr<Window> subWindow = CreateSystemSubWindow(appSubWindow, rect, flags);
         ASSERT_EQ(nullptr, subWindow);
         ASSERT_EQ(WMError::WM_OK, appSubWindow->Destroy());
+        sleep(1);
         ASSERT_EQ(WMError::WM_OK, baseWindow->Destroy());
+        sleep(1);
     }
 }
 
@@ -263,7 +269,9 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow05, Function | MediumTest | L
     ASSERT_EQ(WMError::WM_OK, baseWindow->Hide());
 
     ASSERT_EQ(WMError::WM_OK, systemSubWindow->Destroy());
+    sleep(1);
     ASSERT_EQ(WMError::WM_OK, baseWindow->Destroy());
+    sleep(1);
 }
 
 /**
@@ -299,7 +307,9 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow06, Function | MediumTest | L
     ASSERT_EQ(WMError::WM_OK, baseWindow->Hide());
 
     ASSERT_EQ(WMError::WM_OK, subWindow->Destroy());
+    sleep(1);
     ASSERT_EQ(WMError::WM_OK, baseWindow->Destroy());
+    sleep(1);
 }
 /**
  * @tc.name: SystemSubWindow07
@@ -318,6 +328,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow07, Function | MediumTest | L
     sptr<Window> subWindow = CreateSystemSubWindow(baseWindow, rect, flags);
     ASSERT_EQ(nullptr, subWindow);
     ASSERT_EQ(WMError::WM_OK, baseWindow->Destroy());
+    sleep(1);
 }
 } // namespace Rosen
 } // namespace OHOS

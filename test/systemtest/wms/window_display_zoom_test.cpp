@@ -25,6 +25,8 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using Utils = WindowTestUtils;
+constexpr uint32_t SLEEP_SEC = 1;  // 1s
+
 class WindowDisplayZoomTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -108,6 +110,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom01, Function | MediumTest | Level3)
 
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     window->Destroy();
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -139,6 +142,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom02, Function | MediumTest | Level3)
     expect.translateX_ = expect.translateY_ = 0;
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     window->Destroy();
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -164,6 +168,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom03, Function | MediumTest | Level3)
     ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
 
     window->Destroy();
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -200,6 +205,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom04, Function | MediumTest | Level3)
     ASSERT_TRUE(identity == implPtr->GetWindowProperty()->GetZoomTransform());
 
     window->Destroy();
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -242,6 +248,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom05, Function | MediumTest | Level3)
 
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     window->Destroy();
+    sleep(SLEEP_SEC);
 }
 
 /**
@@ -268,6 +275,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom06, Function | MediumTest | Level3)
 
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     window->Destroy();
+    sleep(SLEEP_SEC);
 }
 }
 } // namespace Rosen
