@@ -129,7 +129,7 @@ HWTEST_F(AbstractScreenControllerTest, SetScreenRotateAnimation01, Function | Sm
     absController_->dmsScreenMap_[1]->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
     sptr<AbstractScreen> screen = screenVec[0];
     screen->rotation_ = Rotation::ROTATION_270;
-    absController_->SetScreenRotateAnimation(screen, 1, Rotation::ROTATION_0);
+    absController_->SetScreenRotateAnimation(screen, 1, Rotation::ROTATION_0, true);
     ASSERT_EQ(Rotation::ROTATION_270, screen->rotation_);
 }
 /**

@@ -60,7 +60,7 @@ public:
     WMError MinimizeStructuredAppWindowsExceptSelf(const sptr<WindowNode>& node);
     void TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes) const;
     Rect GetDisplayRect(DisplayId displayId) const;
-    std::unordered_map<WindowType, SystemBarProperty> GetExpectImmersiveProperty() const;
+    std::unordered_map<WindowType, SystemBarProperty> GetExpectImmersiveProperty(DisplayId id) const;
     uint32_t GetWindowCountByType(WindowType windowType);
     uint32_t GetMainFloatingWindowCount();
     bool IsForbidDockSliceMove(DisplayId displayId) const;

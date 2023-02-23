@@ -43,6 +43,7 @@ struct AbilityTransitionInfo : public Parcelable {
     uint32_t minWindowHeight_;
     TransitionReason reason_ = TransitionReason::ABILITY_TRANSITION;
     int32_t missionId_ = -1;
+    AppExecFwk::DisplayOrientation orientation_ = AppExecFwk::DisplayOrientation::UNSPECIFIED;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {

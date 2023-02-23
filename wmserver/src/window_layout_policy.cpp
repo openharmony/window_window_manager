@@ -19,6 +19,7 @@
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
+#include "window_manager_service_utils.h"
 #include "wm_common_inner.h"
 #include "wm_math.h"
 
@@ -330,10 +331,6 @@ void WindowLayoutPolicy::LayoutWindowTree(DisplayId displayId)
     // ensure that the avoid area windows are traversed first
     auto& displayWindowTree = displayGroupWindowTree_[displayId];
     LayoutWindowNodesByRootType(*(displayWindowTree[WindowRootNodeType::ABOVE_WINDOW_NODE]));
-    if (IsFullScreenRecentWindowExist(*(displayWindowTree[WindowRootNodeType::ABOVE_WINDOW_NODE]))) {
-        WLOGFD("recent window on top, early exit layout tree");
-        return;
-    }
     LayoutWindowNodesByRootType(*(displayWindowTree[WindowRootNodeType::APP_WINDOW_NODE]));
     LayoutWindowNodesByRootType(*(displayWindowTree[WindowRootNodeType::BELOW_WINDOW_NODE]));
 }
@@ -940,7 +937,8 @@ bool WindowLayoutPolicy::IsFullScreenRecentWindowExist(const std::vector<sptr<Wi
     return false;
 }
 
-static void SetBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect)
+static void SetBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect,
+    sptr<DisplayGroupInfo> displayGroupInfo)
 {
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT ||
         node->GetWindowSizeChangeReason() == WindowSizeChangeReason::TRANSFORM) {
@@ -960,9 +958,9 @@ static void SetBounds(const sptr<WindowNode>& node, const Rect& winRect, const R
         }
     }
     WLOGFD("Name:%{public}s id:%{public}u preRect: [%{public}d, %{public}d, %{public}d, %{public}d], "
-        "winRect: [%{public}d, %{public}d, %{public}d, %{public}d]", node->GetWindowName().c_str(),
+        "winRect: [%{public}d, %{public}d, %{public}d, %{public}d],  %{public}u", node->GetWindowName().c_str(),
         node->GetWindowId(), preRect.posX_, preRect.posY_, preRect.width_, preRect.height_,
-        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_, node->GetWindowSizeChangeReason());
     if (node->leashWinSurfaceNode_) {
         if (winRect != preRect) {
             // avoid animation interpreted when client coming
@@ -970,25 +968,32 @@ static void SetBounds(const sptr<WindowNode>& node, const Rect& winRect, const R
         }
         if (node->startingWinSurfaceNode_) {
             node->startingWinSurfaceNode_->SetBounds(0, 0, winRect.width_, winRect.height_);
+            WmsUtils::AdjustFixedOrientationRSSurfaceNode(node, winRect, node->startingWinSurfaceNode_,
+                displayGroupInfo->GetDisplayInfo(node->GetDisplayId()));
         }
         if (node->surfaceNode_) {
             node->surfaceNode_->SetBounds(0, 0, winRect.width_, winRect.height_);
+            WmsUtils::AdjustFixedOrientationRSSurfaceNode(node, winRect, node->surfaceNode_,
+                displayGroupInfo->GetDisplayInfo(node->GetDisplayId()));
         }
     } else if (node->surfaceNode_) {
         node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+        WmsUtils::AdjustFixedOrientationRSSurfaceNode(node, winRect, node->surfaceNode_,
+            displayGroupInfo->GetDisplayInfo(node->GetDisplayId()));
     }
 }
 
 void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect)
 {
     wptr<WindowNode> weakNode = node;
-    auto SetBoundsFunc = [weakNode, winRect, preRect]() {
+    wptr<DisplayGroupInfo> displayGroupInfo = displayGroupInfo_;
+    auto SetBoundsFunc = [weakNode, winRect, preRect, displayGroupInfo]() {
         auto winNode = weakNode.promote();
         if (winNode == nullptr) {
             WLOGI("winNode is nullptr");
             return;
         }
-        SetBounds(winNode, winRect, preRect);
+        SetBounds(winNode, winRect, preRect, displayGroupInfo.promote());
     };
 
     switch (node->GetWindowSizeChangeReason()) {
@@ -1000,6 +1005,11 @@ void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const
             break;
         }
         case WindowSizeChangeReason::ROTATION: {
+            if (WmsUtils::IsFixedOrientation(node->GetRequestedOrientation(), node->GetWindowMode())) {
+                WLOGI("[FixOrientation] winNode %{public}u orientation, skip animation", node->GetWindowId());
+                SetBoundsFunc();
+                return;
+            }
             const RSAnimationTimingProtocol timingProtocol(600); // animation time
             const RSAnimationTimingCurve curve_ = RSAnimationTimingCurve::CreateCubicCurve(
                 0.2, 0.0, 0.2, 1.0); // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
