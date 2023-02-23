@@ -32,13 +32,10 @@ namespace {
 
 uint32_t WindowLayoutPolicy::floatingBottomPosY_ = 0;
 
-WindowLayoutPolicy::WindowLayoutPolicy(const sptr<DisplayGroupInfo>& displayGroupInfo,
-    DisplayGroupWindowTree& displayGroupWindowTree)
-    : displayGroupInfo_(displayGroupInfo), displayGroupWindowTree_(displayGroupWindowTree)
+WindowLayoutPolicy::WindowLayoutPolicy(DisplayGroupWindowTree& displayGroupWindowTree)
+    : displayGroupWindowTree_(displayGroupWindowTree)
 {
-    if (displayGroupInfo) {
-        limitRectMap_ = displayGroupInfo->GetAllDisplayRects();
-    }
+    limitRectMap_ = DisplayGroupInfo::GetInstance().GetAllDisplayRects();
 }
 
 void WindowLayoutPolicy::Launch()
@@ -54,7 +51,7 @@ void WindowLayoutPolicy::Reorder()
 void WindowLayoutPolicy::LimitWindowToBottomRightCorner(const sptr<WindowNode>& node)
 {
     Rect windowRect = node->GetRequestRect();
-    Rect displayRect = displayGroupInfo_->GetDisplayRect(node->GetDisplayId());
+    Rect displayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(node->GetDisplayId());
     windowRect.posX_ = std::max(windowRect.posX_, displayRect.posX_);
     windowRect.posY_ = std::max(windowRect.posY_, displayRect.posY_);
     windowRect.width_ = std::min(windowRect.width_, displayRect.width_);
@@ -85,7 +82,7 @@ void WindowLayoutPolicy::UpdateDisplayGroupRect()
 {
     Rect newDisplayGroupRect = { 0, 0, 0, 0 };
     // current multi-display is only support left-right combination, maxNum is two
-    for (auto& elem : displayGroupInfo_->GetAllDisplayRects()) {
+    for (auto& elem : DisplayGroupInfo::GetInstance().GetAllDisplayRects()) {
         newDisplayGroupRect.posX_ = std::min(displayGroupRect_.posX_, elem.second.posX_);
         newDisplayGroupRect.posY_ = std::min(displayGroupRect_.posY_, elem.second.posY_);
         newDisplayGroupRect.width_ += elem.second.width_;
@@ -148,7 +145,7 @@ bool WindowLayoutPolicy::IsMultiDisplay()
 
 void WindowLayoutPolicy::UpdateMultiDisplayFlag()
 {
-    if (displayGroupInfo_->GetAllDisplayRects().size() > 1) {
+    if (DisplayGroupInfo::GetInstance().GetAllDisplayIds().size() > 1) {
         isMultiDisplay_ = true;
         WLOGFD("Current mode is multi-display");
     } else {
@@ -187,20 +184,20 @@ void WindowLayoutPolicy::UpdateDisplayRectAndDisplayGroupInfo(const std::map<Dis
     for (auto& elem : displayRectMap) {
         auto& displayId = elem.first;
         auto& displayRect = elem.second;
-        displayGroupInfo_->SetDisplayRect(displayId, displayRect);
+        DisplayGroupInfo::GetInstance().SetDisplayRect(displayId, displayRect);
     }
 }
 
 void WindowLayoutPolicy::PostProcessWhenDisplayChange()
 {
-    displayGroupInfo_->UpdateLeftAndRightDisplayId();
+    DisplayGroupInfo::GetInstance().UpdateLeftAndRightDisplayId();
     UpdateMultiDisplayFlag();
     Launch();
 }
 
 void WindowLayoutPolicy::ProcessDisplayCreate(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap)
 {
-    const auto& oriDisplayRectMap = displayGroupInfo_->GetAllDisplayRects();
+    const auto& oriDisplayRectMap = DisplayGroupInfo::GetInstance().GetAllDisplayRects();
     // check displayId and displayRectMap size
     if (oriDisplayRectMap.find(displayId) == oriDisplayRectMap.end() ||
         displayRectMap.size() != oriDisplayRectMap.size()) {
@@ -227,7 +224,7 @@ void WindowLayoutPolicy::ProcessDisplayCreate(DisplayId displayId, const std::ma
 
 void WindowLayoutPolicy::ProcessDisplayDestroy(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap)
 {
-    const auto& oriDisplayRectMap = displayGroupInfo_->GetAllDisplayRects();
+    const auto& oriDisplayRectMap = DisplayGroupInfo::GetInstance().GetAllDisplayRects();
     // check displayId and displayRectMap size
     if (oriDisplayRectMap.find(displayId) != oriDisplayRectMap.end() ||
         displayRectMap.size() != oriDisplayRectMap.size()) {
@@ -258,7 +255,7 @@ void WindowLayoutPolicy::ProcessDisplayDestroy(DisplayId displayId, const std::m
 void WindowLayoutPolicy::ProcessDisplaySizeChangeOrRotation(DisplayId displayId,
                                                             const std::map<DisplayId, Rect>& displayRectMap)
 {
-    const auto& oriDisplayRectMap = displayGroupInfo_->GetAllDisplayRects();
+    const auto& oriDisplayRectMap = DisplayGroupInfo::GetInstance().GetAllDisplayRects();
     // check displayId and displayRectMap size
     if (oriDisplayRectMap.find(displayId) == oriDisplayRectMap.end() ||
         displayRectMap.size() != oriDisplayRectMap.size()) {
@@ -326,7 +323,7 @@ void WindowLayoutPolicy::NotifyAnimationSizeChangeIfNeeded()
 void WindowLayoutPolicy::LayoutWindowTree(DisplayId displayId)
 {
     // reset limit rect
-    limitRectMap_[displayId] = displayGroupInfo_->GetDisplayRect(displayId);
+    limitRectMap_[displayId] = DisplayGroupInfo::GetInstance().GetDisplayRect(displayId);
     displayGroupLimitRect_ = displayGroupRect_;
 
     // ensure that the avoid area windows are traversed first
@@ -364,7 +361,8 @@ void WindowLayoutPolicy::LayoutWindowNode(const sptr<WindowNode>& node)
 
 bool WindowLayoutPolicy::IsVerticalDisplay(DisplayId displayId) const
 {
-    return displayGroupInfo_->GetDisplayRect(displayId).width_ < displayGroupInfo_->GetDisplayRect(displayId).height_;
+    return DisplayGroupInfo::GetInstance().GetDisplayRect(displayId).width_ <
+        DisplayGroupInfo::GetInstance().GetDisplayRect(displayId).height_;
 }
 
 void WindowLayoutPolicy::NotifyClientAndAnimation(const sptr<WindowNode>& node,
@@ -397,7 +395,7 @@ Rect WindowLayoutPolicy::CalcEntireWindowHotZone(const sptr<WindowNode>& node, c
             rect.height_ += (hotZoneY + hotZoneY);
         }
     } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) {
-        rect = displayGroupInfo_->GetDisplayRect(node->GetDisplayId());
+        rect = DisplayGroupInfo::GetInstance().GetDisplayRect(node->GetDisplayId());
     } else if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
         rect.posX_ -= static_cast<int32_t>(hotZoneX);
         rect.posY_ -= static_cast<int32_t>(hotZoneY);
@@ -409,7 +407,7 @@ Rect WindowLayoutPolicy::CalcEntireWindowHotZone(const sptr<WindowNode>& node, c
 
 void WindowLayoutPolicy::CalcAndSetNodeHotZone(const Rect& winRect, const sptr<WindowNode>& node) const
 {
-    float virtualPixelRatio = displayGroupInfo_->GetDisplayVirtualPixelRatio(node->GetDisplayId());
+    float virtualPixelRatio = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId());
     TransformHelper::Vector2 hotZoneScale(1, 1);
     if (node->GetWindowProperty()->isNeedComputerTransform()) {
         node->ComputeTransform();
@@ -478,8 +476,8 @@ WindowSizeLimits WindowLayoutPolicy::GetSystemSizeLimits(const sptr<WindowNode>&
 
 void WindowLayoutPolicy::UpdateWindowSizeLimits(const sptr<WindowNode>& node)
 {
-    const auto& displayRect = displayGroupInfo_->GetDisplayRect(node->GetDisplayId());
-    const auto& virtualPixelRatio = displayGroupInfo_->GetDisplayVirtualPixelRatio(node->GetDisplayId());
+    const auto& displayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(node->GetDisplayId());
+    const auto& virtualPixelRatio = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId());
     const auto& systemLimits = GetSystemSizeLimits(node, displayRect, virtualPixelRatio);
     const auto& customizedLimits = node->GetWindowSizeLimits();
 
@@ -533,12 +531,12 @@ void WindowLayoutPolicy::UpdateWindowSizeLimits(const sptr<WindowNode>& node)
 
 AvoidPosType WindowLayoutPolicy::GetAvoidPosType(const Rect& rect, DisplayId displayId) const
 {
-    const auto& displayRectMap = displayGroupInfo_->GetAllDisplayRects();
+    const auto& displayRectMap = DisplayGroupInfo::GetInstance().GetAllDisplayRects();
     if (displayRectMap.find(displayId) == std::end(displayRectMap)) {
         WLOGFE("GetAvoidPosType fail. Get display fail. displayId: %{public}" PRIu64"", displayId);
         return AvoidPosType::AVOID_POS_UNKNOWN;
     }
-    const auto& displayRect = displayGroupInfo_->GetDisplayRect(displayId);
+    const auto& displayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(displayId);
     return WindowHelper::GetAvoidPosType(rect, displayRect);
 }
 
@@ -626,8 +624,7 @@ static void AdjustFixedOrientationRSSurfaceNode(const sptr<WindowNode>& node, co
     surfaceNode->SetRotation(rotation);
 }
 
-static void SetBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect,
-    sptr<DisplayGroupInfo> displayGroupInfo)
+static void SetBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect)
 {
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT ||
         node->GetWindowSizeChangeReason() == WindowSizeChangeReason::TRANSFORM) {
@@ -650,6 +647,7 @@ static void SetBounds(const sptr<WindowNode>& node, const Rect& winRect, const R
         "winRect: [%{public}d, %{public}d, %{public}d, %{public}d],  %{public}u", node->GetWindowName().c_str(),
         node->GetWindowId(), preRect.posX_, preRect.posY_, preRect.width_, preRect.height_,
         winRect.posX_, winRect.posY_, winRect.width_, winRect.height_, node->GetWindowSizeChangeReason());
+    auto& displayGroupInfo = DisplayGroupInfo::GetInstance();
     if (node->leashWinSurfaceNode_) {
         if (winRect != preRect) {
             // avoid animation interpreted when client coming
@@ -662,25 +660,24 @@ static void SetBounds(const sptr<WindowNode>& node, const Rect& winRect, const R
             node->surfaceNode_->SetBounds(0, 0, winRect.width_, winRect.height_);
         }
         AdjustFixedOrientationRSSurfaceNode(node, winRect, node->leashWinSurfaceNode_,
-            displayGroupInfo->GetDisplayInfo(node->GetDisplayId()));
+            displayGroupInfo.GetDisplayInfo(node->GetDisplayId()));
     } else if (node->surfaceNode_) {
         node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
         AdjustFixedOrientationRSSurfaceNode(node, winRect, node->surfaceNode_,
-            displayGroupInfo->GetDisplayInfo(node->GetDisplayId()));
+            displayGroupInfo.GetDisplayInfo(node->GetDisplayId()));
     }
 }
 
 void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect)
 {
     wptr<WindowNode> weakNode = node;
-    wptr<DisplayGroupInfo> displayGroupInfo = displayGroupInfo_;
-    auto SetBoundsFunc = [weakNode, winRect, preRect, displayGroupInfo]() {
+    auto SetBoundsFunc = [weakNode, winRect, preRect]() {
         auto winNode = weakNode.promote();
         if (winNode == nullptr) {
             WLOGI("winNode is nullptr");
             return;
         }
-        SetBounds(winNode, winRect, preRect, displayGroupInfo.promote());
+        SetBounds(winNode, winRect, preRect);
     };
 
     switch (node->GetWindowSizeChangeReason()) {
@@ -764,8 +761,8 @@ void WindowLayoutPolicy::GetStoragedAspectRatio(const sptr<WindowNode>& node)
 void WindowLayoutPolicy::FixWindowRectWithinDisplay(const sptr<WindowNode>& node) const
 {
     auto displayId = node->GetDisplayId();
-    const Rect& displayRect = displayGroupInfo_->GetDisplayRect(displayId);
-    auto displayInfo = displayGroupInfo_->GetDisplayInfo(displayId);
+    const Rect& displayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(displayId);
+    auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(displayId);
     auto type = node->GetWindowType();
     Rect rect = node->GetRequestRect();
     switch (type) {

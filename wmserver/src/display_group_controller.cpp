@@ -142,9 +142,10 @@ void DisplayGroupController::ProcessCrossNodes(DisplayId defaultDisplayId, Displ
 
 void DisplayGroupController::UpdateWindowShowingDisplays(const sptr<WindowNode>& node)
 {
-    auto leftDisplayId = displayGroupInfo_->GetLeftDisplayId();
-    auto rightDisplayId = displayGroupInfo_->GetRightDisplayId();
-    auto displayRectMap = displayGroupInfo_->GetAllDisplayRects();
+    auto& displayGroupInfo = DisplayGroupInfo::GetInstance();
+    auto leftDisplayId = displayGroupInfo.GetLeftDisplayId();
+    auto rightDisplayId = displayGroupInfo.GetRightDisplayId();
+    auto displayRectMap = displayGroupInfo.GetAllDisplayRects();
     auto showingDisplays = std::vector<DisplayId>();
     const auto& winRect = node->GetWindowRect();
     for (auto& elem : displayRectMap) {
@@ -193,7 +194,7 @@ void DisplayGroupController::UpdateWindowDisplayIdIfNeeded(const sptr<WindowNode
     } else {
         // if more than half width of the window is showing on the display, means the window belongs to this display
         int32_t halfWidth = static_cast<int32_t>(winRect.width_ * 0.5);
-        const auto& displayRectMap = displayGroupInfo_->GetAllDisplayRects();
+        const auto& displayRectMap = DisplayGroupInfo::GetInstance().GetAllDisplayRects();
         for (auto& elem : displayRectMap) {
             auto& displayRect = elem.second;
             if ((winRect.posX_ < displayRect.posX_) &&
@@ -226,7 +227,7 @@ void DisplayGroupController::UpdateWindowDisplayIdIfNeeded(const sptr<WindowNode
 void DisplayGroupController::ChangeToRectInDisplayGroup(const sptr<WindowNode>& node, DisplayId displayId)
 {
     Rect requestRect = node->GetRequestRect();
-    const Rect& displayRect = displayGroupInfo_->GetDisplayRect(displayId);
+    const Rect& displayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(displayId);
     requestRect.posX_ += displayRect.posX_;
     requestRect.posY_ += displayRect.posY_;
     node->SetRequestRect(requestRect);
@@ -316,8 +317,8 @@ void DisplayGroupController::MoveNotCrossNodeToDefaultDisplay(const sptr<WindowN
 {
     WLOGFD("windowId: %{public}d, displayId: %{public}" PRIu64"", node->GetWindowId(), displayId);
     // update new rect in display group
-    const Rect& srcDisplayRect = displayGroupInfo_->GetDisplayRect(displayId);
-    const Rect& dstDisplayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayId_);
+    const Rect& srcDisplayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(displayId);
+    const Rect& dstDisplayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(defaultDisplayId_);
     Rect newRect = node->GetRequestRect();
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_POINTER) {
         newRect.posX_ = static_cast<int32_t>(dstDisplayRect.width_ / 2); // default pointerX : displayRect.width / 2
@@ -399,7 +400,7 @@ void DisplayGroupController::ProcessDisplayCreate(DisplayId defaultDisplayId, sp
     InitNewDisplay(displayId);
 
     // add displayInfo in displayGroupInfo
-    displayGroupInfo_->AddDisplayInfo(displayInfo);
+    DisplayGroupInfo::GetInstance().AddDisplayInfo(displayInfo);
 
     // modify RSTree and window tree of displayGroup for cross-display nodes
     ProcessCrossNodes(defaultDisplayId, DisplayStateChangeType::CREATE);
@@ -416,8 +417,9 @@ void DisplayGroupController::ProcessDisplayDestroy(DisplayId defaultDisplayId, s
                                                    const std::map<DisplayId, Rect>& displayRectMap,
                                                    std::vector<uint32_t>& windowIds)
 {
+    defaultDisplayId_ = defaultDisplayId;
+    DisplayGroupInfo::GetInstance().SetDefaultDisplayId(defaultDisplayId);
     DisplayId displayId = displayInfo->GetDisplayId();
-
     // delete nodes and map element of deleted display
     ProcessNotCrossNodesOnDestroyedDisplay(displayId, windowIds);
     // modify RSTree and window tree of displayGroup for cross-display nodes
@@ -479,12 +481,15 @@ void DisplayGroupController::ProcessDisplayChange(DisplayId defaultDisplayId, sp
                                                   const std::map<DisplayId, Rect>& displayRectMap,
                                                   DisplayStateChangeType type)
 {
+    defaultDisplayId_ = defaultDisplayId;
+    auto& displayGroupInfo = DisplayGroupInfo::GetInstance();
+    displayGroupInfo.SetDefaultDisplayId(defaultDisplayId);
     DisplayId displayId = displayInfo->GetDisplayId();
     WLOGI("display change, displayId: %{public}" PRIu64", type: %{public}d", displayId, type);
     switch (type) {
         case DisplayStateChangeType::UPDATE_ROTATION: {
-            displayGroupInfo_->SetDisplayRotation(displayId, displayInfo->GetRotation());
-            displayGroupInfo_->SetDisplayOrientation(displayId, displayInfo->GetDisplayOrientation());
+            displayGroupInfo.SetDisplayRotation(displayId, displayInfo->GetRotation());
+            displayGroupInfo.SetDisplayOrientation(displayId, displayInfo->GetDisplayOrientation());
             [[fallthrough]];
         }
         case DisplayStateChangeType::DISPLAY_COMPRESS:
@@ -493,7 +498,7 @@ void DisplayGroupController::ProcessDisplayChange(DisplayId defaultDisplayId, sp
             break;
         }
         case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
-            displayGroupInfo_->SetDisplayVirtualPixelRatio(displayId, displayInfo->GetVirtualPixelRatio());
+            displayGroupInfo.SetDisplayVirtualPixelRatio(displayId, displayInfo->GetVirtualPixelRatio());
             windowNodeContainer_->GetLayoutPolicy()->ProcessDisplayVprChange(displayId);
             break;
         }
@@ -524,7 +529,7 @@ void DisplayGroupController::ClearMapOfDestroyedDisplay(DisplayId displayId)
     sysBarTintMaps_.erase(displayId);
     sysBarNodeMaps_.erase(displayId);
     displayGroupWindowTree_.erase(displayId);
-    displayGroupInfo_->RemoveDisplayInfo(displayId);
+    DisplayGroupInfo::GetInstance().RemoveDisplayInfo(displayId);
     windowPairMap_.erase(displayId);
 }
 
@@ -538,7 +543,7 @@ sptr<WindowPair> DisplayGroupController::GetWindowPairByDisplayId(DisplayId disp
 
 void DisplayGroupController::ProcessWindowPairWhenDisplayChange(bool rotateDisplay)
 {
-    for (auto& elem : displayGroupInfo_->GetAllDisplayRects()) {
+    for (auto& elem : DisplayGroupInfo::GetInstance().GetAllDisplayRects()) {
         const auto& displayId = elem.first;
         const auto& windowPair = GetWindowPairByDisplayId(displayId);
         if (windowPair == nullptr) {
@@ -562,7 +567,7 @@ void DisplayGroupController::ProcessWindowPairWhenDisplayChange(bool rotateDispl
 
 void DisplayGroupController::SetSplitRatioConfig(const SplitRatioConfig& splitRatioConfig)
 {
-    for (auto& elem : displayGroupInfo_->GetAllDisplayRects()) {
+    for (auto& elem : DisplayGroupInfo::GetInstance().GetAllDisplayRects()) {
         const auto& displayId = elem.first;
         const auto& windowPair = GetWindowPairByDisplayId(displayId);
         if (windowPair == nullptr) {
@@ -581,7 +586,7 @@ void DisplayGroupController::UpdateSplitRatioPoints(DisplayId displayId)
         WLOGFE("WindowPair is nullptr, displayId: %{public}" PRIu64"", displayId);
         return;
     }
-    auto displayRects = displayGroupInfo_->GetAllDisplayRects();
+    auto displayRects = DisplayGroupInfo::GetInstance().GetAllDisplayRects();
     if (displayRects.find(displayId) == displayRects.end()) {
         return;
     }

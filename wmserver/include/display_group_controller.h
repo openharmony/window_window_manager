@@ -36,9 +36,8 @@ class WindowNodeContainer;
 
 class DisplayGroupController : public RefBase {
 public:
-    DisplayGroupController(const sptr<WindowNodeContainer>& windowNodeContainer,
-        const sptr<DisplayGroupInfo>& displayGroupInfo)
-        : windowNodeContainer_(windowNodeContainer), displayGroupInfo_(displayGroupInfo) {}
+    DisplayGroupController(const sptr<WindowNodeContainer>& windowNodeContainer)
+        : windowNodeContainer_(windowNodeContainer) {}
     ~DisplayGroupController() = default;
 
     void InitNewDisplay(DisplayId displayId);
@@ -80,7 +79,6 @@ private:
     void ProcessSystemBarRotation(const sptr<WindowNode>& node, const std::map<DisplayId, Rect>& displayRectMap);
 
     sptr<WindowNodeContainer> windowNodeContainer_;
-    sptr<DisplayGroupInfo> displayGroupInfo_;
     std::map<DisplayId, sptr<WindowPair>> windowPairMap_;
     DisplayId defaultDisplayId_ { 0 };
 };

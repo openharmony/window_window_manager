@@ -40,7 +40,7 @@ enum class DockWindowShowState : uint32_t {
 class WindowLayoutPolicy : public RefBase {
 public:
     WindowLayoutPolicy() = delete;
-    WindowLayoutPolicy(const sptr<DisplayGroupInfo>& displayGroupInfo, DisplayGroupWindowTree& displayGroupWindowTree);
+    WindowLayoutPolicy(DisplayGroupWindowTree& displayGroupWindowTree);
     ~WindowLayoutPolicy() = default;
     virtual void Launch();
     virtual void Reorder();
@@ -111,7 +111,6 @@ protected:
     Rect displayGroupRect_;
     Rect displayGroupLimitRect_;
     bool isMultiDisplay_ = false;
-    sptr<DisplayGroupInfo> displayGroupInfo_;
     mutable std::map<DisplayId, Rect> limitRectMap_;
     DisplayGroupWindowTree& displayGroupWindowTree_;
     std::map<DisplayId, Rect> restoringDividerWindowRects_;

@@ -249,14 +249,9 @@ void MoveDragController::HandleWindowRemovedOrDestroyed(uint32_t windowId)
 
 void MoveDragController::ConvertPointerPosToDisplayGroupPos(DisplayId displayId, int32_t& posX, int32_t& posY)
 {
-    auto displayRect = displayGroupInfo_->GetDisplayRect(displayId);
+    auto displayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(displayId);
     posX += displayRect.posX_;
     posY += displayRect.posY_;
-}
-
-void MoveDragController::SetDisplayGroupInfo(sptr<DisplayGroupInfo> displayGroupInfo)
-{
-    displayGroupInfo_ = displayGroupInfo;
 }
 
 void MoveDragController::HandleDisplayLimitRectChange(const std::map<DisplayId, Rect>& limitRectMap)
@@ -350,7 +345,7 @@ void MoveDragController::CalculateNewWindowRect(Rect& newRect, DisplayId display
     int32_t diffX = posX - startPointPosX;
     int32_t diffY = posY - startPointPosY;
 
-    float vpr = displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
+    float vpr = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(displayId);
     if (MathHelper::NearZero(vpr)) {
         return;
     }
@@ -393,7 +388,7 @@ void MoveDragController::HandleDragEvent(DisplayId displayId, int32_t posX, int3
     Rect newRect = moveDragProperty_->startPointRect_;
     CalculateNewWindowRect(newRect, displayId, posX, posY);
 
-    if (!CheckWindowRect(displayId, displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId), newRect)) {
+    if (!CheckWindowRect(displayId, DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(displayId), newRect)) {
         return;
     }
 

@@ -31,15 +31,14 @@ namespace {
     constexpr uint32_t MID_INTERVAL = 24;
 }
 
-WindowLayoutPolicyTile::WindowLayoutPolicyTile(const sptr<DisplayGroupInfo>& displayGroupInfo,
-    DisplayGroupWindowTree& displayGroupWindowTree)
-    : WindowLayoutPolicy(displayGroupInfo, displayGroupWindowTree)
+WindowLayoutPolicyTile::WindowLayoutPolicyTile(DisplayGroupWindowTree& displayGroupWindowTree)
+    : WindowLayoutPolicy(displayGroupWindowTree)
 {
 }
 
 void WindowLayoutPolicyTile::Launch()
 {
-    for (auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
+    for (auto& iter : DisplayGroupInfo::GetInstance().GetAllDisplayRects()) {
         const auto& displayId = iter.first;
         /*
          * Init tile rects and layout tile queue
@@ -61,7 +60,7 @@ void WindowLayoutPolicyTile::Launch()
 
 uint32_t WindowLayoutPolicyTile::GetMaxTileWinNum(DisplayId displayId) const
 {
-    float virtualPixelRatio = displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
+    float virtualPixelRatio = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(displayId);
     constexpr uint32_t half = 2;
     uint32_t edgeIntervalVp = static_cast<uint32_t>(EDGE_INTERVAL * half * virtualPixelRatio);
     uint32_t midIntervalVp = static_cast<uint32_t>(MID_INTERVAL * virtualPixelRatio);
@@ -73,14 +72,14 @@ uint32_t WindowLayoutPolicyTile::GetMaxTileWinNum(DisplayId displayId) const
 void WindowLayoutPolicyTile::InitTileRects(DisplayId displayId)
 {
     // TileLayout don't consider limitRect yet, limitDisplay equals to displayRect
-    const auto& displayRect = displayGroupInfo_->GetDisplayRect(displayId);
+    const auto& displayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(displayId);
     if (WindowHelper::IsEmptyRect(displayRect)) {
         WLOGFE("DisplayRect is empty, displayRect: %{public}" PRIu64"", displayId);
         return;
     }
 
     limitRectMap_[displayId] = displayRect;
-    float virtualPixelRatio = displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
+    float virtualPixelRatio = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(displayId);
     uint32_t edgeIntervalVp = static_cast<uint32_t>(EDGE_INTERVAL * virtualPixelRatio);
     uint32_t midIntervalVp = static_cast<uint32_t>(MID_INTERVAL * virtualPixelRatio);
 
@@ -356,7 +355,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
         winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
 
     if (!floatingWindow) { // fullscreen window
-        const auto& displayRect = displayGroupInfo_->GetDisplayRect(node->GetDisplayId());
+        const auto& displayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(node->GetDisplayId());
         const auto& limitDisplayRect = limitRectMap_[node->GetDisplayId()];
         winRect = needAvoid ? limitDisplayRect : displayRect;
     }

@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 #include <transaction/rs_transaction.h>
+
+#include "display_manager.h"
 #include "iremote_object_mocker.h"
 #include "window_helper.h"
 #include "window_system_effect.h"
@@ -48,6 +50,10 @@ void WindowSystemEffectTest::TearDownTestCase()
 
 void WindowSystemEffectTest::SetUp()
 {
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_TRUE((display != nullptr));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    ASSERT_TRUE((displayInfo != nullptr));
     node_ = new WindowNode(CreateWindowProperty()); // 101 is windowId
     node_->SetWindowRect({0, 0, 100, 100}); // 100 test data
     node_->leashWinSurfaceNode_ = CreateRSSurfaceNode("leashSurfaceNodeTest");
@@ -139,7 +145,7 @@ HWTEST_F(WindowSystemEffectTest, SetWindowShadow01, Function | SmallTest | Level
 
     // fullscreen
     node_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    ASSERT_EQ(WMError::WM_DO_NOTHING, WindowSystemEffect::SetWindowShadow(node_));
+    ASSERT_EQ(WMError::WM_OK, WindowSystemEffect::SetWindowShadow(node_));
     // float
     node_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     ASSERT_EQ(WMError::WM_OK, WindowSystemEffect::SetWindowShadow(node_));

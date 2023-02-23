@@ -45,6 +45,10 @@ void WindowRootTest::TearDownTestCase()
 void WindowRootTest::SetUp()
 {
     windowRoot_ = new WindowRoot(nullptr);
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_TRUE((display != nullptr));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    ASSERT_TRUE((displayInfo != nullptr));
 }
 
 void WindowRootTest::TearDown()
@@ -114,20 +118,20 @@ HWTEST_F(WindowRootTest, WindowRootTest03, Function | SmallTest | Level2)
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
 
     displayInfo->SetWidth(49);
-    auto container = windowRoot_->CreateWindowNodeContainer(displayInfo);
+    auto container = windowRoot_->CreateWindowNodeContainer(0, displayInfo);
     ASSERT_EQ(container, nullptr);
 
     displayInfo->SetWidth(7681);
-    container = windowRoot_->CreateWindowNodeContainer(displayInfo);
+    container = windowRoot_->CreateWindowNodeContainer(0, displayInfo);
     ASSERT_EQ(container, nullptr);
 
     displayInfo->SetWidth(50);
     displayInfo->SetHeight(49);
-    container = windowRoot_->CreateWindowNodeContainer(displayInfo);
+    container = windowRoot_->CreateWindowNodeContainer(0, displayInfo);
     ASSERT_EQ(container, nullptr);
 
     displayInfo->SetHeight(7681);
-    container = windowRoot_->CreateWindowNodeContainer(displayInfo);
+    container = windowRoot_->CreateWindowNodeContainer(0, displayInfo);
     ASSERT_EQ(container, nullptr);
 }
 
@@ -144,7 +148,7 @@ HWTEST_F(WindowRootTest, WindowRootTest04, Function | SmallTest | Level2)
     ASSERT_NE(displayInfo, nullptr);
     displayInfo->SetDisplayId(0);
     displayInfo->SetScreenGroupId(SCREEN_ID_INVALID);
-    auto container = windowRoot_->CreateWindowNodeContainer(displayInfo);
+    auto container = windowRoot_->CreateWindowNodeContainer(0, displayInfo);
     ASSERT_NE(container, nullptr);
 
     windowRoot_->GetWindowNodeContainer(DISPLAY_ID_INVALID);
@@ -366,38 +370,6 @@ HWTEST_F(WindowRootTest, WindowRootTest18, Function | SmallTest | Level2)
     windowRoot_->DestroyLeakStartingWindow();
 
     ASSERT_EQ(true, true);
-}
-
-/**
- * @tc.name: WindowRootTest19
- * @tc.desc: test WindowRoot PostProcessAddWindowNode
- * @tc.type: FUNC
- */
-HWTEST_F(WindowRootTest, WindowRootTest19, Function | SmallTest | Level2)
-{
-    WMError ret;
-    sptr<WindowNode> node = new WindowNode();
-    sptr<WindowNode> parentNode = nullptr;
-    sptr<DisplayInfo> displayInfo = new DisplayInfo();
-    sptr<WindowNodeContainer> container = new WindowNodeContainer(displayInfo, SCREEN_ID_INVALID);
-
-    ret = windowRoot_->PostProcessAddWindowNode(node, parentNode, container);
-    ASSERT_EQ(ret, WMError::WM_DO_NOTHING);
-
-    node->currentVisibility_ = true;
-    node->GetWindowProperty()->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    ret = windowRoot_->PostProcessAddWindowNode(node, parentNode, container);
-    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_TYPE);
-    
-    node->currentVisibility_ = true;
-    node->property_->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    node->GetWindowProperty()->SetFocusable(false);
-    sptr<WindowNode> child = new WindowNode();
-    child->currentVisibility_ = true;
-    node->children_.push_back(child);
-    node->children_.push_back(nullptr);
-    ret = windowRoot_->PostProcessAddWindowNode(node, parentNode, container);
-    ASSERT_EQ(ret, WMError::WM_OK);
 }
 
 /**

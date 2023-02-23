@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 #include <algorithm>
+
+#include "display_manager.h"
 #include "window_pair.h"
 #include "minimize_app.h"
 #include "common_test_utils.h"
@@ -34,6 +36,10 @@ public:
 
 void WindowPairTest::SetUpTestCase()
 {
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_TRUE((display != nullptr));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    ASSERT_TRUE((displayInfo != nullptr));
 }
 
 void WindowPairTest::TearDownTestCase()
@@ -67,7 +73,7 @@ HWTEST_F(WindowPairTest, NotifyShowRecent01, Function | SmallTest | Level2)
     sptr<WindowNode> node0 = new WindowNode(property);
     windowPair->primary_ = node0;
     windowPair->NotifyShowRecent(node0);
-    
+
     if (windowPair->secondary_ != nullptr) {
         ASSERT_EQ(WindowType::WINDOW_TYPE_LAUNCHER_RECENT, windowPair->secondary_->GetWindowType());
     }
@@ -498,7 +504,7 @@ HWTEST_F(WindowPairTest, GetOrderedPair03, Function | SmallTest | Level2)
     windowPair->primary_ = node1;
     windowPair->secondary_ = new WindowNode(property1);
     windowPair->divider_ = new WindowNode(property2);
-    
+
     ASSERT_EQ(3, windowPair->GetOrderedPair(node1).size());
 }
 

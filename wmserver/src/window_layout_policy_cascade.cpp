@@ -31,9 +31,8 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Cascade"};
 }
 
-WindowLayoutPolicyCascade::WindowLayoutPolicyCascade(const sptr<DisplayGroupInfo>& displayGroupInfo,
-    DisplayGroupWindowTree& displayGroupWindowTree)
-    : WindowLayoutPolicy(displayGroupInfo, displayGroupWindowTree)
+WindowLayoutPolicyCascade::WindowLayoutPolicyCascade(DisplayGroupWindowTree& displayGroupWindowTree)
+    : WindowLayoutPolicy(displayGroupWindowTree)
 {
     CascadeRects cascadeRects {
         .primaryRect_        = {0, 0, 0, 0},
@@ -41,7 +40,7 @@ WindowLayoutPolicyCascade::WindowLayoutPolicyCascade(const sptr<DisplayGroupInfo
         .dividerRect_        = {0, 0, 0, 0},
         .defaultCascadeRect_ = {0, 0, 0, 0},
     };
-    for (auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
+    for (auto& iter : DisplayGroupInfo::GetInstance().GetAllDisplayRects()) {
         cascadeRectsMap_.insert(std::make_pair(iter.first, cascadeRects));
     }
 }
@@ -55,7 +54,7 @@ void WindowLayoutPolicyCascade::Launch()
 void WindowLayoutPolicyCascade::Reorder()
 {
     WLOGFD("Cascade reorder start");
-    for (auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
+    for (auto& iter : DisplayGroupInfo::GetInstance().GetAllDisplayRects()) {
         DisplayId displayId = iter.first;
         Rect rect = cascadeRectsMap_[displayId].defaultCascadeRect_;
         bool isFirstReorderedWindow = true;
@@ -98,7 +97,7 @@ void WindowLayoutPolicyCascade::Reorder()
 void WindowLayoutPolicyCascade::InitAllRects()
 {
     UpdateDisplayGroupRect();
-    for (auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
+    for (auto& iter : DisplayGroupInfo::GetInstance().GetAllDisplayRects()) {
         auto displayId = iter.first;
         InitSplitRects(displayId);
         LayoutWindowTree(displayId);
@@ -252,8 +251,8 @@ void WindowLayoutPolicyCascade::InitCascadeRect(DisplayId displayId)
      * Calculate default width and height, if width or height is
      * smaller than minWidth or minHeight, use the minimum limits
      */
-    const auto& displayRect = displayGroupInfo_->GetDisplayRect(displayId);
-    auto vpr = displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
+    const auto& displayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(displayId);
+    auto vpr = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(displayId);
     uint32_t defaultW = std::max(static_cast<uint32_t>(displayRect.width_ * ratio),
                                  static_cast<uint32_t>(MIN_FLOATING_WIDTH * vpr));
     uint32_t defaultH = std::max(static_cast<uint32_t>(displayRect.height_ * ratio),
@@ -277,7 +276,7 @@ bool WindowLayoutPolicyCascade::CheckAspectRatioBySizeLimits(const sptr<WindowNo
 {
     // get new limit config with the settings of system and app
     const auto& sizeLimits = node->GetWindowUpdatedSizeLimits();
-    float vpr = displayGroupInfo_->GetDisplayVirtualPixelRatio(node->GetDisplayId());
+    float vpr = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId());
     uint32_t winFrameW = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * vpr) * 2; // 2 mean double decor width
     uint32_t winFrameH = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * vpr) +
         static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * vpr); // decor height
@@ -317,7 +316,7 @@ void WindowLayoutPolicyCascade::ComputeRectByAspectRatio(const sptr<WindowNode>&
         return;
     }
 
-    float vpr = displayGroupInfo_->GetDisplayVirtualPixelRatio(node->GetDisplayId());
+    float vpr = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId());
     uint32_t winFrameW = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * vpr) * 2; // 2 mean double decor width
     uint32_t winFrameH = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * vpr) +
         static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * vpr); // decor height
@@ -374,7 +373,7 @@ void WindowLayoutPolicyCascade::ComputeDecoratedRequestRect(const sptr<WindowNod
         return;
     }
 
-    float virtualPixelRatio = displayGroupInfo_->GetDisplayVirtualPixelRatio(node->GetDisplayId());
+    float virtualPixelRatio = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId());
     uint32_t winFrameW = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio);
     uint32_t winTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
 
@@ -437,8 +436,8 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
             break;
         case WindowMode::WINDOW_MODE_FULLSCREEN: {
             bool needAvoid = (node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
-            winRect = needAvoid ? limitRectMap_[displayId] : displayGroupInfo_->GetDisplayRect(displayId);
-            auto displayInfo = displayGroupInfo_->GetDisplayInfo(displayId);
+            winRect = needAvoid ? limitRectMap_[displayId] : DisplayGroupInfo::GetInstance().GetDisplayRect(displayId);
+            auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(displayId);
             if (displayInfo && WmsUtils::IsExpectedRotatableWindow(node->GetRequestedOrientation(),
                 displayInfo->GetDisplayOrientation())) {
                 WLOGFD("[FixOrientation] the window is expected rotatable, pre-calculated");
@@ -492,10 +491,10 @@ void WindowLayoutPolicyCascade::LimitDividerPositionBySplitRatio(DisplayId displ
 
 void WindowLayoutPolicyCascade::InitSplitRects(DisplayId displayId)
 {
-    float virtualPixelRatio = displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
+    float virtualPixelRatio = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(displayId);
     uint32_t dividerWidth = static_cast<uint32_t>(DIVIDER_WIDTH * virtualPixelRatio);
     auto& dividerRect = cascadeRectsMap_[displayId].dividerRect_;
-    const auto& displayRect = displayGroupInfo_->GetDisplayRect(displayId);
+    const auto& displayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(displayId);
     if (!IsVerticalDisplay(displayId)) {
         dividerRect = { static_cast<uint32_t>((displayRect.width_ - dividerWidth) * DEFAULT_SPLIT_RATIO), 0,
                 dividerWidth, displayRect.height_ };
@@ -511,7 +510,7 @@ void WindowLayoutPolicyCascade::SetSplitRectByDivider(const Rect& divRect, Displ
     auto& dividerRect = cascadeRectsMap_[displayId].dividerRect_;
     auto& primaryRect = cascadeRectsMap_[displayId].primaryRect_;
     auto& secondaryRect = cascadeRectsMap_[displayId].secondaryRect_;
-    const auto& displayRect = displayGroupInfo_->GetDisplayRect(displayId);
+    const auto& displayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(displayId);
 
     dividerRect.width_ = divRect.width_;
     dividerRect.height_ = divRect.height_;
@@ -580,7 +579,7 @@ Rect WindowLayoutPolicyCascade::GetCurCascadeRect(const sptr<WindowNode>& node) 
 
 Rect WindowLayoutPolicyCascade::StepCascadeRect(Rect rect, DisplayId displayId) const
 {
-    float virtualPixelRatio = displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
+    float virtualPixelRatio = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(displayId);
     uint32_t cascadeWidth = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
     uint32_t cascadeHeight = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
 
@@ -651,7 +650,7 @@ DockWindowShowState WindowLayoutPolicyCascade::GetDockWindowShowState(DisplayId 
         }
 
         dockWinRect = node->GetWindowRect();
-        auto displayRect = displayGroupInfo_->GetDisplayRect(displayId);
+        auto displayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(displayId);
         WLOGI("begin dockWinRect :[%{public}d, %{public}d, %{public}u, %{public}u]",
             dockWinRect.posX_, dockWinRect.posY_, dockWinRect.width_, dockWinRect.height_);
         if (dockWinRect.height_ < dockWinRect.width_) {
@@ -679,7 +678,7 @@ void WindowLayoutPolicyCascade::LimitFloatingWindowSize(const sptr<WindowNode>& 
         return;
     }
     Rect oriWinRect = winRect;
-    const Rect& displayRect = displayGroupInfo_->GetDisplayRect(node->GetDisplayId());
+    const Rect& displayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(node->GetDisplayId());
     UpdateFloatingWindowSizeBySizeLimits(node, displayRect, winRect);
     UpdateFloatingWindowSizeForStretchableWindow(node, displayRect, winRect);
 
@@ -761,7 +760,7 @@ void WindowLayoutPolicyCascade::FixWindowSizeByRatioIfDragBeyondLimitRegion(cons
         return;
     }
 
-    float virtualPixelRatio = displayGroupInfo_->GetDisplayVirtualPixelRatio(node->GetDisplayId());
+    float virtualPixelRatio = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId());
     uint32_t windowTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
     Rect limitRect = (node->isShowingOnMultiDisplays_) ? displayGroupLimitRect_ : limitRectMap_[node->GetDisplayId()];
     int32_t limitMinPosX = limitRect.posX_ + static_cast<int32_t>(windowTitleBarH);
@@ -879,7 +878,7 @@ void WindowLayoutPolicyCascade::FixWindowRectWhenDrag(const sptr<WindowNode>& no
 
 void WindowLayoutPolicyCascade::LimitWindowPositionWhenDrag(const sptr<WindowNode>& node, Rect& winRect) const
 {
-    float virtualPixelRatio = displayGroupInfo_->GetDisplayVirtualPixelRatio(node->GetDisplayId());
+    float virtualPixelRatio = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId());
     uint32_t windowTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
     const Rect& lastRect = node->GetWindowRect();
     Rect oriWinRect = winRect;
@@ -936,7 +935,7 @@ void WindowLayoutPolicyCascade::LimitWindowPositionWhenDrag(const sptr<WindowNod
 
 void WindowLayoutPolicyCascade::LimitWindowPositionWhenInitRectOrMove(const sptr<WindowNode>& node, Rect& winRect) const
 {
-    float virtualPixelRatio = displayGroupInfo_->GetDisplayVirtualPixelRatio(node->GetDisplayId());
+    float virtualPixelRatio = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId());
     uint32_t windowTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
 
     // if is cross-display window, the limit rect should be full limitRect

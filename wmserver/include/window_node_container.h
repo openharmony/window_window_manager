@@ -59,7 +59,6 @@ public:
     AvoidArea GetAvoidAreaByType(const sptr<WindowNode>& node, AvoidAreaType avoidAreaType) const;
     WMError MinimizeStructuredAppWindowsExceptSelf(const sptr<WindowNode>& node);
     void TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes) const;
-    Rect GetDisplayRect(DisplayId displayId) const;
     std::unordered_map<WindowType, SystemBarProperty> GetExpectImmersiveProperty(DisplayId id) const;
     uint32_t GetWindowCountByType(WindowType windowType);
     uint32_t GetMainFloatingWindowCount();
@@ -96,10 +95,6 @@ public:
     void SetMinimizedByOther(bool isMinimizedByOther);
     void GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
-    sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
-    void UpdateDisplayInfo(sptr<DisplayInfo> displayInfo);
-    std::vector<sptr<DisplayInfo>> GetAllDisplayInfo();
-    float GetDisplayVirtualPixelRatio(DisplayId displayId) const;
 
     // parentDisplayId is the same as displayId in single-display mode
     bool AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId displayId, DisplayId parentDisplayId,
@@ -204,7 +199,6 @@ private:
     sptr<WindowLayoutPolicy> layoutPolicy_;
     sptr<AvoidAreaController> avoidController_;
     sptr<DisplayGroupController> displayGroupController_;
-    sptr<DisplayGroupInfo> displayGroupInfo_;
 
     // if isFloatWindowHigher_ is true, FloatWindow should be above the full screen window.
     static bool isFloatWindowAboveFullWindow_;
