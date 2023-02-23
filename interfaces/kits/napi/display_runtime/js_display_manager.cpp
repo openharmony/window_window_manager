@@ -16,6 +16,7 @@
 #include <vector>
 #include <new>
 
+#include <hitrace_meter.h>
 #include "js_runtime_utils.h"
 #include "native_engine/native_reference.h"
 #include "display_manager.h"
@@ -109,6 +110,7 @@ NativeValue* OnGetDefaultDisplay(NativeEngine& engine, NativeCallbackInfo& info)
                 task.Reject(engine, CreateJsError(engine,
                     static_cast<int32_t>(errCode), "JsDisplayManager::OnGetDefaultDisplay failed."));
             }
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Async:GetDefaultDisplay");
             sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
             if (display != nullptr) {
                 task.Resolve(engine, CreateJsDisplayObject(engine, display));
@@ -131,6 +133,7 @@ NativeValue* OnGetDefaultDisplay(NativeEngine& engine, NativeCallbackInfo& info)
 NativeValue* OnGetDefaultDisplaySync(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGI("GetDefaultDisplaySync called");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Sync:GetDefaultDisplay");
     sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplaySync();
     if (display == nullptr) {
         WLOGFE("OnGetDefaultDisplaySync, display is nullptr.");

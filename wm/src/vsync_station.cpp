@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include <unistd.h>
 #include "vsync_station.h"
+#include <unistd.h>
+
 #include "frame_trace.h"
 #include "transaction/rs_interfaces.h"
 #include "window_manager_hilog.h"
