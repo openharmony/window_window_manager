@@ -103,6 +103,7 @@ ohos_shared_library("window_napi") {
     "ability_runtime:abilitykit_native",
     "ability_runtime:runtime",
     "c_utils:utils",
+    "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "napi:ace_napi",
   ]

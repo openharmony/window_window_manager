@@ -67,6 +67,29 @@ private:
     void ComputeRectByAspectRatio(const sptr<WindowNode>& node) const;
     bool CheckAspectRatioBySizeLimits(const sptr<WindowNode>& node, WindowSizeLimits& newLimits) const;
 
+    /*
+     * methods for floating window limitSize and position
+     */
+    DockWindowShowState GetDockWindowShowState(DisplayId displayId, Rect& dockWinRect) const;
+    void LimitFloatingWindowSize(const sptr<WindowNode>& node, Rect& winRect) const;
+    void LimitMainFloatingWindowPosition(const sptr<WindowNode>& node, Rect& winRect) const;
+    void UpdateFloatingWindowSizeForStretchableWindow(const sptr<WindowNode>& node,
+        const Rect& displayRect, Rect& winRect) const;
+    void UpdateFloatingWindowSizeBySizeLimits(const sptr<WindowNode>& node,
+        const Rect& displayRect, Rect& winRect) const;
+    void LimitWindowPositionWhenInitRectOrMove(const sptr<WindowNode>& node, Rect& winRect) const;
+    void LimitWindowPositionWhenDrag(const sptr<WindowNode>& node, Rect& winRect) const;
+    void FixWindowSizeByRatioIfDragBeyondLimitRegion(const sptr<WindowNode>& node, Rect& winRect) const;
+    void FixWindowRectWhenDrag(const sptr<WindowNode>& node, const Rect& oriWinRect, Rect& winRect) const;
+
+    /*
+     * Layout preprocess:
+     * 1) Set default cascade rect if rect is empty
+     * 2) Get aspect ratio form persistent storage
+     * 3) Fix rect within display region
+     */
+    void LayoutPreProcess(const sptr<WindowNode>& node, WindowUpdateType updateType);
+
     struct CascadeRects {
         Rect primaryRect_;
         Rect secondaryRect_;

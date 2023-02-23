@@ -156,6 +156,16 @@ void WindowLayoutPolicyCascade::LayoutDivider(const sptr<WindowNode>& node, Wind
     LayoutSplitNodes(displayId, type, true);
 }
 
+void WindowLayoutPolicyCascade::LayoutPreProcess(const sptr<WindowNode>& node, WindowUpdateType updateType)
+{
+    if (updateType == WindowUpdateType::WINDOW_UPDATE_ADDED) {
+        // Get aspect ratio from persistent storage when add window
+        GetStoragedAspectRatio(node);
+    }
+    SetDefaultCascadeRect(node);
+    FixWindowRectWithinDisplay(node);
+}
+
 void WindowLayoutPolicyCascade::PerformWindowLayout(const sptr<WindowNode>& node, WindowUpdateType updateType)
 {
     HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
@@ -164,8 +174,8 @@ void WindowLayoutPolicyCascade::PerformWindowLayout(const sptr<WindowNode>& node
     WLOGFD("windowId: %{public}u, windowType: %{public}u, updateType: %{public}u, requestRect: "
         "requestRect: [%{public}d, %{public}d, %{public}u, %{public}u]", node->GetWindowId(), windowType, updateType,
         requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_);
-    SetDefaultCascadeRect(node);
-    FixWindowRectWithinDisplay(node);
+
+    LayoutPreProcess(node, updateType);
     switch (windowType) {
         case WindowType::WINDOW_TYPE_DOCK_SLICE:
             LayoutDivider(node, updateType);
@@ -629,6 +639,346 @@ Rect WindowLayoutPolicyCascade::GetDividerRect(DisplayId displayId) const
         dividerRect = cascadeRectsMap_[displayId].dividerRect_;
     }
     return dividerRect;
+}
+
+DockWindowShowState WindowLayoutPolicyCascade::GetDockWindowShowState(DisplayId displayId, Rect& dockWinRect) const
+{
+    auto& displayWindowTree = displayGroupWindowTree_[displayId];
+    auto& nodeVec = *(displayWindowTree[WindowRootNodeType::ABOVE_WINDOW_NODE]);
+    for (auto& node : nodeVec) {
+        if (node->GetWindowType() != WindowType::WINDOW_TYPE_LAUNCHER_DOCK) {
+            continue;
+        }
+
+        dockWinRect = node->GetWindowRect();
+        auto displayRect = displayGroupInfo_->GetDisplayRect(displayId);
+        WLOGI("begin dockWinRect :[%{public}d, %{public}d, %{public}u, %{public}u]",
+            dockWinRect.posX_, dockWinRect.posY_, dockWinRect.width_, dockWinRect.height_);
+        if (dockWinRect.height_ < dockWinRect.width_) {
+            if (static_cast<uint32_t>(dockWinRect.posY_) + dockWinRect.height_ == displayRect.height_) {
+                return DockWindowShowState::SHOWN_IN_BOTTOM;
+            } else {
+                return DockWindowShowState::NOT_SHOWN;
+            }
+        } else {
+            if (dockWinRect.posX_ == 0) {
+                return DockWindowShowState::SHOWN_IN_LEFT;
+            } else if (static_cast<uint32_t>(dockWinRect.posX_) + dockWinRect.width_ == displayRect.width_) {
+                return DockWindowShowState::SHOWN_IN_RIGHT;
+            } else {
+                return DockWindowShowState::NOT_SHOWN;
+            }
+        }
+    }
+    return DockWindowShowState::NOT_SHOWN;
+}
+
+void WindowLayoutPolicyCascade::LimitFloatingWindowSize(const sptr<WindowNode>& node, Rect& winRect) const
+{
+    if (node->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
+        return;
+    }
+    Rect oriWinRect = winRect;
+    const Rect& displayRect = displayGroupInfo_->GetDisplayRect(node->GetDisplayId());
+    UpdateFloatingWindowSizeBySizeLimits(node, displayRect, winRect);
+    UpdateFloatingWindowSizeForStretchableWindow(node, displayRect, winRect);
+
+    // fix size in case of moving window when dragging
+    FixWindowRectWhenDrag(node, oriWinRect, winRect);
+}
+
+void WindowLayoutPolicyCascade::LimitMainFloatingWindowPosition(const sptr<WindowNode>& node, Rect& winRect) const
+{
+    if (!WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
+        return;
+    }
+
+    auto reason = node->GetWindowSizeChangeReason();
+    // if drag or move window, limit size and position
+    if (reason == WindowSizeChangeReason::DRAG) {
+        LimitWindowPositionWhenDrag(node, winRect);
+        FixWindowSizeByRatioIfDragBeyondLimitRegion(node, winRect);
+    } else {
+        // Limit window position, such as init window rect when show
+        LimitWindowPositionWhenInitRectOrMove(node, winRect);
+    }
+}
+
+void WindowLayoutPolicyCascade::UpdateFloatingWindowSizeForStretchableWindow(const sptr<WindowNode>& node,
+    const Rect& displayRect, Rect& winRect) const
+{
+    if (!node->GetStretchable() || !WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
+        return;
+    }
+    if (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::DRAG) {
+        const Rect &originRect = node->GetOriginRect();
+        if (originRect.height_ == 0 || originRect.width_ == 0) {
+            WLOGE("invalid originRect. window id: %{public}u", node->GetWindowId());
+            return;
+        }
+        auto dragType = node->GetDragType();
+        if (dragType == DragType::DRAG_BOTTOM_OR_TOP) {
+            // if drag height, use height to fix size.
+            winRect.width_ = winRect.height_ * originRect.width_ / originRect.height_;
+        } else if (dragType == DragType::DRAG_LEFT_TOP_CORNER || dragType == DragType::DRAG_RIGHT_TOP_CORNER ||
+                   dragType == DragType::DRAG_LEFT_OR_RIGHT) {
+            // if drag width or corner, use width to fix size.
+            winRect.height_ = winRect.width_ * originRect.height_ / originRect.width_;
+        }
+    }
+    // limit minimum size of window
+
+    const auto& sizeLimits = node->GetWindowUpdatedSizeLimits();
+    float scale = std::min(static_cast<float>(winRect.width_) / sizeLimits.minWidth_,
+        static_cast<float>(winRect.height_) / sizeLimits.minHeight_);
+    if (scale == 0) {
+        WLOGE("invalid sizeLimits");
+        return;
+    }
+    if (scale < 1.0f) {
+        winRect.width_ = static_cast<uint32_t>(static_cast<float>(winRect.width_) / scale);
+        winRect.height_ = static_cast<uint32_t>(static_cast<float>(winRect.height_) / scale);
+    }
+}
+
+void WindowLayoutPolicyCascade::FixWindowSizeByRatioIfDragBeyondLimitRegion(const sptr<WindowNode>& node,
+    Rect& winRect) const
+{
+    if (!MathHelper::NearZero(node->GetAspectRatio())) {
+        return;
+    }
+    const auto& sizeLimits = node->GetWindowUpdatedSizeLimits();
+    if (sizeLimits.maxWidth_ == sizeLimits.minWidth_ && sizeLimits.maxHeight_ == sizeLimits.minHeight_) {
+        WLOGFD("window rect can not be changed");
+        return;
+    }
+    if (winRect.height_ == 0) {
+        return;
+    }
+    float curRatio = static_cast<float>(winRect.width_) / static_cast<float>(winRect.height_);
+    if (sizeLimits.minRatio_ <= curRatio && curRatio <= sizeLimits.maxRatio_) {
+        WLOGFD("window ratio is satisfied with limit ratio, curRatio: %{public}f", curRatio);
+        return;
+    }
+
+    float virtualPixelRatio = displayGroupInfo_->GetDisplayVirtualPixelRatio(node->GetDisplayId());
+    uint32_t windowTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
+    Rect limitRect = (node->isShowingOnMultiDisplays_) ? displayGroupLimitRect_ : limitRectMap_[node->GetDisplayId()];
+    int32_t limitMinPosX = limitRect.posX_ + static_cast<int32_t>(windowTitleBarH);
+    int32_t limitMaxPosX = limitRect.posX_ + static_cast<int32_t>(limitRect.width_ - windowTitleBarH);
+    int32_t limitMinPosY = limitRect.posY_;
+    int32_t limitMaxPosY = limitRect.posY_ + static_cast<int32_t>(limitRect.height_ - windowTitleBarH);
+
+    Rect dockWinRect;
+    DockWindowShowState dockShownState = GetDockWindowShowState(node->GetDisplayId(), dockWinRect);
+    WLOGFD("dock window show type: %{public}u", dockShownState);
+    if (dockShownState == DockWindowShowState::SHOWN_IN_BOTTOM) {
+        limitMaxPosY = dockWinRect.posY_ - static_cast<int32_t>(windowTitleBarH);
+    } else if (dockShownState == DockWindowShowState::SHOWN_IN_LEFT) {
+        limitMinPosX = dockWinRect.posX_ + static_cast<int32_t>(dockWinRect.width_ + windowTitleBarH);
+    } else if (dockShownState == DockWindowShowState::SHOWN_IN_RIGHT) {
+        limitMaxPosX = dockWinRect.posX_ - static_cast<int32_t>(windowTitleBarH);
+    }
+
+    float newRatio = curRatio < sizeLimits.minRatio_ ? sizeLimits.minRatio_ : sizeLimits.maxRatio_;
+    if ((winRect.posX_ + static_cast<int32_t>(winRect.width_) == limitMinPosX) || (winRect.posX_ == limitMaxPosX)) {
+        // height can not be changed
+        if (sizeLimits.maxHeight_ == sizeLimits.minHeight_) {
+            return;
+        }
+        winRect.height_ = static_cast<uint32_t>(static_cast<float>(winRect.width_) / newRatio);
+    }
+
+    if ((winRect.posY_ == limitMinPosY) || (winRect.posX_ == limitMaxPosY)) {
+        // width can not be changed
+        if (sizeLimits.maxWidth_ == sizeLimits.minWidth_) {
+            return;
+        }
+        winRect.width_ = static_cast<uint32_t>(static_cast<float>(winRect.height_) * newRatio);
+    }
+    WLOGFD("After limit by ratio if beyond limit region, winRect: %{public}d %{public}d %{public}u %{public}u",
+        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+}
+
+void WindowLayoutPolicyCascade::UpdateFloatingWindowSizeBySizeLimits(const sptr<WindowNode>& node,
+    const Rect& displayRect, Rect& winRect) const
+{
+    // get new limit config with the settings of system and app
+    const auto& sizeLimits = node->GetWindowUpdatedSizeLimits();
+
+    // limit minimum size of floating (not system type) window
+    if (!WindowHelper::IsSystemWindow(node->GetWindowType()) ||
+        node->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
+        winRect.width_ = std::max(sizeLimits.minWidth_, winRect.width_);
+        winRect.height_ = std::max(sizeLimits.minHeight_, winRect.height_);
+    }
+    winRect.width_ = std::min(sizeLimits.maxWidth_, winRect.width_);
+    winRect.height_ = std::min(sizeLimits.maxHeight_, winRect.height_);
+    WLOGFD("After limit by size, winRect: %{public}d %{public}d %{public}u %{public}u",
+        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+
+    // width and height can not be changed
+    if (sizeLimits.maxWidth_ == sizeLimits.minWidth_ &&
+        sizeLimits.maxHeight_ == sizeLimits.minHeight_) {
+        winRect.width_ = sizeLimits.maxWidth_;
+        winRect.height_ = sizeLimits.maxHeight_;
+        WLOGFD("window rect can not be changed");
+        return;
+    }
+
+    if (!MathHelper::NearZero(node->GetAspectRatio())) {
+        return;
+    }
+    float curRatio = static_cast<float>(winRect.width_) / static_cast<float>(winRect.height_);
+    // there is no need to fix size by ratio if this is not main floating window
+    if (!WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode()) ||
+        (sizeLimits.minRatio_ <= curRatio && curRatio <= sizeLimits.maxRatio_)) {
+        WLOGFD("window is system window or ratio is satisfied with limits, curSize: [%{public}d, %{public}d], "
+            "curRatio: %{public}f", winRect.width_, winRect.height_, curRatio);
+        return;
+    }
+
+    float newRatio = curRatio < sizeLimits.minRatio_ ? sizeLimits.minRatio_ : sizeLimits.maxRatio_;
+    if (sizeLimits.maxWidth_ == sizeLimits.minWidth_) {
+        winRect.height_ = static_cast<uint32_t>(static_cast<float>(winRect.width_) / newRatio);
+        return;
+    }
+    if (sizeLimits.maxHeight_ == sizeLimits.minHeight_) {
+        winRect.width_ = static_cast<uint32_t>(static_cast<float>(winRect.height_) * newRatio);
+        return;
+    }
+
+    auto dragType = node->GetDragType();
+    if (dragType == DragType::DRAG_BOTTOM_OR_TOP) {
+        // if drag height, use height to fix size.
+        winRect.width_ = static_cast<uint32_t>(static_cast<float>(winRect.height_) * newRatio);
+    } else {
+        // if drag width or corner, use width to fix size.
+        winRect.height_ = static_cast<uint32_t>(static_cast<float>(winRect.width_) / newRatio);
+    }
+    WLOGI("After limit by customize config, winRect: %{public}d %{public}d %{public}u %{public}u",
+        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+}
+
+void WindowLayoutPolicyCascade::FixWindowRectWhenDrag(const sptr<WindowNode>& node,
+    const Rect& oriWinRect, Rect& winRect) const
+{
+    // fix size in case of moving window when dragging
+    const auto& lastWinRect = node->GetWindowRect();
+    if (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::DRAG) {
+        if (oriWinRect.posX_ != lastWinRect.posX_) {
+            winRect.posX_ = oriWinRect.posX_ + static_cast<int32_t>(oriWinRect.width_) -
+                static_cast<int32_t>(winRect.width_);
+        }
+        if (oriWinRect.posY_ != lastWinRect.posY_) {
+            winRect.posY_ = oriWinRect.posY_ + static_cast<int32_t>(oriWinRect.height_) -
+                static_cast<int32_t>(winRect.height_);
+        }
+    }
+}
+
+void WindowLayoutPolicyCascade::LimitWindowPositionWhenDrag(const sptr<WindowNode>& node, Rect& winRect) const
+{
+    float virtualPixelRatio = displayGroupInfo_->GetDisplayVirtualPixelRatio(node->GetDisplayId());
+    uint32_t windowTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
+    const Rect& lastRect = node->GetWindowRect();
+    Rect oriWinRect = winRect;
+
+    Rect limitRect = (node->isShowingOnMultiDisplays_) ? displayGroupLimitRect_ : limitRectMap_[node->GetDisplayId()];
+    int32_t limitMinPosX = limitRect.posX_ + static_cast<int32_t>(windowTitleBarH);
+    int32_t limitMaxPosX = limitRect.posX_ + static_cast<int32_t>(limitRect.width_ - windowTitleBarH);
+    int32_t limitMinPosY = limitRect.posY_;
+    int32_t limitMaxPosY = limitRect.posY_ + static_cast<int32_t>(limitRect.height_ - windowTitleBarH);
+
+    Rect dockWinRect;
+    DockWindowShowState dockShownState = GetDockWindowShowState(node->GetDisplayId(), dockWinRect);
+    if (dockShownState == DockWindowShowState::SHOWN_IN_BOTTOM) {
+        limitMaxPosY = dockWinRect.posY_ - static_cast<int32_t>(windowTitleBarH);
+    } else if (dockShownState == DockWindowShowState::SHOWN_IN_LEFT) {
+        limitMinPosX = dockWinRect.posX_ + static_cast<int32_t>(dockWinRect.width_ + windowTitleBarH);
+    } else if (dockShownState == DockWindowShowState::SHOWN_IN_RIGHT) {
+        limitMaxPosX = dockWinRect.posX_ - static_cast<int32_t>(windowTitleBarH);
+    }
+
+    // limitMinPosX is minimum (x + width)
+    if (oriWinRect.posX_ + static_cast<int32_t>(oriWinRect.width_) < limitMinPosX) {
+        if (oriWinRect.width_ != lastRect.width_) {
+            winRect.width_ = static_cast<uint32_t>(limitMinPosX - oriWinRect.posX_);
+        }
+    }
+    // maximum position x
+    if (oriWinRect.posX_ > limitMaxPosX) {
+        winRect.posX_ = limitMaxPosX;
+        if (oriWinRect.width_ != lastRect.width_) {
+            winRect.width_ = static_cast<uint32_t>(
+                oriWinRect.posX_ + static_cast<int32_t>(oriWinRect.width_) - winRect.posX_);
+        }
+    }
+    // minimum position y
+    if (oriWinRect.posY_ < limitMinPosY) {
+        winRect.posY_ = limitMinPosY;
+        if (oriWinRect.height_ != lastRect.height_) {
+            winRect.height_ = static_cast<uint32_t>(
+                oriWinRect.posY_ + static_cast<int32_t>(oriWinRect.height_) - winRect.posY_);
+        }
+    }
+    // maximum position y
+    if (winRect.posY_ > limitMaxPosY) {
+        winRect.posY_ = limitMaxPosY;
+        if (oriWinRect.height_ != lastRect.height_) {
+            winRect.height_ = static_cast<uint32_t>(
+                oriWinRect.posY_ + static_cast<int32_t>(oriWinRect.height_) - winRect.posY_);
+        }
+    }
+    WLOGI("After limit by position, winRect: %{public}d %{public}d %{public}u %{public}u",
+        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+}
+
+void WindowLayoutPolicyCascade::LimitWindowPositionWhenInitRectOrMove(const sptr<WindowNode>& node, Rect& winRect) const
+{
+    float virtualPixelRatio = displayGroupInfo_->GetDisplayVirtualPixelRatio(node->GetDisplayId());
+    uint32_t windowTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
+
+    // if is cross-display window, the limit rect should be full limitRect
+    Rect limitRect = (node->isShowingOnMultiDisplays_) ? displayGroupLimitRect_ : limitRectMap_[node->GetDisplayId()];
+
+    // limit position of the main floating window(window which support dragging)
+    if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
+        Rect dockWinRect;
+        DockWindowShowState dockShownState = GetDockWindowShowState(node->GetDisplayId(), dockWinRect);
+        winRect.posY_ = std::max(limitRect.posY_, winRect.posY_);
+        winRect.posY_ = std::min(limitRect.posY_ + static_cast<int32_t>(limitRect.height_ - windowTitleBarH),
+                                 winRect.posY_);
+        if (dockShownState == DockWindowShowState::SHOWN_IN_BOTTOM) {
+            WLOGFD("dock window show in bottom");
+            winRect.posY_ = std::min(dockWinRect.posY_ - static_cast<int32_t>(windowTitleBarH),
+                                     winRect.posY_);
+        }
+        winRect.posX_ = std::max(limitRect.posX_ + static_cast<int32_t>(windowTitleBarH - winRect.width_),
+                                 winRect.posX_);
+        if (dockShownState == DockWindowShowState::SHOWN_IN_LEFT) {
+            WLOGFD("dock window show in left");
+            winRect.posX_ = std::max(static_cast<int32_t>(dockWinRect.width_ + windowTitleBarH - winRect.width_),
+                                     winRect.posX_);
+        }
+        winRect.posX_ = std::min(limitRect.posX_ + static_cast<int32_t>(limitRect.width_ - windowTitleBarH),
+                                 winRect.posX_);
+        if (dockShownState == DockWindowShowState::SHOWN_IN_RIGHT) {
+            WLOGFD("dock window show in right");
+            winRect.posX_ = std::min(dockWinRect.posX_ - static_cast<int32_t>(windowTitleBarH),
+                                     winRect.posX_);
+        }
+        auto reason = node->GetWindowSizeChangeReason();
+        // if init window on pc, limit position
+        if (floatingBottomPosY_ != 0 && reason == WindowSizeChangeReason::UNDEFINED) {
+            int32_t bottomPosY = static_cast<int32_t>(floatingBottomPosY_ * virtualPixelRatio);
+            if (winRect.posY_ + static_cast<int32_t>(winRect.height_) >= bottomPosY) {
+                winRect.posY_ = limitRect.posY_;
+            }
+        }
+    }
+    WLOGI("After limit by position if init or move, winRect: %{public}d %{public}d %{public}u %{public}u",
+        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
 }
 } // Rosen
 } // OHOS

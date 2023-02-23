@@ -15,6 +15,7 @@
 #include "js_window_manager.h"
 #include <ability.h>
 #include <cinttypes>
+#include <hitrace_meter.h>
 #include <new>
 #include "ability_context.h"
 #include "display_manager.h"
@@ -505,6 +506,7 @@ NativeValue* JsWindowManager::OnFindWindow(NativeEngine& engine, NativeCallbackI
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params"));
                 return;
             }
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WM:Find %s", windowName.c_str());
             std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(windowName);
             if (jsWindowObj != nullptr && jsWindowObj->Get() != nullptr) {
                 WLOGI("Find window: %{public}s, use exist js window", windowName.c_str());
@@ -591,6 +593,8 @@ NativeValue* JsWindowManager::OnMinimizeAll(NativeEngine& engine, NativeCallback
     WLOGI("Display id = %{public}" PRIu64", err = %{public}d", static_cast<uint64_t>(displayId), errCode);
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WM:MinimizeAll: " PRIu64"",
+                static_cast<uint64_t>(displayId));
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
                 SingletonContainer::Get<WindowManager>().MinimizeAllAppWindows(static_cast<uint64_t>(displayId)));
             if (ret == WmErrorCode::WM_OK) {
