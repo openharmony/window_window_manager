@@ -92,12 +92,12 @@ ohos_shared_library("libwm") {
   if (defined(global_parts_info)) {
     if (defined(global_parts_info.resourceschedule_frame_aware_sched) ||
         defined(global_parts_info.hmosresourceschedule_resourceschedule_frame_aware_sched_override)) {
-      defines += [ "FRAEM_TRACE_ENABLE" ]
+      defines += [ "FRAME_TRACE_ENABLE" ]
       deps += [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf:frame_trace_intf" ]
       include_dirs = [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf" ]
     }
   }
-  
+
   if (!defined(global_parts_info) ||
       defined(global_parts_info.resourceschedule_resource_schedule_service)) {
     soc_perf_enable = true
