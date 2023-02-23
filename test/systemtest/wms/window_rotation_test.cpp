@@ -119,6 +119,7 @@ void WindowRotationTest::TearDown()
 {
     while (!activeWindows_.empty()) {
         ASSERT_EQ(WMError::WM_OK, activeWindows_.back()->Destroy());
+        sleep(SPLIT_TEST_SLEEP_S);
         activeWindows_.pop_back();
     }
     DisplayManager::GetInstance().UnregisterDisplayListener(displayListener_);
