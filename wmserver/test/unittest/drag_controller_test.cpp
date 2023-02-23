@@ -47,9 +47,10 @@ void DragControllerTest::SetUpTestCase()
 
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     ASSERT_TRUE((display != nullptr));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    ASSERT_TRUE((displayInfo != nullptr));
+    ASSERT_TRUE((display != nullptr));
     ASSERT_TRUE((display->GetDisplayInfo() != nullptr));
-    moveDragController_->SetDisplayGroupInfo(new DisplayGroupInfo(display->GetDisplayInfo()->GetScreenGroupId(),
-        display->GetDisplayInfo()));
     ASSERT_TRUE(moveDragController_);
     inputListener_ = moveDragController_->inputListener_;
     ASSERT_TRUE(inputListener_);
@@ -191,7 +192,7 @@ HWTEST_F(DragControllerTest, ConvertPointerPosToDisplayGroupPos, Function | Smal
     displayInfo->SetHeight(1280); // displayHeight: 1280
     displayInfo->SetOffsetX(0);
     displayInfo->SetOffsetY(0);
-    moveDragController_->displayGroupInfo_->AddDisplayInfo(displayInfo);
+    DisplayGroupInfo::GetInstance().AddDisplayInfo(displayInfo);
 
     int32_t posX = 0;
     int32_t posY = 0;
@@ -199,7 +200,7 @@ HWTEST_F(DragControllerTest, ConvertPointerPosToDisplayGroupPos, Function | Smal
 
     moveDragController_->ConvertPointerPosToDisplayGroupPos(1, posX, posY);
     moveDragController_->ConvertPointerPosToDisplayGroupPos(0, posX, posY);
-    moveDragController_->displayGroupInfo_->RemoveDisplayInfo(0);
+    DisplayGroupInfo::GetInstance().RemoveDisplayInfo(0);
 }
 
 /**
@@ -249,7 +250,7 @@ HWTEST_F(DragControllerTest, GetHotZoneRect, Function | SmallTest | Level2)
     displayInfo->SetHeight(1280); // displayHeight: 1280
     displayInfo->SetOffsetX(0);
     displayInfo->SetOffsetY(0);
-    moveDragController_->displayGroupInfo_->AddDisplayInfo(displayInfo);
+    DisplayGroupInfo::GetInstance().AddDisplayInfo(displayInfo);
     moveDragController_->moveDragProperty_ = new MoveDragProperty();
     moveDragController_->moveDragProperty_->targetDisplayId_ = 0;
     moveDragController_->moveDragProperty_->startRectExceptCorner_ = { 0, 0, 40, 40 };

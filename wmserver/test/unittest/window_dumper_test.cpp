@@ -14,6 +14,8 @@
  */
 
 #include <gtest/gtest.h>
+
+#include "display_manager.h"
 #include "window_dumper.h"
 #include "window_manager_service.h"
 #include "window_impl.h"
@@ -34,6 +36,13 @@ public:
 
 void WindowDumperTest::SetUpTestCase()
 {
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_TRUE((display != nullptr));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    ASSERT_TRUE((displayInfo != nullptr));
+
+    displayInfo->SetScreenGroupId(0);
+    WindowManagerService::GetInstance().windowRoot_->CreateWindowNodeContainer(0, displayInfo);
 }
 
 void WindowDumperTest::TearDownTestCase()

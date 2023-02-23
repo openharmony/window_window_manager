@@ -87,7 +87,7 @@ void WindowRootFuzzPart1(sptr<WindowRoot> windowRoot, sptr<WindowNode> windowNod
     windowRoot->GetWindowNodeContainer(displayId);
 
     auto displayInfo = CreateDisplayInfo(data, size);
-    windowRoot->CreateWindowNodeContainer(displayInfo);
+    windowRoot->CreateWindowNodeContainer(0, displayInfo);
 
     uint32_t windowId;
     startPos += GetObject<uint32_t>(windowId, data + startPos, size - startPos);
@@ -177,7 +177,6 @@ void WindowRootFuzzPart3(sptr<WindowRoot> windowRoot, sptr<WindowNode> windowNod
 
     DisplayId displayId;
     startPos += GetObject<DisplayId>(displayId, data + startPos, size - startPos);
-    windowRoot->GetVirtualPixelRatio(displayId);
     windowRoot->GetDisplayGroupRect(displayId);
 
     WindowSizeChangeReason windowSizeChangeReason;
@@ -311,14 +310,13 @@ void WindowRootFuzzPart6(sptr<WindowRoot> windowRoot, sptr<WindowNode> windowNod
     startPos += GetObject<bool>(isRecordedDisplay, data + startPos, size - startPos);
 
     windowRoot->GetScreenGroupId(displayId, isRecordedDisplay);
-    
+
     std::vector<DisplayId> infos;
     for (size_t i = 0; i < VECTOR_MAX_LEN; i++) {
         DisplayId disId;
         startPos += GetObject<DisplayId>(disId, data + startPos, size - startPos);
         infos.emplace_back(disId);
     }
-    windowRoot->GetAllDisplayInfos(infos);
 
     DisplayId defaultDisplayId;
     startPos += GetObject<DisplayId>(defaultDisplayId, data + startPos, size - startPos);

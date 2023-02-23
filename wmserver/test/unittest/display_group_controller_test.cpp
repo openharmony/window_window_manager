@@ -40,12 +40,12 @@ public:
     static void SetDisplayGroupInfo(DisplayId displayId, Rect displayRect);
 private:
     static sptr<WindowNodeContainer> container_;
-    static sptr<DisplayGroupInfo> displayGroupInfo_;
+    static DisplayGroupInfo& displayGroupInfo_;
     static sptr<DisplayGroupController> displayGroupController_;
 };
 
 sptr<WindowNodeContainer> DisplayGroupControllerTest::container_ = nullptr;
-sptr<DisplayGroupInfo> DisplayGroupControllerTest::displayGroupInfo_ = nullptr;
+DisplayGroupInfo& DisplayGroupControllerTest::displayGroupInfo_ = DisplayGroupInfo::GetInstance();
 sptr<DisplayGroupController> DisplayGroupControllerTest::displayGroupController_ = nullptr;
 
 void DisplayGroupControllerTest::SetUpTestCase()
@@ -54,13 +54,13 @@ void DisplayGroupControllerTest::SetUpTestCase()
     ASSERT_TRUE((display != nullptr));
     container_ = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
     displayGroupController_ = container_->displayGroupController_;
-    displayGroupInfo_ = displayGroupController_->displayGroupInfo_;
+
+    DisplayGroupInfo::GetInstance().Init(0, display->GetDisplayInfo());
 }
 
 void DisplayGroupControllerTest::TearDownTestCase()
 {
     container_ = nullptr;
-    displayGroupInfo_ = nullptr;
     displayGroupController_ = nullptr;
 }
 
@@ -96,9 +96,9 @@ void DisplayGroupControllerTest::SetDisplayGroupInfo(DisplayId displayId, Rect d
     displayInfo->SetOffsetY(displayRect.posY_);
     displayInfo->SetWidth(displayRect.width_);
     displayInfo->SetHeight(displayRect.height_);
-    displayGroupInfo_->displayInfosMap_[displayId] = displayInfo;
-    displayGroupInfo_->leftDisplayId_ = 0;
-    displayGroupInfo_->rightDisplayId_ = 1;
+    displayGroupInfo_.displayInfosMap_[displayId] = displayInfo;
+    displayGroupInfo_.leftDisplayId_ = 0;
+    displayGroupInfo_.rightDisplayId_ = 1;
 }
 
 namespace {
@@ -772,7 +772,7 @@ HWTEST_F(DisplayGroupControllerTest, UpdateNodeSizeChangeReasonWithRotation01, F
     std::vector<sptr<WindowNode>>* rootApp = displayGroupController_->GetWindowNodesByDisplayIdAndRootType(
         0, WindowRootNodeType::APP_WINDOW_NODE);
     rootApp->push_back(node1);
-    displayGroupController_->UpdateNodeSizeChangeReasonWithRotation(0, displayGroupInfo_->GetAllDisplayRects());
+    displayGroupController_->UpdateNodeSizeChangeReasonWithRotation(0, displayGroupInfo_.GetAllDisplayRects());
     ASSERT_EQ(WindowSizeChangeReason::ROTATION, node1->GetWindowSizeChangeReason());
 }
 
@@ -788,7 +788,7 @@ HWTEST_F(DisplayGroupControllerTest, UpdateNodeSizeChangeReasonWithRotation02, F
     std::vector<sptr<WindowNode>>* rootApp = displayGroupController_->GetWindowNodesByDisplayIdAndRootType(
         0, WindowRootNodeType::ABOVE_WINDOW_NODE);
     rootApp->push_back(node1);
-    displayGroupController_->UpdateNodeSizeChangeReasonWithRotation(0, displayGroupInfo_->GetAllDisplayRects());
+    displayGroupController_->UpdateNodeSizeChangeReasonWithRotation(0, displayGroupInfo_.GetAllDisplayRects());
     ASSERT_NE(WindowSizeChangeReason::ROTATION, node1->GetWindowSizeChangeReason());
 }
 
@@ -802,7 +802,7 @@ HWTEST_F(DisplayGroupControllerTest, UpdateNodeSizeChangeReasonWithRotation03, F
     displayGroupController_->displayGroupWindowTree_[0].erase(WindowRootNodeType::ABOVE_WINDOW_NODE);
     ASSERT_EQ(nullptr, displayGroupController_->GetWindowNodesByDisplayIdAndRootType(
         0, WindowRootNodeType::ABOVE_WINDOW_NODE));
-    displayGroupController_->UpdateNodeSizeChangeReasonWithRotation(0, displayGroupInfo_->GetAllDisplayRects());
+    displayGroupController_->UpdateNodeSizeChangeReasonWithRotation(0, displayGroupInfo_.GetAllDisplayRects());
     ASSERT_EQ(nullptr, displayGroupController_->GetWindowNodesByDisplayIdAndRootType(
         0, WindowRootNodeType::ABOVE_WINDOW_NODE));
 }
@@ -817,15 +817,15 @@ HWTEST_F(DisplayGroupControllerTest, ProcessDisplayChange01, Function | SmallTes
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     ASSERT_NE(nullptr, displayInfo);
     displayInfo->SetDisplayId(0);
-    displayGroupController_->ProcessDisplayChange(0, displayInfo, displayGroupInfo_->GetAllDisplayRects(),
+    displayGroupController_->ProcessDisplayChange(0, displayInfo, displayGroupInfo_.GetAllDisplayRects(),
         DisplayStateChangeType::UPDATE_ROTATION);
-    displayGroupController_->ProcessDisplayChange(0, displayInfo, displayGroupInfo_->GetAllDisplayRects(),
+    displayGroupController_->ProcessDisplayChange(0, displayInfo, displayGroupInfo_.GetAllDisplayRects(),
         DisplayStateChangeType::DISPLAY_COMPRESS);
-    displayGroupController_->ProcessDisplayChange(0, displayInfo, displayGroupInfo_->GetAllDisplayRects(),
+    displayGroupController_->ProcessDisplayChange(0, displayInfo, displayGroupInfo_.GetAllDisplayRects(),
         DisplayStateChangeType::SIZE_CHANGE);
-    displayGroupController_->ProcessDisplayChange(0, displayInfo, displayGroupInfo_->GetAllDisplayRects(),
+    displayGroupController_->ProcessDisplayChange(0, displayInfo, displayGroupInfo_.GetAllDisplayRects(),
         DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE);
-    displayGroupController_->ProcessDisplayChange(0, displayInfo, displayGroupInfo_->GetAllDisplayRects(),
+    displayGroupController_->ProcessDisplayChange(0, displayInfo, displayGroupInfo_.GetAllDisplayRects(),
         DisplayStateChangeType::DESTROY);
 }
 
@@ -838,7 +838,7 @@ HWTEST_F(DisplayGroupControllerTest, ProcessDisplaySizeChangeOrRotation01, Funct
 {
     auto oriLayoutPolicy = container_->GetLayoutPolicy();
     container_->layoutPolicy_ = nullptr;
-    displayGroupController_->ProcessDisplaySizeChangeOrRotation(0, 0, displayGroupInfo_->GetAllDisplayRects(),
+    displayGroupController_->ProcessDisplaySizeChangeOrRotation(0, 0, displayGroupInfo_.GetAllDisplayRects(),
         DisplayStateChangeType::UPDATE_ROTATION);
     ASSERT_EQ(nullptr, container_->GetLayoutPolicy());
     container_->layoutPolicy_ = oriLayoutPolicy;

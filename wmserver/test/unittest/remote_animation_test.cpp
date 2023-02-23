@@ -112,7 +112,7 @@ void RemoteAnimationTest::CreateWindowNodeContainer()
     ASSERT_TRUE((display != nullptr));
     sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
     ASSERT_TRUE((displayInfo != nullptr));
-    windowRoot_->CreateWindowNodeContainer(displayInfo);
+    windowRoot_->CreateWindowNodeContainer(0, displayInfo);
 }
 
 sptr<WindowProperty> RemoteAnimationTest::CreateWindowProperty(uint32_t windowId)

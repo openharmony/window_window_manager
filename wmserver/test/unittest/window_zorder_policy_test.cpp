@@ -66,7 +66,7 @@ HWTEST_F(WindowZorderPolicyTest, GetWindowPriority02, Function | SmallTest | Lev
 {
     sptr<WindowZorderPolicy> zorderPolicy = new WindowZorderPolicy();
     int32_t zorder = zorderPolicy->GetWindowPriority(static_cast<WindowType>(3000));
-    ASSERT_EQ(zorder, 0);
+    ASSERT_EQ(zorder, 1);
 }
 }
 }

@@ -57,20 +57,20 @@ namespace {
 AnimationConfig WindowNodeContainer::animationConfig_;
 bool WindowNodeContainer::isFloatWindowAboveFullWindow_ = false;
 uint32_t WindowNodeContainer::maxMainFloatingWindowNumber_ = 100;
- 
+
 WindowNodeContainer::WindowNodeContainer(const sptr<DisplayInfo>& displayInfo, ScreenId displayGroupId)
 {
     DisplayId displayId = displayInfo->GetDisplayId();
 
     // create and displayGroupInfo and displayGroupController
-    displayGroupInfo_ = new DisplayGroupInfo(displayGroupId, displayInfo);
-    displayGroupController_ = new DisplayGroupController(this, displayGroupInfo_);
+    DisplayGroupInfo::GetInstance().Init(displayGroupId, displayInfo);
+    displayGroupController_ = new DisplayGroupController(this);
     displayGroupController_->InitNewDisplay(displayId);
 
     // init layout policy
-    layoutPolicies_[WindowLayoutMode::CASCADE] = new WindowLayoutPolicyCascade(displayGroupInfo_,
-        displayGroupController_->displayGroupWindowTree_);
-    layoutPolicies_[WindowLayoutMode::TILE] = new WindowLayoutPolicyTile(displayGroupInfo_,
+    layoutPolicies_[WindowLayoutMode::CASCADE] = new WindowLayoutPolicyCascade(
+            displayGroupController_->displayGroupWindowTree_);
+    layoutPolicies_[WindowLayoutMode::TILE] = new WindowLayoutPolicyTile(
         displayGroupController_->displayGroupWindowTree_);
     layoutPolicy_ = layoutPolicies_[WindowLayoutMode::CASCADE];
     layoutPolicy_->Launch();
@@ -84,8 +84,8 @@ WindowNodeContainer::WindowNodeContainer(const sptr<DisplayInfo>& displayInfo, S
 
     // init avoidAreaController
     avoidController_ = new AvoidAreaController(focusedWindow_);
-    WindowInnerManager::GetInstance().SetDisplayGroupInfo(displayGroupInfo_);
-    WindowInnerManager::GetInstance().NotifyDisplayLimitRectChange(displayGroupInfo_->GetAllDisplayRects());
+    WindowInnerManager::GetInstance().NotifyDisplayLimitRectChange(
+        DisplayGroupInfo::GetInstance().GetAllDisplayRects());
 }
 
 WindowNodeContainer::~WindowNodeContainer()
@@ -1107,7 +1107,7 @@ std::unordered_map<WindowType, SystemBarProperty> WindowNodeContainer::GetExpect
             }
             if (WindowHelper::IsFullScreenWindow((*iter)->GetWindowMode())
                 && (*iter)->GetWindowType() != WindowType::WINDOW_TYPE_PANEL) {
-                auto displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(id);
+                auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(id);
                 if (displayInfo && WmsUtils::IsExpectedRotateLandscapeWindow((*iter)->GetRequestedOrientation(),
                     displayInfo->GetDisplayOrientation())) {
                     WLOGFI("Horizontal window id: %{public}d make it immersive", (*iter)->GetWindowId());
@@ -1471,14 +1471,10 @@ void WindowNodeContainer::DumpScreenWindowTree()
     WLOGD("------ dump window info end -------");
 }
 
-Rect WindowNodeContainer::GetDisplayRect(DisplayId displayId) const
-{
-    return displayGroupInfo_->GetDisplayRect(displayId);
-}
-
 bool WindowNodeContainer::IsVerticalDisplay(DisplayId displayId) const
 {
-    return displayGroupInfo_->GetDisplayRect(displayId).width_ < displayGroupInfo_->GetDisplayRect(displayId).height_;
+    return DisplayGroupInfo::GetInstance().GetDisplayRect(displayId).width_ <
+        DisplayGroupInfo::GetInstance().GetDisplayRect(displayId).height_;
 }
 
 void WindowNodeContainer::ProcessWindowStateChange(WindowState state, WindowStateChangeReason reason)
@@ -1881,7 +1877,7 @@ void WindowNodeContainer::BackUpAllAppWindows()
 void WindowNodeContainer::RestoreAllAppWindows(std::function<bool(uint32_t, WindowMode)> restoreFunc)
 {
     std::vector<uint32_t> backupWindowIds(backupWindowIds_);
-    auto displayIds = DisplayManagerServiceInner::GetInstance().GetAllDisplayIds();
+    auto displayIds = DisplayGroupInfo::GetInstance().GetAllDisplayIds();
     std::vector<sptr<WindowPair>> windowPairs;
     for (auto displayId : displayIds) {
         auto windowPair = displayGroupController_->GetWindowPairByDisplayId(displayId);
@@ -2235,7 +2231,7 @@ WMError WindowNodeContainer::SetWindowMode(sptr<WindowNode>& node, WindowMode ds
             NotifyDockWindowStateChanged(node, false);
         }
     }
-    
+
     if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
         WindowHelper::IsAppWindow(node->GetWindowType())) {
         // minimize other app window.
@@ -2299,7 +2295,7 @@ void WindowNodeContainer::ResetWindowZOrderPriorityWhenSetMode(sptr<WindowNode>&
 void WindowNodeContainer::GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones,
     const ModeChangeHotZonesConfig& config)
 {
-    const auto& displayRect = displayGroupInfo_->GetDisplayRect(displayId);
+    const auto& displayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(displayId);
 
     hotZones.fullscreen_.width_ = displayRect.width_;
     hotZones.fullscreen_.height_ = config.fullscreenRange_;
@@ -2310,26 +2306,6 @@ void WindowNodeContainer::GetModeChangeHotZones(DisplayId displayId, ModeChangeH
     hotZones.secondary_.posX_ = static_cast<int32_t>(displayRect.width_) - config.secondaryRange_;
     hotZones.secondary_.width_ = config.secondaryRange_;
     hotZones.secondary_.height_ = displayRect.height_;
-}
-
-float WindowNodeContainer::GetDisplayVirtualPixelRatio(DisplayId displayId) const
-{
-    return displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
-}
-
-sptr<DisplayInfo> WindowNodeContainer::GetDisplayInfo(DisplayId displayId)
-{
-    return displayGroupInfo_->GetDisplayInfo(displayId);
-}
-
-void WindowNodeContainer::UpdateDisplayInfo(sptr<DisplayInfo> displayInfo)
-{
-    displayGroupInfo_->UpdateDisplayInfo(displayInfo);
-}
-
-std::vector<sptr<DisplayInfo>> WindowNodeContainer::GetAllDisplayInfo()
-{
-    return displayGroupInfo_->GetAllDisplayInfo();
 }
 
 void WindowNodeContainer::UpdateCameraFloatWindowStatus(const sptr<WindowNode>& node, bool isShowing)

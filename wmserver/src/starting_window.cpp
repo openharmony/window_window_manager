@@ -19,6 +19,8 @@
 #include <display_manager_service_inner.h>
 #include <hitrace_meter.h>
 #include <transaction/rs_transaction.h>
+
+#include "display_group_info.h"
 #include "remote_animation.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
@@ -85,7 +87,7 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInf
 
     property->SetDisplayId(info->GetDisplayId());
     property->SetWindowType(info->GetWindowType());
-    auto displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(info->GetDisplayId());
+    auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(info->GetDisplayId());
     if (!(displayInfo && WmsUtils::IsExpectedRotatableWindow(orientation,
         displayInfo->GetDisplayOrientation(), property->GetWindowMode()))) {
         property->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
