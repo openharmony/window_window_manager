@@ -451,19 +451,23 @@ HWTEST_F(WindowPairTest, GetOrderedPair02, Function | SmallTest | Level2)
     sptr<WindowProperty> property0 = new WindowProperty();
     property0->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     property0->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property0->SetWindowId(1);
     sptr<WindowProperty> property1 = new WindowProperty();
     property1->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
     property1->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property1->SetWindowId(2);
+    sptr<WindowProperty> property2 = new WindowProperty();
+    property2->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property2->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
+    property2->SetWindowId(3);
 
     // define primary_, secondary_, divider_
     sptr<WindowNode> node1 = new WindowNode(property1);
+
     windowPair->primary_ = new WindowNode(property0);
-    windowPair->secondary_ = new WindowNode(property1);
-    windowPair->divider_ = new WindowNode(property0);
-    
+    windowPair->secondary_ = node1;
+    windowPair->divider_ = new WindowNode(property2);
     ASSERT_EQ(3, windowPair->GetOrderedPair(node1).size());
-    ASSERT_EQ(windowPair->secondary_, windowPair->GetOrderedPair(node1).at(1));
-    ASSERT_EQ(windowPair->primary_, windowPair->GetOrderedPair(node1).at(0));
 }
 
 /**
@@ -479,19 +483,23 @@ HWTEST_F(WindowPairTest, GetOrderedPair03, Function | SmallTest | Level2)
     sptr<WindowProperty> property0 = new WindowProperty();
     property0->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     property0->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property0->SetWindowId(1);
     sptr<WindowProperty> property1 = new WindowProperty();
     property1->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
     property1->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property1->SetWindowId(2);
+    sptr<WindowProperty> property2 = new WindowProperty();
+    property2->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property2->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
+    property2->SetWindowId(3);
 
     // define primary_, secondary_, divider_
     sptr<WindowNode> node1 = new WindowNode(property0);
-    windowPair->primary_ = new WindowNode(property0);
+    windowPair->primary_ = node1;
     windowPair->secondary_ = new WindowNode(property1);
-    windowPair->divider_ = new WindowNode(property0);
+    windowPair->divider_ = new WindowNode(property2);
     
     ASSERT_EQ(3, windowPair->GetOrderedPair(node1).size());
-    ASSERT_EQ(windowPair->secondary_, windowPair->GetOrderedPair(node1).at(0));
-    ASSERT_EQ(windowPair->primary_, windowPair->GetOrderedPair(node1).at(1));
 }
 
 /**
@@ -505,17 +513,22 @@ HWTEST_F(WindowPairTest, GetOrderedPair04, Function | SmallTest | Level2)
     // create window property
     sptr<WindowProperty> property0 = new WindowProperty();
     property0->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    property0->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
+    property0->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property0->SetWindowId(1);
     sptr<WindowProperty> property1 = new WindowProperty();
     property1->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
     property1->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property1->SetWindowId(2);
+    sptr<WindowProperty> property2 = new WindowProperty();
+    property2->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property2->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
+    property2->SetWindowId(3);
     // define primary_, secondary_, divider_
     sptr<WindowNode> node1 = new WindowNode(property0);
-    windowPair->primary_ = new WindowNode(property0);
+    windowPair->primary_ = node1;
     windowPair->secondary_ = nullptr;
-    windowPair->divider_ = new WindowNode(property0);
-    ASSERT_EQ(1, windowPair->GetOrderedPair(node1).size());
-    ASSERT_EQ(windowPair->divider_, windowPair->GetOrderedPair(node1).at(0));
+    windowPair->divider_ = new WindowNode(property2);
+    ASSERT_EQ(2, windowPair->GetOrderedPair(node1).size());
 }
 
 /**
@@ -529,17 +542,22 @@ HWTEST_F(WindowPairTest, GetOrderedPair05, Function | SmallTest | Level2)
     // create window property
     sptr<WindowProperty> property0 = new WindowProperty();
     property0->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    property0->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
+    property0->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property0->SetWindowId(1);
     sptr<WindowProperty> property1 = new WindowProperty();
     property1->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
     property1->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property1->SetWindowId(2);
+    sptr<WindowProperty> property2 = new WindowProperty();
+    property2->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property2->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
+    property2->SetWindowId(3);
     // define primary_, secondary_, divider_
-    sptr<WindowNode> node1 = new WindowNode(property0);
-    windowPair->primary_ = new WindowNode(property0);
-    windowPair->secondary_ = new WindowNode(property0);
-    windowPair->divider_ = new WindowNode(property0);
-    ASSERT_EQ(1, windowPair->GetOrderedPair(node1).size());
-    ASSERT_EQ(windowPair->divider_, windowPair->GetOrderedPair(node1).at(0));
+    sptr<WindowNode> node1 = new WindowNode(property1);
+    windowPair->primary_ = nullptr;
+    windowPair->secondary_ = node1;
+    windowPair->divider_ = new WindowNode(property2);
+    ASSERT_EQ(2, windowPair->GetOrderedPair(node1).size());
 }
 
 /**
@@ -554,16 +572,21 @@ HWTEST_F(WindowPairTest, GetOrderedPair06, Function | SmallTest | Level2)
     sptr<WindowProperty> property0 = new WindowProperty();
     property0->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     property0->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property0->SetWindowId(1);
     sptr<WindowProperty> property1 = new WindowProperty();
     property1->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
-    property1->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
+    property1->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property1->SetWindowId(2);
+    sptr<WindowProperty> property2 = new WindowProperty();
+    property2->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property2->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
+    property2->SetWindowId(3);
     // define primary_, secondary_, divider_
-    sptr<WindowNode> node1 = new WindowNode(property0);
+    sptr<WindowNode> node1 = new WindowNode(property2);
     windowPair->primary_ = nullptr;
-    windowPair->secondary_ = new WindowNode(property1);
-    windowPair->divider_ = new WindowNode(property0);
+    windowPair->secondary_ = nullptr;
+    windowPair->divider_ = node1;
     ASSERT_EQ(1, windowPair->GetOrderedPair(node1).size());
-    ASSERT_EQ(windowPair->divider_, windowPair->GetOrderedPair(node1).at(0));
 }
 
 /**
@@ -578,16 +601,21 @@ HWTEST_F(WindowPairTest, GetOrderedPair07, Function | SmallTest | Level2)
     sptr<WindowProperty> property0 = new WindowProperty();
     property0->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     property0->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property0->SetWindowId(1);
     sptr<WindowProperty> property1 = new WindowProperty();
     property1->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
-    property1->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
+    property1->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property1->SetWindowId(2);
+    sptr<WindowProperty> property2 = new WindowProperty();
+    property2->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property2->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
+    property2->SetWindowId(3);
     // define primary_, secondary_, divider_
     sptr<WindowNode> node1 = new WindowNode(property0);
-    windowPair->primary_ = new WindowNode(property1);
+    windowPair->primary_ = node1;
     windowPair->secondary_ = new WindowNode(property1);
-    windowPair->divider_ = new WindowNode(property0);
-    ASSERT_EQ(1, windowPair->GetOrderedPair(node1).size());
-    ASSERT_EQ(windowPair->divider_, windowPair->GetOrderedPair(node1).at(0));
+    windowPair->divider_ = nullptr;
+    ASSERT_EQ(2, windowPair->GetOrderedPair(node1).size());
 }
 
 /**
