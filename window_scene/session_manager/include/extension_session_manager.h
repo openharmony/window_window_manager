@@ -16,26 +16,31 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_MANAGER_H
 #define OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_MANAGER_H
 
+#include <event_handler.h>
 #include <iremote_object.h>
 #include <map>
 #include <mutex>
 #include <refbase.h>
 #include <unistd.h>
-
 #include "interfaces/include/ws_common.h"
+#include "session_manager_base.h"
 #include "wm_single_instance.h"
 namespace OHOS::Rosen {
 class ExtensionSession;
-
-class ExtensionSessionManager {
-    WM_DECLARE_SINGLE_INSTANCE(ExtensionSessionManager)
+class ExtensionSessionManager : public SessionManagerBase {
+WM_DECLARE_SINGLE_INSTANCE_BASE(ExtensionSessionManager)
 public:
     sptr<ExtensionSession> RequestExtensionSession(const SessionInfo& sessionInfo);
     WSError RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession);
     WSError RequestExtensionSessionBackground(const sptr<ExtensionSession>& extensionSession);
     WSError RequestExtensionSessionDestruction(const sptr<ExtensionSession>& extensionSession);
+protected:
+    ExtensionSessionManager();
+    virtual ~ExtensionSessionManager() = default;
 
 private:
+    void Init();
+    std::shared_ptr<MessageScheduler> mmsScheduler_ = nullptr;
     std::recursive_mutex mutex_;
     int pid_ = getpid();
     std::atomic<uint32_t> sessionId_ = INVALID_SESSION_ID;

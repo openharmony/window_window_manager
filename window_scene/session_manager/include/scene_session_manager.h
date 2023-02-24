@@ -24,15 +24,15 @@
 
 #include "interfaces/include/ws_common.h"
 #include "session/host/include/root_scene_session.h"
+#include "session_manager_base.h"
 #include "wm_single_instance.h"
 namespace OHOS::Ace::NG {
 class UIWindow;
 }
 namespace OHOS::Rosen {
 class SceneSession;
-
-class SceneSessionManager {
-    WM_DECLARE_SINGLE_INSTANCE(SceneSessionManager)
+class SceneSessionManager : public SessionManagerBase {
+WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManager)
 public:
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo);
     WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession);
@@ -40,8 +40,11 @@ public:
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession);
 
     sptr<RootSceneSession> GetRootSceneSession();
-
+protected:
+    SceneSessionManager();
+    virtual ~SceneSessionManager() = default;
 private:
+    void Init();
     std::recursive_mutex mutex_;
     int pid_ = getpid();
     std::atomic<uint32_t> sessionId_ = INVALID_SESSION_ID;

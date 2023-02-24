@@ -37,7 +37,7 @@ NativeValue* CreateJsSceneSessionObject(NativeEngine& engine, const sptr<SceneSe
     WLOGFI("[NAPI]CreateJsSceneSession");
     std::unique_ptr<JsSceneSession> jsSceneSession = std::make_unique<JsSceneSession>(engine, session);
     object->SetNativePointer(jsSceneSession.release(), JsSceneSession::Finalizer, nullptr);
-    object->SetProperty("persistentId", CreateJsValue(engine, session->GetPersistentId()));
+    object->SetProperty("persistentId", engine.CreateBigInt(session->GetPersistentId()));
     BindFunctions(engine, object, "JsSceneSession");
     return objValue;
 }
@@ -117,7 +117,6 @@ void JsSceneSession::PendingSessionActivation(const SessionInfo& info)
     if (iter == jsCbMap_.end()) {
         return;
     }
-
     std::weak_ptr<JsSceneSession> sessionWptr(shared_from_this());
     auto jsCallBack = iter->second;
     auto complete = std::make_unique<AsyncTask::CompleteCallback>(

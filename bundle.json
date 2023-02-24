@@ -70,7 +70,8 @@
             "//foundation/window/window_manager/extension/window_extension:libwindow_extension",
             "//foundation/window/window_manager/extension/window_extension:window_extension_module",
             "//foundation/window/window_manager/wm:libwm",
-            "//foundation/window/window_manager/utils:libwmutil"
+            "//foundation/window/window_manager/utils:libwmutil",
+            "//foundation/window/window_manager/window_scene/common:libwscommon"
           ],
           "service_group": [
             "//foundation/window/window_manager/sa_profile:wms_sa_profile",

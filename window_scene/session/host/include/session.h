@@ -46,8 +46,8 @@ public:
     Session(const SessionInfo& info);
     virtual ~Session() = default;
 
-    void SetPersistentId(uint32_t persistentId);
-    uint32_t GetPersistentId() const;
+    void SetPersistentId(uint64_t persistentId);
+    uint64_t GetPersistentId() const;
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
 
     virtual WSError SetActive(bool active);
@@ -109,7 +109,7 @@ private:
 
     std::shared_ptr<RSSurfaceNode> CreateSurfaceNode(std::string name);
 
-    uint32_t persistentId_ = INVALID_SESSION_ID;
+    uint64_t persistentId_ = INVALID_SESSION_ID;
     std::shared_ptr<RSSurfaceNode> surfaceNode_ = nullptr;
     SessionState state_ = SessionState::STATE_DISCONNECT;
 

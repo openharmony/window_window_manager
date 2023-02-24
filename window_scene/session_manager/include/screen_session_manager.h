@@ -20,11 +20,10 @@
 #include <memory>
 #include <refbase.h>
 #include <transaction/rs_interfaces.h>
-
+#include "common/include/message_scheduler.h"
 #include "session/screen/include/screen_session.h"
 
 namespace OHOS::Rosen {
-
 class IScreenConnectionListener : public RefBase {
 public:
     IScreenConnectionListener() = default;
@@ -51,13 +50,12 @@ protected:
 
 private:
     void Init();
-    void PostTask(AppExecFwk::EventHandler::Callback callback, int64_t delayTime = 0);
     void RegisterScreenChangeListener();
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent);
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
 
     RSInterfaces& rsInterface_;
-    std::shared_ptr<AppExecFwk::EventHandler> handler_;
+    std::shared_ptr<MessageScheduler> mmsScheduler_ = nullptr;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
 
     std::vector<sptr<IScreenConnectionListener>> screenConnectionListenerList_;
