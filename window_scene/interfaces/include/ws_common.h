@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
 #define OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
 
+#include <inttypes.h>
 #include <fstream>
 #include <map>
 #include <string>

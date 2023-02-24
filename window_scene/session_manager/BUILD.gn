@@ -35,6 +35,7 @@ ohos_shared_library("scene_session_manager") {
   deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/window/window_manager/window_scene/session:scene_session",
+    "//foundation/window/window_manager/window_scene/common:libwscommon",
   ]
 
   external_deps = [
@@ -43,6 +44,7 @@ ohos_shared_library("scene_session_manager") {
     "c_utils:utils",
     "hilog_native:libhilog",
     "ace_engine:ace_uicontent",
+    "eventhandler:libeventhandler"
   ]
 
   part_name = "window_manager"
@@ -61,6 +63,7 @@ ohos_shared_library("screen_session_manager") {
   deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/window/window_manager/window_scene/session:screen_session",
+    "//foundation/window/window_manager/window_scene/common:libwscommon",
   ]
 
   external_deps = [

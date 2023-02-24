@@ -23,7 +23,6 @@
 #include "screen_property.h"
 
 namespace OHOS::Rosen {
-
 class IScreenChangeListener : public RefBase {
 public:
     IScreenChangeListener() = default;

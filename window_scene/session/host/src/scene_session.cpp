@@ -25,8 +25,8 @@ SceneSession::SceneSession(const SessionInfo& info) : Session(info) {}
 
 WSError SceneSession::Recover()
 {
-    WLOGFI("Recover session, id: %{public}u, state: %{public}u", GetPersistentId(),
-        static_cast<uint32_t>(GetSessionState()));
+    // WLOGFI("Recover session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
+    //     static_cast<uint32_t>(GetSessionState()));
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -35,8 +35,11 @@ WSError SceneSession::Recover()
 
 WSError SceneSession::Maximum()
 {
-    WLOGFI("Maximum session, id: %{public}u, state: %{public}u", GetPersistentId(),
-        static_cast<uint32_t>(GetSessionState()));
+    // WLOGFI("Maximum session id: %{public}" PRIu64 " state: %{public}u", GetPersistentId(),
+    //     static_cast<uint32_t>(GetSessionState()));
+    uint64_t persistentId = GetPersistentId();
+    // WLOGFI("create session persistentId: %{public}" PRIu64 "", persistentId);
+    WLOGFE("session is invalid with %{public}" PRIu64 "", persistentId);
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }

@@ -15,6 +15,7 @@
 
 #include "session_manager/include/screen_session_manager.h"
 
+#include <memory>
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -69,20 +70,8 @@ void ScreenSessionManager::UnregisterScreenConnectionListener(sptr<IScreenConnec
 
 void ScreenSessionManager::Init()
 {
-    WLOGFI("Screen session manager init.");
-    auto runner = AppExecFwk::EventRunner::Create(SCREEN_SESSION_MANAGER_THREAD);
-    handler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    mmsScheduler_ = std::make_shared<MessageScheduler>(SCREEN_SESSION_MANAGER_THREAD);
     RegisterScreenChangeListener();
-}
-
-void ScreenSessionManager::PostTask(AppExecFwk::EventHandler::Callback callback, int64_t delayTime)
-{
-    if (handler_ == nullptr) {
-        WLOGFE("Failed to post task, handler is null!");
-        return;
-    }
-
-    handler_->PostTask(callback, delayTime, AppExecFwk::EventQueue::Priority::HIGH);
 }
 
 void ScreenSessionManager::RegisterScreenChangeListener()
@@ -94,7 +83,8 @@ void ScreenSessionManager::RegisterScreenChangeListener()
     if (res != StatusCode::SUCCESS) {
         auto task = [this]() { RegisterScreenChangeListener(); };
         // Retry after 50 ms.
-        PostTask(task, 50);
+        WS_CHECK_NULL_SCHE_VOID(mmsScheduler_, task);
+        mmsScheduler_->PostAsyncTask(task, 50);
     }
 }
 

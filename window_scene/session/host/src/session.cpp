@@ -33,12 +33,12 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
     }
 }
 
-void Session::SetPersistentId(uint32_t persistentId)
+void Session::SetPersistentId(uint64_t persistentId)
 {
     persistentId_ = persistentId;
 }
 
-uint32_t Session::GetPersistentId() const
+uint64_t Session::GetPersistentId() const
 {
     return persistentId_;
 }
@@ -127,8 +127,8 @@ bool Session::IsSessionValid() const
 {
     bool res = state_ > SessionState::STATE_DISCONNECT;
     if (!res) {
-        WLOGFI(
-            "session is already destroyed or not created! id: %{public}u state: %{public}u", GetPersistentId(), state_);
+        WLOGFI("session is already destroyed or not created! id: %{public}" PRIu64 " state: %{public}u",
+            GetPersistentId(), state_);
     }
     return res;
 }
@@ -150,9 +150,8 @@ RSSurfaceNode::SharedPtr Session::CreateSurfaceNode(std::string name)
 
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
-    WLOGFI("session update rect: id: %{public}u, rect[%{public}d, %{public}d, %{public}u, %{public}u], "
-           "reason:%{public}u",
-        GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
+    WLOGFI("session update rect: id: %{public}" PRIu64 ", rect[%{public}d, %{public}d, %{public}u, %{public}u], "\
+        "reason:%{public}u", GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
     if (!IsSessionValid()) {
         winRect_ = rect;
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -164,7 +163,7 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 
 WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel)
 {
-    WLOGFI("Connect session, id: %{public}u, state: %{public}u", GetPersistentId(),
+    WLOGFI("Connect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()));
     if (GetSessionState() != SessionState::STATE_DISCONNECT) {
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -188,7 +187,8 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
 WSError Session::Foreground()
 {
     SessionState state = GetSessionState();
-    WLOGFI("Foreground session, id: %{public}u, state: %{public}u", GetPersistentId(), static_cast<uint32_t>(state));
+    WLOGFI("Foreground session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
+        static_cast<uint32_t>(state));
     if (state != SessionState::STATE_CONNECT && state != SessionState::STATE_BACKGROUND) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -203,7 +203,8 @@ WSError Session::Foreground()
 WSError Session::Background()
 {
     SessionState state = GetSessionState();
-    WLOGFI("Background session, id: %{public}u, state: %{public}u", GetPersistentId(), static_cast<uint32_t>(state));
+    WLOGFI("Background session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
+        static_cast<uint32_t>(state));
     if (state < SessionState::STATE_INACTIVE) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -215,7 +216,8 @@ WSError Session::Background()
 WSError Session::Disconnect()
 {
     SessionState state = GetSessionState();
-    WLOGFI("Disconnect session, id: %{public}u, state: %{public}u", GetPersistentId(), static_cast<uint32_t>(state));
+    WLOGFI("Disconnect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
+        static_cast<uint32_t>(state));
     Background();
     if (GetSessionState() == SessionState::STATE_BACKGROUND) {
         UpdateSessionState(SessionState::STATE_DISCONNECT);
@@ -226,7 +228,7 @@ WSError Session::Disconnect()
 WSError Session::SetActive(bool active)
 {
     SessionState state = GetSessionState();
-    WLOGFI("Session update active: %{public}d, id: %{public}u, state: %{public}u", active, GetPersistentId(),
+    WLOGFI("Session update active: %{public}d, id: %{public}" PRIu64 ", state: %{public}u", active, GetPersistentId(),
         static_cast<uint32_t>(state));
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
