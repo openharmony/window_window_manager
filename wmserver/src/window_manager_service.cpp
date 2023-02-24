@@ -727,7 +727,12 @@ bool WindowManagerService::CheckAnimationPermission(const sptr<WindowProperty>& 
         WindowHelper::IsAppWindow(type)) {
         return true;
     }
-    WLOGFD("check animation permission failed");
+    // If the animation type is CUSTOM
+    if (Permission::IsSystemCalling() || Permission::IsStartByHdcd()) {
+        WLOGFD("check IsSystemCalling permission success, show with animation calling.");
+        return true;
+    }
+    WLOGFE("check animation permission failed");
     return false;
 }
 
