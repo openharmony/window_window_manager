@@ -89,7 +89,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     auto abilityToken = abilityExtensionMap_[persistentId].second;
-    AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIExtensionAbility(abilityToken);
+    AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIExtensionAbility(persistentId);
     return WSError::WS_OK;
 }
 
@@ -109,7 +109,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
     }
     auto abilityToken = abilityExtensionMap_[persistentId].second;
     AAFwk::Want resultWant;
-    AAFwk::AbilityManagerClient::GetInstance()->TerminateUIExtensionAbility(abilityToken, -1, &resultWant);
+    AAFwk::AbilityManagerClient::GetInstance()->TerminateUIExtensionAbility(persistentId, -1, &resultWant);
     abilityExtensionMap_.erase(persistentId);
     return WSError::WS_OK;
 }
