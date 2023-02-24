@@ -14,14 +14,9 @@
  */
 
 #include "window_manager_service_utils.h"
-#include "display_manager_service_inner.h"
-#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
-namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "WmsUtils"};
-}
 
 bool WmsUtils::IsFixedOrientation(Orientation orientation, WindowMode mode)
 {
@@ -66,42 +61,6 @@ bool WmsUtils::IsExpectedRotatableWindow(Orientation requestOrientation,
         return true;
     }
     return false;
-}
-
-void WmsUtils::AdjustFixedOrientationRSSurfaceNode(const sptr<WindowNode>& node, const Rect& winRect,
-    std::shared_ptr<RSSurfaceNode> surfaceNode)
-{
-    auto displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(node->GetDisplayId());
-    WmsUtils::AdjustFixedOrientationRSSurfaceNode(node, winRect, surfaceNode, displayInfo);
-}
-void WmsUtils::AdjustFixedOrientationRSSurfaceNode(const sptr<WindowNode>& node, const Rect& winRect,
-    std::shared_ptr<RSSurfaceNode> surfaceNode, sptr<DisplayInfo> displayInfo)
-{
-    if (!displayInfo) {
-        WLOGFE("display invaild");
-        return;
-    }
-    auto requestOrientation = node->GetRequestedOrientation();
-    if (!IsFixedOrientation(requestOrientation, node->GetWindowMode())) {
-        return;
-    }
-
-    auto displayOri = displayInfo->GetDisplayOrientation();
-    auto displayW = displayInfo->GetWidth();
-    auto displayH = displayInfo->GetHeight();
-    if (WINDOW_TO_DISPLAY_ORIENTATION_MAP.count(requestOrientation) == 0) {
-        return;
-    }
-    int32_t diffOrientation = static_cast<int32_t>(WINDOW_TO_DISPLAY_ORIENTATION_MAP.at(requestOrientation)) -
-        static_cast<int32_t>(displayOri);
-    float rotation = -90.f * (diffOrientation); // 90.f is base degree
-    WLOGFD("[FixOrientation] adjust param display [%{public}u, %{public}d, %{public}d], rotation: %{public}f",
-        displayOri, displayW, displayH, rotation);
-    surfaceNode->SetTranslateX((displayW - static_cast<int32_t>(winRect.width_)) / 2); // 2 is half
-    surfaceNode->SetTranslateY((displayH - static_cast<int32_t>(winRect.height_)) / 2); // 2 is half
-    surfaceNode->SetPivotX(0.5); // 0.5 means center
-    surfaceNode->SetPivotY(0.5); // 0.5 means center
-    surfaceNode->SetRotation(rotation);
 }
 }
 }

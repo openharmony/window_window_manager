@@ -596,6 +596,36 @@ bool WindowLayoutPolicy::IsFullScreenRecentWindowExist(const std::vector<sptr<Wi
     return false;
 }
 
+static void AdjustFixedOrientationRSSurfaceNode(const sptr<WindowNode>& node, const Rect& winRect,
+    std::shared_ptr<RSSurfaceNode> surfaceNode, sptr<DisplayInfo> displayInfo)
+{
+    if (!displayInfo) {
+        WLOGFE("display invaild");
+        return;
+    }
+    auto requestOrientation = node->GetRequestedOrientation();
+    if (!WmsUtils::IsFixedOrientation(requestOrientation, node->GetWindowMode())) {
+        return;
+    }
+
+    auto displayOri = displayInfo->GetDisplayOrientation();
+    auto displayW = displayInfo->GetWidth();
+    auto displayH = displayInfo->GetHeight();
+    if (WINDOW_TO_DISPLAY_ORIENTATION_MAP.count(requestOrientation) == 0) {
+        return;
+    }
+    int32_t diffOrientation = static_cast<int32_t>(WINDOW_TO_DISPLAY_ORIENTATION_MAP.at(requestOrientation)) -
+        static_cast<int32_t>(displayOri);
+    float rotation = -90.f * (diffOrientation); // 90.f is base degree
+    WLOGFD("[FixOrientation] adjust param display [%{public}u, %{public}d, %{public}d], rotation: %{public}f",
+        displayOri, displayW, displayH, rotation);
+    surfaceNode->SetTranslateX((displayW - static_cast<int32_t>(winRect.width_)) / 2); // 2 is half
+    surfaceNode->SetTranslateY((displayH - static_cast<int32_t>(winRect.height_)) / 2); // 2 is half
+    surfaceNode->SetPivotX(0.5); // 0.5 means center
+    surfaceNode->SetPivotY(0.5); // 0.5 means center
+    surfaceNode->SetRotation(rotation);
+}
+
 static void SetBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect,
     sptr<DisplayGroupInfo> displayGroupInfo)
 {
@@ -627,17 +657,15 @@ static void SetBounds(const sptr<WindowNode>& node, const Rect& winRect, const R
         }
         if (node->startingWinSurfaceNode_) {
             node->startingWinSurfaceNode_->SetBounds(0, 0, winRect.width_, winRect.height_);
-            WmsUtils::AdjustFixedOrientationRSSurfaceNode(node, winRect, node->startingWinSurfaceNode_,
-                displayGroupInfo->GetDisplayInfo(node->GetDisplayId()));
         }
         if (node->surfaceNode_) {
             node->surfaceNode_->SetBounds(0, 0, winRect.width_, winRect.height_);
-            WmsUtils::AdjustFixedOrientationRSSurfaceNode(node, winRect, node->surfaceNode_,
-                displayGroupInfo->GetDisplayInfo(node->GetDisplayId()));
         }
+        AdjustFixedOrientationRSSurfaceNode(node, winRect, node->leashWinSurfaceNode_,
+            displayGroupInfo->GetDisplayInfo(node->GetDisplayId()));
     } else if (node->surfaceNode_) {
         node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
-        WmsUtils::AdjustFixedOrientationRSSurfaceNode(node, winRect, node->surfaceNode_,
+        AdjustFixedOrientationRSSurfaceNode(node, winRect, node->surfaceNode_,
             displayGroupInfo->GetDisplayInfo(node->GetDisplayId()));
     }
 }

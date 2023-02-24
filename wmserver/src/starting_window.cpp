@@ -242,7 +242,6 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
                 return;
             }
             WLOGI("StartingWindow::FirstFrameCallback come, id: %{public}u", weakNode->GetWindowId());
-            WmsUtils::AdjustFixedOrientationRSSurfaceNode(weakNode, weakNode->GetWindowRect(), weakNode->surfaceNode_);
             if (transAnimateEnable_) {
                 SetStartingWindowAnimation(weakNode);
             } else {

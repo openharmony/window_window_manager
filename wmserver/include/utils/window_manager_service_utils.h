@@ -45,10 +45,6 @@ public:
         DisplayOrientation currentOrientation, WindowMode mode);
     static bool IsExpectedRotatableWindow(Orientation requestOrientation,
         DisplayOrientation currentOrientation);
-    static void AdjustFixedOrientationRSSurfaceNode(const sptr<WindowNode>& node, const Rect& winRect,
-        std::shared_ptr<RSSurfaceNode> surfaceNode);
-    static void AdjustFixedOrientationRSSurfaceNode(const sptr<WindowNode>& node, const Rect& winRect,
-        std::shared_ptr<RSSurfaceNode> surfaceNode, sptr<DisplayInfo> displayInfo);
 };
 }
 }
