@@ -32,5 +32,5 @@ public:
 private:
     sptr<SessionStage> sessionStage_ = nullptr;
 };
-}
+} // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WINDOW_EVENT_CHANNEL_H

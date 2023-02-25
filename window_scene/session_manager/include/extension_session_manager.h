@@ -17,8 +17,8 @@
 #define OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_MANAGER_H
 
 #include <iremote_object.h>
-#include <mutex>
 #include <map>
+#include <mutex>
 #include <refbase.h>
 #include <unistd.h>
 
@@ -28,7 +28,7 @@ namespace OHOS::Rosen {
 class ExtensionSession;
 
 class ExtensionSessionManager {
-WM_DECLARE_SINGLE_INSTANCE(ExtensionSessionManager)
+    WM_DECLARE_SINGLE_INSTANCE(ExtensionSessionManager)
 public:
     sptr<ExtensionSession> RequestExtensionSession(const SessionInfo& sessionInfo);
     WSError RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession);
@@ -36,11 +36,10 @@ public:
     WSError RequestExtensionSessionDestruction(const sptr<ExtensionSession>& extensionSession);
 
 private:
-
     std::recursive_mutex mutex_;
     int pid_ = getpid();
     std::atomic<uint32_t> sessionId_ = INVALID_SESSION_ID;
     std::map<uint32_t, std::pair<sptr<ExtensionSession>, sptr<IRemoteObject>>> abilityExtensionMap_;
 };
-}
+} // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_MANAGER_H

@@ -14,17 +14,16 @@
  */
 
 #include "session/container/include/session_stage.h"
+
 #include "session/container/include/window_event_channel.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStage"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStage" };
 }
 
-SessionStage::SessionStage(const sptr<ISession>& session) : session_(session)
-{
-}
+SessionStage::SessionStage(const sptr<ISession>& session) : session_(session) {}
 
 bool SessionStage::RegisterSessionStageStateListener(const std::shared_ptr<ISessionStageStateListener>& listener)
 {
@@ -91,9 +90,8 @@ bool SessionStage::UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& hol
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     holder.erase(std::remove_if(holder.begin(), holder.end(),
-        [listener](std::shared_ptr<T> registeredListener) {
-            return registeredListener == listener;
-        }), holder.end());
+                     [listener](std::shared_ptr<T> registeredListener) { return registeredListener == listener; }),
+        holder.end());
     return true;
 }
 
@@ -170,13 +168,13 @@ WSError SessionStage::Disconnect()
     return WSError::WS_OK;
 }
 
-WSError SessionStage::StartPendingSessionActivation(const SessionInfo& info)
+WSError SessionStage::PendingSessionActivation(const SessionInfo& info)
 {
     if (session_ == nullptr) {
         WLOGFE("session is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }
-    return session_->StartPendingSessionActivation(info);
+    return session_->PendingSessionActivation(info);
 }
 
 WSError SessionStage::SetActive(bool active)
@@ -192,8 +190,8 @@ WSError SessionStage::SetActive(bool active)
 
 WSError SessionStage::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
-    WLOGFI("update rect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u",
-        rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
+    WLOGFI("update rect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u", rect.posX_, rect.posY_,
+        rect.width_, rect.height_, reason);
     NotifySizeChange(rect, reason);
     return WSError::WS_OK;
 }

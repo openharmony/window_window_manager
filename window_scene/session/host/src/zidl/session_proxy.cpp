@@ -109,7 +109,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::StartPendingSessionActivation(const SessionInfo& info)
+WSError SessionProxy::PendingSessionActivation(const SessionInfo& info)
 {
     MessageParcel data;
     MessageParcel reply;

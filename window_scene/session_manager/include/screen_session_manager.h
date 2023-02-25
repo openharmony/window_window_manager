@@ -16,9 +16,8 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCREEN_SESSION_MANAGER_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCREEN_SESSION_MANAGER_H
 
-#include <memory>
-
 #include <event_handler.h>
+#include <memory>
 #include <refbase.h>
 #include <transaction/rs_interfaces.h>
 

@@ -19,13 +19,12 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSession"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSession" };
 }
 
 ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property)
     : screenId_(screenId), property_(property)
-{
-}
+{}
 
 void ScreenSession::RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener)
 {
@@ -34,8 +33,8 @@ void ScreenSession::RegisterScreenChangeListener(IScreenChangeListener* screenCh
         return;
     }
 
-    if (std::find(screenChangeListenerList_.begin(), screenChangeListenerList_.end(), screenChangeListener)
-        != screenChangeListenerList_.end()) {
+    if (std::find(screenChangeListenerList_.begin(), screenChangeListenerList_.end(), screenChangeListener) !=
+        screenChangeListenerList_.end()) {
         WLOGFE("Repeat to register screen change listener!");
         return;
     }
@@ -53,10 +52,10 @@ void ScreenSession::UnregisterScreenChangeListener(IScreenChangeListener* screen
         return;
     }
 
-    screenChangeListenerList_.erase(std::remove_if(screenChangeListenerList_.begin(), screenChangeListenerList_.end(),
-        [screenChangeListener](IScreenChangeListener* listener) {
-            return screenChangeListener == listener;
-        }), screenChangeListenerList_.end());
+    screenChangeListenerList_.erase(
+        std::remove_if(screenChangeListenerList_.begin(), screenChangeListenerList_.end(),
+            [screenChangeListener](IScreenChangeListener* listener) { return screenChangeListener == listener; }),
+        screenChangeListenerList_.end());
 }
 
 ScreenId ScreenSession::GetScreenId()

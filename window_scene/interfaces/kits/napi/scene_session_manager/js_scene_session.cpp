@@ -25,9 +25,9 @@
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSession"};
-    const std::string START_SCENE_CB = "requestSceneSessionActivation";
-}
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSession" };
+const std::string PENDING_SCENE_CB = "pendingSceneSessionActivation";
+} // namespace
 
 NativeValue* CreateJsSceneSessionObject(NativeEngine& engine, const sptr<SceneSession>& session)
 {
@@ -48,7 +48,7 @@ void JsSceneSession::Finalizer(NativeEngine* engine, void* data, void* hint)
     std::unique_ptr<JsSceneSession>(static_cast<JsSceneSession*>(data));
 }
 
-void BindFunctions(NativeEngine& engine, NativeObject* object, const char *moduleName)
+void BindFunctions(NativeEngine& engine, NativeObject* object, const char* moduleName)
 {
     BindNativeFunction(engine, *object, "on", moduleName, JsSceneSession::RegisterCallback);
 }
@@ -93,15 +93,15 @@ NativeValue* JsSceneSession::OnRegisterCallback(NativeEngine& engine, NativeCall
     }
 
     std::weak_ptr<JsSceneSession> sessionWptr(shared_from_this());
-    NotifyStartPendingSessionActivationFunc func = [sessionWptr](const SessionInfo& info) {
+    NotifyPendingSessionActivationFunc func = [sessionWptr](const SessionInfo& info) {
         auto jsSceneSession = sessionWptr.lock();
         if (jsSceneSession == nullptr) {
             WLOGFE("[NAPI]this scene session");
             return;
         }
-        jsSceneSession->StartPendingSessionActivation(info);
+        jsSceneSession->PendingSessionActivation(info);
     };
-    session_->SetStartPendingSessionActivationEventListener(func);
+    session_->SetPendingSessionActivationEventListener(func);
     std::shared_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
     jsCbMap_[cbType] = callbackRef;
@@ -109,57 +109,36 @@ NativeValue* JsSceneSession::OnRegisterCallback(NativeEngine& engine, NativeCall
     return engine.CreateUndefined();
 }
 
-void JsSceneSession::StartPendingSessionActivation(const SessionInfo& info)
+void JsSceneSession::PendingSessionActivation(const SessionInfo& info)
 {
-    auto session = SceneSessionManager::GetInstance().RequestSceneSession(info);
-    if (session == nullptr) {
-        WLOGFE("[NAPI]target session is nullptr");
-        return;
-    }
-
-    auto iter = jsCbMap_.find(START_SCENE_CB);
+    WLOGFI("[NAPI]pending session activation: bundleName = %{public}s, id = %{public}s", info.bundleName_.c_str(),
+        info.abilityName_.c_str());
+    auto iter = jsCbMap_.find(PENDING_SCENE_CB);
     if (iter == jsCbMap_.end()) {
         return;
     }
-    jsCallBack_ = iter->second;
-    WLOGFI("[NAPI]start scene: name = %{public}s, id = %{public}u", session->GetSessionInfo().abilityName_.c_str(),
-        session->GetPersistentId());
+
     std::weak_ptr<JsSceneSession> sessionWptr(shared_from_this());
-    auto complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [sessionWptr, session](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            auto jsSceneSession = sessionWptr.lock();
-            if (jsSceneSession == nullptr || session == nullptr) {
-                WLOGFE("[NAPI]this scene session or target session or engine is nullptr");
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [sessionWptr, info, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto jsSessionWptr = sessionWptr.lock();
+            if (jsSessionWptr == nullptr) {
+                WLOGFE("[NAPI]root session or target session or engine is nullptr");
                 return;
             }
-            NativeValue* jsSceneSessionObj = CreateJsSceneSessionObject(engine, session);
-            if (jsSceneSessionObj == nullptr) {
-                WLOGFE("[NAPI]this target session reference is nullptr");
+            NativeValue* jsSceneInfo = CreateJsSceneInfo(engine, info);
+            if (jsSceneInfo == nullptr) {
+                WLOGFE("[NAPI]this target session info is nullptr");
             }
-            NativeValue* argv[] = { jsSceneSessionObj };
-            jsSceneSession->CallJsMethod(START_SCENE_CB.c_str(), argv, ArraySize(argv));
-        }
-    );
+            NativeValue* argv[] = { jsSceneInfo };
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+        });
 
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsSceneSession::StartPendingSessionActivation", engine_,
+    AsyncTask::Schedule("JsSceneSession::PendingSessionActivation", engine_,
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
-}
-
-void JsSceneSession::CallJsMethod(const char* methodName, NativeValue* const* argv, size_t argc)
-{
-    WLOGFI("[NAPI]CallJsMethod methodName = %{public}s", methodName);
-    if (jsCallBack_ == nullptr) {
-        WLOGFE("[NAPI]jsCallBack_ is nullptr");
-        return;
-    }
-    NativeValue* method = jsCallBack_->Get();
-    if (method == nullptr) {
-        WLOGFE("[NAPI]Failed to get method callback from object");
-        return;
-    }
-    engine_.CallFunction(engine_.CreateUndefined(), method, argv, argc);
 }
 
 bool JsSceneSession::IsCallbackRegistered(std::string type, NativeValue* jsListenerObject)
@@ -182,4 +161,4 @@ sptr<SceneSession> JsSceneSession::GetNativeSession() const
 {
     return session_;
 }
-}
+} // namespace OHOS::Rosen

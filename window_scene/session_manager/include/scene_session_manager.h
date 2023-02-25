@@ -17,10 +17,11 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_H
 
 #include <iremote_object.h>
-#include <mutex>
 #include <map>
+#include <mutex>
 #include <refbase.h>
 #include <unistd.h>
+
 #include "interfaces/include/ws_common.h"
 #include "session/host/include/root_scene_session.h"
 #include "wm_single_instance.h"
@@ -31,7 +32,7 @@ namespace OHOS::Rosen {
 class SceneSession;
 
 class SceneSessionManager {
-WM_DECLARE_SINGLE_INSTANCE(SceneSessionManager)
+    WM_DECLARE_SINGLE_INSTANCE(SceneSessionManager)
 public:
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo);
     WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession);
@@ -39,8 +40,8 @@ public:
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession);
 
     sptr<RootSceneSession> GetRootSceneSession();
-private:
 
+private:
     std::recursive_mutex mutex_;
     int pid_ = getpid();
     std::atomic<uint32_t> sessionId_ = INVALID_SESSION_ID;
@@ -48,5 +49,5 @@ private:
     sptr<RootSceneSession> rootSceneSession_;
     std::shared_ptr<Ace::NG::UIWindow> rootScene_;
 };
-}
+} // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_H

@@ -16,17 +16,17 @@
 #include "js_scene_utils.h"
 
 #include <js_runtime_utils.h>
+
 #include "interfaces/include/ws_common.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneUtils"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneUtils" };
 }
 
-bool GetAbilityInfoFromJs(NativeEngine& engine, NativeObject* jsObject,
-    SessionInfo& sessionInfo)
+bool GetAbilityInfoFromJs(NativeEngine& engine, NativeObject* jsObject, SessionInfo& sessionInfo)
 {
     NativeValue* jsBundleName = jsObject->GetProperty("bundleName");
     NativeValue* jsAbilityName = jsObject->GetProperty("abilityName");
@@ -49,17 +49,17 @@ bool GetAbilityInfoFromJs(NativeEngine& engine, NativeObject* jsObject,
     return true;
 }
 
-NativeValue* CreateJsAbilityInfo(NativeEngine& engine, const sptr<SceneSession>& session)
+NativeValue* CreateJsSceneInfo(NativeEngine& engine, const SessionInfo& sessionInfo)
 {
-    WLOGFI("[NAPI]CreateJsAbilityInfo");
+    WLOGFI("[NAPI]CreateJsSceneInfo");
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
     if (object == nullptr) {
-        WLOGFE("[NAPI]Failed to convert abilityInfo to jsObject");
+        WLOGFE("[NAPI]Failed to convert sessionInfo to jsObject");
         return nullptr;
     }
-    object->SetProperty("bundleName", CreateJsValue(engine, session->GetSessionInfo().bundleName_));
-    object->SetProperty("abilityName", CreateJsValue(engine, session->GetSessionInfo().abilityName_));
+    object->SetProperty("bundleName", CreateJsValue(engine, sessionInfo.bundleName_));
+    object->SetProperty("abilityName", CreateJsValue(engine, sessionInfo.abilityName_));
     return objValue;
 }
-}
+} // namespace OHOS::Rosen

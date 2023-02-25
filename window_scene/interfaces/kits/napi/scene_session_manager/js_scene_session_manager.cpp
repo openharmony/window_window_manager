@@ -15,20 +15,19 @@
 
 #include "js_scene_session_manager.h"
 
+#include <js_runtime_utils.h>
 #include <memory>
 
-#include <js_runtime_utils.h>
-
-#include "js_scene_utils.h"
 #include "js_root_scene_session.h"
 #include "js_scene_session.h"
+#include "js_scene_utils.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSessionManager"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSessionManager" };
 }
 
 NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* exportObj)
@@ -48,11 +47,9 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
     std::unique_ptr<JsSceneSessionManager> jsSceneSessionManager = std::make_unique<JsSceneSessionManager>();
     object->SetNativePointer(jsSceneSessionManager.release(), JsSceneSessionManager::Finalizer, nullptr);
 
-    const char *moduleName = "JsSceneSessionManager";
-    BindNativeFunction(*engine, *object, "getRootSceneSession", moduleName,
-        JsSceneSessionManager::GetRootSceneSession);
-    BindNativeFunction(*engine, *object, "requestSceneSession", moduleName,
-        JsSceneSessionManager::RequestSceneSession);
+    const char* moduleName = "JsSceneSessionManager";
+    BindNativeFunction(*engine, *object, "getRootSceneSession", moduleName, JsSceneSessionManager::GetRootSceneSession);
+    BindNativeFunction(*engine, *object, "requestSceneSession", moduleName, JsSceneSessionManager::RequestSceneSession);
     BindNativeFunction(*engine, *object, "requestSceneSessionActivation", moduleName,
         JsSceneSessionManager::RequestSceneSessionActivation);
     BindNativeFunction(*engine, *object, "requestSceneSessionBackground", moduleName,
@@ -108,15 +105,15 @@ NativeValue* JsSceneSessionManager::OnGetRootSceneSession(NativeEngine& engine, 
     WLOGFI("[NAPI]OnGetRootSceneSession");
     sptr<RootSceneSession> rootSceneSession = SceneSessionManager::GetInstance().GetRootSceneSession();
     if (rootSceneSession == nullptr) {
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
-            "System is abnormal"));
+        engine.Throw(
+            CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
         return engine.CreateUndefined();
     } else {
         NativeValue* jsRootSceneSessionObj = JsRootSceneSession::Create(engine, rootSceneSession);
         if (jsRootSceneSessionObj == nullptr) {
             WLOGFE("[NAPI]jsRootSceneSessionObj is nullptr");
-            engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
-                "System is abnormal"));
+            engine.Throw(CreateJsError(
+                engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
         }
         return jsRootSceneSessionObj;
     }
@@ -143,15 +140,6 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
                 errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
             }
         }
-
-        // // parse scene option
-        // NativeNumber* nativeOption = ConvertNativeValueTo<NativeNumber>(info.argv[1]);
-        // if (nativeOption == nullptr) {
-        //     WLOGFE("[NAPI]Failed to convert parameter to session option");
-        //     errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
-        // } else {
-        //     sessionOption = static_cast<SessionOption>(static_cast<uint32_t>(*nativeOption));
-        // }
     }
 
     if (errCode == WSErrorCode::WS_ERROR_INVALID_PARAM) {
@@ -159,20 +147,20 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
-    WLOGFI("[NAPI]SceneInfo [%{public}s, %{public}s], err = %{public}d",
-        sessionInfo.bundleName_.c_str(), sessionInfo.abilityName_.c_str(), errCode);
+    WLOGFI("[NAPI]SceneInfo [%{public}s, %{public}s], err = %{public}d", sessionInfo.bundleName_.c_str(),
+        sessionInfo.abilityName_.c_str(), errCode);
     sptr<SceneSession> sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(sessionInfo);
     if (sceneSession == nullptr) {
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
-            "System is abnormal"));
+        engine.Throw(
+            CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
         return engine.CreateUndefined();
     } else {
         NativeValue* jsSceneSessionObj = CreateJsSceneSessionObject(engine, sceneSession);
         if (jsSceneSessionObj == nullptr) {
             WLOGFE("[NAPI]SceneInfo [%{public}s, %{public}s], jsSceneSessionObj is nullptr",
-            sessionInfo.bundleName_.c_str(), sessionInfo.abilityName_.c_str());
-            engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
-                "System is abnormal"));
+                sessionInfo.bundleName_.c_str(), sessionInfo.abilityName_.c_str());
+            engine.Throw(CreateJsError(
+                engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
         }
         return jsSceneSessionObj;
     }
@@ -214,32 +202,31 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionActivation(NativeEngine
 
     WLOGFI("[NAPI]RequestSceneSessionActivation: SceneInfo [%{public}s, %{public}s]",
         sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetSessionInfo().abilityName_.c_str());
-    AsyncTask::CompleteCallback complete =
-        [sceneSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (sceneSession == nullptr) {
-                task.Reject(engine,
-                    CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
-                    "Invalidate params."));
-                return;
-            }
-            WSErrorCode ret = WS_JS_TO_ERROR_CODE_MAP.at(
-                SceneSessionManager::GetInstance().RequestSceneSessionActivation(sceneSession));
-            if (ret == WSErrorCode::WS_OK) {
-                task.Resolve(engine, engine.CreateUndefined());
-            } else {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
-                    "Request scene session activation failed"));
-            }
-            WLOGFI("[NAPI]Session [%{public}s] request scene session activation end",
-                sceneSession->GetSessionInfo().abilityName_.c_str());
-        };
+    AsyncTask::CompleteCallback complete = [sceneSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        if (sceneSession == nullptr) {
+            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+                                    "Invalidate params."));
+            return;
+        }
+        WSErrorCode ret =
+            WS_JS_TO_ERROR_CODE_MAP.at(SceneSessionManager::GetInstance().RequestSceneSessionActivation(sceneSession));
+        if (ret == WSErrorCode::WS_OK) {
+            task.Resolve(engine, engine.CreateUndefined());
+        } else {
+            task.Reject(
+                engine, CreateJsError(engine, static_cast<int32_t>(ret), "Request scene session activation failed"));
+        }
+        WLOGFI("[NAPI]Session [%{public}s] request scene session activation end",
+            sceneSession->GetSessionInfo().abilityName_.c_str());
+    };
 
-    NativeValue* lastParam = (info.argc <= 1) ? nullptr :
-        ((info.argv[1] != nullptr && info.argv[1]->TypeOf() == NATIVE_FUNCTION) ?
-        info.argv[1] : nullptr);
+    NativeValue* lastParam =
+        (info.argc <= 1)
+            ? nullptr
+            : ((info.argv[1] != nullptr && info.argv[1]->TypeOf() == NATIVE_FUNCTION) ? info.argv[1] : nullptr);
     NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsSceneSessionManager::OnRequestSceneSessionActivation",
-        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    AsyncTask::Schedule("JsSceneSessionManager::OnRequestSceneSessionActivation", engine,
+        CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
 
@@ -279,32 +266,31 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackground(NativeEngine
 
     WLOGFI("[NAPI]RequestSceneSessionBackground: SceneInfo [%{public}s, %{public}s]",
         sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetSessionInfo().abilityName_.c_str());
-    AsyncTask::CompleteCallback complete =
-        [sceneSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (sceneSession == nullptr) {
-                task.Reject(engine,
-                    CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
-                    "Invalidate params."));
-                return;
-            }
-            WSErrorCode ret = WS_JS_TO_ERROR_CODE_MAP.at(
-                    SceneSessionManager::GetInstance().RequestSceneSessionBackground(sceneSession));
-            if (ret == WSErrorCode::WS_OK) {
-                task.Resolve(engine, engine.CreateUndefined());
-            } else {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
-                    "Request scene session background failed"));
-            }
-            WLOGFI("[NAPI]Session [%{public}s] request scene session background end",
-                sceneSession->GetSessionInfo().abilityName_.c_str());
-        };
+    AsyncTask::CompleteCallback complete = [sceneSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        if (sceneSession == nullptr) {
+            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+                                    "Invalidate params."));
+            return;
+        }
+        WSErrorCode ret =
+            WS_JS_TO_ERROR_CODE_MAP.at(SceneSessionManager::GetInstance().RequestSceneSessionBackground(sceneSession));
+        if (ret == WSErrorCode::WS_OK) {
+            task.Resolve(engine, engine.CreateUndefined());
+        } else {
+            task.Reject(
+                engine, CreateJsError(engine, static_cast<int32_t>(ret), "Request scene session background failed"));
+        }
+        WLOGFI("[NAPI]Session [%{public}s] request scene session background end",
+            sceneSession->GetSessionInfo().abilityName_.c_str());
+    };
 
-    NativeValue* lastParam = (info.argc <= 1) ? nullptr :
-        ((info.argv[1] != nullptr && info.argv[1]->TypeOf() == NATIVE_FUNCTION) ?
-        info.argv[1] : nullptr);
+    NativeValue* lastParam =
+        (info.argc <= 1)
+            ? nullptr
+            : ((info.argv[1] != nullptr && info.argv[1]->TypeOf() == NATIVE_FUNCTION) ? info.argv[1] : nullptr);
     NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsSceneSessionManager::OnRequestSceneSessionBackground",
-        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    AsyncTask::Schedule("JsSceneSessionManager::OnRequestSceneSessionBackground", engine,
+        CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
 
@@ -342,32 +328,31 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
 
     WLOGFI("[NAPI]RequestSceneSessionDestruction: SceneInfo [%{public}s, %{public}s]",
         sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetSessionInfo().abilityName_.c_str());
-    AsyncTask::CompleteCallback complete =
-        [sceneSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (sceneSession == nullptr) {
-                task.Reject(engine,
-                    CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
-                    "Invalidate params."));
-                return;
-            }
-            WSErrorCode ret = WS_JS_TO_ERROR_CODE_MAP.at(
-                    SceneSessionManager::GetInstance().RequestSceneSessionDestruction(sceneSession));
-            if (ret == WSErrorCode::WS_OK) {
-                task.Resolve(engine, engine.CreateUndefined());
-            } else {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
-                    "Request scene session destruction failed"));
-            }
-            WLOGFI("[NAPI]Session [%{public}s] request scene session destruction end",
-                sceneSession->GetSessionInfo().abilityName_.c_str());
-        };
+    AsyncTask::CompleteCallback complete = [sceneSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        if (sceneSession == nullptr) {
+            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+                                    "Invalidate params."));
+            return;
+        }
+        WSErrorCode ret =
+            WS_JS_TO_ERROR_CODE_MAP.at(SceneSessionManager::GetInstance().RequestSceneSessionDestruction(sceneSession));
+        if (ret == WSErrorCode::WS_OK) {
+            task.Resolve(engine, engine.CreateUndefined());
+        } else {
+            task.Reject(
+                engine, CreateJsError(engine, static_cast<int32_t>(ret), "Request scene session destruction failed"));
+        }
+        WLOGFI("[NAPI]Session [%{public}s] request scene session destruction end",
+            sceneSession->GetSessionInfo().abilityName_.c_str());
+    };
 
-    NativeValue* lastParam = (info.argc <= 1) ? nullptr :
-        ((info.argv[1] != nullptr && info.argv[1]->TypeOf() == NATIVE_FUNCTION) ?
-        info.argv[1] : nullptr);
+    NativeValue* lastParam =
+        (info.argc <= 1)
+            ? nullptr
+            : ((info.argv[1] != nullptr && info.argv[1]->TypeOf() == NATIVE_FUNCTION) ? info.argv[1] : nullptr);
     NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsSceneSessionManager::OnRequestSceneSessionDestruction",
-        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    AsyncTask::Schedule("JsSceneSessionManager::OnRequestSceneSessionDestruction", engine,
+        CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
-}
+} // namespace OHOS::Rosen

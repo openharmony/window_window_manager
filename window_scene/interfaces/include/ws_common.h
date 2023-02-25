@@ -16,15 +16,15 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
 #define OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
 
-#include "iremote_broker.h"
-
 #include <fstream>
 #include <map>
 #include <string>
 
+#include "iremote_broker.h"
+
 namespace OHOS::Rosen {
 namespace {
-    constexpr uint32_t INVALID_SESSION_ID = 0;
+constexpr uint32_t INVALID_SESSION_ID = 0;
 }
 
 enum class WSError : int32_t {
@@ -49,11 +49,11 @@ enum class WSErrorCode : int32_t {
 };
 
 const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP {
-    {WSError::WS_OK,                                   WSErrorCode::WS_OK                       },
-    {WSError::WS_DO_NOTHING,                           WSErrorCode::WS_ERROR_STATE_ABNORMALLY   },
-    {WSError::WS_ERROR_INVALID_SESSION,                WSErrorCode::WS_ERROR_STATE_ABNORMALLY   },
-    {WSError::WS_ERROR_IPC_FAILED,                     WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY  },
-    {WSError::WS_ERROR_NULLPTR,                        WSErrorCode::WS_ERROR_STATE_ABNORMALLY   },
+    { WSError::WS_OK, WSErrorCode::WS_OK },
+    { WSError::WS_DO_NOTHING, WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
+    { WSError::WS_ERROR_INVALID_SESSION, WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
+    { WSError::WS_ERROR_IPC_FAILED, WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY },
+    { WSError::WS_ERROR_NULLPTR, WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
 };
 
 enum class SessionState : uint32_t {
@@ -102,8 +102,8 @@ struct WSRect {
 
     bool IsInsideOf(const WSRect& a) const
     {
-        return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
-            posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
+        return (posX_ >= a.posX_ && posY_ >= a.posY_ && posX_ + width_ <= a.posX_ + a.width_ &&
+                posY_ + height_ <= a.posY_ + a.height_);
     }
 };
 

@@ -19,10 +19,11 @@
 #include <native_engine/native_engine.h>
 #include <native_engine/native_value.h>
 
+#include "refbase.h"
 #include "session/host/include/root_scene_session.h"
 
 namespace OHOS::Rosen {
-class JsRootSceneSession {
+class JsRootSceneSession : public RefBase {
 public:
     JsRootSceneSession(NativeEngine& engine, const sptr<RootSceneSession>& rootSceneSession);
     ~JsRootSceneSession() = default;
@@ -30,14 +31,17 @@ public:
     static NativeValue* Create(NativeEngine& engine, const sptr<RootSceneSession>& rootSceneSession);
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
 
-    // static NativeValue* RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* LoadContent(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
-    // NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info);
+    bool IsCallbackRegistered(std::string type, NativeValue* jsListenerObject);
+    void PendingSessionActivation(const SessionInfo& info);
 
-    // NativeEngine& engine_;
+    NativeEngine& engine_;
+    std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     sptr<RootSceneSession> rootSceneSession_;
 };
 } // namespace OHOS::Rosen

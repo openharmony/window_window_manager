@@ -17,8 +17,8 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_H
 
 #include <mutex>
-#include <string>
 #include <refbase.h>
+#include <string>
 #include <vector>
 
 #include "interfaces/include/ws_common.h"
@@ -26,14 +26,14 @@
 #include "session/host/include/zidl/session_stub.h"
 
 namespace OHOS::MMI {
-    class PointerEvent;
-    class KeyEvent;
-    class AxisEvent;
-}
+class PointerEvent;
+class KeyEvent;
+class AxisEvent;
+} // namespace OHOS::MMI
 
 namespace OHOS::Rosen {
 class RSSurfaceNode;
-using NotifyStartPendingSessionActivationFunc = std::function<void(const SessionInfo& info)>;
+using NotifyPendingSessionActivationFunc = std::function<void(const SessionInfo& info)>;
 
 class ILifecycleListener {
 public:
@@ -53,19 +53,19 @@ public:
     virtual WSError SetActive(bool active);
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason);
 
-    virtual WSError Connect(const sptr<ISessionStage>& sessionStage,
-        const sptr<IWindowEventChannel>& eventChannel) override;
+    virtual WSError Connect(
+        const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel) override;
     virtual WSError Foreground() override;
     virtual WSError Background() override;
     virtual WSError Disconnect() override;
-    virtual WSError StartPendingSessionActivation(const SessionInfo& info) override;
+    virtual WSError PendingSessionActivation(const SessionInfo& info) override;
 
     virtual WSError Recover() override;
     virtual WSError Maximum() override;
 
     void NotifyForeground();
     void NotifyBackground();
-    
+
     // for window event
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
@@ -74,7 +74,8 @@ public:
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
 
     const SessionInfo& GetSessionInfo() const;
-    void SetStartPendingSessionActivationEventListener(const NotifyStartPendingSessionActivationFunc& func);
+    void SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func);
+
 protected:
     SessionState GetSessionState() const;
     void UpdateSessionState(SessionState state);
@@ -83,21 +84,18 @@ protected:
     WSRect winRect_;
     sptr<ISessionStage> sessionStage_;
     SessionInfo sessionInfo_;
-    NotifyStartPendingSessionActivationFunc startPendingSessionActivationFunc_;
+    NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
 
 private:
     template<typename T>
-    bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder,
-        const std::shared_ptr<T>& listener);
+    bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
     template<typename T>
-    bool UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder,
-        const std::shared_ptr<T>& listener);
+    bool UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
 
     template<typename T1, typename T2, typename Ret>
     using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
     template<typename T>
-    inline EnableIfSame<T, ILifecycleListener,
-        std::vector<std::weak_ptr<ILifecycleListener>>> GetListeners()
+    inline EnableIfSame<T, ILifecycleListener, std::vector<std::weak_ptr<ILifecycleListener>>> GetListeners()
     {
         std::vector<std::weak_ptr<ILifecycleListener>> lifecycleListeners;
         {
@@ -119,5 +117,6 @@ private:
     std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;
     sptr<IWindowEventChannel> windowEventChannel_ = nullptr;
 };
-}
+} // namespace OHOS::Rosen
+  //
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_H

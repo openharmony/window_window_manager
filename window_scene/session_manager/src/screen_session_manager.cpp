@@ -19,9 +19,9 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSessionManager"};
-    const std::string SCREEN_SESSION_MANAGER_THREAD = "ScreenSessionManager";
-}
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSessionManager" };
+const std::string SCREEN_SESSION_MANAGER_THREAD = "ScreenSessionManager";
+} // namespace
 
 ScreenSessionManager& ScreenSessionManager::GetInstance()
 {
@@ -29,8 +29,7 @@ ScreenSessionManager& ScreenSessionManager::GetInstance()
     return screenSessionManager;
 }
 
-ScreenSessionManager::ScreenSessionManager()
-    : rsInterface_(RSInterfaces::GetInstance())
+ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetInstance())
 {
     Init();
 }
@@ -42,8 +41,8 @@ void ScreenSessionManager::RegisterScreenConnectionListener(sptr<IScreenConnecti
         return;
     }
 
-    if (std::find(screenConnectionListenerList_.begin(), screenConnectionListenerList_.end(), screenConnectionListener)
-        != screenConnectionListenerList_.end()) {
+    if (std::find(screenConnectionListenerList_.begin(), screenConnectionListenerList_.end(),
+            screenConnectionListener) != screenConnectionListenerList_.end()) {
         WLOGFE("Repeat to register screen connection callback!");
         return;
     }
@@ -54,19 +53,18 @@ void ScreenSessionManager::RegisterScreenConnectionListener(sptr<IScreenConnecti
     }
 }
 
-void ScreenSessionManager::UnregisterScreenConnectionListener(
-    sptr<IScreenConnectionListener>& screenConnectionListener)
+void ScreenSessionManager::UnregisterScreenConnectionListener(sptr<IScreenConnectionListener>& screenConnectionListener)
 {
     if (screenConnectionListener == nullptr) {
         WLOGFE("Failed to unregister screen connection listener, listener is null!");
         return;
     }
 
-    screenConnectionListenerList_.erase(std::remove_if(screenConnectionListenerList_.begin(),
-        screenConnectionListenerList_.end(),
-        [screenConnectionListener](sptr<IScreenConnectionListener> listener) {
-            return screenConnectionListener == listener;
-        }), screenConnectionListenerList_.end());
+    screenConnectionListenerList_.erase(
+        std::remove_if(screenConnectionListenerList_.begin(), screenConnectionListenerList_.end(),
+            [screenConnectionListener](
+                sptr<IScreenConnectionListener> listener) { return screenConnectionListener == listener; }),
+        screenConnectionListenerList_.end());
 }
 
 void ScreenSessionManager::Init()
@@ -90,14 +88,11 @@ void ScreenSessionManager::PostTask(AppExecFwk::EventHandler::Callback callback,
 void ScreenSessionManager::RegisterScreenChangeListener()
 {
     WLOGFD("Register screen change listener.");
-    auto res = rsInterface_.SetScreenChangeCallback([this](ScreenId screenId, ScreenEvent screenEvent) {
-        OnScreenChange(screenId, screenEvent);
-    });
+    auto res = rsInterface_.SetScreenChangeCallback(
+        [this](ScreenId screenId, ScreenEvent screenEvent) { OnScreenChange(screenId, screenEvent); });
 
     if (res != StatusCode::SUCCESS) {
-        auto task = [this]() {
-            RegisterScreenChangeListener();
-        };
+        auto task = [this]() { RegisterScreenChangeListener(); };
         // Retry after 50 ms.
         PostTask(task, 50);
     }
@@ -105,7 +100,8 @@ void ScreenSessionManager::RegisterScreenChangeListener()
 
 void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenEvent)
 {
-    WLOGFI("On screen change. ScreenId: %{public}" PRIu64", ScreenEvent: %{public}d", screenId, static_cast<int>(screenEvent));
+    WLOGFI("On screen change. ScreenId: %{public}" PRIu64 ", ScreenEvent: %{public}d", screenId,
+        static_cast<int>(screenEvent));
     auto screenSession = GetOrCreateScreenSession(screenId);
 
     if (screenEvent == ScreenEvent::CONNECTED) {
@@ -132,7 +128,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     }
 
     auto screenMode = rsInterface_.GetScreenActiveMode(screenId);
-    auto screenBounds = RRect({0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight()}, 0.0f, 0.0f);
+    auto screenBounds = RRect({ 0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight() }, 0.0f, 0.0f);
     ScreenProperty property;
     property.SetRotation(0.0f);
     property.SetBounds(screenBounds);

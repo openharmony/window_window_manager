@@ -16,16 +16,17 @@
 #include "session_manager/include/scene_session_manager.h"
 
 #include <ability_manager_client.h>
-#include <want.h>
 #include <start_options.h>
 #include <ui_window.h>
-#include "session_info.h"
+#include <want.h>
+
 #include "session/host/include/scene_session.h"
+#include "session_info.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManager"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManager" };
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SceneSessionManager)
@@ -38,10 +39,9 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
 
     rootSceneSession_ = new RootSceneSession();
     rootScene_ = Ace::NG::UIWindow::CreateRootScene();
-    rootSceneSession_->SetLoadContentFunc([rootScene = rootScene_](const std::string& contentUrl,
-        NativeEngine* engine, NativeValue* storage, AbilityRuntime::Context* context) {
-        rootScene->LoadContent(contentUrl, engine, storage, context);
-    });
+    rootSceneSession_->SetLoadContentFunc(
+        [rootScene = rootScene_](const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
+            AbilityRuntime::Context* context) { rootScene->LoadContent(contentUrl, engine, storage, context); });
     return rootSceneSession_;
 }
 
@@ -54,14 +54,14 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
     uint32_t persistentId = pid_ + sessionId_;
     sceneSession->SetPersistentId(persistentId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    abilitySceneMap_.insert({persistentId, std::make_pair(sceneSession, nullptr)});
+    abilitySceneMap_.insert({ persistentId, std::make_pair(sceneSession, nullptr) });
     WLOGFI("create session persistentId: %{public}u", persistentId);
     return sceneSession;
 }
 
 WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession)
 {
-    if(sceneSession == nullptr) {
+    if (sceneSession == nullptr) {
         WLOGFE("session is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
@@ -80,8 +80,8 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
     abilitySessionInfo->surfaceNode = sceneSession->GetSurfaceNode();
     abilitySessionInfo->persistentId = sceneSession->GetPersistentId();
     AAFwk::AbilityManagerClient::GetInstance()->StartAbilityByLauncher(want, startOptions, nullptr, abilitySessionInfo);
-    auto newAbilityToken = AAFwk::AbilityManagerClient::GetInstance()->GetTokenBySceneSession(
-        abilitySessionInfo->persistentId);
+    auto newAbilityToken =
+        AAFwk::AbilityManagerClient::GetInstance()->GetTokenBySceneSession(abilitySessionInfo->persistentId);
     if (newAbilityToken) {
         WLOGFW("newAbilityToken is not null");
     }
@@ -93,7 +93,7 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
 
 WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession)
 {
-    if(sceneSession == nullptr) {
+    if (sceneSession == nullptr) {
         WLOGFE("session is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }
@@ -112,7 +112,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
 
 WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession)
 {
-    if(sceneSession == nullptr) {
+    if (sceneSession == nullptr) {
         WLOGFE("session is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }

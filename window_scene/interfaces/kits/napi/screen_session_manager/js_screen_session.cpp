@@ -16,19 +16,19 @@
 #include "js_screen_session.h"
 
 #include <js_runtime_utils.h>
-#include "window_manager_hilog.h"
 
 #include "interfaces/include/ws_common.h"
 #include "js_screen_utils.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScreenSession"};
-    const std::string ON_CONNECTION_CALLBACK = "connect";
-    const std::string ON_DISCONNECTION_CALLBACK = "disconnect";
-    const std::string ON_PROPERTY_CHANGE_CALLBACK = "propertyChange";
-}
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScreenSession" };
+const std::string ON_CONNECTION_CALLBACK = "connect";
+const std::string ON_DISCONNECTION_CALLBACK = "disconnect";
+const std::string ON_PROPERTY_CHANGE_CALLBACK = "propertyChange";
+} // namespace
 
 NativeValue* JsScreenSession::Create(NativeEngine& engine, const sptr<ScreenSession>& screenSession)
 {
@@ -54,12 +54,9 @@ void JsScreenSession::Finalizer(NativeEngine* engine, void* data, void* hint)
 
 JsScreenSession::JsScreenSession(NativeEngine& engine, const sptr<ScreenSession>& screenSession)
     : engine_(engine), screenSession_(screenSession)
-{
-}
+{}
 
-JsScreenSession::~JsScreenSession()
-{
-}
+JsScreenSession::~JsScreenSession() {}
 
 void JsScreenSession::RegisterScreenChangeListener()
 {
@@ -142,15 +139,14 @@ void JsScreenSession::CallJsCallback(const std::string& callbackType)
                     WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
                     return;
                 }
-                NativeValue* argv[] =
-                    { JsScreenUtils::CreateJsScreenProperty(engine, screenSession->GetScreenProperty()) };
+                NativeValue* argv[] = { JsScreenUtils::CreateJsScreenProperty(
+                    engine, screenSession->GetScreenProperty()) };
                 engine.CallFunction(engine.CreateUndefined(), method, argv, ArraySize(argv));
             } else {
-                NativeValue* argv[] = { };
+                NativeValue* argv[] = {};
                 engine.CallFunction(engine.CreateUndefined(), method, argv, 0);
             }
-        }
-    );
+        });
 
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;

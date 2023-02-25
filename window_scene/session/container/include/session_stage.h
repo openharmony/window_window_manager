@@ -27,10 +27,10 @@
 #include "session/host/include/zidl/session_interface.h"
 
 namespace OHOS::MMI {
-    class PointerEvent;
-    class KeyEvent;
-    class AxisEvent;
-}
+class PointerEvent;
+class KeyEvent;
+class AxisEvent;
+} // namespace OHOS::MMI
 
 namespace OHOS::Rosen {
 class ISessionStageStateListener {
@@ -74,7 +74,7 @@ public:
     virtual WSError Foreground();
     virtual WSError Background();
     virtual WSError Disconnect();
-    virtual WSError StartPendingSessionActivation(const SessionInfo& info);
+    virtual WSError PendingSessionActivation(const SessionInfo& info);
     virtual WSError SetActive(bool active) override;
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
 
@@ -123,17 +123,18 @@ protected:
     }
 
     sptr<ISession> session_;
+
 private:
-    template<typename T> bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder,
-        const std::shared_ptr<T>& listener);
-    template<typename T> bool UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder,
-        const std::shared_ptr<T>& listener);
+    template<typename T>
+    bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
+    template<typename T>
+    bool UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
 
     template<typename T1, typename T2, typename Ret>
     using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
     template<typename T>
-    inline EnableIfSame<T, ISessionStageStateListener,
-        std::vector<std::weak_ptr<ISessionStageStateListener>>> GetListeners()
+    inline EnableIfSame<T, ISessionStageStateListener, std::vector<std::weak_ptr<ISessionStageStateListener>>>
+    GetListeners()
     {
         std::vector<std::weak_ptr<ISessionStageStateListener>> sessionStageStateListeners;
         {
@@ -190,5 +191,5 @@ private:
     std::vector<std::shared_ptr<ISessionStageStateListener>> sessionStageStateListeners_;
     std::vector<std::shared_ptr<ISizeChangeListener>> sizeChangeListeners_;
 };
-}
+} // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_STAGE_H

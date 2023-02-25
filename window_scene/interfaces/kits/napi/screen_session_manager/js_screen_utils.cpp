@@ -16,12 +16,13 @@
 #include "js_screen_utils.h"
 
 #include <js_runtime_utils.h>
+
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScreenUtils"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScreenUtils" };
 }
 
 NativeValue* JsScreenUtils::CreateJsScreenProperty(NativeEngine& engine, const ScreenProperty& screenProperty)

@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 #include "session/host/include/scene_session.h"
+
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSession"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSession" };
 }
 
-SceneSession::SceneSession(const SessionInfo& info) : Session(info)
-{
-}
+SceneSession::SceneSession(const SessionInfo& info) : Session(info) {}
 
 WSError SceneSession::Recover()
 {

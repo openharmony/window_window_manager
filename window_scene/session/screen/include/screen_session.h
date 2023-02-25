@@ -16,10 +16,9 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCREEN_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCREEN_SESSION_H
 
-#include <vector>
-
 #include <refbase.h>
 #include <screen_manager/screen_types.h>
+#include <vector>
 
 #include "screen_property.h"
 
@@ -58,7 +57,7 @@ public:
 private:
     ScreenId screenId_;
     ScreenProperty property_;
-    ScreenState screenState_  { ScreenState::INIT };
+    ScreenState screenState_ { ScreenState::INIT };
     std::vector<IScreenChangeListener*> screenChangeListenerList_;
 };
 } // namespace OHOS::Rosen
