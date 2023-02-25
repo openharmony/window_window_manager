@@ -18,6 +18,7 @@
 #include "ipc_skeleton.h"
 #include "pointer_event.h"
 #include "window_manager_hilog.h"
+#include <transaction/rs_transaction.h>
 
 namespace OHOS {
 namespace Rosen {
@@ -41,7 +42,19 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             struct Rect rect { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
             bool decoStatus = data.ReadBool();
             WindowSizeChangeReason reason = static_cast<WindowSizeChangeReason>(data.ReadUint32());
-            UpdateWindowRect(rect, decoStatus, reason);
+            bool hasRSTransaction = data.ReadBool();
+            if (hasRSTransaction) {
+                auto rsTransaction = data.ReadParcelable<RSTransaction>();
+                if (!rsTransaction) {
+                    WLOGFE("RSTransaction unMarsh failed");
+                    return -1;
+                }
+                std::shared_ptr<RSTransaction> transaction(rsTransaction);
+                rsTransaction->UnmarshallTransactionSyncController(data);
+                UpdateWindowRect(rect, decoStatus, reason, transaction);
+            } else {
+                UpdateWindowRect(rect, decoStatus, reason);
+            }
             break;
         }
         case WindowMessage::TRANS_ID_UPDATE_WINDOW_MODE: {

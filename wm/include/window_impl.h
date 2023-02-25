@@ -225,7 +225,8 @@ public:
     virtual void UnregisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) override;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
     virtual void SetRequestModeSupportInfo(uint32_t modeSupportInfo) override;
-    void UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason);
+    void UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,
+        const std::shared_ptr<RSTransaction> rsTransaction = nullptr);
     void UpdateMode(WindowMode mode);
     void UpdateModeSupportInfo(uint32_t modeSupportInfo);
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
@@ -478,7 +479,8 @@ private:
             reason == WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::UNDEFINED;
     }
     void ClearListenersById(uint32_t winId);
-    void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
+    void NotifySizeChange(Rect rect, WindowSizeChangeReason reason,
+        const std::shared_ptr<RSTransaction> rsTransaction = nullptr);
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void NotifyDisplayMoveChange(DisplayId from, DisplayId to);
     void NotifyOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info);
@@ -532,7 +534,8 @@ private:
     void HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
     void UpdateWindowStateUnfrozen();
-    void UpdateViewportConfig(const Rect& rect, const sptr<class Display>& display, WindowSizeChangeReason reason);
+    void UpdateViewportConfig(const Rect& rect, const sptr<class Display>& display, WindowSizeChangeReason reason,
+        const std::shared_ptr<RSTransaction> rsTransaction = nullptr);
     void UpdateDecorEnable(bool needNotify = false);
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {

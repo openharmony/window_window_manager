@@ -28,13 +28,14 @@ WindowAgent::WindowAgent(sptr<WindowImpl>& windowImpl)
     window_ = windowImpl;
 }
 
-WMError WindowAgent::UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason)
+WMError WindowAgent::UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,
+    const std::shared_ptr<RSTransaction> rsTransaction)
 {
     if (window_ == nullptr) {
         WLOGFE("window_ is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    window_->UpdateRect(rect, decoStatus, reason);
+    window_->UpdateRect(rect, decoStatus, reason, rsTransaction);
     return WMError::WM_OK;
 }
 
