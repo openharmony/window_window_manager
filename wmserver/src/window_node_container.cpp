@@ -1788,14 +1788,18 @@ void WindowNodeContainer::MinimizeOldestMainFloatingWindow(uint32_t windowId)
         WLOGD("The number of floating window is less then MaxFloatAppMainWindowNumber");
         return;
     }
-
-    for (auto& appNode : appWindowNode_->children_) {
-        WindowType windowType = appNode->GetWindowType();
-        WindowMode windowMode = appNode->GetWindowMode();
-        uint32_t winId = appNode->GetWindowId();
-        if (windowId != winId && WindowHelper::IsMainFloatingWindow(windowType, windowMode)) {
-            MinimizeApp::AddNeedMinimizeApp(appNode, MinimizeReason::MAX_APP_COUNT);
-            return;
+    std::vector<sptr<WindowNode>> rootNodes = {
+        appWindowNode_, aboveAppWindowNode_,
+    };
+    for (auto& root : rootNodes) {
+        for (auto& appNode : root->children_) {
+            WindowType windowType = appNode->GetWindowType();
+            WindowMode windowMode = appNode->GetWindowMode();
+            uint32_t winId = appNode->GetWindowId();
+            if (windowId != winId && WindowHelper::IsMainFloatingWindow(windowType, windowMode)) {
+                MinimizeApp::AddNeedMinimizeApp(appNode, MinimizeReason::MAX_APP_COUNT);
+                return;
+            }
         }
     }
     WLOGD("no window needs to minimize");
@@ -2021,10 +2025,14 @@ void WindowNodeContainer::ReZOrderShowWhenLockedWindows(bool up)
             iter++;
         }
     }
-
+    const int32_t floatingPriorityOffset = 1;
     for (auto& needReZOrderNode : needReZOrderNodes) {
         needReZOrderNode->priority_ = dstPriority;
         needReZOrderNode->parent_ = dstRoot;
+        if (WindowHelper::IsMainFloatingWindow(needReZOrderNode->GetWindowType(),
+            needReZOrderNode->GetWindowMode()) && isFloatWindowAboveFullWindow_) {
+            needReZOrderNode->priority_ = dstPriority + floatingPriorityOffset;
+        }
         auto parentNode = needReZOrderNode->parent_;
         auto position = parentNode->children_.end();
         for (auto iter = parentNode->children_.begin(); iter < parentNode->children_.end(); ++iter) {
