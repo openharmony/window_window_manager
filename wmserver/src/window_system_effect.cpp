@@ -41,7 +41,7 @@ void WindowSystemEffect::SetWindowRoot(const sptr<WindowRoot>& windowRoot)
     windowRoot_ = windowRoot;
 }
 
-WMError WindowSystemEffect::SetCornerRadius(const sptr<WindowNode>& node)
+WMError WindowSystemEffect::SetCornerRadius(const sptr<WindowNode>& node, bool needCheckAnimation)
 {
     auto winRoot = windowRoot_.promote();
     if (winRoot == nullptr || node == nullptr) {
@@ -49,7 +49,7 @@ WMError WindowSystemEffect::SetCornerRadius(const sptr<WindowNode>& node)
         return WMError::WM_ERROR_NULLPTR;
     }
     // if change mode during animation, not set radius until animationFinish
-    if (RemoteAnimation::IsRemoteAnimationEnabledAndFirst(node->GetDisplayId()) &&
+    if (needCheckAnimation && RemoteAnimation::IsRemoteAnimationEnabledAndFirst(node->GetDisplayId()) &&
         node->stateMachine_.IsShowAnimationPlaying()) {
         WLOGFW("not set radius during animation");
         return WMError::WM_DO_NOTHING;
@@ -152,14 +152,14 @@ WMError WindowSystemEffect::SetWindowShadow(const sptr<WindowNode>& node)
     return WMError::WM_OK;
 }
 
-WMError WindowSystemEffect::SetWindowEffect(const sptr<WindowNode>& node)
+WMError WindowSystemEffect::SetWindowEffect(const sptr<WindowNode>& node, bool needCheckAnimation)
 {
     auto winRoot = windowRoot_.promote();
     if (node == nullptr) {
         WLOGFE("window node is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    SetCornerRadius(node);
+    SetCornerRadius(node, needCheckAnimation);
     SetWindowShadow(node);
     return WMError::WM_OK;
 }
