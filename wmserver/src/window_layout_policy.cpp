@@ -23,6 +23,7 @@
 #include "window_manager_service_utils.h"
 #include "wm_common_inner.h"
 #include "wm_math.h"
+#include <transaction/rs_sync_transaction_controller.h>
 
 namespace OHOS {
 namespace Rosen {
@@ -371,7 +372,13 @@ void WindowLayoutPolicy::NotifyClientAndAnimation(const sptr<WindowNode>& node,
     const Rect& winRect, WindowSizeChangeReason reason)
 {
     if (node->GetWindowToken()) {
-        node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason);
+        auto syncTransactionController = RSSyncTransactionController::GetInstance();
+        if (reason == WindowSizeChangeReason::ROTATION && syncTransactionController) {
+            node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason,
+                syncTransactionController->GetRSTransaction());
+        } else {
+            node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason);
+        }
         WLOGFD("Id: %{public}d, winRect:[%{public}d, %{public}d, %{public}u, %{public}u], reason: "
             "%{public}u", node->GetWindowId(), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_, reason);
     }

@@ -28,7 +28,8 @@ public:
 
     ~WindowProxy() {};
 
-    WMError UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason) override;
+    WMError UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,
+        const std::shared_ptr<RSTransaction> rsTransaction = nullptr) override;
     WMError UpdateWindowMode(WindowMode mode) override;
     WMError UpdateWindowModeSupportInfo(uint32_t modeSupportInfo) override;
     WMError UpdateFocusStatus(bool focused) override;

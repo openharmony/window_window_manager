@@ -26,7 +26,8 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowProxy"};
 }
 
-WMError WindowProxy::UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason)
+WMError WindowProxy::UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,
+    const std::shared_ptr<RSTransaction> rsTransaction)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -47,6 +48,19 @@ WMError WindowProxy::UpdateWindowRect(const struct Rect& rect, bool decoStatus, 
     if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
         WLOGFE("Write WindowSizeChangeReason failed");
         return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    bool hasRSTransaction = rsTransaction != nullptr;
+    if (!data.WriteBool(hasRSTransaction)) {
+        WLOGFE("Write transaction sync Id failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (hasRSTransaction) {
+        if (!data.WriteParcelable(rsTransaction.get())) {
+            WLOGFE("Write transaction sync Id failed");
+            return WMError::WM_ERROR_IPC_FAILED;
+        }
+        rsTransaction->MarshallTransactionSyncController(data);
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT),

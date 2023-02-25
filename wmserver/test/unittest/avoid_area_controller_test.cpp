@@ -57,7 +57,8 @@ Rect AvoidAreaControllerTest::screenRect;
 
 class WindowListener : public IWindow {
 public:
-    WMError UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason) override
+    WMError UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,
+        const std::shared_ptr<RSTransaction> rsTransaction = nullptr) override
     {
         return WMError::WM_OK;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,8 @@ void JsWindowListener::CallJsMethod(const char* methodName, NativeValue* const* 
     engine_->CallFunction(engine_->CreateUndefined(), method, argv, argc);
 }
 
-void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason)
+void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
+    const std::shared_ptr<RSTransaction> rsTransaction)
 {
     WLOGI("[NAPI]OnSizeChange, wh[%{public}u, %{public}u], reason = %{public}u", rect.width_, rect.height_, reason);
     // js callback should run in js thread

@@ -755,6 +755,10 @@ bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationA
             WLOGE("Convert to RsScreenId fail. screenId: %{public}" PRIu64"", screenId);
             return false;
         }
+        auto syncTransactionController = RSSyncTransactionController::GetInstance();
+        if (syncTransactionController) {
+            syncTransactionController->OpenSyncTransaction();
+        }
         SetScreenRotateAnimation(screen, screenId, rotationAfter, withAnimation);
         screen->rotation_ = rotationAfter;
     } else {

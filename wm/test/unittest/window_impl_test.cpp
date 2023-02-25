@@ -55,7 +55,8 @@ public:
 
 class MockWindowChangeListener : public IWindowChangeListener {
 public:
-    MOCK_METHOD2(OnSizeChange, void(Rect rect, WindowSizeChangeReason reason));
+    MOCK_METHOD3(OnSizeChange, void(Rect rect, WindowSizeChangeReason reason,
+        const std::shared_ptr<RSTransaction> rsTransaction));
     MOCK_METHOD2(OnModeChange, void(WindowMode mode, bool hasDeco));
 };
 
@@ -1696,7 +1697,7 @@ HWTEST_F(WindowImplTest, StretchableUpdateRectDragStartTest, Function | SmallTes
     Rect rect2 { 100, 100, 100, 100 };
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
-    EXPECT_CALL(*content, UpdateViewportConfig(_, _));
+    EXPECT_CALL(*content, UpdateViewportConfig(_, _, _));
     window->UpdateRect(rect2, true, WindowSizeChangeReason::DRAG_START);
     ASSERT_EQ(window->GetWindowProperty()->GetOriginRect(), rect1);
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -2642,7 +2643,7 @@ HWTEST_F(WindowImplTest, NotifySizeChange, Function | SmallTest | Level3)
     window->windowChangeListeners_[window->GetWindowId()].push_back(sptr<IWindowChangeListener>(listener));
     listener = new MockWindowChangeListener;
     window->windowChangeListeners_[window->GetWindowId()].push_back(sptr<IWindowChangeListener>(listener));
-    EXPECT_CALL(*listener, OnSizeChange(_, _));
+    EXPECT_CALL(*listener, OnSizeChange(_, _, _));
     Rect rect;
     window->NotifySizeChange(rect, WindowSizeChangeReason::UNDEFINED);
     window->windowChangeListeners_[window->GetWindowId()].clear();

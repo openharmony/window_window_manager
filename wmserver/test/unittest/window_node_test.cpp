@@ -51,7 +51,8 @@ void WindowNodeTest::TearDown()
 }
 class WindowListener : public IWindow {
 public:
-    virtual WMError UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason) override
+    virtual WMError UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,
+        const std::shared_ptr<RSTransaction> rsTransaction = nullptr) override
     {
         return WMError::WM_OK;
     };
