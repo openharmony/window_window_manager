@@ -16,14 +16,13 @@
 #ifndef OHOS_WINDOW_SCENE_JS_SCENE_SESSION_H
 #define OHOS_WINDOW_SCENE_JS_SCENE_SESSION_H
 
-#include <memory>
-#include <map>
-#include <string>
-
 #include <js_runtime_utils.h>
+#include <map>
+#include <memory>
 #include <native_engine/native_engine.h>
 #include <native_engine/native_value.h>
 #include <refbase.h>
+#include <string>
 
 #include "interfaces/include/ws_common.h"
 
@@ -37,12 +36,11 @@ public:
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
     static NativeValue* RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info);
 
-    void StartPendingSessionActivation(const SessionInfo& info);
+    void PendingSessionActivation(const SessionInfo& info);
     sptr<SceneSession> GetNativeSession() const;
 
 private:
     NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
-    void CallJsMethod(const char* methodName, NativeValue* const* argv, size_t argc);
     bool IsCallbackRegistered(std::string type, NativeValue* jsListenerObject);
 
     NativeEngine& engine_;
@@ -52,6 +50,6 @@ private:
 };
 
 NativeValue* CreateJsSceneSessionObject(NativeEngine& engine, const sptr<SceneSession>& session);
-void BindFunctions(NativeEngine& engine, NativeObject* object, const char *moduleName);
-}
+void BindFunctions(NativeEngine& engine, NativeObject* object, const char* moduleName);
+} // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_JS_SCENE_SESSION_H

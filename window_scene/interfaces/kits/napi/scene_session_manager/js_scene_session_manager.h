@@ -41,5 +41,5 @@ private:
     NativeValue* OnRequestSceneSessionBackground(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnRequestSceneSessionDestruction(NativeEngine& engine, NativeCallbackInfo& info);
 };
-}
+} // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_JS_SCENE_SESSION_MANAGER_H

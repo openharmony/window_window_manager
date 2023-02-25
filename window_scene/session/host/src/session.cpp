@@ -21,9 +21,9 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Session"};
-    const std::string UNDEFINED = "undefined";
-}
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Session" };
+const std::string UNDEFINED = "undefined";
+} // namespace
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
@@ -88,9 +88,8 @@ bool Session::UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, 
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     holder.erase(std::remove_if(holder.begin(), holder.end(),
-        [listener](std::shared_ptr<T> registeredListener) {
-            return registeredListener == listener;
-        }), holder.end());
+                     [listener](std::shared_ptr<T> registeredListener) { return registeredListener == listener; }),
+        holder.end());
     return true;
 }
 
@@ -128,8 +127,8 @@ bool Session::IsSessionValid() const
 {
     bool res = state_ > SessionState::STATE_DISCONNECT;
     if (!res) {
-        WLOGFI("session is already destroyed or not created! id: %{public}u state: %{public}u",
-            GetPersistentId(), state_);
+        WLOGFI(
+            "session is already destroyed or not created! id: %{public}u state: %{public}u", GetPersistentId(), state_);
     }
     return res;
 }
@@ -151,8 +150,9 @@ RSSurfaceNode::SharedPtr Session::CreateSurfaceNode(std::string name)
 
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
-    WLOGFI("session update rect: id: %{public}u, rect[%{public}d, %{public}d, %{public}u, %{public}u], "\
-        "reason:%{public}u", GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
+    WLOGFI("session update rect: id: %{public}u, rect[%{public}d, %{public}d, %{public}u, %{public}u], "
+           "reason:%{public}u",
+        GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
     if (!IsSessionValid()) {
         winRect_ = rect;
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -161,7 +161,6 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
     winRect_ = rect;
     return WSError::WS_OK;
 }
-
 
 WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel)
 {
@@ -189,8 +188,7 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
 WSError Session::Foreground()
 {
     SessionState state = GetSessionState();
-    WLOGFI("Foreground session, id: %{public}u, state: %{public}u", GetPersistentId(),
-        static_cast<uint32_t>(state));
+    WLOGFI("Foreground session, id: %{public}u, state: %{public}u", GetPersistentId(), static_cast<uint32_t>(state));
     if (state != SessionState::STATE_CONNECT && state != SessionState::STATE_BACKGROUND) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -205,8 +203,7 @@ WSError Session::Foreground()
 WSError Session::Background()
 {
     SessionState state = GetSessionState();
-    WLOGFI("Background session, id: %{public}u, state: %{public}u", GetPersistentId(),
-        static_cast<uint32_t>(state));
+    WLOGFI("Background session, id: %{public}u, state: %{public}u", GetPersistentId(), static_cast<uint32_t>(state));
     if (state < SessionState::STATE_INACTIVE) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -218,8 +215,7 @@ WSError Session::Background()
 WSError Session::Disconnect()
 {
     SessionState state = GetSessionState();
-    WLOGFI("Disconnect session, id: %{public}u, state: %{public}u", GetPersistentId(),
-        static_cast<uint32_t>(state));
+    WLOGFI("Disconnect session, id: %{public}u, state: %{public}u", GetPersistentId(), static_cast<uint32_t>(state));
     Background();
     if (GetSessionState() == SessionState::STATE_BACKGROUND) {
         UpdateSessionState(SessionState::STATE_DISCONNECT);
@@ -251,17 +247,17 @@ WSError Session::SetActive(bool active)
     return WSError::WS_OK;
 }
 
-WSError Session::StartPendingSessionActivation(const SessionInfo& info)
+WSError Session::PendingSessionActivation(const SessionInfo& info)
 {
-    if (startPendingSessionActivationFunc_) {
-        startPendingSessionActivationFunc_(info);
+    if (pendingSessionActivationFunc_) {
+        pendingSessionActivationFunc_(info);
     }
     return WSError::WS_OK;
 }
 
-void Session::SetStartPendingSessionActivationEventListener(const NotifyStartPendingSessionActivationFunc& func)
+void Session::SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func)
 {
-    startPendingSessionActivationFunc_ = func;
+    pendingSessionActivationFunc_ = func;
 }
 
 WSError Session::Recover()

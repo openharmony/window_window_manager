@@ -15,31 +15,26 @@
 
 #include "js_screen_session_manager.h"
 
+#include <js_runtime_utils.h>
 #include <memory>
 #include <string>
 
-#include <js_runtime_utils.h>
 #include "interfaces/include/ws_common.h"
 #include "js_screen_session.h"
-#include "session_manager/include/screen_session_manager.h"
 #include "session/screen/include/screen_session.h"
+#include "session_manager/include/screen_session_manager.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScreenSessionManager"};
-    const std::string ON_SCREEN_CONNECTION_CHANGE_CALLBACK = "screenConnectChange";
-}
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScreenSessionManager" };
+const std::string ON_SCREEN_CONNECTION_CHANGE_CALLBACK = "screenConnectChange";
+} // namespace
 
-JsScreenSessionManager::JsScreenSessionManager(NativeEngine& engine)
-    :engine_(engine)
-{
-}
+JsScreenSessionManager::JsScreenSessionManager(NativeEngine& engine) : engine_(engine) {}
 
-JsScreenSessionManager::~JsScreenSessionManager()
-{
-}
+JsScreenSessionManager::~JsScreenSessionManager() {}
 
 NativeValue* JsScreenSessionManager::Init(NativeEngine* engine, NativeValue* exportObj)
 {
@@ -76,8 +71,8 @@ void JsScreenSessionManager::OnScreenConnect(sptr<ScreenSession>& screenSession)
     }
 
     std::shared_ptr<NativeReference> callback_ = screenConnectionCallback_;
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [callback_, screenSession] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [callback_, screenSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
             NativeValue* objValue = engine.CreateObject();
             NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
 
@@ -92,13 +87,12 @@ void JsScreenSessionManager::OnScreenConnect(sptr<ScreenSession>& screenSession)
             }
 
             engine.CallFunction(engine.CreateUndefined(), method, argv, ArraySize(argv));
-        }
-    );
+        });
 
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsScreenSessionManager::OnScreenConnect",
-        engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    AsyncTask::Schedule("JsScreenSessionManager::OnScreenConnect", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsScreenSessionManager::OnScreenDisconnect(sptr<ScreenSession>& screenSession)
@@ -108,8 +102,8 @@ void JsScreenSessionManager::OnScreenDisconnect(sptr<ScreenSession>& screenSessi
     }
 
     std::shared_ptr<NativeReference> callback_ = screenConnectionCallback_;
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [callback_, screenSession] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [callback_, screenSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
             NativeValue* objValue = engine.CreateObject();
             NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
 
@@ -124,13 +118,12 @@ void JsScreenSessionManager::OnScreenDisconnect(sptr<ScreenSession>& screenSessi
             }
 
             engine.CallFunction(engine.CreateUndefined(), method, argv, ArraySize(argv));
-        }
-    );
+        });
 
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsScreenSessionManager::OnScreenDisconnect",
-        engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    AsyncTask::Schedule("JsScreenSessionManager::OnScreenDisconnect", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 NativeValue* JsScreenSessionManager::RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info)

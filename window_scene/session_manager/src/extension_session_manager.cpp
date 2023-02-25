@@ -16,15 +16,16 @@
 #include "session_manager/include/extension_session_manager.h"
 
 #include <ability_manager_client.h>
-#include <want.h>
 #include <start_options.h>
-#include "session_info.h"
+#include <want.h>
+
 #include "session/host/include/extension_session.h"
+#include "session_info.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSessionManager"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSessionManager" };
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ExtensionSessionManager)
@@ -39,13 +40,13 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
     extensionSession->SetPersistentId(persistentId);
     WLOGFI("create session persistentId: %{public}u", persistentId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    abilityExtensionMap_.insert({persistentId, std::make_pair(extensionSession, nullptr)});
+    abilityExtensionMap_.insert({ persistentId, std::make_pair(extensionSession, nullptr) });
     return extensionSession;
 }
 
 WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession)
 {
-    if(extensionSession == nullptr) {
+    if (extensionSession == nullptr) {
         WLOGFE("session is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
@@ -64,9 +65,8 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
     abilitySessionInfo->surfaceNode = extensionSession->GetSurfaceNode();
     abilitySessionInfo->callerToken = sessionInfo.callerToken_;
     abilitySessionInfo->persistentId = extensionSession->GetPersistentId();
-    AAFwk::AbilityManagerClient::GetInstance()->StartUIExtensionAbility(want, abilitySessionInfo,
-        AAFwk::DEFAULT_INVAL_VALUE,
-        AppExecFwk::ExtensionAbilityType::UIEXTENSION);
+    AAFwk::AbilityManagerClient::GetInstance()->StartUIExtensionAbility(
+        want, abilitySessionInfo, AAFwk::DEFAULT_INVAL_VALUE, AppExecFwk::ExtensionAbilityType::UIEXTENSION);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     sptr<IRemoteObject> newAbilityToken = nullptr;
     // replace with real token after start ability
@@ -76,7 +76,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
 
 WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<ExtensionSession>& extensionSession)
 {
-    if(extensionSession == nullptr) {
+    if (extensionSession == nullptr) {
         WLOGFE("session is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }
@@ -95,7 +95,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
 
 WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<ExtensionSession>& extensionSession)
 {
-    if(extensionSession == nullptr) {
+    if (extensionSession == nullptr) {
         WLOGFE("session is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }

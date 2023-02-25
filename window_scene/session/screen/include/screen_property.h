@@ -31,7 +31,7 @@ public:
     RRect GetBounds() const;
 
 private:
-    float rotation_{0.0f};
+    float rotation_ { 0.0f };
     RRect bounds_;
 };
 } // namespace OHOS::Rosen

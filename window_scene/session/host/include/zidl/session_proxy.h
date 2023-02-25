@@ -33,7 +33,7 @@ public:
     virtual WSError Connect(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel) override;
 
-    virtual WSError StartPendingSessionActivation(const SessionInfo& info) override;
+    virtual WSError PendingSessionActivation(const SessionInfo& info) override;
     virtual WSError Recover() override;
     virtual WSError Maximum() override;
 private:

@@ -42,7 +42,7 @@ public:
     virtual WSError Foreground() = 0;
     virtual WSError Background() = 0;
     virtual WSError Disconnect() = 0;
-    virtual WSError StartPendingSessionActivation(const SessionInfo& info) = 0;
+    virtual WSError PendingSessionActivation(const SessionInfo& info) = 0;
 
     // scene session
     virtual WSError Recover() = 0;

@@ -16,17 +16,16 @@
 #ifndef OHOS_WINDOW_SCENE_JS_SCENE_UTILS_H
 #define OHOS_WINDOW_SCENE_JS_SCENE_UTILS_H
 
-#include <native_engine/native_value.h>
 #include <native_engine/native_engine.h>
+#include <native_engine/native_value.h>
 
 #include "interfaces/include/ws_common.h"
 #include "js_runtime_utils.h"
 #include "session/host/include/scene_session.h"
 
 namespace OHOS::Rosen {
-    bool GetAbilityInfoFromJs(NativeEngine& engine, NativeObject* jsObject,
-        SessionInfo& sessionInfo);
-    NativeValue* CreateJsAbilityInfo(NativeEngine& engine, const sptr<SceneSession>& session);
-}
+bool GetAbilityInfoFromJs(NativeEngine& engine, NativeObject* jsObject, SessionInfo& sessionInfo);
+NativeValue* CreateJsSceneInfo(NativeEngine& engine, const SessionInfo& sessionInfo);
+} // namespace OHOS::Rosen
 
 #endif // OHOS_WINDOW_SCENE_JS_SCENE_UTILS_H

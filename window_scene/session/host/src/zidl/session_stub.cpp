@@ -28,7 +28,7 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_DISCONNECT), &SessionStub::HandleDisconnect),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_CONNECT), &SessionStub::HandleConnect),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_ACTIVE_PENDING_SESSION),
-        &SessionStub::HandleStartPendingSessionActivation),
+        &SessionStub::HandlePendingSessionActivation),
 
     // for scene only
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_RECOVER), &SessionStub::HandleRecover),
@@ -108,16 +108,16 @@ int SessionStub::HandleMaximum(MessageParcel& data, MessageParcel& reply)
     return ERR_NONE;
 }
 
-int SessionStub::HandleStartPendingSessionActivation(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("StartPendingSessionActivation!");
+    WLOGFD("PendingSessionActivation!");
     SessionInfo info;
     info.bundleName_ = data.ReadString();
     info.abilityName_ = data.ReadString();
     if (data.ReadBool()) {
         info.callerToken_ = data.ReadRemoteObject();
     }
-    WSError errCode = StartPendingSessionActivation(info);
+    WSError errCode = PendingSessionActivation(info);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

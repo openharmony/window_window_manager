@@ -26,7 +26,9 @@ class ExtensionSession : public Session {
 public:
     ExtensionSession(const SessionInfo& info);
     ~ExtensionSession();
+
 private:
 };
-}
+} // namespace OHOS::Rosen
+
 #endif // OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_H

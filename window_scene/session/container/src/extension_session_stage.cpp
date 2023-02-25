@@ -14,17 +14,15 @@
  */
 
 #include "session/container/include/extension_session_stage.h"
+
 #include "session/container/include/window_event_channel.h"
 #include "window_manager_hilog.h"
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSessionStage"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSessionStage" };
 }
 
-ExtensionSessionStage::ExtensionSessionStage(const sptr<ISession>& extensionSession)
-    : SessionStage(extensionSession)
-{
-}
+ExtensionSessionStage::ExtensionSessionStage(const sptr<ISession>& extensionSession) : SessionStage(extensionSession) {}
 
 WSError ExtensionSessionStage::Connect()
 {
@@ -36,4 +34,5 @@ WSError ExtensionSessionStage::Connect()
     sptr<IWindowEventChannel> eventChannel(new WindowEventChannel(extensionSessionStage));
     return session_->Connect(extensionSessionStage, eventChannel);
 }
+
 } // namespace OHOS::Rosen

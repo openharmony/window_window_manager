@@ -28,5 +28,6 @@ public:
 
     virtual WSError Connect() override;
 };
-}
+} // namespace OHOS::Rosen
+
 #endif // OHOS_ORSEN_WINDOW_SCENE_EXTENSION_SESSION_STAGE_H
