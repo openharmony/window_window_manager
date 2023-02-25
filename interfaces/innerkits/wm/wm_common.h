@@ -112,7 +112,7 @@ enum class WindowState : uint32_t {
     STATE_FROZEN,
     STATE_DESTROYED,
     STATE_UNFROZEN,
-    STATE_BOTTOM = STATE_DESTROYED,
+    STATE_BOTTOM = STATE_UNFROZEN,
 };
 
 enum class WMError : int32_t {
