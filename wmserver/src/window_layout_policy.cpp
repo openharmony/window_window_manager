@@ -619,8 +619,10 @@ static void AdjustFixedOrientationRSSurfaceNode(const sptr<WindowNode>& node, co
     float rotation = -90.f * (diffOrientation); // 90.f is base degree
     WLOGFD("[FixOrientation] adjust param display [%{public}u, %{public}d, %{public}d], rotation: %{public}f",
         displayOri, displayW, displayH, rotation);
-    surfaceNode->SetTranslateX((displayW - static_cast<int32_t>(winRect.width_)) / 2); // 2 is half
-    surfaceNode->SetTranslateY((displayH - static_cast<int32_t>(winRect.height_)) / 2); // 2 is half
+    if (diffOrientation != 0) {
+        surfaceNode->SetTranslateX((displayW - static_cast<int32_t>(winRect.width_)) / 2); // 2 is half
+        surfaceNode->SetTranslateY((displayH - static_cast<int32_t>(winRect.height_)) / 2); // 2 is half
+    }
     surfaceNode->SetPivotX(0.5); // 0.5 means center
     surfaceNode->SetPivotY(0.5); // 0.5 means center
     surfaceNode->SetRotation(rotation);
