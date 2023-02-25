@@ -78,7 +78,8 @@ sptr<WindowNodeContainer> WindowRoot::GetOrCreateWindowNodeContainer(DisplayId d
     // In case of have no container for default display, create container
     WLOGI("Create container for current display, displayId: %{public}" PRIu64 "", displayId);
     sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
-    return CreateWindowNodeContainer(displayInfo);
+    DisplayId defaultDisplayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    return CreateWindowNodeContainer(defaultDisplayId, displayInfo);
 }
 
 sptr<WindowNodeContainer> WindowRoot::GetWindowNodeContainer(DisplayId displayId)
@@ -101,13 +102,15 @@ sptr<WindowNodeContainer> WindowRoot::GetWindowNodeContainer(DisplayId displayId
     return nullptr;
 }
 
-sptr<WindowNodeContainer> WindowRoot::CreateWindowNodeContainer(sptr<DisplayInfo> displayInfo)
+sptr<WindowNodeContainer> WindowRoot::CreateWindowNodeContainer(DisplayId defaultDisplayId,
+    sptr<DisplayInfo> displayInfo)
 {
     if (displayInfo == nullptr || !CheckDisplayInfo(displayInfo)) {
         WLOGFE("get display failed or get invalid display info");
         return nullptr;
     }
 
+    DisplayGroupInfo::GetInstance().SetDefaultDisplayId(defaultDisplayId);
     DisplayId displayId = displayInfo->GetDisplayId();
     ScreenId displayGroupId = displayInfo->GetScreenGroupId();
     WLOGI("create new container for display, width: %{public}d, height: %{public}d, "
@@ -147,11 +150,22 @@ sptr<WindowNode> WindowRoot::GetWindowNode(uint32_t windowId) const
     return iter->second;
 }
 
-void WindowRoot::GetBackgroundNodesByScreenId(ScreenId screenGroupId, std::vector<sptr<WindowNode>>& windowNodes) const
+void WindowRoot::GetBackgroundNodesByScreenId(ScreenId screenGroupId, std::vector<sptr<WindowNode>>& windowNodes)
 {
     for (const auto& it : windowNodeMap_) {
-        if (it.second && screenGroupId == DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(
-            it.second->GetDisplayId()) && !it.second->currentVisibility_) {
+        wptr<WindowNodeContainer> container = GetWindowNodeContainer(it.second->GetDisplayId());
+        if (container == nullptr) {
+            continue;
+        }
+        auto iter = std::find_if(windowNodeContainerMap_.begin(), windowNodeContainerMap_.end(),
+            [container](const std::map<uint64_t, sptr<WindowNodeContainer>>::value_type& containerPair) {
+                return container.promote() == containerPair.second;
+            });
+        ScreenId screenGroupIdOfNode = INVALID_SCREEN_ID;
+        if (iter != windowNodeContainerMap_.end()) {
+            screenGroupIdOfNode = iter->first;
+        }
+        if (it.second && screenGroupId == screenGroupIdOfNode && !it.second->currentVisibility_) {
             windowNodes.push_back(it.second);
         }
     }
@@ -416,7 +430,7 @@ void WindowRoot::MinimizeAllAppWindows(DisplayId displayId)
 
 WMError WindowRoot::ToggleShownStateForAllAppWindows()
 {
-    std::vector<DisplayId> displays = DisplayManagerServiceInner::GetInstance().GetAllDisplayIds();
+    std::vector<DisplayId> displays = DisplayGroupInfo::GetInstance().GetAllDisplayIds();
     std::vector<sptr<WindowNodeContainer>> containers;
     bool isAllAppWindowsEmpty = true;
     for (auto displayId : displays) {
@@ -552,9 +566,9 @@ Rect WindowRoot::GetDisplayRectWithoutSystemBarAreas(const sptr<WindowNode> dstN
         WLOGFE("failed, window container could not be found");
         return {0, 0, 0, 0}; // empty rect
     }
-    auto displayRect = container->GetDisplayRect(displayId);
+    auto displayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(displayId);
     Rect targetRect = displayRect;
-    auto displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
+    auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(displayId);
     if (displayInfo && WmsUtils::IsExpectedRotatableWindow(dstNode->GetRequestedOrientation(),
         displayInfo->GetDisplayOrientation(), dstNode->GetWindowMode())) {
         WLOGFD("[FixOrientation] the window is expected rotatable, pre-calculated");
@@ -1356,6 +1370,7 @@ void WindowRoot::ProcessExpandDisplayCreate(DisplayId defaultDisplayId, sptr<Dis
         WLOGFE("get display failed or get invalid display info");
         return;
     }
+    DisplayGroupInfo::GetInstance().SetDefaultDisplayId(defaultDisplayId);
     DisplayId displayId = displayInfo->GetDisplayId();
     ScreenId displayGroupId = displayInfo->GetScreenGroupId();
     auto container = windowNodeContainerMap_[displayGroupId];
@@ -1367,17 +1382,6 @@ void WindowRoot::ProcessExpandDisplayCreate(DisplayId defaultDisplayId, sptr<Dis
     container->GetDisplayGroupController()->ProcessDisplayCreate(defaultDisplayId, displayInfo, displayRectMap);
     container->GetDisplayGroupController()->SetSplitRatioConfig(splitRatioConfig_);
     WLOGI("Container exist, add new display, displayId: %{public}" PRIu64"", displayId);
-}
-
-std::map<DisplayId, sptr<DisplayInfo>> WindowRoot::GetAllDisplayInfos(const std::vector<DisplayId>& displayIdVec)
-{
-    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
-    for (auto& displayId : displayIdVec) {
-        const sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
-        displayInfoMap.insert(std::make_pair(displayId, displayInfo));
-        WLOGI("Get latest displayInfo, displayId: %{public}" PRIu64"", displayId);
-    }
-    return displayInfoMap;
 }
 
 std::map<DisplayId, Rect> WindowRoot::GetAllDisplayRectsByDMS(sptr<DisplayInfo> displayInfo)
@@ -1423,7 +1427,7 @@ void WindowRoot::ProcessDisplayCreate(DisplayId defaultDisplayId, sptr<DisplayIn
     ScreenId displayGroupId = (displayInfo == nullptr) ? SCREEN_ID_INVALID : displayInfo->GetScreenGroupId();
     auto iter = windowNodeContainerMap_.find(displayGroupId);
     if (iter == windowNodeContainerMap_.end()) {
-        CreateWindowNodeContainer(displayInfo);
+        CreateWindowNodeContainer(defaultDisplayId, displayInfo);
         WLOGI("Create new container for display, displayId: %{public}" PRIu64"", displayId);
     } else {
         auto& displayIdVec = displayIdMap_[displayGroupId];
@@ -1527,16 +1531,6 @@ void WindowRoot::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<DisplayIn
 
     auto displayRectMap = GetAllDisplayRectsByDisplayInfo(displayInfoMap);
     container->GetDisplayGroupController()->ProcessDisplayChange(defaultDisplayId, displayInfo, displayRectMap, type);
-}
-
-float WindowRoot::GetVirtualPixelRatio(DisplayId displayId) const
-{
-    auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(displayId);
-    if (container == nullptr) {
-        WLOGFE("window container could not be found");
-        return 1.0;  // Use DefaultVPR 1.0
-    }
-    return container->GetDisplayVirtualPixelRatio(displayId);
 }
 
 Rect WindowRoot::GetDisplayGroupRect(DisplayId displayId) const

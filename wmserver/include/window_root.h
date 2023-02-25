@@ -40,9 +40,9 @@ public:
 
     sptr<WindowNodeContainer> GetOrCreateWindowNodeContainer(DisplayId displayId);
     sptr<WindowNodeContainer> GetWindowNodeContainer(DisplayId displayId);
-    sptr<WindowNodeContainer> CreateWindowNodeContainer(sptr<DisplayInfo> displayInfo);
+    sptr<WindowNodeContainer> CreateWindowNodeContainer(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo);
     sptr<WindowNode> GetWindowNode(uint32_t windowId) const;
-    void GetBackgroundNodesByScreenId(ScreenId screenGroupId, std::vector<sptr<WindowNode>>& windowNodes) const;
+    void GetBackgroundNodesByScreenId(ScreenId screenGroupId, std::vector<sptr<WindowNode>>& windowNodes);
 
     WMError SaveWindow(const sptr<WindowNode>& node);
     void AddDeathRecipient(sptr<WindowNode> node);
@@ -79,7 +79,6 @@ public:
     void NotifySystemBarTints();
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node);
     void FocusFaultDetection() const;
-    float GetVirtualPixelRatio(DisplayId displayId) const;
     Rect GetDisplayGroupRect(DisplayId displayId) const;
     WMError UpdateSizeChangeReason(uint32_t windowId, WindowSizeChangeReason reason);
     void SetBrightness(uint32_t windowId, float brightness);
@@ -141,7 +140,6 @@ private:
     ScreenId GetScreenGroupId(DisplayId displayId, bool& isRecordedDisplay);
     void ProcessExpandDisplayCreate(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         std::map<DisplayId, Rect>& displayRectMap);
-    std::map<DisplayId, sptr<DisplayInfo>> GetAllDisplayInfos(const std::vector<DisplayId>& displayIdVec);
     std::map<DisplayId, Rect> GetAllDisplayRectsByDMS(sptr<DisplayInfo> displayInfo);
     std::map<DisplayId, Rect> GetAllDisplayRectsByDisplayInfo(
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap);
@@ -162,7 +160,6 @@ private:
     std::shared_ptr<RSOcclusionData> lastOcclusionData_ = std::make_shared<RSOcclusionData>();
     std::map<ScreenId, sptr<WindowNodeContainer>> windowNodeContainerMap_;
     std::map<ScreenId, std::vector<DisplayId>> displayIdMap_;
-
     bool needCheckFocusWindow = false;
 
     std::map<WindowManagerAgentType, std::vector<sptr<IWindowManagerAgent>>> windowManagerAgents_;

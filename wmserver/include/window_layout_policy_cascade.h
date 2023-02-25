@@ -29,8 +29,7 @@ namespace Rosen {
 class WindowLayoutPolicyCascade : public WindowLayoutPolicy {
 public:
     WindowLayoutPolicyCascade() = delete;
-    WindowLayoutPolicyCascade(const sptr<DisplayGroupInfo>& displayGroupInfo,
-        DisplayGroupWindowTree& displayGroupWindowTree);
+    WindowLayoutPolicyCascade(DisplayGroupWindowTree& displayGroupWindowTree);
     ~WindowLayoutPolicyCascade() = default;
     void Launch() override;
     void Reorder() override;

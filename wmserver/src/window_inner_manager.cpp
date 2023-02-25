@@ -247,14 +247,6 @@ void WindowInnerManager::SetInputEventConsumer()
     moveDragController_->SetInputEventConsumer();
 }
 
-void WindowInnerManager::SetDisplayGroupInfo(sptr<DisplayGroupInfo> displayGroupInfo)
-{
-    if (moveDragController_ == nullptr || displayGroupInfo == nullptr) {
-        return;
-    }
-    moveDragController_->SetDisplayGroupInfo(displayGroupInfo);
-}
-
 void WindowInnerManager::NotifyDisplayLimitRectChange(const std::map<DisplayId, Rect>& limitRectMap)
 {
     if (moveDragController_ == nullptr) {

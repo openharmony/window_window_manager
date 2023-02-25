@@ -25,6 +25,7 @@
 #include <transaction/rs_transaction.h>
 #include <sstream>
 
+#include "display_group_info.h"
 #include "display_manager_service_inner.h"
 #include "minimize_app.h"
 #include "persistent_storage.h"
@@ -180,7 +181,7 @@ WMError WindowController::GetFocusWindowNode(DisplayId displayId, sptr<WindowNod
 
 WMError WindowController::GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken)
 {
-    DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    DisplayId displayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
     sptr<WindowNode> windowNode;
     WMError res = GetFocusWindowNode(displayId, windowNode);
     if (res == WMError::WM_OK) {
@@ -250,7 +251,7 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     // for system and subwindow
     WindowSystemEffect::SetWindowEffect(node);
     WLOGFD("createWindow id:%{public}u", windowId);
-    
+
     node->stateMachine_.SetWindowId(windowId);
     node->stateMachine_.SetWindowType(property->GetWindowType());
     return windowRoot_->SaveWindow(node);
@@ -365,7 +366,7 @@ void WindowController::RelayoutKeyboard(const sptr<WindowNode>& node)
     };
     container->TraverseWindowTree(func, true); // FromTopToBottom
 
-    sptr<DisplayInfo> defaultDisplayInfo = DisplayManagerServiceInner::GetInstance().GetDefaultDisplay();
+    sptr<DisplayInfo> defaultDisplayInfo = DisplayGroupInfo::GetInstance().GetDefaultDisplayInfo();
     if (defaultDisplayInfo == nullptr) {
         WLOGFE("defaultDisplayInfo is null");
         return;
@@ -698,7 +699,7 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
     auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayInfo->GetDisplayId());
     if (windowNodeContainer != nullptr) {
         windowNodeContainer->BeforeProcessWindowAvoidAreaChangeWhenDisplayChange();
-        windowNodeContainer->UpdateDisplayInfo(displayInfo);
+        DisplayGroupInfo::GetInstance().UpdateDisplayInfo(displayInfo);
     }
     switch (type) {
         case DisplayStateChangeType::DISPLAY_COMPRESS:
@@ -785,7 +786,7 @@ void WindowController::StopBootAnimationIfNeed(const sptr<WindowNode>& node)
         WLOGFE("Node is nullptr");
         return;
     }
-    if (node->GetDisplayId() != DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId()) {
+    if (node->GetDisplayId() != DisplayGroupInfo::GetInstance().GetDefaultDisplayId()) {
         return;
     }
     auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(node->GetDisplayId());
@@ -1375,7 +1376,7 @@ WMError WindowController::SetAspectRatio(uint32_t windowId, float ratio)
         return WMError::WM_OK;
     }
     if (!WindowHelper::IsAspectRatioSatisfiedWithSizeLimits(node->GetWindowUpdatedSizeLimits(), ratio,
-        windowRoot_->GetVirtualPixelRatio(node->GetDisplayId()))) {
+        DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId()))) {
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
@@ -1560,21 +1561,21 @@ void WindowController::OnScreenshot(DisplayId displayId)
 void WindowController::SetAnchorOffset(int32_t deltaX, int32_t deltaY)
 {
     displayZoomController_->SetAnchorOffset(deltaX, deltaY);
-    DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    DisplayId displayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
     FlushWindowInfoWithDisplayId(displayId);
 }
 
 void WindowController::OffWindowZoom()
 {
     displayZoomController_->OffWindowZoom();
-    DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    DisplayId displayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
     FlushWindowInfoWithDisplayId(displayId);
 }
 
 void WindowController::SetAnchorAndScale(int32_t x, int32_t y, float scale)
 {
     displayZoomController_->SetAnchorAndScale(x, y, scale);
-    DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    DisplayId displayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
     FlushWindowInfoWithDisplayId(displayId);
 }
 

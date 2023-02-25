@@ -24,6 +24,7 @@
 #include "display_manager_service_inner.h"
 #include "string_ex.h"
 #include "unique_fd.h"
+#include "display_group_info.h"
 #include "window_manager_hilog.h"
 #include "window_manager_service.h"
 #include "wm_common.h"
@@ -131,7 +132,7 @@ WMError WindowDumper::DumpScreenGroupWindowInfo(ScreenId screenGroupId,
 WMError WindowDumper::DumpAllWindowInfo(std::string& dumpInfo) const
 {
     std::map<ScreenId, sptr<WindowNodeContainer>> windowNodeContainers;
-    std::vector<DisplayId> displayIds = DisplayManagerServiceInner::GetInstance().GetAllDisplayIds();
+    std::vector<DisplayId> displayIds = DisplayGroupInfo::GetInstance().GetAllDisplayIds();
     for (DisplayId displayId : displayIds) {
         auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
         if (!windowNodeContainer) {

@@ -54,7 +54,8 @@ void DisplayGroupInfoTest::SetUp()
     displayInfo->SetOffsetY(1);
     displayInfo->SetWidth(1);
     displayInfo->SetHeight(1);
-    displayGroupInfo_ = new DisplayGroupInfo(displayGroupId, displayInfo);
+    displayGroupInfo_ = new DisplayGroupInfo();
+    displayGroupInfo_->Init(displayGroupId, displayInfo);
     AddTestDisplayInfo(displayGroupInfo_->displayInfosMap_);
 }
 

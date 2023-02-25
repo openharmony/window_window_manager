@@ -21,6 +21,8 @@
 #include <hitrace_meter.h>
 #include <string>
 #include <transaction/rs_transaction.h>
+
+#include "display_group_info.h"
 #include "minimize_app.h"
 #include "parameters.h"
 #include "starting_window.h"
@@ -309,7 +311,7 @@ void RemoteAnimation::GetExpectRect(const sptr<WindowNode>& dstNode, const sptr<
             avoidRect.posX_, avoidRect.posY_, avoidRect.width_, avoidRect.height_);
         if (WindowHelper::IsMainFullScreenWindow(dstNode->GetWindowType(), dstNode->GetWindowMode())) {
             auto boundsRect = RectF(avoidRect.posX_, avoidRect.posY_, avoidRect.width_, avoidRect.height_);
-            auto displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(dstNode->GetDisplayId());
+            auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(dstNode->GetDisplayId());
             if (displayInfo && WmsUtils::IsExpectedRotatableWindow(dstNode->GetRequestedOrientation(),
                 displayInfo->GetDisplayOrientation())) {
                 WLOGFD("[FixOrientation] the window is expected rotatable, pre-calculate bounds");
@@ -665,7 +667,7 @@ sptr<RSWindowAnimationTarget> RemoteAnimation::CreateWindowAnimationTarget(sptr<
     auto rect = windowNode->GetWindowRect();
     // 0, 1, 2, 3: convert bounds to RectF
     auto boundsRect = RectF(rect.posX_, rect.posY_, rect.width_, rect.height_);
-    auto displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(windowNode->GetDisplayId());
+    auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(windowNode->GetDisplayId());
     if (displayInfo && WmsUtils::IsExpectedRotatableWindow(windowNode->GetRequestedOrientation(),
         displayInfo->GetDisplayOrientation(), windowNode->GetWindowMode())) {
         WLOGFD("[FixOrientation] the window %{public}u is expected rotatable, pre-calculate bounds, rect:"

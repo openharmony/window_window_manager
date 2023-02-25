@@ -54,7 +54,6 @@ public:
     void CompleteFirstFrameDrawing(const wptr<WindowNode> &node);
 
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void SetDisplayGroupInfo(sptr<DisplayGroupInfo> displayGroupInfo);
     void NotifyDisplayLimitRectChange(const std::map<DisplayId, Rect>& limitRectMap);
     bool NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty);
