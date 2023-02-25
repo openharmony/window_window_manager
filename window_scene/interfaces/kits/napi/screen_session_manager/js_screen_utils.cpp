@@ -83,8 +83,8 @@ NativeValue* JsScreenUtils::CreateJsScreenConnectChangeType(NativeEngine& engine
         return engine.CreateUndefined();
     }
 
-    object->SetProperty("CONNECT", CreateJsValue(engine, CreateJsValue(engine, 0)));
-    object->SetProperty("DISCONNECT", CreateJsValue(engine, CreateJsValue(engine, 1)));
+    object->SetProperty("CONNECT", CreateJsValue(engine, 0));
+    object->SetProperty("DISCONNECT", CreateJsValue(engine, 1));
 
     return objValue;
 }
