@@ -18,11 +18,12 @@
 #include <axis_event.h>
 #include <key_event.h>
 #include <pointer_event.h>
+
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannel"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannel" };
 }
 
 WSError WindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -38,4 +39,4 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
     sessionStage_->NotifyPointerEvent(pointerEvent);
     return WSError::WS_OK;
 }
-}
+} // namespace OHOS::Rosen
