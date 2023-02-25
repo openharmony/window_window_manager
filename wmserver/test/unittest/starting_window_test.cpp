@@ -37,6 +37,7 @@ public:
 private:
     static sptr<WindowTransitionInfo> transitionInfo_;
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
+    std::shared_ptr<Media::PixelMap> ContructPixelMap();
     static sptr<RSIWindowAnimationController> animationController_;
     sptr<WindowNode> node_;
     AnimationConfig animationConfig_;
@@ -73,6 +74,17 @@ void StartingWindowTest::TearDown()
 {
     transitionInfo_ = nullptr;
     node_ = nullptr;
+}
+
+std::shared_ptr<Media::PixelMap> StartingWindowTest::ContructPixelMap()
+{
+    Media::InitializationOptions opts;
+    opts.size.width = 200;  // 200： test width
+    opts.size.height = 300; // 300： test height
+    opts.pixelFormat = Media::PixelFormat::ARGB_8888;
+    opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    std::unique_ptr<Media::PixelMap> pixelMapPtr = Media::PixelMap::Create(opts);
+    return std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
 }
 
 RSSurfaceNode::SharedPtr StartingWindowTest::CreateRSSurfaceNode()
@@ -199,7 +211,7 @@ HWTEST_F(StartingWindowTest, CreateWindowNode04, Function | SmallTest | Level2)
  */
 HWTEST_F(StartingWindowTest, DrawStartingWindow01, Function | SmallTest | Level2)
 {
-    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    std::shared_ptr<Media::PixelMap> pixelMap = ContructPixelMap();
     sptr<WindowNode> node = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, StartingWindow::DrawStartingWindow(node, pixelMap, 0x00FFFFFF, true));
     usleep(10000);
@@ -213,7 +225,7 @@ HWTEST_F(StartingWindowTest, DrawStartingWindow01, Function | SmallTest | Level2
 HWTEST_F(StartingWindowTest, DrawStartingWindow02, Function | SmallTest | Level2)
 {
     node_->leashWinSurfaceNode_ = nullptr;
-    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    std::shared_ptr<Media::PixelMap> pixelMap = ContructPixelMap();
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, pixelMap, 0x00FFFFFF, true));
     usleep(10000);
 }
@@ -225,7 +237,7 @@ HWTEST_F(StartingWindowTest, DrawStartingWindow02, Function | SmallTest | Level2
  */
 HWTEST_F(StartingWindowTest, DrawStartingWindow03, Function | SmallTest | Level2)
 {
-    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    std::shared_ptr<Media::PixelMap> pixelMap = ContructPixelMap();
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, pixelMap, 0x00FFFFFF, false));
     usleep(10000);
 }
@@ -238,7 +250,7 @@ HWTEST_F(StartingWindowTest, DrawStartingWindow03, Function | SmallTest | Level2
 HWTEST_F(StartingWindowTest, DrawStartingWindow04, Function | SmallTest | Level2)
 {
     node_->startingWinSurfaceNode_ = nullptr;
-    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    std::shared_ptr<Media::PixelMap> pixelMap = ContructPixelMap();
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, StartingWindow::DrawStartingWindow(node_, pixelMap, 0x00FFFFFF, true));
     usleep(10000);
 }
@@ -261,7 +273,7 @@ HWTEST_F(StartingWindowTest, DrawStartingWindow05, Function | SmallTest | Level2
  */
 HWTEST_F(StartingWindowTest, DrawStartingWindow06, Function | SmallTest | Level2)
 {
-    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    std::shared_ptr<Media::PixelMap> pixelMap = ContructPixelMap();
     ASSERT_EQ(WMError::WM_OK, StartingWindow::DrawStartingWindow(node_, pixelMap, 0x00FFFFFF, true));
     usleep(10000);
 }

@@ -53,9 +53,9 @@ public:
     static void SetWindowSystemEffectConfig(AppWindowEffectConfig config);
     static void SetWindowRoot(const sptr<WindowRoot>& windowRoot);
 
-    static WMError SetWindowEffect(const sptr<WindowNode>& node);
+    static WMError SetWindowEffect(const sptr<WindowNode>& node, bool needCheckAnimation = true);
     static WMError SetWindowShadow(const sptr<WindowNode>& node);
-    static WMError SetCornerRadius(const sptr<WindowNode>& node);
+    static WMError SetCornerRadius(const sptr<WindowNode>& node, bool needCheckAnimation = true);
 private:
     static bool IsAppMainOrSubOrFloatingWindow(const sptr<WindowNode>& node);
     static AppWindowEffectConfig windowSystemEffectConfig_;
