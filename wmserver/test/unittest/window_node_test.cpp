@@ -791,11 +791,17 @@ HWTEST_F(WindowNodeTest, SetSnapshot01, Function | SmallTest | Level1)
     auto defaultValue = windowNode->GetSnapshot();
     ASSERT_EQ(0, defaultValue.use_count());
 
-    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
-    windowNode->SetSnapshot(std::move(pixelMap));
+    Media::InitializationOptions opts;
+    opts.size.width = 200;  // 200： test width
+    opts.size.height = 300; // 300： test height
+    opts.pixelFormat = Media::PixelFormat::ARGB_8888;
+    opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    std::unique_ptr<Media::PixelMap> pixelMapPtr = Media::PixelMap::Create(opts);
+    std::shared_ptr<Media::PixelMap> pixelMap(pixelMapPtr.release());
+    windowNode->SetSnapshot(pixelMap);
 
     auto resultValue = windowNode->GetSnapshot();
-    ASSERT_EQ(2, resultValue.use_count());
+    ASSERT_EQ(3, resultValue.use_count());
 }
 /**
  * @tc.name: UpdateZoomTransform01
