@@ -720,7 +720,7 @@ void RemoteAnimation::ExecuteFinalStateTask(sptr<WindowNode>& node)
     } else if (node->stateMachine_.IsWindowNodeShownOrShowing()) {
         WLOGFI("execute task layout after show animation id:%{public}u!", node->GetWindowId());
         winRoot->LayoutWhenAddWindowNode(node, true);
-        WindowSystemEffect::SetWindowEffect(node);
+        WindowSystemEffect::SetWindowEffect(node, false); // no need to check animationPlaying in finishCallback
         auto winController = windowController_.promote();
         if (winController) {
             winController->FlushWindowInfo(node->GetWindowId());
