@@ -21,6 +21,7 @@
 
 #include "interfaces/include/ws_common.h"
 #include "js_screen_session.h"
+#include "js_screen_utils.h"
 #include "session/screen/include/screen_session.h"
 #include "session_manager/include/screen_session_manager.h"
 #include "window_manager_hilog.h"
@@ -52,6 +53,7 @@ NativeValue* JsScreenSessionManager::Init(NativeEngine* engine, NativeValue* exp
 
     auto jsScreenSessionManager = std::make_unique<JsScreenSessionManager>(*engine);
     object->SetNativePointer(jsScreenSessionManager.release(), JsScreenSessionManager::Finalizer, nullptr);
+    object->SetProperty("ScreenConnectChangeType", JsScreenUtils::CreateJsScreenConnectChangeType(*engine));
 
     const char* moduleName = "JsScreenSessionManager";
     BindNativeFunction(*engine, *object, "on", moduleName, JsScreenSessionManager::RegisterCallback);
@@ -75,7 +77,6 @@ void JsScreenSessionManager::OnScreenConnect(sptr<ScreenSession>& screenSession)
         [callback_, screenSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
             NativeValue* objValue = engine.CreateObject();
             NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
-
             object->SetProperty("screenSession", JsScreenSession::Create(engine, screenSession));
             object->SetProperty("screenConnectChangeType", CreateJsValue(engine, 0));
 
@@ -106,7 +107,6 @@ void JsScreenSessionManager::OnScreenDisconnect(sptr<ScreenSession>& screenSessi
         [callback_, screenSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
             NativeValue* objValue = engine.CreateObject();
             NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
-
             object->SetProperty("screenSession", JsScreenSession::Create(engine, screenSession));
             object->SetProperty("screenConnectChangeType", CreateJsValue(engine, 1));
 

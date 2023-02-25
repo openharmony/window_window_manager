@@ -67,4 +67,25 @@ NativeValue* JsScreenUtils::CreateJsRRect(NativeEngine& engine, const RRect& rre
     object->SetProperty("radius", CreateJsValue(engine, rrect.radius_[0].x_));
     return objValue;
 }
+
+NativeValue* JsScreenUtils::CreateJsScreenConnectChangeType(NativeEngine& engine)
+{
+    WLOGFD("Create.");
+    auto objValue = engine.CreateObject();
+    if (objValue == nullptr) {
+        WLOGFE("Failed to create object!");
+        return engine.CreateUndefined();
+    }
+
+    auto object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to convert object!");
+        return engine.CreateUndefined();
+    }
+
+    object->SetProperty("CONNECT", CreateJsValue(engine, CreateJsValue(engine, 0)));
+    object->SetProperty("DISCONNECT", CreateJsValue(engine, CreateJsValue(engine, 1)));
+
+    return objValue;
+}
 } // namespace OHOS::Rosen

@@ -26,6 +26,7 @@ class JsScreenUtils {
 public:
     static NativeValue* CreateJsScreenProperty(NativeEngine& engine, const ScreenProperty& screenProperty);
     static NativeValue* CreateJsRRect(NativeEngine& engine, const RRect& rrect);
+    static NativeValue* CreateJsScreenConnectChangeType(NativeEngine& engine);
 };
 } // namespace OHOS::Rosen
 
