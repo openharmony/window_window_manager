@@ -30,8 +30,7 @@ namespace Rosen {
 class WindowLayoutPolicyTile : public WindowLayoutPolicy {
 public:
     WindowLayoutPolicyTile() = delete;
-    WindowLayoutPolicyTile(const sptr<DisplayGroupInfo>& displayGroupInfo,
-        DisplayGroupWindowTree& displayGroupWindowTree);
+    WindowLayoutPolicyTile(DisplayGroupWindowTree& displayGroupWindowTree);
     ~WindowLayoutPolicyTile() = default;
     void Launch() override;
     bool IsTileRectSatisfiedWithSizeLimits(const sptr<WindowNode>& node) override;

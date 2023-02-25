@@ -17,6 +17,7 @@
 
 #include <common/rs_common_def.h>
 #include "color_parser.h"
+#include "display_group_info.h"
 #include "remote_animation.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
@@ -58,7 +59,7 @@ WMError WindowSystemEffect::SetCornerRadius(const sptr<WindowNode>& node)
     if (!IsAppMainOrSubOrFloatingWindow(node)) {
         return WMError::WM_DO_NOTHING;
     }
-    auto vpr = winRoot->GetVirtualPixelRatio(node->GetDisplayId());
+    auto vpr = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId());
     auto fullscreenRadius = windowSystemEffectConfig_.fullScreenCornerRadius_ * vpr;
     auto splitRadius = windowSystemEffectConfig_.splitCornerRadius_ * vpr;
     auto floatRadius = windowSystemEffectConfig_.floatCornerRadius_ * vpr;
@@ -143,7 +144,7 @@ WMError WindowSystemEffect::SetWindowShadow(const sptr<WindowNode>& node)
     WLOGFI("[WEffect][id:%{public}d] focused: %{public}u, [%{public}f, %{public}s, %{public}f, %{public}f, %{public}f]",
         node->GetWindowId(), node->isFocused_, shadow.elevation_, shadow.color_.c_str(),
         shadow.offsetX_, shadow.offsetY_, shadow.alpha_);
-    auto vpr = winRoot->GetVirtualPixelRatio(node->GetDisplayId());
+    auto vpr = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId());
     surfaceNode->SetShadowElevation(shadow.elevation_ * vpr);
     surfaceNode->SetShadowColor(colorValue);
     surfaceNode->SetShadowOffsetX(shadow.offsetX_);

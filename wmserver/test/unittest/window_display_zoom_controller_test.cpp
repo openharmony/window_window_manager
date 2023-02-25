@@ -73,7 +73,7 @@ HWTEST_F(WindowDisplayZoomControllerTest, WindowDisplayZoomControllerTest01, Fun
     ASSERT_NE(display, nullptr);
     sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
     ASSERT_NE(displayInfo, nullptr);
-    auto container = windowRoot_->CreateWindowNodeContainer(displayInfo);
+    auto container = windowRoot_->CreateWindowNodeContainer(0, displayInfo);
     ASSERT_NE(container, nullptr);
 
     // windowNodeContainer is not null

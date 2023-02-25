@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "display_zoom_controller.h"
+#include "display_group_info.h"
 #include "window_helper.h"
 
 namespace OHOS::Rosen {
@@ -30,7 +31,7 @@ void DisplayZoomController::SetAnchorAndScale(int32_t x, int32_t y, float scale)
     } else if (zoomInfo_.scale * scale > DISPLAY_ZOOM_MAX_SCALE) {
         scale = DISPLAY_ZOOM_MAX_SCALE / zoomInfo_.scale;
     }
-    DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    DisplayId displayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
     sptr<WindowNodeContainer> windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
     if (windowNodeContainer == nullptr) {
         return;
@@ -63,7 +64,7 @@ void DisplayZoomController::SetAnchorAndScale(int32_t x, int32_t y, float scale)
 void DisplayZoomController::SetAnchorOffset(int32_t deltaX, int32_t deltaY)
 {
     WLOGFD("DisplayZoom: SetAnchorOffset");
-    DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    DisplayId displayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
     sptr<WindowNodeContainer> windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
     if (windowNodeContainer == nullptr) {
         return;
@@ -88,7 +89,7 @@ void DisplayZoomController::SetAnchorOffset(int32_t deltaX, int32_t deltaY)
 void DisplayZoomController::OffWindowZoom()
 {
     WLOGFD("DisplayZoom: Off");
-    DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    DisplayId displayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
     sptr<WindowNodeContainer> windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
     if (windowNodeContainer == nullptr) {
         return;
@@ -110,7 +111,7 @@ void DisplayZoomController::UpdateAllWindowsZoomInfo(DisplayId displayId)
     if (zoomInfo_.scale == DISPLAY_ZOOM_OFF_SCALE) {
         return;
     }
-    DisplayId defaultDisplayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    DisplayId defaultDisplayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
     if (defaultDisplayId != displayId) {
         return;
     }
@@ -142,7 +143,7 @@ void DisplayZoomController::UpdateWindowZoomInfo(uint32_t windowId)
     if (!node->currentVisibility_) {
         return;
     }
-    DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    DisplayId displayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
     if (node->GetDisplayId() != displayId) {
         return;
     }
@@ -191,7 +192,7 @@ bool DisplayZoomController::UpdateZoomTranslateInfo(sptr<WindowNodeContainer> wi
         deskTop->ComputeTransform();
         zoomRect = WindowHelper::TransformRect(deskTop->GetWindowProperty()->GetTransformMat(), originalRect);
     }
-    sptr<DisplayInfo> displayInfo = windowNodeContainer->GetDisplayInfo(displayId);
+    sptr<DisplayInfo> displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(displayId);
     if (displayInfo == nullptr) {
         WLOGFE("DisplayZoom: can't get displayInfo");
         return false;

@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 #include <transaction/rs_transaction.h>
+
+#include "display_manager.h"
 #include "iremote_object_mocker.h"
 #include "mock_RSIWindowAnimationController.h"
 #include "remote_animation.h"
@@ -55,6 +57,10 @@ void StartingWindowTest::TearDownTestCase()
 
 void StartingWindowTest::SetUp()
 {
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_TRUE((display != nullptr));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    ASSERT_TRUE((displayInfo != nullptr));
     transitionInfo_ = new WindowTransitionInfo();
     animationController_ = new RSIWindowAnimationControllerMocker();
     ASSERT_EQ(WMError::WM_OK, RemoteAnimation::SetWindowAnimationController(animationController_));

@@ -23,8 +23,9 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DisplayGroupInfo"};
 }
+WM_IMPLEMENT_SINGLE_INSTANCE(DisplayGroupInfo)
 
-DisplayGroupInfo::DisplayGroupInfo(ScreenId displayGroupId, const sptr<DisplayInfo>& displayInfo)
+void DisplayGroupInfo::Init(ScreenId displayGroupId, const sptr<DisplayInfo>& displayInfo)
 {
     displayGroupId_ = displayGroupId;
     AddDisplayInfo(displayInfo);
@@ -108,6 +109,11 @@ void DisplayGroupInfo::SetDisplayRect(DisplayId displayId, Rect displayRect)
     displayInfo->SetHeight(displayRect.height_);
 }
 
+void DisplayGroupInfo::SetDefaultDisplayId(DisplayId defaultDisplayId)
+{
+    defaultDisplayId_ = defaultDisplayId;
+}
+
 Rotation DisplayGroupInfo::GetDisplayRotation(DisplayId displayId) const
 {
     Rotation rotation = Rotation::ROTATION_0;
@@ -159,6 +165,14 @@ sptr<DisplayInfo> DisplayGroupInfo::GetDisplayInfo(DisplayId displayId) const
     return nullptr;
 }
 
+sptr<DisplayInfo> DisplayGroupInfo::GetDefaultDisplayInfo() const
+{
+    if (displayInfosMap_.find(defaultDisplayId_) != displayInfosMap_.end()) {
+        return displayInfosMap_[defaultDisplayId_];
+    }
+    return nullptr;
+}
+
 void DisplayGroupInfo::UpdateDisplayInfo(sptr<DisplayInfo> displayInfo) const
 {
     DisplayId displayId = displayInfo->GetDisplayId();
@@ -177,6 +191,15 @@ std::vector<sptr<DisplayInfo>> DisplayGroupInfo::GetAllDisplayInfo() const
     return displayInfos;
 }
 
+std::vector<DisplayId> DisplayGroupInfo::GetAllDisplayIds() const
+{
+    std::vector<DisplayId> displayIds;
+    for (auto& iter : displayInfosMap_) {
+        displayIds.push_back(iter.first);
+    }
+    return displayIds;
+}
+
 DisplayId DisplayGroupInfo::GetLeftDisplayId() const
 {
     return leftDisplayId_;
@@ -185,6 +208,11 @@ DisplayId DisplayGroupInfo::GetLeftDisplayId() const
 DisplayId DisplayGroupInfo::GetRightDisplayId() const
 {
     return rightDisplayId_;
+}
+
+DisplayId DisplayGroupInfo::GetDefaultDisplayId() const
+{
+    return defaultDisplayId_;
 }
 } // namespace Rosen
 } // namespace OHOS

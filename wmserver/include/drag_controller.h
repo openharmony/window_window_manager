@@ -75,7 +75,6 @@ public:
     void HandleWindowRemovedOrDestroyed(uint32_t windowId);
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     uint32_t GetActiveWindowId() const;
-    void SetDisplayGroupInfo(sptr<DisplayGroupInfo> displayGroupInfo);
     void HandleDisplayLimitRectChange(const std::map<DisplayId, Rect>& limitRectMap);
     void SetInputEventConsumer();
 
@@ -98,7 +97,6 @@ private:
 
     sptr<WindowProperty> windowProperty_;
     sptr<MoveDragProperty> moveDragProperty_;
-    sptr<DisplayGroupInfo> displayGroupInfo_;
     uint32_t activeWindowId_ = INVALID_WINDOW_ID;
     std::shared_ptr<MMI::PointerEvent> moveEvent_ = nullptr;
     std::shared_ptr<MMI::IInputEventConsumer> inputListener_ = nullptr;

@@ -18,6 +18,7 @@
 #include <ipc_skeleton.h>
 #include <ability_manager_client.h>
 
+#include "display_group_info.h"
 #include "display_manager_service_inner.h"
 #include "dm_common.h"
 #include "window_helper.h"
@@ -66,7 +67,7 @@ void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
         WLOGFE("can not get window node container.");
         return;
     }
-    auto displayInfos = container->GetAllDisplayInfo();
+    auto displayInfos = DisplayGroupInfo::GetInstance().GetAllDisplayInfo();
     if (displayInfos.empty()) {
         return;
     }
