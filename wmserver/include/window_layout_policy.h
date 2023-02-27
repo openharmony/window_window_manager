@@ -107,6 +107,7 @@ protected:
     void UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect);
 
     void GetStoragedAspectRatio(const sptr<WindowNode>& node);
+    bool IsNeedAnimationSync(WindowType type);
 
     Rect displayGroupRect_;
     Rect displayGroupLimitRect_;

@@ -549,7 +549,7 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
         }
         float virtualPixelRatio = display->GetVirtualPixelRatio();
         config.SetDensity(virtualPixelRatio);
-        uiContent_->UpdateViewportConfig(config, WindowSizeChangeReason::UNDEFINED);
+        uiContent_->UpdateViewportConfig(config, WindowSizeChangeReason::UNDEFINED, nullptr);
         WLOGFD("notify uiContent window size change end");
     }
     return WMError::WM_OK;
@@ -2070,7 +2070,8 @@ void WindowImpl::SetModeSupportInfo(uint32_t modeSupportInfo)
     property_->SetModeSupportInfo(modeSupportInfo);
 }
 
-void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason)
+void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,
+    const std::shared_ptr<RSTransaction> rsTransaction)
 {
     if (state_ == WindowState::STATE_DESTROYED) {
         WLOGFW("invalid window state");
@@ -2110,10 +2111,10 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
     }
     ResSchedReport::GetInstance().RequestPerfIfNeed(reason, GetType(), GetMode());
     if ((rectToAce != lastOriRect) || (reason != lastSizeChangeReason_)) {
-        NotifySizeChange(rectToAce, reason);
+        NotifySizeChange(rectToAce, reason, rsTransaction);
         lastSizeChangeReason_ = reason;
     }
-    UpdateViewportConfig(rectToAce, display, reason);
+    UpdateViewportConfig(rectToAce, display, reason, rsTransaction);
 }
 
 void WindowImpl::UpdateMode(WindowMode mode)
@@ -2632,7 +2633,8 @@ void WindowImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType
     NotifyAvoidAreaChange(avoidArea, type);
 }
 
-void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& display, WindowSizeChangeReason reason)
+void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& display, WindowSizeChangeReason reason,
+    const std::shared_ptr<RSTransaction> rsTransaction)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ == nullptr) {
@@ -2644,7 +2646,7 @@ void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& dis
     if (display) {
         config.SetDensity(display->GetVirtualPixelRatio());
     }
-    uiContent_->UpdateViewportConfig(config, reason);
+    uiContent_->UpdateViewportConfig(config, reason, rsTransaction);
     WLOGFD("Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         property_->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
@@ -2973,12 +2975,13 @@ void WindowImpl::ClearListenersById(uint32_t winId)
     ClearUselessListeners(dialogDeathRecipientListener_, winId);
 }
 
-void WindowImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reason)
+void WindowImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reason,
+    const std::shared_ptr<RSTransaction> rsTransaction)
 {
     auto windowChangeListeners = GetListeners<IWindowChangeListener>();
     for (auto& listener : windowChangeListeners) {
         if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnSizeChange(rect, reason);
+            listener.GetRefPtr()->OnSizeChange(rect, reason, rsTransaction);
         }
     }
 }

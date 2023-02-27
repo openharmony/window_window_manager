@@ -21,6 +21,7 @@
 #include "window_property.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
+#include <transaction/rs_transaction.h>
 
 namespace OHOS {
 namespace Rosen {
@@ -51,7 +52,8 @@ public:
         TRANS_ID_RESTORE_SPLIT_WINDOW_MODE,
     };
 
-    virtual WMError UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason) = 0;
+    virtual WMError UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,
+        const std::shared_ptr<RSTransaction> rsTransaction = nullptr) = 0;
     virtual WMError UpdateWindowMode(WindowMode mode) = 0;
     virtual WMError UpdateWindowModeSupportInfo(uint32_t modeSupportInfo) = 0;
     virtual WMError UpdateFocusStatus(bool focused) = 0;

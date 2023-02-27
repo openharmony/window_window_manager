@@ -23,6 +23,7 @@
 #include <refbase.h>
 #include <surface.h>
 #include <transaction/rs_interfaces.h>
+#include <transaction/rs_sync_transaction_controller.h>
 
 #include "abstract_screen.h"
 #include "agent_death_recipient.h"

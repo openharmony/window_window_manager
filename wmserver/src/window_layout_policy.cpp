@@ -23,6 +23,7 @@
 #include "window_manager_service_utils.h"
 #include "wm_common_inner.h"
 #include "wm_math.h"
+#include <transaction/rs_sync_transaction_controller.h>
 
 namespace OHOS {
 namespace Rosen {
@@ -369,7 +370,14 @@ void WindowLayoutPolicy::NotifyClientAndAnimation(const sptr<WindowNode>& node,
     const Rect& winRect, WindowSizeChangeReason reason)
 {
     if (node->GetWindowToken()) {
-        node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason);
+        auto type = node->GetWindowType();
+        auto syncTransactionController = RSSyncTransactionController::GetInstance();
+        if (reason == WindowSizeChangeReason::ROTATION && syncTransactionController && IsNeedAnimationSync(type)) {
+            node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason,
+                syncTransactionController->GetRSTransaction());
+        } else {
+            node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason);
+        }
         WLOGFD("Id: %{public}d, winRect:[%{public}d, %{public}d, %{public}u, %{public}u], reason: "
             "%{public}u", node->GetWindowId(), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_, reason);
     }
@@ -377,6 +385,15 @@ void WindowLayoutPolicy::NotifyClientAndAnimation(const sptr<WindowNode>& node,
         node->ResetWindowSizeChangeReason();
     }
     NotifyAnimationSizeChangeIfNeeded();
+}
+
+bool WindowLayoutPolicy::IsNeedAnimationSync(WindowType type)
+{
+    if (type == WindowType::WINDOW_TYPE_POINTER ||
+        type == WindowType::WINDOW_TYPE_BOOT_ANIMATION) {
+        return false;
+    }
+    return true;
 }
 
 Rect WindowLayoutPolicy::CalcEntireWindowHotZone(const sptr<WindowNode>& node, const Rect& winRect, uint32_t hotZone,
