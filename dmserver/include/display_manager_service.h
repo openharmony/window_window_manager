@@ -86,7 +86,9 @@ public:
     bool SetDisplayState(DisplayState state) override;
     void UpdateRSTree(DisplayId displayId, DisplayId parentDisplayId, std::shared_ptr<RSSurfaceNode>& surfaceNode,
         bool isAdd, bool isMultiDisplay);
-
+    DMError AddSurfaceNodeToDisplay(DisplayId displayId,
+        std::shared_ptr<RSSurfaceNode>& surfaceNode, bool onTop = true) override;
+    DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId, std::shared_ptr<RSSurfaceNode>& surfaceNode) override;
     DisplayState GetDisplayState(DisplayId displayId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
     bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze) override;
@@ -107,6 +109,7 @@ public:
     void RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener);
     void RegisterRSScreenChangeListener(const sptr<IRSScreenChangeListener>& listener);
     void NotifyPrivateWindowStateChanged(bool hasPrivate);
+
 private:
     DisplayManagerService();
     ~DisplayManagerService() = default;

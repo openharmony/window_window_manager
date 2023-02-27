@@ -80,6 +80,9 @@ public:
     DMError RegisterPrivateWindowListener(sptr<IPrivateWindowListener> listener);
     DMError UnregisterPrivateWindowListener(sptr<IPrivateWindowListener> listener);
 
+    DMError AddSurfaceNodeToDisplay(DisplayId displayId, std::shared_ptr<class RSSurfaceNode>& surfaceNode);
+    DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId, std::shared_ptr<class RSSurfaceNode>& surfaceNode);
+
     constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 3840; // max resolution, 4K
 
 private:

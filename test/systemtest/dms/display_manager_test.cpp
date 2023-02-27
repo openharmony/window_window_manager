@@ -14,6 +14,7 @@
  */
 #include <gtest/gtest.h>
 #include <transaction/rs_transaction.h>
+#include <ui/rs_surface_node.h>
 #include "display_test_utils.h"
 #include "display.h"
 #include "screen.h"
@@ -295,6 +296,22 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowSkipSnapShot, Function | SmallTest 
     window1->Destroy();
     window2->Destroy();
     ASSERT_TRUE(!hasPrivateWindow);
+}
+
+/**
+ * @tc.name: AddSurfaceNodeToDisplay | RemoveSurfaceNodeFromDisplay
+ * @tc.desc: add/remove surfaceNode to/from display
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, AddAndRemoveSurfaceNode, Function | SmallTest | Level2)
+{
+    RSSurfaceNodeConfig config;
+    config.SurfaceNodeName = "TestSurfaceNode";
+    auto surfaceNode = RSSurfaceNode::Create(config);
+    DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
+    ASSERT_EQ(DMError::DM_OK, DisplayManager::GetInstance().AddSurfaceNodeToDisplay(id, surfaceNode));
+    sleep(2);
+    ASSERT_EQ(DMError::DM_OK, DisplayManager::GetInstance().RemoveSurfaceNodeFromDisplay(id, surfaceNode));
 }
 
 }
