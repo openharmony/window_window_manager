@@ -28,11 +28,11 @@ public:
 
     ~WindowEventChannelProxy() {};
 
-    virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
-    virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 private:
     static inline BrokerDelegator<WindowEventChannelProxy> delegator_;
 };
-}
+} // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_WINDOW_EVENT_CHANNEL_RPOXY_H
 

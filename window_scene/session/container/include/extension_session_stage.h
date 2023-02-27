@@ -26,7 +26,7 @@ public:
     ExtensionSessionStage(const sptr<ISession>& extensionSession);
     ~ExtensionSessionStage() = default;
 
-    virtual WSError Connect() override;
+    WSError Connect() override;
 };
 } // namespace OHOS::Rosen
 

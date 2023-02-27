@@ -34,7 +34,8 @@ const std::map<uint32_t, WindowEventChannelStubFunc> WindowEventChannelStub::stu
         &WindowEventChannelStub::HandleTransferPointerEvent)
 };
 
-int WindowEventChannelStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+int WindowEventChannelStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
+    MessageParcel &reply, MessageOption &option)
 {
     WLOGFD("Window event channel on remote request!, code: %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
@@ -54,34 +55,12 @@ int WindowEventChannelStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
 int WindowEventChannelStub::HandleTransferKeyEvent(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("TransferKeyEvent!");
-    auto keyEvent = MMI::KeyEvent::Create();
-    if (keyEvent == nullptr) {
-        WLOGFE("Failed to create key event!");
-        return ERR_INVALID_DATA;
-    }
-    if (!keyEvent->ReadFromParcel(data)) {
-        WLOGFE("Read Key Event failed");
-        return ERR_INVALID_DATA;
-    }
-    WSError errCode = TransferKeyEvent(keyEvent);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 
 int WindowEventChannelStub::HandleTransferPointerEvent(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("TransferPointerEvent!");
-    auto pointerEvent = MMI::PointerEvent::Create();
-    if (pointerEvent == nullptr) {
-        WLOGFE("Failed to create pointer event!");
-        return ERR_INVALID_DATA;
-    }
-    if (!pointerEvent->ReadFromParcel(data)) {
-        WLOGFE("Read Pointer Event failed");
-        return ERR_INVALID_DATA;
-    }
-    WSError errCode = TransferPointerEvent(pointerEvent);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 }

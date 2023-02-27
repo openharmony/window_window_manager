@@ -27,17 +27,17 @@ public:
 
     ~SessionProxy() {};
 
-    virtual WSError Foreground() override;
-    virtual WSError Background() override;
-    virtual WSError Disconnect() override;
-    virtual WSError Connect(const sptr<ISessionStage>& sessionStage,
+    WSError Foreground() override;
+    WSError Background() override;
+    WSError Disconnect() override;
+    WSError Connect(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel) override;
 
-    virtual WSError PendingSessionActivation(const SessionInfo& info) override;
-    virtual WSError Recover() override;
-    virtual WSError Maximum() override;
+    WSError PendingSessionActivation(const SessionInfo& info) override;
+    WSError Recover() override;
+    WSError Maximum() override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };
-}
+} // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_RPOXY_H

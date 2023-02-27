@@ -12,61 +12,33 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/window/window_manager/windowmanager_aafwk.gni")
 
 config("session_manager_public_config") {
   include_dirs = [
-    "//foundation/window/window_manager/window_scene",
+    "${window_base_path}/window_scene",
 
     # for window_manager_hilog
-    "//foundation/window/window_manager/utils/include",
+    "${window_base_path}/utils/include",
   ]
 }
 
 ohos_shared_library("scene_session_manager") {
-  sources = [
-    "src/extension_session_manager.cpp",
-    "src/scene_session_manager.cpp",
-  ]
+  sources = [ "src/extension_session_manager.cpp" ]
 
   cflags_cc = [ "-std=c++17" ]
 
   public_configs = [ ":session_manager_public_config" ]
 
   deps = [
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/window/window_manager/window_scene/session:scene_session",
-    "//foundation/window/window_manager/window_scene/common:libwscommon",
+    "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "${window_base_path}/window_scene/session:scene_session",
   ]
 
   external_deps = [
     "ability_base:want",
     "ability_runtime:ability_manager",
-    "c_utils:utils",
-    "hilog_native:libhilog",
     "ace_engine:ace_uicontent",
-    "eventhandler:libeventhandler"
-  ]
-
-  part_name = "window_manager"
-  subsystem_name = "window"
-}
-
-ohos_shared_library("screen_session_manager") {
-  sources = [
-    "src/screen_session_manager.cpp",
-  ]
-
-  cflags_cc = [ "-std=c++17" ]
-
-  public_configs = [ ":session_manager_public_config" ]
-
-  deps = [
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/window/window_manager/window_scene/session:screen_session",
-    "//foundation/window/window_manager/window_scene/common:libwscommon",
-  ]
-
-  external_deps = [
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog_native:libhilog",

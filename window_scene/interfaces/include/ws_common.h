@@ -58,7 +58,7 @@ const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP {
 };
 
 enum class SessionState : uint32_t {
-    STATE_DISCONNECT = 0,
+    STATE_DISCONNECT = 0, // Invalid state
     STATE_CONNECT,
     STATE_FOREGROUND,
     STATE_ACTIVE,
@@ -94,53 +94,6 @@ struct WSRect {
     bool operator!=(const WSRect& a) const
     {
         return !this->operator==(a);
-    }
-
-    bool IsUninitializedRect() const
-    {
-        return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
-    }
-
-    bool IsInsideOf(const WSRect& a) const
-    {
-        return (posX_ >= a.posX_ && posY_ >= a.posY_ && posX_ + width_ <= a.posX_ + a.width_ &&
-                posY_ + height_ <= a.posY_ + a.height_);
-    }
-};
-
-class WindowSceneJudgement final {
-public:
-    // judge whether window scene is enabled
-    static inline bool IsWindowSceneEnabled()
-    {
-        static bool isWindowSceneEnabled = false;
-        static bool initialized = false;
-        if (!initialized) {
-            InitWindowSceneWithConfigFile(isWindowSceneEnabled);
-            initialized = true;
-        }
-        return isWindowSceneEnabled;
-    }
-
-private:
-    // dealing with Windows type end of line "\r\n"
-    static std::ifstream& SafeGetLine(std::ifstream& configFile, std::string& line)
-    {
-        std::getline(configFile, line);
-        if (line.size() && line[line.size() - 1] == '\r') {
-            line = line.substr(0, line.size() - 1);
-        }
-        return configFile;
-    }
-
-    static void InitWindowSceneWithConfigFile(bool& isWindowSceneEnabled)
-    {
-        std::ifstream configFile("/etc/windowscene.config");
-        std::string line;
-        if (configFile.is_open() && SafeGetLine(configFile, line) && line == "ENABLED") {
-            isWindowSceneEnabled = true;
-        }
-        configFile.close();
     }
 };
 } // namespace OHOS::Rosen

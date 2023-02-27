@@ -55,70 +55,42 @@ int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParc
 int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("Foreground!");
-    WSError errCode = Foreground();
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 
 int SessionStub::HandleBackground(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("Background!");
-    WSError errCode = Background();
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 
 int SessionStub::HandleDisconnect(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("Disconnect!");
-    WSError errCode = Disconnect();
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 
 int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("Connect!");
-    sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
-    sptr<ISessionStage> sessionStageProxy = iface_cast<ISessionStage>(sessionStageObject);
-    sptr<IRemoteObject> eventChannelObject = data.ReadRemoteObject();
-    sptr<IWindowEventChannel> eventChannelProxy = iface_cast<IWindowEventChannel>(eventChannelObject);
-    if (sessionStageProxy == nullptr || eventChannelProxy == nullptr) {
-        WLOGFE("Failed to read scene session stage object or event channel object!");
-        return ERR_INVALID_DATA;
-    }
-    WSError errCode = Connect(sessionStageProxy, eventChannelProxy);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 
 int SessionStub::HandleRecover(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("Recover!");
-    WSError errCode = Recover();
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 
 int SessionStub::HandleMaximum(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("Maximum!");
-    WSError errCode = Maximum();
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 
 int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("PendingSessionActivation!");
-    SessionInfo info;
-    info.bundleName_ = data.ReadString();
-    info.abilityName_ = data.ReadString();
-    if (data.ReadBool()) {
-        info.callerToken_ = data.ReadRemoteObject();
-    }
-    WSError errCode = PendingSessionActivation(info);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

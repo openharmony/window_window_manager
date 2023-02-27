@@ -51,19 +51,12 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
 int SessionStageStub::HandleSetActive(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("SetActive!");
-    bool active = data.ReadBool();
-    WSError errCode = SetActive(active);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 
 int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("UpdateRect!");
-    WSRect rect = { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
-    SizeChangeReason reason = static_cast<SizeChangeReason>(data.ReadUint32());
-    WSError errCode = UpdateRect(rect, reason);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -22,61 +22,13 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStageProxy"};
-}
-
 WSError SessionStageProxy::SetActive(bool active)
 {
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (!data.WriteBool(active)) {
-        WLOGFE("Write active failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_SET_ACTIVE),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    int32_t ret = reply.ReadUint32();
-    return static_cast<WSError>(ret);
+    return WSError::WS_OK;
 }
 
 WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (!(data.WriteInt32(rect.posX_) && data.WriteInt32(rect.posY_) &&
-        data.WriteUint32(rect.width_) && data.WriteUint32(rect.height_))) {
-        WLOGFE("Write WindowRect failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
-        WLOGFE("Write SessionSizeChangeReason failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_SIZE_CHANGE),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    int32_t ret = reply.ReadUint32();
-    return static_cast<WSError>(ret);
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
