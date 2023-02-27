@@ -139,7 +139,7 @@ HWTEST_F(WindowSystemEffectTest, SetWindowShadow01, Function | SmallTest | Level
 
     // fullscreen
     node_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    ASSERT_EQ(WMError::WM_DO_NOTHING, WindowSystemEffect::SetWindowShadow(node_));
+    ASSERT_EQ(WMError::WM_OK, WindowSystemEffect::SetWindowShadow(node_));
     // float
     node_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     ASSERT_EQ(WMError::WM_OK, WindowSystemEffect::SetWindowShadow(node_));
