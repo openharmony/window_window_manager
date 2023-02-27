@@ -81,16 +81,16 @@ void ScreenRotationController::SetDefaultDeviceRotationOffset(uint32_t defaultDe
 
 void ScreenRotationController::HandleSensorEventInput(DeviceRotation deviceRotation)
 {
+    if (deviceRotation == DeviceRotation::INVALID) {
+        return;
+    }
     Orientation orientation = GetPreferredOrientation();
-
     currentDisplayRotation_ = GetCurrentDisplayRotation();
     lastSensorRotationConverted_ = deviceRotation;
     if (!IsSensorRelatedOrientation(orientation)) {
         return;
     }
-    if (deviceRotation == DeviceRotation::INVALID) {
-        return;
-    }
+
     if (currentDisplayRotation_ == ConvertDeviceToDisplayRotation(deviceRotation)) {
         return;
     }

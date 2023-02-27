@@ -113,7 +113,7 @@ void GravitySensorSubscriber::UnsubscribeGravitySensor()
 
 void GravitySensorSubscriber::HandleGravitySensorEventCallback(SensorEvent *event)
 {
-    if (!CheckCallbackTimeInterval()) {
+    if (!CheckCallbackTimeInterval() || event == nullptr) {
         return;
     }
     if (event->sensorTypeId != SENSOR_TYPE_ID_GRAVITY) {
@@ -145,6 +145,9 @@ SensorRotation GravitySensorSubscriber::CalcSensorRotation(int sensorDegree)
 
 int GravitySensorSubscriber::CalcRotationDegree(GravityData* gravityData)
 {
+    if (gravityData == nullptr) {
+        return -1;
+    }
     float x = gravityData->x;
     float y = gravityData->y;
     float z = gravityData->z;
@@ -180,6 +183,9 @@ void MotionSubscriber::SubscribeMotionSensor()
         return;
     }
     sptr<RotationMotionEventCallback> callback = new (std::nothrow) RotationMotionEventCallback();
+    if (callback == nullptr) {
+        return;
+    }
     int32_t ret = OHOS::Msdp::SubscribeCallback(OHOS::Msdp::TYPE_ROTATION, callback);
     if (ret != 0) {
         return;
