@@ -313,7 +313,7 @@ void RemoteAnimation::GetExpectRect(const sptr<WindowNode>& dstNode, const sptr<
             auto boundsRect = RectF(avoidRect.posX_, avoidRect.posY_, avoidRect.width_, avoidRect.height_);
             auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(dstNode->GetDisplayId());
             if (displayInfo && WmsUtils::IsExpectedRotatableWindow(dstNode->GetRequestedOrientation(),
-                displayInfo->GetDisplayOrientation())) {
+                displayInfo->GetDisplayOrientation(), dstNode->GetWindowFlags())) {
                 WLOGFD("[FixOrientation] the window is expected rotatable, pre-calculate bounds");
                 boundsRect = RectF(avoidRect.posX_, avoidRect.posY_, avoidRect.height_, avoidRect.width_);
             }
@@ -669,7 +669,7 @@ sptr<RSWindowAnimationTarget> RemoteAnimation::CreateWindowAnimationTarget(sptr<
     auto boundsRect = RectF(rect.posX_, rect.posY_, rect.width_, rect.height_);
     auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(windowNode->GetDisplayId());
     if (displayInfo && WmsUtils::IsExpectedRotatableWindow(windowNode->GetRequestedOrientation(),
-        displayInfo->GetDisplayOrientation(), windowNode->GetWindowMode())) {
+        displayInfo->GetDisplayOrientation(), windowNode->GetWindowMode(), windowNode->GetWindowFlags())) {
         WLOGFD("[FixOrientation] the window %{public}u is expected rotatable, pre-calculate bounds, rect:"
             " [%{public}d, %{public}d, %{public}d, %{public}d]", windowNode->GetWindowId(), rect.posX_, rect.posY_,
             rect.height_, rect.width_);
@@ -701,7 +701,11 @@ void RemoteAnimation::PostProcessShowCallback(const sptr<WindowNode>& node)
         auto displayId = node->GetDisplayId();
         auto requestOri = node->GetRequestedOrientation();
         WLOGFD("[FixOrientation] show animation finished, update display orientation");
-        DisplayManagerServiceInner::GetInstance().SetOrientationFromWindow(displayId, requestOri, false);
+        if (FIX_ORIENTATION_ENABLE) {
+            DisplayManagerServiceInner::GetInstance().SetOrientationFromWindow(displayId, requestOri, false);
+        } else {
+            DisplayManagerServiceInner::GetInstance().SetOrientationFromWindow(displayId, requestOri, true);
+        }
     }
     RSTransaction::FlushImplicitTransaction();
 }
