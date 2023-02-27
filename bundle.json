@@ -15,6 +15,7 @@
       "syscap": ["SystemCapability.WindowManager.WindowManager.Core"],
       "features": [
         "window_manager_feature_coverage = false",
+        "window_manager_dayu210_resource_config",
         "window_manager_feature_subscribe_motion"
       ],
       "adapted_system_type": [ "standard" ],
