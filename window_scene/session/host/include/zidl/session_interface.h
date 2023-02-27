@@ -48,5 +48,5 @@ public:
     virtual WSError Recover() = 0;
     virtual WSError Maximum() = 0;
 };
-}
+} // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_INTERFACE_H

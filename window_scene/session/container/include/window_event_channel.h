@@ -26,8 +26,8 @@ public:
     explicit WindowEventChannel(sptr<SessionStage> sessionStage) : sessionStage_(sessionStage) {}
     ~WindowEventChannel() = default;
 
-    virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
-    virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 
 private:
     sptr<SessionStage> sessionStage_ = nullptr;

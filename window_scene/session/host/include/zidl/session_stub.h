@@ -29,7 +29,7 @@ public:
     SessionStub() = default;
     ~SessionStub() = default;
 
-    virtual int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
         MessageOption &option) override;
 
 private:
@@ -44,5 +44,5 @@ private:
     int HandleRecover(MessageParcel& data, MessageParcel& reply);
     int HandleMaximum(MessageParcel& data, MessageParcel& reply);
 };
-}
+} // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_STUB_H

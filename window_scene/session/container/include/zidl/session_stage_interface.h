@@ -33,5 +33,5 @@ public:
     virtual WSError SetActive(bool active) = 0;
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) = 0;
 };
-}
+} // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

@@ -53,15 +53,15 @@ public:
     virtual WSError SetActive(bool active);
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason);
 
-    virtual WSError Connect(
+    WSError Connect(
         const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel) override;
-    virtual WSError Foreground() override;
-    virtual WSError Background() override;
-    virtual WSError Disconnect() override;
-    virtual WSError PendingSessionActivation(const SessionInfo& info) override;
+    WSError Foreground() override;
+    WSError Background() override;
+    WSError Disconnect() override;
+    WSError PendingSessionActivation(const SessionInfo& info) override;
 
-    virtual WSError Recover() override;
-    virtual WSError Maximum() override;
+    WSError Recover() override;
+    WSError Maximum() override;
 
     void NotifyForeground();
     void NotifyBackground();
@@ -81,7 +81,7 @@ protected:
     void UpdateSessionState(SessionState state);
     bool IsSessionValid() const;
     bool isActive_ = false;
-    WSRect winRect_;
+    WSRect winRect_ {0, 0, 0, 0};
     sptr<ISessionStage> sessionStage_;
     SessionInfo sessionInfo_;
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
@@ -91,21 +91,6 @@ private:
     bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
     template<typename T>
     bool UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
-
-    template<typename T1, typename T2, typename Ret>
-    using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
-    template<typename T>
-    inline EnableIfSame<T, ILifecycleListener, std::vector<std::weak_ptr<ILifecycleListener>>> GetListeners()
-    {
-        std::vector<std::weak_ptr<ILifecycleListener>> lifecycleListeners;
-        {
-            std::lock_guard<std::recursive_mutex> lock(mutex_);
-            for (auto& listener : lifecycleListeners_) {
-                lifecycleListeners.push_back(listener);
-            }
-        }
-        return lifecycleListeners;
-    }
 
     std::shared_ptr<RSSurfaceNode> CreateSurfaceNode(std::string name);
 
@@ -118,5 +103,4 @@ private:
     sptr<IWindowEventChannel> windowEventChannel_ = nullptr;
 };
 } // namespace OHOS::Rosen
-  //
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_H

@@ -29,7 +29,7 @@ public:
     WindowEventChannelStub() = default;
     ~WindowEventChannelStub() = default;
 
-    virtual int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
         MessageOption &option) override;
 
 private:
@@ -38,5 +38,5 @@ private:
     int HandleTransferKeyEvent(MessageParcel& data, MessageParcel& reply);
     int HandleTransferPointerEvent(MessageParcel& data, MessageParcel& reply);
 };
-}
+} // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_WINDOW_EVENT_CHANNEL_STUB_H

@@ -60,8 +60,7 @@
             "//foundation/window/window_manager/snapshot:snapshot_display",
             "//foundation/window/window_manager/interfaces/kits/napi/window_runtime/window_stage_napi:windowstage",
             "//foundation/window/window_manager/interfaces/kits/napi:napi_packages",
-            "//foundation/window/window_manager/resources:window_resources",
-            "//foundation/window/window_manager/window_scene/interfaces/kits/napi:window_scene_napi_packages"
+            "//foundation/window/window_manager/resources:window_resources"
           ],
           "fwk_group": [
             "//foundation/window/window_manager/interfaces/kits/js/declaration:window",
@@ -70,8 +69,7 @@
             "//foundation/window/window_manager/extension/window_extension:libwindow_extension",
             "//foundation/window/window_manager/extension/window_extension:window_extension_module",
             "//foundation/window/window_manager/wm:libwm",
-            "//foundation/window/window_manager/utils:libwmutil",
-            "//foundation/window/window_manager/window_scene/common:libwscommon"
+            "//foundation/window/window_manager/utils:libwmutil"
           ],
           "service_group": [
             "//foundation/window/window_manager/sa_profile:wms_sa_profile",
@@ -132,38 +130,11 @@
           },
           {
             "type": "so",
-            "name": "//foundation/window/window_manager/window_scene/session:screen_session",
-            "header": {
-              "header_files": [
-              ],
-              "header_base": "//foundation/window/window_manager/window_scene"
-            }
-          },
-          {
-            "type": "so",
             "name": "//foundation/window/window_manager/window_scene/session_manager:scene_session_manager",
             "header": {
               "header_files": [
               ],
               "header_base": "//foundation/window/window_manager/window_scene"
-            }
-          },
-          {
-            "type": "so",
-            "name": "//foundation/window/window_manager/window_scene/session_manager:screen_session_manager",
-            "header": {
-              "header_files": [
-              ],
-              "header_base": "//foundation/window/window_manager/window_scene"
-            }
-          },
-          {
-            "type": "none",
-            "name": "//foundation/window/window_manager/window_scene/interfaces/kits/napi:window_scene_napi_packages",
-            "header": {
-              "header_base": "//foundation/window/window_manager/window_scene/interfaces/kits/napi",
-              "header_files": [
-              ]
             }
           }
         ],

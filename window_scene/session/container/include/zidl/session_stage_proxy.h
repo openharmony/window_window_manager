@@ -28,11 +28,11 @@ public:
 
     ~SessionStageProxy() {};
 
-    virtual WSError SetActive(bool active) override;
-    virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
+    WSError SetActive(bool active) override;
+    WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
 };
-}
+} // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_RPOXY_H
 

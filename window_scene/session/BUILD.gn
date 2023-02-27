@@ -12,18 +12,19 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/window/window_manager/windowmanager_aafwk.gni")
 
 config("session_public_config") {
   include_dirs = [
-    "//foundation/window/window_manager/window_scene",
+    "${window_base_path}/window_scene",
+
     # for window_manager_hilog
-    "//foundation/window/window_manager/utils/include",
+    "${window_base_path}/utils/include",
   ]
 }
 
 ohos_shared_library("scene_session") {
   sources = [
-    "container/src/scene_session_stage.cpp",
     "container/src/extension_session_stage.cpp",
     "container/src/session_stage.cpp",
     "container/src/window_event_channel.cpp",
@@ -31,11 +32,8 @@ ohos_shared_library("scene_session") {
     "container/src/zidl/session_stage_stub.cpp",
     "container/src/zidl/window_event_channel_proxy.cpp",
     "container/src/zidl/window_event_channel_stub.cpp",
-
     "host/src/extension_session.cpp",
-    "host/src/scene_session.cpp",
     "host/src/session.cpp",
-    "host/src/root_scene_session.cpp",
     "host/src/zidl/session_proxy.cpp",
     "host/src/zidl/session_stub.cpp",
   ]
@@ -44,7 +42,7 @@ ohos_shared_library("scene_session") {
 
   public_configs = [ ":session_public_config" ]
 
-  deps = [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+  deps = [ "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
 
   external_deps = [
     "c_utils:utils",
@@ -52,22 +50,6 @@ ohos_shared_library("scene_session") {
     "input:libmmi-client",
     "ipc:ipc_core",
   ]
-
-  part_name = "window_manager"
-  subsystem_name = "window"
-}
-
-ohos_shared_library("screen_session") {
-  sources = [
-    "screen/src/screen_property.cpp",
-    "screen/src/screen_session.cpp",
-  ]
-
-  cflags_cc = [ "-std=c++17" ]
-
-  public_configs = [ ":session_public_config" ]
-
-  deps = [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
 
   part_name = "window_manager"
   subsystem_name = "window"

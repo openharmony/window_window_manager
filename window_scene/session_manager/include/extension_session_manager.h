@@ -30,9 +30,36 @@ class ExtensionSession;
 class ExtensionSessionManager : public SessionManagerBase {
 WM_DECLARE_SINGLE_INSTANCE_BASE(ExtensionSessionManager)
 public:
+    /**
+     * @brief create extension session
+     *
+     * @param sessionInfo sessionInfo, identify extension session instance
+     * @return sptr<ExtensionSession> return session if create extension session success;Otherwise, return nullptr
+     */
     sptr<ExtensionSession> RequestExtensionSession(const SessionInfo& sessionInfo);
+
+    /**
+     * @brief active extension session
+     *
+     * @param extensionSession the extension session need to be activated
+     * @return WSError
+     */
     WSError RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession);
+
+    /**
+     * @brief background extension session
+     *
+     * @param extensionSession the extension session need to be go background
+     * @return WSError
+     */
     WSError RequestExtensionSessionBackground(const sptr<ExtensionSession>& extensionSession);
+
+    /**
+     * @brief destroy extension session
+     *
+     * @param extensionSession the extension session need to be destroyed
+     * @return WSError
+     */
     WSError RequestExtensionSessionDestruction(const sptr<ExtensionSession>& extensionSession);
 protected:
     ExtensionSessionManager();
@@ -40,10 +67,6 @@ protected:
 
 private:
     void Init();
-    std::shared_ptr<MessageScheduler> mmsScheduler_ = nullptr;
-    std::recursive_mutex mutex_;
-    int pid_ = getpid();
-    std::atomic<uint32_t> sessionId_ = INVALID_SESSION_ID;
     std::map<uint32_t, std::pair<sptr<ExtensionSession>, sptr<IRemoteObject>>> abilityExtensionMap_;
 };
 } // namespace OHOS::Rosen
