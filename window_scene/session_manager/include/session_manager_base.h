@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_H
-#define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_H
+#ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_BASE_H
+#define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_BASE_H
 
 #include "common/include/message_scheduler.h"
 
@@ -33,4 +33,4 @@ private:
     std::atomic<uint32_t> sessionId_ = INVALID_SESSION_ID;
 };
 } // namespace OHOS::Rosen
-#endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_H
+#endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_BASE_H
