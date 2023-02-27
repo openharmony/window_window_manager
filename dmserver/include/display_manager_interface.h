@@ -76,6 +76,8 @@ public:
         TRANS_ID_SET_SCREEN_ROTATION_LOCKED,
         TRANS_ID_HAS_PRIVATE_WINDOW,
         TRANS_ID_GET_CUTOUT_INFO,
+        TRANS_ID_ADD_SURFACE_NODE,
+        TRANS_ID_REMOVE_SURFACE_NODE,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -126,6 +128,10 @@ public:
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) = 0;
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) = 0;
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) = 0;
+    virtual DMError AddSurfaceNodeToDisplay(DisplayId displayId,
+        std::shared_ptr<class RSSurfaceNode>& surfaceNode, bool onTop = true) = 0;
+    virtual DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId,
+        std::shared_ptr<class RSSurfaceNode>& surfaceNode) = 0;
 };
 } // namespace OHOS::Rosen
 

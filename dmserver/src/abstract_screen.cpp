@@ -24,6 +24,7 @@
 namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "AbstractScreenGroup"};
+    constexpr float MAX_ZORDER = 100000.0f;
 }
 
 AbstractScreen::AbstractScreen(sptr<AbstractScreenController> screenController, const std::string& name, ScreenId dmsId,
@@ -82,6 +83,40 @@ void AbstractScreen::UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, b
     } else {
         rsDisplayNode_->RemoveChild(surfaceNode);
     }
+}
+
+DMError AbstractScreen::AddSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool onTop)
+{
+    if (rsDisplayNode_ == nullptr || surfaceNode == nullptr) {
+        WLOGFE("node is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    surfaceNode->SetVisible(true);
+    if (onTop) {
+        rsDisplayNode_->AddChild(surfaceNode, -1);
+        surfaceNode->SetPositionZ(MAX_ZORDER);
+    } else {
+        rsDisplayNode_->AddChild(surfaceNode, -1);
+    }
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    }
+    return DMError::DM_OK;
+}
+
+DMError AbstractScreen::RemoveSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfaceNode)
+{
+    if (rsDisplayNode_ == nullptr || surfaceNode == nullptr) {
+        WLOGFE("node is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    rsDisplayNode_->RemoveChild(surfaceNode);
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    }
+    return DMError::DM_OK;
 }
 
 void AbstractScreen::UpdateDisplayGroupRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, NodeId parentNodeId,

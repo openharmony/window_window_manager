@@ -142,6 +142,28 @@ void AbstractScreenController::UpdateRSTree(ScreenId dmsScreenId, ScreenId paren
     }
 }
 
+DMError AbstractScreenController::AddSurfaceNodeToScreen(ScreenId dmsScreenId,
+    std::shared_ptr<RSSurfaceNode>& surfaceNode, bool onTop)
+{
+    sptr<AbstractScreen> abstractScreen = GetAbstractScreen(dmsScreenId);
+    if (abstractScreen == nullptr) {
+        WLOGFE("Can not find abstractScreen");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return abstractScreen->AddSurfaceNode(surfaceNode, onTop);
+}
+
+DMError AbstractScreenController::RemoveSurfaceNodeFromScreen(ScreenId dmsScreenId,
+    std::shared_ptr<RSSurfaceNode>& surfaceNode)
+{
+    sptr<AbstractScreen> abstractScreen = GetAbstractScreen(dmsScreenId);
+    if (abstractScreen == nullptr) {
+        WLOGFE("Can not find abstractScreen");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return abstractScreen->RemoveSurfaceNode(surfaceNode);
+}
+
 sptr<AbstractScreen> AbstractScreenController::GetAbstractScreen(ScreenId dmsScreenId) const
 {
     WLOGD("GetAbstractScreen: screenId: %{public}" PRIu64"", dmsScreenId);

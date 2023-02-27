@@ -18,6 +18,7 @@
 #include <chrono>
 #include <cinttypes>
 #include <transaction/rs_interfaces.h>
+#include <ui/rs_surface_node.h>
 
 #include "display_manager_adapter.h"
 #include "display_manager_agent_default.h"
@@ -932,6 +933,18 @@ bool DisplayManager::Unfreeze(std::vector<DisplayId> displayIds)
         return false;
     }
     return SingletonContainer::Get<DisplayManagerAdapter>().SetFreeze(displayIds, false);
+}
+
+DMError DisplayManager::AddSurfaceNodeToDisplay(DisplayId displayId,
+    std::shared_ptr<class RSSurfaceNode>& surfaceNode)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().AddSurfaceNodeToDisplay(displayId, surfaceNode);
+}
+
+DMError DisplayManager::RemoveSurfaceNodeFromDisplay(DisplayId displayId,
+    std::shared_ptr<class RSSurfaceNode>& surfaceNode)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().RemoveSurfaceNodeFromDisplay(displayId, surfaceNode);
 }
 
 void DisplayManager::Impl::OnRemoteDied()

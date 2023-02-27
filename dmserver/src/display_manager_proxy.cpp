@@ -18,6 +18,7 @@
 #include <cinttypes>
 #include <ipc_types.h>
 #include <parcel.h>
+#include <ui/rs_surface_node.h>
 
 #include "marshalling_helper.h"
 #include "window_manager_hilog.h"
@@ -746,6 +747,60 @@ sptr<CutoutInfo> DisplayManagerProxy::GetCutoutInfo(DisplayId displayId)
     }
     sptr<CutoutInfo> info = reply.ReadParcelable<CutoutInfo>();
     return info;
+}
+
+DMError DisplayManagerProxy::AddSurfaceNodeToDisplay(DisplayId displayId,
+    std::shared_ptr<class RSSurfaceNode>& surfaceNode, bool onTop)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint64(displayId)) {
+        WLOGFE("write displayId failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (surfaceNode == nullptr || !surfaceNode->Marshalling(data)) {
+        WLOGFE("Write windowProperty failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_ADD_SURFACE_NODE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("Send request failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadUint32());
+    return ret;
+}
+
+DMError DisplayManagerProxy::RemoveSurfaceNodeFromDisplay(DisplayId displayId,
+    std::shared_ptr<class RSSurfaceNode>& surfaceNode)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint64(displayId)) {
+        WLOGFE("write displayId failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (surfaceNode == nullptr || !surfaceNode->Marshalling(data)) {
+        WLOGFE("Write windowProperty failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_REMOVE_SURFACE_NODE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("Send request failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadUint32());
+    return ret;
 }
 
 DMError DisplayManagerProxy::HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow)
