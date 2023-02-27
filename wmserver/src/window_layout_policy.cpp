@@ -602,7 +602,7 @@ static void AdjustFixedOrientationRSSurfaceNode(const sptr<WindowNode>& node, co
         return;
     }
     auto requestOrientation = node->GetRequestedOrientation();
-    if (!WmsUtils::IsFixedOrientation(requestOrientation, node->GetWindowMode())) {
+    if (!WmsUtils::IsFixedOrientation(requestOrientation, node->GetWindowMode(), node->GetWindowFlags())) {
         return;
     }
 
@@ -615,12 +615,10 @@ static void AdjustFixedOrientationRSSurfaceNode(const sptr<WindowNode>& node, co
     int32_t diffOrientation = static_cast<int32_t>(WINDOW_TO_DISPLAY_ORIENTATION_MAP.at(requestOrientation)) -
         static_cast<int32_t>(displayOri);
     float rotation = -90.f * (diffOrientation); // 90.f is base degree
-    WLOGFD("[FixOrientation] adjust param display [%{public}u, %{public}d, %{public}d], rotation: %{public}f",
-        displayOri, displayW, displayH, rotation);
-    if (diffOrientation != 0) {
-        surfaceNode->SetTranslateX((displayW - static_cast<int32_t>(winRect.width_)) / 2); // 2 is half
-        surfaceNode->SetTranslateY((displayH - static_cast<int32_t>(winRect.height_)) / 2); // 2 is half
-    }
+    WLOGFD("[FixOrientation] %{public}d adjust display [%{public}d, %{public}d], rotation: %{public}f",
+        node->GetWindowId(), displayW, displayH, rotation);
+    surfaceNode->SetTranslateX((displayW - static_cast<int32_t>(winRect.width_)) / 2); // 2 is half
+    surfaceNode->SetTranslateY((displayH - static_cast<int32_t>(winRect.height_)) / 2); // 2 is half
     surfaceNode->SetPivotX(0.5); // 0.5 means center
     surfaceNode->SetPivotY(0.5); // 0.5 means center
     surfaceNode->SetRotation(rotation);
@@ -691,7 +689,8 @@ void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const
             break;
         }
         case WindowSizeChangeReason::ROTATION: {
-            if (WmsUtils::IsFixedOrientation(node->GetRequestedOrientation(), node->GetWindowMode())) {
+            if (WmsUtils::IsFixedOrientation(node->GetRequestedOrientation(),
+                node->GetWindowMode(), node->GetWindowFlags())) {
                 WLOGI("[FixOrientation] winNode %{public}u orientation, skip animation", node->GetWindowId());
                 SetBoundsFunc();
                 return;

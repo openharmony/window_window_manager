@@ -1109,7 +1109,7 @@ std::unordered_map<WindowType, SystemBarProperty> WindowNodeContainer::GetExpect
                 && (*iter)->GetWindowType() != WindowType::WINDOW_TYPE_PANEL) {
                 auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(id);
                 if (displayInfo && WmsUtils::IsExpectedRotateLandscapeWindow((*iter)->GetRequestedOrientation(),
-                    displayInfo->GetDisplayOrientation())) {
+                    displayInfo->GetDisplayOrientation(), (*iter)->GetWindowFlags())) {
                     WLOGFI("Horizontal window id: %{public}d make it immersive", (*iter)->GetWindowId());
                     for (auto it : sysBarPropMap) {
                         sysBarPropMap[it.first] = (sysBarPropMapNode.find(it.first))->second;
