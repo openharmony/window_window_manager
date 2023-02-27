@@ -372,8 +372,9 @@ void WindowLayoutPolicy::NotifyClientAndAnimation(const sptr<WindowNode>& node,
     const Rect& winRect, WindowSizeChangeReason reason)
 {
     if (node->GetWindowToken()) {
+        auto type = node->GetWindowType();
         auto syncTransactionController = RSSyncTransactionController::GetInstance();
-        if (reason == WindowSizeChangeReason::ROTATION && syncTransactionController) {
+        if (reason == WindowSizeChangeReason::ROTATION && syncTransactionController && IsNeedAnimationSync(type)) {
             node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason,
                 syncTransactionController->GetRSTransaction());
         } else {
@@ -386,6 +387,15 @@ void WindowLayoutPolicy::NotifyClientAndAnimation(const sptr<WindowNode>& node,
         node->ResetWindowSizeChangeReason();
     }
     NotifyAnimationSizeChangeIfNeeded();
+}
+
+bool WindowLayoutPolicy::IsNeedAnimationSync(WindowType type)
+{
+    if (type == WindowType::WINDOW_TYPE_POINTER ||
+        type == WindowType::WINDOW_TYPE_BOOT_ANIMATION) {
+        return false;
+    }
+    return true;
 }
 
 Rect WindowLayoutPolicy::CalcEntireWindowHotZone(const sptr<WindowNode>& node, const Rect& winRect, uint32_t hotZone,

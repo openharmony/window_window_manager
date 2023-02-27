@@ -549,7 +549,7 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
         }
         float virtualPixelRatio = display->GetVirtualPixelRatio();
         config.SetDensity(virtualPixelRatio);
-        uiContent_->UpdateViewportConfig(config, WindowSizeChangeReason::UNDEFINED);
+        uiContent_->UpdateViewportConfig(config, WindowSizeChangeReason::UNDEFINED, nullptr);
         WLOGFD("notify uiContent window size change end");
     }
     return WMError::WM_OK;
