@@ -570,7 +570,7 @@ Rect WindowRoot::GetDisplayRectWithoutSystemBarAreas(const sptr<WindowNode> dstN
     Rect targetRect = displayRect;
     auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(displayId);
     if (displayInfo && WmsUtils::IsExpectedRotatableWindow(dstNode->GetRequestedOrientation(),
-        displayInfo->GetDisplayOrientation(), dstNode->GetWindowMode())) {
+        displayInfo->GetDisplayOrientation(), dstNode->GetWindowMode(), dstNode->GetWindowFlags())) {
         WLOGFD("[FixOrientation] the window is expected rotatable, pre-calculated");
         targetRect.height_ = displayRect.width_;
         targetRect.width_ = displayRect.height_;
@@ -728,7 +728,12 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId, bool fromAnimation)
         HandleKeepScreenOn(windowId, false);
         SwitchRenderModeIfNeeded();
     }
-    if (!fromAnimation) {
+    if (!FIX_ORIENTATION_ENABLE) {
+        auto nextRotatableWindow = container->GetNextRotatableWindow(windowId);
+        if (nextRotatableWindow != nullptr) {
+           SetDisplayOrientationFromWindow(nextRotatableWindow, true);
+        }
+    } else if (!fromAnimation) {
         if (node->stateMachine_.IsHideAnimationPlaying()) {
             WLOGFD("[FixOrientation] removing window is playing hide animation, do not update display orientation");
             return res;
@@ -744,7 +749,7 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId, bool fromAnimation)
             return res;
         }
         if (WmsUtils::IsFixedOrientation(nextRotatableWindow->GetRequestedOrientation(),
-            nextRotatableWindow->GetWindowMode())) {
+            nextRotatableWindow->GetWindowMode(), node->GetWindowFlags())) {
             WLOGFI("[FixOrientation] next rotatable window is fixed, do not animation");
             SetDisplayOrientationFromWindow(nextRotatableWindow, false);
         } else {
@@ -756,6 +761,9 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId, bool fromAnimation)
 
 void WindowRoot::UpdateDisplayOrientationWhenHideWindow(sptr<WindowNode>& node)
 {
+    if (!FIX_ORIENTATION_ENABLE) {
+        return;
+    }
     WLOGFD("[FixOrientation] begin");
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {

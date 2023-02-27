@@ -18,6 +18,7 @@
 
 #include <map>
 #include <refbase.h>
+#include <parameters.h>
 
 #include "dm_common.h"
 #include "wm_common.h"
@@ -34,17 +35,18 @@ namespace {
         {Orientation::REVERSE_VERTICAL,    DisplayOrientation::PORTRAIT_INVERTED   },
         {Orientation::REVERSE_HORIZONTAL,  DisplayOrientation::LANDSCAPE_INVERTED   },
     };
+    const bool FIX_ORIENTATION_ENABLE = system::GetBoolParameter("persist.window.fixoriention.enable", true);
 }
 
 class WmsUtils {
 public:
-    static bool IsFixedOrientation(Orientation orientation, WindowMode mode);
+    static bool IsFixedOrientation(Orientation orientation, WindowMode mode, uint32_t flags);
     static bool IsExpectedRotateLandscapeWindow(Orientation requestOrientation,
-        DisplayOrientation currentOrientation);
+        DisplayOrientation currentOrientation, uint32_t flags);
     static bool IsExpectedRotatableWindow(Orientation requestOrientation,
-        DisplayOrientation currentOrientation, WindowMode mode);
+        DisplayOrientation currentOrientation, WindowMode mode, uint32_t flags);
     static bool IsExpectedRotatableWindow(Orientation requestOrientation,
-        DisplayOrientation currentOrientation);
+        DisplayOrientation currentOrientation, uint32_t flags);
 };
 }
 }

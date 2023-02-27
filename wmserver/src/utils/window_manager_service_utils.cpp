@@ -18,8 +18,14 @@
 namespace OHOS {
 namespace Rosen {
 
-bool WmsUtils::IsFixedOrientation(Orientation orientation, WindowMode mode)
+bool WmsUtils::IsFixedOrientation(Orientation orientation, WindowMode mode, uint32_t flags)
 {
+    if (!FIX_ORIENTATION_ENABLE) {
+        return false;
+    }
+    if (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)) {
+        return false;
+    }
     if (mode != WindowMode::WINDOW_MODE_FULLSCREEN) {
         return false;
     }
@@ -33,26 +39,32 @@ bool WmsUtils::IsFixedOrientation(Orientation orientation, WindowMode mode)
 }
 
 bool WmsUtils::IsExpectedRotateLandscapeWindow(Orientation requestOrientation,
-    DisplayOrientation currentOrientation)
+    DisplayOrientation currentOrientation, uint32_t flags)
 {
     if (requestOrientation != Orientation::HORIZONTAL && requestOrientation != Orientation::REVERSE_HORIZONTAL) {
         return false;
     }
-    return IsExpectedRotatableWindow(requestOrientation, currentOrientation);
+    return IsExpectedRotatableWindow(requestOrientation, currentOrientation, flags);
 }
 
 bool WmsUtils::IsExpectedRotatableWindow(Orientation requestOrientation,
-    DisplayOrientation currentOrientation, WindowMode mode)
+    DisplayOrientation currentOrientation, WindowMode mode, uint32_t flags)
 {
     if (mode != WindowMode::WINDOW_MODE_FULLSCREEN) {
         return false;
     }
-    return IsExpectedRotatableWindow(requestOrientation, currentOrientation);
+    return IsExpectedRotatableWindow(requestOrientation, currentOrientation, flags);
 }
 
 bool WmsUtils::IsExpectedRotatableWindow(Orientation requestOrientation,
-    DisplayOrientation currentOrientation)
+    DisplayOrientation currentOrientation, uint32_t flags)
 {
+    if (!FIX_ORIENTATION_ENABLE) {
+        return false;
+    }
+    if (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)) {
+        return false;
+    }
     if (WINDOW_TO_DISPLAY_ORIENTATION_MAP.count(requestOrientation) == 0) {
         return false;
     }
