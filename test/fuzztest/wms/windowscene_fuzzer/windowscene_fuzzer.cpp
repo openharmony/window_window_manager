@@ -16,6 +16,7 @@
 #include "windowscene_fuzzer.h"
 
 #include <securec.h>
+#include <unistd.h>
 
 #include "display_manager.h"
 #include "window.h"
@@ -29,6 +30,7 @@ namespace {
     constexpr size_t DATA_MIN_SIZE = 2;
     constexpr char END_CHAR = '\0';
     constexpr size_t LEN = 10;
+    constexpr uint32_t DELAY_TIME_US = 1000000; // 1s;
 }
 class WindowLifeCycle : public IWindowLifeCycle {
 public:
@@ -176,6 +178,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     windowScene->GoBackground(reason);
     if (window != nullptr) {
         window->Destroy();
+        usleep(DELAY_TIME_US);
     }
     windowScene->GoDestroy();
     return true;
