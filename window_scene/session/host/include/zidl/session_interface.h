@@ -36,7 +36,7 @@ public:
 
         // Scene
         TRANS_ID_RECOVER = 100,
-        TRANS_ID_MAXIMUM,
+        TRANS_ID_MAXIMIZE,
     };
     virtual WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel) = 0;
     virtual WSError Foreground() = 0;
@@ -46,7 +46,7 @@ public:
 
     // scene session
     virtual WSError Recover() = 0;
-    virtual WSError Maximum() = 0;
+    virtual WSError Maximize() = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_INTERFACE_H

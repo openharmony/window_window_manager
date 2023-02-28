@@ -28,13 +28,23 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Window
 
 WSError WindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    WLOGFI("WindowEventChannel receive key event");
+    WLOGFD("WindowEventChannel receive key event");
+    if (!sessionStage_) {
+        WLOGFE("session stage is null!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    sessionStage_->NotifyKeyEvent(keyEvent);
     return WSError::WS_OK;
 }
 
 WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    WLOGFI("WindowEventChannel receive pointer event");
+    WLOGFD("WindowEventChannel receive pointer event");
+    if (!sessionStage_) {
+        WLOGFE("session stage is null!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    sessionStage_->NotifyPointerEvent(pointerEvent);
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

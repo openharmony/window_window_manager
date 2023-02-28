@@ -37,10 +37,9 @@ using NotifyPendingSessionActivationFunc = std::function<void(const SessionInfo&
 
 class ILifecycleListener {
 public:
-    virtual void OnForeground() = 0;
-    virtual void OnBackground() = 0;
+    virtual void OnForeground() {};
+    virtual void OnBackground() {};
 };
-
 class Session : public SessionStub, public virtual RefBase {
 public:
     Session(const SessionInfo& info);
@@ -61,17 +60,11 @@ public:
     WSError PendingSessionActivation(const SessionInfo& info) override;
 
     WSError Recover() override;
-    WSError Maximum() override;
-
-    void NotifyForeground();
-    void NotifyBackground();
+    WSError Maximize() override;
 
     // for window event
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
-
-    bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
-    bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
 
     const SessionInfo& GetSessionInfo() const;
     void SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func);
@@ -87,19 +80,12 @@ protected:
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
 
 private:
-    template<typename T>
-    bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
-    template<typename T>
-    bool UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
-
     std::shared_ptr<RSSurfaceNode> CreateSurfaceNode(std::string name);
 
     uint64_t persistentId_ = INVALID_SESSION_ID;
     std::shared_ptr<RSSurfaceNode> surfaceNode_ = nullptr;
     SessionState state_ = SessionState::STATE_DISCONNECT;
 
-    std::recursive_mutex mutex_;
-    std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;
     sptr<IWindowEventChannel> windowEventChannel_ = nullptr;
 };
 } // namespace OHOS::Rosen

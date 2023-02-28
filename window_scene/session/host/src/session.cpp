@@ -53,24 +53,6 @@ const SessionInfo& Session::GetSessionInfo() const
     return sessionInfo_;
 }
 
-bool Session::RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener)
-{
-    return false;
-}
-
-bool Session::UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener)
-{
-    return false;
-}
-
-void Session::NotifyForeground()
-{
-}
-
-void Session::NotifyBackground()
-{
-}
-
 SessionState Session::GetSessionState() const
 {
     return state_;
@@ -83,18 +65,40 @@ void Session::UpdateSessionState(SessionState state)
 
 bool Session::IsSessionValid() const
 {
-    return false;
+    bool res = state_ > SessionState::STATE_DISCONNECT && state_ < SessionState::STATE_END;
+    if (!res) {
+        WLOGFI("session is already destroyed or not created! id: %{public}" PRIu64 " state: %{public}u",
+            GetPersistentId(), state_);
+    }
+    return res;
 }
 
 RSSurfaceNode::SharedPtr Session::CreateSurfaceNode(std::string name)
 {
-    return nullptr;
+    // expect one session with one surfaceNode
+    if (name.empty()) {
+        WLOGFI("name is empty");
+        name = UNDEFINED + std::to_string(persistentId_);
+    } else {
+        std::string surfaceNodeName = name + std::to_string(persistentId_);
+        std::size_t pos = surfaceNodeName.find_last_of('.');
+        name = (pos == std::string::npos) ? surfaceNodeName : surfaceNodeName.substr(pos + 1); // skip '.'
+    }
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    rsSurfaceNodeConfig.SurfaceNodeName = name;
+    return RSSurfaceNode::Create(rsSurfaceNodeConfig);
 }
 
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
     WLOGFI("session update rect: id: %{public}" PRIu64 ", rect[%{public}d, %{public}d, %{public}u, %{public}u], "\
         "reason:%{public}u", GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
+    if (!IsSessionValid()) {
+        winRect_ = rect;
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    sessionStage_->UpdateRect(rect, reason);
+    winRect_ = rect;
     return WSError::WS_OK;
 }
 
@@ -102,6 +106,20 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
 {
     WLOGFI("Connect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()));
+    if (GetSessionState() != SessionState::STATE_DISCONNECT) {
+        WLOGFE("state is not disconnect!");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (sessionStage == nullptr || eventChannel == nullptr) {
+        WLOGFE("session stage or eventChannel is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    sessionStage_ = sessionStage;
+    windowEventChannel_ = eventChannel;
+
+    UpdateSessionState(SessionState::STATE_CONNECT);
+    // once update rect before connect, update again when connect
+    UpdateRect(winRect_, SizeChangeReason::SHOW);
     return WSError::WS_OK;
 }
 
@@ -110,6 +128,17 @@ WSError Session::Foreground()
     SessionState state = GetSessionState();
     WLOGFI("Foreground session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(state));
+    if (state != SessionState::STATE_CONNECT && state != SessionState::STATE_BACKGROUND) {
+        WLOGFE("state invalid!");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+
+    if (!isActive_) {
+        sessionStage_->SetActive(true);
+        UpdateSessionState(SessionState::STATE_ACTIVE);
+    } else {
+        UpdateSessionState(SessionState::STATE_FOREGROUND);
+    }
     return WSError::WS_OK;
 }
 
@@ -118,6 +147,11 @@ WSError Session::Background()
     SessionState state = GetSessionState();
     WLOGFI("Background session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(state));
+    if (state < SessionState::STATE_INACTIVE) { // only STATE_INACTIVE can transfer to background
+        WLOGFE("state invalid!");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    UpdateSessionState(SessionState::STATE_BACKGROUND);
     return WSError::WS_OK;
 }
 
@@ -126,6 +160,10 @@ WSError Session::Disconnect()
     SessionState state = GetSessionState();
     WLOGFI("Disconnect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(state));
+    Background();
+    if (GetSessionState() == SessionState::STATE_BACKGROUND) {
+        UpdateSessionState(SessionState::STATE_DISCONNECT);
+    }
     return WSError::WS_OK;
 }
 
@@ -134,11 +172,30 @@ WSError Session::SetActive(bool active)
     SessionState state = GetSessionState();
     WLOGFI("Session update active: %{public}d, id: %{public}" PRIu64 ", state: %{public}u", active, GetPersistentId(),
         static_cast<uint32_t>(state));
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (active == isActive_) {
+        WLOGFD("Session active do not change: [%{public}d]", active);
+        return WSError::WS_DO_NOTHING;
+    }
+    isActive_ = active;
+    if (active && GetSessionState() == SessionState::STATE_FOREGROUND) {
+        sessionStage_->SetActive(true);
+        UpdateSessionState(SessionState::STATE_ACTIVE);
+    }
+    if (!active && GetSessionState() == SessionState::STATE_ACTIVE) {
+        sessionStage_->SetActive(false);
+        UpdateSessionState(SessionState::STATE_INACTIVE);
+    }
     return WSError::WS_OK;
 }
 
 WSError Session::PendingSessionActivation(const SessionInfo& info)
 {
+    if (pendingSessionActivationFunc_) {
+        pendingSessionActivationFunc_(info);
+    }
     return WSError::WS_OK;
 }
 
@@ -152,7 +209,7 @@ WSError Session::Recover()
     return WSError::WS_OK;
 }
 
-WSError Session::Maximum()
+WSError Session::Maximize()
 {
     return WSError::WS_OK;
 }
@@ -161,12 +218,22 @@ WSError Session::Maximum()
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     WLOGFD("Session TransferPointEvent");
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    windowEventChannel_->TransferPointerEvent(pointerEvent);
     return WSError::WS_OK;
 }
 
 WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     WLOGFD("Session TransferPointEvent");
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    windowEventChannel_->TransferKeyEvent(keyEvent);
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

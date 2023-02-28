@@ -26,83 +26,164 @@ SessionStage::SessionStage(const sptr<ISession>& session) : session_(session) {}
 
 bool SessionStage::RegisterSessionStageStateListener(const std::shared_ptr<ISessionStageStateListener>& listener)
 {
-    return false;
+    return RegisterListenerLocked(sessionStageStateListeners_, listener);
 }
 
 bool SessionStage::UnregisterSessionStageStateListener(const std::shared_ptr<ISessionStageStateListener>& listener)
 {
-    return false;
+    return UnregisterListenerLocked(sessionStageStateListeners_, listener);
 }
 
 bool SessionStage::RegisterSizeChangeListener(const std::shared_ptr<ISizeChangeListener>& listener)
 {
-    return false;
+    return RegisterListenerLocked(sizeChangeListeners_, listener);
 }
 
 bool SessionStage::UnregisterSizeChangeListener(const std::shared_ptr<ISizeChangeListener>& listener)
 {
-    return false;
+    return UnregisterListenerLocked(sizeChangeListeners_, listener);
 }
 
 bool SessionStage::RegisterPointerEventListener(const std::shared_ptr<IPointerEventListener>& listener)
 {
-    return false;
+    return RegisterListenerLocked(pointerEventListeners_, listener);
 }
 
 bool SessionStage::UnregisterPointerEventListener(const std::shared_ptr<IPointerEventListener>& listener)
 {
-    return false;
+    return UnregisterListenerLocked(pointerEventListeners_, listener);
 }
 
 bool SessionStage::RegisterKeyEventListener(const std::shared_ptr<IKeyEventListener>& listener)
 {
-    return false;
+    return RegisterListenerLocked(keyEventListeners_, listener);
 }
 
 bool SessionStage::UnregisterKeyEventListener(const std::shared_ptr<IKeyEventListener>& listener)
 {
-    return false;
+    return UnregisterListenerLocked(keyEventListeners_, listener);
+}
+
+template<typename T>
+bool SessionStage::RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return false;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        WLOGFW("Listener already registered");
+        return true;
+    }
+    holder.emplace_back(listener);
+    return true;
+}
+
+template<typename T>
+bool SessionStage::UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return false;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    holder.erase(std::remove_if(holder.begin(), holder.end(),
+        [listener](std::shared_ptr<T> registeredListener) { return registeredListener == listener; }),
+        holder.end());
+    return true;
 }
 
 void SessionStage::NotifySizeChange(const WSRect& rect, SizeChangeReason reason)
 {
+    auto sizeChangeListeners = GetListeners<ISizeChangeListener>();
+    for (auto& listener : sizeChangeListeners) {
+        if (!listener.expired()) {
+            listener.lock()->OnSizeChange(rect, reason);
+        }
+    }
 }
 
 void SessionStage::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    auto pointerEventListeners = GetListeners<IPointerEventListener>();
+    for (auto& listener : pointerEventListeners) {
+        if (!listener.expired()) {
+            listener.lock()->OnPointerEvent(pointerEvent);
+        }
+    }
 }
 
 void SessionStage::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
+    auto keyEventListeners = GetListeners<IKeyEventListener>();
+    for (auto& listener : keyEventListeners) {
+        if (!listener.expired()) {
+            listener.lock()->OnKeyEvent(keyEvent);
+        }
+    }
 }
 
 WSError SessionStage::Connect()
 {
-    return WSError::WS_OK;
+    if (session_ == nullptr) {
+        WLOGFE("session is invalid");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    sptr<SessionStage> sessionStage(this);
+    sptr<IWindowEventChannel> eventChannel(new WindowEventChannel(sessionStage));
+    return session_->Connect(sessionStage, eventChannel);
 }
 
 WSError SessionStage::Foreground()
 {
-    return WSError::WS_OK;
+    if (session_ == nullptr) {
+        WLOGFE("session is invalid");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    WSError res = session_->Foreground();
+    if (res == WSError::WS_OK) {
+        NotifyAfterForeground();
+    }
+    return res;
 }
 
 WSError SessionStage::Background()
 {
+    if (session_ == nullptr) {
+        WLOGFE("session is invalid");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    NotifyAfterBackground();
     return WSError::WS_OK;
 }
 
 WSError SessionStage::Disconnect()
 {
+    if (session_ == nullptr) {
+        WLOGFE("session is invalid");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     return WSError::WS_OK;
 }
 
 WSError SessionStage::PendingSessionActivation(const SessionInfo& info)
 {
-    return WSError::WS_OK;
+    if (session_ == nullptr) {
+        WLOGFE("session is invalid");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return session_->PendingSessionActivation(info);
 }
 
 WSError SessionStage::SetActive(bool active)
 {
+    WLOGFD("active status: %{public}d", active);
+    if (active) {
+        NotifyAfterActive();
+    } else {
+        NotifyAfterInactive();
+    }
     return WSError::WS_OK;
 }
 
@@ -110,6 +191,7 @@ WSError SessionStage::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
     WLOGFI("update rect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u", rect.posX_, rect.posY_,
         rect.width_, rect.height_, reason);
+    NotifySizeChange(rect, reason);
     return WSError::WS_OK;
 }
 
@@ -118,7 +200,7 @@ WSError SessionStage::Recover()
     return WSError::WS_OK;
 }
 
-WSError SessionStage::Maximum()
+WSError SessionStage::Maximize()
 {
     return WSError::WS_OK;
 }
