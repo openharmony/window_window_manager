@@ -35,7 +35,7 @@ public:
 
     WSError PendingSessionActivation(const SessionInfo& info) override;
     WSError Recover() override;
-    WSError Maximum() override;
+    WSError Maximize() override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

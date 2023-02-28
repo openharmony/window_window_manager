@@ -35,10 +35,10 @@ class AxisEvent;
 namespace OHOS::Rosen {
 class ISessionStageStateListener {
 public:
-    virtual void AfterForeground() = 0;
-    virtual void AfterBackground() = 0;
-    virtual void AfterActive() = 0;
-    virtual void AfterInactive() = 0;
+    virtual void AfterForeground() {};
+    virtual void AfterBackground() {};
+    virtual void AfterActive() {};
+    virtual void AfterInactive() {};
 };
 
 class ISizeChangeListener {
@@ -57,6 +57,15 @@ public:
 };
 
 class SessionStage : public SessionStageStub, public virtual RefBase {
+#define CALL_SESSION_STATE_LISTENER(sessionStateCb, listeners) \
+    do {                                                       \
+        for (auto& listener : (listeners)) {                   \
+            if (!listener.expired()) {                         \
+                listener.lock()->sessionStateCb();             \
+            }                                                  \
+        }                                                      \
+    } while (0)
+
 public:
     SessionStage(const sptr<ISession>& session);
     virtual ~SessionStage() = default;
@@ -68,7 +77,7 @@ public:
     virtual WSError PendingSessionActivation(const SessionInfo& info);
     // for scene session stage
     virtual WSError Recover();
-    virtual WSError Maximum();
+    virtual WSError Maximize();
 
     // IPC
     WSError SetActive(bool active) override;
@@ -90,9 +99,93 @@ public:
 
 protected:
     void NotifySizeChange(const WSRect& rect, SizeChangeReason reason);
+    inline void NotifyAfterForeground()
+    {
+        auto sessionStateListeners = GetListeners<ISessionStageStateListener>();
+        CALL_SESSION_STATE_LISTENER(AfterForeground, sessionStateListeners);
+    }
+
+    inline void NotifyAfterBackground()
+    {
+        auto sessionStateListeners = GetListeners<ISessionStageStateListener>();
+        CALL_SESSION_STATE_LISTENER(AfterBackground, sessionStateListeners);
+    }
+
+    inline void NotifyAfterActive()
+    {
+        auto sessionStateListeners = GetListeners<ISessionStageStateListener>();
+        CALL_SESSION_STATE_LISTENER(AfterActive, sessionStateListeners);
+    }
+
+    inline void NotifyAfterInactive(bool needNotifyUiContent = true)
+    {
+        auto sessionStateListeners = GetListeners<ISessionStageStateListener>();
+        CALL_SESSION_STATE_LISTENER(AfterInactive, sessionStateListeners);
+    }
+
     sptr<ISession> session_;
 
 private:
+    template<typename T>
+    bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
+    template<typename T>
+    bool UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
+
+    template<typename T1, typename T2, typename Ret>
+    using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
+    template<typename T>
+    inline EnableIfSame<T, ISessionStageStateListener, std::vector<std::weak_ptr<ISessionStageStateListener>>>
+    GetListeners()
+    {
+        std::vector<std::weak_ptr<ISessionStageStateListener>> sessionStageStateListeners;
+        {
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            for (auto& listener : sessionStageStateListeners_) {
+                sessionStageStateListeners.push_back(listener);
+            }
+        }
+        return sessionStageStateListeners;
+    }
+
+    template<typename T>
+    inline EnableIfSame<T, ISizeChangeListener, std::vector<std::weak_ptr<ISizeChangeListener>>> GetListeners()
+    {
+        std::vector<std::weak_ptr<ISizeChangeListener>> sizeChangeListeners;
+        {
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            for (auto& listener : sizeChangeListeners_) {
+                sizeChangeListeners.push_back(listener);
+            }
+        }
+        return sizeChangeListeners;
+    }
+
+    template<typename T>
+    inline EnableIfSame<T, IPointerEventListener, std::vector<std::weak_ptr<IPointerEventListener>>> GetListeners()
+    {
+        std::vector<std::weak_ptr<IPointerEventListener>> pointerEventListeners;
+        {
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            for (auto& listener : pointerEventListeners_) {
+                pointerEventListeners.push_back(listener);
+            }
+        }
+        return pointerEventListeners;
+    }
+
+    template<typename T>
+    inline EnableIfSame<T, IKeyEventListener, std::vector<std::weak_ptr<IKeyEventListener>>> GetListeners()
+    {
+        std::vector<std::weak_ptr<IKeyEventListener>> keyEventListeners;
+        {
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            for (auto& listener : keyEventListeners_) {
+                keyEventListeners.push_back(listener);
+            }
+        }
+        return keyEventListeners;
+    }
+
     std::recursive_mutex mutex_;
     std::vector<std::shared_ptr<IPointerEventListener>> pointerEventListeners_;
     std::vector<std::shared_ptr<IKeyEventListener>> keyEventListeners_;
