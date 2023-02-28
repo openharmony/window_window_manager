@@ -17,6 +17,9 @@ ability_runtime_kits_path = "${ability_runtime_path}/frameworks/kits"
 ability_runtime_services_path = "${ability_runtime_path}/services"
 ability_runtime_napi_path = "${ability_runtime_path}/frameworks/js/napi"
 
+window_base_path = "//foundation/window/window_manager"
+graphic_base_path = "//foundation/graphic"
+
 declare_args() {
   efficiency_manager_enable = true
   window_manager_feature_subscribe_motion = false
