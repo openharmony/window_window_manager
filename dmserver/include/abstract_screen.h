@@ -51,6 +51,8 @@ public:
     ScreenSourceMode GetSourceMode() const;
 
     void UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
+    DMError AddSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool onTop);
+    DMError RemoveSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfaceNode);
     void UpdateDisplayGroupRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, NodeId parentNodeId, bool isAdd);
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint);
     ScreenId GetScreenGroupId() const;

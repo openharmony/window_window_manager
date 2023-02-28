@@ -19,6 +19,7 @@
 #include "display_manager_service.h"
 #include "display_manager_agent_default.h"
 #include "common_test_utils.h"
+#include "mock_rs_display_node.h"
 
 
 using namespace testing;
@@ -35,6 +36,8 @@ public:
 
     void SetAceessTokenPermission(const std::string processName);
     static sptr<DisplayManagerService> dms_;
+    static constexpr DisplayId DEFAULT_DISPLAY = 0ULL;
+    static constexpr DisplayId DEFAULT_SCREEN = 0ULL;
 };
 
 sptr<DisplayManagerService> DisplayManagerServiceTest::dms_ = nullptr;
@@ -398,6 +401,39 @@ HWTEST_F(DisplayManagerServiceTest, ScreenRotationLock, Function | SmallTest | L
     ASSERT_EQ(false, isLocked);
 
     ASSERT_NE(nullptr, dms_->GetCutoutInfo(10));
+}
+
+/**
+ * @tc.name: AddSurfaceNodeToDisplay | RemoveSurfaceNodeFromDisplay
+ * @tc.desc: add/remove surfaceNode to/from display
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, AddAndRemoveSurfaceNode, Function | SmallTest | Level3)
+{
+    sptr<DisplayManagerService> dms = new DisplayManagerService();
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms->AddSurfaceNodeToDisplay(DEFAULT_DISPLAY, surfaceNode, true));
+    surfaceNode = std::make_shared<RSSurfaceNode>(RSSurfaceNodeConfig{}, true);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms->AddSurfaceNodeToDisplay(DEFAULT_DISPLAY, surfaceNode, true));
+    std::shared_ptr<RSDisplayNode> displayNode = std::make_shared<MockRSDisplayNode>(RSDisplayNodeConfig{});
+    sptr<SupportedScreenModes> info = new SupportedScreenModes;
+    sptr<AbstractScreen> absScreen =
+        new AbstractScreen(nullptr, "", INVALID_SCREEN_ID, INVALID_SCREEN_ID);
+    dms->abstractDisplayController_->abstractDisplayMap_[DEFAULT_DISPLAY] =
+        new AbstractDisplay(DEFAULT_DISPLAY, "", info, absScreen);
+    dms->abstractDisplayController_->abstractDisplayMap_[DEFAULT_DISPLAY]->screenId_ = DEFAULT_SCREEN;
+
+    dms->abstractScreenController_->dmsScreenMap_[DEFAULT_SCREEN] =
+        new AbstractScreen(dms->abstractScreenController_, "", INVALID_SCREEN_ID, INVALID_SCREEN_ID);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms->AddSurfaceNodeToDisplay(DEFAULT_DISPLAY, surfaceNode, true));
+    dms->abstractScreenController_->dmsScreenMap_[DEFAULT_SCREEN]->rsDisplayNode_ = displayNode;
+ 
+    EXPECT_CALL(*reinterpret_cast<MockRSDisplayNode*>(displayNode.get()), AddChild(_, _));
+    ASSERT_EQ(DMError::DM_OK, dms->AddSurfaceNodeToDisplay(DEFAULT_DISPLAY, surfaceNode, false));
+    EXPECT_CALL(*reinterpret_cast<MockRSDisplayNode*>(displayNode.get()), RemoveChild(_));
+    ASSERT_EQ(DMError::DM_OK, dms->RemoveSurfaceNodeFromDisplay(DEFAULT_DISPLAY, surfaceNode));
+
+    testing::Mock::AllowLeak(displayNode.get());
 }
 }
 } // namespace Rosen

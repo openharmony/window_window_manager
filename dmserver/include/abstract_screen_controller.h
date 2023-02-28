@@ -70,6 +70,8 @@ public:
     const std::shared_ptr<RSDisplayNode>& GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const;
     void UpdateRSTree(ScreenId dmsScreenId, ScreenId parentScreenId, std::shared_ptr<RSSurfaceNode>& surfaceNode,
         bool isAdd, bool isMultiDisplay);
+    DMError AddSurfaceNodeToScreen(ScreenId dmsScreenId, std::shared_ptr<RSSurfaceNode>& surfaceNode, bool onTop);
+    DMError RemoveSurfaceNodeFromScreen(ScreenId dmsScreenId, std::shared_ptr<RSSurfaceNode>& surfaceNode);
     DMError MakeMirror(ScreenId, std::vector<ScreenId> screens);
     bool MakeExpand(std::vector<ScreenId> screenIds, std::vector<Point> startPoints);
     void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens);

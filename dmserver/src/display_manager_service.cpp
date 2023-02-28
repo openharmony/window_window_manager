@@ -546,6 +546,30 @@ void DisplayManagerService::UpdateRSTree(DisplayId displayId, DisplayId parentDi
     abstractScreenController_->UpdateRSTree(screenId, parentScreenId, surfaceNode, isAdd, isMultiDisplay);
 }
 
+DMError DisplayManagerService::AddSurfaceNodeToDisplay(DisplayId displayId,
+    std::shared_ptr<RSSurfaceNode>& surfaceNode, bool onTop)
+{
+    WLOGFI("DisplayId: %{public}" PRIu64", onTop: %{public}d", displayId, onTop);
+    if (surfaceNode == nullptr) {
+        WLOGFW("Surface is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    ScreenId screenId = GetScreenIdByDisplayId(displayId);
+    return abstractScreenController_->AddSurfaceNodeToScreen(screenId, surfaceNode, true);
+}
+
+DMError DisplayManagerService::RemoveSurfaceNodeFromDisplay(DisplayId displayId,
+    std::shared_ptr<RSSurfaceNode>& surfaceNode)
+{
+    WLOGFI("DisplayId: %{public}" PRIu64"", displayId);
+    if (surfaceNode == nullptr) {
+        WLOGFW("Surface is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    ScreenId screenId = GetScreenIdByDisplayId(displayId);
+    return abstractScreenController_->RemoveSurfaceNodeFromScreen(screenId, surfaceNode);
+}
+
 sptr<ScreenInfo> DisplayManagerService::GetScreenInfoById(ScreenId screenId)
 {
     auto screen = abstractScreenController_->GetAbstractScreen(screenId);

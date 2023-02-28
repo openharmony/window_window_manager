@@ -77,6 +77,10 @@ public:
     void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
     DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
     DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
+    DMError AddSurfaceNodeToDisplay(DisplayId displayId,
+        std::shared_ptr<class RSSurfaceNode>& surfaceNode, bool onTop = true) override;
+    DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId,
+        std::shared_ptr<class RSSurfaceNode>& surfaceNode) override;
 
 private:
     static inline BrokerDelegator<DisplayManagerProxy> delegator_;
