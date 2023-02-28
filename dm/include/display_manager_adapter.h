@@ -69,6 +69,9 @@ public:
     virtual bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze);
     virtual sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId);
+    virtual DMError AddSurfaceNodeToDisplay(DisplayId displayId, std::shared_ptr<class RSSurfaceNode>& surfaceNode);
+    virtual DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId,
+        std::shared_ptr<class RSSurfaceNode>& surfaceNode);
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
 };

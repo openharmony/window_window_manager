@@ -357,6 +357,28 @@ sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
     return displayManagerServiceProxy_->GetCutoutInfo(displayId);
 }
 
+DMError DisplayManagerAdapter::AddSurfaceNodeToDisplay(DisplayId displayId,
+    std::shared_ptr<class RSSurfaceNode>& surfaceNode)
+{
+    if (displayId == DISPLAY_ID_INVALID) {
+        WLOGFE("screen id is invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    return displayManagerServiceProxy_->AddSurfaceNodeToDisplay(displayId, surfaceNode);
+}
+
+DMError DisplayManagerAdapter::RemoveSurfaceNodeFromDisplay(DisplayId displayId,
+    std::shared_ptr<class RSSurfaceNode>& surfaceNode)
+{
+    if (displayId == DISPLAY_ID_INVALID) {
+        WLOGFE("screen id is invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    return displayManagerServiceProxy_->RemoveSurfaceNodeFromDisplay(displayId, surfaceNode);
+}
+
 sptr<ScreenGroupInfo> ScreenManagerAdapter::GetScreenGroupInfoById(ScreenId screenId)
 {
     if (screenId == SCREEN_ID_INVALID) {

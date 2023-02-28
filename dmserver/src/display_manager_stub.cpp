@@ -348,6 +348,20 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteParcelable(cutoutInfo);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_ADD_SURFACE_NODE: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(data);
+            auto ret = AddSurfaceNodeToDisplay(displayId, surfaceNode, true);
+            reply.WriteUint32(static_cast<uint32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_REMOVE_SURFACE_NODE: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(data);
+            auto ret = RemoveSurfaceNodeFromDisplay(displayId, surfaceNode);
+            reply.WriteUint32(static_cast<uint32_t>(ret));
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
