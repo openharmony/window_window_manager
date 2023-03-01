@@ -44,9 +44,9 @@ public:
     static bool IsExpectedRotateLandscapeWindow(Orientation requestOrientation,
         DisplayOrientation currentOrientation, uint32_t flags);
     static bool IsExpectedRotatableWindow(Orientation requestOrientation,
-        DisplayOrientation currentOrientation, WindowMode mode, uint32_t flags);
+        DisplayOrientation currentOrientation, WindowMode mode, uint32_t flags, bool restricted = true);
     static bool IsExpectedRotatableWindow(Orientation requestOrientation,
-        DisplayOrientation currentOrientation, uint32_t flags);
+        DisplayOrientation currentOrientation, uint32_t flags, bool restricted = true);
 };
 }
 }

@@ -296,10 +296,9 @@ public:
     bool Marshalling(Parcel& parcel) const
     {
         return parcel.WriteFloat(pivotX_) && parcel.WriteFloat(pivotY_) &&
-            parcel.WriteFloat(scaleX_) && parcel.WriteFloat(scaleY_) && parcel.WriteFloat(scaleZ_) &&
-            parcel.WriteFloat(rotationX_) && parcel.WriteFloat(rotationY_) &&
-            parcel.WriteFloat(rotationZ_) && parcel.WriteFloat(translateX_) &&
-            parcel.WriteFloat(translateY_) && parcel.WriteFloat(translateZ_);
+               parcel.WriteFloat(scaleX_) && parcel.WriteFloat(scaleY_) && parcel.WriteFloat(scaleZ_) &&
+               parcel.WriteFloat(rotationX_) && parcel.WriteFloat(rotationY_) && parcel.WriteFloat(rotationZ_) &&
+               parcel.WriteFloat(translateX_) && parcel.WriteFloat(translateY_) && parcel.WriteFloat(translateZ_);
     }
 
     void Unmarshalling(Parcel& parcel)
