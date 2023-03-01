@@ -182,6 +182,8 @@ void WindowLayoutPolicyCascade::PerformWindowLayout(const sptr<WindowNode>& node
         case WindowType::WINDOW_TYPE_STATUS_BAR:
         case WindowType::WINDOW_TYPE_NAVIGATION_BAR:
             LayoutWindowTree(node->GetDisplayId());
+            // AvoidNodes will change limitRect, need to recalculate default cascade rect
+            InitCascadeRect(node->GetDisplayId());
             break;
         default:
             if (node->IsSplitMode()) {
