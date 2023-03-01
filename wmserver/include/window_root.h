@@ -153,6 +153,7 @@ private:
     void ChangeRSRenderModeIfNeeded(bool isToUnified);
     bool IsAppWindowExceed() const;
     void SetDisplayOrientationFromWindow(sptr<WindowNode>& node, bool withAnimation);
+    void CheckAndNotifyWaterMarkChangedResult();
 
     std::map<uint32_t, sptr<WindowNode>> windowNodeMap_;
     std::map<sptr<IRemoteObject>, uint32_t> windowIdMap_;
@@ -160,6 +161,7 @@ private:
     std::shared_ptr<RSOcclusionData> lastOcclusionData_ = std::make_shared<RSOcclusionData>();
     std::map<ScreenId, sptr<WindowNodeContainer>> windowNodeContainerMap_;
     std::map<ScreenId, std::vector<DisplayId>> displayIdMap_;
+    bool lastWaterMarkShowStates_ { false };
     bool needCheckFocusWindow = false;
 
     std::map<WindowManagerAgentType, std::vector<sptr<IWindowManagerAgent>>> windowManagerAgents_;

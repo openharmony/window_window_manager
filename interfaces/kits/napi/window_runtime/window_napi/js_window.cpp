@@ -581,6 +581,13 @@ NativeValue* JsWindow::SetBackdropBlurStyle(NativeEngine* engine, NativeCallback
     return (me != nullptr) ? me->OnSetBackdropBlurStyle(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindow::SetWaterMarkFlag(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGI("SetWaterMarkFlag");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnSetWaterMarkFlag(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindow::SetAspectRatio(NativeEngine* engine, NativeCallbackInfo* info)
 {
     WLOGI("[NAPI]SetAspectRatio");
@@ -3674,6 +3681,57 @@ NativeValue* JsWindow::OnSetBackdropBlurStyle(NativeEngine& engine, NativeCallba
     return engine.CreateUndefined();
 }
 
+NativeValue* JsWindow::OnSetWaterMarkFlag(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    if (info.argc < 1) {
+        WLOGFE("Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+
+    NativeBoolean* nativeBool = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
+    if (nativeBool == nullptr) {
+        WLOGFE("SetWaterMarkFlag Invalid window flag");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+
+    bool isAddSafetyLayer = static_cast<bool>(*nativeBool);
+    wptr<Window> weakToken(windowToken_);
+    AsyncTask::CompleteCallback complete =
+        [weakToken, isAddSafetyLayer](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto window = weakToken.promote();
+            if (window == nullptr) {
+                task.Reject(engine,
+                    CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                    "OnSetWaterMarkFlag failed."));
+                return;
+            }
+            WMError ret = WMError::WM_OK;
+            if (isAddSafetyLayer) {
+                ret = window->AddWindowFlag(WindowFlag::WINDOW_FLAG_WATER_MARK);
+            } else {
+                ret = window->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_WATER_MARK);
+            }
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+            } else {
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(ret)), "SetWaterMarkFlag failed."));
+            }
+            WLOGI("[NAPI]Window [%{public}u, %{public}s] set waterMark flag end, ret = %{public}d",
+                window->GetWindowId(), window->GetWindowName().c_str(), ret);
+        };
+
+    NativeValue* lastParam = (info.argc == 1) ? nullptr :
+        (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsWindow::OnSetWaterMarkFlag",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+
 NativeValue* JsWindow::OnSetAspectRatio(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WMError errCode = WMError::WM_OK;
@@ -3885,6 +3943,7 @@ void BindFunctions(NativeEngine& engine, NativeObject* object, const char *modul
     BindNativeFunction(engine, *object, "setBackdropBlurStyle", moduleName, JsWindow::SetBackdropBlurStyle);
     BindNativeFunction(engine, *object, "setAspectRatio", moduleName, JsWindow::SetAspectRatio);
     BindNativeFunction(engine, *object, "resetAspectRatio", moduleName, JsWindow::ResetAspectRatio);
+    BindNativeFunction(engine, *object, "setWaterMarkFlag", moduleName, JsWindow::SetWaterMarkFlag);
 }
 }  // namespace Rosen
 }  // namespace OHOS

@@ -41,7 +41,6 @@ public:
     static NativeValue* GetTopWindow(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* GetLastWindow(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetWindowLayoutMode(NativeEngine* engine, NativeCallbackInfo* info);
-
 private:
     static NativeValue* OnCreate(NativeEngine& engine, NativeCallbackInfo& info);
     static NativeValue* OnCreateWindow(NativeEngine& engine, NativeCallbackInfo& info);

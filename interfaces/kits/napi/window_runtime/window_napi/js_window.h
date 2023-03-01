@@ -117,6 +117,7 @@ public:
     static NativeValue* SetBlur(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetBackdropBlur(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetBackdropBlurStyle(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetWaterMarkFlag(NativeEngine* engine, NativeCallbackInfo* info);
 private:
     std::string GetWindowName();
     static bool ParseScaleOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans);
@@ -204,6 +205,7 @@ private:
     NativeValue* OnSetBlur(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetBackdropBlur(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetBackdropBlurStyle(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetWaterMarkFlag(NativeEngine& engine, NativeCallbackInfo& info);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;

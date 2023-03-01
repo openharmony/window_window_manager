@@ -45,5 +45,10 @@ void WindowManagerAgent::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, b
 {
     SingletonContainer::Get<WindowManager>().UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
 }
+
+void WindowManagerAgent::NotifyWaterMarkFlagChangedResult(bool showWaterMark)
+{
+    SingletonContainer::Get<WindowManager>().NotifyWaterMarkFlagChangedResult(showWaterMark);
+}
 } // namespace Rosen
 } // namespace OHOS

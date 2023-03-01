@@ -393,6 +393,7 @@ void WindowRoot::NotifyWindowVisibilityChange(std::shared_ptr<RSOcclusionData> o
         WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
             node->GetWindowId(), isVisible);
     }
+    CheckAndNotifyWaterMarkChangedResult();
     if (hasAppWindowChange) {
         SwitchRenderModeIfNeeded();
     }
@@ -795,7 +796,12 @@ WMError WindowRoot::UpdateWindowNode(uint32_t windowId, WindowUpdateReason reaso
         WLOGFE("update window failed, window container could not be found");
         return WMError::WM_ERROR_INVALID_DISPLAY;
     }
-    return container->UpdateWindowNode(node, reason);
+
+    auto ret = container->UpdateWindowNode(node, reason);
+    if (ret == WMError::WM_OK && reason == WindowUpdateReason::UPDATE_FLAGS) {
+        CheckAndNotifyWaterMarkChangedResult();
+    }
+    return ret;
 }
 
 WMError WindowRoot::UpdateSizeChangeReason(uint32_t windowId, WindowSizeChangeReason reason)
@@ -985,6 +991,8 @@ WMError WindowRoot::DestroyWindowInner(sptr<WindowNode>& node)
         WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
             node->GetWindowId(), node->isVisible_);
         WindowManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
+
+        CheckAndNotifyWaterMarkChangedResult();
     }
 
     auto cmpFunc = [node](const std::map<uint64_t, sptr<WindowNode>>::value_type& pair) {
@@ -1830,6 +1838,34 @@ void WindowRoot::ClearWindowPairSnapshot(DisplayId displayId)
         return;
     }
     return container->ClearWindowPairSnapshot(displayId);
+}
+
+void WindowRoot::CheckAndNotifyWaterMarkChangedResult()
+{
+    auto searchWaterMarkWindow = [](wptr<WindowNode> node) {
+        return (node != nullptr && node->isVisible_ &&
+                (node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)));
+    };
+    bool currentWaterMarkState = false;
+    for (auto& containerPair : windowNodeContainerMap_) {
+        auto container = containerPair.second;
+        if (container == nullptr) {
+            continue;
+        }
+        std::vector<sptr<WindowNode>> allWindowNode;
+        container->TraverseContainer(allWindowNode);
+        auto itor = std::find_if(allWindowNode.begin(), allWindowNode.end(), searchWaterMarkWindow);
+        if (itor != allWindowNode.end()) {
+            currentWaterMarkState = true;
+            break;
+        }
+    }
+    if (lastWaterMarkShowStates_ != currentWaterMarkState) {
+        WLOGFD("WaterMarkWindows has been changed. lastWaterMarkState : %{public}d, newState:%{public}d",
+            lastWaterMarkShowStates_, currentWaterMarkState);
+        WindowManagerAgentController::GetInstance().NotifyWaterMarkFlagChangedResult(currentWaterMarkState);
+        lastWaterMarkShowStates_ = currentWaterMarkState;
+    }
 }
 } // namespace Rosen
 } // namespace OHOS
