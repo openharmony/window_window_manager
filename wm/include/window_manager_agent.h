@@ -32,6 +32,7 @@ public:
         WindowUpdateType type) override;
     void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& visibilityInfos) override;
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) override;
+    void NotifyWaterMarkFlagChangedResult(bool showWaterMark) override;
 };
 } // namespace Rosen
 } // namespace OHOS

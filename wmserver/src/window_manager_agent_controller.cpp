@@ -82,5 +82,14 @@ void WindowManagerAgentController::UpdateCameraFloatWindowStatus(uint32_t access
         agent->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
     }
 }
+
+void WindowManagerAgentController::NotifyWaterMarkFlagChangedResult(bool showWaterMark)
+{
+    WLOGFD("NotifyWaterMarkFlagChanged with result:%{public}d", showWaterMark);
+    for (auto& agent : wmAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG)) {
+        agent->NotifyWaterMarkFlagChangedResult(showWaterMark);
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

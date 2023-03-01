@@ -23,11 +23,10 @@
 
 #include <transaction/rs_transaction.h>
 #include "display_manager.h"
-#include "wm_common.h"
-#include "window_manager.h"
-#include "window_test_utils.h"
 #include "surface_draw.h"
 #include "window_manager.h"
+#include "window_test_utils.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;

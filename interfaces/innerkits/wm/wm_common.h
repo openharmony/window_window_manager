@@ -190,7 +190,8 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_PARENT_LIMIT = 1 << 1,
     WINDOW_FLAG_SHOW_WHEN_LOCKED = 1 << 2,
     WINDOW_FLAG_FORBID_SPLIT_MOVE = 1 << 3,
-    WINDOW_FLAG_END = 1 << 4,
+    WINDOW_FLAG_WATER_MARK = 1 << 4,
+    WINDOW_FLAG_END = 1 << 5,
 };
 
 enum class WindowSizeChangeReason : uint32_t {
