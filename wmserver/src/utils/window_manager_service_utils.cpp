@@ -48,16 +48,16 @@ bool WmsUtils::IsExpectedRotateLandscapeWindow(Orientation requestOrientation,
 }
 
 bool WmsUtils::IsExpectedRotatableWindow(Orientation requestOrientation,
-    DisplayOrientation currentOrientation, WindowMode mode, uint32_t flags)
+    DisplayOrientation currentOrientation, WindowMode mode, uint32_t flags, bool restricted)
 {
     if (mode != WindowMode::WINDOW_MODE_FULLSCREEN) {
         return false;
     }
-    return IsExpectedRotatableWindow(requestOrientation, currentOrientation, flags);
+    return IsExpectedRotatableWindow(requestOrientation, currentOrientation, flags, restricted);
 }
 
 bool WmsUtils::IsExpectedRotatableWindow(Orientation requestOrientation,
-    DisplayOrientation currentOrientation, uint32_t flags)
+    DisplayOrientation currentOrientation, uint32_t flags, bool restricted)
 {
     if (!FIX_ORIENTATION_ENABLE) {
         return false;
@@ -69,10 +69,13 @@ bool WmsUtils::IsExpectedRotatableWindow(Orientation requestOrientation,
         return false;
     }
     DisplayOrientation disOrientation = WINDOW_TO_DISPLAY_ORIENTATION_MAP.at(requestOrientation);
-    if (disOrientation != currentOrientation) {
-        return true;
+    if (disOrientation == currentOrientation) {
+        return false;
     }
-    return false;
+    if (restricted && (static_cast<int32_t>(disOrientation) - static_cast<int32_t>(currentOrientation)) % 2 == 0) {
+        return false;
+    }
+    return true;
 }
 }
 }

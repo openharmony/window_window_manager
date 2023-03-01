@@ -767,12 +767,12 @@ void WindowRoot::UpdateDisplayOrientationWhenHideWindow(sptr<WindowNode>& node)
     WLOGFD("[FixOrientation] begin");
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
-        WLOGFE("[FixOrientation]failed, window container could not be found");
+        WLOGFE("[FixOrientation] failed, window container could not be found");
         return;
     }
     auto nextRotatableWindow = container->GetNextRotatableWindow(node->GetWindowId());
     if (nextRotatableWindow != nullptr) {
-        WLOGFD("[FixOrientation] nexi rotatable window: %{public}u", nextRotatableWindow->GetWindowId());
+        WLOGFD("[FixOrientation] next rotatable window: %{public}u", nextRotatableWindow->GetWindowId());
         SetDisplayOrientationFromWindow(nextRotatableWindow, false);
     }
 }

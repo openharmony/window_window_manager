@@ -87,17 +87,17 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom01, Function | MediumTest | Level3)
     Rect rect = window->GetRect();
     expect.pivotX_ = (0 - rect.posX_) * 1.0 / rect.width_;
     expect.pivotY_ = (0 - rect.posY_) * 1.0 / rect.height_;
-    expect.scaleX_ = expect.scaleY_ = 2;
+    expect.scaleX_ = expect.scaleY_ = 2; // scale value
     ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
 
     WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 2);
     sleep(1);
-    expect.scaleX_ = expect.scaleY_ = 4;
+    expect.scaleX_ = expect.scaleY_ = 4; // scale value
     ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
 
     WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 0.5);
     sleep(1);
-    expect.scaleX_ = expect.scaleY_ = 2;
+    expect.scaleX_ = expect.scaleY_ = 2; // scale value
     ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
 
     WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 0.1);
@@ -134,8 +134,8 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom02, Function | MediumTest | Level3)
     Rect rect = window->GetRect();
     expect.pivotX_ = (0 - rect.posX_) * 1.0 / rect.width_;
     expect.pivotY_ = (0 - rect.posY_) * 1.0 / rect.height_;
-    expect.scaleX_ = expect.scaleY_ = 2;
-    expect.translateX_ = expect.translateY_ = -100;
+    expect.scaleX_ = expect.scaleY_ = 2; // scale value
+    expect.translateX_ = expect.translateY_ = -100;  // translate value
 
     WindowAccessibilityController::GetInstance().SetAnchorOffset(200, 200);
     sleep(1);
@@ -192,7 +192,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom04, Function | MediumTest | Level3)
     Rect rect = window->GetRect();
     expect.pivotX_ = (0 - rect.posX_) * 1.0 / rect.width_;
     expect.pivotY_ = (0 - rect.posY_) * 1.0 / rect.height_;
-    expect.scaleX_ = expect.scaleY_ = 2;
+    expect.scaleX_ = expect.scaleY_ = 2; // scale value
     ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
 
     ASSERT_EQ(WMError::WM_OK, window->Hide());;
@@ -226,8 +226,8 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom05, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Show());
 
     Transform animate;
-    animate.translateX_ = -100;
-    animate.translateZ_ = 100;
+    animate.translateX_ = -100; // translate x value
+    animate.translateZ_ = 100; // translate z value
     window->SetTransform(animate);
     sleep(1);
 
@@ -235,7 +235,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom05, Function | MediumTest | Level3)
     Rect rect = window->GetRect();
     expect.pivotX_ = (0 - rect.posX_) * 1.0 / rect.width_;
     expect.pivotY_ = (0 - rect.posY_) * 1.0 / rect.height_;
-    expect.scaleX_ = expect.scaleY_ = 1.7;
+    expect.scaleX_ = expect.scaleY_ = 1.7; // scale value
     Transform actual = implPtr->GetWindowProperty()->GetZoomTransform();
 
     auto isExpec = [](float a, float b) -> bool {
