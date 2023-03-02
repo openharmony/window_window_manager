@@ -19,3 +19,8 @@ group("window_scene") {
     "session_manager:scene_session_manager",
   ]
 }
+
+group("test") {
+  testonly = true
+  deps = [ "test/unittest:unittest" ]
+}

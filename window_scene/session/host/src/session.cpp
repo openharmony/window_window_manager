@@ -179,14 +179,15 @@ WSError Session::SetActive(bool active)
         WLOGFD("Session active do not change: [%{public}d]", active);
         return WSError::WS_DO_NOTHING;
     }
-    isActive_ = active;
     if (active && GetSessionState() == SessionState::STATE_FOREGROUND) {
         sessionStage_->SetActive(true);
         UpdateSessionState(SessionState::STATE_ACTIVE);
+        isActive_ = active;
     }
     if (!active && GetSessionState() == SessionState::STATE_ACTIVE) {
         sessionStage_->SetActive(false);
         UpdateSessionState(SessionState::STATE_INACTIVE);
+        isActive_ = active;
     }
     return WSError::WS_OK;
 }
