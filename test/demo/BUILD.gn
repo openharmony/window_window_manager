@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/window/window_manager/windowmanager_aafwk.gni")
 
 group("demo") {
   testonly = true
@@ -22,6 +23,7 @@ group("demo") {
     ":demo_screenshot_listener",
     ":demo_snapshot_virtual_screen",
     ":demo_system_sub_window",
+    ":demo_water_mark_listener",
   ]
 }
 
@@ -113,6 +115,25 @@ ohos_executable("demo_freeze_display") {
   ]
   deps = [ "//foundation/window/window_manager/dm:libdm" ]
   external_deps = [ "multimedia_image_framework:image_native" ]
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
+ohos_executable("demo_water_mark_listener") {
+  sources = [ "demo_water_mark_listener.cpp" ]
+
+  include_dirs = [
+    "${window_base_path}/interfaces/innerkits/wm",
+    "${window_base_path}/test/common/utils/include",
+  ]
+
+  deps = [
+    "${graphic_base_path}/graphic_2d/rosen/modules/render_service_base:librender_service_base",
+    "${window_base_path}/wm:libwm",
+  ]
+
+  external_deps = [ "c_utils:utils" ]
+
   part_name = "window_manager"
   subsystem_name = "window"
 }

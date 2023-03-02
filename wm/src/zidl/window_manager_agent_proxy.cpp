@@ -167,6 +167,26 @@ void WindowManagerAgentProxy::UpdateCameraFloatWindowStatus(uint32_t accessToken
         WLOGFE("SendRequest failed");
     }
 }
+
+void WindowManagerAgentProxy::NotifyWaterMarkFlagChangedResult(bool showWaterMark)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteBool(showWaterMark)) {
+        WLOGFE("Write is showing status failed");
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WATER_MARK_FLAG),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
 

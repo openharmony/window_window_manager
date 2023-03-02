@@ -468,6 +468,38 @@ HWTEST_F(WindowRootTest, WindowRootTest25, Function | SmallTest | Level2)
 
     ASSERT_EQ(true, true);
 }
+
+/**
+ * @tc.name: CheckAndNotifyWaterMarkChangedResult
+ * @tc.desc: test WindowRoot CheckAndNotifyWaterMarkChangedResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, CheckAndNotifyWaterMarkChangedResult, Function | SmallTest | Level2)
+{
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_NE(display, nullptr);
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    auto container = windowRoot_->CreateWindowNodeContainer(display->GetId(), displayInfo);
+    ASSERT_NE(container, nullptr);
+
+    windowRoot_->lastWaterMarkShowStates_ = false;
+    windowRoot_->CheckAndNotifyWaterMarkChangedResult();
+    ASSERT_EQ(windowRoot_->lastWaterMarkShowStates_, false);
+
+    auto windowNode = new (std::nothrow)WindowNode();
+    ASSERT_NE(windowNode, nullptr);
+    windowNode->isVisible_ = true;
+    windowNode->SetDisplayId(displayInfo->GetDisplayId());
+    windowNode->property_->flags_ |= static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
+    container->appWindowNode_->children_.push_back(windowNode);
+
+    windowRoot_->CheckAndNotifyWaterMarkChangedResult();
+    ASSERT_EQ(windowRoot_->lastWaterMarkShowStates_, true);
+
+    container->appWindowNode_->children_.clear();
+    windowRoot_->CheckAndNotifyWaterMarkChangedResult();
+    ASSERT_EQ(windowRoot_->lastWaterMarkShowStates_, false);
+}
 }
 }
 }

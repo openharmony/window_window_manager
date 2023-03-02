@@ -58,6 +58,14 @@ public:
     };
 };
 
+class TestWaterMarkFlagChangeListener : public IWaterMarkFlagChangedListener {
+public:
+    void OnWaterMarkFlagUpdate(bool showWaterMark) override
+    {
+        WLOGI("TestWaterMarkFlagChangeListener");
+    };
+};
+
 class WindowManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -397,6 +405,74 @@ HWTEST_F(WindowManagerTest, UnregisterSystemBarChangedListener01, Function | Sma
 
     windowManager.pImpl_->systemBarChangedListenerAgent_ = oldWindowManagerAgent;
     windowManager.pImpl_->systemBarChangedListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: RegisterWaterMarkListener01
+ * @tc.desc: check RegisterWaterMarkListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterWaterMarkFlagChangedListener01, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+
+    windowManager.pImpl_->waterMarkFlagChangeAgent_ = nullptr;
+    windowManager.pImpl_->waterMarkFlagChangeListeners_.clear();
+
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWaterMarkFlagChangedListener(nullptr));
+
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<TestWaterMarkFlagChangeListener> listener = new TestWaterMarkFlagChangeListener();
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
+
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWaterMarkFlagChangedListener(listener));
+    ASSERT_EQ(0, windowManager.pImpl_->waterMarkFlagChangeListeners_.size());
+    ASSERT_EQ(nullptr, windowManager.pImpl_->waterMarkFlagChangeAgent_);
+
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterWaterMarkFlagChangedListener(listener));
+    ASSERT_EQ(1, windowManager.pImpl_->waterMarkFlagChangeListeners_.size());
+    ASSERT_NE(nullptr, windowManager.pImpl_->waterMarkFlagChangeAgent_);
+
+    // to check that the same listner can not be registered twice
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterWaterMarkFlagChangedListener(listener));
+    ASSERT_EQ(1, windowManager.pImpl_->waterMarkFlagChangeListeners_.size());
+}
+
+/**
+ * @tc.name: UnregisterWaterMarkFlagChangedListener01
+ * @tc.desc: check UnregisterWaterMarkFlagChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterWaterMarkFlagChangedListener01, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    windowManager.pImpl_->waterMarkFlagChangeAgent_ = nullptr;
+    windowManager.pImpl_->waterMarkFlagChangeListeners_.clear();
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
+    // check nullpter
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterWaterMarkFlagChangedListener(nullptr));
+
+    sptr<TestWaterMarkFlagChangeListener> listener1 = new TestWaterMarkFlagChangeListener();
+    sptr<TestWaterMarkFlagChangeListener> listener2 = new TestWaterMarkFlagChangeListener();
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWaterMarkFlagChangedListener(listener1));
+
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    windowManager.RegisterWaterMarkFlagChangedListener(listener1);
+    windowManager.RegisterWaterMarkFlagChangedListener(listener2);
+    ASSERT_EQ(2, windowManager.pImpl_->waterMarkFlagChangeListeners_.size());
+
+    EXPECT_CALL(m->Mock(), UnregisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWaterMarkFlagChangedListener(listener1));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWaterMarkFlagChangedListener(listener2));
+    ASSERT_EQ(0, windowManager.pImpl_->waterMarkFlagChangeListeners_.size());
+    ASSERT_EQ(nullptr, windowManager.pImpl_->waterMarkFlagChangeAgent_);
+
+    // if agent == nullptr, it can not be crashed.
+    windowManager.pImpl_->waterMarkFlagChangeListeners_.push_back(listener1);
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWaterMarkFlagChangedListener(listener1));
+    ASSERT_EQ(0, windowManager.pImpl_->waterMarkFlagChangeListeners_.size());
 }
 }
 } // namespace Rosen

@@ -94,6 +94,11 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
             break;
         }
+        case WindowManagerAgentMsg::TRANS_ID_UPDATE_WATER_MARK_FLAG: {
+            bool showWaterMark = data.ReadBool();
+            NotifyWaterMarkFlagChangedResult(showWaterMark);
+            break;
+        }
         default:
             break;
     }
