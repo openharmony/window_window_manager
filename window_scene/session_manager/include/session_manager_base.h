@@ -16,6 +16,8 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_BASE_H
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_BASE_H
 
+#include "common/include/message_scheduler.h"
+
 namespace OHOS::Rosen {
 class SessionManagerBase {
 public:
@@ -26,7 +28,8 @@ public:
         return (((uint64_t)pid_ << 32) | (++sessionId_)); // 32: high bit for uint64
     }
 protected:
-
+    std::shared_ptr<MessageScheduler> mmsScheduler_ = nullptr;
+    std::atomic<bool> mmsSchedulerInit_ = false;
 private:
     int pid_ = getpid();
     // shared by scene session and extension session once in same process
