@@ -1534,8 +1534,18 @@ void WindowController::MinimizeWindowsByLauncher(std::vector<uint32_t>& windowId
         MinimizeApp::ExecuteMinimizeTargetReasons(MinimizeReason::GESTURE_ANIMATION);
     };
     if (!isAnimated) {
+        WLOGFD("no animation minimize size: %{public}u", static_cast<uint32_t>(windowIds.size()));
         func();
     } else {
+        WLOGFD("animation minimize size: %{public}u", static_cast<uint32_t>(windowIds.size()));
+        auto needMinimizeAppNodes = MinimizeApp::GetNeedMinimizeAppNodesWithReason(MinimizeReason::GESTURE_ANIMATION);
+        for (auto& weakNode : needMinimizeAppNodes) {
+            auto node = weakNode.promote();
+            if (node) {
+                // gesture animation no need to play default animation when minimize
+                node->isPlayAnimationHide_ = true;
+            }
+        }
         finishCallback = RemoteAnimation::CreateAnimationFinishedCallback(func);
         if (finishCallback == nullptr) {
             return;

@@ -262,6 +262,8 @@ void WindowRoot::MinimizeTargetWindows(std::vector<uint32_t>& windowIds)
                 WLOGFE("Minimize window failed id: %{public}u, type: %{public}u",
                     windowNode->GetWindowId(), static_cast<uint32_t>(windowNode->GetWindowType()));
             }
+        } else {
+            WLOGFW("Cannot find window with id: %{public}u", windowId);
         }
     }
 }
