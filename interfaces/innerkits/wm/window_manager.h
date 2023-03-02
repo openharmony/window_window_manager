@@ -111,6 +111,11 @@ public:
     virtual void OnWindowUpdate(const std::vector<sptr<AccessibilityWindowInfo>>& infos, WindowUpdateType type) = 0;
 };
 
+class IWaterMarkFlagChangedListener : virtual public RefBase {
+public:
+    virtual void OnWaterMarkFlagUpdate(bool showWaterMark) = 0;
+};
+
 class ICameraFloatWindowChangedListener : virtual public RefBase {
 public:
     virtual void OnCameraFloatWindowChange(uint32_t accessTokenId, bool isShowing) = 0;
@@ -131,6 +136,8 @@ public:
     WMError UnregisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
     WMError RegisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener);
     WMError UnregisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener);
+    WMError RegisterWaterMarkFlagChangedListener(const sptr<IWaterMarkFlagChangedListener>& listener);
+    WMError UnregisterWaterMarkFlagChangedListener(const sptr<IWaterMarkFlagChangedListener>& listener);
     WMError MinimizeAllAppWindows(DisplayId displayId);
     WMError ToggleShownStateForAllAppWindows();
     WMError SetWindowLayoutMode(WindowLayoutMode mode);
@@ -152,6 +159,7 @@ private:
     void UpdateWindowVisibilityInfo(
         const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const;
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) const;
+    void NotifyWaterMarkFlagChangedResult(bool showWaterMark) const;
     void OnRemoteDied() const;
 };
 } // namespace Rosen
