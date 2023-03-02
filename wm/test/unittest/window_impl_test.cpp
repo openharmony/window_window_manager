@@ -1329,7 +1329,7 @@ HWTEST_F(WindowImplTest, SetFocusable01, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->SetFocusable(true));
     ASSERT_TRUE(window->GetFocusable());
     WindowState state = window->GetWindowState();
-    window->SetWindowState(WindowState::STATE_UNFROZEN);
+    window->SetWindowState(WindowState::STATE_DESTROYED);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFocusable(false));
     ASSERT_TRUE(window->GetFocusable());
     window->SetWindowState(state);
@@ -1391,7 +1391,7 @@ HWTEST_F(WindowImplTest, SetTouchable01, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->SetTouchable(true));
     ASSERT_TRUE(window->GetTouchable());
     WindowState state = window->GetWindowState();
-    window->SetWindowState(WindowState::STATE_UNFROZEN);
+    window->SetWindowState(WindowState::STATE_DESTROYED);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetTouchable(false));
     ASSERT_TRUE(window->GetTouchable());
     window->SetWindowState(state);
@@ -1806,7 +1806,7 @@ HWTEST_F(WindowImplTest, PrivacyMode01, Function | SmallTest | Level3)
     ASSERT_NE(nullptr, window);
 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(4).WillRepeatedly(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(8).WillRepeatedly(Return(WMError::WM_OK));
 
     window->SetPrivacyMode(true);
     window->SetSystemPrivacyMode(true);
@@ -1970,7 +1970,7 @@ HWTEST_F(WindowImplTest, SetWindowType, Function | SmallTest | Level3)
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<WindowImpl> window = new WindowImpl(option);
 
-    window->SetWindowState(WindowState::STATE_UNFROZEN);
+    window->SetWindowState(WindowState::STATE_DESTROYED);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW));
 
     EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
@@ -1996,7 +1996,7 @@ HWTEST_F(WindowImplTest, SetWindowMode, Function | SmallTest | Level3)
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     sptr<WindowImpl> window = new WindowImpl(option);
 
-    window->SetWindowState(WindowState::STATE_UNFROZEN);
+    window->SetWindowState(WindowState::STATE_DESTROYED);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN));
     EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
