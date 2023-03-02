@@ -25,11 +25,21 @@
 #include "interfaces/include/ws_common.h"
 #include "session_manager_base.h"
 #include "wm_single_instance.h"
+
+namespace OHOS::AAFwk {
+class SessionInfo;
+}
 namespace OHOS::Rosen {
 class ExtensionSession;
 class ExtensionSessionManager : public SessionManagerBase {
 WM_DECLARE_SINGLE_INSTANCE_BASE(ExtensionSessionManager)
 public:
+    /**
+     * @brief init extension session manager
+     *
+     * @return WSError
+     */
+    WSError Init();
     /**
      * @brief create extension session
      *
@@ -62,12 +72,12 @@ public:
      */
     WSError RequestExtensionSessionDestruction(const sptr<ExtensionSession>& extensionSession);
 protected:
+    sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<ExtensionSession>& extensionSession);
     ExtensionSessionManager();
     virtual ~ExtensionSessionManager() = default;
 
 private:
-    void Init();
-    std::map<uint32_t, std::pair<sptr<ExtensionSession>, sptr<IRemoteObject>>> abilityExtensionMap_;
+    std::map<uint32_t, sptr<ExtensionSession>> extensionMap_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_MANAGER_H
