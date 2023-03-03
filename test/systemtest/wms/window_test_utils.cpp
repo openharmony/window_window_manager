@@ -55,11 +55,6 @@ sptr<Window> WindowTestUtils::CreateTestWindow(const TestWindowInfo& info)
     if (info.parentId != INVALID_WINDOW_ID) {
         option->SetParentId(info.parentId);
     }
-    if (info.needAvoid) {
-        option->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
-    } else {
-        option->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
-    }
     if (info.parentLimit) {
         option->AddWindowFlag(WindowFlag::WINDOW_FLAG_PARENT_LIMIT);
     } else {
