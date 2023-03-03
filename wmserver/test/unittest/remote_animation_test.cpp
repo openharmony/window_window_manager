@@ -609,47 +609,6 @@ HWTEST_F(RemoteAnimationTest, GetTransitionEvent02, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: GetExpectRect01
- * @tc.desc: GetExpectRect
- * @tc.type: FUNC
- */
-HWTEST_F(RemoteAnimationTest, GetExpectRect01, Function | SmallTest | Level2)
-{
-    auto target = RemoteAnimation::CreateWindowAnimationTarget(transitionInfo_, node_);
-    RemoteAnimation::GetExpectRect(node_, target);
-    Rect actualRect = GetSurfaceBoundsRect(node_);
-    EXPECT_EQ(node_->GetWindowRect(), actualRect); // avoidRect is empty thus return
-
-    sptr<WindowNode> statusBar = new WindowNode(CreateWindowProperty(0));
-    ASSERT_NE(nullptr, statusBar);
-    statusBar->GetWindowProperty()->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    statusBar->SetWindowRect({0, 0, 100, 100});
-    windowRoot_->windowNodeMap_[0] = statusBar;
-
-    Rect avoidRect = windowRoot_->GetDisplayRectWithoutSystemBarAreas(node_);
-    EXPECT_FALSE(WindowHelper::IsEmptyRect(avoidRect));
-
-    RemoteAnimation::GetExpectRect(node_, target);
-    actualRect = GetSurfaceBoundsRect(node_);
-    EXPECT_EQ(avoidRect, actualRect); // get expect rect
-
-    node_->leashWinSurfaceNode_ = nullptr;
-    RemoteAnimation::GetExpectRect(node_, target);
-
-    node_->GetWindowProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    RemoteAnimation::GetExpectRect(node_, target);
-    EXPECT_FALSE(WindowHelper::IsMainFullScreenWindow(node_->GetWindowType(), node_->GetWindowMode()));
-
-    RemoteAnimation::windowRoot_ = nullptr;
-    RemoteAnimation::GetExpectRect(node_, target);
-
-    node_->GetWindowProperty()->SetWindowFlags(0);
-    RemoteAnimation::GetExpectRect(node_, target);
-    bool needAvoid = (node_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
-    EXPECT_EQ(false, needAvoid);
-}
-
-/**
  * @tc.name: NotifyAnimationTransition01
  * @tc.desc: NotifyAnimationTransition failed
  * @tc.type: FUNC

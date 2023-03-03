@@ -239,8 +239,8 @@ HWTEST_F(WindowOptionTest, WindowFlag01, Function | SmallTest | Level2)
 HWTEST_F(WindowOptionTest, WindowFlag02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    option->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
-    ASSERT_EQ(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID), option->GetWindowFlags());
+    option->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
+    ASSERT_EQ(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED), option->GetWindowFlags());
 }
 
 /**
@@ -251,9 +251,9 @@ HWTEST_F(WindowOptionTest, WindowFlag02, Function | SmallTest | Level2)
 HWTEST_F(WindowOptionTest, WindowFlag03, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    option->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+    option->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     option->AddWindowFlag(WindowFlag::WINDOW_FLAG_PARENT_LIMIT);
-    option->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+    option->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     ASSERT_EQ(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT), option->GetWindowFlags());
 }
 

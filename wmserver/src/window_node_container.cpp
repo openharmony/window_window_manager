@@ -207,8 +207,6 @@ void WindowNodeContainer::LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool a
 {
     if (afterAnimation) {
         layoutPolicy_->PerformWindowLayout(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
-        // tile layout will change window mode from fullscreen to float
-        // notify systembar window to change color
         NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_ADD);
         DumpScreenWindowTreeByWinId(node->GetWindowId());
         return;
@@ -232,8 +230,6 @@ void WindowNodeContainer::LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool a
                 node->SetWindowSizeChangeReason(WindowSizeChangeReason::CUSTOM_ANIMATION_SHOW);
         }
         layoutPolicy_->PerformWindowLayout(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
-        // tile layout will change window mode from fullscreen to float
-        // notify systembar window to change color
         NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_ADD);
         DumpScreenWindowTreeByWinId(node->GetWindowId());
     }
