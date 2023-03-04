@@ -134,7 +134,7 @@ WSError Session::Foreground()
     }
 
     if (!isActive_) {
-        sessionStage_->SetActive(true);
+        SetActive(true);
         UpdateSessionState(SessionState::STATE_ACTIVE);
     } else {
         UpdateSessionState(SessionState::STATE_FOREGROUND);
