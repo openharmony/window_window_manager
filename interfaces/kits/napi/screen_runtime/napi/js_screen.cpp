@@ -19,6 +19,7 @@
 #include "screen.h"
 #include "screen_info.h"
 #include "window_manager_hilog.h"
+#include "xpower_event_js.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -122,6 +123,9 @@ NativeValue* JsScreen::SetScreenActiveMode(NativeEngine* engine, NativeCallbackI
 {
     WLOGI("SetScreenActiveMode is called");
     JsScreen* me = CheckParamsAndGetThis<JsScreen>(engine, info);
+    if (me != nullptr) {
+        HiviewDFX::ReportXPowerJsStackSysEvent(engine, "EPS_LCD_FREQ");
+    }
     return (me != nullptr) ? me->OnSetScreenActiveMode(*engine, *info) : nullptr;
 }
 
