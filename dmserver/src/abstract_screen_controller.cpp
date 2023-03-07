@@ -81,11 +81,6 @@ std::vector<ScreenId> AbstractScreenController::GetAllScreenIds() const
     return res;
 }
 
-uint32_t AbstractScreenController::GetRSScreenNum() const
-{
-    return screenIdManager_.GetRSScreenNum();
-}
-
 std::vector<ScreenId> AbstractScreenController::GetAllValidScreenIds(const std::vector<ScreenId>& screenIds) const
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -234,12 +229,6 @@ void AbstractScreenController::RegisterAbstractScreenCallback(sptr<AbstractScree
     }
 }
 
-void AbstractScreenController::RegisterRSScreenChangeListener(const sptr<IRSScreenChangeListener>& listener)
-{
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    rSScreenChangeListener_ = listener;
-}
-
 void AbstractScreenController::OnRsScreenConnectionChange(ScreenId rsScreenId, ScreenEvent screenEvent)
 {
     WLOGFI("rs screen event. id:%{public}" PRIu64", event:%{public}u", rsScreenId, static_cast<uint32_t>(screenEvent));
@@ -309,9 +298,6 @@ void AbstractScreenController::ProcessScreenConnected(ScreenId rsScreenId)
     if (abstractScreenCallback_ != nullptr) {
         abstractScreenCallback_->onConnect_(absScreen);
     }
-    if (rSScreenChangeListener_ != nullptr) {
-        rSScreenChangeListener_->onConnected_();
-    }
 }
 
 sptr<AbstractScreen> AbstractScreenController::InitAndGetScreen(ScreenId rsScreenId)
@@ -358,9 +344,6 @@ void AbstractScreenController::ProcessScreenDisconnected(ScreenId rsScreenId)
         }
         dmsScreenMap_.erase(dmsScreenMapIter);
         NotifyScreenDisconnected(dmsScreenId);
-        if (rSScreenChangeListener_ != nullptr) {
-            rSScreenChangeListener_->onDisconnected_();
-        }
         if (screenGroup != nullptr && screenGroup->combination_ == ScreenCombination::SCREEN_MIRROR &&
             screen->dmsId_ == screenGroup->mirrorScreenId_ && screenGroup->GetChildCount() != 0) {
             auto defaultScreenId = GetDefaultAbstractScreenId();
@@ -1010,9 +993,6 @@ void AbstractScreenController::AddScreenToGroup(sptr<AbstractScreenGroup> group,
         if (abstractScreenCallback_ != nullptr) {
             abstractScreenCallback_->onConnect_(screen);
         }
-        if (rSScreenChangeListener_ != nullptr) {
-            rSScreenChangeListener_->onConnected_();
-        }
     }
 
     NotifyScreenGroupChanged(removeFromGroup, ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
@@ -1123,11 +1103,6 @@ bool AbstractScreenController::ScreenIdManager::HasDmsScreenId(ScreenId dmsScree
 bool AbstractScreenController::ScreenIdManager::HasRsScreenId(ScreenId dmsScreenId) const
 {
     return rs2DmsScreenIdMap_.find(dmsScreenId) != rs2DmsScreenIdMap_.end();
-}
-
-uint32_t AbstractScreenController::ScreenIdManager::GetRSScreenNum() const
-{
-    return rs2DmsScreenIdMap_.size();
 }
 
 bool AbstractScreenController::ScreenIdManager::ConvertToRsScreenId(ScreenId dmsScreenId, ScreenId& rsScreenId) const

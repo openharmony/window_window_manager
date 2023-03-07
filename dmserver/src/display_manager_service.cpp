@@ -305,11 +305,6 @@ std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(Displ
     return nullptr;
 }
 
-uint32_t DisplayManagerService::GetRSScreenNum() const
-{
-    return abstractScreenController_->GetRSScreenNum();
-}
-
 DMError DisplayManagerService::GetScreenSupportedColorGamuts(ScreenId screenId,
     std::vector<ScreenColorGamut>& colorGamuts)
 {
@@ -732,11 +727,6 @@ void DisplayManagerService::SetGravitySensorSubscriptionEnabled()
 sptr<CutoutInfo> DisplayManagerService::GetCutoutInfo(DisplayId displayId)
 {
     return displayCutoutController_->GetCutoutInfo(displayId);
-}
-
-void DisplayManagerService::RegisterRSScreenChangeListener(const sptr<IRSScreenChangeListener>& listener)
-{
-    abstractScreenController_->RegisterRSScreenChangeListener(listener);
 }
 
 void DisplayManagerService::NotifyPrivateWindowStateChanged(bool hasPrivate)
