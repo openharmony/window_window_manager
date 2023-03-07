@@ -28,16 +28,23 @@ namespace Rosen {
 class InputEventListener;
 
 class InputTransferStation {
-WM_DECLARE_SINGLE_INSTANCE(InputTransferStation);
+WM_DECLARE_SINGLE_INSTANCE_BASE(InputTransferStation);
 friend class InputEventListener;
 public:
+    bool IsDestroyed()
+    {
+        return destroyed_;
+    }
     void AddInputWindow(const sptr<Window>& window);
     void RemoveInputWindow(uint32_t windowId);
-
+protected:
+    InputTransferStation() = default;
+    ~InputTransferStation();
 private:
     sptr<WindowInputChannel> GetInputChannel(uint32_t windowId);
 
     std::mutex mtx_;
+    bool destroyed_ { false };
     std::unordered_map<uint32_t, sptr<WindowInputChannel>> windowInputChannels_;
     std::shared_ptr<MMI::IInputEventConsumer> inputListener_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
