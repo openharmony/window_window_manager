@@ -24,7 +24,6 @@
 #include "abstract_display.h"
 #include "cutout_info.h"
 #include "display_change_listener.h"
-#include "rsscreen_change_listener.h"
 #include "singleton_delegator.h"
 #include "wm_single_instance.h"
 #include "window_info_queried_listener.h"
@@ -39,7 +38,6 @@ public:
     sptr<DisplayInfo> GetDefaultDisplay() const;
     sptr<DisplayInfo> GetDisplayById(DisplayId displayId) const;
     std::vector<DisplayId> GetAllDisplayIds() const;
-    uint32_t GetRSScreenNum() const;
     sptr<ScreenInfo> GetScreenInfoByDisplayId(DisplayId displayId) const;
     ScreenId GetScreenGroupIdByDisplayId(DisplayId displayId) const;
     sptr<SupportedScreenModes> GetScreenModesByDisplayId(DisplayId displayId) const;
@@ -51,7 +49,6 @@ public:
     bool SetRotationFromWindow(DisplayId displayId, Rotation targetRotation, bool withAnimation = true);
     void SetGravitySensorSubscriptionEnabled();
     void RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener);
-    void RegisterRSScreenChangeListener(const sptr<IRSScreenChangeListener>& listener);
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) const;
     void NotifyPrivateWindowStateChanged(bool hasPrivate);
 };

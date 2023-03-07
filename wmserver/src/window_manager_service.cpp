@@ -98,16 +98,6 @@ void WindowManagerService::OnStart()
     sptr<IWindowInfoQueriedListener> windowInfoQueriedListener = new WindowInfoQueriedListener();
     DisplayManagerServiceInner::GetInstance().RegisterWindowInfoQueriedListener(windowInfoQueriedListener);
 
-    PostAsyncTask([this]() {
-        sptr<IRSScreenChangeListener> rSScreenChangeListener = new IRSScreenChangeListener();
-        rSScreenChangeListener->onConnected_
-            = std::bind(&WindowManagerService::OnRSScreenConnected, this);
-        rSScreenChangeListener->onDisconnected_
-            = std::bind(&WindowManagerService::OnRSScreenDisconnected, this);
-        WLOGI("RegisterRSScreenChangeListener");
-        DisplayManagerServiceInner::GetInstance().RegisterRSScreenChangeListener(rSScreenChangeListener);
-    });
-
     AddSystemAbilityListener(RENDER_SERVICE);
     AddSystemAbilityListener(ABILITY_MGR_SERVICE_ID);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
@@ -190,16 +180,6 @@ void WindowManagerService::InitWithRanderServiceAdded()
     WLOGI("RegisterWindowVisibilityChangeCallback");
     if (rsInterface_.RegisterOcclusionChangeCallback(windowVisibilityChangeCb) != WM_OK) {
         WLOGFE("RegisterWindowVisibilityChangeCallback failed");
-    }
-    RenderModeChangeCallback renderModeChangeCb
-        = std::bind(&WindowManagerService::OnRenderModeChanged, this, std::placeholders::_1);
-    WLOGI("SetRenderModeChangeCallback");
-    if (rsInterface_.SetRenderModeChangeCallback(renderModeChangeCb) != WM_OK) {
-        WLOGFE("SetRenderModeChangeCallback failed");
-    }
-
-    if (windowRoot_->GetMaxUniRenderAppWindowNumber() <= 0) {
-        rsInterface_.UpdateRenderMode(false);
     }
 }
 
@@ -323,13 +303,6 @@ void WindowManagerService::ConfigureWindowManagerService()
         auto numbers = *item.intsValue_;
         if (numbers.size() == 1 && numbers[0] > 0) {
             windowRoot_->SetMaxAppWindowNumber(static_cast<uint32_t>(numbers[0]));
-        }
-    }
-    item = config["maxUniRenderAppWindowNumber"];
-    if (item.IsInts()) {
-        auto numbers = *item.intsValue_;
-        if (numbers.size() == 1 && numbers[0] > 0) {
-            windowRoot_->SetMaxUniRenderAppWindowNumber(static_cast<uint32_t>(numbers[0]));
         }
     }
     item = config["modeChangeHotZones"];
@@ -1289,27 +1262,6 @@ void WindowInfoQueriedListener::HasPrivateWindow(DisplayId displayId, bool& hasP
 {
     WLOGI("called");
     WindowManagerService::GetInstance().HasPrivateWindow(displayId, hasPrivateWindow);
-}
-
-void WindowManagerService::OnRSScreenConnected()
-{
-    PostAsyncTask([this]() {
-        windowRoot_->SwitchRenderModeIfNeeded();
-    });
-}
-
-void WindowManagerService::OnRSScreenDisconnected()
-{
-    PostAsyncTask([this]() {
-        windowRoot_->SwitchRenderModeIfNeeded();
-    });
-}
-
-void WindowManagerService::OnRenderModeChanged(bool isUniRender)
-{
-    PostAsyncTask([this, isUniRender]() {
-        windowRoot_->OnRenderModeChanged(isUniRender);
-    });
 }
 } // namespace Rosen
 } // namespace OHOS
