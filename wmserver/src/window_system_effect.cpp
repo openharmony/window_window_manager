@@ -141,9 +141,10 @@ WMError WindowSystemEffect::SetWindowShadow(const sptr<WindowNode>& node)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
-    WLOGFI("[WEffect][id:%{public}d] focused: %{public}u, [%{public}f, %{public}s, %{public}f, %{public}f, %{public}f]",
-        node->GetWindowId(), node->isFocused_, shadow.elevation_, shadow.color_.c_str(),
-        shadow.offsetX_, shadow.offsetY_, shadow.alpha_);
+    WLOGFI("[WEffect]id: %{public}d focused: %{public}u elevation: %{public}f",
+        node->GetWindowId(), node->isFocused_, shadow.elevation_);
+    WLOGFI("[WEffect]color: %{public}s offsetX: %{public}f offsetY: %{public}f alpha: %{public}f",
+        shadow.color_.c_str(), shadow.offsetX_, shadow.offsetY_, shadow.alpha_);
     auto vpr = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId());
     surfaceNode->SetShadowElevation(shadow.elevation_ * vpr);
     surfaceNode->SetShadowColor(colorValue);
