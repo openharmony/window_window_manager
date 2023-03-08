@@ -301,10 +301,9 @@ WMError WindowManager::UnregisterFocusChangedListener(const sptr<IFocusChangedLi
     if (pImpl_->focusChangedListeners_.empty() && pImpl_->focusChangedListenerAgent_ != nullptr) {
         ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS, pImpl_->focusChangedListenerAgent_);
-        if (ret != WMError::WM_OK) {
-            return WMError::WM_OK;
+        if (ret == WMError::WM_OK) {
+            pImpl_->focusChangedListenerAgent_ = nullptr;
         }
-        pImpl_->focusChangedListenerAgent_ = nullptr;
     }
     return ret;
 }
@@ -357,10 +356,9 @@ WMError WindowManager::UnregisterSystemBarChangedListener(const sptr<ISystemBarC
     if (pImpl_->systemBarChangedListeners_.empty() && pImpl_->systemBarChangedListenerAgent_ != nullptr) {
         ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR, pImpl_->systemBarChangedListenerAgent_);
-        if (ret != WMError::WM_OK) {
-            return WMError::WM_OK;
+        if (ret == WMError::WM_OK) {
+            pImpl_->systemBarChangedListenerAgent_ = nullptr;
         }
-        pImpl_->systemBarChangedListenerAgent_ = nullptr;
     }
     return ret;
 }
@@ -431,10 +429,9 @@ WMError WindowManager::UnregisterWindowUpdateListener(const sptr<IWindowUpdateLi
     if (pImpl_->windowUpdateListeners_.empty() && pImpl_->windowUpdateListenerAgent_ != nullptr) {
         ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE, pImpl_->windowUpdateListenerAgent_);
-        if (ret != WMError::WM_OK) {
-            return WMError::WM_OK;
+        if (ret == WMError::WM_OK) {
+            pImpl_->windowUpdateListenerAgent_ = nullptr;
         }
-        pImpl_->windowUpdateListenerAgent_ = nullptr;
     }
     return ret;
 }
@@ -485,10 +482,9 @@ WMError WindowManager::UnregisterVisibilityChangedListener(const sptr<IVisibilit
         ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
             pImpl_->windowVisibilityListenerAgent_);
-        if (ret != WMError::WM_OK) {
-            return WMError::WM_OK;
+        if (ret == WMError::WM_OK) {
+            pImpl_->windowVisibilityListenerAgent_ = nullptr;
         }
-        pImpl_->windowVisibilityListenerAgent_ = nullptr;
     }
     return ret;
 }
@@ -545,10 +541,9 @@ WMError WindowManager::UnregisterCameraFloatWindowChangedListener(
         ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT,
             pImpl_->cameraFloatWindowChangedListenerAgent_);
-        if (ret != WMError::WM_OK) {
-            return WMError::WM_OK;
+        if (ret == WMError::WM_OK) {
+            pImpl_->cameraFloatWindowChangedListenerAgent_ = nullptr;
         }
-        pImpl_->cameraFloatWindowChangedListenerAgent_ = nullptr;
     }
     return ret;
 }
@@ -605,10 +600,9 @@ WMError WindowManager::UnregisterWaterMarkFlagChangedListener(const sptr<IWaterM
         ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG,
             pImpl_->waterMarkFlagChangeAgent_);
-        if (ret != WMError::WM_OK) {
-            return WMError::WM_OK;
+        if (ret == WMError::WM_OK) {
+            pImpl_->waterMarkFlagChangeAgent_ = nullptr;
         }
-        pImpl_->waterMarkFlagChangeAgent_ = nullptr;
     }
     WLOGFD("Try to unregisterWaterMarkFlagChangedListener && result : %{public}u", static_cast<uint32_t>(ret));
     return ret;
