@@ -290,13 +290,13 @@ std::vector<sptr<WindowNode>> WindowPair::CreateOrderedPair(
 {
     std::vector<sptr<WindowNode>> orderedPair;
 
-    if (bottom != nullptr && WindowHelper::IsAppWindow(bottom->GetWindowType())) {
+    if (bottom != nullptr) {
         orderedPair.push_back(bottom);
     }
-    if (mid != nullptr && WindowHelper::IsAppWindow(mid->GetWindowType())) {
+    if (mid != nullptr) {
         orderedPair.push_back(mid);
     }
-    if (top != nullptr && WindowHelper::IsAppWindow(top->GetWindowType())) {
+    if (top != nullptr) {
         orderedPair.push_back(top);
     }
 
