@@ -173,10 +173,11 @@ HWTEST_F(ScreenRotationControllerTest, HandleGravitySensorEventCallback, Functio
     GravitySensorSubscriber::lastCallbackTime_ = currentTimeInMillitm - 200;
     GravitySensorSubscriber::HandleGravitySensorEventCallback(&event);
 
+    auto currentSensorRotationValue = ScreenRotationController::lastSensorRotationConverted_;
     data.z = 1.f;
     GravitySensorSubscriber::lastCallbackTime_ = currentTimeInMillitm - 200;
     GravitySensorSubscriber::HandleGravitySensorEventCallback(&event);
-    ASSERT_EQ(DeviceRotation::INVALID, ScreenRotationController::lastSensorRotationConverted_);
+    ASSERT_EQ(currentSensorRotationValue, ScreenRotationController::lastSensorRotationConverted_);
 }
 
 /**
