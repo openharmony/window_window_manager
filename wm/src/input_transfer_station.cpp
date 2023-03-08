@@ -28,6 +28,12 @@ namespace {
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(InputTransferStation)
 
+InputTransferStation::~InputTransferStation()
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    destroyed_ = true;
+}
+
 void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
 {
     if (keyEvent == nullptr) {
@@ -87,6 +93,10 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
     }
     sptr<WindowInputChannel> inputChannel = new WindowInputChannel(window);
     std::lock_guard<std::mutex> lock(mtx_);
+    if (destroyed_) {
+        WLOGFW("Already destroyed");
+        return;
+    }
     windowInputChannels_.insert(std::make_pair(windowId, inputChannel));
     if (inputListener_ == nullptr) {
         WLOGFD("Init input listener, IsMainHandlerAvailable: %{public}u", window->IsMainHandlerAvailable());
@@ -118,6 +128,10 @@ void InputTransferStation::RemoveInputWindow(uint32_t windowId)
     sptr<WindowInputChannel> inputChannel = nullptr;
     {
         std::lock_guard<std::mutex> lock(mtx_);
+        if (destroyed_) {
+            WLOGFW("Already destroyed");
+            return;
+        }
         auto iter = windowInputChannels_.find(windowId);
         if (iter != windowInputChannels_.end()) {
             inputChannel = iter->second;
@@ -134,6 +148,10 @@ void InputTransferStation::RemoveInputWindow(uint32_t windowId)
 sptr<WindowInputChannel> InputTransferStation::GetInputChannel(uint32_t windowId)
 {
     std::lock_guard<std::mutex> lock(mtx_);
+    if (destroyed_) {
+        WLOGFW("Already destroyed");
+        return nullptr;
+    }
     auto iter = windowInputChannels_.find(windowId);
     if (iter == windowInputChannels_.end()) {
         return nullptr;
