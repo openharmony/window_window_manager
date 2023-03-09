@@ -674,6 +674,10 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
                 return res;
             }
         }
+        if (WindowHelper::IsSplitWindowMode(node->GetWindowMode()) &&
+            WindowHelper::IsAppWindow(node->GetWindowType())) {
+            container->NotifyDockWindowStateChanged(node, false);
+        }
         WMError res = container->ShowStartingWindow(node);
         if (res != WMError::WM_OK) {
             MinimizeApp::ClearNodesWithReason(MinimizeReason::OTHER_WINDOW);
