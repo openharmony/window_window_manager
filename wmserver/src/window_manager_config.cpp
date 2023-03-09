@@ -27,7 +27,6 @@ namespace {
 WindowManagerConfig::ConfigItem WindowManagerConfig::config_;
 const std::map<std::string, WindowManagerConfig::ValueType> WindowManagerConfig::configItemTypeMap_ = {
     { "maxAppWindowNumber",                           WindowManagerConfig::ValueType::INTS },
-    { "maxUniRenderAppWindowNumber",                  WindowManagerConfig::ValueType::INTS },
     { "modeChangeHotZones",                           WindowManagerConfig::ValueType::INTS },
     { "duration",                                     WindowManagerConfig::ValueType::INTS },
     { "durationIn",                                   WindowManagerConfig::ValueType::INTS },

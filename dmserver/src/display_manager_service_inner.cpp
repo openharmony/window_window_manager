@@ -82,11 +82,6 @@ void DisplayManagerServiceInner::UpdateRSTree(DisplayId displayId, DisplayId par
     DisplayManagerService::GetInstance().UpdateRSTree(displayId, parentDisplayId, surfaceNode, isAdd, isMultiDisplay);
 }
 
-uint32_t DisplayManagerServiceInner::GetRSScreenNum() const
-{
-    return DisplayManagerService::GetInstance().GetRSScreenNum();
-}
-
 sptr<ScreenInfo> DisplayManagerServiceInner::GetScreenInfoByDisplayId(DisplayId displayId) const
 {
     auto displayInfo = DisplayManagerService::GetInstance().GetDisplayInfoById(displayId);
@@ -157,11 +152,6 @@ bool DisplayManagerServiceInner::SetRotationFromWindow(DisplayId displayId, Rota
 void DisplayManagerServiceInner::SetGravitySensorSubscriptionEnabled()
 {
     DisplayManagerService::GetInstance().SetGravitySensorSubscriptionEnabled();
-}
-
-void DisplayManagerServiceInner::RegisterRSScreenChangeListener(const sptr<IRSScreenChangeListener>& listener)
-{
-    DisplayManagerService::GetInstance().RegisterRSScreenChangeListener(listener);
 }
 
 sptr<CutoutInfo> DisplayManagerServiceInner::GetCutoutInfo(DisplayId displayId) const

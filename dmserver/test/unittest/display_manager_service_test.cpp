@@ -151,10 +151,6 @@ HWTEST_F(DisplayManagerServiceTest, DisplayChange, Function | SmallTest | Level3
 
     std::vector<DisplayId> displayIds;
     dms_->SetFreeze(displayIds, false);
-
-    sptr<IRSScreenChangeListener> screenChangeListener = new IRSScreenChangeListener();
-    dms_->RegisterRSScreenChangeListener(screenChangeListener);
-    dms_->abstractScreenController_->rSScreenChangeListener_ = nullptr;
 }
 
 /**
@@ -208,7 +204,6 @@ HWTEST_F(DisplayManagerServiceTest, GetDisplayInfo, Function | SmallTest | Level
     ASSERT_EQ(absDisplay->name_, dms_->GetDisplayInfoByScreen(0)->name_);
 
     absDisplay->screenId_ = 0;
-    ASSERT_EQ(1, dms_->GetRSScreenNum());
 
     ASSERT_EQ(SCREEN_ID_INVALID, dms_->GetScreenIdByDisplayId(1));
     ASSERT_EQ(0, dms_->GetScreenIdByDisplayId(0));

@@ -85,8 +85,6 @@ public:
     void HandleKeepScreenOn(uint32_t windowId, bool requireLock);
     void UpdateFocusableProperty(uint32_t windowId);
     void SetMaxAppWindowNumber(uint32_t windowNum);
-    void SetMaxUniRenderAppWindowNumber(uint32_t uniAppWindowNum);
-    uint32_t GetMaxUniRenderAppWindowNumber() const;
     WMError GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
     std::vector<DisplayId> GetAllDisplayIds() const;
@@ -104,28 +102,15 @@ public:
     bool CheckMultiDialogWindows(WindowType type, sptr<IRemoteObject> token);
     bool HasPrivateWindow(DisplayId displayId);
     Rect GetDisplayRectWithoutSystemBarAreas(const sptr<WindowNode> destNode);
-    void SwitchRenderModeIfNeeded();
-    void OnRenderModeChanged(bool isUniRender);
     sptr<WindowNode> GetWindowNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken);
     bool TakeWindowPairSnapshot(DisplayId displayId);
     void ClearWindowPairSnapshot(DisplayId displayId);
-    bool IsUniRender()
-    {
-        return renderMode_ == RenderMode::UNIFIED;
-    }
     void LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool afterAnimation = false);
     void GetAllAnimationPlayingNodes(std::vector<wptr<WindowNode>>& windowNodes);
     void GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const;
     WMError NotifyDesktopUnfrozen();
     void UpdateDisplayOrientationWhenHideWindow(sptr<WindowNode>& node);
 private:
-    enum class RenderMode : uint8_t {
-        SEPARATED,
-        UNIFIED,
-        SEPARATING,
-        UNIFYING,
-    };
-
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);
     WMError DestroyWindowSelf(sptr<WindowNode>& node, const sptr<WindowNodeContainer>& container);
@@ -150,8 +135,6 @@ private:
         std::shared_ptr<RSOcclusionData> occlusionData);
     bool CheckAddingModeAndSize(sptr<WindowNode>& node, const sptr<WindowNodeContainer>& container);
     WMError BindDialogToParent(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
-    void ChangeRSRenderModeIfNeeded(bool isToUnified);
-    bool IsAppWindowExceed() const;
     void SetDisplayOrientationFromWindow(sptr<WindowNode>& node, bool withAnimation);
     void CheckAndNotifyWaterMarkChangedResult();
 
@@ -170,9 +153,7 @@ private:
         this, std::placeholders::_1));
     Callback callback_;
     uint32_t maxAppWindowNumber_ = 100;
-    uint32_t maxUniRenderAppWindowNumber_ { maxAppWindowNumber_ };
     SplitRatioConfig splitRatioConfig_ = {0.1, 0.9, {}};
-    RenderMode renderMode_ { RenderMode::UNIFIED };
 };
 }
 }

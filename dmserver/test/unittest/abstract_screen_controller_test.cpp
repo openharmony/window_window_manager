@@ -561,7 +561,6 @@ HWTEST_F(AbstractScreenControllerTest, AddScreenToGroup01, Function | SmallTest 
     std::map<ScreenId, bool> removeChildResMap;
     absController_->AddScreenToGroup(group, addScreens, addChildPos, removeChildResMap);
     absController_->abstractScreenCallback_ = nullptr;
-    absController_->rSScreenChangeListener_ = nullptr;
     ASSERT_EQ(6, absController_->dmsScreenMap_.size());
 }
 /**
