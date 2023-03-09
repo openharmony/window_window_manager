@@ -197,10 +197,6 @@ void WindowRootFuzzPart3(sptr<WindowRoot> windowRoot, sptr<WindowNode> windowNod
     startPos += GetObject<uint32_t>(windowNum, data + startPos, size - startPos);
     windowRoot->SetMaxAppWindowNumber(windowNum);
 
-    uint32_t uniAppWindowNum;
-    startPos += GetObject<uint32_t>(uniAppWindowNum, data + startPos, size - startPos);
-    windowRoot->SetMaxUniRenderAppWindowNumber(uniAppWindowNum);
-
     ModeChangeHotZones hotZones;
     ModeChangeHotZonesConfig config;
     startPos += GetObject<ModeChangeHotZones>(hotZones, data + startPos, size - startPos);
@@ -233,10 +229,6 @@ void WindowRootFuzzPart4(sptr<WindowRoot> windowRoot, sptr<WindowNode> windowNod
     windowRoot->GetAllDisplayIds();
     windowRoot->GetTotalWindowNum();
 
-    bool isUniRender;
-    startPos += GetObject<bool>(isUniRender, data + startPos, size - startPos);
-    windowRoot->OnRenderModeChanged(isUniRender);
-
     windowRoot->TakeWindowPairSnapshot(displayId);
     windowRoot->ClearWindowPairSnapshot(displayId);
 
@@ -265,7 +257,6 @@ void WindowRootFuzzPart4(sptr<WindowRoot> windowRoot, sptr<WindowNode> windowNod
     windowRoot->NotifySystemBarTints();
 
     windowRoot->FocusFaultDetection();
-    windowRoot->GetMaxUniRenderAppWindowNumber();
 
     windowRoot->GetWindowForDumpAceHelpInfo();
     windowRoot->DestroyLeakStartingWindow();
@@ -286,9 +277,6 @@ void WindowRootFuzzPart5(sptr<WindowRoot> windowRoot, sptr<WindowNode> windowNod
     }
     windowRoot->MinimizeTargetWindows(windowIds);
     windowRoot->UpdateRsTree(windowNode->GetWindowId(), false);
-
-    windowRoot->SwitchRenderModeIfNeeded();
-    windowRoot->IsUniRender();
 
     bool afterAnimation;
     GetObject<bool>(afterAnimation, data + startPos, size - startPos);
@@ -321,11 +309,6 @@ void WindowRootFuzzPart6(sptr<WindowRoot> windowRoot, sptr<WindowNode> windowNod
     DisplayId defaultDisplayId;
     startPos += GetObject<DisplayId>(defaultDisplayId, data + startPos, size - startPos);
     windowRoot->MoveNotShowingWindowToDefaultDisplay(defaultDisplayId, displayId);
-
-    bool isToUnified;
-    GetObject<bool>(isToUnified, data + startPos, size - startPos);
-    windowRoot->ChangeRSRenderModeIfNeeded(isToUnified);
-    windowRoot->IsAppWindowExceed();
 }
 
 void DoFuzzTest(const uint8_t* data, size_t size)

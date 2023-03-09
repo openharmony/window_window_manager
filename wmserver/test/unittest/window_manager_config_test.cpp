@@ -42,8 +42,6 @@ const std::string XML_STR = R"(<?xml version='1.0' encoding="utf-8"?>
     <decor enable="false"></decor>
     <!--max number of main window that could be shown on display-->
     <maxAppWindowNumber>100</maxAppWindowNumber>
-    <!--maximum number of windows supported by unified rendering -->
-    <maxUniRenderAppWindowNumber>99</maxUniRenderAppWindowNumber>
     <!--minimizeByOther enable is true means fullscreen window will be minmized by other fullscreen window-->
     <minimizeByOther enable="true"></minimizeByOther>
     <!--window mdoe change hot zones config, fullscreen primary secondary-->
