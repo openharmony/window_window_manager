@@ -222,7 +222,7 @@ void RegisterDisplayListenerWithType(NativeEngine& engine, const std::string& ty
     if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
         SingletonContainer::Get<DisplayManager>().RegisterDisplayListener(displayListener);
         WLOGI("RegisterDisplayListenerWithType success");
-    } else if (type == EVENT_PRIVATE_WINDOW) {
+    } else if (type == EVENT_PRIVATE_MODE) {
         SingletonContainer::Get<DisplayManager>().RegisterPrivateWindowListener(displayListener);
         WLOGI("RegisterPrivateWindowListenerWithType success");
     } else {
@@ -263,7 +263,7 @@ void UnregisterAllDisplayListenerWithType(const std::string& type)
             sptr<DisplayManager::IDisplayListener> thisListener(it->second);
             SingletonContainer::Get<DisplayManager>().UnregisterDisplayListener(thisListener);
             WLOGFD("unregister all displayListener success");
-        } else if (type == EVENT_PRIVATE_WINDOW) {
+        } else if (type == EVENT_PRIVATE_MODE) {
             sptr<DisplayManager::IPrivateWindowListener> thisListener(it->second);
             SingletonContainer::Get<DisplayManager>().UnregisterPrivateWindowListener(thisListener);
             WLOGFD("unregister all privateWindowListener success");
@@ -287,7 +287,7 @@ void UnRegisterDisplayListenerWithType(const std::string& type, NativeValue* val
                 sptr<DisplayManager::IDisplayListener> thisListener(it->second);
                 SingletonContainer::Get<DisplayManager>().UnregisterDisplayListener(thisListener);
                 WLOGFD("unregister displayListener success");
-            } else if (type == EVENT_PRIVATE_WINDOW) {
+            } else if (type == EVENT_PRIVATE_MODE) {
                 sptr<DisplayManager::IPrivateWindowListener> thisListener(it->second);
                 SingletonContainer::Get<DisplayManager>().UnregisterPrivateWindowListener(thisListener);
                 WLOGFD("unRegister privateWindowListener success");
