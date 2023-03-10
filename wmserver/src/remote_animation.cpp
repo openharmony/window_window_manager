@@ -477,7 +477,7 @@ WMError RemoteAnimation::NotifyAnimationBackTransition(sptr<WindowTransitionInfo
     if (finishedCallback == nullptr) {
         return WMError::WM_ERROR_NO_MEM;
     }
-    windowAnimationController_->OnAppTransition(srcTarget, dstTarget, finishedCallback);
+    windowAnimationController_->OnAppBackTransition(srcTarget, dstTarget, finishedCallback);
     return WMError::WM_OK;
 }
 
