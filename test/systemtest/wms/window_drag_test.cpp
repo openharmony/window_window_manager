@@ -101,7 +101,6 @@ void WindowDragTest::SetUp()
 void WindowDragTest::TearDown() {
     while (!activeWindows_.empty()) {
         ASSERT_EQ(WMError::WM_OK, activeWindows_.back()->Destroy());
-        sleep(WAIT_CALLBACK_US);
         activeWindows_.pop_back();
     }
 }

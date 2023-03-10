@@ -36,7 +36,6 @@ public:
     static inline float virtualPixelRatio_ = 0.0;
 private:
     static constexpr uint32_t WAIT_SYANC_US = 100000;
-    static constexpr uint32_t SLEEP_SEC = 1;
     static void InitAvoidArea();
 };
 
@@ -93,7 +92,6 @@ void WindowLayoutTest::InitAvoidArea()
     window->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, WindowTestUtils::systemAvoidArea_);
     window->Hide();
     window->Destroy();
-    sleep(SLEEP_SEC);
 }
 
 void WindowLayoutTest::TearDownTestCase()
@@ -109,7 +107,6 @@ void WindowLayoutTest::TearDown()
 {
     while (!activeWindows_.empty()) {
         ASSERT_EQ(WMError::WM_OK, activeWindows_.back()->Destroy());
-        sleep(SLEEP_SEC);
         activeWindows_.pop_back();
     }
 }

@@ -51,7 +51,6 @@ namespace {
 
 using Utils = WindowTestUtils;
 const int WAIT_ASYNC_US = 100000;  // 100000us
-const int SLEEP_SEC = 1;  // 1s
 
 class TestSystemBarChangedListener : public ISystemBarChangedListener {
 public:
@@ -241,7 +240,6 @@ void WindowImmersiveTest::TearDown()
 {
     while (!activeWindows_.empty()) {
         ASSERT_EQ(WMError::WM_OK, activeWindows_.back()->Destroy());
-        sleep(SLEEP_SEC);
         activeWindows_.pop_back();
     }
     WindowManager::GetInstance().UnregisterSystemBarChangedListener(testSystemBarChangedListener_);
