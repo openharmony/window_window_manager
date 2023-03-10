@@ -20,6 +20,7 @@
 #include <rs_iwindow_animation_finished_callback.h>
 #include <ui/rs_surface_node.h>
 
+#include "pixel_map.h"
 #include "window_property.h"
 #include "window_transition_info.h"
 #include "zidl/window_interface.h"
@@ -68,6 +69,7 @@ public:
         TRANS_ID_SET_ANCHOR_OFFSET,
         TRANS_ID_OFF_WINDOW_ZOOM,
         TRANS_ID_RAISE_WINDOW_Z_ORDER,
+        TRANS_ID_GET_SNAPSHOT,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -107,6 +109,7 @@ public:
     virtual void SetAnchorOffset(int32_t deltaX, int32_t deltaY) = 0;
     virtual void OffWindowZoom() = 0;
     virtual WmErrorCode RaiseToAppTop(uint32_t windowId) = 0;
+    virtual std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t windowId) = 0;
 };
 }
 }
