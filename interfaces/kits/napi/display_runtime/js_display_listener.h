@@ -47,7 +47,7 @@ private:
 const std::string EVENT_ADD = "add";
 const std::string EVENT_REMOVE = "remove";
 const std::string EVENT_CHANGE = "change";
-const std::string EVENT_PRIVATE_WINDOW = "privateWindow";
+const std::string EVENT_PRIVATE_MODE = "privateMode";
 }  // namespace Rosen
 }  // namespace OHOS
 #endif /* OHOS_JS_DISPLAY_LISTENER_H */
