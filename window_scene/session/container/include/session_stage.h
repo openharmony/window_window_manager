@@ -67,7 +67,7 @@ class SessionStage : public SessionStageStub, public virtual RefBase {
     } while (0)
 
 public:
-    SessionStage(const sptr<ISession>& session);
+    explicit SessionStage(const sptr<ISession>& session);
     virtual ~SessionStage() = default;
 
     virtual WSError Connect();

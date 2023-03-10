@@ -42,7 +42,7 @@ public:
 };
 class Session : public SessionStub, public virtual RefBase {
 public:
-    Session(const SessionInfo& info);
+    explicit Session(const SessionInfo& info);
     virtual ~Session() = default;
 
     void SetPersistentId(uint64_t persistentId);
