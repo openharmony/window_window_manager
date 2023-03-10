@@ -107,6 +107,7 @@ sptr<Window> WaterMarkTest::CreateWindow(const Utils::TestWindowInfo& appinfo)
     option->SetWindowRect(appinfo.rect);
     option->SetWindowType(appinfo.type);
     option->SetWindowMode(appinfo.mode);
+    option->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     sptr<Window> window = Window::Create(appinfo.name, option);
     return window;
 }
@@ -149,6 +150,10 @@ HWTEST_F(WaterMarkTest, SetWaterMarkFlag01, Function | MediumTest | Level1)
     window->AddWindowFlag(WindowFlag::WINDOW_FLAG_WATER_MARK);
     sleep(NORMAL_SLEEP_TIME);
     ASSERT_EQ(lisenter_->isShowing_, true);
+
+    window->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_WATER_MARK);
+    sleep(NORMAL_SLEEP_TIME);
+    ASSERT_EQ(lisenter_->isShowing_, false);
 
     window->Destroy();
     sleep(NORMAL_SLEEP_TIME);
