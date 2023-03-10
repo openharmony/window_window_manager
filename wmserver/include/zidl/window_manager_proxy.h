@@ -65,6 +65,7 @@ public:
     void SetAnchorAndScale(int32_t x, int32_t y, float scale) override;
     void SetAnchorOffset(int32_t deltaX, int32_t deltaY) override;
     void OffWindowZoom() override;
+    std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t windowId) override;
 private:
     static inline BrokerDelegator<WindowManagerProxy> delegator_;
 };
