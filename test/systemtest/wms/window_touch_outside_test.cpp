@@ -119,7 +119,6 @@ HWTEST_F(WindowTouchOutsideTest, onTouchInside, Function | MediumTest | Level3)
     usleep(WAIT_CALLBACK_US);
     ASSERT_TRUE(!windowlistener1_->isTouchOutside_);
     firstWindow->Destroy();
-    sleep(1);
 }
 
 /**
@@ -138,9 +137,7 @@ HWTEST_F(WindowTouchOutsideTest, onTouchOutside, Function | MediumTest | Level3)
     usleep(WAIT_CALLBACK_US);
     ASSERT_TRUE(windowlistener1_->isTouchOutside_);
     firstWindow->Destroy();
-    sleep(1);
     secondWindow->Destroy();
-    sleep(1);
 }
 
 /**
@@ -158,9 +155,7 @@ HWTEST_F(WindowTouchOutsideTest, onTouchOutsideNotShow, Function | MediumTest | 
     usleep(WAIT_CALLBACK_US);
     ASSERT_TRUE(!windowlistener1_->isTouchOutside_);
     firstWindow->Destroy();
-    sleep(1);
     secondWindow->Destroy();
-    sleep(1);
 }
 
 /**
@@ -185,11 +180,8 @@ HWTEST_F(WindowTouchOutsideTest, onTouchOutsideForAllWindow, Function | MediumTe
     ASSERT_TRUE(windowlistener1_->isTouchOutside_);
     ASSERT_TRUE(windowlistener2_->isTouchOutside_);
     firstWindow->Destroy();
-    sleep(1);
     secondWindow->Destroy();
-    sleep(1);
     thirdWindow->Destroy();
-    sleep(1);
 }
 } // namespace
 } // Rosen
