@@ -130,6 +130,10 @@ WmErrorCode RaiseToAppTop(uint32_t windowId)
 {
     return WmErrorCode::WM_OK;
 };
+std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t windowId) override
+{
+    return nullptr;
+}
 };
 }
 }

@@ -284,5 +284,11 @@ WmErrorCode WindowAdapter::RaiseToAppTop(uint32_t windowId)
     return windowManagerServiceProxy_->RaiseToAppTop(windowId);
 }
 
+std::shared_ptr<Media::PixelMap> WindowAdapter::GetSnapshot(int32_t windowId)
+{
+    INIT_PROXY_CHECK_RETURN(nullptr);
+    return windowManagerServiceProxy_->GetSnapshot(windowId);
+}
+
 } // namespace Rosen
 } // namespace OHOS
