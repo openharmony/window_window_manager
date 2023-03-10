@@ -139,7 +139,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow01, Function | MediumTest | Level3)
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     ASSERT_EQ(true, window != nullptr);
     activeWindows_.push_back(window);
-    Rect expect = Utils::GetDefaultFloatingRect(window);
+    Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_TRUE(Utils::RectEqualTo(window, Utils::GetFloatingLimitedRect(expect, virtualPixelRatio_)));
     ASSERT_EQ(WMError::WM_OK, window->Hide());
@@ -311,10 +311,12 @@ HWTEST_F(WindowLayoutTest, LayoutWindow08, Function | MediumTest | Level3)
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     activeWindows_.push_back(window);
-    Rect expect = Utils::GetDefaultFloatingRect(window);
+    Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
+    usleep(WAIT_SYANC_US);
     ASSERT_TRUE(Utils::RectEqualTo(window, expect));
     ASSERT_EQ(WMError::WM_OK, window->Hide());
+    usleep(WAIT_SYANC_US);
 }
 
 /**
@@ -335,9 +337,10 @@ HWTEST_F(WindowLayoutTest, LayoutWindow09, Function | MediumTest | Level3)
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     activeWindows_.push_back(window);
-    Rect expect = Utils::GetDefaultFloatingRect(window);
+    Rect expect = Utils::GetDefaultFloatingRect(window, true);
 
     ASSERT_EQ(WMError::WM_OK, window->Show());
+    usleep(WAIT_SYANC_US);
     ASSERT_TRUE(Utils::RectEqualTo(window, expect));
 
     ASSERT_EQ(WMError::WM_OK, window->Resize(2u, 2u));        // 2: custom min size
@@ -365,14 +368,18 @@ HWTEST_F(WindowLayoutTest, LayoutWindow10, Function | MediumTest | Level3)
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     activeWindows_.push_back(window);
-    Rect expect = Utils::GetDefaultFloatingRect(window);
+    Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
+    usleep(WAIT_SYANC_US);
     ASSERT_TRUE(Utils::RectEqualTo(window, expect));
     ASSERT_EQ(WMError::WM_OK, window->Maximize());
+    usleep(WAIT_SYANC_US);
     ASSERT_TRUE(Utils::RectEqualTo(window, Utils::displayRect_));
     ASSERT_EQ(WMError::WM_OK, window->Recover());
+    usleep(WAIT_SYANC_US);
     ASSERT_TRUE(Utils::RectEqualTo(window, expect));
     ASSERT_EQ(WMError::WM_OK, window->Minimize());
+    usleep(WAIT_SYANC_US);
     ASSERT_EQ(WMError::WM_OK, window->Close());
 }
 
@@ -395,10 +402,11 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
 
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     activeWindows_.push_back(window);
-    Rect expect = Utils::GetDefaultFloatingRect(window);
+    Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
+    usleep(WAIT_SYANC_US);
     // init tile window rects and get max tile window num
-    Utils::InitTileWindowRects(window);
+    Utils::InitTileWindowRects(window, false);
     uint32_t maxTileNum = Utils::GetMaxTileWinNum();
     if (maxTileNum < 1) {
         return;
@@ -460,8 +468,9 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     activeWindows_.push_back(window);
     ASSERT_EQ(WMError::WM_OK, window->Show());
+    usleep(WAIT_SYANC_US);
     // init tile window rects and get max tile window num
-    Utils::InitTileWindowRects(window);
+    Utils::InitTileWindowRects(window, false);
     uint32_t maxTileNum = Utils::GetMaxTileWinNum();
     if (maxTileNum < 1) {
         return;
@@ -521,7 +530,7 @@ HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     activeWindows_.push_back(window);
-    Rect expect = Utils::GetDefaultFloatingRect(window);
+    Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     usleep(WAIT_SYANC_US);
     ASSERT_TRUE(Utils::RectEqualTo(window, expect));
@@ -548,7 +557,7 @@ HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     activeWindows_.push_back(window);
-    Rect expect = Utils::GetDefaultFloatingRect(window);
+    Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     usleep(WAIT_SYANC_US);
     ASSERT_TRUE(Utils::RectEqualTo(window, expect));

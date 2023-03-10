@@ -71,11 +71,11 @@ public:
     static bool InitSplitRects();
     static void UpdateSplitRects(const sptr<Window>& window);
     static bool RectEqualToRect(const Rect& l, const Rect& r);
-    static Rect GetDefaultFloatingRect(const sptr<Window>& window);
+    static Rect GetDefaultFloatingRect(const sptr<Window>& window, bool avoid);
     static Rect CalcLimitedRect(const Rect& rect, float virtualPixelRatio);
     static Rect GetDecorateRect(const Rect& rect, float virtualPixelRatio);
     static Rect GetFloatingLimitedRect(const Rect& rect, float virtualPixelRatio);
-    static void InitTileWindowRects(const sptr<Window>& window);
+    static void InitTileWindowRects(const sptr<Window>& window, bool avoid);
     static float GetVirtualPixelRatio(DisplayId displayId);
     static std::shared_ptr<MMI::PointerEvent> CreatePointerEvent(int32_t posX, int32_t posY, uint32_t pointerId,
         int32_t pointerAction);
