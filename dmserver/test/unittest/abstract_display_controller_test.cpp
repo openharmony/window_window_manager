@@ -209,13 +209,13 @@ HWTEST_F(AbstractDisplayControllerTest, ProcessDisplayRotationChange01, Function
 {
     sptr<AbstractScreen> absScreen = new AbstractScreen(absScreenController_, name_, 1, 1);
     EXPECT_EQ(nullptr, absDisplayController_->GetAbstractDisplayByAbsScreen(absScreen));
-    absDisplayController_->ProcessDisplayRotationChange(absScreen);
+    absDisplayController_->ProcessDisplayRotationChange(absScreen, DisplayStateChangeType::UPDATE_ROTATION);
 
     auto display = absDisplayController_->GetAbstractDisplayByAbsScreen(absScreen_);
     EXPECT_NE(nullptr, display);
     display->rotation_ = absScreen_->rotation_;
     EXPECT_EQ(false, display->RequestRotation(absScreen->rotation_));
-    absDisplayController_->ProcessDisplayRotationChange(absScreen_);
+    absDisplayController_->ProcessDisplayRotationChange(absScreen_, DisplayStateChangeType::UPDATE_ROTATION);
 }
 
 /**
@@ -295,29 +295,29 @@ HWTEST_F(AbstractDisplayControllerTest, GetAbstractDisplayByAbsScreen01, Functio
  */
 HWTEST_F(AbstractDisplayControllerTest, ProcessDisplayUpdateOrientation01, Function | SmallTest | Level3)
 {
-    absDisplayController_->ProcessDisplayUpdateOrientation(absScreen_);
+    absDisplayController_->ProcessDisplayUpdateOrientation(absScreen_, DisplayStateChangeType::UPDATE_ROTATION);
 
     auto oriId = absScreen_->groupDmsId_;
     absScreen_->groupDmsId_ = SCREEN_ID_INVALID;
     sptr<AbstractScreenGroup> group = absScreen_->GetGroup();
     EXPECT_EQ(nullptr, group);
-    absDisplayController_->ProcessDisplayUpdateOrientation(absScreen_);
+    absDisplayController_->ProcessDisplayUpdateOrientation(absScreen_, DisplayStateChangeType::UPDATE_ROTATION);
     absScreen_->groupDmsId_ = oriId;
 
     group = absScreen_->GetGroup();
     EXPECT_NE(nullptr, group);
     absDisplayController_->abstractDisplayMap_.clear();
     group->combination_ = ScreenCombination::SCREEN_ALONE;
-    absDisplayController_->ProcessDisplayUpdateOrientation(absScreen_);
+    absDisplayController_->ProcessDisplayUpdateOrientation(absScreen_, DisplayStateChangeType::UPDATE_ROTATION);
 
     group->combination_ = ScreenCombination::SCREEN_EXPAND;
-    absDisplayController_->ProcessDisplayUpdateOrientation(absScreen_);
+    absDisplayController_->ProcessDisplayUpdateOrientation(absScreen_, DisplayStateChangeType::UPDATE_ROTATION);
 
     group->combination_ = ScreenCombination::SCREEN_MIRROR;
-    absDisplayController_->ProcessDisplayUpdateOrientation(absScreen_);
+    absDisplayController_->ProcessDisplayUpdateOrientation(absScreen_, DisplayStateChangeType::UPDATE_ROTATION);
 
     group->combination_ = static_cast<ScreenCombination>(100); // 100 is test data
-    absDisplayController_->ProcessDisplayUpdateOrientation(absScreen_);
+    absDisplayController_->ProcessDisplayUpdateOrientation(absScreen_, DisplayStateChangeType::UPDATE_ROTATION);
 }
 
 /**
