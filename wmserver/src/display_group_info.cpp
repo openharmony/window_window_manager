@@ -87,6 +87,15 @@ void DisplayGroupInfo::SetDisplayOrientation(DisplayId displayId, DisplayOrienta
     displayInfosMap_[displayId]->SetDisplayOrientation(orientation);
 }
 
+void DisplayGroupInfo::SetDisplayStateChangeType(DisplayId displayId, DisplayStateChangeType changeType)
+{
+    if (displayInfosMap_.find(displayId) == displayInfosMap_.end()) {
+        WLOGFE("current display is not exits, displayId: %{public}" PRIu64"", displayId);
+        return;
+    }
+    displayInfosMap_[displayId]->SetDisplayStateChangeType(changeType);
+}
+
 void DisplayGroupInfo::SetDisplayVirtualPixelRatio(DisplayId displayId, float vpr)
 {
     if (displayInfosMap_.find(displayId) == displayInfosMap_.end()) {
@@ -122,6 +131,16 @@ Rotation DisplayGroupInfo::GetDisplayRotation(DisplayId displayId) const
         rotation = displayInfo->GetRotation();
     }
     return rotation;
+}
+
+DisplayStateChangeType DisplayGroupInfo::GetDisplayStateChangeType(DisplayId displayId) const
+{
+    DisplayStateChangeType type = DisplayStateChangeType::UNKNOWN;
+    if (displayInfosMap_.find(displayId) != displayInfosMap_.end()) {
+        auto& displayInfo = displayInfosMap_[displayId];
+        type = displayInfo->GetDisplayStateChangeType();
+    }
+    return type;
 }
 
 float DisplayGroupInfo::GetDisplayVirtualPixelRatio(DisplayId displayId) const

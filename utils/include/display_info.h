@@ -22,6 +22,7 @@
 #include "class_var_definition.h"
 #include "display.h"
 #include "dm_common.h"
+#include "display_change_listener.h"
 #include "noncopyable.h"
 
 namespace OHOS::Rosen {
@@ -55,6 +56,8 @@ public:
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(bool, WaterfallDisplayCompressionStatus, waterfallDisplayCompressionStatus, false);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(DisplayOrientation, DisplayOrientation, displayOrientation,
         DisplayOrientation::UNKNOWN);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(DisplayStateChangeType, DisplayStateChangeType, displayStateChangeType,
+        DisplayStateChangeType::UNKNOWN);
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_DISPLAY_INFO_H

@@ -269,19 +269,24 @@ void AbstractDisplayController::OnAbstractScreenChange(sptr<AbstractScreen> absS
     }
     WLOGI("screen changes. id:%{public}" PRIu64"", absScreen->dmsId_);
     if (event == DisplayChangeEvent::UPDATE_ORIENTATION) {
-        ProcessDisplayUpdateOrientation(absScreen);
+        ProcessDisplayUpdateOrientation(absScreen, DisplayStateChangeType::UPDATE_ROTATION);
+    } else if (event == DisplayChangeEvent::UPDATE_ORIENTATION_FROM_WINDOW) {
+        ProcessDisplayUpdateOrientation(absScreen, DisplayStateChangeType::UPDATE_ROTATION_FROM_WINDOW);
     } else if (event == DisplayChangeEvent::DISPLAY_SIZE_CHANGED) {
         ProcessDisplaySizeChange(absScreen);
     } else if (event == DisplayChangeEvent::DISPLAY_VIRTUAL_PIXEL_RATIO_CHANGED) {
         ProcessVirtualPixelRatioChange(absScreen);
     } else if (event == DisplayChangeEvent::UPDATE_ROTATION) {
-        ProcessDisplayRotationChange(absScreen);
+        ProcessDisplayRotationChange(absScreen, DisplayStateChangeType::UPDATE_ROTATION);
+    } else if (event == DisplayChangeEvent::UPDATE_ROTATION_FROM_WINDOW) {
+        ProcessDisplayRotationChange(absScreen, DisplayStateChangeType::UPDATE_ROTATION_FROM_WINDOW);
     } else {
         WLOGE("unknown screen change event. id:%{public}" PRIu64" event %{public}u", absScreen->dmsId_, event);
     }
 }
 
-void AbstractDisplayController::ProcessDisplayRotationChange(sptr<AbstractScreen> absScreen)
+void AbstractDisplayController::ProcessDisplayRotationChange(sptr<AbstractScreen> absScreen,
+    DisplayStateChangeType type)
 {
     sptr<AbstractDisplay> abstractDisplay = GetAbstractDisplayByAbsScreen(absScreen);
     if (abstractDisplay == nullptr) {
@@ -291,7 +296,7 @@ void AbstractDisplayController::ProcessDisplayRotationChange(sptr<AbstractScreen
         abstractDisplay->SetDisplayOrientation(
             ScreenRotationController::ConvertRotationToDisplayOrientation(absScreen->rotation_));
         // Notify rotation event to WMS
-        SetDisplayStateChangeListener(abstractDisplay, DisplayStateChangeType::UPDATE_ROTATION);
+        SetDisplayStateChangeListener(abstractDisplay, type);
     }
     sptr<DisplayInfo> displayInfo = abstractDisplay->ConvertToDisplayInfo();
     DisplayManagerAgentController::GetInstance().OnDisplayChange(displayInfo,
@@ -385,7 +390,8 @@ sptr<AbstractDisplay> AbstractDisplayController::GetAbstractDisplayByAbsScreen(s
     return abstractDisplay;
 }
 
-void AbstractDisplayController::ProcessDisplayUpdateOrientation(sptr<AbstractScreen> absScreen)
+void AbstractDisplayController::ProcessDisplayUpdateOrientation(sptr<AbstractScreen> absScreen,
+    DisplayStateChangeType type)
 {
     sptr<AbstractDisplay> abstractDisplay = nullptr;
     {
@@ -423,7 +429,7 @@ void AbstractDisplayController::ProcessDisplayUpdateOrientation(sptr<AbstractScr
     abstractDisplay->SetOrientation(absScreen->orientation_);
     if (abstractDisplay->RequestRotation(absScreen->rotation_)) {
         // Notify rotation event to WMS
-        SetDisplayStateChangeListener(abstractDisplay, DisplayStateChangeType::UPDATE_ROTATION);
+        SetDisplayStateChangeListener(abstractDisplay, type);
     }
 }
 
