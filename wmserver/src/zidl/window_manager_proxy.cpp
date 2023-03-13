@@ -785,5 +785,36 @@ void WindowManagerProxy::OffWindowZoom()
         WLOGFE("SendRequest failed");
     }
 }
+
+std::shared_ptr<Media::PixelMap> WindowManagerProxy::GetSnapshot(int32_t windowId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    Media::InitializationOptions opts;
+    opts.size.width = 200;  // 200：default width
+    opts.size.height = 300; // 300：default height
+    std::shared_ptr<Media::PixelMap> pixelMap(Media::PixelMap::Create(opts).release());
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return pixelMap;
+    }
+    if (!data.WriteUint32(windowId)) {
+        WLOGFE("Write windowId failed");
+        return pixelMap;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_SNAPSHOT),
+        data, reply, option) != ERR_NONE) {
+        return pixelMap;
+    }
+
+    std::shared_ptr<Media::PixelMap> map(reply.ReadParcelable<Media::PixelMap>());
+    if (map == nullptr) {
+        return pixelMap;
+    }
+    return map;
+}
+
 } // namespace Rosen
 } // namespace OHOS
