@@ -97,9 +97,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow01, Function | MediumTest | Level2)
     sleep(1);
 
     subWindow->Destroy();
-    sleep(1);
     scene->GoDestroy();
-    sleep(1);
 }
 
 /**
@@ -124,9 +122,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow02, Function | MediumTest | Level2)
     sleep(1);
 
     subWindow->Destroy();
-    sleep(1);
     scene->GoDestroy();
-    sleep(1);
 }
 
 /**
@@ -151,9 +147,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow03, Function | MediumTest | Level2)
     sleep(1);
 
     subWindow->Destroy();
-    sleep(1);
     scene->GoDestroy();
-    sleep(1);
 }
 
 /**
@@ -178,9 +172,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow04, Function | MediumTest | Level2)
     sleep(1);
 
     subWindow->Destroy();
-    sleep(1);
     scene->GoDestroy();
-    sleep(1);
 }
 
 /**
@@ -210,11 +202,8 @@ HWTEST_F(WindowSubWindowTest, SubWindow05, Function | MediumTest | Level3)
     sleep(1);
 
     subWindow->Destroy();
-    sleep(1);
     subWindow2->Destroy();
-    sleep(1);
     scene->GoDestroy();
-    sleep(1);
 }
 
 /**
@@ -243,11 +232,8 @@ HWTEST_F(WindowSubWindowTest, SubWindow06, Function | MediumTest | Level3)
     sleep(1);
 
     subWindow0->Destroy();
-    sleep(1);
     subWindow1->Destroy();
-    sleep(1);
     scene->GoDestroy();
-    sleep(1);
 }
 
 /**
@@ -272,9 +258,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow07, Function | MediumTest | Level4)
     sleep(1);
 
     subWindow->Destroy();
-    sleep(1);
     scene->GoDestroy();
-    sleep(1);
 }
 
 /**
@@ -318,9 +302,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow09, Function | MediumTest | Level2)
     ASSERT_EQ(WMError::WM_OK, subWindow->Destroy());
 
     subWindow->Destroy();
-    sleep(1);
     scene->GoDestroy();
-    sleep(1);
 }
 
 /**
@@ -346,7 +328,6 @@ HWTEST_F(WindowSubWindowTest, SubWindow10, Function | MediumTest | Level2)
     ASSERT_EQ(WMError::WM_OK, subWindow->Destroy());
 
     scene->GoDestroy();
-    sleep(1);
 }
 
 /**
@@ -390,17 +371,11 @@ HWTEST_F(WindowSubWindowTest, SubWindow11, Function | MediumTest | Level3)
     sleep(1);
 
     subWindow0->Destroy();
-    sleep(1);
     subWindow1->Destroy();
-    sleep(1);
     subWindow2->Destroy();
-    sleep(1);
     subWindow3->Destroy();
-    sleep(1);
     subWindow4->Destroy();
-    sleep(1);
     scene->GoDestroy();
-    sleep(1);
 }
 
 /**
@@ -426,9 +401,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow12, Function | MediumTest | Level3)
     sleep(1);
 
     subWindow0->Destroy();
-    sleep(1);
     scene->GoDestroy();
-    sleep(1);
 }
 
 /**
@@ -446,19 +419,16 @@ HWTEST_F(WindowSubWindowTest, SubWindow13, Function | MediumTest | Level3)
     ASSERT_NE(nullptr, subWindow0);
     ASSERT_EQ(WMError::WM_OK, subWindow0->Show());
     ASSERT_EQ(WMError::WM_OK, subWindow0->Destroy());
-    sleep(1);
 
 
     sptr<Window> subWindow1 = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, 0, "sub1");
     ASSERT_NE(nullptr, subWindow1);
     ASSERT_EQ(WMError::WM_OK, subWindow1->Show());
     ASSERT_EQ(WMError::WM_OK, subWindow1->Destroy());
-    sleep(1);
 
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
     sleep(1);
     scene->GoDestroy();
-    sleep(1);
 }
 } // namespace Rosen
 } // namespace OHOS

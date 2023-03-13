@@ -25,8 +25,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-constexpr uint32_t SLEEP_SEC = 1;  // 1s
-
 class WindowDialogWindowTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -97,9 +95,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow01, Function | MediumTest | Level2)
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
 
     dialogWindow->Destroy();
-    sleep(SLEEP_SEC);
     scene->GoDestroy();
-    sleep(SLEEP_SEC);
 }
 
 /**
@@ -126,9 +122,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow02, Function | MediumTest | Level2)
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
 
     dialogWindow0->Destroy();
-    sleep(SLEEP_SEC);
     scene->GoDestroy();
-    sleep(SLEEP_SEC);
 }
 
 /**
@@ -154,7 +148,6 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow03, Function | MediumTest | Level2)
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
 
     dialogWindow0->Destroy();
-    sleep(SLEEP_SEC);
     scene->GoDestroy();
 }
 
@@ -180,7 +173,6 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow04, Function | MediumTest | Level2)
     ASSERT_NE(nullptr, dialogWindow1);
     ASSERT_EQ(WMError::WM_OK, dialogWindow1->Show());
     ASSERT_EQ(WMError::WM_OK, dialogWindow1->Destroy());
-    sleep(SLEEP_SEC);
 
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
     scene->GoDestroy();
@@ -207,7 +199,6 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow05, Function | MediumTest | Level2)
     ASSERT_EQ(WMError::WM_OK, dialogWindow->Hide());
 
     dialogWindow->Destroy();
-    sleep(SLEEP_SEC);
     scene->GoDestroy();
 }
 
@@ -232,10 +223,8 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow06, Function | MediumTest | Level2)
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
 
     ASSERT_EQ(WMError::WM_OK, dialogWindow->Destroy());
-    sleep(SLEEP_SEC);
 
     dialogWindow->Destroy();
-    sleep(SLEEP_SEC);
     scene->GoDestroy();
 }
 
@@ -258,9 +247,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow07, Function | MediumTest | Level2)
 
     sptr<Window> mainWindow = scene->GetMainWindow();
     ASSERT_EQ(WMError::WM_OK, mainWindow->Destroy());
-    sleep(SLEEP_SEC);
     ASSERT_EQ(WMError::WM_OK, dialogWindow->Destroy());
-    sleep(SLEEP_SEC);
 
     scene->GoDestroy();
 }

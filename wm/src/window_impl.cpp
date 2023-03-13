@@ -134,10 +134,6 @@ WindowImpl::~WindowImpl()
     WLOGI("windowName: %{public}s, windowId: %{public}d, deConstructorCnt: %{public}d, surfaceNode:%{public}d",
         GetWindowName().c_str(), GetWindowId(), ++deConstructorCnt, static_cast<uint32_t>(surfaceNode_.use_count()));
     Destroy(true, false);
-    if (surfaceNode_ != nullptr) {
-        surfaceNode_ = nullptr;
-        RSTransaction::FlushImplicitTransaction();
-    }
 }
 
 sptr<Window> WindowImpl::Find(const std::string& name)
