@@ -25,7 +25,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowAnimationTest"};
-    constexpr uint32_t SLEEP_SEC = 1;  // 1s
 }
 
 using Utils = WindowTestUtils;
@@ -114,7 +113,6 @@ HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest01, Function | Me
     usleep(500000); // 500000us = 0.5s
     ASSERT_TRUE(trans_ == window->GetTransform());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
-    sleep(SLEEP_SEC);
 }
 
 /**
@@ -134,7 +132,6 @@ HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest02, Function | Me
     usleep(500000); // 500000us = 0.5s
     ASSERT_TRUE(defaultTrans_ == window->GetTransform());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
-    sleep(SLEEP_SEC);
 }
 
 /**
@@ -151,7 +148,6 @@ HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest03, Function | Me
     usleep(500000); // 500000us = 0.5s
     ASSERT_TRUE(defaultTrans_ == window->GetTransform());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
-    sleep(SLEEP_SEC);
 }
 
 /**
@@ -172,7 +168,6 @@ HWTEST_F(WindowAnimationTransitionTest, AnimationTransitionTest04, Function | Me
     ASSERT_EQ(WMError::WM_OK, window->Hide());
     ASSERT_TRUE(defaultTrans_ == window->GetTransform());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
-    sleep(SLEEP_SEC);
 }
 }
 } // namespace Rosen

@@ -62,7 +62,6 @@ void WindowRaiseToAppTopTest::TearDown()
 {
     while (!activeWindows_.empty()) {
         ASSERT_EQ(WMError::WM_OK, activeWindows_.back()->Destroy());
-        sleep(TEST_SLEEP_S);
         activeWindows_.pop_back();
     }
 }
