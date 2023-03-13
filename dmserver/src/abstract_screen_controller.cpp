@@ -747,6 +747,20 @@ void AbstractScreenController::SetScreenRotateAnimation(
     }
 }
 
+void AbstractScreenController::OpenRotationSyncTransaction()
+{
+     // Before open transaction, it must flush first.
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (!transactionProxy) {
+        return;
+    }
+    transactionProxy->FlushImplicitTransaction();
+    auto syncTransactionController = RSSyncTransactionController::GetInstance();
+    if (syncTransactionController) {
+        syncTransactionController->OpenSyncTransaction();
+    }
+}
+
 bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationAfter,
     bool isFromWindow, bool withAnimation)
 {
@@ -764,10 +778,7 @@ bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationA
             WLOGE("Convert to RsScreenId fail. screenId: %{public}" PRIu64"", screenId);
             return false;
         }
-        auto syncTransactionController = RSSyncTransactionController::GetInstance();
-        if (syncTransactionController) {
-            syncTransactionController->OpenSyncTransaction();
-        }
+        OpenRotationSyncTransaction();
         SetScreenRotateAnimation(screen, screenId, rotationAfter, withAnimation);
         screen->rotation_ = rotationAfter;
     } else {
