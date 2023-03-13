@@ -84,6 +84,15 @@ WMError RemoteAnimation::SetWindowAnimationController(const sptr<RSIWindowAnimat
     }
 
     windowAnimationController_ = controller;
+    auto winRoot = windowRoot_.promote();
+    if (winRoot) {
+        auto wallpaperNode = winRoot->FindWallpaperWindow();
+        if (wallpaperNode) {
+            NotifyAnimationUpdateWallpaper(wallpaperNode);
+        } else {
+            WLOGFW("Cannot find wallpaper window!");
+        }
+    }
     return WMError::WM_OK;
 }
 

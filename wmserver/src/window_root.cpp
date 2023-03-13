@@ -1199,6 +1199,19 @@ WMError WindowRoot::NotifyDesktopUnfrozen()
     return WMError::WM_ERROR_INVALID_OPERATION;
 }
 
+sptr<WindowNode> WindowRoot::FindWallpaperWindow()
+{
+    auto iter = std::find_if(windowNodeMap_.begin(), windowNodeMap_.end(),
+        [](const std::map<uint32_t, sptr<WindowNode>>::value_type& pair) {
+            return pair.second->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER;
+        });
+    if (iter == windowNodeMap_.end()) {
+        WLOGI("cannot find windowNode");
+        return nullptr;
+    }
+    return iter->second;
+}
+
 WMError WindowRoot::RaiseZOrderForAppWindow(sptr<WindowNode>& node)
 {
     if (node == nullptr) {
