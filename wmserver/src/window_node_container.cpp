@@ -440,7 +440,49 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node, bool fromA
     if (node->GetWindowProperty()->GetPrivacyMode()) {
         UpdatePrivateStateAndNotify();
     }
+
+    HandleRemoveWindowDisplayOrientation(node, fromAnimation);
     return WMError::WM_OK;
+}
+
+void WindowNodeContainer::HandleRemoveWindowDisplayOrientation(sptr<WindowNode>& node, bool fromAnimation)
+{
+    if (!FIX_ORIENTATION_ENABLE) {
+        auto nextRotatableWindow = GetNextRotatableWindow(node->GetWindowId());
+        if (nextRotatableWindow != nullptr) {
+            SetDisplayOrientationFromWindow(nextRotatableWindow, true);
+        }
+        return;
+    }
+    if (!fromAnimation) {
+        if (node->stateMachine_.IsHideAnimationPlaying()) {
+            WLOGFD("[FixOrientation] removing window is playing hide animation, do not update display orientation");
+            return;
+        }
+        auto nextRotatableWindow = GetNextRotatableWindow(node->GetWindowId());
+        if (nextRotatableWindow == nullptr) {
+            WLOGFD("[FixOrientation] no next window, do not update display orientation");
+            return;
+        }
+        WLOGFD("[FixOrientation] nexi rotatable window: %{public}u", nextRotatableWindow->GetWindowId());
+        if (nextRotatableWindow->stateMachine_.IsShowAnimationPlaying()) {
+            WLOGFD("[FixOrientation] next window is playing show animation, do not update display orientation");
+            return;
+        }
+        if (WmsUtils::IsFixedOrientation(nextRotatableWindow->GetRequestedOrientation(),
+            nextRotatableWindow->GetWindowMode(), nextRotatableWindow->GetWindowFlags())) {
+            WLOGFI("[FixOrientation] next rotatable window is fixed, do not animation");
+            SetDisplayOrientationFromWindow(nextRotatableWindow, false);
+        } else {
+            SetDisplayOrientationFromWindow(nextRotatableWindow, true);
+        }
+    }
+}
+
+void WindowNodeContainer::SetDisplayOrientationFromWindow(sptr<WindowNode>& node, bool withAnimation)
+{
+    DisplayManagerServiceInner::GetInstance().SetOrientationFromWindow(node->GetDisplayId(),
+        node->GetRequestedOrientation(), withAnimation);
 }
 
 void WindowNodeContainer::UpdatePrivateStateAndNotify()

@@ -523,7 +523,7 @@ WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<Window
             WLOGFD("[FixOrientation] window is playing show animation, do not update display orientation");
             return WMError::WM_OK;
         }
-        SetDisplayOrientationFromWindow(node, true);
+        container->SetDisplayOrientationFromWindow(node, true);
     }
     return WMError::WM_OK;
 }
@@ -725,34 +725,6 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId, bool fromAnimation)
         }
         HandleKeepScreenOn(windowId, false);
     }
-    if (!FIX_ORIENTATION_ENABLE) {
-        auto nextRotatableWindow = container->GetNextRotatableWindow(windowId);
-        if (nextRotatableWindow != nullptr) {
-           SetDisplayOrientationFromWindow(nextRotatableWindow, true);
-        }
-    } else if (!fromAnimation) {
-        if (node->stateMachine_.IsHideAnimationPlaying()) {
-            WLOGFD("[FixOrientation] removing window is playing hide animation, do not update display orientation");
-            return res;
-        }
-        auto nextRotatableWindow = container->GetNextRotatableWindow(windowId);
-        if (nextRotatableWindow == nullptr) {
-            WLOGFD("[FixOrientation] no next window, do not update display orientation");
-            return res;
-        }
-        WLOGFD("[FixOrientation] nexi rotatable window: %{public}u", nextRotatableWindow->GetWindowId());
-        if (nextRotatableWindow->stateMachine_.IsShowAnimationPlaying()) {
-            WLOGFD("[FixOrientation] next window is playing show animation, do not update display orientation");
-            return res;
-        }
-        if (WmsUtils::IsFixedOrientation(nextRotatableWindow->GetRequestedOrientation(),
-            nextRotatableWindow->GetWindowMode(), node->GetWindowFlags())) {
-            WLOGFI("[FixOrientation] next rotatable window is fixed, do not animation");
-            SetDisplayOrientationFromWindow(nextRotatableWindow, false);
-        } else {
-            SetDisplayOrientationFromWindow(nextRotatableWindow, true);
-        }
-    }
     return res;
 }
 
@@ -770,14 +742,8 @@ void WindowRoot::UpdateDisplayOrientationWhenHideWindow(sptr<WindowNode>& node)
     auto nextRotatableWindow = container->GetNextRotatableWindow(node->GetWindowId());
     if (nextRotatableWindow != nullptr) {
         WLOGFD("[FixOrientation] next rotatable window: %{public}u", nextRotatableWindow->GetWindowId());
-        SetDisplayOrientationFromWindow(nextRotatableWindow, false);
+        container->SetDisplayOrientationFromWindow(nextRotatableWindow, false);
     }
-}
-
-void WindowRoot::SetDisplayOrientationFromWindow(sptr<WindowNode>& node, bool withAnimation)
-{
-    DisplayManagerServiceInner::GetInstance().SetOrientationFromWindow(node->GetDisplayId(),
-        node->GetRequestedOrientation(), withAnimation);
 }
 
 WMError WindowRoot::UpdateWindowNode(uint32_t windowId, WindowUpdateReason reason)

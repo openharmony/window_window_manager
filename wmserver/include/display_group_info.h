@@ -35,11 +35,13 @@ public:
 
     void SetDisplayRotation(DisplayId displayId, Rotation rotation);
     void SetDisplayOrientation(DisplayId displayId, DisplayOrientation orientation);
+    void SetDisplayStateChangeType(DisplayId displayId, DisplayStateChangeType changeType);
     void SetDisplayVirtualPixelRatio(DisplayId displayId, float vpr);
     void SetDisplayRect(DisplayId displayId, Rect displayRect);
     void SetDefaultDisplayId(DisplayId defaultDisplayId);
 
     Rotation GetDisplayRotation(DisplayId displayId) const;
+    DisplayStateChangeType GetDisplayStateChangeType(DisplayId displayId) const;
     float GetDisplayVirtualPixelRatio(DisplayId displayId) const;
     std::map<DisplayId, Rect> GetAllDisplayRects() const;
     Rect GetDisplayRect(DisplayId displayId) const;

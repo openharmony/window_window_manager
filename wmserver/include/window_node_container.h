@@ -126,6 +126,7 @@ public:
     void UpdatePrivateStateAndNotify();
     static void SetConfigMainFloatingWindowAbove(bool isAbove);
     static void SetMaxMainFloatingWindowNumber(uint32_t maxNumber);
+    void SetDisplayOrientationFromWindow(sptr<WindowNode>& node, bool withAnimation);
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
     sptr<WindowNode> FindRoot(WindowType type) const;
@@ -170,6 +171,7 @@ private:
     void ResetWindowZOrderPriorityWhenSetMode(sptr<WindowNode>& node,
         const WindowMode& dstMode, const WindowMode& srcMode);
     void ResetAllMainFloatingWindowZOrder(sptr<WindowNode>& rootNode);
+    void HandleRemoveWindowDisplayOrientation(sptr<WindowNode>& node, bool fromAnimation);
 
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     uint32_t brightnessWindow_ = INVALID_WINDOW_ID;

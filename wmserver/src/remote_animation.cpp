@@ -314,7 +314,7 @@ void RemoteAnimation::GetExpectRect(const sptr<WindowNode>& dstNode, const sptr<
             auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(dstNode->GetDisplayId());
             if (displayInfo && WmsUtils::IsExpectedRotatableWindow(dstNode->GetRequestedOrientation(),
                 displayInfo->GetDisplayOrientation(), dstNode->GetWindowFlags())) {
-                WLOGFD("[FixOrientation] the window is expected rotatable, pre-calculate bounds");
+                WLOGFD("[FixOrientation] window %{public}u expected rotatable, pre-cal bounds", dstNode->GetWindowId());
                 boundsRect = RectF(avoidRect.posX_, avoidRect.posY_, avoidRect.height_, avoidRect.width_);
             }
             dstTarget->windowBounds_.rect_ = boundsRect;

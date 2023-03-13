@@ -135,7 +135,6 @@ private:
         std::shared_ptr<RSOcclusionData> occlusionData);
     bool CheckAddingModeAndSize(sptr<WindowNode>& node, const sptr<WindowNodeContainer>& container);
     WMError BindDialogToParent(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
-    void SetDisplayOrientationFromWindow(sptr<WindowNode>& node, bool withAnimation);
     void CheckAndNotifyWaterMarkChangedResult();
 
     std::map<uint32_t, sptr<WindowNode>> windowNodeMap_;

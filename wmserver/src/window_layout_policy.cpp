@@ -708,9 +708,12 @@ void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const
         case WindowSizeChangeReason::ROTATION: {
             if (WmsUtils::IsFixedOrientation(node->GetRequestedOrientation(),
                 node->GetWindowMode(), node->GetWindowFlags())) {
-                WLOGI("[FixOrientation] winNode %{public}u orientation, skip animation", node->GetWindowId());
-                SetBoundsFunc();
-                return;
+                auto disInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(node->GetDisplayId());
+                if (disInfo && disInfo->GetDisplayStateChangeType() != DisplayStateChangeType::UPDATE_ROTATION) {
+                    WLOGI("[FixOrientation] winNode %{public}u orientation, skip animation", node->GetWindowId());
+                    SetBoundsFunc();
+                    return;
+                }
             }
             const RSAnimationTimingProtocol timingProtocol(600); // animation time
             const RSAnimationTimingCurve curve_ = RSAnimationTimingCurve::CreateCubicCurve(
