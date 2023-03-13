@@ -44,6 +44,7 @@ public:
     sptr<WindowNode> GetWindowNode(uint32_t windowId) const;
     void GetBackgroundNodesByScreenId(ScreenId screenGroupId, std::vector<sptr<WindowNode>>& windowNodes);
 
+    sptr<WindowNode> FindWallpaperWindow();
     WMError SaveWindow(const sptr<WindowNode>& node);
     void AddDeathRecipient(sptr<WindowNode> node);
     sptr<WindowNode> FindWindowNodeWithToken(const sptr<IRemoteObject>& token) const;
