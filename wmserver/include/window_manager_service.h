@@ -105,6 +105,7 @@ public:
     WMError SetWindowLayoutMode(WindowLayoutMode mode) override;
     WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
         bool isAsyncTask = false) override;
+    WMError SetWindowGravity(uint32_t windowId, WindowGravity gravity, uint32_t percent) override;
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     WmErrorCode RaiseToAppTop(uint32_t windowId) override;

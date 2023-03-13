@@ -411,5 +411,15 @@ float WindowNode::GetAspectRatio() const
 {
     return property_->GetAspectRatio();
 }
+
+void WindowNode::SetWindowGravity(WindowGravity gravity, uint32_t percent)
+{
+    property_->SetWindowGravity(gravity, percent);
+}
+
+void WindowNode::GetWindowGravity(WindowGravity& gravity, uint32_t& percent) const
+{
+    property_->GetWindowGravity(gravity, percent);
+}
 } // namespace Rosen
 } // namespace OHOS

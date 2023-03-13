@@ -74,6 +74,10 @@ WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeActio
 {
     return WMError::WM_OK;
 };
+WMError SetWindowGravity(uint32_t windowId, WindowGravity gravity, uint32_t percent)
+{
+    return WMError::WM_OK;
+};
 WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {

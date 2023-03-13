@@ -1461,6 +1461,14 @@ WMError WindowImpl::Resize(uint32_t width, uint32_t height)
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
 }
 
+WMError WindowImpl::SetWindowGravity(WindowGravity gravity, uint32_t percent)
+{
+    WLOGFD("id:%{public}d SetWindowGravity %{public}u %{public}u",
+            property_->GetWindowId(), gravity, percent);
+
+    return SingletonContainer::Get<WindowAdapter>().SetWindowGravity(property_->GetWindowId(), gravity, percent);
+}
+
 WMError WindowImpl::SetKeepScreenOn(bool keepScreenOn)
 {
     if (!IsWindowValid()) {

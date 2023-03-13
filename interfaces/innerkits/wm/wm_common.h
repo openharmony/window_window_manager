@@ -232,6 +232,11 @@ enum class WindowTag : uint32_t {
     SYSTEM_WINDOW = 2,
 };
 
+enum class WindowGravity : uint32_t {
+    WINDOW_GRAVITY_FLOAT = 0,
+    WINDOW_GRAVITY_BOTTOM,
+};
+
 struct PointInfo {
     int32_t x;
     int32_t y;
