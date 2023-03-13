@@ -1117,6 +1117,11 @@ WMError WindowManagerService::GetVisibilityWindowInfo(std::vector<sptr<WindowVis
     });
 }
 
+std::shared_ptr<Media::PixelMap> WindowManagerService::GetSnapshot(int32_t windowId)
+{
+    return nullptr;
+}
+
 WMError WindowManagerService::GetSystemConfig(SystemConfig& systemConfig)
 {
     systemConfig = systemConfig_;

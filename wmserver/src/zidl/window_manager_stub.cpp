@@ -274,6 +274,12 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             OffWindowZoom();
             break;
         }
+        case WindowManagerMessage::TRANS_ID_GET_SNAPSHOT: {
+            uint32_t windowId = data.ReadUint32();
+            std::shared_ptr<Media::PixelMap> pixelMap = GetSnapshot(windowId);
+            reply.WriteParcelable(pixelMap.get());
+            break;
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

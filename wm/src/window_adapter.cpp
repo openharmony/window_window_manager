@@ -297,5 +297,12 @@ void WindowAdapter::OffWindowZoom()
     INIT_PROXY_CHECK_RETURN();
     windowManagerServiceProxy_->OffWindowZoom();
 }
+
+std::shared_ptr<Media::PixelMap> WindowAdapter::GetSnapshot(int32_t windowId)
+{
+    INIT_PROXY_CHECK_RETURN(nullptr);
+    return windowManagerServiceProxy_->GetSnapshot(windowId);
+}
+
 } // namespace Rosen
 } // namespace OHOS
