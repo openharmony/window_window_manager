@@ -465,6 +465,37 @@ WMError WindowManagerProxy::UpdateProperty(sptr<WindowProperty>& windowProperty,
     return static_cast<WMError>(ret);
 }
 
+WMError WindowManagerProxy::SetWindowGravity(uint32_t windowId, WindowGravity gravity, uint32_t percent)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(windowId)) {
+        WLOGFE("Write mainWinId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(gravity))) {
+        WLOGFE("Write mainWinId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(percent)) {
+        WLOGFE("Write mainWinId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_SET_WINDOW_GRAVITY),
+        data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
+}
+
 WMError WindowManagerProxy::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
 {
     MessageParcel data;

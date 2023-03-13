@@ -51,6 +51,7 @@ public:
     virtual WMError ToggleShownStateForAllAppWindows();
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode);
     virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action);
+    virtual WMError SetWindowGravity(uint32_t windowId, WindowGravity gravity, uint32_t percent);
     virtual WMError GetSystemConfig(SystemConfig& systemConfig);
     virtual WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones);
     virtual WMError UpdateRsTree(uint32_t windowId, bool isAdd);

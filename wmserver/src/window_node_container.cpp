@@ -754,6 +754,9 @@ bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId disp
         return true;
     }
 
+    WindowGravity windowGravity;
+    uint32_t percent;
+    node->GetWindowGravity(windowGravity, percent);
     if (node->EnableDefaultAnimation(animationPlayed)) {
         WLOGFD("Add node with animation");
         StartTraceArgs(HITRACE_TAG_WINDOW_MANAGER, "Animate(%u)", node->GetWindowId());
@@ -761,6 +764,7 @@ bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId disp
             animationConfig_.windowAnimationConfig_.animationTiming_.timingCurve_, updateRSTreeFunc);
         FinishTrace(HITRACE_TAG_WINDOW_MANAGER);
     } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
+        windowGravity != WindowGravity::WINDOW_GRAVITY_FLOAT &&
         !animationPlayed) { // add keyboard with animation
         auto timingProtocol = animationConfig_.keyboardAnimationConfig_.durationIn_;
         RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationConfig_.curve_, updateRSTreeFunc);
@@ -800,6 +804,9 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
         return true;
     }
 
+    WindowGravity windowGravity;
+    uint32_t percent;
+    node->GetWindowGravity(windowGravity, percent);
     if (node->EnableDefaultAnimation(animationPlayed)) {
         WLOGFD("remove with animation");
         StartTraceArgs(HITRACE_TAG_WINDOW_MANAGER, "Animate(%u)", node->GetWindowId());
@@ -816,6 +823,7 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
         });
         FinishTrace(HITRACE_TAG_WINDOW_MANAGER);
     } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
+        windowGravity != WindowGravity::WINDOW_GRAVITY_FLOAT &&
         !animationPlayed) { // remove keyboard with animation
         auto timingProtocol = animationConfig_.keyboardAnimationConfig_.durationOut_;
         RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationConfig_.curve_, updateRSTreeFunc);
