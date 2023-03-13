@@ -51,10 +51,10 @@ private:
     void OnAbstractScreenConnect(sptr<AbstractScreen> absScreen);
     void OnAbstractScreenDisconnect(sptr<AbstractScreen> absScreen);
     void OnAbstractScreenChange(sptr<AbstractScreen> absScreen, DisplayChangeEvent event);
-    void ProcessDisplayUpdateOrientation(sptr<AbstractScreen> absScreen);
+    void ProcessDisplayUpdateOrientation(sptr<AbstractScreen> absScreen, DisplayStateChangeType type);
     void ProcessDisplaySizeChange(sptr<AbstractScreen> absScreen);
     void ProcessVirtualPixelRatioChange(sptr<AbstractScreen> absScreen);
-    void ProcessDisplayRotationChange(sptr<AbstractScreen> absScreen);
+    void ProcessDisplayRotationChange(sptr<AbstractScreen> absScreen, DisplayStateChangeType type);
     void ProcessDisplayCompression(sptr<AbstractScreen> absScreen);
     sptr<AbstractDisplay> GetAbstractDisplayByAbsScreen(sptr<AbstractScreen> absScreen);
     void BindAloneScreenLocked(sptr<AbstractScreen> absScreen);

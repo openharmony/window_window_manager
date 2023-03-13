@@ -658,6 +658,7 @@ void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr
         case DisplayStateChangeType::DISPLAY_COMPRESS:
         case DisplayStateChangeType::SIZE_CHANGE:
         case DisplayStateChangeType::UPDATE_ROTATION:
+        case DisplayStateChangeType::UPDATE_ROTATION_FROM_WINDOW:
         case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
             ProcessDisplayChange(defaultDisplayId, displayInfo, displayInfoMap, type);
             /*
@@ -707,6 +708,7 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
             [[fallthrough]];
         case DisplayStateChangeType::SIZE_CHANGE:
         case DisplayStateChangeType::UPDATE_ROTATION:
+        case DisplayStateChangeType::UPDATE_ROTATION_FROM_WINDOW:
         case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
             windowRoot_->ProcessDisplayChange(defaultDisplayId, displayInfo, displayInfoMap, type);
             break;

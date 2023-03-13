@@ -119,8 +119,10 @@ void DisplayGroupController::ProcessCrossNodes(DisplayId defaultDisplayId, Displ
                 auto showingDisplays = node->GetShowingDisplays();
 
                 DisplayId newDisplayId;
-                if (type == DisplayStateChangeType::SIZE_CHANGE || type == DisplayStateChangeType::UPDATE_ROTATION ||
-                    type == DisplayStateChangeType::DISPLAY_COMPRESS) {
+                if (type == DisplayStateChangeType::SIZE_CHANGE ||
+                    type == DisplayStateChangeType::UPDATE_ROTATION ||
+                    type == DisplayStateChangeType::DISPLAY_COMPRESS ||
+                    type == DisplayStateChangeType::UPDATE_ROTATION_FROM_WINDOW) {
                     newDisplayId = node->GetDisplayId();
                 } else {
                     newDisplayId = defaultDisplayId;
@@ -487,9 +489,11 @@ void DisplayGroupController::ProcessDisplayChange(DisplayId defaultDisplayId, sp
     DisplayId displayId = displayInfo->GetDisplayId();
     WLOGI("display change, displayId: %{public}" PRIu64", type: %{public}d", displayId, type);
     switch (type) {
-        case DisplayStateChangeType::UPDATE_ROTATION: {
+        case DisplayStateChangeType::UPDATE_ROTATION:
+        case DisplayStateChangeType::UPDATE_ROTATION_FROM_WINDOW: {
             displayGroupInfo.SetDisplayRotation(displayId, displayInfo->GetRotation());
             displayGroupInfo.SetDisplayOrientation(displayId, displayInfo->GetDisplayOrientation());
+            displayGroupInfo.SetDisplayStateChangeType(displayId, type);
             [[fallthrough]];
         }
         case DisplayStateChangeType::DISPLAY_COMPRESS:
