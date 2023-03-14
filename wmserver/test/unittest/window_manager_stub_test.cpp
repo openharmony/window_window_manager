@@ -496,7 +496,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest20, Function | SmallTest | Level2
 }
 
 /**
- * @tc.name: OnRemoteRequest20
+ * @tc.name: OnRemoteRequest21
  * @tc.desc: test TRANS_ID_RAISE_WINDOW_Z_ORDER success
  * @tc.type: FUNC
  */
@@ -511,6 +511,24 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest21, Function | SmallTest | Level2
 
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_RAISE_WINDOW_Z_ORDER);
 
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OnRemoteRequest22
+ * @tc.desc: test TRANS_ID_RAISE_WINDOW_Z_ORDER success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest22, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(WindowManagerStub::GetDescriptor());
+    data.WriteBool(true);
+    uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_GESTURE_NAVIGATION_ENABLED);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }

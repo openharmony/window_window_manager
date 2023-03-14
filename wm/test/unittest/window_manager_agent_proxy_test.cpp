@@ -116,7 +116,6 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraFloatWindowStatus01, Function 
 {
     windowManagerAgentProxy_->UpdateCameraFloatWindowStatus(100, false);
 }
-
 }
 }
 }

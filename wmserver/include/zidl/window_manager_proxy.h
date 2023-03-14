@@ -67,6 +67,7 @@ public:
     void OffWindowZoom() override;
     WmErrorCode RaiseToAppTop(uint32_t windowId) override;
     std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t windowId) override;
+    WMError SetGestureNavigaionEnabled(bool enable) override;
 private:
     static inline BrokerDelegator<WindowManagerProxy> delegator_;
 };

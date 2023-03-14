@@ -34,6 +34,7 @@ public:
     void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& visibilityInfos) override;
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) override;
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark) override;
+    void NotifyGestureNavigationEnabledResult(bool enable) override;
 
 private:
     static inline BrokerDelegator<WindowManagerAgentProxy> delegator_;

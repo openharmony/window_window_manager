@@ -114,6 +114,12 @@ NativeValue* JsWindowManager::SetWindowLayoutMode(NativeEngine* engine, NativeCa
     return (me != nullptr) ? me->OnSetWindowLayoutMode(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindowManager::SetGestureNavigationEnabled(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(engine, info);
+    return (me != nullptr) ? me->OnSetGestureNavigationEnabled(*engine, *info) : nullptr;
+}
+
 static void GetNativeContext(NativeEngine& engine, NativeValue* nativeContext, void*& contextPtr, WMError& errCode)
 {
     AppExecFwk::Ability* ability = nullptr;
@@ -882,6 +888,46 @@ NativeValue* JsWindowManager::OnSetWindowLayoutMode(NativeEngine& engine, Native
     return result;
 }
 
+NativeValue* JsWindowManager::OnSetGestureNavigationEnabled(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFD("OnSetGestureNavigationEnabled");
+    if (info.argc < 1) { // 1: minimum params num
+        WLOGFE("Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+
+    NativeBoolean* nativeBool = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
+    if (nativeBool == nullptr) {
+        WLOGFE("Failed to convert parameter to bool");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    bool gestureNavigationEnable = static_cast<bool>(*nativeBool);
+
+    WLOGI("Set gesture navigation enable as %{public}d", gestureNavigationEnable);
+    AsyncTask::CompleteCallback complete =
+        [gestureNavigationEnable](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+                SingletonContainer::Get<WindowManager>().SetGestureNavigaionEnabled(gestureNavigationEnable));
+            if (ret == WmErrorCode::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+                WLOGD("SetGestureNavigationEnabled success");
+            } else {
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(ret), "SetGestureNavigationEnabled failed"));
+            }
+        };
+    // 1: maximum params num; 1: index of callback
+    NativeValue* lastParam = (info.argc <= 1) ? nullptr :
+        ((info.argv[1] != nullptr && info.argv[1]->TypeOf() == NATIVE_FUNCTION) ?
+        info.argv[1] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsWindowManager::OnSetGestureNavigationEnabled",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 NativeValue* JsWindowManagerInit(NativeEngine* engine, NativeValue* exportObj)
 {
     WLOGFD("JsWindowManagerInit");
@@ -923,6 +969,8 @@ NativeValue* JsWindowManagerInit(NativeEngine* engine, NativeValue* exportObj)
     BindNativeFunction(*engine, *object, "toggleShownStateForAllAppWindows", moduleName,
         JsWindowManager::ToggleShownStateForAllAppWindows);
     BindNativeFunction(*engine, *object, "setWindowLayoutMode", moduleName, JsWindowManager::SetWindowLayoutMode);
+    BindNativeFunction(*engine, *object, "setGestureNavigationEnabled", moduleName,
+        JsWindowManager::SetGestureNavigationEnabled);
     return engine->CreateUndefined();
 }
 }  // namespace Rosen

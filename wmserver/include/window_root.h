@@ -112,6 +112,7 @@ public:
     WMError NotifyDesktopUnfrozen();
     void UpdateDisplayOrientationWhenHideWindow(sptr<WindowNode>& node);
     bool HasMainFullScreenWindowShown(DisplayId displayId);
+    WMError SetGestureNavigaionEnabled(bool enable);
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);
@@ -147,6 +148,7 @@ private:
     std::map<ScreenId, std::vector<DisplayId>> displayIdMap_;
     bool lastWaterMarkShowStates_ { false };
     bool needCheckFocusWindow = false;
+    bool lastGestureNativeEnabled_ { true };
 
     std::map<WindowManagerAgentType, std::vector<sptr<IWindowManagerAgent>>> windowManagerAgents_;
 
