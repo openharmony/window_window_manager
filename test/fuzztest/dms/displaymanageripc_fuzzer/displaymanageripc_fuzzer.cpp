@@ -18,10 +18,10 @@
 #include <iremote_broker.h>
 #include <iservice_registry.h>
 #include <securec.h>
-#include <set>
 #include <system_ability_definition.h>
 
 #include "display_manager_interface.h"
+#include "display_manager_proxy.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS ::Rosen {
@@ -61,13 +61,6 @@ std::pair<sptr<IDisplayManager>, sptr<IRemoteObject>> GetProxy()
 
 bool IPCFuzzTest(const uint8_t* data, size_t size)
 {
-    std::set<uint32_t> ignore = {
-        static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_CREATE_VIRTUAL_SCREEN),
-        static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE),
-        static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_EXPAND),
-        static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_MIRROR),
-        static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT)
-    };
     uint32_t code;
     int flags, waitTime;
     if (data == nullptr || size < sizeof(code) + sizeof(flags) + sizeof(waitTime)) {
@@ -84,9 +77,6 @@ bool IPCFuzzTest(const uint8_t* data, size_t size)
     MessageParcel sendData;
     MessageParcel reply;
     MessageOption option(flags, waitTime);
-    if (ignore.find(code) != ignore.end()) {
-        return false;
-    }
     uint32_t dataSize = (size - startPos) > 1024 * 1024 ? 1024 * 1024 : (size - startPos);
     sendData.WriteBuffer(data + startPos, dataSize);
     proxy.second->SendRequest(code, sendData, reply, option);
@@ -101,6 +91,8 @@ void IPCSpecificInterfaceFuzzTest1(sptr<IRemoteObject> proxy, MessageParcel& sen
     proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID),
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_SCREEN),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT),
         sendData, reply, option);
     proxy->SendRequest(
         static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT),
