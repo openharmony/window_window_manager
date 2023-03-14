@@ -27,7 +27,6 @@ using namespace OHOS::Rosen;
 namespace OHOS {
 namespace {
     constexpr size_t DATA_MIN_SIZE = 2;
-    constexpr uint32_t DELAY_TIME_US = 1000000; // 1s;
 }
 class FocusChangedListener : public IFocusChangedListener {
 public:
@@ -80,7 +79,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     }
     window->Hide(0);
     window->Destroy();
-    usleep(DELAY_TIME_US);
     return true;
 }
 
@@ -412,7 +410,6 @@ void WindowImplFuzzTest(const uint8_t* data, size_t size)
 
     window->Hide(reason, withAnimation);
     window->Destroy();
-    usleep(DELAY_TIME_US);
 }
 } // namespace.OHOS
 
