@@ -91,5 +91,14 @@ void WindowManagerAgentController::NotifyWaterMarkFlagChangedResult(bool showWat
         agent->NotifyWaterMarkFlagChangedResult(showWaterMark);
     }
 }
+
+void WindowManagerAgentController::NotifyGestureNavigationEnabledResult(bool enable)
+{
+    WLOGFD("NotifyGestureNavigationEnabledResult with result:%{public}d", enable);
+    for (auto& agent : wmAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED)) {
+        agent->NotifyGestureNavigationEnabledResult(enable);
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

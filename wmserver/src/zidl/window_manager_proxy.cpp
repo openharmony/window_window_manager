@@ -854,5 +854,28 @@ std::shared_ptr<Media::PixelMap> WindowManagerProxy::GetSnapshot(int32_t windowI
     return map;
 }
 
+WMError WindowManagerProxy::SetGestureNavigaionEnabled(bool enable)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteBool(enable)) {
+        WLOGFE("Write anchor delatX failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GESTURE_NAVIGATION_ENABLED),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
+}
 } // namespace Rosen
 } // namespace OHOS

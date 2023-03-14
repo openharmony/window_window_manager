@@ -52,6 +52,8 @@ private:
     WmErrorCode ProcessDialogTargetTouchRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
     WmErrorCode ProcessDialogDeathRecipientRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister);
+    WmErrorCode ProcessGestureNavigationEnabledChangeRegister(sptr<JsWindowListener> listener,
+        sptr<Window> window, bool isRegister);
     using Func_t = WmErrorCode(JsWindowRegisterManager::*)(sptr<JsWindowListener>, sptr<Window> window, bool);
     std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
     std::mutex mtx_;

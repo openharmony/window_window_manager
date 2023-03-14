@@ -1273,6 +1273,13 @@ void WindowManagerService::HasPrivateWindow(DisplayId displayId, bool& hasPrivat
     WLOGI("called %{public}u", hasPrivateWindow);
 }
 
+WMError WindowManagerService::SetGestureNavigaionEnabled(bool enable)
+{
+    return PostSyncTask([this, enable]() {
+        return windowRoot_->SetGestureNavigaionEnabled(enable);
+    });
+}
+
 void WindowInfoQueriedListener::HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow)
 {
     WLOGI("called");

@@ -74,6 +74,7 @@ public:
     virtual void OffWindowZoom();
     virtual WmErrorCode RaiseToAppTop(uint32_t windowId);
     virtual std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t windowId);
+    virtual WMError SetGestureNavigaionEnabled(bool enable);
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxy();

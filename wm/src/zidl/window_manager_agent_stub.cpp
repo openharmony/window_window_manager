@@ -99,6 +99,11 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             NotifyWaterMarkFlagChangedResult(showWaterMark);
             break;
         }
+        case WindowManagerAgentMsg::TRANS_ID_UPDATE_GESTURE_NAVIGATION_ENABLED: {
+            bool enbale = data.ReadBool();
+            NotifyGestureNavigationEnabledResult(enbale);
+            break;
+        }
         default:
             break;
     }

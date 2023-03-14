@@ -26,7 +26,8 @@ JsWindowRegisterManager::JsWindowRegisterManager()
 {
     // white register list for window manager
     listenerProcess_[CaseType::CASE_WINDOW_MANAGER] = {
-        {SYSTEM_BAR_TINT_CHANGE_CB,     &JsWindowRegisterManager::ProcessSystemBarChangeRegister   }
+        {SYSTEM_BAR_TINT_CHANGE_CB,            &JsWindowRegisterManager::ProcessSystemBarChangeRegister               },
+        {GESTURE_NAVIGATION_ENABLED_CHANGE_CB, &JsWindowRegisterManager::ProcessGestureNavigationEnabledChangeRegister},
     };
     // white register list for window
     listenerProcess_[CaseType::CASE_WINDOW] = {
@@ -152,6 +153,21 @@ WmErrorCode JsWindowRegisterManager::ProcessSystemBarChangeRegister(sptr<JsWindo
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<WindowManager>().UnregisterSystemBarChangedListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessGestureNavigationEnabledChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister)
+{
+    sptr<IGestureNavigationEnabledChangedListener> thisListener(listener);
+    WmErrorCode ret;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<WindowManager>().RegisterGestureNavigationEnabledChangedListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<WindowManager>().UnregisterGestureNavigationEnabledChangedListener(thisListener));
     }
     return ret;
 }

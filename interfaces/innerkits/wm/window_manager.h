@@ -66,6 +66,11 @@ public:
     virtual void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) = 0;
 };
 
+class IGestureNavigationEnabledChangedListener : virtual public RefBase {
+public:
+    virtual void OnGestureNavigationEnabledUpdate(bool enable) = 0;
+};
+
 class WindowVisibilityInfo : public Parcelable {
 public:
     WindowVisibilityInfo() = default;
@@ -138,11 +143,16 @@ public:
     WMError UnregisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener);
     WMError RegisterWaterMarkFlagChangedListener(const sptr<IWaterMarkFlagChangedListener>& listener);
     WMError UnregisterWaterMarkFlagChangedListener(const sptr<IWaterMarkFlagChangedListener>& listener);
+    WMError RegisterGestureNavigationEnabledChangedListener(
+        const sptr<IGestureNavigationEnabledChangedListener>& listener);
+    WMError UnregisterGestureNavigationEnabledChangedListener(
+        const sptr<IGestureNavigationEnabledChangedListener>& listener);
     WMError MinimizeAllAppWindows(DisplayId displayId);
     WMError ToggleShownStateForAllAppWindows();
     WMError SetWindowLayoutMode(WindowLayoutMode mode);
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const;
+    WMError SetGestureNavigaionEnabled(bool enable) const;
 
 private:
     WindowManager();
@@ -160,6 +170,7 @@ private:
         const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const;
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) const;
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark) const;
+    void NotifyGestureNavigationEnabledResult(bool enable) const;
     void OnRemoteDied() const;
 };
 } // namespace Rosen
