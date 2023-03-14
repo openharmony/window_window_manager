@@ -606,8 +606,13 @@ ColorSpace WindowImpl::GetColorSpace()
 std::shared_ptr<Media::PixelMap> WindowImpl::Snapshot()
 {
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
-    RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
-    std::shared_ptr<Media::PixelMap> pixelMap = callback->GetResult(2000); // wait for <= 2000ms
+    auto isSucceeded = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    if (isSucceeded) {
+        pixelMap = callback->GetResult(2000); // wait for <= 2000ms
+    } else {
+        pixelMap = SingletonContainer::Get<WindowAdapter>().GetSnapshot(property_->GetWindowId());
+    }
     if (pixelMap != nullptr) {
         WLOGFD("WMS-Client Save WxH = %{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
     } else {
