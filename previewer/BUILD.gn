@@ -75,12 +75,12 @@ ohos_shared_library("previewer_window_napi") {
   libs = []
 
   sources = [
-    "../../../ability/ability_runtime/frameworks/native/runtime/js_runtime_utils.cpp",
     "../interfaces/kits/napi/window_runtime/window_napi/js_window.cpp",
     "../interfaces/kits/napi/window_runtime/window_napi/js_window_utils.cpp",
     "../interfaces/kits/napi/window_runtime/window_stage_napi/js_window_stage.cpp",
 
     # mock
+    "mock/ability_runtime/js_runtime_utils.cpp",
     "mock/js_transition_controller.cpp",
     "mock/js_window_register_manager.cpp",
     "mock/permission.cpp",
@@ -94,12 +94,12 @@ ohos_shared_library("previewer_window_napi") {
     "mock",
     "mock/ui",
     "mock/transaction",
+    "mock/ability_runtime",
     "../wm/include",
     "../utils/include",
     "../interfaces/innerkits/wm",
     "../interfaces/innerkits/dm",
     "../interfaces/kits/napi/window_runtime/window_stage_napi",
-    "../../../ability/ability_runtime/interfaces/inner_api/runtime/include",
     "../../../../commonlibrary/c_utils/base/include",
   ]
 
