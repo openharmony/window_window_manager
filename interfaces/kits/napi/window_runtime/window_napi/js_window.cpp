@@ -1299,12 +1299,12 @@ NativeValue* JsWindow::OnBindDialogTarget(NativeEngine& engine, NativeCallbackIn
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
 
-    NativeValue* value = nullptr;
     sptr<IRemoteObject> token = nullptr;
     token = NAPI_ohos_rpc_getNativeRemoteObject(
         reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(info.argv[0]));
     if (token == nullptr) {
-        std::shared_ptr<AbilityRuntime::RequestInfo> requestInfo = AbilityRuntime::RequestInfo::UnwrapRequestInfo(engine, info.argv[0]);
+        std::shared_ptr<AbilityRuntime::RequestInfo> requestInfo =
+            AbilityRuntime::RequestInfo::UnwrapRequestInfo(engine, info.argv[0]);
         if (requestInfo != nullptr) {
             token = requestInfo->GetToken();
         }
@@ -1318,35 +1318,32 @@ NativeValue* JsWindow::OnBindDialogTarget(NativeEngine& engine, NativeCallbackIn
         return engine.CreateUndefined();
     }
 
-    value = info.argv[1];
+    NativeValue* value = info.argv[1];
     if (value == nullptr || !value->IsCallable()) {
         registerManager_->RegisterListener(windowToken_,
             "dialogDeathRecipient", CaseType::CASE_WINDOW, engine, nullptr);
     } else {
-        registerManager_->RegisterListener(windowToken_,
-            "dialogDeathRecipient", CaseType::CASE_WINDOW, engine, value);
+        registerManager_->RegisterListener(windowToken_, "dialogDeathRecipient", CaseType::CASE_WINDOW, engine, value);
     }
 
     wptr<Window> weakToken(windowToken_);
-    AsyncTask::CompleteCallback complete =
-        [weakToken, token](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr) {
-                task.Reject(engine, CreateJsError(engine,
-                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
-                return;
-            }
+    AsyncTask::CompleteCallback complete = [weakToken, token](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+            return;
+        }
 
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->BindDialogTarget(token));
-            if (ret == WmErrorCode::WM_OK) {
-                task.Resolve(engine, engine.CreateUndefined());
-            } else {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Bind Dialog Target failed"));
-            }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->BindDialogTarget(token));
+        if (ret == WmErrorCode::WM_OK) {
+            task.Resolve(engine, engine.CreateUndefined());
+        } else {
+            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Bind Dialog Target failed"));
+        }
 
-            WLOGI("BindDialogTarget end, window [%{public}u, %{public}s]",
-                weakToken->GetWindowId(), weakToken->GetWindowName().c_str());
-        };
+        WLOGI("BindDialogTarget end, window [%{public}u, %{public}s]",
+            weakToken->GetWindowId(), weakToken->GetWindowName().c_str());
+    };
 
     NativeValue* result = nullptr;
     NativeValue* lastParam = (info.argc == 2) ? nullptr :
