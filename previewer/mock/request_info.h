@@ -20,14 +20,17 @@ namespace OHOS {
 namespace AbilityRuntime {
 class RequestInfo {
 public:
-    static NativeValue* WrapRequestInfo(NativeEngine &engine, RequestInfo *request) {
+    static NativeValue* WrapRequestInfo(NativeEngine &engine, RequestInfo *request)
+    {
         return nullptr;
     };
-    static std::shared_ptr<RequestInfo> UnwrapRequestInfo(NativeEngine &engine, NativeValue *jsParam) {
+    static std::shared_ptr<RequestInfo> UnwrapRequestInfo(NativeEngine &engine, NativeValue *jsParam)
+    {
         return nullptr;
     };
 
-    sptr<IRemoteObject> GetToken() {
+    sptr<IRemoteObject> GetToken()
+    {
         return callerToken_;
     };
 private:

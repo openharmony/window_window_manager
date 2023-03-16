@@ -60,7 +60,12 @@ std::string SysCapUtil::GetBundleName()
     }
 
     std::string bundleName = "";
-    iBundleMgr->GetBundleNameForUid(IPCSkeleton::GetCallingUid(), bundleName);
+    AppExecFwk::BundleInfo bundleInfo;
+    if (iBundleMgr->GetBundleInfoForSelf(0, bundleInfo) == ERR_OK) {
+        bundleName = bundleInfo.name;
+    } else {
+        WLOGFW("Call for GetBundleInfoForSelf failed");
+    }
     return StringUtil::Trim(bundleName);
 }
 
