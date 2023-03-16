@@ -23,9 +23,18 @@ group("systemtest") {
     ":dms_display_manager_test",
     ":dms_display_minimal_test",
     ":dms_display_power_test",
+    ":dms_private_window_test",
     ":dms_screen_manager_test",
     ":dms_screenshot_test",
   ]
+}
+
+ohos_systemtest("dms_private_window_test") {
+  module_out_path = module_out_path
+
+  sources = [ "private_window_test.cpp" ]
+
+  deps = [ ":dms_systemtest_common" ]
 }
 
 ohos_systemtest("dms_display_minimal_test") {
