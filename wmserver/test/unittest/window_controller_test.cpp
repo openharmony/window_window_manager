@@ -183,7 +183,7 @@ HWTEST_F(WindowControllerTest, NotifyWindowTransition, Function | SmallTest | Le
 
     srcInfo->SetTransitionReason(TransitionReason::BACK_TRANSITION);
     srcNode->stateMachine_.currState_ = WindowNodeState::STARTING_CREATED;
-    EXPECT_CALL(*mock, OnAppTransition(_, _, _)).Times(1);
+    EXPECT_CALL(*mock, OnAppBackTransition(_, _, _)).Times(1);
     ASSERT_EQ(WMError::WM_OK, windowController_->NotifyWindowTransition(srcInfo, dstInfo));
 
     srcInfo->SetTransitionReason(TransitionReason::ABILITY_TRANSITION);
