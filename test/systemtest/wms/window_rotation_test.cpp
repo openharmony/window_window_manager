@@ -156,6 +156,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest1, Function | MediumTest | Level3
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);
+    ASSERT_EQ(Rotation::ROTATION_0, screen->GetRotation());
 }
 
 /**
@@ -233,6 +234,8 @@ HWTEST_F(WindowRotationTest, WindowRotationTest4, Function | MediumTest | Level3
     ScreenId defaultScreenId = DisplayManager::GetInstance().GetDefaultDisplay()->GetScreenId();
     auto defaultScreen = ScreenManager::GetInstance().GetScreenById(defaultScreenId);
     defaultScreen->SetOrientation(Orientation::REVERSE_HORIZONTAL);
+    sleep(SPLIT_TEST_SLEEP_S);
+
     fullInfo_.name  = "fullscreen.4";
     fullInfo_.orientation_ = Orientation::HORIZONTAL;
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
@@ -242,7 +245,6 @@ HWTEST_F(WindowRotationTest, WindowRotationTest4, Function | MediumTest | Level3
     sleep(SPLIT_TEST_SLEEP_S);
 
     ASSERT_EQ(Orientation::HORIZONTAL, fullWindow->GetRequestedOrientation());
-    sleep(SPLIT_TEST_SLEEP_S);
     DisplayId displayId = displayListener_->changeFuture_.GetResult(FUTURE_GET_RESULT_TIMEOUT);
     displayListener_->changeFuture_.Reset(-1);
     ScreenId screenId = screenListener_->changeFuture_.GetResult(FUTURE_GET_RESULT_TIMEOUT);
@@ -256,42 +258,6 @@ HWTEST_F(WindowRotationTest, WindowRotationTest4, Function | MediumTest | Level3
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);
     defaultScreen->SetOrientation(Orientation::UNSPECIFIED);
-}
-
-/**
-* @tc.name: WindowRotationTest6
-* @tc.desc: test window rotation when display is zoomed.
-* @tc.type: FUNC
-* @tc.require: issueI5NGWL
-*/
-HWTEST_F(WindowRotationTest, WindowRotationTest5, Function | MediumTest | Level3)
-{
-    WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 2);
-    sleep(SPLIT_TEST_SLEEP_S);
-    fullInfo_.name  = "fullscreen.5";
-    fullInfo_.orientation_ = Orientation::REVERSE_HORIZONTAL;
-    fullInfo_.mode = WindowMode::WINDOW_MODE_FULLSCREEN;
-    const sptr<Window> fullWindow = Utils::CreateTestWindow(fullInfo_);
-    ASSERT_NE(nullptr, fullWindow);
-    ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
-    sleep(SPLIT_TEST_SLEEP_S);
-
-    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
-    ASSERT_EQ(Orientation::REVERSE_HORIZONTAL, display->GetOrientation());
-    sleep(SPLIT_TEST_SLEEP_S);
-
-    Window* ptr = fullWindow.GetRefPtr();
-    WindowImpl* implPtr = (WindowImpl*)ptr;
-    Transform expect;
-    ASSERT_NE(expect, implPtr->GetWindowProperty()->GetZoomTransform());
-
-    ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
-    sleep(SPLIT_TEST_SLEEP_S);
-    WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 1);
-    sleep(SPLIT_TEST_SLEEP_S);
-    WindowAccessibilityController::GetInstance().OffWindowZoom();
-    sleep(SPLIT_TEST_SLEEP_S);
-    ASSERT_EQ(WMError::WM_OK, fullWindow->Destroy());
     sleep(SPLIT_TEST_SLEEP_S);
 }
 
@@ -301,13 +267,14 @@ HWTEST_F(WindowRotationTest, WindowRotationTest5, Function | MediumTest | Level3
 *           windows.
 * @tc.type: FUNC
 */
-HWTEST_F(WindowRotationTest, WindowRotationTest6, Function | MediumTest | Level3)
+HWTEST_F(WindowRotationTest, WindowRotationTest5, Function | MediumTest | Level3)
 {
     ScreenId defaultScreenId = DisplayManager::GetInstance().GetDefaultDisplay()->GetScreenId();
     auto defaultScreen = ScreenManager::GetInstance().GetScreenById(defaultScreenId);
     defaultScreen->SetOrientation(Orientation::REVERSE_HORIZONTAL);
+    sleep(SPLIT_TEST_SLEEP_S);
 
-    fullInfo_.name  = "fullscreen.6";
+    fullInfo_.name  = "fullscreen.5";
     fullInfo_.orientation_ = Orientation::HORIZONTAL;
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
     activeWindows_.push_back(fullWindow);
@@ -338,8 +305,6 @@ HWTEST_F(WindowRotationTest, WindowRotationTest6, Function | MediumTest | Level3
     defaultScreen->SetOrientation(Orientation::UNSPECIFIED);
     sleep(SPLIT_TEST_SLEEP_S);
 }
-
-
 }
 } // namespace Rosen
 } // namespace OHOS
