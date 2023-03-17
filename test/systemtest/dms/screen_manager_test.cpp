@@ -59,7 +59,7 @@ public:
     static VirtualScreenOption defaultOption_;
     static uint32_t waitCount_;
     const uint32_t sleepUs_ = 10 * 1000;
-    const uint32_t maxWaitCount_ = 2000;
+    const uint32_t maxWaitCount_ = 20;
     const uint32_t execTimes_ = 10;
     const uint32_t acquireFrames_ = 1;
     static constexpr uint32_t TEST_SLEEP_S = 1; // test sleep time

@@ -131,10 +131,12 @@ sptr<WindowScene> WindowTestUtils::CreateWindowScene()
     return scene;
 }
 
-Rect WindowTestUtils::GetDefaultFloatingRect(const sptr<Window>& window)
+Rect WindowTestUtils::GetDefaultFloatingRect(const sptr<Window>& window, bool avoid)
 {
     limitDisplayRect_ = displayRect_;
-    UpdateSplitRects(window);
+    if (avoid) {
+        UpdateSplitRects(window);
+    }
     constexpr uint32_t half = 2;
     constexpr float ratio = DEFAULT_ASPECT_RATIO;  // 0.67: default height/width ratio
     float vpr = GetVirtualPixelRatio(0);
@@ -248,7 +250,7 @@ uint32_t WindowTestUtils::GetMaxTileWinNum()
     return maxNum;
 }
 
-void WindowTestUtils::InitTileWindowRects(const sptr<Window>& window)
+void WindowTestUtils::InitTileWindowRects(const sptr<Window>& window, bool avoid)
 {
     float virtualPixelRatio = GetVirtualPixelRatio(0);
     uint32_t edgeInterval = static_cast<uint32_t>(EDGE_INTERVAL * virtualPixelRatio); // 48 is edge interval
@@ -256,7 +258,9 @@ void WindowTestUtils::InitTileWindowRects(const sptr<Window>& window)
     constexpr float ratio = DEFAULT_ASPECT_RATIO;
     constexpr int half = 2;
     limitDisplayRect_ = displayRect_;
-    UpdateSplitRects(window);
+    if (avoid) {
+        UpdateSplitRects(window);
+    }
 
     uint32_t minFloatingW = static_cast<uint32_t>(MIN_FLOATING_WIDTH * virtualPixelRatio);
     uint32_t minFloatingH = static_cast<uint32_t>(MIN_FLOATING_HEIGHT * virtualPixelRatio);
