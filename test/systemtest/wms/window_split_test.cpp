@@ -87,19 +87,24 @@ namespace {
 HWTEST_F(WindowSplitTest, SplitWindow01, Function | MediumTest | Level3)
 {
     fullInfo_.name  = "fullscreen.1";
-    fullInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+    fullInfo_.mode = WindowMode::WINDOW_MODE_FULLSCREEN;
     splitInfo_.name = "primary.1";
-    splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
-
-    const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
-    activeWindows_.push_back(fullWindow);
-    ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
-    sleep(SPLIT_TEST_SLEEP_S);
+    splitInfo_.mode = WindowMode::WINDOW_MODE_FULLSCREEN;
 
     const sptr<Window>& priWindow = Utils::CreateTestWindow(splitInfo_);
     activeWindows_.push_back(priWindow);
+    priWindow->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    sleep(SPLIT_TEST_SLEEP_S);
     ASSERT_EQ(WMError::WM_OK, priWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
+
+    const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
+    activeWindows_.push_back(fullWindow);
+    fullWindow->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    sleep(SPLIT_TEST_SLEEP_S);
+    ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
+    sleep(SPLIT_TEST_SLEEP_S);
+
 
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, priWindow->GetMode());
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, fullWindow->GetMode());
@@ -119,18 +124,24 @@ HWTEST_F(WindowSplitTest, SplitWindow01, Function | MediumTest | Level3)
 HWTEST_F(WindowSplitTest, SplitWindow02, Function | MediumTest | Level3)
 {
     fullInfo_.name  = "fullscreen.2";
-    fullInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+    fullInfo_.mode = WindowMode::WINDOW_MODE_FULLSCREEN;
     splitInfo_.name = "secondary.2";
-    splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+    splitInfo_.mode = WindowMode::WINDOW_MODE_FULLSCREEN;
 
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
     activeWindows_.push_back(fullWindow);
+    fullWindow->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    sleep(SPLIT_TEST_SLEEP_S);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
+
     const sptr<Window>& secWindow = Utils::CreateTestWindow(splitInfo_);
     activeWindows_.push_back(secWindow);
+    secWindow->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    sleep(SPLIT_TEST_SLEEP_S);
     ASSERT_EQ(WMError::WM_OK, secWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
+
 
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, secWindow->GetMode());
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, fullWindow->GetMode());
