@@ -1705,7 +1705,8 @@ WMError WindowImpl::DisableAppWindowDecor()
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     WLOGI("disable app window decoration.");
-    property_->SetDecorEnable(false);
+    windowSystemConfig_.isSystemDecorEnable_ = false;
+    UpdateDecorEnable(true);
     return WMError::WM_OK;
 }
 
