@@ -185,8 +185,6 @@ NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& display)
         WLOGFE("Failed to convert prop to jsObject");
         return engine.CreateUndefined();
     }
-    std::unique_ptr<JsDisplay> jsDisplay = std::make_unique<JsDisplay>(display);
-    object->SetNativePointer(jsDisplay.release(), JsDisplay::Finalizer, nullptr);
     auto info = display->GetDisplayInfo();
     if (info == nullptr) {
         WLOGFE("Failed to GetDisplayInfo");
@@ -211,9 +209,10 @@ NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& display)
     object->SetProperty("scaledDensity", CreateJsValue(engine, info->GetVirtualPixelRatio()));
     object->SetProperty("xDPI", CreateJsValue(engine, 0.0f));
     object->SetProperty("yDPI", CreateJsValue(engine, 0.0f));
-    const char *moduleName = "JsDisplay";
-    BindNativeFunction(engine, *object, "getCutoutInfo", moduleName, JsDisplay::GetCutoutInfo);
     if (jsDisplayObj == nullptr || jsDisplayObj->Get() == nullptr) {
+        std::unique_ptr<JsDisplay> jsDisplay = std::make_unique<JsDisplay>(display);
+        object->SetNativePointer(jsDisplay.release(), JsDisplay::Finalizer, nullptr);
+        BindNativeFunction(engine, *object, "getCutoutInfo", "JsDisplay", JsDisplay::GetCutoutInfo);
         std::shared_ptr<NativeReference> jsDisplayRef;
         jsDisplayRef.reset(engine.CreateReference(objValue, 1));
         DisplayId displayId = display->GetId();
