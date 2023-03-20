@@ -1450,12 +1450,12 @@ HWTEST_F(WindowImplTest, DisableAppWindowDecor01, Function | SmallTest | Level3)
     window->windowSystemConfig_.isSystemDecorEnable_ = false;
     window->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     window->DisableAppWindowDecor();
-    ASSERT_FALSE(window->property_->isDecorEnable_);
+    ASSERT_FALSE(window->IsDecorEnable());
     window->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->DisableAppWindowDecor();
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
-    ASSERT_FALSE(window->property_->isDecorEnable_);
+    ASSERT_FALSE(window->IsDecorEnable());
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
