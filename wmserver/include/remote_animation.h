@@ -61,6 +61,7 @@ public:
     static void OnRemoteDie(const sptr<IRemoteObject>& remoteObject);
     static bool CheckAnimationController();
     static bool CheckRemoteAnimationEnabled(DisplayId displayId);
+    static void NotifyAnimationAbilityDied(sptr<WindowTransitionInfo> info);
     static WMError NotifyAnimationByHome();
     static WMError NotifyAnimationScreenUnlock(std::function<void(void)> callback);
     static void SetMainTaskHandler(std::shared_ptr<AppExecFwk::EventHandler> handler);
