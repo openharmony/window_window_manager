@@ -179,7 +179,8 @@ sptr<WindowNode> WindowRoot::FindWindowNodeWithToken(const sptr<IRemoteObject>& 
     }
     auto iter = std::find_if(windowNodeMap_.begin(), windowNodeMap_.end(),
         [token](const std::map<uint32_t, sptr<WindowNode>>::value_type& pair) {
-            if (!(WindowHelper::IsSubWindow(pair.second->GetWindowType()))) {
+            if ((WindowHelper::IsMainWindow(pair.second->GetWindowType())) ||
+                (pair.second->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP)) {
                 return pair.second->abilityToken_ == token;
             }
             return false;
