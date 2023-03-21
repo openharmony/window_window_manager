@@ -67,6 +67,7 @@ public:
     virtual void StartingWindow(
         sptr<AAFwk::AbilityTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap) override;
     virtual void CancelStartingWindow(sptr<IRemoteObject> abilityToken) override;
+    virtual void NotifyAnimationAbilityDied(sptr<AAFwk::AbilityTransitionInfo> info) override;
 };
 
 class RSUIDirector;
@@ -90,6 +91,7 @@ public:
     WMError RemoveWindow(uint32_t windowId, bool isFromInnerkits) override;
     WMError NotifyWindowTransition(sptr<WindowTransitionInfo>& from, sptr<WindowTransitionInfo>& to,
         bool isFromClient = false) override;
+    void NotifyAnimationAbilityDied(sptr<WindowTransitionInfo> info);
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override;
     WMError RequestFocus(uint32_t windowId) override;
     AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType) override;
