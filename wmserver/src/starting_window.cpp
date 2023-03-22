@@ -87,11 +87,6 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInf
 
     property->SetDisplayId(info->GetDisplayId());
     property->SetWindowType(info->GetWindowType());
-    auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(info->GetDisplayId());
-    if (!(displayInfo && WmsUtils::IsExpectedRotatableWindow(orientation,
-        displayInfo->GetDisplayOrientation(), property->GetWindowMode(), property->GetWindowFlags(), false))) {
-        property->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
-    }
     if (info->GetShowFlagWhenLocked()) {
         property->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     }

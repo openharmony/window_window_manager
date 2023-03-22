@@ -437,8 +437,7 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
             winRect = cascadeRectsMap_[displayId].secondaryRect_;
             break;
         case WindowMode::WINDOW_MODE_FULLSCREEN: {
-            bool needAvoid = (node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
-            winRect = needAvoid ? limitRectMap_[displayId] : DisplayGroupInfo::GetInstance().GetDisplayRect(displayId);
+            winRect = DisplayGroupInfo::GetInstance().GetDisplayRect(displayId);
             auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(displayId);
             if (displayInfo && WmsUtils::IsExpectedRotatableWindow(node->GetRequestedOrientation(),
                 displayInfo->GetDisplayOrientation(), node->GetWindowFlags())) {
