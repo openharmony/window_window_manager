@@ -347,7 +347,6 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
 {
     UpdateWindowSizeLimits(node);
     bool floatingWindow = (node->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
-    bool needAvoid = (node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     Rect lastRect = node->GetWindowRect();
     Rect winRect = node->GetRequestRect();
     WLOGI("[Before TileLayout] windowId: %{public}u, mode: %{public}u, type: %{public}u requestRect: [%{public}d, "
@@ -355,9 +354,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
         winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
 
     if (!floatingWindow) { // fullscreen window
-        const auto& displayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(node->GetDisplayId());
-        const auto& limitDisplayRect = limitRectMap_[node->GetDisplayId()];
-        winRect = needAvoid ? limitDisplayRect : displayRect;
+        winRect = DisplayGroupInfo::GetInstance().GetDisplayRect(node->GetDisplayId());
     }
 
     WLOGI("[After TileLayout] windowId: %{public}u, isDecor: %{public}u, winRect: [%{public}d, %{public}d, "
