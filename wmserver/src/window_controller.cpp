@@ -483,7 +483,9 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId, bool fromAnimation
     };
     WMError res = WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
-        if (windowRoot_->NotifyDesktopUnfrozen() == WMError::WM_OK) {
+        // if has main full screen window, no need to do remote unlock animation
+        if (windowRoot_->NotifyDesktopUnfrozen() == WMError::WM_OK &&
+            !windowRoot_->HasMainFullScreenWindowShown(windowNode->GetDisplayId())) {
             res = RemoteAnimation::NotifyAnimationScreenUnlock(removeFunc);
             WLOGI("NotifyAnimationScreenUnlock with remote animation");
         }
