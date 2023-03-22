@@ -492,6 +492,9 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     NativeEngine* engine, NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability)
 {
     WLOGFI("SetUIContent contentInfo: %{public}s", contentInfo.c_str());
+    if (uiContent_) {
+        uiContent_->Destroy();
+    }
     std::unique_ptr<Ace::UIContent> uiContent;
     if (ability != nullptr) {
         uiContent = Ace::UIContent::Create(ability);
