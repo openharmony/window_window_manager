@@ -129,6 +129,7 @@ WMError WindowSystemEffect::SetWindowShadow(const sptr<WindowNode>& node)
     if (!WindowHelper::IsFloatingWindow(node->GetWindowMode())) {
         surfaceNode->SetShadowElevation(0.f);
         surfaceNode->SetShadowAlpha(0.f);
+        surfaceNode->SetShadowRadius(0.f);
         WLOGFD("[WEffect]close shadow id: %{public}u", node->GetWindowId());
         return WMError::WM_OK;
     }
