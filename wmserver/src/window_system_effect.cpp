@@ -143,14 +143,15 @@ WMError WindowSystemEffect::SetWindowShadow(const sptr<WindowNode>& node)
 
     WLOGFI("[WEffect]id: %{public}u focused: %{public}d elevation: %{public}f",
         node->GetWindowId(), static_cast<int32_t>(node->isFocused_), shadow.elevation_);
-    WLOGFI("[WEffect]color: %{public}s offsetX: %{public}f offsetY: %{public}f alpha: %{public}f",
-        shadow.color_.c_str(), shadow.offsetX_, shadow.offsetY_, shadow.alpha_);
+    WLOGFI("[WEffect]color: %{public}s offsetX: %{public}f offsetY: %{public}f alpha: %{public}f radius: %{public}f",
+        shadow.color_.c_str(), shadow.offsetX_, shadow.offsetY_, shadow.alpha_, shadow.radius_);
     auto vpr = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId());
     surfaceNode->SetShadowElevation(shadow.elevation_ * vpr);
     surfaceNode->SetShadowColor(colorValue);
     surfaceNode->SetShadowOffsetX(shadow.offsetX_);
     surfaceNode->SetShadowOffsetY(shadow.offsetY_);
     surfaceNode->SetShadowAlpha(shadow.alpha_);
+    surfaceNode->SetShadowRadius(shadow.radius_);
     return WMError::WM_OK;
 }
 
