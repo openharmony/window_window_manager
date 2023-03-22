@@ -101,9 +101,10 @@ bool WindowInputChannel::IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& k
 {
     int32_t keyCode = keyEvent->GetKeyCode();
     bool isKeyFN = (keyCode == MMI::KeyEvent::KEYCODE_FN);
+    bool isKeyBack = (keyCode == MMI::KeyEvent::KEYCODE_BACK);
     bool isKeyboard = (keyCode >= MMI::KeyEvent::KEYCODE_0 && keyCode <= MMI::KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN);
     WLOGI("isKeyFN: %{public}d, isKeyboard: %{public}d", isKeyFN, isKeyboard);
-    return (isKeyFN || isKeyboard);
+    return (isKeyFN || isKeyboard || isKeyBack);
 }
 }
 }
