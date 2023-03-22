@@ -97,6 +97,7 @@
                     <offsetX>0</offsetX>
                     <offsetY>0</offsetY>
                     <alpha>0</alpha>
+                    <radius>0</radius>
                 </focused>
                 <unfocused>
                     <elevation>0</elevation>
@@ -104,6 +105,7 @@
                     <offsetX>0</offsetX>
                     <offsetY>0</offsetY>
                     <alpha>0</alpha>
+                    <radius>0</radius>
                 </unfocused>
             </shadow>
         </appWindows>
