@@ -254,7 +254,7 @@ HWTEST_F(WindowPairTest, IsForbidDockSliceMove02, Function | SmallTest | Level2)
     sptr<WindowPair> windowPair = new WindowPair(0);
     windowPair->status_ = WindowPairStatus::PAIRED_DONE;
     sptr<WindowProperty> property1 = new WindowProperty();
-    property1->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
+    property1->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     windowPair->primary_ = new WindowNode(property1);
     windowPair->secondary_ = new WindowNode(property1);
     ASSERT_EQ(false, windowPair->IsForbidDockSliceMove());
@@ -270,7 +270,7 @@ HWTEST_F(WindowPairTest, IsForbidDockSliceMove03, Function | SmallTest | Level2)
     sptr<WindowPair> windowPair = new WindowPair(0);
     windowPair->status_ = WindowPairStatus::PAIRED_DONE;
     sptr<WindowProperty> property1 = new WindowProperty();
-    property1->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
+    property1->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     windowPair->primary_ = nullptr;
     windowPair->secondary_ = new WindowNode(property1);
     ASSERT_EQ(true, windowPair->IsForbidDockSliceMove());
@@ -302,7 +302,7 @@ HWTEST_F(WindowPairTest, IsForbidDockSliceMove05, Function | SmallTest | Level2)
     sptr<WindowPair> windowPair = new WindowPair(0);
     windowPair->status_ = WindowPairStatus::PAIRED_DONE;
     sptr<WindowProperty> property1 = new WindowProperty();
-    property1->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
+    property1->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     windowPair->primary_ = new WindowNode(property1);
     windowPair->secondary_ = nullptr;
     ASSERT_EQ(true, windowPair->IsForbidDockSliceMove());
@@ -318,7 +318,7 @@ HWTEST_F(WindowPairTest, IsForbidDockSliceMove06, Function | SmallTest | Level2)
     sptr<WindowPair> windowPair = new WindowPair(0);
     windowPair->status_ = WindowPairStatus::PAIRED_DONE;
     sptr<WindowProperty> property1 = new WindowProperty();
-    property1->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
+    property1->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     sptr<WindowProperty> property2 = new WindowProperty();
     property2->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE));
     windowPair->primary_ = new WindowNode(property1);
