@@ -537,19 +537,19 @@ WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<Window
 bool WindowRoot::CheckAddingModeAndSize(sptr<WindowNode>& node, const sptr<WindowNodeContainer>& container)
 {
     if (!WindowHelper::IsMainWindow(node->GetWindowType())) {
-        return false;
+        return true;
     }
     // intercept the node which doesn't support floating mode at tile mode
     if (WindowHelper::IsInvalidWindowInTileLayoutMode(node->GetModeSupportInfo(), container->GetCurrentLayoutMode())) {
         WLOGFE("window doesn't support floating mode in tile, windowId: %{public}u", node->GetWindowId());
-        return true;
+        return false;
     }
     // intercept the node that the tile rect can't be applied to
     WMError res = container->IsTileRectSatisfiedWithSizeLimits(node);
     if (res != WMError::WM_OK) {
-        return true;
+        return false;
     }
-    return false;
+    return true;
 }
 
 Rect WindowRoot::GetDisplayRectWithoutSystemBarAreas(const sptr<WindowNode> dstNode)
@@ -627,6 +627,12 @@ void WindowRoot::LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool afterAnima
         WLOGFE("add window failed, window container could not be found");
         return;
     }
+
+    if (!CheckAddingModeAndSize(node, container)) { // true means stop adding
+        WLOGFE("Invalid mode or size in tile mode, windowId: %{public}u", node->GetWindowId());
+        return;
+    }
+
     container->LayoutWhenAddWindowNode(node, afterAnimation);
     return;
 }
@@ -648,17 +654,22 @@ WMError WindowRoot::BindDialogToParent(sptr<WindowNode>& node, sptr<WindowNode>&
 WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, bool fromStartingWin)
 {
     if (node == nullptr) {
-        WLOGFE("failed, node is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
 
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
-        WLOGFE("failed, window container could not be found");
         return WMError::WM_ERROR_INVALID_DISPLAY;
     }
 
-    if (CheckAddingModeAndSize(node, container)) { // true means stop adding
+    if (!CheckAddingModeAndSize(node, container)) { // true means stop adding
+        /*
+         * Starting Window has no windowToken, which should be destroied if mode or size is invalid
+         */
+        if (node->GetWindowToken() == nullptr) {
+            (void)DestroyWindow(node->GetWindowId(), false);
+        }
+        WLOGFE("Invalid mode or size in tile mode, windowId: %{public}u", node->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
     }
 
