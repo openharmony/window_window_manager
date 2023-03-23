@@ -28,8 +28,6 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowLayoutPolicyCascade"};
 }
 
-Rect WindowLayoutPolicyCascade::cascadeRectSetFromCfg_ = {0, 0, 0, 0};
-
 WindowLayoutPolicyCascade::WindowLayoutPolicyCascade(const sptr<DisplayGroupInfo>& displayGroupInfo,
     DisplayGroupWindowTree& displayGroupWindowTree)
     : WindowLayoutPolicy(displayGroupInfo, displayGroupWindowTree)
@@ -257,10 +255,6 @@ void WindowLayoutPolicyCascade::LimitDividerMoveBounds(Rect& rect, DisplayId dis
 
 void WindowLayoutPolicyCascade::InitCascadeRect(DisplayId displayId)
 {
-    // Init size and position of default cascade rect on pc
-    if (InitCascadeRectCfg(displayId)) {
-        return;
-    }
     constexpr uint32_t half = 2;
     constexpr float ratio = DEFAULT_ASPECT_RATIO;
 
@@ -288,24 +282,6 @@ void WindowLayoutPolicyCascade::InitCascadeRect(DisplayId displayId)
     WLOGFI("init CascadeRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
         resRect.posX_, resRect.posY_, resRect.width_, resRect.height_);
     cascadeRectsMap_[displayId].firstCascadeRect_ = resRect;
-}
-
-bool WindowLayoutPolicyCascade::InitCascadeRectCfg(DisplayId displayId)
-{
-    if (cascadeRectSetFromCfg_.width_ == 0) {
-        return false;
-    }
-    Rect resRect = cascadeRectSetFromCfg_;
-    auto vpr = displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
-    resRect.width_ = static_cast<uint32_t>(vpr * resRect.width_);
-    resRect.height_ = static_cast<uint32_t>(vpr * resRect.height_);
-    resRect.posX_ = static_cast<int32_t>(vpr * resRect.posX_);
-    resRect.posY_ = static_cast<int32_t>(vpr * resRect.posY_);
-
-    WLOGFI("Init CascadeRect Cfg:[%{public}d, %{public}d, %{public}d, %{public}d]",
-        resRect.posX_, resRect.posY_, resRect.width_, resRect.height_);
-    cascadeRectsMap_[displayId].firstCascadeRect_ = resRect;
-    return true;
 }
 
 void WindowLayoutPolicyCascade::ApplyWindowRectConstraints(const sptr<WindowNode>& node, Rect& winRect) const
@@ -691,17 +667,5 @@ void WindowLayoutPolicyCascade::UpdateWindowNodeRectOffset(const sptr<WindowNode
         rect.width_, rect.height_, rect.posX_, rect.posY_);
 }
 
-void WindowLayoutPolicyCascade::SetCascadeRectCfg(const std::vector<int>& numbers)
-{
-    if (numbers.size() != 4 || numbers[2] == 0) { // 4 is rect's size and 2 is rect's width
-        return;
-    }
-    uint32_t idx = 0;
-    Rect rect = cascadeRectSetFromCfg_;
-    rect.posX_ = numbers[idx++];
-    rect.posY_ = numbers[idx++];
-    rect.width_ = numbers[idx++];
-    rect.height_ = numbers[idx];
-}
 } // Rosen
 } // OHOS
