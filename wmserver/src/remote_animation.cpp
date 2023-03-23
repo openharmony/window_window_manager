@@ -305,6 +305,36 @@ WMError RemoteAnimation::NotifyAnimationStartApp(sptr<WindowTransitionInfo> srcI
     return WMError::WM_OK;
 }
 
+void RemoteAnimation::GetExpectRect(const sptr<WindowNode>& dstNode, const sptr<RSWindowAnimationTarget>& dstTarget)
+{
+    // when exit immersive, startingWindow (0,0,w,h), but app need avoid
+    bool needAvoid = (dstNode->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
+    auto winRoot = windowRoot_.promote();
+    if (needAvoid && winRoot) {
+        auto avoidRect = winRoot->GetDisplayRectWithoutSystemBarAreas(dstNode);
+        if (WindowHelper::IsEmptyRect(avoidRect)) {
+            return;
+        }
+        WLOGFI("name:%{public}s id:%{public}u avoidRect:[x:%{public}d, y:%{public}d, w:%{public}d, h:%{public}d]",
+            dstNode->GetWindowName().c_str(), dstNode->GetWindowId(),
+            avoidRect.posX_, avoidRect.posY_, avoidRect.width_, avoidRect.height_);
+        if (WindowHelper::IsMainFullScreenWindow(dstNode->GetWindowType(), dstNode->GetWindowMode())) {
+            auto boundsRect = RectF(avoidRect.posX_, avoidRect.posY_, avoidRect.width_, avoidRect.height_);
+            auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(dstNode->GetDisplayId());
+            if (displayInfo && WmsUtils::IsExpectedRotatableWindow(dstNode->GetRequestedOrientation(),
+                displayInfo->GetDisplayOrientation(), dstNode->GetWindowFlags())) {
+                WLOGFD("[FixOrientation] window %{public}u expected rotatable, pre-cal bounds", dstNode->GetWindowId());
+                boundsRect = RectF(avoidRect.posX_, avoidRect.posY_, avoidRect.height_, avoidRect.width_);
+            }
+            dstTarget->windowBounds_.rect_ = boundsRect;
+            if (dstNode->leashWinSurfaceNode_) {
+                dstNode->leashWinSurfaceNode_->SetBounds(avoidRect.posX_, avoidRect.posY_,
+                    avoidRect.width_, avoidRect.height_);
+            }
+        }
+    }
+}
+
 WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> srcInfo,
     sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& srcNode,
     const sptr<WindowNode>& dstNode)
@@ -331,6 +361,8 @@ WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> sr
     }
     ResSchedReport::GetInstance().ResSchedDataReport(
         Rosen::RES_TYPE_SHOW_REMOTE_ANIMATION, Rosen::REMOTE_ANIMATION_BEGIN, payload);
+    // when exit immersive, startingWindow (0,0,w,h), but app need avoid
+    GetExpectRect(dstNode, dstTarget);
     dstNode->isPlayAnimationShow_ = true;
     // Transition to next state and update task count will success when enable animationFirst_
     dstNode->stateMachine_.TransitionTo(WindowNodeState::SHOW_ANIMATION_PLAYING);
