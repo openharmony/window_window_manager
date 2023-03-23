@@ -86,7 +86,7 @@ RSSurfaceNode::SharedPtr Session::CreateSurfaceNode(std::string name)
     }
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = name;
-    return RSSurfaceNode::Create(rsSurfaceNodeConfig);
+    return RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::EXTENSION_ABILITY_NODE);
 }
 
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
