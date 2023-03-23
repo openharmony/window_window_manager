@@ -59,6 +59,7 @@ const std::map<std::string, WindowManagerConfig::ValueType> WindowManagerConfig:
     { "translate",                                    WindowManagerConfig::ValueType::FLOATS },
     { "offsetX",                                      WindowManagerConfig::ValueType::FLOATS },
     { "offsetY",                                      WindowManagerConfig::ValueType::FLOATS },
+    { "radius",                                       WindowManagerConfig::ValueType::FLOATS },
     { "fullScreen",                                   WindowManagerConfig::ValueType::STRING },
     { "split",                                        WindowManagerConfig::ValueType::STRING },
     { "float",                                        WindowManagerConfig::ValueType::STRING },
