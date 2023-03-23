@@ -43,8 +43,6 @@ public:
     void RemoveWindowNode(const sptr<WindowNode>& node) override;
     Rect GetDividerRect(DisplayId displayId) const override;
     std::vector<int32_t> GetExitSplitPoints(DisplayId displayId) const override;
-    // methods for set cascade rect size and position from configuration
-    static void SetCascadeRectCfg(const std::vector<int>& numbers);
 
 private:
     void InitAllRects();
@@ -59,8 +57,6 @@ private:
     void InitLimitRects(DisplayId displayId);
     void LimitDividerMoveBounds(Rect& rect, DisplayId displayId) const;
     void InitCascadeRect(DisplayId displayId);
-    // methods for init default cascade rect from configuration
-    bool InitCascadeRectCfg(DisplayId displayId);
     void SetCascadeRect(const sptr<WindowNode>& node);
     void ApplyWindowRectConstraints(const sptr<WindowNode>& node, Rect& winRect) const;
     void UpdateWindowNodeRectOffset(const sptr<WindowNode>& node) const;
@@ -82,7 +78,6 @@ private:
     };
     mutable std::map<DisplayId, LayoutRects> cascadeRectsMap_;
     std::map<DisplayId, Rect> restoringDividerWindowRects_;
-    static Rect cascadeRectSetFromCfg_;
 };
 }
 }
