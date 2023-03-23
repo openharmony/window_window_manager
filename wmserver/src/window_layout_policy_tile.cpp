@@ -221,7 +221,7 @@ void WindowLayoutPolicyTile::PushBackNodeInTileQueue(const sptr<WindowNode>& nod
     if (!WindowHelper::IsWindowModeSupported(node->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING)) {
         WLOGFD("Window don't support floating mode that should be minimized, winId: %{public}u, "
             "modeSupportInfo: %{public}u", node->GetWindowId(), node->GetModeSupportInfo());
-        MinimizeApp::AddNeedMinimizeApp(node, MinimizeReason::LAYOUT_TILE);
+        MinimizeApp::AddNeedMinimizeApp(node, MinimizeReason::INVALID_MODE_OR_SIZE_IN_TILE);
         return;
     }
     auto& foregroundNodes = foregroundNodesMap_[displayId];
@@ -335,7 +335,7 @@ void WindowLayoutPolicyTile::ApplyPresetRectForTileWindows(DisplayId displayId)
                 }
             }
             needMinimizeNodes.push_back(node);
-            MinimizeApp::AddNeedMinimizeApp(node, MinimizeReason::LAYOUT_TILE);
+            MinimizeApp::AddNeedMinimizeApp(node, MinimizeReason::INVALID_MODE_OR_SIZE_IN_TILE);
             break;
         }
     }

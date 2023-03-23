@@ -35,6 +35,7 @@ enum MinimizeReason : uint32_t {
     SPLIT_QUIT = 1 << 6,
     GESTURE_ANIMATION = 1 << 7,
     OTHER_WINDOW = 1 << 8,
+    INVALID_MODE_OR_SIZE_IN_TILE = 1 << 9,
 };
 
 class MinimizeApp : public RefBase {
@@ -57,7 +58,8 @@ private:
     {
         return (reason == MinimizeReason::MINIMIZE_ALL || reason == MinimizeReason::MINIMIZE_BUTTON ||
             reason == MinimizeReason::MAX_APP_COUNT || reason == MinimizeReason::LAYOUT_TILE ||
-            reason == MinimizeReason::SPLIT_REPLACE || reason == MinimizeReason::SPLIT_QUIT);
+            reason == MinimizeReason::INVALID_MODE_OR_SIZE_IN_TILE || reason == MinimizeReason::SPLIT_REPLACE ||
+            reason == MinimizeReason::SPLIT_QUIT);
     }
 
     static std::map<MinimizeReason, std::vector<wptr<WindowNode>>> needMinimizeAppNodes_;
