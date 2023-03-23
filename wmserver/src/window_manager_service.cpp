@@ -565,6 +565,16 @@ bool WindowManagerService::ConfigAppWindowShadow(const WindowManagerConfig::Conf
         }
         outShadow.alpha_ = alpha[0];
     }
+
+    item = shadowConfig["radius"];
+    if (item.IsFloats()) {
+        auto radius = *item.floatsValue_;
+        if (radius.size() != 1 || (radius.size() == 1 && MathHelper::LessNotEqual(radius[0], 0.0))) {
+            return false;
+        }
+        outShadow.radius_ = radius[0];
+    }
+
     return true;
 }
 

@@ -29,6 +29,7 @@ struct WindowShadowParameters {
     float offsetX_;
     float offsetY_;
     float alpha_;
+    float radius_;
 };
 struct AppWindowEffectConfig {
     float fullScreenCornerRadius_;
