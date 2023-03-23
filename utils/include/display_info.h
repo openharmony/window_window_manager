@@ -58,6 +58,7 @@ public:
         DisplayOrientation::UNKNOWN);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(DisplayStateChangeType, DisplayStateChangeType, displayStateChangeType,
         DisplayStateChangeType::UNKNOWN);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(bool, IsDefaultVertical, isDefaultVertical, true);
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_DISPLAY_INFO_H
