@@ -111,6 +111,7 @@ public:
     void GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const;
     WMError NotifyDesktopUnfrozen();
     void UpdateDisplayOrientationWhenHideWindow(sptr<WindowNode>& node);
+    bool HasMainFullScreenWindowShown(DisplayId displayId);
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);

@@ -1540,6 +1540,12 @@ bool WindowRoot::HasPrivateWindow(DisplayId displayId)
     return container != nullptr ? container->HasPrivateWindow() : false;
 }
 
+bool WindowRoot::HasMainFullScreenWindowShown(DisplayId displayId)
+{
+    auto container = GetWindowNodeContainer(displayId);
+    return container != nullptr ? container->HasMainFullScreenWindowShown() : false;
+}
+
 void WindowRoot::SetMaxAppWindowNumber(uint32_t windowNum)
 {
     maxAppWindowNumber_ = windowNum;
