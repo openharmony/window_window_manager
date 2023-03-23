@@ -44,6 +44,11 @@ AbstractDisplay::AbstractDisplay(DisplayId id, std::string name,
     } else {
         displayOrientation_ = DisplayOrientation::PORTRAIT;
     }
+    if (info->width_ < info->height_) {
+        isDefaultVertical_ = true;
+    } else {
+        isDefaultVertical_ = false;
+    }
     auto numbersConfig = DisplayManagerConfig::GetIntNumbersConfig();
     if (numbersConfig.count("dpi") != 0) {
         uint32_t densityDpi = static_cast<uint32_t>(numbersConfig["dpi"][0]);
@@ -247,6 +252,7 @@ sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
     displayInfo->displayState_ = displayState_;
     displayInfo->SetWaterfallDisplayCompressionStatus(waterfallDisplayCompressionStatus_);
     displayInfo->SetDisplayOrientation(displayOrientation_);
+    displayInfo->SetIsDefaultVertical(isDefaultVertical_);
     return displayInfo;
 }
 } // namespace OHOS::Rosen
