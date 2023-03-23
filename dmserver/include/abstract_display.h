@@ -85,6 +85,7 @@ private:
     DisplayOrientation displayOrientation_ { DisplayOrientation::UNKNOWN };
     FreezeFlag freezeFlag_ { FreezeFlag::UNFREEZING };
     DEFINE_VAR_DEFAULT_FUNC_SET(DisplayState, DisplayState, displayState, DisplayState::UNKNOWN);
+    bool isDefaultVertical_ { true };
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_H
