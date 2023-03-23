@@ -89,6 +89,7 @@ private:
     static sptr<RSWindowAnimationFinishedCallback> CreateHideAnimationFinishedCallback(
         const sptr<WindowNode>& srcNode, TransitionEvent event);
     static void ProcessNodeStateTask(sptr<WindowNode>& node);
+    static void GetExpectRect(const sptr<WindowNode>& dstNode, const sptr<RSWindowAnimationTarget>& dstTarget);
     static void PostProcessShowCallback(const sptr<WindowNode>& node);
     static void ExecuteFinalStateTask(sptr<WindowNode>& node);
     static void GetAnimationTargetsForHome(std::vector<sptr<RSWindowAnimationTarget>>& animationTargets,
