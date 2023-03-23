@@ -263,7 +263,7 @@ int WindowManagerService::Dump(int fd, const std::vector<std::u16string>& args)
     if (windowDumper_ == nullptr) {
         windowDumper_ = new WindowDumper(windowRoot_);
     }
-
+    WLOGFI("Pid : %{public}d", IPCSkeleton::GetCallingPid());
     return PostSyncTask([this, fd, &args]() {
         return static_cast<int>(windowDumper_->Dump(fd, args));
     });
