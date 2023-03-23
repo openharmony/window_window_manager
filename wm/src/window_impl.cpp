@@ -708,7 +708,12 @@ WMError WindowImpl::SetLayoutFullScreen(bool status)
         WLOGFE("invalid window or fullscreen mode is not be supported, winId:%{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    WMError ret = WMError::WM_OK;
+    WMError ret = SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetWindowMode errCode:%{public}d winId:%{public}u",
+            static_cast<int32_t>(ret), property_->GetWindowId());
+        return ret;
+    }
     if (status) {
         ret = RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
         if (ret != WMError::WM_OK) {
@@ -3071,6 +3076,7 @@ void WindowImpl::SetDefaultOption()
             break;
         }
         case WindowType::WINDOW_TYPE_KEYGUARD: {
+            RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
             break;
         }
@@ -3120,8 +3126,10 @@ bool WindowImpl::IsWindowValid() const
 
 bool WindowImpl::IsLayoutFullScreen() const
 {
+    uint32_t flags = GetWindowFlags();
     auto mode = GetMode();
-    return (mode == WindowMode::WINDOW_MODE_FULLSCREEN);
+    bool needAvoid = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
+    return (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !needAvoid);
 }
 
 bool WindowImpl::IsFullScreen() const
