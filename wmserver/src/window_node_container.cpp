@@ -1795,6 +1795,21 @@ bool WindowNodeContainer::HasPrivateWindow()
     return false;
 }
 
+bool WindowNodeContainer::HasMainFullScreenWindowShown()
+{
+    std::vector<sptr<WindowNode>> windowNodes;
+    for (auto& node : appWindowNode_->children_) {
+        TraverseWindowNode(node, windowNodes);
+    }
+    for (const auto& node : windowNodes) {
+        if (node->currentVisibility_ &&
+            WindowHelper::IsMainFullScreenWindow(node->GetWindowType(), node->GetWindowMode())) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void WindowNodeContainer::MinimizeOldestAppWindow()
 {
     for (auto& appNode : appWindowNode_->children_) {

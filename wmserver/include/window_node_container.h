@@ -127,6 +127,7 @@ public:
     static void SetConfigMainFloatingWindowAbove(bool isAbove);
     static void SetMaxMainFloatingWindowNumber(uint32_t maxNumber);
     void SetDisplayOrientationFromWindow(sptr<WindowNode>& node, bool withAnimation);
+    bool HasMainFullScreenWindowShown();
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
     sptr<WindowNode> FindRoot(WindowType type) const;
