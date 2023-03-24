@@ -490,8 +490,13 @@ WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<Window
         container->RaiseZOrderForAppWindow(parentNode, parent);
     }
     if (node->GetWindowProperty()->GetFocusable()) {
-        container->SetFocusWindow(node->GetWindowId());
-        needCheckFocusWindow = true;
+        // when launcher reboot, the focus window should not change with showing a full screen window.
+        sptr<WindowNode> focusWin = GetWindowNode(container->GetFocusWindow());
+        if (focusWin != nullptr &&
+            !(WindowHelper::IsFullScreenWindow(focusWin->GetWindowMode()) && focusWin->zOrder_ > node->zOrder_)) {
+            container->SetFocusWindow(node->GetWindowId());
+            needCheckFocusWindow = true;
+        }
     }
     if (!WindowHelper::IsSystemBarWindow(node->GetWindowType())) {
         container->SetActiveWindow(node->GetWindowId(), false);
