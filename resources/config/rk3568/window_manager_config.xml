@@ -56,9 +56,9 @@
     <keyboardAnimation>
         <timing>
             <!--duration of animation when add keyboard, unit is ms-->
-            <durationIn>500</durationIn>
+            <durationIn>150</durationIn>
             <!--duration of animation when remove keyboard, unit is ms-->
-            <durationOut>300</durationOut>
+            <durationOut>150</durationOut>
             <!--friction curve-->
             <curve name="cubic">0.2 0.0 0.2 1.0</curve>
         </timing>
