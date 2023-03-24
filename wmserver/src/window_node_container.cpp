@@ -659,10 +659,12 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
         if (node->surfaceNode_) {
             node->surfaceNode_->SetAppFreeze(true);
         }
+	wptr<WindowNode> weakNode(node);
         RSNode::Animate(animationConfig_.windowAnimationConfig_.animationTiming_.timingProtocol_,
-            animationConfig_.windowAnimationConfig_.animationTiming_.timingCurve_, updateRSTreeFunc, [node]() {
-            if (node->surfaceNode_) {
-                node->surfaceNode_->SetAppFreeze(false);
+            animationConfig_.windowAnimationConfig_.animationTiming_.timingCurve_, updateRSTreeFunc, [weakNode]() {
+	    auto weakWindow = weakNode.promote();
+            if (weakWindow && weakWindow->surfaceNode_) {
+                weakWindow->surfaceNode_->SetAppFreeze(false);
             }
         });
         FinishTrace(HITRACE_TAG_WINDOW_MANAGER);
