@@ -34,7 +34,11 @@ namespace Rosen {
 class VsyncStation {
 WM_DECLARE_SINGLE_INSTANCE_BASE(VsyncStation);
 public:
-    ~VsyncStation() = default;
+    ~VsyncStation()
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        destroyed_ = true;
+    }
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback);
     void RemoveCallback();
     void SetIsMainHandlerAvailable(bool available)
@@ -57,6 +61,7 @@ private:
     bool hasRequestedVsync_ = false;
     bool hasInitVsyncReceiver_ = false;
     bool isMainHandlerAvailable_ = true;
+    bool destroyed_ = false;
     const std::string VSYNC_THREAD_ID = "VsyncThread";
     std::shared_ptr<OHOS::Rosen::VSyncReceiver> receiver_ = nullptr;
     std::unordered_set<std::shared_ptr<VsyncCallback>> vsyncCallbacks_;
