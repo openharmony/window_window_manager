@@ -268,9 +268,11 @@ void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
         return;
     }
     node->leashWinSurfaceNode_->RemoveChild(node->startingWinSurfaceNode_);
+    node->leashWinSurfaceNode_->RemoveChild(node->closeWinSurfaceNode_);
     node->leashWinSurfaceNode_->RemoveChild(node->surfaceNode_);
     node->leashWinSurfaceNode_ = nullptr;
     node->startingWinSurfaceNode_ = nullptr;
+    node->closeWinSurfaceNode_ = nullptr;
     WLOGI("Release startwindow surfaceNode end id: %{public}u, [leashWinSurface]: use_count: %{public}ld, \
         [startWinSurface]: use_count: %{public}ld ", node->GetWindowId(),
         node->leashWinSurfaceNode_.use_count(), node->startingWinSurfaceNode_.use_count());

@@ -188,15 +188,15 @@ static void GetAndDrawSnapShot(const sptr<WindowNode>& srcNode)
             return;
         }
         struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
-        rsSurfaceNodeConfig.SurfaceNodeName = "startingWindow" + std::to_string(srcNode->GetWindowId());
-        srcNode->startingWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig,
+        rsSurfaceNodeConfig.SurfaceNodeName = "closeWin" + std::to_string(srcNode->GetWindowId());
+        srcNode->closeWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig,
             RSSurfaceNodeType::STARTING_WINDOW_NODE);
         auto rect = srcNode->GetWindowRect();
-        srcNode->startingWinSurfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);
-        SurfaceDraw::DrawImageRect(srcNode->startingWinSurfaceNode_, srcNode->GetWindowRect(),
+        srcNode->closeWinSurfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);
+        SurfaceDraw::DrawImageRect(srcNode->closeWinSurfaceNode_, srcNode->GetWindowRect(),
             pixelMap, 0x00ffffff, true);
         srcNode->leashWinSurfaceNode_->RemoveChild(srcNode->surfaceNode_);
-        srcNode->leashWinSurfaceNode_->AddChild(srcNode->startingWinSurfaceNode_, -1);
+        srcNode->leashWinSurfaceNode_->AddChild(srcNode->closeWinSurfaceNode_, -1);
         RSTransaction::FlushImplicitTransaction();
         WLOGFI("Draw surface snapshot in starting window for window:%{public}u", srcNode->GetWindowId());
     } else if (srcNode->surfaceNode_) {
