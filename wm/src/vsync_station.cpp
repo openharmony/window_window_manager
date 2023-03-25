@@ -34,6 +34,9 @@ void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallb
 {
     {
         std::lock_guard<std::mutex> lock(mtx_);
+        if (destroyed_) {
+            return;
+        }
         vsyncCallbacks_.insert(vsyncCallback);
 
         if (!hasInitVsyncReceiver_ || !vsyncHandler_) {
