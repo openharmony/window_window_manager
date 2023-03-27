@@ -216,6 +216,12 @@ void WindowManagerServiceHandler::NotifyWindowTransition(
     WindowManagerService::GetInstance().NotifyWindowTransition(fromInfo, toInfo, false);
 }
 
+void WindowManagerServiceHandler::NotifyAnimationAbilityDied(sptr<AAFwk::AbilityTransitionInfo> info)
+{
+    sptr<WindowTransitionInfo> windowTransitionInfo = new WindowTransitionInfo(info);
+    WindowManagerService::GetInstance().NotifyAnimationAbilityDied(windowTransitionInfo);
+}
+
 int32_t WindowManagerServiceHandler::GetFocusWindow(sptr<IRemoteObject>& abilityToken)
 {
     return static_cast<int32_t>(WindowManagerService::GetInstance().GetFocusWindowInfo(abilityToken));
@@ -664,6 +670,13 @@ WMError WindowManagerService::NotifyWindowTransition(
             return windowController_->NotifyWindowTransition(fromInfo, toInfo);
         });
     }
+}
+
+void WindowManagerService::NotifyAnimationAbilityDied(sptr<WindowTransitionInfo> info)
+{
+    return PostAsyncTask([this, info]() mutable {
+        return RemoteAnimation::NotifyAnimationAbilityDied(info);
+    });
 }
 
 WMError WindowManagerService::GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken)

@@ -441,6 +441,44 @@ WMError RemoteAnimation::NotifyAnimationClose(sptr<WindowTransitionInfo> srcInfo
     return WMError::WM_OK;
 }
 
+void RemoteAnimation::NotifyAnimationAbilityDied(sptr<WindowTransitionInfo> info)
+{
+    if (info == nullptr) {
+        WLOGFE("Window transition info is null!");
+        return;
+    }
+    auto handler = wmsTaskHandler_.lock();
+    if (handler == nullptr) {
+        WLOGFE("wmsTaskHandler_ is nullptr");
+        return;
+    }
+    // need post task when visit windowRoot node map
+    auto task = [info]() {
+        if (!CheckAnimationController()) {
+            return;
+        }
+        WLOGFI("ability died bundleName:%{public}s, abilityName:%{public}s", info->GetBundleName().c_str(),
+            info->GetAbilityName().c_str());
+        sptr<RSWindowAnimationTarget> target = new(std::nothrow) RSWindowAnimationTarget();
+        if (target == nullptr) {
+            WLOGFE("target is nullptr");
+            return;
+        }
+        target->bundleName_ = info->GetBundleName();
+        target->abilityName_ = info->GetAbilityName();
+        target->missionId_ = info->GetMissionId();
+        target->windowId_ = INVALID_WINDOW_ID;
+        auto func = []() { WLOGFI("NotifyAbilityDied finished!"); };
+        auto finishCallback = CreateAnimationFinishedCallback(func);
+        windowAnimationController_->OnCloseWindow(target, finishCallback);
+    };
+    bool ret = handler->PostTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    if (!ret) {
+        WLOGFE("EventHandler PostTask Failed");
+        task();
+    }
+}
+
 WMError RemoteAnimation::NotifyAnimationBackTransition(sptr<WindowTransitionInfo> srcInfo,
     sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& srcNode,
     const sptr<WindowNode>& dstNode)
