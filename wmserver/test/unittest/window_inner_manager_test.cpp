@@ -31,6 +31,7 @@ using EventPriority = OHOS::AppExecFwk::EventQueue::Priority;
 
 namespace {
     const std::string INNER_WM_THREAD_NAME = "TestInnerWindowManager";
+    constexpr int32_t TEST_CUSTOM_ID = 100;
 }
 
 class WindowInnerManagerTest : public testing::Test {
@@ -115,13 +116,15 @@ HWTEST_F(WindowInnerManagerTest, NotifyWindowEndUpMovingOrDragging, Function | S
     WindowInnerManager& windowInnerManager = WindowInnerManager::GetInstance();
     windowInnerManager.eventHandler_ = nullptr;
     windowInnerManager.moveDragController_ = new MoveDragController();
-    windowInnerManager.moveDragController_->activeWindowId_ = INVALID_WINDOW_ID;
-    uint32_t windowId = 1;
+    windowInnerManager.moveDragController_->activeWindowId_ = TEST_CUSTOM_ID;
 
+    uint32_t windowId = INVALID_WINDOW_ID;
     windowInnerManager.NotifyWindowEndUpMovingOrDragging(windowId);
+    ASSERT_EQ(windowInnerManager.moveDragController_->activeWindowId_, TEST_CUSTOM_ID);
 
-    windowId = INVALID_WINDOW_ID;
+    windowId = TEST_CUSTOM_ID;
     windowInnerManager.NotifyWindowEndUpMovingOrDragging(windowId);
+    ASSERT_EQ(windowInnerManager.moveDragController_->activeWindowId_, INVALID_WINDOW_ID);
 }
 /**
  * @tc.name: NotifyWindowRemovedOrDestroyed
@@ -133,13 +136,19 @@ HWTEST_F(WindowInnerManagerTest, NotifyWindowRemovedOrDestroyed, Function | Smal
     WindowInnerManager& windowInnerManager = WindowInnerManager::GetInstance();
     windowInnerManager.eventHandler_ = nullptr;
     windowInnerManager.moveDragController_ = new MoveDragController();
-    windowInnerManager.moveDragController_->activeWindowId_ = INVALID_WINDOW_ID;
+    windowInnerManager.moveDragController_->activeWindowId_ = TEST_CUSTOM_ID;
 
-    uint32_t windowId = 1;
+    uint32_t windowId = INVALID_WINDOW_ID;
     windowInnerManager.NotifyWindowRemovedOrDestroyed(windowId);
+    ASSERT_EQ(windowInnerManager.moveDragController_->activeWindowId_, TEST_CUSTOM_ID);
 
-    windowId = INVALID_WINDOW_ID;
+    windowId = TEST_CUSTOM_ID;
+
+    auto moveDragProperty = windowInnerManager.moveDragController_->moveDragProperty_;
+    moveDragProperty->startDragFlag_ = true;
+    moveDragProperty->startMoveFlag_ = true;
     windowInnerManager.NotifyWindowRemovedOrDestroyed(windowId);
+    ASSERT_EQ(windowInnerManager.moveDragController_->activeWindowId_, INVALID_WINDOW_ID);
 }
 /**
  * @tc.name: ConsumePointerEvent
@@ -156,19 +165,23 @@ HWTEST_F(WindowInnerManagerTest, ConsumePointerEvent, Function | SmallTest | Lev
     pointerEvent->processedCallback_ = nullptr;
     pointerEvent->sourceType_ = MMI::PointerEvent::SOURCE_TYPE_MOUSE;
     pointerEvent->buttonId_ = MMI::PointerEvent::MOUSE_BUTTON_RIGHT;
-    pointerEvent->pointerAction_ = MMI::PointerEvent::POINTER_ACTION_UNKNOWN;
-
-    pointerEvent->agentWindowId_ = 1;
-    windowInnerManager.moveDragController_->activeWindowId_ = INVALID_WINDOW_ID;
-    windowInnerManager.ConsumePointerEvent(pointerEvent);
+    pointerEvent->pointerAction_ = MMI::PointerEvent::POINTER_ACTION_MOVE;
 
     pointerEvent->agentWindowId_ = 1;
     windowInnerManager.moveDragController_->activeWindowId_ = 1;
     windowInnerManager.ConsumePointerEvent(pointerEvent);
+    ASSERT_NE(windowInnerManager.moveDragController_->moveEvent_, nullptr);
+    ASSERT_EQ(windowInnerManager.moveDragController_->moveEvent_->agentWindowId_, pointerEvent->agentWindowId_);
+
+    pointerEvent->agentWindowId_ = 1;
+    windowInnerManager.moveDragController_->activeWindowId_ = INVALID_WINDOW_ID;
+    windowInnerManager.ConsumePointerEvent(pointerEvent);
+    ASSERT_EQ(windowInnerManager.moveDragController_->moveEvent_->agentWindowId_, pointerEvent->agentWindowId_);
 
     pointerEvent->agentWindowId_ = INVALID_WINDOW_ID;
     windowInnerManager.moveDragController_->activeWindowId_ = INVALID_WINDOW_ID;
     windowInnerManager.ConsumePointerEvent(pointerEvent);
+    ASSERT_EQ(windowInnerManager.moveDragController_->moveEvent_->agentWindowId_, pointerEvent->agentWindowId_);
 }
 }
 }

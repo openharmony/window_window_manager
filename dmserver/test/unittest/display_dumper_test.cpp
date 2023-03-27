@@ -329,6 +329,7 @@ HWTEST_F(DisplayDumperTest, DumpAllScreenInfo01, Function | SmallTest | Level1)
         DisplayManagerService::GetInstance().mutex_);
     std::string dumpInfo;
     displayDumper->DumpAllScreenInfo(dumpInfo);
+    ASSERT_NE(dumpInfo.size(), 0);
 }
 
 /**
@@ -344,6 +345,8 @@ HWTEST_F(DisplayDumperTest, GetDisplayInfo01, Function | SmallTest | Level1)
         DisplayManagerService::GetInstance().mutex_);
     std::ostringstream oss;
     displayDumper->GetDisplayInfo(nullptr, oss);
+    std::string result = oss.str();
+    ASSERT_EQ(result.size(), 0);
 }
 }
 }
