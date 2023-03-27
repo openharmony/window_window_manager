@@ -202,7 +202,7 @@ HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest01, Function | Medium
     bool isWindowVisible = false;
     bool isSubWindowVisible = false;
 
-    uint32_t visibilityInfoCount = 0;
+    [[maybe_unused]] uint32_t visibilityInfoCount = 0;
     ASSERT_EQ(WMError::WM_OK, window1->Show());
     isWindowVisible = FillColor(window1);
     WaitForCallback();
