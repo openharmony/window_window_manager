@@ -30,7 +30,6 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
     Utils::TestWindowInfo inputMethodWindowInfo_;
-    Utils::TestWindowInfo keyGuardWindowInfo_;
 };
 
 void WindowInputMethodTest::SetUpTestCase()
@@ -54,15 +53,7 @@ void WindowInputMethodTest::SetUp()
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = false,
         .parentLimit = false,
-        .parentId = INVALID_WINDOW_ID,
-    };
-    keyGuardWindowInfo_ = {
-        .name = "",
-        .rect = Utils::customAppRect_,
-        .type = WindowType::WINDOW_TYPE_KEYGUARD,
-        .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
-        .needAvoid = false,
-        .parentLimit = false,
+        .showWhenLocked = true,
         .parentId = INVALID_WINDOW_ID,
     };
 }
@@ -88,34 +79,17 @@ HWTEST_F(WindowInputMethodTest, InputMethodWindow01, Function | MediumTest | Lev
 
 /**
  * @tc.name: InputMethodWindow02
- * @tc.desc: One KeyGuard Window
+ * @tc.desc: One InputMethod Floating Window & One KeyGuard Window
  * @tc.type: FUNC
  */
 HWTEST_F(WindowInputMethodTest, InputMethodWindow02, Function | MediumTest | Level3)
 {
-    keyGuardWindowInfo_.name  = "keyGuard.1";
-    const sptr<Window>& window = Utils::CreateTestWindow(keyGuardWindowInfo_);
-    ASSERT_EQ(WindowType::WINDOW_TYPE_KEYGUARD, window->GetType());
-    ASSERT_EQ(WMError::WM_OK, window->Show());
-    ASSERT_EQ(WMError::WM_OK, window->Hide());
-}
-
-/**
- * @tc.name: InputMethodWindow03
- * @tc.desc: One InputMethod Floating Window & One KeyGuard Window
- * @tc.type: FUNC
- */
-HWTEST_F(WindowInputMethodTest, InputMethodWindow03, Function | MediumTest | Level3)
-{
     inputMethodWindowInfo_.name = "input_method.2";
-    keyGuardWindowInfo_.name  = "keyGuard.2";
     const sptr<Window>& inputMethodWindow = Utils::CreateTestWindow(inputMethodWindowInfo_);
-    const sptr<Window>& keyGuardWindow = Utils::CreateTestWindow(keyGuardWindowInfo_);
-    keyGuardWindow->Show();
     inputMethodWindow->Show();
-    ASSERT_TRUE(Utils::RectEqualTo(keyGuardWindow, Utils::displayRect_));
     ASSERT_EQ(inputMethodWindow->GetRect().width_,  Utils::customAppRect_.width_);
     ASSERT_EQ(inputMethodWindow->GetRect().height_,  Utils::customAppRect_.height_);
+    inputMethodWindow->Hide();
 }
 } // namespace
 } // namespace Rosen

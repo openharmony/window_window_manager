@@ -69,6 +69,7 @@ public:
     static sptr<TestIWaterMarkFlagChangedListener> lisenter_;
     Utils::TestWindowInfo appInfo_;
     sptr<Window> CreateWindow(const Utils::TestWindowInfo& appinfo);
+    static inline DisplayId displayId_;
 };
 
 sptr<TestIWaterMarkFlagChangedListener> WaterMarkTest::lisenter_ = nullptr;
@@ -76,6 +77,7 @@ void WaterMarkTest::SetUpTestCase()
 {
     lisenter_= new TestIWaterMarkFlagChangedListener();
     WindowManager::GetInstance().RegisterWaterMarkFlagChangedListener(lisenter_);
+    displayId_ = DisplayManager::GetInstance().GetDefaultDisplayId();
 }
 
 void WaterMarkTest::TearDownTestCase()
@@ -104,6 +106,7 @@ void WaterMarkTest::TearDown()
 sptr<Window> WaterMarkTest::CreateWindow(const Utils::TestWindowInfo& appinfo)
 {
     sptr<WindowOption> option = new WindowOption();
+    option->SetDisplayId(displayId_);
     option->SetWindowRect(appinfo.rect);
     option->SetWindowType(appinfo.type);
     option->SetWindowMode(appinfo.mode);
@@ -138,7 +141,7 @@ namespace {
 HWTEST_F(WaterMarkTest, SetWaterMarkFlag01, Function | MediumTest | Level1)
 {
     appInfo_.name = "window1";
-    appInfo_.rect = {0, 0, 300, 100};
+    appInfo_.rect = {200, 200, 300, 300};
     sptr<Window> window = CreateWindow(appInfo_);
     ASSERT_NE(window, nullptr);
     window->Show();
@@ -148,7 +151,7 @@ HWTEST_F(WaterMarkTest, SetWaterMarkFlag01, Function | MediumTest | Level1)
     ASSERT_TRUE(drawSuccess);
 
     window->AddWindowFlag(WindowFlag::WINDOW_FLAG_WATER_MARK);
-    sleep(NORMAL_SLEEP_TIME);
+    sleep(NORMAL_SLEEP_TIME * 30);
     ASSERT_EQ(lisenter_->isShowing_, true);
 
     window->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_WATER_MARK);

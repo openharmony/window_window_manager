@@ -179,6 +179,7 @@ bool WindowImmersiveTest::SystemBarEnableState(bool expectStatus, bool expectNav
 void TestSystemBarChangedListener::OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints)
 {
     WLOGI("TestSystemBarChangedListener Display ID: %{public}" PRIu64"", displayId);
+    WLOGI("TestSystemBarChangedListener tints size: %{public}zu", tints.size());
     for (auto tint : tints) {
         auto type = tint.type_;
         for (uint32_t i = 0; i < tints_.size(); i++) {
@@ -234,6 +235,7 @@ void WindowImmersiveTest::SetUp()
 
     WindowManager::GetInstance().RegisterSystemBarChangedListener(testSystemBarChangedListener_);
     activeWindows_.clear();
+    sleep(1);
 }
 
 void WindowImmersiveTest::TearDown()
@@ -243,6 +245,7 @@ void WindowImmersiveTest::TearDown()
         activeWindows_.pop_back();
     }
     WindowManager::GetInstance().UnregisterSystemBarChangedListener(testSystemBarChangedListener_);
+    sleep(1);
 }
 
 namespace {
