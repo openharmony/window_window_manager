@@ -24,6 +24,9 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr uint32_t SLEEP_TIME_US = 2000000;
+}
 class ScreenRotationControllerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -394,15 +397,27 @@ HWTEST_F(ScreenRotationControllerTest, ProcessSwitchToSensorRelatedOrientation, 
  */
 HWTEST_F(ScreenRotationControllerTest, ProcessSwitchToAutoRotation, Function | SmallTest | Level3)
 {
+    auto defaultDisplayInfo = DisplayManagerService::GetInstance().GetDefaultDisplayInfo();
+    ASSERT_NE(nullptr, defaultDisplayInfo);
+
     DeviceRotation deviceRotation = DeviceRotation::INVALID;
     ScreenRotationController::ProcessSwitchToAutoRotation(deviceRotation);
     deviceRotation = DeviceRotation::ROTATION_PORTRAIT;
     ScreenRotationController::ProcessSwitchToAutoRotation(deviceRotation);
+    usleep(SLEEP_TIME_US);
+
+    auto displayRotationTarget = ScreenRotationController::ConvertDeviceToDisplayRotation(deviceRotation);
+    ASSERT_EQ(displayRotationTarget, defaultDisplayInfo->GetRotation());
 
     deviceRotation = DeviceRotation::INVALID;
     ScreenRotationController::ProcessSwitchToAutoRotationPortrait(deviceRotation);
     deviceRotation = DeviceRotation::ROTATION_PORTRAIT;
     ScreenRotationController::ProcessSwitchToAutoRotationPortrait(deviceRotation);
+    usleep(SLEEP_TIME_US);
+    defaultDisplayInfo = DisplayManagerService::GetInstance().GetDefaultDisplayInfo();
+    ASSERT_NE(nullptr, defaultDisplayInfo);
+    displayRotationTarget = ScreenRotationController::ConvertDeviceToDisplayRotation(deviceRotation);
+    ASSERT_EQ(displayRotationTarget, defaultDisplayInfo->GetRotation());
 
     deviceRotation = DeviceRotation::INVALID;
     ScreenRotationController::ProcessSwitchToAutoRotationLandscape(deviceRotation);
