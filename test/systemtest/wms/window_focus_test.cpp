@@ -88,6 +88,7 @@ void WindowFocusTest::SetUp()
             .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
             .needAvoid = false,
             .parentLimit = false,
+            .showWhenLocked = true,
             .parentId = INVALID_WINDOW_ID,
     };
     floatAppInfo_ = {
@@ -97,6 +98,7 @@ void WindowFocusTest::SetUp()
             .mode = WindowMode::WINDOW_MODE_FLOATING,
             .needAvoid = false,
             .parentLimit = false,
+            .showWhenLocked = true,
             .parentId = INVALID_WINDOW_ID,
     };
     subAppInfo_ = {
@@ -106,6 +108,7 @@ void WindowFocusTest::SetUp()
             .mode = WindowMode::WINDOW_MODE_FLOATING,
             .needAvoid = false,
             .parentLimit = false,
+            .showWhenLocked = false,
             .parentId = INVALID_WINDOW_ID,
     };
     WindowManager::GetInstance().RegisterFocusChangedListener(testFocusChangedListener_);

@@ -99,6 +99,7 @@ HWTEST_F(DisplayManagerConfigTest, ReadEnableConfigInfo, Function | SmallTest | 
         xmlFreeDoc(docPtr);
         return;
     }
+    uint32_t readCount = 0;
     for (xmlNodePtr curNodePtr = rootPtr->xmlChildrenNode; curNodePtr != nullptr; curNodePtr = curNodePtr->next) {
         if (!DisplayManagerConfig::IsValidNode(*curNodePtr)) {
             continue;
@@ -107,14 +108,18 @@ HWTEST_F(DisplayManagerConfigTest, ReadEnableConfigInfo, Function | SmallTest | 
         auto nodeName = curNodePtr->name;
         if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("isWaterfallDisplay"))) {
             DisplayManagerConfig::ReadEnableConfigInfo(curNodePtr);
+            readCount++;
             continue;
         }
 
         if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("dpi"))) {
             DisplayManagerConfig::ReadEnableConfigInfo(curNodePtr);
+            readCount++;
             continue;
         }
     }
+
+    ASSERT_LE(DisplayManagerConfig::enableConfig_.size(), readCount);
 
     DisplayManagerConfig::DumpConfig();
     xmlFreeDoc(docPtr);
@@ -141,6 +146,7 @@ HWTEST_F(DisplayManagerConfigTest, ReadStringConfigInfo, Function | SmallTest | 
         xmlFreeDoc(docPtr);
         return;
     }
+    uint32_t readCount = 0;
     for (xmlNodePtr curNodePtr = rootPtr->xmlChildrenNode; curNodePtr != nullptr; curNodePtr = curNodePtr->next) {
         if (!DisplayManagerConfig::IsValidNode(*curNodePtr)) {
             continue;
@@ -149,15 +155,18 @@ HWTEST_F(DisplayManagerConfigTest, ReadStringConfigInfo, Function | SmallTest | 
         auto nodeName = curNodePtr->name;
         if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("defaultDisplayCutoutPath"))) {
             DisplayManagerConfig::ReadStringConfigInfo(curNodePtr);
+            readCount++;
             continue;
         }
 
         if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("dpi"))) {
             DisplayManagerConfig::ReadStringConfigInfo(curNodePtr);
+            readCount++;
             continue;
         }
     }
 
+    ASSERT_LE(DisplayManagerConfig::stringConfig_.size(), readCount);
     DisplayManagerConfig::DumpConfig();
     xmlFreeDoc(docPtr);
 }
