@@ -125,6 +125,11 @@ HWTEST_F(DisplayManagerServiceTest, Config, Function | SmallTest | Level3)
     };
 
     dms_->ConfigureDisplayManagerService();
+
+    ASSERT_NE(dms_->displayCutoutController_, nullptr);
+    ASSERT_FALSE(dms_->displayCutoutController_->isWaterfallDisplay_);
+    ASSERT_EQ(dms_->displayCutoutController_->curvedScreenBoundary_[0],
+        DisplayManagerConfig::intNumbersConfig_["curvedScreenBoundary"][0]);
 }
 
 /**
