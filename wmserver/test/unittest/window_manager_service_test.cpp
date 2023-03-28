@@ -106,14 +106,14 @@ HWTEST_F(WindowManagerServiceTest, WindowVisibilityChangeCallback01, Function | 
     ASSERT_EQ(nullptr, occlusionData);
 }
 /**
- * @tc.name: RegisterWindowManagerServiceHandler
- * @tc.desc: Register Snapshot Handler
+ * @tc.name: InitWithAbilityManagerServiceAdded
+ * @tc.desc: Init with ability manager service added.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, RegisterWindowManagerServiceHandler01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, InitWithAbilityManagerServiceAdded01, Function | SmallTest | Level2)
 {
     wms->wmsHandler_ = new WindowManagerServiceHandler;
-    wms->RegisterWindowManagerServiceHandler();
+    wms->InitWithAbilityManagerServiceAdded();
     ASSERT_NE(nullptr, wms->wmsHandler_);
 }
 /**
