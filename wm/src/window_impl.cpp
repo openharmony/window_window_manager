@@ -2333,6 +2333,9 @@ void WindowImpl::StartMove()
 
 void WindowImpl::ResetMoveOrDragState()
 {
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        return;
+    }
     moveDragProperty_->pointEventStarted_ = false;
     moveDragProperty_->startDragFlag_ = false;
     moveDragProperty_->startMoveFlag_ = false;
