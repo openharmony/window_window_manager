@@ -170,7 +170,7 @@ void JsDisplayListener::OnPrivateWindow(bool hasPrivate)
         WLOGFE("OnPrivateWindow not register!");
         return;
     }
-    if (jsCallBack_.find(EVENT_PRIVATE_MODE) == jsCallBack_.end()) {
+    if (jsCallBack_.find(EVENT_PRIVATE_MODE_CHANGE) == jsCallBack_.end()) {
         WLOGE("OnPrivateWindow not this event, return");
         return;
     }
@@ -178,7 +178,7 @@ void JsDisplayListener::OnPrivateWindow(bool hasPrivate)
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             NativeValue* argv[] = {CreateJsValue(*engine_, hasPrivate)};
-            CallJsMethod(EVENT_PRIVATE_MODE, argv, ArraySize(argv));
+            CallJsMethod(EVENT_PRIVATE_MODE_CHANGE, argv, ArraySize(argv));
         }
     );
 
