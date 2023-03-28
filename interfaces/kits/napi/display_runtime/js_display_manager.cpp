@@ -206,32 +206,35 @@ NativeValue* OnGetAllDisplays(NativeEngine& engine, NativeCallbackInfo& info)
     return result;
 }
 
-void RegisterDisplayListenerWithType(NativeEngine& engine, const std::string& type, NativeValue* value)
+DMError RegisterDisplayListenerWithType(NativeEngine& engine, const std::string& type, NativeValue* value)
 {
     if (IfCallbackRegistered(type, value)) {
         WLOGFE("RegisterDisplayListenerWithType callback already registered!");
-        return;
+        return DMError::DM_ERROR_INVALID_PARAM;
     }
     std::unique_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
     sptr<JsDisplayListener> displayListener = new(std::nothrow) JsDisplayListener(&engine);
+    DMError ret = DMError::DM_OK;
     if (displayListener == nullptr) {
         WLOGFE("displayListener is nullptr");
-        return;
+        return DMError::DM_ERROR_INVALID_PARAM;
     }
     if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
-        SingletonContainer::Get<DisplayManager>().RegisterDisplayListener(displayListener);
-        WLOGI("RegisterDisplayListenerWithType success");
-    } else if (type == EVENT_PRIVATE_MODE) {
-        SingletonContainer::Get<DisplayManager>().RegisterPrivateWindowListener(displayListener);
-        WLOGI("RegisterPrivateWindowListenerWithType success");
+        ret = SingletonContainer::Get<DisplayManager>().RegisterDisplayListener(displayListener);
+    } else if (type == EVENT_PRIVATE_MODE_CHANGE) {
+        ret = SingletonContainer::Get<DisplayManager>().RegisterPrivateWindowListener(displayListener);
     } else {
-        WLOGFE("RegisterDisplayListenerWithType failed method: %{public}s not support!",
-               type.c_str());
-        return;
+        WLOGFE("RegisterDisplayListenerWithType failed, %{public}s not support", type.c_str());
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    if (ret != DMError::DM_OK) {
+        WLOGFE("RegisterDisplayListenerWithType failed, ret: %{public}u", ret);
+        return ret;
     }
     displayListener->AddCallback(type, value);
     jsCbMap_[type][std::move(callbackRef)] = displayListener;
+    return DMError::DM_OK;
 }
 
 bool IfCallbackRegistered(const std::string& type, NativeValue* jsListenerObject)
@@ -250,47 +253,53 @@ bool IfCallbackRegistered(const std::string& type, NativeValue* jsListenerObject
     return false;
 }
 
-void UnregisterAllDisplayListenerWithType(const std::string& type)
+DMError UnregisterAllDisplayListenerWithType(const std::string& type)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGI("UnregisterAllDisplayListenerWithType methodName %{public}s not registered!",
             type.c_str());
-        return;
+        return DMError::DM_ERROR_INVALID_PARAM;
     }
+    DMError ret = DMError::DM_OK;
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         it->second->RemoveAllCallback();
         if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
             sptr<DisplayManager::IDisplayListener> thisListener(it->second);
-            SingletonContainer::Get<DisplayManager>().UnregisterDisplayListener(thisListener);
-            WLOGFD("unregister all displayListener success");
-        } else if (type == EVENT_PRIVATE_MODE) {
+            ret = SingletonContainer::Get<DisplayManager>().UnregisterDisplayListener(thisListener);
+            WLOGFD("unregister displayListener, type: %{public}s ret: %{public}u", type.c_str(), ret);
+        } else if (type == EVENT_PRIVATE_MODE_CHANGE) {
             sptr<DisplayManager::IPrivateWindowListener> thisListener(it->second);
-            SingletonContainer::Get<DisplayManager>().UnregisterPrivateWindowListener(thisListener);
-            WLOGFD("unregister all privateWindowListener success");
+            ret = SingletonContainer::Get<DisplayManager>().UnregisterPrivateWindowListener(thisListener);
+            WLOGFD("unregister privateWindowListener, ret: %{public}u", ret);
         }
         jsCbMap_[type].erase(it++);
     }
     jsCbMap_.erase(type);
+    return ret;
 }
 
-void UnRegisterDisplayListenerWithType(const std::string& type, NativeValue* value)
+DMError UnRegisterDisplayListenerWithType(const std::string& type, NativeValue* value)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGI("UnRegisterDisplayListenerWithType methodName %{public}s not registered!",
             type.c_str());
-        return;
+        return DMError::DM_ERROR_INVALID_PARAM;
     }
+    DMError ret = DMError::DM_OK;
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         if (value->StrictEquals(it->first->Get())) {
             it->second->RemoveCallback(type, value);
             if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
                 sptr<DisplayManager::IDisplayListener> thisListener(it->second);
-                SingletonContainer::Get<DisplayManager>().UnregisterDisplayListener(thisListener);
-                WLOGFD("unregister displayListener success");
-            } else if (type == EVENT_PRIVATE_MODE) {
+                ret = SingletonContainer::Get<DisplayManager>().UnregisterDisplayListener(thisListener);
+                WLOGFD("unregister displayListener, type: %{public}s ret: %{public}u", type.c_str(), ret);
+            } else if (type == EVENT_PRIVATE_MODE_CHANGE) {
                 sptr<DisplayManager::IPrivateWindowListener> thisListener(it->second);
-                SingletonContainer::Get<DisplayManager>().UnregisterPrivateWindowListener(thisListener);
-                WLOGFD("unRegister privateWindowListener success");
+                ret = SingletonContainer::Get<DisplayManager>().UnregisterPrivateWindowListener(thisListener);
+                WLOGFD("unregister privateWindowListener, ret: %{public}u", ret);
+            } else {
+                ret = DMError::DM_ERROR_INVALID_PARAM;
+                WLOGFE("unregister displaylistener with type failed, %{public}s not matched", type.c_str());
             }
             jsCbMap_[type].erase(it++);
             break;
@@ -301,6 +310,7 @@ void UnRegisterDisplayListenerWithType(const std::string& type, NativeValue* val
     if (jsCbMap_[type].empty()) {
         jsCbMap_.erase(type);
     }
+    return ret;
 }
 
 NativeValue* OnRegisterDisplayManagerCallback(NativeEngine& engine, NativeCallbackInfo& info)
@@ -329,7 +339,12 @@ NativeValue* OnRegisterDisplayManagerCallback(NativeEngine& engine, NativeCallba
         return engine.CreateUndefined();
     }
     std::lock_guard<std::mutex> lock(mtx_);
-    RegisterDisplayListenerWithType(engine, cbType, value);
+    DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(RegisterDisplayListenerWithType(engine, cbType, value));
+    if (ret != DmErrorCode::DM_OK) {
+        WLOGFE("Failed to register display listener with type");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
     return engine.CreateUndefined();
 }
 
@@ -348,15 +363,21 @@ NativeValue* OnUnregisterDisplayManagerCallback(NativeEngine& engine, NativeCall
         return engine.CreateUndefined();
     }
     std::lock_guard<std::mutex> lock(mtx_);
+    DmErrorCode ret = DmErrorCode::DM_OK;
     if (info.argc == ARGC_ONE) {
-        UnregisterAllDisplayListenerWithType(cbType);
+        ret = DM_JS_TO_ERROR_CODE_MAP.at(UnregisterAllDisplayListenerWithType(cbType));
     } else {
         NativeValue* value = info.argv[INDEX_ONE];
         if ((value == nullptr) || (!value->IsCallable())) {
-            UnregisterAllDisplayListenerWithType(cbType);
+            ret = DM_JS_TO_ERROR_CODE_MAP.at(UnregisterAllDisplayListenerWithType(cbType));
         } else {
-            UnRegisterDisplayListenerWithType(cbType, value);
+            ret = DM_JS_TO_ERROR_CODE_MAP.at(UnRegisterDisplayListenerWithType(cbType, value));
         }
+    }
+    if (ret != DmErrorCode::DM_OK) {
+        WLOGFE("failed to unregister display listener with type");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
     }
     return engine.CreateUndefined();
 }
