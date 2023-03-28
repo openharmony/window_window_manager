@@ -37,6 +37,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
 class DisplayManager::Impl : public RefBase {
 public:
+    Impl(std::recursive_mutex& mutex) : mutex_(mutex) {}
     ~Impl();
     static inline SingletonDelegator<DisplayManager> delegator;
     bool CheckRectValid(const Media::Rect& rect, int32_t oriHeight, int32_t oriWidth) const;
@@ -72,7 +73,7 @@ private:
     DisplayId defaultDisplayId_ = DISPLAY_ID_INVALID;
     std::map<DisplayId, sptr<Display>> displayMap_;
     DisplayStateCallback displayStateCallback_;
-    std::recursive_mutex mutex_;
+    std::recursive_mutex& mutex_;
     std::set<sptr<IDisplayListener>> displayListeners_;
     std::set<sptr<IDisplayPowerEventListener>> powerEventListeners_;
     std::set<sptr<IScreenshotListener>> screenshotListeners_;
@@ -291,12 +292,14 @@ DisplayManager::Impl::~Impl()
     Clear();
 }
 
-DisplayManager::DisplayManager() : pImpl_(new Impl())
+DisplayManager::DisplayManager() : pImpl_(new Impl(mutex_))
 {
 }
 
 DisplayManager::~DisplayManager()
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    destroyed_ = true;
 }
 
 DisplayId DisplayManager::GetDefaultDisplayId()
@@ -364,6 +367,10 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
 
 sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (destroyed_) {
+        return nullptr;
+    }
     return pImpl_->GetDisplayById(displayId);
 }
 
