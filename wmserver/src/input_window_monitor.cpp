@@ -77,10 +77,10 @@ void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
     container->TraverseContainer(windowNodes);
     TraverseWindowNodes(windowNodes, displayGroupInfo_.windowsInfo);
     WLOGFD("update display info to IMS, displayId: %{public}" PRIu64"", displayId);
-    auto task = [this]() {
-        MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo_);
+    auto task = [displayGroupInfo = displayGroupInfo_]() {
+        MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
     };
-    WindowInnerManager::GetInstance().PostTask(task, "UpdateDisplayInfoBydisplayId");
+    WindowInnerManager::GetInstance().PostTask(std::move(task), "UpdateDisplayInfoBydisplayId");
 }
 
 void InputWindowMonitor::UpdateDisplayGroupInfo(const sptr<WindowNodeContainer>& windowNodeContainer,
