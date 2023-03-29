@@ -109,6 +109,7 @@ public:
     sptr<DisplayGroupController> GetDisplayGroupController() const;
     sptr<WindowNode> GetRootNode(WindowRootNodeType type) const;
     void NotifyDockWindowStateChanged(sptr<WindowNode>& node, bool isEnable);
+    void NotifyDockWindowStateChanged(DisplayId displayId);
     void UpdateCameraFloatWindowStatus(const sptr<WindowNode>& node, bool isShowing);
     void UpdateAvoidAreaListener(sptr<WindowNode>& windowNode, bool haveAvoidAreaListener);
     void BeforeProcessWindowAvoidAreaChangeWhenDisplayChange() const;
