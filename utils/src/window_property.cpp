@@ -19,6 +19,10 @@
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr uint32_t SYSTEM_BAR_PROPERTY_MAX_NUM = 2;
+    constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 10;
+}
 WindowProperty::WindowProperty(const sptr<WindowProperty>& property)
 {
     CopyFrom(property);
@@ -595,6 +599,9 @@ bool WindowProperty::MapMarshalling(Parcel& parcel) const
 void WindowProperty::MapUnmarshalling(Parcel& parcel, WindowProperty* property)
 {
     uint32_t size = parcel.ReadUint32();
+    if (size > SYSTEM_BAR_PROPERTY_MAX_NUM) {
+        return;
+    }
     for (uint32_t i = 0; i < size; i++) {
         WindowType type = static_cast<WindowType>(parcel.ReadUint32());
         SystemBarProperty prop = { parcel.ReadBool(), parcel.ReadUint32(), parcel.ReadUint32() };
@@ -619,7 +626,10 @@ bool WindowProperty::MarshallingTouchHotAreas(Parcel& parcel) const
 
 void WindowProperty::UnmarshallingTouchHotAreas(Parcel& parcel, WindowProperty* property)
 {
-    auto size = parcel.ReadUint32();
+    uint32_t size = parcel.ReadUint32();
+    if (size > TOUCH_HOT_AREA_MAX_NUM) {
+        return;
+    }
     for (uint32_t i = 0; i < size; i++) {
         property->touchHotAreas_.emplace_back(
             Rect{ parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() });
