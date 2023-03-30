@@ -15,6 +15,7 @@
 
 #include "zidl/window_manager_proxy.h"
 #include <ipc_types.h>
+#include <key_event.h>
 #include <rs_iwindow_animation_controller.h>
 
 #include "marshalling_helper.h"
@@ -907,6 +908,30 @@ WMError WindowManagerProxy::SetGestureNavigaionEnabled(bool enable)
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WMError>(ret);
+}
+
+void WindowManagerProxy::DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(windowId)) {
+        WLOGFE("Write anchor delatX failed");
+        return;
+    }
+    if (!event->WriteToParcel(data)) {
+        WLOGFE("Write event faild");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_DISPATCH_KEY_EVENT),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

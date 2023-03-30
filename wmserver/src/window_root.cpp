@@ -1250,6 +1250,41 @@ WMError WindowRoot::RaiseZOrderForAppWindow(sptr<WindowNode>& node)
     return container->RaiseZOrderForAppWindow(node, parentNode);
 }
 
+void WindowRoot::DispatchKeyEvent(sptr<WindowNode> node, std::shared_ptr<MMI::KeyEvent> event)
+{
+    sptr<WindowNodeContainer> container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (container == nullptr) {
+        WLOGFW("window container could not be found");
+        return;
+    }
+    std::vector<sptr<WindowNode>> windowNodes;
+    container->TraverseContainer(windowNodes);
+    auto iter = std::find(windowNodes.begin(), windowNodes.end(), node);
+    if (iter == windowNodes.end()) {
+        WLOGFE("Cannot find node");
+        return;
+    }
+    for (++iter; iter != windowNodes.end(); ++iter) {
+        if (*iter == nullptr) {
+            WLOGFE("Node is null");
+            continue;
+        }
+        if ((*iter)->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
+            WLOGFI("Skip component window: %{public}u", (*iter)->GetWindowId());
+            continue;
+        }
+        if (WindowHelper::IsAppWindow((*iter)->GetWindowType())) {
+            WLOGFI("App window: %{public}u", (*iter)->GetWindowId());
+            if ((*iter)->GetWindowToken()) {
+                (*iter)->GetWindowToken()->ConsumeKeyEvent(event);
+            }
+            break;
+        }
+        WLOGFI("Unexpected window: %{public}u", (*iter)->GetWindowId());
+        break;
+    }
+}
+
 uint32_t WindowRoot::GetWindowIdByObject(const sptr<IRemoteObject>& remoteObject)
 {
     auto iter = windowIdMap_.find(remoteObject);

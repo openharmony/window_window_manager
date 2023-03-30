@@ -15,6 +15,7 @@
 
 #include "window_adapter.h"
 #include <iservice_registry.h>
+#include <key_event.h>
 #include <system_ability_definition.h>
 #include "window_manager.h"
 #include "window_manager_hilog.h"
@@ -302,6 +303,10 @@ WMError WindowAdapter::SetGestureNavigaionEnabled(bool enable)
     return windowManagerServiceProxy_->SetGestureNavigaionEnabled(enable);
 }
 
-
+void WindowAdapter::DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event)
+{
+    INIT_PROXY_CHECK_RETURN();
+    windowManagerServiceProxy_->DispatchKeyEvent(windowId, event);
+}
 } // namespace Rosen
 } // namespace OHOS
