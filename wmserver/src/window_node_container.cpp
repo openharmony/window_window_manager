@@ -1348,6 +1348,28 @@ void WindowNodeContainer::NotifyDockWindowStateChanged(sptr<WindowNode>& node, b
     WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(node->GetDisplayId(), tints);
 }
 
+void WindowNodeContainer::NotifyDockWindowStateChanged(DisplayId displayId)
+{
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
+    bool isEnable = true;
+    for (auto& windowNode : appWindowNode_->children_) {
+        if (WindowHelper::IsSplitWindowMode(windowNode->GetWindowMode()) ||
+            WindowHelper::IsFullScreenWindow(windowNode->GetWindowMode())) {
+            isEnable = false;
+            break;
+        }
+    }
+    WLOGFD("[Immersive] display %{public}" PRIu64" begin isEnable: %{public}d", displayId, isEnable);
+    SystemBarProperty prop;
+    prop.enable_ = isEnable;
+    SystemBarRegionTint tint;
+    tint.type_ = WindowType::WINDOW_TYPE_LAUNCHER_DOCK;
+    tint.prop_ = prop;
+    SystemBarRegionTints tints;
+    tints.push_back(tint);
+    WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(displayId, tints);
+}
+
 void WindowNodeContainer::UpdateAvoidAreaListener(sptr<WindowNode>& windowNode, bool haveAvoidAreaListener)
 {
     avoidController_->UpdateAvoidAreaListener(windowNode, haveAvoidAreaListener);
@@ -2029,6 +2051,7 @@ WMError WindowNodeContainer::SwitchLayoutPolicy(WindowLayoutMode dstMode, Displa
         DumpScreenWindowTree();
     }
     NotifyIfSystemBarTintChanged(displayId);
+    NotifyDockWindowStateChanged(displayId);
     return WMError::WM_OK;
 }
 
