@@ -276,7 +276,7 @@ sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::GetTransitionFinishedCa
             weakNode->stateMachine_.TransitionTo(WindowNodeState::SHOW_ANIMATION_DONE);
         });
     };
-    return CreateAnimationFinishedCallback(callback);
+    return CreateAnimationFinishedCallback(callback, dstNode);
 }
 
 WMError RemoteAnimation::NotifyAnimationStartApp(sptr<WindowTransitionInfo> srcInfo,
@@ -469,7 +469,7 @@ void RemoteAnimation::NotifyAnimationAbilityDied(sptr<WindowTransitionInfo> info
         target->missionId_ = info->GetMissionId();
         target->windowId_ = INVALID_WINDOW_ID;
         auto func = []() { WLOGFI("NotifyAbilityDied finished!"); };
-        auto finishCallback = CreateAnimationFinishedCallback(func);
+        auto finishCallback = CreateAnimationFinishedCallback(func, nullptr);
         windowAnimationController_->OnCloseWindow(target, finishCallback);
     };
     bool ret = handler->PostTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
@@ -520,7 +520,7 @@ WMError RemoteAnimation::NotifyAnimationBackTransition(sptr<WindowTransitionInfo
         FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
             "wms:async:ShowRemoteAnimation");
     };
-    sptr<RSWindowAnimationFinishedCallback> finishedCallback = CreateAnimationFinishedCallback(func);
+    sptr<RSWindowAnimationFinishedCallback> finishedCallback = CreateAnimationFinishedCallback(func, dstNode);
     if (finishedCallback == nullptr) {
         return WMError::WM_ERROR_NO_MEM;
     }
@@ -603,7 +603,7 @@ WMError RemoteAnimation::NotifyAnimationByHome()
     } else {
         GetAnimationHomeFinishCallback(func, needMinimizeAppNodes);
     }
-    sptr<RSWindowAnimationFinishedCallback> finishedCallback = CreateAnimationFinishedCallback(func);
+    sptr<RSWindowAnimationFinishedCallback> finishedCallback = CreateAnimationFinishedCallback(func, nullptr);
     if (finishedCallback == nullptr) {
         return WMError::WM_ERROR_NO_MEM;
     }
@@ -661,13 +661,13 @@ void RemoteAnimation::NotifyAnimationTargetsUpdate(std::vector<uint32_t>& fullSc
     }
 }
 
-WMError RemoteAnimation::NotifyAnimationScreenUnlock(std::function<void(void)> callback)
+WMError RemoteAnimation::NotifyAnimationScreenUnlock(std::function<void(void)> callback, sptr<WindowNode> node)
 {
     if (!CheckAnimationController()) {
         return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     }
     WLOGFI("NotifyAnimationScreenUnlock");
-    sptr<RSWindowAnimationFinishedCallback> finishedCallback = CreateAnimationFinishedCallback(callback);
+    sptr<RSWindowAnimationFinishedCallback> finishedCallback = CreateAnimationFinishedCallback(callback, node);
     if (finishedCallback == nullptr) {
         return WMError::WM_ERROR_NO_MEM;
     }
@@ -909,7 +909,7 @@ sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::CreateShowAnimationFini
                 Rosen::RES_TYPE_SHOW_REMOTE_ANIMATION, Rosen::REMOTE_ANIMATION_END, payload);
         };
     }
-    return CreateAnimationFinishedCallback(func);
+    return CreateAnimationFinishedCallback(func, dstNode);
 }
 
 static void ProcessAbility(const sptr<WindowNode>& srcNode, TransitionEvent event)
@@ -983,11 +983,31 @@ sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::CreateHideAnimationFini
                 "wms:async:ShowRemoteAnimation");
         };
     }
-    return CreateAnimationFinishedCallback(func);
+    return CreateAnimationFinishedCallback(func, srcNode);
+}
+
+static void ReportWindowAnimationCallbackTimeout(sptr<WindowNode>& node, std::string taskName)
+{
+    std::ostringstream oss;
+    oss << "animation callback time out: " << "window_name: " << node->GetWindowName()
+        << "callbackName: " << taskName << ";";
+    std::string info = oss.str();
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "ANIMATION_CALLBACK_TIMEOUT",
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        "PID", node->GetCallingPid(),
+        "UID", node->GetCallingUid(),
+        "PACKAGE_NAME", node->abilityInfo_.abilityName_,
+        "PROCESS_NAME", node->abilityInfo_.bundleName_,
+        "MSG", info);
+    if (ret != 0) {
+        WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
+    }
 }
 
 sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::CreateAnimationFinishedCallback(
-    const std::function<void(void)>& callback)
+    const std::function<void(void)>& callback, sptr<WindowNode> windowNode)
 {
     if (callback == nullptr) {
         WLOGFE("callback is null!");
@@ -995,27 +1015,35 @@ sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::CreateAnimationFinished
     }
     auto currentId = allocationId_.fetch_add(1);
     std::string timeOutTaskName = ANIMATION_TIME_OUT_TASK + std::to_string(currentId);
-    auto func = [callback, timeOutTaskName]() {
+    wptr<WindowNode> weakNode = windowNode;
+    auto timeoutFunc = [callback, timeOutTaskName, weakNode]() {
+        WLOGFE("callback %{public}s is time out!", timeOutTaskName.c_str());
+        callback();
+        auto node = weakNode.promote();
+        if (node == nullptr) {
+            WLOGFW("window node is null or is home event, not report abnormal info!");
+            return;
+        }
+        ReportWindowAnimationCallbackTimeout(node, timeOutTaskName);
+    };
+    auto callbackTask = [callback, timeOutTaskName]() {
         auto handler = wmsTaskHandler_.lock();
         if (handler != nullptr) {
             handler->RemoveTask(timeOutTaskName);
             WLOGFD("remove task %{public}s since animationCallback Come", timeOutTaskName.c_str());
             handler->PostTask(callback, AppExecFwk::EventQueue::Priority::IMMEDIATE);
-        } else {
-            WLOGFW("callback execute not on main wms thread since handler is null!");
-            callback();
         }
     };
     auto handlerSptr = wmsTaskHandler_.lock();
     if (handlerSptr != nullptr) {
-        handlerSptr->PostTask(func, timeOutTaskName, ANIMATION_TIME_OUT_MILLISECONDS);
+        handlerSptr->PostTask(timeoutFunc, timeOutTaskName, ANIMATION_TIME_OUT_MILLISECONDS);
         WLOGFD("PostTask task %{public}s", timeOutTaskName.c_str());
     }
     sptr<RSWindowAnimationFinishedCallback> finishCallback = new(std::nothrow) RSWindowAnimationFinishedCallback(
-        func);
+        callbackTask);
     if (finishCallback == nullptr) {
         WLOGFE("New RSIWindowAnimationFinishedCallback failed");
-        func();
+        callbackTask();
         return nullptr;
     }
     return finishCallback;
