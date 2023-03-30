@@ -288,6 +288,12 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteParcelable(pixelMap.get());
             break;
         }
+        case WindowManagerMessage::TRANS_ID_GESTURE_NAVIGATION_ENABLED: {
+            bool enable = data.ReadBool();
+            WMError errCode = SetGestureNavigaionEnabled(enable);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

@@ -66,6 +66,14 @@ public:
     };
 };
 
+class TestGestureNavigationEnabledChangedListener : public IGestureNavigationEnabledChangedListener {
+public:
+    void OnGestureNavigationEnabledUpdate(bool enable) override
+    {
+        WLOGI("TestGestureNavigationEnabledChangedListener");
+    };
+};
+
 class WindowManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -481,6 +489,76 @@ HWTEST_F(WindowManagerTest, UnregisterWaterMarkFlagChangedListener01, Function |
     ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWaterMarkFlagChangedListener(listener1));
     ASSERT_EQ(0, windowManager.pImpl_->waterMarkFlagChangeListeners_.size());
 }
+
+
+/**
+ * @tc.name: RegisterGestureNavigationEnabledChangedListener
+ * @tc.desc: check RegisterGestureNavigationEnabledChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterGestureNavigationEnabledChangedListener, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+
+    windowManager.pImpl_->gestureNavigationEnabledAgent_ = nullptr;
+    windowManager.pImpl_->gestureNavigationEnabledListeners_.clear();
+
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterGestureNavigationEnabledChangedListener(nullptr));
+
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<TestGestureNavigationEnabledChangedListener> listener = new TestGestureNavigationEnabledChangedListener();
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
+
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterGestureNavigationEnabledChangedListener(listener));
+    ASSERT_EQ(0, windowManager.pImpl_->gestureNavigationEnabledListeners_.size());
+    ASSERT_EQ(nullptr, windowManager.pImpl_->gestureNavigationEnabledAgent_);
+
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterGestureNavigationEnabledChangedListener(listener));
+    ASSERT_EQ(1, windowManager.pImpl_->gestureNavigationEnabledListeners_.size());
+    ASSERT_NE(nullptr, windowManager.pImpl_->gestureNavigationEnabledAgent_);
+
+    // to check that the same listner can not be registered twice
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterGestureNavigationEnabledChangedListener(listener));
+    ASSERT_EQ(1, windowManager.pImpl_->gestureNavigationEnabledListeners_.size());
+}
+
+/**
+ * @tc.name: UnregisterGestureNavigationEnabledChangedListener
+ * @tc.desc: check UnregisterGestureNavigationEnabledChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterGestureNavigationEnabledChangedListener, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    windowManager.pImpl_->gestureNavigationEnabledAgent_ = nullptr;
+    windowManager.pImpl_->gestureNavigationEnabledListeners_.clear();
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
+    // check nullpter
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterGestureNavigationEnabledChangedListener(nullptr));
+
+    sptr<TestGestureNavigationEnabledChangedListener> listener1 = new TestGestureNavigationEnabledChangedListener();
+    sptr<TestGestureNavigationEnabledChangedListener> listener2 = new TestGestureNavigationEnabledChangedListener();
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterGestureNavigationEnabledChangedListener(listener1));
+
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    windowManager.RegisterGestureNavigationEnabledChangedListener(listener1);
+    windowManager.RegisterGestureNavigationEnabledChangedListener(listener2);
+    ASSERT_EQ(2, windowManager.pImpl_->gestureNavigationEnabledListeners_.size());
+
+    EXPECT_CALL(m->Mock(), UnregisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterGestureNavigationEnabledChangedListener(listener1));
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterGestureNavigationEnabledChangedListener(listener2));
+    ASSERT_EQ(0, windowManager.pImpl_->gestureNavigationEnabledListeners_.size());
+    ASSERT_EQ(nullptr, windowManager.pImpl_->gestureNavigationEnabledAgent_);
+
+    // if agent == nullptr, it can not be crashed.
+    windowManager.pImpl_->gestureNavigationEnabledListeners_.push_back(listener1);
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterGestureNavigationEnabledChangedListener(listener1));
+    ASSERT_EQ(0, windowManager.pImpl_->gestureNavigationEnabledListeners_.size());
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

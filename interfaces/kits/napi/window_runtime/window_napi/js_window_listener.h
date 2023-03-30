@@ -42,6 +42,7 @@ const std::string TOUCH_OUTSIDE_CB = "touchOutside";
 const std::string SCREENSHOT_EVENT_CB = "screenshot";
 const std::string DIALOG_TARGET_TOUCH_CB = "dialogTargetTouch";
 const std::string DIALOG_DEATH_RECIPIENT_CB = "dialogDeathRecipient";
+const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 
 class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
@@ -51,7 +52,8 @@ class JsWindowListener : public IWindowChangeListener,
                          public ITouchOutsideListener,
                          public IScreenshotListener,
                          public IDialogTargetTouchListener,
-                         public IDialogDeathRecipientListener {
+                         public IDialogDeathRecipientListener,
+                         public IGestureNavigationEnabledChangedListener {
 public:
     JsWindowListener(NativeEngine* engine, std::shared_ptr<NativeReference> callback)
         : engine_(engine), jsCallBack_(callback), weakRef_(wptr<JsWindowListener> (this)) {}
@@ -70,6 +72,7 @@ public:
     void OnScreenshot() override;
     void OnDialogTargetTouch() const override;
     void OnDialogDeathRecipient() const override;
+    void OnGestureNavigationEnabledUpdate(bool enable) override;
     void CallJsMethod(const char* methodName, NativeValue* const* argv = nullptr, size_t argc = 0);
 private:
     WindowState state_ {WindowState::STATE_INITIAL};

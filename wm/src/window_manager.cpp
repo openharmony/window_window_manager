@@ -122,6 +122,8 @@ public:
     void NotifyWindowVisibilityInfoChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark);
+    void NotifyGestureNavigationEnabledResult(bool enable);
+    
     static inline SingletonDelegator<WindowManager> delegator_;
 
     std::recursive_mutex mutex_;
@@ -137,6 +139,8 @@ public:
     sptr<WindowManagerAgent> cameraFloatWindowChangedListenerAgent_;
     std::vector<sptr<IWaterMarkFlagChangedListener>> waterMarkFlagChangeListeners_;
     sptr<WindowManagerAgent> waterMarkFlagChangeAgent_;
+    std::vector<sptr<IGestureNavigationEnabledChangedListener>> gestureNavigationEnabledListeners_;
+    sptr<WindowManagerAgent> gestureNavigationEnabledAgent_;
 };
 
 void WindowManager::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
@@ -250,6 +254,19 @@ void WindowManager::Impl::NotifyWaterMarkFlagChangedResult(bool showWaterMark)
     }
     for (auto& listener : waterMarkFlagChangeListeners) {
         listener->OnWaterMarkFlagUpdate(showWaterMark);
+    }
+}
+
+void WindowManager::Impl::NotifyGestureNavigationEnabledResult(bool enable)
+{
+    WLOGFI("Notify gesture navigation enable result, enable = %{public}d", enable);
+    std::vector<sptr<IGestureNavigationEnabledChangedListener>> gestureNavigationEnabledListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        gestureNavigationEnabledListeners = gestureNavigationEnabledListeners_;
+    }
+    for (auto& listener : gestureNavigationEnabledListeners) {
+        listener->OnGestureNavigationEnabledUpdate(enable);
     }
 }
 
@@ -608,6 +625,75 @@ WMError WindowManager::UnregisterWaterMarkFlagChangedListener(const sptr<IWaterM
     return ret;
 }
 
+WMError WindowManager::RegisterGestureNavigationEnabledChangedListener(
+    const sptr<IGestureNavigationEnabledChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->gestureNavigationEnabledAgent_ == nullptr) {
+        pImpl_->gestureNavigationEnabledAgent_ = new (std::nothrow)WindowManagerAgent();
+        if (pImpl_->gestureNavigationEnabledAgent_ != nullptr) {
+            ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
+                WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED,
+                pImpl_->gestureNavigationEnabledAgent_);
+        } else {
+            WLOGFE("Create windowManagerAgent object failed !");
+            ret = WMError::WM_ERROR_NULLPTR;
+        }
+    }
+    if (ret != WMError::WM_OK) {
+        WLOGFE("RegisterWindowManagerAgent failed !");
+        pImpl_->gestureNavigationEnabledAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->gestureNavigationEnabledListeners_.begin(),
+            pImpl_->gestureNavigationEnabledListeners_.end(), listener);
+        if (iter != pImpl_->gestureNavigationEnabledListeners_.end()) {
+            WLOGFW("Listener is already registered.");
+            return WMError::WM_OK;
+        }
+        pImpl_->gestureNavigationEnabledListeners_.push_back(listener);
+    }
+    WLOGFD("Try to registerGestureNavigationEnabledChangedListener and result is %{public}u",
+        static_cast<uint32_t>(ret));
+    return ret;
+}
+
+WMError WindowManager::UnregisterGestureNavigationEnabledChangedListener(
+    const sptr<IGestureNavigationEnabledChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->gestureNavigationEnabledListeners_.begin(),
+        pImpl_->gestureNavigationEnabledListeners_.end(), listener);
+    if (iter == pImpl_->gestureNavigationEnabledListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    pImpl_->gestureNavigationEnabledListeners_.erase(iter);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->gestureNavigationEnabledListeners_.empty() &&
+        pImpl_->gestureNavigationEnabledAgent_ != nullptr) {
+        ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED,
+            pImpl_->gestureNavigationEnabledAgent_);
+        if (ret == WMError::WM_OK) {
+            pImpl_->gestureNavigationEnabledAgent_ = nullptr;
+        }
+    }
+    WLOGFD("Try to unregisterGestureNavigationEnabledChangedListener and result is %{public}u",
+        static_cast<uint32_t>(ret));
+    return ret;
+}
+
 void WindowManager::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) const
 {
     if (focusChangeInfo == nullptr) {
@@ -662,6 +748,16 @@ WMError WindowManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibility
     return ret;
 }
 
+WMError WindowManager::SetGestureNavigaionEnabled(bool enable) const
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetGestureNavigaionEnabled(enable);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("set gesture navigaion enabled failed");
+    }
+    return ret;
+}
+
+
 void WindowManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) const
 {
     pImpl_->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
@@ -671,6 +767,12 @@ void WindowManager::NotifyWaterMarkFlagChangedResult(bool showWaterMark) const
 {
     pImpl_->NotifyWaterMarkFlagChangedResult(showWaterMark);
 }
+
+void WindowManager::NotifyGestureNavigationEnabledResult(bool enable) const
+{
+    pImpl_->NotifyGestureNavigationEnabledResult(enable);
+}
+
 
 void WindowManager::OnRemoteDied() const
 {

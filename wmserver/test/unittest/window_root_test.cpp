@@ -500,6 +500,23 @@ HWTEST_F(WindowRootTest, CheckAndNotifyWaterMarkChangedResult, Function | SmallT
     windowRoot_->CheckAndNotifyWaterMarkChangedResult();
     ASSERT_EQ(windowRoot_->lastWaterMarkShowStates_, false);
 }
+
+/**
+ * @tc.name: SetGestureNavigaionEnabled
+ * @tc.desc: test WindowRoot SetGestureNavigaionEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, SetGestureNavigaionEnabled, Function | SmallTest | Level2)
+{
+    windowRoot_->lastGestureNativeEnabled_ = false;
+    auto ret = windowRoot_->SetGestureNavigaionEnabled(false);
+    ASSERT_EQ(ret, WMError::WM_DO_NOTHING);
+
+    ret = windowRoot_->SetGestureNavigaionEnabled(true);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    windowRoot_->lastGestureNativeEnabled_ = false;
+}
 }
 }
 }

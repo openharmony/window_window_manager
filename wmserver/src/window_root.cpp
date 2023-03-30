@@ -763,6 +763,18 @@ void WindowRoot::UpdateDisplayOrientationWhenHideWindow(sptr<WindowNode>& node)
     }
 }
 
+WMError WindowRoot::SetGestureNavigaionEnabled(bool enable)
+{
+    if (lastGestureNativeEnabled_ == enable) {
+        WLOGFW("Do not set gesture navigation too much times as same value and the value is %{public}d", enable);
+        return WMError::WM_DO_NOTHING;
+    }
+    WindowManagerAgentController::GetInstance().NotifyGestureNavigationEnabledResult(enable);
+    lastGestureNativeEnabled_ = enable;
+    WLOGFD("Set gesture navigation enabled succeeded and notify result of %{public}d", enable);
+    return WMError::WM_OK;
+}
+
 WMError WindowRoot::UpdateWindowNode(uint32_t windowId, WindowUpdateReason reason)
 {
     auto node = GetWindowNode(windowId);
