@@ -148,7 +148,6 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow02, Function | MediumTest | L
         WindowType::WINDOW_TYPE_TOAST,
         WindowType::WINDOW_TYPE_STATUS_BAR,
         WindowType::WINDOW_TYPE_PANEL,
-        WindowType::WINDOW_TYPE_KEYGUARD,
         WindowType::WINDOW_TYPE_VOLUME_OVERLAY,
         WindowType::WINDOW_TYPE_NAVIGATION_BAR,
         WindowType::WINDOW_TYPE_DRAGGING_EFFECT,
