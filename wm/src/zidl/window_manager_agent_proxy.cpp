@@ -187,6 +187,26 @@ void WindowManagerAgentProxy::NotifyWaterMarkFlagChangedResult(bool showWaterMar
         WLOGFE("SendRequest failed");
     }
 }
+void WindowManagerAgentProxy::NotifyGestureNavigationEnabledResult(bool enable)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteBool(enable)) {
+        WLOGFE("Write is showing status failed");
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_GESTURE_NAVIGATION_ENABLED),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
 } // namespace Rosen
 } // namespace OHOS
 

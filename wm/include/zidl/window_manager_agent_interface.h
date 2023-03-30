@@ -29,6 +29,7 @@ enum class WindowManagerAgentType : uint32_t {
     WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
     WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT,
     WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG,
+    WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED,
 };
 
 class IWindowManagerAgent : public IRemoteBroker {
@@ -42,6 +43,7 @@ public:
         TRANS_ID_UPDATE_WINDOW_VISIBILITY,
         TRANS_ID_UPDATE_CAMERA_FLOAT,
         TRANS_ID_UPDATE_WATER_MARK_FLAG,
+        TRANS_ID_UPDATE_GESTURE_NAVIGATION_ENABLED,
     };
 
     virtual void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) = 0;
@@ -51,6 +53,7 @@ public:
     virtual void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& visibilityInfos) = 0;
     virtual void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) = 0;
     virtual void NotifyWaterMarkFlagChangedResult(bool isShowing) = 0;
+    virtual void NotifyGestureNavigationEnabledResult(bool enable) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

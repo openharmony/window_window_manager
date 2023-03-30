@@ -28,6 +28,7 @@ group("systemtest") {
     ":wms_window_effect_test",
     ":wms_window_focus_test",
     ":wms_window_gamut_test",
+    ":wms_window_gesture_navigation_enabled_test",
     ":wms_window_immersive_test",
     ":wms_window_input_method_test",
     ":wms_window_input_test",
@@ -156,6 +157,14 @@ ohos_systemtest("wms_window_gamut_test") {
   module_out_path = module_out_path
 
   sources = [ "window_gamut_test.cpp" ]
+
+  deps = [ ":wms_systemtest_common" ]
+}
+
+ohos_systemtest("wms_window_gesture_navigation_enabled_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_gesture_navigation_enabled_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
 }
