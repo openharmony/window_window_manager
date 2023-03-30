@@ -486,7 +486,7 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId, bool fromAnimation
         // if has main full screen window, no need to do remote unlock animation
         if (windowRoot_->NotifyDesktopUnfrozen() == WMError::WM_OK &&
             !windowRoot_->HasMainFullScreenWindowShown(windowNode->GetDisplayId())) {
-            res = RemoteAnimation::NotifyAnimationScreenUnlock(removeFunc);
+            res = RemoteAnimation::NotifyAnimationScreenUnlock(removeFunc, windowNode);
             WLOGI("NotifyAnimationScreenUnlock with remote animation");
         }
     }
@@ -1550,7 +1550,7 @@ void WindowController::MinimizeWindowsByLauncher(std::vector<uint32_t>& windowId
                 node->isPlayAnimationHide_ = true;
             }
         }
-        finishCallback = RemoteAnimation::CreateAnimationFinishedCallback(func);
+        finishCallback = RemoteAnimation::CreateAnimationFinishedCallback(func, nullptr);
         if (finishCallback == nullptr) {
             return;
         }
