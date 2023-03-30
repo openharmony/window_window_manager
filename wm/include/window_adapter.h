@@ -76,6 +76,7 @@ public:
     virtual WmErrorCode RaiseToAppTop(uint32_t windowId);
     virtual std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t windowId);
     virtual WMError SetGestureNavigaionEnabled(bool enable);
+    virtual void DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event);
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxy();

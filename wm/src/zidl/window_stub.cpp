@@ -16,6 +16,7 @@
 #include "zidl/window_stub.h"
 #include <vector>
 #include "ipc_skeleton.h"
+#include <key_event.h>
 #include "pointer_event.h"
 #include "window_manager_hilog.h"
 #include <transaction/rs_transaction.h>
@@ -164,6 +165,15 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         }
         case WindowMessage::TRANS_ID_RESTORE_SPLIT_WINDOW_MODE: {
             RestoreSplitWindowMode(data.ReadUint32());
+            break;
+        }
+        case WindowMessage::TRANS_ID_CONSUME_KEY_EVENT: {
+            auto event = MMI::KeyEvent::Create();
+            if (!event->ReadFromParcel(data)) {
+                WLOGFE("Read Pointer Event failed");
+                return -1;
+            }
+            ConsumeKeyEvent(event);
             break;
         }
         default:

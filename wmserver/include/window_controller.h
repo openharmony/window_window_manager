@@ -82,6 +82,7 @@ public:
     WMError ChangeMouseStyle(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty);
     void RecoverDefaultMouseStyle(uint32_t windowId);
     WmErrorCode RaiseToAppTop(uint32_t windowId);
+    void DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event);
     WMError SetAspectRatio(uint32_t windowId, float ratio);
     void FlushWindowInfo(uint32_t windowId);
 

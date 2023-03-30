@@ -137,6 +137,7 @@ public:
     {
         return nullptr;
     };
+    void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent> event) override {}
 };
 
 sptr<WindowProperty> CreateWindowProperty(uint32_t windowId, const std::string& windowName)

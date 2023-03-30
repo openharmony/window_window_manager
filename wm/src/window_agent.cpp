@@ -229,5 +229,14 @@ WMError WindowAgent::NotifyWindowClientPointUp(const std::shared_ptr<MMI::Pointe
     window_->ConsumePointerEvent(pointerEvent);
     return WMError::WM_OK;
 }
+
+void WindowAgent::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent> event)
+{
+    if (window_ == nullptr) {
+        WLOGFE("window_ is nullptr");
+        return;
+    }
+    window_->ConsumeKeyEvent(event);
+}
 } // namespace Rosen
 } // namespace OHOS

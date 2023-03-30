@@ -2758,9 +2758,12 @@ HWTEST_F(WindowImplTest, HandleBackKeyPressedEvent, Function | SmallTest | Level
 HWTEST_F(WindowImplTest, ConsumeKeyEvent, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new WindowOption();
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
     sptr<WindowImpl> window = new WindowImpl(option);
     std::shared_ptr<MMI::KeyEvent> keyEvent = std::make_shared<MockKeyEvent>();
+    EXPECT_CALL(m->Mock(), DispatchKeyEvent(_, _));
+    window->ConsumeKeyEvent(keyEvent);
+    window->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
     EXPECT_CALL(*content, ProcessKeyEvent(_));

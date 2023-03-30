@@ -1131,6 +1131,20 @@ WmErrorCode WindowController::RaiseToAppTop(uint32_t windowId)
     return WmErrorCode::WM_OK;
 }
 
+void WindowController::DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFW("Could not find window");
+        return;
+    }
+    if (node->GetWindowType() != WindowType::WINDOW_TYPE_APP_COMPONENT) {
+        WLOGFI("Window type is not WINDOW_TYPE_APP_COMPONENT");
+        return;
+    }
+    windowRoot_->DispatchKeyEvent(node, event);
+}
+
 void WindowController::UpdateFocusIfNeededWhenRaiseWindow(const sptr<WindowNode>& node)
 {
     auto property = node->GetWindowProperty();
