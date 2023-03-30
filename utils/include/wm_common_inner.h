@@ -23,6 +23,8 @@
 
 namespace OHOS {
 namespace Rosen {
+class KeyboardAnimationConfig;
+
 enum class LifeCycleEvent : uint32_t {
     CREATE_EVENT,
     SHOW_EVENT,
@@ -95,6 +97,7 @@ struct SystemConfig : public Parcelable {
     uint32_t decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     bool isStretchable_ = false;
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    KeyboardAnimationConfig keyboardAnimationConfig_;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -103,7 +106,8 @@ struct SystemConfig : public Parcelable {
             return false;
         }
 
-        if (!parcel.WriteUint32(static_cast<uint32_t>(defaultWindowMode_))) {
+        if (!parcel.WriteUint32(static_cast<uint32_t>(defaultWindowMode_)) ||
+            !parcel.WriteParcelable(&keyboardAnimationConfig_)) {
             return false;
         }
 
@@ -117,6 +121,8 @@ struct SystemConfig : public Parcelable {
         config->isStretchable_ = parcel.ReadBool();
         config->decorModeSupportInfo_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
+        KeyboardAnimationConfig* keyboardConfig = parcel.ReadParcelable<KeyboardAnimationConfig>();
+        config->keyboardAnimationConfig_ = *keyboardConfig;
         return config;
     }
 };

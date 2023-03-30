@@ -44,7 +44,7 @@ void JsWindowListener::CallJsMethod(const char* methodName, NativeValue* const* 
 }
 
 void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
-    const std::shared_ptr<RSTransaction> rsTransaction)
+    const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     WLOGI("[NAPI]OnSizeChange, wh[%{public}u, %{public}u], reason = %{public}u", rect.width_, rect.height_, reason);
     // js callback should run in js thread
@@ -202,7 +202,8 @@ void JsWindowListener::AfterUnfocused()
     LifeCycleCallBack(LifeCycleEventType::INACTIVE);
 }
 
-void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info)
+void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
+    const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     WLOGI("[NAPI]OccupiedAreaChangeInfo, type: %{public}u, " \
         "input rect: [%{public}d, %{public}d, %{public}u, %{public}u]", static_cast<uint32_t>(info->type_),

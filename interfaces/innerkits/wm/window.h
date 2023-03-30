@@ -69,7 +69,7 @@ public:
 class IWindowChangeListener : virtual public RefBase {
 public:
     virtual void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
-        const std::shared_ptr<RSTransaction> rsTransaction = nullptr) {}
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) {}
     virtual void OnModeChange(WindowMode mode, bool hasDeco = true) {}
 };
 
@@ -98,6 +98,8 @@ class OccupiedAreaChangeInfo : public Parcelable {
 public:
     OccupiedAreaChangeInfo() = default;
     OccupiedAreaChangeInfo(OccupiedAreaType type, Rect rect) : type_(type), rect_(rect) {};
+    OccupiedAreaChangeInfo(OccupiedAreaType type, Rect rect, uint32_t safeHeight)
+        : type_(type), rect_(rect), safeHeight_(safeHeight) {};
     ~OccupiedAreaChangeInfo() = default;
 
     virtual bool Marshalling(Parcel& parcel) const override;
@@ -105,11 +107,13 @@ public:
 
     OccupiedAreaType type_ = OccupiedAreaType::TYPE_INPUT;
     Rect rect_ = { 0, 0, 0, 0 };
+    uint32_t safeHeight_ = 0;
 };
 
 class IOccupiedAreaChangeListener : virtual public RefBase {
 public:
-    virtual void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info) {}
+    virtual void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) {}
 };
 
 class IAceAbilityHandler : virtual public RefBase {
@@ -501,6 +505,11 @@ public:
      * @return WMError
      */
     virtual WMError ResetAspectRatio() = 0;
+    /**
+     * @brief Get keyboard animation config
+     * @return KeyboardAnimationConfig
+     */
+    virtual KeyboardAnimationConfig GetKeyboardAnimationConfig() = 0;
 };
 }
 }
