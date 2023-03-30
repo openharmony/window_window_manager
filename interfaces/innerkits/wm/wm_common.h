@@ -462,6 +462,60 @@ using OnCallback = std::function<void(int64_t)>;
 struct VsyncCallback {
     OnCallback onCallback;
 };
+
+/*
+ * Config of keyboard animation
+ */
+class KeyboardAnimationConfig : public Parcelable {
+public:
+    std::string curveType_ = "";
+    std::vector<float> curveParams_ = {};
+    uint32_t durationIn_ = 0;
+    uint32_t durationOut_ = 0;
+
+    virtual bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteString(curveType_)) {
+            return false;
+        }
+
+        auto paramSize = curveParams_.size();
+        if (paramSize == 4) { // 4: param size
+            if (!parcel.WriteUint32(static_cast<uint32_t>(paramSize))) {
+                return false;
+            }
+            for (auto& param : curveParams_) {
+                if (!parcel.WriteFloat(param)) {
+                    return false;
+                }
+            }
+        } else {
+            if (!parcel.WriteUint32(0)) {
+                return false;
+            }
+        }
+
+        if (!parcel.WriteUint32(durationIn_) || !parcel.WriteUint32(durationOut_)) {
+            return false;
+        }
+        return true;
+    }
+
+    static KeyboardAnimationConfig* Unmarshalling(Parcel& parcel)
+    {
+        KeyboardAnimationConfig* config = new KeyboardAnimationConfig;
+        config->curveType_ = parcel.ReadString();
+        auto paramSize = parcel.ReadUint32();
+        if (paramSize == 4) { // 4: param size
+            for (uint32_t i = 0; i < paramSize; i++) {
+                config->curveParams_.push_back(parcel.ReadFloat());
+            }
+        }
+        config->durationIn_ = parcel.ReadUint32();
+        config->durationOut_ = parcel.ReadUint32();
+        return config;
+    }
+};
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H

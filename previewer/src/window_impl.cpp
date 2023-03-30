@@ -778,5 +778,10 @@ WMError WindowImpl::ResetAspectRatio()
 {
     return WMError::WM_OK;
 }
+
+KeyboardAnimationConfig WindowImpl::GetKeyboardAnimationConfig()
+{
+    return keyboardAnimationConfig_;
+}
 } // namespace Rosen
 } // namespace OHOS

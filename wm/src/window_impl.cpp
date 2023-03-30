@@ -961,6 +961,11 @@ void WindowImpl::SetSystemConfig()
     }
 }
 
+KeyboardAnimationConfig WindowImpl::GetKeyboardAnimationConfig()
+{
+    return windowSystemConfig_.keyboardAnimationConfig_;
+}
+
 WMError WindowImpl::WindowCreateCheck(uint32_t parentId)
 {
     // check window name, same window names are forbidden
@@ -2106,7 +2111,7 @@ void WindowImpl::SetModeSupportInfo(uint32_t modeSupportInfo)
 }
 
 void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,
-    const std::shared_ptr<RSTransaction> rsTransaction)
+    const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     if (state_ == WindowState::STATE_DESTROYED) {
         WLOGFW("invalid window state");
@@ -2679,7 +2684,7 @@ void WindowImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType
 }
 
 void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& display, WindowSizeChangeReason reason,
-    const std::shared_ptr<RSTransaction> rsTransaction)
+    const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ == nullptr) {
@@ -2914,10 +2919,11 @@ void WindowImpl::UpdateDisplayId(DisplayId from, DisplayId to)
     property_->SetDisplayId(to);
 }
 
-void WindowImpl::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info)
+void WindowImpl::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info,
+    const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     WLOGFD("Update OccupiedArea, id: %{public}u", property_->GetWindowId());
-    NotifyOccupiedAreaChange(info);
+    NotifyOccupiedAreaChange(info, rsTransaction);
 }
 
 void WindowImpl::UpdateActiveStatus(bool isActive)
@@ -3021,7 +3027,7 @@ void WindowImpl::ClearListenersById(uint32_t winId)
 }
 
 void WindowImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reason,
-    const std::shared_ptr<RSTransaction> rsTransaction)
+    const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     auto windowChangeListeners = GetListeners<IWindowChangeListener>();
     for (auto& listener : windowChangeListeners) {
@@ -3061,12 +3067,13 @@ void WindowImpl::NotifyModeChange(WindowMode mode, bool hasDeco)
     }
 }
 
-void WindowImpl::NotifyOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info)
+void WindowImpl::NotifyOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info,
+    const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     auto occupiedAreaChangeListeners = GetListeners<IOccupiedAreaChangeListener>();
     for (auto& listener : occupiedAreaChangeListeners) {
         if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnSizeChange(info);
+            listener.GetRefPtr()->OnSizeChange(info, rsTransaction);
         }
     }
 }

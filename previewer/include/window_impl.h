@@ -193,6 +193,7 @@ public:
     WmErrorCode RaiseToAppTop() override;
     virtual WMError SetAspectRatio(float ratio) override;
     virtual WMError ResetAspectRatio() override;
+    virtual KeyboardAnimationConfig GetKeyboardAnimationConfig() override;
 
 private:
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;
@@ -201,6 +202,7 @@ private:
     WindowState state_ { WindowState::STATE_INITIAL };
     std::string name_;
     std::unique_ptr<Ace::UIContent> uiContent_;
+    KeyboardAnimationConfig keyboardAnimationConfig_;
 };
 } // namespace Rosen
 } // namespace OHOS

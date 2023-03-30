@@ -117,6 +117,8 @@ private:
     bool CheckParentWindowValid(const sptr<WindowProperty>& property);
     void UpdatePrivateStateAndNotify(const sptr<WindowNode>& node);
     void UpdateFocusIfNeededWhenRaiseWindow(const sptr<WindowNode>& node);
+    void NotifyInputCallingWindowRectAndOccupiedAreaChange(const sptr<WindowNode>& callingWindow, const Rect& rect,
+        const Rect& occupiedArea);
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
