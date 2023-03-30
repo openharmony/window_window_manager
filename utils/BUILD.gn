@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/window/window_manager/windowmanager_aafwk.gni")
 config("libwmutil_private_config") {
   include_dirs = [
     "include",
@@ -26,6 +27,65 @@ config("libwmutil_public_config") {
     "//foundation/window/window_manager/utils/include",
     "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
   ]
+}
+
+## build libwmutil_static.a
+ohos_static_library("libwmutil_static") {
+  sources = [
+    "src/agent_death_recipient.cpp",
+    "src/cutout_info.cpp",
+    "src/display_info.cpp",
+    "src/perform_reporter.cpp",
+    "src/permission.cpp",
+    "src/persistent_storage.cpp",
+    "src/screen_group_info.cpp",
+    "src/screen_info.cpp",
+    "src/screenshot_info.cpp",
+    "src/singleton_container.cpp",
+    "src/string_util.cpp",
+    "src/surface_draw.cpp",
+    "src/surface_reader.cpp",
+    "src/surface_reader_handler_impl.cpp",
+    "src/sys_cap_util.cpp",
+    "src/window_property.cpp",
+    "src/window_transition_info.cpp",
+    "src/wm_math.cpp",
+    "src/wm_occlusion_region.cpp",
+    "src/xml_config_base.cpp",
+  ]
+
+  configs = [
+    ":libwmutil_private_config",
+    "${window_base_path}/resources/config/build:coverage_flags",
+  ]
+
+  public_configs = [ ":libwmutil_public_config" ]
+
+  deps = [
+    "${graphic_base_path}/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
+    "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+  ]
+
+  external_deps = [
+    "ability_runtime:ability_manager",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "graphic_standard:surface",
+    "hilog_native:libhilog",
+    "hisysevent_native:libhisysevent",
+    "hitrace_native:hitrace_meter",
+    "input:libmmi-client",
+    "ipc:ipc_core",
+    "multimedia_image_framework:image_native",
+    "preferences:native_preferences",
+    "samgr:samgr_proxy",
+  ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
 }
 
 ## Build libwmutil.so
@@ -83,6 +143,8 @@ ohos_shared_library("libwmutil") {
     "preferences:native_preferences",
     "samgr:samgr_proxy",
   ]
+
+  version_script = "libwmutil.map"
   part_name = "window_manager"
   subsystem_name = "window"
 }
