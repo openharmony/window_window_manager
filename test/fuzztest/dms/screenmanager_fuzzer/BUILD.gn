@@ -13,6 +13,7 @@
 
 import("//build/config/features.gni")
 import("//build/test.gni")
+import("//foundation/window/window_manager/windowmanager_aafwk.gni")
 
 module_output_path = "window_manager/dms"
 
@@ -33,8 +34,8 @@ ohos_fuzztest("ScreenManagerFuzzTest") {
 
   sources = [ "screenmanager_fuzzer.cpp" ]
   deps = [
+    "${window_base_path}/dm:libdm_static",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/window/window_manager/dm:libdm",
   ]
   external_deps = [ "c_utils:utils" ]
 }

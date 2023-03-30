@@ -34,8 +34,8 @@ ohos_executable("demo_mirror_screen_listener") {
       [ "//foundation/window/window_manager/test/common/utils/include" ]
 
   deps = [
+    "${window_base_path}/dm:libdm_static",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
-    "//foundation/window/window_manager/dm:libdm",
   ]
 
   external_deps = [ "c_utils:utils" ]
@@ -51,8 +51,8 @@ ohos_executable("demo_screenshot_listener") {
       [ "//foundation/window/window_manager/test/common/utils/include" ]
 
   deps = [
-    "//foundation/window/window_manager/dm:libdm",
-    "//foundation/window/window_manager/utils:libwmutil",
+    "${window_base_path}/dm:libdm_static",
+    "${window_base_path}/utils:libwmutil_static",
   ]
 
   external_deps = [
@@ -75,10 +75,10 @@ ohos_executable("demo_snapshot_virtual_screen") {
   ]
 
   deps = [
+    "${window_base_path}/dm:libdm_static",
+    "${window_base_path}/utils:libwmutil_static",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/window/window_manager/dm:libdm",
     "//foundation/window/window_manager/snapshot:libsnapshot_util",
-    "//foundation/window/window_manager/utils:libwmutil",
   ]
 
   part_name = "window_manager"
@@ -94,8 +94,8 @@ ohos_executable("demo_system_sub_window") {
   ]
 
   deps = [
+    "${window_base_path}/wm:libwm_static",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
-    "//foundation/window/window_manager/wm:libwm",
   ]
 
   external_deps = [ "c_utils:utils" ]
@@ -113,7 +113,7 @@ ohos_executable("demo_freeze_display") {
     # pixel_map.h
     "//foundation/multimedia/image_framework/interfaces/innerkits/include",
   ]
-  deps = [ "//foundation/window/window_manager/dm:libdm" ]
+  deps = [ "${window_base_path}/dm:libdm_static" ]
   external_deps = [ "multimedia_image_framework:image_native" ]
   part_name = "window_manager"
   subsystem_name = "window"
@@ -129,7 +129,7 @@ ohos_executable("demo_water_mark_listener") {
 
   deps = [
     "${graphic_base_path}/graphic_2d/rosen/modules/render_service_base:librender_service_base",
-    "${window_base_path}/wm:libwm",
+    "${window_base_path}/wm:libwm_static",
   ]
 
   external_deps = [ "c_utils:utils" ]
