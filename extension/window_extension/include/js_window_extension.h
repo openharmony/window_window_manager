@@ -90,6 +90,7 @@ private:
     std::unique_ptr<NativeReference> jsObj_;
     std::shared_ptr<NativeReference> shellContextRef_;
     sptr<WindowExtensionStubImpl> stub_;
+    static int extensionCnt_;
 };
 } // namespace Rosen
 } // namespace OHOS
