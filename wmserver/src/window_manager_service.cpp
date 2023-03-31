@@ -161,7 +161,7 @@ void WindowManagerService::OnAccountSwitched(int accountId)
 
 void WindowManagerService::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclusionData> occlusionData)
 {
-    WLOGFD("NotifyWindowVisibilityChange: enter");
+    WLOGI("NotifyWindowVisibilityChange: enter");
     std::weak_ptr<RSOcclusionData> weak(occlusionData);
     PostVoidSyncTask([this, weak]() {
         auto weakOcclusionData = weak.lock();
