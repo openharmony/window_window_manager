@@ -227,6 +227,7 @@ void WindowManager::Impl::NotifyWindowVisibilityInfoChanged(
         visibilityChangeListeners = windowVisibilityListeners_;
     }
     for (auto& listener : visibilityChangeListeners) {
+        WLOGI("Notify WindowVisibilityInfo to caller");
         listener->OnWindowVisibilityChanged(windowVisibilityInfos);
     }
 }
