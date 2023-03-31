@@ -395,6 +395,7 @@ void WindowRoot::NotifyWindowVisibilityChange(std::shared_ptr<RSOcclusionData> o
     }
     CheckAndNotifyWaterMarkChangedResult();
     if (windowVisibilityInfos.size() != 0) {
+        WLOGI("Notify windowvisibilityinfo changed start");
         WindowManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
 }
