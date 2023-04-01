@@ -71,6 +71,7 @@ public:
         TRANS_ID_RAISE_WINDOW_Z_ORDER,
         TRANS_ID_GET_SNAPSHOT,
         TRANS_ID_GESTURE_NAVIGATION_ENABLED,
+        TRANS_ID_SET_WINDOW_GRAVITY,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -90,6 +91,7 @@ public:
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode) = 0;
     virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
         bool isAsyncTask = false) = 0;
+    virtual WMError SetWindowGravity(uint32_t windowId, WindowGravity gravity, uint32_t percent) = 0;
     virtual WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
     virtual WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,

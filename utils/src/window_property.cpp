@@ -576,6 +576,18 @@ uint32_t WindowProperty::GetAccessTokenId() const
     return accessTokenId_;
 }
 
+void WindowProperty::SetWindowGravity(WindowGravity gravity, uint32_t percent)
+{
+    windowGravity_ = gravity;
+    windowGravitySizePercent_ = percent;
+}
+
+void WindowProperty::GetWindowGravity(WindowGravity& gravity, uint32_t& percent) const
+{
+    gravity = windowGravity_;
+    percent = windowGravitySizePercent_;
+}
+
 bool WindowProperty::MapMarshalling(Parcel& parcel) const
 {
     auto size = sysBarPropMap_.size();

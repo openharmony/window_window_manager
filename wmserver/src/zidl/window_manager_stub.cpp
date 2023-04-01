@@ -294,6 +294,14 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
+        case WindowManagerMessage::TRANS_ID_SET_WINDOW_GRAVITY: {
+            uint32_t windowId = data.ReadUint32();
+            WindowGravity gravity = static_cast<WindowGravity>(data.ReadUint32());
+            uint32_t percent = data.ReadUint32();
+            WMError errCode = SetWindowGravity(windowId, gravity, percent);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

@@ -229,6 +229,12 @@ WMError WindowAdapter::UpdateProperty(sptr<WindowProperty>& windowProperty, Prop
     return windowManagerServiceProxy_->UpdateProperty(windowProperty, action);
 }
 
+WMError WindowAdapter::SetWindowGravity(uint32_t windowId, WindowGravity gravity, uint32_t percent)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    return windowManagerServiceProxy_->SetWindowGravity(windowId, gravity, percent);
+}
+
 WMError WindowAdapter::NotifyWindowTransition(sptr<WindowTransitionInfo> from, sptr<WindowTransitionInfo> to)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
