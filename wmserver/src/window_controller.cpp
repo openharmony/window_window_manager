@@ -337,7 +337,11 @@ void WindowController::RelayoutKeyboard(const sptr<WindowNode>& node)
         WLOGFE("Node is nullptr");
         return;
     }
-    if (node->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+    WindowGravity gravity;
+    uint32_t percent = 0;
+    node->GetWindowGravity(gravity, percent);
+    if (node->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
+        gravity == WindowGravity::WINDOW_GRAVITY_FLOAT) {
         return;
     }
 
@@ -374,6 +378,11 @@ void WindowController::RelayoutKeyboard(const sptr<WindowNode>& node)
 
     auto previousRect = node->GetWindowRect();
     WLOGFD("NavigationBarHeight: %{public}u", navigationBarHeight);
+    if (gravity == WindowGravity::WINDOW_GRAVITY_BOTTOM) {
+        if (percent != 0) {
+            previousRect.height_ = defaultDisplayInfo->GetHeight() * percent / 100;
+        }
+    }
     Rect requestedRect = { previousRect.posX_,
         static_cast<int32_t>(defaultDisplayInfo->GetHeight() - previousRect.height_ - navigationBarHeight),
         previousRect.width_, previousRect.height_ };
@@ -398,28 +407,37 @@ void WindowController::ResizeSoftInputCallingWindowIfNeed(const sptr<WindowNode>
         WLOGFE("callingWindow is null or invisible or not float window, callingWindowId:%{public}u", callingWindowId);
         return;
     }
-    Rect softInputWindowRect = node->GetWindowRect();
-    Rect callingWindowRect = callingWindow->GetWindowRect();
-    Rect rect = WindowHelper::GetOverlap(softInputWindowRect, callingWindowRect, 0, 0);
-    if (WindowHelper::IsEmptyRect(rect)) {
-        WLOGFE("there is no overlap");
+    WindowGravity gravity;
+    uint32_t percent = 0;
+    node->GetWindowGravity(gravity, percent);
+    if (gravity == WindowGravity::WINDOW_GRAVITY_FLOAT) {
+        WLOGFI("input method window gtavity is float");
         return;
     }
-    Rect requestedRect = callingWindowRect;
-    requestedRect.posY_ = softInputWindowRect.posY_ - static_cast<int32_t>(requestedRect.height_);
-    Rect statusBarWindowRect = { 0, 0, 0, 0 };
-    auto statusbarWindow = windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR]);
-    if (statusbarWindow != nullptr && statusbarWindow->parent_ != nullptr) {
-        statusBarWindowRect = statusbarWindow->GetWindowRect();
+    if (gravity == WindowGravity::WINDOW_GRAVITY_BOTTOM) {
+        Rect softInputWindowRect = node->GetWindowRect();
+        Rect callingWindowRect = callingWindow->GetWindowRect();
+        Rect rect = WindowHelper::GetOverlap(softInputWindowRect, callingWindowRect, 0, 0);
+        if (WindowHelper::IsEmptyRect(rect)) {
+            WLOGFE("there is no overlap");
+            return;
+        }
+        Rect requestedRect = callingWindowRect;
+        requestedRect.posY_ = softInputWindowRect.posY_ - static_cast<int32_t>(requestedRect.height_);
+        Rect statusBarWindowRect = { 0, 0, 0, 0 };
+        auto statusbarWindow = windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR]);
+        if (statusbarWindow != nullptr && statusbarWindow->parent_ != nullptr) {
+            statusBarWindowRect = statusbarWindow->GetWindowRect();
+        }
+        int32_t posY = std::max(requestedRect.posY_, static_cast<int32_t>(statusBarWindowRect.height_));
+        if (posY != requestedRect.posY_) {
+            requestedRect.height_ = static_cast<uint32_t>(softInputWindowRect.posY_ - posY);
+            requestedRect.posY_ = posY;
+        }
+        callingWindowRestoringRect_ = callingWindowRect;
+        callingWindowId_ = callingWindow->GetWindowId();
+        ResizeRectAndFlush(callingWindowId_, requestedRect, WindowSizeChangeReason::DRAG);
     }
-    int32_t posY = std::max(requestedRect.posY_, static_cast<int32_t>(statusBarWindowRect.height_));
-    if (posY != requestedRect.posY_) {
-        requestedRect.height_ = static_cast<uint32_t>(softInputWindowRect.posY_ - posY);
-        requestedRect.posY_ = posY;
-    }
-    callingWindowRestoringRect_ = callingWindowRect;
-    callingWindowId_ = callingWindow->GetWindowId();
-    ResizeRectAndFlush(callingWindowId_, requestedRect, WindowSizeChangeReason::DRAG);
 }
 
 void WindowController::RestoreCallingWindowSizeIfNeed()
@@ -552,6 +570,13 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
     if (WindowHelper::IsSystemBarWindow(node->GetWindowType())) {
         if ((reason== WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::RESIZE) &&
             rect == node->GetWindowRect()) {
+            return WMError::WM_OK;
+        }
+    }
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        if (reason == WindowSizeChangeReason::RESIZE && rect != node->GetWindowRect()) {
+            RelayoutKeyboard(node);
+            ResizeSoftInputCallingWindowIfNeed(node);
             return WMError::WM_OK;
         }
     }
@@ -1358,6 +1383,22 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             break;
     }
     return ret;
+}
+
+WMError WindowController::SetWindowGravity(uint32_t windowId, WindowGravity gravity, uint32_t percent)
+{
+    sptr<WindowNode> node = windowRoot_->GetWindowNode(windowId);
+    if (node->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        return WMError::WM_ERROR_INVALID_TYPE;
+    }
+    node->SetWindowGravity(gravity, percent);
+    RelayoutKeyboard(node);
+    if (gravity == WindowGravity::WINDOW_GRAVITY_FLOAT) {
+        RestoreCallingWindowSizeIfNeed();
+    } else {
+        ResizeSoftInputCallingWindowIfNeed(node);
+    }
+    return WMError::WM_OK;
 }
 
 void WindowController::UpdatePrivateStateAndNotify(const sptr<WindowNode>& node)

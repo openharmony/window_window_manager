@@ -26,6 +26,7 @@ public:
     static bool IsSystemCalling();
     static bool CheckCallingPermission(const std::string& permission);
     static bool IsStartByHdcd();
+    static bool IsStartByInputMethod();
 };
 } // Rosen
 } // OHOS

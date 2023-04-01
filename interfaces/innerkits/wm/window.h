@@ -317,6 +317,14 @@ public:
      */
     virtual WMError Resize(uint32_t width, uint32_t height) = 0;
     /**
+     * @brief set the window gravity
+     *
+     * @param gravity
+     * @param percent
+     * @return WMError
+     */
+    virtual WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) = 0;
+    /**
      * @brief Set the screen always on
      *
      * @param keepScreenOn

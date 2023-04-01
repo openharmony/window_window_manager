@@ -88,6 +88,7 @@ public:
     bool isNeedComputerTransform();
     void ClearTransformZAxisOffset(Transform& trans);
     void SetAspectRatio(float ratio);
+    void SetWindowGravity(WindowGravity gravity, uint32_t percent);
 
     const std::string& GetWindowName() const;
     const AbilityInfo& GetAbilityInfo() const;
@@ -134,6 +135,7 @@ public:
     const TransformHelper::Matrix4& GetTransformMat() const;
     const TransformHelper::Matrix4& GetWorldTransformMat() const;
     float GetAspectRatio() const;
+    void GetWindowGravity(WindowGravity& gravity, uint32_t& percent) const;
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static WindowProperty* Unmarshalling(Parcel& parcel);
@@ -204,6 +206,8 @@ private:
     bool isDisplayZoomOn_ {false};
     bool isAnimateWindow_ {false};
     float aspectRatio_ {0.0};
+    WindowGravity windowGravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
+    uint32_t windowGravitySizePercent_ = 0;
 
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
     WindowSizeLimits sizeLimits_;

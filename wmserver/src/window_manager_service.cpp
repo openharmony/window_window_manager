@@ -739,6 +739,11 @@ bool WindowManagerService::CheckSystemWindowPermission(const sptr<WindowProperty
         // type is not system
         return true;
     }
+    if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && Permission::IsStartByInputMethod()) {
+        // WINDOW_TYPE_INPUT_METHOD_FLOAT counld be created by input method app
+        WLOGFD("check create permission success, input method app create input method window.");
+        return true;
+    }
     if (type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT || type == WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW ||
         type == WindowType::WINDOW_TYPE_TOAST) {
         // some system types counld be created by normal app
@@ -1149,6 +1154,14 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
             windowProperty->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {
             dragController_->UpdateDragInfo(windowProperty->GetWindowId());
         }
+        return res;
+    });
+}
+
+WMError WindowManagerService::SetWindowGravity(uint32_t windowId, WindowGravity gravity, uint32_t percent)
+{
+    return PostSyncTask([this, windowId, gravity, percent]() {
+        WMError res = windowController_->SetWindowGravity(windowId, gravity, percent);
         return res;
     });
 }

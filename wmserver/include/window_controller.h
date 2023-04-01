@@ -59,6 +59,7 @@ public:
     WMError ToggleShownStateForAllAppWindows();
     WMError SetWindowLayoutMode(WindowLayoutMode mode);
     WMError UpdateProperty(sptr<WindowProperty>& property, PropertyChangeAction action);
+    WMError SetWindowGravity(uint32_t windowId, WindowGravity gravity, uint32_t percent);
     void NotifySystemBarTints();
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);
     WMError GetModeChangeHotZones(DisplayId displayId,

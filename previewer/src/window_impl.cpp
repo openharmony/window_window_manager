@@ -377,6 +377,11 @@ WMError WindowImpl::Resize(uint32_t width, uint32_t height)
     return WMError::WM_OK;
 }
 
+WMError WindowImpl::SetWindowGravity(WindowGravity gravity, uint32_t percent)
+{
+    return WMError::WM_OK;
+}
+
 WMError WindowImpl::SetKeepScreenOn(bool keepScreenOn)
 {
     return WMError::WM_OK;

@@ -19,6 +19,7 @@
 #include <bundle_constants.h>
 #include <ipc_skeleton.h>
 #include <bundle_mgr_proxy.h>
+#include <bundle_mgr_interface.h>
 #include <system_ability_definition.h>
 #include <iservice_registry.h>
 #include <tokenid_kit.h>
@@ -78,6 +79,49 @@ bool Permission::IsStartByHdcd()
         return true;
     }
     return false;
+}
+
+bool Permission::IsStartByInputMethod()
+{
+    sptr<ISystemAbilityManager> systemAbilityManager =
+            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManager) {
+        WLOGFE("Failed to get system ability mgr.");
+        return false;
+    }
+    sptr<IRemoteObject> remoteObject
+        = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (!remoteObject) {
+        WLOGFE("Failed to get display manager service.");
+        return false;
+    }
+    auto bundleManagerServiceProxy_= iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    if ((!bundleManagerServiceProxy_) || (!bundleManagerServiceProxy_->AsObject())) {
+        WLOGFE("Failed to get system display manager services");
+        return false;
+    }
+
+    int uid = IPCSkeleton::GetCallingUid();
+    std::string bundleName;
+    bundleManagerServiceProxy_->GetBundleNameForUid(uid, bundleName);
+
+    AppExecFwk::BundleInfo bundleInfo;
+    bool result = bundleManagerServiceProxy_->GetBundleInfo(bundleName,
+        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO, bundleInfo);
+    if (!result) {
+        WLOGFE("failed to query extension ability info");
+        return false;
+    }
+
+    auto extensionInfo = std::find_if(bundleInfo.extensionInfos.begin(), bundleInfo.extensionInfos.end(),
+        [](AppExecFwk::ExtensionAbilityInfo extensionInfo) {
+            return (extensionInfo.type == AppExecFwk::ExtensionAbilityType::INPUTMETHOD);
+        });
+    if (extensionInfo != bundleInfo.extensionInfos.end()) {
+        return true;
+    } else {
+        return false;
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

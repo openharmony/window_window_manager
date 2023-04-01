@@ -91,6 +91,7 @@ public:
     Transform GetZoomTransform() const;
     void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn);
     void SetAspectRatio(float ratio);
+    void SetWindowGravity(WindowGravity gravity, uint32_t percent);
 
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;
@@ -128,6 +129,7 @@ public:
     WindowSizeLimits GetWindowSizeLimits() const;
     WindowSizeLimits GetWindowUpdatedSizeLimits() const;
     float GetAspectRatio() const;
+    void GetWindowGravity(WindowGravity& gravity, uint32_t& percent) const;
 
     bool EnableDefaultAnimation(bool animationPlayed);
     sptr<WindowNode> parent_;
