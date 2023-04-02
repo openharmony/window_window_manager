@@ -331,6 +331,35 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     return WMError::WM_OK;
 }
 
+bool WindowController::GetNavigationBarHeight(DisplayId displayId, uint32_t& navigationBarHeight)
+{
+    auto container = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
+    if (container == nullptr) {
+        WLOGFE("Node container is null");
+        return false;
+    }
+
+    bool hasFullScreenKeyGuardWindow = false;
+    WindowNodeOperationFunc func = [&navigationBarHeight, &hasFullScreenKeyGuardWindow](sptr<WindowNode> windowNode) {
+        if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD &&
+            windowNode->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+                hasFullScreenKeyGuardWindow = true;
+        }
+        if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR && windowNode->isVisible_) {
+            navigationBarHeight = windowNode->GetWindowRect().height_;
+            if (hasFullScreenKeyGuardWindow) {
+                WLOGFW("The navigation bar is overlaid by the keyguard window and is invisible");
+                navigationBarHeight = 0;
+            }
+            return true;
+        }
+        return false;
+    };
+    container->TraverseWindowTree(func, true); // FromTopToBottom
+
+    return true;
+}
+
 void WindowController::RelayoutKeyboard(const sptr<WindowNode>& node)
 {
     if (node == nullptr) {
@@ -352,23 +381,10 @@ void WindowController::RelayoutKeyboard(const sptr<WindowNode>& node)
     }
 
     uint32_t navigationBarHeight = 0;
-    bool hasFullScreenKeyGuardWindow = false;
-    WindowNodeOperationFunc func = [&navigationBarHeight, &hasFullScreenKeyGuardWindow](sptr<WindowNode> windowNode) {
-        if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD &&
-            windowNode->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-                hasFullScreenKeyGuardWindow = true;
-        }
-        if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR && windowNode->isVisible_) {
-            navigationBarHeight = windowNode->GetWindowRect().height_;
-            if (hasFullScreenKeyGuardWindow) {
-                WLOGFW("The navigation bar is overlaid by the keyguard window and is invisible");
-                navigationBarHeight = 0;
-            }
-            return true;
-        }
-        return false;
-    };
-    container->TraverseWindowTree(func, true); // FromTopToBottom
+    bool res = GetNavigationBarHeight(node->GetDisplayId(), navigationBarHeight);
+    if (res == false) {
+        return;
+    }
 
     sptr<DisplayInfo> defaultDisplayInfo = DisplayGroupInfo::GetInstance().GetDefaultDisplayInfo();
     if (defaultDisplayInfo == nullptr) {
@@ -380,7 +396,9 @@ void WindowController::RelayoutKeyboard(const sptr<WindowNode>& node)
     WLOGFD("NavigationBarHeight: %{public}u", navigationBarHeight);
     if (gravity == WindowGravity::WINDOW_GRAVITY_BOTTOM) {
         if (percent != 0) {
+            previousRect.width_ = defaultDisplayInfo->GetWidth();
             previousRect.height_ = defaultDisplayInfo->GetHeight() * percent / 100;
+            previousRect.posX_ = 0;
         }
     }
     Rect requestedRect = { previousRect.posX_,
@@ -573,13 +591,6 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
             return WMError::WM_OK;
         }
     }
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-        if (reason == WindowSizeChangeReason::RESIZE && rect != node->GetWindowRect()) {
-            RelayoutKeyboard(node);
-            ResizeSoftInputCallingWindowIfNeed(node);
-            return WMError::WM_OK;
-        }
-    }
     auto property = node->GetWindowProperty();
     node->SetWindowSizeChangeReason(reason);
     Rect lastRect = property->GetWindowRect();
@@ -605,6 +616,11 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
     WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_RECT);
     if (res != WMError::WM_OK) {
         return res;
+    }
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
+        reason == WindowSizeChangeReason::RESIZE) {
+        RelayoutKeyboard(node);
+        ResizeSoftInputCallingWindowIfNeed(node);
     }
     accessibilityConnection_->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
     return WMError::WM_OK;
@@ -1398,6 +1414,11 @@ WMError WindowController::SetWindowGravity(uint32_t windowId, WindowGravity grav
     } else {
         ResizeSoftInputCallingWindowIfNeed(node);
     }
+    WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_RECT);
+    if (res != WMError::WM_OK) {
+        return res;
+    }
+    FlushWindowInfo(windowId);
     return WMError::WM_OK;
 }
 

@@ -95,7 +95,7 @@ bool Permission::IsStartByInputMethod()
         WLOGFE("Failed to get display manager service.");
         return false;
     }
-    auto bundleManagerServiceProxy_= iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    auto bundleManagerServiceProxy_ = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
     if ((!bundleManagerServiceProxy_) || (!bundleManagerServiceProxy_->AsObject())) {
         WLOGFE("Failed to get system display manager services");
         return false;
