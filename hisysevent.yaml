@@ -55,6 +55,14 @@ WINDOW_ANIMATION_ABNORMAL:
   PROCESS_NAME: {type: STRING, desc: bundle name}
   MSG: {type: STRING, desc: windowmanager event message}
 
+ANIMATION_CALLBACK_TIMEOUT:
+  __BASE: {type: FAULT, level: MINOR, desc: animationCallback is time out}
+  PID: {type: INT32, desc: app pid}
+  UID: {type: INT32, desc: app uid}
+  PACKAGE_NAME: {type: STRING, desc: ability name}
+  PROCESS_NAME: {type: STRING, desc: bundle name}
+  MSG: {type: STRING, desc: windowmanager event message}
+
 WINDOW_LIFE_CYCLE_EXCEPTION:
   __BASE: {type: FAULT, level: CRITICAL, desc: The window life cycle is abnormal}
   PID: {type: INT32, desc: session pid}
