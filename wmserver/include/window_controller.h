@@ -111,6 +111,7 @@ private:
     void SetDefaultDisplayInfo(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo);
     void ProcessDisplayCompression(DisplayId defaultDisplayId, const sptr<DisplayInfo>& displayInfo);
     void NotifyAfterAddWindow(sptr<WindowNode>& node);
+    bool GetNavigationBarHeight(DisplayId displayId, uint32_t& navigationBarHeight);
     void RelayoutKeyboard(const sptr<WindowNode>& node);
     bool CheckParentWindowValid(const sptr<WindowProperty>& property);
     void UpdatePrivateStateAndNotify(const sptr<WindowNode>& node);
