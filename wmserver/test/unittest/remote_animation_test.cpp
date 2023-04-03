@@ -982,15 +982,15 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationTargetsUpdate02, Function | SmallTe
 HWTEST_F(RemoteAnimationTest, NotifyAnimationScreenUnlock01, Function | SmallTest | Level2)
 {
     std::function<void(void)> callback = nullptr;
-    WMError ret = RemoteAnimation::NotifyAnimationScreenUnlock(callback);
+    WMError ret = RemoteAnimation::NotifyAnimationScreenUnlock(callback, nullptr);
     EXPECT_EQ(WMError::WM_ERROR_NO_MEM, ret);
 
     callback = []() {};
-    ret = RemoteAnimation::NotifyAnimationScreenUnlock(callback);
+    ret = RemoteAnimation::NotifyAnimationScreenUnlock(callback, node_);
     EXPECT_EQ(WMError::WM_OK, ret);
 
     RemoteAnimation::windowAnimationController_ = nullptr;
-    ret = RemoteAnimation::NotifyAnimationScreenUnlock(callback);
+    ret = RemoteAnimation::NotifyAnimationScreenUnlock(callback, node_);
     EXPECT_EQ(WMError::WM_ERROR_NO_REMOTE_ANIMATION, ret);
 }
 
@@ -1020,11 +1020,11 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationUpdateWallpaper01, Function | Small
 HWTEST_F(RemoteAnimationTest, CreateAnimationFinishedCallback01, Function | SmallTest | Level2)
 {
     std::function<void(void)> callback = nullptr;
-    EXPECT_EQ(nullptr, RemoteAnimation::CreateAnimationFinishedCallback(callback));
+    EXPECT_EQ(nullptr, RemoteAnimation::CreateAnimationFinishedCallback(callback, node_));
 
     bool testFlag = false;
     callback = [&testFlag]() { testFlag = true; };
-    auto finishCallback = RemoteAnimation::CreateAnimationFinishedCallback(callback);
+    auto finishCallback = RemoteAnimation::CreateAnimationFinishedCallback(callback, node_);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished();
     usleep(SLEEP_TIME_IN_US);
@@ -1033,7 +1033,7 @@ HWTEST_F(RemoteAnimationTest, CreateAnimationFinishedCallback01, Function | Smal
     wmsTaskHandler_ = nullptr;
     RemoteAnimation::wmsTaskHandler_ = wmsTaskHandler_;
     callback = [&testFlag]() { testFlag = false; };
-    finishCallback = RemoteAnimation::CreateAnimationFinishedCallback(callback);
+    finishCallback = RemoteAnimation::CreateAnimationFinishedCallback(callback, node_);
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished();
     usleep(SLEEP_TIME_IN_US);

@@ -63,7 +63,7 @@ public:
     static bool CheckRemoteAnimationEnabled(DisplayId displayId);
     static void NotifyAnimationAbilityDied(sptr<WindowTransitionInfo> info);
     static WMError NotifyAnimationByHome();
-    static WMError NotifyAnimationScreenUnlock(std::function<void(void)> callback);
+    static WMError NotifyAnimationScreenUnlock(std::function<void(void)> callback, sptr<WindowNode> node);
     static void SetMainTaskHandler(std::shared_ptr<AppExecFwk::EventHandler> handler);
     static void NotifyAnimationTargetsUpdate(std::vector<uint32_t>& fullScreenWinIds,
         std::vector<uint32_t>& floatWinIds);
@@ -73,7 +73,7 @@ public:
     static bool IsRemoteAnimationEnabledAndFirst(DisplayId displayId = 0);
     static void CallbackTimeOutProcess();
     static sptr<RSWindowAnimationFinishedCallback> CreateAnimationFinishedCallback(
-        const std::function<void(void)>& callback);
+        const std::function<void(void)>& callback, sptr<WindowNode> windowNode);
     static inline bool IsAnimationFirst()
     {
         return animationFirst_;
