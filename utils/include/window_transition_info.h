@@ -68,6 +68,8 @@ public:
     int32_t GetMissionId() const;
     void SetOrientation(AppExecFwk::DisplayOrientation orientation);
     AppExecFwk::DisplayOrientation GetOrientation() const;
+    void SetApiCompatibleVersion(uint32_t apiCompatibleVersion);
+    uint32_t GetApiCompatibleVersion() const;
 private:
     std::string bundleName_;
     std::string abilityName_;
@@ -83,6 +85,7 @@ private:
     WindowSizeLimits sizeLimits_;
     int32_t missionId_ = -1;
     AppExecFwk::DisplayOrientation orientation_ = AppExecFwk::DisplayOrientation::UNSPECIFIED;
+    uint32_t apiCompatibleVersion_ = 0;
 };
 } // Rosen
 } // OHOS
