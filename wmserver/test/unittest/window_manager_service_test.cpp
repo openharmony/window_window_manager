@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "common_test_utils.h"
 #include "iremote_object_mocker.h"
+#include "mock_IWindow.h"
 #include "mock_RSIWindowAnimationController.h"
 #include "window_manager_service.h"
 
@@ -266,6 +267,112 @@ HWTEST_F(WindowManagerServiceTest, BindDialogTarget01, Function | SmallTest | Le
     sptr<IRemoteObject> targetToken = new IRemoteObjectMocker();
     uint32_t id = 0;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->BindDialogTarget(id, targetToken));
+}
+/**
+ * @tc.name: DispatchKeyEvent01
+ * @tc.desc: Dispatch KeyEvent for app window bellow the component window.
+ * @tc.require: issueI6RMUY
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, DispatchKeyEvent01, Function | SmallTest | Level2)
+{
+    wms = new WindowManagerService();
+    sptr<WindowNode> compNode = new WindowNode();
+    compNode->property_->type_ = WindowType::WINDOW_TYPE_APP_COMPONENT;
+    compNode->SetWindowToken(new IWindowMocker);
+    compNode->property_->windowId_ = 1U;
+    sptr<WindowNode> appNode = new WindowNode();
+    appNode->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    IWindowMocker* token = new IWindowMocker;
+    appNode->SetWindowToken(token);
+    appNode->property_->windowId_ = 2U;
+    auto event = MMI::KeyEvent::Create();
+    wms->windowController_->windowRoot_->windowNodeMap_[appNode->GetWindowId()] = appNode;
+    wms->windowController_->windowRoot_->windowNodeMap_[compNode->GetWindowId()] = compNode;
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(new DisplayInfo, 0);
+    wms->windowController_->windowRoot_->windowNodeContainerMap_[compNode->GetDisplayId()] = container;
+    wms->windowController_->windowRoot_->displayIdMap_[compNode->GetDisplayId()] = { compNode->GetDisplayId() };
+    container->appWindowNode_->children_.push_back(appNode);
+    container->appWindowNode_->children_.push_back(compNode);
+    std::vector<sptr<WindowNode>> windowNodes;
+    container->TraverseContainer(windowNodes);
+    ASSERT_TRUE(windowNodes[0] == compNode);
+    ASSERT_TRUE(windowNodes[1] == appNode);
+    EXPECT_CALL(*token, ConsumeKeyEvent(_));
+    wms->DispatchKeyEvent(compNode->GetWindowId(), event);
+    testing::Mock::AllowLeak(token);
+}
+/**
+ * @tc.name: DispatchKeyEvent02
+ * @tc.desc: Dispatch KeyEvent for app window bellow the app window.
+ * @tc.require: issueI6RMUY
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, DispatchKeyEvent02, Function | SmallTest | Level2)
+{
+    wms = new WindowManagerService();
+    sptr<WindowNode> appNode1 = new WindowNode();
+    appNode1->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    appNode1->SetWindowToken(new IWindowMocker);
+    appNode1->property_->windowId_ = 1U;
+    sptr<WindowNode> appNode2 = new WindowNode();
+    appNode2->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    appNode2->SetWindowToken(new IWindowMocker);
+    appNode2->property_->windowId_ = 2U;
+    auto event = MMI::KeyEvent::Create();
+    wms->windowController_->windowRoot_->windowNodeMap_[appNode2->GetWindowId()] = appNode2;
+    wms->windowController_->windowRoot_->windowNodeMap_[appNode1->GetWindowId()] = appNode1;
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(new DisplayInfo, 0);
+    wms->windowController_->windowRoot_->windowNodeContainerMap_[appNode1->GetDisplayId()] = container;
+    wms->windowController_->windowRoot_->displayIdMap_[appNode1->GetDisplayId()] = { appNode1->GetDisplayId() };
+    container->appWindowNode_->children_.push_back(appNode2);
+    container->appWindowNode_->children_.push_back(appNode1);
+    std::vector<sptr<WindowNode>> windowNodes;
+    container->TraverseContainer(windowNodes);
+    ASSERT_TRUE(windowNodes[0] == appNode1);
+    ASSERT_TRUE(windowNodes[1] == appNode2);
+    wms->DispatchKeyEvent(appNode1->GetWindowId(), event);
+}
+/**
+ * @tc.name: DispatchKeyEvent03
+ * @tc.desc: Dispatch KeyEvent for app window bellow two component window.
+ * @tc.require: issueI6RMUY
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, DispatchKeyEvent03, Function | SmallTest | Level2)
+{
+    wms = new WindowManagerService();
+    sptr<WindowNode> compNode1 = new WindowNode();
+    compNode1->property_->type_ = WindowType::WINDOW_TYPE_APP_COMPONENT;
+    compNode1->SetWindowToken(new IWindowMocker);
+    compNode1->property_->windowId_ = 1U;
+    sptr<WindowNode> compNode2 = new WindowNode();
+    compNode2->property_->type_ = WindowType::WINDOW_TYPE_APP_COMPONENT;
+    compNode2->SetWindowToken(new IWindowMocker);
+    compNode2->property_->windowId_ = 2U;
+    sptr<WindowNode> appNode = new WindowNode();
+    appNode->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    IWindowMocker* token = new IWindowMocker;
+    appNode->SetWindowToken(token);
+    appNode->property_->windowId_ = 3U;
+    auto event = MMI::KeyEvent::Create();
+    wms->windowController_->windowRoot_->windowNodeMap_[appNode->GetWindowId()] = appNode;
+    wms->windowController_->windowRoot_->windowNodeMap_[compNode1->GetWindowId()] = compNode1;
+    wms->windowController_->windowRoot_->windowNodeMap_[compNode2->GetWindowId()] = compNode2;
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(new DisplayInfo, 0);
+    wms->windowController_->windowRoot_->windowNodeContainerMap_[compNode1->GetDisplayId()] = container;
+    wms->windowController_->windowRoot_->displayIdMap_[compNode1->GetDisplayId()] = { compNode1->GetDisplayId() };
+    container->appWindowNode_->children_.push_back(appNode);
+    container->appWindowNode_->children_.push_back(compNode1);
+    container->appWindowNode_->children_.push_back(compNode2);
+    std::vector<sptr<WindowNode>> windowNodes;
+    container->TraverseContainer(windowNodes);
+    ASSERT_TRUE(windowNodes[0] == compNode2);
+    ASSERT_TRUE(windowNodes[1] == compNode1);
+    ASSERT_TRUE(windowNodes[2] == appNode);
+    EXPECT_CALL(*token, ConsumeKeyEvent(_));
+    wms->DispatchKeyEvent(compNode2->GetWindowId(), event);
+    testing::Mock::AllowLeak(token);
 }
 }
 }

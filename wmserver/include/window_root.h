@@ -79,6 +79,7 @@ public:
 
     void NotifySystemBarTints();
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node);
+    void DispatchKeyEvent(sptr<WindowNode> node, std::shared_ptr<MMI::KeyEvent> event);
     void FocusFaultDetection() const;
     Rect GetDisplayGroupRect(DisplayId displayId) const;
     WMError UpdateSizeChangeReason(uint32_t windowId, WindowSizeChangeReason reason);

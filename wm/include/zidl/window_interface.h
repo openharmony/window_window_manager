@@ -50,6 +50,7 @@ public:
         TRANS_ID_NOTIFY_CLIENT_POINT_UP,
         TRANS_ID_UPDATE_ZOOM_TRANSFORM,
         TRANS_ID_RESTORE_SPLIT_WINDOW_MODE,
+        TRANS_ID_CONSUME_KEY_EVENT,
     };
 
     virtual WMError UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,
@@ -73,6 +74,7 @@ public:
     virtual WMError NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
     virtual WMError UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn) = 0;
     virtual WMError RestoreSplitWindowMode(uint32_t mode) = 0;
+    virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent> event) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

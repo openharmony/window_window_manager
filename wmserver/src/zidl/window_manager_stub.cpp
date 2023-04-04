@@ -15,6 +15,7 @@
 
 #include "zidl/window_manager_stub.h"
 #include <ipc_skeleton.h>
+#include <key_event.h>
 #include <rs_iwindow_animation_controller.h>
 
 #include "marshalling_helper.h"
@@ -300,6 +301,13 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             uint32_t percent = data.ReadUint32();
             WMError errCode = SetWindowGravity(windowId, gravity, percent);
             reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
+        case WindowManagerMessage::TRANS_ID_DISPATCH_KEY_EVENT: {
+            uint32_t windowId = data.ReadUint32();
+            std::shared_ptr<MMI::KeyEvent> event = MMI::KeyEvent::Create();
+            event->ReadFromParcel(data);
+            DispatchKeyEvent(windowId, event);
             break;
         }
         default:

@@ -16,6 +16,7 @@
 
 #include "iremote_broker.h"
 #include "window.h"
+#include "zidl/window_interface.h"
 #include "window_property.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
@@ -48,6 +49,7 @@ public:
     MOCK_METHOD1(NotifyWindowClientPointUp, WMError(const std::shared_ptr<MMI::PointerEvent>& pointerEvent));
     MOCK_METHOD2(UpdateZoomTransform, WMError(const Transform& trans, bool isDisplayZoomOn));
     MOCK_METHOD1(RestoreSplitWindowMode, WMError(uint32_t mode));
+    MOCK_METHOD1(ConsumeKeyEvent, void(std::shared_ptr<MMI::KeyEvent> event));
     sptr<IRemoteObject> AsObject() override
     {
         return nullptr;
