@@ -891,9 +891,9 @@ DMError AbstractScreenController::SetScreenActiveMode(ScreenId screenId, uint32_
 
 void AbstractScreenController::ProcessScreenModeChanged(ScreenId dmsScreenId)
 {
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:ProcessScreenModeChanged(%" PRIu64")", dmsScreenId);
     sptr<AbstractScreen> absScreen = nullptr;
     sptr<AbstractScreenCallback> absScreenCallback = nullptr;
+    sptr<SupportedScreenModes> activeScreenMode = nullptr;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         auto dmsScreenMapIter = dmsScreenMap_.find(dmsScreenId);
@@ -906,9 +906,14 @@ void AbstractScreenController::ProcessScreenModeChanged(ScreenId dmsScreenId)
             WLOGFE("screen is nullptr. dmsScreenId=%{public}" PRIu64"", dmsScreenId);
             return;
         }
+        activeScreenMode = absScreen->GetActiveScreenMode();
         absScreenCallback = abstractScreenCallback_;
     }
-
+    uint32_t width = activeScreenMode->width_;
+    uint32_t height = activeScreenMode->height_;
+    uint32_t refreshRate = activeScreenMode->refreshRate_;
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:ProcessScreenModeChanged(%" PRIu64"),\
+        width*height(%u*%u), refreshRate(%u)", dmsScreenId, width, height, refreshRate);
     if (absScreenCallback != nullptr) {
         absScreenCallback->onChange_(absScreen, DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
     }
