@@ -1470,6 +1470,9 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
 WMError WindowController::SetWindowGravity(uint32_t windowId, WindowGravity gravity, uint32_t percent)
 {
     sptr<WindowNode> node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
     if (node->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         return WMError::WM_ERROR_INVALID_TYPE;
     }

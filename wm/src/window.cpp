@@ -42,7 +42,7 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
     if ((context != nullptr) && (context->GetApplicationInfo() != nullptr)) {
         version = context->GetApplicationInfo()->apiCompatibleVersion;
     }
-    // 10 ArkUI新框架适用版本API10
+    // 10 ArkUI new framework support after API10
     if (version >= 10) {
         option->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
     }

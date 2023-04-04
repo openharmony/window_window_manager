@@ -73,6 +73,10 @@ HWTEST_F(WindowInputMethodTest, InputMethodWindow01, Function | MediumTest | Lev
     inputMethodWindowInfo_.name = "input_method.1";
     const sptr<Window>& window = Utils::CreateTestWindow(inputMethodWindowInfo_);
     ASSERT_EQ(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, window->GetType());
+    window->SetWindowGravity(WindowGravity::WINDOW_GRAVITY_BOTTOM, 0);
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    ASSERT_EQ(WMError::WM_OK, window->Hide());
+    window->SetWindowGravity(WindowGravity::WINDOW_GRAVITY_FLOAT, 0);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_EQ(WMError::WM_OK, window->Hide());
 }
@@ -86,6 +90,12 @@ HWTEST_F(WindowInputMethodTest, InputMethodWindow02, Function | MediumTest | Lev
 {
     inputMethodWindowInfo_.name = "input_method.2";
     const sptr<Window>& inputMethodWindow = Utils::CreateTestWindow(inputMethodWindowInfo_);
+    inputMethodWindow->SetWindowGravity(WindowGravity::WINDOW_GRAVITY_BOTTOM, 0);
+    inputMethodWindow->Show();
+    ASSERT_EQ(inputMethodWindow->GetRect().width_,  Utils::customAppRect_.width_);
+    ASSERT_EQ(inputMethodWindow->GetRect().height_,  Utils::customAppRect_.height_);
+    inputMethodWindow->Hide();
+    inputMethodWindow->SetWindowGravity(WindowGravity::WINDOW_GRAVITY_FLOAT, 0);
     inputMethodWindow->Show();
     ASSERT_EQ(inputMethodWindow->GetRect().width_,  Utils::customAppRect_.width_);
     ASSERT_EQ(inputMethodWindow->GetRect().height_,  Utils::customAppRect_.height_);

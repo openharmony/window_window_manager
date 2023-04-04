@@ -722,7 +722,7 @@ WMError WindowImpl::SetLayoutFullScreen(bool status)
     if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
         version = context_->GetApplicationInfo()->apiCompatibleVersion;
     }
-    // 10 ArkUI新框架适用版本API10
+    // 10 ArkUI new framework support after API10
     if (version >= 10) {
         if (uiContent_ != nullptr) {
             uiContent_->SetIgnoreViewSafeArea(status);
