@@ -142,6 +142,7 @@ WMError SetGestureNavigaionEnabled(bool enable) override
 {
     return WMError::WM_OK;
 }
+void DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event) override {}
 };
 }
 }

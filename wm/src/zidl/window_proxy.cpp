@@ -15,6 +15,7 @@
 
 #include "zidl/window_proxy.h"
 #include <ipc_types.h>
+#include <key_event.h>
 #include "pointer_event.h"
 #include "message_option.h"
 #include "window_manager_hilog.h"
@@ -478,6 +479,26 @@ WMError WindowProxy::RestoreSplitWindowMode(uint32_t mode)
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return WMError::WM_OK;
+}
+
+void WindowProxy::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent> event)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!event->WriteToParcel(data)) {
+        WLOGFE("Write point event failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_CONSUME_KEY_EVENT),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

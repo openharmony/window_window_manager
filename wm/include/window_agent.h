@@ -48,6 +48,7 @@ public:
     WMError NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     WMError UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn) override;
     WMError RestoreSplitWindowMode(uint32_t mode) override;
+    void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent> event) override;
 private:
     sptr<WindowImpl> window_;
 };

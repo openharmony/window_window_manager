@@ -2205,6 +2205,12 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
             WLOGFE("There is no key event consumer");
         }
     }
+    if (GetType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
+        WLOGFI("DispatchKeyEvent: %{public}u", GetWindowId());
+        SingletonContainer::Get<WindowAdapter>().DispatchKeyEvent(GetWindowId(), keyEvent);
+        keyEvent->MarkProcessed();
+        return;
+    }
 }
 
 void WindowImpl::HandleModeChangeHotZones(int32_t posX, int32_t posY)

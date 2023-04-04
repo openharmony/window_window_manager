@@ -1200,6 +1200,13 @@ std::shared_ptr<Media::PixelMap> WindowManagerService::GetSnapshot(int32_t windo
     return nullptr;
 }
 
+void WindowManagerService::DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event)
+{
+    PostVoidSyncTask([this, windowId, event]() {
+        windowController_->DispatchKeyEvent(windowId, event);
+    });
+}
+
 WMError WindowManagerService::GetSystemConfig(SystemConfig& systemConfig)
 {
     systemConfig = systemConfig_;
