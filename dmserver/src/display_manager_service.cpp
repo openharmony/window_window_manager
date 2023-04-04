@@ -397,6 +397,7 @@ bool DisplayManagerService::WakeUpBegin(PowerStateChangeReason reason)
 
 bool DisplayManagerService::WakeUpEnd()
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:WakeUpEnd");
     if (!Permission::IsSystemServiceCalling()) {
         WLOGFE("wake up end permission denied!");
         return false;
@@ -419,6 +420,7 @@ bool DisplayManagerService::SuspendBegin(PowerStateChangeReason reason)
 
 bool DisplayManagerService::SuspendEnd()
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:SuspendEnd");
     if (!Permission::IsSystemServiceCalling()) {
         WLOGFE("suspend end permission denied!");
         return false;
