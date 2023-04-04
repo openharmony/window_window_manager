@@ -24,6 +24,8 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowProxy"};
+    // data timeout 1000ms
+    constexpr int RAW_DATA_TIMEOUT = 1000;
 }
 
 WMError WindowProxy::UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,
@@ -332,6 +334,7 @@ WMError WindowProxy::DumpInfo(const std::vector<std::string>& params, std::vecto
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
+    option.SetWaitTime(RAW_DATA_TIMEOUT);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
