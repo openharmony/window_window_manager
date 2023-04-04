@@ -106,8 +106,12 @@ bool Permission::IsStartByInputMethod()
     bundleManagerServiceProxy_->GetBundleNameForUid(uid, bundleName);
 
     AppExecFwk::BundleInfo bundleInfo;
+    // reset ipc identity
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
     bool result = bundleManagerServiceProxy_->GetBundleInfo(bundleName,
         AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO, bundleInfo);
+    // set ipc identity to raw
+    IPCSkeleton::SetCallingIdentity(identity);
     if (!result) {
         WLOGFE("failed to query extension ability info");
         return false;
