@@ -1656,7 +1656,7 @@ std::string WindowImpl::TransferLifeCycleEventToString(LifeCycleEvent type) cons
 
 WMError WindowImpl::SetPrivacyMode(bool isPrivacyMode)
 {
-    WLOGFD("id : %{public}u, SetPrivacyMode", GetWindowId());
+    WLOGFD("id : %{public}u, SetPrivacyMode, %{public}u", GetWindowId(), isPrivacyMode);
     property_->SetPrivacyMode(isPrivacyMode);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
 }
@@ -1668,7 +1668,7 @@ bool WindowImpl::IsPrivacyMode() const
 
 void WindowImpl::SetSystemPrivacyMode(bool isSystemPrivacyMode)
 {
-    WLOGFD("id : %{public}u, SetSystemPrivacyMode", GetWindowId());
+    WLOGFD("id : %{public}u, SetSystemPrivacyMode, %{public}u", GetWindowId(), isSystemPrivacyMode);
     property_->SetSystemPrivacyMode(isSystemPrivacyMode);
     UpdateProperty(PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
 }
