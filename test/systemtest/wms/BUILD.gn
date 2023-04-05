@@ -55,6 +55,8 @@ ohos_systemtest("wms_window_layout_test") {
   sources = [ "window_layout_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ohos_systemtest("wms_window_effect_test") {
@@ -63,6 +65,8 @@ ohos_systemtest("wms_window_effect_test") {
   sources = [ "window_effect_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ohos_systemtest("wms_window_multi_ability_test") {
@@ -71,6 +75,8 @@ ohos_systemtest("wms_window_multi_ability_test") {
   sources = [ "window_multi_ability_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ohos_systemtest("wms_window_subwindow_test") {
@@ -90,7 +96,10 @@ ohos_systemtest("wms_window_systemsubwindow_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [ "bundle_framework:appexecfwk_base" ]
+  external_deps = [
+    "bundle_framework:appexecfwk_base",
+    "power_manager:powermgr_client",
+  ]
 }
 
 ohos_systemtest("wms_window_dialogwindow_test") {
@@ -109,6 +118,8 @@ ohos_systemtest("wms_window_immersive_test") {
   sources = [ "window_immersive_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ohos_systemtest("wms_window_focus_test") {
@@ -117,6 +128,8 @@ ohos_systemtest("wms_window_focus_test") {
   sources = [ "window_focus_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ohos_systemtest("wms_window_split_immersive_test") {
@@ -125,6 +138,8 @@ ohos_systemtest("wms_window_split_immersive_test") {
   sources = [ "window_split_immersive_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ohos_systemtest("wms_window_split_test") {
@@ -133,6 +148,8 @@ ohos_systemtest("wms_window_split_test") {
   sources = [ "window_split_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ohos_systemtest("wms_window_move_drag_test") {
@@ -142,7 +159,10 @@ ohos_systemtest("wms_window_move_drag_test") {
 
   deps = [ ":wms_systemtest_common" ]
 
-  external_deps = [ "bundle_framework:appexecfwk_base" ]
+  external_deps = [
+    "bundle_framework:appexecfwk_base",
+    "power_manager:powermgr_client",
+  ]
 }
 
 ohos_systemtest("wms_window_input_method_test") {
@@ -151,6 +171,8 @@ ohos_systemtest("wms_window_input_method_test") {
   sources = [ "window_input_method_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ohos_systemtest("wms_window_gamut_test") {
@@ -159,6 +181,8 @@ ohos_systemtest("wms_window_gamut_test") {
   sources = [ "window_gamut_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ohos_systemtest("wms_window_gesture_navigation_enabled_test") {
@@ -175,6 +199,8 @@ ohos_systemtest("wms_window_input_test") {
   sources = [ "window_input_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ohos_systemtest("wms_window_visibility_info_test") {
@@ -183,6 +209,8 @@ ohos_systemtest("wms_window_visibility_info_test") {
   sources = [ "window_visibility_info_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ohos_systemtest("wms_window_display_zoom_test") {
@@ -191,6 +219,8 @@ ohos_systemtest("wms_window_display_zoom_test") {
   sources = [ "window_display_zoom_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ohos_systemtest("wms_window_drag_test") {
@@ -199,6 +229,8 @@ ohos_systemtest("wms_window_drag_test") {
   sources = [ "window_drag_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ohos_systemtest("wms_window_raisetoapptop_test") {
@@ -207,6 +239,8 @@ ohos_systemtest("wms_window_raisetoapptop_test") {
   sources = [ "window_raisetoapptop_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ohos_systemtest("wms_window_rotation_test") {
@@ -215,6 +249,8 @@ ohos_systemtest("wms_window_rotation_test") {
   sources = [ "window_rotation_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ohos_systemtest("wms_window_occupied_area_change_test") {
@@ -223,6 +259,8 @@ ohos_systemtest("wms_window_occupied_area_change_test") {
   sources = [ "window_occupied_area_change_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ohos_systemtest("wms_window_touch_outside_test") {
@@ -231,6 +269,8 @@ ohos_systemtest("wms_window_touch_outside_test") {
   sources = [ "window_touch_outside_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ohos_systemtest("wms_window_mode_support_info_test") {
@@ -239,6 +279,8 @@ ohos_systemtest("wms_window_mode_support_info_test") {
   sources = [ "window_mode_support_info_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ohos_systemtest("wms_window_app_floating_window_test") {
@@ -247,6 +289,8 @@ ohos_systemtest("wms_window_app_floating_window_test") {
   sources = [ "window_app_floating_window_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ohos_systemtest("wms_window_animation_transition_test") {
@@ -255,6 +299,8 @@ ohos_systemtest("wms_window_animation_transition_test") {
   sources = [ "window_animation_transition_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ohos_systemtest("wms_window_water_mark_test") {
@@ -263,6 +309,8 @@ ohos_systemtest("wms_window_water_mark_test") {
   sources = [ "window_water_mark_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "power_manager:powermgr_client" ]
 }
 
 ## Build wms_systemtest_common.a {{{
@@ -302,7 +350,6 @@ ohos_static_library("wms_systemtest_common") {
   ]
 
   public_deps = [
-    "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent",
 
     # need delete it for abilitycontext
@@ -326,6 +373,7 @@ ohos_static_library("wms_systemtest_common") {
     "ability_runtime:ability_context_native",
     "bundle_framework:appexecfwk_base",
     "ipc:ipc_core",
+    "power_manager:powermgr_client",
   ]
 }
 ## Build wms_systemtest_common.a }}}
