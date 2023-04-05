@@ -38,6 +38,14 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
             return nullptr;
         }
     }
+    uint32_t version = 0;
+    if ((context != nullptr) && (context->GetApplicationInfo() != nullptr)) {
+        version = context->GetApplicationInfo()->apiCompatibleVersion;
+    }
+    // 10 ArkUI新框架适用版本API10
+    if (version >= 10) {
+        option->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+    }
     WindowType type = option->GetWindowType();
     if (!(WindowHelper::IsAppWindow(type) || WindowHelper::IsSystemWindow(type))) {
         WLOGFE("window type is invalid %{public}d", type);

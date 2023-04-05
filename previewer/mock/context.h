@@ -18,20 +18,25 @@
 #include <memory>
 
 namespace OHOS {
-namespace AbilityRuntime {
-class Context {
-public:
-    Context() = default;
-    virtual ~Context() = default;
-    virtual std::string GetBundleName() const = 0;
-};
-}  // namespace AbilityRuntime
 namespace AppExecFwk {
+class ApplicationInfo {
+public:
+    uint32_t apiCompatibleVersion;
+};
 class Context {
 public:
     Context() = default;
     virtual ~Context() = default;
 };
 }  // namespace AppExecFwk
+namespace AbilityRuntime {
+class Context {
+public:
+    Context() = default;
+    virtual ~Context() = default;
+    virtual std::string GetBundleName() const = 0;
+    virtual std::shared_ptr<AppExecFwk::ApplicationInfo> GetApplicationInfo() const = 0;
+};
+}  // namespace AbilityRuntime
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_CONTEXT_H
