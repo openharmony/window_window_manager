@@ -78,12 +78,12 @@ test_public_deps = [
 ]
 
 test_inner_deps = [
+  "${window_base_path}/dm:libdm_static",
+  "${window_base_path}/utils:libwmutil_static",
+  "${window_base_path}/wm:libwm_static",
   "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  "//foundation/window/window_manager/dm:libdm",
   "//foundation/window/window_manager/dmserver:libdms",
   "//foundation/window/window_manager/test/common/utils:libtestutil",
-  "//foundation/window/window_manager/utils:libwmutil",
-  "//foundation/window/window_manager/wm:libwm",
   "//foundation/window/window_manager/wmserver:libwms",
 ]
 

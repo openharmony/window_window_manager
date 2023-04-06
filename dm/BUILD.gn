@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/window/window_manager/windowmanager_aafwk.gni")
 
 config("libdm_private_config") {
   include_dirs = [
@@ -25,6 +26,43 @@ config("libdm_public_config") {
     "../interfaces/innerkits/dm",
     "../utils/include",
   ]
+}
+
+## Build libdm_static.a
+ohos_static_library("libdm_static") {
+  sources = [
+    "../dmserver/src/display_manager_proxy.cpp",
+    "src/display.cpp",
+    "src/display_manager.cpp",
+    "src/display_manager_adapter.cpp",
+    "src/screen.cpp",
+    "src/screen_group.cpp",
+    "src/screen_manager.cpp",
+    "src/zidl/display_manager_agent_stub.cpp",
+  ]
+
+  configs = [
+    ":libdm_private_config",
+    "${window_base_path}/resources/config/build:coverage_flags",
+  ]
+
+  public_configs = [ ":libdm_public_config" ]
+
+  deps = [
+    "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "${window_base_path}/utils:libwmutil",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog_native:libhilog",
+    "ipc:ipc_core",
+    "multimedia_image_framework:image_native",
+    "samgr:samgr_proxy",
+  ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
 }
 
 ## Build libdm.so
@@ -60,6 +98,9 @@ ohos_shared_library("libdm") {
     "samgr:samgr_proxy",
   ]
 
+  innerapi_tags = [ "platformsdk" ]  # define the type of the inner API
+
+  version_script = "libdm.map"
   part_name = "window_manager"
   subsystem_name = "window"
 }

@@ -80,6 +80,7 @@ config("window_extension_module_private_config") {
   ]
 }
 
+## Build libwindow_extension_module.so
 ohos_shared_library("window_extension_module") {
   sources = [ "src/window_extension_module_loader.cpp" ]
 

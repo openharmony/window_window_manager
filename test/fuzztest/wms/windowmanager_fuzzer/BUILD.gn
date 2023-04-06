@@ -13,6 +13,7 @@
 
 import("//build/config/features.gni")
 import("//build/test.gni")
+import("//foundation/window/window_manager/windowmanager_aafwk.gni")
 
 module_output_path = "window_manager/wms"
 
@@ -33,7 +34,7 @@ ohos_fuzztest("WindowManagerFuzzTest") {
   ]
 
   sources = [ "windowmanager_fuzzer.cpp" ]
-  deps = [ "//foundation/window/window_manager/wm:libwm" ]
+  deps = [ "${window_base_path}/wm:libwm_static" ]
 
   external_deps = [
     "c_utils:utils",

@@ -13,6 +13,7 @@
 
 import("//build/config/features.gni")
 import("//build/test.gni")
+import("//foundation/window/window_manager/windowmanager_aafwk.gni")
 
 module_output_path = "window_manager/wms"
 
@@ -40,10 +41,10 @@ ohos_fuzztest("WindowControllerFuzzTest") {
 
   sources = [ "windowcontroller_fuzzer.cpp" ]
   deps = [
+    "${window_base_path}/dm:libdm_static",
+    "${window_base_path}/utils:libwmutil_static",
+    "${window_base_path}/wm:libwm_static",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/window/window_manager/dm:libdm",
-    "//foundation/window/window_manager/utils:libwmutil",
-    "//foundation/window/window_manager/wm:libwm",
     "//foundation/window/window_manager/wmserver:libwms",
   ]
 
