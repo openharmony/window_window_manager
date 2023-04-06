@@ -846,6 +846,9 @@ void WindowImpl::MapDialogWindowToAppIfNeeded()
 
 WMError WindowImpl::UpdateProperty(PropertyChangeAction action)
 {
+    if (action == PropertyChangeAction::ACTION_UPDATE_MODE) {
+        UpdateDecorEnable();
+    }
     return SingletonContainer::Get<WindowAdapter>().UpdateProperty(property_, action);
 }
 
