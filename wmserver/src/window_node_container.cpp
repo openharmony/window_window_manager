@@ -2084,13 +2084,35 @@ void WindowNodeContainer::UpdateModeSupportInfoWhenKeyguardChange(const sptr<Win
 
 void WindowNodeContainer::RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const
 {
-    if (node->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT || !isScreenLocked_) {
+    if (node->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         return;
     }
 
-    node->priority_ = zorderPolicy_->GetWindowPriority(
-        WindowType::WINDOW_TYPE_KEYGUARD) + 2; // 2: higher than keyguard and show when locked window
-    WLOGD("raise input method float window priority.");
+    if (isScreenLocked_) {
+        node->priority_ = zorderPolicy_->GetWindowPriority(
+            WindowType::WINDOW_TYPE_KEYGUARD) + 2; // 2: higher than keyguard and show when locked window
+        WLOGD("Raise input method float window priority when screen locked.");
+        return;
+    }
+
+    auto callingWindowId = node->GetCallingWindow();
+    auto callingWindow = FindWindowNodeById(callingWindowId);
+    if (callingWindowId == focusedWindow_ && callingWindow != nullptr) {
+        auto callingWindowType = callingWindow->GetWindowType();
+        auto callingWindowPriority = zorderPolicy_->GetWindowPriority(callingWindowType);
+        auto inputMethodPriority = zorderPolicy_->GetWindowPriority(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+
+        node->priority_ = (inputMethodPriority < callingWindowPriority) ?
+            (callingWindowPriority + 1) : inputMethodPriority;
+        WLOGFD("Reset input method float window priority to %{public}d.", node->priority_);
+        return;
+    }
+
+    auto focusWindow = FindWindowNodeById(focusedWindow_);
+    if (focusWindow != nullptr && focusWindow->GetWindowType() == WindowType::WINDOW_TYPE_PANEL) {
+        node->priority_ = zorderPolicy_->GetWindowPriority(WindowType::WINDOW_TYPE_PANEL) + 1;
+        WLOGFD("The input method float window should be higher than panel");
+    }
 }
 
 void WindowNodeContainer::ReZOrderShowWhenLockedWindows(bool up)
