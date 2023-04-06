@@ -163,16 +163,16 @@ ohos_static_library("dmserver_unittest_common") {
   ]
 
   public_deps = [
+    "${window_base_path}/dm:libdm_static",
+    "${window_base_path}/utils:libwmutil_static",
+    "${window_base_path}/wm:libwm_static",
     "//commonlibrary/c_utils/base:utils",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/multimedia/image_framework/interfaces/innerkits:image_native",  # PixelMap
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
-    "//foundation/window/window_manager/dm:libdm",
     "//foundation/window/window_manager/dmserver:libdms",
     "//foundation/window/window_manager/snapshot:snapshot_display",
     "//foundation/window/window_manager/test/common/utils:libtestutil",
-    "//foundation/window/window_manager/utils:libwmutil",
-    "//foundation/window/window_manager/wm:libwm",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
     "//third_party/libjpeg-turbo:turbojpeg_static",  # jpeg

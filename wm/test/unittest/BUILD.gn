@@ -187,6 +187,9 @@ ohos_static_library("wm_unittest_common") {
 
     # need delete it for abilitycontext
     "${ability_runtime_inner_api_path}/ability_manager:ability_manager",
+    "${window_base_path}/dm:libdm_static",
+    "${window_base_path}/utils:libwmutil_static",
+    "${window_base_path}/wm:libwm_static",
     "//commonlibrary/c_utils/base:utils",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent",
     "//foundation/arkui/napi:ace_napi",
@@ -194,10 +197,7 @@ ohos_static_library("wm_unittest_common") {
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
     "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
-    "//foundation/window/window_manager/dm:libdm",
     "//foundation/window/window_manager/dmserver:libdms",
-    "//foundation/window/window_manager/utils:libwmutil",
-    "//foundation/window/window_manager/wm:libwm",
     "//foundation/window/window_manager/wmserver:libwms",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
