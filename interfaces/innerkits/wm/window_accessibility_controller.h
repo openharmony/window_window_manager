@@ -23,9 +23,24 @@ namespace OHOS::Rosen {
 class WindowAccessibilityController {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowAccessibilityController);
 public:
-    // below three interfaces only take effect for the main display
+    /**
+     * @brief Set anchor and scale, only take effect for the main display.
+     *
+     * @param x
+     * @param y
+     * @param scale
+     */
     void SetAnchorAndScale(int32_t x, int32_t y, float scale);
+    /**
+     * @brief Set anchor offset, only take effect for the main display.
+     *
+     * @param deltaX
+     * @param deltaY
+     */
     void SetAnchorOffset(int32_t deltaX, int32_t deltaY);
+    /**
+     * @brief Turn off the func of window zoom.
+     */
     void OffWindowZoom();
 private:
     WindowAccessibilityController();

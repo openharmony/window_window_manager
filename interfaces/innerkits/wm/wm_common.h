@@ -22,6 +22,9 @@
 namespace OHOS {
 namespace Rosen {
 using DisplayId = uint64_t;
+/**
+ * @brief Enumerates type of window.
+ */
 enum class WindowType : uint32_t {
     APP_WINDOW_BASE = 1,
     APP_MAIN_WINDOW_BASE = APP_WINDOW_BASE,
@@ -75,6 +78,9 @@ enum class WindowType : uint32_t {
     SYSTEM_WINDOW_END = SYSTEM_SUB_WINDOW_END,
 };
 
+/**
+ * @brief Enumerates mode of window.
+ */
 enum class WindowMode : uint32_t {
     WINDOW_MODE_UNDEFINED = 0,
     WINDOW_MODE_FULLSCREEN = 1,
@@ -84,6 +90,9 @@ enum class WindowMode : uint32_t {
     WINDOW_MODE_PIP
 };
 
+/**
+ * @brief Enumerates mode supported of window.
+ */
 enum WindowModeSupport : uint32_t {
     WINDOW_MODE_SUPPORT_FULLSCREEN = 1 << 0,
     WINDOW_MODE_SUPPORT_FLOATING = 1 << 1,
@@ -97,6 +106,9 @@ enum WindowModeSupport : uint32_t {
                               WINDOW_MODE_SUPPORT_PIP
 };
 
+/**
+ * @brief Enumerates blur style of window.
+ */
 enum class WindowBlurStyle : uint32_t {
     WINDOW_BLUR_OFF = 0,
     WINDOW_BLUR_THIN,
@@ -104,6 +116,9 @@ enum class WindowBlurStyle : uint32_t {
     WINDOW_BLUR_THICK
 };
 
+/**
+ * @brief Enumerates state of window.
+ */
 enum class WindowState : uint32_t {
     STATE_INITIAL,
     STATE_CREATED,
@@ -115,6 +130,9 @@ enum class WindowState : uint32_t {
     STATE_BOTTOM = STATE_DESTROYED, // Add state type after STATE_DESTROYED is not allowed
 };
 
+/**
+ * @brief Enumerates error code of window.
+ */
 enum class WMError : int32_t {
     WM_OK = 0,
     WM_DO_NOTHING,
@@ -143,6 +161,9 @@ enum class WMError : int32_t {
     WM_ERROR_START_ABILITY_FAILED,
 };
 
+/**
+ * @brief Enumerates error code of window only used for js api.
+ */
 enum class WmErrorCode : int32_t {
     WM_OK = 0,
     WM_ERROR_NO_PERMISSION = 201,
@@ -161,6 +182,9 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_OPER_FULLSCREEN_FAILED = 1300010,
 };
 
+/**
+ * @brief Used to map from WMError to WmErrorCode.
+ */
 const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_OK,                                   WmErrorCode::WM_OK                           },
     {WMError::WM_DO_NOTHING,                           WmErrorCode::WM_ERROR_STATE_ABNORMALLY       },
@@ -185,6 +209,9 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_ERROR_START_ABILITY_FAILED,           WmErrorCode::WM_ERROR_START_ABILITY_FAILED   },
 };
 
+/**
+ * @brief Enumerates flag of window.
+ */
 enum class WindowFlag : uint32_t {
     WINDOW_FLAG_NEED_AVOID = 1,
     WINDOW_FLAG_PARENT_LIMIT = 1 << 1,
@@ -194,6 +221,9 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_END = 1 << 5,
 };
 
+/**
+ * @brief Enumerates window size change reason.
+ */
 enum class WindowSizeChangeReason : uint32_t {
     UNDEFINED = 0,
     MAXIMIZE,
@@ -212,6 +242,9 @@ enum class WindowSizeChangeReason : uint32_t {
     END,
 };
 
+/**
+ * @brief Enumerates layout mode of window.
+ */
 enum class WindowLayoutMode : uint32_t {
     BASE = 0,
     CASCADE = BASE,
@@ -219,6 +252,9 @@ enum class WindowLayoutMode : uint32_t {
     END,
 };
 
+/**
+ * @brief Enumerates drag event.
+ */
 enum class DragEvent : uint32_t {
     DRAG_EVENT_IN  = 1,
     DRAG_EVENT_OUT,
@@ -226,12 +262,18 @@ enum class DragEvent : uint32_t {
     DRAG_EVENT_END,
 };
 
+/**
+ * @brief Enumerates window tag.
+ */
 enum class WindowTag : uint32_t {
     MAIN_WINDOW = 0,
     SUB_WINDOW = 1,
     SYSTEM_WINDOW = 2,
 };
 
+/**
+ * @brief Enumerates window gravity.
+ */
 enum class WindowGravity : uint32_t {
     WINDOW_GRAVITY_FLOAT = 0,
     WINDOW_GRAVITY_BOTTOM,
@@ -253,14 +295,30 @@ namespace {
     constexpr int32_t INVALID_UID = -1;
 }
 
+/**
+ * @class Transform
+ * 
+ * @brief parameter of transform and rotate.
+ */
 class Transform {
 public:
+    /**
+     * @brief Construct of Transform.
+     */
     Transform()
         : pivotX_(0.5f), pivotY_(0.5f), scaleX_(1.f), scaleY_(1.f), scaleZ_(1.f), rotationX_(0.f),
           rotationY_(0.f), rotationZ_(0.f), translateX_(0.f), translateY_(0.f), translateZ_(0.f)
     {}
+    /**
+     * @brief Deconstruct of Transform.
+     */
     ~Transform() {}
 
+    /**
+     * @brief operator "=="
+     * 
+     * @param right
+     */
     bool operator==(const Transform& right) const
     {
         return NearZero(pivotX_ - right.pivotX_) &&
@@ -276,6 +334,11 @@ public:
             NearZero(translateZ_ - right.translateZ_);
     }
 
+    /**
+     * @brief operator "!="
+     * 
+     * @param right
+     */
     bool operator!=(const Transform& right) const
     {
         return !(*this == right);
@@ -293,12 +356,23 @@ public:
     float translateY_;
     float translateZ_;
 
+    /**
+     * @brief Identity Transform.
+     * 
+     * @return Transform
+     */
     static const Transform& Identity()
     {
         static Transform I;
         return I;
     }
 
+    /**
+     * @brief Marshalling.
+     * 
+     * @param parcel
+     * @return bool
+     */
     bool Marshalling(Parcel& parcel) const
     {
         return parcel.WriteFloat(pivotX_) && parcel.WriteFloat(pivotY_) &&
@@ -307,6 +381,11 @@ public:
                parcel.WriteFloat(translateX_) && parcel.WriteFloat(translateY_) && parcel.WriteFloat(translateZ_);
     }
 
+    /**
+     * @brief Unmarshalling.
+     * 
+     * @param parcel
+     */
     void Unmarshalling(Parcel& parcel)
     {
         pivotX_ = parcel.ReadFloat();
@@ -328,6 +407,11 @@ private:
     }
 };
 
+/**
+ * @struct SystemBarProperty
+ * 
+ * @brief Window transform
+ */
 struct SystemBarProperty {
     bool enable_;
     uint32_t backgroundColor_;
@@ -341,6 +425,11 @@ struct SystemBarProperty {
     }
 };
 
+/**
+ * @struct Rect
+ * 
+ * @brief Window Rect
+ */
 struct Rect {
     int32_t posX_;
     int32_t posY_;
@@ -369,6 +458,9 @@ struct Rect {
     }
 };
 
+/**
+ * @brief Enumerates avoid area type.
+ */
 enum class AvoidAreaType : uint32_t {
     TYPE_SYSTEM,           // area of SystemUI
     TYPE_CUTOUT,           // cutout of screen
@@ -376,15 +468,24 @@ enum class AvoidAreaType : uint32_t {
     TYPE_KEYBOARD,         // area for soft input keyboard
 };
 
+/**
+ * @brief Enumerates occupied area type.
+ */
 enum class OccupiedAreaType : uint32_t {
     TYPE_INPUT, // area of input window
 };
 
+/**
+ * @brief Enumerates color space.
+ */
 enum class ColorSpace : uint32_t {
     COLOR_SPACE_DEFAULT = 0, // Default color space.
     COLOR_SPACE_WIDE_GAMUT,  // Wide gamut color space. The specific wide color gamut depends on the screen.
 };
 
+/**
+ * @brief Enumerates window animation.
+ */
 enum class WindowAnimation : uint32_t {
     NONE,
     DEFAULT,
@@ -392,6 +493,11 @@ enum class WindowAnimation : uint32_t {
     CUSTOM,
 };
 
+/**
+ * @class AvoidArea
+ * 
+ * @brief area needed to avoid.
+ */
 class AvoidArea : public Parcelable {
 public:
     Rect topRect_ { 0, 0, 0, 0 };
@@ -449,6 +555,9 @@ public:
     }
 };
 
+/**
+ * @brief Enumerates window update type.
+ */
 enum class WindowUpdateType : int32_t {
     WINDOW_UPDATE_ADDED = 1,
     WINDOW_UPDATE_REMOVED,
@@ -459,6 +568,12 @@ enum class WindowUpdateType : int32_t {
 };
 
 using OnCallback = std::function<void(int64_t)>;
+
+/**
+ * @struct VsyncCallback
+ * 
+ * @brief vsync callback
+ */
 struct VsyncCallback {
     OnCallback onCallback;
 };
