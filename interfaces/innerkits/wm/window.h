@@ -57,7 +57,7 @@ class RSTransaction;
 
 /**
  * @class IWindowLifeCycle
- * 
+ *
  * @brief IWindowLifeCycle is a listener used to notify caller that lifecycle of window.
  */
 class IWindowLifeCycle : virtual public RefBase {
@@ -102,7 +102,7 @@ public:
 
 /**
  * @class IWindowChangeListener
- * 
+ *
  * @brief IWindowChangeListener is used to observe the window size or window mode when window changed.
  */
 class IWindowChangeListener : virtual public RefBase {
@@ -128,14 +128,14 @@ public:
 
 /**
  * @class IAvoidAreaChangedListener
- * 
+ *
  * @brief IAvoidAreaChangedListener is used to observe the avoid area when avoid area size changed.
  */
 class IAvoidAreaChangedListener : virtual public RefBase {
 public:
     /**
      * @brief Notify caller when avoid area size changed.
-     * 
+     *
      * @param avoidArea
      * @param type
      */
@@ -144,14 +144,14 @@ public:
 
 /**
  * @class IWindowDragListener
- * 
+ *
  * @brief IWindowDragListener is used to observe the drag status when drag window.
  */
 class IWindowDragListener : virtual public RefBase {
 public:
     /**
      * @brief Notify caller when drag window.
-     * 
+     *
      * @param x
      * @param y
      * @param event
@@ -161,14 +161,14 @@ public:
 
 /**
  * @class IDisplayMoveListener
- * 
+ *
  * @brief IDisplayMoveListener is used to observe display move status when display move.
  */
 class IDisplayMoveListener : virtual public RefBase {
 public:
     /**
      * @brief Notify caller when display move.
-     * 
+     *
      * @param from display id before display start move.
      * @param to display id after display move end.
      */
@@ -177,20 +177,20 @@ public:
 
 /**
  * @class IDispatchInputEventListener
- * 
+ *
  * @brief IDispatchInputEventListener is used to dispatch input event.
  */
 class IDispatchInputEventListener : virtual public RefBase {
 public:
     /**
      * @brief Dispatch PointerEvent.
-     * 
+     *
      * @param inputEvent Means PointerEvent.
      */
     virtual void OnDispatchPointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent) = 0;
     /**
      * @brief Dispatch KeyEvent.
-     * 
+     *
      * @param inputEvent Means KeyEvent.
      */
     virtual void OnDispatchKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
@@ -198,7 +198,7 @@ public:
 
 /**
  * @class OccupiedAreaChangeInfo
- * 
+ *
  */
 class OccupiedAreaChangeInfo : public Parcelable {
 public:
@@ -208,14 +208,13 @@ public:
     OccupiedAreaChangeInfo() = default;
     /**
      * @brief Construct func of OccupiedAreaChangeInfo.
-     * 
+     *
      * @param OccupiedAreaType
      * @param rect rect of Occupied area
      */
     OccupiedAreaChangeInfo(OccupiedAreaType type, Rect rect) : type_(type), rect_(rect) {};
     /**
      * @brief Deconstruct func of OccupiedAreaChangeInfo.
-     * 
      */
     OccupiedAreaChangeInfo(OccupiedAreaType type, Rect rect, uint32_t safeHeight)
         : type_(type), rect_(rect), safeHeight_(safeHeight) {};
@@ -223,13 +222,13 @@ public:
 
     /**
      * @brief Marshalling the data of OccupiedAreaChangeInfo.
-     * 
+     *
      * @param parcel
      */
     virtual bool Marshalling(Parcel& parcel) const override;
     /**
      * @brief Unmarshalling the data of OccupiedAreaChangeInfo.
-     * 
+     *
      * @param parcel
      */
     static OccupiedAreaChangeInfo* Unmarshalling(Parcel& parcel);
@@ -241,14 +240,14 @@ public:
 
 /**
  * @class IOccupiedAreaChangeListener
- * 
+ *
  * @brief IOccupiedAreaChangeListener is used to observe OccupiedArea change.
  */
 class IOccupiedAreaChangeListener : virtual public RefBase {
 public:
     /**
      * @brief Notify caller when OccupiedArea size change.
-     * 
+     *
      * @param info
      */
     virtual void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
@@ -257,7 +256,7 @@ public:
 
 /**
  * @class IAceAbilityHandler
- * 
+ *
  * @brief IAceAbilityHandler is used to control Ace Ability.
  */
 class IAceAbilityHandler : virtual public RefBase {
@@ -293,19 +292,19 @@ public:
     virtual ~IInputEventConsumer() = default;
     /**
      * @brief Observe KeyEvent of Multi-Model Input.
-     * 
+     *
      * @param keyEvent KeyEvent of Multi-Model Input.
      */
     virtual bool OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const = 0;
     /**
      * @brief Observe PointerEvent of Multi-Model Input.
-     * 
+     *
      * @param pointerEvent PointerEvent of Multi-Model Input.
      */
     virtual bool OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const = 0;
     /**
      * @brief Observe axisEvent of Multi-Model Input.
-     * 
+     *
      * @param axisEvent axisEvent of Multi-Model Input.
      */
     virtual bool OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axisEvent) const = 0;
@@ -723,7 +722,7 @@ public:
     /**
      * @brief Set brightness value of window.
      *
-     * @param float 
+     * @param float
      * @return WMError
      */
     virtual WMError SetBrightness(float brightness) = 0;
