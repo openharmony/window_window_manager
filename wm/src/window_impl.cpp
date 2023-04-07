@@ -1754,6 +1754,7 @@ WMError WindowImpl::Maximize()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
         return SetFullScreen(true);
     } else {
         WLOGI("Maximize fail, not main window");
@@ -2243,6 +2244,7 @@ void WindowImpl::HandleModeChangeHotZones(int32_t posX, int32_t posY)
             hotZones.secondary_.posY_, hotZones.secondary_.width_, hotZones.secondary_.height_);
 
         if (WindowHelper::IsPointInTargetRectWithBound(posX, posY, hotZones.fullscreen_)) {
+            SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
             SetFullScreen(true);
         } else if (WindowHelper::IsPointInTargetRectWithBound(posX, posY, hotZones.primary_)) {
             SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
