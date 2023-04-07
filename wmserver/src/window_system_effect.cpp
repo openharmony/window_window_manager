@@ -125,17 +125,22 @@ WMError WindowSystemEffect::SetWindowShadow(const sptr<WindowNode>& node)
         WLOGFE("window surfaceNode is null");
         return WMError::WM_ERROR_NULLPTR;
     }
+
+    auto& shadow = node->isFocused_ ? windowSystemEffectConfig_.focusedShadow_ :
+        windowSystemEffectConfig_.unfocusedShadow_;
+
     // when float mode change to fullscreen/split mode
     if (!WindowHelper::IsFloatingWindow(node->GetWindowMode())) {
-        surfaceNode->SetShadowElevation(0.f);
+        if (MathHelper::GreatNotEqual(shadow.elevation_, 0.f)) {
+            surfaceNode->SetShadowElevation(0.f);
+        } else {
+            surfaceNode->SetShadowRadius(0.f);
+        }
         surfaceNode->SetShadowAlpha(0.f);
-        surfaceNode->SetShadowRadius(0.f);
         WLOGFD("[WEffect]close shadow id: %{public}u", node->GetWindowId());
         return WMError::WM_OK;
     }
 
-    auto& shadow = node->isFocused_ ? windowSystemEffectConfig_.focusedShadow_ :
-        windowSystemEffectConfig_.unfocusedShadow_;
     uint32_t colorValue;
     if (!ColorParser::Parse(shadow.color_, colorValue)) {
         WLOGFE("[WEffect]invalid color string: %{public}s", shadow.color_.c_str());
@@ -147,12 +152,15 @@ WMError WindowSystemEffect::SetWindowShadow(const sptr<WindowNode>& node)
     WLOGFI("[WEffect]color: %{public}s offsetX: %{public}f offsetY: %{public}f alpha: %{public}f radius: %{public}f",
         shadow.color_.c_str(), shadow.offsetX_, shadow.offsetY_, shadow.alpha_, shadow.radius_);
     auto vpr = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId());
-    surfaceNode->SetShadowElevation(shadow.elevation_ * vpr);
+    if (MathHelper::GreatNotEqual(shadow.elevation_, 0.f)) {
+        surfaceNode->SetShadowElevation(shadow.elevation_ * vpr);
+    } else {
+        surfaceNode->SetShadowRadius(shadow.radius_);
+    }
     surfaceNode->SetShadowColor(colorValue);
     surfaceNode->SetShadowOffsetX(shadow.offsetX_);
     surfaceNode->SetShadowOffsetY(shadow.offsetY_);
     surfaceNode->SetShadowAlpha(shadow.alpha_);
-    surfaceNode->SetShadowRadius(shadow.radius_);
     return WMError::WM_OK;
 }
 
