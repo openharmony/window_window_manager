@@ -23,12 +23,14 @@
 #include "window_agent.h"
 #include "window_impl.h"
 #include "window_manager.h"
+#include "window_manager_hilog.h"
 
 using namespace OHOS::Rosen;
 
 namespace OHOS {
 namespace {
     constexpr size_t DATA_MIN_SIZE = 2;
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowAgentFuzzTest"};
 }
 
 template<class T>
@@ -129,22 +131,18 @@ void CheckWindowAgentFunctionsPart2(sptr<WindowAgent> agent, const uint8_t* data
 void WindowAgentFuzzTest(const uint8_t* data, size_t size)
 {
     sptr<OHOS::Rosen::WindowOption> option = new OHOS::Rosen::WindowOption();
+    if (option == nullptr) {
+        WLOGFE("Failed to malloc option.");
+        return;
+    }
     sptr<OHOS::Rosen::WindowImpl> window = new(std::nothrow) OHOS::Rosen::WindowImpl(option);
     if (window == nullptr) {
+        WLOGFE("Failed to malloc window impl.");
         return;
     }
-    OHOS::Rosen::WMError error = window->Create(option->GetParentId(), nullptr);
-    if (error != OHOS::Rosen::WMError::WM_OK) {
-        return;
-    }
-    window->Show();
-
     sptr<WindowAgent> windowAgent = new WindowAgent(window);
     OHOS::CheckWindowAgentFunctionsPart1(windowAgent, data, size);
     OHOS::CheckWindowAgentFunctionsPart2(windowAgent, data, size);
-
-    window->Hide();
-    window->Destroy();
 }
 } // namespace.OHOS
 
