@@ -127,7 +127,7 @@ WMError WindowSystemEffect::SetWindowShadow(const sptr<WindowNode>& node)
     }
     // when float mode change to fullscreen/split mode
     if (!WindowHelper::IsFloatingWindow(node->GetWindowMode())) {
-        if (shadow.elevation_ > 0.f) {
+        if (MathHelper::GreatNotEqual(shadow.elevation_, 0.f)) {
             surfaceNode->SetShadowElevation(0.f);
         } else {
             surfaceNode->SetShadowRadius(0.f);
@@ -150,7 +150,7 @@ WMError WindowSystemEffect::SetWindowShadow(const sptr<WindowNode>& node)
     WLOGFI("[WEffect]color: %{public}s offsetX: %{public}f offsetY: %{public}f alpha: %{public}f radius: %{public}f",
         shadow.color_.c_str(), shadow.offsetX_, shadow.offsetY_, shadow.alpha_, shadow.radius_);
     auto vpr = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId());
-    if (shadow.elevation_ > 0.f) {
+    if (MathHelper::GreatNotEqual(shadow.elevation_, 0.f)) {
         surfaceNode->SetShadowElevation(shadow.elevation_ * vpr);
     } else {
         surfaceNode->SetShadowRadius(shadow.radius_);
