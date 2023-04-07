@@ -66,29 +66,116 @@ public:
     Screen& operator=(Screen&&) = delete;
     bool IsGroup() const;
     std::string GetName() const;
+    
+    /**
+     * @brief Get screen id.
+     */
     ScreenId GetId() const;
+
+    /**
+     * @brief Get width of the screen.
+     */
     uint32_t GetWidth() const;
+    
+    /**
+     * @brief Get height of the screen.
+     */
     uint32_t GetHeight() const;
+
+    /**
+     * @brief Get virtual width of the screen.
+     */
     uint32_t GetVirtualWidth() const;
+
+    /**
+     * @brief Get virtual height of the screen.
+     */
     uint32_t GetVirtualHeight() const;
+
+    /**
+     * @brief Get virtual pixel ratio of the screen.
+     */
     float GetVirtualPixelRatio() const;
+
+    /**
+     * @brief Get the Rotation of the screen.
+     */
     Rotation GetRotation() const;
+
+    /**
+     * @brief Get the orientation of the screen.
+     */
     Orientation GetOrientation() const;
+
+    /**
+     * @brief Is a real screen.
+     */
     bool IsReal() const;
+
+    /**
+     * @brief Get screen parent id.
+     */
     ScreenId GetParentId() const;
+
+    /**
+     * @brief Get screen mode id.
+     */
     uint32_t GetModeId() const;
+
+    /**
+     * @brief Get supported modes of the screen.
+     */
     std::vector<sptr<SupportedScreenModes>> GetSupportedModes() const;
+
+    /**
+     * @brief Set screen active mode.
+     */
     DMError SetScreenActiveMode(uint32_t modeId);
+
+    /**
+     * @brief Set orientation for the screen.
+     */
     DMError SetOrientation(Orientation orientation) const;
+
+    /**
+     * @brief Set the density dpi of the screen.
+     */
     DMError SetDensityDpi(uint32_t dpi) const;
+
+    /**
+     * @brief Get the screen info.
+     */
     sptr<ScreenInfo> GetScreenInfo() const;
 
     // colorspace, gamut
+    /**
+     * @brief Get the supported color gamuts of the screen.
+     */
     DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts) const;
+
+    /**
+     * @brief Get the color gamut of the screen.
+     */
     DMError GetScreenColorGamut(ScreenColorGamut& colorGamut) const;
+
+    /**
+     * @brief Set the color gamut of the screen.
+     */
     DMError SetScreenColorGamut(int32_t colorGamutIdx);
+
+    /**
+     * @brief Get the gamut map of the screen.
+     */
     DMError GetScreenGamutMap(ScreenGamutMap& gamutMap) const;
+
+    /**
+     * @brief Set the gamut map of the screen.
+     */
     DMError SetScreenGamutMap(ScreenGamutMap gamutMap);
+
+    /**
+     * @brief Set color transform for the screen.
+     */
     DMError SetScreenColorTransform();
 protected:
     // No more methods or variables can be defined here.
