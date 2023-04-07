@@ -35,6 +35,7 @@ const std::map<std::string, WindowManagerConfig::ValueType> WindowManagerConfig:
     { "floatingBottomPosY",                           WindowManagerConfig::ValueType::INTS },
     { "defaultFloatingWindow",                        WindowManagerConfig::ValueType::INTS },
     { "maxMainFloatingWindowNumber",                  WindowManagerConfig::ValueType::INTS },
+    { "maxFloatingWindowSize",                        WindowManagerConfig::ValueType::INTS },
     { "windowAnimation",                              WindowManagerConfig::ValueType::MAP },
     { "keyboardAnimation",                            WindowManagerConfig::ValueType::MAP },
     { "timing",                                       WindowManagerConfig::ValueType::MAP },

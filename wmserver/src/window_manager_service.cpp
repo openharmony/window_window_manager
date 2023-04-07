@@ -357,6 +357,13 @@ void WindowManagerService::ConfigureWindowManagerService()
             WindowNodeContainer::SetMaxMainFloatingWindowNumber(static_cast<uint32_t>(numbers[0]));
         }
     }
+    item = config["maxFloatingWindowSize"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1 && numbers[0] > 0) {
+            WindowLayoutPolicy::SetMaxFloatingWindowSize(numbers[0]);
+        }
+    }
 }
 
 void WindowManagerService::ConfigHotZones(const std::vector<int>& numbers)
