@@ -125,6 +125,10 @@ WMError WindowSystemEffect::SetWindowShadow(const sptr<WindowNode>& node)
         WLOGFE("window surfaceNode is null");
         return WMError::WM_ERROR_NULLPTR;
     }
+
+    auto& shadow = node->isFocused_ ? windowSystemEffectConfig_.focusedShadow_ :
+        windowSystemEffectConfig_.unfocusedShadow_;
+
     // when float mode change to fullscreen/split mode
     if (!WindowHelper::IsFloatingWindow(node->GetWindowMode())) {
         if (MathHelper::GreatNotEqual(shadow.elevation_, 0.f)) {
@@ -137,8 +141,6 @@ WMError WindowSystemEffect::SetWindowShadow(const sptr<WindowNode>& node)
         return WMError::WM_OK;
     }
 
-    auto& shadow = node->isFocused_ ? windowSystemEffectConfig_.focusedShadow_ :
-        windowSystemEffectConfig_.unfocusedShadow_;
     uint32_t colorValue;
     if (!ColorParser::Parse(shadow.color_, colorValue)) {
         WLOGFE("[WEffect]invalid color string: %{public}s", shadow.color_.c_str());
