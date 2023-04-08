@@ -64,7 +64,7 @@ public:
     virtual sptr<WindowProperty> GetWindowProperty() = 0;
     virtual WMError NotifyTouchOutside() = 0;
     virtual WMError NotifyScreenshot() = 0;
-    virtual WMError DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
+    virtual WMError DumpInfo(const std::vector<std::string>& params) = 0;
     virtual WMError NotifyDestroy(void) = 0;
     virtual WMError NotifyForeground(void) = 0;
     virtual WMError NotifyBackground(void) = 0;

@@ -304,5 +304,10 @@ std::shared_ptr<Media::PixelMap> WindowAdapter::GetSnapshot(int32_t windowId)
     return windowManagerServiceProxy_->GetSnapshot(windowId);
 }
 
+void WindowAdapter::NotifyDumpInfoResult(const std::vector<std::string>& info)
+{
+    INIT_PROXY_CHECK_RETURN();
+    windowManagerServiceProxy_->NotifyDumpInfoResult(info);
+}
 } // namespace Rosen
 } // namespace OHOS

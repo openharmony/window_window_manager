@@ -1086,6 +1086,13 @@ std::shared_ptr<Media::PixelMap> WindowManagerService::GetSnapshot(int32_t windo
     return nullptr;
 }
 
+void WindowManagerService::NotifyDumpInfoResult(const std::vector<std::string>& info)
+{
+    if (windowDumper_) {
+        windowDumper_->dumpInfoFuture_.SetValue(info);
+    }
+}
+
 WMError WindowManagerService::GetSystemConfig(SystemConfig& systemConfig)
 {
     systemConfig = systemConfig_;

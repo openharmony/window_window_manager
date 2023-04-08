@@ -125,12 +125,7 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
                 WLOGFE("Fail to read params");
                 return -1;
             }
-            std::vector<std::string> info;
-            DumpInfo(params, info);
-            if (!reply.WriteStringVector(info)) {
-                WLOGFE("Fail to write info");
-                return -1;
-            }
+            DumpInfo(params);
             break;
         }
         case WindowMessage::TRANS_ID_NOTIFY_CLIENT_POINT_UP: {
