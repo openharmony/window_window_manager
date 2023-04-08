@@ -37,25 +37,89 @@ namespace {
 }
 
 class RSSurfaceNode;
+/**
+ * @class IWindowExtensionCallback
+ *
+ * @brief Callback of window extension.
+ */
 class IWindowExtensionCallback : virtual public RefBase {
 public:
+    /**
+     * @brief Window ready to connect.
+     *
+     * @param rsSurfaceNode Surface node from RS.
+     */
     virtual void OnWindowReady(const std::shared_ptr<RSSurfaceNode>& rsSurfaceNode) = 0;
+    /**
+     * @brief Callback when window extension disconnected.
+     */
     virtual void OnExtensionDisconnected() = 0;
+    /**
+     * @brief Callback when receive key event.
+     *
+     * @param event Keyboard event.
+     */
     virtual void OnKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event) = 0;
+    /**
+     * @brief Callback when receive pointer event.
+     *
+     * @param event Pointer event.
+     */
     virtual void OnPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event) = 0;
+    /**
+     * @brief Callback when press back button.
+     */
     virtual void OnBackPress() = 0;
 };
 
+/**
+ * @class WindowExtensionConnection
+ *
+ * @brief Connection for window extension.
+ */
 class WindowExtensionConnection : public RefBase {
 public:
+    /**
+     * @brief Constructor for WindowExtensionConnection.
+     */
     WindowExtensionConnection();
+    /**
+     * @brief Deconstructor for WindowExtensionConnection.
+     */
     ~WindowExtensionConnection();
+    /**
+     * @brief Deconstructor for WindowExtensionConnection.
+     *
+     * @param element Element name.
+     * @param rect Rect of window extension.
+     * @param uid User id.
+     * @param windowId Window id.
+     * @param callback Callback for window extension.
+     * @return ERR_OK means connect success, others means connect failed.
+     */
     int ConnectExtension(const AppExecFwk::ElementName& element, const Rect& rect,
         uint32_t uid, uint32_t windowId, const sptr<IWindowExtensionCallback>& callback) const;
+    /**
+     * @brief Disconnect window extension.
+     */
     void DisconnectExtension() const;
+    /**
+     * @brief Show window extension.
+     */
     void Show() const;
+    /**
+     * @brief Hide window extension.
+     */
     void Hide() const;
+    /**
+     * @brief Request focus of window extension.
+     */
     void RequestFocus() const;
+    /**
+     * @brief Set bounds of window extension.
+     *
+     * @param rect Window extension rect.
+     */
     void SetBounds(const Rect& rect) const;
 private:
     class Impl;

@@ -20,22 +20,27 @@
 #include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
+/**
+ * @class WindowAccessibilityController
+ *
+ * @brief Controller of window accessibility.
+ */
 class WindowAccessibilityController {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowAccessibilityController);
 public:
     /**
      * @brief Set anchor and scale, only take effect for the main display.
      *
-     * @param x
-     * @param y
-     * @param scale
+     * @param x Point x coordinate of Anchor.
+     * @param y Point y coordinate of Anchor.
+     * @param scale Parameter of zooming.
      */
     void SetAnchorAndScale(int32_t x, int32_t y, float scale);
     /**
      * @brief Set anchor offset, only take effect for the main display.
      *
-     * @param deltaX
-     * @param deltaY
+     * @param deltaX X coordinate offset of anchor.
+     * @param deltaY Y coordinate offset of anchor.
      */
     void SetAnchorOffset(int32_t deltaX, int32_t deltaY);
     /**

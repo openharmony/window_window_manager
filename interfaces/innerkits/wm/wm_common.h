@@ -279,6 +279,11 @@ enum class WindowGravity : uint32_t {
     WINDOW_GRAVITY_BOTTOM,
 };
 
+/**
+ * @struct PointInfo.
+ *
+ * @brief point Info.
+ */
 struct PointInfo {
     int32_t x;
     int32_t y;
@@ -297,28 +302,17 @@ namespace {
 
 /**
  * @class Transform
- * 
+ *
  * @brief parameter of transform and rotate.
  */
 class Transform {
 public:
-    /**
-     * @brief Construct of Transform.
-     */
     Transform()
         : pivotX_(0.5f), pivotY_(0.5f), scaleX_(1.f), scaleY_(1.f), scaleZ_(1.f), rotationX_(0.f),
           rotationY_(0.f), rotationZ_(0.f), translateX_(0.f), translateY_(0.f), translateZ_(0.f)
     {}
-    /**
-     * @brief Deconstruct of Transform.
-     */
     ~Transform() {}
 
-    /**
-     * @brief operator "=="
-     * 
-     * @param right
-     */
     bool operator==(const Transform& right) const
     {
         return NearZero(pivotX_ - right.pivotX_) &&
@@ -334,11 +328,6 @@ public:
             NearZero(translateZ_ - right.translateZ_);
     }
 
-    /**
-     * @brief operator "!="
-     * 
-     * @param right
-     */
     bool operator!=(const Transform& right) const
     {
         return !(*this == right);
@@ -356,23 +345,12 @@ public:
     float translateY_;
     float translateZ_;
 
-    /**
-     * @brief Identity Transform.
-     * 
-     * @return Transform
-     */
     static const Transform& Identity()
     {
         static Transform I;
         return I;
     }
 
-    /**
-     * @brief Marshalling.
-     * 
-     * @param parcel
-     * @return bool
-     */
     bool Marshalling(Parcel& parcel) const
     {
         return parcel.WriteFloat(pivotX_) && parcel.WriteFloat(pivotY_) &&
@@ -381,11 +359,6 @@ public:
                parcel.WriteFloat(translateX_) && parcel.WriteFloat(translateY_) && parcel.WriteFloat(translateZ_);
     }
 
-    /**
-     * @brief Unmarshalling.
-     * 
-     * @param parcel
-     */
     void Unmarshalling(Parcel& parcel)
     {
         pivotX_ = parcel.ReadFloat();
@@ -409,8 +382,8 @@ private:
 
 /**
  * @struct SystemBarProperty
- * 
- * @brief Window transform
+ *
+ * @brief Property of system bar
  */
 struct SystemBarProperty {
     bool enable_;
@@ -427,7 +400,7 @@ struct SystemBarProperty {
 
 /**
  * @struct Rect
- * 
+ *
  * @brief Window Rect
  */
 struct Rect {
@@ -495,8 +468,8 @@ enum class WindowAnimation : uint32_t {
 
 /**
  * @class AvoidArea
- * 
- * @brief area needed to avoid.
+ *
+ * @brief Area needed to avoid.
  */
 class AvoidArea : public Parcelable {
 public:
@@ -571,8 +544,8 @@ using OnCallback = std::function<void(int64_t)>;
 
 /**
  * @struct VsyncCallback
- * 
- * @brief vsync callback
+ *
+ * @brief Vsync callback
  */
 struct VsyncCallback {
     OnCallback onCallback;
