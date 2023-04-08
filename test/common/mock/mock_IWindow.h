@@ -40,7 +40,7 @@ public:
     MOCK_METHOD0(GetWindowProperty, sptr<WindowProperty>());
     MOCK_METHOD0(NotifyTouchOutside, WMError());
     MOCK_METHOD0(NotifyScreenshot, WMError());
-    MOCK_METHOD2(DumpInfo, WMError(const std::vector<std::string>& params, std::vector<std::string>& info));
+    MOCK_METHOD1(DumpInfo, WMError(const std::vector<std::string>& params));
     MOCK_METHOD0(NotifyDestroy, WMError(void));
     MOCK_METHOD0(NotifyForeground, WMError(void));
     MOCK_METHOD0(NotifyBackground, WMError(void));

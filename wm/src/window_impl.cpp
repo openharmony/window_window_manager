@@ -622,6 +622,7 @@ void WindowImpl::DumpInfo(const std::vector<std::string>& params, std::vector<st
     if (uiContent_ != nullptr) {
         uiContent_->DumpInfo(params, info);
     }
+    SingletonContainer::Get<WindowAdapter>().NotifyDumpInfoResult(info);
 }
 
 WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
