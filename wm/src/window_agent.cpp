@@ -169,12 +169,13 @@ WMError WindowAgent::NotifyScreenshot()
     return WMError::WM_OK;
 }
 
-WMError WindowAgent::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
+WMError WindowAgent::DumpInfo(const std::vector<std::string>& params)
 {
     if (window_ == nullptr) {
         WLOGFE("window_ is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
+    std::vector<std::string> info;
     window_->DumpInfo(params, info);
     return WMError::WM_OK;
 }
