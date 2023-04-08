@@ -81,7 +81,7 @@ public:
     /**
      * @brief Notify caller the error code when window go forground failed.
      *
-     * @param ret error code when window go forground failed.
+     * @param ret Error code when window go forground failed.
      */
     virtual void ForegroundFailed(int32_t ret) {}
     /**
@@ -110,12 +110,11 @@ public:
      */
     virtual void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) {}
-        const std::shared_ptr<RSTransaction> rsTransaction = nullptr) {}
     /**
      * @brief Notify caller when window mode changed.
      *
-     * @param mode mode of the current window.
-     * @param hasDeco window has decoration or not.
+     * @param mode Mode of the current window.
+     * @param hasDeco Window has decoration or not.
      */
     virtual void OnModeChange(WindowMode mode, bool hasDeco = true) {}
 };
@@ -163,8 +162,8 @@ public:
     /**
      * @brief Notify caller when display move.
      *
-     * @param from display id before display start move.
-     * @param to display id after display move end.
+     * @param from Display id before display start move.
+     * @param to Display id after display move end.
      */
     virtual void OnDisplayMove(DisplayId from, DisplayId to) {}
 };
@@ -204,8 +203,8 @@ public:
     /**
      * @brief Construct func of OccupiedAreaChangeInfo.
      *
-     * @param OccupiedAreaType
-     * @param rect rect of Occupied area
+     * @param OccupiedAreaType Type of occupied area.
+     * @param rect Rect of occupied area.
      */
     OccupiedAreaChangeInfo(OccupiedAreaType type, Rect rect) : type_(type), rect_(rect) {};
     /**
@@ -244,6 +243,7 @@ public:
      * @brief Notify caller when OccupiedArea size change.
      *
      * @param info Occupied area info when occupied changed.
+     * @param rsTransaction Animation transaction.
      */
     virtual void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) {}
@@ -300,7 +300,7 @@ public:
     /**
      * @brief Observe axisEvent of Multi-Model Input.
      *
-     * @param axisEvent axisEvent of Multi-Model Input.
+     * @param axisEvent AxisEvent of Multi-Model Input.
      */
     virtual bool OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axisEvent) const = 0;
 };
@@ -432,7 +432,7 @@ public:
     /**
      * @brief Get ability context
      *
-     * @return ability context from AbilityRuntime
+     * @return Ability context from AbilityRuntime
      */
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const = 0;
     /**
@@ -474,13 +474,13 @@ public:
     /**
      * @brief Get id of window.
      *
-     * @return Id of window.
+     * @return ID of window.
      */
     virtual uint32_t GetWindowId() const = 0;
     /**
      * @brief Get flag of window.
      *
-     * @return flag of window.
+     * @return Flag of window.
      */
     virtual uint32_t GetWindowFlags() const = 0;
     /**
@@ -573,7 +573,7 @@ public:
     /**
      * @brief Add window flag.
      *
-     * @param flag flag of window.
+     * @param flag Flag of window.
      * @return WM_OK means add success, others means failed.
      */
     virtual WMError AddWindowFlag(WindowFlag flag) = 0;
@@ -631,7 +631,7 @@ public:
      * @brief Show window
      *
      * @param reason Reason for window state change.
-     * @param withAnimation true means window show with animation, false means window show without animation.
+     * @param withAnimation True means window show with animation, false means window show without animation.
      * @return WM_OK means window show success, others means failed.
      */
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) = 0;
@@ -639,8 +639,8 @@ public:
      * @brief Hide window
      *
      * @param reason Reason for window state change.
-     * @param withAnimation true means window show with animation, false means window show without animation.
-     * @param isFromInnerkits true means remove command is from inner kits.
+     * @param withAnimation True means window show with animation, false means window show without animation.
+     * @param isFromInnerkits True means remove command is from inner kits.
      * @return WM_OK means window hide success, others means failed.
      */
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) = 0;
@@ -678,85 +678,85 @@ public:
     /**
      * @brief Get the screen is always on or not.
      *
-     * @return true means screen is always on, false means the opposite.
+     * @return True means screen is always on, false means the opposite.
      */
     virtual bool IsKeepScreenOn() const = 0;
     /**
      * @brief Set the screen on
      *
-     * @param turnScreenOn true means turn screen on, false means the opposite.
+     * @param turnScreenOn True means turn screen on, false means the opposite.
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetTurnScreenOn(bool turnScreenOn) = 0;
     /**
      * @brief Get the screen is on or not.
      *
-     * @return true means screen is on, false means screen is off.
+     * @return True means screen is on, false means screen is off.
      */
     virtual bool IsTurnScreenOn() const = 0;
     /**
      * @brief Set Background color.
      *
-     * @param color background color.
+     * @param color Background color.
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetBackgroundColor(const std::string& color) = 0;
     /**
      * @brief Set transparent status.
      *
-     * @param isTransparent true means set window transparent, false means the opposite.
+     * @param isTransparent True means set window transparent, false means the opposite.
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetTransparent(bool isTransparent) = 0;
     /**
      * @brief Get transparent status.
      *
-     * @return true means window is transparent, false means the opposite.
+     * @return True means window is transparent, false means the opposite.
      */
     virtual bool IsTransparent() const = 0;
     /**
      * @brief Set brightness value of window.
      *
-     * @param brightness brightness of window.
+     * @param brightness Brightness of window.
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetBrightness(float brightness) = 0;
     /**
      * @brief Get brightness value of window.
      *
-     * @return brightness value of window.
+     * @return Brightness value of window.
      */
     virtual float GetBrightness() const = 0;
     /**
      * @brief Set calling window.
      *
-     * @param windowId window id.
+     * @param windowId Window id.
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetCallingWindow(uint32_t windowId) = 0;
     /**
      * @brief Set privacy mode of window.
      *
-     * @param isPrivacyMode true means set window private, false means not set window private.
+     * @param isPrivacyMode True means set window private, false means not set window private.
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetPrivacyMode(bool isPrivacyMode) = 0;
     /**
      * @brief Get privacy property of window.
      *
-     * @return true means window is private and cannot be screenshot or recorded.
+     * @return True means window is private and cannot be screenshot or recorded.
      */
     virtual bool IsPrivacyMode() const = 0;
     /**
      * @brief Set privacy mode by system.
      *
-     * @param isSystemPrivacyMode true means set window private, false means not set window private.
+     * @param isSystemPrivacyMode True means set window private, false means not set window private.
      */
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) = 0;
     /**
      * @brief Bind Dialog window to target token.
      *
-     * @param targetToken window token of target.
+     * @param targetToken Window token of target.
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) = 0;
@@ -769,7 +769,7 @@ public:
     /**
      * @brief Set skip flag of snapshot.
      *
-     * @param isSkip true means skip the snapshot, false means the opposite.
+     * @param isSkip True means skip the snapshot, false means the opposite.
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetSnapshotSkip(bool isSkip) = 0;
@@ -778,21 +778,21 @@ public:
     /**
      * @brief Set corner radius of window.
      *
-     * @param cornerRadius corner radius of window
+     * @param cornerRadius Corner radius of window
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetCornerRadius(float cornerRadius) = 0;
     /**
      * @brief Set shadow radius of window.
      *
-     * @param radius shadow radius of window
+     * @param radius Shadow radius of window
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetShadowRadius(float radius) = 0;
     /**
      * @brief Set shadow color of window.
      *
-     * @param color shadow color of window.
+     * @param color Shadow color of window.
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetShadowColor(std::string color) = 0;
@@ -813,7 +813,7 @@ public:
     /**
      * @brief Set blur property.
      *
-     * @param radius blur value.
+     * @param radius Blur value.
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetBlur(float radius) = 0;
@@ -841,20 +841,20 @@ public:
     /**
      * @brief Check current focus status.
      *
-     * @return true means window is focused, false means window is unfocused.
+     * @return True means window is focused, false means window is unfocused.
      */
     virtual bool IsFocused() const = 0;
     /**
      * @brief Update surfaceNode after customAnimation.
      *
-     * @param isAdd true means add custom animation, false means the opposite.
+     * @param isAdd True means add custom animation, false means the opposite.
      * @return WM_OK means update success, others means update failed.
      */
     virtual WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) = 0;
     /**
      * @brief Set InputEvent Consumer.
      *
-     * @param inputEventConsumer consume input event object.
+     * @param inputEventConsumer Consume input event object.
      * @return WM_OK means set success, others means set failed.
      */
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) = 0;
@@ -883,7 +883,7 @@ public:
      */
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) = 0;
     /**
-     * @brief register window lifecycle listener.
+     * @brief Register window lifecycle listener.
      *
      * @param listener WindowLifeCycle listener.
      * @return WM_OK means register success, others means register failed.
@@ -897,7 +897,7 @@ public:
      */
     virtual WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
     /**
-     * @brief register window change listener.
+     * @brief Register window change listener.
      *
      * @param listener IWindowChangeListener.
      * @return WM_OK means register success, others means register failed.
@@ -911,7 +911,7 @@ public:
      */
     virtual WMError UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) = 0;
     /**
-     * @brief register avoid area change listener.
+     * @brief Register avoid area change listener.
      *
      * @param listener IAvoidAreaChangedListener.
      * @return WM_OK means register success, others means register failed.
@@ -925,7 +925,7 @@ public:
      */
     virtual WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
     /**
-     * @brief register window drag listener.
+     * @brief Register window drag listener.
      *
      * @param listener IWindowDragListener.
      * @return WM_OK means register success, others means register failed.
@@ -939,7 +939,7 @@ public:
      */
     virtual WMError UnregisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
     /**
-     * @brief register display move listener.
+     * @brief Register display move listener.
      *
      * @param listener IDisplayMoveListener.
      * @return WM_OK means register success, others means register failed.
@@ -953,13 +953,13 @@ public:
      */
     virtual WMError UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
     /**
-     * @brief register window destroyed listener.
+     * @brief Register window destroyed listener.
      *
-     * @param func function to notify window destroyed. 
+     * @param func Function to notify window destroyed.
      */
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) = 0;
     /**
-     * @brief register Occupied Area Change listener.
+     * @brief Register Occupied Area Change listener.
      *
      * @param listener IOccupiedAreaChangeListener.
      * @return WM_OK means register success, others means register failed.
@@ -973,7 +973,7 @@ public:
      */
     virtual WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
     /**
-     * @brief register touch outside listener.
+     * @brief Register touch outside listener.
      *
      * @param listener ITouchOutsideListener.
      * @return WM_OK means register success, others means register failed.
@@ -987,14 +987,14 @@ public:
      */
     virtual WMError UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) = 0;
     /**
-     * @brief register Animation Transition Controller listener.
+     * @brief Register Animation Transition Controller listener.
      *
      * @param listener IAnimationTransitionController.
      * @return WM_OK means register success, others means register failed.
      */
     virtual WMError RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener) = 0;
     /**
-     * @brief register screen shot listener.
+     * @brief Register screen shot listener.
      *
      * @param listener IScreenshotListener.
      * @return WM_OK means register success, others means register failed.
@@ -1008,7 +1008,7 @@ public:
      */
     virtual WMError UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) = 0;
     /**
-     * @brief register dialog target touch listener.
+     * @brief Register dialog target touch listener.
      *
      * @param listener IDialogTargetTouchListener.
      * @return WM_OK means register success, others means register failed.
@@ -1022,7 +1022,7 @@ public:
      */
     virtual WMError UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) = 0;
     /**
-     * @brief register dialog death Recipient listener.
+     * @brief Register dialog death Recipient listener.
      *
      * @param listener IDialogDeathRecipientListener.
      */
@@ -1040,7 +1040,7 @@ public:
     /**
      * @brief Set ace ability handler.
      *
-     * @param handler ace ability handler.
+     * @param handler Ace ability handler.
      */
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) = 0;
     /**
@@ -1058,7 +1058,7 @@ public:
     /**
      * @brief Get ui content info.
      *
-     * @return ui content info.
+     * @return UI content info.
      */
     virtual std::string GetContentInfo() = 0;
     /**
@@ -1070,13 +1070,13 @@ public:
     /**
      * @brief Window handle new want.
      *
-     * @param want want object of AAFwk.
+     * @param want Want object of AAFwk.
      */
     virtual void OnNewWant(const AAFwk::Want& want) = 0;
     /**
      * @brief Set requested orientation.
      *
-     * @param Orientation screen orientation.
+     * @param Orientation Screen orientation.
      */
     virtual void SetRequestedOrientation(Orientation) = 0;
     /**
@@ -1088,7 +1088,7 @@ public:
     /**
      * @brief Set requested mode support info.
      *
-     * @param modeSupportInfo mode of window supported.
+     * @param modeSupportInfo Mode of window supported.
      */
     virtual void SetRequestModeSupportInfo(uint32_t modeSupportInfo) = 0;
     /**
@@ -1100,33 +1100,33 @@ public:
     /**
      * @brief Set touch hot areas.
      *
-     * @param rects hot areas of touching.
+     * @param rects Hot areas of touching.
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetTouchHotAreas(const std::vector<Rect>& rects) = 0;
     /**
      * @brief Get requested touch hot areas.
      *
-     * @param rects hot areas of touching.
+     * @param rects Hot areas of touching.
      */
     virtual void GetRequestedTouchHotAreas(std::vector<Rect>& rects) const = 0;
     /**
      * @brief Main handler available or not.
      *
-     * @return true means main handler is available, false means the opposite.
+     * @return True means main handler is available, false means the opposite.
      */
     virtual bool IsMainHandlerAvailable() const = 0;
     /**
      * @brief Set window label name.
      *
-     * @param label window label name.
+     * @param label Window label name.
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetAPPWindowLabel(const std::string& label) = 0;
     /**
      * @brief Set window icon.
      *
-     * @param icon window icon.
+     * @param icon Window icon.
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) = 0;
@@ -1174,7 +1174,7 @@ public:
     /**
      * @brief Set flag that need remove window input channel.
      *
-     * @param needRemoveWindowInputChannel true means remove input channel, false means not remove.
+     * @param needRemoveWindowInputChannel True means remove input channel, false means not remove.
      */
     virtual void SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel) = 0;
 
@@ -1182,7 +1182,7 @@ public:
     /**
      * @brief Is support wide gamut or not.
      *
-     * @return true means support wide gamut, false means not support.
+     * @return True means support wide gamut, false means not support.
      */
     virtual bool IsSupportWideGamut() = 0;
     /**

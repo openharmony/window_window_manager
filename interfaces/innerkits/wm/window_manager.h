@@ -57,16 +57,17 @@ public:
      */
     ~FocusChangeInfo() = default;
     /**
-     * @brief Marshalling
-     * 
-     * @param parcel
-     * @return bool
+     * @brief Marshalling FocusChangeInfo.
+     *
+     * @param parcel Package of FocusChangeInfo.
+     * @return True means marshall FocusChangeInfo success, false means marshall failed.
      */
     virtual bool Marshalling(Parcel& parcel) const override;
     /**
-     * @brief Unmarshalling
-     * 
-     * @param parcel
+     * @brief Unmarshalling FocusChangeInfo.
+     *
+     * @param parcel Package of FocusChangeInfo.
+     * @return FocusChangeInfo object.
      */
     static FocusChangeInfo* Unmarshalling(Parcel& parcel);
 
@@ -80,59 +81,59 @@ public:
 
 /**
  * @class IFocusChangedListener
- * 
- * @brief listener to observe focus changed.
+ *
+ * @brief Listener to observe focus changed.
  */
 class IFocusChangedListener : virtual public RefBase {
 public:
     /**
      * @brief Notify caller when window get focus
-     * 
-     * @param focusChangeInfo
+     *
+     * @param focusChangeInfo Window info while its focus status changed.
      */
     virtual void OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo) = 0;
     /**
      * @brief Notify caller when window lose focus
-     * 
-     * @param focusChangeInfo
+     *
+     * @param focusChangeInfo Window info while its focus status changed.
      */
     virtual void OnUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo) = 0;
 };
 
 /**
  * @class ISystemBarChangedListener
- * 
- * @brief listener to observe systembar changed.
+ *
+ * @brief Listener to observe systembar changed.
  */
 class ISystemBarChangedListener : virtual public RefBase {
 public:
     /**
      * @brief Notify caller when system bar property changed
-     * 
-     * @param displayId
-     * @param tints Vector about SystemBarRegionTint.
+     *
+     * @param displayId ID of display.
+     * @param tints Tint of system bar region.
      */
     virtual void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) = 0;
 };
 
 /**
  * @class IGestureNavigationEnabledChangedListener
- * 
- * @brief listener to observe GestureNavigationEnabled changed.
+ *
+ * @brief Listener to observe GestureNavigationEnabled changed.
  */
 class IGestureNavigationEnabledChangedListener : virtual public RefBase {
 public:
     /**
-     * @brief Notify caller when  GestureNavigationEnabled changed.
-     * 
-     * @param enable
+     * @brief Notify caller when GestureNavigationEnabled changed.
+     *
+     * @param enable True means set Gesture on, false means set Gesture off.
      */
     virtual void OnGestureNavigationEnabledUpdate(bool enable) = 0;
 };
 
 /**
  * @class WindowVisibilityInfo
- * 
+ *
  * @brief Visibility info of window.
  */
 class WindowVisibilityInfo : public Parcelable {
@@ -143,6 +144,12 @@ public:
     WindowVisibilityInfo() = default;
     /**
      * @brief Construct of WindowVisibilityInfo.
+     *
+     * @param winId Window id.
+     * @param pid Process id.
+     * @param uid User id.
+     * @param visibility True means window is visible, false means the opposite.
+     * @param winType Type of window.
      */
     WindowVisibilityInfo(uint32_t winId, int32_t pid, int32_t uid, bool visibility, WindowType winType)
         : windowId_(winId), pid_(pid), uid_(uid), isVisible_(visibility), windowType_(winType) {};
@@ -152,17 +159,17 @@ public:
     ~WindowVisibilityInfo() = default;
 
     /**
-     * @brief Marshalling.
-     * 
-     * @param parcel
-     * @return bool
+     * @brief Marshalling WindowVisibilityInfo.
+     *
+     * @param parcel Package of WindowVisibilityInfo.
+     * @return True means marshall success, false means marshall failed.
      */
     virtual bool Marshalling(Parcel& parcel) const override;
     /**
-     * @brief Unmarshalling.
-     * 
-     * @param parcel
-     * @return WindowVisibilityInfo
+     * @brief Unmarshalling WindowVisibilityInfo.
+     *
+     * @param parcel Package of WindowVisibilityInfo.
+     * @return WindowVisibilityInfo object.
      */
     static WindowVisibilityInfo* Unmarshalling(Parcel& parcel);
 
@@ -175,22 +182,22 @@ public:
 
 /**
  * @class IVisibilityChangedListener
- * 
- * @brief listener to observe visibility changed.
+ *
+ * @brief Listener to observe visibility changed.
  */
 class IVisibilityChangedListener : virtual public RefBase {
 public:
     /**
      * @brief Notify caller when window visibility changed.
-     * 
-     * @param windowVisibilityInfo
+     *
+     * @param windowVisibilityInfo Window visibility info.
      */
     virtual void OnWindowVisibilityChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfo) = 0;
 };
 
 /**
  * @class AccessibilityWindowInfo
- * 
+ *
  * @brief Window info used for Accessibility.
  */
 class AccessibilityWindowInfo : public Parcelable {
@@ -205,17 +212,17 @@ public:
     ~AccessibilityWindowInfo() = default;
 
     /**
-     * @brief Marshalling.
-     * 
-     * @param parcel
-     * @return bool
+     * @brief Marshalling AccessibilityWindowInfo.
+     *
+     * @param parcel Package of AccessibilityWindowInfo.
+     * @return True means marshall success, false means marshall failed.
      */
     virtual bool Marshalling(Parcel& parcel) const override;
     /**
-     * @brief Unmarshalling.
-     * 
-     * @param parcel
-     * @return AccessibilityWindowInfo
+     * @brief Unmarshalling AccessibilityWindowInfo.
+     *
+     * @param parcel Package of AccessibilityWindowInfo.
+     * @return AccessibilityWindowInfo object.
      */
     static AccessibilityWindowInfo* Unmarshalling(Parcel& parcel);
 
@@ -231,54 +238,54 @@ public:
 
 /**
  * @class IWindowUpdateListener
- * 
- * @brief listener to observe window update.
+ *
+ * @brief Listener to observe window update.
  */
 class IWindowUpdateListener : virtual public RefBase {
 public:
     /**
      * @brief Notify caller when AccessibilityWindowInfo update.
-     * 
-     * @param infos
-     * @param type
+     *
+     * @param infos Window info used for Accessibility.
+     * @param type Type for window update.
      */
     virtual void OnWindowUpdate(const std::vector<sptr<AccessibilityWindowInfo>>& infos, WindowUpdateType type) = 0;
 };
 
 /**
  * @class IWaterMarkFlagChangedListener
- * 
- * @brief listener to observe water mark flag changed.
+ *
+ * @brief Listener to observe water mark flag changed.
  */
 class IWaterMarkFlagChangedListener : virtual public RefBase {
 public:
     /**
      * @brief Notify caller when water mark flag changed.
-     * 
-     * @param showWaterMark
+     *
+     * @param showWaterMark True means show water mark, false means the opposite.
      */
     virtual void OnWaterMarkFlagUpdate(bool showWaterMark) = 0;
 };
 
 /**
  * @class ICameraFloatWindowChangedListener
- * 
- * @brief listener to observe camera window changed.
+ *
+ * @brief Listener to observe camera window changed.
  */
 class ICameraFloatWindowChangedListener : virtual public RefBase {
 public:
     /**
      * @brief Notify caller when camera window changed.
-     * 
-     * @param accessTokenId
-     * @param isShowing
+     *
+     * @param accessTokenId Token id of camera window.
+     * @param isShowing True means camera is shown, false means the opposite.
      */
     virtual void OnCameraFloatWindowChange(uint32_t accessTokenId, bool isShowing) = 0;
 };
 
 /**
  * @class WindowManager
- * 
+ *
  * @brief WindowManager used to manage window.
  */
 class WindowManager {
@@ -289,142 +296,142 @@ public:
     /**
      * @brief Register focus changed listener.
      *
-     * @param listener
-     * @return WMError
+     * @param listener IFocusChangedListener.
+     * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
     /**
      * @brief Unregister focus changed listener.
      *
-     * @param listener
-     * @return WMError
+     * @param listener IFocusChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
     /**
      * @brief Register system bar changed listener.
      *
-     * @param listener
-     * @return WMError
+     * @param listener ISystemBarChangedListener.
+     * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterSystemBarChangedListener(const sptr<ISystemBarChangedListener>& listener);
     /**
      * @brief Unregister system bar changed listener.
      *
-     * @param listener
-     * @return WMError
+     * @param listener ISystemBarChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterSystemBarChangedListener(const sptr<ISystemBarChangedListener>& listener);
     /**
      * @brief Register window updated listener.
      *
-     * @param listener
-     * @return WMError
+     * @param listener IWindowUpdateListener.
+     * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
     /**
      * @brief Unregister window updated listener.
      *
-     * @param listener
-     * @return WMError
+     * @param listener IWindowUpdateListener.
+     * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
     /**
      * @brief Register visibility changed listener.
      *
-     * @param listener
-     * @return WMError
+     * @param listener IVisibilityChangedListener.
+     * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
     /**
      * @brief Unregister visibility changed listener.
      *
-     * @param listener
-     * @return WMError
+     * @param listener IVisibilityChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
     /**
      * @brief Register camera float window changed listener.
      *
-     * @param listener
-     * @return WMError
+     * @param listener ICameraFloatWindowChangedListener.
+     * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener);
     /**
      * @brief Unregister camera float window changed listener.
      *
-     * @param listener
-     * @return WMError
+     * @param listener ICameraFloatWindowChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener);
     /**
      * @brief Register water mark flag changed listener.
      *
-     * @param listener
-     * @return WMError
+     * @param listener IWaterMarkFlagChangedListener.
+     * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterWaterMarkFlagChangedListener(const sptr<IWaterMarkFlagChangedListener>& listener);
     /**
      * @brief Unregister water mark flag changed listener.
      *
-     * @param listener
-     * @return WMError
+     * @param listener IWaterMarkFlagChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWaterMarkFlagChangedListener(const sptr<IWaterMarkFlagChangedListener>& listener);
     /**
      * @brief Register gesture navigation enabled changed listener.
      *
-     * @param listener
-     * @return WMError
+     * @param listener IGestureNavigationEnabledChangedListener.
+     * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterGestureNavigationEnabledChangedListener(
         const sptr<IGestureNavigationEnabledChangedListener>& listener);
     /**
      * @brief Unregister gesture navigation enabled changed listener.
      *
-     * @param listener
-     * @return WMError
+     * @param listener IGestureNavigationEnabledChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterGestureNavigationEnabledChangedListener(
         const sptr<IGestureNavigationEnabledChangedListener>& listener);
     /**
      * @brief Minimize all app window.
      *
-     * @param displayId
-     * @return WMError
+     * @param displayId Display id.
+     * @return WM_OK means minimize success, others means minimize failed.
      */
     WMError MinimizeAllAppWindows(DisplayId displayId);
     /**
      * @brief Toggle all app windows to the foreground.
      *
-     * @return WMError
+     * @return WM_OK means toggle success, others means toggle failed.
      */
     WMError ToggleShownStateForAllAppWindows();
     /**
      * @brief Set window layout mode.
      *
-     * @param mode
-     * @return WMError
+     * @param mode Window layout mode.
+     * @return WM_OK means set success, others means set failed.
      */
     WMError SetWindowLayoutMode(WindowLayoutMode mode);
     /**
      * @brief Get accessibility window info.
      *
-     * @param infos
-     * @return WMError
+     * @param infos WindowInfos used for Accessibility.
+     * @return WM_OK means get success, others means get failed.
      */
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const;
     /**
      * @brief Get visibility window info.
      *
-     * @param infos
-     * @return WMError
+     * @param infos Visible window infos
+     * @return WM_OK means get success, others means get failed.
      */
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const;
     /**
      * @brief Set gesture navigaion enabled.
      *
-     * @param enable
-     * @return WMError
+     * @param enable True means set gesture on, false means set gesture off.
+     * @return WM_OK means set success, others means set failed.
      */
     WMError SetGestureNavigaionEnabled(bool enable) const;
 

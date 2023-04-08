@@ -133,7 +133,6 @@ using DisplayStateCallback = std::function<void(DisplayState)>;
 
 /**
  * @brief Enumerates display power events.
- * 
  */
 enum class DisplayPowerEvent : uint32_t {
     WAKE_UP,
@@ -145,7 +144,6 @@ enum class DisplayPowerEvent : uint32_t {
 
 /**
  * @brief Enumerates event status.
- * 
  */
 enum class EventStatus : uint32_t {
     BEGIN,
@@ -162,7 +160,6 @@ public:
 
 /**
  * @brief Enumerates screen change events.
- * 
  */
 enum class ScreenChangeEvent : uint32_t {
     UPDATE_ORIENTATION,
@@ -237,7 +234,7 @@ enum class DisplayChangeEvent : uint32_t {
 };
 
 /**
- * @brief Enumerates screen source mode. 
+ * @brief Enumerates screen source mode.
  */
 enum class ScreenSourceMode: uint32_t {
     SCREEN_MAIN = 0,
