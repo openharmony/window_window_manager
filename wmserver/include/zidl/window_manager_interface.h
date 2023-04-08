@@ -69,6 +69,7 @@ public:
         TRANS_ID_SET_ANCHOR_OFFSET,
         TRANS_ID_OFF_WINDOW_ZOOM,
         TRANS_ID_GET_SNAPSHOT,
+        TRANS_ID_NOTIFY_DUMP_INFO_RESULT,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -108,6 +109,7 @@ public:
     virtual void SetAnchorOffset(int32_t deltaX, int32_t deltaY) = 0;
     virtual void OffWindowZoom() = 0;
     virtual std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t windowId) = 0;
+    virtual void NotifyDumpInfoResult(const std::vector<std::string>& info) {};
 };
 }
 }

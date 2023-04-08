@@ -73,6 +73,7 @@ public:
     virtual void SetAnchorOffset(int32_t deltaX, int32_t deltaY);
     virtual void OffWindowZoom();
     virtual std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t windowId);
+    virtual void NotifyDumpInfoResult(const std::vector<std::string>& info);
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxy();
