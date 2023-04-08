@@ -25,8 +25,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowProxy"};
-    // data timeout 1000ms
-    constexpr int RAW_DATA_TIMEOUT = 1000;
 }
 
 WMError WindowProxy::UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,
@@ -330,12 +328,11 @@ WMError WindowProxy::NotifyScreenshot()
     return WMError::WM_OK;
 }
 
-WMError WindowProxy::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
+WMError WindowProxy::DumpInfo(const std::vector<std::string>& params)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
-    option.SetWaitTime(RAW_DATA_TIMEOUT);
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -347,10 +344,6 @@ WMError WindowProxy::DumpInfo(const std::vector<std::string>& params, std::vecto
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_DUMP_INFO),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!reply.ReadStringVector(&info)) {
-        WLOGFE("Read info failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return WMError::WM_OK;

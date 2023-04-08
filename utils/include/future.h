@@ -16,6 +16,7 @@
 #ifndef OHOS_WM_INCLUDE_FUTURE_H
 #define OHOS_WM_INCLUDE_FUTURE_H
 
+#include <condition_variable>
 #include "hilog/log.h"
 #include "window_manager_hilog.h"
 
@@ -47,9 +48,10 @@ protected:
         conditionVariable_.notify_one();
     }
 
+    std::mutex mutex_;
+
 private:
     std::condition_variable conditionVariable_;
-    std::mutex mutex_;
 };
 
 template<class T>
@@ -61,6 +63,12 @@ public:
     }
     void Reset(T defaultValue)
     {
+        flag_ = false;
+        result_ = defaultValue;
+    }
+    void ResetLock(T defaultValue)
+    {
+        std::unique_lock <std::mutex> lock(Future<T>::mutex_);
         flag_ = false;
         result_ = defaultValue;
     }

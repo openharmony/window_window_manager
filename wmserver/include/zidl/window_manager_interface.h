@@ -73,6 +73,7 @@ public:
         TRANS_ID_GESTURE_NAVIGATION_ENABLED,
         TRANS_ID_SET_WINDOW_GRAVITY,
         TRANS_ID_DISPATCH_KEY_EVENT,
+        TRANS_ID_NOTIFY_DUMP_INFO_RESULT,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -116,6 +117,7 @@ public:
     virtual std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t windowId) = 0;
     virtual WMError SetGestureNavigaionEnabled(bool enable) = 0;
     virtual void DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event) = 0;
+    virtual void NotifyDumpInfoResult(const std::vector<std::string>& info) {};
 };
 }
 }

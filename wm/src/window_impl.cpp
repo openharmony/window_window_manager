@@ -383,6 +383,7 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
     } else if (state_ == WindowState::STATE_SHOWN) {
         WindowMode lastMode = property_->GetWindowMode();
         property_->SetWindowMode(mode);
+        UpdateDecorEnable();
         WMError ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_MODE);
         if (ret != WMError::WM_OK) {
             property_->SetWindowMode(lastMode);
@@ -638,6 +639,7 @@ void WindowImpl::DumpInfo(const std::vector<std::string>& params, std::vector<st
     if (uiContent_ != nullptr) {
         uiContent_->DumpInfo(params, info);
     }
+    SingletonContainer::Get<WindowAdapter>().NotifyDumpInfoResult(info);
 }
 
 WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
@@ -846,9 +848,6 @@ void WindowImpl::MapDialogWindowToAppIfNeeded()
 
 WMError WindowImpl::UpdateProperty(PropertyChangeAction action)
 {
-    if (action == PropertyChangeAction::ACTION_UPDATE_MODE) {
-        UpdateDecorEnable();
-    }
     return SingletonContainer::Get<WindowAdapter>().UpdateProperty(property_, action);
 }
 
