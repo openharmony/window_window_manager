@@ -310,6 +310,12 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             DispatchKeyEvent(windowId, event);
             break;
         }
+        case WindowManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT: {
+            std::vector<std::string> info;
+            data.ReadStringVector(&info);
+            NotifyDumpInfoResult(info);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

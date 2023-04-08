@@ -308,5 +308,11 @@ void WindowAdapter::DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::Key
     INIT_PROXY_CHECK_RETURN();
     windowManagerServiceProxy_->DispatchKeyEvent(windowId, event);
 }
+
+void WindowAdapter::NotifyDumpInfoResult(const std::vector<std::string>& info)
+{
+    INIT_PROXY_CHECK_RETURN();
+    windowManagerServiceProxy_->NotifyDumpInfoResult(info);
+}
 } // namespace Rosen
 } // namespace OHOS

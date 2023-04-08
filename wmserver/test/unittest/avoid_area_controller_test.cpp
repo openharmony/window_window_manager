@@ -132,7 +132,7 @@ public:
     {
         return WMError::WM_OK;
     }
-    WMError DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override
+    WMError DumpInfo(const std::vector<std::string>& params) override
     {
         return WMError::WM_OK;
     }

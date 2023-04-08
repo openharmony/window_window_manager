@@ -198,8 +198,7 @@ HWTEST_F(WindowProxyTest, NotifyTouchOutside01, Function | SmallTest | Level2)
 HWTEST_F(WindowProxyTest, DumpInfo01, Function | SmallTest | Level2)
 {
     std::vector<std::string> params;
-    std::vector<std::string> info;
-    WMError err = windowProxy_->DumpInfo(params, info);
+    WMError err = windowProxy_->DumpInfo(params);
     ASSERT_EQ(err, WMError::WM_OK);
 }
 

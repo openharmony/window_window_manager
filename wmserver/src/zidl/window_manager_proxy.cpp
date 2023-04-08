@@ -933,5 +933,25 @@ void WindowManagerProxy::DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI
         return;
     }
 }
+
+void WindowManagerProxy::NotifyDumpInfoResult(const std::vector<std::string>& info)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteStringVector(info)) {
+        WLOGFE("Write info failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
