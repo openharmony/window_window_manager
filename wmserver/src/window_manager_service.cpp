@@ -1207,6 +1207,13 @@ void WindowManagerService::DispatchKeyEvent(uint32_t windowId, std::shared_ptr<M
     });
 }
 
+void WindowManagerService::NotifyDumpInfoResult(const std::vector<std::string>& info)
+{
+    if (windowDumper_) {
+        windowDumper_->dumpInfoFuture_.SetValue(info);
+    }
+}
+
 WMError WindowManagerService::GetSystemConfig(SystemConfig& systemConfig)
 {
     systemConfig = systemConfig_;

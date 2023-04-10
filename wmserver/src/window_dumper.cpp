@@ -40,7 +40,7 @@ namespace {
     const std::string ARG_DUMP_WINDOW = "-w";
 }
 
-WMError WindowDumper::Dump(int fd, const std::vector<std::u16string>& args) const
+WMError WindowDumper::Dump(int fd, const std::vector<std::u16string>& args)
 {
     WLOGI("Dump begin fd: %{public}d", fd);
     if (fd < 0) {
@@ -75,7 +75,7 @@ WMError WindowDumper::Dump(int fd, const std::vector<std::u16string>& args) cons
 }
 
 WMError WindowDumper::DumpScreenGroupWindowInfo(ScreenId screenGroupId,
-    const sptr<WindowNodeContainer>& windowNodeContainer, std::string& dumpInfo) const
+    const sptr<WindowNodeContainer>& windowNodeContainer, std::string& dumpInfo)
 {
     if (windowNodeContainer == nullptr) {
         WLOGFE("windowNodeContainer is null");
@@ -129,7 +129,7 @@ WMError WindowDumper::DumpScreenGroupWindowInfo(ScreenId screenGroupId,
     return WMError::WM_OK;
 }
 
-WMError WindowDumper::DumpAllWindowInfo(std::string& dumpInfo) const
+WMError WindowDumper::DumpAllWindowInfo(std::string& dumpInfo)
 {
     std::map<ScreenId, sptr<WindowNodeContainer>> windowNodeContainers;
     std::vector<DisplayId> displayIds = DisplayGroupInfo::GetInstance().GetAllDisplayIds();
@@ -152,7 +152,7 @@ WMError WindowDumper::DumpAllWindowInfo(std::string& dumpInfo) const
     return WMError::WM_OK;
 }
 
-bool WindowDumper::IsValidDigitString(const std::string& windowIdStr) const
+bool WindowDumper::IsValidDigitString(const std::string& windowIdStr)
 {
     if (windowIdStr.empty()) {
         return false;
@@ -168,7 +168,7 @@ bool WindowDumper::IsValidDigitString(const std::string& windowIdStr) const
 }
 
 WMError WindowDumper::DumpSpecifiedWindowInfo(uint32_t windowId, const std::vector<std::string>& params,
-    std::string& dumpInfo) const
+    std::string& dumpInfo)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node == nullptr) {
@@ -221,8 +221,9 @@ WMError WindowDumper::DumpSpecifiedWindowInfo(uint32_t windowId, const std::vect
             WLOGI("do not dump ui info");
             return WMError::WM_OK;
         }
-        std::vector<std::string> infos;
-        node->GetWindowToken()->DumpInfo(resetParams, infos);
+        dumpInfoFuture_.ResetLock({});
+        node->GetWindowToken()->DumpInfo(resetParams);
+        auto infos = dumpInfoFuture_.GetResult(2000); // 2000: wait for 2000ms
         for (auto& info: infos) {
             dumpInfo.append(info).append("\n");
         }
@@ -230,7 +231,7 @@ WMError WindowDumper::DumpSpecifiedWindowInfo(uint32_t windowId, const std::vect
     return WMError::WM_OK;
 }
 
-WMError WindowDumper::DumpWindowInfo(const std::vector<std::string>& args, std::string& dumpInfo) const
+WMError WindowDumper::DumpWindowInfo(const std::vector<std::string>& args, std::string& dumpInfo)
 {
     if (args.empty()) {
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -245,7 +246,7 @@ WMError WindowDumper::DumpWindowInfo(const std::vector<std::string>& args, std::
     }
 }
 
-void WindowDumper::ShowIllegalArgsInfo(std::string& dumpInfo, WMError errCode) const
+void WindowDumper::ShowIllegalArgsInfo(std::string& dumpInfo, WMError errCode)
 {
     switch (errCode) {
         case WMError::WM_ERROR_INVALID_PARAM:
@@ -259,7 +260,7 @@ void WindowDumper::ShowIllegalArgsInfo(std::string& dumpInfo, WMError errCode) c
     }
 }
 
-void WindowDumper::ShowHelpInfo(std::string& dumpInfo) const
+void WindowDumper::ShowHelpInfo(std::string& dumpInfo)
 {
     dumpInfo.append("Usage:\n")
         .append(" -h                             ")
@@ -272,7 +273,7 @@ void WindowDumper::ShowHelpInfo(std::string& dumpInfo) const
     ShowAceDumpHelp(dumpInfo);
 }
 
-void WindowDumper::ShowAceDumpHelp(std::string& dumpInfo) const
+void WindowDumper::ShowAceDumpHelp(std::string& dumpInfo)
 {
     auto node = windowRoot_->GetWindowForDumpAceHelpInfo();
     if (node == nullptr) {
@@ -282,8 +283,9 @@ void WindowDumper::ShowAceDumpHelp(std::string& dumpInfo) const
     if (node->GetWindowToken() != nullptr) {
         std::vector<std::string> params;
         params.emplace_back(ARG_DUMP_HELP);
-        std::vector<std::string> infos;
-        node->GetWindowToken()->DumpInfo(params, infos);
+        dumpInfoFuture_.ResetLock({});
+        node->GetWindowToken()->DumpInfo(params);
+        auto infos = dumpInfoFuture_.GetResult(2000); // 2000: wait for 2000ms
         for (auto& info: infos) {
             dumpInfo.append(info).append("\n");
         }
