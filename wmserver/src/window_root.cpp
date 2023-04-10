@@ -75,7 +75,7 @@ sptr<WindowNodeContainer> WindowRoot::GetOrCreateWindowNodeContainer(DisplayId d
     }
 
     // In case of have no container for default display, create container
-    WLOGFI("Create container for current display, displayId: %{public}" PRIu64 "", displayId);
+    WLOGFD("Create container for current display, displayId: %{public}" PRIu64 "", displayId);
     sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
     return CreateWindowNodeContainer(displayInfo);
 }
@@ -109,7 +109,7 @@ sptr<WindowNodeContainer> WindowRoot::CreateWindowNodeContainer(sptr<DisplayInfo
 
     DisplayId displayId = displayInfo->GetDisplayId();
     ScreenId displayGroupId = displayInfo->GetScreenGroupId();
-    WLOGFI("create new container for display, width: %{public}d, height: %{public}d, "
+    WLOGFD("create new container for display, width: %{public}d, height: %{public}d, "
         "displayGroupId:%{public}" PRIu64", displayId:%{public}" PRIu64"", displayInfo->GetWidth(),
         displayInfo->GetHeight(), displayGroupId, displayId);
     sptr<WindowNodeContainer> container = new WindowNodeContainer(displayInfo, displayGroupId);
@@ -170,7 +170,7 @@ sptr<WindowNode> WindowRoot::FindWindowNodeWithToken(const sptr<IRemoteObject>& 
             return false;
         });
     if (iter == windowNodeMap_.end()) {
-        WLOGFI("cannot find windowNode");
+        WLOGFD("cannot find windowNode");
         return nullptr;
     }
     return iter->second;
@@ -182,17 +182,17 @@ void WindowRoot::AddDeathRecipient(sptr<WindowNode> node)
         WLOGFE("AddDeathRecipient failed, node is nullptr");
         return;
     }
-    WLOGFI("Add for window: %{public}u", node->GetWindowId());
+    WLOGFD("Add for window: %{public}u", node->GetWindowId());
 
     auto remoteObject = node->GetWindowToken()->AsObject();
     windowIdMap_.insert(std::make_pair(remoteObject, node->GetWindowId()));
 
     if (windowDeath_ == nullptr) {
-        WLOGFI("failed to create death Recipient ptr WindowDeathRecipient");
+        WLOGFD("failed to create death Recipient ptr WindowDeathRecipient");
         return;
     }
     if (!remoteObject->AddDeathRecipient(windowDeath_)) {
-        WLOGFI("failed to add death recipient");
+        WLOGFD("failed to add death recipient");
     }
 }
 
@@ -203,7 +203,7 @@ WMError WindowRoot::SaveWindow(const sptr<WindowNode>& node)
         return WMError::WM_ERROR_NULLPTR;
     }
 
-    WLOGFI("save windowId %{public}u", node->GetWindowId());
+    WLOGFD("save windowId %{public}u", node->GetWindowId());
     windowNodeMap_.insert(std::make_pair(node->GetWindowId(), node));
     if (node->surfaceNode_ != nullptr) {
         surfaceIdWindowNodeMap_.insert(std::make_pair(node->surfaceNode_->GetId(), node));
@@ -461,7 +461,7 @@ WMError WindowRoot::ToggleShownStateForAllAppWindows()
 
 void WindowRoot::DestroyLeakStartingWindow()
 {
-    WLOGFI("DestroyLeakStartingWindow is called");
+    WLOGFD("DestroyLeakStartingWindow is called");
     std::vector<uint32_t> destroyIds;
     for (auto& iter : windowNodeMap_) {
         if (iter.second->startingWindowShown_ && !iter.second->GetWindowToken()) {
@@ -469,7 +469,7 @@ void WindowRoot::DestroyLeakStartingWindow()
         }
     }
     for (auto& id : destroyIds) {
-        WLOGFI("Destroy Window id:%{public}u", id);
+        WLOGFD("Destroy Window id:%{public}u", id);
         DestroyWindow(id, false);
     }
 }
@@ -478,7 +478,7 @@ WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<Window
     sptr<WindowNodeContainer>& container)
 {
     if (!node->currentVisibility_) {
-        WLOGFI("window is invisible, do not need process");
+        WLOGFD("window is invisible, do not need process");
         return WMError::WM_DO_NOTHING;
     }
     if (WindowHelper::IsSubWindow(node->GetWindowType())) {
@@ -509,7 +509,7 @@ WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<Window
         HandleKeepScreenOn(child->GetWindowId(), child->IsKeepScreenOn());
     }
     HandleKeepScreenOn(node->GetWindowId(), node->IsKeepScreenOn());
-    WLOGFI("windowId:%{public}u, name:%{public}s, orientation:%{public}u, type:%{public}u, isMainWindow:%{public}d",
+    WLOGFD("windowId:%{public}u, name:%{public}s, orientation:%{public}u, type:%{public}u, isMainWindow:%{public}d",
         node->GetWindowId(), node->GetWindowName().c_str(), static_cast<uint32_t>(node->GetRequestedOrientation()),
         node->GetWindowType(), WindowHelper::IsMainWindow(node->GetWindowType()));
     if (WindowHelper::IsRotatableWindow(node->GetWindowType(), node->GetWindowMode())) {
@@ -581,7 +581,7 @@ void WindowRoot::GetAllAnimationPlayingNodes(std::vector<wptr<WindowNode>>& wind
             if (!WindowHelper::IsMainWindow(it.second->GetWindowType())) {
                 continue;
             }
-            WLOGFI("id:%{public}u state:%{public}u",
+            WLOGFD("id:%{public}u state:%{public}u",
                 it.second->GetWindowId(), static_cast<uint32_t>(it.second->stateMachine_.GetCurrentState()));
             if (it.second->stateMachine_.IsRemoteAnimationPlaying() ||
                 it.second->stateMachine_.GetAnimationCount() > 0) {
@@ -742,12 +742,12 @@ void WindowRoot::SetBrightness(uint32_t windowId, float brightness)
         return;
     }
     if (!WindowHelper::IsAppWindow(node->GetWindowType())) {
-        WLOGFI("non app window does not support set brightness");
+        WLOGFD("non app window does not support set brightness");
         return;
     }
     if (windowId == container->GetActiveWindow()) {
         if (container->GetDisplayBrightness() != brightness) {
-            WLOGFI("set brightness with value: %{public}u", container->ToOverrideBrightness(brightness));
+            WLOGFD("set brightness with value: %{public}u", container->ToOverrideBrightness(brightness));
             DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
                 container->ToOverrideBrightness(brightness));
             container->SetDisplayBrightness(brightness);
@@ -789,7 +789,7 @@ void WindowRoot::UpdateFocusableProperty(uint32_t windowId)
     }
     auto nextFocusableWindow = container->GetNextFocusableWindow(windowId);
     if (nextFocusableWindow != nullptr) {
-        WLOGFI("adjust focus window, next focus window id: %{public}u", nextFocusableWindow->GetWindowId());
+        WLOGFD("adjust focus window, next focus window id: %{public}u", nextFocusableWindow->GetWindowId());
         container->SetFocusWindow(nextFocusableWindow->GetWindowId());
     }
 }
@@ -805,7 +805,7 @@ WMError WindowRoot::SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode)
     auto res = container->SetWindowMode(node, dstMode);
     if (res == WMError::WM_OK
         && (WindowHelper::IsSplitWindowMode(curWinMode) || WindowHelper::IsSplitWindowMode(dstMode))) {
-        WLOGFI("SwitchRender: split mode changed");
+        WLOGFD("SwitchRender: split mode changed");
         SwitchRenderModeIfNeeded();
     }
     if (WindowHelper::IsRotatableWindow(node->GetWindowType(), node->GetWindowMode())) {
@@ -868,7 +868,7 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
         WLOGFE("destroy window failed, because window node is not exist.");
         return WMError::WM_ERROR_NULLPTR;
     }
-    WLOGFI("destroy window %{public}u, onlySelf:%{public}u.", windowId, onlySelf);
+    WLOGFD("destroy window %{public}u, onlySelf:%{public}u.", windowId, onlySelf);
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (!container) {
         WLOGFW("destroy window failed, window container could not be found");
@@ -920,7 +920,7 @@ WMError WindowRoot::DestroyWindowInner(sptr<WindowNode>& node)
     sptr<IWindow> window = node->GetWindowToken();
     if ((window != nullptr) && (window->AsObject() != nullptr)) {
         if (windowIdMap_.count(window->AsObject()) == 0) {
-            WLOGFI("window remote object has been destroyed");
+            WLOGFD("window remote object has been destroyed");
             return WMError::WM_ERROR_DESTROYED_OBJECT;
         }
 
@@ -930,7 +930,7 @@ WMError WindowRoot::DestroyWindowInner(sptr<WindowNode>& node)
         windowIdMap_.erase(window->AsObject());
     }
     windowNodeMap_.erase(node->GetWindowId());
-    WLOGFI("destroy window node use_count:%{public}d", node->GetSptrRefCount());
+    WLOGFD("destroy window node use_count:%{public}d", node->GetSptrRefCount());
     return WMError::WM_OK;
 }
 
@@ -942,12 +942,12 @@ void WindowRoot::UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node
         return;
     }
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        WLOGFI("window is divider, do not get next focus window.");
+        WLOGFD("window is divider, do not get next focus window.");
         return;
     }
     uint32_t windowId = node->GetWindowId();
     uint32_t focusedWindowId = container->GetFocusWindow();
-    WLOGFI("current window: %{public}u, focus window: %{public}u", windowId, focusedWindowId);
+    WLOGFD("current window: %{public}u, focus window: %{public}u", windowId, focusedWindowId);
     if (WindowHelper::IsMainWindow(node->GetWindowType())) {
         if (windowId != focusedWindowId) {
             auto iter = std::find_if(node->children_.begin(), node->children_.end(),
@@ -971,7 +971,7 @@ void WindowRoot::UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node
     }
     auto nextFocusableWindow = container->GetNextFocusableWindow(windowId);
     if (nextFocusableWindow != nullptr) {
-        WLOGFI("adjust focus window, next focus window id: %{public}u", nextFocusableWindow->GetWindowId());
+        WLOGFD("adjust focus window, next focus window id: %{public}u", nextFocusableWindow->GetWindowId());
         container->SetFocusWindow(nextFocusableWindow->GetWindowId());
     }
 }
@@ -985,7 +985,7 @@ void WindowRoot::UpdateActiveWindowWithWindowRemoved(const sptr<WindowNode>& nod
     }
     uint32_t windowId = node->GetWindowId();
     uint32_t activeWindowId = container->GetActiveWindow();
-    WLOGFI("current window: %{public}u, active window: %{public}u", windowId, activeWindowId);
+    WLOGFD("current window: %{public}u, active window: %{public}u", windowId, activeWindowId);
     if (WindowHelper::IsMainWindow(node->GetWindowType())) {
         if (windowId != activeWindowId) {
             auto iter = std::find_if(node->children_.begin(), node->children_.end(),
@@ -1009,7 +1009,7 @@ void WindowRoot::UpdateActiveWindowWithWindowRemoved(const sptr<WindowNode>& nod
     }
     auto nextActiveWindow = container->GetNextActiveWindow(windowId);
     if (nextActiveWindow != nullptr) {
-        WLOGFI("adjust active window, next active window id: %{public}u", nextActiveWindow->GetWindowId());
+        WLOGFD("adjust active window, next active window id: %{public}u", nextActiveWindow->GetWindowId());
         container->SetActiveWindow(nextActiveWindow->GetWindowId(), true);
     }
 }
@@ -1021,7 +1021,7 @@ void WindowRoot::UpdateBrightnessWithWindowRemoved(uint32_t windowId, const sptr
         return;
     }
     if (windowId == container->GetBrightnessWindow()) {
-        WLOGFI("adjust brightness window with active window: %{public}u", container->GetActiveWindow());
+        WLOGFD("adjust brightness window with active window: %{public}u", container->GetActiveWindow());
         container->UpdateBrightness(container->GetActiveWindow(), true);
     }
 }
@@ -1075,7 +1075,7 @@ WMError WindowRoot::RequestActiveWindow(uint32_t windowId)
         return WMError::WM_ERROR_NULLPTR;
     }
     auto res = container->SetActiveWindow(windowId, false);
-    WLOGFI("windowId:%{public}u, name:%{public}s, orientation:%{public}u, type:%{public}u, isMainWindow:%{public}d",
+    WLOGFD("windowId:%{public}u, name:%{public}s, orientation:%{public}u, type:%{public}u, isMainWindow:%{public}d",
         windowId, node->GetWindowName().c_str(), static_cast<uint32_t>(node->GetRequestedOrientation()),
         node->GetWindowType(), WindowHelper::IsMainWindow(node->GetWindowType()));
     if (res == WMError::WM_OK &&
@@ -1290,9 +1290,9 @@ void WindowRoot::ProcessExpandDisplayCreate(DisplayId defaultDisplayId, sptr<Dis
         return;
     }
 
-    WLOGFI("[Display Create] before add new display, displayId: %{public}" PRIu64"", displayId);
+    WLOGFD("[Display Create] before add new display, displayId: %{public}" PRIu64"", displayId);
     container->GetMultiDisplayController()->ProcessDisplayCreate(defaultDisplayId, displayInfo, displayRectMap);
-    WLOGFI("[Display Create] Container exist, add new display, displayId: %{public}" PRIu64"", displayId);
+    WLOGFD("[Display Create] Container exist, add new display, displayId: %{public}" PRIu64"", displayId);
 }
 
 std::map<DisplayId, sptr<DisplayInfo>> WindowRoot::GetAllDisplayInfos(const std::vector<DisplayId>& displayIdVec)
@@ -1301,7 +1301,7 @@ std::map<DisplayId, sptr<DisplayInfo>> WindowRoot::GetAllDisplayInfos(const std:
     for (auto& displayId : displayIdVec) {
         const sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
         displayInfoMap.insert(std::make_pair(displayId, displayInfo));
-        WLOGFI("Get latest displayInfo, displayId: %{public}" PRIu64"", displayId);
+        WLOGFD("Get latest displayInfo, displayId: %{public}" PRIu64"", displayId);
     }
     return displayInfoMap;
 }
@@ -1319,7 +1319,7 @@ std::map<DisplayId, Rect> WindowRoot::GetAllDisplayRectsByDMS(sptr<DisplayInfo> 
         Rect displayRect = { info->GetOffsetX(), info->GetOffsetY(), info->GetWidth(), info->GetHeight() };
         displayRectMap.insert(std::make_pair(displayId, displayRect));
 
-        WLOGFI("displayId: %{public}" PRIu64", displayRect: [ %{public}d, %{public}d, %{public}d, %{public}d]",
+        WLOGFD("displayId: %{public}" PRIu64", displayRect: [ %{public}d, %{public}d, %{public}d, %{public}d]",
             displayId, displayRect.posX_, displayRect.posY_, displayRect.width_, displayRect.height_);
     }
     return displayRectMap;
@@ -1336,7 +1336,7 @@ std::map<DisplayId, Rect> WindowRoot::GetAllDisplayRectsByDisplayInfo(
         Rect displayRect = { info->GetOffsetX(), info->GetOffsetY(), info->GetWidth(), info->GetHeight() };
         displayRectMap.insert(std::make_pair(id, displayRect));
 
-        WLOGFI("displayId: %{public}" PRIu64", displayRect: [ %{public}d, %{public}d, %{public}d, %{public}d]",
+        WLOGFD("displayId: %{public}" PRIu64", displayRect: [ %{public}d, %{public}d, %{public}d, %{public}d]",
             id, displayRect.posX_, displayRect.posY_, displayRect.width_, displayRect.height_);
     }
     return displayRectMap;
@@ -1350,11 +1350,11 @@ void WindowRoot::ProcessDisplayCreate(DisplayId defaultDisplayId, sptr<DisplayIn
     auto iter = windowNodeContainerMap_.find(displayGroupId);
     if (iter == windowNodeContainerMap_.end()) {
         CreateWindowNodeContainer(displayInfo);
-        WLOGFI("[Display Create] Create new container for display, displayId: %{public}" PRIu64"", displayId);
+        WLOGFD("[Display Create] Create new container for display, displayId: %{public}" PRIu64"", displayId);
     } else {
         auto& displayIdVec = displayIdMap_[displayGroupId];
         if (std::find(displayIdVec.begin(), displayIdVec.end(), displayId) != displayIdVec.end()) {
-            WLOGFI("[Display Create] Current display is already exist, displayId: %{public}" PRIu64"", displayId);
+            WLOGFD("[Display Create] Current display is already exist, displayId: %{public}" PRIu64"", displayId);
             return;
         }
         // add displayId in displayId vector
@@ -1405,7 +1405,7 @@ void WindowRoot::ProcessDisplayDestroy(DisplayId defaultDisplayId, sptr<DisplayI
         WLOGFE("window node container is nullptr, displayId :%{public}" PRIu64 "", displayId);
         return;
     }
-    WLOGFI("[Display Destroy] displayId: %{public}" PRIu64"", displayId);
+    WLOGFD("[Display Destroy] displayId: %{public}" PRIu64"", displayId);
 
     std::vector<uint32_t> needDestroyWindows;
     auto displayRectMap = GetAllDisplayRectsByDisplayInfo(displayInfoMap);
@@ -1425,7 +1425,7 @@ void WindowRoot::ProcessDisplayDestroy(DisplayId defaultDisplayId, sptr<DisplayI
     }
     // move window which is not showing on destroyed display to default display
     MoveNotShowingWindowToDefaultDisplay(defaultDisplayId, displayId);
-    WLOGFI("[Display Destroy] displayId: %{public}" PRIu64" ", displayId);
+    WLOGFD("[Display Destroy] displayId: %{public}" PRIu64" ", displayId);
 }
 
 void WindowRoot::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
@@ -1545,7 +1545,7 @@ void WindowRoot::RemoveSingleUserWindowNodes(int accountId)
     for (auto id : displayIds) {
         sptr<WindowNodeContainer> container = GetOrCreateWindowNodeContainer(id);
         if (container == nullptr) {
-            WLOGFI("get container failed %{public}" PRIu64"", id);
+            WLOGFD("get container failed %{public}" PRIu64"", id);
             continue;
         }
         container->RemoveSingleUserWindowNodes(accountId);
@@ -1589,7 +1589,7 @@ sptr<WindowNode> WindowRoot::FindDialogCallerNode(WindowType type, sptr<IRemoteO
             return false;
         });
     if (iter == windowNodeMap_.end()) {
-        WLOGFI("cannot find windowNode");
+        WLOGFD("cannot find windowNode");
         return nullptr;
     }
     return iter->second;
@@ -1622,7 +1622,7 @@ bool WindowRoot::CheckMultiDialogWindows(WindowType type, sptr<IRemoteObject> to
 
 void WindowRoot::OnRenderModeChanged(bool isUniRender)
 {
-    WLOGFI("SwitchRender: render mode of RS has changed from %{public}u to %{public}s",
+    WLOGFD("SwitchRender: render mode of RS has changed from %{public}u to %{public}s",
         static_cast<uint32_t>(renderMode_), std::to_string(isUniRender).c_str());
     if (isUniRender) {
         switch (renderMode_) {
@@ -1685,27 +1685,27 @@ void WindowRoot::ChangeRSRenderModeIfNeeded(bool isToUnified)
     switch (renderMode_) {
         case RenderMode::SEPARATED:
             if (isToUnified) {
-                WLOGFI("SwitchRender: notify RS from separated to be unifying");
+                WLOGFD("SwitchRender: notify RS from separated to be unifying");
                 renderMode_ = RenderMode::UNIFYING;
                 RSInterfaces::GetInstance().UpdateRenderMode(true);
             }
             break;
         case RenderMode::UNIFIED:
             if (!isToUnified) {
-                WLOGFI("SwitchRender: notify RS from unified to be separating");
+                WLOGFD("SwitchRender: notify RS from unified to be separating");
                 renderMode_ = RenderMode::SEPARATING;
                 RSInterfaces::GetInstance().UpdateRenderMode(false);
             }
             break;
         case RenderMode::SEPARATING:
             if (isToUnified) {
-                WLOGFI("SwitchRender: notify RS from separating to be unifying");
+                WLOGFD("SwitchRender: notify RS from separating to be unifying");
                 renderMode_ = RenderMode::UNIFYING;
             }
             break;
         case RenderMode::UNIFYING:
             if (!isToUnified) {
-                WLOGFI("SwitchRender: notify RS from unifying to be separating");
+                WLOGFD("SwitchRender: notify RS from unifying to be separating");
                 renderMode_ = RenderMode::SEPARATING;
             }
             break;
@@ -1729,7 +1729,7 @@ bool WindowRoot::IsAppWindowExceed() const
             appWindowNum++;
         }
     }
-    WLOGFI("SwitchRender: the number of app window is %{public}u", maxUniRenderAppWindowNumber_);
+    WLOGFD("SwitchRender: the number of app window is %{public}u", maxUniRenderAppWindowNumber_);
     return (appWindowNum > maxUniRenderAppWindowNumber_);
 }
 
