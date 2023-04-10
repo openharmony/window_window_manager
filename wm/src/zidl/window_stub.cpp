@@ -100,7 +100,39 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         }
         case WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA: {
             sptr<OccupiedAreaChangeInfo> info = data.ReadParcelable<OccupiedAreaChangeInfo>();
-            UpdateOccupiedAreaChangeInfo(info);
+            bool hasRSTransaction = data.ReadBool();
+            if (hasRSTransaction) {
+                auto rsTransaction = data.ReadParcelable<RSTransaction>();
+                if (!rsTransaction) {
+                    WLOGFE("RSTransaction unMarsh failed");
+                    return -1;
+                }
+                std::shared_ptr<RSTransaction> transaction(rsTransaction);
+                rsTransaction->UnmarshallTransactionSyncController(data);
+                UpdateOccupiedAreaChangeInfo(info, transaction);
+            } else {
+                UpdateOccupiedAreaChangeInfo(info);
+            }
+
+            break;
+        }
+        case WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA_AND_RECT: {
+            sptr<OccupiedAreaChangeInfo> info = data.ReadParcelable<OccupiedAreaChangeInfo>();
+            struct Rect rect { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
+            bool hasRSTransaction = data.ReadBool();
+            if (hasRSTransaction) {
+                auto rsTransaction = data.ReadParcelable<RSTransaction>();
+                if (!rsTransaction) {
+                    WLOGFE("RSTransaction unMarsh failed");
+                    return -1;
+                }
+                std::shared_ptr<RSTransaction> transaction(rsTransaction);
+                rsTransaction->UnmarshallTransactionSyncController(data);
+                UpdateOccupiedAreaAndRect(info, rect, transaction);
+            } else {
+                UpdateOccupiedAreaAndRect(info, rect);
+            }
+
             break;
         }
         case WindowMessage::TRANS_ID_UPDATE_ACTIVE_STATUS: {

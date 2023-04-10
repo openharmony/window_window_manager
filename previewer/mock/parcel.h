@@ -66,15 +66,26 @@ public:
     bool WriteBool(bool value);
 
     bool ReadBool();
-    
+
     template<typename T>
     bool WriteObject(const sptr<T> &object)
     {
         return true;
     }
-    
+
     template <typename T>
     sptr<T> ReadObject()
+    {
+        return nullptr;
+    }
+
+    bool WriteParcelable(const Parcelable *object)
+    {
+        return true;
+    }
+
+    template <typename T>
+    T* ReadParcelable() const
     {
         return nullptr;
     }

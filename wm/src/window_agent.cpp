@@ -29,7 +29,7 @@ WindowAgent::WindowAgent(sptr<WindowImpl>& windowImpl)
 }
 
 WMError WindowAgent::UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,
-    const std::shared_ptr<RSTransaction> rsTransaction)
+    const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     if (window_ == nullptr) {
         WLOGFE("window_ is nullptr");
@@ -109,13 +109,26 @@ WMError WindowAgent::UpdateDisplayId(DisplayId from, DisplayId to)
     return WMError::WM_OK;
 }
 
-WMError WindowAgent::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info)
+WMError WindowAgent::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info,
+    const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     if (window_ == nullptr) {
         WLOGFE("window is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    window_->UpdateOccupiedAreaChangeInfo(info);
+    window_->UpdateOccupiedAreaChangeInfo(info, rsTransaction);
+    return WMError::WM_OK;
+}
+
+WMError WindowAgent::UpdateOccupiedAreaAndRect(const sptr<OccupiedAreaChangeInfo>& info, const Rect& rect,
+    const std::shared_ptr<RSTransaction>& rsTransaction)
+{
+    if (window_ == nullptr) {
+        WLOGFE("window is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    window_->UpdateRect(rect, window_->GetWindowProperty()->GetDecoStatus(), WindowSizeChangeReason::UNDEFINED);
+    window_->UpdateOccupiedAreaChangeInfo(info, rsTransaction);
     return WMError::WM_OK;
 }
 
