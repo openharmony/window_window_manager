@@ -115,8 +115,10 @@ WMError WindowSystemEffect::SetWindowShadow(const sptr<WindowNode>& node)
     }
 
     if (MathHelper::NearZero(windowSystemEffectConfig_.focusedShadow_.elevation_) &&
-        MathHelper::NearZero(windowSystemEffectConfig_.unfocusedShadow_.elevation_)) {
-        WLOGFD("shadow elevation both 0.0, id: %{public}u", node->GetWindowId());
+        MathHelper::NearZero(windowSystemEffectConfig_.unfocusedShadow_.elevation_) &&
+        MathHelper::NearZero(windowSystemEffectConfig_.focusedShadow_.radius_) &&
+        MathHelper::NearZero(windowSystemEffectConfig_.unfocusedShadow_.radius_)) {
+        WLOGFD("shadow elevation and radius are both 0.0, id: %{public}u", node->GetWindowId());
         return WMError::WM_DO_NOTHING;
     }
 
