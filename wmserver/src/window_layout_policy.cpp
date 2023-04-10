@@ -32,6 +32,7 @@ namespace {
 }
 
 uint32_t WindowLayoutPolicy::floatingBottomPosY_ = 0;
+uint32_t WindowLayoutPolicy::maxFloatingWindowSize_ = 1920;  // 1920: default max size of floating window
 
 WindowLayoutPolicy::WindowLayoutPolicy(DisplayGroupWindowTree& displayGroupWindowTree)
     : displayGroupWindowTree_(displayGroupWindowTree)
@@ -458,8 +459,8 @@ WindowSizeLimits WindowLayoutPolicy::GetSystemSizeLimits(const sptr<WindowNode>&
     const Rect& displayRect, float vpr)
 {
     WindowSizeLimits systemLimits;
-    systemLimits.maxWidth_ = static_cast<uint32_t>(MAX_FLOATING_SIZE * vpr);
-    systemLimits.maxHeight_ = static_cast<uint32_t>(MAX_FLOATING_SIZE * vpr);
+    systemLimits.maxWidth_ = static_cast<uint32_t>(maxFloatingWindowSize_ * vpr);
+    systemLimits.maxHeight_ = static_cast<uint32_t>(maxFloatingWindowSize_ * vpr);
 
     // Float camera window has a special limit:
     // if display sw <= 600dp, portrait: min width = display sw * 30%, landscape: min width = sw * 50%
@@ -757,6 +758,11 @@ bool WindowLayoutPolicy::IsTileRectSatisfiedWithSizeLimits(const sptr<WindowNode
 void WindowLayoutPolicy::SetCascadeRectBottomPosYLimit(uint32_t floatingBottomPosY)
 {
     floatingBottomPosY_ = floatingBottomPosY;
+}
+
+void WindowLayoutPolicy::SetMaxFloatingWindowSize(uint32_t maxSize)
+{
+    maxFloatingWindowSize_ = maxSize;
 }
 
 void WindowLayoutPolicy::GetStoragedAspectRatio(const sptr<WindowNode>& node)
