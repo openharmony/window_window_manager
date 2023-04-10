@@ -34,6 +34,7 @@ namespace {
     constexpr int32_t PERF_DRAG_CODE = 31;
     constexpr int32_t PERF_MOVE_CODE = 32;
     constexpr int32_t PERF_SLIDE_CODE = 11;
+    constexpr int32_t PERF_STATUS_BAR_DRAG_CODE = 37;
     const std::string TASK_NAME = "SlideOff";
 }
 
@@ -110,7 +111,7 @@ class ResSchedReport {
     {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
         if (type == WindowType::WINDOW_TYPE_STATUS_BAR) {
-            SlideNormal(isOn);
+            StatusBarDrag(isOn);
         }
         if (type == WindowType::WINDOW_TYPE_DESKTOP) {
             Slide(isOn);
@@ -119,15 +120,15 @@ class ResSchedReport {
     }
 private:
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
-    void SlideNormal(bool isOn)
+    void StatusBarDrag(bool isOn)
     {
         static auto lastRequestPerfTime = std::chrono::steady_clock::now();
         static auto eventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
         static auto handler = std::make_shared<AppExecFwk::EventHandler>(eventRunner);
         static auto task = []() {
             std::unordered_map<std::string, std::string> mapPayload;
-            OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(PERF_SLIDE_CODE,
-                SlideEventStatus::SLIDE_NORMAL_END, mapPayload);
+            OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(PERF_STATUS_BAR_DRAG_CODE,
+                1, mapPayload);
         };
         auto current = std::chrono::steady_clock::now();
         bool isTimeOut = std::chrono::duration_cast<std::chrono::milliseconds>(current - lastRequestPerfTime).
@@ -136,15 +137,15 @@ private:
             handler->RemoveTask(TASK_NAME);
             lastRequestPerfTime = current;
             std::unordered_map<std::string, std::string> mapPayload;
-            OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(PERF_SLIDE_CODE,
-                SlideEventStatus::SLIDE_NORMAL_BEGIN, mapPayload);
+            OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(PERF_STATUS_BAR_DRAG_CODE,
+                0, mapPayload);
         }
         if (!isOn) {
             std::unordered_map<std::string, std::string> mapPayload;
-            OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(PERF_SLIDE_CODE,
-                 SlideEventStatus::SLIDE_NORMAL_BEGIN, mapPayload);
-            // 500 is the animation duration.
-            handler->PostTask(task, TASK_NAME, 500, AppExecFwk::EventQueue::Priority::HIGH);
+            OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(PERF_STATUS_BAR_DRAG_CODE,
+                0, mapPayload);
+            // 990 is the animation duration.
+            handler->PostTask(task, TASK_NAME, 990, AppExecFwk::EventQueue::Priority::HIGH);
         }
     }
 
