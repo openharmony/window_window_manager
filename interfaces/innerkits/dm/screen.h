@@ -66,29 +66,168 @@ public:
     Screen& operator=(Screen&&) = delete;
     bool IsGroup() const;
     std::string GetName() const;
+    
+    /**
+     * @brief Get screen id.
+     *
+     * @return Screen id.
+     */
     ScreenId GetId() const;
+
+    /**
+     * @brief Get width of the screen.
+     *
+     * @return Width of the screen.
+     */
     uint32_t GetWidth() const;
+    
+    /**
+     * @brief Get height of the screen.
+     *
+     * @return Height of the screen.
+     */
     uint32_t GetHeight() const;
+
+    /**
+     * @brief Get virtual width of the screen.
+     *
+     * @return Virtual width of the screen.
+     */
     uint32_t GetVirtualWidth() const;
+
+    /**
+     * @brief Get virtual height of the screen.
+     *
+     * @return Virtual height of the screen.
+     */
     uint32_t GetVirtualHeight() const;
+
+    /**
+     * @brief Get virtual pixel ratio of the screen.
+     *
+     * @return Virtual pixel ratio of the screen.
+     */
     float GetVirtualPixelRatio() const;
+
+    /**
+     * @brief Get the Rotation of the screen.
+     *
+     * @return The Rotation of the screen.
+     */
     Rotation GetRotation() const;
+
+    /**
+     * @brief Get the orientation of the screen.
+     *
+     * @return Orientation of the screen.
+     */
     Orientation GetOrientation() const;
+
+    /**
+     * @brief Is a real screen.
+     *
+     * @return True means screen is real, false means the opposite.
+     */
     bool IsReal() const;
+
+    /**
+     * @brief Get screen parent id.
+     *
+     * @return Screen parent id.
+     */
     ScreenId GetParentId() const;
+
+    /**
+     * @brief Get screen mode id.
+     *
+     * @return Screen mode id.
+     */
     uint32_t GetModeId() const;
+
+    /**
+     * @brief Get supported modes of the screen.
+     *
+     * @return Supported modes of the screen.
+     */
     std::vector<sptr<SupportedScreenModes>> GetSupportedModes() const;
+
+    /**
+     * @brief Set screen active mode.
+     *
+     * @param moddId Mode id.
+     * @return DM_OK means set success, others means set failed.
+     */
     DMError SetScreenActiveMode(uint32_t modeId);
+
+    /**
+     * @brief Set orientation for the screen.
+     *
+     * @param orientation Orientation for the screen.
+     * @return DM_OK means set success, others means set failed.
+     */
     DMError SetOrientation(Orientation orientation) const;
+
+    /**
+     * @brief Set the density dpi of the screen.
+     *
+     * @param dpi Density dpi of the screen.
+     * @return DM_OK means set success, others means set failed.
+     */
     DMError SetDensityDpi(uint32_t dpi) const;
+
+    /**
+     * @brief Get the screen info.
+     *
+     * @return Screen info.
+     */
     sptr<ScreenInfo> GetScreenInfo() const;
 
     // colorspace, gamut
+    /**
+     * @brief Get the supported color gamuts of the screen.
+     *
+     * @param colorGamuts Supported color gamuts of the screen.
+     * @return DM_OK means get success, others means get failed.
+     */
     DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts) const;
+
+    /**
+     * @brief Get the color gamut of the screen.
+     *
+     * @param colorGamut Color gamut of the screen.
+     * @return DM_OK means get success, others means get failed.
+     */
     DMError GetScreenColorGamut(ScreenColorGamut& colorGamut) const;
+
+    /**
+     * @brief Set the color gamut of the screen.
+     *
+     * @param colorGamutIdx Color gamut of the screen.
+     * @return DM_OK means set success, others means set failed.
+     */
     DMError SetScreenColorGamut(int32_t colorGamutIdx);
+
+    /**
+     * @brief Get the gamut map of the screen.
+     *
+     * @param gamutMap Gamut map of the screen.
+     * @return DM_OK means get success, others means get failed.
+     */
     DMError GetScreenGamutMap(ScreenGamutMap& gamutMap) const;
+
+    /**
+     * @brief Set the gamut map of the screen.
+     *
+     * @param gamutMap Gamut map of the screen.
+     * @return DM_OK means set success, others means set failed.
+     */
     DMError SetScreenGamutMap(ScreenGamutMap gamutMap);
+
+    /**
+     * @brief Set color transform for the screen.
+     *
+     * @return DM_OK means set success, others means set failed.
+     */
     DMError SetScreenColorTransform();
 protected:
     // No more methods or variables can be defined here.

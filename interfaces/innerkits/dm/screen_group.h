@@ -36,8 +36,26 @@ public:
     ScreenGroup(ScreenGroup&&) = delete;
     ScreenGroup& operator=(const ScreenGroup&) = delete;
     ScreenGroup& operator=(ScreenGroup&&) = delete;
+
+    /**
+     * @brief Get the screenCombination type of the screen group.
+     *
+     * @return ScreenCombination type of the screen group.
+     */
     ScreenCombination GetCombination() const;
+
+    /**
+     * @brief Get the child screen ids.
+     *
+     * @return Child screen ids.
+     */
     std::vector<ScreenId> GetChildIds() const;
+
+    /**
+     * @brief Get the child screen positions.
+     *
+     * @return Child screen positions.
+     */
     std::vector<Point> GetChildPositions() const;
 
 private:
