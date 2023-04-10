@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WINDOW_DUMPER_H
 
 #include "dm_common.h"
+#include "future.h"
 #include "window_root.h"
 
 namespace OHOS {
@@ -29,19 +30,21 @@ enum DumpType : uint32_t {
 class WindowDumper : public RefBase {
 public:
     explicit WindowDumper(const sptr<WindowRoot>& root) : windowRoot_(root) {}
-    WMError Dump(int fd, const std::vector<std::u16string>& args) const;
+    WMError Dump(int fd, const std::vector<std::u16string>& args);
+
+    RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
 
 private:
-    WMError DumpWindowInfo(const std::vector<std::string>& args, std::string& dumpInfo) const;
-    WMError DumpAllWindowInfo(std::string& dumpInfo) const;
+    WMError DumpWindowInfo(const std::vector<std::string>& args, std::string& dumpInfo);
+    WMError DumpAllWindowInfo(std::string& dumpInfo);
     WMError DumpScreenGroupWindowInfo(ScreenId screenGroupId, const sptr<WindowNodeContainer>& windowNodeContainer,
-        std::string& dumpInfo) const;
-    bool IsValidDigitString(const std::string& windowIdStr) const;
+        std::string& dumpInfo);
+    bool IsValidDigitString(const std::string& windowIdStr);
     WMError DumpSpecifiedWindowInfo(uint32_t windowId, const std::vector<std::string>& params,
-        std::string& dumpInfo) const;
-    void ShowHelpInfo(std::string& dumpInfo) const;
-    void ShowAceDumpHelp(std::string& dumpInfo) const;
-    void ShowIllegalArgsInfo(std::string& dumpInfo, WMError errCode) const;
+        std::string& dumpInfo);
+    void ShowHelpInfo(std::string& dumpInfo);
+    void ShowAceDumpHelp(std::string& dumpInfo);
+    void ShowIllegalArgsInfo(std::string& dumpInfo, WMError errCode);
     const sptr<WindowRoot> windowRoot_;
 };
 }
