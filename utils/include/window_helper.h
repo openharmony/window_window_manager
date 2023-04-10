@@ -211,32 +211,6 @@ public:
         return modeSupportInfo;
     }
 
-    static Rect GetFixedWindowRectByLimitSize(const Rect& oriDstRect, const Rect& lastRect, bool isVertical,
-        float virtualPixelRatio)
-    {
-        uint32_t minFloatingW = static_cast<uint32_t>(MIN_FLOATING_WIDTH * virtualPixelRatio);
-        uint32_t minFloatingH = static_cast<uint32_t>(MIN_FLOATING_HEIGHT * virtualPixelRatio);
-        Rect dstRect = oriDstRect;
-        // fix minimum size
-        dstRect.width_ = std::max(minFloatingW, oriDstRect.width_);
-        dstRect.height_ = std::max(minFloatingH, oriDstRect.height_);
-
-        // fix maximum size
-        dstRect.width_ = std::min(static_cast<uint32_t>(MAX_FLOATING_SIZE * virtualPixelRatio), dstRect.width_);
-        dstRect.height_ = std::min(static_cast<uint32_t>(MAX_FLOATING_SIZE * virtualPixelRatio), dstRect.height_);
-
-        // limit position by fixed width or height
-        if (oriDstRect.posX_ != lastRect.posX_) {
-            dstRect.posX_ = oriDstRect.posX_ + static_cast<int32_t>(oriDstRect.width_) -
-                static_cast<int32_t>(dstRect.width_);
-        }
-        if (oriDstRect.posY_ != lastRect.posY_) {
-            dstRect.posY_ = oriDstRect.posY_ + static_cast<int32_t>(oriDstRect.height_) -
-                static_cast<int32_t>(dstRect.height_);
-        }
-        return dstRect;
-    }
-
     static bool IsPointInTargetRect(int32_t pointPosX, int32_t pointPosY, const Rect& targetRect)
     {
         if ((pointPosX > targetRect.posX_) &&
