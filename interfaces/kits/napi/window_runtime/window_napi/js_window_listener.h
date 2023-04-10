@@ -60,14 +60,15 @@ public:
     ~JsWindowListener();
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
-        const std::shared_ptr<RSTransaction> rsTransaction = nullptr) override;
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void OnModeChange(WindowMode mode, bool hasDeco) override;
     void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type) override;
     void AfterForeground() override;
     void AfterBackground() override;
     void AfterFocused() override;
     void AfterUnfocused() override;
-    void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info) override;
+    void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void OnTouchOutside() const override;
     void OnScreenshot() override;
     void OnDialogTargetTouch() const override;

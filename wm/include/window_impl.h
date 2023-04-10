@@ -227,7 +227,7 @@ public:
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
     virtual void SetRequestModeSupportInfo(uint32_t modeSupportInfo) override;
     void UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,
-        const std::shared_ptr<RSTransaction> rsTransaction = nullptr);
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateMode(WindowMode mode);
     void UpdateModeSupportInfo(uint32_t modeSupportInfo);
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
@@ -244,7 +244,8 @@ public:
     sptr<WindowProperty> GetWindowProperty();
     void UpdateDragEvent(const PointInfo& point, DragEvent event);
     void UpdateDisplayId(DisplayId from, DisplayId to);
-    void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info);
+    void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info,
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateActiveStatus(bool isActive);
     void NotifyTouchOutside();
     void NotifyScreenshot();
@@ -277,6 +278,7 @@ public:
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
     virtual WMError NotifyMemoryLevel(int32_t level) const override;
     virtual bool IsAllowHaveSystemSubWindow() override;
+    virtual KeyboardAnimationConfig GetKeyboardAnimationConfig() override;
     void RestoreSplitWindowMode(uint32_t mode);
 private:
     template<typename T1, typename T2, typename Ret>
@@ -481,10 +483,11 @@ private:
     }
     void ClearListenersById(uint32_t winId);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason,
-        const std::shared_ptr<RSTransaction> rsTransaction = nullptr);
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void NotifyDisplayMoveChange(DisplayId from, DisplayId to);
-    void NotifyOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info);
+    void NotifyOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info,
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifyModeChange(WindowMode mode, bool hasDeco = true);
     void NotifyDragEvent(const PointInfo& point, DragEvent event);
     void DestroyDialogWindow();
@@ -536,7 +539,7 @@ private:
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
     void UpdateWindowStateUnfrozen();
     void UpdateViewportConfig(const Rect& rect, const sptr<class Display>& display, WindowSizeChangeReason reason,
-        const std::shared_ptr<RSTransaction> rsTransaction = nullptr);
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateDecorEnable(bool needNotify = false);
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {

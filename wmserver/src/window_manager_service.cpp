@@ -462,22 +462,22 @@ void WindowManagerService::ConfigKeyboardAnimation(const WindowManagerConfig::Co
     auto& animationConfig = WindowNodeContainer::GetAnimationConfigRef();
     WindowManagerConfig::ConfigItem item = animeConfig["timing"];
     if (item.IsMap() && item.mapValue_->count("curve")) {
-        animationConfig.keyboardAnimationConfig_.curve_ = CreateCurve(item["curve"]);
+        animationConfig.keyboardAnimationConfig_.curve_ = CreateCurve(item["curve"], true);
     }
     item = animeConfig["timing"]["durationIn"];
     if (item.IsInts()) {
         auto numbers = *item.intsValue_;
         if (numbers.size() == 1) { // duration
-            animationConfig.keyboardAnimationConfig_.durationIn_ =
-                RSAnimationTimingProtocol(numbers[0]);
+            animationConfig.keyboardAnimationConfig_.durationIn_ = RSAnimationTimingProtocol(numbers[0]);
+            systemConfig_.keyboardAnimationConfig_.durationIn_ = numbers[0];
         }
     }
     item = animeConfig["timing"]["durationOut"];
     if (item.IsInts()) {
         auto numbers = *item.intsValue_;
         if (numbers.size() == 1) { // duration
-            animationConfig.keyboardAnimationConfig_.durationOut_ =
-                RSAnimationTimingProtocol(numbers[0]);
+            animationConfig.keyboardAnimationConfig_.durationOut_ = RSAnimationTimingProtocol(numbers[0]);
+            systemConfig_.keyboardAnimationConfig_.durationOut_ = numbers[0];
         }
     }
 }
@@ -622,37 +622,50 @@ void WindowManagerService::ConfigWindowEffect(const WindowManagerConfig::ConfigI
     WindowSystemEffect::SetWindowSystemEffectConfig(systemEffectConfig);
 }
 
-RSAnimationTimingCurve WindowManagerService::CreateCurve(const WindowManagerConfig::ConfigItem& curveConfig)
+RSAnimationTimingCurve WindowManagerService::CreateCurve(const WindowManagerConfig::ConfigItem& curveConfig,
+    bool isForKeyboard)
 {
+    static std::map<std::string, RSAnimationTimingCurve> curveMap = {
+        { "easeOut",           RSAnimationTimingCurve::EASE_OUT },
+        { "ease",              RSAnimationTimingCurve::EASE },
+        { "easeIn",            RSAnimationTimingCurve::EASE_IN },
+        { "easeOut",           RSAnimationTimingCurve::EASE_IN_OUT },
+        { "default",           RSAnimationTimingCurve::DEFAULT },
+        { "linear",            RSAnimationTimingCurve::LINEAR },
+        { "spring",            RSAnimationTimingCurve::SPRING },
+        { "interactiveSpring", RSAnimationTimingCurve::INTERACTIVE_SPRING }
+    };
+
+    RSAnimationTimingCurve curve = RSAnimationTimingCurve::EASE_OUT;
+    std::string keyboardCurveName = "easeOut";
+    std::vector<float> keyboardCurveParams = {};
+
     const auto& nameItem = curveConfig.GetProp("name");
     if (nameItem.IsString()) {
         std::string name = nameItem.stringValue_;
-        if (name == "easeOut") {
-            return RSAnimationTimingCurve::EASE_OUT;
-        } else if (name == "ease") {
-            return RSAnimationTimingCurve::EASE;
-        } else if (name == "easeIn") {
-            return RSAnimationTimingCurve::EASE_IN;
-        } else if (name == "easeInOut") {
-            return RSAnimationTimingCurve::EASE_IN_OUT;
-        } else if (name == "default") {
-            return RSAnimationTimingCurve::DEFAULT;
-        } else if (name == "linear") {
-            return RSAnimationTimingCurve::LINEAR;
-        } else if (name == "spring") {
-            return RSAnimationTimingCurve::SPRING;
-        } else if (name == "interactiveSpring") {
-            return RSAnimationTimingCurve::INTERACTIVE_SPRING;
-        } else if (name == "cubic" && curveConfig.IsFloats() &&
+        if (name == "cubic" && curveConfig.IsFloats() &&
             curveConfig.floatsValue_->size() == 4) { // 4 curve parameter
             const auto& numbers = *curveConfig.floatsValue_;
-            return RSAnimationTimingCurve::CreateCubicCurve(numbers[0], // 0 ctrlX1
-                numbers[1], // 1 ctrlY1
-                numbers[2], // 2 ctrlX2
+            keyboardCurveName = name;
+            keyboardCurveParams.assign(numbers.begin(), numbers.end());
+            curve = RSAnimationTimingCurve::CreateCubicCurve(numbers[0], // 0 ctrlX1
+                numbers[1],  // 1 ctrlY1
+                numbers[2],  // 2 ctrlX2
                 numbers[3]); // 3 ctrlY2
+        } else {
+            auto iter = curveMap.find(name);
+            if (iter != curveMap.end()) {
+                keyboardCurveName = name;
+                curve = iter->second;
+            }
         }
     }
-    return RSAnimationTimingCurve::EASE_OUT;
+    if (isForKeyboard) {
+        systemConfig_.keyboardAnimationConfig_.curveType_ = keyboardCurveName;
+        systemConfig_.keyboardAnimationConfig_.curveParams_.assign(
+            keyboardCurveParams.begin(), keyboardCurveParams.end());
+    }
+    return curve;
 }
 
 void WindowManagerService::OnStop()

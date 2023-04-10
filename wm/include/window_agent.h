@@ -28,7 +28,7 @@ public:
     explicit WindowAgent(sptr<WindowImpl>& window);
     ~WindowAgent() = default;
     WMError UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,
-        const std::shared_ptr<RSTransaction> rsTransaction = nullptr) override;
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     WMError UpdateWindowMode(WindowMode mode) override;
     WMError UpdateWindowModeSupportInfo(uint32_t modeSupportInfo) override;
     WMError UpdateFocusStatus(bool focused) override;
@@ -36,7 +36,10 @@ public:
     WMError UpdateWindowState(WindowState state) override;
     WMError UpdateWindowDragInfo(const PointInfo& point, DragEvent event) override;
     WMError UpdateDisplayId(DisplayId from, DisplayId to) override;
-    WMError UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info) override;
+    WMError UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info,
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+    WMError UpdateOccupiedAreaAndRect(const sptr<OccupiedAreaChangeInfo>& info, const Rect& rect,
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     WMError UpdateActiveStatus(bool isActive) override;
     sptr<WindowProperty> GetWindowProperty() override;
     WMError NotifyTouchOutside() override;

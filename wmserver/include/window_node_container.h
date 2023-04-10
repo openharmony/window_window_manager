@@ -174,6 +174,7 @@ private:
         const WindowMode& dstMode, const WindowMode& srcMode);
     void ResetAllMainFloatingWindowZOrder(sptr<WindowNode>& rootNode);
     void HandleRemoveWindowDisplayOrientation(sptr<WindowNode>& node, bool fromAnimation);
+    void OpenInputMethodSyncTransaction();
 
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     uint32_t brightnessWindow_ = INVALID_WINDOW_ID;
