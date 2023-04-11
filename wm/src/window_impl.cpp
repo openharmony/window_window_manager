@@ -77,7 +77,11 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     property_->SetWindowName(option->GetWindowName());
     property_->SetRequestRect(option->GetWindowRect());
     property_->SetWindowType(option->GetWindowType());
-    property_->SetWindowMode(option->GetWindowMode());
+    if (WindowHelper::IsAppFloatingWindow(option->GetWindowType())) {
+        property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    } else {
+        property_->SetWindowMode(option->GetWindowMode());
+    }
     property_->SetFullScreen(option->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     property_->SetFocusable(option->GetFocusable());
     property_->SetTouchable(option->GetTouchable());
