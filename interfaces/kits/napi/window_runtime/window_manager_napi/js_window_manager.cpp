@@ -707,16 +707,18 @@ NativeValue* JsWindowManager::OnUnregisterWindowManagerCallback(NativeEngine& en
     return engine.CreateUndefined();
 }
 
-static void GetTopWindowTask(void* contextPtr, NativeEngine& engine, AsyncTask& task)
+static void GetTopWindowTask(void* contextPtr, NativeEngine& engine, AsyncTask& task, bool newApi)
 {
     std::string windowName;
     sptr<Window> window = nullptr;
     AppExecFwk::Ability* ability = nullptr;
     bool isOldApi = GetAPI7Ability(engine, ability);
+    int32_t error = static_cast<int32_t>(WMError::WM_OK);
     if (isOldApi) {
         if (ability->GetWindow() == nullptr) {
-            task.Reject(engine, CreateJsError(engine,
-                static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "FA mode can not get ability window"));
+            error = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
+                static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
+            task.Reject(engine, CreateJsError(engine, error, "FA mode can not get ability window"));
             WLOGE("FA mode can not get ability window");
             return;
         }
@@ -724,16 +726,18 @@ static void GetTopWindowTask(void* contextPtr, NativeEngine& engine, AsyncTask& 
     } else {
         auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
         if (contextPtr == nullptr || context == nullptr) {
-            task.Reject(engine, CreateJsError(engine,
-                static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "Stage mode without context"));
+            error = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
+                static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
+            task.Reject(engine, CreateJsError(engine, error, "Stage mode without context"));
             WLOGFE("Stage mode without context");
             return;
         }
         window = Window::GetTopWindowWithContext(context->lock());
     }
     if (window == nullptr) {
-        task.Reject(engine, CreateJsError(engine,
-            static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "Get top window failed"));
+            error = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
+                static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
+        task.Reject(engine, CreateJsError(engine, error, "Get top window failed"));
         WLOGFE("Get top window failed");
         return;
     }
@@ -777,7 +781,7 @@ NativeValue* JsWindowManager::OnGetTopWindow(NativeEngine& engine, NativeCallbac
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params"));
                 return;
             }
-            return GetTopWindowTask(contextPtr, engine, task);
+            return GetTopWindowTask(contextPtr, engine, task, false);
         };
     NativeValue* result = nullptr;
     AsyncTask::Schedule("JsWindowManager::OnGetTopWindow",
@@ -808,30 +812,7 @@ NativeValue* JsWindowManager::OnGetLastWindow(NativeEngine& engine, NativeCallba
 
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            std::string windowName;
-            sptr<Window> window = nullptr;
-            auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
-            if (contextPtr == nullptr || context == nullptr) {
-                task.Reject(engine, CreateJsError(engine,
-                    static_cast<int32_t>(WmErrorCode::WM_ERROR_CONTEXT_ABNORMALLY),
-                    "Stage mode without context"));
-                return;
-            }
-            window = Window::GetTopWindowWithContext(context->lock());
-            if (window == nullptr) {
-                task.Reject(engine, CreateJsError(engine,
-                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-                    "Get top window failed"));
-                return;
-            }
-            windowName = window->GetWindowName();
-            std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(windowName);
-            if (jsWindowObj != nullptr && jsWindowObj->Get() != nullptr) {
-                task.Resolve(engine, jsWindowObj->Get());
-            } else {
-                task.Resolve(engine, CreateJsWindowObject(engine, window));
-            }
-            WLOGI("Get top window %{public}s success", windowName.c_str());
+            return GetTopWindowTask(contextPtr, engine, task, true);
         };
     NativeValue* result = nullptr;
     AsyncTask::Schedule("JsWindowManager::OnGetTopWindow",
