@@ -531,7 +531,7 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     // make uiContent available after Initialize/Restore
     uiContent_ = std::move(uiContent);
     if (isIgnoreSafeAreaNeedNotify_) {
-        uiContent->SetIgnoreViewSafeArea(isIgnoreSafeArea_);
+        uiContent_->SetIgnoreViewSafeArea(isIgnoreSafeArea_);
     }
     UpdateDecorEnable(true);
 
@@ -1761,8 +1761,8 @@ WMError WindowImpl::Maximize()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
-        SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-        return SetFullScreen(true);
+        SetFullScreen(true);
+        return SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     } else {
         WLOGI("Maximize fail, not main window");
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -2257,8 +2257,8 @@ void WindowImpl::HandleModeChangeHotZones(int32_t posX, int32_t posY)
             hotZones.secondary_.posY_, hotZones.secondary_.width_, hotZones.secondary_.height_);
 
         if (WindowHelper::IsPointInTargetRectWithBound(posX, posY, hotZones.fullscreen_)) {
-            SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
             SetFullScreen(true);
+            SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
         } else if (WindowHelper::IsPointInTargetRectWithBound(posX, posY, hotZones.primary_)) {
             SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
         } else if (WindowHelper::IsPointInTargetRectWithBound(posX, posY, hotZones.secondary_)) {
