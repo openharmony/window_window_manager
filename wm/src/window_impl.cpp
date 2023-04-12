@@ -530,9 +530,6 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     }
     // make uiContent available after Initialize/Restore
     uiContent_ = std::move(uiContent);
-    if (isIgnoreSafeAreaNeedNotify_) {
-        uiContent->SetIgnoreViewSafeArea(isIgnoreSafeArea_);
-    }
     UpdateDecorEnable(true);
 
     if (state_ == WindowState::STATE_SHOWN) {
@@ -713,40 +710,25 @@ WMError WindowImpl::SetLayoutFullScreen(bool status)
         WLOGFE("invalid window or fullscreen mode is not be supported, winId:%{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    WMError ret = WMError::WM_OK;
-    uint32_t version = 0;
-    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
-        version = context_->GetApplicationInfo()->apiCompatibleVersion;
+    WMError ret = SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetWindowMode errCode:%{public}d winId:%{public}u",
+            static_cast<int32_t>(ret), property_->GetWindowId());
+        return ret;
     }
-    // 10 ArkUI新框架适用版本API10
-    if (version >= 10) {
-        if (uiContent_ != nullptr) {
-            uiContent_->SetIgnoreViewSafeArea(status);
-        } else {
-            isIgnoreSafeAreaNeedNotify_ = true;
-            isIgnoreSafeArea_ = status;
-        }
-    } else {
-        ret = SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    if (status) {
+        ret = RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
         if (ret != WMError::WM_OK) {
-            WLOGFE("SetWindowMode errCode:%{public}d winId:%{public}u",
+            WLOGFE("RemoveWindowFlag errCode:%{public}d winId:%{public}u",
                 static_cast<int32_t>(ret), property_->GetWindowId());
             return ret;
         }
-        if (status) {
-            ret = RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
-            if (ret != WMError::WM_OK) {
-                WLOGFE("RemoveWindowFlag errCode:%{public}d winId:%{public}u",
-                    static_cast<int32_t>(ret), property_->GetWindowId());
-                return ret;
-            }
-        } else {
-            ret = AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
-            if (ret != WMError::WM_OK) {
-                WLOGFE("AddWindowFlag errCode:%{public}d winId:%{public}u",
-                    static_cast<int32_t>(ret), property_->GetWindowId());
-                return ret;
-            }
+    } else {
+        ret = AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+        if (ret != WMError::WM_OK) {
+            WLOGFE("AddWindowFlag errCode:%{public}d winId:%{public}u",
+                static_cast<int32_t>(ret), property_->GetWindowId());
+            return ret;
         }
     }
     return ret;
