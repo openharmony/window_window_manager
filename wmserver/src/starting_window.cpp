@@ -82,18 +82,15 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInf
         WLOGFE("Set orientation from ability failed");
         return nullptr;
     }
+    WLOGFD("orientation:%{public}u", orientation);
     property->SetRequestedOrientation(orientation);
 
     property->SetDisplayId(info->GetDisplayId());
     property->SetWindowType(info->GetWindowType());
-
-    // 10 ArkUI新框架适用版本API10
-    if (info->GetApiCompatibleVersion() < 10) {
-        auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(info->GetDisplayId());
-        if (!(displayInfo && WmsUtils::IsExpectedRotatableWindow(orientation,
-            displayInfo->GetDisplayOrientation(), property->GetWindowMode(), property->GetWindowFlags(), false))) {
-            property->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
-        }
+    auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(info->GetDisplayId());
+    if (!(displayInfo && WmsUtils::IsExpectedRotatableWindow(orientation,
+        displayInfo->GetDisplayOrientation(), property->GetWindowMode(), property->GetWindowFlags(), false))) {
+        property->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
     }
     if (info->GetShowFlagWhenLocked()) {
         property->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
