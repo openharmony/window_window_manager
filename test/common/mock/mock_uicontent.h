@@ -79,7 +79,6 @@ public:
     MOCK_METHOD1(SetActionEventHandler, void(std::function<void(const std::string& action)>&& actionCallback));
     MOCK_METHOD1(SetErrorEventHandler,
         void(std::function<void(const std::string& code, const std::string& msg)>&& actionCallback));
-    MOCK_METHOD1(SetIgnoreViewSafeArea, void(bool ignoreViewSafeArea));
 };
 } // namespace Ace
 } // namespace OHOS
