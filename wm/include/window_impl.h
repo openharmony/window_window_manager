@@ -591,8 +591,6 @@ private:
     bool isAppFloatingWindow_ = false;
     bool isFocused_ = false;
     uint32_t mouseStyleID_ = 0;
-    bool isIgnoreSafeAreaNeedNotify_ = false;
-    bool isIgnoreSafeArea_ = false;
     const std::map<DragType, uint32_t> STYLEID_MAP = {
         {DragType::DRAG_UNDEFINED, MMI::MOUSE_ICON::DEFAULT},
         {DragType::DRAG_BOTTOM_OR_TOP, MMI::MOUSE_ICON::NORTH_SOUTH},

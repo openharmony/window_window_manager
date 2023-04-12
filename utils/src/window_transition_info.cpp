@@ -45,7 +45,6 @@ WindowTransitionInfo::WindowTransitionInfo(sptr<AAFwk::AbilityTransitionInfo> in
     sizeLimits_.minHeight_ = info->minWindowHeight_;
     reason_ = static_cast<TransitionReason>(info->reason_);
     orientation_ = info->orientation_;
-    apiCompatibleVersion_ = info->apiCompatibleVersion_;
 }
 
 void WindowTransitionInfo::SetBundleName(std::string name)
@@ -181,16 +180,6 @@ void WindowTransitionInfo::SetOrientation(AppExecFwk::DisplayOrientation orienta
 AppExecFwk::DisplayOrientation WindowTransitionInfo::GetOrientation() const
 {
     return orientation_;
-}
-
-void WindowTransitionInfo::SetApiCompatibleVersion(uint32_t apiCompatibleVersion)
-{
-    apiCompatibleVersion_ = apiCompatibleVersion;
-}
-
-uint32_t WindowTransitionInfo::GetApiCompatibleVersion() const
-{
-    return apiCompatibleVersion_;
 }
 
 bool WindowTransitionInfo::Marshalling(Parcel& parcel) const

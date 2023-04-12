@@ -44,7 +44,6 @@ struct AbilityTransitionInfo : public Parcelable {
     TransitionReason reason_ = TransitionReason::ABILITY_TRANSITION;
     int32_t missionId_ = -1;
     AppExecFwk::DisplayOrientation orientation_ = AppExecFwk::DisplayOrientation::UNSPECIFIED;
-    uint32_t apiCompatibleVersion_ = 0;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {

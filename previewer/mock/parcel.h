@@ -19,7 +19,6 @@
 #include <string>
 #include <vector>
 #include "refbase.h"
-#include "context.h"
 
 namespace OHOS {
 class Parcel;
