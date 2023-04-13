@@ -34,6 +34,7 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JSWindowExtension"};
 }
+int JsWindowExtension::extensionCnt_ = 0;
 
 class DispatchInputEventListener : public IDispatchInputEventListener {
 public:
@@ -260,7 +261,9 @@ void JsWindowExtension::OnStart(const AAFwk::Want& want)
     Extension::OnStart(want);
 
     AbilityRuntime::ElementName elementName = want.GetElement();
-    std::string windowName = elementName.GetBundleName();
+    std::string windowName = elementName.GetBundleName() + elementName.GetModuleName() +
+        elementName.GetAbilityName() + std::to_string(extensionCnt_);
+    extensionCnt_++;
 
     stub_ = new(std::nothrow) WindowExtensionStubImpl(windowName);
     WLOGFI("JsWindowExtension OnStart begin..");
