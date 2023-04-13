@@ -1100,16 +1100,16 @@ DMError DisplayManagerProxy::SetVirtualPixelRatio(ScreenId screenId, float virtu
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("SetVirtualPixelRatio: WriteInterfaceToken failed");
+        WLOGFE("WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(screenId) || !data.WriteFloat(virtualPixelRatio)) {
-        WLOGFE("SetVirtualPixelRatio: write screenId/modeId failed");
+        WLOGFE("write screenId/modeId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_PIXEL_RATIO),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SetVirtualPixelRatio: SendRequest failed");
+        WLOGFE("SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -1119,19 +1119,19 @@ DMError DisplayManagerProxy::IsScreenRotationLocked(bool& isLocked)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("IsScreenRotationLocked: remote is nullptr");
+        WLOGFW("remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("IsScreenRotationLocked: WriteInterfaceToken failed");
+        WLOGFE("WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_IS_SCREEN_ROTATION_LOCKED),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("IsScreenRotationLocked: SendRequest failed");
+        WLOGFW("SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -1143,7 +1143,7 @@ DMError DisplayManagerProxy::SetScreenRotationLocked(bool isLocked)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SetScreenRotationLocked: remote is null");
+        WLOGFW("remote is null");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -1151,16 +1151,16 @@ DMError DisplayManagerProxy::SetScreenRotationLocked(bool isLocked)
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("SetScreenRotationLocked: WriteInterfaceToken failed");
+        WLOGFE("WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteBool(isLocked)) {
-        WLOGFE("SetScreenRotationLocked: write isLocked failed");
+        WLOGFE("write isLocked failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_ROTATION_LOCKED),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SetScreenRotationLocked: SendRequest failed");
+        WLOGFE("SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());

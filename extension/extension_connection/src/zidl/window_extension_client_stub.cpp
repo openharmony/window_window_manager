@@ -61,7 +61,8 @@ int WindowExtensionClientStub::OnRemoteRequest(uint32_t code, MessageParcel& dat
             break;
         }
         default: {
-            break;
+            WLOGFW("unknown transaction code %{public}d", code);
+            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
         }
     }
     return 0;
