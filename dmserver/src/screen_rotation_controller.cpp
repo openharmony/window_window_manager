@@ -82,16 +82,19 @@ void ScreenRotationController::SetDefaultDeviceRotationOffset(uint32_t defaultDe
 void ScreenRotationController::HandleSensorEventInput(DeviceRotation deviceRotation)
 {
     if (deviceRotation == DeviceRotation::INVALID) {
+        WLOGFW("deviceRotation is invalid, return.");
         return;
     }
     Orientation orientation = GetPreferredOrientation();
     currentDisplayRotation_ = GetCurrentDisplayRotation();
     lastSensorRotationConverted_ = deviceRotation;
     if (!IsSensorRelatedOrientation(orientation)) {
+        WLOGFD("If the current preferred orientation is locked or sensor-independent, return.");
         return;
     }
 
     if (currentDisplayRotation_ == ConvertDeviceToDisplayRotation(deviceRotation)) {
+        WLOGFD("If the current display rotation is same to sensor rotation, return.");
         return;
     }
     Rotation targetDisplayRotation = CalcTargetDisplayRotation(orientation, deviceRotation);
@@ -125,7 +128,7 @@ Rotation ScreenRotationController::CalcTargetDisplayRotation(
     switch (requestedOrientation) {
         case Orientation::SENSOR: {
             lastSensorDecidedRotation_ = ConvertDeviceToDisplayRotation(sensorRotationConverted);
-            return ConvertDeviceToDisplayRotation(sensorRotationConverted);
+            return lastSensorDecidedRotation_;
         }
         case Orientation::SENSOR_VERTICAL: {
             return ProcessAutoRotationPortraitOrientation(sensorRotationConverted);
@@ -133,13 +136,12 @@ Rotation ScreenRotationController::CalcTargetDisplayRotation(
         case Orientation::SENSOR_HORIZONTAL: {
             return ProcessAutoRotationLandscapeOrientation(sensorRotationConverted);
         }
-        case Orientation::UNSPECIFIED:
         case Orientation::AUTO_ROTATION_RESTRICTED: {
             if (isScreenRotationLocked_) {
                 return currentDisplayRotation_;
             }
             lastSensorDecidedRotation_ = ConvertDeviceToDisplayRotation(sensorRotationConverted);
-            return ConvertDeviceToDisplayRotation(sensorRotationConverted);
+            return lastSensorDecidedRotation_;
         }
         case Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED: {
             if (isScreenRotationLocked_) {
@@ -165,7 +167,7 @@ Rotation ScreenRotationController::ProcessAutoRotationPortraitOrientation(Device
         return currentDisplayRotation_;
     }
     lastSensorDecidedRotation_ = ConvertDeviceToDisplayRotation(sensorRotationConverted);
-    return ConvertDeviceToDisplayRotation(sensorRotationConverted);
+    return lastSensorDecidedRotation_;
 }
 
 Rotation ScreenRotationController::ProcessAutoRotationLandscapeOrientation(DeviceRotation sensorRotationConverted)
@@ -174,7 +176,7 @@ Rotation ScreenRotationController::ProcessAutoRotationLandscapeOrientation(Devic
         return currentDisplayRotation_;
     }
     lastSensorDecidedRotation_ = ConvertDeviceToDisplayRotation(sensorRotationConverted);
-    return ConvertDeviceToDisplayRotation(sensorRotationConverted);
+    return lastSensorDecidedRotation_;
 }
 
 void ScreenRotationController::SetScreenRotation(Rotation targetRotation, bool withAnimation)
