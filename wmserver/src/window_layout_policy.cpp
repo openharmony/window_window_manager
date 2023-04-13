@@ -398,7 +398,7 @@ bool WindowLayoutPolicy::IsNeedAnimationSync(WindowType type)
 }
 
 Rect WindowLayoutPolicy::CalcEntireWindowHotZone(const sptr<WindowNode>& node, const Rect& winRect, uint32_t hotZone,
-    float vpr, TransformHelper::Vector2 hotZoneScale) const
+    float vpr, TransformHelper::Vector2 hotZoneScale)
 {
     Rect rect = winRect;
     uint32_t hotZoneX = static_cast<uint32_t>(hotZone * vpr / hotZoneScale.x_);
@@ -423,7 +423,7 @@ Rect WindowLayoutPolicy::CalcEntireWindowHotZone(const sptr<WindowNode>& node, c
     return rect;
 }
 
-void WindowLayoutPolicy::CalcAndSetNodeHotZone(const Rect& winRect, const sptr<WindowNode>& node) const
+void WindowLayoutPolicy::CalcAndSetNodeHotZone(const Rect& winRect, const sptr<WindowNode>& node)
 {
     float virtualPixelRatio = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId());
     TransformHelper::Vector2 hotZoneScale(1, 1);
