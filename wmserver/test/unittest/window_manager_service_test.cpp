@@ -374,6 +374,16 @@ HWTEST_F(WindowManagerServiceTest, DispatchKeyEvent03, Function | SmallTest | Le
     wms->DispatchKeyEvent(compNode2->GetWindowId(), event);
     testing::Mock::AllowLeak(token);
 }
+/**
+ * @tc.name: SetWindowGravity
+ * @tc.desc: SetWindowGravity test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, SetWindowGravity01, Function | SmallTest | Level2)
+{
+    uint32_t id = 0;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->SetWindowGravity(id, WindowGravity::WINDOW_GRAVITY_BOTTOM, 0));
+}
 }
 }
 }

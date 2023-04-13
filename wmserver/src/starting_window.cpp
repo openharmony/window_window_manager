@@ -87,7 +87,7 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInf
     property->SetDisplayId(info->GetDisplayId());
     property->SetWindowType(info->GetWindowType());
 
-    // 10 ArkUI新框架适用版本API10
+    // 10 ArkUI new framework support after API10
     if (info->GetApiCompatibleVersion() < 10) {
         auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(info->GetDisplayId());
         if (!(displayInfo && WmsUtils::IsExpectedRotatableWindow(orientation,
