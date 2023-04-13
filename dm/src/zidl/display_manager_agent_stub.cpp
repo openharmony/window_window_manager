@@ -125,8 +125,10 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
             NotifyPrivateWindowStateChanged(hasPrivate);
             break;
         }
-        default:
-            break;
+        default: {
+            WLOGFW("unknown transaction code %{public}d", code);
+            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+        }
     }
     return 0;
 }

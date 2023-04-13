@@ -42,7 +42,7 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
     const auto func = stubFuncMap_.find(code);
     if (func == stubFuncMap_.end()) {
         WLOGFE("Failed to find function handler!");
-        return ERR_UNKNOWN_TRANSACTION;
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
 
     return (this->*(func->second))(data, reply);
