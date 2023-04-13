@@ -398,7 +398,7 @@ void WindowController::RelayoutKeyboard(const sptr<WindowNode>& node)
     if (gravity == WindowGravity::WINDOW_GRAVITY_BOTTOM) {
         if (percent != 0) {
             requestRect.width_ = defaultDisplayInfo->GetWidth();
-            requestRect.height_ = defaultDisplayInfo->GetHeight() * percent / 100;
+            requestRect.height_ = defaultDisplayInfo->GetHeight() * percent / 100; // 100: for calc percent.
             requestRect.posX_ = 0;
         }
     }
