@@ -412,6 +412,7 @@ void WindowController::NotifyInputCallingWindowRectAndOccupiedAreaChange(const s
 {
     // update calling window rect
     callingWindow->SetWindowRect(rect);
+    WindowLayoutPolicy::CalcAndSetNodeHotZone(rect, callingWindow);
 
     // set bounds and do animation for calling window
     wptr<WindowNode> weakNode = callingWindow;
