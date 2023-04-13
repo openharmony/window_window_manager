@@ -540,7 +540,8 @@ HWTEST_F(WindowManagerTest, UnregisterGestureNavigationEnabledChangedListener, F
 
     sptr<TestGestureNavigationEnabledChangedListener> listener1 = new TestGestureNavigationEnabledChangedListener();
     sptr<TestGestureNavigationEnabledChangedListener> listener2 = new TestGestureNavigationEnabledChangedListener();
-    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterGestureNavigationEnabledChangedListener(listener1));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
+        windowManager.UnregisterGestureNavigationEnabledChangedListener(listener1));
 
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     windowManager.RegisterGestureNavigationEnabledChangedListener(listener1);
