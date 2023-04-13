@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "common_test_utils.h"
 #include "display_manager.h"
+#include "display_manager_proxy.h"
 #include "screen_manager.h"
 #include "window.h"
 #include "window_manager_hilog.h"

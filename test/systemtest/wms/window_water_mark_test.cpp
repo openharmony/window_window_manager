@@ -23,6 +23,7 @@
 
 #include <transaction/rs_transaction.h>
 #include "display_manager.h"
+#include "display_manager_proxy.h"
 #include "surface_draw.h"
 #include "window_test_utils.h"
 #include "window_manager.h"

@@ -19,6 +19,7 @@
 #include "display.h"
 #include "display_info.h"
 #include "display_manager.h"
+#include "display_manager_proxy.h"
 #include "window_impl.h"
 
 using namespace testing;
@@ -91,13 +92,19 @@ void SurfaceDrawTest::TearDown()
 
 sptr<Window> SurfaceDrawTest::CreateTestWindow(const std::string& name)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow)WindowOption();
+    if (option == nullptr) {
+        return nullptr;
+    }
     option->SetDisplayId(displayId_);
     option->SetWindowType(windowInfo_.type);
     option->SetWindowRect(windowInfo_.rect);
     option->SetWindowMode(windowInfo_.mode);
     option->SetWindowName(name);
     sptr<Window> window = Window::Create(option->GetWindowName(), option);
+    if (window == nullptr) {
+        return nullptr;
+    }
     window->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     return window;
 }
@@ -112,6 +119,7 @@ HWTEST_F(SurfaceDrawTest, DrawImage01, Function | SmallTest | Level1)
 {
     ASSERT_FALSE(SurfaceDraw::DrawImage(nullptr, 0, 0, ""));
     sptr<Window> window = CreateTestWindow("testDrawImage");
+    ASSERT_NE(nullptr, window);
     window->Show();
     usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
 
@@ -146,6 +154,7 @@ HWTEST_F(SurfaceDrawTest, DrawMasking01, Function | SmallTest | Level1)
     ASSERT_FALSE(SurfaceDraw::DrawMasking(nullptr, screenRect, transRect));
 
     sptr<Window> window = CreateTestWindow("testDrawMasking");
+    ASSERT_NE(nullptr, window);
     window->Show();
     usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
 

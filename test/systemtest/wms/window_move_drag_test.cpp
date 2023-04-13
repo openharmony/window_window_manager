@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include "display_manager_proxy.h"
 #include "pointer_event.h"
 #include "window_helper.h"
 #include "window_impl.h"
