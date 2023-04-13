@@ -781,7 +781,6 @@ bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId disp
     } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         windowGravity != WindowGravity::WINDOW_GRAVITY_FLOAT &&
         !animationPlayed) { // add keyboard with animation
-        OpenInputMethodSyncTransaction();
         auto timingProtocol = animationConfig_.keyboardAnimationConfig_.durationIn_;
         RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationConfig_.curve_, updateRSTreeFunc);
     } else {
@@ -841,7 +840,6 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
     } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         windowGravity != WindowGravity::WINDOW_GRAVITY_FLOAT && !animationPlayed) {
         // remove keyboard with animation
-        OpenInputMethodSyncTransaction();
         auto timingProtocol = animationConfig_.keyboardAnimationConfig_.durationOut_;
         RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationConfig_.curve_, updateRSTreeFunc);
     } else {
@@ -1315,13 +1313,7 @@ void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& 
         }
 
         sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, overlapRect);
-        auto syncTransactionController = RSSyncTransactionController::GetInstance();
-        if (syncTransactionController) {
-            callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info,
-                syncTransactionController->GetRSTransaction());
-        } else {
-            callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info);
-        }
+        callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info);
 
         WLOGD("keyboard size change callingWindow: [%{public}s, %{public}u], "
             "overlap rect: [%{public}d, %{public}d, %{public}u, %{public}u]",

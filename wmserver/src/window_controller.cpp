@@ -444,13 +444,7 @@ void WindowController::NotifyInputCallingWindowRectAndOccupiedAreaChange(const s
     const Rect& safeRect = WindowHelper::GetOverlap(occupiedArea, rect, 0, 0);
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
         occupiedArea, safeRect.height_);
-    auto syncTransactionController = RSSyncTransactionController::GetInstance();
-    if (syncTransactionController) {
-        callingWindow->GetWindowToken()->UpdateOccupiedAreaAndRect(info, rect,
-            syncTransactionController->GetRSTransaction());
-    } else {
-        callingWindow->GetWindowToken()->UpdateOccupiedAreaAndRect(info, rect);
-    }
+    callingWindow->GetWindowToken()->UpdateOccupiedAreaAndRect(info, rect);
 
     FlushWindowInfo(callingWindow->GetWindowId());
     WLOGFD("Calling windowId: %{public}u, calling winRect: [%{public}d, %{public}d, %{public}u, %{public}u], "
