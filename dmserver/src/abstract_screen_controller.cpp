@@ -907,6 +907,11 @@ void AbstractScreenController::ProcessScreenModeChanged(ScreenId dmsScreenId)
             return;
         }
         activeScreenMode = absScreen->GetActiveScreenMode();
+        if (activeScreenMode == nullptr) {
+            WLOGFE("active screen mode is nullptr. dmsScreenId=%{public}" PRIu64"",
+                dmsScreenId);
+            return;
+        }
         absScreenCallback = abstractScreenCallback_;
     }
     uint32_t width = activeScreenMode->width_;

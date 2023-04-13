@@ -14,8 +14,8 @@
  */
 
 #include <gtest/gtest.h>
-
 #include "display_manager.h"
+#include "display_manager_proxy.h"
 #include "screen_manager.h"
 #include "screen_manager_utils.h"
 #include "mock_display_manager_adapter.h"
