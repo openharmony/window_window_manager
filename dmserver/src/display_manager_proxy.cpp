@@ -261,7 +261,7 @@ DMError DisplayManagerProxy::SetOrientation(ScreenId screenId, Orientation orien
     return static_cast<DMError>(reply.ReadInt32());
 }
 
-std::shared_ptr<Media::PixelMap> DisplayManagerProxy::GetDisplaySnapshot(DisplayId displayId)
+std::shared_ptr<Media::PixelMap> DisplayManagerProxy::GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -289,6 +289,10 @@ std::shared_ptr<Media::PixelMap> DisplayManagerProxy::GetDisplaySnapshot(Display
     }
 
     std::shared_ptr<Media::PixelMap> pixelMap(reply.ReadParcelable<Media::PixelMap>());
+    DmErrorCode replyErreoCode = static_cast<DmErrorCode>(reply.ReadInt32());
+    if (errorCode) {
+        *errorCode = replyErreoCode;
+    }
     if (pixelMap == nullptr) {
         WLOGFW("DisplayManagerProxy::GetDisplaySnapshot SendRequest nullptr.");
         return nullptr;

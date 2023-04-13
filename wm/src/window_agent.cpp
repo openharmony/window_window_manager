@@ -127,7 +127,10 @@ WMError WindowAgent::UpdateOccupiedAreaAndRect(const sptr<OccupiedAreaChangeInfo
         WLOGFE("window is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    window_->UpdateRect(rect, window_->GetWindowProperty()->GetDecoStatus(), WindowSizeChangeReason::UNDEFINED);
+    auto property = window_->GetWindowProperty();
+    if (property) {
+        window_->UpdateRect(rect, property->GetDecoStatus(), WindowSizeChangeReason::UNDEFINED);
+    }
     window_->UpdateOccupiedAreaChangeInfo(info, rsTransaction);
     return WMError::WM_OK;
 }
