@@ -177,7 +177,7 @@ void WindowPair::ExitSplitMode()
     }
     MinimizeApp::AddNeedMinimizeApp(hideNode, MinimizeReason::SPLIT_QUIT);
     MinimizeApp::ExecuteMinimizeTargetReasons(MinimizeReason::SPLIT_QUIT);
-    WLOGFI("Exit Split Mode, Minimize Window %{public}u", hideNode->GetWindowId());
+    WLOGFD("Exit Split Mode, Minimize Window %{public}u", hideNode->GetWindowId());
 }
 
 void WindowPair::Clear()
@@ -337,7 +337,7 @@ void WindowPair::SwitchPosition()
     if (primary_ == nullptr || secondary_ == nullptr) {
         return;
     }
-    WLOGFI("Switch the pair pos, pri: %{public}u pri-mode: %{public}u, sec: %{public}u sec-mode: %{public}u,",
+    WLOGFD("Switch the pair pos, pri: %{public}u pri-mode: %{public}u, sec: %{public}u sec-mode: %{public}u,",
         primary_->GetWindowId(), primary_->GetWindowMode(), secondary_->GetWindowId(), secondary_->GetWindowMode());
     if (primary_->GetWindowMode() == secondary_->GetWindowMode() &&
         primary_->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {

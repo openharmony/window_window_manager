@@ -74,7 +74,7 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, std::shar
         }
     } else {
         if (node->stateMachine_.IsWindowNodeShownOrShowing()) {
-            WLOGFI("current window is visible, windowId:%{public}u state:%{public}u!",
+            WLOGFD("current window is visible, windowId:%{public}u state:%{public}u!",
                 node->GetWindowId(), static_cast<uint32_t>(node->stateMachine_.GetCurrentState()));
             return;
         }
@@ -97,14 +97,14 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, std::shar
     StartingWindow::DrawStartingWindow(node, pixelMap, bkgColor, isColdStart);
     FlushWindowInfo(node->GetWindowId());
     node->startingWindowShown_ = true;
-    WLOGFI("StartingWindow show success with id:%{public}u!", node->GetWindowId());
+    WLOGFD("StartingWindow show success with id:%{public}u!", node->GetWindowId());
 }
 
 void WindowController::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
 {
     auto node = windowRoot_->FindWindowNodeWithToken(abilityToken);
     if (node == nullptr) {
-        WLOGFI("cannot find windowNode!");
+        WLOGFD("cannot find windowNode!");
         return;
     }
     if (!node->startingWindowShown_) {
@@ -114,7 +114,7 @@ void WindowController::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:CancelStartingWindow(%u)", node->GetWindowId());
     FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::STARTING_WINDOW),
         "wms:async:ShowStartingWindow");
-    WLOGFI("CancelStartingWindow with id:%{public}u!", node->GetWindowId());
+    WLOGFD("CancelStartingWindow with id:%{public}u!", node->GetWindowId());
     node->isAppCrash_ = true;
     WMError res = DestroyWindow(node->GetWindowId(), false);
     if (res != WMError::WM_OK) {
@@ -125,7 +125,7 @@ void WindowController::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
 WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& srcInfo,
     sptr<WindowTransitionInfo>& dstInfo)
 {
-    WLOGFI("NotifyWindowTransition begin!");
+    WLOGFD("NotifyWindowTransition begin!");
     sptr<WindowNode> dstNode = nullptr;
     sptr<WindowNode> srcNode = nullptr;
     if (srcInfo) {
@@ -164,7 +164,7 @@ WMError WindowController::GetFocusWindowNode(DisplayId displayId, sptr<WindowNod
         return WMError::WM_ERROR_NULLPTR;
     }
     uint32_t focusWindowId = windowNodeContainer->GetFocusWindow();
-    WLOGFI("focusWindowId: %{public}u", focusWindowId);
+    WLOGFD("focusWindowId: %{public}u", focusWindowId);
     auto thisWindowNode = windowRoot_->GetWindowNode(focusWindowId);
     if (thisWindowNode == nullptr || !thisWindowNode->currentVisibility_) {
         WLOGFE("focusWindowNode is null or invisible, focusWindowId: %{public}u", focusWindowId);
@@ -216,7 +216,7 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     node->abilityToken_ = token;
     node->dialogTargetToken_ = token;
     UpdateWindowAnimation(node);
-    WLOGFI("createWindow name:%{public}u, windowName:%{public}s",
+    WLOGFD("createWindow name:%{public}u, windowName:%{public}s",
         windowId, node->GetWindowName().c_str());
     // test
     node->stateMachine_.SetWindowId(windowId);
@@ -289,7 +289,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     if (!node->stateMachine_.IsShowAnimationPlaying()) {
         if (WindowHelper::IsMainWindow(node->GetWindowType())) {
             MinimizeApp::ExecuteMinimizeAll();
-            WLOGFI("id:%{public}u execute minimize all", node->GetWindowId());
+            WLOGFD("id:%{public}u execute minimize all", node->GetWindowId());
         }
         node->stateMachine_.TransitionTo(WindowNodeState::SHOWN); // for normal show which not use remote animation
     } else if (WindowHelper::IsMainWindow(node->GetWindowType())) {
@@ -340,7 +340,7 @@ void WindowController::RelayoutKeyboard(const sptr<WindowNode>& node)
     }
 
     auto previousRect = node->GetWindowRect();
-    WLOGFI("relayout keyboard window with navigationBarHeight: %{public}u", navigationBarHeight);
+    WLOGFD("relayout keyboard window with navigationBarHeight: %{public}u", navigationBarHeight);
     Rect requestedRect = { previousRect.posX_,
         static_cast<int32_t>(defaultDisplayInfo->GetHeight() - previousRect.height_ - navigationBarHeight),
         previousRect.width_, previousRect.height_ };
@@ -406,11 +406,11 @@ void WindowController::HandleTurnScreenOn(const sptr<WindowNode>& node)
         WLOGFE("window is invalid");
         return;
     }
-    WLOGFI("handle turn screen on: [%{public}s, %{public}d]", node->GetWindowName().c_str(), node->IsTurnScreenOn());
+    WLOGFD("handle turn screen on: [%{public}s, %{public}d]", node->GetWindowName().c_str(), node->IsTurnScreenOn());
     // reset ipc identity
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     if (node->IsTurnScreenOn() && !PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
-        WLOGFI("turn screen on");
+        WLOGFD("turn screen on");
         PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
     }
     // set ipc identity to raw
@@ -451,7 +451,7 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId, bool fromAnimation
     WMError res = WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
         if (RemoteAnimation::NotifyAnimationScreenUnlock(removeFunc) == WMError::WM_OK) {
-            WLOGFI("NotifyAnimationScreenUnlock with remote animation");
+            WLOGFD("NotifyAnimationScreenUnlock with remote animation");
             res = WMError::WM_OK;
         }
     }
@@ -512,7 +512,7 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
         newRect = { rect.posX_, rect.posY_, lastRect.width_, lastRect.height_ };
         if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
             if (windowRoot_->IsForbidDockSliceMove(node->GetDisplayId())) {
-                WLOGFI("dock slice is forbidden to move");
+                WLOGFD("dock slice is forbidden to move");
                 newRect = lastRect;
             } else if (windowRoot_->IsVerticalDisplay(node)) {
                 newRect.posX_ = lastRect.posX_;
@@ -574,7 +574,7 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
     if (!node->stateMachine_.IsShowAnimationPlaying()) {
         if (WindowHelper::IsMainWindow(node->GetWindowType())) {
             MinimizeApp::ExecuteMinimizeAll();
-            WLOGFI("id:%{public}u execute minimize all", node->GetWindowId());
+            WLOGFD("id:%{public}u execute minimize all", node->GetWindowId());
         }
     }
     return WMError::WM_OK;
@@ -634,7 +634,7 @@ void WindowController::SetDefaultDisplayInfo(DisplayId defaultDisplayId, sptr<Di
     if (displayInfo->GetDisplayId() != defaultDisplayId) {
         return;
     }
-    WLOGFI("get default display info");
+    WLOGFD("get default display info");
     auto displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
     auto displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
     defaultDisplayRect_ = { 0, 0, displayWidth, displayHeight };
@@ -700,10 +700,10 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
 
 void WindowController::ProcessDisplayCompression(DisplayId defaultDisplayId, const sptr<DisplayInfo>& displayInfo)
 {
-    WLOGFI("Enter processDisplayCompress");
+    WLOGFD("Enter processDisplayCompress");
     DisplayId displayId = displayInfo->GetDisplayId();
     if (displayId != defaultDisplayId) {
-        WLOGFI("Not default display");
+        WLOGFD("Not default display");
         return;
     }
     auto& dms = DisplayManagerServiceInner::GetInstance();
@@ -786,7 +786,7 @@ void WindowController::StopBootAnimationIfNeed(const sptr<WindowNode>& node)
         allRegion = curRegion.Or(allRegion);
         WmOcclusion::Region subResult = defaultDisplayRegion.Sub(allRegion);
         if (subResult.GetSize() == 0) {
-            WLOGFI("stop boot animation");
+            WLOGFD("stop boot animation");
             system::SetParameter("bootevent.wms.fullscreen.ready", "true");
             isBootAnimationStopped_ = true;
             RecordBootAnimationEvent();
@@ -798,7 +798,7 @@ void WindowController::RecordBootAnimationEvent() const
 {
     uint64_t time = static_cast<uint64_t>(std::chrono::time_point_cast<std::chrono::seconds>
         (std::chrono::steady_clock::now()).time_since_epoch().count());
-    WLOGFI("boot animation done duration(s): %{public}" PRIu64"", time);
+    WLOGFD("boot animation done duration(s): %{public}" PRIu64"", time);
     std::ostringstream os;
     os << "boot animation done duration(s): " << time <<";";
     int32_t ret = OHOS::HiviewDFX::HiSysEvent::Write(
@@ -827,7 +827,7 @@ WMError WindowController::SetWindowType(uint32_t windowId, WindowType type)
     }
     FlushWindowInfo(windowId);
     accessibilityConnection_->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-    WLOGFI("SetWindowType end");
+    WLOGFD("SetWindowType end");
     return res;
 }
 
@@ -851,7 +851,7 @@ WMError WindowController::SetWindowFlags(uint32_t windowId, uint32_t flags)
     }
     FlushWindowInfo(windowId);
     accessibilityConnection_->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-    WLOGFI("SetWindowFlags end");
+    WLOGFD("SetWindowFlags end");
     return res;
 }
 
@@ -869,7 +869,7 @@ WMError WindowController::SetSystemBarProperty(uint32_t windowId, WindowType typ
     }
     FlushWindowInfo(windowId);
     accessibilityConnection_->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-    WLOGFI("SetSystemBarProperty end");
+    WLOGFD("SetSystemBarProperty end");
     return res;
 }
 
@@ -947,7 +947,7 @@ WMError WindowController::ProcessPointDown(uint32_t windowId, bool isPointDown)
         }
     }
 
-    WLOGFI("process point down, windowId: %{public}u", windowId);
+    WLOGFD("process point down, windowId: %{public}u", windowId);
     WMError zOrderRes = windowRoot_->RaiseZOrderForAppWindow(node);
     WMError focusRes = windowRoot_->RequestFocus(windowId);
     windowRoot_->RequestActiveWindow(windowId);
@@ -956,7 +956,7 @@ WMError WindowController::ProcessPointDown(uint32_t windowId, bool isPointDown)
         FlushWindowInfo(windowId);
         accessibilityConnection_->NotifyAccessibilityWindowInfo(windowRoot_->GetWindowNode(windowId),
             WindowUpdateType::WINDOW_UPDATE_FOCUSED);
-        WLOGFI("ProcessPointDown end");
+        WLOGFD("ProcessPointDown end");
         return WMError::WM_OK;
     }
     return WMError::WM_ERROR_INVALID_OPERATION;
@@ -1000,7 +1000,7 @@ WMError WindowController::InterceptInputEventToServer(uint32_t windowId)
         return WMError::WM_ERROR_NULLPTR;
     }
     auto inputPidInServer = WindowInnerManager::GetInstance().GetPid();
-    WLOGFI("InterceptInputEventToServer, windowId: %{public}u, inputPid: %{public}u", windowId, inputPidInServer);
+    WLOGFD("InterceptInputEventToServer, windowId: %{public}u, inputPid: %{public}u", windowId, inputPidInServer);
     node->SetInputEventCallingPid(static_cast<int32_t>(inputPidInServer));
     FlushWindowInfo(windowId);
     return WMError::WM_OK;
@@ -1053,7 +1053,7 @@ WMError WindowController::NotifyWindowClientPointUp(uint32_t windowId,
         return WMError::WM_ERROR_NULLPTR;
     }
     if (node->GetWindowToken() != nullptr) {
-        WLOGFI("notify client when receive point_up event, windowId: %{public}u", windowId);
+        WLOGFD("notify client when receive point_up event, windowId: %{public}u", windowId);
         node->GetWindowToken()->NotifyWindowClientPointUp(pointerEvent);
     }
     return WMError::WM_OK;
@@ -1090,7 +1090,7 @@ void WindowController::FlushWindowInfo(uint32_t windowId)
 
 void WindowController::FlushWindowInfoWithDisplayId(DisplayId displayId)
 {
-    WLOGFI("FlushWindowInfoWithDisplayId, displayId: %{public}" PRIu64"", displayId);
+    WLOGFD("FlushWindowInfoWithDisplayId, displayId: %{public}" PRIu64"", displayId);
     RSTransaction::FlushImplicitTransaction();
     inputWindowMonitor_->UpdateInputWindowByDisplayId(displayId);
 }
@@ -1105,7 +1105,7 @@ void WindowController::UpdateWindowAnimation(const sptr<WindowNode>& node)
 
     uint32_t animationFlag = node->GetWindowProperty()->GetAnimationFlag();
     uint32_t windowId = node->GetWindowProperty()->GetWindowId();
-    WLOGFI("windowId: %{public}u, animationFlag: %{public}u", windowId, animationFlag);
+    WLOGFD("windowId: %{public}u, animationFlag: %{public}u", windowId, animationFlag);
     std::shared_ptr<const RSTransitionEffect> effect = nullptr;
     if (animationFlag == static_cast<uint32_t>(WindowAnimation::DEFAULT)) {
         effect = RSTransitionEffect::Create()
@@ -1157,7 +1157,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         WLOGFE("window is invalid");
         return WMError::WM_ERROR_NULLPTR;
     }
-    WLOGFI("window: [%{public}s, %{public}u] update property for action: %{public}u", node->GetWindowName().c_str(),
+    WLOGFD("window: [%{public}s, %{public}u] update property for action: %{public}u", node->GetWindowName().c_str(),
         node->GetWindowId(), static_cast<uint32_t>(action));
     WMError ret = WMError::WM_OK;
     switch (action) {
@@ -1295,7 +1295,7 @@ WMError WindowController::UpdateTouchHotAreas(const sptr<WindowNode>& node, cons
             oss <<", ";
         }
     }
-    WLOGFI("windowId: %{public}u, size: %{public}d, rects: %{public}s",
+    WLOGFD("windowId: %{public}u, size: %{public}d, rects: %{public}s",
         node->GetWindowId(), static_cast<int32_t>(rects.size()), oss.str().c_str());
     if (rects.size() > TOUCH_HOT_AREA_MAX_NUM) {
         WLOGFE("the number of touch hot areas exceeds the maximum");

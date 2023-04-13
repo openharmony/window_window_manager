@@ -57,15 +57,15 @@ JsWindow::JsWindow(const sptr<Window>& window)
             return;
         }
         g_jsWindowMap.erase(windowName);
-        WLOGFI("[NAPI]Destroy window %{public}s in js window", windowName.c_str());
+        WLOGFD("[NAPI]Destroy window %{public}s in js window", windowName.c_str());
     };
     windowToken_->RegisterWindowDestroyedListener(func);
-    WLOGFI("[NAPI] constructorCnt: %{public}d", ++ctorCnt);
+    WLOGFD("[NAPI] constructorCnt: %{public}d", ++ctorCnt);
 }
 
 JsWindow::~JsWindow()
 {
-    WLOGFI("[NAPI] deConstructorCnt:%{public}d", ++dtorCnt);
+    WLOGFD("[NAPI] deConstructorCnt:%{public}d", ++dtorCnt);
     windowToken_ = nullptr;
 }
 
@@ -79,498 +79,498 @@ std::string JsWindow::GetWindowName()
 
 void JsWindow::Finalizer(NativeEngine* engine, void* data, void* hint)
 {
-    WLOGFI("[NAPI]finalizerCnt:%{public}d", ++finalizerCnt);
+    WLOGFD("[NAPI]finalizerCnt:%{public}d", ++finalizerCnt);
     auto jsWin = std::unique_ptr<JsWindow>(static_cast<JsWindow*>(data));
     if (jsWin == nullptr) {
         WLOGFE("[NAPI]jsWin is nullptr");
         return;
     }
     std::string windowName = jsWin->GetWindowName();
-    WLOGFI("[NAPI]Window %{public}s", windowName.c_str());
+    WLOGFD("[NAPI]Window %{public}s", windowName.c_str());
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     g_jsWindowMap.erase(windowName);
-    WLOGFI("[NAPI]Remove window %{public}s from g_jsWindowMap", windowName.c_str());
+    WLOGFD("[NAPI]Remove window %{public}s from g_jsWindowMap", windowName.c_str());
 }
 
 NativeValue* JsWindow::Show(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]Show");
+    WLOGFD("[NAPI]Show");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnShow(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::ShowWindow(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]Show");
+    WLOGFD("[NAPI]Show");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnShowWindow(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::ShowWithAnimation(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]ShowWithAnimation");
+    WLOGFD("[NAPI]ShowWithAnimation");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnShowWithAnimation(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::Destroy(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]Destroy");
+    WLOGFD("[NAPI]Destroy");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnDestroy(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::DestroyWindow(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]Destroy");
+    WLOGFD("[NAPI]Destroy");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnDestroyWindow(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::Hide(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]Hide");
+    WLOGFD("[NAPI]Hide");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnHide(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::HideWithAnimation(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]HideWithAnimation");
+    WLOGFD("[NAPI]HideWithAnimation");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnHideWithAnimation(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::MoveTo(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]MoveTo");
+    WLOGFD("[NAPI]MoveTo");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnMoveTo(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::MoveWindowTo(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]MoveTo");
+    WLOGFD("[NAPI]MoveTo");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnMoveWindowTo(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::Resize(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]Resize");
+    WLOGFD("[NAPI]Resize");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnResize(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::ResizeWindow(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]Resize");
+    WLOGFD("[NAPI]Resize");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnResizeWindow(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetWindowType(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetWindowType");
+    WLOGFD("[NAPI]SetWindowType");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetWindowType(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetWindowMode(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetWindowMode");
+    WLOGFD("[NAPI]SetWindowMode");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetWindowMode(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::GetProperties(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]GetProperties");
+    WLOGFD("[NAPI]GetProperties");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnGetProperties(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::GetWindowPropertiesSync(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]GetProperties");
+    WLOGFD("[NAPI]GetProperties");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnGetWindowPropertiesSync(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::RegisterWindowCallback(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]RegisterWindowCallback");
+    WLOGFD("[NAPI]RegisterWindowCallback");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnRegisterWindowCallback(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::UnregisterWindowCallback(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]UnregisterWindowCallback");
+    WLOGFD("[NAPI]UnregisterWindowCallback");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnUnregisterWindowCallback(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::BindDialogTarget(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]BindDialogTarget");
+    WLOGFD("[NAPI]BindDialogTarget");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnBindDialogTarget(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::LoadContent(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]LoadContent");
+    WLOGFD("[NAPI]LoadContent");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnLoadContent(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetUIContent(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]LoadContent");
+    WLOGFD("[NAPI]LoadContent");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetUIContent(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetFullScreen(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetFullScreen");
+    WLOGFD("[NAPI]SetFullScreen");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetFullScreen(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetLayoutFullScreen(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetLayoutFullScreen");
+    WLOGFD("[NAPI]SetLayoutFullScreen");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetLayoutFullScreen(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetWindowLayoutFullScreen(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetLayoutFullScreen");
+    WLOGFD("[NAPI]SetLayoutFullScreen");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetWindowLayoutFullScreen(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetSystemBarEnable(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetSystemBarEnable");
+    WLOGFD("[NAPI]SetSystemBarEnable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetSystemBarEnable(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetWindowSystemBarEnable(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetSystemBarEnable");
+    WLOGFD("[NAPI]SetSystemBarEnable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetWindowSystemBarEnable(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetSystemBarProperties(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetSystemBarProperties");
+    WLOGFD("[NAPI]SetSystemBarProperties");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetSystemBarProperties(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetWindowSystemBarProperties(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetWindowSystemBarProperties");
+    WLOGFD("[NAPI]SetWindowSystemBarProperties");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetWindowSystemBarProperties(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::GetAvoidArea(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]GetAvoidArea");
+    WLOGFD("[NAPI]GetAvoidArea");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnGetAvoidArea(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::GetWindowAvoidAreaSync(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]GetAvoidArea");
+    WLOGFD("[NAPI]GetAvoidArea");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnGetWindowAvoidAreaSync(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::IsShowing(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]IsShowing");
+    WLOGFD("[NAPI]IsShowing");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnIsShowing(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::IsWindowShowingSync(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]IsShowing");
+    WLOGFD("[NAPI]IsShowing");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnIsWindowShowingSync(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::IsSupportWideGamut(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]IsSupportWideGamut");
+    WLOGFD("[NAPI]IsSupportWideGamut");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnIsSupportWideGamut(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::IsWindowSupportWideGamut(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]IsSupportWideGamut");
+    WLOGFD("[NAPI]IsSupportWideGamut");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnIsWindowSupportWideGamut(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetBackgroundColor(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetBackgroundColor");
+    WLOGFD("[NAPI]SetBackgroundColor");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetBackgroundColor(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetWindowBackgroundColorSync(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetBackgroundColor");
+    WLOGFD("[NAPI]SetBackgroundColor");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetWindowBackgroundColorSync(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetBrightness(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetBrightness");
+    WLOGFD("[NAPI]SetBrightness");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetBrightness(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetWindowBrightness(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetBrightness");
+    WLOGFD("[NAPI]SetBrightness");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetWindowBrightness(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetDimBehind(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetDimBehind");
+    WLOGFD("[NAPI]SetDimBehind");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetDimBehind(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetFocusable(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetFocusable");
+    WLOGFD("[NAPI]SetFocusable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetFocusable(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetWindowFocusable(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetFocusable");
+    WLOGFD("[NAPI]SetFocusable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetWindowFocusable(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetKeepScreenOn(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetKeepScreenOn");
+    WLOGFD("[NAPI]SetKeepScreenOn");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetKeepScreenOn(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetWindowKeepScreenOn(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetKeepScreenOn");
+    WLOGFD("[NAPI]SetKeepScreenOn");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetWindowKeepScreenOn(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetWakeUpScreen(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetWakeUpScreen");
+    WLOGFD("[NAPI]SetWakeUpScreen");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetWakeUpScreen(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetOutsideTouchable(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetOutsideTouchable");
+    WLOGFD("[NAPI]SetOutsideTouchable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetOutsideTouchable(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetPrivacyMode(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetPrivacyMode");
+    WLOGFD("[NAPI]SetPrivacyMode");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetPrivacyMode(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetWindowPrivacyMode(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetPrivacyMode");
+    WLOGFD("[NAPI]SetPrivacyMode");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetWindowPrivacyMode(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetTouchable(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetTouchable");
+    WLOGFD("[NAPI]SetTouchable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetTouchable(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetWindowTouchable(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetTouchable");
+    WLOGFD("[NAPI]SetTouchable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetWindowTouchable(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetTransparent(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetTransparent");
+    WLOGFD("[NAPI]SetTransparent");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetTransparent(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetCallingWindow(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetCallingWindow");
+    WLOGFD("[NAPI]SetCallingWindow");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetCallingWindow(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetPreferredOrientation(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetPreferredOrientation");
+    WLOGFD("[NAPI]SetPreferredOrientation");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetPreferredOrientation(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetSnapshotSkip(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("NAPI");
+    WLOGFD("NAPI");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetSnapshotSkip(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::DisableWindowDecor(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]DisableWindowDecor");
+    WLOGFD("[NAPI]DisableWindowDecor");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnDisableWindowDecor(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetColorSpace(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetColorSpace");
+    WLOGFD("[NAPI]SetColorSpace");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetColorSpace(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetWindowColorSpace(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetColorSpace");
+    WLOGFD("[NAPI]SetColorSpace");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetWindowColorSpace(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::GetColorSpace(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]GetColorSpace");
+    WLOGFD("[NAPI]GetColorSpace");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnGetColorSpace(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::GetWindowColorSpaceSync(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]GetColorSpace");
+    WLOGFD("[NAPI]GetColorSpace");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnGetWindowColorSpaceSync(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::Dump(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]Dump");
+    WLOGFD("[NAPI]Dump");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnDump(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetForbidSplitMove(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetForbidSplitMove");
+    WLOGFD("[NAPI]SetForbidSplitMove");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetForbidSplitMove(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::Opacity(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]Opacity");
+    WLOGFD("[NAPI]Opacity");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnOpacity(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::Scale(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]Scale");
+    WLOGFD("[NAPI]Scale");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnScale(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::Rotate(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]Rotate");
+    WLOGFD("[NAPI]Rotate");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnRotate(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::Translate(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]Translate");
+    WLOGFD("[NAPI]Translate");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnTranslate(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::GetTransitionController(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]GetTransitionController");
+    WLOGFD("[NAPI]GetTransitionController");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnGetTransitionController(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetCornerRadius(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetCornerRadius");
+    WLOGFD("[NAPI]SetCornerRadius");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetCornerRadius(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetShadow(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetShadow");
+    WLOGFD("[NAPI]SetShadow");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetShadow(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetBlur(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetBlur");
+    WLOGFD("[NAPI]SetBlur");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetBlur(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetBackdropBlur(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetBackdropBlur");
+    WLOGFD("[NAPI]SetBackdropBlur");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetBackdropBlur(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetBackdropBlurStyle(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetBackdropBlurStyle");
+    WLOGFD("[NAPI]SetBackdropBlurStyle");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetBackdropBlurStyle(*engine, *info) : nullptr;
 }
@@ -597,7 +597,7 @@ NativeValue* JsWindow::OnShow(NativeEngine& engine, NativeCallbackInfo& info)
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window show failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] show end, ret = %{public}d",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] show end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
     NativeValue* result = nullptr;
@@ -627,7 +627,7 @@ NativeValue* JsWindow::OnShowWindow(NativeEngine& engine, NativeCallbackInfo& in
                 task.Reject(engine, CreateJsError(engine,
                     static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(ret)), "Window show failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] show end, ret = %{public}d",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] show end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
     NativeValue* result = nullptr;
@@ -667,7 +667,7 @@ NativeValue* JsWindow::OnShowWithAnimation(NativeEngine& engine, NativeCallbackI
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window show failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] ShowWithAnimation end, ret = %{public}d",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] ShowWithAnimation end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
     NativeValue* result = nullptr;
@@ -696,7 +696,7 @@ NativeValue* JsWindow::OnDestroy(NativeEngine& engine, NativeCallbackInfo& info)
                 return;
             }
             WMError ret = weakWindow->Destroy();
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] destroy end, ret = %{public}d",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] destroy end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
             if (ret != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window destroy failed"));
@@ -727,7 +727,7 @@ NativeValue* JsWindow::OnDestroyWindow(NativeEngine& engine, NativeCallbackInfo&
                 return;
             }
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->Destroy());
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] destroy end, ret = %{public}d",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] destroy end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
             if (ret != WmErrorCode::WM_OK) {
                 task.Reject(engine,
@@ -766,7 +766,7 @@ NativeValue* JsWindow::OnHide(NativeEngine& engine, NativeCallbackInfo& info)
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window hide failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] hide end, ret = %{public}d",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] hide end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
@@ -811,7 +811,7 @@ NativeValue* JsWindow::OnHideWithAnimation(NativeEngine& engine, NativeCallbackI
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window show failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] HideWithAnimation end, ret = %{public}d",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] HideWithAnimation end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
     NativeValue* result = nullptr;
@@ -857,7 +857,7 @@ NativeValue* JsWindow::OnMoveTo(NativeEngine& engine, NativeCallbackInfo& info)
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window move failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] move end, ret = %{public}d",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] move end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
     // 2: params num; 2: index of callback
@@ -909,7 +909,7 @@ NativeValue* JsWindow::OnMoveWindowTo(NativeEngine& engine, NativeCallbackInfo& 
                     CreateJsError(engine, static_cast<int32_t>(ret),
                     "Window move failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] move end, ret = %{public}d",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] move end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
@@ -959,7 +959,7 @@ NativeValue* JsWindow::OnResize(NativeEngine& engine, NativeCallbackInfo& info)
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window resize failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] resize end, ret = %{public}d",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] resize end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
     // 2: params num; 2: index of callback
@@ -1013,7 +1013,7 @@ NativeValue* JsWindow::OnResizeWindow(NativeEngine& engine, NativeCallbackInfo& 
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window resize failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] resize end, ret = %{public}d",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] resize end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
@@ -1069,7 +1069,7 @@ NativeValue* JsWindow::OnSetWindowType(NativeEngine& engine, NativeCallbackInfo&
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set type failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set type end, ret = %{public}d",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] set type end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
@@ -1129,7 +1129,7 @@ NativeValue* JsWindow::OnSetWindowMode(NativeEngine& engine, NativeCallbackInfo&
                 task.Reject(engine,
                     CreateJsError(engine, static_cast<int32_t>(ret), "Window set mode failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set type end, ret = %{public}d",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] set type end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
@@ -1165,7 +1165,7 @@ NativeValue* JsWindow::OnGetProperties(NativeEngine& engine, NativeCallbackInfo&
                 task.Reject(engine, CreateJsError(engine,
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "Window get properties failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] get properties end, objValue = %{public}p",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] get properties end, objValue = %{public}p",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), objValue);
         };
 
@@ -1187,7 +1187,7 @@ NativeValue* JsWindow::OnGetWindowPropertiesSync(NativeEngine& engine, NativeCal
         return engine.CreateUndefined();
     }
     auto objValue = CreateJsWindowPropertiesObject(engine, window);
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] get properties end, objValue = %{public}p",
+    WLOGFD("[NAPI]Window [%{public}u, %{public}s] get properties end, objValue = %{public}p",
         window->GetWindowId(), window->GetWindowName().c_str(), objValue);
     if (objValue != nullptr) {
         return objValue;
@@ -1217,12 +1217,12 @@ NativeValue* JsWindow::OnRegisterWindowCallback(NativeEngine& engine, NativeCall
     }
     NativeValue* value = info.argv[1];
     if (!value->IsCallable()) {
-        WLOGFI("[NAPI]Callback(info->argv[1]) is not callable");
+        WLOGFD("[NAPI]Callback(info->argv[1]) is not callable");
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     registerManager_->RegisterListener(windowToken_, cbType, CaseType::CASE_WINDOW, engine, value);
-    WLOGFI("[NAPI]Register end, window [%{public}u, %{public}s], type = %{public}s, callback = %{public}p",
+    WLOGFD("[NAPI]Register end, window [%{public}u, %{public}s], type = %{public}s, callback = %{public}p",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), cbType.c_str(), value);
     return engine.CreateUndefined();
 }
@@ -1253,7 +1253,7 @@ NativeValue* JsWindow::OnUnregisterWindowCallback(NativeEngine& engine, NativeCa
         }
     }
 
-    WLOGFI("[NAPI]Unregister end, window [%{public}u, %{public}s], type = %{public}s, callback = %{public}p",
+    WLOGFD("[NAPI]Unregister end, window [%{public}u, %{public}s], type = %{public}s, callback = %{public}p",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), cbType.c_str(), value);
     return engine.CreateUndefined();
 }
@@ -1310,7 +1310,7 @@ NativeValue* JsWindow::OnBindDialogTarget(NativeEngine& engine, NativeCallbackIn
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Bind Dialog Target failed"));
             }
 
-            WLOGFI("[NAPI]BindDialogTarget end, window [%{public}u, %{public}s]",
+            WLOGFD("[NAPI]BindDialogTarget end, window [%{public}u, %{public}s]",
                 weakToken->GetWindowId(), weakToken->GetWindowName().c_str());
         };
 
@@ -1335,7 +1335,7 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     } else {
         task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window load content failed"));
     }
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] load content end, ret = %{public}d",
+    WLOGFD("[NAPI]Window [%{public}u, %{public}s] load content end, ret = %{public}d",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
     return;
 }
@@ -1516,7 +1516,7 @@ NativeValue* JsWindow::OnSetFullScreen(NativeEngine& engine, NativeCallbackInfo&
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window SetFullScreen failed."));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set full screen end, ret = %{public}d",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] set full screen end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
@@ -1560,7 +1560,7 @@ NativeValue* JsWindow::OnSetLayoutFullScreen(NativeEngine& engine, NativeCallbac
                 task.Reject(engine, CreateJsError(engine,
                     static_cast<int32_t>(ret), "Window OnSetLayoutFullScreen failed."));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set layout full screen end, ret = %{public}d",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] set layout full screen end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -1610,7 +1610,7 @@ NativeValue* JsWindow::OnSetWindowLayoutFullScreen(NativeEngine& engine, NativeC
                 task.Reject(engine, CreateJsError(engine,
                     static_cast<int32_t>(ret), "Window OnSetLayoutFullScreen failed."));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set layout full screen end, ret = %{public}d",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] set layout full screen end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
@@ -1653,7 +1653,7 @@ NativeValue* JsWindow::OnSetSystemBarEnable(NativeEngine& engine, NativeCallback
                 task.Reject(engine, CreateJsError(engine,
                     static_cast<int32_t>(ret), "JsWindow::OnSetSystemBarEnable failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set system bar enable end, ret = %{public}d",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] set system bar enable end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
     NativeValue* lastParam = nullptr;
@@ -1758,7 +1758,7 @@ NativeValue* JsWindow::OnSetSystemBarProperties(NativeEngine& engine, NativeCall
                 task.Reject(engine, CreateJsError(engine,
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindow::OnSetSystemBarProperties failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set system bar properties end, ret = %{public}d",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] set system bar properties end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
@@ -1869,7 +1869,7 @@ NativeValue* JsWindow::OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& 
                 task.Reject(engine, CreateJsError(engine,
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindow::OnGetAvoidArea failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] get avoid area end, ret = %{public}d",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] get avoid area end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -1943,7 +1943,7 @@ NativeValue* JsWindow::OnIsShowing(NativeEngine& engine, NativeCallbackInfo& inf
             }
             bool state = weakWindow->GetWindowState() == WindowState::STATE_SHOWN;
             task.Resolve(engine, CreateJsValue(engine, state));
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] get show state end, state = %{public}u",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] get show state end, state = %{public}u",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), state);
         };
 
@@ -1965,7 +1965,7 @@ NativeValue* JsWindow::OnIsWindowShowingSync(NativeEngine& engine, NativeCallbac
         return engine.CreateUndefined();
     }
     bool state = (window->GetWindowState() == WindowState::STATE_SHOWN);
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] get show state end, state = %{public}u",
+    WLOGFD("[NAPI]Window [%{public}u, %{public}s] get show state end, state = %{public}u",
         window->GetWindowId(), window->GetWindowName().c_str(), state);
     return CreateJsValue(engine, state);
 }
@@ -2009,7 +2009,7 @@ NativeValue* JsWindow::OnSetPreferredOrientation(NativeEngine& engine, NativeCal
             }
             weakWindow->SetRequestedOrientation(requestedOrientation);
             task.Resolve(engine, engine.CreateUndefined());
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] OnSetPreferredOrientation end, orientation = %{public}u",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] OnSetPreferredOrientation end, orientation = %{public}u",
                 weakWindow->GetWindowId(),
                 weakWindow->GetWindowName().c_str(),
                 static_cast<uint32_t>(requestedOrientation));
@@ -2042,7 +2042,7 @@ NativeValue* JsWindow::OnIsSupportWideGamut(NativeEngine& engine, NativeCallback
             }
             bool flag = weakWindow->IsSupportWideGamut();
             task.Resolve(engine, CreateJsValue(engine, flag));
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] OnIsSupportWideGamut end, ret = %{public}u",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] OnIsSupportWideGamut end, ret = %{public}u",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), flag);
         };
 
@@ -2068,7 +2068,7 @@ NativeValue* JsWindow::OnIsWindowSupportWideGamut(NativeEngine& engine, NativeCa
             }
             bool flag = weakWindow->IsSupportWideGamut();
             task.Resolve(engine, CreateJsValue(engine, flag));
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] OnIsWindowSupportWideGamut end, ret = %{public}u",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] OnIsWindowSupportWideGamut end, ret = %{public}u",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), flag);
         };
 
@@ -2109,7 +2109,7 @@ NativeValue* JsWindow::OnSetBackgroundColor(NativeEngine& engine, NativeCallback
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
                     "Window set background color failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set background color end",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] set background color end",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
 
@@ -2146,7 +2146,7 @@ NativeValue* JsWindow::OnSetWindowBackgroundColorSync(NativeEngine& engine, Nati
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetBackgroundColor(color));
     if (ret == WmErrorCode::WM_OK) {
-        WLOGFI("[NAPI]Window [%{public}u, %{public}s] set background color end",
+        WLOGFD("[NAPI]Window [%{public}u, %{public}s] set background color end",
             window->GetWindowId(), window->GetWindowName().c_str());
         return engine.CreateUndefined();
     } else {
@@ -2187,7 +2187,7 @@ NativeValue* JsWindow::OnSetBrightness(NativeEngine& engine, NativeCallbackInfo&
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set brightness failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set brightness end",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] set brightness end",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
 
@@ -2237,7 +2237,7 @@ NativeValue* JsWindow::OnSetWindowBrightness(NativeEngine& engine, NativeCallbac
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set brightness failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set brightness end",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] set brightness end",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
 
@@ -2297,7 +2297,7 @@ NativeValue* JsWindow::OnSetFocusable(NativeEngine& engine, NativeCallbackInfo& 
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set focusable failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set focusable end",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] set focusable end",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
 
@@ -2347,7 +2347,7 @@ NativeValue* JsWindow::OnSetWindowFocusable(NativeEngine& engine, NativeCallback
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set focusable failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set focusable end",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] set focusable end",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
 
@@ -2393,7 +2393,7 @@ NativeValue* JsWindow::OnSetKeepScreenOn(NativeEngine& engine, NativeCallbackInf
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
                     "Window set keep screen on failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set keep screen on end",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] set keep screen on end",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
 
@@ -2444,7 +2444,7 @@ NativeValue* JsWindow::OnSetWindowKeepScreenOn(NativeEngine& engine, NativeCallb
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
                     "Window set keep screen on failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set keep screen on end",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] set keep screen on end",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
 
@@ -2483,7 +2483,7 @@ NativeValue* JsWindow::OnSetWakeUpScreen(NativeEngine& engine, NativeCallbackInf
     }
 
     windowToken_->SetTurnScreenOn(wakeUp);
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] set wake up screen %{public}d end",
+    WLOGFD("[NAPI]Window [%{public}u, %{public}s] set wake up screen %{public}d end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), wakeUp);
     return engine.CreateUndefined();
 }
@@ -2531,7 +2531,7 @@ NativeValue* JsWindow::OnSetPrivacyMode(NativeEngine& engine, NativeCallbackInfo
             }
             weakWindow->SetPrivacyMode(isPrivacyMode);
             task.Resolve(engine, engine.CreateUndefined());
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set privacy mode end, mode = %{public}u",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] set privacy mode end, mode = %{public}u",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), isPrivacyMode);
         };
 
@@ -2577,7 +2577,7 @@ NativeValue* JsWindow::OnSetWindowPrivacyMode(NativeEngine& engine, NativeCallba
             }
             weakWindow->SetPrivacyMode(isPrivacyMode);
             task.Resolve(engine, engine.CreateUndefined());
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set privacy mode end, mode = %{public}u",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] set privacy mode end, mode = %{public}u",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), isPrivacyMode);
         };
 
@@ -2622,7 +2622,7 @@ NativeValue* JsWindow::OnSetTouchable(NativeEngine& engine, NativeCallbackInfo& 
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set touchable failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set touchable end",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] set touchable end",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
 
@@ -2672,7 +2672,7 @@ NativeValue* JsWindow::OnSetWindowTouchable(NativeEngine& engine, NativeCallback
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set touchable failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set touchable end",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] set touchable end",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
 
@@ -2717,7 +2717,7 @@ NativeValue* JsWindow::OnSetTransparent(NativeEngine& engine, NativeCallbackInfo
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set transparent failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set transparent end",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] set transparent end",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
 
@@ -2762,7 +2762,7 @@ NativeValue* JsWindow::OnSetCallingWindow(NativeEngine& engine, NativeCallbackIn
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
                     "Window set calling window failed"));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set calling window end",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] set calling window end",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
 
@@ -2780,7 +2780,7 @@ NativeValue* JsWindow::OnDisableWindowDecor(NativeEngine& engine, NativeCallback
         return engine.CreateUndefined();
     }
     windowToken_->DisableAppWindowDecor();
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] disable app window decor end",
+    WLOGFD("[NAPI]Window [%{public}u, %{public}s] disable app window decor end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
     return engine.CreateUndefined();
 }
@@ -2817,7 +2817,7 @@ NativeValue* JsWindow::OnSetColorSpace(NativeEngine& engine, NativeCallbackInfo&
             }
             weakWindow->SetColorSpace(colorSpace);
             task.Resolve(engine, engine.CreateUndefined());
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] OnSetColorSpace end, colorSpace = %{public}u",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] OnSetColorSpace end, colorSpace = %{public}u",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), static_cast<uint32_t>(colorSpace));
         };
 
@@ -2867,7 +2867,7 @@ NativeValue* JsWindow::OnSetWindowColorSpace(NativeEngine& engine, NativeCallbac
             }
             weakWindow->SetColorSpace(colorSpace);
             task.Resolve(engine, engine.CreateUndefined());
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] OnSetWindowColorSpace end, colorSpace = %{public}u",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] OnSetWindowColorSpace end, colorSpace = %{public}u",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), static_cast<uint32_t>(colorSpace));
         };
 
@@ -2898,7 +2898,7 @@ NativeValue* JsWindow::OnGetColorSpace(NativeEngine& engine, NativeCallbackInfo&
             }
             ColorSpace colorSpace = weakWindow->GetColorSpace();
             task.Resolve(engine, CreateJsValue(engine, static_cast<uint32_t>(colorSpace)));
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] OnGetColorSpace end, colorSpace = %{public}u",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] OnGetColorSpace end, colorSpace = %{public}u",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), static_cast<uint32_t>(colorSpace));
         };
 
@@ -2920,7 +2920,7 @@ NativeValue* JsWindow::OnGetWindowColorSpaceSync(NativeEngine& engine, NativeCal
         return engine.CreateUndefined();
     }
     ColorSpace colorSpace = window->GetColorSpace();
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] OnGetColorSpace end, colorSpace = %{public}u",
+    WLOGFD("[NAPI]Window [%{public}u, %{public}s] OnGetColorSpace end, colorSpace = %{public}u",
         window->GetWindowId(), window->GetWindowName().c_str(), static_cast<uint32_t>(colorSpace));
 
     return CreateJsValue(engine, static_cast<uint32_t>(colorSpace));
@@ -2928,7 +2928,7 @@ NativeValue* JsWindow::OnGetWindowColorSpaceSync(NativeEngine& engine, NativeCal
 
 NativeValue* JsWindow::OnDump(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("[NAPI]dump window start");
+    WLOGFD("[NAPI]dump window start");
     if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         return nullptr;
@@ -2945,14 +2945,14 @@ NativeValue* JsWindow::OnDump(NativeEngine& engine, NativeCallbackInfo& info)
     std::vector<std::string> dumpInfo;
     windowToken_->DumpInfo(params, dumpInfo);
     NativeValue* dumpInfoValue = CreateNativeArray(engine, dumpInfo);
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] dump end",
+    WLOGFD("[NAPI]Window [%{public}u, %{public}s] dump end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
     return dumpInfoValue;
 }
 
 NativeValue* JsWindow::Snapshot(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]Snapshot");
+    WLOGFD("[NAPI]Snapshot");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSnapshot(*engine, *info) : nullptr;
 }
@@ -3036,7 +3036,7 @@ NativeValue* JsWindow::OnSnapshot(NativeEngine& engine, NativeCallbackInfo& info
                 WLOGFE("[NAPI]window snapshot get nativePixelMap is null");
             }
             task.Resolve(engine, nativePixelMap);
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] OnSnapshot, WxH=%{public}dx%{public}d",
+            WLOGFD("[NAPI]Window [%{public}u, %{public}s] OnSnapshot, WxH=%{public}dx%{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
                 pixelMap->GetWidth(), pixelMap->GetHeight());
         };
@@ -3079,7 +3079,7 @@ NativeValue* JsWindow::OnSetSnapshotSkip(NativeEngine& engine, NativeCallbackInf
     }
 
     window->SetSnapshotSkip(isSkip);
-    WLOGFI("NAPI [%{public}u, %{public}s] set snapshotSkip end",
+    WLOGFD("NAPI [%{public}u, %{public}s] set snapshotSkip end",
         window->GetWindowId(), window->GetWindowName().c_str());
 
     return engine.CreateUndefined();
@@ -3115,7 +3115,7 @@ NativeValue* JsWindow::OnOpacity(NativeEngine& engine, NativeCallbackInfo& info)
     }
     float alpha = static_cast<double>(*nativeVal);
     windowToken_->SetAlpha(alpha);
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] Opacity end, alpha = %{public}f",
+    WLOGFD("[NAPI]Window [%{public}u, %{public}s] Opacity end, alpha = %{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), alpha);
     return engine.CreateUndefined();
 }
@@ -3196,9 +3196,9 @@ NativeValue* JsWindow::OnScale(NativeEngine& engine, NativeCallbackInfo& info)
         return engine.CreateUndefined();
     }
     windowToken_->SetTransform(trans);
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] Scale end",
+    WLOGFD("[NAPI]Window [%{public}u, %{public}s] Scale end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
-    WLOGFI("[NAPI]scaleX = %{public}f, scaleY = %{public}f, pivotX = %{public}f pivotY = %{public}f",
+    WLOGFD("[NAPI]scaleX = %{public}f, scaleY = %{public}f, pivotX = %{public}f pivotY = %{public}f",
         trans.scaleX_, trans.scaleY_, trans.pivotX_, trans.pivotY_);
     return engine.CreateUndefined();
 }
@@ -3261,9 +3261,9 @@ NativeValue* JsWindow::OnRotate(NativeEngine& engine, NativeCallbackInfo& info)
         return engine.CreateUndefined();
     }
     windowToken_->SetTransform(trans);
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] Rotate end",
+    WLOGFD("[NAPI]Window [%{public}u, %{public}s] Rotate end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
-    WLOGFI("[NAPI]rotateX = %{public}f, rotateY = %{public}f," \
+    WLOGFD("[NAPI]rotateX = %{public}f, rotateY = %{public}f," \
         "rotateZ = %{public}f pivotX = %{public}f pivotY = %{public}f",
         trans.rotationX_, trans.rotationY_, trans.rotationZ_, trans.pivotX_, trans.pivotY_);
     return engine.CreateUndefined();
@@ -3313,7 +3313,7 @@ NativeValue* JsWindow::OnTranslate(NativeEngine& engine, NativeCallbackInfo& inf
         return engine.CreateUndefined();
     }
     windowToken_->SetTransform(trans);
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] Translate end," \
+    WLOGFD("[NAPI]Window [%{public}u, %{public}s] Translate end," \
         "translateX = %{public}f, translateY = %{public}f, translateZ = %{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(),
         trans.translateX_, trans.translateY_, trans.translateZ_);
@@ -3351,7 +3351,7 @@ void JsWindow::CreateTransitionController(NativeEngine& engine)
     windowToken_->RegisterAnimationTransitionController(nativeController);
     jsTransControllerObj_.reset(engine.CreateReference(objValue, 1));
     nativeController->SetJsController(jsTransControllerObj_);
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] CreateTransitionController end",
+    WLOGFD("[NAPI]Window [%{public}u, %{public}s] CreateTransitionController end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
 }
 
@@ -3408,7 +3408,7 @@ NativeValue* JsWindow::OnSetCornerRadius(NativeEngine& engine, NativeCallbackInf
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
         return engine.CreateUndefined();
     }
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] SetCornerRadius end, radius = %{public}f",
+    WLOGFD("[NAPI]Window [%{public}u, %{public}s] SetCornerRadius end, radius = %{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
     return engine.CreateUndefined();
 }
@@ -3502,7 +3502,7 @@ NativeValue* JsWindow::OnSetBlur(NativeEngine& engine, NativeCallbackInfo& info)
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
         return engine.CreateUndefined();
     }
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] SetBlur end, radius = %{public}f",
+    WLOGFD("[NAPI]Window [%{public}u, %{public}s] SetBlur end, radius = %{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
     return engine.CreateUndefined();
 }
@@ -3537,7 +3537,7 @@ NativeValue* JsWindow::OnSetBackdropBlur(NativeEngine& engine, NativeCallbackInf
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
         return engine.CreateUndefined();
     }
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] SetBackdropBlur end, radius = %{public}f",
+    WLOGFD("[NAPI]Window [%{public}u, %{public}s] SetBackdropBlur end, radius = %{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
     return engine.CreateUndefined();
 }
@@ -3575,17 +3575,17 @@ NativeValue* JsWindow::OnSetBackdropBlurStyle(NativeEngine& engine, NativeCallba
         return engine.CreateUndefined();
     }
 
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] SetBackdropBlurStyle end, style = %{public}u",
+    WLOGFD("[NAPI]Window [%{public}u, %{public}s] SetBackdropBlurStyle end, style = %{public}u",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), style);
     return engine.CreateUndefined();
 }
 
 std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
 {
-    WLOGFI("[NAPI]Try to find window %{public}s in g_jsWindowMap", windowName.c_str());
+    WLOGFD("[NAPI]Try to find window %{public}s in g_jsWindowMap", windowName.c_str());
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     if (g_jsWindowMap.find(windowName) == g_jsWindowMap.end()) {
-        WLOGFI("[NAPI]Can not find window %{public}s in g_jsWindowMap", windowName.c_str());
+        WLOGFD("[NAPI]Can not find window %{public}s in g_jsWindowMap", windowName.c_str());
         return nullptr;
     }
     return g_jsWindowMap[windowName];
@@ -3597,13 +3597,13 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
     // avoid repeatedly create js window when getWindow
     std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(windowName);
     if (jsWindowObj != nullptr && jsWindowObj->Get() != nullptr) {
-        WLOGFI("[NAPI]FindJsWindowObject %{public}s", windowName.c_str());
+        WLOGFD("[NAPI]FindJsWindowObject %{public}s", windowName.c_str());
         return jsWindowObj->Get();
     }
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
 
-    WLOGFI("[NAPI]CreateJsWindow %{public}s", windowName.c_str());
+    WLOGFD("[NAPI]CreateJsWindow %{public}s", windowName.c_str());
     std::unique_ptr<JsWindow> jsWindow = std::make_unique<JsWindow>(window);
     object->SetNativePointer(jsWindow.release(), JsWindow::Finalizer, nullptr);
 

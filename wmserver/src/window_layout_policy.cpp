@@ -36,17 +36,17 @@ WindowLayoutPolicy::WindowLayoutPolicy(const sptr<DisplayGroupInfo>& displayGrou
 
 void WindowLayoutPolicy::Launch()
 {
-    WLOGFI("WindowLayoutPolicy::Launch");
+    WLOGFD("WindowLayoutPolicy::Launch");
 }
 
 void WindowLayoutPolicy::Clean()
 {
-    WLOGFI("WindowLayoutPolicy::Clean");
+    WLOGFD("WindowLayoutPolicy::Clean");
 }
 
 void WindowLayoutPolicy::Reorder()
 {
-    WLOGFI("WindowLayoutPolicy::Reorder");
+    WLOGFD("WindowLayoutPolicy::Reorder");
 }
 
 std::vector<int32_t> WindowLayoutPolicy::GetExitSplitPoints(DisplayId displayId) const
@@ -76,7 +76,7 @@ void WindowLayoutPolicy::LimitWindowToBottomRightCorner(const sptr<WindowNode>& 
     }
     node->SetRequestRect(windowRect);
 
-    WLOGFI("windowId: %{public}d, newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+    WLOGFD("windowId: %{public}d, newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
         node->GetWindowId(), windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
 
     for (auto& childNode : node->children_) {
@@ -97,7 +97,7 @@ void WindowLayoutPolicy::UpdateDisplayGroupRect()
         newDisplayGroupRect.height_ = maxHeight - newDisplayGroupRect.posY_;
     }
     displayGroupRect_ = newDisplayGroupRect;
-    WLOGFI("displayGroupRect_: [ %{public}d, %{public}d, %{public}d, %{public}d]",
+    WLOGFD("displayGroupRect_: [ %{public}d, %{public}d, %{public}d, %{public}d]",
         displayGroupRect_.posX_, displayGroupRect_.posY_, displayGroupRect_.width_, displayGroupRect_.height_);
 }
 
@@ -120,7 +120,7 @@ void WindowLayoutPolicy::UpdateDisplayGroupLimitRect()
         newDisplayGroupLimitRect.height_ = static_cast<uint32_t>(maxHeight - newDisplayGroupLimitRect.posY_);
     }
     displayGroupLimitRect_ = newDisplayGroupLimitRect;
-    WLOGFI("displayGroupLimitRect_: [ %{public}d, %{public}d, %{public}d, %{public}d]",
+    WLOGFD("displayGroupLimitRect_: [ %{public}d, %{public}d, %{public}d, %{public}d]",
         displayGroupLimitRect_.posX_, displayGroupLimitRect_.posY_,
         displayGroupLimitRect_.width_, displayGroupLimitRect_.height_);
 }
@@ -130,13 +130,13 @@ void WindowLayoutPolicy::UpdateRectInDisplayGroup(const sptr<WindowNode>& node,
                                                   const Rect& newDisplayRect)
 {
     Rect newRect = node->GetRequestRect();
-    WLOGFI("before update rect in display group, windowId: %{public}d, rect: [%{public}d, %{public}d, "
+    WLOGFD("before update rect in display group, windowId: %{public}d, rect: [%{public}d, %{public}d, "
         "%{public}d, %{public}d]", node->GetWindowId(), newRect.posX_, newRect.posY_, newRect.width_, newRect.height_);
 
     newRect.posX_ = newRect.posX_ - oriDisplayRect.posX_ + newDisplayRect.posX_;
     newRect.posY_ = newRect.posY_ - oriDisplayRect.posY_ + newDisplayRect.posY_;
     node->SetRequestRect(newRect);
-    WLOGFI("after update rect in display group, windowId: %{public}d, newRect: [%{public}d, %{public}d, "
+    WLOGFD("after update rect in display group, windowId: %{public}d, newRect: [%{public}d, %{public}d, "
         "%{public}d, %{public}d]", node->GetWindowId(), newRect.posX_, newRect.posY_, newRect.width_, newRect.height_);
 
     for (auto& childNode : node->children_) {
@@ -153,10 +153,10 @@ void WindowLayoutPolicy::UpdateMultiDisplayFlag()
 {
     if (displayGroupInfo_->GetAllDisplayRects().size() > 1) {
         isMultiDisplay_ = true;
-        WLOGFI("current mode is multi-display");
+        WLOGFD("current mode is multi-display");
     } else {
         isMultiDisplay_ = false;
-        WLOGFI("current mode is not multi-display");
+        WLOGFD("current mode is not multi-display");
     }
 }
 
@@ -164,7 +164,7 @@ void WindowLayoutPolicy::UpdateRectInDisplayGroupForAllNodes(DisplayId displayId
                                                              const Rect& oriDisplayRect,
                                                              const Rect& newDisplayRect)
 {
-    WLOGFI("displayId: %{public}" PRIu64", oriDisplayRect: [ %{public}d, %{public}d, %{public}d, %{public}d] "
+    WLOGFD("displayId: %{public}" PRIu64", oriDisplayRect: [ %{public}d, %{public}d, %{public}d, %{public}d] "
         "newDisplayRect: [ %{public}d, %{public}d, %{public}d, %{public}d]",
         displayId, oriDisplayRect.posX_, oriDisplayRect.posY_, oriDisplayRect.width_, oriDisplayRect.height_,
         newDisplayRect.posX_, newDisplayRect.posY_, newDisplayRect.width_, newDisplayRect.height_);
@@ -180,7 +180,7 @@ void WindowLayoutPolicy::UpdateRectInDisplayGroupForAllNodes(DisplayId displayId
                 LimitWindowToBottomRightCorner(node);
             }
         }
-        WLOGFI("Recalculate window rect in display group, displayId: %{public}" PRIu64", rootType: %{public}d",
+        WLOGFD("Recalculate window rect in display group, displayId: %{public}" PRIu64", rootType: %{public}d",
             displayId, iter.first);
     }
 }
@@ -226,7 +226,7 @@ void WindowLayoutPolicy::ProcessDisplayCreate(DisplayId displayId, const std::ma
     }
     UpdateDisplayRectAndDisplayGroupInfo(displayRectMap);
     PostProcessWhenDisplayChange();
-    WLOGFI("Process display create, displayId: %{public}" PRIu64"", displayId);
+    WLOGFD("Process display create, displayId: %{public}" PRIu64"", displayId);
 }
 
 void WindowLayoutPolicy::ProcessDisplayDestroy(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap)
@@ -256,7 +256,7 @@ void WindowLayoutPolicy::ProcessDisplayDestroy(DisplayId displayId, const std::m
 
     UpdateDisplayRectAndDisplayGroupInfo(displayRectMap);
     PostProcessWhenDisplayChange();
-    WLOGFI("Process display destroy, displayId: %{public}" PRIu64"", displayId);
+    WLOGFD("Process display destroy, displayId: %{public}" PRIu64"", displayId);
 }
 
 void WindowLayoutPolicy::ProcessDisplaySizeChangeOrRotation(DisplayId displayId,
@@ -280,7 +280,7 @@ void WindowLayoutPolicy::ProcessDisplaySizeChangeOrRotation(DisplayId displayId,
 
     UpdateDisplayRectAndDisplayGroupInfo(displayRectMap);
     PostProcessWhenDisplayChange();
-    WLOGFI("Process display change, displayId: %{public}" PRIu64"", displayId);
+    WLOGFD("Process display change, displayId: %{public}" PRIu64"", displayId);
 }
 
 void WindowLayoutPolicy::LayoutWindowNodesByRootType(const std::vector<sptr<WindowNode>>& nodeVec)
@@ -329,7 +329,7 @@ void WindowLayoutPolicy::LayoutWindowTree(DisplayId displayId)
     // ensure that the avoid area windows are traversed first
     LayoutWindowNodesByRootType(*(displayWindowTree[WindowRootNodeType::ABOVE_WINDOW_NODE]));
     if (IsFullScreenRecentWindowExist(*(displayWindowTree[WindowRootNodeType::ABOVE_WINDOW_NODE]))) {
-        WLOGFI("recent window on top, early exit layout tree");
+        WLOGFD("recent window on top, early exit layout tree");
         return;
     }
     LayoutWindowNodesByRootType(*(displayWindowTree[WindowRootNodeType::APP_WINDOW_NODE]));
@@ -341,10 +341,10 @@ void WindowLayoutPolicy::LayoutWindowNode(const sptr<WindowNode>& node)
     if (node == nullptr) {
         return;
     }
-    WLOGFI("LayoutWindowNode, window[%{public}u]", node->GetWindowId());
+    WLOGFD("LayoutWindowNode, window[%{public}u]", node->GetWindowId());
     if (node->parent_ != nullptr) { // isn't root node
         if (!node->currentVisibility_) {
-            WLOGFI("window[%{public}u] currently not visible, no need layout", node->GetWindowId());
+            WLOGFD("window[%{public}u] currently not visible, no need layout", node->GetWindowId());
             return;
         }
         UpdateLayoutRect(node);
@@ -366,7 +366,7 @@ bool WindowLayoutPolicy::IsVerticalDisplay(DisplayId displayId) const
 void WindowLayoutPolicy::UpdateClientRect(const Rect& rect, const sptr<WindowNode>& node, WindowSizeChangeReason reason)
 {
     if (node->GetWindowToken()) {
-        WLOGFI("notify client id: %{public}d, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u], reason: "
+        WLOGFD("notify client id: %{public}d, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u], reason: "
             "%{public}u", node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
         node->GetWindowToken()->UpdateWindowRect(rect, node->GetDecoStatus(), reason);
     }
@@ -509,7 +509,7 @@ void WindowLayoutPolicy::FixWindowSizeByRatioIfDragBeyondLimitRegion(const sptr<
     const auto& sizeLimits = node->GetWindowUpdatedSizeLimits();
     if (sizeLimits.maxWidth_ == sizeLimits.minWidth_ &&
         sizeLimits.maxHeight_ == sizeLimits.minHeight_) {
-        WLOGFI("window rect can not be changed");
+        WLOGFD("window rect can not be changed");
         return;
     }
     if (winRect.height_ == 0) {
@@ -518,7 +518,7 @@ void WindowLayoutPolicy::FixWindowSizeByRatioIfDragBeyondLimitRegion(const sptr<
     }
     float curRatio = static_cast<float>(winRect.width_) / static_cast<float>(winRect.height_);
     if (sizeLimits.minRatio_ <= curRatio && curRatio <= sizeLimits.maxRatio_) {
-        WLOGFI("window ratio is satisfied with limit ratio, curRatio: %{public}f", curRatio);
+        WLOGFD("window ratio is satisfied with limit ratio, curRatio: %{public}f", curRatio);
         return;
     }
 
@@ -559,7 +559,7 @@ void WindowLayoutPolicy::FixWindowSizeByRatioIfDragBeyondLimitRegion(const sptr<
         }
         winRect.width_ = static_cast<uint32_t>(static_cast<float>(winRect.height_) * newRatio);
     }
-    WLOGFI("After limit by ratio if beyond limit region, winRect: %{public}d %{public}d %{public}u %{public}u",
+    WLOGFD("After limit by ratio if beyond limit region, winRect: %{public}d %{public}d %{public}u %{public}u",
         winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
 }
 
@@ -649,7 +649,7 @@ void WindowLayoutPolicy::UpdateWindowSizeLimits(const sptr<WindowNode>& node)
     uint32_t newMinHeight = static_cast<uint32_t>(static_cast<float>(newLimits.minWidth_) / newLimits.maxRatio_);
     newLimits.minHeight_ = std::max(newMinHeight, newLimits.minHeight_);
 
-    WLOGFI("[Update SizeLimits] winId: %{public}u, Width: [max:%{public}u, min:%{public}u], Height: [max:%{public}u, "
+    WLOGFD("[Update SizeLimits] winId: %{public}u, Width: [max:%{public}u, min:%{public}u], Height: [max:%{public}u, "
         "min:%{public}u], Ratio: [max:%{public}f, min:%{public}f]", node->GetWindowId(), newLimits.maxWidth_,
         newLimits.minWidth_, newLimits.maxHeight_, newLimits.minHeight_, newLimits.maxRatio_, newLimits.minRatio_);
     node->SetWindowUpdatedSizeLimits(newLimits);
@@ -742,7 +742,7 @@ void WindowLayoutPolicy::UpdateFloatingWindowSizeBySizeLimits(const sptr<WindowN
         // if drag width or corner, use width to fix size.
         winRect.height_ = static_cast<uint32_t>(static_cast<float>(winRect.width_) / newRatio);
     }
-    WLOGFI("After limit by customize config, winRect: %{public}d %{public}d %{public}u %{public}u",
+    WLOGFD("After limit by customize config, winRect: %{public}d %{public}d %{public}u %{public}u",
         winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
 }
 
@@ -852,7 +852,7 @@ void WindowLayoutPolicy::LimitWindowPositionWhenDrag(const sptr<WindowNode>& nod
                 oriWinRect.posY_ + static_cast<int32_t>(oriWinRect.height_) - winRect.posY_);
         }
     }
-    WLOGFI("After limit by position, winRect: %{public}d %{public}d %{public}u %{public}u",
+    WLOGFD("After limit by position, winRect: %{public}d %{public}d %{public}u %{public}u",
         winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
 }
 
@@ -904,7 +904,7 @@ void WindowLayoutPolicy::LimitWindowPositionWhenInitRectOrMove(const sptr<Window
             }
         }
     }
-    WLOGFI("After limit by position if init or move, winRect: %{public}d %{public}d %{public}u %{public}u",
+    WLOGFD("After limit by position if init or move, winRect: %{public}d %{public}d %{public}u %{public}u",
         winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
 }
 
@@ -919,7 +919,7 @@ DockWindowShowState WindowLayoutPolicy::GetDockWindowShowState(DisplayId display
 
         dockWinRect = node->GetWindowRect();
         auto displayRect = displayGroupInfo_->GetDisplayRect(displayId);
-        WLOGFI("begin dockWinRect :[%{public}d, %{public}d, %{public}u, %{public}u]",
+        WLOGFD("begin dockWinRect :[%{public}d, %{public}d, %{public}u, %{public}u]",
             dockWinRect.posX_, dockWinRect.posY_, dockWinRect.width_, dockWinRect.height_);
         if (dockWinRect.height_ < dockWinRect.width_) {
             if (static_cast<uint32_t>(dockWinRect.posY_) + dockWinRect.height_ == displayRect.height_) {
@@ -988,7 +988,7 @@ void WindowLayoutPolicy::UpdateLimitRect(const sptr<WindowNode>& node, Rect& lim
     }
     limitRect.height_ = static_cast<uint32_t>(limitH < 0 ? 0 : limitH);
     limitRect.width_ = static_cast<uint32_t>(limitW < 0 ? 0 : limitW);
-    WLOGFI("Type: %{public}d, limitRect: %{public}d %{public}d %{public}u %{public}u",
+    WLOGFD("Type: %{public}d, limitRect: %{public}d %{public}d %{public}u %{public}u",
         node->GetWindowType(), limitRect.posX_, limitRect.posY_, limitRect.width_, limitRect.height_);
 }
 
@@ -999,7 +999,7 @@ void WindowLayoutPolicy::Reset()
 float WindowLayoutPolicy::GetVirtualPixelRatio(DisplayId displayId) const
 {
     float virtualPixelRatio = displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
-    WLOGFI("GetVirtualPixel success. displayId:%{public}" PRIu64", vpr:%{public}f", displayId, virtualPixelRatio);
+    WLOGFD("GetVirtualPixel success. displayId:%{public}" PRIu64", vpr:%{public}f", displayId, virtualPixelRatio);
     return virtualPixelRatio;
 }
 
@@ -1018,7 +1018,7 @@ static void SetBounds(const sptr<WindowNode>& node, const Rect& winRect, const R
 {
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT ||
         node->GetWindowSizeChangeReason() == WindowSizeChangeReason::TRANSFORM) {
-        WLOGFI("not need to update bounds");
+        WLOGFD("not need to update bounds");
         return;
     }
     // set surface node gravity based on WindowSizeChangeReason
@@ -1061,7 +1061,7 @@ void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const
     auto SetBoundsFunc = [weakNode, winRect, preRect]() {
         auto winNode = weakNode.promote();
         if (winNode == nullptr) {
-            WLOGFI("winNode is nullptr");
+            WLOGFD("winNode is nullptr");
             return;
         }
         SetBounds(winNode, winRect, preRect);
