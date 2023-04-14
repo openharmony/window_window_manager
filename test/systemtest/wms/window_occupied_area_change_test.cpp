@@ -15,6 +15,7 @@
 
 // gtest
 #include <gtest/gtest.h>
+#include "display_manager_proxy.h"
 #include "wm_common.h"
 #include "window_test_utils.h"
 using namespace testing;

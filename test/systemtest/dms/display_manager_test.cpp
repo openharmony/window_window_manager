@@ -17,6 +17,7 @@
 #include <ui/rs_surface_node.h>
 #include "display_test_utils.h"
 #include "display.h"
+#include "display_manager_proxy.h"
 #include "screen.h"
 #include "surface_draw.h"
 #include "wm_common.h"

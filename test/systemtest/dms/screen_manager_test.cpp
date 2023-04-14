@@ -17,6 +17,7 @@
 
 #include "common_test_utils.h"
 #include "display_test_utils.h"
+#include "display_manager_proxy.h"
 #include "future.h"
 #include "screen.h"
 #include "surface_draw.h"

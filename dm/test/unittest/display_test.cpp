@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "display_manager.h"
+#include "display_manager_proxy.h"
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
 #include "display_cutout_controller.h"

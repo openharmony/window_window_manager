@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "display_manager_adapter.h"
+#include "display_manager_proxy.h"
 
 using namespace testing;
 using namespace testing::ext;

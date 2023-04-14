@@ -38,7 +38,7 @@ group("unittest") {
 ohos_unittest("wm_window_manager_test") {
   module_out_path = module_out_path
 
-  include_dirs = [ "//foundation/window/window_manager/wm/src" ]
+  include_dirs = [ "${window_base_path}/wm/src" ]
   sources = [ "window_manager_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
@@ -148,13 +148,15 @@ ohos_unittest("wm_window_manager_agent_proxy_test") {
 ## Build wm_unittest_common.a {{{
 config("wm_unittest_common_public_config") {
   include_dirs = [
-    "//foundation/window/window_manager/test/common/mock",
-    "//foundation/window/window_manager/wm/include",
-    "//foundation/window/window_manager/wm/include/zidl",
-    "//foundation/window/window_manager/wmserver/include",
-    "//foundation/window/window_manager/wmserver/include/window_snapshot",
-    "//foundation/window/window_manager/interfaces/innerkits/wm",
-    "//foundation/window/window_manager/utils/include",
+    "${window_base_path}/test/common/mock",
+    "${window_base_path}/dm/include",
+    "${window_base_path}/dmserver/include",
+    "${window_base_path}/wm/include",
+    "${window_base_path}/wm/include/zidl",
+    "${window_base_path}/wmserver/include",
+    "${window_base_path}/wmserver/include/window_snapshot",
+    "${window_base_path}/interfaces/innerkits/wm",
+    "${window_base_path}/utils/include",
     "//commonlibrary/c_utils/base/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
@@ -178,8 +180,8 @@ ohos_static_library("wm_unittest_common") {
 
   public_configs = [
     ":wm_unittest_common_public_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
-    "//foundation/window/window_manager/resources/config/build:testcase_flags",
+    "${window_base_path}/resources/config/build:coverage_flags",
+    "${window_base_path}/resources/config/build:testcase_flags",
   ]
 
   public_deps = [
@@ -188,8 +190,10 @@ ohos_static_library("wm_unittest_common") {
     # need delete it for abilitycontext
     "${ability_runtime_inner_api_path}/ability_manager:ability_manager",
     "${window_base_path}/dm:libdm_static",
+    "${window_base_path}/dmserver:libdms",
     "${window_base_path}/utils:libwmutil_static",
     "${window_base_path}/wm:libwm_static",
+    "${window_base_path}/wmserver:libwms",
     "//commonlibrary/c_utils/base:utils",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent",
     "//foundation/arkui/napi:ace_napi",
@@ -197,8 +201,6 @@ ohos_static_library("wm_unittest_common") {
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
     "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
-    "//foundation/window/window_manager/dmserver:libdms",
-    "//foundation/window/window_manager/wmserver:libwms",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
