@@ -27,6 +27,9 @@ bool ScreenGroupInfo::Marshalling(Parcel &parcel) const
     if (!parcel.WriteUint32(size)) {
         return false;
     }
+    if (size > MAX_SCREEN_GROUP_INFO_SIZE) {
+        return false;
+    }
     for (size_t i = 0; i < size; i++) {
         if (!parcel.WriteInt32(position_[i].posX_) || !parcel.WriteInt32(position_[i].posY_)) {
             return false;
@@ -59,6 +62,9 @@ bool ScreenGroupInfo::InnerUnmarshalling(Parcel& parcel)
     combination_ = (ScreenCombination) combination;
     uint32_t size;
     if (!parcel.ReadUint32(size)) {
+        return false;
+    }
+    if (size > MAX_SCREEN_GROUP_INFO_SIZE) {
         return false;
     }
     for (size_t i = 0; i < size; i++) {
