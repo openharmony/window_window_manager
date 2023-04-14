@@ -77,6 +77,7 @@ public:
     DEFINE_VAR_FUNC_GET_SET(WaterfallDisplayAreaRects, WaterfallDisplayAreaRects, waterfallDisplayAreaRects);
     DEFINE_VAR_FUNC_GET_SET(std::vector<DMRect>, BoundingRects, boundingRects);
 private:
+    const static uint32_t MAX_CUTOUT_INFO_SIZE = 20;
     bool WriteBoundingRectsVector(const std::vector<DMRect>& boundingRects, Parcel &parcel) const;
     static bool ReadBoundingRectsVector(std::vector<DMRect>& unmarBoundingRects, Parcel &parcel);
     static bool ReadWaterfallDisplayAreaRects(WaterfallDisplayAreaRects& waterfallDisplayAreaRects, Parcel &parcel);

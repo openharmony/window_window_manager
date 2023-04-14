@@ -771,20 +771,19 @@ bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationA
         WLOGFE("SetRotation error, cannot get screen with screenId: %{public}" PRIu64, screenId);
         return false;
     }
-    if (rotationAfter != screen->rotation_) {
-        WLOGI("set orientation. rotation %{public}u", rotationAfter);
-        ScreenId rsScreenId;
-        if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
-            WLOGE("Convert to RsScreenId fail. screenId: %{public}" PRIu64"", screenId);
-            return false;
-        }
-        OpenRotationSyncTransaction();
-        SetScreenRotateAnimation(screen, screenId, rotationAfter, withAnimation);
-        screen->rotation_ = rotationAfter;
-    } else {
-        WLOGI("rotation not changed. screen %{public}" PRIu64" rotation %{public}u", screenId, rotationAfter);
+    if (rotationAfter == screen->rotation_) {
+        WLOGFD("rotation not changed. screen %{public}" PRIu64" rotation %{public}u", screenId, rotationAfter);
         return false;
     }
+    WLOGFD("set orientation. rotation %{public}u", rotationAfter);
+    ScreenId rsScreenId;
+    if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
+        WLOGE("Convert to RsScreenId fail. screenId: %{public}" PRIu64"", screenId);
+        return false;
+    }
+    OpenRotationSyncTransaction();
+    SetScreenRotateAnimation(screen, screenId, rotationAfter, withAnimation);
+    screen->rotation_ = rotationAfter;
 
     NotifyScreenChanged(screen->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
     // Notify rotation event to AbstractDisplayController

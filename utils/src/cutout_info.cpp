@@ -55,7 +55,11 @@ CutoutInfo *CutoutInfo::Unmarshalling(Parcel &parcel)
 
 bool CutoutInfo::WriteBoundingRectsVector(const std::vector<DMRect>& boundingRects, Parcel &parcel) const
 {
-    if (!parcel.WriteUint32(static_cast<uint32_t>(boundingRects.size()))) {
+    uint32_t size = static_cast<uint32_t>(boundingRects.size());
+    if (!parcel.WriteUint32(size)) {
+        return false;
+    }
+    if (size > MAX_CUTOUT_INFO_SIZE) {
         return false;
     }
     for (DMRect rect : boundingRects) {
@@ -71,6 +75,9 @@ bool CutoutInfo::ReadBoundingRectsVector(std::vector<DMRect>& unmarBoundingRects
 {
     uint32_t size;
     if (!parcel.ReadUint32(size)) {
+        return false;
+    }
+    if (size > MAX_CUTOUT_INFO_SIZE) {
         return false;
     }
     for (uint32_t index = 0; index < size; index++) {

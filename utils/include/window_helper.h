@@ -117,7 +117,8 @@ public:
         return mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
     }
 
-    static inline bool IsAppFullOrSplitWindow(WindowType type, WindowMode mode) {
+    static inline bool IsAppFullOrSplitWindow(WindowType type, WindowMode mode)
+    {
         if (!IsAppWindow(type)) {
             return false;
         }
