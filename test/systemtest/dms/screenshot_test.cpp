@@ -18,6 +18,7 @@
 
 #include "common_test_utils.h"
 #include "display_test_utils.h"
+#include "display_manager_proxy.h"
 #include "future.h"
 #include "pixel_map.h"
 #include "screenshot_listener_future.h"

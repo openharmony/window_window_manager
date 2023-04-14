@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include "display_manager_proxy.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
 #include "window_impl.h"

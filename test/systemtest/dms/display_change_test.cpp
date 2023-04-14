@@ -18,6 +18,7 @@
 #include "display_cutout_controller.h"
 #include "display_info.h"
 #include "display_manager.h"
+#include "display_manager_proxy.h"
 #include "screen_manager.h"
 #include "screen_manager/rs_screen_mode_info.h"
 #include "window_manager_hilog.h"

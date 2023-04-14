@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "display_manager_proxy.h"
 #include "window_test_utils.h"
 #include <ability_context.h>
 #include "window_helper.h"
