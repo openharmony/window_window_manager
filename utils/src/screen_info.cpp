@@ -29,6 +29,9 @@ bool ScreenInfo::Marshalling(Parcel &parcel) const
     if (!res) {
         return false;
     }
+    if (modes_.size() > MAX_SUPPORTED_SCREEN_MODES_SIZE) {
+        return false;
+    }
     for (uint32_t modeIndex = 0; modeIndex < modes_.size(); modeIndex++) {
         if (parcel.WriteUint32(modes_[modeIndex]->height_) &&
             parcel.WriteUint32(modes_[modeIndex]->width_) &&
@@ -69,6 +72,9 @@ bool ScreenInfo::InnerUnmarshalling(Parcel& parcel)
         parcel.ReadUint32(orientation) && parcel.ReadUint32(sourceMode) && parcel.ReadUint32(type) &&
         parcel.ReadUint32(modeId_) && parcel.ReadUint32(size);
     if (!res1) {
+        return false;
+    }
+    if (size > MAX_SUPPORTED_SCREEN_MODES_SIZE) {
         return false;
     }
     modes_.clear();

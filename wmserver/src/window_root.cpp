@@ -459,6 +459,7 @@ WMError WindowRoot::ToggleShownStateForAllAppWindows()
                 mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
                 property->SetWindowMode(mode);
                 // when change mode, need to reset shadow and radius
+                windowNode->SetWindowMode(mode);
                 WindowSystemEffect::SetWindowEffect(windowNode);
                 windowNode->GetWindowToken()->RestoreSplitWindowMode(static_cast<uint32_t>(mode));
             }
@@ -675,9 +676,8 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
     }
 
     if (fromStartingWin) {
-        if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+        if (WindowHelper::IsFullScreenWindow(node->GetWindowMode()) &&
             WindowHelper::IsAppWindow(node->GetWindowType()) && !node->isPlayAnimationShow_) {
-            container->NotifyDockWindowStateChanged(node, false);
             WMError res = MinimizeStructuredAppWindowsExceptSelf(node);
             if (res != WMError::WM_OK) {
                 WLOGFE("Minimize other structured window failed");
@@ -685,15 +685,14 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
                 return res;
             }
         }
-        if (WindowHelper::IsSplitWindowMode(node->GetWindowMode()) &&
-            WindowHelper::IsAppWindow(node->GetWindowType())) {
-            container->NotifyDockWindowStateChanged(node, false);
-        }
         WMError res = container->ShowStartingWindow(node);
         if (res != WMError::WM_OK) {
             MinimizeApp::ClearNodesWithReason(MinimizeReason::OTHER_WINDOW);
         }
         return res;
+    }
+    if (WindowHelper::IsAppFullOrSplitWindow(node->GetWindowType(), node->GetWindowMode())) {
+        container->NotifyDockWindowStateChanged(node, false);
     }
     // limit number of main window
     uint32_t mainWindowNumber = container->GetWindowCountByType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
