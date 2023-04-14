@@ -150,6 +150,16 @@ sptr<WindowNode> WindowRoot::GetWindowNode(uint32_t windowId) const
     return iter->second;
 }
 
+sptr<WindowNode> WindowRoot::GetWindowNodeByMissionId(uint32_t missionId) const
+{
+    for (const auto& it : windowNodeMap_) {
+        if (it.second && it.second->abilityInfo_.missionId_ == missionId) {
+            return it.second;
+        }
+    }
+    return nullptr;
+}
+
 void WindowRoot::GetBackgroundNodesByScreenId(ScreenId screenGroupId, std::vector<sptr<WindowNode>>& windowNodes)
 {
     for (const auto& it : windowNodeMap_) {

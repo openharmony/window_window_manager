@@ -1234,6 +1234,18 @@ void WindowManagerService::NotifyDumpInfoResult(const std::vector<std::string>& 
     }
 }
 
+WMError WindowManagerService::GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
+    std::vector<sptr<RSWindowAnimationTarget>>& targets)
+{
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("get window animation targets permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    return PostSyncTask([this, missionIds, &targets]() {
+        return RemoteAnimation::GetWindowAnimationTargets(missionIds, targets);
+    });
+}
+
 WMError WindowManagerService::GetSystemConfig(SystemConfig& systemConfig)
 {
     systemConfig = systemConfig_;
