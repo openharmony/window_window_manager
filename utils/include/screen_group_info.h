@@ -36,6 +36,7 @@ public:
     DEFINE_VAR_FUNC_GET_SET(std::vector<Point>, Position, position);
     DEFINE_VAR_DEFAULT_FUNC_GET(ScreenCombination, Combination, combination, ScreenCombination::SCREEN_ALONE);
 private:
+    const static uint32_t MAX_SCREEN_GROUP_INFO_SIZE = 20;
     bool InnerUnmarshalling(Parcel& parcel);
 };
 } // namespace OHOS::Rosen
