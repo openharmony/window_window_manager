@@ -74,6 +74,7 @@ public:
         TRANS_ID_SET_WINDOW_GRAVITY,
         TRANS_ID_DISPATCH_KEY_EVENT,
         TRANS_ID_NOTIFY_DUMP_INFO_RESULT,
+        TRANS_ID_GET_WINDOW_ANIMATION_TARGETS,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -118,6 +119,8 @@ public:
     virtual WMError SetGestureNavigaionEnabled(bool enable) = 0;
     virtual void DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event) = 0;
     virtual void NotifyDumpInfoResult(const std::vector<std::string>& info) {};
+    virtual WMError GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
+        std::vector<sptr<RSWindowAnimationTarget>>& targets) = 0;
 };
 }
 }

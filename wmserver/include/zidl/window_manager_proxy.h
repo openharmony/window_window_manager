@@ -71,6 +71,8 @@ public:
     WMError SetGestureNavigaionEnabled(bool enable) override;
     void DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event) override;
     void NotifyDumpInfoResult(const std::vector<std::string>& info) override;
+    WMError GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
+        std::vector<sptr<RSWindowAnimationTarget>>& targets) override;
 private:
     static inline BrokerDelegator<WindowManagerProxy> delegator_;
 };
