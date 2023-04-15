@@ -28,8 +28,11 @@ namespace {
 }
 
 AbstractScreen::AbstractScreen(sptr<AbstractScreenController> screenController, const std::string& name, ScreenId dmsId,
-    ScreenId rsId) : name_(name), dmsId_(dmsId), rsId_(rsId), screenController_(screenController)
+    ScreenId rsId) : dmsId_(dmsId), rsId_(rsId), screenController_(screenController)
 {
+    if (name != "") {
+        name_ = name;
+    }
 }
 
 AbstractScreen::~AbstractScreen()
@@ -373,6 +376,31 @@ Rotation AbstractScreen::CalcRotation(Orientation orientation) const
             return Rotation::ROTATION_0;
         }
     }
+}
+
+const std::string& AbstractScreen::GetScreenName() const
+{
+    return name_;
+}
+
+void AbstractScreen::SetPhyWidth(uint32_t phyWidth)
+{
+    phyWidth_ = phyWidth;
+}
+
+void AbstractScreen::SetPhyHeight(uint32_t phyHeight)
+{
+    phyHeight_ = phyHeight;
+}
+
+uint32_t AbstractScreen::GetPhyWidth() const
+{
+    return phyWidth_;
+}
+
+uint32_t AbstractScreen::GetPhyHeight() const
+{
+    return phyHeight_;
 }
 
 AbstractScreenGroup::AbstractScreenGroup(sptr<AbstractScreenController> screenController, ScreenId dmsId, ScreenId rsId,

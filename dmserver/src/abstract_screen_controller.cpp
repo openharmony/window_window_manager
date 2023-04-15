@@ -303,16 +303,20 @@ void AbstractScreenController::ProcessScreenConnected(ScreenId rsScreenId)
 sptr<AbstractScreen> AbstractScreenController::InitAndGetScreen(ScreenId rsScreenId)
 {
     ScreenId dmsScreenId = screenIdManager_.CreateAndGetNewScreenId(rsScreenId);
-    std::ostringstream buffer;
-    buffer<<DEFAULT_SCREEN_NAME<<"_"<<dmsScreenId;
-    std::string name = buffer.str();
+    RSScreenCapability screenCapability = rsInterface_.GetScreenCapability(rsScreenId);
+    WLOGFD("Screen name is %{public}s, phyWidth is %{public}u, phyHeight is %{public}u",
+        screenCapability.GetName().c_str(), screenCapability.GetPhyWidth(), screenCapability.GetPhyHeight());
+
     sptr<AbstractScreen> absScreen =
-        new(std::nothrow) AbstractScreen(this, name, dmsScreenId, rsScreenId);
+        new(std::nothrow) AbstractScreen(this, screenCapability.GetName(), dmsScreenId, rsScreenId);
     if (absScreen == nullptr) {
         WLOGFE("new AbstractScreen failed.");
         screenIdManager_.DeleteScreenId(dmsScreenId);
         return nullptr;
     }
+    absScreen->SetPhyWidth(screenCapability.GetPhyWidth());
+    absScreen->SetPhyHeight(screenCapability.GetPhyHeight());
+
     if (!InitAbstractScreenModesInfo(absScreen)) {
         screenIdManager_.DeleteScreenId(dmsScreenId);
         WLOGFE("InitAndGetScreen failed.");

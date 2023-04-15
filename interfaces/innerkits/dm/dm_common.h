@@ -41,7 +41,6 @@ enum class PowerStateChangeReason : uint32_t {
     POWER_BUTTON,
 };
 
-
 /**
  * @brief Enumerates the state of the screen power.
  */
@@ -58,9 +57,13 @@ enum class ScreenPowerState : uint32_t {
  * @brief Enumerates the state of the display.
  */
 enum class DisplayState : uint32_t {
-    ON,
-    OFF,
     UNKNOWN,
+    OFF,
+    ON,
+    DOZE,
+    DOZE_SUSPEND,
+    VR,
+    ON_SUSPEND,
 };
 
 /**

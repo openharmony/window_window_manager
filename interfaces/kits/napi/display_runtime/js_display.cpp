@@ -29,10 +29,14 @@ using namespace AbilityRuntime;
 constexpr size_t ARGC_ONE = 1;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsDisplay"};
-    const std::map<DisplayState, DisplayStateMode> NATIVE_TO_JS_DISPLAY_STATE_MAP {
-        { DisplayState::UNKNOWN, DisplayStateMode::STATE_UNKNOWN },
-        { DisplayState::OFF,     DisplayStateMode::STATE_OFF     },
-        { DisplayState::ON,      DisplayStateMode::STATE_ON      },
+    const std::map<DisplayState,      DisplayStateMode> NATIVE_TO_JS_DISPLAY_STATE_MAP {
+        { DisplayState::UNKNOWN,      DisplayStateMode::STATE_UNKNOWN      },
+        { DisplayState::OFF,          DisplayStateMode::STATE_OFF          },
+        { DisplayState::ON,           DisplayStateMode::STATE_ON           },
+        { DisplayState::DOZE,         DisplayStateMode::STATE_DOZE         },
+        { DisplayState::DOZE_SUSPEND, DisplayStateMode::STATE_DOZE_SUSPEND },
+        { DisplayState::VR,           DisplayStateMode::STATE_VR           },
+        { DisplayState::ON_SUSPEND,   DisplayStateMode::STATE_ON_SUSPEND   },
     };
 }
 
@@ -191,24 +195,24 @@ NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& display)
         return engine.CreateUndefined();
     }
     object->SetProperty("id", CreateJsValue(engine, static_cast<uint32_t>(info->GetDisplayId())));
-    object->SetProperty("width", CreateJsValue(engine, info->GetWidth()));
-    object->SetProperty("height", CreateJsValue(engine, info->GetHeight()));
-    object->SetProperty("refreshRate", CreateJsValue(engine, info->GetRefreshRate()));
     object->SetProperty("name", CreateJsValue(engine, info->GetName()));
-    object->SetProperty("alive", CreateJsValue(engine, true));
+    object->SetProperty("alive", CreateJsValue(engine, info->GetAliveStatus()));
     if (NATIVE_TO_JS_DISPLAY_STATE_MAP.count(info->GetDisplayState()) != 0) {
         object->SetProperty("state", CreateJsValue(engine, NATIVE_TO_JS_DISPLAY_STATE_MAP.at(info->GetDisplayState())));
     } else {
         object->SetProperty("state", CreateJsValue(engine, DisplayStateMode::STATE_UNKNOWN));
     }
 
+    object->SetProperty("refreshRate", CreateJsValue(engine, info->GetRefreshRate()));
     object->SetProperty("rotation", CreateJsValue(engine, info->GetRotation()));
-    object->SetProperty("orientation", CreateJsValue(engine, info->GetDisplayOrientation()));
+    object->SetProperty("width", CreateJsValue(engine, info->GetWidth()));
+    object->SetProperty("height", CreateJsValue(engine, info->GetHeight()));
     object->SetProperty("densityDPI", CreateJsValue(engine, info->GetVirtualPixelRatio() * DOT_PER_INCH));
+    object->SetProperty("orientation", CreateJsValue(engine, info->GetDisplayOrientation()));
     object->SetProperty("densityPixels", CreateJsValue(engine, info->GetVirtualPixelRatio()));
     object->SetProperty("scaledDensity", CreateJsValue(engine, info->GetVirtualPixelRatio()));
-    object->SetProperty("xDPI", CreateJsValue(engine, 0.0f));
-    object->SetProperty("yDPI", CreateJsValue(engine, 0.0f));
+    object->SetProperty("xDPI", CreateJsValue(engine, info->GetXDpi()));
+    object->SetProperty("yDPI", CreateJsValue(engine, info->GetYDpi()));
     if (jsDisplayObj == nullptr || jsDisplayObj->Get() == nullptr) {
         std::unique_ptr<JsDisplay> jsDisplay = std::make_unique<JsDisplay>(display);
         object->SetNativePointer(jsDisplay.release(), JsDisplay::Finalizer, nullptr);

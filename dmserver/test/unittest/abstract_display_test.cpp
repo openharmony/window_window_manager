@@ -57,13 +57,13 @@ void AbstractDisplayTest::SetUp()
     sptr<SupportedScreenModes> info = new SupportedScreenModes(modesInfo);
     absController = nullptr;
     absScreen = new AbstractScreen(absController, name, 1, 1);
-    absDisplay = new AbstractDisplay(id, name, info, absScreen);
+    absDisplay = new AbstractDisplay(id, info, absScreen);
     modesInfo.width_ = 800;
     modesInfo.height_ = 2560;
-    absDisplay2 = new AbstractDisplay(id, name, info, absScreen);
+    absDisplay2 = new AbstractDisplay(id, info, absScreen);
     modesInfo.width_ = 2560;
     modesInfo.height_ = 2560;
-    absDisplay3 = new AbstractDisplay(id, name, info, absScreen);
+    absDisplay3 = new AbstractDisplay(id, info, absScreen);
 }
 
 void AbstractDisplayTest::TearDown()
