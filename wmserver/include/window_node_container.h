@@ -129,6 +129,8 @@ public:
     static void SetMaxMainFloatingWindowNumber(uint32_t maxNumber);
     void SetDisplayOrientationFromWindow(sptr<WindowNode>& node, bool withAnimation);
     bool HasMainFullScreenWindowShown();
+    static bool GetAnimateTransactionEnabled();
+
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
     sptr<WindowNode> FindRoot(WindowType type) const;
@@ -208,6 +210,7 @@ private:
     // if isFloatWindowHigher_ is true, FloatWindow should be above the full screen window.
     static bool isFloatWindowAboveFullWindow_;
     static uint32_t maxMainFloatingWindowNumber_;
+    static bool isAnimateTransactionEnabled_;
 };
 } // namespace Rosen
 } // namespace OHOS

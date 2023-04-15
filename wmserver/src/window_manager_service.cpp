@@ -361,7 +361,7 @@ void WindowManagerService::ConfigureWindowManagerService()
     if (item.IsInts()) {
         auto numbers = *item.intsValue_;
         if (numbers.size() == 1 && numbers[0] > 0) {
-            WindowLayoutPolicy::SetMaxFloatingWindowSize(numbers[0]);
+            WindowLayoutPolicy::SetMaxFloatingWindowSize(static_cast<uint32_t>(numbers[0]));
         }
     }
 }

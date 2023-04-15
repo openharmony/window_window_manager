@@ -446,9 +446,18 @@ void WindowController::NotifyInputCallingWindowRectAndOccupiedAreaChange(const s
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
         occupiedArea, safeRect.height_);
 
-    callingWindow->GetWindowToken()->UpdateOccupiedAreaAndRect(info, rect);
+    if (WindowNodeContainer::GetAnimateTransactionEnabled()) {
+        auto syncTransactionController = RSSyncTransactionController::GetInstance();
+        if (syncTransactionController) {
+            callingWindow->GetWindowToken()->UpdateOccupiedAreaAndRect(info, rect,
+                syncTransactionController->GetRSTransaction());
+        }
+    } else {
+        callingWindow->GetWindowToken()->UpdateOccupiedAreaAndRect(info, rect);
+    }
 
     FlushWindowInfo(callingWindow->GetWindowId());
+    accessibilityConnection_->NotifyAccessibilityWindowInfo(callingWindow, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
     WLOGFD("Calling windowId: %{public}u, calling winRect: [%{public}d, %{public}d, %{public}u, %{public}u], "
         "occupiedArea: [%{public}d, %{public}d, %{public}u, %{public}u], safeHeight: %{public}u",
         callingWindow->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_,

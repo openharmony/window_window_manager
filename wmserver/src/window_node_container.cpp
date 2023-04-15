@@ -58,6 +58,7 @@ namespace {
 AnimationConfig WindowNodeContainer::animationConfig_;
 bool WindowNodeContainer::isFloatWindowAboveFullWindow_ = false;
 uint32_t WindowNodeContainer::maxMainFloatingWindowNumber_ = 100;
+bool WindowNodeContainer::isAnimateTransactionEnabled_ = false;
 
 WindowNodeContainer::WindowNodeContainer(const sptr<DisplayInfo>& displayInfo, ScreenId displayGroupId)
 {
@@ -87,6 +88,7 @@ WindowNodeContainer::WindowNodeContainer(const sptr<DisplayInfo>& displayInfo, S
     avoidController_ = new AvoidAreaController(focusedWindow_);
     WindowInnerManager::GetInstance().NotifyDisplayLimitRectChange(
         DisplayGroupInfo::GetInstance().GetAllDisplayRects());
+    isAnimateTransactionEnabled_ = system::GetParameter("persist.window.animateTransaction.enabled", "0")  == "1";
 }
 
 WindowNodeContainer::~WindowNodeContainer()
@@ -724,6 +726,10 @@ bool WindowNodeContainer::AddAppSurfaceNodeOnRSTree(sptr<WindowNode>& node)
 
 void WindowNodeContainer::OpenInputMethodSyncTransaction()
 {
+    if (!isAnimateTransactionEnabled_) {
+        WLOGD("InputMethodSyncTransaction is not enabled");
+        return;
+    }
     // Before open transaction, it must flush first.
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (!transactionProxy) {
@@ -734,6 +740,7 @@ void WindowNodeContainer::OpenInputMethodSyncTransaction()
     if (syncTransactionController) {
         syncTransactionController->OpenSyncTransaction();
     }
+    WLOGD("OpenInputMethodSyncTransaction");
 }
 
 bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId displayId, DisplayId parentDisplayId,
@@ -782,6 +789,7 @@ bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId disp
         windowGravity != WindowGravity::WINDOW_GRAVITY_FLOAT &&
         !animationPlayed) { // add keyboard with animation
         auto timingProtocol = animationConfig_.keyboardAnimationConfig_.durationIn_;
+        OpenInputMethodSyncTransaction();
         RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationConfig_.curve_, updateRSTreeFunc);
     } else {
         WLOGFD("add node without animation");
@@ -840,10 +848,10 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
     } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         windowGravity != WindowGravity::WINDOW_GRAVITY_FLOAT && !animationPlayed) {
         // remove keyboard with animation
+        OpenInputMethodSyncTransaction();
         auto timingProtocol = animationConfig_.keyboardAnimationConfig_.durationOut_;
         RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationConfig_.curve_, updateRSTreeFunc);
     } else {
-        WLOGFD("remove without animation");
         updateRSTreeFunc();
     }
     return true;
@@ -1313,7 +1321,15 @@ void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& 
         }
 
         sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, overlapRect);
-        callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info);
+        if (isAnimateTransactionEnabled_) {
+            auto syncTransactionController = RSSyncTransactionController::GetInstance();
+            if (syncTransactionController) {
+                callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info,
+                    syncTransactionController->GetRSTransaction());
+            }
+        } else {
+            callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info);
+        }
 
         WLOGD("keyboard size change callingWindow: [%{public}s, %{public}u], "
             "overlap rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
@@ -2499,6 +2515,11 @@ void WindowNodeContainer::ClearWindowPairSnapshot(DisplayId displayId)
 bool WindowNodeContainer::IsScreenLocked()
 {
     return isScreenLocked_;
+}
+
+bool WindowNodeContainer::GetAnimateTransactionEnabled()
+{
+    return isAnimateTransactionEnabled_;
 }
 } // namespace Rosen
 } // namespace OHOS
