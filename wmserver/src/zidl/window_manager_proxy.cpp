@@ -962,7 +962,7 @@ WMError WindowManagerProxy::GetWindowAnimationTargets(std::vector<uint32_t> miss
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        WLOGFE("write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteUInt32Vector(missionIds)) {
