@@ -410,13 +410,13 @@ HWTEST_F(WindowManagerServiceTest, GetWindowAnimationTargets01, Function | Small
     wms->windowController_->windowRoot_->displayIdMap_[compNode->GetDisplayId()] = { compNode->GetDisplayId() };
     container->appWindowNode_->children_.push_back(appNode);
     container->appWindowNode_->children_.push_back(compNode);
+    RemoteAnimation::SetWindowControllerAndRoot(wms->windowController_, wms->windowController_->windowRoot_);
     std::vector<uint32_t> missionIds;
     missionIds.push_back(1);
     missionIds.push_back(2);
     std::vector<sptr<RSWindowAnimationTarget>> targets;
-    WMError ret = wms->GetWindowAnimationTargets(missionIds, targets);
-    ASSERT_TRUE(ret == WMError::WM_OK);
-    ASSERT_TRUE(targets.size() == 2);
+    ASSERT_EQ(WMError::WM_OK, wms->GetWindowAnimationTargets(missionIds, targets));
+    ASSERT_EQ(2, targets.size());
 }
 }
 }
