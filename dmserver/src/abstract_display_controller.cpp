@@ -530,10 +530,7 @@ void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realA
         }
         if (dummyDisplay_ == nullptr) {
             DisplayId displayId = displayCount_.fetch_add(1);
-            std::ostringstream buffer;
-            buffer<<"display_"<<displayId;
-            std::string name = buffer.str();
-            sptr<AbstractDisplay> display = new(std::nothrow) AbstractDisplay(displayId, name, info, realAbsScreen);
+            sptr<AbstractDisplay> display = new(std::nothrow) AbstractDisplay(displayId, info, realAbsScreen);
             if (display == nullptr) {
                 WLOGFE("create display failed");
                 return;
@@ -599,10 +596,7 @@ void AbstractDisplayController::AddScreenToExpandLocked(sptr<AbstractScreen> abs
         return;
     }
     DisplayId displayId = displayCount_.fetch_add(1);
-    std::ostringstream buffer;
-    buffer<<"display_"<<displayId;
-    std::string name = buffer.str();
-    sptr<AbstractDisplay> display = new AbstractDisplay(displayId, name, info, absScreen);
+    sptr<AbstractDisplay> display = new AbstractDisplay(displayId, info, absScreen);
     Point point = abstractScreenController_->GetAbstractScreenGroup(absScreen->groupDmsId_)->
         GetChildPosition(absScreen->dmsId_);
     display->SetOffset(point.posX_, point.posY_);

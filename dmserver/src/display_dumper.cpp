@@ -195,8 +195,10 @@ DMError DisplayDumper::DumpSpecifiedScreenInfo(ScreenId screenId, std::string& d
         WLOGFE("screen is null");
         return DMError::DM_ERROR_NULLPTR;
     }
-    const std::string& screenName = screen->name_.size() <= SCREEN_NAME_MAX_LENGTH ?
-        screen->name_ : screen->name_.substr(0, SCREEN_NAME_MAX_LENGTH);
+
+    const std::string& name = screen->GetScreenName();
+    const std::string& screenName = name.size() <= SCREEN_NAME_MAX_LENGTH ?
+        name : name.substr(0, SCREEN_NAME_MAX_LENGTH);
     std::string isGroup = screen->isScreenGroup_ ? "true" : "false";
     std::string screenType = TransferTypeToString(screen->type_);
     std::string isMirrored = screen->rSDisplayNodeConfig_.isMirrored ? "true" : "false";
@@ -303,8 +305,10 @@ void DisplayDumper::GetScreenInfo(const sptr<AbstractScreen>& screen, std::ostri
         WLOGFE("screen is null");
         return;
     }
-    const std::string& screenName = screen->name_.size() <= SCREEN_NAME_MAX_LENGTH ?
-        screen->name_ : screen->name_.substr(0, SCREEN_NAME_MAX_LENGTH);
+
+    const std::string& name = screen->GetScreenName();
+    const std::string& screenName = name.size() <= SCREEN_NAME_MAX_LENGTH ?
+        name : name.substr(0, SCREEN_NAME_MAX_LENGTH);
     std::string isGroup = screen->isScreenGroup_ ? "true" : "false";
     std::string screenType = TransferTypeToString(screen->type_);
     std::string isMirrored = screen->rSDisplayNodeConfig_.isMirrored ? "true" : "false";

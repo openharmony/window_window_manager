@@ -123,6 +123,7 @@ int Display::GetDpi() const
 
 sptr<DisplayInfo> Display::GetDisplayInfo() const
 {
+    UpdateDisplayInfo();
     return pImpl_->GetDisplayInfo();
 }
 

@@ -33,7 +33,7 @@ public:
     constexpr static int32_t DEFAULT_HIGHT = 1280;
     constexpr static float DEFAULT_VIRTUAL_PIXEL_RATIO = 1.0;
     constexpr static uint32_t DEFAULT_FRESH_RATE = 60;
-    AbstractDisplay(DisplayId id, std::string name, sptr<SupportedScreenModes>& info, sptr<AbstractScreen>& absScreen);
+    AbstractDisplay(DisplayId id, sptr<SupportedScreenModes>& info, sptr<AbstractScreen>& absScreen);
     WM_DISALLOW_COPY_AND_MOVE(AbstractDisplay);
     ~AbstractDisplay() = default;
     static inline bool IsVertical(Rotation rotation)
@@ -69,6 +69,7 @@ public:
     bool RequestRotation(Rotation rotation);
     void SetFreezeFlag(FreezeFlag);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(bool, WaterfallDisplayCompressionStatus, waterfallDisplayCompressionStatus, false);
+
 private:
     DisplayId id_ { DISPLAY_ID_INVALID };
     std::string name_ { "" };
@@ -79,13 +80,21 @@ private:
     int32_t width_ { 0 };
     int32_t height_ { 0 };
     uint32_t refreshRate_ { 0 };
-    float virtualPixelRatio_ { 1.0 };
+    float virtualPixelRatio_ { 1.0f };
     Rotation rotation_ { Rotation::ROTATION_0 };
     Orientation orientation_ { Orientation::UNSPECIFIED };
     DisplayOrientation displayOrientation_ { DisplayOrientation::UNKNOWN };
     FreezeFlag freezeFlag_ { FreezeFlag::UNFREEZING };
     DEFINE_VAR_DEFAULT_FUNC_SET(DisplayState, DisplayState, displayState, DisplayState::UNKNOWN);
     bool isDefaultVertical_ { true };
+    uint32_t phyWidth_ { UINT32_MAX };
+    uint32_t phyHeight_ { UINT32_MAX };
+    float xDpi_ { 0.0f };
+    float yDpi_ { 0.0f };
+
+    void UpdateXDpi();
+    void UpdateYDpi();
+    void CalculateXYDpi(uint32_t phyWidth, uint32_t phyHeight);
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_H
