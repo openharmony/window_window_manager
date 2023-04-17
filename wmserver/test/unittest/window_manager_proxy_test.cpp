@@ -17,6 +17,7 @@
 #include "window_manager_proxy.h"
 #include "window_manager_stub_impl.h"
 #include "iremote_object_mocker.h"
+#include <rs_window_animation_target.h>
 
 using namespace testing;
 using namespace testing::ext;
@@ -220,6 +221,20 @@ HWTEST_F(WindowManagerProxyTest, GetVisibilityWindowInfo01, Function | SmallTest
     ASSERT_EQ(err, WMError::WM_OK);
 }
 
+/**
+ * @tc.name: GetWindowAnimationTargets01
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, GetWindowAnimationTargets01, Function | SmallTest | Level2)
+{
+    std::vector<uint32_t> missionIds;
+    missionIds.push_back(0);
+    missionIds.push_back(1);
+    std::vector<sptr<RSWindowAnimationTarget>> targets;
+    WMError err = windowManagerProxy_->GetWindowAnimationTargets(missionIds, targets);
+    ASSERT_EQ(err, WMError::WM_OK);
+}
 }
 }
 }

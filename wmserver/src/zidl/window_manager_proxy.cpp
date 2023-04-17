@@ -17,6 +17,7 @@
 #include <ipc_types.h>
 #include <key_event.h>
 #include <rs_iwindow_animation_controller.h>
+#include <rs_window_animation_target.h>
 
 #include "marshalling_helper.h"
 #include "window_manager_hilog.h"
@@ -952,6 +953,31 @@ void WindowManagerProxy::NotifyDumpInfoResult(const std::vector<std::string>& in
         WLOGFE("SendRequest failed");
         return;
     }
+}
+
+WMError WindowManagerProxy::GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
+    std::vector<sptr<RSWindowAnimationTarget>>& targets)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUInt32Vector(missionIds)) {
+        WLOGFE("Write missionIds failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_WINDOW_ANIMATION_TARGETS),
+        data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!MarshallingHelper::UnmarshallingVectorParcelableObj<RSWindowAnimationTarget>(reply, targets)) {
+        WLOGFE("read window animation targets failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(reply.ReadInt32());
 }
 } // namespace Rosen
 } // namespace OHOS

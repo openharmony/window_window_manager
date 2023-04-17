@@ -143,6 +143,11 @@ WMError SetGestureNavigaionEnabled(bool enable) override
     return WMError::WM_OK;
 }
 void DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event) override {}
+WMError GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
+    std::vector<sptr<RSWindowAnimationTarget>>& targets) override
+{
+    return WMError::WM_OK;
+}
 };
 }
 }

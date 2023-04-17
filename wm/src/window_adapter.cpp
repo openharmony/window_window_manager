@@ -17,6 +17,7 @@
 #include <iservice_registry.h>
 #include <key_event.h>
 #include <system_ability_definition.h>
+#include <rs_window_animation_target.h>
 #include "window_manager.h"
 #include "window_manager_proxy.h"
 #include "window_manager_hilog.h"
@@ -314,6 +315,13 @@ void WindowAdapter::NotifyDumpInfoResult(const std::vector<std::string>& info)
 {
     INIT_PROXY_CHECK_RETURN();
     windowManagerServiceProxy_->NotifyDumpInfoResult(info);
+}
+
+WMError WindowAdapter::GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
+    std::vector<sptr<RSWindowAnimationTarget>>& targets)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    return windowManagerServiceProxy_->GetWindowAnimationTargets(missionIds, targets);
 }
 } // namespace Rosen
 } // namespace OHOS

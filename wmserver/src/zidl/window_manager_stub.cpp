@@ -17,6 +17,7 @@
 #include <ipc_skeleton.h>
 #include <key_event.h>
 #include <rs_iwindow_animation_controller.h>
+#include <rs_window_animation_target.h>
 
 #include "marshalling_helper.h"
 #include "memory_guard.h"
@@ -314,6 +315,18 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             std::vector<std::string> info;
             data.ReadStringVector(&info);
             NotifyDumpInfoResult(info);
+            break;
+        }
+        case WindowManagerMessage::TRANS_ID_GET_WINDOW_ANIMATION_TARGETS: {
+            std::vector<uint32_t> missionIds;
+            data.ReadUInt32Vector(&missionIds);
+            std::vector<sptr<RSWindowAnimationTarget>> targets;
+            WMError errCode = GetWindowAnimationTargets(missionIds, targets);
+            if (!MarshallingHelper::MarshallingVectorParcelableObj<RSWindowAnimationTarget>(reply, targets)) {
+                WLOGFE("Write window animation targets failed");
+                return -1;
+            }
+            reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
         default:
