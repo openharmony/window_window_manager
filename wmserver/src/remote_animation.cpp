@@ -676,6 +676,24 @@ WMError RemoteAnimation::NotifyAnimationScreenUnlock(std::function<void(void)> c
     return WMError::WM_OK;
 }
 
+WMError RemoteAnimation::GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
+    std::vector<sptr<RSWindowAnimationTarget>>& targets)
+{
+    auto winRoot = windowRoot_.promote();
+    if (winRoot == nullptr) {
+        WLOGFE("window root is nullptr");
+        return WMError::WM_ERROR_NO_MEM;
+    }
+    for (uint32_t& missionId : missionIds) {
+        sptr<WindowNode> windowNode = winRoot->GetWindowNodeByMissionId(missionId);
+        if (windowNode == nullptr) {
+            continue;
+        }
+        targets.push_back(CreateWindowAnimationTarget(nullptr, windowNode));
+    }
+    return WMError::WM_OK;
+}
+
 sptr<RSWindowAnimationTarget> RemoteAnimation::CreateWindowAnimationTarget(sptr<WindowTransitionInfo> info,
     const sptr<WindowNode>& windowNode)
 {

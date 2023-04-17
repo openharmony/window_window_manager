@@ -1039,6 +1039,53 @@ HWTEST_F(RemoteAnimationTest, CreateAnimationFinishedCallback01, Function | Smal
     usleep(SLEEP_TIME_IN_US);
     EXPECT_EQ(false, testFlag);
 }
+
+/*
+ * @tc.name: GetWindowAnimationTargets01
+ * @tc.desc: GetWindowAnimationTargets for null window root
+ * @tc.type: FUNC
+ */
+HWTEST_F(RemoteAnimationTest, GetWindowAnimationTargets01, Function | SmallTest | Level2)
+{
+    RemoteAnimation::windowRoot_ = nullptr;
+    std::vector<uint32_t> missionIds;
+    std::vector<sptr<RSWindowAnimationTarget>> targets;
+    EXPECT_EQ(WMError::WM_ERROR_NO_MEM, RemoteAnimation::GetWindowAnimationTargets(missionIds, targets));
+}
+
+/*
+ * @tc.name: GetWindowAnimationTargets02
+ * @tc.desc: GetWindowAnimationTargets for not exit mission
+ * @tc.type: FUNC
+ */
+HWTEST_F(RemoteAnimationTest, GetWindowAnimationTargets02, Function | SmallTest | Level2)
+{
+    std::vector<uint32_t> missionIds;
+    missionIds.push_back(1);
+    std::vector<sptr<RSWindowAnimationTarget>> targets;
+    WMError ret = RemoteAnimation::GetWindowAnimationTargets(missionIds, targets);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(true, targets.empty());
+}
+
+/*
+ * @tc.name: GetWindowAnimationTargets03
+ * @tc.desc: GetWindowAnimationTargets successful
+ * @tc.type: FUNC
+ */
+HWTEST_F(RemoteAnimationTest, GetWindowAnimationTargets03, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> srcNode = new WindowNode(CreateWindowProperty(1)); // 1 is windowId
+    srcNode->abilityInfo_.missionId_ = 1;
+    windowRoot_->windowNodeMap_[1] = srcNode;
+    std::vector<uint32_t> missionIds;
+    missionIds.push_back(1);
+    std::vector<sptr<RSWindowAnimationTarget>> targets;
+    WMError ret = RemoteAnimation::GetWindowAnimationTargets(missionIds, targets);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(1, targets.size());
+    EXPECT_EQ(true, targets[0]->missionId_ == 1);
+}
 }
 }
 }

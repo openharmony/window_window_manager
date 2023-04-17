@@ -74,6 +74,8 @@ public:
     static void CallbackTimeOutProcess();
     static sptr<RSWindowAnimationFinishedCallback> CreateAnimationFinishedCallback(
         const std::function<void(void)>& callback, sptr<WindowNode> windowNode);
+    static WMError GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
+        std::vector<sptr<RSWindowAnimationTarget>>& targets);
     static inline bool IsAnimationFirst()
     {
         return animationFirst_;
