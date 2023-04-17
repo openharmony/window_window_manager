@@ -587,11 +587,11 @@ DMError DisplayManager::Impl::UnregisterPrivateWindowListener(sptr<IPrivateWindo
     }
     privateWindowListeners_.erase(iter);
     DMError ret = DMError::DM_OK;
-    if (privateWindowListeners_.empty() && displayManagerListener_ != nullptr) {
+    if (privateWindowListeners_.empty() && privateWindowListenerAgent_ != nullptr) {
         ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
-            displayManagerListener_,
+            privateWindowListenerAgent_,
             DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER);
-        displayManagerListener_ = nullptr;
+        privateWindowListenerAgent_ = nullptr;
     }
     return ret;
 }
