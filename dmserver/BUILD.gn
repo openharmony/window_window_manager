@@ -70,7 +70,11 @@ ohos_shared_library("libdms") {
     "sensor:sensor_interface_native",
   ]
 
-  include_dirs = [ "//third_party/flutter/skia/src" ]
+  if (defined(use_new_skia) && use_new_skia) {
+    include_dirs = [ "//third_party/skia/src" ]
+  } else {
+    include_dirs = [ "//third_party/flutter/skia/src" ]
+  }
 
   defines = []
   if (window_manager_feature_subscribe_motion) {
