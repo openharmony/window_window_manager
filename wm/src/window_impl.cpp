@@ -722,6 +722,12 @@ WMError WindowImpl::SetLayoutFullScreen(bool status)
     if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
         version = context_->GetApplicationInfo()->apiCompatibleVersion;
     }
+    ret = SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetWindowMode errCode:%{public}d winId:%{public}u",
+            static_cast<int32_t>(ret), property_->GetWindowId());
+        return ret;
+    }
     // 10 ArkUI new framework support after API10
     if (version >= 10) {
         if (uiContent_ != nullptr) {
@@ -731,12 +737,6 @@ WMError WindowImpl::SetLayoutFullScreen(bool status)
             isIgnoreSafeArea_ = status;
         }
     } else {
-        ret = SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-        if (ret != WMError::WM_OK) {
-            WLOGFE("SetWindowMode errCode:%{public}d winId:%{public}u",
-                static_cast<int32_t>(ret), property_->GetWindowId());
-            return ret;
-        }
         if (status) {
             ret = RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
             if (ret != WMError::WM_OK) {
@@ -1765,8 +1765,7 @@ WMError WindowImpl::Maximize()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
-        SetFullScreen(true);
-        return SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+        return SetFullScreen(true);
     } else {
         WLOGI("Maximize fail, not main window");
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -2262,7 +2261,6 @@ void WindowImpl::HandleModeChangeHotZones(int32_t posX, int32_t posY)
 
         if (WindowHelper::IsPointInTargetRectWithBound(posX, posY, hotZones.fullscreen_)) {
             SetFullScreen(true);
-            SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
         } else if (WindowHelper::IsPointInTargetRectWithBound(posX, posY, hotZones.primary_)) {
             SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
         } else if (WindowHelper::IsPointInTargetRectWithBound(posX, posY, hotZones.secondary_)) {
