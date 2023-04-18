@@ -170,7 +170,7 @@ WMError WindowController::GetFocusWindowNode(DisplayId displayId, sptr<WindowNod
         return WMError::WM_ERROR_NULLPTR;
     }
     uint32_t focusWindowId = windowNodeContainer->GetFocusWindow();
-    WLOGI("FocusId: %{public}u", focusWindowId);
+    WLOGFD("Now focusId: %{public}u", focusWindowId);
     auto thisWindowNode = windowRoot_->GetWindowNode(focusWindowId);
     if (thisWindowNode == nullptr || !thisWindowNode->currentVisibility_) {
         WLOGFE("Node is null or invisible, id: %{public}u", focusWindowId);
