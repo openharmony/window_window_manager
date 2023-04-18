@@ -56,7 +56,7 @@ void ScreenRotationControllerTest::SetUpTestCase()
     absScreen->activeIdx_ = 0;
     absScreen->modes_.clear();
     absScreen->modes_ = { { info } };
-    sptr<AbstractDisplay> absDisplay = new AbstractDisplay(0, name, info, absScreen);
+    sptr<AbstractDisplay> absDisplay = new AbstractDisplay(0, info, absScreen);
     DisplayManagerService::GetInstance().abstractDisplayController_->abstractDisplayMap_ = {
         {0, absDisplay}
     };

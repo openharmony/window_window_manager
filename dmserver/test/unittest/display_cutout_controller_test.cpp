@@ -223,7 +223,7 @@ HWTEST_F(DisplayCutoutControllerTest, TransferBoundingRectsByRotation03, Functio
     auto displayController = DisplayManagerService::GetInstance().abstractDisplayController_;
     ASSERT_NE(displayController, nullptr);
 
-    sptr<AbstractDisplay> absDisplay = new AbstractDisplay(id, name, info, absScreen);
+    sptr<AbstractDisplay> absDisplay = new AbstractDisplay(id, info, absScreen);
     absDisplay->RequestRotation(Rotation::ROTATION_0);
     displayController->abstractDisplayMap_.insert((std::make_pair(id, absDisplay)));
 

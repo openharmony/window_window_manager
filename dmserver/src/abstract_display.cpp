@@ -25,12 +25,11 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "AbstractDisplay"};
     constexpr int32_t PAD_SCREEN_WIDTH = 2560;
     constexpr int32_t PHONE_SCREEN_WIDTH = 2160;
+    constexpr float INCH_2_MM = 25.4f;
 }
 
-AbstractDisplay::AbstractDisplay(DisplayId id, std::string name,
-    sptr<SupportedScreenModes>& info, sptr<AbstractScreen>& absScreen)
+AbstractDisplay::AbstractDisplay(DisplayId id, sptr<SupportedScreenModes>& info, sptr<AbstractScreen>& absScreen)
     : id_(id),
-      name_(name),
       screenId_(absScreen->dmsId_),
       screenGroupId_(absScreen->groupDmsId_),
       width_(info->width_),
@@ -38,6 +37,7 @@ AbstractDisplay::AbstractDisplay(DisplayId id, std::string name,
       refreshRate_(info->refreshRate_),
       orientation_(absScreen->orientation_)
 {
+    name_ = absScreen->GetScreenName();
     RequestRotation(absScreen->rotation_);
     if (width_ > height_) {
         displayOrientation_ = DisplayOrientation::LANDSCAPE;
@@ -49,6 +49,8 @@ AbstractDisplay::AbstractDisplay(DisplayId id, std::string name,
     } else {
         isDefaultVertical_ = false;
     }
+
+    CalculateXYDpi(absScreen->GetPhyWidth(), absScreen->GetPhyHeight());
     auto numbersConfig = DisplayManagerConfig::GetIntNumbersConfig();
     if (numbersConfig.count("dpi") != 0) {
         uint32_t densityDpi = static_cast<uint32_t>(numbersConfig["dpi"][0]);
@@ -68,6 +70,18 @@ AbstractDisplay::AbstractDisplay(DisplayId id, std::string name,
         virtualPixelRatio_ = 1.0f; // Other is 1.0
     }
     absScreen->SetVirtualPixelRatio(virtualPixelRatio_);
+}
+
+void AbstractDisplay::CalculateXYDpi(uint32_t phyWidth, uint32_t phyHeight)
+{
+    if (phyWidth == 0 || phyHeight == 0) {
+        return;
+    }
+
+    phyWidth_ = phyWidth;
+    phyHeight_ = phyHeight;
+    xDpi_ = width_ * INCH_2_MM / phyWidth_;
+    yDpi_ = height_ * INCH_2_MM / phyHeight_;
 }
 
 DisplayId AbstractDisplay::GetId() const
@@ -118,11 +132,27 @@ void AbstractDisplay::SetOffsetY(int32_t offsetY)
 void AbstractDisplay::SetWidth(int32_t width)
 {
     width_ = width;
+    UpdateXDpi();
 }
 
 void AbstractDisplay::SetHeight(int32_t height)
 {
     height_ = height;
+    UpdateYDpi();
+}
+
+void AbstractDisplay::UpdateXDpi()
+{
+    if (phyWidth_ != UINT32_MAX) {
+        xDpi_ = width_ * INCH_2_MM / phyWidth_;
+    }
+}
+
+void AbstractDisplay::UpdateYDpi()
+{
+    if (phyHeight_ != UINT32_MAX) {
+        yDpi_ = height_ * INCH_2_MM / phyHeight_;
+    }
 }
 
 void AbstractDisplay::SetOffset(int32_t offsetX, int32_t offsetY)
@@ -236,19 +266,22 @@ sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
     if (displayInfo == nullptr) {
         return displayInfo;
     }
+
     displayInfo->name_ = name_;
-    displayInfo->SetOffsetX(offsetX_);
-    displayInfo->SetOffsetY(offsetY_);
+    displayInfo->SetDisplayId(id_);
     displayInfo->SetWidth(width_);
     displayInfo->SetHeight(height_);
-    displayInfo->SetDisplayId(id_);
     displayInfo->SetRefreshRate(refreshRate_);
     displayInfo->SetScreenId(screenId_);
     displayInfo->SetScreenGroupId(screenGroupId_);
     displayInfo->SetVirtualPixelRatio(virtualPixelRatio_);
+    displayInfo->SetXDpi(xDpi_);
+    displayInfo->SetYDpi(yDpi_);
+    displayInfo->SetDpi(virtualPixelRatio_ * DOT_PER_INCH);
     displayInfo->SetRotation(rotation_);
     displayInfo->SetOrientation(orientation_);
-    displayInfo->SetDpi(virtualPixelRatio_ * DOT_PER_INCH);
+    displayInfo->SetOffsetX(offsetX_);
+    displayInfo->SetOffsetY(offsetY_);
     displayInfo->displayState_ = displayState_;
     displayInfo->SetWaterfallDisplayCompressionStatus(waterfallDisplayCompressionStatus_);
     displayInfo->SetDisplayOrientation(displayOrientation_);
