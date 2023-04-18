@@ -67,7 +67,7 @@ HWTEST_F(ScreenshotTest, GetScreenshot_default, Function | SmallTest | Level2)
 
     DisplayManager::GetInstance().GetDefaultDisplayId();
 
-    EXPECT_CALL(m->Mock(), GetDisplaySnapshot(_)).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(m->Mock(), GetDisplaySnapshot(_, _)).Times(1).WillOnce(Return(nullptr));
 
     ASSERT_EQ(nullptr, DisplayManager::GetInstance().GetScreenshot(0));
 }
@@ -79,7 +79,7 @@ HWTEST_F(ScreenshotTest, GetScreenshot_01, Function | MediumTest | Level2)
     EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(nullptr));
     DisplayManager::GetInstance().GetDefaultDisplayId();
 
-    EXPECT_CALL(m->Mock(), GetDisplaySnapshot(_)).Times(1).WillOnce(Return(CommonTestUtils::CreatePixelMap()));
+    EXPECT_CALL(m->Mock(), GetDisplaySnapshot(_, _)).Times(1).WillOnce(Return(CommonTestUtils::CreatePixelMap()));
     auto screenshot = DisplayManager::GetInstance().GetScreenshot(0);
     ASSERT_NE(nullptr, screenshot);
 

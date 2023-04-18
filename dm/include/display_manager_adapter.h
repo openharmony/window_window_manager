@@ -57,7 +57,7 @@ public:
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo();
     virtual sptr<DisplayInfo> GetDisplayInfoByScreenId(ScreenId screenId);
     virtual std::vector<DisplayId> GetAllDisplayIds();
-    virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId);
+    virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode = nullptr);
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
     virtual bool WakeUpBegin(PowerStateChangeReason reason);
     virtual bool WakeUpEnd();

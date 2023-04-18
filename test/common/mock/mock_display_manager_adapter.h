@@ -30,7 +30,7 @@ public:
         DisplayManagerAgentType type));
     MOCK_METHOD0(GetDefaultDisplayInfo, sptr<DisplayInfo>());
     MOCK_METHOD1(GetDisplayInfoByScreenId, sptr<DisplayInfo>(ScreenId screenId));
-    MOCK_METHOD1(GetDisplaySnapshot, std::shared_ptr<Media::PixelMap>(DisplayId displayId));
+    MOCK_METHOD2(GetDisplaySnapshot, std::shared_ptr<Media::PixelMap>(DisplayId displayId, DmErrorCode* errorCode));
 
     MOCK_METHOD1(WakeUpBegin, bool(PowerStateChangeReason reason));
     MOCK_METHOD0(WakeUpEnd, bool());
