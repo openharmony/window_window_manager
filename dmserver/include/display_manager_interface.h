@@ -90,7 +90,8 @@ public:
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) = 0;
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) = 0;
-    virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId) = 0;
+    virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
+        DmErrorCode* errorCode = nullptr) = 0;
     virtual DMError SetScreenRotationLocked(bool isLocked) = 0;
     virtual DMError IsScreenRotationLocked(bool& isLocked) = 0;
 

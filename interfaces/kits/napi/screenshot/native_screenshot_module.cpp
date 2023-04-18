@@ -185,18 +185,17 @@ static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
     if (param->useInputOption) {
         GNAPI_LOG("Get Screenshot by input option");
         param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId,
-            param->option.rect, param->option.size, param->option.rotation);
+            param->option.rect, param->option.size, param->option.rotation, &param->wret);
     } else {
         GNAPI_LOG("Get Screenshot by default option");
-        param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId);
+        param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId, &param->wret);
     }
-    if (param->image == nullptr) {
+    if (param->image == nullptr && param->wret == DmErrorCode::DM_OK) {
         GNAPI_LOG("Get Screenshot failed!");
         param->wret = DmErrorCode::DM_ERROR_INVALID_SCREEN;
         param->errMessage = "Get Screenshot failed: Screenshot image is nullptr";
         return;
     }
-    param->wret = DmErrorCode::DM_OK;
 }
 
 napi_value Resolve(napi_env env, std::unique_ptr<Param> &param)

@@ -132,9 +132,10 @@ public:
      * @brief Get screenshot of the target display.
      *
      * @param displayId Display id.
+     * @param errorCode error code.
      * @return PixelMap object of screenshot.
      */
-    std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId);
+    std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId, DmErrorCode* errorCode = nullptr);
     /**
      * @brief Get screenshot of the target display.
      *
@@ -142,10 +143,11 @@ public:
      * @param rect Rect of screenshot.
      * @param size Size of screenshot.
      * @param rotation Parameter of rotation.
+     * @param errorCode error code.
      * @return PixelMap object of screenshot.
      */
     std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId, const Media::Rect &rect,
-                                        const Media::Size &size, int rotation);
+        const Media::Size &size, int rotation, DmErrorCode* errorCode = nullptr);
 
     /**
      * @brief Begin to wake up screen.
