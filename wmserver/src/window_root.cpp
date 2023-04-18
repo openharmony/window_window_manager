@@ -1034,27 +1034,22 @@ void WindowRoot::UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node
     uint32_t windowId = node->GetWindowId();
     uint32_t focusedWindowId = container->GetFocusWindow();
     WLOGFD("current window: %{public}u, focus window: %{public}u", windowId, focusedWindowId);
-    if (WindowHelper::IsMainWindow(node->GetWindowType())) {
-        if (windowId != focusedWindowId) {
-            auto iter = std::find_if(node->children_.begin(), node->children_.end(),
-                                     [focusedWindowId](sptr<WindowNode> node) {
-                                         return node->GetWindowId() == focusedWindowId;
-                                     });
-            if (iter == node->children_.end()) {
-                return;
-            }
-        }
-        if (!node->children_.empty()) {
-            auto firstChild = node->children_.front();
-            if (firstChild->priority_ < 0) {
-                windowId = firstChild->GetWindowId();
-            }
-        }
-    } else {
-        if (windowId != focusedWindowId) {
+    if (windowId != focusedWindowId) {
+        auto iter = std::find_if(node->children_.begin(), node->children_.end(),
+            [focusedWindowId](sptr<WindowNode> node) {
+                return node->GetWindowId() == focusedWindowId;
+            });
+        if (iter == node->children_.end()) {
             return;
         }
     }
+    if (!node->children_.empty()) {
+        auto firstChild = node->children_.front();
+        if (firstChild->priority_ < 0) {
+            windowId = firstChild->GetWindowId();
+        }
+    }
+
     auto nextFocusableWindow = container->GetNextFocusableWindow(windowId);
     if (nextFocusableWindow != nullptr) {
         WLOGFD("adjust focus window, next focus window id: %{public}u", nextFocusableWindow->GetWindowId());
@@ -1072,27 +1067,22 @@ void WindowRoot::UpdateActiveWindowWithWindowRemoved(const sptr<WindowNode>& nod
     uint32_t windowId = node->GetWindowId();
     uint32_t activeWindowId = container->GetActiveWindow();
     WLOGFD("current window: %{public}u, active window: %{public}u", windowId, activeWindowId);
-    if (WindowHelper::IsMainWindow(node->GetWindowType())) {
-        if (windowId != activeWindowId) {
-            auto iter = std::find_if(node->children_.begin(), node->children_.end(),
-                                     [activeWindowId](sptr<WindowNode> node) {
-                                         return node->GetWindowId() == activeWindowId;
-                                     });
-            if (iter == node->children_.end()) {
-                return;
-            }
-        }
-        if (!node->children_.empty()) {
-            auto firstChild = node->children_.front();
-            if (firstChild->priority_ < 0) {
-                windowId = firstChild->GetWindowId();
-            }
-        }
-    } else {
-        if (windowId != activeWindowId) {
+    if (windowId != activeWindowId) {
+        auto iter = std::find_if(node->children_.begin(), node->children_.end(),
+            [activeWindowId](sptr<WindowNode> node) {
+                return node->GetWindowId() == activeWindowId;
+            });
+        if (iter == node->children_.end()) {
             return;
         }
     }
+    if (!node->children_.empty()) {
+        auto firstChild = node->children_.front();
+        if (firstChild->priority_ < 0) {
+            windowId = firstChild->GetWindowId();
+        }
+    }
+
     auto nextActiveWindow = container->GetNextActiveWindow(windowId);
     if (nextActiveWindow != nullptr) {
         WLOGI("Next active window id: %{public}u", nextActiveWindow->GetWindowId());
