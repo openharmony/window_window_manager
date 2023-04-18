@@ -192,7 +192,7 @@ HWTEST_F(DisplayManagerServiceTest, GetDisplayInfo, Function | SmallTest | Level
     std::string name = "testDisplay";
     sptr<SupportedScreenModes> info = new SupportedScreenModes();
     sptr<AbstractScreen> absScreen = new AbstractScreen(dms_->abstractScreenController_, name, 0, 0);
-    sptr<AbstractDisplay> absDisplay = new AbstractDisplay(0, name, info, absScreen);
+    sptr<AbstractDisplay> absDisplay = new AbstractDisplay(0, info, absScreen);
 
     dms_->abstractDisplayController_->abstractDisplayMap_.clear();
     ASSERT_EQ(nullptr, dms_->GetDefaultDisplayInfo());
@@ -420,7 +420,7 @@ HWTEST_F(DisplayManagerServiceTest, AddAndRemoveSurfaceNode, Function | SmallTes
     sptr<AbstractScreen> absScreen =
         new AbstractScreen(nullptr, "", INVALID_SCREEN_ID, INVALID_SCREEN_ID);
     dms->abstractDisplayController_->abstractDisplayMap_[DEFAULT_DISPLAY] =
-        new AbstractDisplay(DEFAULT_DISPLAY, "", info, absScreen);
+        new AbstractDisplay(DEFAULT_DISPLAY, info, absScreen);
     dms->abstractDisplayController_->abstractDisplayMap_[DEFAULT_DISPLAY]->screenId_ = DEFAULT_SCREEN;
 
     dms->abstractScreenController_->dmsScreenMap_[DEFAULT_SCREEN] =

@@ -64,8 +64,12 @@ public:
     DMError GetScreenGamutMap(ScreenGamutMap& gamutMap);
     DMError SetScreenGamutMap(ScreenGamutMap gamutMap);
     DMError SetScreenColorTransform();
+    const std::string& GetScreenName() const;
+    void SetPhyWidth(uint32_t phyWidth);
+    void SetPhyHeight(uint32_t phyHeight);
+    uint32_t GetPhyWidth() const;
+    uint32_t GetPhyHeight() const;
 
-    const std::string name_;
     const ScreenId dmsId_;
     const ScreenId rsId_;
     bool isScreenGroup_ { false };
@@ -80,9 +84,15 @@ public:
     Orientation orientation_ { Orientation::UNSPECIFIED };
     Rotation rotation_ { Rotation::ROTATION_0 };
     Orientation screenRequestedOrientation_ { Orientation::UNSPECIFIED };
+
 protected:
     void FillScreenInfo(sptr<ScreenInfo>) const;
     const sptr<AbstractScreenController> screenController_;
+
+private:
+    std::string name_ { "UNKNOW" };
+    uint32_t phyWidth_ { UINT32_MAX };
+    uint32_t phyHeight_ { UINT32_MAX };
 };
 
 class AbstractScreenGroup : public AbstractScreen {
