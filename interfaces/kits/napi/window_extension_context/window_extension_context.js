@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-var ExtensionContext = requireNapi("application.ExtensionContext")
+let ExtensionContext = requireNapi("application.ExtensionContext");
 
 class WindowExtensionContext extends ExtensionContext {
-    constructor(obj) {
-        super(obj);
-    }
+  constructor(obj) {
+    super(obj);
+  }
 
-    startAbility(want, options, callback) {
-        console.log("startAbility");
-        return this.__context_impl__.startAbility(want, options, callback);
-    }
+  startAbility(want, options, callback) {
+    console.log("startAbility");
+    return this.__context_impl__.startAbility(want, options, callback);
+  }
 }
 
-export default WindowExtensionContext
+export default WindowExtensionContext;
