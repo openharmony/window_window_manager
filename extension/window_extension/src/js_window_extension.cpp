@@ -94,7 +94,11 @@ JsWindowExtension* JsWindowExtension::Create(const std::unique_ptr<AbilityRuntim
 }
 
 JsWindowExtension::JsWindowExtension(AbilityRuntime::JsRuntime& jsRuntime) : jsRuntime_(jsRuntime) {}
-JsWindowExtension::~JsWindowExtension() = default;
+JsWindowExtension::~JsWindowExtension()
+{
+    WLOGFD("Called");
+    jsRuntime_.FreeNativeReference(std::move(jsObj_));
+}
 
 void JsWindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRecord>& record,
     const std::shared_ptr<AbilityRuntime::OHOSApplication>& application,
