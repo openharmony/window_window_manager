@@ -79,7 +79,6 @@ ohos_shared_library("libwms") {
   ]
 
   deps = [
-    "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/window/window_manager/dmserver:libdms",
     "//foundation/window/window_manager/etc:wms_etc",
