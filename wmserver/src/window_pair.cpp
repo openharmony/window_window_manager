@@ -450,9 +450,6 @@ void WindowPair::RotateDividerWindow(const Rect& rect)
     }
     WLOGFD("Rotate divider when display rotate rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
-    // update divider dialog window
-    WindowInnerManager::GetInstance().UpdateInnerWindow(displayId_, WindowType::WINDOW_TYPE_DOCK_SLICE,
-        rect.width_, rect.height_);
 }
 
 void WindowPair::SetDividerRect(const Rect& rect)
