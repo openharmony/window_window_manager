@@ -55,6 +55,8 @@ ohos_unittest("wm_window_impl_test") {
   sources = [ "window_impl_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
+
+  external_deps = [ "common_event_service:cesfwk_innerkits" ]
 }
 
 ohos_unittest("wm_window_effect_test") {
@@ -95,6 +97,8 @@ ohos_unittest("wm_window_scene_test") {
   sources = [ "window_scene_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
+
+  external_deps = [ "common_event_service:cesfwk_innerkits" ]
 }
 
 ohos_unittest("wm_window_test") {
@@ -103,6 +107,8 @@ ohos_unittest("wm_window_test") {
   sources = [ "window_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
+
+  external_deps = [ "common_event_service:cesfwk_innerkits" ]
 }
 
 ohos_unittest("wm_window_impl_listener_test") {
