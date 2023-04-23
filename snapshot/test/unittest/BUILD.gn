@@ -81,7 +81,7 @@ ohos_static_library("utils_unittest_common") {
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
     "hilog_native:libhilog",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
   ]
 
   subsystem_name = "window"

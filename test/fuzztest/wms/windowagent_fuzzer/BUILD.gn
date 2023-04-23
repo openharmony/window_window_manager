@@ -64,7 +64,7 @@ ohos_fuzztest("WindowAgentFuzzTest") {
     "graphic_standard:window_animation",
     "hilog_native:libhilog",
     "input:libmmi-client",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "multimedia_image_framework:image_native",
   ]
 }

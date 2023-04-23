@@ -183,7 +183,7 @@ ohos_static_library("dmserver_unittest_common") {
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
     "hilog_native:libhilog",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "sensor:sensor_interface_native",
   ]
   subsystem_name = "window"

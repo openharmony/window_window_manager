@@ -44,7 +44,7 @@ ohos_fuzztest("WindowIPCFuzzTest") {
   external_deps = [
     "ability_runtime:ability_manager",
     "input:libmmi-client",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
 }
