@@ -102,7 +102,7 @@ ohos_unittest("utils_surface_draw_test") {
     "ability_runtime:abilitykit_native",
     "ace_engine:ace_uicontent",
     "input:libmmi-client",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
   ]
 }
 
@@ -144,7 +144,7 @@ ohos_unittest("utils_all_test") {
 
   external_deps = [
     "ability_runtime:ability_manager",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
   ]
 }
 
@@ -165,7 +165,7 @@ ohos_unittest("utils_window_transition_info_test") {
 
   external_deps = [
     "ability_runtime:ability_manager",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
   ]
 }
 

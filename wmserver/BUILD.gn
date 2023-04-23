@@ -104,7 +104,7 @@ ohos_shared_library("libwms") {
     "hisysevent_native:libhisysevent",
     "hitrace_native:hitrace_meter",
     "input:libmmi-client",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "power_manager:powermgr_client",
     "safwk:system_ability_fwk",
   ]

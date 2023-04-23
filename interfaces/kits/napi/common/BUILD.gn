@@ -52,7 +52,7 @@ ohos_static_library("dm_napi_common") {
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
     "hilog_native:libhilog",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
   ]
 
   subsystem_name = "window"
