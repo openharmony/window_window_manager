@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-import Ability from '@ohos.app.ability.UIAbility'
+import Ability from '@ohos.app.ability.UIAbility';
 
 export default class MainAbility extends Ability {
-    onCreate(want, launchParam) {
-        console.log("onCreate");
-    }
+  onCreate(want, launchParam) {
+    console.log("onCreate");
+  }
 
-    onDestroy() {
-        console.log("onDestroy");
-    }
+  onDestroy() {
+    console.log("onDestroy");
+  }
 
-    onWindowStageCreate(windowStage) {
-        let context = this.context;
-        windowStage.setUIContent(this.context, "WindowExtAbility/pages/second", null);
-    }
+  onWindowStageCreate(windowStage) {
+    let context = this.context;
+    windowStage.setUIContent(this.context, "WindowExtAbility/pages/second", null);
+  }
 
-    onWindowStageDestroy() {
-    }
+  onWindowStageDestroy() {
+  }
 
-    onForeground() {
-        console.log("onForeground");
-    }
+  onForeground() {
+    console.log("onForeground");
+  }
 
-    onBackground() {
-        console.log("onBackground");
-    }
+  onBackground() {
+    console.log("onBackground");
+  }
 }
