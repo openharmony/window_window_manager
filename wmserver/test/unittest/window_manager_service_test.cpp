@@ -157,6 +157,32 @@ HWTEST_F(WindowManagerServiceTest, StartingWindow01, Function | SmallTest | Leve
     ASSERT_EQ(true, wms->startingOpen_);
     wms->CancelStartingWindow(nullptr);
 }
+
+/**
+ * @tc.name: MoveMissionsToForeground
+ * @tc.desc: MoveMissionsToForont test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, MoveMissionsToForeground01, Function | SmallTest | Level2)
+{
+    WMError rs = wms->MoveMissionsToForeground({1, 2, 3}, 1);
+    ASSERT_EQ(WMError::WM_OK, rs);
+}
+
+
+/**
+ * @tc.name: MoveMissionsToBackground
+ * @tc.desc: MoveMissionsToBackground test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, MoveMissionsToBackground01, Function | SmallTest | Level2)
+{
+    std::vector<int32_t> moveRs;
+    WMError rs = wms->MoveMissionsToBackground({1, 2, 3}, moveRs);
+    ASSERT_EQ(WMError::WM_OK, rs);
+    ASSERT_EQ(3, moveRs.size());
+}
+
 /**
  * @tc.name: CreateWindow
  * @tc.desc: CreateWindow test
