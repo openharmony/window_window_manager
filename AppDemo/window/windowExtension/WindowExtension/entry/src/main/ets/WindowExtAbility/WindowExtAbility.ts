@@ -14,24 +14,24 @@
  */
 
 // @ts-nocheck
-import Extension from '@ohos.application.WindowExtension'
-import rpc from '@ohos.rpc'
+import Extension from '@ohos.application.WindowExtension';
+import rpc from '@ohos.rpc';
 
 export default class WindowExtAbility extends Extension {
-    onWindowReady(window) {
-        window.loadContent('WindowExtAbility/pages/index1').then(() => {
-            window.getProperties().then((pro) => {
-                console.log("WindowExtension " + JSON.stringify(pro));
-            })
-            window.show();
-        })
-    }
+  onWindowReady(window) {
+    window.loadContent('WindowExtAbility/pages/index1').then(() => {
+      window.getProperties().then((pro) => {
+        console.log("WindowExtension " + JSON.stringify(pro));
+      });
+      window.show();
+    })
+  }
 
-    onConnect(want) {
-        console.info('JSWindowExtension onConnect ' + want.abilityName);
-    }
+  onConnect(want) {
+    console.info('JSWindowExtension onConnect ' + want.abilityName);
+  }
 
-    onDisconnect(want) {
-        console.info('JSWindowExtension onDisconnect ' + want.abilityName);
-    }
+  onDisconnect(want) {
+    console.info('JSWindowExtension onDisconnect ' + want.abilityName);
+  }
 };

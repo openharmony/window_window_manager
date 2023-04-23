@@ -14,17 +14,17 @@
  */
 
 class WindowExtensionAbility {
-    onWindowReady(window) {
-        console.log('WindowExtension windowReady');
-    }
+  onWindowReady(window) {
+    console.log('WindowExtension windowReady');
+  }
 
-    onConnect(want) {
-        console.log('WindowExtension onConnect, want:' + want.abilityName);
-    }
+  onConnect(want) {
+    console.log('WindowExtension onConnect, want:' + want.abilityName);
+  }
 
-    onDisconnect(want) {
-        console.log('WindowExtension  onDisconnect' + want.abilityName);
-    }
+  onDisconnect(want) {
+    console.log('WindowExtension  onDisconnect' + want.abilityName);
+  }
 }
 
-export default WindowExtensionAbility
+export default WindowExtensionAbility;
