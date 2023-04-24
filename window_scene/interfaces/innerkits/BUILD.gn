@@ -13,25 +13,17 @@
 
 import("//build/ohos.gni")
 import("//foundation/window/window_manager/windowmanager_aafwk.gni")
-config("libwscommon_public_config") {
-  include_dirs = [
-    "${window_base_path}/window_scene",
 
-    # for window_manager_hilog
-    "${window_base_path}/utils/include",
-  ]
+config("libwsutils_public_config") {
+  include_dirs =
+      [ "${window_base_path}/window_scene/interfaces/innerkits/include" ]
 }
 
-## Build libwindow_scene_common.so
-ohos_shared_library("window_scene_common") {
-  sources = [ "src/message_scheduler.cpp" ]
+ohos_shared_library("libwsutils") {
+  sources = [ "src/scene_board_judgement.cpp" ]
 
-  public_configs = [ ":libwscommon_public_config" ]
+  public_configs = [ ":libwsutils_public_config" ]
 
-  external_deps = [
-    "eventhandler:libeventhandler",
-    "hilog_native:libhilog",
-  ]
   part_name = "window_manager"
   subsystem_name = "window"
 }
