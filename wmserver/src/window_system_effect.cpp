@@ -160,8 +160,8 @@ WMError WindowSystemEffect::SetWindowShadow(const sptr<WindowNode>& node)
         surfaceNode->SetShadowRadius(shadow.radius_);
     }
     surfaceNode->SetShadowColor(colorValue);
-    surfaceNode->SetShadowOffsetX(shadow.offsetX_);
-    surfaceNode->SetShadowOffsetY(shadow.offsetY_);
+    surfaceNode->SetShadowOffsetX(shadow.offsetX_ * vpr);
+    surfaceNode->SetShadowOffsetY(shadow.offsetY_ * vpr);
     surfaceNode->SetShadowAlpha(shadow.alpha_);
     return WMError::WM_OK;
 }
