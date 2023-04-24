@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "common/include/scene_board_judgement.h"
+#include "scene_board_judgement.h"
 
 namespace OHOS::Rosen {
 bool SceneBoardJudgement::IsSceneBoardEnabled()
