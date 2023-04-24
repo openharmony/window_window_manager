@@ -492,7 +492,7 @@ WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<Window
     if (node->GetWindowProperty()->GetFocusable()) {
         // when launcher reboot, the focus window should not change with showing a full screen window.
         sptr<WindowNode> focusWin = GetWindowNode(container->GetFocusWindow());
-        if (focusWin != nullptr &&
+        if (focusWin == nullptr ||
             !(WindowHelper::IsFullScreenWindow(focusWin->GetWindowMode()) && focusWin->zOrder_ > node->zOrder_)) {
             container->SetFocusWindow(node->GetWindowId());
             needCheckFocusWindow = true;
