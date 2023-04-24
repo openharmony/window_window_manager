@@ -73,6 +73,7 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
     runner_ = AppExecFwk::EventRunner::Create(name_);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(runner_);
     snapshotController_ = new SnapshotController(windowRoot_, handler_);
+    windowGroupMgr_ = new WindowGroupMgr(windowRoot_);
     int ret = HiviewDFX::Watchdog::GetInstance().AddThread(name_, handler_);
     if (ret != 0) {
         WLOGFE("Add watchdog thread failed");
@@ -247,6 +248,20 @@ void WindowManagerServiceHandler::CancelStartingWindow(sptr<IRemoteObject> abili
 {
     WLOGI("WindowManagerServiceHandler CancelStartingWindow!");
     WindowManagerService::GetInstance().CancelStartingWindow(abilityToken);
+}
+
+int32_t WindowManagerServiceHandler::MoveMissionsToForeground(const std::vector<int32_t>& missionIds,
+    int32_t topMissionId)
+{
+    WLOGD("WindowManagerServiceHandler MoveMissionsToForeground!");
+    return static_cast<int32_t>(WindowManagerService::GetInstance().MoveMissionsToForeground(missionIds, topMissionId));
+}
+
+int32_t WindowManagerServiceHandler::MoveMissionsToBackground(const std::vector<int32_t>& missionIds,
+    std::vector<int32_t>& result)
+{
+    WLOGD("WindowManagerServiceHandler MoveMissionsToBackground!");
+    return static_cast<int32_t>(WindowManagerService::GetInstance().MoveMissionsToBackground(missionIds, result));
 }
 
 bool WindowManagerService::Init()
@@ -730,6 +745,38 @@ void WindowManagerService::CancelStartingWindow(sptr<IRemoteObject> abilityToken
     });
 }
 
+WMError WindowManagerService::MoveMissionsToForeground(const std::vector<int32_t>& missionIds, int32_t topMissionId)
+{
+    if (windowGroupMgr_) {
+        return PostSyncTask([this, &missionIds, topMissionId]() {
+            WMError res = windowGroupMgr_->MoveMissionsToForeground(missionIds, topMissionId);
+            // no need to return inner error to caller
+            if (res > WMError::WM_ERROR_NEED_REPORT_BASE) {
+                return res;
+            }
+            return WMError::WM_OK;
+        });
+    }
+    return WMError::WM_ERROR_NULLPTR;
+}
+
+WMError WindowManagerService::MoveMissionsToBackground(const std::vector<int32_t>& missionIds,
+    std::vector<int32_t>& result)
+{
+    if (windowGroupMgr_) {
+        return PostSyncTask([this, &missionIds, &result]() {
+            WMError res = windowGroupMgr_->MoveMissionsToBackground(missionIds, result);
+            // no need to return wms inner error to caller
+            if (res > WMError::WM_ERROR_NEED_REPORT_BASE) {
+                return res;
+            }
+            return WMError::WM_OK;
+        });
+    }
+    return WMError::WM_ERROR_NULLPTR;
+}
+
+
 bool WindowManagerService::CheckAnimationPermission(const sptr<WindowProperty>& property) const
 {
     WindowType type = property->GetWindowType();
@@ -867,6 +914,7 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId, bool onlySelf)
             WLOGI("[WMS] Destroy: %{public}u", windowId);
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:DestroyWindow(%u)", windowId);
             WindowInnerManager::GetInstance().NotifyWindowRemovedOrDestroyed(windowId);
+            windowGroupMgr_->OnWindowDestroyed(windowId);
             auto node = windowRoot_->GetWindowNode(windowId);
             if (node == nullptr) {
                 return WMError::WM_OK;
@@ -992,6 +1040,7 @@ void WindowManagerService::OnWindowEvent(Event event, const sptr<IRemoteObject>&
                     dragController_->FinishDrag(windowId);
                 }
                 WindowInnerManager::GetInstance().NotifyWindowRemovedOrDestroyed(windowId);
+                windowGroupMgr_->OnWindowDestroyed(windowId);
                 windowController_->DestroyWindow(windowId, node->stateMachine_.GetDestroyTaskParam());
             };
 
@@ -1027,6 +1076,7 @@ void WindowManagerService::NotifyDisplayStateChange(DisplayId defaultDisplayId, 
     } else {
         PostAsyncTask([this, defaultDisplayId, displayInfo, displayInfoMap, type]() mutable {
             windowController_->NotifyDisplayStateChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+            windowGroupMgr_->OnDisplayStateChange(defaultDisplayId, displayInfo, displayInfoMap, type);
         });
     }
 }
