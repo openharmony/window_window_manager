@@ -24,7 +24,10 @@ config("libwscommon_public_config") {
 
 ## Build libwindow_scene_common.so
 ohos_shared_library("window_scene_common") {
-  sources = [ "src/message_scheduler.cpp" ]
+  sources = [
+    "src/message_scheduler.cpp",
+    "src/scene_board_judgement.cpp",
+  ]
 
   public_configs = [ ":libwscommon_public_config" ]
 
