@@ -127,6 +127,16 @@
           },
           {
             "type": "so",
+            "name": "//foundation/window/window_manager/window_scene/interfaces/innerkits:libwsutils",
+            "header": {
+              "header_files": [
+                "scene_board_judgement.h"
+              ],
+              "header_base": "//foundation/window/window_manager/window_scene/interfaces/innerkits/include"
+            }
+          },
+          {
+            "type": "so",
             "name": "//foundation/window/window_manager/window_scene/session:scene_session",
             "header": {
               "header_files": [
