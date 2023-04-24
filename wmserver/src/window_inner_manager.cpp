@@ -17,7 +17,6 @@
 
 #include "ability_manager_client.h"
 #include "memory_guard.h"
-#include "ui_service_mgr_client.h"
 #include "window.h"
 #include "window_manager_hilog.h"
 
@@ -106,11 +105,6 @@ void WindowInnerManager::CreateInnerWindow(std::string name, DisplayId displayId
                 }
                 break;
             }
-            case WindowType::WINDOW_TYPE_DOCK_SLICE: {
-                DividerWindow::GetInstance().Create(name, displayId, rect, mode);
-                DividerWindow::GetInstance().Update(rect.width_, rect.height_);
-                break;
-            }
             default:
                 break;
         }
@@ -130,10 +124,6 @@ void WindowInnerManager::DestroyInnerWindow(DisplayId displayId, WindowType type
                 }
                 break;
             }
-            case WindowType::WINDOW_TYPE_DOCK_SLICE: {
-                DividerWindow::GetInstance().Destroy();
-                break;
-            }
             default:
                 break;
         }
@@ -151,10 +141,6 @@ void WindowInnerManager::UpdateInnerWindow(DisplayId displayId, WindowType type,
                 if (recentHolderWindowFlag) {
                     PlaceHolderWindow::GetInstance().Update(width, height);
                 }
-                break;
-            }
-            case WindowType::WINDOW_TYPE_DOCK_SLICE: {
-                DividerWindow::GetInstance().Update(width, height);
                 break;
             }
             default:
