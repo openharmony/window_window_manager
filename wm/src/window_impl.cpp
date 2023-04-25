@@ -1299,7 +1299,7 @@ void WindowImpl::AdjustWindowAnimationFlag(bool withAnimation)
     if (withAnimation && !isAppWindow && animationTransitionController_) {
         // use custom animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
-    } else if (isAppWindow || (withAnimation && !animationTransitionController_)) {
+    } else if ((isAppWindow && needDefaultAnimation_) || (withAnimation && !animationTransitionController_)) {
         // use default animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::DEFAULT));
     } else if (winType == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
@@ -3409,6 +3409,11 @@ bool WindowImpl::IsAllowHaveSystemSubWindow()
         return false;
     }
     return true;
+}
+
+void WindowImpl::SetNeedDefaultAnimation(bool needDefaultAnimation)
+{
+    needDefaultAnimation_= needDefaultAnimation;
 }
 } // namespace Rosen
 } // namespace OHOS
