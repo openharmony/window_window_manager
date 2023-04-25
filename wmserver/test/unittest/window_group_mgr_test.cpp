@@ -76,6 +76,7 @@ void WindowGroupMgrTest::SetUpTestCase()
         node->abilityInfo_ = abilityInfo;
         sptr<WindowOption> windowOption = new WindowOption();
         sptr<WindowImpl> windowImpl = new WindowImpl(windowOption);
+        windowImpl->SetWindowState(WindowState::STATE_SHOWN);
         sptr<IWindow> window = new WindowAgent(windowImpl);
         node->SetWindowToken(window);
         WLOGFI("windowId: %{public}u, missionId: %{public}d", node->GetWindowId(), node->abilityInfo_.missionId_);
