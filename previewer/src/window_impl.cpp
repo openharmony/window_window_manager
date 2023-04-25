@@ -783,5 +783,10 @@ KeyboardAnimationConfig WindowImpl::GetKeyboardAnimationConfig()
 {
     return keyboardAnimationConfig_;
 }
+
+void WindowImpl::SetNeedDefaultAnimation(bool needDefaultAnimation)
+{
+    return;
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -195,6 +195,7 @@ public:
     virtual WMError ResetAspectRatio() override;
     virtual KeyboardAnimationConfig GetKeyboardAnimationConfig() override;
 
+    virtual void SetNeedDefaultAnimation(bool needDefaultAnimation) override;
 private:
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> subWindowMap_;
