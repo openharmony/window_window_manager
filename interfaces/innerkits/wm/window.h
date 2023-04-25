@@ -1238,6 +1238,12 @@ public:
      * @return KeyboardAnimationConfig
      */
     virtual KeyboardAnimationConfig GetKeyboardAnimationConfig() = 0;
+    /**
+     * @brief Set need default animation for window show and hide.
+     *
+     * @param needDefaultAnimation True means need default animation, false means not need.
+     */
+    virtual void SetNeedDefaultAnimation(bool needDefaultAnimation) = 0;
 };
 }
 }
