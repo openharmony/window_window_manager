@@ -14,15 +14,17 @@
  */
 
 #include "perform_reporter.h"
-#include "window_manager_hilog.h"
 
 #include <hisysevent.h>
+
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "PerformReporter"};
 }
+WM_IMPLEMENT_SINGLE_INSTANCE(WindowInfoReporter)
 
 /**
  * @brief Construct a new Perform Reporter:: Perform Reporter object
@@ -109,6 +111,159 @@ void PerformReporter::clear()
     for (auto& iter: timeSplitCount_) {
         iter.second = 0;
     }
+}
+
+std::string WindowInfoReporter::GetMsgString(const FullInfoMap& infoMap)
+{
+    if (infoMap.empty()) {
+        return "";
+    }
+    std::ostringstream oss;
+    oss << "{";
+    for (auto& bundleInfos : infoMap) {
+        if (bundleInfos.second.empty()) {
+            continue;
+        }
+        oss << "{";
+        for (auto& packageInfo : bundleInfos.second) {
+            oss << "BUNDLE_NAME:" << bundleInfos.first << ",";
+            oss << "ABILITY_NAME:" << packageInfo.first << ",";
+            oss << "COUNT:" << packageInfo.second;
+        }
+        oss << "},";
+    }
+    oss << "};";
+    return oss.str();
+}
+
+std::string WindowInfoReporter::GetMsgString(const BundleNameMap& infoMap)
+{
+    if (infoMap.empty()) {
+        return "";
+    }
+    std::ostringstream oss;
+    oss << "{";
+    for (auto& bundleInfo : infoMap) {
+        oss << "{";
+        oss << "BUNDLE_NAME:" << bundleInfo.first << ",";
+        oss << "COUNT:" << bundleInfo.second;
+        oss << "},";
+    }
+    oss << "};";
+    return oss.str();
+}
+
+void WindowInfoReporter::InsertCreateReportInfo(const std::string& bundleName)
+{
+    UpdateReportInfo(windowCreateReportInfos_, bundleName);
+}
+
+void WindowInfoReporter::InsertShowReportInfo(const std::string& bundleName)
+{
+    UpdateReportInfo(windowShowReportInfos_, bundleName);
+}
+
+void WindowInfoReporter::InsertHideReportInfo(const std::string& bundleName)
+{
+    UpdateReportInfo(windowHideReportInfos_, bundleName);
+}
+
+void WindowInfoReporter::InsertDestroyReportInfo(const std::string& bundleName)
+{
+    UpdateReportInfo(windowDestoryReportInfos_, bundleName);
+}
+
+void WindowInfoReporter::InsertNavigationBarReportInfo(const std::string& bundleName, const std::string& packageName)
+{
+    UpdateReportInfo(windowNavigationBarReportInfos_, bundleName, packageName);
+}
+
+void WindowInfoReporter::UpdateReportInfo(FullInfoMap& infoMap,
+    const std::string& bundleName, const std::string& packageName)
+{
+    if (bundleName.empty() || packageName.empty()) {
+        return;
+    }
+    std::lock_guard<std::mutex> lock(mtx_);
+    auto iter = infoMap.find(bundleName);
+    if (iter == infoMap.end()) {
+        std::map<std::string, uint32_t> infos;
+        infos.insert(std::make_pair(packageName, 1));
+        infoMap.insert(std::make_pair(bundleName, infos));
+        return;
+    }
+
+    auto countPairIter = iter->second.find(packageName);
+    if (countPairIter == iter->second.end()) {
+        iter->second.insert(std::make_pair(packageName, 1));
+        return;
+    }
+    infoMap[bundleName][packageName]++;
+}
+
+void WindowInfoReporter::UpdateReportInfo(BundleNameMap& infoMap, const std::string& bundleName)
+{
+    if (bundleName.empty()) {
+        return;
+    }
+    std::lock_guard<std::mutex> lock(mtx_);
+    auto iter = infoMap.find(bundleName);
+    if (iter == infoMap.end()) {
+        infoMap.insert(std::make_pair(bundleName, 1));
+        return;
+    }
+    infoMap[bundleName]++;
+}
+
+void WindowInfoReporter::ReportBackButtonInfoImmediately()
+{
+    Report("WM_REPORT_BACK_KEYEVENT", "Click Back Button");
+}
+
+void WindowInfoReporter::ReportZeroOpacityInfoImmediately(const std::string& bundleName, const std::string& packageName)
+{
+    if (bundleName.empty()) {
+        return;
+    }
+    std::ostringstream oss;
+    oss << "{ PROCESS_NAME:" << bundleName.c_str() << ", PACKAGE_NAME:" << "" << packageName.c_str() << " }";
+    Report("WM_REPORT_WINDOW_OPACITY_ZERO", oss.str());
+}
+
+void WindowInfoReporter::ReportRecordedInfos()
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    WLOGFD("----Report HiSysEvent write all-----");
+    Report("WM_REPORT_WINDOW_CREATE", GetMsgString(windowCreateReportInfos_));
+    Report("WM_REPORT_WINDOW_SHOW", GetMsgString(windowShowReportInfos_));
+    Report("WM_REPORT_WINDOW_HIDE", GetMsgString(windowHideReportInfos_));
+    Report("WM_REPORT_WINDOW_DESTORY", GetMsgString(windowDestoryReportInfos_));
+    Report("WM_REPORT_HIDE_NAVIGATIONBAR", GetMsgString(windowNavigationBarReportInfos_));
+    ClearRecordedInfos();
+}
+
+void WindowInfoReporter::Report(const std::string& reportTag, const std::string& msg)
+{
+    if (msg.empty()) {
+        return;
+    }
+    WLOGFD("Report Tag : [%{public}s], Msg: %{public}s", reportTag.c_str(), msg.c_str());
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER, reportTag,
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC, "MSG", msg);
+    if (ret != 0) {
+        WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
+    }
+}
+
+void WindowInfoReporter::ClearRecordedInfos()
+{
+    WLOGFD("Clear all hiSysEvent write information");
+    windowCreateReportInfos_.clear();
+    windowShowReportInfos_.clear();
+    windowHideReportInfos_.clear();
+    windowDestoryReportInfos_.clear();
+    windowNavigationBarReportInfos_.clear();
 }
 }
 }

@@ -59,7 +59,8 @@ public:
     AvoidArea GetAvoidAreaByType(const sptr<WindowNode>& node, AvoidAreaType avoidAreaType) const;
     WMError MinimizeStructuredAppWindowsExceptSelf(const sptr<WindowNode>& node);
     void TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes) const;
-    std::unordered_map<WindowType, SystemBarProperty> GetExpectImmersiveProperty(DisplayId id) const;
+    std::unordered_map<WindowType, SystemBarProperty> GetExpectImmersiveProperty(DisplayId id,
+        sptr<WindowNode>& triggerWindow) const;
     uint32_t GetWindowCountByType(WindowType windowType);
     uint32_t GetMainFloatingWindowCount();
     bool IsForbidDockSliceMove(DisplayId displayId) const;
@@ -177,6 +178,9 @@ private:
     void ResetAllMainFloatingWindowZOrder(sptr<WindowNode>& rootNode);
     void HandleRemoveWindowDisplayOrientation(sptr<WindowNode>& node, bool fromAnimation);
     void OpenInputMethodSyncTransaction();
+
+    void JudgeToReportSystemBarInfo(const sptr<WindowNode> window,
+        const std::unordered_map<WindowType, SystemBarProperty>& systemBarPropInfo) const;
 
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     uint32_t brightnessWindow_ = INVALID_WINDOW_ID;
