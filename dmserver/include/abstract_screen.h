@@ -84,6 +84,7 @@ public:
     Orientation orientation_ { Orientation::UNSPECIFIED };
     Rotation rotation_ { Rotation::ROTATION_0 };
     Orientation screenRequestedOrientation_ { Orientation::UNSPECIFIED };
+    std::vector<std::shared_ptr<RSSurfaceNode>> children_;
 
 protected:
     void FillScreenInfo(sptr<ScreenInfo>) const;
