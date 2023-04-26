@@ -21,6 +21,8 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <mutex>
+#include "wm_single_instance.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -29,6 +31,7 @@ public:
     PerformReporter(const std::string& tag, const std::vector<int64_t>& timeSpiltsMs, uint32_t reportInterval = 50);
     void start();
     void end();
+
 private:
     void count(int64_t costTime);
     bool report();
@@ -41,6 +44,46 @@ private:
     uint32_t reportInterval_;
 
     static constexpr auto BARRIER = std::numeric_limits<int64_t>::max();
+};
+
+// the map form : <bundleName, <abilityName, count>>
+using FullInfoMap = std::map<std::string, std::map<std::string, uint32_t>>;
+// the map form : <bundleName, count>
+using BundleNameMap = std::map<std::string, uint32_t>;
+class WindowInfoReporter {
+WM_DECLARE_SINGLE_INSTANCE(WindowInfoReporter);
+
+public:
+    void InsertCreateReportInfo(const std::string& bundleName);
+    void InsertShowReportInfo(const std::string& bundleName);
+    void InsertHideReportInfo(const std::string& bundleName);
+    void InsertDestroyReportInfo(const std::string& bundleName);
+
+    void InsertRecentReportInfo(const std::string& bundleName, const std::string& packageName);
+    void InsertNavigationBarReportInfo(const std::string& bundleName, const std::string& packageName);
+
+    void ReportBackButtonInfoImmediately();
+    void ReportZeroOpacityInfoImmediately(const std::string& bundleName, const std::string& packageName);
+    void ReportRecordedInfos();
+
+private:
+    void UpdateReportInfo(FullInfoMap& infoMap, const std::string& bundleName,
+        const std::string& packageName);
+    void UpdateReportInfo(BundleNameMap& infoMap, const std::string& bundleName);
+    std::string GetMsgString(const FullInfoMap& infoMap);
+    std::string GetMsgString(const BundleNameMap& infoMap);
+
+    void Report(const std::string& reportTag, const std::string& msg);
+    void ClearRecordedInfos();
+
+    BundleNameMap windowCreateReportInfos_;
+    BundleNameMap windowShowReportInfos_;
+    BundleNameMap windowHideReportInfos_;
+    BundleNameMap windowDestoryReportInfos_;
+    FullInfoMap windowRecentReportInfos_;
+    FullInfoMap windowNavigationBarReportInfos_;
+
+    std::mutex mtx_;
 };
 }
 }

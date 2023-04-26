@@ -20,6 +20,7 @@
 #include "window.h"
 #include "window_manager_hilog.h"
 #include "xcollie/watchdog.h"
+#include "perform_reporter.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -295,6 +296,25 @@ void WindowInnerManager::ConsumePointerEvent(const std::shared_ptr<MMI::PointerE
         return;
     }
     moveDragController_->ConsumePointerEvent(pointerEvent);
+}
+
+void WindowInnerManager::StartWindowInfoReportLoop()
+{
+    if (isReportTaskStart_ || eventHandler_ == nullptr) {
+        return;
+    }
+    auto task = [this]() {
+        WindowInfoReporter::GetInstance().ReportRecordedInfos();
+        isReportTaskStart_ = false;
+        StartWindowInfoReportLoop();
+    };
+    int64_t delayTime = 1000 * 60 * 60; // an hour.
+    bool ret = eventHandler_->PostTask(task, "WindowInfoReport", delayTime);
+    if (!ret) {
+        WLOGFE("post listener callback task failed. the task name is WindowInfoReport");
+        return;
+    }
+    isReportTaskStart_ = true;
 }
 } // Rosen
 } // OHOS
