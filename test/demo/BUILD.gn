@@ -72,6 +72,8 @@ ohos_executable("demo_snapshot_virtual_screen") {
     "//foundation/window/window_manager/interfaces/innerkits/dm",
     "//foundation/window/window_manager/snapshot/include",
     "//foundation/window/window_manager/utils/include",
+    "../../dmserver/include",
+    "../../dm/include",
   ]
 
   deps = [
