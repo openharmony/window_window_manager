@@ -17,6 +17,7 @@
 #include <iostream>
 #include <string>
 
+#include "display_manager_proxy.h"
 #include "screen_manager.h"
 #include "snapshot_utils.h"
 #include "surface_reader.h"
@@ -34,6 +35,9 @@ const float DEFAULT_DENSITY = 2.0;
 const std::string FILE_NAME = "/data/snapshot_virtual_screen";
 }
 
+static ScreenId mainId;
+static ScreenId virtualScreenId;
+
 static VirtualScreenOption InitOption(ScreenId mainId, SurfaceReader& surfaceReader)
 {
     auto defaultScreen = ScreenManager::GetInstance().GetScreenById(mainId);
@@ -49,6 +53,22 @@ static VirtualScreenOption InitOption(ScreenId mainId, SurfaceReader& surfaceRea
     return option;
 }
 
+static bool InitMirror(SurfaceReader& surfaceReader)
+{
+    mainId = static_cast<ScreenId>(DisplayManager::GetInstance().GetDefaultDisplayId());
+    if (mainId == SCREEN_ID_INVALID) {
+        std::cout<< "get default display id failed!" << std::endl;
+        return false;
+    }
+    VirtualScreenOption option = InitOption(mainId, surfaceReader);
+    virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(option);
+    std::vector<ScreenId> mirrorIds;
+    mirrorIds.push_back(virtualScreenId);
+    ScreenId screenGroupId = static_cast<ScreenId>(1);
+    ScreenManager::GetInstance().MakeMirror(mainId, mirrorIds, screenGroupId);
+    return true;
+}
+
 int main(int argc, char *argv[])
 {
     SurfaceReader surfaceReader;
@@ -58,13 +78,9 @@ int main(int argc, char *argv[])
         return 0;
     }
     surfaceReader.SetHandler(surfaceReaderHandler);
-    ScreenId mainId = static_cast<ScreenId>(DisplayManager::GetInstance().GetDefaultDisplayId());
-    VirtualScreenOption option = InitOption(mainId, surfaceReader);
-    ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(option);
-    std::vector<ScreenId> mirrorIds;
-    mirrorIds.push_back(virtualScreenId);
-    ScreenId screenGroupId = static_cast<ScreenId>(1);
-    ScreenManager::GetInstance().MakeMirror(mainId, mirrorIds, screenGroupId);
+    if (!InitMirror(surfaceReader)) {
+        return 0;
+    }
     int fileIndex = 1;
     auto startTime = time(nullptr);
     if (startTime < 0) {
