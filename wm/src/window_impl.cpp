@@ -2844,7 +2844,6 @@ WmErrorCode WindowImpl::UpdateWindowStateWhenHide()
 
 WmErrorCode WindowImpl::UpdateSubWindowStateAndNotify(uint32_t parentId)
 {
-    sptr<WindowProperty> property = GetWindowProperty();
     if (subWindowMap_.find(parentId) == subWindowMap_.end()) {
         WLOGFD("main window: %{public}u has no child node", parentId);
         return WmErrorCode::WM_OK;
@@ -2880,9 +2879,6 @@ WmErrorCode WindowImpl::UpdateSubWindowStateAndNotify(uint32_t parentId)
 
 sptr<WindowProperty> WindowImpl::GetWindowProperty()
 {
-    if (!IsWindowValid()) {
-        return nullptr;
-    }
     return property_;
 }
 

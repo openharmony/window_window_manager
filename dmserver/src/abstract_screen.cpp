@@ -101,6 +101,7 @@ DMError AbstractScreen::AddSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfaceNo
     } else {
         rsDisplayNode_->AddChild(surfaceNode, -1);
     }
+    children_.push_back(surfaceNode);
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();
@@ -111,10 +112,18 @@ DMError AbstractScreen::AddSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfaceNo
 DMError AbstractScreen::RemoveSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
     if (rsDisplayNode_ == nullptr || surfaceNode == nullptr) {
-        WLOGFE("node is nullptr");
+        WLOGFE("Node is nullptr");
         return DMError::DM_ERROR_NULLPTR;
+    };
+    auto iter = std::find_if(children_.begin(), children_.end(), [surfaceNode] (std::shared_ptr<RSSurfaceNode> node) {
+        return surfaceNode->GetId() == node->GetId();
+    });
+    if (iter == children_.end()) {
+        WLOGFW("Child not found");
+        return DMError::DM_ERROR_INVALID_PARAM;
     }
-    rsDisplayNode_->RemoveChild(surfaceNode);
+    rsDisplayNode_->RemoveChild(*iter);
+    children_.erase(iter);
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();
