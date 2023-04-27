@@ -85,6 +85,7 @@ public:
     void DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event);
     WMError SetAspectRatio(uint32_t windowId, float ratio);
     void FlushWindowInfo(uint32_t windowId);
+    void SetDragFrameGravity(int32_t dragGravity);
 
 private:
     uint32_t GenWindowId();
@@ -143,6 +144,7 @@ private:
         {DragType::DRAG_LEFT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_WEST_SOUTH_EAST},
         {DragType::DRAG_RIGHT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_EAST_SOUTH_WEST}
     };
+    int32_t dragFrameGravity_ = -1;
 };
 } // Rosen
 } // OHOS
