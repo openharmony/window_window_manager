@@ -234,6 +234,10 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
+    if (surfaceNode != nullptr) {
+        surfaceNode->SetFrameGravity(Gravity::RESIZE);
+    }
+
     sptr<WindowNode> node = windowRoot_->FindWindowNodeWithToken(token);
     if (node != nullptr && WindowHelper::IsMainWindow(property->GetWindowType()) && node->startingWindowShown_) {
         StartingWindow::HandleClientWindowCreate(node, window, windowId, surfaceNode, property, pid, uid);
@@ -1062,6 +1066,15 @@ WMError WindowController::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<
         moveDragProperty->startDragFlag_) {
         WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_START);
         ChangeMouseStyle(windowId, moveDragProperty);
+        if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW && dragFrameGravity_ != -1) {
+            if (node->surfaceNode_) {
+                node->surfaceNode_->SetFrameGravity(static_cast<Gravity>(dragFrameGravity_));
+            }
+        }
+        if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE && dragFrameGravity_ != -1) {
+            windowRoot_->GetWindowNodeContainer(node->GetDisplayId())->SetWindowPairFrameGravity(
+                node->GetDisplayId(), static_cast<Gravity>(dragFrameGravity_));
+        }
         return res;
     }
     return WMError::WM_OK;
@@ -1126,6 +1139,15 @@ WMError WindowController::ProcessPointUp(uint32_t windowId)
                 accessibilityConnection_->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             }
         }
+    }
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW && dragFrameGravity_ != -1) {
+        if (node->surfaceNode_) {
+            node->surfaceNode_->SetFrameGravity(Gravity::RESIZE);
+        }
+    }
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE && dragFrameGravity_ != -1) {
+        windowRoot_->GetWindowNodeContainer(node->GetDisplayId())->SetWindowPairFrameGravity(
+            node->GetDisplayId(), Gravity::RESIZE);
     }
     WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_END);
     if (res != WMError::WM_OK) {
@@ -1743,6 +1765,11 @@ WMError WindowController::BindDialogTarget(uint32_t& windowId, sptr<IRemoteObjec
     node->dialogTargetToken_ = targetToken;
 
     return WMError::WM_OK;
+}
+
+void WindowController::SetDragFrameGravity(int32_t dragGravity)
+{
+    dragFrameGravity_ = dragGravity;
 }
 } // namespace OHOS
 } // namespace Rosen

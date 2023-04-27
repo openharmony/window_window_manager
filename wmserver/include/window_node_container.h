@@ -130,6 +130,7 @@ public:
     void SetDisplayOrientationFromWindow(sptr<WindowNode>& node, bool withAnimation);
     bool HasMainFullScreenWindowShown();
     static bool GetAnimateTransactionEnabled();
+    void SetWindowPairFrameGravity(DisplayId displayId, Gravity gravity);
 
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;

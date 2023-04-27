@@ -649,18 +649,7 @@ static void SetBounds(const sptr<WindowNode>& node, const Rect& winRect, const R
         WLOGI("not need to update bounds");
         return;
     }
-    // set surface node gravity based on WindowSizeChangeReason
-    if (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::DRAG_START ||
-        node->GetWindowSizeChangeReason() == WindowSizeChangeReason::DRAG ||
-        node->GetWindowSizeChangeReason() == WindowSizeChangeReason::ROTATION) {
-        if (node->surfaceNode_) {
-            node->surfaceNode_->SetFrameGravity(Gravity::RESIZE);
-        }
-    } else {
-        if (node->surfaceNode_) {
-            node->surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
-        }
-    }
+
     WLOGFD("Name:%{public}s id:%{public}u preRect: [%{public}d, %{public}d, %{public}d, %{public}d], "
         "winRect: [%{public}d, %{public}d, %{public}d, %{public}d],  %{public}u", node->GetWindowName().c_str(),
         node->GetWindowId(), preRect.posX_, preRect.posY_, preRect.width_, preRect.height_,
