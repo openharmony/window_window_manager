@@ -528,7 +528,8 @@ WMError WindowManagerProxy::GetSystemConfig(SystemConfig& systemConfig)
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    systemConfig = *(reply.ReadParcelable<SystemConfig>());
+    sptr<SystemConfig> config = reply.ReadParcelable<SystemConfig>();
+    systemConfig = *config;
     int32_t ret = reply.ReadInt32();
     return static_cast<WMError>(ret);
 }
