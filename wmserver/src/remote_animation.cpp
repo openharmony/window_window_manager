@@ -1004,7 +1004,7 @@ sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::CreateHideAnimationFini
     return CreateAnimationFinishedCallback(func, srcNode);
 }
 
-static void ReportWindowAnimationCallbackTimeout(sptr<WindowNode>& node, std::string taskName)
+static void ReportWindowAnimationCallbackTimeout(sptr<WindowNode>& node, const std::string taskName)
 {
     std::ostringstream oss;
     oss << "animation callback time out: " << "window_name: " << node->GetWindowName()
