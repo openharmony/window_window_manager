@@ -398,7 +398,7 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddToGroupLocked(sptr<Abstra
 {
     sptr<AbstractScreenGroup> res;
     if (dmsScreenGroupMap_.empty()) {
-        WLOGI("connect the first screen");
+        WLOGFI("connect the first screen");
         res = AddAsFirstScreenLocked(newScreen);
     } else {
         res = AddAsSuccedentScreenLocked(newScreen);
@@ -408,11 +408,11 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddToGroupLocked(sptr<Abstra
 
 sptr<AbstractScreenGroup> AbstractScreenController::RemoveFromGroupLocked(sptr<AbstractScreen> screen)
 {
-    WLOGI("RemoveFromGroupLocked.");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto groupDmsId = screen->groupDmsId_;
     auto iter = dmsScreenGroupMap_.find(groupDmsId);
     if (iter == dmsScreenGroupMap_.end()) {
-        WLOGE("RemoveFromGroupLocked. groupDmsId:%{public}" PRIu64"is not in dmsScreenGroupMap_.", groupDmsId);
+        WLOGFE("groupDmsId:%{public}" PRIu64"is not in dmsScreenGroupMap_.", groupDmsId);
         return nullptr;
     }
     sptr<AbstractScreenGroup> screenGroup = iter->second;
@@ -426,7 +426,7 @@ bool AbstractScreenController::RemoveChildFromGroup(sptr<AbstractScreen> screen,
 {
     bool res = screenGroup->RemoveChild(screen);
     if (!res) {
-        WLOGE("RemoveFromGroupLocked. remove screen:%{public}" PRIu64" failed from screenGroup:%{public}" PRIu64".",
+        WLOGFE("remove screen:%{public}" PRIu64" failed from screenGroup:%{public}" PRIu64".",
               screen->dmsId_, screen->groupDmsId_);
         return false;
     }
@@ -441,10 +441,11 @@ bool AbstractScreenController::RemoveChildFromGroup(sptr<AbstractScreen> screen,
 bool AbstractScreenController::CheckScreenInScreenGroup(sptr<AbstractScreen> screen) const
 {
     WLOGI("CheckScreenInScreenGroup.");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto groupDmsId = screen->groupDmsId_;
     auto iter = dmsScreenGroupMap_.find(groupDmsId);
     if (iter == dmsScreenGroupMap_.end()) {
-        WLOGE("CheckScreenInScreenGroup. groupDmsId:%{public}" PRIu64"is not in dmsScreenGroupMap_.", groupDmsId);
+        WLOGFE("groupDmsId:%{public}" PRIu64"is not in dmsScreenGroupMap_.", groupDmsId);
         return false;
     }
     sptr<AbstractScreenGroup> screenGroup = iter->second;
@@ -617,7 +618,8 @@ DMError AbstractScreenController::DestroyVirtualScreen(ScreenId screenId)
 
 DMError AbstractScreenController::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface)
 {
-    WLOGFI("AbstractScreenController::SetVirtualScreenSurface");
+    WLOGFI("begin");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     int32_t res = -1;
     ScreenId rsScreenId;
     if (screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
@@ -780,11 +782,6 @@ bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationA
         return false;
     }
     WLOGFD("set orientation. rotation %{public}u", rotationAfter);
-    ScreenId rsScreenId;
-    if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
-        WLOGE("Convert to RsScreenId fail. screenId: %{public}" PRIu64"", screenId);
-        return false;
-    }
     OpenRotationSyncTransaction();
     SetScreenRotateAnimation(screen, screenId, rotationAfter, withAnimation);
     screen->rotation_ = rotationAfter;
@@ -1286,9 +1283,12 @@ bool AbstractScreenController::SetScreenPowerForAll(ScreenPowerState state, Powe
 
 ScreenPowerState AbstractScreenController::GetScreenPower(ScreenId dmsScreenId) const
 {
-    if (dmsScreenMap_.find(dmsScreenId) == dmsScreenMap_.end()) {
-        WLOGFE("cannot find screen %{public}" PRIu64"", dmsScreenId);
-        return ScreenPowerState::INVALID_STATE;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        if (dmsScreenMap_.find(dmsScreenId) == dmsScreenMap_.end()) {
+            WLOGFE("cannot find screen %{public}" PRIu64"", dmsScreenId);
+            return ScreenPowerState::INVALID_STATE;
+        }
     }
 
     ScreenId rsId = ConvertToRsScreenId(dmsScreenId);
