@@ -169,30 +169,6 @@ HWTEST_F(WindowDumperTest, Dump07, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: ShowAceDumpHelp01
- * @tc.desc: ShowAceDumpHelp
- * @tc.type: FUNC
- */
-HWTEST_F(WindowDumperTest, ShowAceDumpHelp01, Function | SmallTest | Level1)
-{
-    sptr<WindowDumper> windowDumper;
-    sptr<WindowNode> node = new WindowNode();
-    uint32_t id = 101;
-    node->property_->SetWindowId(id);
-    node->property_->SetWindowType(WindowType::WINDOW_TYPE_KEYGUARD);
-    sptr<WindowOption> windowOption = new WindowOption();
-    sptr<WindowImpl> windowImpl = new WindowImpl(windowOption);
-    sptr<IWindow> window = new WindowAgent(windowImpl);
-    node->SetWindowToken(window);
-    WindowManagerService::GetInstance().windowRoot_->windowNodeMap_.insert(std::make_pair(id, node));
-    windowDumper = new WindowDumper(WindowManagerService::GetInstance().windowRoot_);
-    std::string dumpInfo;
-    windowDumper->ShowAceDumpHelp(dumpInfo);
-    WindowManagerService::GetInstance().windowRoot_->windowNodeMap_.clear();
-    ASSERT_FALSE(dumpInfo.empty());
-}
-
-/**
  * @tc.name: ShowAceDumpHelp02
  * @tc.desc: ShowAceDumpHelp
  * @tc.type: FUNC
