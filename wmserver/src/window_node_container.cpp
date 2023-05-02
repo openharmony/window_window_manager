@@ -210,10 +210,6 @@ void WindowNodeContainer::LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool a
 {
     if (afterAnimation) {
         layoutPolicy_->PerformWindowLayout(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
-        // tile layout will change window mode from fullscreen to float
-        // notify systembar window to change color
-        NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_ADD);
-        DumpScreenWindowTreeByWinId(node->GetWindowId());
         return;
     }
     WLOGFD("AddWindowNode Id:%{public}u, currState:%{public}u",
@@ -235,10 +231,6 @@ void WindowNodeContainer::LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool a
                 node->SetWindowSizeChangeReason(WindowSizeChangeReason::CUSTOM_ANIMATION_SHOW);
         }
         layoutPolicy_->PerformWindowLayout(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
-        // tile layout will change window mode from fullscreen to float
-        // notify systembar window to change color
-        NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_ADD);
-        DumpScreenWindowTreeByWinId(node->GetWindowId());
     }
 }
 
@@ -279,6 +271,8 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     MinimizeOldestMainFloatingWindow(node->GetWindowId());
     AssignZOrder();
     LayoutWhenAddWindowNode(node, afterAnimation);
+    NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_ADD);
+    DumpScreenWindowTreeByWinId(node->GetWindowId());
     UpdateCameraFloatWindowStatus(node, true);
     if (WindowHelper::IsMainWindow(node->GetWindowType())) {
         backupWindowIds_.clear();
@@ -1174,6 +1168,10 @@ std::unordered_map<WindowType, SystemBarProperty> WindowNodeContainer::GetExpect
     };
 
     std::vector<sptr<WindowNode>> rootNodes = { aboveAppWindowNode_, appWindowNode_, belowAppWindowNode_ };
+    if (layoutMode_ == WindowLayoutMode::TILE) {
+        rootNodes = { aboveAppWindowNode_, belowAppWindowNode_ };
+    }
+
     for (const auto& node : rootNodes) {
         for (auto iter = node->children_.rbegin(); iter < node->children_.rend(); ++iter) {
             auto& sysBarPropMapNode = (*iter)->GetSystemBarProperty();
