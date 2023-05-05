@@ -144,7 +144,8 @@ private:
         {DragType::DRAG_LEFT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_WEST_SOUTH_EAST},
         {DragType::DRAG_RIGHT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_EAST_SOUTH_WEST}
     };
-    int32_t dragFrameGravity_ = -1;
+    const int32_t INVALID_GRAVITY = -1;
+    int32_t dragFrameGravity_ = INVALID_GRAVITY;
 };
 } // Rosen
 } // OHOS
