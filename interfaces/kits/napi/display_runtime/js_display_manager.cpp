@@ -363,7 +363,7 @@ NativeValue* OnUnregisterDisplayManagerCallback(NativeEngine& engine, NativeCall
         return engine.CreateUndefined();
     }
     std::lock_guard<std::mutex> lock(mtx_);
-    DmErrorCode ret = DmErrorCode::DM_OK;
+    DmErrorCode ret;
     if (info.argc == ARGC_ONE) {
         ret = DM_JS_TO_ERROR_CODE_MAP.at(UnregisterAllDisplayListenerWithType(cbType));
     } else {
