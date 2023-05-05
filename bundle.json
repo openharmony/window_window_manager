@@ -146,7 +146,25 @@
           },
           {
             "type": "so",
+            "name": "//foundation/window/window_manager/window_scene/session:screen_session",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/window_scene"
+            }
+          },
+          {
+            "type": "so",
             "name": "//foundation/window/window_manager/window_scene/session_manager:scene_session_manager",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/window_scene"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/window_scene/session_manager:screen_session_manager",
             "header": {
               "header_files": [
               ],

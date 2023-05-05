@@ -17,7 +17,6 @@
 #define OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_MANAGER_H
 
 #include <event_handler.h>
-#include <iremote_object.h>
 #include <map>
 #include <mutex>
 #include <refbase.h>
@@ -77,7 +76,7 @@ protected:
     virtual ~ExtensionSessionManager() = default;
 
 private:
-    std::map<uint32_t, sptr<ExtensionSession>> extensionMap_;
+    std::map<uint64_t, sptr<ExtensionSession>> extensionMap_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_MANAGER_H
