@@ -32,6 +32,7 @@ const std::map<std::string, WindowManagerConfig::ValueType> WindowManagerConfig:
     { "durationIn",                                   WindowManagerConfig::ValueType::INTS },
     { "durationOut",                                  WindowManagerConfig::ValueType::INTS },
     { "defaultWindowMode",                            WindowManagerConfig::ValueType::INTS },
+    { "dragFrameGravity",                             WindowManagerConfig::ValueType::INTS },
     { "floatingBottomPosY",                           WindowManagerConfig::ValueType::INTS },
     { "defaultFloatingWindow",                        WindowManagerConfig::ValueType::INTS },
     { "maxMainFloatingWindowNumber",                  WindowManagerConfig::ValueType::INTS },
