@@ -37,6 +37,7 @@
 #include "wm_common.h"
 #include "wm_common_inner.h"
 #include "wm_math.h"
+#include "perform_reporter.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -1534,6 +1535,15 @@ bool WindowImpl::IsTurnScreenOn() const
 
 WMError WindowImpl::SetBackgroundColor(uint32_t color)
 {
+    // 0xff000000: ARGB style, means Opaque color.
+    const bool isAlphaZero = !(color & 0xff000000);
+    auto abilityInfo = property_->GetAbilityInfo();
+    if (isAlphaZero && WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        auto& reportInstance = SingletonContainer::Get<WindowInfoReporter>();
+        reportInstance.ReportZeroOpacityInfoImmediately(abilityInfo.bundleName_,
+            abilityInfo.abilityName_);
+    }
+
     if (uiContent_ != nullptr) {
         uiContent_->SetBackgroundColor(color);
         return WMError::WM_OK;
@@ -2181,6 +2191,8 @@ void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>&
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         inputEventConsumer = inputEventConsumer_;
     }
+    SingletonContainer::Get<WindowInfoReporter>().ReportBackButtonInfoImmediately();
+
     bool isConsumed = false;
     if (inputEventConsumer != nullptr) {
         WLOGD("Transfer back key event to inputEventConsumer");

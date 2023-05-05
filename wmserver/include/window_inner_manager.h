@@ -61,6 +61,7 @@ public:
     void NotifyWindowRemovedOrDestroyed(uint32_t windowId);
     pid_t GetPid();
     void SetInputEventConsumer();
+    void StartWindowInfoReportLoop();
 
 protected:
     WindowInnerManager();
@@ -77,6 +78,7 @@ private:
     std::shared_ptr<EventRunner> eventLoop_;
     InnerWMRunningState state_;
     const std::string INNER_WM_THREAD_NAME = "InnerWindowManager";
+    bool isReportTaskStart_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS
