@@ -26,6 +26,7 @@ config("session_public_config") {
 ohos_shared_library("scene_session") {
   sources = [
     "container/src/extension_session_stage.cpp",
+    "container/src/scene_session_stage.cpp",
     "container/src/session_stage.cpp",
     "container/src/window_event_channel.cpp",
     "container/src/zidl/session_stage_proxy.cpp",
@@ -33,23 +34,41 @@ ohos_shared_library("scene_session") {
     "container/src/zidl/window_event_channel_proxy.cpp",
     "container/src/zidl/window_event_channel_stub.cpp",
     "host/src/extension_session.cpp",
+    "host/src/root_scene_session.cpp",
+    "host/src/scene_session.cpp",
     "host/src/session.cpp",
     "host/src/zidl/session_proxy.cpp",
     "host/src/zidl/session_stub.cpp",
   ]
 
-  cflags_cc = [ "-std=c++17" ]
-
   public_configs = [ ":session_public_config" ]
 
   deps = [ "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+
+  public_deps =
+      [ "${window_base_path}/window_scene/interfaces/innerkits:libwsutils" ]
 
   external_deps = [
     "c_utils:utils",
     "hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "multimedia_image_framework:image_native",
   ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
+ohos_shared_library("screen_session") {
+  sources = [
+    "screen/src/screen_property.cpp",
+    "screen/src/screen_session.cpp",
+  ]
+
+  public_configs = [ ":session_public_config" ]
+
+  deps = [ "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
 
   part_name = "window_manager"
   subsystem_name = "window"

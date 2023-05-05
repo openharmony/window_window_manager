@@ -25,6 +25,7 @@
 #include <ipc_skeleton.h>
 #include <parameters.h>
 #include <rs_iwindow_animation_controller.h>
+#include "scene_board_judgement.h"
 #include <system_ability_definition.h>
 #include <sstream>
 #include "xcollie/watchdog.h"
@@ -55,7 +56,8 @@ namespace {
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerService)
 
-const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<WindowManagerService>());
+const bool REGISTER_RESULT = SceneBoardJudgement::IsSceneBoardEnabled() ? false :
+    SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<WindowManagerService>());
 
 WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERVICE_ID, true),
     rsInterface_(RSInterfaces::GetInstance()),

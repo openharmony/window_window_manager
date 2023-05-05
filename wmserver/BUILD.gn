@@ -12,6 +12,8 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+
 config("libwms_config") {
   visibility = [ ":*" ]
 
@@ -109,6 +111,7 @@ ohos_shared_library("libwms") {
     "ipc:ipc_single",
     "power_manager:powermgr_client",
     "safwk:system_ability_fwk",
+    "window_manager:libwsutils",
   ]
 
   if (is_standard_system) {
