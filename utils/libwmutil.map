@@ -25,6 +25,7 @@
             OHOS::Rosen::WindowProperty::*;
             OHOS::Rosen::XmlConfigBase::*;
             OHOS::Rosen::PerformReporter::*;
+            OHOS::Rosen::WindowInfoReporter::*;
             OHOS::Rosen::TransformHelper::*;
             OHOS::Rosen::PersistentStorage::*;
             OHOS::Rosen::WindowTransitionInfo::*;

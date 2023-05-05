@@ -80,3 +80,31 @@ SHOW_WINDOW_TIME:
 GET_SNAPSHOT_TIME:
   __BASE: {type: STATISTIC, level: MINOR, desc: Get snapshot time performance}
   MSG: {type: STRING, desc: windowmanager event message}
+
+WM_REPORT_BACK_KEYEVENT:
+  __BASE: {type: STATISTIC, level: MINOR, desc: The back button is triggered}
+  MSG: {type: STRING, desc: windowmanager event message}
+
+WM_REPORT_WINDOW_OPACITY_ZERO:
+  __BASE: {type: STATISTIC, level: MINOR, desc: The window background is transparent}
+  MSG: {type: STRING, desc: windowmanager event message}
+
+WM_REPORT_WINDOW_CREATE:
+  __BASE: {type: STATISTIC, level: MINOR, desc: The window is created}
+  MSG: {type: STRING, desc: windowmanager event message}
+
+WM_REPORT_WINDOW_SHOW:
+  __BASE: {type: STATISTIC, level: MINOR, desc: The window is shown}
+  MSG: {type: STRING, desc: windowmanager event message}
+
+WM_REPORT_WINDOW_HIDE:
+  __BASE: {type: STATISTIC, level: MINOR, desc: The window is hidden}
+  MSG: {type: STRING, desc: windowmanager event message}
+
+WM_REPORT_WINDOW_DESTORY:
+  __BASE: {type: STATISTIC, level: MINOR, desc: The window is destroied}
+  MSG: {type: STRING, desc: windowmanager event message}
+
+WM_REPORT_HIDE_NAVIGATIONBAR:
+  __BASE: {type: STATISTIC, level: MINOR, desc: The navigation bar is hidden}
+  MSG: {type: STRING, desc: windowmanager event message}

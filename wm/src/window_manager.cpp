@@ -123,7 +123,7 @@ public:
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark);
     void NotifyGestureNavigationEnabledResult(bool enable);
-    
+
     static inline SingletonDelegator<WindowManager> delegator_;
 
     std::recursive_mutex mutex_;

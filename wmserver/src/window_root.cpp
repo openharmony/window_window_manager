@@ -248,6 +248,9 @@ WMError WindowRoot::SaveWindow(const sptr<WindowNode>& node)
         }
     }
     AddDeathRecipient(node);
+    if (WindowHelper::IsMainWindow(node->GetWindowType())) {
+        WindowInfoReporter::GetInstance().InsertCreateReportInfo(node->abilityInfo_.bundleName_);
+    }
     return WMError::WM_OK;
 }
 

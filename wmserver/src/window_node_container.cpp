@@ -291,6 +291,9 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     if (node->GetWindowProperty()->GetPrivacyMode()) {
         UpdatePrivateStateAndNotify();
     }
+    if (WindowHelper::IsMainWindow(node->GetWindowType())) {
+        WindowInfoReporter::GetInstance().InsertShowReportInfo(node->abilityInfo_.bundleName_);
+    }
     return WMError::WM_OK;
 }
 
@@ -437,7 +440,9 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node, bool fromA
     if (node->GetWindowProperty()->GetPrivacyMode()) {
         UpdatePrivateStateAndNotify();
     }
-
+    if (WindowHelper::IsMainWindow(node->GetWindowType())) {
+        WindowInfoReporter::GetInstance().InsertHideReportInfo(node->abilityInfo_.bundleName_);
+    }
     HandleRemoveWindowDisplayOrientation(node, fromAnimation);
     return WMError::WM_OK;
 }
@@ -632,6 +637,9 @@ WMError WindowNodeContainer::DestroyWindowNode(sptr<WindowNode>& node, std::vect
     node->children_.swap(emptyVector);
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER) {
         RemoteAnimation::NotifyAnimationUpdateWallpaper(nullptr);
+    }
+    if (WindowHelper::IsMainWindow(node->GetWindowType())) {
+        WindowInfoReporter::GetInstance().InsertDestroyReportInfo(node->abilityInfo_.bundleName_);
     }
     WLOGI("DestroyNode Id: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
@@ -1160,7 +1168,8 @@ bool WindowNodeContainer::IsSplitImmersiveNode(sptr<WindowNode> node) const
     return node->IsSplitMode() || type == WindowType::WINDOW_TYPE_DOCK_SLICE;
 }
 
-std::unordered_map<WindowType, SystemBarProperty> WindowNodeContainer::GetExpectImmersiveProperty(DisplayId id) const
+std::unordered_map<WindowType, SystemBarProperty> WindowNodeContainer::GetExpectImmersiveProperty(DisplayId id,
+    sptr<WindowNode>& triggerWindow) const
 {
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap {
         { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty() },
@@ -1193,6 +1202,7 @@ std::unordered_map<WindowType, SystemBarProperty> WindowNodeContainer::GetExpect
                     for (auto it : sysBarPropMap) {
                         sysBarPropMap[it.first] = (sysBarPropMapNode.find(it.first))->second;
                     }
+                    triggerWindow = (*iter);
                 }
                 return sysBarPropMap;
             } else if (IsSplitImmersiveNode(*iter)) {
@@ -1247,7 +1257,9 @@ void WindowNodeContainer::ProcessWindowAvoidAreaChangeWhenDisplayChange() const
 void WindowNodeContainer::NotifyIfSystemBarTintChanged(DisplayId displayId) const
 {
     HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
-    auto expectSystemBarProp = GetExpectImmersiveProperty(displayId);
+    sptr<WindowNode> triggerWindow = nullptr;
+    auto expectSystemBarProp = GetExpectImmersiveProperty(displayId, triggerWindow);
+    JudgeToReportSystemBarInfo(triggerWindow, expectSystemBarProp);
     SystemBarRegionTints tints;
     SysBarTintMap& sysBarTintMap = displayGroupController_->sysBarTintMaps_[displayId];
     for (auto it : sysBarTintMap) {
@@ -1262,6 +1274,28 @@ void WindowNodeContainer::NotifyIfSystemBarTintChanged(DisplayId displayId) cons
         tints.emplace_back(sysBarTintMap[it.first]);
     }
     WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(displayId, tints);
+}
+
+void WindowNodeContainer::JudgeToReportSystemBarInfo(const sptr<WindowNode> window,
+    const std::unordered_map<WindowType, SystemBarProperty>& systemBarPropInfo) const
+{
+    if (window == nullptr || !WindowHelper::IsMainWindow(window->GetWindowType())) {
+        WLOGFD("No need to report");
+        return;
+    }
+
+    // 2 means the must size of systemBarPropInfo.
+    if (systemBarPropInfo.size() != 2) {
+        return;
+    }
+
+    auto bundleName = window->abilityInfo_.bundleName_;
+    auto abilityName = window->abilityInfo_.abilityName_;
+    auto navigationItor = systemBarPropInfo.find(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    if (navigationItor != systemBarPropInfo.end() && !navigationItor->second.enable_) {
+        WindowInfoReporter::GetInstance().InsertNavigationBarReportInfo(bundleName, abilityName);
+        WLOGFD("the navigation bar is disabled by window. windowId:[%{public}u]", window->GetWindowId());
+    }
 }
 
 void WindowNodeContainer::NotifyIfSystemBarRegionChanged(DisplayId displayId) const
