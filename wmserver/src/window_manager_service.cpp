@@ -316,6 +316,15 @@ void WindowManagerService::ConfigureWindowManagerService()
             StartingWindow::SetDefaultWindowMode(systemConfig_.defaultWindowMode_);
         }
     }
+    item = config["dragFrameGravity"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1
+            && (numbers[0] == static_cast<int32_t>(Gravity::RESIZE)
+            || numbers[0] == static_cast<int32_t>(Gravity::TOP_LEFT))) {
+            windowController_->SetDragFrameGravity(static_cast<int32_t>(numbers[0]));
+        }
+    }
     item = config["remoteAnimation"].GetProp("enable");
     if (item.IsBool()) {
         RemoteAnimation::isRemoteAnimationEnable_ = item.boolValue_;

@@ -2544,6 +2544,21 @@ void WindowNodeContainer::ClearWindowPairSnapshot(DisplayId displayId)
     windowPair->ClearPairSnapshot();
 }
 
+void WindowNodeContainer::SetWindowPairFrameGravity(DisplayId displayId, Gravity gravity)
+{
+    auto windowPair = displayGroupController_->GetWindowPairByDisplayId(displayId);
+    if (windowPair == nullptr) {
+        WLOGFE("Window pair is nullptr");
+        return;
+    }
+    std::vector<sptr<WindowNode>> windowNodes = windowPair->GetPairedWindows();
+    for (auto& windowNode : windowNodes) {
+        if (windowNode->surfaceNode_) {
+            windowNode->surfaceNode_->SetFrameGravity(gravity);
+        }
+    }
+}
+
 bool WindowNodeContainer::IsScreenLocked()
 {
     return isScreenLocked_;
