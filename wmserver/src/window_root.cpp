@@ -163,6 +163,9 @@ sptr<WindowNode> WindowRoot::GetWindowNodeByMissionId(uint32_t missionId) const
 void WindowRoot::GetBackgroundNodesByScreenId(ScreenId screenGroupId, std::vector<sptr<WindowNode>>& windowNodes)
 {
     for (const auto& it : windowNodeMap_) {
+        if (it.second == nullptr) {
+            continue;
+        }
         wptr<WindowNodeContainer> container = GetWindowNodeContainer(it.second->GetDisplayId());
         if (container == nullptr) {
             continue;
@@ -175,7 +178,7 @@ void WindowRoot::GetBackgroundNodesByScreenId(ScreenId screenGroupId, std::vecto
         if (iter != windowNodeContainerMap_.end()) {
             screenGroupIdOfNode = iter->first;
         }
-        if (it.second && screenGroupId == screenGroupIdOfNode && !it.second->currentVisibility_) {
+        if (screenGroupId == screenGroupIdOfNode && !it.second->currentVisibility_) {
             windowNodes.push_back(it.second);
         }
     }
