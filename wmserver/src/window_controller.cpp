@@ -1066,14 +1066,17 @@ WMError WindowController::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<
         moveDragProperty->startDragFlag_) {
         WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_START);
         ChangeMouseStyle(windowId, moveDragProperty);
-        if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW && dragFrameGravity_ != -1) {
+        if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW && dragFrameGravity_ != INVALID_GRAVITY) {
             if (node->surfaceNode_) {
                 node->surfaceNode_->SetFrameGravity(static_cast<Gravity>(dragFrameGravity_));
             }
         }
-        if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE && dragFrameGravity_ != -1) {
-            windowRoot_->GetWindowNodeContainer(node->GetDisplayId())->SetWindowPairFrameGravity(
-                node->GetDisplayId(), static_cast<Gravity>(dragFrameGravity_));
+        if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE && dragFrameGravity_ != INVALID_GRAVITY) {
+            sptr<WindowNodeContainer> container = windowRoot_->GetWindowNodeContainer(node->GetDisplayId());
+            if (container != nullptr) {
+                container->SetWindowPairFrameGravity(
+                    node->GetDisplayId(), static_cast<Gravity>(dragFrameGravity_));
+            }
         }
         return res;
     }
@@ -1140,14 +1143,16 @@ WMError WindowController::ProcessPointUp(uint32_t windowId)
             }
         }
     }
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW && dragFrameGravity_ != -1) {
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW && dragFrameGravity_ != INVALID_GRAVITY) {
         if (node->surfaceNode_) {
             node->surfaceNode_->SetFrameGravity(Gravity::RESIZE);
         }
     }
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE && dragFrameGravity_ != -1) {
-        windowRoot_->GetWindowNodeContainer(node->GetDisplayId())->SetWindowPairFrameGravity(
-            node->GetDisplayId(), Gravity::RESIZE);
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE && dragFrameGravity_ != INVALID_GRAVITY) {
+        sptr<WindowNodeContainer> container = windowRoot_->GetWindowNodeContainer(node->GetDisplayId());
+        if (container != nullptr) {
+            container->SetWindowPairFrameGravity(node->GetDisplayId(), Gravity::RESIZE);
+        }
     }
     WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_END);
     if (res != WMError::WM_OK) {
