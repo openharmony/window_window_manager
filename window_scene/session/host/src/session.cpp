@@ -15,8 +15,9 @@
 
 #include "session/host/include/session.h"
 
+#include "surface_capture_future.h"
+#include <transaction/rs_interfaces.h>
 #include <ui/rs_surface_node.h>
-
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -53,6 +54,66 @@ const SessionInfo& Session::GetSessionInfo() const
     return sessionInfo_;
 }
 
+bool Session::RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener)
+{
+    return RegisterListenerLocked(lifecycleListeners_, listener);
+}
+
+bool Session::UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener)
+{
+    return UnregisterListenerLocked(lifecycleListeners_, listener);
+}
+
+template<typename T>
+bool Session::RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return false;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        WLOGFE("Listener already registered");
+        return false;
+    }
+    holder.emplace_back(listener);
+    return true;
+}
+
+template<typename T>
+bool Session::UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return false;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    holder.erase(std::remove_if(holder.begin(), holder.end(),
+        [listener](std::shared_ptr<T> registeredListener) { return registeredListener == listener; }),
+        holder.end());
+    return true;
+}
+
+void Session::NotifyForeground()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (!listener.expired()) {
+            listener.lock()->OnForeground();
+        }
+    }
+}
+
+void Session::NotifyBackground()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (!listener.expired()) {
+            listener.lock()->OnBackground();
+        }
+    }
+}
+
 SessionState Session::GetSessionState() const
 {
     return state_;
@@ -86,7 +147,7 @@ RSSurfaceNode::SharedPtr Session::CreateSurfaceNode(std::string name)
     }
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = name;
-    return RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::EXTENSION_ABILITY_NODE);
+    return RSSurfaceNode::Create(rsSurfaceNodeConfig);
 }
 
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
@@ -98,7 +159,6 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     sessionStage_->UpdateRect(rect, reason);
-    winRect_ = rect;
     return WSError::WS_OK;
 }
 
@@ -133,12 +193,11 @@ WSError Session::Foreground()
         return WSError::WS_ERROR_INVALID_SESSION;
     }
 
+    UpdateSessionState(SessionState::STATE_FOREGROUND);
     if (!isActive_) {
         SetActive(true);
-        UpdateSessionState(SessionState::STATE_ACTIVE);
-    } else {
-        UpdateSessionState(SessionState::STATE_FOREGROUND);
     }
+    NotifyForeground();
     return WSError::WS_OK;
 }
 
@@ -152,6 +211,9 @@ WSError Session::Background()
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
+
+    snapshot_ = Snapshot();
+    NotifyBackground();
     return WSError::WS_OK;
 }
 
@@ -215,7 +277,6 @@ WSError Session::Maximize()
     return WSError::WS_OK;
 }
 
-// for window event
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     WLOGFD("Session TransferPointEvent");
@@ -223,18 +284,34 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    windowEventChannel_->TransferPointerEvent(pointerEvent);
-    return WSError::WS_OK;
+    return windowEventChannel_->TransferPointerEvent(pointerEvent);
 }
 
 WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    WLOGFD("Session TransferPointEvent");
+    WLOGFD("Session TransferKeyEvent");
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    windowEventChannel_->TransferKeyEvent(keyEvent);
-    return WSError::WS_OK;
+    return windowEventChannel_->TransferKeyEvent(keyEvent);
+}
+
+std::shared_ptr<Media::PixelMap> Session::GetSnapshot() const
+{
+    return snapshot_;
+}
+
+std::shared_ptr<Media::PixelMap> Session::Snapshot()
+{
+    auto callback = std::make_shared<SurfaceCaptureFuture>();
+    RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
+    auto pixelMap = callback->GetResult(2000); // wait for <= 2000ms
+    if (pixelMap != nullptr) {
+        WLOGFD("Save pixelMap WxH = %{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
+    } else {
+        WLOGFE("Failed to get pixelMap, return nullptr");
+    }
+    return pixelMap;
 }
 } // namespace OHOS::Rosen

@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_INTERFACE_H
 
 #include <iremote_broker.h>
+
 #include "interfaces/include/ws_common.h"
 #include "session/container/include/zidl/session_stage_interface.h"
 #include "session/container/include/zidl/window_event_channel_interface.h"

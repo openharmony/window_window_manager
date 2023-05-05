@@ -16,6 +16,8 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_BASE_H
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_BASE_H
 
+#include <unistd.h>
+
 #include "common/include/message_scheduler.h"
 #include "interfaces/include/ws_common.h"
 namespace OHOS::Rosen {
