@@ -68,6 +68,7 @@ ohos_shared_library("libdms") {
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "sensor:sensor_interface_native",
+    "window_manager:libwsutils",
   ]
 
   if (defined(use_new_skia) && use_new_skia) {

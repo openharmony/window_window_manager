@@ -133,6 +133,7 @@ ohos_shared_library("windowstage_kit") {
 
   external_deps = [
     "ability_runtime:runtime",
+    "ace_engine:ace_uicontent",
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "napi:ace_napi",
