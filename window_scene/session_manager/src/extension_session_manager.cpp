@@ -60,7 +60,6 @@ sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sp
     }
     auto sessionInfo = extSession->GetSessionInfo();
     abilitySessionInfo->sessionToken = extSession;
-    abilitySessionInfo->surfaceNode = extSession->GetSurfaceNode();
     abilitySessionInfo->callerToken = sessionInfo.callerToken_;
     abilitySessionInfo->persistentId = extSession->GetPersistentId();
     return abilitySessionInfo;

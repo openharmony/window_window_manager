@@ -30,8 +30,8 @@ public:
     WSError Foreground() override;
     WSError Background() override;
     WSError Disconnect() override;
-    WSError Connect(const sptr<ISessionStage>& sessionStage,
-        const sptr<IWindowEventChannel>& eventChannel) override;
+    WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode) override;
 
     WSError PendingSessionActivation(const SessionInfo& info) override;
     WSError Recover() override;

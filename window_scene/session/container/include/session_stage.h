@@ -75,7 +75,7 @@ public:
     explicit SessionStage(const sptr<ISession>& session);
     virtual ~SessionStage() = default;
 
-    virtual WSError Connect();
+    virtual WSError Connect(const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     virtual WSError Foreground();
     virtual WSError Background();
     virtual WSError Disconnect();

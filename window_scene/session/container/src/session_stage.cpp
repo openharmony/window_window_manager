@@ -85,7 +85,7 @@ bool SessionStage::UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& hol
     return true;
 }
 
-WSError SessionStage::Connect()
+WSError SessionStage::Connect(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
     if (session_ == nullptr) {
         WLOGFE("session is invalid");
@@ -93,7 +93,7 @@ WSError SessionStage::Connect()
     }
     sptr<SessionStage> sessionStage(this);
     sptr<IWindowEventChannel> eventChannel(new WindowEventChannel(sessionStage));
-    return session_->Connect(sessionStage, eventChannel);
+    return session_->Connect(sessionStage, eventChannel, surfaceNode);
 }
 
 WSError SessionStage::Foreground()
