@@ -82,31 +82,34 @@ void WindowFocusTest::TearDownTestCase()
 void WindowFocusTest::SetUp()
 {
     fullScreenAppInfo_ = {
-            .name = "FullWindow",
-            .rect = Utils::customAppRect_,
-            .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-            .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
-            .needAvoid = false,
-            .parentLimit = false,
-            .parentId = INVALID_WINDOW_ID,
+        .name = "FullWindow",
+        .rect = Utils::customAppRect_,
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
+        .needAvoid = false,
+        .parentLimit = false,
+        .showWhenLocked = true,
+        .parentId = INVALID_WINDOW_ID,
     };
     floatAppInfo_ = {
-            .name = "ParentWindow",
-            .rect = Utils::customAppRect_,
-            .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-            .mode = WindowMode::WINDOW_MODE_FLOATING,
-            .needAvoid = false,
-            .parentLimit = false,
-            .parentId = INVALID_WINDOW_ID,
+        .name = "ParentWindow",
+        .rect = Utils::customAppRect_,
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = false,
+        .parentLimit = false,
+        .showWhenLocked = true,
+        .parentId = INVALID_WINDOW_ID,
     };
     subAppInfo_ = {
-            .name = "SubWindow",
-            .rect = Utils::customAppRect_,
-            .type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW,
-            .mode = WindowMode::WINDOW_MODE_FLOATING,
-            .needAvoid = false,
-            .parentLimit = false,
-            .parentId = INVALID_WINDOW_ID,
+        .name = "SubWindow",
+        .rect = Utils::customAppRect_,
+        .type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = false,
+        .parentLimit = false,
+        .showWhenLocked = false,
+        .parentId = INVALID_WINDOW_ID,
     };
     WindowManager::GetInstance().RegisterFocusChangedListener(testFocusChangedListener_);
 }
