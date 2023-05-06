@@ -962,6 +962,46 @@ DMError AbstractScreenController::MakeMirror(ScreenId screenId, std::vector<Scre
     return DMError::DM_OK;
 }
 
+DMError AbstractScreenController::StopScreens(const std::vector<ScreenId>& screenIds, ScreenCombination stopCombination)
+{
+    for (ScreenId screenId : screenIds) {
+        WLOGFI("ScreenId: %{public}" PRIu64"", screenId);
+        auto screen = GetAbstractScreen(screenId);
+        if (screen == nullptr) {
+            WLOGFW("screen:%{public}" PRIu64" is nullptr", screenId);
+            continue;
+        }
+        auto iter = dmsScreenGroupMap_.find(screen->groupDmsId_);
+        if (iter == dmsScreenGroupMap_.end()) {
+            WLOGFW("groupDmsId:%{public}" PRIu64"is not in dmsScreenGroupMap_", screen->groupDmsId_);
+            continue;
+        }
+        sptr<AbstractScreenGroup> screenGroup = iter->second;
+        if (screenGroup == nullptr) {
+            WLOGFW("screenGroup:%{public}" PRIu64" is nullptr", screen->groupDmsId_);
+            continue;
+        }
+        if (screenGroup->combination_ != stopCombination) {
+            WLOGFW("try to stop screen in another combination");
+            continue;
+        }
+        if (screenGroup->combination_ == ScreenCombination::SCREEN_MIRROR &&
+            screen->dmsId_ == screenGroup->mirrorScreenId_) {
+            WLOGFW("try to stop main mirror screen");
+            continue;
+        }
+
+        if (abstractScreenCallback_ != nullptr && CheckScreenInScreenGroup(screen)) {
+            abstractScreenCallback_->onDisconnect_(screen);
+        }
+        bool res = RemoveChildFromGroup(screen, screenGroup);
+        if (res) {
+            NotifyScreenGroupChanged(screen->ConvertToScreenInfo(), ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
+        }
+    }
+    return DMError::DM_OK;
+}
+
 void AbstractScreenController::ChangeScreenGroup(sptr<AbstractScreenGroup> group, const std::vector<ScreenId>& screens,
     const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination)
 {

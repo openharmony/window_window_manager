@@ -71,6 +71,7 @@ public:
     DMError RemoveSurfaceNodeFromScreen(ScreenId dmsScreenId, std::shared_ptr<RSSurfaceNode>& surfaceNode);
     DMError MakeMirror(ScreenId, std::vector<ScreenId> screens);
     bool MakeExpand(std::vector<ScreenId> screenIds, std::vector<Point> startPoints);
+    DMError StopScreens(const std::vector<ScreenId>& screenIds, ScreenCombination stopCombination);
     void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens);
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) const;
     ScreenPowerState GetScreenPower(ScreenId dmsScreenId) const;
