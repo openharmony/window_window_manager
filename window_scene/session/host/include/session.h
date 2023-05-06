@@ -41,6 +41,7 @@ using NotifyPendingSessionActivationFunc = std::function<void(const SessionInfo&
 
 class ILifecycleListener {
 public:
+    virtual void OnConnect() = 0;
     virtual void OnForeground() = 0;
     virtual void OnBackground() = 0;
 };
@@ -60,7 +61,8 @@ public:
     virtual WSError SetActive(bool active);
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason);
 
-    WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel) override;
+    WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode) override;
     WSError Foreground() override;
     WSError Background() override;
     WSError Disconnect() override;
@@ -69,8 +71,9 @@ public:
     WSError Recover() override;
     WSError Maximize() override;
 
-    virtual void NotifyForeground();
-    virtual void NotifyBackground();
+    void NotifyConnect();
+    void NotifyForeground();
+    void NotifyBackground();
 
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);

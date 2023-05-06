@@ -23,15 +23,10 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Session" };
-const std::string UNDEFINED = "undefined";
 } // namespace
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
-    surfaceNode_ = CreateSurfaceNode(info.bundleName_);
-    if (surfaceNode_ == nullptr) {
-        WLOGFE("create surface node failed");
-    }
 }
 
 void Session::SetPersistentId(uint64_t persistentId)
@@ -94,6 +89,16 @@ bool Session::UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, 
     return true;
 }
 
+void Session::NotifyConnect()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (!listener.expired()) {
+            listener.lock()->OnConnect();
+        }
+    }
+}
+
 void Session::NotifyForeground()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
@@ -134,22 +139,6 @@ bool Session::IsSessionValid() const
     return res;
 }
 
-RSSurfaceNode::SharedPtr Session::CreateSurfaceNode(std::string name)
-{
-    // expect one session with one surfaceNode
-    if (name.empty()) {
-        WLOGFI("name is empty");
-        name = UNDEFINED + std::to_string(persistentId_);
-    } else {
-        std::string surfaceNodeName = name + std::to_string(persistentId_);
-        std::size_t pos = surfaceNodeName.find_last_of('.');
-        name = (pos == std::string::npos) ? surfaceNodeName : surfaceNodeName.substr(pos + 1); // skip '.'
-    }
-    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
-    rsSurfaceNodeConfig.SurfaceNodeName = name;
-    return RSSurfaceNode::Create(rsSurfaceNodeConfig);
-}
-
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
     WLOGFI("session update rect: id: %{public}" PRIu64 ", rect[%{public}d, %{public}d, %{public}u, %{public}u], "\
@@ -162,7 +151,8 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
     return WSError::WS_OK;
 }
 
-WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel)
+WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
     WLOGFI("Connect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()));
@@ -176,10 +166,12 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     }
     sessionStage_ = sessionStage;
     windowEventChannel_ = eventChannel;
+    surfaceNode_ = surfaceNode;
 
     UpdateSessionState(SessionState::STATE_CONNECT);
     // once update rect before connect, update again when connect
     UpdateRect(winRect_, SizeChangeReason::SHOW);
+    NotifyConnect();
     return WSError::WS_OK;
 }
 

@@ -14,7 +14,9 @@
  */
 
 #include "session/host/include/zidl/session_stub.h"
+
 #include <ipc_types.h>
+#include <ui/rs_surface_node.h>
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -80,14 +82,15 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("Connect!");
     sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
-    sptr<ISessionStage> sessionStageProxy = iface_cast<ISessionStage>(sessionStageObject);
+    sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(sessionStageObject);
     sptr<IRemoteObject> eventChannelObject = data.ReadRemoteObject();
-    sptr<IWindowEventChannel> eventChannelProxy = iface_cast<IWindowEventChannel>(eventChannelObject);
-    if (sessionStageProxy == nullptr || eventChannelProxy == nullptr) {
+    sptr<IWindowEventChannel> eventChannel = iface_cast<IWindowEventChannel>(eventChannelObject);
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(data);
+    if (sessionStage == nullptr || eventChannel == nullptr || surfaceNode == nullptr) {
         WLOGFE("Failed to read scene session stage object or event channel object!");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = Connect(sessionStageProxy, eventChannelProxy);
+    WSError errCode = Connect(sessionStage, eventChannel, surfaceNode);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
