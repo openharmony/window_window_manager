@@ -16,7 +16,9 @@ import("//build/ohos.gni")
 group("window_scene") {
   public_deps = [
     "session:scene_session",
+    "session:screen_session",
     "session_manager:scene_session_manager",
+    "session_manager:screen_session_manager",
   ]
 }
 

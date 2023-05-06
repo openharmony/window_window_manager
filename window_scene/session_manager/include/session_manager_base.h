@@ -30,7 +30,7 @@ public:
         return (((uint64_t)pid_ << 32) | (++sessionId_)); // 32: high bit for uint64
     }
 protected:
-    std::shared_ptr<MessageScheduler> mmsScheduler_ = nullptr;
+    std::shared_ptr<MessageScheduler> msgScheduler_ = nullptr;
     std::atomic<bool> mmsSchedulerInit_ = false;
 private:
     int pid_ = getpid();
