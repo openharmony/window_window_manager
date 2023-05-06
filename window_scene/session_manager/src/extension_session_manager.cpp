@@ -25,8 +25,8 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSessionManager" };
-    const std::string EXTENSION_SESSION_MANAGER_THREAD = "ExtensionSessionManager";
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSessionManager" };
+const std::string EXTENSION_SESSION_MANAGER_THREAD = "ExtensionSessionManager";
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ExtensionSessionManager)
@@ -39,12 +39,12 @@ WSError ExtensionSessionManager::Init()
 {
     WLOGFI("extension session manager init.");
     if (mmsSchedulerInit_) {
-        WLOGFW("mmsScheduler_ already init!");
+        WLOGFW("msgScheduler_ already init!");
         return WSError::WS_DO_NOTHING;
     }
-    mmsScheduler_ = std::make_shared<MessageScheduler>(EXTENSION_SESSION_MANAGER_THREAD);
-    if (!mmsScheduler_) {
-        WLOGFE("new mmsScheduler_ failed!");
+    msgScheduler_ = std::make_shared<MessageScheduler>(EXTENSION_SESSION_MANAGER_THREAD);
+    if (!msgScheduler_) {
+        WLOGFE("new msgScheduler_ failed!");
         return WSError::WS_ERROR_NULLPTR;
     }
     mmsSchedulerInit_ = true;
@@ -69,7 +69,7 @@ sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sp
 sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const SessionInfo& sessionInfo)
 {
     if (!mmsSchedulerInit_) {
-        WLOGFE("mmsScheduler_ not init!");
+        WLOGFE("msgScheduler_ not init!");
         return nullptr;
     }
     auto task = [this, sessionInfo]() {
@@ -85,9 +85,9 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
         extensionMap_.insert({ persistentId, extensionSession });
         return extensionSession;
     };
-    // once init but mmsScheduler_ is nullptr
-    WS_CHECK_NULL_SCHE_RETURN(mmsScheduler_, task);
-    return mmsScheduler_->PostSyncTask(task);
+    // once init but msgScheduler_ is nullptr
+    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
+    return msgScheduler_->PostSyncTask(task);
 }
 
 WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession)
@@ -118,8 +118,8 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
             AppExecFwk::ExtensionAbilityType::UI);
         return WSError::WS_OK;
     };
-    WS_CHECK_NULL_SCHE_RETURN(mmsScheduler_, task);
-    mmsScheduler_->PostAsyncTask(task);
+    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
+    msgScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
 
@@ -147,8 +147,8 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
         AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIExtensionAbility(extSessionInfo);
         return WSError::WS_OK;
     };
-    WS_CHECK_NULL_SCHE_RETURN(mmsScheduler_, task);
-    mmsScheduler_->PostAsyncTask(task);
+    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
+    msgScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
 
@@ -176,8 +176,8 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
         extensionMap_.erase(persistentId);
         return WSError::WS_OK;
     };
-    WS_CHECK_NULL_SCHE_RETURN(mmsScheduler_, task);
-    mmsScheduler_->PostAsyncTask(task);
+    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
+    msgScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
