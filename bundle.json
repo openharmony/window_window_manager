@@ -26,7 +26,6 @@
       ],
       "deps": {
         "components": [
-          "imf",
           "sensor",
           "ability_base",
           "graphic_standard",
@@ -41,9 +40,7 @@
           "hiviewdfx_hilog_native",
           "ipc",
           "power_manager",
-          "utils_base",
           "hitrace_native",
-          "resource_management",
           "samgr",
           "input",
           "safwk",
@@ -51,11 +48,14 @@
           "config_policy",
           "ace_engine",
           "multimedia_image_framework",
-          "preferences"
+          "preferences",
+          "hiview",
+          "hicollie_native",
+          "eventhandler",
+          "c_utils",
+          "common"
         ],
         "third_party": [
-          "flutter",
-          "libxml2",
           "libjpeg-turbo"
         ]
       },
