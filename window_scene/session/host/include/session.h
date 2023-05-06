@@ -31,15 +31,20 @@ class KeyEvent;
 class AxisEvent;
 } // namespace OHOS::MMI
 
+namespace OHOS::Media {
+class PixelMap;
+}
+
 namespace OHOS::Rosen {
 class RSSurfaceNode;
 using NotifyPendingSessionActivationFunc = std::function<void(const SessionInfo& info)>;
 
 class ILifecycleListener {
 public:
-    virtual void OnForeground() {};
-    virtual void OnBackground() {};
+    virtual void OnForeground() = 0;
+    virtual void OnBackground() = 0;
 };
+
 class Session : public SessionStub, public virtual RefBase {
 public:
     explicit Session(const SessionInfo& info);
@@ -47,13 +52,15 @@ public:
 
     void SetPersistentId(uint64_t persistentId);
     uint64_t GetPersistentId() const;
+
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
+    std::shared_ptr<Media::PixelMap> GetSnapshot() const;
+    SessionState GetSessionState() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason);
 
-    WSError Connect(
-        const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel) override;
+    WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel) override;
     WSError Foreground() override;
     WSError Background() override;
     WSError Disconnect() override;
@@ -62,15 +69,19 @@ public:
     WSError Recover() override;
     WSError Maximize() override;
 
-    // for window event
+    virtual void NotifyForeground();
+    virtual void NotifyBackground();
+
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+
+    bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
+    bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
 
     const SessionInfo& GetSessionInfo() const;
     void SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func);
 
 protected:
-    SessionState GetSessionState() const;
     void UpdateSessionState(SessionState state);
     bool IsSessionValid() const;
     bool isActive_ = false;
@@ -80,13 +91,38 @@ protected:
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
 
 private:
+    template<typename T>
+    bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
+    template<typename T>
+    bool UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
+
+    template<typename T1, typename T2, typename Ret>
+    using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
+    template<typename T>
+    inline EnableIfSame<T, ILifecycleListener, std::vector<std::weak_ptr<ILifecycleListener>>> GetListeners()
+    {
+        std::vector<std::weak_ptr<ILifecycleListener>> lifecycleListeners;
+        {
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            for (auto& listener : lifecycleListeners_) {
+                lifecycleListeners.push_back(listener);
+            }
+        }
+        return lifecycleListeners;
+    }
+
     std::shared_ptr<RSSurfaceNode> CreateSurfaceNode(std::string name);
+    std::shared_ptr<Media::PixelMap> Snapshot();
 
     uint64_t persistentId_ = INVALID_SESSION_ID;
     std::shared_ptr<RSSurfaceNode> surfaceNode_ = nullptr;
     SessionState state_ = SessionState::STATE_DISCONNECT;
 
+    std::recursive_mutex mutex_;
+    std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;
     sptr<IWindowEventChannel> windowEventChannel_ = nullptr;
+
+    std::shared_ptr<Media::PixelMap> snapshot_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_H
