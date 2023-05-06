@@ -934,7 +934,14 @@ void WindowNodeContainer::UpdateFocusStatus(uint32_t id, bool focused)
             " abilityName: %{public}s, pid: %{public}d, uid: %{public}d", id,
             node->GetWindowProperty()->GetWindowName().c_str(), info.bundleName_.c_str(), info.abilityName_.c_str(),
             node->GetCallingPid(), node->GetCallingUid());
-        FocusAppInfo appInfo = { node->GetCallingPid(), node->GetCallingUid(), info.bundleName_, info.abilityName_ };
+        uint64_t focusNodeId = 0; // 0 means invalid
+        if (node->surfaceNode_ == nullptr) {
+            WLOGFW("focused window surfaceNode is null");
+        } else {
+            focusNodeId = node->surfaceNode_->GetId();
+        }
+        FocusAppInfo appInfo =
+            { node->GetCallingPid(), node->GetCallingUid(), info.bundleName_, info.abilityName_, focusNodeId };
         RSInterfaces::GetInstance().SetFocusAppInfo(appInfo);
     }
     if (node->GetWindowToken()) {
