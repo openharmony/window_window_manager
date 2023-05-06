@@ -719,13 +719,15 @@ sptr<RSWindowAnimationTarget> RemoteAnimation::CreateWindowAnimationTarget(sptr<
     windowAnimationTarget->missionId_ = windowNode->abilityInfo_.missionId_;
     windowAnimationTarget->windowId_ = windowNode->GetWindowId();
     windowAnimationTarget->displayId_ = windowNode->GetDisplayId();
-    if (WindowHelper::IsAppWindow(windowNode->GetWindowType())) {
+    // some ability not has startingWindow，e.g. oobe
+    if (WindowHelper::IsAppWindow(windowNode->GetWindowType()) && windowNode->leashWinSurfaceNode_) {
         windowAnimationTarget->surfaceNode_ = windowNode->leashWinSurfaceNode_;
     } else {
         windowAnimationTarget->surfaceNode_ = windowNode->surfaceNode_;
     }
     if (windowAnimationTarget->surfaceNode_ == nullptr) {
-        WLOGFE("Window surface node is null!");
+        WLOGFE("Window surface node is null id:%{public}u, type:%{public}u!",
+            windowNode->GetWindowId(), windowNode->GetWindowType());
         return nullptr;
     }
 
