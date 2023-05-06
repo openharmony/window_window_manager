@@ -359,12 +359,14 @@ HWTEST_F(DisplayManagerServiceTest, MirrorAndExpand, Function | SmallTest | Leve
     ScreenId screenGroupId1 = DISPLAY_ID_INVALID;
     dms_->MakeMirror(DISPLAY_ID_INVALID, mirrorScreenIds, screenGroupId1);
     ASSERT_EQ(SCREEN_ID_INVALID, screenGroupId1);
+    ASSERT_EQ(DMError::DM_OK, dms_->StopMirror(mirrorScreenIds));
 
     std::vector<ScreenId> expandScreenIds;
     std::vector<Point> startPoints;
     ScreenId screenGroupId2 = DISPLAY_ID_INVALID;
     dms_->MakeExpand(expandScreenIds, startPoints, screenGroupId2);
     ASSERT_EQ(SCREEN_ID_INVALID, screenGroupId2);
+    ASSERT_EQ(DMError::DM_OK, dms_->StopExpand(expandScreenIds));
 }
 
 /**

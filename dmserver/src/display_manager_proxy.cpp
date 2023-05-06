@@ -907,6 +907,34 @@ DMError DisplayManagerProxy::MakeMirror(ScreenId mainScreenId, std::vector<Scree
     return ret;
 }
 
+DMError DisplayManagerProxy::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("StopMirror fail: remote is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("StopMirror fail: WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    bool res = data.WriteUInt64Vector(mirrorScreenIds);
+    if (!res) {
+        WLOGFE("StopMirror fail: data write failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_STOP_MIRROR),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("StopMirror fail: SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
+
 sptr<ScreenInfo> DisplayManagerProxy::GetScreenInfoById(ScreenId screenId)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -1036,6 +1064,34 @@ DMError DisplayManagerProxy::MakeExpand(std::vector<ScreenId> screenId, std::vec
     DMError ret = static_cast<DMError>(reply.ReadInt32());
     screenGroupId = static_cast<ScreenId>(reply.ReadUint64());
     return ret;
+}
+
+DMError DisplayManagerProxy::StopExpand(const std::vector<ScreenId>& expandScreenIds)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("StopExpand fail: remote is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("StopExpand fail: WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    bool res = data.WriteUInt64Vector(expandScreenIds);
+    if (!res) {
+        WLOGFE("StopExpand fail: data write failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_STOP_EXPAND),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("StopExpand fail: SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
 }
 
 void DisplayManagerProxy::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
