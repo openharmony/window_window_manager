@@ -135,6 +135,7 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
             return WSError::WS_ERROR_NULLPTR;
         }
         // to add StartAbility
+        AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(want, startOptions, scnSessionInfo);
         return WSError::WS_OK;
     };
     WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
