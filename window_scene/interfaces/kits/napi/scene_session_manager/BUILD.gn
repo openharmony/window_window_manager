@@ -21,6 +21,7 @@ config("scene_session_manager_napi_public_config") {
 
 ohos_shared_library("scenesessionmanager_napi") {
   sources = [
+    "js_root_scene_session.cpp",
     "js_scene_session.cpp",
     "js_scene_session_manager.cpp",
     "js_scene_utils.cpp",
