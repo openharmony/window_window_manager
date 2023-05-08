@@ -157,7 +157,7 @@ WMError WindowSystemEffect::SetWindowShadow(const sptr<WindowNode>& node)
     if (MathHelper::GreatNotEqual(shadow.elevation_, 0.f)) {
         surfaceNode->SetShadowElevation(shadow.elevation_ * vpr);
     } else {
-        surfaceNode->SetShadowRadius(shadow.radius_);
+        surfaceNode->SetShadowRadius(ConvertRadiusToSigma(shadow.radius_ * vpr));
     }
     surfaceNode->SetShadowColor(colorValue);
     surfaceNode->SetShadowOffsetX(shadow.offsetX_ * vpr);
