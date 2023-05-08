@@ -29,7 +29,8 @@ struct SystemBarRegionTint {
     WindowType type_;
     SystemBarProperty prop_;
     Rect region_;
-    SystemBarRegionTint() : prop_(SystemBarProperty()) {}
+    SystemBarRegionTint()
+        : type_(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW), prop_(), region_{ 0, 0, 0, 0 } {}
     SystemBarRegionTint(WindowType type, SystemBarProperty prop, Rect region)
         : type_(type), prop_(prop), region_(region) {}
 };
