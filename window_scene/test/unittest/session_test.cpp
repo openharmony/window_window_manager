@@ -58,6 +58,7 @@ public:
     void SetUp() override;
     void TearDown() override;
 private:
+    RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
     sptr<Session> session_ = nullptr;
 };
 
@@ -83,6 +84,14 @@ void WindowSessionTest::TearDown()
     session_ = nullptr;
 }
 
+RSSurfaceNode::SharedPtr WindowSessionTest::CreateRSSurfaceNode()
+{
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    rsSurfaceNodeConfig.SurfaceNodeName = "WindowSessionTestSurfaceNode";
+    auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig);
+    return surfaceNode;
+}
+
 namespace {
 /**
  * @tc.name: SetActive01
@@ -102,7 +111,8 @@ HWTEST_F(WindowSessionTest, SetActive01, Function | SmallTest | Level2)
 
     sptr<WindowEventChannelMocker> mockEventChannel = new(std::nothrow) WindowEventChannelMocker(mockSessionStage);
     EXPECT_NE(nullptr, mockEventChannel);
-    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage, mockEventChannel));
+    auto surfaceNode = CreateRSSurfaceNode();
+    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage, mockEventChannel, surfaceNode));
     ASSERT_EQ(WSError::WS_OK, session_->SetActive(true));
     ASSERT_EQ(false, session_->isActive_);
 
@@ -129,7 +139,7 @@ HWTEST_F(WindowSessionTest, UpdateRect01, Function | SmallTest | Level2)
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateRect(rect, SizeChangeReason::SHOW));
     sptr<WindowEventChannelMocker> mockEventChannel = new(std::nothrow) WindowEventChannelMocker(mockSessionStage);
     EXPECT_NE(nullptr, mockEventChannel);
-    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage, mockEventChannel));
+    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage, mockEventChannel, nullptr));
 
     rect = {0, 0, 100, 100};
     EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _)).Times(1).WillOnce(Return(WSError::WS_OK));
@@ -151,47 +161,30 @@ HWTEST_F(WindowSessionTest, IsSessionValid01, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: CreateSurfaceNode01
- * @tc.desc: check func CreateSurfaceNode
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, CreateSurfaceNode01, Function | SmallTest | Level2)
-{
-    std::shared_ptr<RSSurfaceNode> surfaceNode1 = session_->CreateSurfaceNode("");
-    ASSERT_NE(surfaceNode1, nullptr);
-    std::string expectName = UNDEFINED + std::to_string(session_->persistentId_);
-    ASSERT_EQ(surfaceNode1->GetName(), expectName);
-
-    auto surfaceNode2 = session_->CreateSurfaceNode("testNode");
-    ASSERT_NE(surfaceNode2, nullptr);
-    expectName = "testNode" + std::to_string(session_->persistentId_);
-    ASSERT_EQ(surfaceNode2->GetName(), expectName);
-}
-
-/**
  * @tc.name: Connect01
  * @tc.desc: check func Connect
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionTest, Connect01, Function | SmallTest | Level2)
 {
+    auto surfaceNode = CreateRSSurfaceNode();
     session_->state_ = SessionState::STATE_CONNECT;
-    auto result = session_->Connect(nullptr, nullptr);
+    auto result = session_->Connect(nullptr, nullptr, nullptr);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
 
     session_->state_ = SessionState::STATE_DISCONNECT;
-    result = session_->Connect(nullptr, nullptr);
+    result = session_->Connect(nullptr, nullptr, nullptr);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     sptr<ISession> sessionToken = nullptr;
     sptr<SessionStage> sessionStage = new(std::nothrow) SessionStage(sessionToken);
     EXPECT_NE(nullptr, sessionStage);
-    result = session_->Connect(sessionStage, nullptr);
+    result = session_->Connect(sessionStage, nullptr, surfaceNode);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     sptr<TestWindowEventChannel> testWindowEventChannel = new(std::nothrow) TestWindowEventChannel();
     EXPECT_NE(nullptr, testWindowEventChannel);
-    result = session_->Connect(sessionStage, testWindowEventChannel);
+    result = session_->Connect(sessionStage, testWindowEventChannel, surfaceNode);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 

@@ -16,9 +16,11 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCREEN_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCREEN_SESSION_H
 
+#include <vector>
+
 #include <refbase.h>
 #include <screen_manager/screen_types.h>
-#include <vector>
+#include <ui/rs_display_node.h>
 
 #include "screen_property.h"
 
@@ -49,6 +51,7 @@ public:
 
     ScreenId GetScreenId();
     ScreenProperty GetScreenProperty() const;
+    std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
 
     void Connect();
     void Disconnect();
@@ -56,6 +59,7 @@ public:
 private:
     ScreenId screenId_;
     ScreenProperty property_;
+    std::shared_ptr<RSDisplayNode> displayNode_;
     ScreenState screenState_ { ScreenState::INIT };
     std::vector<IScreenChangeListener*> screenChangeListenerList_;
 };
