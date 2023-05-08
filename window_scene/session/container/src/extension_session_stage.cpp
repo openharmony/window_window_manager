@@ -16,7 +16,7 @@
 #include "session/container/include/extension_session_stage.h"
 
 namespace OHOS::Rosen {
-
 ExtensionSessionStage::ExtensionSessionStage(const sptr<ISession>& extensionSession) : SessionStage(extensionSession)
 {
+}
 } // namespace OHOS::Rosen
