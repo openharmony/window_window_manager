@@ -58,6 +58,11 @@ public:
     static WMError SetWindowShadow(const sptr<WindowNode>& node);
     static WMError SetCornerRadius(const sptr<WindowNode>& node, bool needCheckAnimation = true);
 private:
+    static float ConvertRadiusToSigma(float radius)
+    {
+        constexpr float BlurSigmaScale = 0.57735f;
+        return radius > 0.0f ? BlurSigmaScale * radius + SK_ScalarHalf : 0.0f;
+    }
     static bool IsAppMainOrSubOrFloatingWindow(const sptr<WindowNode>& node);
     static AppWindowEffectConfig windowSystemEffectConfig_;
     static wptr<WindowRoot> windowRoot_;
