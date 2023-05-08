@@ -91,6 +91,7 @@ void WindowExtensionStubImpl::RequestFocus()
 
 void WindowExtensionStubImpl::GetExtensionWindow(sptr<IWindowExtensionClient>& token)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     token_ = token;
     if (token_ == nullptr) {
         WLOGFE("token is null");

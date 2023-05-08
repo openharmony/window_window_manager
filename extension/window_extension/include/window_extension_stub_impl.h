@@ -16,6 +16,7 @@
 #ifndef WINDOW_EXTENSION_STUB_IMPL_H
 #define WINDOW_EXTENSION_STUB_IMPL_H
 
+#include <mutex>
 #include <string>
 
 #include "window.h"
@@ -45,6 +46,7 @@ private:
     sptr<Window> window_;
     std::string windowName_;
     sptr<IWindowExtensionClient> token_;
+    std::mutex mutex_;
 };
 } // namespace Rosen
 } // namespace OHOS
