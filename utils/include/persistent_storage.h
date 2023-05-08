@@ -41,7 +41,14 @@ public:
         switch (storageType) {
             case PersistentStorageType::ASPECT_RATIO: {
                 pref->PutFloat(key, value);
-                WLOG_D("[PersistentStorage] Insert aspect ratio, key %{public}s, value %{public}f", key.c_str(), value);
+                WLOG_D("[PersistentStorage] Insert aspect ratio, key %{public}s, value %{public}f",
+                    key.c_str(), static_cast<float>(value));
+                break;
+            }
+            case PersistentStorageType::MAXIMIZE_STATE: {
+                pref->PutInt(key, value);
+                WLOG_D("[PersistentStorage] Insert Maximize state, key %{public}s, value %{public}d",
+                    key.c_str(), static_cast<int>(value));
                 break;
             }
             default:
@@ -61,7 +68,14 @@ public:
         switch (storageType) {
             case PersistentStorageType::ASPECT_RATIO: {
                 value = pref->GetFloat(key);
-                WLOG_D("[PersistentStorage] Get aspect ratio, key: %{public}s, value:%{public}f", key.c_str(), value);
+                WLOG_D("[PersistentStorage] Get aspect ratio, key: %{public}s, value:%{public}f",
+                    key.c_str(), static_cast<float>(value));
+                break;
+            }
+            case PersistentStorageType::MAXIMIZE_STATE: {
+                value = pref->GetInt(key);
+                WLOG_D("[PersistentStorage] Get Maximize state, key: %{public}s, value:%{public}d",
+                    key.c_str(), static_cast<int>(value));
                 break;
             }
             default:

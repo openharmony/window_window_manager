@@ -73,6 +73,8 @@ public:
     void NotifyDumpInfoResult(const std::vector<std::string>& info) override;
     WMError GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
         std::vector<sptr<RSWindowAnimationTarget>>& targets) override;
+    void SetMaximizeMode(MaximizeMode maximizeMode) override;
+    MaximizeMode GetMaximizeMode() override;
 private:
     static inline BrokerDelegator<WindowManagerProxy> delegator_;
 };

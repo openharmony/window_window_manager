@@ -193,10 +193,13 @@ public:
 
     virtual bool IsDecorEnable() const override;
     virtual WMError Maximize() override;
+    virtual WMError MaximizeFloating() override;
     virtual WMError Minimize() override;
     virtual WMError Recover() override;
     virtual WMError Close() override;
     virtual void StartMove() override;
+    virtual WMError SetGlobalMaximizeMode(MaximizeMode mode) override;
+    virtual MaximizeMode GetGlobalMaximizeMode() override;
 
     virtual WMError RequestFocus() const override;
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
@@ -543,6 +546,7 @@ private:
     void UpdateViewportConfig(const Rect& rect, const sptr<class Display>& display, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateDecorEnable(bool needNotify = false);
+    WMError SetFloatingMaximize(bool isEnter);
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
         ColorSpace colorSpace;

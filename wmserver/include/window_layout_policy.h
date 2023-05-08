@@ -61,6 +61,7 @@ public:
     static void SetCascadeRectBottomPosYLimit(uint32_t floatingBottomPosY);
     static void SetMaxFloatingWindowSize(uint32_t maxSize);
     static void CalcAndSetNodeHotZone(const Rect& winRect, const sptr<WindowNode>& node);
+    virtual void GetMaximizeRect(const sptr<WindowNode>& node, Rect& maxRect);
 
 protected:
     /*

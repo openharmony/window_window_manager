@@ -89,6 +89,7 @@ public:
     void ClearTransformZAxisOffset(Transform& trans);
     void SetAspectRatio(float ratio);
     void SetWindowGravity(WindowGravity gravity, uint32_t percent);
+    void SetMaximizeMode(MaximizeMode maximizeMode);
 
     const std::string& GetWindowName() const;
     const AbilityInfo& GetAbilityInfo() const;
@@ -136,6 +137,7 @@ public:
     const TransformHelper::Matrix4& GetWorldTransformMat() const;
     float GetAspectRatio() const;
     void GetWindowGravity(WindowGravity& gravity, uint32_t& percent) const;
+    MaximizeMode GetMaximizeMode() const;
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static WindowProperty* Unmarshalling(Parcel& parcel);
@@ -212,6 +214,7 @@ private:
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
     WindowSizeLimits sizeLimits_;
     WindowSizeLimits updatedSizeLimits_;
+    MaximizeMode maximizeMode_ { MaximizeMode::MODE_RECOVER };
 };
 }
 }
