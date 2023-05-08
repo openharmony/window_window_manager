@@ -778,6 +778,31 @@ WMError WindowImpl::SetFullScreen(bool status)
     return ret;
 }
 
+WMError WindowImpl::SetFloatingMaximize(bool isEnter)
+{
+    WLOGFI("id:%{public}d SetFloatingMaximize status: %{public}d", property_->GetWindowId(), isEnter);
+    if (!IsWindowValid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    if (isEnter && GetGlobalMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+        WMError ret = SetFullScreen(true);
+        if (ret == WMError::WM_OK) {
+            property_->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
+        }
+        return ret;
+    }
+
+    if (isEnter && GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+            SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+        }
+    }
+    property_->SetMaximizeMode(isEnter ? MaximizeMode::MODE_AVOID_SYSTEM_BAR : MaximizeMode::MODE_RECOVER);
+    property_->SetWindowSizeChangeReason(WindowSizeChangeReason::RESIZE);
+    return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
+}
+
 WMError WindowImpl::SetAspectRatio(float ratio)
 {
     WLOGFI("windowId: %{public}u, ratio: %{public}f", GetWindowId(), ratio);
@@ -1800,6 +1825,41 @@ WMError WindowImpl::Maximize()
     }
 }
 
+WMError WindowImpl::MaximizeFloating()
+{
+    WLOGI("id: %{public}u MaximizeFloating", property_->GetWindowId());
+    if (!IsWindowValid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        return SetFloatingMaximize(true);
+    } else {
+        WLOGI("MaximizeFloating fail, not main window");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+}
+
+WMError WindowImpl::SetGlobalMaximizeMode(MaximizeMode mode)
+{
+    WLOGI("id: %{public}u SetGlobalMaximizeMode: %{public}u", property_->GetWindowId(),
+        static_cast<uint32_t>(mode));
+    if (!IsWindowValid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        SingletonContainer::Get<WindowAdapter>().SetMaximizeMode(mode);
+        return WMError::WM_OK;
+    } else {
+        WLOGI("SetGlobalMaximizeMode fail, not main window");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+}
+
+MaximizeMode WindowImpl::GetGlobalMaximizeMode()
+{
+    return SingletonContainer::Get<WindowAdapter>().GetMaximizeMode();
+}
+
 WMError WindowImpl::NotifyWindowTransition(TransitionReason reason)
 {
     sptr<WindowTransitionInfo> fromInfo = new(std::nothrow) WindowTransitionInfo();
@@ -1855,6 +1915,11 @@ WMError WindowImpl::Recover()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+            property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+            SetFloatingMaximize(false);
+            return WMError::WM_OK;
+        }
         SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     }
     return WMError::WM_OK;
@@ -2259,7 +2324,13 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
             (void)inputEventConsumer->OnInputEvent(keyEvent);
         } else if (uiContent_ != nullptr) {
             WLOGD("Transfer key event to uiContent");
-            (void)uiContent_->ProcessKeyEvent(keyEvent);
+            bool handled = static_cast<bool>(uiContent_->ProcessKeyEvent(keyEvent));
+            if (!handled && keyCode == MMI::KeyEvent::KEYCODE_ESCAPE &&
+                GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+                property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL) {
+                WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
+                Recover();
+            }
         } else {
             WLOGFE("There is no key event consumer");
         }
@@ -2448,7 +2519,8 @@ void WindowImpl::ReadyToMoveOrDragWindow(const std::shared_ptr<MMI::PointerEvent
         moveDragProperty_->startMoveFlag_ = true;
         SingletonContainer::Get<WindowAdapter>().NotifyServerReadyToMoveOrDrag(property_->GetWindowId(),
             property_, moveDragProperty_);
-    } else if (IsPointInDragHotZone(startPointPosX, startPointPosY, moveDragProperty_->sourceType_)) {
+    } else if (IsPointInDragHotZone(startPointPosX, startPointPosY, moveDragProperty_->sourceType_)
+        && property_->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
         moveDragProperty_->startDragFlag_ = true;
         UpdateDragType(startPointPosX, startPointPosY);
         SingletonContainer::Get<WindowAdapter>().NotifyServerReadyToMoveOrDrag(property_->GetWindowId(),
@@ -2582,7 +2654,8 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
         }
         float vpr = display->GetVirtualPixelRatio();
         CalculateStartRectExceptHotZone(vpr);
-        if (IsPointInDragHotZone(mousePointX, mousePointY, sourceType)) {
+        if (IsPointInDragHotZone(mousePointX, mousePointY, sourceType) &&
+            property_->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
             newStyleID = CalculatePointerDirection(mousePointX, mousePointY);
         } else if (action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
             newStyleID = MMI::MOUSE_ICON::DEFAULT;
