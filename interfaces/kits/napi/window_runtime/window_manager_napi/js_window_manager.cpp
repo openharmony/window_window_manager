@@ -713,7 +713,7 @@ static void GetTopWindowTask(void* contextPtr, NativeEngine& engine, AsyncTask& 
     sptr<Window> window = nullptr;
     AppExecFwk::Ability* ability = nullptr;
     bool isOldApi = GetAPI7Ability(engine, ability);
-    int32_t error = static_cast<int32_t>(WMError::WM_OK);
+    int32_t error;
     if (isOldApi) {
         if (ability->GetWindow() == nullptr) {
             error = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
@@ -735,8 +735,8 @@ static void GetTopWindowTask(void* contextPtr, NativeEngine& engine, AsyncTask& 
         window = Window::GetTopWindowWithContext(context->lock());
     }
     if (window == nullptr) {
-            error = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
-                static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
+        error = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
+            static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
         task.Reject(engine, CreateJsError(engine, error, "Get top window failed"));
         WLOGFE("Get top window failed");
         return;

@@ -32,8 +32,9 @@ WindowExtensionStubImpl::WindowExtensionStubImpl(const std::string& windowName) 
 
 WindowExtensionStubImpl::~WindowExtensionStubImpl()
 {
-    if (window_ != nullptr) {
-        window_->Destroy();
+    auto window = window_.promote();
+    if (window != nullptr) {
+        window->Destroy();
     }
 }
 
@@ -51,41 +52,45 @@ sptr<Window> WindowExtensionStubImpl::CreateWindow(
     option->SetParentId(parentWindowId);
     WLOGI("Window::Create");
     window_ = Window::Create(windowName_, option, context);
-    return window_;
+    return window_.promote();
 }
 
 void WindowExtensionStubImpl::SetBounds(const Rect& rect)
 {
-    if (window_ == nullptr) {
+    auto window = window_.promote();
+    if (window == nullptr) {
         return;
     }
-    Rect orgRect = window_->GetRect();
+    Rect orgRect = window->GetRect();
     if (rect.width_ != orgRect.width_ || rect.height_ != orgRect.height_) {
-        window_->Resize(rect.width_, rect.height_);
+        window->Resize(rect.width_, rect.height_);
     }
     if (rect.posX_ != orgRect.posX_ || rect.posY_ != orgRect.posY_) {
-        window_->MoveTo(rect.posX_, rect.posY_);
+        window->MoveTo(rect.posX_, rect.posY_);
     }
 }
 
 void WindowExtensionStubImpl::Hide()
 {
-    if (window_ != nullptr) {
-        window_->Hide();
+    auto window = window_.promote();
+    if (window != nullptr) {
+        window->Hide();
     }
 }
 
 void WindowExtensionStubImpl::Show()
 {
-    if (window_ != nullptr) {
-        window_->Show();
+    auto window = window_.promote();
+    if (window != nullptr) {
+        window->Show();
     }
 }
 
 void WindowExtensionStubImpl::RequestFocus()
 {
-    if (window_ != nullptr) {
-        window_->RequestFocus();
+    auto window = window_.promote();
+    if (window != nullptr) {
+        window->RequestFocus();
     }
 }
 
@@ -96,8 +101,9 @@ void WindowExtensionStubImpl::GetExtensionWindow(sptr<IWindowExtensionClient>& t
         WLOGFE("token is null");
         return;
     }
+    auto window = window_.promote();
 
-    std::shared_ptr<RSSurfaceNode> node = (window_ != nullptr ? window_->GetSurfaceNode() : nullptr);
+    std::shared_ptr<RSSurfaceNode> node = (window != nullptr ? window->GetSurfaceNode() : nullptr);
     if (node == nullptr) {
         WLOGFE("node is null");
         return;
@@ -108,7 +114,7 @@ void WindowExtensionStubImpl::GetExtensionWindow(sptr<IWindowExtensionClient>& t
 
 sptr<Window> WindowExtensionStubImpl::GetWindow() const
 {
-    return window_;
+    return window_.promote();
 }
 } // namespace Rosen
 } // namespace OHOS
