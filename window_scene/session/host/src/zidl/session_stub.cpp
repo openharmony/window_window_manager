@@ -90,7 +90,16 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         WLOGFE("Failed to read scene session stage object or event channel object!");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = Connect(sessionStage, eventChannel, surfaceNode);
+
+    sptr<WindowSessionProperty> property = nullptr;
+    if (data.ReadBool()) {
+        property = data.ReadStrongParcelable<WindowSessionProperty>();
+    } else {
+        WLOGFW("Property not exist!");
+    }
+    uint64_t persistentId = INVALID_SESSION_ID;
+    WSError errCode = Connect(sessionStage, eventChannel, surfaceNode, persistentId, property);
+    reply.WriteUint64(persistentId);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

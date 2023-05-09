@@ -32,6 +32,8 @@ ohos_unittest("ws_session_test") {
 ## Build ws_unittest_common.a {{{
 config("ws_unittest_common_public_config") {
   include_dirs = [
+    # for WMError Code
+    "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/window_scene",
     "${window_base_path}/window_scene/test",
     "//third_party/googletest/googlemock/include",

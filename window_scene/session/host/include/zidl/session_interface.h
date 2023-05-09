@@ -18,6 +18,7 @@
 
 #include <iremote_broker.h>
 #include "interfaces/include/ws_common.h"
+#include "common/include/window_session_property.h"
 #include "session/container/include/zidl/session_stage_interface.h"
 #include "session/container/include/zidl/window_event_channel_interface.h"
 
@@ -40,7 +41,8 @@ public:
         TRANS_ID_MAXIMIZE,
     };
     virtual WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-        const std::shared_ptr<RSSurfaceNode>& surfaceNode) = 0;
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint64_t& persistentId,
+        sptr<WindowSessionProperty> property = nullptr) = 0;
     virtual WSError Foreground() = 0;
     virtual WSError Background() = 0;
     virtual WSError Disconnect() = 0;

@@ -96,13 +96,13 @@ public:
     bool RegisterInputEventListener(const std::shared_ptr<IInputEventListener>& listener);
     bool UnregisterInputEventListener(const std::shared_ptr<IInputEventListener>& listener);
 
-    inline void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+    inline void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override
     {
         auto listeners = GetListeners<IInputEventListener>();
         CALL_INPUT_EVENT_LISTENER(listeners, OnPointerEvent, pointerEvent);
     }
 
-    inline void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+    inline void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override
     {
         auto listeners = GetListeners<IInputEventListener>();
         CALL_INPUT_EVENT_LISTENER(listeners, OnKeyEvent, keyEvent);

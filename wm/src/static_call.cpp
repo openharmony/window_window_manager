@@ -14,6 +14,7 @@
  */
 
 #include "static_call.h"
+#include "session/host/include/zidl/session_interface.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -23,6 +24,12 @@ sptr<Window> StaticCall::CreateWindow(const std::string& windowName,
     sptr<WindowOption>& option, std::shared_ptr<AbilityRuntime::Context> context)
 {
     return Window::Create(windowName, option, context);
+}
+
+sptr<Window> StaticCall::CreateWindow(const std::string& windowName,
+    sptr<WindowOption>& option, std::shared_ptr<AbilityRuntime::Context> context, const sptr<ISession>& iSession)
+{
+    return Window::Create(windowName, option, context, iSession);
 }
 
 std::vector<sptr<Window>> StaticCall::GetSubWindow(uint32_t parentId)

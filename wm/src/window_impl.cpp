@@ -1918,7 +1918,7 @@ WMError WindowImpl::RegisterWindowChangeListener(const sptr<IWindowChangeListene
 
 WMError WindowImpl::UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
 {
-    WLOGFD("Start register");
+    WLOGFD("Start unregister");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     return UnregisterListener(windowChangeListeners_[GetWindowId()], listener);
 }

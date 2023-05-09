@@ -41,6 +41,7 @@ WindowScene::~WindowScene()
 WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRuntime::Context>& context,
     sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option)
 {
+    WLOGFI("WindowScene init with normal option!");
     displayId_ = displayId;
     if (option == nullptr) {
         option = new(std::nothrow) WindowOption();
@@ -55,6 +56,28 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
     mainWindow_ = SingletonContainer::Get<StaticCall>().CreateWindow(
         GenerateMainWindowName(context), option, context);
     if (mainWindow_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    mainWindow_->RegisterLifeCycleListener(listener);
+
+    return WMError::WM_OK;
+}
+
+WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRuntime::Context>& context,
+    sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option, const sptr<ISession>& iSession)
+{
+    WLOGFI("WindowScene with window session!");
+    displayId_ = displayId;
+    if (option == nullptr || iSession == nullptr) {
+        WLOGFE("Cannot init scene with option or iSession null!");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    option->SetDisplayId(displayId);
+
+    mainWindow_ = SingletonContainer::Get<StaticCall>().CreateWindow(
+        GenerateMainWindowName(context), option, context, iSession);
+    if (mainWindow_ == nullptr) {
+        WLOGFE("mainWindow is null after creat Window!");
         return WMError::WM_ERROR_NULLPTR;
     }
     mainWindow_->RegisterLifeCycleListener(listener);
@@ -101,7 +124,7 @@ std::vector<sptr<Window>> WindowScene::GetSubWindow()
 
 WMError WindowScene::GoForeground(uint32_t reason)
 {
-    WLOGI("reason:%{public}u", reason);
+    WLOGFI("reason:%{public}u", reason);
     if (mainWindow_ == nullptr) {
         WLOGFE("Go foreground failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;
@@ -111,7 +134,7 @@ WMError WindowScene::GoForeground(uint32_t reason)
 
 WMError WindowScene::GoBackground(uint32_t reason)
 {
-    WLOGI("reason:%{public}u", reason);
+    WLOGFI("reason:%{public}u", reason);
     if (mainWindow_ == nullptr) {
         WLOGFE("Go background failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;

@@ -150,6 +150,16 @@ WindowTag WindowOption::GetWindowTag() const
     return windowTag_;
 }
 
+void WindowOption::SetWindowSessionType(WindowSessionType sessionType)
+{
+    sessionType_ = sessionType;
+}
+
+WindowSessionType WindowOption::GetWindowSessionType() const
+{
+    return sessionType_;
+}
+
 void WindowOption::SetMainHandlerAvailable(bool isMainHandlerAvailable)
 {
     isMainHandlerAvailable_ = isMainHandlerAvailable;

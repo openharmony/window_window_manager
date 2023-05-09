@@ -76,6 +76,8 @@ enum class WindowType : uint32_t {
     SYSTEM_SUB_WINDOW_END,
 
     SYSTEM_WINDOW_END = SYSTEM_SUB_WINDOW_END,
+
+    WINDOW_TYPE_UI_EXTENSION = 3000,
 };
 
 /**
@@ -269,6 +271,14 @@ enum class WindowTag : uint32_t {
     MAIN_WINDOW = 0,
     SUB_WINDOW = 1,
     SYSTEM_WINDOW = 2,
+};
+
+/**
+ * @brief Enumerates window session type.
+ */
+enum class WindowSessionType : uint32_t {
+    SCENE_SESSION = 0,
+    EXTENSION_SESSION = 1,
 };
 
 /**

@@ -21,15 +21,12 @@
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
 #include "window_scene.h"
-#include "ui_window.h"
 namespace OHOS {
 namespace Rosen {
-NativeValue* CreateJsWindowStage(NativeEngine& engine, std::shared_ptr<Rosen::WindowScene> windowScene,
-    std::shared_ptr<Ace::NG::UIWindow> uiWindow = nullptr);
+NativeValue* CreateJsWindowStage(NativeEngine& engine, std::shared_ptr<Rosen::WindowScene> windowScene);
 class JsWindowStage {
 public:
-    explicit JsWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene,
-        const std::shared_ptr<Ace::NG::UIWindow>& uiWindow);
+    explicit JsWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene);
     ~JsWindowStage();
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
     static NativeValue* SetUIContent(NativeEngine* engine, NativeCallbackInfo* info);
@@ -58,7 +55,6 @@ private:
     NativeValue* OnDisableWindowDecor(NativeEngine& engine, NativeCallbackInfo& info);
 
     std::weak_ptr<Rosen::WindowScene> windowScene_;
-    std::weak_ptr<Ace::NG::UIWindow> uiWindow_;
 };
 }  // namespace Rosen
 }  // namespace OHOS
