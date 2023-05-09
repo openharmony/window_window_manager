@@ -37,9 +37,7 @@ gen_js_obj("window_stage_abc") {
 ohos_shared_library("windowstage") {
   sources = [ "window_stage_module.cpp" ]
 
-  configs = [
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
-  ]
+  configs = [ "../../../../../resources/config/build:coverage_flags" ]
 
   deps = [
     ":window_stage_abc",

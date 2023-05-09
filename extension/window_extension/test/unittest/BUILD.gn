@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../../../../windowmanager_aafwk.gni")
 module_out_path = "window_manager/extension/window_extension"
 
 group("unittest") {
@@ -32,13 +32,13 @@ ohos_unittest("extension_window_extension_proxy_test") {
 ## Build window_extension_unittest_common.a {{{
 config("window_extension_unittest_common_public_config") {
   include_dirs = [
-    "//foundation/window/window_manager/interfaces/innerkits/wm",
-    "//foundation/window/window_manager/wm/include",
-    "//foundation/window/window_manager/extension/window_extension/include",
-    "//foundation/window/window_manager/extension/window_extension/include/zidl",
-    "//foundation/window/window_manager/extension/extension_connection/include",
-    "//foundation/window/window_manager/extension/extension_connection/include/zidl",
-    "//foundation/window/window_manager/interfaces/innerkits/extension",
+    "../../../../interfaces/innerkits/wm",
+    "../../../../wm/include",
+    "../../include",
+    "../../include/zidl",
+    "../../../extension_connection/include",
+    "../../../extension_connection/include/zidl",
+    "../../../../interfaces/innerkits/extension",
     "//third_party/googletest/googlemock/include",
   ]
 }
@@ -49,8 +49,8 @@ ohos_static_library("window_extension_unittest_common") {
 
   public_configs = [
     ":window_extension_unittest_common_public_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
-    "//foundation/window/window_manager/resources/config/build:testcase_flags",
+    "../../../../resources/config/build:coverage_flags",
+    "../../../../resources/config/build:testcase_flags",
   ]
 
   public_deps = [
@@ -63,10 +63,10 @@ ohos_static_library("window_extension_unittest_common") {
   ]
 
   deps = [
-    "//foundation/window/window_manager/extension/extension_connection:libwindow_extension_client",
-    "//foundation/window/window_manager/extension/window_extension:libwindow_extension",
-    "//foundation/window/window_manager/interfaces/kits/napi/window_runtime:window_native_kit",
-    "//foundation/window/window_manager/wm:libwm",
+    "../..:libwindow_extension",
+    "../../../../interfaces/kits/napi/window_runtime:window_native_kit",
+    "../../../../wm:libwm",
+    "../../../extension_connection:libwindow_extension_client",
   ]
 
   external_deps = [

@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../../../windowmanager_aafwk.gni")
 
 module_out_path = "window_manager/dms"
 
@@ -99,12 +99,12 @@ ohos_systemtest("dms_screen_gamut_test") {
 ## Build dms_systemtest_common.a {{{
 config("dms_systemtest_common_public_config") {
   include_dirs = [
-    "//foundation/window/window_manager/dm/include",
-    "//foundation/window/window_manager/dmserver/include",
-    "//foundation/window/window_manager/interfaces/innerkits/dm",
-    "//foundation/window/window_manager/interfaces/innerkits/wm",
-    "//foundation/window/window_manager/test/common/utils/include",
-    "//foundation/window/window_manager/utils/include",
+    "../../../dm/include",
+    "../../../dmserver/include",
+    "../../../interfaces/innerkits/dm",
+    "../../../interfaces/innerkits/wm",
+    "../../common/utils/include",
+    "../../../utils/include",
 
     # RSSurface
     "//foundation/graphic/graphic_2d/interfaces/inner_api/surface",
@@ -120,19 +120,19 @@ ohos_static_library("dms_systemtest_common") {
 
   public_configs = [
     ":dms_systemtest_common_public_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
-    "//foundation/window/window_manager/resources/config/build:testcase_flags",
+    "../../../resources/config/build:coverage_flags",
+    "../../../resources/config/build:testcase_flags",
   ]
 
   public_deps = [
     "${window_base_path}/dm:libdm_static",
     "${window_base_path}/utils:libwmutil_static",
     "${window_base_path}/wm:libwm_static",
+    "../../../dmserver:libdms",
+    "../../common/utils:libtestutil",
     "//commonlibrary/c_utils/base:utils",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
-    "//foundation/window/window_manager/dmserver:libdms",
-    "//foundation/window/window_manager/test/common/utils:libtestutil",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]

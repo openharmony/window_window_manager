@@ -12,11 +12,11 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../windowmanager_aafwk.gni")
 config("libwmutil_private_config") {
   include_dirs = [
     "include",
-    "//foundation/window/window_manager/dmserver/include",
+    "../dmserver/include",
     "../interfaces/innerkits/dm",
     "../interfaces/innerkits/wm",
   ]
@@ -24,7 +24,7 @@ config("libwmutil_private_config") {
 
 config("libwmutil_public_config") {
   include_dirs = [
-    "//foundation/window/window_manager/utils/include",
+    "include",
     "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
   ]
 }
@@ -115,7 +115,7 @@ ohos_shared_library("libwmutil") {
 
   configs = [
     ":libwmutil_private_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "../resources/config/build:coverage_flags",
   ]
 
   public_configs = [ ":libwmutil_public_config" ]
