@@ -16,15 +16,12 @@
 #ifndef OHOS_ROSEN_DISPLAY_MANAGER_CONFIG_H
 #define OHOS_ROSEN_DISPLAY_MANAGER_CONFIG_H
 
-#include <map>
 #include <refbase.h>
-#include <string>
-#include <vector>
-
+#include "xml_config_base.h"
 #include "libxml/parser.h"
 
 namespace OHOS::Rosen {
-class DisplayManagerConfig : public RefBase {
+class DisplayManagerConfig : public RefBase, public XmlConfigBase {
 public:
     DisplayManagerConfig() = delete;
     ~DisplayManagerConfig() = default;
