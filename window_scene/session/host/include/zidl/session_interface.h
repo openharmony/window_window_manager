@@ -17,12 +17,12 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_INTERFACE_H
 
 #include <iremote_broker.h>
-
 #include "interfaces/include/ws_common.h"
 #include "session/container/include/zidl/session_stage_interface.h"
 #include "session/container/include/zidl/window_event_channel_interface.h"
 
 namespace OHOS::Rosen {
+class RSSurfaceNode;
 class ISession : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISession");
@@ -39,7 +39,8 @@ public:
         TRANS_ID_RECOVER = 100,
         TRANS_ID_MAXIMIZE,
     };
-    virtual WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel) = 0;
+    virtual WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode) = 0;
     virtual WSError Foreground() = 0;
     virtual WSError Background() = 0;
     virtual WSError Disconnect() = 0;

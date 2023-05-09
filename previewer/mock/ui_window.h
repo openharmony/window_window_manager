@@ -30,26 +30,28 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT UIWindow {
 public:
-    static std::shared_ptr<UIWindow> CreateRootScene() {
+    static std::shared_ptr<UIWindow> CreateRootScene()
+    {
         return nullptr;
-    };
+    }
 
     static std::shared_ptr<UIWindow> CreateWindowScene(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode) {
-            return nullptr;
-        };
+        const sptr<Rosen::ISession>& iSession)
+    {
+        return nullptr;
+    }
 
     static std::shared_ptr<UIWindow> CreateWindowExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode) {
-            return nullptr;
-        };
+        const sptr<Rosen::ISession>& iSession)
+    {
+        return nullptr;
+    }
 
     virtual ~UIWindow() = default;
 
     virtual void LoadContent(const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
         AbilityRuntime::Context* context = nullptr) = 0;
 
-    // for lifecycle
     virtual void RegisterSessionStageStateListener(
         const std::shared_ptr<Rosen::ISessionStageStateListener>& listener) = 0;
 
@@ -57,6 +59,7 @@ public:
     virtual void Foreground() = 0;
     virtual void Background() = 0;
     virtual void Disconnect() = 0;
+    virtual void OnNewWant(const AAFwk::Want& want) = 0;
 };
 
 } // namespace OHOS::Ace::NG

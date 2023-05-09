@@ -24,17 +24,6 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneS
 
 SceneSessionStage::SceneSessionStage(const sptr<ISession>& sceneSession) : SessionStage(sceneSession) {}
 
-WSError SceneSessionStage::Connect()
-{
-    if (session_ == nullptr) {
-        WLOGFE("session is invalid");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    sptr<SceneSessionStage> sceneSessionStage(this);
-    sptr<IWindowEventChannel> eventChannel(new WindowEventChannel(sceneSessionStage));
-    return session_->Connect(sceneSessionStage, eventChannel);
-}
-
 WSError SceneSessionStage::Recover()
 {
     if (session_ == nullptr) {
