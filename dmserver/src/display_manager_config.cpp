@@ -78,7 +78,11 @@ std::string DisplayManagerConfig::GetConfigPath(const std::string& configFileNam
 bool DisplayManagerConfig::LoadConfigXml()
 {
     auto configFilePath = GetConfigPath("etc/window/resources/display_manager_config.xml");
-    xmlDocPtr docPtr = xmlReadFile(configFilePath.c_str(), nullptr, XML_PARSE_NOBLANKS);
+    xmlDocPtr docPtr = nullptr;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        docPtr = xmlReadFile(configFilePath.c_str(), nullptr, XML_PARSE_NOBLANKS);
+    }
     WLOGFI("[DmConfig] filePath: %{public}s", configFilePath.c_str());
     if (docPtr == nullptr) {
         WLOGFE("[DmConfig] load xml error!");
