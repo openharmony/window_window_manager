@@ -24,14 +24,14 @@ namespace OHOS::Rosen {
 class SessionProxy : public IRemoteProxy<ISession> {
 public:
     explicit SessionProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<ISession>(impl) {};
-
     ~SessionProxy() {};
 
     WSError Foreground() override;
     WSError Background() override;
     WSError Disconnect() override;
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-        const std::shared_ptr<RSSurfaceNode>& surfaceNode) override;
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint64_t& persistentId,
+        sptr<WindowSessionProperty> property = nullptr) override;
 
     WSError PendingSessionActivation(const SessionInfo& info) override;
     WSError Recover() override;

@@ -140,6 +140,13 @@ public:
     void SetWindowTag(WindowTag windowTag);
 
     /**
+     * @brief Set window session type.
+     *
+     * @param sessionType The session type of window.
+     */
+    void SetWindowSessionType(WindowSessionType sessionType);
+
+    /**
      * @brief Set keep screen on.
      *
      * @param keepScreenOn The window keep screen on or not.
@@ -280,6 +287,13 @@ public:
     WindowTag GetWindowTag() const;
 
     /**
+     * @brief Get window session type.
+     *
+     * @return Return window session type.
+     */
+    WindowSessionType GetWindowSessionType() const;
+
+    /**
      * @brief Get window brightness.
      *
      * @return Return screen brightness.
@@ -319,6 +333,7 @@ private:
     uint32_t flags_ { 0 };
     PointInfo hitOffset_ { 0, 0 };
     WindowTag windowTag_;
+    WindowSessionType sessionType_ { WindowSessionType::SCENE_SESSION };
     bool keepScreenOn_ = false;
     bool turnScreenOn_ = false;
     bool isMainHandlerAvailable_ = true;

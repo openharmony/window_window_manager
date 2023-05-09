@@ -152,9 +152,10 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 }
 
 WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint64_t& persistentId, sptr<WindowSessionProperty> property)
 {
-    WLOGFI("Connect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
+    persistentId = GetPersistentId();
+    WLOGFI("Connect session, id: %{public}" PRIu64 ", state: %{public}u", persistentId,
         static_cast<uint32_t>(GetSessionState()));
     if (GetSessionState() != SessionState::STATE_DISCONNECT) {
         WLOGFE("state is not disconnect!");
@@ -167,10 +168,10 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     sessionStage_ = sessionStage;
     windowEventChannel_ = eventChannel;
     surfaceNode_ = surfaceNode;
-
+    property_ = property;
     UpdateSessionState(SessionState::STATE_CONNECT);
     // once update rect before connect, update again when connect
-    UpdateRect(winRect_, SizeChangeReason::SHOW);
+    UpdateRect(winRect_, SizeChangeReason::UNDEFINED);
     NotifyConnect();
     return WSError::WS_OK;
 }

@@ -29,6 +29,7 @@ config("libwm_public_config") {
   include_dirs = [
     "../interfaces/innerkits/wm",
     "../utils/include",
+    "../window_scene",
   ]
 }
 
@@ -46,6 +47,7 @@ ohos_static_library("libwm_static") {
     "src/window_accessibility_controller.cpp",
     "src/window_adapter.cpp",
     "src/window_agent.cpp",
+    "src/window_extension_session_impl.cpp",
     "src/window_frame_trace_impl.cpp",
     "src/window_impl.cpp",
     "src/window_input_channel.cpp",
@@ -53,6 +55,8 @@ ohos_static_library("libwm_static") {
     "src/window_manager_agent.cpp",
     "src/window_option.cpp",
     "src/window_scene.cpp",
+    "src/window_scene_session_impl.cpp",
+    "src/window_session_impl.cpp",
     "src/zidl/window_manager_agent_stub.cpp",
     "src/zidl/window_stub.cpp",
   ]
@@ -68,6 +72,8 @@ ohos_static_library("libwm_static") {
     "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/window_scene/session:scene_session",
   ]
 
   external_deps = [
@@ -141,6 +147,7 @@ ohos_shared_library("libwm") {
     "src/window_accessibility_controller.cpp",
     "src/window_adapter.cpp",
     "src/window_agent.cpp",
+    "src/window_extension_session_impl.cpp",
     "src/window_frame_trace_impl.cpp",
     "src/window_impl.cpp",
     "src/window_input_channel.cpp",
@@ -148,6 +155,8 @@ ohos_shared_library("libwm") {
     "src/window_manager_agent.cpp",
     "src/window_option.cpp",
     "src/window_scene.cpp",
+    "src/window_scene_session_impl.cpp",
+    "src/window_session_impl.cpp",
     "src/zidl/window_manager_agent_stub.cpp",
     "src/zidl/window_stub.cpp",
   ]
@@ -160,6 +169,8 @@ ohos_shared_library("libwm") {
   public_configs = [ ":libwm_public_config" ]
 
   deps = [
+    "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/window_scene/session:scene_session",
     "../dm:libdm",
     "../utils:libwmutil",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",

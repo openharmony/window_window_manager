@@ -25,7 +25,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr uint32_t INVALID_SESSION_ID = 0;
+constexpr uint64_t INVALID_SESSION_ID = 0;
 }
 
 enum class WSError : int32_t {
@@ -50,11 +50,11 @@ enum class WSErrorCode : int32_t {
 };
 
 const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP {
-    { WSError::WS_OK, WSErrorCode::WS_OK },
-    { WSError::WS_DO_NOTHING, WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
+    { WSError::WS_OK,                    WSErrorCode::WS_OK },
+    { WSError::WS_DO_NOTHING,            WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
     { WSError::WS_ERROR_INVALID_SESSION, WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
-    { WSError::WS_ERROR_IPC_FAILED, WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY },
-    { WSError::WS_ERROR_NULLPTR, WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
+    { WSError::WS_ERROR_IPC_FAILED,      WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY },
+    { WSError::WS_ERROR_NULLPTR,         WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
 };
 
 enum class SessionState : uint32_t {
@@ -74,11 +74,21 @@ struct SessionInfo {
 };
 
 enum class SizeChangeReason : uint32_t {
-    SHOW = 0,
-    HIDE,
+    UNDEFINED = 0,
     MAXIMIZE,
     RECOVER,
     ROTATION,
+    DRAG,
+    DRAG_START,
+    DRAG_END,
+    RESIZE,
+    MOVE,
+    HIDE,
+    TRANSFORM,
+    CUSTOM_ANIMATION_SHOW,
+    FULL_TO_SPLIT,
+    SPLIT_TO_FULL,
+    END,
 };
 
 struct WSRect {

@@ -35,7 +35,7 @@ protected:
 private:
     int pid_ = getpid();
     // shared by scene session and extension session once in same process
-    std::atomic<uint32_t> sessionId_ = INVALID_SESSION_ID;
+    std::atomic<uint32_t> sessionId_ = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_BASE_H
