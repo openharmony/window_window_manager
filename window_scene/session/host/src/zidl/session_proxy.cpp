@@ -18,6 +18,7 @@
 #include <ipc_types.h>
 #include <message_option.h>
 #include <message_parcel.h>
+#include <ui/rs_surface_node.h>
 
 #include "window_manager_hilog.h"
 
@@ -83,7 +84,8 @@ WSError SessionProxy::Disconnect()
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel)
+WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -98,6 +100,10 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
     }
     if (!data.WriteRemoteObject(eventChannel->AsObject())) {
         WLOGFE("Write IWindowEventChannel failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!surfaceNode->Marshalling(data)) {
+        WLOGFE("Write surfaceNode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_CONNECT),

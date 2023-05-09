@@ -24,7 +24,7 @@ class SessionStageMocker : public SessionStage {
 public:
     SessionStageMocker(const sptr<ISession>& session) : SessionStage(session) {};
     ~SessionStageMocker() {};
-    MOCK_METHOD0(Connect, WSError());
+    MOCK_METHOD1(Connect, WSError(const std::shared_ptr<RSSurfaceNode>& surfaceNode));
     MOCK_METHOD0(Foreground, WSError(void));
     MOCK_METHOD0(Background, WSError(void));
     MOCK_METHOD0(Disconnect, WSError(void));

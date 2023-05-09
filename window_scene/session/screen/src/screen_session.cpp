@@ -24,7 +24,10 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Screen
 
 ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property)
     : screenId_(screenId), property_(property)
-{}
+{
+    Rosen::RSDisplayNodeConfig config = { .screenId = screenId_ };
+    displayNode_ = Rosen::RSDisplayNode::Create(config);
+}
 
 void ScreenSession::RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener)
 {
@@ -68,6 +71,11 @@ ScreenProperty ScreenSession::GetScreenProperty() const
     return property_;
 }
 
+std::shared_ptr<RSDisplayNode> ScreenSession::GetDisplayNode() const
+{
+    return displayNode_;
+}
+
 void ScreenSession::Connect()
 {
     screenState_ = ScreenState::CONNECTION;
@@ -83,5 +91,4 @@ void ScreenSession::Disconnect()
         listener->OnDisconnect();
     }
 }
-
 } // namespace OHOS::Rosen

@@ -105,7 +105,6 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     }
     auto sessionInfo = scnSession->GetSessionInfo();
     abilitySessionInfo->sessionToken = scnSession;
-    abilitySessionInfo->surfaceNode = scnSession->GetSurfaceNode();
     abilitySessionInfo->callerToken = sessionInfo.callerToken_;
     abilitySessionInfo->persistentId = scnSession->GetPersistentId();
     return abilitySessionInfo;
