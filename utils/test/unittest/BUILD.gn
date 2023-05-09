@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../../../windowmanager_aafwk.gni")
 module_out_path = "window_manager/utils"
 
 group("unittest") {
@@ -172,13 +172,13 @@ ohos_unittest("utils_window_transition_info_test") {
 ## Build dm_unittest_common.a {{{
 config("utils_unittest_common_public_config") {
   include_dirs = [
-    "//foundation/window/window_manager/dmserver/include",
-    "//foundation/window/window_manager/test/common/mock",
-    "//foundation/window/window_manager/interfaces/innerkits/dm",
-    "//foundation/window/window_manager/interfaces/innerkits/wm",
-    "//foundation/window/window_manager/utils/include",
-    "//foundation/window/window_manager/wm/include",
-    "//foundation/window/window_manager/dm/include",
+    "../../../dmserver/include",
+    "../../../test/common/mock",
+    "../../../interfaces/innerkits/dm",
+    "../../../interfaces/innerkits/wm",
+    "../../include",
+    "../../../wm/include",
+    "../../../dm/include",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
   ]
 }
@@ -189,8 +189,8 @@ ohos_static_library("utils_unittest_common") {
 
   public_configs = [
     ":utils_unittest_common_public_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
-    "//foundation/window/window_manager/resources/config/build:testcase_flags",
+    "../../../resources/config/build:coverage_flags",
+    "../../../resources/config/build:testcase_flags",
   ]
 
   public_deps = [

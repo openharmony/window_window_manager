@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../../windowmanager_aafwk.gni")
 
 group("demo") {
   testonly = true
@@ -30,8 +30,7 @@ group("demo") {
 ohos_executable("demo_mirror_screen_listener") {
   sources = [ "demo_mirror_screen_listener.cpp" ]
 
-  include_dirs =
-      [ "//foundation/window/window_manager/test/common/utils/include" ]
+  include_dirs = [ "../common/utils/include" ]
 
   deps = [
     "${window_base_path}/dm:libdm_static",
@@ -47,8 +46,7 @@ ohos_executable("demo_mirror_screen_listener") {
 ohos_executable("demo_screenshot_listener") {
   sources = [ "demo_screenshot_listener.cpp" ]
 
-  include_dirs =
-      [ "//foundation/window/window_manager/test/common/utils/include" ]
+  include_dirs = [ "../common/utils/include" ]
 
   deps = [
     "${window_base_path}/dm:libdm_static",
@@ -69,9 +67,9 @@ ohos_executable("demo_snapshot_virtual_screen") {
   sources = [ "demo_snapshot_virtual_screen.cpp" ]
 
   include_dirs = [
-    "//foundation/window/window_manager/interfaces/innerkits/dm",
-    "//foundation/window/window_manager/snapshot/include",
-    "//foundation/window/window_manager/utils/include",
+    "../../interfaces/innerkits/dm",
+    "../../snapshot/include",
+    "../../utils/include",
     "../../dmserver/include",
     "../../dm/include",
   ]
@@ -79,8 +77,8 @@ ohos_executable("demo_snapshot_virtual_screen") {
   deps = [
     "${window_base_path}/dm:libdm_static",
     "${window_base_path}/utils:libwmutil_static",
+    "../../snapshot:libsnapshot_util",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/window/window_manager/snapshot:libsnapshot_util",
   ]
 
   part_name = "window_manager"
@@ -91,8 +89,8 @@ ohos_executable("demo_system_sub_window") {
   sources = [ "demo_system_sub_window.cpp" ]
 
   include_dirs = [
-    "//foundation/window/window_manager/interfaces/innerkits/wm",
-    "//foundation/window/window_manager/test/common/utils/include",
+    "../../interfaces/innerkits/wm",
+    "../common/utils/include",
   ]
 
   deps = [
@@ -110,7 +108,7 @@ ohos_executable("demo_freeze_display") {
   sources = [ "demo_freeze_display.cpp" ]
 
   include_dirs = [
-    "//foundation/window/window_manager/interfaces/innerkits/dm",
+    "../../interfaces/innerkits/dm",
 
     # pixel_map.h
     "//foundation/multimedia/image_framework/interfaces/innerkits/include",

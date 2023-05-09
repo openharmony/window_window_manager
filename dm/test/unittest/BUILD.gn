@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../../../windowmanager_aafwk.gni")
 
 module_out_path = "window_manager/dm"
 
@@ -68,7 +68,7 @@ ohos_unittest("dm_screenshot_test") {
 ohos_unittest("dm_screen_manager_test") {
   module_out_path = module_out_path
 
-  include_dirs = [ "//foundation/window/window_manager/dm/src" ]
+  include_dirs = [ "../../src" ]
 
   sources = [ "screen_manager_test.cpp" ]
 
@@ -102,7 +102,7 @@ ohos_unittest("dm_display_manager_adapter_test") {
 ohos_unittest("dm_display_manager_test") {
   module_out_path = module_out_path
 
-  include_dirs = [ "//foundation/window/window_manager/dm/src" ]
+  include_dirs = [ "../../src" ]
 
   sources = [ "display_manager_test.cpp" ]
 
@@ -120,15 +120,15 @@ ohos_unittest("dm_display_manager_agent_stub_test") {
 ## Build dm_unittest_common.a {{{
 config("dm_unittest_common_public_config") {
   include_dirs = [
-    "//foundation/window/window_manager/dm/include",
-    "//foundation/window/window_manager/dm/include/zidl",
-    "//foundation/window/window_manager/dmserver/include",
-    "//foundation/window/window_manager/snapshot",
-    "//foundation/window/window_manager/test/common/mock",
-    "//foundation/window/window_manager/test/common/utils/include",
-    "//foundation/window/window_manager/interfaces/innerkits/dm",
-    "//foundation/window/window_manager/test/common/utils/include",
-    "//foundation/window/window_manager/utils/include",
+    "../../include",
+    "../../include/zidl",
+    "../../../dmserver/include",
+    "../../../snapshot",
+    "../../../test/common/mock",
+    "../../../test/common/utils/include",
+    "../../../interfaces/innerkits/dm",
+    "../../../test/common/utils/include",
+    "../../../utils/include",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client",  # RSSurface
   ]
 }
@@ -139,21 +139,21 @@ ohos_static_library("dm_unittest_common") {
 
   public_configs = [
     ":dm_unittest_common_public_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
-    "//foundation/window/window_manager/resources/config/build:testcase_flags",
+    "../../../resources/config/build:coverage_flags",
+    "../../../resources/config/build:testcase_flags",
   ]
 
   public_deps = [
     "${window_base_path}/dm:libdm_static",
     "${window_base_path}/utils:libwmutil_static",
     "${window_base_path}/wm:libwm_static",
+    "../../../dmserver:libdms",
+    "../../../snapshot:snapshot_display",
+    "../../../test/common/utils:libtestutil",
     "//commonlibrary/c_utils/base:utils",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/multimedia/image_framework/interfaces/innerkits:image_native",  # PixelMap
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
-    "//foundation/window/window_manager/dmserver:libdms",
-    "//foundation/window/window_manager/snapshot:snapshot_display",
-    "//foundation/window/window_manager/test/common/utils:libtestutil",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
     "//third_party/libjpeg-turbo:turbojpeg_static",

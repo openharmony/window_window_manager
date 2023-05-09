@@ -13,30 +13,30 @@
 
 import("//build/config/features.gni")
 import("//build/test.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../../../../windowmanager_aafwk.gni")
 
 module_output_path = "window_manager/wms"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("WindowControllerFuzzTest") {
-  fuzz_config_file = "//foundation/window/window_manager/test/fuzztest/wms/windowcontroller_fuzzer"
+  fuzz_config_file = "."
   module_out_path = module_output_path
   include_dirs = [
-    "//foundation/window/window_manager/wm/include",
-    "//foundation/window/window_manager/wmserver/include",
-    "//foundation/window/window_manager/wmserver/include/window_snapshot",
-    "//foundation/window/window_manager/dmserver/include",
-    "//foundation/window/window_manager/utils/include",
-    "//foundation/window/window_manager/interfaces/innerkits/dm",
-    "//foundation/window/window_manager/interfaces/innerkits/wm",
+    "../../../../wm/include",
+    "../../../../wmserver/include",
+    "../../../../wmserver/include/window_snapshot",
+    "../../../../dmserver/include",
+    "../../../../utils/include",
+    "../../../../interfaces/innerkits/dm",
+    "../../../../interfaces/innerkits/wm",
     "//foundation/graphic/graphic_2d/interfaces/innerkits/surface",
     "//commonlibrary/c_utils/base/include",
   ]
 
   configs = [
-    "//foundation/window/window_manager/test/fuzztest:configs_cc_ld",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
-    "//foundation/window/window_manager/resources/config/build:testcase_flags",
+    "../..:configs_cc_ld",
+    "../../../../resources/config/build:coverage_flags",
+    "../../../../resources/config/build:testcase_flags",
   ]
 
   sources = [ "windowcontroller_fuzzer.cpp" ]
@@ -44,8 +44,8 @@ ohos_fuzztest("WindowControllerFuzzTest") {
     "${window_base_path}/dm:libdm_static",
     "${window_base_path}/utils:libwmutil_static",
     "${window_base_path}/wm:libwm_static",
+    "../../../../wmserver:libwms",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/window/window_manager/wmserver:libwms",
   ]
 
   external_deps = [

@@ -15,13 +15,13 @@ import("//build/ohos.gni")
 
 config("wm_interface_config") {
   visibility = [ ":*" ]
-  include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
+  include_dirs = [ "../../interfaces/innerkits" ]
 }
 
 ohos_shared_library("wm_interface") {
   public_configs = [ ":wm_interface_config" ]
 
-  include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
+  include_dirs = [ "../../interfaces/innerkits" ]
 
   public_deps = [
     "//commonlibrary/c_utils/base:utils",

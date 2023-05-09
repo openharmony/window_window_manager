@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../../../windowmanager_aafwk.gni")
 
 module_out_path = "window_manager/dmserver"
 
@@ -125,7 +125,7 @@ ohos_unittest("dmserver_abstract_display_controller_test") {
 
 ohos_unittest("dmserver_display_manager_config_test") {
   module_out_path = module_out_path
-  include_dirs = [ "//foundation/window/window_manager/dmserver/src" ]
+  include_dirs = [ "../../src" ]
 
   sources = [ "display_manager_config_test.cpp" ]
 
@@ -140,13 +140,13 @@ ohos_unittest("dmserver_display_manager_config_test") {
 ## Build dmserver_unittest_common.a {{{
 config("dmserver_unittest_common_public_config") {
   include_dirs = [
-    "//foundation/window/window_manager/dm/include",
-    "//foundation/window/window_manager/dmserver/include",
-    "//foundation/window/window_manager/snapshot",
-    "//foundation/window/window_manager/interfaces/innerkits/dm",
-    "//foundation/window/window_manager/test/common/mock",
-    "//foundation/window/window_manager/test/common/utils/include",
-    "//foundation/window/window_manager/utils/include",
+    "../../../dm/include",
+    "../../include",
+    "../../../snapshot",
+    "../../../interfaces/innerkits/dm",
+    "../../../test/common/mock",
+    "../../../test/common/utils/include",
+    "../../../utils/include",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client",  # RSSurface
     "//base/sensors/sensor/interfaces/native/include",
   ]
@@ -158,21 +158,21 @@ ohos_static_library("dmserver_unittest_common") {
 
   public_configs = [
     ":dmserver_unittest_common_public_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
-    "//foundation/window/window_manager/resources/config/build:testcase_flags",
+    "../../../resources/config/build:coverage_flags",
+    "../../../resources/config/build:testcase_flags",
   ]
 
   public_deps = [
     "${window_base_path}/dm:libdm_static",
     "${window_base_path}/utils:libwmutil_static",
     "${window_base_path}/wm:libwm_static",
+    "../..:libdms",
+    "../../../snapshot:snapshot_display",
+    "../../../test/common/utils:libtestutil",
     "//commonlibrary/c_utils/base:utils",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/multimedia/image_framework/interfaces/innerkits:image_native",  # PixelMap
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
-    "//foundation/window/window_manager/dmserver:libdms",
-    "//foundation/window/window_manager/snapshot:snapshot_display",
-    "//foundation/window/window_manager/test/common/utils:libtestutil",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
     "//third_party/libjpeg-turbo:turbojpeg_static",  # jpeg

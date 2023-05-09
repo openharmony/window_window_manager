@@ -26,4 +26,7 @@ ohos_copy("window_declaration") {
 
   module_source_dir = target_out_dir + "/$target_name"
   module_install_name = ""
+
+  part_name = "window_manager"
+  subsystem_name = "window"
 }

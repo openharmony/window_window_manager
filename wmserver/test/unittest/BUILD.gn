@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../../../windowmanager_aafwk.gni")
 module_out_path = "window_manager/wmserver"
 
 group("unittest") {
@@ -82,22 +82,22 @@ test_inner_deps = [
   "${window_base_path}/dm:libdm_static",
   "${window_base_path}/utils:libwmutil_static",
   "${window_base_path}/wm:libwm_static",
+  "../..:libwms",
+  "../../../dmserver:libdms",
+  "../../../test/common/utils:libtestutil",
   "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  "//foundation/window/window_manager/dmserver:libdms",
-  "//foundation/window/window_manager/test/common/utils:libtestutil",
-  "//foundation/window/window_manager/wmserver:libwms",
 ]
 
 config("wmserver_unittest_common_public_config") {
   include_dirs = [
-    "//foundation/window/window_manager/test/common/mock",
-    "//foundation/window/window_manager/test/common/utils/include",
-    "//foundation/window/window_manager/wm/include",
-    "//foundation/window/window_manager/wmserver/include",
-    "//foundation/window/window_manager/wmserver/include/zidl",
-    "//foundation/window/window_manager/wmserver/include/window_snapshot",
-    "//foundation/window/window_manager/interfaces/innerkits/wm",
-    "//foundation/window/window_manager/utils/include",
+    "../../../test/common/mock",
+    "../../../test/common/utils/include",
+    "../../../wm/include",
+    "../../include",
+    "../../include/zidl",
+    "../../include/window_snapshot",
+    "../../../interfaces/innerkits/wm",
+    "../../../utils/include",
     "//third_party/googletest/googlemock/include",
     "foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include/",
   ]
@@ -105,8 +105,8 @@ config("wmserver_unittest_common_public_config") {
 
 test_public_config = [
   ":wmserver_unittest_common_public_config",
-  "//foundation/window/window_manager/resources/config/build:coverage_flags",
-  "//foundation/window/window_manager/resources/config/build:testcase_flags",
+  "../../../resources/config/build:coverage_flags",
+  "../../../resources/config/build:testcase_flags",
 ]
 
 ohos_unittest("wmserver_window_manager_service_test") {
