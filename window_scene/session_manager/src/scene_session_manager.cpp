@@ -159,7 +159,12 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             WLOGFE("session is invalid with %{public}" PRIu64 "", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
+        auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
+        if (!scnSessionInfo) {
+            return WSError::WS_ERROR_NULLPTR;
+        }
         // to add MinimizeAbility
+        AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo);
         return WSError::WS_OK;
     };
 
