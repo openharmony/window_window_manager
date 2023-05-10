@@ -87,14 +87,7 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInf
     property->SetDisplayId(info->GetDisplayId());
     property->SetWindowType(info->GetWindowType());
 
-    // 10 ArkUI new framework support after API10
-    if (info->GetApiCompatibleVersion() < 10) {
-        auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(info->GetDisplayId());
-        if (!(displayInfo && WmsUtils::IsExpectedRotatableWindow(orientation,
-            displayInfo->GetDisplayOrientation(), property->GetWindowMode(), property->GetWindowFlags(), false))) {
-            property->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
-        }
-    }
+    ChangePropertyByApiVersion(info, orientation, property);
     if (info->GetShowFlagWhenLocked()) {
         property->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     }
@@ -118,6 +111,26 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInf
     }
     node->stateMachine_.TransitionTo(WindowNodeState::STARTING_CREATED);
     return node;
+}
+
+void StartingWindow::ChangePropertyByApiVersion(const sptr<WindowTransitionInfo>& info,
+    const Orientation orientation, sptr<WindowProperty>& property)
+{
+    // 10 ArkUI new framework support after API10
+    if (info->GetApiCompatibleVersion() < 10) {
+        auto displayInfo = DisplayGroupInfo::GetInstance().GetDisplayInfo(info->GetDisplayId());
+        if (!(displayInfo && WmsUtils::IsExpectedRotatableWindow(orientation,
+            displayInfo->GetDisplayOrientation(), property->GetWindowMode(), property->GetWindowFlags(), false))) {
+            property->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+        }
+    } else {
+        if (WindowHelper::IsMainWindow(property->GetWindowType())) {
+            SystemBarProperty statusSystemBarProperty(true, 0x00FFFFFF, 0xFF000000);
+            SystemBarProperty navigationSystemBarProperty(true, 0x00FFFFFF, 0xFF000000);
+            property->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusSystemBarProperty);
+            property->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR, navigationSystemBarProperty);
+        }
+    }
 }
 
 WMError StartingWindow::CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node)
