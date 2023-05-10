@@ -167,18 +167,15 @@ static bool GetWindowTypeAndParentId(NativeEngine& engine, uint32_t& parentId, W
         WLOGFE("Failed to convert parameter to windowType");
         return false;
     }
-    // adapt to the old version
-    if (static_cast<uint32_t>(*type) >= static_cast<uint32_t>(WindowType::SYSTEM_WINDOW_BASE)) {
-        winType = static_cast<WindowType>(static_cast<uint32_t>(*type));
+
+    if (static_cast<uint32_t>(*type) >= static_cast<uint32_t>(ApiWindowType::TYPE_BASE) &&
+        static_cast<uint32_t>(*type) < static_cast<uint32_t>(ApiWindowType::TYPE_END)) {
+        winType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(static_cast<uint32_t>(*type)));
     } else {
-        if (static_cast<uint32_t>(*type) >= static_cast<uint32_t>(ApiWindowType::TYPE_BASE) &&
-            static_cast<uint32_t>(*type) < static_cast<uint32_t>(ApiWindowType::TYPE_END)) {
-            winType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(static_cast<uint32_t>(*type)));
-        } else {
-            WLOGFE("Type %{public}u is not supported", static_cast<uint32_t>(*type));
-            return false;
-        }
+        WLOGFE("Type %{public}u is not supported", static_cast<uint32_t>(*type));
+        return false;
     }
+
     AppExecFwk::Ability* ability = nullptr;
     bool isOldApi = GetAPI7Ability(engine, ability);
     if (isOldApi) {
