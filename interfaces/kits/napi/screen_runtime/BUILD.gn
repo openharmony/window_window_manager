@@ -13,15 +13,12 @@
 
 import("//arkcompiler/ets_frontend/ts2panda/ts2abc_config.gni")
 import("//build/ohos.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../../../../windowmanager_aafwk.gni")
 
 config("screen_runtime_config") {
   visibility = [ ":*" ]
 
-  include_dirs = [
-    "//foundation/window/window_manager/interfaces/kits/napi/screen_runtime/api",
-    "//foundation/window/window_manager/interfaces/kits/napi/screen_runtime/napi",
-  ]
+  include_dirs = [ "napi" ]
 }
 
 ohos_shared_library("screen_napi") {
@@ -34,12 +31,12 @@ ohos_shared_library("screen_napi") {
 
   configs = [
     ":screen_runtime_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "../../../../resources/config/build:coverage_flags",
   ]
 
   deps = [
-    "//foundation/window/window_manager/dm:libdm",
-    "//foundation/window/window_manager/utils:libwmutil",
+    "../../../../dm:libdm",
+    "../../../../utils:libwmutil",
   ]
 
   external_deps = [

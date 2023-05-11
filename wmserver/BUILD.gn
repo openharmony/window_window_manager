@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../windowmanager_aafwk.gni")
 
 config("libwms_config") {
   visibility = [ ":*" ]
@@ -23,12 +23,12 @@ config("libwms_config") {
     "include/window_snapshot",
     "include/window_group",
     "//utils/system/safwk/native/include",
-    "//foundation/window/window_manager/interfaces/innerkits/wm",
-    "//foundation/window/window_manager/interfaces/innerkits/dm",
-    "//foundation/window/window_manager/wm/include",
-    "//foundation/window/window_manager/utils/include",
-    "//foundation/window/window_manager/dm/include",
-    "//foundation/window/window_manager/dmserver/include",
+    "../interfaces/innerkits/wm",
+    "../interfaces/innerkits/dm",
+    "../wm/include",
+    "../utils/include",
+    "../dm/include",
+    "../dmserver/include",
   ]
 }
 
@@ -82,15 +82,15 @@ ohos_shared_library("libwms") {
 
   configs = [
     ":libwms_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "../resources/config/build:coverage_flags",
   ]
 
   deps = [
+    "../dmserver:libdms",
+    "../etc:wms_etc",
+    "../utils:libwmutil",
+    "../wm:libwm",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/window/window_manager/dmserver:libdms",
-    "//foundation/window/window_manager/etc:wms_etc",
-    "//foundation/window/window_manager/utils:libwmutil",
-    "//foundation/window/window_manager/wm:libwm",
     "//third_party/libxml2:libxml2",
   ]
 

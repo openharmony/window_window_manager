@@ -25,7 +25,7 @@ ohos_executable("snapshot_display") {
 
   configs = [
     ":snapshot_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "../resources/config/build:coverage_flags",
   ]
 
   deps = [
@@ -47,11 +47,11 @@ ohos_shared_library("libsnapshot_util") {
 
   configs = [
     ":snapshot_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "../resources/config/build:coverage_flags",
   ]
 
   deps = [
-    "//foundation/window/window_manager/dm:libdm",
+    "../dm:libdm",
     "//third_party/libjpeg-turbo:turbojpeg_static",
   ]
 

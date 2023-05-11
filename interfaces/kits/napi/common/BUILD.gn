@@ -28,7 +28,7 @@ config("dm_napi_common_public_config") {
   include_dirs = [
     ".",
     "//third_party/node/src",
-    "//foundation/window/window_manager/interfaces/innerkits/dm",
+    "../../../innerkits/dm",
   ]
 }
 
@@ -37,15 +37,15 @@ ohos_static_library("dm_napi_common") {
 
   configs = [
     ":dm_napi_common_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "../../../../resources/config/build:coverage_flags",
   ]
 
   public_configs = [ ":dm_napi_common_public_config" ]
 
   deps = [
+    "../../../../utils:libwmutil",
+    "../../../../wm:libwm",
     "//foundation/arkui/napi:ace_napi",
-    "//foundation/window/window_manager/utils:libwmutil",
-    "//foundation/window/window_manager/wm:libwm",
   ]
 
   external_deps = [

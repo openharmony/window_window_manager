@@ -17,8 +17,8 @@ config("previewer_window_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
-    "//foundation/window/window_manager/interfaces/innerkits/wm",
-    "//foundation/window/window_manager/previewer/include",
+    "../interfaces/innerkits/wm",
+    "include",
   ]
 }
 
@@ -66,7 +66,7 @@ ohos_shared_library("previewer_window") {
 config("previewer_window_napi_config") {
   visibility = [ ":*" ]
 
-  include_dirs = [ "//foundation/window/window_manager/interfaces/kits/napi/window_runtime/window_napi" ]
+  include_dirs = [ "../interfaces/kits/napi/window_runtime/window_napi" ]
 }
 
 ohos_shared_library("previewer_window_napi") {
@@ -130,4 +130,7 @@ ohos_copy("copy_previewer_library") {
       [ target_out_dir + "/previewer/common/bin/libpreviewer_window" + suffix ]
   module_source_dir = target_out_dir + "/previewer/common/bin/"
   module_install_name = ""
+
+  part_name = "window_manager"
+  subsystem_name = "window"
 }

@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../windowmanager_aafwk.gni")
 
 config("libdm_private_config") {
   include_dirs = [
@@ -80,14 +80,14 @@ ohos_shared_library("libdm") {
 
   configs = [
     ":libdm_private_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "../resources/config/build:coverage_flags",
   ]
 
   public_configs = [ ":libdm_public_config" ]
 
   deps = [
+    "../utils:libwmutil",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/window/window_manager/utils:libwmutil",
   ]
 
   external_deps = [

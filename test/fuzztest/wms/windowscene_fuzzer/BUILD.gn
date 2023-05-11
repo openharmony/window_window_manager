@@ -13,26 +13,25 @@
 
 import("//build/config/features.gni")
 import("//build/test.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../../../../windowmanager_aafwk.gni")
 
 module_output_path = "window_manager/wms"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("WindowSceneFuzzTest") {
-  fuzz_config_file =
-      "//foundation/window/window_manager/test/fuzztest/wms/windowscene_fuzzer"
+  fuzz_config_file = "."
   module_out_path = module_output_path
   include_dirs = [
-    "//foundation/window/window_manager/wmserver/include",
-    "//foundation/window/window_manager/interfaces/innerkits/dm",
-    "//foundation/window/window_manager/interfaces/innerkits/wm",
+    "../../../../wmserver/include",
+    "../../../../interfaces/innerkits/dm",
+    "../../../../interfaces/innerkits/wm",
     "//foundation/graphic/graphic_2d/interfaces/innerkits/surface",
     "//commonlibrary/c_utils/base/include",
   ]
 
   configs = [
-    "//foundation/window/window_manager/test/fuzztest:configs_cc_ld",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "../..:configs_cc_ld",
+    "../../../../resources/config/build:coverage_flags",
   ]
 
   sources = [ "windowscene_fuzzer.cpp" ]

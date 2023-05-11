@@ -13,21 +13,20 @@
 
 import("//build/config/features.gni")
 import("//build/test.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../../../../windowmanager_aafwk.gni")
 
 module_output_path = "window_manager/wms"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("WindowFuzzTest") {
-  fuzz_config_file =
-      "//foundation/window/window_manager/test/fuzztest/wms/window_fuzzer"
+  fuzz_config_file = "."
   module_out_path = module_output_path
   include_dirs = [
-    "//foundation/window/window_manager/wm/include",
-    "//foundation/window/window_manager/dm/include",
-    "//foundation/window/window_manager/wmserver/include",
-    "//foundation/window/window_manager/interfaces/innerkits/wm",
-    "//foundation/window/window_manager/interfaces/innerkits/dm",
+    "../../../../wm/include",
+    "../../../../dm/include",
+    "../../../../wmserver/include",
+    "../../../../interfaces/innerkits/wm",
+    "../../../../interfaces/innerkits/dm",
     "//commonlibrary/c_utils/base/include",
 
     # for abilityContext
@@ -41,9 +40,9 @@ ohos_fuzztest("WindowFuzzTest") {
   ]
 
   configs = [
-    "//foundation/window/window_manager/test/fuzztest:configs_cc_ld",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
-    "//foundation/window/window_manager/resources/config/build:testcase_flags",
+    "../..:configs_cc_ld",
+    "../../../../resources/config/build:coverage_flags",
+    "../../../../resources/config/build:testcase_flags",
   ]
 
   sources = [ "window_fuzzer.cpp" ]
