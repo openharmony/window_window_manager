@@ -17,5 +17,6 @@ group("window_scene_napi_packages") {
   public_deps = [
     "scene_session_manager:scenesessionmanager_napi",
     "screen_session_manager:screensessionmanager_napi",
+    "session_manager_service:sessionmanagerservice_napi",
   ]
 }
