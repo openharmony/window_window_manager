@@ -18,6 +18,9 @@
 
 #include "common/include/message_scheduler.h"
 #include "session/screen/include/screen_session.h"
+#include "zidl/screen_session_manager_stub.h"
+#include "client_agent_container.h"
+#include "singleton_delegator.h"
 
 namespace OHOS::Rosen {
 class IScreenConnectionListener : public RefBase {
@@ -31,7 +34,7 @@ public:
 
 class RSInterfaces;
 
-class ScreenSessionManager : public RefBase {
+class ScreenSessionManager : public ScreenSessionManagerStub {
 public:
     static ScreenSessionManager& GetInstance();
     ScreenSessionManager(const ScreenSessionManager&) = delete;
@@ -41,8 +44,16 @@ public:
 
     sptr<ScreenSession> GetScreenSession(ScreenId screenId);
 
+    sptr<DisplayInfo> GetDefaultDisplayInfo() override;
+
     void RegisterScreenConnectionListener(sptr<IScreenConnectionListener>& screenConnectionListener);
     void UnregisterScreenConnectionListener(sptr<IScreenConnectionListener>& screenConnectionListener);
+
+    virtual DMError RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+        DisplayManagerAgentType type) override;
+
+    virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+        DisplayManagerAgentType type) override;
 
 protected:
     ScreenSessionManager();
@@ -54,9 +65,14 @@ private:
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent);
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
 
+    ScreenId GetDefaultScreenId();
+
     RSInterfaces& rsInterface_;
     std::shared_ptr<MessageScheduler> msgScheduler_ = nullptr;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
+    ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
+
+    ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
 
     std::vector<sptr<IScreenConnectionListener>> screenConnectionListenerList_;
 };

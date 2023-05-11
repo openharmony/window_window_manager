@@ -17,6 +17,8 @@
 
 #include <transaction/rs_interfaces.h>
 #include "window_manager_hilog.h"
+#include "screen_session_manager.h"
+#include "permission.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -66,6 +68,38 @@ void ScreenSessionManager::UnregisterScreenConnectionListener(sptr<IScreenConnec
             [screenConnectionListener](
                 sptr<IScreenConnectionListener> listener) { return screenConnectionListener == listener; }),
         screenConnectionListenerList_.end());
+}
+
+DMError ScreenSessionManager::RegisterDisplayManagerAgent(
+    const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
+{
+    if (type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER && !Permission::IsSystemCalling()
+        && !Permission::IsStartByHdcd()) {
+        WLOGFE("register display manager agent permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    if ((displayManagerAgent == nullptr) || (displayManagerAgent->AsObject() == nullptr)) {
+        WLOGFE("displayManagerAgent invalid");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    return dmAgentContainer_.RegisterAgent(displayManagerAgent, type) ? DMError::DM_OK :DMError::DM_ERROR_NULLPTR;
+}
+
+DMError ScreenSessionManager::UnregisterDisplayManagerAgent(
+    const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
+{
+    if (type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER && !Permission::IsSystemCalling()
+        && !Permission::IsStartByHdcd()) {
+        WLOGFE("unregister display manager agent permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    if ((displayManagerAgent == nullptr) || (displayManagerAgent->AsObject() == nullptr)) {
+        WLOGFE("displayManagerAgent invalid");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    return dmAgentContainer_.UnregisterAgent(displayManagerAgent, type) ? DMError::DM_OK :DMError::DM_ERROR_NULLPTR;
 }
 
 void ScreenSessionManager::Init()
@@ -121,6 +155,18 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSession(ScreenId screenId)
     return iter->second;
 }
 
+sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo()
+{
+    GetDefaultScreenId();
+    sptr<ScreenSession> screenSession = GetScreenSession(defaultScreenId_);
+    if (screenSession) {
+        return screenSession->ConvertToDisplayInfo();
+    } else {
+        WLOGFE("Get default screen session failed.");
+        return nullptr;
+    }
+}
+
 sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId screenId)
 {
     auto sessionIt = screenSessionMap_.find(screenId);
@@ -140,5 +186,12 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     }
     screenSessionMap_[screenId] = session;
     return session;
+}
+ScreenId ScreenSessionManager::GetDefaultScreenId()
+{
+    if (defaultScreenId_ == INVALID_SCREEN_ID) {
+        defaultScreenId_ = rsInterface_.GetDefaultScreenId();
+    }
+    return defaultScreenId_;
 }
 } // namespace OHOS::Rosen

@@ -21,7 +21,9 @@
 
 #include "display_manager.h"
 #include "screen_manager.h"
+#include "session_manager.h"
 #include "window_manager_hilog.h"
+#include "scene_board_judgement.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -32,9 +34,16 @@ WM_IMPLEMENT_SINGLE_INSTANCE(ScreenManagerAdapter)
 
 #define INIT_PROXY_CHECK_RETURN(ret) \
     do { \
-        if (!InitDMSProxy()) { \
-            WLOGFE("InitDMSProxy failed!"); \
-            return ret; \
+        if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) { \
+            if (!InitDMSProxy()) { \
+                WLOGFE("InitDMSProxy failed!"); \
+                return ret; \
+            } \
+        } else { \
+            if (!InitSMSProxy()) { \
+                WLOGFE("InitSMSProxy failed!"); \
+                return ret; \
+            } \
         } \
     } while (false)
 
@@ -270,6 +279,35 @@ bool BaseAdapter::InitDMSProxy()
         }
         isProxyValid_ = true;
     }
+    return true;
+}
+
+bool BaseAdapter::InitSMSProxy()
+{
+    if (isProxyValid_) {
+        return true;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    SessionManager& sessionManager = SessionManager::GetInstance();
+    displayManagerServiceProxy_ = sessionManager.GetScreenSessionManagerProxy();
+    if ((!displayManagerServiceProxy_) || (!displayManagerServiceProxy_->AsObject())) {
+        WLOGFE("Failed to get system display manager services");
+        return false;
+    }
+
+    dmsDeath_ = new(std::nothrow) DMSDeathRecipient(*this);
+    if (dmsDeath_ == nullptr) {
+        WLOGFE("Failed to create death Recipient ptr DMSDeathRecipient");
+        return false;
+    }
+
+    sptr<IRemoteObject> remoteObject = displayManagerServiceProxy_->AsObject();
+    if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(dmsDeath_)) {
+        WLOGFE("Failed to add death recipient");
+        return false;
+    }
+    isProxyValid_ = true;
     return true;
 }
 
