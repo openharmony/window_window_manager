@@ -29,10 +29,12 @@ public:
 
     void SetBounds(const RRect& bounds);
     RRect GetBounds() const;
+    float GetDensity();
 
 private:
     float rotation_ { 0.0f };
     RRect bounds_;
+    float density_ { 1.5f };
 };
 } // namespace OHOS::Rosen
 
