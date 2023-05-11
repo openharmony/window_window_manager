@@ -190,8 +190,12 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         abilitySceneMap_.erase(persistentId);
-
+        auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
+        if (!scnSessionInfo) {
+            return WSError::WS_ERROR_NULLPTR;
+        }
         // to add TerminateAbility
+        AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
         return WSError::WS_OK;
     };
 
