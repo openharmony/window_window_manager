@@ -43,12 +43,12 @@ ohos_unittest("snapshot_display_test") {
 ## Build utils_unittest_common.a {{{
 config("utils_unittest_common_public_config") {
   include_dirs = [
-    "//foundation/window/window_manager/dmserver/include",
-    "//foundation/window/window_manager/interfaces/innerkits/dm",
-    "//foundation/window/window_manager/interfaces/innerkits/wm",
-    "//foundation/window/window_manager/snapshot/include",
-    "//foundation/window/window_manager/test/common/utils/include",
-    "//foundation/window/window_manager/utils/include",
+    "../../../dmserver/include",
+    "../../../interfaces/innerkits/dm",
+    "../../../interfaces/innerkits/wm",
+    "../../include",
+    "../../../test/common/utils/include",
+    "../../../utils/include",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
   ]
 }
@@ -59,19 +59,19 @@ ohos_static_library("utils_unittest_common") {
 
   public_configs = [
     ":utils_unittest_common_public_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
-    "//foundation/window/window_manager/resources/config/build:testcase_flags",
+    "../../../resources/config/build:coverage_flags",
+    "../../../resources/config/build:testcase_flags",
   ]
 
   public_deps = [
+    "../..:libsnapshot_util",
+    "../../../dm:libdm",
+    "../../../test/common/utils:libtestutil",
+    "../../../utils:libwmutil",
     "//commonlibrary/c_utils/base:utils",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/window/window_manager/dm:libdm",
-    "//foundation/window/window_manager/snapshot:libsnapshot_util",
-    "//foundation/window/window_manager/test/common/utils:libtestutil",
-    "//foundation/window/window_manager/utils:libwmutil",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]

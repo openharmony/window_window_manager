@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../windowmanager_aafwk.gni")
 
 config("libwm_private_config") {
   visibility = [ ":*" ]
@@ -154,15 +154,15 @@ ohos_shared_library("libwm") {
 
   configs = [
     ":libwm_private_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "../resources/config/build:coverage_flags",
   ]
 
   public_configs = [ ":libwm_public_config" ]
 
   deps = [
+    "../dm:libdm",
+    "../utils:libwmutil",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/window/window_manager/dm:libdm",
-    "//foundation/window/window_manager/utils:libwmutil",
   ]
 
   external_deps = [

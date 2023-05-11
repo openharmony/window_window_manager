@@ -24,13 +24,11 @@ ohos_static_library("libtestutil") {
     "src/screen_manager_utils.cpp",
   ]
 
-  include_dirs = [ "//foundation/window/window_manager/utils/include" ]
+  include_dirs = [ "../../../utils/include" ]
 
   configs = [ ":libtestutil_private_config" ]
 
-  public_configs = [
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
-  ]
+  public_configs = [ "../../../resources/config/build:coverage_flags" ]
 
   external_deps = [
     "access_token:libaccesstoken_sdk",

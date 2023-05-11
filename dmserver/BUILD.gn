@@ -12,13 +12,13 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../windowmanager_aafwk.gni")
 
 ## Build libdms.so
 config("libdms_private_config") {
   include_dirs = [
-    "//foundation/window/window_manager/dm/include",
-    "//foundation/window/window_manager/interfaces/innerkits/dm",
+    "../dm/include",
+    "../interfaces/innerkits/dm",
   ]
 }
 
@@ -47,14 +47,14 @@ ohos_shared_library("libdms") {
 
   configs = [
     ":libdms_private_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "../resources/config/build:coverage_flags",
   ]
 
   public_configs = [ ":libdms_public_config" ]
 
   deps = [
+    "../utils:libwmutil",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/window/window_manager/utils:libwmutil",
     "//third_party/libxml2:libxml2",
   ]
 

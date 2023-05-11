@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../../../../../windowmanager_aafwk.gni")
 
 config("screen_session_manager_napi_public_config") {
   visibility = [ ":*" ]

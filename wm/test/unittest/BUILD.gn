@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../../../windowmanager_aafwk.gni")
 module_out_path = "window_manager/wm"
 
 group("unittest") {
@@ -217,5 +217,8 @@ ohos_static_library("wm_unittest_common") {
     "ipc:ipc_single",
     "power_manager:powermgr_client",
   ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
 }
 ## Build wm_unittest_common.a }}}

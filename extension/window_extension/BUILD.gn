@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../../windowmanager_aafwk.gni")
 
 config("libwindow_extension_private_config") {
   visibility = [ ":*" ]
@@ -42,15 +42,15 @@ ohos_shared_library("libwindow_extension") {
 
   configs = [
     ":libwindow_extension_private_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "../../resources/config/build:coverage_flags",
   ]
 
   deps = [
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_path}/frameworks/native/appkit:app_context",
+    "../../interfaces/kits/napi/window_runtime:window_native_kit",
+    "../../wm:libwm",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/window/window_manager/interfaces/kits/napi/window_runtime:window_native_kit",
-    "//foundation/window/window_manager/wm:libwm",
   ]
 
   external_deps = [
@@ -87,10 +87,10 @@ ohos_shared_library("window_extension_module") {
 
   configs = [
     ":window_extension_module_private_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "../../resources/config/build:coverage_flags",
   ]
 
-  deps = [ "//foundation/window/window_manager/extension/window_extension:libwindow_extension" ]
+  deps = [ ":libwindow_extension" ]
 
   external_deps = [
     "ability_runtime:abilitykit_native",

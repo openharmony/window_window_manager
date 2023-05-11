@@ -13,18 +13,18 @@
 
 import("//arkcompiler/ets_frontend/ts2panda/ts2abc_config.gni")
 import("//build/ohos.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../../../../windowmanager_aafwk.gni")
 
 config("window_manager_napi_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
-    "//foundation/window/window_manager/interfaces/kits/napi/window_runtime/window_napi",
-    "//foundation/window/window_manager/interfaces/kits/napi/window_runtime/window_manager_napi",
-    "//foundation/window/window_manager/interfaces/innerkits/wm",
-    "//foundation/window/window_manager/interfaces/innerkits/dm",
-    "//foundation/window/window_manager/wm/include",
-    "//foundation/window/window_manager/utils/include",
+    "window_napi",
+    "window_manager_napi",
+    "../../../innerkits/wm",
+    "../../../innerkits/dm",
+    "../../../../wm/include",
+    "../../../../utils/include",
   ]
 }
 
@@ -32,11 +32,11 @@ config("window_native_kit_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
-    "//foundation/window/window_manager/interfaces/kits/napi/window_runtime/window_napi",
-    "//foundation/window/window_manager/interfaces/innerkits/wm",
-    "//foundation/window/window_manager/wm/include",
-    "//foundation/window/window_manager/utils/include",
-    "//foundation/window/window_manager/wmserver/include",
+    "window_napi",
+    "../../../innerkits/wm",
+    "../../../../wm/include",
+    "../../../../utils/include",
+    "../../../../wmserver/include",
 
     # because of pixle_map.h
     "//foundation/multimedia/image_framework/interfaces/innerkits/include",
@@ -54,12 +54,12 @@ ohos_shared_library("window_native_kit") {
 
   configs = [
     ":window_native_kit_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "../../../../resources/config/build:coverage_flags",
   ]
 
   deps = [
-    "//foundation/window/window_manager/utils:libwmutil",
-    "//foundation/window/window_manager/wm:libwm",
+    "../../../../utils:libwmutil",
+    "../../../../wm:libwm",
   ]
 
   external_deps = [
@@ -91,13 +91,13 @@ ohos_shared_library("window_napi") {
 
   configs = [
     ":window_manager_napi_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "../../../../resources/config/build:coverage_flags",
   ]
 
   deps = [
     ":window_native_kit",
-    "//foundation/window/window_manager/utils:libwmutil",
-    "//foundation/window/window_manager/wm:libwm",
+    "../../../../utils:libwmutil",
+    "../../../../wm:libwm",
   ]
 
   external_deps = [
@@ -122,14 +122,14 @@ ohos_shared_library("windowstage_kit") {
 
   configs = [
     ":window_native_kit_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "../../../../resources/config/build:coverage_flags",
   ]
 
-  include_dirs = [ "//foundation/window/window_manager/interfaces/kits/napi/window_runtime/window_stage_napi" ]
+  include_dirs = [ "window_stage_napi" ]
   deps = [
     ":window_native_kit",
-    "//foundation/window/window_manager/utils:libwmutil",
-    "//foundation/window/window_manager/wm:libwm",
+    "../../../../utils:libwmutil",
+    "../../../../wm:libwm",
   ]
 
   external_deps = [

@@ -12,14 +12,14 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../../../../windowmanager_aafwk.gni")
 
 config("display_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
-    "//foundation/window/window_manager/interfaces/kits/napi/display_runtime",
-    "//foundation/window/window_manager/utils/include",
+    ".",
+    "../../../../utils/include",
 
     # because of pixle_map.h
     "//foundation/multimedia/image_framework/interfaces/innerkits/include",
@@ -37,13 +37,13 @@ ohos_shared_library("display_napi") {
 
   configs = [
     ":display_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "../../../../resources/config/build:coverage_flags",
   ]
 
   deps = [
+    "../../../../dm:libdm",
+    "../../../../utils:libwmutil",
     "../common:dm_napi_common",
-    "//foundation/window/window_manager/dm:libdm",
-    "//foundation/window/window_manager/utils:libwmutil",
   ]
 
   external_deps = [

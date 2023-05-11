@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../../windowmanager_aafwk.gni")
 
 config("session_public_config") {
   include_dirs = [
