@@ -28,10 +28,12 @@ public:
         TRANS_ID_SCREEN_BASE = 0,
         TRANS_ID_GET_SCREEN_INFO_BY_ID,
         TRANS_ID_GET_SCENE_SESSION_MANAGER,
+        TRANS_ID_GET_SCREEN_SESSION_MANAGER_SERVICE,
     };
 
     virtual int GetValueById(int id) = 0;
     virtual sptr<IRemoteObject> GetSceneSessionManager() = 0;
+    virtual sptr<IRemoteObject> GetScreenSessionManagerService() = 0;
 };
 
 } // namespace OHOS::Rosen

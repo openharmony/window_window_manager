@@ -31,6 +31,7 @@ ohos_shared_library("screensessionmanager_napi") {
 
   deps = [
     "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/session:screen_session",
     "${window_base_path}/window_scene/session_manager:screen_session_manager",
   ]

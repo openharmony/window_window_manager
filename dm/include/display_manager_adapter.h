@@ -37,6 +37,7 @@ public:
     virtual void Clear();
 protected:
     bool InitDMSProxy();
+    bool InitSMSProxy();
     std::recursive_mutex mutex_;
     sptr<IDisplayManager> displayManagerServiceProxy_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
