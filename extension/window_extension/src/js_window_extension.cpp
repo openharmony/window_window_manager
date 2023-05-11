@@ -148,8 +148,8 @@ void JsWindowExtension::BindContext(NativeEngine& engine, NativeObject* obj)
         WLOGFE("Failed to get js window extension context");
         return;
     }
-    shellContextRef_ = jsRuntime_.LoadSystemModule("application.WindowExtensionContext", &contextObj, 1);
-    contextObj = shellContextRef_->Get();
+    auto shellContextRef = jsRuntime_.LoadSystemModule("application.WindowExtensionContext", &contextObj, 1);
+    contextObj = shellContextRef->Get();
     NativeObject* nativeObj = AbilityRuntime::ConvertNativeValueTo<NativeObject>(contextObj);
     if (nativeObj == nullptr) {
         WLOGFE("Failed to get context native object");
@@ -163,7 +163,7 @@ void JsWindowExtension::BindContext(NativeEngine& engine, NativeObject* obj)
     nativeObj->ConvertToNativeBindingObject(&engine, AbilityRuntime::DetachCallbackFunc, AttachWindowExtensionContext,
         workContext, nullptr);
     WLOGI("JsWindowExtension::Init Bind.");
-    context->Bind(jsRuntime_, shellContextRef_.get());
+    context->Bind(jsRuntime_, shellContextRef.release());
     WLOGI("JsWindowExtension::SetProperty.");
     obj->SetProperty("context", contextObj);
 
