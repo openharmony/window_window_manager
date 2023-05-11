@@ -35,4 +35,17 @@ RRect ScreenProperty::GetBounds() const
 {
     return bounds_;
 }
+
+float ScreenProperty::GetDensity()
+{
+    int32_t width = bounds_.rect_.width_;
+    int32_t height = bounds_.rect_.height_;
+
+    if (width == 1344 && height == 2772) { // telephone
+        density_ = 3.5f;
+    } else {
+        density_ = 1.5f;
+    }
+    return density_;
+}
 } // namespace OHOS::Rosen
