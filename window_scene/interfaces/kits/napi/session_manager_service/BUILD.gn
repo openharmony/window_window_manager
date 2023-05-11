@@ -1,0 +1,56 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//arkcompiler/ets_frontend/ts2panda/ts2abc_config.gni")
+import("//build/ohos.gni")
+import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+
+config("session_manager_service_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "${window_base_path}/interfaces/kits/napi/screen_runtime/api",
+    "${window_base_path}/interfaces/kits/napi/screen_runtime/napi",
+  ]
+}
+
+ohos_shared_library("sessionmanagerservice_napi") {
+  sources = [
+    "napi/js_session_manager_service.cpp",
+    "napi/session_manager_service_module.cpp",
+  ]
+
+  configs = [
+    ":session_manager_service_config",
+    "${window_base_path}/resources/config/build:coverage_flags",
+  ]
+
+  deps = [
+    "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/window_scene/session_manager_service:session_manager_service",
+  ]
+
+  external_deps = [
+    "ability_runtime:runtime",
+    "c_utils:utils",
+    "graphic_standard:surface",  # use for SurfaceUtils
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_napi_common",
+    "napi:ace_napi",
+  ]
+
+  relative_install_dir = "module"
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
