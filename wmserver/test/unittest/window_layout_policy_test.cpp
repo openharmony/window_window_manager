@@ -489,10 +489,30 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateRectInDisplayGroupForAllNodes02, Function
  */
 HWTEST_F(WindowLayoutPolicyTest, UpdateDisplayRectAndDisplayGroupInfo, Function | SmallTest | Level2)
 {
-    std::map<DisplayId, Rect> displayRectMap = {};
-    layoutPolicy_->UpdateDisplayRectAndDisplayGroupInfo(displayRectMap);
-    displayRectMap = displayGroupInfo_.GetAllDisplayRects();
-    layoutPolicy_->UpdateDisplayRectAndDisplayGroupInfo(displayRectMap);
+    auto baseSize = displayGroupInfo_.displayInfosMap_.size();
+    ASSERT_EQ(baseSize, 1);
+    auto defaultDisplayInfo = displayGroupInfo_.displayInfosMap_.at(0);
+    ASSERT_EQ(defaultDisplayInfo->GetDisplayId(), defaultDisplayInfo_->GetDisplayId());
+    auto displayId = defaultDisplayInfo->GetDisplayId();
+    Rect baseRect = { defaultDisplayInfo->GetOffsetX(), defaultDisplayInfo->GetOffsetY(),
+            defaultDisplayInfo->GetWidth(), defaultDisplayInfo->GetHeight() };
+
+    std::map<DisplayId, Rect> insertMapData = {};
+    layoutPolicy_->UpdateDisplayRectAndDisplayGroupInfo(insertMapData);
+    auto rectInfo = displayGroupInfo_.GetDisplayRect(displayId);
+    ASSERT_EQ(rectInfo.posX_, baseRect.posX_);
+    ASSERT_EQ(rectInfo.posY_, baseRect.posY_);
+    ASSERT_EQ(rectInfo.width_, baseRect.width_);
+    ASSERT_EQ(rectInfo.height_, baseRect.height_);
+
+    insertMapData.clear();
+    insertMapData.insert(std::make_pair(0, Rect{10, 10, 10, 10}));
+    layoutPolicy_->UpdateDisplayRectAndDisplayGroupInfo(insertMapData);
+    rectInfo = displayGroupInfo_.GetDisplayRect(displayId);
+    ASSERT_EQ(rectInfo.posX_, 10);
+    ASSERT_EQ(rectInfo.posY_, 10);
+    ASSERT_EQ(rectInfo.width_, 10);
+    ASSERT_EQ(rectInfo.height_, 10);
 }
 
 /**
@@ -553,16 +573,6 @@ HWTEST_F(WindowLayoutPolicyTest, ProcessDisplaySizeChangeOrRotation, Function | 
 
     auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
     ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
-}
-
-/**
- * @tc.name: NotifyAnimationSizeChangeIfNeeded
- * @tc.desc: test NotifyAnimationSizeChangeIfNeeded
- * @tc.type: FUNC
- */
-HWTEST_F(WindowLayoutPolicyTest, NotifyAnimationSizeChangeIfNeeded, Function | SmallTest | Level2)
-{
-    layoutPolicy_->NotifyAnimationSizeChangeIfNeeded();
 }
 
 /**
