@@ -17,10 +17,10 @@
 
 #include <ability_manager_client.h>
 #include <start_options.h>
-#include <ui_window.h>
 #include <want.h>
 
 #include "common/include/message_scheduler.h"
+#include "root_scene.h"
 #include "session/host/include/scene_session.h"
 #include "session_info.h"
 #include "window_manager_hilog.h"
@@ -52,7 +52,7 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
         }
 
         rootSceneSession_ = new (std::nothrow) RootSceneSession();
-        rootScene_ = Ace::NG::UIWindow::CreateRootScene();
+        rootScene_ = new (std::nothrow) RootScene();
         if (!rootSceneSession_ || !rootScene_) {
             WLOGFE("rootSceneSession or rootScene is nullptr");
             return sptr<RootSceneSession>(nullptr);

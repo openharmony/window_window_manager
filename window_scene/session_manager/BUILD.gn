@@ -14,6 +14,13 @@
 import("//build/ohos.gni")
 import("../../windowmanager_aafwk.gni")
 
+config("session_manager_private_config") {
+  include_dirs = [
+    "${window_base_path}/interfaces/innerkits/wm",
+    "${window_base_path}/wm/include",
+  ]
+}
+
 config("session_manager_public_config") {
   include_dirs = [
     "${window_base_path}/window_scene",
@@ -34,6 +41,8 @@ ohos_shared_library("scene_session_manager") {
     "src/zidl/scene_session_manager_stub.cpp",
   ]
 
+  configs = [ ":session_manager_private_config" ]
+
   public_configs = [ ":session_manager_public_config" ]
 
   deps = [
@@ -45,12 +54,13 @@ ohos_shared_library("scene_session_manager") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:ability_manager",
-    "ace_engine:ace_uicontent",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog_native:libhilog",
     "ipc:ipc_single",
+    "window_manager:libwm",
   ]
+
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
@@ -72,6 +82,7 @@ ohos_shared_library("screen_session_manager") {
     "eventhandler:libeventhandler",
     "hilog_native:libhilog",
   ]
+
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
@@ -106,6 +117,7 @@ ohos_shared_library("session_manager") {
     "ipc:ipc_single",
   ]
 
+  innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
 }

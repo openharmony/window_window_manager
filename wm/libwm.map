@@ -22,6 +22,7 @@
             OHOS::Rosen::WindowManager*;
             OHOS::Rosen::Window*;
             OHOS::Rosen::WindowAccessibilityController*;
+            OHOS::Rosen::RootScene*;
 
             VTT*FocusChangeInfo*;
             VTT*WindowVisibilityInfo*;

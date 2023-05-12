@@ -642,7 +642,7 @@ public:
      *
      * @return WMError
      */
-    virtual WMError Destroy() = 0;
+    virtual WMError Destroy() { return WMError::WM_OK; }
     /**
      * @brief Show window
      *
@@ -650,7 +650,7 @@ public:
      * @param withAnimation True means window show with animation, false means window show without animation.
      * @return WM_OK means window show success, others means failed.
      */
-    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) = 0;
+    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) { return WMError::WM_OK; }
     /**
      * @brief Hide window
      *
@@ -659,7 +659,10 @@ public:
      * @param isFromInnerkits True means remove command is from inner kits.
      * @return WM_OK means window hide success, others means failed.
      */
-    virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) = 0;
+    virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true)
+    {
+        return WMError::WM_OK;
+    }
     /**
      * @brief move the window to (x, y)
      *

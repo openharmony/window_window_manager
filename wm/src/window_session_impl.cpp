@@ -690,8 +690,6 @@ void WindowSessionImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsync
         return;
     }
     VsyncStation::GetInstance().RequestVsync(vsyncCallback);
-    return;
 }
 } // namespace Rosen
 } // namespace OHOS
-
