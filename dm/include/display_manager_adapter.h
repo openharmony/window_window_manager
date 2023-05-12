@@ -90,6 +90,8 @@ public:
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos);
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, ScreenId& screenGroupId);
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint, ScreenId& screenGroupId);
+    virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds);
+    virtual DMError StopExpand(const std::vector<ScreenId>& expandScreenIds);
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId>);
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
     virtual sptr<ScreenInfo> GetScreenInfo(ScreenId screenId);

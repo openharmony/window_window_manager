@@ -313,6 +313,13 @@ DMError ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<Scre
     return displayManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId, screenGroupId);
 }
 
+DMError ScreenManagerAdapter::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->StopMirror(mirrorScreenIds);
+}
+
 sptr<ScreenInfo> ScreenManagerAdapter::GetScreenInfo(ScreenId screenId)
 {
     if (screenId == SCREEN_ID_INVALID) {
@@ -408,6 +415,14 @@ DMError ScreenManagerAdapter::MakeExpand(std::vector<ScreenId> screenId, std::ve
 
     return displayManagerServiceProxy_->MakeExpand(screenId, startPoint, screenGroupId);
 }
+
+DMError ScreenManagerAdapter::StopExpand(const std::vector<ScreenId>& expandScreenIds)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->StopExpand(expandScreenIds);
+}
+
 
 void ScreenManagerAdapter::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
 {

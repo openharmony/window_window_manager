@@ -530,6 +530,23 @@ DMError DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<Scr
     return DMError::DM_OK;
 }
 
+DMError DisplayManagerService::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)
+{
+    auto allMirrorScreenIds = abstractScreenController_->GetAllValidScreenIds(mirrorScreenIds);
+    if (allMirrorScreenIds.empty()) {
+        WLOGFI("stop mirror done. screens' size:%{public}u", static_cast<uint32_t>(allMirrorScreenIds.size()));
+        return DMError::DM_OK;
+    }
+
+    DMError ret = abstractScreenController_->StopScreens(allMirrorScreenIds, ScreenCombination::SCREEN_MIRROR);
+    if (ret != DMError::DM_OK) {
+        WLOGFE("stop mirror failed.");
+        return ret;
+    }
+
+    return DMError::DM_OK;
+}
+
 void DisplayManagerService::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
 {
     abstractScreenController_->RemoveVirtualScreenFromGroup(screens);
@@ -677,6 +694,23 @@ DMError DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds,
         return DMError::DM_ERROR_NULLPTR;
     }
     screenGroupId = screen->groupDmsId_;
+    return DMError::DM_OK;
+}
+
+DMError DisplayManagerService::StopExpand(const std::vector<ScreenId>& expandScreenIds)
+{
+    auto allExpandScreenIds = abstractScreenController_->GetAllValidScreenIds(expandScreenIds);
+    if (allExpandScreenIds.empty()) {
+        WLOGFI("stop expand done. screens' size:%{public}u", static_cast<uint32_t>(allExpandScreenIds.size()));
+        return DMError::DM_OK;
+    }
+
+    DMError ret = abstractScreenController_->StopScreens(allExpandScreenIds, ScreenCombination::SCREEN_EXPAND);
+    if (ret != DMError::DM_OK) {
+        WLOGFE("stop expand failed.");
+        return ret;
+    }
+
     return DMError::DM_OK;
 }
 

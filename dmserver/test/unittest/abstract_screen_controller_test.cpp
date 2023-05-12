@@ -141,6 +141,7 @@ HWTEST_F(AbstractScreenControllerTest, MakeMirror01, Function | SmallTest | Leve
 {
     std::vector<ScreenId> screens;
     ASSERT_TRUE(DMError::DM_OK != absController_->MakeMirror(5, screens));
+    ASSERT_EQ(DMError::DM_OK, absController_->StopScreens(screens, ScreenCombination::SCREEN_MIRROR));
 }
 /**
  * @tc.name: MakeMirror
@@ -152,6 +153,7 @@ HWTEST_F(AbstractScreenControllerTest, MakeMirror02, Function | SmallTest | Leve
     std::vector<ScreenId> screens;
     absController_->dmsScreenMap_[2]->type_ = ScreenType::UNDEFINED;
     ASSERT_TRUE(DMError::DM_OK != absController_->MakeMirror(2, screens));
+    ASSERT_EQ(DMError::DM_OK, absController_->StopScreens(screens, ScreenCombination::SCREEN_MIRROR));
 }
 /**
  * @tc.name: MakeMirror
@@ -165,6 +167,7 @@ HWTEST_F(AbstractScreenControllerTest, MakeMirror03, Function | SmallTest | Leve
     absController_->dmsScreenMap_[2]->groupDmsId_ = 5;
     absController_->abstractScreenCallback_ = nullptr;
     ASSERT_TRUE(DMError::DM_OK != absController_->MakeMirror(2, screens));
+    ASSERT_EQ(DMError::DM_OK, absController_->StopScreens(screens, ScreenCombination::SCREEN_MIRROR));
 }
 /**
  * @tc.name: MakeMirror
@@ -178,6 +181,7 @@ HWTEST_F(AbstractScreenControllerTest, MakeMirror04, Function | SmallTest | Leve
     absController_->dmsScreenMap_[2]->groupDmsId_ = 5;
     absController_->abstractScreenCallback_ = new AbstractScreenController::AbstractScreenCallback;
     ASSERT_TRUE(DMError::DM_OK != absController_->MakeMirror(2, screens));
+    ASSERT_EQ(DMError::DM_OK, absController_->StopScreens(screens, ScreenCombination::SCREEN_MIRROR));
 }
 /**
  * @tc.name: ProcessScreenConnected
@@ -575,6 +579,7 @@ HWTEST_F(AbstractScreenControllerTest, MakeExpand01, Function | SmallTest | Leve
     ScreenId defaultId = absController_->GetDefaultAbstractScreenId();
     absController_->dmsScreenMap_[defaultId] = nullptr;
     ASSERT_EQ(false, absController_->MakeExpand(screenIds, startPoints));
+    ASSERT_EQ(DMError::DM_OK, absController_->StopScreens(screenIds, ScreenCombination::SCREEN_EXPAND));
 }
 /**
  * @tc.name: MakeExpand
@@ -590,6 +595,7 @@ HWTEST_F(AbstractScreenControllerTest, MakeExpand02, Function | SmallTest | Leve
     ScreenId groupDmsId = defaultScreen->groupDmsId_;
     absController_->dmsScreenGroupMap_[groupDmsId] = nullptr;
     ASSERT_EQ(false, absController_->MakeExpand(screenIds, startPoints));
+    ASSERT_EQ(DMError::DM_OK, absController_->StopScreens(screenIds, ScreenCombination::SCREEN_EXPAND));
 }
 /**
  * @tc.name: RemoveVirtualScreenFromGroup

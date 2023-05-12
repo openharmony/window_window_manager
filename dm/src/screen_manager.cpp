@@ -467,6 +467,24 @@ DMError ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> m
     return ret;
 }
 
+DMError ScreenManager::StopExpand(const std::vector<ScreenId>& expandScreenIds)
+{
+    WLOGFI("Stop expand");
+    if (expandScreenIds.empty()) {
+        return DMError::DM_OK;
+    }
+    return SingletonContainer::Get<ScreenManagerAdapter>().StopExpand(expandScreenIds);
+}
+
+DMError ScreenManager::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)
+{
+    WLOGFI("Stop mirror");
+    if (mirrorScreenIds.empty()) {
+        return DMError::DM_OK;
+    }
+    return SingletonContainer::Get<ScreenManagerAdapter>().StopMirror(mirrorScreenIds);
+}
+
 DMError ScreenManager::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
 {
     WLOGFI("screens.size=%{public}llu", (unsigned long long)screens.size());

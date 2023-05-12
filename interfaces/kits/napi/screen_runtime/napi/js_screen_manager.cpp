@@ -34,6 +34,7 @@ constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 constexpr int32_t INDEX_ONE = 1;
+constexpr uint32_t MAX_SCREENS_NUM = 1000;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsScreenManager"};
 }
@@ -79,6 +80,18 @@ static NativeValue* MakeExpand(NativeEngine* engine, NativeCallbackInfo* info)
 {
     JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(engine, info);
     return (me != nullptr) ? me->OnMakeExpand(*engine, *info) : nullptr;
+}
+
+static NativeValue* StopMirror(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(engine, info);
+    return (me != nullptr) ? me->OnStopMirror(*engine, *info) : nullptr;
+}
+
+static NativeValue* StopExpand(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(engine, info);
+    return (me != nullptr) ? me->OnStopExpand(*engine, *info) : nullptr;
 }
 
 static NativeValue* CreateVirtualScreen(NativeEngine* engine, NativeCallbackInfo* info)
@@ -438,6 +451,112 @@ NativeValue* OnMakeExpand(NativeEngine& engine, NativeCallbackInfo& info)
     }
     NativeValue* result = nullptr;
     AsyncTask::Schedule("JsScreenManager::OnMakeExpand",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* OnStopMirror(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGI("OnStopMirror is called");
+    if (info.argc < ARGC_ONE) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+
+    NativeArray* array = ConvertNativeValueTo<NativeArray>(info.argv[0]);
+    if (array == nullptr) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    uint32_t size = array->GetLength();
+    if (size > MAX_SCREENS_NUM) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    std::vector<ScreenId> screenIds;
+    for (uint32_t i = 0; i < size; i++) {
+        uint32_t screenId;
+        NativeValue* value = array->GetElement(i);
+        if (!ConvertFromJsValue(engine, value, screenId)) {
+            engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+            return engine.CreateUndefined();
+        }
+        screenIds.emplace_back(static_cast<ScreenId>(screenId));
+    }
+
+    AsyncTask::CompleteCallback complete =
+        [ screenIds](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(
+                SingletonContainer::Get<ScreenManager>().StopMirror(screenIds));
+            if (ret == DmErrorCode::DM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+            } else {
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(ret),
+                    "JsScreenManager::OnStopMirror failed."));
+            }
+        };
+    NativeValue* lastParam = nullptr;
+    if (info.argc >= ARGC_TWO && info.argv[ARGC_TWO - 1] != nullptr &&
+        info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
+        lastParam = info.argv[ARGC_TWO - 1];
+    }
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsScreenManager::OnStopMirror",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* OnStopExpand(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGI("OnStopExpand is called");
+    if (info.argc < ARGC_ONE) {
+        WLOGFE("Params not match");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+
+    NativeArray* array = ConvertNativeValueTo<NativeArray>(info.argv[0]);
+    if (array == nullptr) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    uint32_t size = array->GetLength();
+    if (size > MAX_SCREENS_NUM) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    std::vector<ScreenId> screenIds;
+    for (uint32_t i = 0; i < size; i++) {
+        uint32_t screenId;
+        NativeValue* value = array->GetElement(i);
+        if (!ConvertFromJsValue(engine, value, screenId)) {
+            engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+            return engine.CreateUndefined();
+        }
+        screenIds.emplace_back(static_cast<ScreenId>(screenId));
+    }
+
+    AsyncTask::CompleteCallback complete =
+        [screenIds](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(
+                SingletonContainer::Get<ScreenManager>().StopExpand(screenIds));
+            if (ret == DmErrorCode::DM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+                WLOGI("MakeExpand success");
+            } else {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
+                    "JsScreenManager::OnStopExpand failed."));
+                WLOGFE("MakeExpand failed");
+            }
+        };
+    NativeValue* lastParam = nullptr;
+    if (info.argc >= ARGC_TWO && info.argv[ARGC_TWO - 1] != nullptr &&
+        info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
+        lastParam = info.argv[ARGC_TWO - 1];
+    }
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsScreenManager::OnStopExpand",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -894,6 +1013,8 @@ NativeValue* JsScreenManagerInit(NativeEngine* engine, NativeValue* exportObj)
     BindNativeFunction(*engine, *object, "off", moduleName, JsScreenManager::UnregisterScreenMangerCallback);
     BindNativeFunction(*engine, *object, "makeMirror", moduleName, JsScreenManager::MakeMirror);
     BindNativeFunction(*engine, *object, "makeExpand", moduleName, JsScreenManager::MakeExpand);
+    BindNativeFunction(*engine, *object, "stopMirror", moduleName, JsScreenManager::StopMirror);
+    BindNativeFunction(*engine, *object, "stopExpand", moduleName, JsScreenManager::StopExpand);
     BindNativeFunction(*engine, *object, "createVirtualScreen", moduleName, JsScreenManager::CreateVirtualScreen);
     BindNativeFunction(*engine, *object, "destroyVirtualScreen", moduleName, JsScreenManager::DestroyVirtualScreen);
     BindNativeFunction(*engine, *object, "setVirtualScreenSurface", moduleName,

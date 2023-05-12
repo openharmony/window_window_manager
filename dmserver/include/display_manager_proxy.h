@@ -71,10 +71,12 @@ public:
     void NotifyDisplayEvent(DisplayEvent event) override;
     bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze) override;
     DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, ScreenId& screenGroupId) override;
+    DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) override;
     sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
     sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
     DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screens) override;
     DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint, ScreenId& screenGroupId) override;
+    DMError StopExpand(const std::vector<ScreenId>& expandScreenIds) override;
     void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
     DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
     DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;

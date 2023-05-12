@@ -364,6 +364,26 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteUint32(static_cast<uint32_t>(ret));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_STOP_MIRROR: {
+            std::vector<ScreenId> mirrorScreenIds;
+            if (!data.ReadUInt64Vector(&mirrorScreenIds)) {
+                WLOGE("fail to receive mirror screens in stub.");
+                break;
+            }
+            DMError ret = StopMirror(mirrorScreenIds);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_STOP_EXPAND: {
+            std::vector<ScreenId> expandScreenIds;
+            if (!data.ReadUInt64Vector(&expandScreenIds)) {
+                WLOGE("fail to receive expand screens in stub.");
+                break;
+            }
+            DMError ret = StopExpand(expandScreenIds);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
