@@ -111,7 +111,23 @@ public:
      * @return DM_OK means make mirror success, others means make mirror failed.
      */
     DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, ScreenId& screenGroupId);
-    
+
+    /**
+     * @brief Stop expand screens.
+     *
+     * @param expandScreenIds Expand screen ids.
+     * @return DM_OK means stop expand success, others means stop expand failed.
+     */
+    DMError StopExpand(const std::vector<ScreenId>& expandScreenIds);
+
+    /**
+     * @brief Stop mirror screens.
+     *
+     * @param mirrorScreenIds Mirror screen ids.
+     * @return DM_OK means stop mirror success, others means stop mirror failed.
+     */
+    DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds);
+
     /**
      * @brief Remove virtual screen from group.
      *

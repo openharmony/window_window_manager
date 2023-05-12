@@ -78,6 +78,8 @@ public:
         TRANS_ID_GET_CUTOUT_INFO,
         TRANS_ID_ADD_SURFACE_NODE,
         TRANS_ID_REMOVE_SURFACE_NODE,
+        TRANS_ID_SCREEN_STOP_MIRROR,
+        TRANS_ID_SCREEN_STOP_EXPAND,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -126,6 +128,8 @@ public:
         ScreenId& screenGroupId) = 0;
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoints,
         ScreenId& screenGroupId) = 0;
+    virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) = 0;
+    virtual DMError StopExpand(const std::vector<ScreenId>& expandScreenIds) = 0;
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) = 0;
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) = 0;
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) = 0;
