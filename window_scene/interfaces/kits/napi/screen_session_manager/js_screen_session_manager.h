@@ -23,7 +23,7 @@
 namespace OHOS::Rosen {
 class JsScreenSessionManager final : public IScreenConnectionListener {
 public:
-    JsScreenSessionManager(NativeEngine& engine);
+    explicit JsScreenSessionManager(NativeEngine& engine);
     ~JsScreenSessionManager();
 
     static NativeValue* Init(NativeEngine* engine, NativeValue* exportObj);

@@ -23,15 +23,12 @@
 #include "session_manager_base.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 
-namespace OHOS::Ace::NG {
-class UIWindow;
-}
-
 namespace OHOS::AAFwk {
 class SessionInfo;
 }
 
 namespace OHOS::Rosen {
+class RootScene;
 class SceneSession;
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 class SceneSessionManager : public SceneSessionManagerStub,
@@ -60,7 +57,7 @@ private:
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& scnSession);
     std::map<uint64_t, sptr<SceneSession>> abilitySceneMap_;
     sptr<RootSceneSession> rootSceneSession_;
-    std::shared_ptr<Ace::NG::UIWindow> rootScene_;
+    sptr<RootScene> rootScene_;
     NotifyCreateSpecificSessionFunc createSpecificSessionFunc_;
 };
 } // namespace OHOS::Rosen
