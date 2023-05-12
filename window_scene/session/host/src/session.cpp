@@ -127,6 +127,7 @@ SessionState Session::GetSessionState() const
 void Session::UpdateSessionState(SessionState state)
 {
     state_ = state;
+    NotifySessionStateChange(state);
 }
 
 bool Session::IsSessionValid() const
@@ -306,5 +307,47 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot()
         WLOGFE("Failed to get pixelMap, return nullptr");
     }
     return pixelMap;
+}
+
+void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func)
+{
+    sessionStateChangeFunc_ = func;
+}
+
+void Session::NotifySessionStateChange(const SessionState& state)
+{
+    WLOGFI("state: %{public}u", static_cast<uint32_t>(state));
+    if (sessionStateChangeFunc_) {
+        sessionStateChangeFunc_(state);
+    }
+}
+
+void Session::SetSessionRect(const WSRect& rect)
+{
+    winRect_ = rect;
+}
+WSRect Session::GetSessionRect() const
+{
+    return winRect_;
+}
+
+WSError Session::UpdateActiveStatus(bool isActive)
+{
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (isActive == isActive_) {
+        WLOGFD("Session active do not change: [%{public}d]", isActive);
+        return WSError::WS_DO_NOTHING;
+    }
+    isActive_ = isActive;
+    if (isActive && GetSessionState() == SessionState::STATE_FOREGROUND) {
+        UpdateSessionState(SessionState::STATE_ACTIVE);
+    }
+    if (!isActive && GetSessionState() == SessionState::STATE_ACTIVE) {
+        UpdateSessionState(SessionState::STATE_INACTIVE);
+    }
+    WLOGFD("UpdateActiveStatus, status: %{public}d", isActive);
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

@@ -72,6 +72,7 @@ public:
     WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     WMError RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
     WMError UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
+    void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
     uint64_t GetPersistentId() const;
 
 protected:
@@ -106,11 +107,16 @@ private:
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason);
     void ClearListenersById(uint64_t persistentId);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
+    WMError CreateAndConnectSpecificSession();
+    WMError WindowSessionCreateCheck();
+    bool IsValidSystemWindowType(const WindowType& type);
+
     static std::map<uint64_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<uint64_t, std::vector<sptr<IWindowChangeListener>>> windowChangeListeners_;
     static std::recursive_mutex globalMutex_;
     std::recursive_mutex mutex_;
     NotifyNativeWinDestroyFunc notifyNativefunc_;
+    static std::map<std::string, std::pair<uint64_t, sptr<WindowSessionImpl>>> windowSessionMap_;
 };
 } // namespace Rosen
 } // namespace OHOS

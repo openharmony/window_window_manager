@@ -18,10 +18,11 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SessionManagerServiceProxy"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionManagerServiceProxy"};
 }
 
-SessionManagerServiceProxy::SessionManagerServiceProxy(sptr<IRemoteObject>& remoteObject) : IRemoteProxy(remoteObject)
+SessionManagerServiceProxy::SessionManagerServiceProxy(const sptr<IRemoteObject>& remoteObject)
+    : IRemoteProxy(remoteObject)
 {
 }
 
@@ -61,5 +62,33 @@ int SessionManagerServiceProxy::GetValueById(int id)
     WLOGFI("GetValueById: value: %{public}d", value);
 
     return value;
+}
+
+sptr<IRemoteObject> SessionManagerServiceProxy::GetSceneSessionManager()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("GetValueById remote is nullptr");
+        return nullptr;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("GetValueById: WriteInterfacetoken failed");
+        return nullptr;
+    }
+
+    int ret = remote->SendRequest(static_cast<uint32_t>(
+        SessionManagerServiceMessage::TRANS_ID_GET_SCENE_SESSION_MANAGER),
+        data, reply, option);
+    if (ret != ERR_NONE) {
+        WLOGFW("GetValueById: SendRequest failed, errorCode %{public}d", ret);
+        return nullptr;
+    }
+
+    return reply.ReadRemoteObject();
 }
 } // namespace OHOS::Rosen

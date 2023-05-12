@@ -26,6 +26,7 @@ using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSession" };
 const std::string PENDING_SCENE_CB = "pendingSceneSessionActivation";
+const std::string SESSION_STATE_CHANGE_CB = "sessionStateChange";
 } // namespace
 
 NativeValue* JsSceneSession::Create(NativeEngine& engine, const sptr<SceneSession>& session)
@@ -33,8 +34,8 @@ NativeValue* JsSceneSession::Create(NativeEngine& engine, const sptr<SceneSessio
     WLOGI("[NAPI]Create");
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
-    if (object == nullptr) {
-        WLOGFE("[NAPI]Object is null!");
+    if (object == nullptr || session == nullptr) {
+        WLOGFE("[NAPI]Object or session is null!");
         return engine.CreateUndefined();
     }
 
@@ -48,6 +49,31 @@ NativeValue* JsSceneSession::Create(NativeEngine& engine, const sptr<SceneSessio
     return objValue;
 }
 
+JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& session)
+    : engine_(engine), session_(session)
+{
+    listenerFunc_ = {
+        { PENDING_SCENE_CB,               &JsSceneSession::ProcessPendingSceneSessionActivationRegister },
+        { SESSION_STATE_CHANGE_CB,        &JsSceneSession::ProcessSessionStateChangeRegister },
+    };
+}
+
+void JsSceneSession::ProcessPendingSceneSessionActivationRegister()
+{
+    NotifyPendingSessionActivationFunc func = [this](const SessionInfo& info) {
+        this->PendingSessionActivation(info);
+    };
+    session_->SetPendingSessionActivationEventListener(func);
+}
+
+void JsSceneSession::ProcessSessionStateChangeRegister()
+{
+    NotifySessionStateChangeFunc func = [this](const SessionState& state) {
+        this->OnSessionStateChange(state);
+    };
+    session_->SetSessionStateChangeListenser(func);
+}
+
 void JsSceneSession::Finalizer(NativeEngine* engine, void* data, void* hint)
 {
     WLOGI("[NAPI]Finalizer");
@@ -59,6 +85,21 @@ NativeValue* JsSceneSession::RegisterCallback(NativeEngine* engine, NativeCallba
     WLOGI("[NAPI]RegisterCallback");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(engine, info);
     return (me != nullptr) ? me->OnRegisterCallback(*engine, *info) : nullptr;
+}
+
+bool JsSceneSession::IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject)
+{
+    if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
+        return false;
+    }
+
+    for (auto iter = jsCbMap_.begin(); iter != jsCbMap_.end(); ++iter) {
+        if (jsListenerObject->StrictEquals(iter->second->Get())) {
+            WLOGFE("[NAPI]Method %{public}s has already been registered", type.c_str());
+            return true;
+        }
+    }
+    return false;
 }
 
 NativeValue* JsSceneSession::OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info)
@@ -93,21 +134,33 @@ NativeValue* JsSceneSession::OnRegisterCallback(NativeEngine& engine, NativeCall
         return engine.CreateUndefined();
     }
 
-    auto sessionWptr = weak_from_this();
-    NotifyPendingSessionActivationFunc func = [sessionWptr](const SessionInfo& info) {
-        auto jsSceneSession = sessionWptr.lock();
-        if (jsSceneSession == nullptr) {
-            WLOGFE("[NAPI]this scene session is null");
-            return;
-        }
-        jsSceneSession->PendingSessionActivation(info);
-    };
-    session_->SetPendingSessionActivationEventListener(func);
+    (this->*listenerFunc_[cbType])();
     std::shared_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
     jsCbMap_[cbType] = callbackRef;
-    WLOGFI("[NAPI]Register end, type = %{public}s, callback = %{public}p", cbType.c_str(), value);
+    WLOGFI("[NAPI]Register end, type = %{public}s", cbType.c_str());
     return engine.CreateUndefined();
+}
+
+void JsSceneSession::OnSessionStateChange(const SessionState& state)
+{
+    WLOGFI("[NAPI]OnSessionStateChange, state: %{public}u", static_cast<uint32_t>(state));
+    auto iter = jsCbMap_.find(SESSION_STATE_CHANGE_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [state, jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            NativeValue* jsSessionStateObj = CreateJsValue(engine, state);
+            NativeValue* argv[] = { jsSessionStateObj };
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSession::OnSessionStateChange", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsSceneSession::PendingSessionActivation(const SessionInfo& info)
@@ -139,22 +192,6 @@ void JsSceneSession::PendingSessionActivation(const SessionInfo& info)
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
     AsyncTask::Schedule("JsSceneSession::PendingSessionActivation", engine_,
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
-}
-
-bool JsSceneSession::IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject)
-{
-    if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGFI("[NAPI]Method %{public}s has not been registered", type.c_str());
-        return false;
-    }
-
-    for (auto iter = jsCbMap_.begin(); iter != jsCbMap_.end(); ++iter) {
-        if (jsListenerObject->StrictEquals(iter->second->Get())) {
-            WLOGFE("[NAPI]Method %{public}s has already been registered", type.c_str());
-            return true;
-        }
-    }
-    return false;
 }
 
 sptr<SceneSession> JsSceneSession::GetNativeSession() const
