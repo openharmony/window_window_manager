@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "event_handler.h"
 #include "js_window_listener.h"
 #include "js_runtime_utils.h"
 #include "window_manager_hilog.h"
@@ -84,30 +83,32 @@ void JsWindowListener::OnModeChange(WindowMode mode, bool hasDeco)
 void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints)
 {
     WLOGFD("[NAPI]OnSystemBarPropertyChange");
-    eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
-    if (eventHandler_ != nullptr) {
-        eventHandler_->PostTask(
-            [self = weakRef_, displayId, tints, eng = engine_]() {
-                WLOGFD("[NAPI]OnSystemBarPropertyChange");
-                auto thisListener = self.promote();
-                if (thisListener == nullptr || eng == nullptr) {
-                    WLOGFE("[NAPI]this listener or engine is nullptr");
-                    return;
-                }
-                NativeValue* propertyValue = eng->CreateObject();
-                NativeObject* object = ConvertNativeValueTo<NativeObject>(propertyValue);
-                if (object == nullptr) {
-                    WLOGFE("[NAPI]Failed to convert prop to jsObject");
-                    return;
-                }
-                object->SetProperty("displayId", CreateJsValue(*eng, static_cast<uint32_t>(displayId)));
-                object->SetProperty("regionTint", CreateJsSystemBarRegionTintArrayObject(*eng, tints));
-                NativeValue* argv[] = {propertyValue};
-                thisListener->CallJsMethod(SYSTEM_BAR_TINT_CHANGE_CB.c_str(), argv, ArraySize(argv));
-            });
-    } else {
-        WLOGFE("[NAPI]Fail to get eventRunner");
-    }
+    // js callback should run in js thread
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
+        [self = weakRef_, displayId, tints, eng = engine_] (NativeEngine &engine,
+            AsyncTask &task, int32_t status) {
+            auto thisListener = self.promote();
+            if (thisListener == nullptr || eng == nullptr) {
+                WLOGFE("[NAPI]this listener or engine is nullptr");
+                return;
+            }
+            NativeValue* propertyValue = eng->CreateObject();
+            NativeObject* object = ConvertNativeValueTo<NativeObject>(propertyValue);
+            if (object == nullptr) {
+                WLOGFE("[NAPI]Failed to convert prop to jsObject");
+                return;
+            }
+            object->SetProperty("displayId", CreateJsValue(*eng, static_cast<uint32_t>(displayId)));
+            object->SetProperty("regionTint", CreateJsSystemBarRegionTintArrayObject(*eng, tints));
+            NativeValue* argv[] = {propertyValue};
+            thisListener->CallJsMethod(SYSTEM_BAR_TINT_CHANGE_CB.c_str(), argv, ArraySize(argv));
+        }
+    );
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsWindowListener::OnSystemBarPropertyChange",
+        *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)

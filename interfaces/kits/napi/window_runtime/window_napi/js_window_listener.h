@@ -81,7 +81,6 @@ private:
     NativeEngine* engine_ = nullptr;
     std::shared_ptr<NativeReference> jsCallBack_ = nullptr;
     wptr<JsWindowListener> weakRef_  = nullptr;
-    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
     DEFINE_VAR_DEFAULT_FUNC_SET(bool, IsDeprecatedInterface, isDeprecatedInterface, false)
 };
 }  // namespace Rosen

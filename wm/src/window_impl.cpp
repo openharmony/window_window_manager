@@ -1017,23 +1017,6 @@ WMError WindowImpl::WindowCreateCheck(uint32_t parentId)
     return WMError::WM_OK;
 }
 
-void WindowImpl::ChangePropertyByApiVersion()
-{
-    uint32_t version = 0;
-    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
-        version = context_->GetApplicationInfo()->apiCompatibleVersion;
-    }
-    // 10 ArkUI new framework support after API10
-    if (version >= 10) {
-        if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
-            SystemBarProperty statusSystemBarProperty(true, 0x00FFFFFF, 0xFF000000);
-            SystemBarProperty navigationSystemBarProperty(true, 0x00FFFFFF, 0xFF000000);
-            property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusSystemBarProperty);
-            property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR, navigationSystemBarProperty);
-        }
-    }
-}
-
 WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRuntime::Context>& context)
 {
     WLOGFD("Window[%{public}s] Create", name_.c_str());
@@ -1051,7 +1034,6 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
     if (token) {
         property_->SetTokenState(true);
     }
-    ChangePropertyByApiVersion();
     InitAbilityInfo();
     SetSystemConfig();
 
