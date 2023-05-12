@@ -103,7 +103,7 @@ bool Permission::IsStartByInputMethod()
 
     int uid = IPCSkeleton::GetCallingUid();
     std::string bundleName;
-    bundleManagerServiceProxy_->GetBundleNameForUid(uid, bundleName);
+    bundleManagerServiceProxy_->GetNameForUid(uid, bundleName);
 
     AppExecFwk::BundleInfo bundleInfo;
     // reset ipc identity

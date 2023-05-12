@@ -88,7 +88,6 @@ private:
 
     AbilityRuntime::JsRuntime& jsRuntime_;
     std::unique_ptr<NativeReference> jsObj_;
-    std::shared_ptr<NativeReference> shellContextRef_;
     sptr<WindowExtensionStubImpl> stub_;
     static int extensionCnt_;
 };
