@@ -76,6 +76,9 @@ class IInputEventConsumer {
 class ITouchOutsideListener : virtual public RefBase {
 };
 class IAnimationTransitionController : virtual public RefBase {
+public:
+    virtual void AnimationForShown() = 0;
+    virtual void AnimationForHidden() = 0;
 };
 class IScreenshotListener : virtual public RefBase {
 };
