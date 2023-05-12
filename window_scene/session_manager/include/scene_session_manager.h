@@ -21,6 +21,7 @@
 #include "wm_single_instance.h"
 
 #include "session_manager_base.h"
+#include "session_manager/include/zidl/scene_session_manager_stub.h"
 
 namespace OHOS::Ace::NG {
 class UIWindow;
@@ -32,7 +33,9 @@ class SessionInfo;
 
 namespace OHOS::Rosen {
 class SceneSession;
-class SceneSessionManager : public SessionManagerBase {
+using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
+class SceneSessionManager : public SceneSessionManagerStub,
+                            public SessionManagerBase {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManager)
 public:
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo);
@@ -42,6 +45,11 @@ public:
 
     sptr<RootSceneSession> GetRootSceneSession();
     sptr<SceneSession> GetSceneSession(uint64_t persistentId);
+    WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session);
+    WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId);
+    void SetCreateSpecificSessionListener(const NotifyCreateSpecificSessionFunc& func);
 
 protected:
     SceneSessionManager();
@@ -53,6 +61,7 @@ private:
     std::map<uint64_t, sptr<SceneSession>> abilitySceneMap_;
     sptr<RootSceneSession> rootSceneSession_;
     std::shared_ptr<Ace::NG::UIWindow> rootScene_;
+    NotifyCreateSpecificSessionFunc createSpecificSessionFunc_;
 };
 } // namespace OHOS::Rosen
 

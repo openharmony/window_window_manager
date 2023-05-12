@@ -47,6 +47,8 @@ static sptr<Window> CreateWindowWithSession(sptr<WindowOption>& option,
         WLOGFE("malloc windowSessionImpl failed");
         return nullptr;
     }
+
+    windowSessionImpl->SetWindowType(option->GetWindowType());
     WMError error = windowSessionImpl->Create(context, iSession);
     if (error != WMError::WM_OK) {
         errCode = error;
