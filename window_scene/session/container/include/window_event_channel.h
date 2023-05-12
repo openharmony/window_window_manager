@@ -17,20 +17,20 @@
 #define OHOS_ROSEN_WINDOW_SCENE_WINDOW_EVENT_CHANNEL_H
 
 #include "interfaces/include/ws_common.h"
-#include "session/container/include/session_stage.h"
+#include "session/container/include/zidl/session_stage_interface.h"
 #include "session/container/include/zidl/window_event_channel_stub.h"
 
 namespace OHOS::Rosen {
 class WindowEventChannel : public WindowEventChannelStub {
 public:
-    explicit WindowEventChannel(sptr<SessionStage> sessionStage) : sessionStage_(sessionStage) {}
+    explicit WindowEventChannel(sptr<ISessionStage> iSessionStage) : sessionStage_(iSessionStage) {}
     ~WindowEventChannel() = default;
 
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 
 private:
-    sptr<SessionStage> sessionStage_ = nullptr;
+    sptr<ISessionStage> sessionStage_ = nullptr;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WINDOW_EVENT_CHANNEL_H

@@ -112,7 +112,8 @@ HWTEST_F(WindowSessionTest, SetActive01, Function | SmallTest | Level2)
     sptr<WindowEventChannelMocker> mockEventChannel = new(std::nothrow) WindowEventChannelMocker(mockSessionStage);
     EXPECT_NE(nullptr, mockEventChannel);
     auto surfaceNode = CreateRSSurfaceNode();
-    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage, mockEventChannel, surfaceNode));
+    uint64_t persistentId;
+    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage, mockEventChannel, surfaceNode, persistentId));
     ASSERT_EQ(WSError::WS_OK, session_->SetActive(true));
     ASSERT_EQ(false, session_->isActive_);
 
@@ -136,14 +137,15 @@ HWTEST_F(WindowSessionTest, UpdateRect01, Function | SmallTest | Level2)
     EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _)).Times(1).WillOnce(Return(WSError::WS_OK));
 
     WSRect rect = {0, 0, 0, 0};
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateRect(rect, SizeChangeReason::SHOW));
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED));
     sptr<WindowEventChannelMocker> mockEventChannel = new(std::nothrow) WindowEventChannelMocker(mockSessionStage);
     EXPECT_NE(nullptr, mockEventChannel);
-    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage, mockEventChannel, nullptr));
+    uint64_t persistentId = 0;
+    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage, mockEventChannel, nullptr, persistentId));
 
     rect = {0, 0, 100, 100};
     EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _)).Times(1).WillOnce(Return(WSError::WS_OK));
-    ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::SHOW));
+    ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED));
     ASSERT_EQ(rect, session_->winRect_);
 }
 
@@ -169,22 +171,23 @@ HWTEST_F(WindowSessionTest, Connect01, Function | SmallTest | Level2)
 {
     auto surfaceNode = CreateRSSurfaceNode();
     session_->state_ = SessionState::STATE_CONNECT;
-    auto result = session_->Connect(nullptr, nullptr, nullptr);
+    uint64_t persistentId = 0;
+    auto result = session_->Connect(nullptr, nullptr, nullptr, persistentId);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
 
     session_->state_ = SessionState::STATE_DISCONNECT;
-    result = session_->Connect(nullptr, nullptr, nullptr);
+    result = session_->Connect(nullptr, nullptr, nullptr, persistentId);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     sptr<ISession> sessionToken = nullptr;
     sptr<SessionStage> sessionStage = new(std::nothrow) SessionStage(sessionToken);
     EXPECT_NE(nullptr, sessionStage);
-    result = session_->Connect(sessionStage, nullptr, surfaceNode);
+    result = session_->Connect(sessionStage, nullptr, surfaceNode, persistentId);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     sptr<TestWindowEventChannel> testWindowEventChannel = new(std::nothrow) TestWindowEventChannel();
     EXPECT_NE(nullptr, testWindowEventChannel);
-    result = session_->Connect(sessionStage, testWindowEventChannel, surfaceNode);
+    result = session_->Connect(sessionStage, testWindowEventChannel, surfaceNode, persistentId);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 

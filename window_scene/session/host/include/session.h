@@ -62,7 +62,8 @@ public:
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason);
 
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-        const std::shared_ptr<RSSurfaceNode>& surfaceNode) override;
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint64_t& persistentId,
+        sptr<WindowSessionProperty> property = nullptr) override;
     WSError Foreground() override;
     WSError Background() override;
     WSError Disconnect() override;
@@ -92,7 +93,7 @@ protected:
     sptr<ISessionStage> sessionStage_;
     SessionInfo sessionInfo_;
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
-
+    sptr<WindowSessionProperty> property_ = nullptr;
 private:
     template<typename T>
     bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);

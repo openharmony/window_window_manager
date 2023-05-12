@@ -14,16 +14,47 @@
  */
 
 #include "window.h"
+
+#include "scene_board_judgement.h"
+#include "session/host/include/zidl/session_interface.h"
 #include "window_helper.h"
 #include "window_impl.h"
+#include "window_session_impl.h"
+#include "window_scene_session_impl.h"
+#include "window_extension_session_impl.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Window"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Window"};
 }
+
+static sptr<Window> CreateWindowWithSession(sptr<WindowOption>& option,
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError& errCode,
+    sptr<ISession> iSession = nullptr)
+{
+    sptr<WindowSessionImpl> windowSessionImpl = nullptr;
+    auto sessionType = option->GetWindowSessionType();
+    if (sessionType == WindowSessionType::SCENE_SESSION) {
+        windowSessionImpl = new(std::nothrow) WindowSceneSessionImpl(option);
+    } else if (sessionType == WindowSessionType::EXTENSION_SESSION) {
+        windowSessionImpl = new(std::nothrow) WindowExtensionSessionImpl(option);
+    }
+
+    if (windowSessionImpl == nullptr) {
+        WLOGFE("malloc windowSessionImpl failed");
+        return nullptr;
+    }
+    WMError error = windowSessionImpl->Create(context, iSession);
+    if (error != WMError::WM_OK) {
+        errCode = error;
+        return nullptr;
+    }
+    return windowSessionImpl;
+}
+
 sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& option,
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError& errCode)
 {
@@ -52,6 +83,9 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
         return nullptr;
     }
     option->SetWindowName(windowName);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return CreateWindowWithSession(option, context, errCode);
+    }
     sptr<WindowImpl> windowImpl = new(std::nothrow) WindowImpl(option);
     if (windowImpl == nullptr) {
         WLOGFE("malloc windowImpl failed");
@@ -63,6 +97,28 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
         return nullptr;
     }
     return windowImpl;
+}
+
+sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& option,
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, const sptr<ISession>& iSession, WMError& errCode)
+{
+    // create from ability mgr service
+    if (!iSession || !option) {
+        WLOGFE("host window session is nullptr: %{public}u or option is null: %{public}u",
+            iSession == nullptr, option == nullptr);
+        return nullptr;
+    }
+    if (windowName.empty()) {
+        WLOGFE("window name is empty");
+        return nullptr;
+    }
+    WindowType type = option->GetWindowType();
+    if (!(WindowHelper::IsAppWindow(type) || WindowHelper::IsUIExtensionWindow(type))) {
+        WLOGFE("window type is invalid %{public}d", type);
+        return nullptr;
+    }
+    option->SetWindowName(windowName);
+    return CreateWindowWithSession(option, context, errCode, iSession);
 }
 
 sptr<Window> Window::Find(const std::string& windowName)
