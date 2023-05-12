@@ -20,6 +20,10 @@ config("session_public_config") {
 
     # for window_manager_hilog
     "${window_base_path}/utils/include",
+    "${window_base_path}/window_scene/common/include",
+
+    # for WMError Code
+    "${window_base_path}/interfaces/innerkits/wm",
   ]
 }
 
@@ -43,7 +47,10 @@ ohos_shared_library("scene_session") {
 
   public_configs = [ ":session_public_config" ]
 
-  deps = [ "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+  deps = [
+    "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "${window_base_path}/window_scene/common:window_scene_common",
+  ]
 
   public_deps =
       [ "${window_base_path}/window_scene/interfaces/innerkits:libwsutils" ]

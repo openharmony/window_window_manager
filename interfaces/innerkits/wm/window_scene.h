@@ -54,6 +54,19 @@ public:
         sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option = nullptr);
 
     /**
+     * Init a WindowScene instance based on the parameters displayId, context, listener and option.
+     *
+     * @param displayId the id of current display
+     * @param context current ability context
+     * @param listener the life cycle listener of the window
+     * @param option the settings for window, such as WindowType, width, height, etc
+     * @param iSession session token of window session
+     * @return the error code of window
+     */
+    WMError Init(DisplayId displayId, const std::shared_ptr<AbilityRuntime::Context>& context,
+        sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option, const sptr<ISession>& iSession);
+
+    /**
      * Create a window instance based on the parameters windowName and option.
      *
      * @param windowName the id of this window

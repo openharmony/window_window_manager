@@ -20,6 +20,11 @@
 
 #include "interfaces/include/ws_common.h"
 
+namespace OHOS::MMI {
+class PointerEvent;
+class KeyEvent;
+class AxisEvent;
+} // namespace MMI
 namespace OHOS::Rosen {
 class ISessionStage : public IRemoteBroker {
 public:
@@ -29,6 +34,9 @@ public:
         TRANS_ID_SET_ACTIVE,
         TRANS_ID_NOTIFY_SIZE_CHANGE,
     };
+
+    virtual void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
+    virtual void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) {}
 
     virtual WSError SetActive(bool active) = 0;
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) = 0;
