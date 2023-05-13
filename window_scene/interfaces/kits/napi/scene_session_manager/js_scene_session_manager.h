@@ -16,13 +16,18 @@
 #ifndef OHOS_WINDOW_SCENE_JS_SCENE_SESSION_MANAGER_H
 #define OHOS_WINDOW_SCENE_JS_SCENE_SESSION_MANAGER_H
 
+#include <map>
+
 #include <native_engine/native_engine.h>
 #include <native_engine/native_value.h>
+
+#include "interfaces/include/ws_common.h"
+#include "session/host/include/scene_session.h"
 
 namespace OHOS::Rosen {
 class JsSceneSessionManager final {
 public:
-    JsSceneSessionManager() = default;
+    explicit JsSceneSessionManager(NativeEngine& engine);
     ~JsSceneSessionManager() = default;
 
     static NativeValue* Init(NativeEngine* engine, NativeValue* exportObj);
@@ -33,13 +38,24 @@ public:
     static NativeValue* RequestSceneSessionActivation(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* RequestSceneSessionBackground(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* RequestSceneSessionDestruction(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
+    NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetRootSceneSession(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnRequestSceneSession(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnRequestSceneSessionActivation(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnRequestSceneSessionBackground(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnRequestSceneSessionDestruction(NativeEngine& engine, NativeCallbackInfo& info);
+
+    void OnCreateSpecificSession(const sptr<SceneSession>& sceneSession);
+    void ProcessCreateSpecificSessionRegister();
+    bool IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject);
+
+    NativeEngine& engine_;
+    std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
+    using Func = void(JsSceneSessionManager::*)();
+    std::map<std::string, Func> listenerFunc_;
 };
 } // namespace OHOS::Rosen
 

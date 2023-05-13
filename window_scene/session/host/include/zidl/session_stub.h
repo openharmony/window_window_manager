@@ -40,6 +40,7 @@ private:
     int HandleDisconnect(MessageParcel& data, MessageParcel& reply);
     int HandleConnect(MessageParcel& data, MessageParcel& reply);
     int HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateActivateStatus(MessageParcel& data, MessageParcel& reply);
     // for scene
     int HandleRecover(MessageParcel& data, MessageParcel& reply);
     int HandleMaximize(MessageParcel& data, MessageParcel& reply);

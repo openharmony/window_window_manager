@@ -22,6 +22,7 @@
 #include "window_manager_hilog.h"
 #include "window_helper.h"
 #include "session/container/include/window_event_channel.h"
+#include "session_manager/include/session_manager.h"
 #include "vsync_station.h"
 
 namespace OHOS {
@@ -33,6 +34,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowS
 std::map<uint64_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
 std::map<uint64_t, std::vector<sptr<IWindowChangeListener>>> WindowSessionImpl::windowChangeListeners_;
 std::recursive_mutex WindowSessionImpl::globalMutex_;
+std::map<std::string, std::pair<uint64_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 
 #define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, listeners) \
     do {                                                      \
@@ -122,6 +124,62 @@ uint64_t WindowSessionImpl::GetPersistentId() const
     return property_->GetPersistentId();
 }
 
+WMError WindowSessionImpl::CreateAndConnectSpecificSession()
+{
+    sptr<ISessionStage> iSessionStage(this);
+    sptr<WindowEventChannel> channel = new (std::nothrow) WindowEventChannel(iSessionStage);
+    if (channel == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    sptr<IWindowEventChannel> eventChannel(channel);
+    uint64_t persistentId = INVALID_SESSION_ID;
+    sptr<Rosen::ISession> session;
+    SessionManager::GetInstance().CreateAndConnectSpecificSession(iSessionStage, eventChannel, surfaceNode_,
+        property_, persistentId, session);
+    property_->SetPersistentId(persistentId);
+    if (session != nullptr) {
+        hostSession_ = session;
+    } else {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    WLOGFI("CreateAndConnectSpecificSession [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u], ",
+        property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType());
+    return WMError::WM_OK;
+}
+
+bool WindowSessionImpl::IsValidSystemWindowType(const WindowType& type)
+{
+    if (!(type == WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW || type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
+        type == WindowType::WINDOW_TYPE_FLOAT_CAMERA || type == WindowType::WINDOW_TYPE_DIALOG ||
+        type == WindowType::WINDOW_TYPE_FLOAT || type == WindowType::WINDOW_TYPE_SCREENSHOT ||
+        type == WindowType::WINDOW_TYPE_VOICE_INTERACTION)) {
+        return false;
+    }
+    return true;
+}
+
+WMError WindowSessionImpl::WindowSessionCreateCheck()
+{
+    const auto& name = property_->GetWindowName();
+    // check window name, same window names are forbidden
+    if (windowSessionMap_.find(name) != windowSessionMap_.end()) {
+        WLOGFE("WindowName(%{public}s) already exists.", name.c_str());
+        return WMError::WM_ERROR_REPEAT_OPERATION;
+    }
+
+    // check if camera floating window is already exists
+    if (property_->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
+        for (const auto& item : windowSessionMap_) {
+            if (item.second.second && item.second.second->property_ &&
+                item.second.second->property_->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
+                    WLOGFE("Camera floating window is already exists.");
+                return WMError::WM_ERROR_REPEAT_OPERATION;
+            }
+        }
+    }
+    return WMError::WM_OK;
+}
+
 WMError WindowSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<Rosen::ISession>& iSession)
 {
@@ -136,7 +194,20 @@ WMError WindowSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>
     if (hostSession_) {
         ret = Connect();
         state_ = WindowState::STATE_CREATED;
+    } else {
+        // Not valid system window type for session should return WMError::WM_OK;
+        if (!IsValidSystemWindowType(property_->GetWindowType())) {
+            return WMError::WM_OK;
+        }
+        ret = WindowSessionCreateCheck();
+        if (ret != WMError::WM_OK) {
+            return ret;
+        }
+        ret = CreateAndConnectSpecificSession();
     }
+
+    windowSessionMap_.insert(std::make_pair(property_->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
     return ret;
 }
 
@@ -147,7 +218,11 @@ WMError WindowSessionImpl::Connect()
         return WMError::WM_ERROR_NULLPTR;
     }
     sptr<ISessionStage> iSessionStage(this);
-    sptr<IWindowEventChannel> eventChannel(new WindowEventChannel(iSessionStage));
+    sptr<WindowEventChannel> channel = new (std::nothrow) WindowEventChannel(iSessionStage);
+    if (channel == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    sptr<IWindowEventChannel> eventChannel(channel);
     uint64_t persistentId = INVALID_SESSION_ID;
     WSError ret = hostSession_->Connect(iSessionStage, eventChannel, surfaceNode_, persistentId, property_);
     property_->SetPersistentId(persistentId);
@@ -200,7 +275,11 @@ WMError WindowSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFrom
     WSError ret = WSError::WS_OK;
     if (!WindowHelper::IsMainWindow(GetType())) {
         // main window no need to notify host, since host knows hide first
-        // need to set host session SetActive(false)
+        // need to SetActive(false) for host session before background
+        ret = SetActive(false);
+        if (ret != WSError::WS_OK) {
+            return static_cast<WMError>(ret);
+        }
         ret = hostSession_->Background();
     }
 
@@ -223,7 +302,7 @@ WMError WindowSessionImpl::Destroy(bool needClearListener)
     WSError ret = WSError::WS_OK;
     if (!WindowHelper::IsMainWindow(GetType())) {
         // main window no need to notify host, since host knows hide first
-        ret = hostSession_->Disconnect();
+        SessionManager::GetInstance().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
     }
     // delete after replace WSError with WMError
     WMError res = static_cast<WMError>(ret);
@@ -234,6 +313,7 @@ WMError WindowSessionImpl::Destroy(bool needClearListener)
     if (needClearListener) {
         ClearListenersById(GetPersistentId());
     }
+    windowSessionMap_.erase(property_->GetWindowName());
     return res;
 }
 
@@ -245,6 +325,10 @@ WMError WindowSessionImpl::Destroy()
 WSError WindowSessionImpl::SetActive(bool active)
 {
     WLOGFD("active status: %{public}d", active);
+    WSError ret = hostSession_->UpdateActiveStatus(active);
+    if (ret != WSError::WS_OK) {
+        return ret;
+    }
     if (active) {
         NotifyAfterActive();
     } else {
@@ -497,6 +581,11 @@ void WindowSessionImpl::ClearListenersById(uint64_t persistentId)
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     ClearUselessListeners(lifecycleListeners_, persistentId);
     ClearUselessListeners(windowChangeListeners_, persistentId);
+}
+
+void WindowSessionImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func)
+{
+    notifyNativefunc_ = std::move(func);
 }
 
 void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool needNotifyUiContent)

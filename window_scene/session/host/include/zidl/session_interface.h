@@ -35,6 +35,7 @@ public:
         TRANS_ID_BACKGROUND,
         TRANS_ID_DISCONNECT,
         TRANS_ID_ACTIVE_PENDING_SESSION,
+        TRANS_ID_UPDATE_ACTIVE_STATUS,
 
         // Scene
         TRANS_ID_RECOVER = 100,
@@ -47,6 +48,7 @@ public:
     virtual WSError Background() = 0;
     virtual WSError Disconnect() = 0;
     virtual WSError PendingSessionActivation(const SessionInfo& info) = 0;
+    virtual WSError UpdateActiveStatus(bool isActive) = 0;
 
     // scene session
     virtual WSError Recover() = 0;

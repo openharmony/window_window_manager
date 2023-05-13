@@ -16,12 +16,12 @@
 #include "session_manager_service.h"
 
 #include <system_ability_definition.h>
-
+#include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
-    // constexpr HiviewDFX::HiLogLabel LEVEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SessionManagerService"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionManagerService"};
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(SessionManagerService)
 
@@ -32,6 +32,12 @@ SessionManagerService::SessionManagerService()
 int SessionManagerService::GetValueById(int id)
 {
     return id + 1;
+}
+
+sptr<IRemoteObject> SessionManagerService::GetSceneSessionManager()
+{
+    WLOGFD("GetSceneSessionManager success");
+    return &(SceneSessionManager::GetInstance());
 }
 
 IRemoteObject* SessionManagerService::GetRemoteObject()

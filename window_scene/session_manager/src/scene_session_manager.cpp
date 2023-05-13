@@ -32,6 +32,7 @@ const std::string SCENE_SESSION_MANAGER_THREAD = "SceneSessionManager";
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SceneSessionManager)
+
 SceneSessionManager::SceneSessionManager()
 {
     Init();
@@ -201,6 +202,59 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
 
     WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
     msgScheduler_->PostAsyncTask(task);
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+    const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+    sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session)
+{
+    auto task = [this, sessionStage, eventChannel, surfaceNode, property, &persistentId, &session]() {
+        // create specific session
+        SessionInfo info;
+        sptr<SceneSession> sceneSession = RequestSceneSession(info);
+        if (sceneSession == nullptr) {
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        if (createSpecificSessionFunc_) {
+            createSpecificSessionFunc_(sceneSession);
+        }
+        // connect specific session and sessionStage
+        WSError errCode = sceneSession->Connect(sessionStage, eventChannel, surfaceNode, persistentId, property);
+        session = sceneSession;
+        return errCode;
+    };
+    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
+    msgScheduler_->PostSyncTask(task);
+    return WSError::WS_OK;
+}
+
+void SceneSessionManager::SetCreateSpecificSessionListener(const NotifyCreateSpecificSessionFunc& func)
+{
+    WLOGFD("SetCreateSpecificSessionListener");
+    createSpecificSessionFunc_ = func;
+}
+
+WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const uint64_t& persistentId)
+{
+    auto task = [this, persistentId]() {
+        WLOGFI("Deatroy session persistentId: %{public}" PRIu64 "", persistentId);
+        auto iter = abilitySceneMap_.find(persistentId);
+        if (iter == abilitySceneMap_.end()) {
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+        const auto& sceneSession = iter->second;
+        if (sceneSession == nullptr) {
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        auto ret = sceneSession->UpdateActiveStatus(false);
+        ret = sceneSession->Disconnect();
+        abilitySceneMap_.erase(persistentId);
+        return ret;
+    };
+
+    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
+    msgScheduler_->PostSyncTask(task);
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

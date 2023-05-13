@@ -31,6 +31,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_CONNECT), &SessionStub::HandleConnect),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_ACTIVE_PENDING_SESSION),
         &SessionStub::HandlePendingSessionActivation),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_UPDATE_ACTIVE_STATUS),
+        &SessionStub::HandleUpdateActivateStatus),
 
     // for scene only
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_RECOVER), &SessionStub::HandleRecover),
@@ -130,6 +132,15 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         info.callerToken_ = data.ReadRemoteObject();
     }
     WSError errCode = PendingSessionActivation(info);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateActivateStatus(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleUpdateActivateStatus!");
+    bool isActive = data.ReadBool();
+    WSError errCode = UpdateActiveStatus(isActive);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

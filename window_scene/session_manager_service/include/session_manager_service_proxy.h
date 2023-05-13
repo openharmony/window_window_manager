@@ -23,11 +23,16 @@
 namespace OHOS::Rosen {
 class SessionManagerServiceProxy : public IRemoteProxy<ISessionManagerService> {
 public:
-    explicit SessionManagerServiceProxy(sptr<IRemoteObject>& remoteObject);
+    explicit SessionManagerServiceProxy(const sptr<IRemoteObject>& remoteObject);
 
     ~SessionManagerServiceProxy() override;
 
     int GetValueById(int id) override;
+
+    sptr<IRemoteObject> GetSceneSessionManager() override;
+
+private:
+    static inline BrokerDelegator<SessionManagerServiceProxy> delegator_;
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_WINDOW_SCENE_SESSION_MANAGER_SERVICE_PROXY_H
