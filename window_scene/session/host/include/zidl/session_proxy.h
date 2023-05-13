@@ -33,6 +33,7 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint64_t& persistentId,
         sptr<WindowSessionProperty> property = nullptr) override;
 
+    WSError UpdateActiveStatus(bool isActive) override;
     WSError PendingSessionActivation(const SessionInfo& info) override;
     WSError Recover() override;
     WSError Maximize() override;

@@ -31,6 +31,8 @@ public:
 
     IRemoteObject* GetRemoteObject();
 
+    sptr<IRemoteObject> GetSceneSessionManager() override;
+
 private:
     void Init();
 

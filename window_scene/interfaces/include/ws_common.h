@@ -92,10 +92,10 @@ enum class SizeChangeReason : uint32_t {
 };
 
 struct WSRect {
-    int32_t posX_;
-    int32_t posY_;
-    uint32_t width_;
-    uint32_t height_;
+    int32_t posX_ = 0;
+    int32_t posY_ = 0;
+    uint32_t width_ = 0;
+    uint32_t height_ = 0;
 
     bool operator==(const WSRect& a) const
     {

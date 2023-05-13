@@ -22,7 +22,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SessionManagerServiceStub"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionManagerServiceStub"};
 }
 
 int32_t SessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -43,6 +43,10 @@ int32_t SessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessageParcel 
             int id = data.ReadInt32();
             int value = GetValueById(id);
             reply.WriteInt32(value);
+            break;
+        }
+        case SessionManagerServiceMessage::TRANS_ID_GET_SCENE_SESSION_MANAGER: {
+            reply.WriteRemoteObject(GetSceneSessionManager());
             break;
         }
         default: {

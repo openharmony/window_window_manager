@@ -61,4 +61,49 @@ NativeValue* CreateJsSessionInfo(NativeEngine& engine, const SessionInfo& sessio
     object->SetProperty("abilityName", CreateJsValue(engine, sessionInfo.abilityName_));
     return objValue;
 }
+
+NativeValue* CreateJsSessionState(NativeEngine& engine, const SessionState& state)
+{
+    WLOGFI("[NAPI]CreateJsSessionState");
+    NativeValue* objValue = engine.CreateObject();
+    NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("[NAPI]Failed to convert sessionInfo to jsObject");
+        return nullptr;
+    }
+    object->SetProperty("sessionState", CreateJsValue(engine, state));
+    return objValue;
+}
+
+NativeValue* SessionStateInit(NativeEngine* engine)
+{
+    if (engine == nullptr) {
+        WLOGFE("Engine is nullptr");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("STATE_DISCONNECT", CreateJsValue(*engine,
+        static_cast<int32_t>(SessionState::STATE_DISCONNECT)));
+    object->SetProperty("STATE_CONNECT", CreateJsValue(*engine,
+        static_cast<int32_t>(SessionState::STATE_CONNECT)));
+    object->SetProperty("STATE_FOREGROUND", CreateJsValue(*engine,
+        static_cast<int32_t>(SessionState::STATE_FOREGROUND)));
+    object->SetProperty("STATE_ACTIVE", CreateJsValue(*engine,
+        static_cast<int32_t>(SessionState::STATE_ACTIVE)));
+    object->SetProperty("STATE_INACTIVE", CreateJsValue(*engine,
+        static_cast<int32_t>(SessionState::STATE_INACTIVE)));
+    object->SetProperty("STATE_BACKGROUND", CreateJsValue(*engine,
+        static_cast<int32_t>(SessionState::STATE_BACKGROUND)));
+    object->SetProperty("STATE_END", CreateJsValue(*engine,
+        static_cast<int32_t>(SessionState::STATE_END)));
+
+    return objValue;
+}
 } // namespace OHOS::Rosen

@@ -38,6 +38,7 @@ class PixelMap;
 namespace OHOS::Rosen {
 class RSSurfaceNode;
 using NotifyPendingSessionActivationFunc = std::function<void(const SessionInfo& info)>;
+using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
 
 class ILifecycleListener {
 public:
@@ -53,10 +54,13 @@ public:
 
     void SetPersistentId(uint64_t persistentId);
     uint64_t GetPersistentId() const;
+    void SetSessionRect(const WSRect& rect);
+    WSRect GetSessionRect() const;
 
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     SessionState GetSessionState() const;
+    const SessionInfo& GetSessionInfo() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason);
@@ -67,7 +71,6 @@ public:
     WSError Foreground() override;
     WSError Background() override;
     WSError Disconnect() override;
-    WSError PendingSessionActivation(const SessionInfo& info) override;
 
     WSError Recover() override;
     WSError Maximize() override;
@@ -81,9 +84,11 @@ public:
 
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
-
-    const SessionInfo& GetSessionInfo() const;
     void SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func);
+    WSError PendingSessionActivation(const SessionInfo& info) override;
+    void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
+    void NotifySessionStateChange(const SessionState& state);
+    WSError UpdateActiveStatus(bool isActive) override; // update active status from session_stage
 
 protected:
     void UpdateSessionState(SessionState state);
@@ -93,6 +98,7 @@ protected:
     sptr<ISessionStage> sessionStage_;
     SessionInfo sessionInfo_;
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
+    NotifySessionStateChangeFunc sessionStateChangeFunc_;
     sptr<WindowSessionProperty> property_ = nullptr;
 private:
     template<typename T>
