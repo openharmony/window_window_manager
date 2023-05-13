@@ -187,6 +187,7 @@ static void GetAndDrawSnapShot(const sptr<WindowNode>& srcNode)
             WLOGFE("get surfaceSnapshot failed for window:%{public}u", srcNode->GetWindowId());
             return;
         }
+        WindowInnerManager::GetInstance().UpdateMissionSnapShot(srcNode, pixelMap);
         struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
         rsSurfaceNodeConfig.SurfaceNodeName = "closeWin" + std::to_string(srcNode->GetWindowId());
         srcNode->closeWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig,
