@@ -20,21 +20,21 @@
 
 namespace OHOS {
 namespace Rosen {
-class SessionStageMocker : public SessionStage {
+class SessionMocker : public Session {
 public:
-    SessionStageMocker(const sptr<ISession>& session) : SessionStage(session) {};
-    ~SessionStageMocker() {};
-    MOCK_METHOD1(Connect, WSError(const std::shared_ptr<RSSurfaceNode>& surfaceNode));
+    SessionMocker(const SessionInfo& info) : Session(info) {}
+    ~SessionMocker() {}
+    MOCK_METHOD5(Connect, WSError(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        uint64_t& persistentId, sptr<WindowSessionProperty> property));
     MOCK_METHOD0(Foreground, WSError(void));
     MOCK_METHOD0(Background, WSError(void));
     MOCK_METHOD0(Disconnect, WSError(void));
-    MOCK_METHOD1(PendingSessionActivation, WSError(const SessionInfo& info));
 
     MOCK_METHOD0(Recover, WSError(void));
     MOCK_METHOD0(Maximize, WSError(void));
-
-    MOCK_METHOD1(SetActive, WSError(bool active));
-    MOCK_METHOD2(UpdateRect, WSError(const WSRect& rect, SizeChangeReason reason));
+    MOCK_METHOD1(PendingSessionActivation, WSError(const SessionInfo& info));
+    MOCK_METHOD1(UpdateActiveStatus, WSError(bool isActive));
 };
 } // namespace Rosen
 } // namespace OHOS
