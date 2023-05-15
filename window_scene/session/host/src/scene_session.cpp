@@ -35,7 +35,7 @@ WSError SceneSession::Recover()
 
 WSError SceneSession::Maximize()
 {
-    WLOGFI("Maximum session id: %{public}" PRIu64 " state: %{public}u", GetPersistentId(),
+    WLOGFI("Maximize session id: %{public}" PRIu64 " state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()));
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;

@@ -30,6 +30,7 @@ group("unittest") {
     ":wm_window_option_test",
     ":wm_window_proxy_test",
     ":wm_window_scene_test",
+    ":wm_window_session_impl_test",
     ":wm_window_stub_test",
     ":wm_window_test",
   ]
@@ -57,6 +58,14 @@ ohos_unittest("wm_window_impl_test") {
   deps = [ ":wm_unittest_common" ]
 
   external_deps = [ "common_event_service:cesfwk_innerkits" ]
+}
+
+ohos_unittest("wm_window_session_impl_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_session_impl_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
 }
 
 ohos_unittest("wm_window_effect_test") {
@@ -163,6 +172,8 @@ config("wm_unittest_common_public_config") {
     "${window_base_path}/wmserver/include/window_snapshot",
     "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/utils/include",
+    "${window_base_path}/window_scene",
+    "${window_base_path}/window_scene/test/mock",
     "//commonlibrary/c_utils/base/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
@@ -196,6 +207,8 @@ ohos_static_library("wm_unittest_common") {
     "${window_base_path}/dm:libdm_static",
     "${window_base_path}/dmserver:libdms",
     "${window_base_path}/utils:libwmutil_static",
+    "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/wm:libwm_static",
     "${window_base_path}/wmserver:libwms",
     "//commonlibrary/c_utils/base:utils",
