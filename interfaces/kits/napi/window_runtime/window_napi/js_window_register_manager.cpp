@@ -265,8 +265,7 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
         WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    std::shared_ptr<NativeReference> callbackRef;
-    callbackRef.reset(engine.CreateReference(value, 1));
+    NativeReference* callbackRef = engine.CreateReference(value, 1);
     sptr<JsWindowListener> windowManagerListener = new(std::nothrow) JsWindowListener(&engine, callbackRef);
     if (windowManagerListener == nullptr) {
         WLOGFE("[NAPI]New JsWindowListener failed");
