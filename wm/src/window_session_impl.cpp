@@ -100,6 +100,7 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(std::string name, 
 
 WindowSessionImpl::~WindowSessionImpl()
 {
+    WLOGFD("~WindowSessionImpl");
     Destroy(false);
 }
 
@@ -114,7 +115,7 @@ bool WindowSessionImpl::IsWindowSessionInvalid() const
     bool res = ((hostSession_ == nullptr) || (GetPersistentId() == INVALID_SESSION_ID) ||
         (state_ == WindowState::STATE_DESTROYED));
     if (res) {
-        WLOGW("already destroyed or not created! id: %{public}" PRIu64 "", GetPersistentId());
+        WLOGW("already destroyed or not created! id: %{public}" PRIu64 " state_:%{public}u", GetPersistentId(), state_);
     }
     return res;
 }
@@ -185,12 +186,15 @@ WMError WindowSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>
 {
     // allow iSession is nullptr when create from window manager
     if (!context) {
-        WLOGFE("context is nullptr: %{public}u", context == nullptr);
+        WLOGFE("context is nullptr!");
         return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    WMError ret = WindowSessionCreateCheck();
+    if (ret != WMError::WM_OK) {
+        return ret;
     }
     hostSession_ = iSession;
     context_ = context;
-    WMError ret = WMError::WM_OK;
     if (hostSession_) {
         ret = Connect();
         state_ = WindowState::STATE_CREATED;
@@ -199,15 +203,14 @@ WMError WindowSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>
         if (!IsValidSystemWindowType(property_->GetWindowType())) {
             return WMError::WM_OK;
         }
-        ret = WindowSessionCreateCheck();
-        if (ret != WMError::WM_OK) {
-            return ret;
-        }
         ret = CreateAndConnectSpecificSession();
     }
-
-    windowSessionMap_.insert(std::make_pair(property_->GetWindowName(),
-        std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
+    if (ret == WMError::WM_OK) {
+        windowSessionMap_.insert(std::make_pair(property_->GetWindowName(),
+            std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
+    }
+    WLOGFD("Window Create [name:%{public}s, id:%{public}" PRIu64 "], state:%{pubic}u",
+        property_->GetWindowName().c_str(), property_->GetPersistentId(), state_);
     return ret;
 }
 
@@ -235,8 +238,8 @@ WMError WindowSessionImpl::Connect()
 
 WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
-    WLOGFI("Window Show [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u], reason:%{public}u",
-        property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType(), reason);
+    WLOGFI("Window Show [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u], reason:%{public}u state:%{pubic}u",
+        property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType(), reason, state_);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -294,7 +297,7 @@ WMError WindowSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFrom
 
 WMError WindowSessionImpl::Destroy(bool needClearListener)
 {
-    WLOGFI("id:%{public}" PRIu64 " Destroy", property_->GetPersistentId());
+    WLOGFI("id:%{public}" PRIu64 " Destroy, state_:%{public}u", property_->GetPersistentId(), state_);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_OK;
@@ -313,6 +316,7 @@ WMError WindowSessionImpl::Destroy(bool needClearListener)
     if (needClearListener) {
         ClearListenersById(GetPersistentId());
     }
+    hostSession_ = nullptr;
     windowSessionMap_.erase(property_->GetWindowName());
     return res;
 }

@@ -41,7 +41,7 @@ public:
     virtual WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession);
     WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
-    WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
+    WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
     WMError Destroy() override;
     WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability) override;
