@@ -307,6 +307,74 @@ HWTEST_F(WindowSessionTest, TransferKeyEvent01, Function | SmallTest | Level2)
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
+/**
+ * @tc.name: UpdateActiveStatus01
+ * @tc.desc: check func UpdateActiveStatus01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateActiveStatus01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->isActive_ = false;
+    session_->UpdateSessionState(SessionState::STATE_FOREGROUND);
+    auto result = session_->UpdateActiveStatus(false);
+    ASSERT_EQ(result, WSError::WS_DO_NOTHING);
+
+    result = session_->UpdateActiveStatus(true);
+    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(SessionState::STATE_ACTIVE, session_->state_);
+}
+
+/**
+ * @tc.name: UpdateActiveStatus02
+ * @tc.desc: check func UpdateActiveStatus02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateActiveStatus02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->isActive_ = false;
+    session_->UpdateSessionState(SessionState::STATE_INACTIVE);
+    auto result = session_->UpdateActiveStatus(true);
+    ASSERT_EQ(result, WSError::WS_DO_NOTHING);
+    ASSERT_EQ(SessionState::STATE_INACTIVE, session_->state_);
+    ASSERT_EQ(false, session_->isActive_);
+
+    session_->UpdateSessionState(SessionState::STATE_FOREGROUND);
+    result = session_->UpdateActiveStatus(true);
+    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(SessionState::STATE_ACTIVE, session_->state_);
+
+    result = session_->UpdateActiveStatus(false);
+    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(SessionState::STATE_INACTIVE, session_->state_);
+}
+
+/**
+ * @tc.name: SetSessionRect
+ * @tc.desc: check func SetSessionRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetSessionRect, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    WSRect rect = { 0, 0, 320, 240}; // width: 320, height: 240
+    session_->SetSessionRect(rect);
+    ASSERT_EQ(rect, session_->winRect_);
+}
+
+/**
+ * @tc.name: GetSessionRect
+ * @tc.desc: check func GetSessionRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetSessionRect, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    WSRect rect = { 0, 0, 320, 240}; // width: 320, height: 240
+    session_->SetSessionRect(rect);
+    ASSERT_EQ(rect, session_->GetSessionRect());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
