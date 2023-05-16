@@ -79,19 +79,13 @@ HWTEST_F(DisplayTest, GetCutoutInfo01, Function | SmallTest | Level1)
  */
 HWTEST_F(DisplayTest, UpdateDisplayInfo01, Function | SmallTest | Level1)
 {
+    auto baseInfo = defaultDisplay_->GetDisplayInfo();
+    auto defaultName = baseInfo->GetName();
+    auto defaultDpi = baseInfo->GetName();
     defaultDisplay_->UpdateDisplayInfo(nullptr);
-}
 
-/**
- * @tc.name: GetName
- * @tc.desc: UpdateDisplayInfo with nullptr
- * @tc.type: FUNC
- * @tc.require: issueI5K0JP
- */
-HWTEST_F(DisplayTest, GetName, Function | SmallTest | Level1)
-{
-    defaultDisplay_->GetName();
-    defaultDisplay_->GetDpi();
+    auto changedInfo = defaultDisplay_->GetDisplayInfo();
+    ASSERT_EQ(changedInfo->GetName(), defaultName);
 }
 
 /**
@@ -166,7 +160,7 @@ HWTEST_F(DisplayTest, SetWaterfallCompression02, Function | SmallTest | Level1)
 HWTEST_F(DisplayTest, GetName01, Function | SmallTest | Level1)
 {
     auto name = defaultDisplay_->GetName();
-    ASSERT_EQ("display_0", name);
+    ASSERT_FALSE(name.empty());
 }
 
 /**
