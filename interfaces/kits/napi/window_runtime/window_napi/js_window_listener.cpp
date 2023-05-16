@@ -26,6 +26,7 @@ namespace {
 
 JsWindowListener::~JsWindowListener()
 {
+    jsCallBack_->Unref();
     WLOGI("[NAPI]~JsWindowListener");
 }
 
