@@ -37,12 +37,16 @@ int SessionManagerService::GetValueById(int id)
 sptr<IRemoteObject> SessionManagerService::GetSceneSessionManager()
 {
     WLOGFD("GetSceneSessionManager success");
-    return &(SceneSessionManager::GetInstance());
+    if (sceneSessionManagerObj_) {
+        return sceneSessionManagerObj_;
+    }
+    sceneSessionManagerObj_ = SceneSessionManager::GetInstance().AsObject();
+    return sceneSessionManagerObj_;
 }
 
-IRemoteObject* SessionManagerService::GetRemoteObject()
+sptr<IRemoteObject> SessionManagerService::GetRemoteObject()
 {
-    return dynamic_cast<IRemoteObject*>(this);
+    sessionManagerServiceObj_ = this->AsObject();
+    return sessionManagerServiceObj_;
 }
-
 } // namesapce OHOS::Rosen
