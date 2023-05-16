@@ -2933,8 +2933,8 @@ void WindowImpl::NotifyDragEvent(const PointInfo& point, DragEvent event)
     auto windowDragListeners = GetListeners<IWindowDragListener>();
     Rect rect = GetRect();
     for (auto& listener : windowDragListeners) {
-        if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnDrag(point.x - rect.posX_, point.y - rect.posY_, event);
+        if (listener != nullptr) {
+            listener->OnDrag(point.x - rect.posX_, point.y - rect.posY_, event);
         }
     }
 }
@@ -2967,8 +2967,8 @@ void WindowImpl::NotifyScreenshot()
 {
     auto screenshotListeners = GetListeners<IScreenshotListener>();
     for (auto& screenshotListener : screenshotListeners) {
-        if (screenshotListener.GetRefPtr() != nullptr) {
-            screenshotListener.GetRefPtr()->OnScreenshot();
+        if (screenshotListener != nullptr) {
+            screenshotListener->OnScreenshot();
         }
     }
 }
@@ -2977,8 +2977,8 @@ void WindowImpl::NotifyTouchOutside()
 {
     auto touchOutsideListeners = GetListeners<ITouchOutsideListener>();
     for (auto& touchOutsideListener : touchOutsideListeners) {
-        if (touchOutsideListener.GetRefPtr() != nullptr) {
-            touchOutsideListener.GetRefPtr()->OnTouchOutside();
+        if (touchOutsideListener != nullptr) {
+            touchOutsideListener->OnTouchOutside();
         }
     }
 }
@@ -2988,8 +2988,8 @@ void WindowImpl::NotifyTouchDialogTarget()
     SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId());
     auto dialogTargetTouchListeners = GetListeners<IDialogTargetTouchListener>();
     for (auto& dialogTargetTouchListener : dialogTargetTouchListeners) {
-        if (dialogTargetTouchListener.GetRefPtr() != nullptr) {
-            dialogTargetTouchListener.GetRefPtr()->OnDialogTargetTouch();
+        if (dialogTargetTouchListener != nullptr) {
+            dialogTargetTouchListener->OnDialogTargetTouch();
         }
     }
 }
@@ -2997,8 +2997,8 @@ void WindowImpl::NotifyTouchDialogTarget()
 void WindowImpl::NotifyDestroy()
 {
     auto dialogDeathRecipientListener = GetListener<IDialogDeathRecipientListener>();
-    if (dialogDeathRecipientListener.GetRefPtr() != nullptr) {
-        dialogDeathRecipientListener.GetRefPtr()->OnDialogDeathRecipient();
+    if (dialogDeathRecipientListener != nullptr) {
+        dialogDeathRecipientListener->OnDialogDeathRecipient();
     }
 }
 
@@ -3058,8 +3058,8 @@ void WindowImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reason,
 {
     auto windowChangeListeners = GetListeners<IWindowChangeListener>();
     for (auto& listener : windowChangeListeners) {
-        if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnSizeChange(rect, reason, rsTransaction);
+        if (listener != nullptr) {
+            listener->OnSizeChange(rect, reason, rsTransaction);
         }
     }
 }
@@ -3068,8 +3068,8 @@ void WindowImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAr
 {
     auto avoidAreaChangeListeners = GetListeners<IAvoidAreaChangedListener>();
     for (auto& listener : avoidAreaChangeListeners) {
-        if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnAvoidAreaChanged(*avoidArea, type);
+        if (listener != nullptr) {
+            listener->OnAvoidAreaChanged(*avoidArea, type);
         }
     }
 }
@@ -3078,8 +3078,8 @@ void WindowImpl::NotifyDisplayMoveChange(DisplayId from, DisplayId to)
 {
     auto displayMoveListeners = GetListeners<IDisplayMoveListener>();
     for (auto& listener : displayMoveListeners) {
-        if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnDisplayMove(from, to);
+        if (listener != nullptr) {
+            listener->OnDisplayMove(from, to);
         }
     }
 }
@@ -3088,8 +3088,8 @@ void WindowImpl::NotifyModeChange(WindowMode mode, bool hasDeco)
 {
     auto windowChangeListeners = GetListeners<IWindowChangeListener>();
     for (auto& listener : windowChangeListeners) {
-        if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnModeChange(mode, hasDeco);
+        if (listener != nullptr) {
+            listener->OnModeChange(mode, hasDeco);
         }
     }
 }
@@ -3099,8 +3099,8 @@ void WindowImpl::NotifyOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& in
 {
     auto occupiedAreaChangeListeners = GetListeners<IOccupiedAreaChangeListener>();
     for (auto& listener : occupiedAreaChangeListeners) {
-        if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnSizeChange(info, rsTransaction);
+        if (listener != nullptr) {
+            listener->OnSizeChange(info, rsTransaction);
         }
     }
 }

@@ -80,8 +80,8 @@ class WindowImpl : public Window {
 #define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, listeners) \
     do {                                                      \
         for (auto& listener : (listeners)) {                  \
-            if (listener.GetRefPtr() != nullptr) {            \
-                listener.GetRefPtr()->windowLifecycleCb();    \
+            if (listener != nullptr) {            \
+                listener->windowLifecycleCb();    \
             }                                                 \
         }                                                     \
     } while (0)
@@ -89,8 +89,8 @@ class WindowImpl : public Window {
 #define CALL_LIFECYCLE_LISTENER_WITH_PARAM(windowLifecycleCb, listeners, param) \
     do {                                                                        \
         for (auto& listener : (listeners)) {                                    \
-            if (listener.GetRefPtr() != nullptr) {                              \
-                listener.GetRefPtr()->windowLifecycleCb(param);                 \
+            if (listener != nullptr) {                              \
+                listener->windowLifecycleCb(param);                 \
             }                                                                   \
         }                                                                       \
     } while (0)
@@ -292,9 +292,9 @@ private:
         listeners.erase(winId);
     }
     template<typename T>
-    inline EnableIfSame<T, IWindowLifeCycle, std::vector<wptr<IWindowLifeCycle>>> GetListeners()
+    inline EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> GetListeners()
     {
-        std::vector<wptr<IWindowLifeCycle>> lifecycleListeners;
+        std::vector<sptr<IWindowLifeCycle>> lifecycleListeners;
         {
             std::lock_guard<std::recursive_mutex> lock(globalMutex_);
             for (auto& listener : lifecycleListeners_[GetWindowId()]) {
@@ -304,9 +304,9 @@ private:
         return lifecycleListeners;
     }
     template<typename T>
-    inline EnableIfSame<T, IWindowChangeListener, std::vector<wptr<IWindowChangeListener>>> GetListeners()
+    inline EnableIfSame<T, IWindowChangeListener, std::vector<sptr<IWindowChangeListener>>> GetListeners()
     {
-        std::vector<wptr<IWindowChangeListener>> windowChangeListeners;
+        std::vector<sptr<IWindowChangeListener>> windowChangeListeners;
         {
             std::lock_guard<std::recursive_mutex> lock(globalMutex_);
             for (auto& listener : windowChangeListeners_[GetWindowId()]) {
@@ -316,9 +316,9 @@ private:
         return windowChangeListeners;
     }
     template<typename T>
-    inline EnableIfSame<T, IAvoidAreaChangedListener, std::vector<wptr<IAvoidAreaChangedListener>>> GetListeners()
+    inline EnableIfSame<T, IAvoidAreaChangedListener, std::vector<sptr<IAvoidAreaChangedListener>>> GetListeners()
     {
-        std::vector<wptr<IAvoidAreaChangedListener>> avoidAreaChangeListeners;
+        std::vector<sptr<IAvoidAreaChangedListener>> avoidAreaChangeListeners;
         {
             std::lock_guard<std::recursive_mutex> lock(globalMutex_);
             for (auto& listener : avoidAreaChangeListeners_[GetWindowId()]) {
@@ -328,9 +328,9 @@ private:
         return avoidAreaChangeListeners;
     }
     template<typename T>
-    inline EnableIfSame<T, IDisplayMoveListener, std::vector<wptr<IDisplayMoveListener>>> GetListeners()
+    inline EnableIfSame<T, IDisplayMoveListener, std::vector<sptr<IDisplayMoveListener>>> GetListeners()
     {
-        std::vector<wptr<IDisplayMoveListener>> displayMoveListeners;
+        std::vector<sptr<IDisplayMoveListener>> displayMoveListeners;
         {
             std::lock_guard<std::recursive_mutex> lock(mutex_);
             for (auto& listener : displayMoveListeners_) {
@@ -340,9 +340,9 @@ private:
         return displayMoveListeners;
     }
     template<typename T>
-    inline EnableIfSame<T, IScreenshotListener, std::vector<wptr<IScreenshotListener>>> GetListeners()
+    inline EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> GetListeners()
     {
-        std::vector<wptr<IScreenshotListener>> screenshotListeners;
+        std::vector<sptr<IScreenshotListener>> screenshotListeners;
         {
             std::lock_guard<std::recursive_mutex> lock(globalMutex_);
             for (auto& listener : screenshotListeners_[GetWindowId()]) {
@@ -352,9 +352,9 @@ private:
         return screenshotListeners;
     }
     template<typename T>
-    inline EnableIfSame<T, ITouchOutsideListener, std::vector<wptr<ITouchOutsideListener>>> GetListeners()
+    inline EnableIfSame<T, ITouchOutsideListener, std::vector<sptr<ITouchOutsideListener>>> GetListeners()
     {
-        std::vector<wptr<ITouchOutsideListener>> touchOutsideListeners;
+        std::vector<sptr<ITouchOutsideListener>> touchOutsideListeners;
         {
             std::lock_guard<std::recursive_mutex> lock(globalMutex_);
             for (auto& listener : touchOutsideListeners_[GetWindowId()]) {
@@ -364,9 +364,9 @@ private:
         return touchOutsideListeners;
     }
     template<typename T>
-    inline EnableIfSame<T, IDialogTargetTouchListener, std::vector<wptr<IDialogTargetTouchListener>>> GetListeners()
+    inline EnableIfSame<T, IDialogTargetTouchListener, std::vector<sptr<IDialogTargetTouchListener>>> GetListeners()
     {
-        std::vector<wptr<IDialogTargetTouchListener>> dialogTargetTouchListeners;
+        std::vector<sptr<IDialogTargetTouchListener>> dialogTargetTouchListeners;
         {
             std::lock_guard<std::recursive_mutex> lock(globalMutex_);
             for (auto& listener : dialogTargetTouchListeners_[GetWindowId()]) {
@@ -376,9 +376,9 @@ private:
         return dialogTargetTouchListeners;
     }
     template<typename T>
-    inline EnableIfSame<T, IWindowDragListener, std::vector<wptr<IWindowDragListener>>> GetListeners()
+    inline EnableIfSame<T, IWindowDragListener, std::vector<sptr<IWindowDragListener>>> GetListeners()
     {
-        std::vector<wptr<IWindowDragListener>> windowDragListeners;
+        std::vector<sptr<IWindowDragListener>> windowDragListeners;
         {
             std::lock_guard<std::recursive_mutex> lock(mutex_);
             for (auto& listener : windowDragListeners_) {
@@ -388,9 +388,9 @@ private:
         return windowDragListeners;
     }
     template<typename T>
-    inline EnableIfSame<T, IOccupiedAreaChangeListener, std::vector<wptr<IOccupiedAreaChangeListener>>> GetListeners()
+    inline EnableIfSame<T, IOccupiedAreaChangeListener, std::vector<sptr<IOccupiedAreaChangeListener>>> GetListeners()
     {
-        std::vector<wptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListeners;
+        std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListeners;
         {
             std::lock_guard<std::recursive_mutex> lock(globalMutex_);
             for (auto& listener : occupiedAreaChangeListeners_[GetWindowId()]) {
