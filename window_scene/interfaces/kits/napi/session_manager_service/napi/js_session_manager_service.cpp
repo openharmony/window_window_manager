@@ -51,7 +51,7 @@ private:
     {
         WLOGI("JsSessionManagerService: OnGetRemoteObject is called");
         auto& sessionManagerService = SingletonContainer::Get<SessionManagerService>();
-        IRemoteObject* remoteObject = sessionManagerService.GetRemoteObject();
+        sptr<IRemoteObject> remoteObject = sessionManagerService.GetRemoteObject();
 
         napi_env env = reinterpret_cast<napi_env>(&engine);
         napi_value value = NAPI_ohos_rpc_CreateJsRemoteObject(env, remoteObject);
