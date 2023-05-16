@@ -148,6 +148,7 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
         winRect_ = rect;
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    winRect_ = rect;
     sessionStage_->UpdateRect(rect, reason);
     return WSError::WS_OK;
 }
