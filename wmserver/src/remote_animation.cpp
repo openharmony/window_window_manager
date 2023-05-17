@@ -33,6 +33,9 @@
 #include "window_manager_service_utils.h"
 #include "window_system_effect.h"
 #include "zidl/ressched_report.h"
+#ifdef SOC_PERF_ENABLE
+#include "socperf_client.h"
+#endif
 
 namespace OHOS {
 namespace Rosen {
@@ -603,6 +606,10 @@ WMError RemoteAnimation::NotifyAnimationByHome()
     } else {
         GetAnimationHomeFinishCallback(func, needMinimizeAppNodes);
     }
+#ifdef SOC_PERF_ENABLE
+    constexpr int32_t ACTION_TYPE_CPU_BOOST_CMDID = 10050;
+    OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequestEx(ACTION_TYPE_CPU_BOOST_CMDID, true, "");
+#endif
     sptr<RSWindowAnimationFinishedCallback> finishedCallback = CreateAnimationFinishedCallback(func, nullptr);
     if (finishedCallback == nullptr) {
         return WMError::WM_ERROR_NO_MEM;
