@@ -58,6 +58,11 @@ JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& s
     };
 }
 
+JsSceneSession::~JsSceneSession()
+{
+    WLOGD("~JsSceneSession");
+}
+
 void JsSceneSession::ProcessPendingSceneSessionActivationRegister()
 {
     NotifyPendingSessionActivationFunc func = [this](const SessionInfo& info) {

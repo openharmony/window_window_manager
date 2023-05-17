@@ -50,7 +50,7 @@ public:
 class Session : public SessionStub, public virtual RefBase {
 public:
     explicit Session(const SessionInfo& info);
-    virtual ~Session() = default;
+    ~Session();
 
     void SetPersistentId(uint64_t persistentId);
     uint64_t GetPersistentId() const;
