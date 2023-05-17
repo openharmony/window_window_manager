@@ -393,15 +393,13 @@ public:
     /**
      * @brief create main/uiextension window with session
      *
-     * @param windowName window name, identify window instance
      * @param option window propertion
      * @param context ability context
      * @param iSession session token of window session
      * @param errCode error code of create window
      * @return sptr<Window> If create window success, return window instance; Otherwise, return nullptr
      */
-    static sptr<Window> Create(const std::string& windowName,
-        sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context,
+    static sptr<Window> Create(sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, WMError& errCode = DefaultCreateErrCode);
 
     /**

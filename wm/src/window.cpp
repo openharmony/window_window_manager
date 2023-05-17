@@ -101,8 +101,8 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
     return windowImpl;
 }
 
-sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& option,
-    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, const sptr<ISession>& iSession, WMError& errCode)
+sptr<Window> Window::Create(sptr<WindowOption>& option, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
+    const sptr<ISession>& iSession, WMError& errCode)
 {
     // create from ability mgr service
     if (!iSession || !option) {
@@ -110,8 +110,8 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
             iSession == nullptr, option == nullptr);
         return nullptr;
     }
-    if (windowName.empty()) {
-        WLOGFE("window name is empty");
+    if (option->GetWindowName().empty()) {
+        WLOGFE("window name in option is empty");
         return nullptr;
     }
     WindowType type = option->GetWindowType();
@@ -119,7 +119,6 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
         WLOGFE("window type is invalid %{public}d", type);
         return nullptr;
     }
-    option->SetWindowName(windowName);
     return CreateWindowWithSession(option, context, errCode, iSession);
 }
 

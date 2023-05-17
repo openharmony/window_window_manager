@@ -25,6 +25,16 @@ class WindowSceneSessionImpl : public WindowSessionImpl {
 public:
     explicit WindowSceneSessionImpl(const sptr<WindowOption>& option);
     ~WindowSceneSessionImpl();
+    WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
+        const sptr<Rosen::ISession>& iSession) override;
+    WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
+    WSError SetActive(bool active) override;
+protected:
+    WMError Destroy(bool needClearListener) override;
+
+private:
+    bool IsValidSystemWindowType(const WindowType& type);
+    WMError CreateAndConnectSpecificSession();
 };
 } // namespace Rosen
 } // namespace OHOS
