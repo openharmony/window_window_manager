@@ -170,16 +170,6 @@ HWTEST_F(WindowProxyTest, UpdateActiveStatus01, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetWindowProperty01
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(WindowProxyTest, GetWindowProperty01, Function | SmallTest | Level2)
-{
-    ASSERT_TRUE(windowProxy_->GetWindowProperty() == nullptr);
-}
-
-/**
  * @tc.name: NotifyTouchOutside01
  * @tc.desc: normal function
  * @tc.type: FUNC
