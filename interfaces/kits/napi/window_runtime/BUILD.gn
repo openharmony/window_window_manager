@@ -79,6 +79,7 @@ ohos_shared_library("window_native_kit") {
   ]
 
   version_script = "libnative_kit.map"
+  innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
 }
@@ -139,6 +140,7 @@ ohos_shared_library("windowstage_kit") {
     "napi:ace_napi",
   ]
 
+  innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "window_manager"
   subsystem_name = "window"
 }
