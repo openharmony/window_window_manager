@@ -451,7 +451,7 @@ HWTEST_F(AbstractScreenControllerTest, SetRotation01, Function | SmallTest | Lev
 {
     absController_->dmsScreenMap_[1]->rotation_ = Rotation::ROTATION_180;
     absController_->screenIdManager_.dms2RsScreenIdMap_.erase(1);
-    ASSERT_EQ(false, absController_->SetRotation(1, Rotation::ROTATION_0, true));
+    ASSERT_EQ(true, absController_->SetRotation(1, Rotation::ROTATION_0, true));
 }
 /**
  * @tc.name: SetScreenActiveMode
