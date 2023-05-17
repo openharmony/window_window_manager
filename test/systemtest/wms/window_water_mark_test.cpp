@@ -152,7 +152,7 @@ HWTEST_F(WaterMarkTest, SetWaterMarkFlag01, Function | MediumTest | Level1)
     ASSERT_TRUE(drawSuccess);
 
     window->AddWindowFlag(WindowFlag::WINDOW_FLAG_WATER_MARK);
-    sleep(NORMAL_SLEEP_TIME * 30);
+    sleep(NORMAL_SLEEP_TIME);
     ASSERT_EQ(lisenter_->isShowing_, true);
 
     window->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_WATER_MARK);
