@@ -39,7 +39,7 @@ ohos_shared_library("window_scene_common") {
     "hilog_native:libhilog",
     "ipc:ipc_single",
   ]
-
+  innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "window_manager"
   subsystem_name = "window"
 }
