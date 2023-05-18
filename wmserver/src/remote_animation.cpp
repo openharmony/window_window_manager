@@ -608,7 +608,7 @@ WMError RemoteAnimation::NotifyAnimationByHome()
         GetAnimationHomeFinishCallback(func, needMinimizeAppNodes);
     }
 #ifdef SOC_PERF_ENABLE
-    constexpr int32_t ACTION_TYPE_CPU_BOOST_CMDID = 10050;
+    constexpr int32_t ACTION_TYPE_CPU_BOOST_CMDID = 10060;
     OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequestEx(ACTION_TYPE_CPU_BOOST_CMDID, true, "");
 #endif
     sptr<RSWindowAnimationFinishedCallback> finishedCallback = CreateAnimationFinishedCallback(func, nullptr);
