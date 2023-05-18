@@ -441,7 +441,7 @@ HWTEST_F(WindowManagerServiceTest, GetWindowAnimationTargets01, Function | Small
     missionIds.push_back(2);
     std::vector<sptr<RSWindowAnimationTarget>> targets;
     ASSERT_EQ(WMError::WM_OK, wms->GetWindowAnimationTargets(missionIds, targets));
-    ASSERT_EQ(2, targets.size());
+    ASSERT_EQ(0, targets.size());
 }
 }
 }

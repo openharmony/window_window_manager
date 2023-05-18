@@ -694,10 +694,11 @@ WMError RemoteAnimation::GetWindowAnimationTargets(std::vector<uint32_t> mission
     }
     for (uint32_t& missionId : missionIds) {
         sptr<WindowNode> windowNode = winRoot->GetWindowNodeByMissionId(missionId);
-        if (windowNode == nullptr) {
+        auto target = CreateWindowAnimationTarget(nullptr, windowNode);
+        if (target == nullptr) {
             continue;
         }
-        targets.push_back(CreateWindowAnimationTarget(nullptr, windowNode));
+        targets.push_back(target);
     }
     return WMError::WM_OK;
 }
