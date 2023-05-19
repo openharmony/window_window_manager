@@ -24,6 +24,7 @@
 #include "session/host/include/scene_session.h"
 #include "session_info.h"
 #include "window_manager_hilog.h"
+#include "common/include/permission.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -209,6 +210,9 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session)
 {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartedByInputMethod()) {
+        WLOGFE("check input method permission failed");
+    }
     auto task = [this, sessionStage, eventChannel, surfaceNode, property, &persistentId, &session]() {
         // create specific session
         SessionInfo info;
