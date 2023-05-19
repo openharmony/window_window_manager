@@ -110,7 +110,7 @@ class ResSchedReport {
     void TrigSlide(WindowType type, bool isOn)
     {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
-        if (type == WindowType::WINDOW_TYPE_STATUS_BAR) {
+        if (type == WindowType::WINDOW_TYPE_STATUS_BAR || type == WindowType::WINDOW_TYPE_PANEL) {
             StatusBarDrag(isOn);
         }
         if (type == WindowType::WINDOW_TYPE_DESKTOP) {
