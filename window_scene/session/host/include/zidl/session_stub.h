@@ -43,6 +43,10 @@ private:
     int HandleUpdateActivateStatus(MessageParcel& data, MessageParcel& reply);
     // for scene
     int HandleSessionEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply);
+    int HandleCreateAndConnectSpecificSession(MessageParcel& data, MessageParcel& reply);
+    int HandleDestroyAndDisconnectSpecificSession(MessageParcel& data, MessageParcel& reply);
+    int HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_STUB_H

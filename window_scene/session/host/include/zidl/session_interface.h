@@ -38,7 +38,11 @@ public:
         TRANS_ID_UPDATE_ACTIVE_STATUS,
 
         // Scene
-        TRANS_ID_SESSION_EVENT = 100
+        TRANS_ID_SESSION_EVENT = 100,
+        TRANS_ID_UPDATE_SESSION_RECT,
+        TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION,
+        TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION,
+        TRANS_ID_RAISE_TO_APP_TOP,
     };
     virtual WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint64_t& persistentId,
@@ -51,6 +55,12 @@ public:
 
     // scene session
     virtual WSError OnSessionEvent(SessionEvent event) = 0;
+    virtual WSError RaiseToAppTop() = 0;
+    virtual WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) = 0;
+    virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session) = 0;
+    virtual WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_INTERFACE_H

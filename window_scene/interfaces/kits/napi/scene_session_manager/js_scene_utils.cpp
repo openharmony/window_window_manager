@@ -106,4 +106,26 @@ NativeValue* SessionStateInit(NativeEngine* engine)
 
     return objValue;
 }
+
+NativeValue* CreateJsSessionRect(NativeEngine& engine, const WSRect& rect)
+{
+    WLOGFD("CreateJsSessionRect.");
+    auto objValue = engine.CreateObject();
+    if (objValue == nullptr) {
+        WLOGFE("Failed to create object!");
+        return engine.CreateUndefined();
+    }
+
+    auto object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to convert object!");
+        return engine.CreateUndefined();
+    }
+
+    object->SetProperty("posX_", CreateJsValue(engine, rect.posX_));
+    object->SetProperty("posY_", CreateJsValue(engine, rect.posY_));
+    object->SetProperty("width_", CreateJsValue(engine, rect.width_));
+    object->SetProperty("height_", CreateJsValue(engine, rect.height_));
+    return objValue;
+}
 } // namespace OHOS::Rosen

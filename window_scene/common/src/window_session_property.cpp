@@ -98,6 +98,16 @@ DisplayId WindowSessionProperty::GetDisplayId() const
     return displayId_;
 }
 
+void WindowSessionProperty::SetParentId(uint32_t parentId)
+{
+    parentId_ = parentId;
+}
+
+uint32_t WindowSessionProperty::GetParentId() const
+{
+    return parentId_;
+}
+
 void WindowSessionProperty::SetPersistentId(uint64_t persistentId)
 {
     persistentId_ = persistentId;
@@ -106,6 +116,16 @@ void WindowSessionProperty::SetPersistentId(uint64_t persistentId)
 uint64_t WindowSessionProperty::GetPersistentId() const
 {
     return persistentId_;
+}
+
+void WindowSessionProperty::SetParentPersistentId(uint64_t persistentId)
+{
+    parentPersistentId_ = persistentId;
+}
+
+uint64_t WindowSessionProperty::GetParentPersistentId() const
+{
+    return parentPersistentId_;
 }
 
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
@@ -119,7 +139,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(focusable_) && parcel.WriteBool(touchable_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteUint64(persistentId_) &&
         parcel.WriteString(sessionInfo_.bundleName_) &&
-        parcel.WriteString(sessionInfo_.abilityName_);
+        parcel.WriteString(sessionInfo_.abilityName_) &&
+        parcel.WriteUint64(parentPersistentId_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -140,6 +161,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetPersistentId(parcel.ReadUint64());
     SessionInfo info = { parcel.ReadString(), parcel.ReadString(), nullptr };
     property->SetSessionInfo(info);
+    property->SetParentPersistentId(parcel.ReadUint64());
     return property;
 }
 } // namespace Rosen
