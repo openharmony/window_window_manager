@@ -20,9 +20,10 @@
 #include "permission.h"
 #include "session/container/include/window_event_channel.h"
 #include "session_manager/include/session_manager.h"
-#include "wm_common.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
+#include "wm_common.h"
+
 #include "window_session_impl.h"
 
 namespace OHOS {
@@ -50,6 +51,21 @@ bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
     return true;
 }
 
+sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentSessionByParentId(uint32_t parentId)
+{
+    for (const auto& item : windowSessionMap_) {
+        if (item.second.second && item.second.second->GetProperty() &&
+            item.second.second->GetWindowId() == parentId &&
+            WindowHelper::IsMainWindow(item.second.second->GetType())) {
+            WLOGFD("Find parent, [parentName: %{public}s, parentId:%{public}u, selfPersistentId: %{public}" PRIu64"]",
+                item.second.second->GetProperty()->GetWindowName().c_str(), parentId, GetProperty()->GetPersistentId());
+            return item.second.second;
+        }
+    }
+    WLOGFD("Can not find parent window");
+    return nullptr;
+}
+
 WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 {
     sptr<ISessionStage> iSessionStage(this);
@@ -60,15 +76,29 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     sptr<IWindowEventChannel> eventChannel(channel);
     uint64_t persistentId = INVALID_SESSION_ID;
     sptr<Rosen::ISession> session;
-    SessionManager::GetInstance().CreateAndConnectSpecificSession(iSessionStage, eventChannel, surfaceNode_,
-        property_, persistentId, session);
+    if (WindowHelper::IsSubWindow(property_->GetWindowType())) { // sub window
+        auto parentSession = FindParentSessionByParentId(property_->GetParentId());
+        if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        // set parent persistentId
+        property_->SetParentPersistentId(parentSession->GetPersistentId());
+        // creat sub session by parent session
+        parentSession->GetHostSession()->CreateAndConnectSpecificSession(iSessionStage, eventChannel, surfaceNode_,
+            property_, persistentId, session);
+        // update subWindowSessionMap_
+        subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
+    } else { // system window
+        SessionManager::GetInstance().CreateAndConnectSpecificSession(iSessionStage, eventChannel, surfaceNode_,
+            property_, persistentId, session);
+    }
     property_->SetPersistentId(persistentId);
     if (session != nullptr) {
         hostSession_ = session;
     } else {
         return WMError::WM_ERROR_NULLPTR;
     }
-    WLOGFI("CreateAndConnectSpecificSession [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u], ",
+    WLOGFI("CreateAndConnectSpecificSession [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u]",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType());
     return WMError::WM_OK;
 }
@@ -89,17 +119,21 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     context_ = context;
     if (hostSession_) { // main window
         ret = Connect();
-        state_ = WindowState::STATE_CREATED;
-    } else { // system window
-        // Not valid system window type for session should return WMError::WM_OK;
-        if (!IsValidSystemWindowType(property_->GetWindowType())) {
-            return WMError::WM_OK;
+    } else { // system or sub window
+        if (WindowHelper::IsSystemWindow(property_->GetWindowType())) {
+            // Not valid system window type for session should return WMError::WM_OK;
+            if (!IsValidSystemWindowType(property_->GetWindowType())) {
+                return WMError::WM_OK;
+            }
+        } else if (!WindowHelper::IsSubWindow(property_->GetWindowType())) {
+            return WMError::WM_ERROR_INVALID_TYPE;
         }
         ret = CreateAndConnectSpecificSession();
     }
     if (ret == WMError::WM_OK) {
         windowSessionMap_.insert(std::make_pair(property_->GetWindowName(),
             std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
+        state_ = WindowState::STATE_CREATED;
     }
     if (GetDebugPropForPC()) {
         windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
@@ -159,19 +193,150 @@ WSError WindowSceneSessionImpl::SetActive(bool active)
     return WSError::WS_OK;
 }
 
+void WindowSceneSessionImpl::DestroySubWindow()
+{
+    for (auto elem : subWindowSessionMap_) {
+        WLOGFE("Id: %{public}" PRIu64 ", size: %{public}u", elem.first, subWindowSessionMap_.size());
+    }
+
+    const uint64_t& parentPersistentId = property_->GetParentPersistentId();
+    const uint64_t& persistentId = GetPersistentId();
+
+    WLOGFD("Id: %{public}" PRIu64 ", parentId: %{public}" PRIu64 "", persistentId, parentPersistentId);
+
+    // remove from subWindowMap_ when destroy sub window
+    auto subIter = subWindowSessionMap_.find(parentPersistentId);
+    if (subIter != subWindowSessionMap_.end()) {
+        auto& subWindows = subIter->second;
+        for (auto iter = subWindows.begin(); iter != subWindows.end();) {
+            if ((*iter) == nullptr) {
+                iter++;
+                continue;
+            }
+            if ((*iter)->GetPersistentId() == persistentId) {
+                WLOGFD("Destroy sub window, persistentId: %{public}" PRIu64 "", persistentId);
+                iter = subWindows.erase(iter);
+                break;
+            }
+        }
+    }
+
+    // remove from subWindowMap_ when destroy main window
+    auto mainIter = subWindowSessionMap_.find(persistentId);
+    if (mainIter != subWindowSessionMap_.end()) {
+        auto& subWindows = mainIter->second;
+        for (auto iter = subWindows.begin(); iter != subWindows.end();) {
+            if ((*iter) == nullptr) {
+                WLOGFD("Destroy sub window which is nullptr");
+                iter = subWindows.erase(iter);
+                continue;
+            }
+            WLOGFD("Destroy sub window, persistentId: %{public}" PRIu64 "", (*iter)->GetPersistentId());
+            (*iter)->Destroy(false);
+            iter++;
+        }
+        mainIter->second.clear();
+        subWindowSessionMap_.erase(mainIter);
+    }
+}
+
 WMError WindowSceneSessionImpl::Destroy(bool needClearListener)
 {
-    WLOGFI("id:%{public}" PRIu64 " Destroy, state_:%{public}u", property_->GetPersistentId(), state_);
+    WLOGFI("Id:%{public}" PRIu64 " Destroy, state_:%{public}u", property_->GetPersistentId(), state_);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_OK;
     }
+    WSError ret = WSError::WS_OK;
     if (!WindowHelper::IsMainWindow(GetType())) {
-        // main window no need to notify host, since host knows hide first
-        SessionManager::GetInstance().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+        if (WindowHelper::IsSystemWindow(GetType())) {
+            // main window no need to notify host, since host knows hide first
+            SessionManager::GetInstance().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+        } else if (WindowHelper::IsSubWindow(GetType())) {
+            auto parentSession = FindParentSessionByParentId(GetParentId());
+            if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
+                return WMError::WM_ERROR_NULLPTR;
+            }
+            parentSession->GetHostSession()->DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+        }
     }
-    WindowSessionImpl::Destroy(needClearListener);
-    return WMError::WM_OK;
+    // delete after replace WSError with WMError
+    WMError res = static_cast<WMError>(ret);
+    NotifyBeforeDestroy(GetWindowName());
+    if (needClearListener) {
+        ClearListenersById(GetPersistentId());
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        state_ = WindowState::STATE_DESTROYED;
+    }
+
+    DestroySubWindow();
+    windowSessionMap_.erase(property_->GetWindowName());
+    hostSession_ = nullptr;
+    return res;
+}
+
+WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
+{
+    WLOGFD("Id:%{public}" PRIu64 " MoveTo %{public}d %{public}d", property_->GetPersistentId(), x, y);
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    const auto& rect = property_->GetWindowRect();
+    Rect newRect = { x, y, rect.width_, rect.height_ }; // must keep x/y
+    property_->SetRequestRect(newRect);
+    if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
+        WLOGFD("Window is hidden or created! id: %{public}" PRIu64 ", oriPos: [%{public}d, %{public}d, "
+            "movePos: [%{public}d, %{public}d]", property_->GetPersistentId(), rect.posX_, rect.posY_, x, y);
+        return WMError::WM_OK;
+    }
+
+    WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
+    const WSError& ret = hostSession_->UpdateSessionRect(wsRect, SizeChangeReason::MOVE);
+    return static_cast<WMError>(ret);
+}
+
+WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
+{
+    WLOGFD("Id:%{public}" PRIu64 " Resize %{public}u %{public}u", property_->GetPersistentId(), width, height);
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    const auto& rect = property_->GetWindowRect();
+    Rect newRect = { rect.posX_, rect.posY_, width, height }; // must keep w/h
+    property_->SetRequestRect(newRect);
+    if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
+        WLOGFD("Window is hidden or created! id: %{public}" PRIu64 ", oriSize: [%{public}u, %{public}u, "
+            "newSize [%{public}u, %{public}u]", property_->GetPersistentId(), rect.width_, rect.height_, width, height);
+        return WMError::WM_OK;
+    }
+
+    WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
+    const WSError& ret = hostSession_->UpdateSessionRect(wsRect, SizeChangeReason::RESIZE);
+    return static_cast<WMError>(ret);
+}
+
+WmErrorCode WindowSceneSessionImpl::RaiseToAppTop()
+{
+    auto parentId = GetParentId();
+    if (parentId == INVALID_SESSION_ID) {
+        WLOGFE("Only the children of the main window can be raised!");
+        return WmErrorCode::WM_ERROR_INVALID_PARENT;
+    }
+
+    if (!WindowHelper::IsSubWindow(GetType())) {
+        WLOGFE("Must be app sub window window!");
+        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+    }
+
+    if (state_ != WindowState::STATE_SHOWN) {
+        WLOGFE("The sub window must be shown!");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+
+    const WSError& ret = hostSession_->RaiseToAppTop();
+    return static_cast<WmErrorCode>(ret);
 }
 
 bool WindowSceneSessionImpl::GetDebugPropForPC()

@@ -24,6 +24,7 @@
 #include <refbase.h>
 
 #include "interfaces/include/ws_common.h"
+#include "session/host/include/scene_session.h"
 
 namespace OHOS::Rosen {
 class SceneSession;
@@ -45,13 +46,20 @@ private:
     void ProcessPendingSceneSessionActivationRegister();
     void ProcessSessionStateChangeRegister();
     void ProcessSessionEventRegister();
+    void ProcessCreateSpecificSessionRegister();
+    void ProcessSessionRectChangeRegister();
+    void ProcessRaiseToTopRegister();
 
     void PendingSessionActivation(const SessionInfo& info);
     void OnSessionStateChange(const SessionState& state);
     void OnSessionEvent(uint32_t actionId);
+    void OnCreateSpecificSession(const sptr<SceneSession>& session);
+    void OnSessionRectChange(const WSRect& rect);
+    void OnRaiseToTop();
 
     NativeEngine& engine_;
-    sptr<SceneSession> session_;
+    wptr<SceneSession> weakSession_ = nullptr;
+    wptr<SceneSession::SessionChangeCallback> sessionchangeCallback_ = nullptr;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     using Func = void(JsSceneSession::*)();
     std::map<std::string, Func> listenerFunc_;

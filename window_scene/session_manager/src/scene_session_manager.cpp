@@ -80,10 +80,20 @@ sptr<SceneSession> SceneSessionManager::GetSceneSession(uint64_t persistentId)
 
 sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo)
 {
-    auto task = [this, sessionInfo]() {
+    sptr<SceneSession::SpecificSessionCallback> specificCallback = new (std::nothrow)
+        SceneSession::SpecificSessionCallback();
+    if (specificCallback == nullptr) {
+        WLOGFE("SpecificSessionCallback is nullptr");
+        return nullptr;
+    }
+    specificCallback->onCreate_ = std::bind(&SceneSessionManager::RequestSceneSession,
+        this, std::placeholders::_1);
+    specificCallback->onDestroy_ = std::bind(&SceneSessionManager::DestroyAndDisconnectSpecificSession,
+        this, std::placeholders::_1);
+    auto task = [this, sessionInfo, specificCallback]() {
         WLOGFI("sessionInfo: bundleName: %{public}s, abilityName: %{public}s", sessionInfo.bundleName_.c_str(),
             sessionInfo.abilityName_.c_str());
-        sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo);
+        sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, specificCallback);
         if (sceneSession == nullptr) {
             WLOGFE("sceneSession is nullptr!");
             return sceneSession;
@@ -220,11 +230,11 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         if (sceneSession == nullptr) {
             return WSError::WS_ERROR_NULLPTR;
         }
+        // connect specific session and sessionStage
+        WSError errCode = sceneSession->Connect(sessionStage, eventChannel, surfaceNode, persistentId, property);
         if (createSpecificSessionFunc_) {
             createSpecificSessionFunc_(sceneSession);
         }
-        // connect specific session and sessionStage
-        WSError errCode = sceneSession->Connect(sessionStage, eventChannel, surfaceNode, persistentId, property);
         session = sceneSession;
         return errCode;
     };

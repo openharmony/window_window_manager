@@ -20,12 +20,44 @@
 #include "session/host/include/session.h"
 
 namespace OHOS::Rosen {
+class SceneSession;
+using SpecificSessionCreateCallback = std::function<sptr<SceneSession>(const SessionInfo& info)>;
+using SpecificSessionDestroyCallback = std::function<WSError(const uint64_t& persistentId)>;
+using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
+using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect)>;
+using NotifySessionEventFunc = std::function<void(int32_t eventId)>;
+using NotifyRaiseToTopFunc = std::function<void()>;
 class SceneSession : public Session {
 public:
-    SceneSession(const SessionInfo& info);
+    // callback for notify SceneSessionManager
+    struct SpecificSessionCallback : public RefBase {
+        SpecificSessionCreateCallback onCreate_;
+        SpecificSessionDestroyCallback onDestroy_;
+    };
+
+    // callback for notify SceneBoard
+    struct SessionChangeCallback : public RefBase {
+        NotifyCreateSpecificSessionFunc onCreateSpecificSession_;
+        NotifySessionRectChangeFunc onRectChange_;
+        NotifyRaiseToTopFunc onRaiseToTop_;
+        NotifySessionEventFunc OnSessionEvent_;
+    };
+
+    SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
     ~SceneSession() = default;
 
     WSError OnSessionEvent(SessionEvent event) override;
+    WSError RaiseToAppTop() override;
+    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) override;
+    WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session) override;
+    WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) override;
+    void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
+
+private:
+    sptr<SpecificSessionCallback> specificCallback_ = nullptr;
+    sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
 };
 } // namespace OHOS::Rosen
 

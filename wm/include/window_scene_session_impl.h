@@ -28,6 +28,7 @@ public:
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
+    WMError Destroy(bool needClearListener) override;
     WSError SetActive(bool active) override;
     WMError DisableAppWindowDecor() override;
     bool IsDecorEnable() const override;
@@ -37,12 +38,17 @@ public:
     void StartMove() override;
     WMError Close() override;
     WindowMode GetMode() const override;
+    WMError MoveTo(int32_t x, int32_t y) override;
+    WMError Resize(uint32_t width, uint32_t height) override;
+    WmErrorCode RaiseToAppTop() override;
+
 protected:
-    WMError Destroy(bool needClearListener) override;
+    void DestroySubWindow();
+    WMError CreateAndConnectSpecificSession();
+    sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
 
 private:
     bool IsValidSystemWindowType(const WindowType& type);
-    WMError CreateAndConnectSpecificSession();
     bool GetDebugPropForPC();
 };
 } // namespace Rosen

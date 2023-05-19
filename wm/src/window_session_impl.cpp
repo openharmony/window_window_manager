@@ -36,6 +36,7 @@ std::map<uint64_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifec
 std::map<uint64_t, std::vector<sptr<IWindowChangeListener>>> WindowSessionImpl::windowChangeListeners_;
 std::recursive_mutex WindowSessionImpl::globalMutex_;
 std::map<std::string, std::pair<uint64_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
+std::map<uint64_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
 
 #define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, listeners) \
     do {                                                      \
@@ -64,6 +65,7 @@ std::map<std::string, std::pair<uint64_t, sptr<WindowSessionImpl>>> WindowSessio
 
 WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 {
+    WLOGFD("WindowSessionImpl");
     property_ = new (std::nothrow) WindowSessionProperty();
     if (property_ == nullptr) {
         WLOGFE("Property is null");
@@ -76,6 +78,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetTouchable(option->GetTouchable());
     property_->SetDisplayId(option->GetDisplayId());
     property_->SetWindowName(option->GetWindowName());
+    property_->SetParentId(option->GetParentId());
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
 }
 
@@ -101,14 +104,18 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(std::string name, 
 
 WindowSessionImpl::~WindowSessionImpl()
 {
-    WLOGFD("~WindowSessionImpl");
+    WLOGFD("~WindowSessionImpl, id: %{public}" PRIu64"", GetPersistentId());
     Destroy(false);
 }
 
 uint32_t WindowSessionImpl::GetWindowId() const
 {
-    // for get window property
-    return static_cast<uint32_t>((property_->GetPersistentId()) & 0xffffffff); // 0xffffffff: to get lower 32 bits
+    return static_cast<uint32_t>(GetPersistentId()) & 0xffffffff; // 0xffffffff: to get low 32 bits
+}
+
+uint32_t WindowSessionImpl::GetParentId() const
+{
+    return static_cast<uint32_t>(property_->GetParentPersistentId()) & 0xffffffff; // 0xffffffff: to get low 32 bits
 }
 
 bool WindowSessionImpl::IsWindowSessionInvalid() const
@@ -116,7 +123,7 @@ bool WindowSessionImpl::IsWindowSessionInvalid() const
     bool res = ((hostSession_ == nullptr) || (GetPersistentId() == INVALID_SESSION_ID) ||
         (state_ == WindowState::STATE_DESTROYED));
     if (res) {
-        WLOGW("already destroyed or not created! id: %{public}" PRIu64 " state_:%{public}u", GetPersistentId(), state_);
+        WLOGW("already destroyed or not created! id: %{public}" PRIu64" state_: %{public}u", GetPersistentId(), state_);
     }
     return res;
 }
@@ -124,6 +131,16 @@ bool WindowSessionImpl::IsWindowSessionInvalid() const
 uint64_t WindowSessionImpl::GetPersistentId() const
 {
     return property_->GetPersistentId();
+}
+
+sptr<WindowSessionProperty> WindowSessionImpl::GetProperty() const
+{
+    return property_;
+}
+
+sptr<ISession> WindowSessionImpl::GetHostSession() const
+{
+    return hostSession_;
 }
 
 WMError WindowSessionImpl::WindowSessionCreateCheck()
@@ -151,6 +168,7 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
 WMError WindowSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<Rosen::ISession>& iSession)
 {
+    WLOGFD("WindowSessionImpl::Create");
     // allow iSession is nullptr when create from window manager
     if (!context || !hostSession_) {
         WLOGFE("context or hostSession is nullptr!");
@@ -244,7 +262,7 @@ WMError WindowSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFrom
 
 WMError WindowSessionImpl::Destroy(bool needClearListener)
 {
-    WLOGFI("id:%{public}" PRIu64 " Destroy, state_:%{public}u", property_->GetPersistentId(), state_);
+    WLOGFI("Id:%{public}" PRIu64 " Destroy, state_:%{public}u", property_->GetPersistentId(), state_);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
