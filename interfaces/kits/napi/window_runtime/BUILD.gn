@@ -68,6 +68,7 @@ ohos_shared_library("window_native_kit") {
     "ability_runtime:extensionkit_native",
     "ability_runtime:runtime",
     "access_token:libaccesstoken_sdk",
+    "ace_engine:ace_uicontent",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
