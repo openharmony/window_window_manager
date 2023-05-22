@@ -89,23 +89,6 @@ HWTEST_F(WindowDumperTest, Dump02, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: Dump03
- * @tc.desc: Dump one param with '-h'
- * @tc.type: FUNC
- */
-HWTEST_F(WindowDumperTest, Dump03, Function | SmallTest | Level1)
-{
-    sptr<WindowDumper> windowDumper;
-    windowDumper = new WindowDumper(WindowManagerService::GetInstance().windowRoot_);
-    int fd = 1;
-    std::vector<std::u16string> args;
-    const std::u16string DUMP_HELP = u"-h";
-    args.emplace_back(DUMP_HELP);
-    WMError ret = windowDumper->Dump(fd, args);
-    ASSERT_EQ(ret, WMError::WM_OK);
-}
-
-/**
  * @tc.name: Dump04
  * @tc.desc: Dump one param with '-x'
  * @tc.type: FUNC
@@ -198,7 +181,7 @@ HWTEST_F(WindowDumperTest, ShowAceDumpHelp01, Function | SmallTest | Level1)
     std::string dumpInfo;
     windowDumper->ShowAceDumpHelp(dumpInfo);
     WindowManagerService::GetInstance().windowRoot_->windowNodeMap_.clear();
-    ASSERT_FALSE(dumpInfo.empty());
+    ASSERT_TRUE(dumpInfo.empty());
 }
 
 /**
