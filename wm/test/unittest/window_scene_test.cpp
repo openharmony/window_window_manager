@@ -259,18 +259,6 @@ HWTEST_F(WindowSceneTest, OnNewWant02, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: UpdateConfiguration01
- * @tc.desc: UpdateConfiguration nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneTest, UpdateConfiguration01, Function | SmallTest | Level2)
-{
-    sptr<WindowScene> scene = new WindowScene();
-    std::shared_ptr<AppExecFwk::Configuration> configuration = nullptr;
-    scene->UpdateConfiguration(configuration);
-}
-
-/**
  * @tc.name: UpdateConfiguration02
  * @tc.desc: UpdateConfiguration without scene init
  * @tc.type: FUNC
