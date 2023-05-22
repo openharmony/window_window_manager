@@ -33,6 +33,7 @@ namespace {
     constexpr int32_t PERF_CLICK_NORMAL_CODE = 9;
     constexpr int32_t PERF_DRAG_CODE = 31;
     constexpr int32_t PERF_MOVE_CODE = 32;
+    constexpr int32_t PERF_ANIMATION_BOOST_CODE = 33;
     constexpr int32_t PERF_SLIDE_CODE = 11;
     constexpr int32_t PERF_STATUS_BAR_DRAG_CODE = 37;
     const std::string TASK_NAME = "SlideOff";
@@ -72,6 +73,14 @@ class ResSchedReport {
         std::unordered_map<std::string, std::string> mapPayload;
         // 2 means click event.
         OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(PERF_CLICK_NORMAL_CODE, 2, mapPayload);
+#endif
+    }
+
+    void AnimationBoost()
+    {
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+        std::unordered_map<std::string, std::string>mapPayload;
+        OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(PERF_ANIMATION_BOOST_CODE, 0, mapPayload);
 #endif
     }
 
