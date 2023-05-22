@@ -2612,6 +2612,34 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
     }
 }
 
+void WindowImpl::PerfLauncherHotAreaIfNeed(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    int32_t action = pointerEvent->GetPointerAction();
+    if (action != MMI::PointerEvent::POINTER_ACTION_CANCEL) {
+        return;
+    }
+    MMI::PointerEvent::PointerItem pointerItem;
+    int32_t pointId = pointerEvent->GetPointerId();
+    if (!pointerEvent->GetPointerItem(pointId, pointerItem)) {
+        WLOGFW("invalid pointerEvent");
+        return;
+    }
+    auto display = SingletonContainer::IsDestroyed() ? nullptr :
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr) {
+        return;
+    }
+    auto displayHeight = display->GetHeight();
+    constexpr float HOT_RATE = 0.07;
+    auto height = static_cast<int32_t>(displayHeight * HOT_RATE);
+    int32_t pointDisplayY = pointerItem.GetDisplayY();
+    if (pointDisplayY > displayHeight - height) {
+        ResSchedReport::GetInstance().AnimationBoost();
+    }
+#endif
+}
+
 void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     // If windowRect transformed, transform event back to its origin position
@@ -2631,6 +2659,7 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
         pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         HandlePointerStyle(pointerEvent);
     }
+    PerfLauncherHotAreaIfNeed(pointerEvent);
     if (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         WLOGFD("WMS process point down, id:%{public}u, action: %{public}d", GetWindowId(), action);
         if (GetType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) {
