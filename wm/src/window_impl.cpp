@@ -638,6 +638,7 @@ void WindowImpl::DumpInfo(const std::vector<std::string>& params, std::vector<st
     if (params.size() == 1 && params[0] == PARAM_DUMP_HELP) { // 1: params num
         WLOGFD("Dump ArkUI help Info");
         Ace::UIContent::ShowDumpHelp(info);
+        SingletonContainer::Get<WindowAdapter>().NotifyDumpInfoResult(info);
         return;
     }
     WLOGFD("ArkUI:DumpInfo");
