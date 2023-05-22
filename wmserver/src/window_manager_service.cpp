@@ -496,7 +496,7 @@ void WindowManagerService::ConfigKeyboardAnimation(const WindowManagerConfig::Co
         auto numbers = *item.intsValue_;
         if (numbers.size() == 1) { // duration
             animationConfig.keyboardAnimationConfig_.durationIn_ = RSAnimationTimingProtocol(numbers[0]);
-            systemConfig_.keyboardAnimationConfig_.durationIn_ = numbers[0];
+            systemConfig_.keyboardAnimationConfig_.durationIn_ = static_cast<uint32_t>(numbers[0]);
         }
     }
     item = animeConfig["timing"]["durationOut"];

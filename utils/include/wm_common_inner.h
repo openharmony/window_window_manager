@@ -121,7 +121,7 @@ struct SystemConfig : public Parcelable {
         config->isStretchable_ = parcel.ReadBool();
         config->decorModeSupportInfo_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
-        KeyboardAnimationConfig* keyboardConfig = parcel.ReadParcelable<KeyboardAnimationConfig>();
+        sptr<KeyboardAnimationConfig> keyboardConfig = parcel.ReadParcelable<KeyboardAnimationConfig>();
         config->keyboardAnimationConfig_ = *keyboardConfig;
         return config;
     }
