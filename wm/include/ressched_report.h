@@ -79,7 +79,7 @@ class ResSchedReport {
     void AnimationBoost()
     {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
-        std::unordered_map<std::string, std::string>mapPayload;
+        std::unordered_map<std::string, std::string> mapPayload;
         OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(PERF_ANIMATION_BOOST_CODE, 0, mapPayload);
 #endif
     }
