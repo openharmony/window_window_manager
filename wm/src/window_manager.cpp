@@ -111,6 +111,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowManager)
 
 class WindowManager::Impl {
 public:
+    Impl(std::recursive_mutex& mutex) : mutex_(mutex) {}
     void NotifyFocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
         WindowType windowType, DisplayId displayId);
     void NotifyUnfocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
@@ -126,7 +127,7 @@ public:
 
     static inline SingletonDelegator<WindowManager> delegator_;
 
-    std::recursive_mutex mutex_;
+    std::recursive_mutex& mutex_;
     std::vector<sptr<IFocusChangedListener>> focusChangedListeners_;
     sptr<WindowManagerAgent> focusChangedListenerAgent_;
     std::vector<sptr<ISystemBarChangedListener>> systemBarChangedListeners_;
@@ -271,7 +272,13 @@ void WindowManager::Impl::NotifyGestureNavigationEnabledResult(bool enable)
     }
 }
 
-WindowManager::WindowManager() : pImpl_(std::make_unique<Impl>()) {}
+WindowManager::WindowManager() : pImpl_(std::make_unique<Impl>(mutex_)) {}
+
+WindowManager::~WindowManager()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    destroyed_ = true;
+}
 
 WMError WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener)
 {
@@ -775,10 +782,14 @@ void WindowManager::NotifyGestureNavigationEnabledResult(bool enable) const
 }
 
 
-void WindowManager::OnRemoteDied() const
+void WindowManager::OnRemoteDied()
 {
     WLOGI("wms is died");
-    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (destroyed_) {
+        WLOGE("Already destroyed");
+        return;
+    }
     pImpl_->focusChangedListenerAgent_ = nullptr;
     pImpl_->systemBarChangedListenerAgent_ = nullptr;
     pImpl_->windowUpdateListenerAgent_ = nullptr;
