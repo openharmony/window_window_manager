@@ -26,10 +26,10 @@ sptr<Window> StaticCall::CreateWindow(const std::string& windowName,
     return Window::Create(windowName, option, context);
 }
 
-sptr<Window> StaticCall::CreateWindow(const std::string& windowName,
-    sptr<WindowOption>& option, std::shared_ptr<AbilityRuntime::Context> context, const sptr<ISession>& iSession)
+sptr<Window> StaticCall::CreateWindow(sptr<WindowOption>& option, std::shared_ptr<AbilityRuntime::Context> context,
+    const sptr<ISession>& iSession)
 {
-    return Window::Create(windowName, option, context, iSession);
+    return Window::Create(option, context, iSession);
 }
 
 std::vector<sptr<Window>> StaticCall::GetSubWindow(uint32_t parentId)

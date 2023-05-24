@@ -30,7 +30,7 @@ class SceneSession;
 class JsSceneSession : public std::enable_shared_from_this<JsSceneSession> {
 public:
     JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& session);
-    ~JsSceneSession() = default;
+    ~JsSceneSession();
 
     static NativeValue* Create(NativeEngine& engine, const sptr<SceneSession>& session);
     static void Finalizer(NativeEngine* engine, void* data, void* hint);

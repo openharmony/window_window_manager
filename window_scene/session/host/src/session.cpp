@@ -29,6 +29,11 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
 }
 
+Session::~Session()
+{
+    WLOGD("~Session");
+}
+
 void Session::SetPersistentId(uint64_t persistentId)
 {
     persistentId_ = persistentId;
