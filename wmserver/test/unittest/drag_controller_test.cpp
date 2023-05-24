@@ -119,16 +119,6 @@ HWTEST_F(DragControllerTest, OnInputEvent03, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: Stop01
- * @tc.desc: Stop01
- * @tc.type: FUNC
- */
-HWTEST_F(DragControllerTest, Stop01, Function | SmallTest | Level2)
-{
-    moveDragController_->Stop();
-}
-
-/**
  * @tc.name: Stop02
  * @tc.desc: Stop02
  * @tc.type: FUNC

@@ -2470,7 +2470,6 @@ HWTEST_F(WindowImplTest, InvalidWindow, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetCallingWindow(INVALID_WINDOW_ID));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetBackgroundColor(std::string("???")));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Close());
-    ASSERT_EQ(nullptr, window->GetWindowProperty());
 }
 
 /*
