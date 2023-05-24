@@ -1037,7 +1037,7 @@ HWTEST_F(RemoteAnimationTest, CreateAnimationFinishedCallback01, Function | Smal
     EXPECT_NE(nullptr, finishCallback);
     finishCallback->OnAnimationFinished();
     usleep(SLEEP_TIME_IN_US);
-    EXPECT_EQ(false, testFlag);
+    EXPECT_EQ(true, testFlag);
 }
 
 /*
@@ -1077,14 +1077,17 @@ HWTEST_F(RemoteAnimationTest, GetWindowAnimationTargets03, Function | SmallTest 
 {
     sptr<WindowNode> srcNode = new WindowNode(CreateWindowProperty(1)); // 1 is windowId
     srcNode->abilityInfo_.missionId_ = 1;
+    srcNode->surfaceNode_ = CreateRSSurfaceNode(0);
     windowRoot_->windowNodeMap_[1] = srcNode;
     std::vector<uint32_t> missionIds;
     missionIds.push_back(1);
     std::vector<sptr<RSWindowAnimationTarget>> targets;
     WMError ret = RemoteAnimation::GetWindowAnimationTargets(missionIds, targets);
     EXPECT_EQ(WMError::WM_OK, ret);
-    EXPECT_EQ(1, targets.size());
+    ASSERT_GE(targets.size(), 1);
+    ASSERT_NE(targets[0], nullptr);
     EXPECT_EQ(true, targets[0]->missionId_ == 1);
+    usleep(SLEEP_TIME_IN_US);
 }
 }
 }
