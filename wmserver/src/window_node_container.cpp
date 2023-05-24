@@ -88,7 +88,7 @@ WindowNodeContainer::WindowNodeContainer(const sptr<DisplayInfo>& displayInfo, S
     avoidController_ = new AvoidAreaController(focusedWindow_);
     WindowInnerManager::GetInstance().NotifyDisplayLimitRectChange(
         DisplayGroupInfo::GetInstance().GetAllDisplayRects());
-    isAnimateTransactionEnabled_ = system::GetParameter("persist.window.animateTransaction.enabled", "0")  == "1";
+    isAnimateTransactionEnabled_ = system::GetParameter("persist.window.animateTransaction.enabled", "1")  == "1";
 }
 
 WindowNodeContainer::~WindowNodeContainer()
