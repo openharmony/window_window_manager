@@ -17,6 +17,7 @@ import("../../windowmanager_aafwk.gni")
 config("session_public_config") {
   include_dirs = [
     "${window_base_path}/window_scene",
+    "${window_base_path}/interfaces/innerkits/dm",
 
     # for window_manager_hilog
     "${window_base_path}/utils/include",
@@ -75,7 +76,10 @@ ohos_shared_library("screen_session") {
 
   public_configs = [ ":session_public_config" ]
 
-  deps = [ "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+  deps = [
+    "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "${window_base_path}/utils:libwmutil",
+  ]
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"

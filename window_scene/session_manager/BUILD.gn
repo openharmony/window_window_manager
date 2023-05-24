@@ -28,6 +28,12 @@ config("session_manager_public_config") {
     "${window_base_path}/window_scene/session_manager/include/zidl",
     "${window_base_path}/window_scene/session_manager_service/include",
 
+    # for screen_session_manager
+    "${window_base_path}/utils/include",
+    "${window_base_path}/dm/include",
+    "${window_base_path}/interfaces/innerkits/dm",
+    "${window_base_path}/dmserver/include",
+
     # for window_manager_hilog
     "${window_base_path}/utils/include",
   ]
@@ -67,12 +73,19 @@ ohos_shared_library("scene_session_manager") {
 }
 
 ohos_shared_library("screen_session_manager") {
-  sources = [ "src/screen_session_manager.cpp" ]
+  sources = [
+    "../../dm/src/zidl/display_manager_agent_proxy.cpp",
+    "src/screen_session_manager.cpp",
+    "src/zidl/screen_session_manager_stub.cpp",
+  ]
+
+  cflags_cc = [ "-std=c++17" ]
 
   public_configs = [ ":session_manager_public_config" ]
 
   deps = [
     "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/session:screen_session",
   ]
@@ -81,6 +94,7 @@ ohos_shared_library("screen_session_manager") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog_native:libhilog",
+    "ipc:ipc_core",
   ]
 
   innerapi_tags = [ "platformsdk" ]
@@ -93,6 +107,7 @@ ohos_shared_library("session_manager") {
     "../session_manager_service/src/session_manager_service_proxy.cpp",
     "src/session_manager.cpp",
     "src/zidl/scene_session_manager_proxy.cpp",
+    "src/zidl/screen_session_manager_proxy.cpp",
   ]
 
   cflags_cc = [ "-std=c++17" ]
@@ -102,6 +117,7 @@ ohos_shared_library("session_manager") {
   deps = [
     "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "${window_base_path}/dmserver:libdms",
+    "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/session:scene_session",
   ]
