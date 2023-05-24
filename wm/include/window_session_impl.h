@@ -77,6 +77,12 @@ public:
 
 protected:
     WMError Connect();
+    bool IsWindowSessionInvalid() const;
+    void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
+    void NotifyAfterActive();
+    void NotifyAfterInactive();
+    WMError WindowSessionCreateCheck();
+    virtual WMError Destroy(bool needClearListener);
 
     std::unique_ptr<Ace::UIContent> uiContent_ = nullptr;
     sptr<ISession> hostSession_ = nullptr;
@@ -84,39 +90,34 @@ protected:
     std::shared_ptr<RSSurfaceNode> surfaceNode_ = nullptr;
     sptr<WindowSessionProperty> property_ = nullptr;
     WindowState state_ { WindowState::STATE_INITIAL };
+    static std::map<std::string, std::pair<uint64_t, sptr<WindowSessionImpl>>> windowSessionMap_;
+    std::recursive_mutex mutex_;
 
 private:
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
-    template<typename T> EnableIfSame<T, IWindowLifeCycle, std::vector<wptr<IWindowLifeCycle>>> GetListeners();
+    template<typename T> EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> GetListeners();
     template<typename T>
-    EnableIfSame<T, IWindowChangeListener, std::vector<wptr<IWindowChangeListener>>> GetListeners();
+    EnableIfSame<T, IWindowChangeListener, std::vector<sptr<IWindowChangeListener>>> GetListeners();
     template<typename T> void ClearUselessListeners(std::map<uint64_t, T>& listeners, uint64_t persistentId);
 
-    WMError Destroy(bool needClearListener);
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
-    bool IsWindowSessionInvalid() const;
+
     void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
-    void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
+
     void NotifyAfterFocused();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
     void NotifyBeforeDestroy(std::string windowName);
-    void NotifyAfterActive();
-    void NotifyAfterInactive();
+
     void NotifyForegroundFailed(WMError ret);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason);
     void ClearListenersById(uint64_t persistentId);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
-    WMError CreateAndConnectSpecificSession();
-    WMError WindowSessionCreateCheck();
-    bool IsValidSystemWindowType(const WindowType& type);
 
     static std::map<uint64_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<uint64_t, std::vector<sptr<IWindowChangeListener>>> windowChangeListeners_;
     static std::recursive_mutex globalMutex_;
-    std::recursive_mutex mutex_;
     NotifyNativeWinDestroyFunc notifyNativefunc_;
-    static std::map<std::string, std::pair<uint64_t, sptr<WindowSessionImpl>>> windowSessionMap_;
 };
 } // namespace Rosen
 } // namespace OHOS
