@@ -671,7 +671,7 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
         }
     } else if (reason == WindowSizeChangeReason::RESIZE) {
         newRect = { lastRect.posX_, lastRect.posY_, rect.width_, rect.height_ };
-    } else if (reason == WindowSizeChangeReason::DRAG) {
+    } else if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::MAXIMIZE) {
         newRect = rect;
     }
     property->SetRequestRect(newRect);
@@ -1060,6 +1060,10 @@ WMError WindowController::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<
     if (!node->currentVisibility_) {
         WLOGFE("Window is invisible, windowId: %{public}u", windowId);
         return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+
+    if (node->GetWindowProperty()->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+        return WMError::WM_OK;
     }
 
     // if start dragging or start moving dock_slice, need to update size change reason
@@ -1492,6 +1496,26 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         }
         case PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO: {
             ret = SetAspectRatio(windowId, property->GetAspectRatio());
+            break;
+        }
+        case PropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE: {
+            MaximizeMode mode = property->GetMaximizeMode();
+            node->GetWindowProperty()->SetMaximizeMode(mode);
+            Rect newRect = {0, 0, 0, 0};
+            if (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+                node->SetOriginRect(node->GetWindowRect());
+                auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(node->GetDisplayId());
+                if (windowNodeContainer == nullptr) {
+                    WLOGFE("window node container is null");
+                    return WMError::WM_ERROR_NULLPTR;
+                }
+                windowNodeContainer->GetLayoutPolicy()->GetMaximizeRect(node, newRect);
+            } else {
+                newRect = node->GetOriginRect();
+            }
+            WLOGI("window %{public}d maximizeMode %{public}d rect %{public}d %{public}d %{public}d %{public}d",
+                windowId, static_cast<uint32_t>(mode), newRect.posX_, newRect.posY_, newRect.width_, newRect.height_);
+            ret = ResizeRectAndFlush(windowId, newRect, WindowSizeChangeReason::MAXIMIZE);
             break;
         }
         default:

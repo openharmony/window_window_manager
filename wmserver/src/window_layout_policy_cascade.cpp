@@ -181,6 +181,7 @@ void WindowLayoutPolicyCascade::PerformWindowLayout(const sptr<WindowNode>& node
             break;
         case WindowType::WINDOW_TYPE_STATUS_BAR:
         case WindowType::WINDOW_TYPE_NAVIGATION_BAR:
+        case WindowType::WINDOW_TYPE_LAUNCHER_DOCK:
             LayoutWindowTree(node->GetDisplayId());
             // AvoidNodes will change limitRect, need to recalculate default cascade rect
             InitCascadeRect(node->GetDisplayId());
@@ -445,6 +446,11 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
                 WLOGFD("[FixOrientation] the window is expected rotatable, pre-calculated");
                 winRect = {winRect.posX_, winRect.posY_, winRect.height_, winRect.width_};
             }
+            if (property->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+                // restore the origin rect so when recover from fullscreen we can use
+                node->SetRequestRect(node->GetOriginRect());
+                property->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
+            }
             break;
         }
         case WindowMode::WINDOW_MODE_FLOATING: {
@@ -454,6 +460,12 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
             UpdateWindowSizeLimits(node);
             winRect = property->GetRequestRect();
             ApplyWindowRectConstraints(node, winRect);
+
+            if (property->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+                GetMaximizeRect(node, winRect);
+                WLOGFI("[In CascadeLayout] winId: %{public}u, maxRect: %{public}d, %{public}d, %{public}u, %{public}u",
+                    node->GetWindowId(), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+            }
             break;
         }
         default:
@@ -560,7 +572,7 @@ Rect WindowLayoutPolicyCascade::GetCurCascadeRect(const sptr<WindowNode>& node) 
             if ((*iter)->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
                 (*iter)->GetWindowId() != node->GetWindowId()) {
                 auto property = (*iter)->GetWindowProperty();
-                if (property != nullptr) {
+                if (property != nullptr && property->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
                     cascadeRect = ((*iter)->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ?
                         property->GetWindowRect() : property->GetRequestRect());
                 }
@@ -980,6 +992,26 @@ void WindowLayoutPolicyCascade::LimitWindowPositionWhenInitRectOrMove(const sptr
     }
     WLOGI("After limit by position if init or move, winRect: %{public}d %{public}d %{public}u %{public}u",
         winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+}
+
+void WindowLayoutPolicyCascade::GetMaximizeRect(const sptr<WindowNode>& node, Rect& maxRect)
+{
+    auto property = node->GetWindowProperty();
+    if (property == nullptr) {
+        WLOGFE("window property is nullptr.");
+        return;
+    }
+    const auto& displayRect = DisplayGroupInfo::GetInstance().GetDisplayRect(node->GetDisplayId());
+    const Rect& limitRect = limitRectMap_[node->GetDisplayId()];
+    Rect dockWinRect = { 0, 0, 0, 0 };
+    DockWindowShowState dockState = GetDockWindowShowState(node->GetDisplayId(), dockWinRect);
+    uint32_t dockHeight = dockState == DockWindowShowState::SHOWN_IN_BOTTOM ? dockWinRect.height_ : 0;
+    maxRect.posX_ = limitRect.posX_;
+    maxRect.posY_ = limitRect.posY_;
+    maxRect.width_ = limitRect.width_;
+    maxRect.height_ = displayRect.height_ - limitRect.posY_ - dockHeight;
+    WLOGFI("GetMaximizeRect maxRect = %{public}d, %{public}d, %{public}u, %{public}u ",
+        maxRect.posX_, maxRect.posY_, maxRect.width_, maxRect.height_);
 }
 } // Rosen
 } // OHOS

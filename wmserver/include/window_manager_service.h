@@ -147,6 +147,9 @@ public:
     void SetAnchorOffset(int32_t deltaX, int32_t deltaY) override;
     void OffWindowZoom() override;
     void PostAsyncTask(Task task);
+    void SetMaximizeMode(MaximizeMode maximizeMode) override;
+    MaximizeMode GetMaximizeMode() override;
+
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;
@@ -206,6 +209,7 @@ private:
     bool startingOpen_ = true;
     std::shared_ptr<RSUIDirector> rsUiDirector_;
     std::shared_ptr<PerformReporter> windowShowPerformReport_;
+    MaximizeMode maximizeMode_ = MaximizeMode::MODE_FULL_FILL;
 };
 } // namespace Rosen
 } // namespace OHOS

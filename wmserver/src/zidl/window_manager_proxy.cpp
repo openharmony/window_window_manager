@@ -941,7 +941,7 @@ void WindowManagerProxy::NotifyDumpInfoResult(const std::vector<std::string>& in
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        WLOGFE("WriteInterfaceToken pfailed");
         return;
     }
     if (!data.WriteStringVector(info)) {
@@ -979,5 +979,44 @@ WMError WindowManagerProxy::GetWindowAnimationTargets(std::vector<uint32_t> miss
     }
     return static_cast<WMError>(reply.ReadInt32());
 }
+
+void WindowManagerProxy::SetMaximizeMode(MaximizeMode maximizeMode)
+{
+    MessageParcel data;
+    MessageOption option;
+    MessageParcel reply;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed!");
+        return;
+    }
+    if (!data.WriteInt32(static_cast<uint32_t>(maximizeMode))) {
+        WLOGFE("Write maximizeMode failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_SET_MAXIMIZE_MODE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
+MaximizeMode WindowManagerProxy::GetMaximizeMode()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return MaximizeMode::MODE_FULL_FILL;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_MAXIMIZE_MODE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return MaximizeMode::MODE_FULL_FILL;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<MaximizeMode>(ret);
+}
+
 } // namespace Rosen
 } // namespace OHOS
