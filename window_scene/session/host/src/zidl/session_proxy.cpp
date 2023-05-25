@@ -161,23 +161,6 @@ WSError SessionProxy::PendingSessionActivation(const SessionInfo& info)
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::Recover()
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_RECOVER),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    int32_t ret = reply.ReadUint32();
-    return static_cast<WSError>(ret);
-}
 
 WSError SessionProxy::UpdateActiveStatus(bool isActive)
 {
@@ -201,7 +184,8 @@ WSError SessionProxy::UpdateActiveStatus(bool isActive)
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::Maximize()
+
+WSError SessionProxy::OnSessionEvent(SessionEvent event)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -210,7 +194,11 @@ WSError SessionProxy::Maximize()
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_MAXIMIZE),
+    if (!(data.WriteUint32(static_cast<uint32_t>(event)))) {
+        WLOGFE("Write event id failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_SESSION_EVENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
