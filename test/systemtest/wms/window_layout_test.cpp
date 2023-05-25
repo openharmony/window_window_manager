@@ -403,7 +403,6 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
         .parentLimit = false,
-        .showWhenLocked = true,
         .parentId = INVALID_WINDOW_ID,
     };
 
@@ -470,7 +469,6 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
         .parentLimit = false,
-        .showWhenLocked = true,
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
@@ -534,7 +532,6 @@ HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
         .parentLimit = false,
-        .showWhenLocked = true,
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
@@ -562,7 +559,6 @@ HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
         .parentLimit = false,
-        .showWhenLocked = true,
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
