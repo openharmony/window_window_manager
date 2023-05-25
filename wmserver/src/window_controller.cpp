@@ -234,7 +234,11 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (surfaceNode != nullptr && property->GetWindowType() != WindowType::WINDOW_TYPE_BOOT_ANIMATION) {
+    if (!surfaceNode) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    if (property->GetWindowType() != WindowType::WINDOW_TYPE_BOOT_ANIMATION) {
         surfaceNode->SetFrameGravity(Gravity::RESIZE);
     }
 
