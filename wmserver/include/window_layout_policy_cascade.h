@@ -36,6 +36,7 @@ public:
     Rect GetDividerRect(DisplayId displayId) const override;
     void SetSplitDividerWindowRects(std::map<DisplayId, Rect> dividerWindowRects) override;
     void PerformWindowLayout(const sptr<WindowNode>& node, WindowUpdateType updateType) override;
+    void GetMaximizeRect(const sptr<WindowNode>& node, Rect& maxRect) override;
 
 private:
     /*

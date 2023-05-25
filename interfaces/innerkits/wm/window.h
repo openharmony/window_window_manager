@@ -1199,6 +1199,12 @@ public:
      */
     virtual WMError Maximize() { return WMError::WM_OK; }
     /**
+     * @brief maximize the main window according to MaximizeMode. called by ACE when maximize button is clicked.
+     *
+     * @return WMError
+     */
+    virtual WMError MaximizeFloating() {return WMError::WM_OK;}
+    /**
      * @brief minimize the main window. It is called by ACE when minimize button is clicked.
      *
      * @return WMError
@@ -1227,6 +1233,20 @@ public:
      * @param needRemoveWindowInputChannel True means remove input channel, false means not remove.
      */
     virtual void SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel) {}
+    /**
+     * @brief set global window maximize mode. It is called by ACE when maximize mode changed.
+     *
+     * @param mode MODE_AVOID_SYSTEM_BAR - avoid statusbar and dockbar; MODE_FULL_FILL - fullfill the screen
+     *
+     * @return WMError
+     */
+    virtual WMError SetGlobalMaximizeMode(MaximizeMode mode) {return WMError::WM_OK;}
+    /**
+     * @brief get global window maximize mode.
+     *
+     * @return MaximizeMode
+     */
+    virtual MaximizeMode GetGlobalMaximizeMode() {return MaximizeMode::MODE_FULL_FILL;}
 
     // colorspace, gamut
     /**

@@ -148,6 +148,11 @@ WMError GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
 {
     return WMError::WM_OK;
 }
+void SetMaximizeMode(MaximizeMode maximizeMode) override {}
+MaximizeMode GetMaximizeMode() override
+{
+    return MaximizeMode::MODE_FULL_FILL;
+}
 };
 }
 }

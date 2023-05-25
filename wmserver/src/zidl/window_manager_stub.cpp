@@ -329,6 +329,16 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
+        case WindowManagerMessage::TRANS_ID_SET_MAXIMIZE_MODE: {
+            MaximizeMode maximizeMode = static_cast<MaximizeMode>(data.ReadUint32());
+            SetMaximizeMode(maximizeMode);
+            break;
+        }
+        case WindowManagerMessage::TRANS_ID_GET_MAXIMIZE_MODE: {
+            MaximizeMode maximizeMode = GetMaximizeMode();
+            reply.WriteInt32(static_cast<int32_t>(maximizeMode));
+            break;
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
