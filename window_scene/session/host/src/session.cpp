@@ -267,14 +267,9 @@ void Session::SetPendingSessionActivationEventListener(const NotifyPendingSessio
     pendingSessionActivationFunc_ = func;
 }
 
-WSError Session::Recover()
+void Session::SetSessionEventListener(const NotifySessionEventFunc& func)
 {
-    return WSError::WS_OK;
-}
-
-WSError Session::Maximize()
-{
-    return WSError::WS_OK;
+    sessionEventFunc_ = func;
 }
 
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -361,5 +356,11 @@ WSError Session::UpdateActiveStatus(bool isActive)
     WLOGFD("UpdateActiveStatus, isActive: %{public}d, state: %{public}u", isActive_,
         static_cast<uint32_t>(state_));
     return ret;
+}
+
+WSError Session::OnSessionEvent(SessionEvent event)
+{
+    WLOGFD("Session OnSessionEvent");
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
