@@ -296,7 +296,7 @@ bool DisplayManagerService::SetRotationFromWindow(ScreenId screenId, Rotation ta
 std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:GetDisplaySnapshot(%" PRIu64")", displayId);
-    if (Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION) ||
+    if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
         Permission::IsStartByHdcd()) {
         auto res = abstractDisplayController_->GetScreenSnapshot(displayId);
         if (res != nullptr) {
