@@ -42,7 +42,8 @@ private:
     int HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateActivateStatus(MessageParcel& data, MessageParcel& reply);
     // for scene
-    int HandleSessionEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleRecover(MessageParcel& data, MessageParcel& reply);
+    int HandleMaximize(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_STUB_H

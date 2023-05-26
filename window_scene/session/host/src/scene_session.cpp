@@ -23,11 +23,22 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneS
 
 SceneSession::SceneSession(const SessionInfo& info) : Session(info) {}
 
-WSError SceneSession::OnSessionEvent(SessionEvent event)
+WSError SceneSession::Recover()
 {
-    WLOGFD("SceneSession OnSessionEvent event: %{public}d", static_cast<int32_t>(event));
-    if (sessionEventFunc_) {
-        sessionEventFunc_(static_cast<uint32_t>(event));
+    WLOGFI("Recover session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
+        static_cast<uint32_t>(GetSessionState()));
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::Maximize()
+{
+    WLOGFI("Maximize session id: %{public}" PRIu64 " state: %{public}u", GetPersistentId(),
+        static_cast<uint32_t>(GetSessionState()));
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
     }
     return WSError::WS_OK;
 }
