@@ -27,7 +27,6 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSession" };
 const std::string PENDING_SCENE_CB = "pendingSceneSessionActivation";
 const std::string SESSION_STATE_CHANGE_CB = "sessionStateChange";
-const std::string SESSION_EVENT_CB = "sessionEvent";
 } // namespace
 
 NativeValue* JsSceneSession::Create(NativeEngine& engine, const sptr<SceneSession>& session)
@@ -56,7 +55,6 @@ JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& s
     listenerFunc_ = {
         { PENDING_SCENE_CB,               &JsSceneSession::ProcessPendingSceneSessionActivationRegister },
         { SESSION_STATE_CHANGE_CB,        &JsSceneSession::ProcessSessionStateChangeRegister },
-        { SESSION_EVENT_CB,               &JsSceneSession::ProcessSessionEventRegister },
     };
 }
 
@@ -79,35 +77,6 @@ void JsSceneSession::ProcessSessionStateChangeRegister()
         this->OnSessionStateChange(state);
     };
     session_->SetSessionStateChangeListenser(func);
-}
-
-void JsSceneSession::ProcessSessionEventRegister()
-{
-    NotifySessionEventFunc func = [this](int32_t eventId) {
-        this->OnSessionEvent(eventId);
-    };
-    session_->SetSessionEventListener(func);
-}
-
-void JsSceneSession::OnSessionEvent(uint32_t eventId)
-{
-    WLOGFI("[NAPI]OnSessionEvent, eventId: %{public}d", eventId);
-    auto iter = jsCbMap_.find(SESSION_EVENT_CB);
-    if (iter == jsCbMap_.end()) {
-        return;
-    }
-    auto jsCallBack = iter->second;
-    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [eventId, jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            NativeValue* jsSessionStateObj = CreateJsValue(engine, eventId);
-            NativeValue* argv[] = { jsSessionStateObj };
-            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
-        });
-
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsSceneSession::OnSessionEvent", engine_,
-        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsSceneSession::Finalizer(NativeEngine* engine, void* data, void* hint)

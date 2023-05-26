@@ -35,7 +35,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
         &SessionStub::HandleUpdateActivateStatus),
 
     // for scene only
-    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_SESSION_EVENT), &SessionStub::HandleSessionEvent),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_RECOVER), &SessionStub::HandleRecover),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_MAXIMIZE), &SessionStub::HandleMaximize)
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -105,11 +106,18 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
     return ERR_NONE;
 }
 
-int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleRecover(MessageParcel& data, MessageParcel& reply)
 {
-    uint32_t eventId = data.ReadUint32();
-    WLOGFD("HandleSessionEvent eventId: %{public}d", eventId);
-    WSError errCode = OnSessionEvent(static_cast<SessionEvent>(eventId));
+    WLOGFD("Recover!");
+    WSError errCode = Recover();
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleMaximize(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("Maximize!");
+    WSError errCode = Maximize();
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

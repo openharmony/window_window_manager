@@ -338,7 +338,6 @@ WMError WindowSessionImpl::SetUIContent(const std::string& contentInfo,
     }
     // make uiContent available after Initialize/Restore
     uiContent_ = std::move(uiContent);
-    UpdateDecorEnable(true);
     if (state_ == WindowState::STATE_SHOWN) {
         // UIContent may be nullptr when show window, need to notify again when window is shown
         uiContent_->Foreground();
@@ -346,28 +345,6 @@ WMError WindowSessionImpl::SetUIContent(const std::string& contentInfo,
     UpdateViewportConfig(GetRect(), WindowSizeChangeReason::UNDEFINED);
     WLOGFD("notify uiContent window size change end");
     return WMError::WM_OK;
-}
-
-void WindowSessionImpl::UpdateDecorEnable(bool needNotify)
-{
-    WLOGFD("Start");
-    if (needNotify) {
-        if (uiContent_ != nullptr) {
-            uiContent_->UpdateWindowMode(GetMode(), IsDecorEnable());
-            WLOGFD("Notify uiContent window mode change end");
-        }
-        NotifyModeChange(GetMode(), IsDecorEnable());
-    }
-}
-
-void WindowSessionImpl::NotifyModeChange(WindowMode mode, bool hasDeco)
-{
-    auto windowChangeListeners = GetListeners<IWindowChangeListener>();
-    for (auto& listener : windowChangeListeners) {
-        if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnModeChange(mode, hasDeco);
-        }
-    }
 }
 
 std::shared_ptr<RSSurfaceNode> WindowSessionImpl::GetSurfaceNode() const

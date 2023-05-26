@@ -112,14 +112,6 @@ enum class SizeChangeReason : uint32_t {
     END,
 };
 
-enum class SessionEvent : uint32_t {
-    EVENT_MAXIMIZE = 100,
-    EVENT_RECOVER,
-    EVENT_MINIMIZE,
-    EVENT_CLOSE,
-    EVENT_START_MOVE
-};
-
 struct WSRect {
     int32_t posX_ = 0;
     int32_t posY_ = 0;

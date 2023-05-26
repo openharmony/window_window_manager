@@ -29,21 +29,12 @@ public:
         const sptr<Rosen::ISession>& iSession) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WSError SetActive(bool active) override;
-    WMError DisableAppWindowDecor() override;
-    bool IsDecorEnable() const override;
-    WMError Minimize() override;
-    WMError Maximize() override;
-    WMError Recover() override;
-    void StartMove() override;
-    WMError Close() override;
-    WindowMode GetMode() const override;
 protected:
     WMError Destroy(bool needClearListener) override;
 
 private:
     bool IsValidSystemWindowType(const WindowType& type);
     WMError CreateAndConnectSpecificSession();
-    bool GetDebugPropForPC();
 };
 } // namespace Rosen
 } // namespace OHOS

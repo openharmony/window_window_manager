@@ -25,7 +25,8 @@ public:
     SceneSession(const SessionInfo& info);
     ~SceneSession() = default;
 
-    WSError OnSessionEvent(SessionEvent event) override;
+    WSError Recover() override;
+    WSError Maximize() override;
 };
 } // namespace OHOS::Rosen
 
