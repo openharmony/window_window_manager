@@ -20,30 +20,12 @@
 #include "native_engine/native_value.h"
 #include "native_engine/native_engine.h"
 #include <gmock/gmock.h>
-namespace OHOS {
-namespace AppExecFwk {
-    class Ability;
-    class Configuration;
-    class FormAshmem;
-} // namespace AppExecFwk
-namespace AAFwk {
-    class Want;
-} // namespace AAFwk
-namespace MMI {
-    class PointerEvent;
-    class AxisEvent;
-} // namespace MMI
-namespace Media {
-    class PixelMap;
-} // namespace Media
-} // namespace OHOS
+
 namespace OHOS {
 namespace Ace {
 class UIContentMocker : public UIContent {
 public:
     MOCK_METHOD3(Initialize, void(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage));
-    MOCK_METHOD3(Initialize,
-        void(const std::shared_ptr<Window>& aceWindow, const std::string& url, NativeValue* storage));
     MOCK_METHOD0(Foreground, void());
     MOCK_METHOD0(Background, void());
     MOCK_METHOD0(Focus, void());
