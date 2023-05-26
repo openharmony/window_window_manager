@@ -15,9 +15,6 @@
 
 #include "window_scene_session_impl.h"
 
-#include <parameters.h>
-
-#include "permission.h"
 #include "session/container/include/window_event_channel.h"
 #include "session_manager/include/session_manager.h"
 #include "wm_common.h"
@@ -101,9 +98,6 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         windowSessionMap_.insert(std::make_pair(property_->GetWindowName(),
             std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
     }
-    if (GetDebugPropForPC()) {
-        windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
-    }
     WLOGFD("Window Create [name:%{public}s, id:%{public}" PRIu64 "], state:%{pubic}u",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), state_);
     return ret;
@@ -172,99 +166,6 @@ WMError WindowSceneSessionImpl::Destroy(bool needClearListener)
     }
     WindowSessionImpl::Destroy(needClearListener);
     return WMError::WM_OK;
-}
-
-bool WindowSceneSessionImpl::GetDebugPropForPC()
-{
-    return system::GetParameter("persist.sceneboard.debugforpc.enabled", "0")  == "1";
-}
-
-bool WindowSceneSessionImpl::IsDecorEnable() const
-{
-    bool enable = WindowHelper::IsMainWindow(property_->GetWindowType()) && enableWindowDecor_;
-    WLOGFD("get decor enable %{public}d", enable);
-    return enable;
-}
-
-WMError WindowSceneSessionImpl::Minimize()
-{
-    WLOGFD("WindowSceneSessionImpl::Minimize called");
-    if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    hostSession_->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
-    return WMError::WM_OK;
-}
-
-WMError WindowSceneSessionImpl::Maximize()
-{
-    WLOGFD("WindowSceneSessionImpl::Maximize called");
-    if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
-    windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
-    UpdateDecorEnable(true);
-    return WMError::WM_OK;
-}
-
-WMError WindowSceneSessionImpl::Recover()
-{
-    WLOGFD("WindowSceneSessionImpl::Recover called");
-    if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    hostSession_->OnSessionEvent(SessionEvent::EVENT_RECOVER);
-    windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
-    UpdateDecorEnable(true);
-    return WMError::WM_OK;
-}
-
-void WindowSceneSessionImpl::StartMove()
-{
-    WLOGFD("WindowSceneSessionImpl::StartMove called");
-    if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
-        return;
-    }
-    hostSession_->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
-    return;
-}
-
-WMError WindowSceneSessionImpl::Close()
-{
-    WLOGFD("WindowSceneSessionImpl::Close called");
-    if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    hostSession_->OnSessionEvent(SessionEvent::EVENT_CLOSE);
-    return WMError::WM_OK;
-}
-
-WMError WindowSceneSessionImpl::DisableAppWindowDecor()
-{
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        WLOGFE("disable app window decor permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
-    if (!WindowHelper::IsMainWindow(property_->GetWindowType())) {
-        WLOGFE("window decoration is invalid on sub window");
-        return WMError::WM_ERROR_INVALID_OPERATION;
-    }
-    WLOGI("disable app window decoration.");
-    enableWindowDecor_ = false;
-    UpdateDecorEnable(true);
-    return WMError::WM_OK;
-}
-
-WindowMode WindowSceneSessionImpl::GetMode() const
-{
-    WLOGFD("WindowSceneSessionImpl::GetMode called");
-    return windowMode_;
 }
 } // namespace Rosen
 } // namespace OHOS

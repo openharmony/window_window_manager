@@ -24,6 +24,9 @@ class SceneSessionStage : public SessionStage {
 public:
     SceneSessionStage(const sptr<ISession>& sceneSession);
     ~SceneSessionStage() = default;
+
+    WSError Recover() override;
+    WSError Maximize() override;
 };
 } // namespace OHOS::Rosen
 
