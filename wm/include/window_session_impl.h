@@ -83,6 +83,8 @@ protected:
     void NotifyAfterInactive();
     WMError WindowSessionCreateCheck();
     virtual WMError Destroy(bool needClearListener);
+    void UpdateDecorEnable(bool needNotify = false);
+    void NotifyModeChange(WindowMode mode, bool hasDeco = true);
 
     std::unique_ptr<Ace::UIContent> uiContent_ = nullptr;
     sptr<ISession> hostSession_ = nullptr;
@@ -92,6 +94,8 @@ protected:
     WindowState state_ { WindowState::STATE_INITIAL };
     static std::map<std::string, std::pair<uint64_t, sptr<WindowSessionImpl>>> windowSessionMap_;
     std::recursive_mutex mutex_;
+    WindowMode windowMode_ = WindowMode::WINDOW_MODE_UNDEFINED;
+    bool enableWindowDecor_ = true;
 
 private:
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
