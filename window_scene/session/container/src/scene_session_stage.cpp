@@ -15,30 +15,6 @@
 
 #include "session/container/include/scene_session_stage.h"
 
-#include "session/container/include/window_event_channel.h"
-#include "window_manager_hilog.h"
 namespace OHOS::Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionStage" };
-}
-
 SceneSessionStage::SceneSessionStage(const sptr<ISession>& sceneSession) : SessionStage(sceneSession) {}
-
-WSError SceneSessionStage::Recover()
-{
-    if (session_ == nullptr) {
-        WLOGFE("sceneSession is invalid");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return session_->Recover();
-}
-
-WSError SceneSessionStage::Maximize()
-{
-    if (session_ == nullptr) {
-        WLOGFE("sceneSession is invalid");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return session_->Maximize();
-}
 } // namespace OHOS::Rosen
