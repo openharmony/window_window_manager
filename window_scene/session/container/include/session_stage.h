@@ -81,9 +81,6 @@ public:
     virtual WSError Disconnect();
     virtual WSError PendingSessionActivation(const SessionInfo& info);
     // for scene session stage
-    virtual WSError Recover();
-    virtual WSError Maximize();
-
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
 
