@@ -23,6 +23,7 @@
 #include "js_root_scene_session.h"
 #include "js_scene_session.h"
 #include "js_scene_utils.h"
+#include "js_window_scene.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
@@ -59,6 +60,7 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
     BindNativeFunction(*engine, *object, "requestSceneSessionDestruction", moduleName,
         JsSceneSessionManager::RequestSceneSessionDestruction);
     BindNativeFunction(*engine, *object, "on", moduleName, JsSceneSessionManager::RegisterCallback);
+    BindNativeFunction(*engine, *object, "getWindowSceneConfig", moduleName, JsSceneSessionManager::GetWindowSceneConfig);
     return engine->CreateUndefined();
 }
 
@@ -162,6 +164,13 @@ NativeValue* JsSceneSessionManager::RequestSceneSessionDestruction(NativeEngine*
     WLOGI("[NAPI]RequestSceneSessionDestruction");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
     return (me != nullptr) ? me->OnRequestSceneSessionDestruction(*engine, *info) : nullptr;
+}
+
+NativeValue* JsSceneSessionManager::GetWindowSceneConfig(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGI("[NAPI]GetWindowSceneConfig");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
+    return (me != nullptr) ? me->OnGetWindowSceneConfig(*engine, *info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject)
@@ -452,4 +461,18 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
         CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
+
+NativeValue* JsSceneSessionManager::OnGetWindowSceneConfig(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("[NAPI]OnGetWindowSceneConfig");
+    const AppWindowSceneConfig& windowSceneConfig = SceneSessionManager::GetInstance().GetWindowSceneConfig();
+    NativeValue* jsWindowSceneObj = JsWindowScene::CreateWindowSceneConfig(engine, windowSceneConfig);
+    if (jsWindowSceneObj == nullptr) {
+        WLOGFE("[NAPI]jsWindowSceneObj is nullptr");
+        engine.Throw(CreateJsError(engine,
+            static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
+    }
+    return jsWindowSceneObj;
+}
+
 } // namespace OHOS::Rosen
