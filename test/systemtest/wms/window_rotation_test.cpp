@@ -106,6 +106,7 @@ void WindowRotationTest::SetUp()
             .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
             .needAvoid = true,
             .parentLimit = false,
+            .showWhenLocked = true,
             .parentId = INVALID_WINDOW_ID,
     };
 
@@ -157,6 +158,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest1, Function | MediumTest | Level3
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);
+    ASSERT_EQ(Rotation::ROTATION_0, screen->GetRotation());
 }
 
 /**
