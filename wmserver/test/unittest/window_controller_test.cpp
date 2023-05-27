@@ -251,7 +251,8 @@ HWTEST_F(WindowControllerTest, CreateWindow, Function | SmallTest | Level3)
 
     uint32_t windowId;
     property->SetParentId(INVALID_WINDOW_ID);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
     struct RSSurfaceNodeConfig surfaceNodeConfig;
     surfaceNodeConfig.SurfaceNodeName = "SurfaceNode";
     surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);

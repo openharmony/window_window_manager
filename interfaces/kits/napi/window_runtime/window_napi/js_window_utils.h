@@ -160,11 +160,20 @@ const std::map<ApiOrientation, Orientation> JS_TO_NATIVE_ORIENTATION_MAP {
     {ApiOrientation::LOCKED,                                Orientation::LOCKED                             },
 };
 
+struct SystemBarPropertyFlag {
+    bool enableFlag;
+    bool backgroundColorFlag;
+    bool contentColorFlag;
+    SystemBarPropertyFlag() : enableFlag(false), backgroundColorFlag(false), contentColorFlag(false) {}
+};
+
     NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect& rect);
     NativeValue* CreateJsWindowPropertiesObject(NativeEngine& engine, sptr<Window>& window);
     bool SetSystemBarPropertiesFromJs(NativeEngine& engine, NativeObject* jsObject,
-        std::map<WindowType, SystemBarProperty>& properties, sptr<Window>& window);
+        std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags,
+        sptr<Window>& window);
     bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
+        std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags,
         NativeEngine& engine, NativeCallbackInfo& info, sptr<Window>& window);
     NativeValue* CreateJsSystemBarRegionTintArrayObject(NativeEngine& engine,
         const SystemBarRegionTints& tints);
