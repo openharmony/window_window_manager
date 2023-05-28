@@ -97,6 +97,10 @@ JsWindowExtension::JsWindowExtension(AbilityRuntime::JsRuntime& jsRuntime) : jsR
 JsWindowExtension::~JsWindowExtension()
 {
     WLOGFD("Called");
+    auto context = GetContext();
+    if (context) {
+        context->Unbind();
+    }
     jsRuntime_.FreeNativeReference(std::move(jsObj_));
 }
 
