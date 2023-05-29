@@ -51,7 +51,7 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
     }
 
     if (property) {
-        if (!data.WriteBool(true) || !property->Marshalling(data)) {
+        if (!data.WriteBool(true) || !data.WriteParcelable(property.GetRefPtr())) {
             WLOGFE("Write property failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }

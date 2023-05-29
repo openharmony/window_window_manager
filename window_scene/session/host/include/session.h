@@ -39,7 +39,6 @@ namespace OHOS::Rosen {
 class RSSurfaceNode;
 using NotifyPendingSessionActivationFunc = std::function<void(const SessionInfo& info)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
-using NotifySessionEventFunc = std::function<void(int32_t eventId)>;
 
 class ILifecycleListener {
 public:
@@ -55,13 +54,16 @@ public:
 
     void SetPersistentId(uint64_t persistentId);
     uint64_t GetPersistentId() const;
+    uint64_t GetParentPersistentId() const;
     void SetSessionRect(const WSRect& rect);
-    WSRect GetSessionRect() const;
 
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     SessionState GetSessionState() const;
     const SessionInfo& GetSessionInfo() const;
+    sptr<WindowSessionProperty> GetSessionProperty() const;
+    WSRect GetSessionRect() const;
+    WindowType GetWindowType() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason);
@@ -88,7 +90,12 @@ public:
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
     void NotifySessionStateChange(const SessionState& state);
     WSError UpdateActiveStatus(bool isActive) override; // update active status from session_stage
-    void SetSessionEventListener(const NotifySessionEventFunc& func);
+    WSError RaiseToAppTop() override;
+    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) override;
+    WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session) override;
+    WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) override;
 
 protected:
     void UpdateSessionState(SessionState state);
@@ -99,7 +106,6 @@ protected:
     SessionInfo sessionInfo_;
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
-    NotifySessionEventFunc sessionEventFunc_;
     sptr<WindowSessionProperty> property_ = nullptr;
 private:
     template<typename T>

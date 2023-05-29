@@ -35,11 +35,13 @@ static sptr<Window> CreateWindowWithSession(sptr<WindowOption>& option,
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError& errCode,
     sptr<ISession> iSession = nullptr)
 {
+    WLOGFD("CreateWindowWithSession");
     sptr<WindowSessionImpl> windowSessionImpl = nullptr;
     auto sessionType = option->GetWindowSessionType();
     if (sessionType == WindowSessionType::SCENE_SESSION) {
         windowSessionImpl = new(std::nothrow) WindowSceneSessionImpl(option);
     } else if (sessionType == WindowSessionType::EXTENSION_SESSION) {
+        option->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
         windowSessionImpl = new(std::nothrow) WindowExtensionSessionImpl(option);
     }
 
@@ -52,6 +54,7 @@ static sptr<Window> CreateWindowWithSession(sptr<WindowOption>& option,
     WMError error = windowSessionImpl->Create(context, iSession);
     if (error != WMError::WM_OK) {
         errCode = error;
+        WLOGFD("CreateWindowWithSession, error: %{public}", static_cast<uint32_t>(errCode));
         return nullptr;
     }
     return windowSessionImpl;
