@@ -44,6 +44,15 @@ uint64_t Session::GetPersistentId() const
     return persistentId_;
 }
 
+uint64_t Session::GetParentPersistentId() const
+{
+    if (property_ != nullptr) {
+        WLOGFD("GetParentPersistentId, id:%{public}" PRIu64"", property_->GetParentPersistentId());
+        return property_->GetParentPersistentId();
+    }
+    return INVALID_SESSION_ID;
+}
+
 std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
 {
     return surfaceNode_;
@@ -267,14 +276,9 @@ void Session::SetPendingSessionActivationEventListener(const NotifyPendingSessio
     pendingSessionActivationFunc_ = func;
 }
 
-void Session::SetSessionEventListener(const NotifySessionEventFunc& func)
-{
-    sessionEventFunc_ = func;
-}
-
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    WLOGFD("Session TransferPointEvent");
+    WLOGFD("Session TransferPointEvent, Id: %{public} " PRIu64"", persistentId_);
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
@@ -362,5 +366,42 @@ WSError Session::OnSessionEvent(SessionEvent event)
 {
     WLOGFD("Session OnSessionEvent");
     return WSError::WS_OK;
+}
+
+WSError Session::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
+{
+    WLOGFD("UpdateSessionRect");
+    return WSError::WS_OK;
+}
+
+WSError Session::RaiseToAppTop()
+{
+    return WSError::WS_OK;
+}
+
+WSError Session::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+    const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+    sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session)
+{
+    return WSError::WS_OK;
+}
+
+WSError Session::DestroyAndDisconnectSpecificSession(const uint64_t& persistentId)
+{
+    return WSError::WS_OK;
+}
+
+sptr<WindowSessionProperty> Session::GetSessionProperty() const
+{
+    return property_;
+}
+
+WindowType Session::GetWindowType() const
+{
+    if (property_ != nullptr) {
+        WLOGFD("Type:%{public}" PRIu64"", property_->GetWindowType());
+        return property_->GetWindowType();
+    }
+    return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 }
 } // namespace OHOS::Rosen

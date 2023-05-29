@@ -27,6 +27,7 @@ bool GetAbilityInfoFromJs(NativeEngine& engine, NativeObject* jsObject, SessionI
 NativeValue* CreateJsSessionInfo(NativeEngine& engine, const SessionInfo& sessionInfo);
 NativeValue* CreateJsSessionState(NativeEngine& engine, const SessionState& state);
 NativeValue* SessionStateInit(NativeEngine* engine);
+NativeValue* CreateJsSessionRect(NativeEngine& engine, const WSRect& rect);
 } // namespace OHOS::Rosen
 
 #endif // OHOS_WINDOW_SCENE_JS_SCENE_UTILS_H

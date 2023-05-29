@@ -43,6 +43,7 @@ public:
     WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
     WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
     WMError Destroy() override;
+    virtual WMError Destroy(bool needClearListener);
     WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability) override;
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
@@ -73,7 +74,10 @@ public:
     WMError RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
     WMError UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
+    uint32_t GetParentId() const;
     uint64_t GetPersistentId() const;
+    sptr<WindowSessionProperty> GetProperty() const;
+    sptr<ISession> GetHostSession() const;
 
 protected:
     WMError Connect();
@@ -81,8 +85,9 @@ protected:
     void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
     void NotifyAfterActive();
     void NotifyAfterInactive();
+    void NotifyBeforeDestroy(std::string windowName);
+    void ClearListenersById(uint64_t persistentId);
     WMError WindowSessionCreateCheck();
-    virtual WMError Destroy(bool needClearListener);
     void UpdateDecorEnable(bool needNotify = false);
     void NotifyModeChange(WindowMode mode, bool hasDeco = true);
 
@@ -92,7 +97,10 @@ protected:
     std::shared_ptr<RSSurfaceNode> surfaceNode_ = nullptr;
     sptr<WindowSessionProperty> property_ = nullptr;
     WindowState state_ { WindowState::STATE_INITIAL };
+    // map of windowSession: <sessionName, <persistentId, windowSession>>
     static std::map<std::string, std::pair<uint64_t, sptr<WindowSessionImpl>>> windowSessionMap_;
+    // map of subSession: <persistentId, std::vector<windowSession>>
+    static std::map<uint64_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
     std::recursive_mutex mutex_;
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_UNDEFINED;
     bool enableWindowDecor_ = true;
@@ -104,18 +112,13 @@ private:
     template<typename T>
     EnableIfSame<T, IWindowChangeListener, std::vector<sptr<IWindowChangeListener>>> GetListeners();
     template<typename T> void ClearUselessListeners(std::map<uint64_t, T>& listeners, uint64_t persistentId);
-
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
-
     void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
-
     void NotifyAfterFocused();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
-    void NotifyBeforeDestroy(std::string windowName);
 
     void NotifyForegroundFailed(WMError ret);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason);
-    void ClearListenersById(uint64_t persistentId);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
 
     static std::map<uint64_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
