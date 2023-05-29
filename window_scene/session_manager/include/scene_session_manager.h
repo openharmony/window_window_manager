@@ -19,6 +19,7 @@
 #include "interfaces/include/ws_common.h"
 #include "session/host/include/root_scene_session.h"
 #include "wm_single_instance.h"
+#include "window_scene_config.h"
 
 #include "session_manager_base.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
@@ -47,6 +48,7 @@ public:
         sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session);
     WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId);
     void SetCreateSpecificSessionListener(const NotifyCreateSpecificSessionFunc& func);
+    const AppWindowSceneConfig& GetWindowSceneConfig() const;
 
 protected:
     SceneSessionManager();
@@ -54,11 +56,17 @@ protected:
 
 private:
     void Init();
+    void LoadWindowSceneXml();
+    void ConfigWindowSceneXml();
+    void ConfigWindowEffect(const WindowSceneConfig::ConfigItem& effectConfig);
+    bool ConfigAppWindowCornerRadius(const WindowSceneConfig::ConfigItem& item, float& out);
+    bool ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig, WindowShadowConfig& outShadow);
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& scnSession);
     std::map<uint64_t, sptr<SceneSession>> abilitySceneMap_;
     sptr<RootSceneSession> rootSceneSession_;
     sptr<RootScene> rootScene_;
     NotifyCreateSpecificSessionFunc createSpecificSessionFunc_;
+    AppWindowSceneConfig appWindowSceneConfig_;
 };
 } // namespace OHOS::Rosen
 
