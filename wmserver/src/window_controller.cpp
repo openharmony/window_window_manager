@@ -419,36 +419,38 @@ void WindowController::RelayoutKeyboard(const sptr<WindowNode>& node)
 void WindowController::NotifyInputCallingWindowRectAndOccupiedAreaChange(const sptr<WindowNode>& callingWindow,
     const Rect& rect, const Rect& occupiedArea)
 {
-    // update calling window rect
-    callingWindow->SetWindowRect(rect);
-    WindowLayoutPolicy::CalcAndSetNodeHotZone(rect, callingWindow);
+    if (callingWindow->GetWindowType() != WindowType::WINDOW_TYPE_APP_COMPONENT) {
+        // update calling window rect
+        callingWindow->SetWindowRect(rect);
+        WindowLayoutPolicy::CalcAndSetNodeHotZone(rect, callingWindow);
 
-    // set bounds and do animation for calling window
-    wptr<WindowNode> weakNode = callingWindow;
-    auto setBoundsFun = [weakNode, rect]() {
-        auto winNode = weakNode.promote();
-        if (winNode == nullptr) {
-            WLOGFW("Window node is nullptr");
-            return;
-        }
-        if (winNode->leashWinSurfaceNode_) {
-            winNode->leashWinSurfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
-            if (winNode->startingWinSurfaceNode_) {
-                winNode->startingWinSurfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);
+        // set bounds and do animation for calling window
+        wptr<WindowNode> weakNode = callingWindow;
+        auto setBoundsFun = [weakNode, rect]() {
+            auto winNode = weakNode.promote();
+            if (winNode == nullptr) {
+                WLOGFW("Window node is nullptr");
+                return;
             }
-            if (winNode->surfaceNode_) {
-                winNode->surfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);
+            if (winNode->leashWinSurfaceNode_) {
+                winNode->leashWinSurfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+                if (winNode->startingWinSurfaceNode_) {
+                    winNode->startingWinSurfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);
+                }
+                if (winNode->surfaceNode_) {
+                    winNode->surfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);
+                }
+            } else {
+                if (winNode->surfaceNode_) {
+                    winNode->surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+                }
             }
-        } else {
-            if (winNode->surfaceNode_) {
-                winNode->surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
-            }
-        }
-    };
-    const auto& keyboardAnimationConfig = WindowNodeContainer::GetAnimationConfigRef().keyboardAnimationConfig_;
-    auto timingProtocol = WindowHelper::IsEmptyRect(occupiedArea) ? keyboardAnimationConfig.durationOut_ :
-        keyboardAnimationConfig.durationIn_;
-    RSNode::Animate(timingProtocol, keyboardAnimationConfig.curve_, setBoundsFun);
+        };
+        const auto& keyboardAnimationConfig = WindowNodeContainer::GetAnimationConfigRef().keyboardAnimationConfig_;
+        auto timingProtocol = WindowHelper::IsEmptyRect(occupiedArea) ? keyboardAnimationConfig.durationOut_ :
+            keyboardAnimationConfig.durationIn_;
+        RSNode::Animate(timingProtocol, keyboardAnimationConfig.curve_, setBoundsFun);
+    }
 
     // if keyboard will occupy calling, notify calling window the occupied area and safe height
     const Rect& safeRect = WindowHelper::GetOverlap(occupiedArea, rect, 0, 0);
@@ -508,17 +510,19 @@ void WindowController::ResizeSoftInputCallingWindowIfNeed(const sptr<WindowNode>
 
     // calculate new rect of calling window
     Rect newRect = callingWindowRect;
-    newRect.posY_ = softInputWindowRect.posY_ - static_cast<int32_t>(newRect.height_);
-    Rect statusBarWindowRect = { 0, 0, 0, 0 };
-    auto statusbarWindow = windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR]);
-    if (statusbarWindow != nullptr && statusbarWindow->parent_ != nullptr) {
-        statusBarWindowRect = statusbarWindow->GetWindowRect();
-    }
-    newRect.posY_ = std::max(newRect.posY_,
-        statusBarWindowRect.posY_ + static_cast<int32_t>(statusBarWindowRect.height_));
+    if (callingWindow->GetWindowType() != WindowType::WINDOW_TYPE_APP_COMPONENT) {
+        newRect.posY_ = softInputWindowRect.posY_ - static_cast<int32_t>(newRect.height_);
+        Rect statusBarWindowRect = { 0, 0, 0, 0 };
+        auto statusbarWindow = windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR]);
+        if (statusbarWindow != nullptr && statusbarWindow->parent_ != nullptr) {
+            statusBarWindowRect = statusbarWindow->GetWindowRect();
+        }
+        newRect.posY_ = std::max(newRect.posY_,
+            statusBarWindowRect.posY_ + static_cast<int32_t>(statusBarWindowRect.height_));
 
-    callingWindowRestoringRect_ = callingWindowRect;
-    callingWindowId_ = callingWindow->GetWindowId();
+        callingWindowRestoringRect_ = callingWindowRect;
+        callingWindowId_ = callingWindow->GetWindowId();
+    }
 
     NotifyInputCallingWindowRectAndOccupiedAreaChange(callingWindow, newRect, softInputWindowRect);
 }
