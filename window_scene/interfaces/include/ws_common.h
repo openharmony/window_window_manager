@@ -136,5 +136,24 @@ struct WSRect {
         return !this->operator==(a);
     }
 };
+
+struct WindowShadowConfig {
+    float elevation_ = 0.0f;
+    float offsetX_ = 0.0f;
+    float offsetY_ = 0.0f;
+    float alpha_ = 0.0f;
+    float radius_ = 0.0f;
+    std::string color_ = "#000000";
+};
+
+struct AppWindowSceneConfig {
+    float fullScreenCornerRadius_ = 0.0f;
+    float splitCornerRadius_ = 0.0f;
+    float floatCornerRadius_ = 0.0f;
+
+    WindowShadowConfig focusedShadow_;
+    WindowShadowConfig unfocusedShadow_;
+};
+
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
