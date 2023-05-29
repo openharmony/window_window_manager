@@ -641,6 +641,8 @@ WMError WindowNodeContainer::DestroyWindowNode(sptr<WindowNode>& node, std::vect
     if (WindowHelper::IsMainWindow(node->GetWindowType())) {
         WindowInfoReporter::GetInstance().InsertDestroyReportInfo(node->abilityInfo_.bundleName_);
     }
+
+    UpdateAvoidAreaListener(node, false);
     WLOGI("DestroyNode Id: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }
