@@ -73,7 +73,7 @@ public:
     bool MakeExpand(std::vector<ScreenId> screenIds, std::vector<Point> startPoints);
     DMError StopScreens(const std::vector<ScreenId>& screenIds, ScreenCombination stopCombination);
     void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens);
-    bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) const;
+    bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason, bool needToNotify = true);
     ScreenPowerState GetScreenPower(ScreenId dmsScreenId) const;
     DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio);
 
@@ -96,12 +96,14 @@ private:
     void OnRsScreenConnectionChange(ScreenId rsScreenId, ScreenEvent screenEvent);
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
     void ProcessScreenConnected(ScreenId rsScreenId);
+    void ProcessDefaultScreenReconnected(ScreenId rsScreenId);
     sptr<AbstractScreen> InitAndGetScreen(ScreenId rsScreenId);
     void ProcessScreenDisconnected(ScreenId rsScreenId);
     bool InitAbstractScreenModesInfo(sptr<AbstractScreen>& absScreen);
     sptr<AbstractScreen> InitVirtualScreen(ScreenId dmsScreenId, ScreenId rsId, VirtualScreenOption option);
     sptr<AbstractScreenGroup> AddToGroupLocked(sptr<AbstractScreen> newScreen);
-    sptr<AbstractScreenGroup> RemoveFromGroupLocked(sptr<AbstractScreen> newScreen);
+    sptr<AbstractScreenGroup> RemoveFromGroupLocked(sptr<AbstractScreen> screen);
+    void RemoveDefaultScreenFromGroupLocked(sptr<AbstractScreen> screen);
     bool RemoveChildFromGroup(sptr<AbstractScreen>, sptr<AbstractScreenGroup>);
     bool CheckScreenInScreenGroup(sptr<AbstractScreen> newScreen) const;
     sptr<AbstractScreenGroup> AddAsFirstScreenLocked(sptr<AbstractScreen> newScreen);
@@ -149,6 +151,7 @@ private:
     std::atomic<ScreenId> defaultRsScreenId_ {SCREEN_ID_INVALID };
     Orientation buildInDefaultOrientation_ { Orientation::UNSPECIFIED };
     bool isExpandCombination_ = false;
+    ScreenPowerState powerState_;
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_SCREEN_CONTROLLER_H
