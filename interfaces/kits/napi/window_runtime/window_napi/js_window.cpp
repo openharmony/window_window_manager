@@ -3538,29 +3538,23 @@ NativeValue* JsWindow::OnSetShadow(NativeEngine& engine, NativeCallbackInfo& inf
 
     if ((ret == WmErrorCode::WM_OK) && (info.argc >= 2)) { // parse the 2nd param: color
         std::string color;
-        if (!ConvertFromJsValue(engine, info.argv[1], color)) {
-            engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
-            return engine.CreateUndefined();
+        if (ConvertFromJsValue(engine, info.argv[1], color)) {
+            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowColor(color));
         }
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowColor(color));
     }
 
     if ((ret == WmErrorCode::WM_OK) && info.argc >= 3) { // parse the 3rd param: offsetX
         NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[2]); // 2: the 3rd param
-        if (nativeVal == nullptr) {
-            engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
-            return engine.CreateUndefined();
+        if (nativeVal != nullptr) {
+            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowOffsetX(static_cast<double>(*nativeVal)));
         }
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowOffsetX(static_cast<double>(*nativeVal)));
     }
 
     if ((ret == WmErrorCode::WM_OK) && info.argc >= 4) { // parse the 4th param: offsetY
         NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[3]); // 3: the 4th param
-        if (nativeVal == nullptr) {
-            engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
-            return engine.CreateUndefined();
+        if (nativeVal != nullptr) {
+            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowOffsetY(static_cast<double>(*nativeVal)));
         }
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowOffsetY(static_cast<double>(*nativeVal)));
     }
 
     if (ret != WmErrorCode::WM_OK) {
