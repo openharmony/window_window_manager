@@ -16,6 +16,7 @@
 #include "session_manager/include/scene_session_manager.h"
 
 #include <ability_manager_client.h>
+#include <parameters.h>
 #include <start_options.h>
 #include <want.h>
 
@@ -51,6 +52,8 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
         if (rootSceneSession_ != nullptr) {
             return rootSceneSession_;
         }
+
+        system::SetParameter("bootevent.boot.completed", "true");
 
         rootSceneSession_ = new (std::nothrow) RootSceneSession();
         rootScene_ = new (std::nothrow) RootScene();

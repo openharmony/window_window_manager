@@ -32,7 +32,10 @@ ScreenSessionManager& ScreenSessionManager::GetInstance()
     return screenSessionManager;
 }
 
-ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetInstance())
+ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetInstance()),
+    sessionDisplayPowerController_(new SessionDisplayPowerController(
+        std::bind(&ScreenSessionManager::NotifyDisplayStateChange, this,
+            std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4)))
 {
     Init();
 }
@@ -193,5 +196,134 @@ ScreenId ScreenSessionManager::GetDefaultScreenId()
         defaultScreenId_ = rsInterface_.GetDefaultScreenId();
     }
     return defaultScreenId_;
+}
+
+bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
+{
+    return NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP, EventStatus::BEGIN);
+}
+
+bool ScreenSessionManager::WakeUpEnd()
+{
+    return NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP, EventStatus::END);
+}
+
+bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
+{
+    sessionDisplayPowerController_->SuspendBegin(reason);
+    return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::BEGIN);
+}
+
+bool ScreenSessionManager::SuspendEnd()
+{
+    return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::END);
+}
+
+bool ScreenSessionManager::SetDisplayState(DisplayState state)
+{
+    return sessionDisplayPowerController_->SetDisplayState(state);
+}
+
+void ScreenSessionManager::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
+    const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
+{
+    if (displayChangeListener_ != nullptr) {
+        displayChangeListener_->OnDisplayStateChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+    }
+}
+
+bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
+{
+    auto screenIds = GetAllScreenIds();
+    if (screenIds.empty()) {
+        WLOGFE("no screen info");
+        return false;
+    }
+
+    ScreenPowerStatus status;
+    switch (state) {
+        case ScreenPowerState::POWER_ON: {
+            status = ScreenPowerStatus::POWER_STATUS_ON;
+            break;
+        }
+        case ScreenPowerState::POWER_OFF: {
+            status = ScreenPowerStatus::POWER_STATUS_OFF;
+            break;
+        }
+        default: {
+            WLOGFW("SetScreenPowerStatus state not support");
+            return false;
+        }
+    }
+
+    for (auto screenId : screenIds) {
+        rsInterface_.SetScreenPowerStatus(screenId, status);
+    }
+
+    return NotifyDisplayPowerEvent(state == ScreenPowerState::POWER_ON ? DisplayPowerEvent::DISPLAY_ON :
+        DisplayPowerEvent::DISPLAY_OFF, EventStatus::END);
+}
+
+std::vector<ScreenId> ScreenSessionManager::GetAllScreenIds()
+{
+    std::vector<ScreenId> res;
+    for (const auto& iter : screenSessionMap_) {
+        res.emplace_back(iter.first);
+    }
+    return res;
+}
+
+DisplayState ScreenSessionManager::GetDisplayState(DisplayId displayId)
+{
+    return sessionDisplayPowerController_->GetDisplayState(displayId);
+}
+
+void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
+{
+    sessionDisplayPowerController_->NotifyDisplayEvent(event);
+}
+
+ScreenPowerState ScreenSessionManager::GetScreenPower(ScreenId screenId)
+{
+    if (screenSessionMap_.find(screenId) == screenSessionMap_.end()) {
+        WLOGFE("cannot find screen %{public}" PRIu64"", screenId);
+        return ScreenPowerState::INVALID_STATE;
+    }
+
+    auto state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(screenId));
+    WLOGFI("GetScreenPower:%{public}u, rsscreen:%{public}" PRIu64".", state, screenId);
+    return state;
+}
+
+void ScreenSessionManager::RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener)
+{
+    displayChangeListener_ = listener;
+    WLOGFD("IDisplayChangeListener registered");
+}
+
+bool ScreenSessionManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER);
+    if (agents.empty()) {
+        return false;
+    }
+    WLOGFI("NotifyDisplayPowerEvent");
+    for (auto& agent : agents) {
+        agent->NotifyDisplayPowerEvent(event, status);
+    }
+    return true;
+}
+
+bool ScreenSessionManager::NotifyDisplayStateChanged(DisplayId id, DisplayState state)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
+    if (agents.empty()) {
+        return false;
+    }
+    WLOGFI("NotifyDisplayStateChanged");
+    for (auto& agent : agents) {
+        agent->NotifyDisplayStateChanged(id, state);
+    }
+    return true;
 }
 } // namespace OHOS::Rosen
