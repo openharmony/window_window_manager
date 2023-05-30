@@ -278,7 +278,7 @@ void Session::SetPendingSessionActivationEventListener(const NotifyPendingSessio
 
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    WLOGFD("Session TransferPointEvent, Id: %{public} " PRIu64"", persistentId_);
+    WLOGFD("Session TransferPointEvent, Id: %{public}" PRIu64 "", persistentId_);
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
@@ -399,7 +399,7 @@ sptr<WindowSessionProperty> Session::GetSessionProperty() const
 WindowType Session::GetWindowType() const
 {
     if (property_ != nullptr) {
-        WLOGFD("Type:%{public}" PRIu64"", property_->GetWindowType());
+        WLOGFD("Type:%{public}" PRIu32 "", static_cast<uint32_t>(property_->GetWindowType()));
         return property_->GetWindowType();
     }
     return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;

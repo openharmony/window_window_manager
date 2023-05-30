@@ -54,7 +54,7 @@ static sptr<Window> CreateWindowWithSession(sptr<WindowOption>& option,
     WMError error = windowSessionImpl->Create(context, iSession);
     if (error != WMError::WM_OK) {
         errCode = error;
-        WLOGFD("CreateWindowWithSession, error: %{public}", static_cast<uint32_t>(errCode));
+        WLOGFD("CreateWindowWithSession, error: %{public}u", static_cast<uint32_t>(errCode));
         return nullptr;
     }
     return windowSessionImpl;
