@@ -63,6 +63,7 @@ ohos_shared_library("scene_session_manager") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog_native:libhilog",
+    "init:libbegetutil",
     "ipc:ipc_single",
     "window_manager:libwm",
   ]
@@ -76,6 +77,7 @@ ohos_shared_library("screen_session_manager") {
   sources = [
     "../../dm/src/zidl/display_manager_agent_proxy.cpp",
     "src/screen_session_manager.cpp",
+    "src/session_display_power_controller.cpp",
     "src/zidl/screen_session_manager_stub.cpp",
   ]
 
