@@ -51,6 +51,7 @@ private:
 
     void InitScreenSessionManagerProxy();
 
+    bool serviceConnected_ = false;
     sptr<AbilityConnection> abilityConnection_;
     sptr<IRemoteObject> remoteObject_ = nullptr;
     sptr<ISessionManagerService> sessionManagerServiceProxy_ = nullptr;

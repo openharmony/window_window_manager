@@ -77,7 +77,7 @@ SessionManager::~SessionManager()
 
 void SessionManager::Init()
 {
-    if (!abilityConnection_) {
+    if (!serviceConnected_) {
         ConnectToService();
     }
 }
@@ -121,6 +121,7 @@ void SessionManager::ConnectToService()
     if (ret != ERR_OK) {
         WLOGFE("ConnectToService failed, errorcode: %{public}d", ret);
     }
+    serviceConnected_ = (ret == ERR_OK);
 }
 
 void SessionManager::InitSessionManagerServiceProxy()
@@ -144,12 +145,13 @@ void SessionManager::GetSceneSessionManagerProxy()
     }
     if (!sessionManagerServiceProxy_) {
         WLOGFE("sessionManagerServiceProxy_ is nullptr");
+        return;
     }
 
     sptr<IRemoteObject> remoteObject = sessionManagerServiceProxy_->GetSceneSessionManager();
     sceneSessionManagerProxy_ = iface_cast<ISceneSessionManager>(remoteObject);
     if (!sceneSessionManagerProxy_) {
-        WLOGFW("Get screen session manager proxy failed, nullptr");
+        WLOGFW("Get scene session manager proxy failed, nullptr");
     }
 }
 
