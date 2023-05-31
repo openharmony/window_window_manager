@@ -93,8 +93,8 @@ WSError SessionStage::Connect(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
     }
     sptr<SessionStage> sessionStage(this);
     sptr<IWindowEventChannel> eventChannel(new WindowEventChannel(sessionStage));
-    uint64_t persistentId = INVALID_SESSION_ID;
-    return session_->Connect(sessionStage, eventChannel, surfaceNode, persistentId);
+    SystemSessionConfig systemConfig;
+    return session_->Connect(sessionStage, eventChannel, surfaceNode, systemConfig);
 }
 
 WSError SessionStage::Foreground()

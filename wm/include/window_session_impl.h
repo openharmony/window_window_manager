@@ -103,7 +103,7 @@ protected:
     static std::map<uint64_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
     std::recursive_mutex mutex_;
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_UNDEFINED;
-    bool enableWindowDecor_ = true;
+    SystemSessionConfig windowSystemConfig_ ;
 
 private:
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);

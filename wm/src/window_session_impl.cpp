@@ -206,9 +206,7 @@ WMError WindowSessionImpl::Connect()
         return WMError::WM_ERROR_NULLPTR;
     }
     sptr<IWindowEventChannel> eventChannel(channel);
-    uint64_t persistentId = INVALID_SESSION_ID;
-    WSError ret = hostSession_->Connect(iSessionStage, eventChannel, surfaceNode_, persistentId, property_);
-    property_->SetPersistentId(persistentId);
+    WSError ret = hostSession_->Connect(iSessionStage, eventChannel, surfaceNode_, windowSystemConfig_, property_);
     // replace WSError with WMError
     WMError res = static_cast<WMError>(ret);
     WLOGFI("Window Connect [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u], ret:%{public}u",
