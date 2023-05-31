@@ -69,6 +69,41 @@ private:
     uint64_t persistentId_ = INVALID_SESSION_ID;
     uint64_t parentPersistentId_ = INVALID_SESSION_ID;
 };
+
+struct SystemSessionConfig : public Parcelable {
+    bool isSystemDecorEnable_ = true;
+    uint32_t decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+    bool isStretchable_ = false;
+    WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    KeyboardAnimationConfig keyboardAnimationConfig_;
+
+    virtual bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteBool(isSystemDecorEnable_) || !parcel.WriteBool(isStretchable_) ||
+            !parcel.WriteUint32(decorModeSupportInfo_)) {
+            return false;
+        }
+
+        if (!parcel.WriteUint32(static_cast<uint32_t>(defaultWindowMode_)) ||
+            !parcel.WriteParcelable(&keyboardAnimationConfig_)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    static SystemSessionConfig* Unmarshalling(Parcel& parcel)
+    {
+        SystemSessionConfig* config = new SystemSessionConfig();
+        config->isSystemDecorEnable_ = parcel.ReadBool();
+        config->isStretchable_ = parcel.ReadBool();
+        config->decorModeSupportInfo_ = parcel.ReadUint32();
+        config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
+        sptr<KeyboardAnimationConfig> keyboardConfig = parcel.ReadParcelable<KeyboardAnimationConfig>();
+        config->keyboardAnimationConfig_ = *keyboardConfig;
+        return config;
+    }
+};
 } // namespace Rosen
 } // namespace OHOS
 #endif // OHOS_ROSEN_WINDOW_PROPERTY_H
