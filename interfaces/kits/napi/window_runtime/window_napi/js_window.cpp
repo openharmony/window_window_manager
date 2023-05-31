@@ -610,6 +610,29 @@ NativeValue* JsWindow::ResetAspectRatio(NativeEngine* engine, NativeCallbackInfo
     return (me != nullptr) ? me->OnResetAspectRatio(*engine, *info) : nullptr;
 }
 
+static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
+    std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, wptr<Window> weakToken)
+{
+    auto weakWindow = weakToken.promote();
+
+    for (auto it : systemBarPropertyFlags) {
+        WindowType type = it.first;
+        SystemBarPropertyFlag flag = it.second;
+        auto property = weakWindow->GetSystemBarPropertyByType(type);
+        if (flag.enableFlag == false) {
+            systemBarProperties[type].enable_ = property.enable_;
+        }
+        if (flag.backgroundColorFlag == false) {
+            systemBarProperties[type].backgroundColor_ = property.backgroundColor_;
+        }
+        if (flag.contentColorFlag == false) {
+            systemBarProperties[type].contentColor_ = property.contentColor_;
+        }
+    }
+
+    return;
+}
+
 NativeValue* JsWindow::OnShow(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WMError errCode = WMError::WM_OK;
@@ -1703,18 +1726,21 @@ NativeValue* JsWindow::OnSetSystemBarEnable(NativeEngine& engine, NativeCallback
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     std::map<WindowType, SystemBarProperty> systemBarProperties;
-    if (errCode == WMError::WM_OK && !GetSystemBarStatus(systemBarProperties, engine, info, windowToken_)) {
+    std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
+    if (errCode == WMError::WM_OK && !GetSystemBarStatus(systemBarProperties, systemBarPropertyFlags,
+        engine, info, windowToken_)) {
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     wptr<Window> weakToken(windowToken_);
-    AsyncTask::CompleteCallback complete =
-        [weakToken, systemBarProperties, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+    AsyncTask::CompleteCallback complete = [weakToken, systemBarProperties, systemBarPropertyFlags, errCode]
+        (NativeEngine& engine, AsyncTask& task, int32_t status) mutable {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 WLOGFE("window is nullptr or get invalid param");
                 return;
             }
+            UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, weakToken);
             WMError ret = weakWindow->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR,
                 systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR));
             ret = weakWindow->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR,
@@ -1744,8 +1770,9 @@ NativeValue* JsWindow::OnSetWindowSystemBarEnable(NativeEngine& engine, NativeCa
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
     std::map<WindowType, SystemBarProperty> systemBarProperties;
+    std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
     if (info.argc < 1 || windowToken_ == nullptr || // 1: params num
-        !GetSystemBarStatus(systemBarProperties, engine, info, windowToken_)) {
+        !GetSystemBarStatus(systemBarProperties, systemBarPropertyFlags, engine, info, windowToken_)) {
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
@@ -1753,23 +1780,22 @@ NativeValue* JsWindow::OnSetWindowSystemBarEnable(NativeEngine& engine, NativeCa
         return engine.CreateUndefined();
     }
     wptr<Window> weakToken(windowToken_);
-    AsyncTask::CompleteCallback complete =
-        [weakToken, systemBarProperties](NativeEngine& engine, AsyncTask& task, int32_t status) {
+    AsyncTask::CompleteCallback complete = [weakToken, systemBarProperties, systemBarPropertyFlags]
+        (NativeEngine& engine, AsyncTask& task, int32_t status) mutable {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 task.Reject(engine,
                     CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
                 return;
             }
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-                weakWindow->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR,
-                systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR)));
+            UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, weakToken);
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSystemBarProperty(
+                WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR)));
             if (ret != WmErrorCode::WM_OK) {
                 task.Reject(engine, CreateJsError(engine,
                     static_cast<int32_t>(ret), "JsWindow::OnSetWindowSystemBarEnable failed"));
             }
-            ret = WM_JS_TO_ERROR_CODE_MAP.at(
-                weakWindow->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR,
+            ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR,
                 systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_BAR)));
             if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
@@ -1799,27 +1825,28 @@ NativeValue* JsWindow::OnSetSystemBarProperties(NativeEngine& engine, NativeCall
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     std::map<WindowType, SystemBarProperty> systemBarProperties;
+    std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
     if (errCode == WMError::WM_OK) {
         NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
         if (nativeObj == nullptr) {
             WLOGFE("Failed to convert object to SystemBarProperties");
             errCode = WMError::WM_ERROR_INVALID_PARAM;
-        } else {
-            if (!SetSystemBarPropertiesFromJs(engine, nativeObj, systemBarProperties, windowToken_)) {
-                WLOGFE("Failed to GetSystemBarProperties From Js Object");
-                errCode = WMError::WM_ERROR_INVALID_PARAM;
-            }
+        } else if (!SetSystemBarPropertiesFromJs(engine, nativeObj,
+            systemBarProperties, systemBarPropertyFlags, windowToken_)) {
+            WLOGFE("Failed to GetSystemBarProperties From Js Object");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
         }
     }
     wptr<Window> weakToken(windowToken_);
-    AsyncTask::CompleteCallback complete =
-        [weakToken, systemBarProperties, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+    AsyncTask::CompleteCallback complete = [weakToken, systemBarProperties, systemBarPropertyFlags, errCode]
+        (NativeEngine& engine, AsyncTask& task, int32_t status) mutable {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 WLOGFE("window is nullptr or get invalid param");
                 return;
             }
+            UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, weakToken);
             WMError ret = weakWindow->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR,
                 systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR));
             ret = weakWindow->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR,
@@ -1849,14 +1876,14 @@ NativeValue* JsWindow::OnSetWindowSystemBarProperties(NativeEngine& engine, Nati
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     std::map<WindowType, SystemBarProperty> systemBarProperties;
+    std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
     if (errCode == WmErrorCode::WM_OK) {
         NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
         if (nativeObj == nullptr) {
             errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-        } else {
-            if (!SetSystemBarPropertiesFromJs(engine, nativeObj, systemBarProperties, windowToken_)) {
-                errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-            }
+        } else if (!SetSystemBarPropertiesFromJs(engine, nativeObj,
+            systemBarProperties, systemBarPropertyFlags, windowToken_)) {
+            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
         }
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
@@ -1865,17 +1892,17 @@ NativeValue* JsWindow::OnSetWindowSystemBarProperties(NativeEngine& engine, Nati
     }
 
     wptr<Window> weakToken(windowToken_);
-    AsyncTask::CompleteCallback complete =
-        [weakToken, systemBarProperties](NativeEngine& engine, AsyncTask& task, int32_t status) {
+    AsyncTask::CompleteCallback complete = [weakToken, systemBarProperties, systemBarPropertyFlags]
+        (NativeEngine& engine, AsyncTask& task, int32_t status) mutable {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 task.Reject(engine,
                     CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
                 return;
             }
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-                weakWindow->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR,
-                systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR)));
+            UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, weakToken);
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSystemBarProperty(
+                WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR)));
             if (ret != WmErrorCode::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret)));
             }
@@ -1889,8 +1916,7 @@ NativeValue* JsWindow::OnSetWindowSystemBarProperties(NativeEngine& engine, Nati
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
-        ((info.argv[1] != nullptr && info.argv[1]->TypeOf() == NATIVE_FUNCTION) ?
-        info.argv[1] : nullptr);
+        ((info.argv[1] != nullptr && info.argv[1]->TypeOf() == NATIVE_FUNCTION) ? info.argv[1] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule("JsWindow::OnSetWindowSystemBarProperties",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
