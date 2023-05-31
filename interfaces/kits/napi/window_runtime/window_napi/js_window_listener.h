@@ -55,7 +55,7 @@ class JsWindowListener : public IWindowChangeListener,
                          public IDialogDeathRecipientListener,
                          public IGestureNavigationEnabledChangedListener {
 public:
-    JsWindowListener(NativeEngine* engine, std::shared_ptr<NativeReference> callback)
+    JsWindowListener(NativeEngine* engine, NativeReference* callback)
         : engine_(engine), jsCallBack_(callback), weakRef_(wptr<JsWindowListener> (this)) {}
     ~JsWindowListener();
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
@@ -79,7 +79,7 @@ private:
     WindowState state_ {WindowState::STATE_INITIAL};
     void LifeCycleCallBack(LifeCycleEventType eventType);
     NativeEngine* engine_ = nullptr;
-    std::shared_ptr<NativeReference> jsCallBack_ = nullptr;
+    NativeReference* jsCallBack_ = nullptr;
     wptr<JsWindowListener> weakRef_  = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
     DEFINE_VAR_DEFAULT_FUNC_SET(bool, IsDeprecatedInterface, isDeprecatedInterface, false)
