@@ -484,7 +484,11 @@ public:
      *
      * @return Name of window.
      */
-    virtual const std::string& GetWindowName() const { return std::string(); }
+    virtual const std::string& GetWindowName() const
+    {
+        static const std::string name;
+        return name;
+    }
     /**
      * @brief Get id of window.
      *
