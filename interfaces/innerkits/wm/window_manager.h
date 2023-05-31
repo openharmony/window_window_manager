@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WINDOW_MANAGER_H
 
 #include <memory>
+#include <mutex>
 #include <refbase.h>
 #include <vector>
 #include <iremote_object.h>
@@ -438,9 +439,11 @@ public:
 
 private:
     WindowManager();
-    ~WindowManager() = default;
+    ~WindowManager();
+    std::recursive_mutex mutex_;
     class Impl;
     std::unique_ptr<Impl> pImpl_;
+    bool destroyed_ = false;
 
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
         DisplayId displayId, bool focused) const;
@@ -453,7 +456,7 @@ private:
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) const;
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark) const;
     void NotifyGestureNavigationEnabledResult(bool enable) const;
-    void OnRemoteDied() const;
+    void OnRemoteDied();
 };
 } // namespace Rosen
 } // namespace OHOS
