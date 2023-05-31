@@ -27,6 +27,7 @@ public:
     ~WindowSceneSessionImpl();
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession) override;
+    WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError Destroy(bool needClearListener) override;
     WSError SetActive(bool active) override;
@@ -46,6 +47,7 @@ protected:
     void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();
     sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
+    void UpdateSubWindowStateAndNotify(uint64_t parentPersistentId, const WindowState& newState);
 
 private:
     bool IsValidSystemWindowType(const WindowType& type);
