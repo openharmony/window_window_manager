@@ -33,6 +33,7 @@
 #include "napi_remote_object.h"
 #include "permission.h"
 #include "request_info.h"
+#include "ui_content.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -222,6 +223,13 @@ NativeValue* JsWindow::LoadContent(NativeEngine* engine, NativeCallbackInfo* inf
     WLOGD("LoadContent");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnLoadContent(*engine, *info) : nullptr;
+}
+
+NativeValue* JsWindow::GetUIContext(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGD("GetUIContext");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnGetUIContext(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetUIContent(NativeEngine* engine, NativeCallbackInfo* info)
@@ -1470,6 +1478,39 @@ NativeValue* JsWindow::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& i
         return LoadContentScheduleOld(engine, info);
     } else {
         return LoadContentScheduleNew(engine, info);
+    }
+}
+
+NativeValue* JsWindow::OnGetUIContext(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    if (info.argc >= 1) {
+        WLOGFE("Argc is invalid: %{public}zu, expect zero params", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+
+    wptr<Window> weakToken(windowToken_);
+    auto window = weakToken.promote();
+    if (window == nullptr) {
+        WLOGFE("window is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        return engine.CreateUndefined();
+    }
+
+    auto uicontent = window->GetUIContent();
+    if (uicontent == nullptr) {
+        WLOGFE("uicontent is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        return engine.CreateUndefined();
+    }
+
+    NativeValue* uiContext = uicontent->GetUIContext();
+    if (uiContext == nullptr) {
+        WLOGFE("uiContext obtained from jsEngine is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        return engine.CreateUndefined();
+    } else {
+        return uiContext;
     }
 }
 
@@ -3879,6 +3920,7 @@ void BindFunctions(NativeEngine& engine, NativeObject* object, const char *modul
     BindNativeFunction(engine, *object, "off", moduleName, JsWindow::UnregisterWindowCallback);
     BindNativeFunction(engine, *object, "bindDialogTarget", moduleName, JsWindow::BindDialogTarget);
     BindNativeFunction(engine, *object, "loadContent", moduleName, JsWindow::LoadContent);
+    BindNativeFunction(engine, *object, "getUIContext", moduleName, JsWindow::GetUIContext);
     BindNativeFunction(engine, *object, "setUIContent", moduleName, JsWindow::SetUIContent);
     BindNativeFunction(engine, *object, "setFullScreen", moduleName, JsWindow::SetFullScreen);
     BindNativeFunction(engine, *object, "setLayoutFullScreen", moduleName, JsWindow::SetLayoutFullScreen);
