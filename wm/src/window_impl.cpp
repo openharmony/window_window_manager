@@ -38,6 +38,7 @@
 #include "wm_common_inner.h"
 #include "wm_math.h"
 #include "perform_reporter.h"
+#include <hisysevent.h>
 
 namespace OHOS {
 namespace Rosen {
@@ -2785,6 +2786,12 @@ void WindowImpl::UpdateFocusStatus(bool focused)
 {
     WLOGFD("IsFocused: %{public}d, id: %{public}u", focused, property_->GetWindowId());
     if (focused) {
+        HiSysEventWrite(
+            OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+            "FOCUS_WINDOW",
+            OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+            "PID", getpid(),
+            "UID", getuid());
         NotifyAfterFocused();
     } else {
         NotifyAfterUnfocused();
