@@ -143,6 +143,72 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     return ret;
 }
 
+void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(uint64_t parentPersistentId, const WindowState& newState)
+{
+    auto iter = subWindowSessionMap_.find(parentPersistentId);
+    if (iter == subWindowSessionMap_.end()) {
+        WLOGFD("main window: %{public}" PRIu64" has no child node", parentPersistentId);
+        return;
+    }
+    const auto& subWindows = iter->second;
+    if (subWindows.empty()) {
+        WLOGFD("main window: %{public}" PRIu64", its subWindowMap is empty", parentPersistentId);
+        return;
+    }
+
+    // when main window hide and subwindow whose state is shown should hide and notify user
+    if (newState == WindowState::STATE_HIDDEN) {
+        for (auto subwindow : subWindows) {
+            if (subwindow != nullptr && subwindow->GetWindowState() == WindowState::STATE_SHOWN) {
+                subwindow->NotifyAfterBackground();
+                subwindow->state_ = WindowState::STATE_HIDDEN;
+            }
+        }
+    // when main window show and subwindow whose state is shown should show and notify user
+    } else if (newState == WindowState::STATE_SHOWN) {
+        for (auto subwindow : subWindows) {
+            if (subwindow != nullptr && subwindow->GetWindowState() == WindowState::STATE_HIDDEN) {
+                subwindow->NotifyAfterForeground();
+                subwindow->state_ = WindowState::STATE_SHOWN;
+            }
+        }
+    }
+    return;
+}
+
+WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
+{
+    WLOGFI("Window Show [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u], reason:%{public}u state:%{pubic}u",
+        property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType(), reason, state_);
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (state_ == WindowState::STATE_SHOWN) {
+        WLOGFD("window session is alreay shown [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u]",
+            property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType());
+        return WMError::WM_OK;
+    }
+    if (hostSession_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    WSError ret = hostSession_->Foreground();
+    // delete after replace WSError with WMError
+    WMError res = static_cast<WMError>(ret);
+    if (res == WMError::WM_OK) {
+        // update sub window state if this is main window
+        if (WindowHelper::IsMainWindow(GetType())) {
+            UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
+        }
+        NotifyAfterForeground();
+        state_ = WindowState::STATE_SHOWN;
+    } else {
+        NotifyForegroundFailed(res);
+    }
+    return res;
+}
+
 WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
     WLOGFI("id:%{public}" PRIu64 " Hide, reason:%{public}u, state:%{public}u",
@@ -170,6 +236,10 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     // delete after replace WSError with WMError
     WMError res = static_cast<WMError>(ret);
     if (res == WMError::WM_OK) {
+        // update sub window state if this is main window
+        if (WindowHelper::IsMainWindow(GetType())) {
+            UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
+        }
         NotifyAfterBackground();
         state_ = WindowState::STATE_HIDDEN;
     }
