@@ -2457,6 +2457,42 @@ HWTEST_F(WindowImplTest, ShowHide, Function | SmallTest | Level3)
 }
 
 /*
+ * @tc.name: CloseWindow
+ * @tc.desc: CloseWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, CloseWindow, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowImpl> window = new WindowImpl(option);
+    std::shared_ptr<AbilityRuntime::AbilityContext> context =
+        std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID, context));
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    ASSERT_EQ(WMError::WM_OK, window->Close());
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/*
+ * @tc.name: PendingCloseWindow
+ * @tc.desc: PendingCloseWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, PendingCloseWindow, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowImpl> window = new WindowImpl(option);
+    window->PendingClose();
+    ASSERT_EQ(nullptr, window->context_);
+}
+
+/*
  * @tc.name: InvalidWindow
  * @tc.desc: InvalidWindow test
  * @tc.type: FUNC

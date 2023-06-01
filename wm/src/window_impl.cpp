@@ -1935,17 +1935,37 @@ WMError WindowImpl::Close()
     }
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
         auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-        if (abilityContext != nullptr) {
-            WMError ret = NotifyWindowTransition(TransitionReason::CLOSE_BUTTON);
-            if (ret != WMError::WM_OK) {
-                WLOGI("Close without animation ret:%{public}u", static_cast<uint32_t>(ret));
-                abilityContext->CloseAbility();
-            }
-        } else {
-            Destroy();
+        if (!abilityContext) {
+            return Destroy();
+        }
+        sptr<AAFwk::IPrepareTerminateCallback> callback = this;
+        if (AAFwk::AbilityManagerClient::GetInstance()->PrepareTerminateAbility(abilityContext->GetToken(),
+            callback) != ERR_OK) {
+            WLOGFW("RegisterWindowManagerServiceHandler failed, do close window");
+            PendingClose();
+            return WMError::WM_OK;
         }
     }
     return WMError::WM_OK;
+}
+
+void WindowImpl::DoPrepareTerminate()
+{
+    WLOGFI("do pending close by ability");
+    PendingClose();
+}
+
+void WindowImpl::PendingClose()
+{
+    WLOGFD("begin");
+    WMError ret = NotifyWindowTransition(TransitionReason::CLOSE_BUTTON);
+    if (ret != WMError::WM_OK) {
+        WLOGI("Close without animation ret:%{public}u", static_cast<uint32_t>(ret));
+        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+        if (abilityContext != nullptr) {
+            abilityContext->CloseAbility();
+        }
+    }
 }
 
 WMError WindowImpl::RequestFocus() const
