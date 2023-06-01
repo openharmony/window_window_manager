@@ -26,10 +26,11 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneUtils" };
 }
 
-bool GetAbilityInfoFromJs(NativeEngine& engine, NativeObject* jsObject, SessionInfo& sessionInfo)
+bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, SessionInfo& sessionInfo)
 {
     NativeValue* jsBundleName = jsObject->GetProperty("bundleName");
     NativeValue* jsAbilityName = jsObject->GetProperty("abilityName");
+    NativeValue* jsIsSystem = jsObject->GetProperty("isSystem");
     if (jsBundleName->TypeOf() != NATIVE_UNDEFINED) {
         std::string bundleName;
         if (!ConvertFromJsValue(engine, jsBundleName, bundleName)) {
@@ -46,6 +47,14 @@ bool GetAbilityInfoFromJs(NativeEngine& engine, NativeObject* jsObject, SessionI
         }
         sessionInfo.abilityName_ = abilityName;
     }
+    if (jsIsSystem->TypeOf() != NATIVE_UNDEFINED) {
+        bool isSystem;
+        if (!ConvertFromJsValue(engine, jsIsSystem, isSystem)) {
+            WLOGFE("[NAPI]Failed to convert parameter to isSystem");
+            return false;
+        }
+        sessionInfo.isSystem_ = isSystem;
+    }
     return true;
 }
 
@@ -59,6 +68,7 @@ NativeValue* CreateJsSessionInfo(NativeEngine& engine, const SessionInfo& sessio
     }
     object->SetProperty("bundleName", CreateJsValue(engine, sessionInfo.bundleName_));
     object->SetProperty("abilityName", CreateJsValue(engine, sessionInfo.abilityName_));
+    object->SetProperty("isSystem", CreateJsValue(engine, sessionInfo.isSystem_));
     return objValue;
 }
 
