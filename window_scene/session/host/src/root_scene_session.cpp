@@ -16,10 +16,8 @@
 #include "session/host/include/root_scene_session.h"
 
 namespace OHOS::Rosen {
-void RootSceneSession::SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func)
-{
-    pendingSessionActivationFunc_ = func;
-}
+
+RootSceneSession::RootSceneSession(const SessionInfo& info) : SceneSession(info, nullptr) {}
 
 void RootSceneSession::SetLoadContentFunc(const LoadContentFunc& loadContentFunc)
 {
