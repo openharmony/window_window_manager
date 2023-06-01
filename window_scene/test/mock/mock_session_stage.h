@@ -14,24 +14,16 @@
  */
 
 #include "interfaces/include/ws_common.h"
-#include "session/container/include/session_stage.h"
+#include "session/container/include/zidl/session_stage_stub.h"
 #include "session/host/include/session.h"
 #include <gmock/gmock.h>
 
 namespace OHOS {
 namespace Rosen {
-class SessionStageMocker : public SessionStage {
+class SessionStageMocker : public SessionStageStub {
 public:
-    SessionStageMocker(const sptr<ISession>& session) : SessionStage(session) {};
+    SessionStageMocker() {};
     ~SessionStageMocker() {};
-    MOCK_METHOD1(Connect, WSError(const std::shared_ptr<RSSurfaceNode>& surfaceNode));
-    MOCK_METHOD0(Foreground, WSError(void));
-    MOCK_METHOD0(Background, WSError(void));
-    MOCK_METHOD0(Disconnect, WSError(void));
-    MOCK_METHOD1(PendingSessionActivation, WSError(const SessionInfo& info));
-
-    MOCK_METHOD0(Recover, WSError(void));
-    MOCK_METHOD0(Maximize, WSError(void));
 
     MOCK_METHOD1(SetActive, WSError(bool active));
     MOCK_METHOD2(UpdateRect, WSError(const WSRect& rect, SizeChangeReason reason));
