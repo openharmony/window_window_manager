@@ -240,7 +240,7 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
         rootSceneSession_->SetLoadContentFunc(
             [rootScene = rootScene_](const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
                 AbilityRuntime::Context* context) { rootScene->LoadContent(contentUrl, engine, storage, context); });
-        // AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_);
+        AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_);
         return rootSceneSession_;
     };
 
