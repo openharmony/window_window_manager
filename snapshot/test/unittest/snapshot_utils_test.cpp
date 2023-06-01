@@ -40,6 +40,9 @@ public:
 void SnapshotUtilsTest::SetUpTestCase()
 {
     CommonTestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
+    const char** perms = new const char *[1];
+    perms[0] = "ohos.permission.CAPTURE_SCREEN";
+    CommonTestUtils::SetAceessTokenPermission("DisplayManagerServiceTest", perms, 1);
 }
 
 void SnapshotUtilsTest::TearDownTestCase()
