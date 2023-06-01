@@ -546,7 +546,10 @@ WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<Window
             WLOGFD("[FixOrientation] window is playing show animation, do not update display orientation");
             return WMError::WM_OK;
         }
-        container->SetDisplayOrientationFromWindow(node, true);
+        auto topRotatableWindow = container->GetNextRotatableWindow(INVALID_WINDOW_ID);
+        if (topRotatableWindow == node) {
+            container->SetDisplayOrientationFromWindow(node, true);
+        }
     }
     return WMError::WM_OK;
 }
