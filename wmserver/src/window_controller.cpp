@@ -401,13 +401,14 @@ void WindowController::RelayoutKeyboard(const sptr<WindowNode>& node)
     auto requestRect = node->GetRequestRect();
     if (gravity == WindowGravity::WINDOW_GRAVITY_BOTTOM) {
         if (percent != 0) {
-            requestRect.width_ = defaultDisplayInfo->GetWidth();
-            requestRect.height_ = defaultDisplayInfo->GetHeight() * percent / 100; // 100: for calc percent.
+            requestRect.width_ = static_cast<uint32_t>(defaultDisplayInfo->GetWidth());
+            requestRect.height_ =
+                static_cast<uint32_t>(defaultDisplayInfo->GetHeight()) * percent / 100u; // 100: for calc percent.
             requestRect.posX_ = 0;
         }
     }
-    requestRect.posY_ = static_cast<int32_t>(defaultDisplayInfo->GetHeight() -
-        requestRect.height_ - navigationBarHeight);
+    requestRect.posY_ = defaultDisplayInfo->GetHeight() -
+        static_cast<int32_t>(requestRect.height_ + navigationBarHeight);
     node->SetRequestRect(requestRect);
 }
 

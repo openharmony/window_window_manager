@@ -32,10 +32,6 @@ WindowExtensionStubImpl::WindowExtensionStubImpl(const std::string& windowName) 
 
 WindowExtensionStubImpl::~WindowExtensionStubImpl()
 {
-    auto window = window_.promote();
-    if (window != nullptr) {
-        window->Destroy();
-    }
 }
 
 sptr<Window> WindowExtensionStubImpl::CreateWindow(
