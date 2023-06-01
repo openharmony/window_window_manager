@@ -169,8 +169,7 @@ WMError WindowSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>
     const sptr<Rosen::ISession>& iSession)
 {
     WLOGFD("WindowSessionImpl::Create");
-    // allow iSession is nullptr when create from window manager
-    if (!context || !hostSession_) {
+    if (!context || !iSession) {
         WLOGFE("context or hostSession is nullptr!");
         return WMError::WM_ERROR_INVALID_PARAM;
     }

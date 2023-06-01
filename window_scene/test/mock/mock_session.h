@@ -14,7 +14,7 @@
  */
 
 #include "interfaces/include/ws_common.h"
-#include "session/container/include/session_stage.h"
+#include "session/container/include/zidl/session_stage_interface.h"
 #include "session/host/include/session.h"
 #include <gmock/gmock.h>
 

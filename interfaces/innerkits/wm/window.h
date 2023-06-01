@@ -587,7 +587,11 @@ public:
      *
      * @return Property of transform.
      */
-    virtual const Transform& GetTransform() const { return {}; }
+    virtual const Transform& GetTransform() const
+    {
+        static const Transform trans;
+        return trans;
+    }
     /**
      * @brief Add window flag.
      *
