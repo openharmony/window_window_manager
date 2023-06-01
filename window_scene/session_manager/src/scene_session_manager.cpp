@@ -15,6 +15,7 @@
 
 #include "session_manager/include/scene_session_manager.h"
 
+#include <sstream>
 #include <ability_manager_client.h>
 #include <parameters.h>
 #include <start_options.h>
@@ -113,6 +114,23 @@ void SceneSessionManager::ConfigDecor(const WindowSceneConfig::ConfigItem& decor
     }
 }
 
+static void AddAlphaToColor(float alpha, std::string& color)
+{
+    if (color.size() == 9 || alpha > 1.0f) { // size 9: color is ARGB
+        return;
+    }
+
+    uint32_t alphaValue = 0xFF * alpha;
+    std::stringstream ss;
+    ss << std::hex << alphaValue;
+    std::string strAlpha = ss.str();
+    if (strAlpha.size() == 1) {
+        strAlpha.append(1, '0');
+    }
+
+    color.insert(1, strAlpha);
+}
+
 void SceneSessionManager::ConfigWindowEffect(const WindowSceneConfig::ConfigItem& effectConfig)
 {
     AppWindowSceneConfig config;
@@ -140,6 +158,9 @@ void SceneSessionManager::ConfigWindowEffect(const WindowSceneConfig::ConfigItem
             appWindowSceneConfig_.unfocusedShadow_ = config.unfocusedShadow_;
         }
     }
+
+    AddAlphaToColor(appWindowSceneConfig_.focusedShadow_.alpha_, appWindowSceneConfig_.focusedShadow_.color_);
+    AddAlphaToColor(appWindowSceneConfig_.unfocusedShadow_.alpha_, appWindowSceneConfig_.unfocusedShadow_.color_);
 
     WLOGFI("Config window effect successfully");
 }
