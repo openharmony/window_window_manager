@@ -198,8 +198,6 @@ ohos_shared_library("libwm") {
     "samgr:samgr_proxy",
   ]
 
-  innerapi_tags = [ "platformsdk" ]  #define the type of the inner API
-
   defines = []
   if (efficiency_manager_enable) {
     external_deps += [ "efficiency_manager:suspend_manager_client" ]
@@ -237,7 +235,6 @@ ohos_shared_library("libwm") {
     defines += [ "IMF_ENABLE" ]
   }
 
-  version_script = "libwm.map"
   part_name = "window_manager"
   subsystem_name = "window"
 }

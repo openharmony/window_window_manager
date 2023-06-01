@@ -106,9 +106,6 @@ ohos_shared_library("libdm") {
     "samgr:samgr_proxy",
   ]
 
-  innerapi_tags = [ "platformsdk" ]  # define the type of the inner API
-
-  version_script = "libdm.map"
   part_name = "window_manager"
   subsystem_name = "window"
 }
