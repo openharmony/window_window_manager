@@ -67,6 +67,49 @@ void SceneSessionManager::ConfigWindowSceneXml()
     if (item.IsMap()) {
         ConfigWindowEffect(item);
     }
+    item = config["decor"];
+    if (item.IsMap()) {
+        ConfigDecor(item);
+    }
+    item = config["defaultWindowMode"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1 &&
+            (numbers[0] == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
+             numbers[0] == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
+            systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(numbers[0]));
+        }
+    }
+}
+
+void SceneSessionManager::ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig)
+{
+    WindowSceneConfig::ConfigItem item = decorConfig.GetProp("enable");
+    if (item.IsBool()) {
+        systemConfig_.isSystemDecorEnable_ = item.boolValue_;
+        std::vector<std::string> supportedModes;
+        item = decorConfig["supportedMode"];
+        if (item.IsStrings()) {
+            systemConfig_.decorModeSupportInfo_ = 0;
+            supportedModes = *item.stringsValue_;
+        }
+        for (auto mode : supportedModes) {
+            if (mode == "fullscreen") {
+                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN;
+            } else if (mode == "floating") {
+                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
+            } else if (mode == "pip") {
+                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_PIP;
+            } else if (mode == "split") {
+                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                    WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY;
+            } else {
+                WLOGFW("Invalid supporedMode");
+                systemConfig_.decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+                break;
+            }
+        }
+    }
 }
 
 void SceneSessionManager::ConfigWindowEffect(const WindowSceneConfig::ConfigItem& effectConfig)
@@ -234,6 +277,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         }
         uint64_t persistentId = GeneratePersistentId();
         sceneSession->SetPersistentId(persistentId);
+        sceneSession->SetSystemConfig(systemConfig_);
         abilitySceneMap_.insert({ persistentId, sceneSession });
         WLOGFI("create session persistentId: %{public}" PRIu64 "", persistentId);
         return sceneSession;
@@ -365,7 +409,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             return WSError::WS_ERROR_NULLPTR;
         }
         // connect specific session and sessionStage
-        WSError errCode = sceneSession->Connect(sessionStage, eventChannel, surfaceNode, persistentId, property);
+        WSError errCode = sceneSession->Connect(sessionStage, eventChannel, surfaceNode, systemConfig_, property);
+        if (property) {
+            persistentId = property->GetPersistentId();
+        }
         if (createSpecificSessionFunc_) {
             createSpecificSessionFunc_(sceneSession);
         }

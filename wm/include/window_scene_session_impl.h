@@ -51,7 +51,6 @@ protected:
 
 private:
     bool IsValidSystemWindowType(const WindowType& type);
-    bool GetDebugPropForPC();
 };
 } // namespace Rosen
 } // namespace OHOS
