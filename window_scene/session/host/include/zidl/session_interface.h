@@ -45,7 +45,7 @@ public:
         TRANS_ID_RAISE_TO_APP_TOP,
     };
     virtual WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-        const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint64_t& persistentId,
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr) = 0;
     virtual WSError Foreground() = 0;
     virtual WSError Background() = 0;

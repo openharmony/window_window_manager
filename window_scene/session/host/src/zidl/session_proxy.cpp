@@ -85,7 +85,7 @@ WSError SessionProxy::Disconnect()
 }
 
 WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint64_t& persistentId, sptr<WindowSessionProperty> property)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -123,8 +123,12 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    persistentId = reply.ReadUint64();
-    uint32_t ret = reply.ReadUint32();
+    sptr<SystemSessionConfig> config = reply.ReadParcelable<SystemSessionConfig>();
+    systemConfig = *config;
+    if (property) {
+        property->SetPersistentId(reply.ReadUint64());
+    }
+    int32_t ret = reply.ReadUint32();
     return static_cast<WSError>(ret);
 }
 

@@ -134,12 +134,12 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         windowSessionMap_.insert(std::make_pair(property_->GetWindowName(),
             std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
         state_ = WindowState::STATE_CREATED;
+        if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+            windowMode_ = windowSystemConfig_.defaultWindowMode_;
+        }
     }
-    if (GetDebugPropForPC()) {
-        windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
-    }
-    WLOGFD("Window Create [name:%{public}s, id:%{public}" PRIu64 "], state:%{pubic}u",
-        property_->GetWindowName().c_str(), property_->GetPersistentId(), state_);
+    WLOGFD("Window Create [name:%{public}s, id:%{public}" PRIu64 "], state:%{pubic}u, windowmode:%{public}u",
+        property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, windowMode_);
     return ret;
 }
 
@@ -409,14 +409,11 @@ WmErrorCode WindowSceneSessionImpl::RaiseToAppTop()
     return static_cast<WmErrorCode>(ret);
 }
 
-bool WindowSceneSessionImpl::GetDebugPropForPC()
-{
-    return system::GetParameter("persist.sceneboard.debugforpc.enabled", "0")  == "1";
-}
-
 bool WindowSceneSessionImpl::IsDecorEnable() const
 {
-    bool enable = WindowHelper::IsMainWindow(property_->GetWindowType()) && enableWindowDecor_;
+    bool enable = WindowHelper::IsMainWindow(property_->GetWindowType()) &&
+        windowSystemConfig_.isSystemDecorEnable_ &&
+        WindowHelper::IsWindowModeSupported(windowSystemConfig_.decorModeSupportInfo_, GetMode());
     WLOGFD("get decor enable %{public}d", enable);
     return enable;
 }
@@ -491,14 +488,13 @@ WMError WindowSceneSessionImpl::DisableAppWindowDecor()
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     WLOGI("disable app window decoration.");
-    enableWindowDecor_ = false;
+    windowSystemConfig_.isSystemDecorEnable_ = false;
     UpdateDecorEnable(true);
     return WMError::WM_OK;
 }
 
 WindowMode WindowSceneSessionImpl::GetMode() const
 {
-    WLOGFD("WindowSceneSessionImpl::GetMode called");
     return windowMode_;
 }
 } // namespace Rosen

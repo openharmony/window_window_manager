@@ -168,10 +168,9 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 }
 
 WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint64_t& persistentId, sptr<WindowSessionProperty> property)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property)
 {
-    persistentId = GetPersistentId();
-    WLOGFI("Connect session, id: %{public}" PRIu64 ", state: %{public}u", persistentId,
+    WLOGFI("Connect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()));
     if (GetSessionState() != SessionState::STATE_DISCONNECT) {
         WLOGFE("state is not disconnect!");
@@ -184,7 +183,12 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     sessionStage_ = sessionStage;
     windowEventChannel_ = eventChannel;
     surfaceNode_ = surfaceNode;
+    systemConfig = systemConfig_;
+    if (property) {
+        property->SetPersistentId(GetPersistentId());
+    }
     property_ = property;
+
     UpdateSessionState(SessionState::STATE_CONNECT);
     // once update rect before connect, update again when connect
     UpdateRect(winRect_, SizeChangeReason::UNDEFINED);
@@ -403,5 +407,10 @@ WindowType Session::GetWindowType() const
         return property_->GetWindowType();
     }
     return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+}
+
+void Session::SetSystemConfig(const SystemSessionConfig& systemConfig)
+{
+    systemConfig_ = systemConfig;
 }
 } // namespace OHOS::Rosen
