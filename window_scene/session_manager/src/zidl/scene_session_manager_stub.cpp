@@ -71,6 +71,18 @@ int SceneSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
             reply.WriteUint32(static_cast<uint32_t>(ret));
             break;
         }
+        case SceneSessionManagerMessage::TRANS_ID_UPDATE_PROPERTY: {
+            auto action = static_cast<PropertyChangeAction>(data.ReadUint32());
+            sptr<WindowSessionProperty> property = nullptr;
+            if (data.ReadBool()) {
+                property = data.ReadStrongParcelable<WindowSessionProperty>();
+            } else {
+                WLOGFW("Property not exist!");
+            }
+            const WSError& ret = UpdateProperty(property, action);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
         default:
             WLOGFE("Unknown session message!");
     }

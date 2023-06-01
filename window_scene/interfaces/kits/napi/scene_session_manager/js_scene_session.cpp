@@ -31,6 +31,8 @@ const std::string SESSION_RECT_CHANGE_CB = "sessionRectChange";
 const std::string CREATE_SPECIFIC_SCENE_CB = "createSpecificSession";
 const std::string RAISE_TO_TOP_CB = "raiseToTop";
 const std::string BACK_PRESSED_CB = "backPressed";
+const std::string SESSION_FOCUSABLE_CHANGE_CB = "sessionFocusableChange";
+const std::string CLICK_CB = "click";
 } // namespace
 
 NativeValue* JsSceneSession::Create(NativeEngine& engine, const sptr<SceneSession>& session)
@@ -66,6 +68,8 @@ JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& s
         { CREATE_SPECIFIC_SCENE_CB,       &JsSceneSession::ProcessCreateSpecificSessionRegister },
         { RAISE_TO_TOP_CB,                &JsSceneSession::ProcessRaiseToTopRegister },
         { BACK_PRESSED_CB,                &JsSceneSession::ProcessBackPressedRegister },
+        { SESSION_FOCUSABLE_CHANGE_CB,    &JsSceneSession::ProcessSessionFocusableChangeRegister },
+        { CLICK_CB,                       &JsSceneSession::ProcessClickRegister }, 
     };
 
     sptr<SceneSession::SessionChangeCallback> sessionchangeCallback = new (std::nothrow)
@@ -155,6 +159,34 @@ void JsSceneSession::ProcessSessionEventRegister()
     }
     sessionchangeCallback->OnSessionEvent_ = std::bind(&JsSceneSession::OnSessionEvent, this, std::placeholders::_1);
     WLOGFD("ProcessSessionEventRegister success");
+}
+
+void JsSceneSession::ProcessSessionFocusableChangeRegister()
+{
+    NotifySessionFocusableChangeFunc func = [this](bool isFocusable) {
+        this->OnSessionFocusableChange(isFocusable);
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    session->SetSessionFocusableChangeListener(func);
+    WLOGFD("ProcessSessionFocusableChangeRegister success");
+}
+
+void JsSceneSession::ProcessClickRegister()
+{
+    NotifyClickFunc func = [this]() {
+        this->OnClick();
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    session->SetClickListener(func);
+    WLOGFD("ProcessClickChangeRegister success");
 }
 
 void JsSceneSession::OnSessionEvent(uint32_t eventId)
@@ -374,6 +406,47 @@ void JsSceneSession::OnRaiseToTop()
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
     AsyncTask::Schedule("JsSceneSession::OnRaiseToTop", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsSceneSession::OnSessionFocusableChange(bool isFocusable)
+{
+    WLOGFI("[NAPI]OnSessionFocusableChange, state: %{public}u", isFocusable);
+    auto iter = jsCbMap_.find(SESSION_FOCUSABLE_CHANGE_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [isFocusable, jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            NativeValue* jsSessionFocusableObj = CreateJsValue(engine, isFocusable);
+            NativeValue* argv[] = { jsSessionFocusableObj };
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSession::OnSessionFocusableChange", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsSceneSession::OnClick()
+{
+    WLOGFI("[NAPI]OnClick");
+    auto iter = jsCbMap_.find(CLICK_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            NativeValue* argv[] = { };
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, 0);
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSession::OnClick", engine_,
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 

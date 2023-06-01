@@ -137,9 +137,7 @@ void SceneSessionManager::ConfigWindowEffect(const WindowSceneConfig::ConfigItem
     // config corner radius
     WindowSceneConfig::ConfigItem item = effectConfig["appWindows"]["cornerRadius"];
     if (item.IsMap()) {
-        if (ConfigAppWindowCornerRadius(item["fullScreen"], config.fullScreenCornerRadius_) &&
-            ConfigAppWindowCornerRadius(item["split"], config.splitCornerRadius_) &&
-            ConfigAppWindowCornerRadius(item["float"], config.floatCornerRadius_)) {
+        if (ConfigAppWindowCornerRadius(item["float"], config.floatCornerRadius_)) {
             appWindowSceneConfig_ = config;
         }
     }
@@ -185,16 +183,7 @@ bool SceneSessionManager::ConfigAppWindowCornerRadius(const WindowSceneConfig::C
 bool SceneSessionManager::ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig,
     WindowShadowConfig& outShadow)
 {
-    WindowSceneConfig::ConfigItem item = shadowConfig["elevation"];
-    if (item.IsFloats()) {
-        auto elevation = *item.floatsValue_;
-        if (elevation.size() != 1 || MathHelper::LessNotEqual(elevation[0], 0.0)) {
-            return false;
-        }
-        outShadow.elevation_ = elevation[0];
-    }
-
-    item = shadowConfig["color"];
+    WindowSceneConfig::ConfigItem item = shadowConfig["color"];
     if (item.IsString()) {
         auto color = item.stringValue_;
         uint32_t colorValue;
@@ -500,4 +489,83 @@ WSError SceneSessionManager::ProcessBackEvent()
     return WSError::WS_OK;
 }
 
+WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, PropertyChangeAction action)
+{
+    if (property == nullptr) {
+        WLOGFE("property is invalid");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    uint64_t persistentId = property->GetPersistentId();
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        WLOGFE("session is invalid");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    WLOGI("Id: %{public}" PRIu64", action: %{public}u", sceneSession->GetPersistentId(), static_cast<uint32_t>(action));
+    WSError ret = WSError::WS_OK;
+    switch (action) {
+        case PropertyChangeAction::ACTION_UPDATE_FLAGS: {
+            // @todo
+            break;
+        }
+        case PropertyChangeAction::ACTION_UPDATE_FOCUSABLE: {
+            sceneSession->SetFocusable(property->GetFocusable());
+            break;
+        }
+        case PropertyChangeAction::ACTION_UPDATE_TOUCHABLE: {
+            // @todo
+            break;
+        }
+        case PropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS: {
+            // @todo
+            break;
+        }
+        case PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
+            // @todo
+            break;
+        }
+        default:
+            break;
+    }
+
+    return ret;
+}
+
+WSError SceneSessionManager::SetFocusedSession(uint64_t persistentId)
+{
+    if (focusedSessionId_ == persistentId) {
+        WLOGI("Focus scene not change, id: %{public}" PRIu64, focusedSessionId_);
+        return WSError::WS_DO_NOTHING;
+    }
+    focusedSessionId_ = persistentId;
+    return WSError::WS_OK;
+}
+
+uint64_t SceneSessionManager::GetFocusedSession() const
+{
+    return focusedSessionId_;
+}
+
+WSError SceneSessionManager::UpdateFocus(uint64_t persistentId, bool isFocused)
+{
+    // notify session and client
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        WLOGFE("could not find window");
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    WSError res = WSError::WS_OK;
+    res = sceneSession->UpdateFocus(isFocused);
+    if (res != WSError::WS_OK) {
+        return res;
+    }
+    // focusId change
+    if (isFocused) {
+        return SetFocusedSession(persistentId);
+    }
+    if (persistentId == GetFocusedSession()) {
+        focusedSessionId_ = INVALID_SESSION_ID;
+    }
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

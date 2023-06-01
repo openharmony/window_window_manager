@@ -32,6 +32,7 @@ public:
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session) override;
     WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) override;
+    WSError UpdateProperty(sptr<WindowSessionProperty>& property, PropertyChangeAction action) override;
 
 private:
     static inline BrokerDelegator<SceneSessionManagerProxy> delegator_;
