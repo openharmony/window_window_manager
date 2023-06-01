@@ -51,6 +51,54 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_WAKE_UP_BEGIN: {
+            PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
+            reply.WriteBool(WakeUpBegin(reason));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_WAKE_UP_END: {
+            reply.WriteBool(WakeUpEnd());
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SUSPEND_BEGIN: {
+            PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
+            reply.WriteBool(SuspendBegin(reason));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SUSPEND_END: {
+            reply.WriteBool(SuspendEnd());
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_DISPLAY_STATE: {
+            DisplayState state = static_cast<DisplayState>(data.ReadUint32());
+            reply.WriteBool(SetDisplayState(state));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_POWER_FOR_ALL: {
+            ScreenPowerState state = static_cast<ScreenPowerState>(data.ReadUint32());
+            PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
+            reply.WriteBool(SetScreenPowerForAll(state, reason));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_STATE: {
+            DisplayState state = GetDisplayState(data.ReadUint64());
+            reply.WriteUint32(static_cast<uint32_t>(state));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_EVENT: {
+            DisplayEvent event = static_cast<DisplayEvent>(data.ReadUint32());
+            NotifyDisplayEvent(event);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER: {
+            ScreenId dmsScreenId;
+            if (!data.ReadUint64(dmsScreenId)) {
+                WLOGFE("fail to read dmsScreenId.");
+                break;
+            }
+            reply.WriteUint32(static_cast<uint32_t>(GetScreenPower(dmsScreenId)));
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

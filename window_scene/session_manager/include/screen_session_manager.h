@@ -21,6 +21,9 @@
 #include "zidl/screen_session_manager_stub.h"
 #include "client_agent_container.h"
 #include "singleton_delegator.h"
+#include "display_change_listener.h"
+#include "session_display_power_controller.h"
+
 
 namespace OHOS::Rosen {
 class IScreenConnectionListener : public RefBase {
@@ -43,6 +46,7 @@ public:
     ScreenSessionManager& operator=(ScreenSessionManager&&) = delete;
 
     sptr<ScreenSession> GetScreenSession(ScreenId screenId);
+    std::vector<ScreenId> GetAllScreenIds();
 
     sptr<DisplayInfo> GetDefaultDisplayInfo() override;
 
@@ -54,6 +58,20 @@ public:
 
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
+
+    bool WakeUpBegin(PowerStateChangeReason reason) override;
+    bool WakeUpEnd() override;
+    bool SuspendBegin(PowerStateChangeReason reason) override;
+    bool SuspendEnd() override;
+    bool SetDisplayState(DisplayState state) override;
+    DisplayState GetDisplayState(DisplayId displayId) override;
+    bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
+    ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override;
+    void NotifyDisplayEvent(DisplayEvent event) override;
+
+    void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
+    bool NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
+    bool NotifyDisplayStateChanged(DisplayId id, DisplayState state);
 
 protected:
     ScreenSessionManager();
@@ -67,6 +85,9 @@ private:
 
     ScreenId GetDefaultScreenId();
 
+    void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
+        const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
+
     RSInterfaces& rsInterface_;
     std::shared_ptr<MessageScheduler> msgScheduler_ = nullptr;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
@@ -75,6 +96,9 @@ private:
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
 
     std::vector<sptr<IScreenConnectionListener>> screenConnectionListenerList_;
+
+    sptr<IDisplayChangeListener> displayChangeListener_;
+    sptr<SessionDisplayPowerController> sessionDisplayPowerController_;
 };
 } // namespace OHOS::Rosen
 
