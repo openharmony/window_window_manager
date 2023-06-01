@@ -49,6 +49,11 @@ public:
         density_ = density;
     }
 
+    WindowState GetWindowState() const override
+    {
+        return WindowState::STATE_SHOWN;
+    }
+
 private:
     void RegisterInputEventListener();
 
