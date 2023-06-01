@@ -17,6 +17,7 @@
 
 #include "surface_capture_future.h"
 #include <transaction/rs_interfaces.h>
+#include <pointer_event.h>
 #include <ui/rs_surface_node.h>
 #include "window_manager_hilog.h"
 
@@ -51,6 +52,16 @@ uint64_t Session::GetParentPersistentId() const
         return property_->GetParentPersistentId();
     }
     return INVALID_SESSION_ID;
+}
+
+void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& property)
+{
+    property_ = property;
+}
+
+const sptr<WindowSessionProperty>& Session::GetWindowSessionProperty() const
+{
+    return property_;
 }
 
 std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
@@ -144,6 +155,41 @@ void Session::UpdateSessionState(SessionState state)
     NotifySessionStateChange(state);
 }
 
+void Session::UpdateSessionFocusable(bool isFocusable)
+{
+    property_->SetFocusable(isFocusable);
+    NotifySessionFocusableChange(isFocusable);
+}
+
+WSError Session::SetFocusable(bool isFocusable) 
+{
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (isFocusable == property_->GetFocusable()) {
+        WLOGFD("Session focusable do not change: [%{public}d]", isFocusable);
+        return WSError::WS_DO_NOTHING;
+    }
+    UpdateSessionFocusable(isFocusable);
+    return WSError::WS_OK;
+}
+
+bool Session::GetFocusable() const
+{
+    return property_->GetFocusable();
+}
+
+WSError Session::SetTouchable(bool touchable) 
+{
+    property_->SetTouchable(touchable);
+    return WSError::WS_OK;
+}
+
+bool Session::GetTouchable() const
+{
+    return property_->GetTouchable();
+}
+
 bool Session::IsSessionValid() const
 {
     bool res = state_ > SessionState::STATE_DISCONNECT && state_ < SessionState::STATE_END;
@@ -235,6 +281,7 @@ WSError Session::Disconnect()
     SessionState state = GetSessionState();
     WLOGFI("Disconnect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(state));
+    state_ = SessionState::STATE_INACTIVE;
     Background();
     if (GetSessionState() == SessionState::STATE_BACKGROUND) {
         UpdateSessionState(SessionState::STATE_DISCONNECT);
@@ -292,6 +339,10 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
+    auto action = pointerEvent->GetPointerAction();
+    if (!isFocused_ && GetFocusable() && action == MMI::PointerEvent::POINTER_ACTION_DOWN) {
+        NotifyClick();
+    }
     return windowEventChannel_->TransferPointerEvent(pointerEvent);
 }
 
@@ -334,6 +385,44 @@ void Session::NotifySessionStateChange(const SessionState& state)
     if (sessionStateChangeFunc_) {
         sessionStateChangeFunc_(state);
     }
+}
+
+void Session::SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func)
+{
+    sessionFocusableChangeFunc_ = func;
+}
+
+void Session::SetClickListener(const NotifyClickFunc& func)
+{
+    clickFunc_ = func;
+}
+
+void Session::NotifySessionFocusableChange(bool isFocusable)
+{
+    WLOGFI("Notify session focusable change: %{public}u", isFocusable);
+    if (sessionFocusableChangeFunc_) {
+        sessionFocusableChangeFunc_(isFocusable);
+    }
+}
+
+void Session::NotifyClick()
+{
+    WLOGFI("Notify click");
+    if (clickFunc_) {
+        clickFunc_();
+    }
+}
+
+WSError Session::UpdateFocus(bool isFocused)
+{
+    WLOGFI("Session update focus id: %{public}" PRIu64, GetPersistentId());
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    isFocused_ = isFocused;
+    sessionStage_->UpdateFocus(isFocused);
+
+    return WSError::WS_OK;
 }
 
 void Session::SetSessionRect(const WSRect& rect)

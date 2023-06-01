@@ -99,4 +99,39 @@ WSError SceneSessionManagerProxy::DestroyAndDisconnectSpecificSession(const uint
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
+
+WSError SceneSessionManagerProxy::UpdateProperty(sptr<WindowSessionProperty>& property, PropertyChangeAction action)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(action))) {
+        WLOGFE("Write PropertyChangeAction failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (property) {
+        if (!data.WriteBool(true) || !data.WriteParcelable(property.GetRefPtr())) {
+            WLOGFE("Write property failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    } else {
+        if (!data.WriteBool(false)) {
+            WLOGFE("Write property failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_UPDATE_PROPERTY),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadUint32();
+    return static_cast<WSError>(ret);
+}
 } // namespace OHOS::Rosen

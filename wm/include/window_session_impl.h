@@ -26,6 +26,7 @@
 #include "session/host/include/zidl/session_interface.h"
 #include "window.h"
 #include "window_option.h"
+#include "wm_common_inner.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -66,6 +67,7 @@ public:
     // inherits from session stage
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
+    WSError UpdateFocus(bool focus) override;
     void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError HandleBackEvent() override { return WSError::WS_OK; };
@@ -139,6 +141,7 @@ private:
     static std::map<uint64_t, std::vector<sptr<IWindowChangeListener>>> windowChangeListeners_;
     static std::recursive_mutex globalMutex_;
     NotifyNativeWinDestroyFunc notifyNativefunc_;
+    WMError UpdateProperty(PropertyChangeAction action);
 };
 } // namespace Rosen
 } // namespace OHOS
