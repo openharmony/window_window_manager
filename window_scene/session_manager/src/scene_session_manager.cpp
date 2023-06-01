@@ -229,10 +229,9 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
         if (rootSceneSession_ != nullptr) {
             return rootSceneSession_;
         }
-
         system::SetParameter("bootevent.boot.completed", "true");
-
-        rootSceneSession_ = new (std::nothrow) RootSceneSession();
+        SessionInfo info;
+        rootSceneSession_ = new (std::nothrow) RootSceneSession(info);
         rootScene_ = new (std::nothrow) RootScene();
         if (!rootSceneSession_ || !rootScene_) {
             WLOGFE("rootSceneSession or rootScene is nullptr");
@@ -241,6 +240,7 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
         rootSceneSession_->SetLoadContentFunc(
             [rootScene = rootScene_](const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
                 AbilityRuntime::Context* context) { rootScene->LoadContent(contentUrl, engine, storage, context); });
+        // AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_);
         return rootSceneSession_;
     };
 

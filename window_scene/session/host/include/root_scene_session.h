@@ -27,21 +27,18 @@ class NativeEngine;
 class NativeValue;
 
 namespace OHOS::Rosen {
-class RootSceneSession : public RefBase {
+class RootSceneSession : public SceneSession {
 public:
     using LoadContentFunc =
         std::function<void(const std::string&, NativeEngine*, NativeValue*, AbilityRuntime::Context*)>;
-    RootSceneSession() = default;
+    RootSceneSession(const SessionInfo& info);
     ~RootSceneSession() = default;
 
-    void SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func);
     void SetLoadContentFunc(const LoadContentFunc& loadContentFunc);
     void LoadContent(
         const std::string& contentUrl, NativeEngine* engine, NativeValue* storage, AbilityRuntime::Context* context);
-
 private:
     LoadContentFunc loadContentFunc_;
-    NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
 };
 } // namespace OHOS::Rosen
 
