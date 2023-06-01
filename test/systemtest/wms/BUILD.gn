@@ -362,10 +362,10 @@ ohos_static_library("wms_systemtest_common") {
 
     # need delete it for abilitycontext
     "${ability_runtime_inner_api_path}/ability_manager:ability_manager",
-    "${window_base_path}/dm:libdm_static",
+    "${window_base_path}/dm:libdm",
     "${window_base_path}/dmserver:libdms",
-    "${window_base_path}/utils:libwmutil_static",
-    "${window_base_path}/wm:libwm_static",
+    "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/wm:libwm",
     "//commonlibrary/c_utils/base:utils",
     "//foundation/arkui/napi:ace_napi",
     "//foundation/graphic/graphic_2d/rosen/modules/animation/window_animation:window_animation",
