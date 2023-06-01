@@ -103,7 +103,7 @@ namespace {
 HWTEST_F(WindowSessionTest, SetActive01, Function | SmallTest | Level2)
 {
     sptr<ISession> sessionToken = nullptr;
-    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker(sessionToken);
+    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
     EXPECT_NE(nullptr, mockSessionStage);
     EXPECT_CALL(*(mockSessionStage), SetActive(_)).WillOnce(Return(WSError::WS_OK));
     EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _)).Times(1).WillOnce(Return(WSError::WS_OK));
@@ -132,7 +132,7 @@ HWTEST_F(WindowSessionTest, SetActive01, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest, UpdateRect01, Function | SmallTest | Level2)
 {
     sptr<ISession> sessionToken = nullptr;
-    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker(sessionToken);
+    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
     EXPECT_NE(nullptr, mockSessionStage);
     session_->sessionStage_ = mockSessionStage;
     EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _)).Times(1).WillOnce(Return(WSError::WS_OK));
@@ -180,15 +180,14 @@ HWTEST_F(WindowSessionTest, Connect01, Function | SmallTest | Level2)
     result = session_->Connect(nullptr, nullptr, nullptr, systemConfig);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
-    sptr<ISession> sessionToken = nullptr;
-    sptr<SessionStage> sessionStage = new(std::nothrow) SessionStage(sessionToken);
-    EXPECT_NE(nullptr, sessionStage);
-    result = session_->Connect(sessionStage, nullptr, surfaceNode, systemConfig);
+    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
+    EXPECT_NE(nullptr, mockSessionStage);
+    result = session_->Connect(mockSessionStage, nullptr, surfaceNode, systemConfig);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     sptr<TestWindowEventChannel> testWindowEventChannel = new(std::nothrow) TestWindowEventChannel();
     EXPECT_NE(nullptr, testWindowEventChannel);
-    result = session_->Connect(sessionStage, testWindowEventChannel, surfaceNode, systemConfig);
+    result = session_->Connect(mockSessionStage, testWindowEventChannel, surfaceNode, systemConfig);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
