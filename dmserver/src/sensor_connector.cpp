@@ -186,7 +186,7 @@ void MotionSubscriber::SubscribeMotionSensor()
     if (callback == nullptr) {
         return;
     }
-    int32_t ret = OHOS::Msdp::SubscribeCallback(OHOS::Msdp::TYPE_ROTATION, callback);
+    int32_t ret = OHOS::Msdp::SubscribeCallback(OHOS::Msdp::MOTION_TYPE_ROTATION, callback);
     if (ret != 0) {
         return;
     }
@@ -200,20 +200,17 @@ void MotionSubscriber::UnsubscribeMotionSensor()
         WLOGFI("dms: Unsubscribe motion sensor");
         return;
     }
-    int32_t ret = OHOS::Msdp::UnsubscribeCallback(OHOS::Msdp::TYPE_ROTATION, motionEventCallback_);
+    int32_t ret = OHOS::Msdp::UnsubscribeCallback(OHOS::Msdp::MOTION_TYPE_ROTATION, motionEventCallback_);
     if (ret != 0) {
         return;
     }
     isMotionSensorSubscribed_ = false;
 }
 
-void RotationMotionEventCallback::OnMotionChanged(const MotionData& motionData)
+void RotationMotionEventCallback::OnMotionChanged(const MotionEvent& motionData)
 {
-    if (motionData.result != 1) {
-        return;
-    }
     DeviceRotation motionRotation = DeviceRotation::INVALID;
-    switch (motionData.rotateAction) {
+    switch (motionData.status) {
         case MOTION_ACTION_PORTRAIT: {
             motionRotation = DeviceRotation::ROTATION_PORTRAIT;
             break;
