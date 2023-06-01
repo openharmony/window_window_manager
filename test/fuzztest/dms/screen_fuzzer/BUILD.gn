@@ -35,8 +35,8 @@ ohos_fuzztest("ScreenFuzzTest") {
 
   sources = [ "screen_fuzzer.cpp" ]
   deps = [
-    "${window_base_path}/dm:libdm_static",
-    "${window_base_path}/utils:libwmutil_static",
+    "${window_base_path}/dm:libdm",
+    "${window_base_path}/utils:libwmutil",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]
   external_deps = [ "c_utils:utils" ]
