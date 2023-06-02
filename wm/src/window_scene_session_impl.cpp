@@ -91,7 +91,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     } else { // system window
         if (WindowHelper::IsAppFloatingWindow(GetType())) {
             property_->SetParentPersistentId(GetFloatingWindowParentId());
-            WLOGFI("WindowSessionImpl set SetParentPersistentId: %{public}d", property_->GetParentPersostentId());
+            WLOGFI("WindowSessionImpl set SetParentPersistentId: %{public}d", property_->GetParentPersistentId());
         }
         SessionManager::GetInstance().CreateAndConnectSpecificSession(iSessionStage, eventChannel, surfaceNode_,
             property_, persistentId, session);
