@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef TEST_FUZZTEST_WINDOW_CONTROLLER_FUZZER_H
-#define TEST_FUZZTEST_WINDOW_CONTROLLER_FUZZER_H
+#ifndef OHOS_ROSEN_PERMISSION_H
+#define OHOS_ROSEN_PERMISSION_H
 
-#define FUZZ_PROJECT_NAME "windowcontroller_fuzzer"
+#include <string>
 
-#endif
+namespace OHOS {
+namespace Rosen {
+class Permission {
+public:
+    static bool IsSystemServiceCalling(bool needPrintLog = true);
+    static bool IsSystemCalling();
+    static bool IsStartedByInputMethod();
+};
+} // Rosen
+} // OHOS
+#endif // OHOS_ROSEN_PERMISSION_H

@@ -50,31 +50,32 @@ public:
 class Session : public SessionStub, public virtual RefBase {
 public:
     explicit Session(const SessionInfo& info);
-    virtual ~Session() = default;
+    ~Session();
 
     void SetPersistentId(uint64_t persistentId);
     uint64_t GetPersistentId() const;
+    uint64_t GetParentPersistentId() const;
     void SetSessionRect(const WSRect& rect);
-    WSRect GetSessionRect() const;
 
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     SessionState GetSessionState() const;
     const SessionInfo& GetSessionInfo() const;
+    sptr<WindowSessionProperty> GetSessionProperty() const;
+    WSRect GetSessionRect() const;
+    WindowType GetWindowType() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason);
 
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-        const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint64_t& persistentId,
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr) override;
     WSError Foreground() override;
     WSError Background() override;
     WSError Disconnect() override;
 
-    WSError Recover() override;
-    WSError Maximize() override;
-
+    WSError OnSessionEvent(SessionEvent event) override;
     void NotifyConnect();
     void NotifyForeground();
     void NotifyBackground();
@@ -89,6 +90,13 @@ public:
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
     void NotifySessionStateChange(const SessionState& state);
     WSError UpdateActiveStatus(bool isActive) override; // update active status from session_stage
+    WSError RaiseToAppTop() override;
+    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) override;
+    WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session) override;
+    WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) override;
+    void SetSystemConfig(const SystemSessionConfig& systemConfig);
 
 protected:
     void UpdateSessionState(SessionState state);
@@ -100,6 +108,7 @@ protected:
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
     sptr<WindowSessionProperty> property_ = nullptr;
+    SystemSessionConfig systemConfig_;
 private:
     template<typename T>
     bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);

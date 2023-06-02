@@ -16,14 +16,18 @@
 #include "session_manager/include/scene_session_manager.h"
 
 #include <ability_manager_client.h>
+#include <parameters.h>
 #include <start_options.h>
 #include <want.h>
 
+#include "color_parser.h"
 #include "common/include/message_scheduler.h"
 #include "root_scene.h"
 #include "session/host/include/scene_session.h"
 #include "session_info.h"
 #include "window_manager_hilog.h"
+#include "common/include/permission.h"
+#include "wm_math.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -42,6 +46,181 @@ void SceneSessionManager::Init()
 {
     WLOGFI("scene session manager init");
     msgScheduler_ = std::make_shared<MessageScheduler>(SCENE_SESSION_MANAGER_THREAD);
+    LoadWindowSceneXml();
+}
+
+void SceneSessionManager::LoadWindowSceneXml()
+{
+    if (WindowSceneConfig::LoadConfigXml()) {
+        if (WindowSceneConfig::GetConfig().IsMap()) {
+            WindowSceneConfig::DumpConfig(*WindowSceneConfig::GetConfig().mapValue_);
+        }
+        ConfigWindowSceneXml();
+    } else {
+        WLOGFE("Load window scene xml failed");
+    }
+}
+
+void SceneSessionManager::ConfigWindowSceneXml()
+{
+    const auto& config = WindowSceneConfig::GetConfig();
+    WindowSceneConfig::ConfigItem item = config["windowEffect"];
+    if (item.IsMap()) {
+        ConfigWindowEffect(item);
+    }
+    item = config["decor"];
+    if (item.IsMap()) {
+        ConfigDecor(item);
+    }
+    item = config["defaultWindowMode"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1 &&
+            (numbers[0] == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
+             numbers[0] == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
+            systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(numbers[0]));
+        }
+    }
+}
+
+void SceneSessionManager::ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig)
+{
+    WindowSceneConfig::ConfigItem item = decorConfig.GetProp("enable");
+    if (item.IsBool()) {
+        systemConfig_.isSystemDecorEnable_ = item.boolValue_;
+        std::vector<std::string> supportedModes;
+        item = decorConfig["supportedMode"];
+        if (item.IsStrings()) {
+            systemConfig_.decorModeSupportInfo_ = 0;
+            supportedModes = *item.stringsValue_;
+        }
+        for (auto mode : supportedModes) {
+            if (mode == "fullscreen") {
+                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN;
+            } else if (mode == "floating") {
+                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
+            } else if (mode == "pip") {
+                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_PIP;
+            } else if (mode == "split") {
+                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                    WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY;
+            } else {
+                WLOGFW("Invalid supporedMode");
+                systemConfig_.decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+                break;
+            }
+        }
+    }
+}
+
+void SceneSessionManager::ConfigWindowEffect(const WindowSceneConfig::ConfigItem& effectConfig)
+{
+    AppWindowSceneConfig config;
+    // config corner radius
+    WindowSceneConfig::ConfigItem item = effectConfig["appWindows"]["cornerRadius"];
+    if (item.IsMap()) {
+        if (ConfigAppWindowCornerRadius(item["fullScreen"], config.fullScreenCornerRadius_) &&
+            ConfigAppWindowCornerRadius(item["split"], config.splitCornerRadius_) &&
+            ConfigAppWindowCornerRadius(item["float"], config.floatCornerRadius_)) {
+            appWindowSceneConfig_ = config;
+        }
+    }
+
+    // config shadow
+    item = effectConfig["appWindows"]["shadow"]["focused"];
+    if (item.IsMap()) {
+        if (ConfigAppWindowShadow(item, config.focusedShadow_)) {
+            appWindowSceneConfig_.focusedShadow_ = config.focusedShadow_;
+        }
+    }
+
+    item = effectConfig["appWindows"]["shadow"]["unfocused"];
+    if (item.IsMap()) {
+        if (ConfigAppWindowShadow(item, config.unfocusedShadow_)) {
+            appWindowSceneConfig_.unfocusedShadow_ = config.unfocusedShadow_;
+        }
+    }
+
+    WLOGFI("Config window effect successfully");
+}
+
+bool SceneSessionManager::ConfigAppWindowCornerRadius(const WindowSceneConfig::ConfigItem& item, float& out)
+{
+    std::map<std::string, float> stringToCornerRadius = {
+        {"off", 0.0f}, {"defaultCornerRadiusXS", 4.0f}, {"defaultCornerRadiusS", 8.0f},
+        {"defaultCornerRadiusM", 12.0f}, {"defaultCornerRadiusL", 16.0f}, {"defaultCornerRadiusXL", 24.0f}
+    };
+
+    if (item.IsString()) {
+        auto value = item.stringValue_;
+        if (stringToCornerRadius.find(value) != stringToCornerRadius.end()) {
+            out = stringToCornerRadius[value];
+            return true;
+        }
+    }
+    return false;
+}
+
+bool SceneSessionManager::ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig,
+    WindowShadowConfig& outShadow)
+{
+    WindowSceneConfig::ConfigItem item = shadowConfig["elevation"];
+    if (item.IsFloats()) {
+        auto elevation = *item.floatsValue_;
+        if (elevation.size() != 1 || MathHelper::LessNotEqual(elevation[0], 0.0)) {
+            return false;
+        }
+        outShadow.elevation_ = elevation[0];
+    }
+
+    item = shadowConfig["color"];
+    if (item.IsString()) {
+        auto color = item.stringValue_;
+        uint32_t colorValue;
+        if (!ColorParser::Parse(color, colorValue)) {
+            return false;
+        }
+        outShadow.color_ = color;
+    }
+
+    item = shadowConfig["offsetX"];
+    if (item.IsFloats()) {
+        auto offsetX = *item.floatsValue_;
+        if (offsetX.size() != 1) {
+            return false;
+        }
+        outShadow.offsetX_ = offsetX[0];
+    }
+
+    item = shadowConfig["offsetY"];
+    if (item.IsFloats()) {
+        auto offsetY = *item.floatsValue_;
+        if (offsetY.size() != 1) {
+            return false;
+        }
+        outShadow.offsetY_ = offsetY[0];
+    }
+
+    item = shadowConfig["alpha"];
+    if (item.IsFloats()) {
+        auto alpha = *item.floatsValue_;
+        if (alpha.size() != 1 ||
+            (MathHelper::LessNotEqual(alpha[0], 0.0) && MathHelper::GreatNotEqual(alpha[0], 1.0))) {
+            return false;
+        }
+        outShadow.alpha_ = alpha[0];
+    }
+
+    item = shadowConfig["radius"];
+    if (item.IsFloats()) {
+        auto radius = *item.floatsValue_;
+        if (radius.size() != 1 || MathHelper::LessNotEqual(radius[0], 0.0)) {
+            return false;
+        }
+        outShadow.radius_ = radius[0];
+    }
+
+    return true;
 }
 
 sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
@@ -50,6 +229,8 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
         if (rootSceneSession_ != nullptr) {
             return rootSceneSession_;
         }
+
+        system::SetParameter("bootevent.boot.completed", "true");
 
         rootSceneSession_ = new (std::nothrow) RootSceneSession();
         rootScene_ = new (std::nothrow) RootScene();
@@ -79,16 +260,27 @@ sptr<SceneSession> SceneSessionManager::GetSceneSession(uint64_t persistentId)
 
 sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo)
 {
-    auto task = [this, sessionInfo]() {
+    sptr<SceneSession::SpecificSessionCallback> specificCallback = new (std::nothrow)
+        SceneSession::SpecificSessionCallback();
+    if (specificCallback == nullptr) {
+        WLOGFE("SpecificSessionCallback is nullptr");
+        return nullptr;
+    }
+    specificCallback->onCreate_ = std::bind(&SceneSessionManager::RequestSceneSession,
+        this, std::placeholders::_1);
+    specificCallback->onDestroy_ = std::bind(&SceneSessionManager::DestroyAndDisconnectSpecificSession,
+        this, std::placeholders::_1);
+    auto task = [this, sessionInfo, specificCallback]() {
         WLOGFI("sessionInfo: bundleName: %{public}s, abilityName: %{public}s", sessionInfo.bundleName_.c_str(),
             sessionInfo.abilityName_.c_str());
-        sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo);
+        sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, specificCallback);
         if (sceneSession == nullptr) {
             WLOGFE("sceneSession is nullptr!");
             return sceneSession;
         }
         uint64_t persistentId = GeneratePersistentId();
         sceneSession->SetPersistentId(persistentId);
+        sceneSession->SetSystemConfig(systemConfig_);
         abilitySceneMap_.insert({ persistentId, sceneSession });
         WLOGFI("create session persistentId: %{public}" PRIu64 "", persistentId);
         return sceneSession;
@@ -209,6 +401,9 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session)
 {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartedByInputMethod()) {
+        WLOGFE("check input method permission failed");
+    }
     auto task = [this, sessionStage, eventChannel, surfaceNode, property, &persistentId, &session]() {
         // create specific session
         SessionInfo info;
@@ -216,11 +411,14 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         if (sceneSession == nullptr) {
             return WSError::WS_ERROR_NULLPTR;
         }
+        // connect specific session and sessionStage
+        WSError errCode = sceneSession->Connect(sessionStage, eventChannel, surfaceNode, systemConfig_, property);
+        if (property) {
+            persistentId = property->GetPersistentId();
+        }
         if (createSpecificSessionFunc_) {
             createSpecificSessionFunc_(sceneSession);
         }
-        // connect specific session and sessionStage
-        WSError errCode = sceneSession->Connect(sessionStage, eventChannel, surfaceNode, persistentId, property);
         session = sceneSession;
         return errCode;
     };
@@ -257,4 +455,10 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const uint64_t&
     msgScheduler_->PostSyncTask(task);
     return WSError::WS_OK;
 }
+
+const AppWindowSceneConfig& SceneSessionManager::GetWindowSceneConfig() const
+{
+    return appWindowSceneConfig_;
+}
+
 } // namespace OHOS::Rosen

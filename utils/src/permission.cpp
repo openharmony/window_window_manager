@@ -102,12 +102,11 @@ bool Permission::IsStartByInputMethod()
     }
 
     int uid = IPCSkeleton::GetCallingUid();
-    std::string bundleName;
-    bundleManagerServiceProxy_->GetNameForUid(uid, bundleName);
-
-    AppExecFwk::BundleInfo bundleInfo;
     // reset ipc identity
     std::string identity = IPCSkeleton::ResetCallingIdentity();
+    std::string bundleName;
+    bundleManagerServiceProxy_->GetNameForUid(uid, bundleName);
+    AppExecFwk::BundleInfo bundleInfo;
     // 200000 use uid to caculate userId
     int userId = uid / 200000;
     bool result = bundleManagerServiceProxy_->GetBundleInfo(bundleName,

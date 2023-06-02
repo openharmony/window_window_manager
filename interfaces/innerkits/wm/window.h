@@ -393,15 +393,13 @@ public:
     /**
      * @brief create main/uiextension window with session
      *
-     * @param windowName window name, identify window instance
      * @param option window propertion
      * @param context ability context
      * @param iSession session token of window session
      * @param errCode error code of create window
      * @return sptr<Window> If create window success, return window instance; Otherwise, return nullptr
      */
-    static sptr<Window> Create(const std::string& windowName,
-        sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context,
+    static sptr<Window> Create(sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, WMError& errCode = DefaultCreateErrCode);
 
     /**
@@ -486,7 +484,11 @@ public:
      *
      * @return Name of window.
      */
-    virtual const std::string& GetWindowName() const { return std::string(); }
+    virtual const std::string& GetWindowName() const
+    {
+        static const std::string name;
+        return name;
+    }
     /**
      * @brief Get id of window.
      *
@@ -585,7 +587,11 @@ public:
      *
      * @return Property of transform.
      */
-    virtual const Transform& GetTransform() const { return {}; }
+    virtual const Transform& GetTransform() const
+    {
+        static const Transform trans;
+        return trans;
+    }
     /**
      * @brief Add window flag.
      *
@@ -1201,6 +1207,12 @@ public:
      */
     virtual WMError Maximize() { return WMError::WM_OK; }
     /**
+     * @brief maximize the main window according to MaximizeMode. called by ACE when maximize button is clicked.
+     *
+     * @return WMError
+     */
+    virtual WMError MaximizeFloating() {return WMError::WM_OK;}
+    /**
      * @brief minimize the main window. It is called by ACE when minimize button is clicked.
      *
      * @return WMError
@@ -1229,6 +1241,20 @@ public:
      * @param needRemoveWindowInputChannel True means remove input channel, false means not remove.
      */
     virtual void SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel) {}
+    /**
+     * @brief set global window maximize mode. It is called by ACE when maximize mode changed.
+     *
+     * @param mode MODE_AVOID_SYSTEM_BAR - avoid statusbar and dockbar; MODE_FULL_FILL - fullfill the screen
+     *
+     * @return WMError
+     */
+    virtual WMError SetGlobalMaximizeMode(MaximizeMode mode) {return WMError::WM_OK;}
+    /**
+     * @brief get global window maximize mode.
+     *
+     * @return MaximizeMode
+     */
+    virtual MaximizeMode GetGlobalMaximizeMode() {return MaximizeMode::MODE_FULL_FILL;}
 
     // colorspace, gamut
     /**

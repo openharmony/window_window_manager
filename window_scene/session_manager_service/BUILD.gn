@@ -24,6 +24,7 @@ config("session_manager_service_public_config") {
     "${window_base_path}/utils/include",
     "${window_base_path}/window_scene/session_manager/include",
     "${window_base_path}/window_scene/session_manager_service/include",
+    "${window_base_path}/window_scene/session_manager/include",
   ]
 }
 
@@ -44,6 +45,7 @@ ohos_shared_library("session_manager_service") {
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session_manager:scene_session_manager",
+    "${window_base_path}/window_scene/session_manager:screen_session_manager",
   ]
 
   external_deps = [

@@ -67,6 +67,7 @@ ohos_static_library("libwmutil_static") {
   ]
 
   external_deps = [
+    "ability_base:want",
     "ability_runtime:ability_manager",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
@@ -144,7 +145,6 @@ ohos_shared_library("libwmutil") {
     "samgr:samgr_proxy",
   ]
 
-  version_script = "libwmutil.map"
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"

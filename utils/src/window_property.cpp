@@ -566,9 +566,19 @@ void WindowProperty::SetAspectRatio(float ratio)
     aspectRatio_ = ratio;
 }
 
+void WindowProperty::SetMaximizeMode(MaximizeMode maximizeMode)
+{
+    maximizeMode_ = maximizeMode;
+}
+
 float WindowProperty::GetAspectRatio() const
 {
     return aspectRatio_;
+}
+
+MaximizeMode WindowProperty::GetMaximizeMode() const
+{
+    return maximizeMode_;
 }
 
 uint32_t WindowProperty::GetAccessTokenId() const
@@ -835,6 +845,9 @@ bool WindowProperty::Write(Parcel& parcel, PropertyChangeAction action)
         case PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO:
             ret = ret && parcel.WriteFloat(aspectRatio_);
             break;
+        case PropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE:
+            ret = ret && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_));
+            break;
         default:
             break;
     }
@@ -902,6 +915,9 @@ void WindowProperty::Read(Parcel& parcel, PropertyChangeAction action)
             break;
         case PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO:
             SetAspectRatio(parcel.ReadFloat());
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE:
+            SetMaximizeMode(static_cast<MaximizeMode>(parcel.ReadUint32()));
             break;
         default:
             break;

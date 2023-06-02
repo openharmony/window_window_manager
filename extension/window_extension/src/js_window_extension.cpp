@@ -97,6 +97,10 @@ JsWindowExtension::JsWindowExtension(AbilityRuntime::JsRuntime& jsRuntime) : jsR
 JsWindowExtension::~JsWindowExtension()
 {
     WLOGFD("Called");
+    auto context = GetContext();
+    if (context) {
+        context->Unbind();
+    }
     jsRuntime_.FreeNativeReference(std::move(jsObj_));
 }
 
@@ -234,22 +238,11 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
 void JsWindowExtension::OnDisconnect(const AAFwk::Want& want)
 {
     Extension::OnDisconnect(want);
-    NativeEngine& engine = jsRuntime_.GetNativeEngine();
-    std::unique_ptr<AbilityRuntime::AsyncTask::CompleteCallback> complete =
-        std::make_unique<AbilityRuntime::AsyncTask::CompleteCallback>(
-        [=] (NativeEngine& engine, AbilityRuntime::AsyncTask& task, int32_t status) {
-            NativeEngine* nativeEngine = &jsRuntime_.GetNativeEngine();
-            napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine), want);
-            NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
-            NativeValue* argv[] = { nativeWant };
-            CallJsMethod("onDisconnect", argv, AbilityRuntime::ArraySize(argv));
-        }
-    );
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AbilityRuntime::AsyncTask::ExecuteCallback> execute = nullptr;
-    AbilityRuntime::AsyncTask::Schedule("JsWindowExtension::OnDisconnect", engine,
-        std::make_unique<AbilityRuntime::AsyncTask>(callback, std::move(execute), std::move(complete)));
-
+    NativeEngine* nativeEngine = &jsRuntime_.GetNativeEngine();
+    napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine), want);
+    NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
+    NativeValue* argv[] = { nativeWant };
+    CallJsMethod("onDisconnect", argv, AbilityRuntime::ArraySize(argv));
     auto window = stub_ != nullptr ? stub_->GetWindow() : nullptr;
     if (window != nullptr) {
         window->Destroy();

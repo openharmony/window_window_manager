@@ -323,5 +323,16 @@ WMError WindowAdapter::GetWindowAnimationTargets(std::vector<uint32_t> missionId
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     return windowManagerServiceProxy_->GetWindowAnimationTargets(missionIds, targets);
 }
+void WindowAdapter::SetMaximizeMode(MaximizeMode maximizeMode)
+{
+    INIT_PROXY_CHECK_RETURN();
+    windowManagerServiceProxy_->SetMaximizeMode(maximizeMode);
+}
+
+MaximizeMode WindowAdapter::GetMaximizeMode()
+{
+    INIT_PROXY_CHECK_RETURN(MaximizeMode::MODE_FULL_FILL);
+    return windowManagerServiceProxy_->GetMaximizeMode();
+}
 } // namespace Rosen
 } // namespace OHOS

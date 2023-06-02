@@ -35,7 +35,7 @@ ohos_fuzztest("WindowIPCFuzzTest") {
 
   sources = [ "windowipc_fuzzer.cpp" ]
   deps = [
-    "${window_base_path}/wm:libwm_static",
+    "${window_base_path}/wm:libwm",
     "//foundation/graphic/graphic_2d/rosen/modules/animation/window_animation:window_animation",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]

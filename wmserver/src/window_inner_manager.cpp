@@ -221,6 +221,31 @@ void WindowInnerManager::CompleteFirstFrameDrawing(const wptr<WindowNode> &node)
     PostTask(task, "CompleteFirstFrameDrawing");
 }
 
+void WindowInnerManager::UpdateMissionSnapShot(const wptr<WindowNode> &node, std::shared_ptr<Media::PixelMap> pixelMap)
+{
+    // asynchronously calls the UpdateMissionSnapShot of AbilityManager
+    auto weakNode = node.promote();
+    if (weakNode == nullptr) {
+        WLOGFE("UpdateMissionSnapShot failed.");
+        return;
+    }
+    wptr<IRemoteObject> weakToken(weakNode->abilityToken_);
+    WLOGFD("Update id %{public}u", weakNode->GetWindowId());
+    auto task = [weakToken, pixelMap]() {
+        auto token = weakToken.promote();
+        if (token == nullptr) {
+            WLOGE("UpdateMissionSnapShot failed, because window token is nullptr.");
+            return;
+        }
+        if (pixelMap == nullptr) {
+            WLOGE("UpdateMissionSnapShot failed, because pixelMap is nullptr.");
+            return;
+        }
+        AAFwk::AbilityManagerClient::GetInstance()->UpdateMissionSnapShot(token, pixelMap);
+    };
+    PostTask(task, "UpdateMissionSnapShot");
+}
+
 void WindowInnerManager::PostTask(InnerTask &&task, std::string name, EventPriority priority)
 {
     if (eventHandler_ == nullptr) {

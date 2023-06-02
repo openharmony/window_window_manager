@@ -33,6 +33,9 @@
 #include "window_manager_service_utils.h"
 #include "window_system_effect.h"
 #include "zidl/ressched_report.h"
+#ifdef SOC_PERF_ENABLE
+#include "socperf_client.h"
+#endif
 
 namespace OHOS {
 namespace Rosen {
@@ -187,6 +190,7 @@ static void GetAndDrawSnapShot(const sptr<WindowNode>& srcNode)
             WLOGFE("get surfaceSnapshot failed for window:%{public}u", srcNode->GetWindowId());
             return;
         }
+        WindowInnerManager::GetInstance().UpdateMissionSnapShot(srcNode, pixelMap);
         struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
         rsSurfaceNodeConfig.SurfaceNodeName = "closeWin" + std::to_string(srcNode->GetWindowId());
         srcNode->closeWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig,
@@ -603,6 +607,10 @@ WMError RemoteAnimation::NotifyAnimationByHome()
     } else {
         GetAnimationHomeFinishCallback(func, needMinimizeAppNodes);
     }
+#ifdef SOC_PERF_ENABLE
+    constexpr int32_t ACTION_TYPE_CPU_BOOST_CMDID = 10060;
+    OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequestEx(ACTION_TYPE_CPU_BOOST_CMDID, true, "");
+#endif
     sptr<RSWindowAnimationFinishedCallback> finishedCallback = CreateAnimationFinishedCallback(func, nullptr);
     if (finishedCallback == nullptr) {
         return WMError::WM_ERROR_NO_MEM;
@@ -686,10 +694,11 @@ WMError RemoteAnimation::GetWindowAnimationTargets(std::vector<uint32_t> mission
     }
     for (uint32_t& missionId : missionIds) {
         sptr<WindowNode> windowNode = winRoot->GetWindowNodeByMissionId(missionId);
-        if (windowNode == nullptr) {
+        auto target = CreateWindowAnimationTarget(nullptr, windowNode);
+        if (target == nullptr) {
             continue;
         }
-        targets.push_back(CreateWindowAnimationTarget(nullptr, windowNode));
+        targets.push_back(target);
     }
     return WMError::WM_OK;
 }

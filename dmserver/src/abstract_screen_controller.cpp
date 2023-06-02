@@ -231,16 +231,14 @@ void AbstractScreenController::RegisterAbstractScreenCallback(sptr<AbstractScree
 
 void AbstractScreenController::OnRsScreenConnectionChange(ScreenId rsScreenId, ScreenEvent screenEvent)
 {
-    WLOGFI("rs screen event. id:%{public}" PRIu64", event:%{public}u", rsScreenId, static_cast<uint32_t>(screenEvent));
+    WLOGFI("RS screen event. rsScreenId:%{public}" PRIu64", defaultRsScreenId_:%{public}" PRIu64", event:%{public}u",
+        rsScreenId, static_cast<uint64_t>(defaultRsScreenId_), static_cast<uint32_t>(screenEvent));
     if (screenEvent == ScreenEvent::CONNECTED) {
         auto task = [this, rsScreenId] {
             ProcessScreenConnected(rsScreenId);
         };
         controllerHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
     } else if (screenEvent == ScreenEvent::DISCONNECTED) {
-        if (rsScreenId == defaultRsScreenId_) {
-            defaultRsScreenId_ = SCREEN_ID_INVALID;
-        }
         auto task = [this, rsScreenId] {
             ProcessScreenDisconnected(rsScreenId);
         };
@@ -250,14 +248,60 @@ void AbstractScreenController::OnRsScreenConnectionChange(ScreenId rsScreenId, S
     }
 }
 
+void AbstractScreenController::ProcessDefaultScreenReconnected(ScreenId rsScreenId)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (rsScreenId != defaultRsScreenId_ || defaultRsScreenId_ == SCREEN_ID_INVALID) {
+        return;
+    }
+    ScreenId dmsScreenId;
+    if (!screenIdManager_.ConvertToDmsScreenId(rsScreenId, dmsScreenId)) {
+        WLOGFE("disconnect screen, rsScreenId=%{public}" PRIu64" is not in rs2DmsScreenIdMap_", rsScreenId);
+        return;
+    }
+    WLOGFD("rsScreenId=%{public}" PRIu64", dmsScreenId=%{public}" PRIu64", "
+        "defaultRsScreenId: %{public}" PRIu64"", rsScreenId, dmsScreenId, static_cast<uint64_t>(defaultRsScreenId_));
+    auto dmsScreenMapIter = dmsScreenMap_.find(dmsScreenId);
+    if (dmsScreenMapIter != dmsScreenMap_.end()) {
+        auto screen = dmsScreenMapIter->second;
+        if (screen == nullptr) {
+            WLOGFE("screen is nullptr");
+            return;
+        }
+        auto groupDmsId = screen->lastGroupDmsId_;
+        auto iter = dmsScreenGroupMap_.find(groupDmsId);
+        if (iter == dmsScreenGroupMap_.end()) {
+            WLOGFE("groupDmsId: %{public}" PRIu64"is not in dmsScreenGroupMap_.", groupDmsId);
+            return;
+        }
+        sptr<AbstractScreenGroup> screenGroup = iter->second;
+        if (screenGroup == nullptr) {
+            WLOGFE("screenGroup is nullptr");
+            return;
+        }
+        Point point;
+        if (!screenGroup->AddChild(screen, point)) {
+            WLOGE("fail to add screen to group. screen: %{public}" PRIu64"", screen->dmsId_);
+            return;
+        }
+
+        // Recover default screen, set power state again
+        SetScreenPowerForAll(powerState_, PowerStateChangeReason::POWER_BUTTON, false);
+        const uint32_t level = 165;
+        RSInterfaces::GetInstance().SetScreenBacklight(rsScreenId, level);
+    } else {
+        WLOGFE("can't find screen in dmsScreenMap, dmsScreenId: %{public}" PRIu64"", dmsScreenId);
+    }
+}
+
 void AbstractScreenController::ProcessScreenConnected(ScreenId rsScreenId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (screenIdManager_.HasRsScreenId(rsScreenId)) {
-        WLOGE("reconnect screen, screenId=%{public}" PRIu64"", rsScreenId);
+        WLOGFD("reconnect screen, screenId=%{public}" PRIu64"", rsScreenId);
+        ProcessDefaultScreenReconnected(rsScreenId);
         return;
     }
-    WLOGFD("connect new screen");
     auto absScreen = InitAndGetScreen(rsScreenId);
     if (absScreen == nullptr) {
         return;
@@ -328,18 +372,24 @@ sptr<AbstractScreen> AbstractScreenController::InitAndGetScreen(ScreenId rsScree
 
 void AbstractScreenController::ProcessScreenDisconnected(ScreenId rsScreenId)
 {
-    WLOGFI("disconnect screen, screenId=%{public}" PRIu64"", rsScreenId);
     ScreenId dmsScreenId;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!screenIdManager_.ConvertToDmsScreenId(rsScreenId, dmsScreenId)) {
-        WLOGFE("disconnect screen, screenId=%{public}" PRIu64" is not in rs2DmsScreenIdMap_", rsScreenId);
+        WLOGFE("disconnect screen, rsScreenId=%{public}" PRIu64" is not in rs2DmsScreenIdMap_", rsScreenId);
         return;
     }
+    WLOGFI("disconnect screen, rsScreenId= %{public}" PRIu64", dmsScreenId= %{public}" PRIu64"",
+        rsScreenId, dmsScreenId);
     auto dmsScreenMapIter = dmsScreenMap_.find(dmsScreenId);
     sptr<AbstractScreenGroup> screenGroup;
     if (dmsScreenMapIter != dmsScreenMap_.end()) {
         auto screen = dmsScreenMapIter->second;
         if (abstractScreenCallback_ != nullptr && CheckScreenInScreenGroup(screen)) {
+            if (rsScreenId == defaultRsScreenId_ && defaultRsScreenId_ != SCREEN_ID_INVALID) {
+                // Disconnect default screen
+                RemoveDefaultScreenFromGroupLocked(screen);
+                return;
+            }
             abstractScreenCallback_->onDisconnect_(screen);
         }
         screenGroup = RemoveFromGroupLocked(screen);
@@ -406,6 +456,29 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddToGroupLocked(sptr<Abstra
     return res;
 }
 
+void AbstractScreenController::RemoveDefaultScreenFromGroupLocked(sptr<AbstractScreen> screen)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (screen == nullptr) {
+        return;
+    }
+    auto groupDmsId = screen->groupDmsId_;
+    auto iter = dmsScreenGroupMap_.find(groupDmsId);
+    if (iter == dmsScreenGroupMap_.end()) {
+        WLOGFE("groupDmsId:%{public}" PRIu64"is not in dmsScreenGroupMap_.", groupDmsId);
+        return;
+    }
+    sptr<AbstractScreenGroup> screenGroup = iter->second;
+    if (screenGroup == nullptr) {
+        return;
+    }
+    auto rsScreenId = screen->rsId_;
+    bool res = screenGroup->RemoveDefaultScreen(screen);
+    if (!res) {
+        WLOGFE("RemoveDefaultScreen failed, rsScreenId: %{public}" PRIu64"", rsScreenId);
+    }
+}
+
 sptr<AbstractScreenGroup> AbstractScreenController::RemoveFromGroupLocked(sptr<AbstractScreen> screen)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -417,6 +490,7 @@ sptr<AbstractScreenGroup> AbstractScreenController::RemoveFromGroupLocked(sptr<A
     }
     sptr<AbstractScreenGroup> screenGroup = iter->second;
     if (!RemoveChildFromGroup(screen, screenGroup)) {
+        WLOGFE("RemoveChildFromGroup failed");
         return nullptr;
     }
     return screenGroup;
@@ -440,7 +514,6 @@ bool AbstractScreenController::RemoveChildFromGroup(sptr<AbstractScreen> screen,
 
 bool AbstractScreenController::CheckScreenInScreenGroup(sptr<AbstractScreen> screen) const
 {
-    WLOGI("CheckScreenInScreenGroup.");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto groupDmsId = screen->groupDmsId_;
     auto iter = dmsScreenGroupMap_.find(groupDmsId);
@@ -1272,7 +1345,8 @@ void AbstractScreenController::NotifyScreenGroupChanged(
     controllerHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
 }
 
-bool AbstractScreenController::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) const
+bool AbstractScreenController::SetScreenPowerForAll(ScreenPowerState state,
+    PowerStateChangeReason reason, bool needToNotify)
 {
     WLOGFI("state:%{public}u, reason:%{public}u", state, reason);
     auto screenIds = GetAllScreenIds();
@@ -1285,10 +1359,12 @@ bool AbstractScreenController::SetScreenPowerForAll(ScreenPowerState state, Powe
     switch (state) {
         case ScreenPowerState::POWER_ON: {
             status = ScreenPowerStatus::POWER_STATUS_ON;
+            powerState_ = ScreenPowerState::POWER_ON;
             break;
         }
         case ScreenPowerState::POWER_OFF: {
             status = ScreenPowerStatus::POWER_STATUS_OFF;
+            powerState_ = ScreenPowerState::POWER_OFF;
             break;
         }
         default: {
@@ -1308,7 +1384,7 @@ bool AbstractScreenController::SetScreenPowerForAll(ScreenPowerState state, Powe
             continue;
         }
         RSInterfaces::GetInstance().SetScreenPowerStatus(screen->rsId_, status);
-        WLOGI("set screen power status. rsscreen %{public}" PRIu64", status %{public}u", screen->rsId_, status);
+        WLOGFI("set screen power status. rsscreen %{public}" PRIu64", status %{public}u", screen->rsId_, status);
         hasSetScreenPower = true;
     }
     WLOGFI("SetScreenPowerStatus end");
@@ -1316,9 +1392,12 @@ bool AbstractScreenController::SetScreenPowerForAll(ScreenPowerState state, Powe
         WLOGFI("no real screen");
         return false;
     }
-    return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(
-        state == ScreenPowerState::POWER_ON ? DisplayPowerEvent::DISPLAY_ON :
-        DisplayPowerEvent::DISPLAY_OFF, EventStatus::END);
+    if (needToNotify) {
+        return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(
+            state == ScreenPowerState::POWER_ON ? DisplayPowerEvent::DISPLAY_ON :
+            DisplayPowerEvent::DISPLAY_OFF, EventStatus::END);
+    }
+    return true;
 }
 
 ScreenPowerState AbstractScreenController::GetScreenPower(ScreenId dmsScreenId) const

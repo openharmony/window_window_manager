@@ -29,6 +29,8 @@ public:
 
     int GetValueById(int id) override;
 
+    sptr<IRemoteObject> GetScreenSessionManagerService() override;
+
     sptr<IRemoteObject> GetRemoteObject();
 
     sptr<IRemoteObject> GetSceneSessionManager() override;
@@ -37,10 +39,10 @@ private:
     void Init();
 
     static inline SingletonDelegator<SessionManagerService> delegator_;
-
     std::recursive_mutex mutex_;
     sptr<IRemoteObject> sceneSessionManagerObj_ = nullptr;
     sptr<IRemoteObject> sessionManagerServiceObj_ = nullptr;
+    sptr<IRemoteObject> screenSessionManagerObj_ = nullptr;
 };
 } // namesapce OHOS::Rosen
 #endif // FOUNDATION_WINDOW_SCENE_SESSION_MANAGER_SERVICE_H

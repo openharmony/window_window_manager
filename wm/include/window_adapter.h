@@ -80,6 +80,8 @@ public:
     virtual void NotifyDumpInfoResult(const std::vector<std::string>& info);
     virtual WMError GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
         std::vector<sptr<RSWindowAnimationTarget>>& targets);
+    virtual void SetMaximizeMode(MaximizeMode maximizeMode);
+    virtual MaximizeMode GetMaximizeMode();
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxy();

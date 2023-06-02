@@ -23,6 +23,7 @@
 #include "js_root_scene_session.h"
 #include "js_scene_session.h"
 #include "js_scene_utils.h"
+#include "js_window_scene.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
@@ -59,6 +60,7 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
     BindNativeFunction(*engine, *object, "requestSceneSessionDestruction", moduleName,
         JsSceneSessionManager::RequestSceneSessionDestruction);
     BindNativeFunction(*engine, *object, "on", moduleName, JsSceneSessionManager::RegisterCallback);
+    BindNativeFunction(*engine, *object, "getWindowSceneConfig", moduleName, JsSceneSessionManager::GetWindowSceneConfig);
     return engine->CreateUndefined();
 }
 
@@ -164,6 +166,13 @@ NativeValue* JsSceneSessionManager::RequestSceneSessionDestruction(NativeEngine*
     return (me != nullptr) ? me->OnRequestSceneSessionDestruction(*engine, *info) : nullptr;
 }
 
+NativeValue* JsSceneSessionManager::GetWindowSceneConfig(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGI("[NAPI]GetWindowSceneConfig");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
+    return (me != nullptr) ? me->OnGetWindowSceneConfig(*engine, *info) : nullptr;
+}
+
 bool JsSceneSessionManager::IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
@@ -240,18 +249,16 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
     }
+
     SessionInfo sessionInfo;
     if (errCode == WSErrorCode::WS_OK) {
-        // parse ability info
         NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
         if (nativeObj == nullptr) {
-            WLOGFE("[NAPI]Failed to convert object to AbilityInfo");
+            WLOGFE("[NAPI]Failed to convert object to session info");
             errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
-        } else {
-            if (!GetAbilityInfoFromJs(engine, nativeObj, sessionInfo)) {
-                WLOGFE("[NAPI]Failed to GetSystemBarProperties From Js Object");
-                errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
-            }
+        } else if (!ConvertSessionInfoFromJs(engine, nativeObj, sessionInfo)) {
+            WLOGFE("[NAPI]Failed to get session info from js object");
+            errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
         }
     }
 
@@ -260,6 +267,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
+
     WLOGFI("[NAPI]SessionInfo [%{public}s, %{public}s], errCode = %{public}d",
         sessionInfo.bundleName_.c_str(), sessionInfo.abilityName_.c_str(), errCode);
     sptr<SceneSession> sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(sessionInfo);
@@ -270,8 +278,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
     } else {
         NativeValue* jsSceneSessionObj = JsSceneSession::Create(engine, sceneSession);
         if (jsSceneSessionObj == nullptr) {
-            WLOGFE("[NAPI]SceneInfo [%{public}s, %{public}s], jsSceneSessionObj is nullptr",
-                sessionInfo.bundleName_.c_str(), sessionInfo.abilityName_.c_str());
+            WLOGFE("jsSceneSessionObj is nullptr");
             engine.Throw(CreateJsError(
                 engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
         }
@@ -290,7 +297,6 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionActivation(NativeEngine
 
     sptr<SceneSession> sceneSession = nullptr;
     if (errCode == WSErrorCode::WS_OK) {
-        // find scene session
         auto jsSceneSessionObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
         if (jsSceneSessionObj == nullptr) {
             WLOGFE("[NAPI]Failed to get js scene session object");
@@ -298,7 +304,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionActivation(NativeEngine
         } else {
             auto jsSceneSession = static_cast<JsSceneSession*>(jsSceneSessionObj->GetNativePointer());
             if (jsSceneSession == nullptr) {
-                WLOGFE("[NAPI]Failed to find scene session From Js Object");
+                WLOGFE("[NAPI]Failed to get scene session from js object");
                 errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
             }
             sceneSession = jsSceneSession->GetNativeSession();
@@ -348,7 +354,6 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackground(NativeEngine
 
     sptr<SceneSession> sceneSession = nullptr;
     if (errCode == WSErrorCode::WS_OK) {
-        // find scene session
         auto jsSceneSessionObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
         if (jsSceneSessionObj == nullptr) {
             WLOGFE("[NAPI]Failed to get js scene session object");
@@ -356,7 +361,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackground(NativeEngine
         } else {
             auto jsSceneSession = static_cast<JsSceneSession*>(jsSceneSessionObj->GetNativePointer());
             if (jsSceneSession == nullptr) {
-                WLOGFE("[NAPI]Failed to find scene session From Js Object");
+                WLOGFE("[NAPI]Failed to get scene session from js object");
                 errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
             }
             sceneSession = jsSceneSession->GetNativeSession();
@@ -406,7 +411,6 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
 
     sptr<SceneSession> sceneSession = nullptr;
     if (errCode == WSErrorCode::WS_OK) {
-        // find scene session
         auto jsSceneSessionObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
         if (jsSceneSessionObj == nullptr) {
             WLOGFE("[NAPI]Failed to get js scene session object");
@@ -414,7 +418,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
         } else {
             auto jsSceneSession = static_cast<JsSceneSession*>(jsSceneSessionObj->GetNativePointer());
             if (jsSceneSession == nullptr) {
-                WLOGFE("[NAPI]Failed to find scene session From Js Object");
+                WLOGFE("[NAPI]Failed to get scene session from js object");
                 errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
             }
             sceneSession = jsSceneSession->GetNativeSession();
@@ -452,4 +456,18 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
         CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
+
+NativeValue* JsSceneSessionManager::OnGetWindowSceneConfig(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("[NAPI]OnGetWindowSceneConfig");
+    const AppWindowSceneConfig& windowSceneConfig = SceneSessionManager::GetInstance().GetWindowSceneConfig();
+    NativeValue* jsWindowSceneObj = JsWindowScene::CreateWindowSceneConfig(engine, windowSceneConfig);
+    if (jsWindowSceneObj == nullptr) {
+        WLOGFE("[NAPI]jsWindowSceneObj is nullptr");
+        engine.Throw(CreateJsError(engine,
+            static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
+    }
+    return jsWindowSceneObj;
+}
+
 } // namespace OHOS::Rosen

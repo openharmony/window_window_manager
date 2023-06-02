@@ -108,3 +108,8 @@ WM_REPORT_WINDOW_DESTORY:
 WM_REPORT_HIDE_NAVIGATIONBAR:
   __BASE: {type: STATISTIC, level: MINOR, desc: The navigation bar is hidden}
   MSG: {type: STRING, desc: windowmanager event message}
+
+FOCUS_WINDOW:
+  __BASE: {type: BEHAVIOR, level: MINOR, tag: PowerStats, desc: Window focus changed}
+  PID: {type: INT32, desc: app pid}
+  UID: {type: INT32, desc: app uid}

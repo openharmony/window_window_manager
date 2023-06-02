@@ -96,8 +96,8 @@ HWTEST_F(WindowSessionImplTest, CreateWindowAndDestroy01, Function | SmallTest |
     ASSERT_EQ(WMError::WM_ERROR_INVALID_SESSION, window->Create(abilityContext_, session));
     // session is null
     window = new WindowSessionImpl(option);
-    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, nullptr));
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->Create(abilityContext_, nullptr));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
 
 /**
@@ -179,9 +179,7 @@ HWTEST_F(WindowSessionImplTest, Hide01, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_OK, window->Hide());
     window->state_ = WindowState::STATE_SHOWN;
     window->property_->type_ = WindowType::WINDOW_TYPE_FLOAT;
-    EXPECT_CALL(*(session), Background()).WillOnce(Return(WSError::WS_ERROR_INVALID_SESSION));
-    EXPECT_CALL(*(session), UpdateActiveStatus(_)).WillOnce(Return(WSError::WS_OK));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_SESSION, window->Hide());
+    ASSERT_EQ(WMError::WM_OK, window->Hide());
     window->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }

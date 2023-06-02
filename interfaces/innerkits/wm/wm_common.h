@@ -141,7 +141,6 @@ enum class WMError : int32_t {
     WM_ERROR_NO_MEM,
     WM_ERROR_DESTROYED_OBJECT,
     WM_ERROR_INVALID_WINDOW,
-    WM_ERROR_INVALID_SESSION,
     WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE,
     WM_ERROR_INVALID_OPERATION,
     WM_ERROR_INVALID_PERMISSION,
@@ -151,6 +150,7 @@ enum class WMError : int32_t {
     WM_ERROR_INVALID_PARENT,
     WM_ERROR_OPER_FULLSCREEN_FAILED,
     WM_ERROR_REPEAT_OPERATION,
+    WM_ERROR_INVALID_SESSION,
 
     WM_ERROR_DEVICE_NOT_SUPPORT = 801, // the value do not change.It is defined on all system
 
@@ -475,6 +475,15 @@ enum class WindowAnimation : uint32_t {
     DEFAULT,
     INPUTE,
     CUSTOM,
+};
+
+/**
+ * @brief Enumerates window maximize mode.
+ */
+enum class MaximizeMode : uint32_t {
+    MODE_AVOID_SYSTEM_BAR,
+    MODE_FULL_FILL,
+    MODE_RECOVER,
 };
 
 /**

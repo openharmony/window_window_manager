@@ -51,7 +51,7 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
     }
 
     if (property) {
-        if (!data.WriteBool(true) || !property->Marshalling(data)) {
+        if (!data.WriteBool(true) || !data.WriteParcelable(property.GetRefPtr())) {
             WLOGFE("Write property failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
@@ -74,7 +74,7 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
         return WSError::WS_ERROR_IPC_FAILED;
     }
     session = iface_cast<ISession>(sessionObject);
-    int32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
@@ -96,7 +96,7 @@ WSError SceneSessionManagerProxy::DestroyAndDisconnectSpecificSession(const uint
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 } // namespace OHOS::Rosen

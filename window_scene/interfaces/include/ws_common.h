@@ -34,7 +34,6 @@ enum class WSError : int32_t {
     WS_ERROR_NO_MEM,
     WS_ERROR_DESTROYED_OBJECT,
     WS_ERROR_INVALID_WINDOW,
-    WS_ERROR_INVALID_SESSION,
     WS_ERROR_INVALID_WINDOW_MODE_OR_SIZE,
     WS_ERROR_INVALID_OPERATION,
     WS_ERROR_INVALID_PERMISSION,
@@ -44,6 +43,7 @@ enum class WSError : int32_t {
     WS_ERROR_INVALID_PARENT,
     WS_ERROR_OPER_FULLSCREEN_FAILED,
     WS_ERROR_REPEAT_OPERATION,
+    WS_ERROR_INVALID_SESSION,
 
     WS_ERROR_DEVICE_NOT_SUPPORT = 801, // the value do not change.It is defined on all system
 
@@ -92,6 +92,7 @@ struct SessionInfo {
     std::string bundleName_ = "";
     std::string abilityName_ = "";
     sptr<IRemoteObject> callerToken_ = nullptr;
+    bool isSystem_ = false;
 };
 
 enum class SizeChangeReason : uint32_t {
@@ -112,6 +113,14 @@ enum class SizeChangeReason : uint32_t {
     END,
 };
 
+enum class SessionEvent : uint32_t {
+    EVENT_MAXIMIZE = 100,
+    EVENT_RECOVER,
+    EVENT_MINIMIZE,
+    EVENT_CLOSE,
+    EVENT_START_MOVE
+};
+
 struct WSRect {
     int32_t posX_ = 0;
     int32_t posY_ = 0;
@@ -128,5 +137,24 @@ struct WSRect {
         return !this->operator==(a);
     }
 };
+
+struct WindowShadowConfig {
+    float elevation_ = 0.0f;
+    float offsetX_ = 0.0f;
+    float offsetY_ = 0.0f;
+    float alpha_ = 0.0f;
+    float radius_ = 0.0f;
+    std::string color_ = "#000000";
+};
+
+struct AppWindowSceneConfig {
+    float fullScreenCornerRadius_ = 0.0f;
+    float splitCornerRadius_ = 0.0f;
+    float floatCornerRadius_ = 0.0f;
+
+    WindowShadowConfig focusedShadow_;
+    WindowShadowConfig unfocusedShadow_;
+};
+
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

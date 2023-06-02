@@ -238,7 +238,7 @@ HWTEST_F(WindowControllerTest, CreateWindow, Function | SmallTest | Level3)
     windowRoot_->windowNodeMap_.clear();
     sptr<IWindow> window;
     sptr<WindowProperty> property = new WindowProperty();
-    std::shared_ptr<RSSurfaceNode> surfaceNode;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
 
     sptr<WindowProperty> property2 = new WindowProperty();
     property2->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
@@ -251,6 +251,11 @@ HWTEST_F(WindowControllerTest, CreateWindow, Function | SmallTest | Level3)
 
     uint32_t windowId;
     property->SetParentId(INVALID_WINDOW_ID);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    surfaceNodeConfig.SurfaceNodeName = "SurfaceNode";
+    surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
     ASSERT_EQ(WMError::WM_OK, windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
 
     property->SetParentId(1);

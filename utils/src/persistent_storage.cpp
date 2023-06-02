@@ -22,6 +22,7 @@ namespace {
 }
 std::map<PersistentStorageType, std::string> PersistentStorage::storagePath_ = {
     { PersistentStorageType::ASPECT_RATIO, "/data/service/el1/public/window/window_aspect_ratio.xml" },
+    { PersistentStorageType::MAXIMIZE_STATE, "/data/service/el1/public/window/window_maximize_state.xml" },
 };
 
 bool PersistentStorage::HasKey(const std::string& key, PersistentStorageType storageType)

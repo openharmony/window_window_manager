@@ -19,6 +19,8 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
 
+#include "screen_session_manager.h"
+
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionManagerService"};
@@ -48,5 +50,14 @@ sptr<IRemoteObject> SessionManagerService::GetRemoteObject()
 {
     sessionManagerServiceObj_ = this->AsObject();
     return sessionManagerServiceObj_;
+}
+
+sptr<IRemoteObject> SessionManagerService::GetScreenSessionManagerService()
+{
+    if (screenSessionManagerObj_) {
+        return screenSessionManagerObj_;
+    }
+    screenSessionManagerObj_ = ScreenSessionManager::GetInstance().AsObject();
+    return screenSessionManagerObj_;
 }
 } // namesapce OHOS::Rosen

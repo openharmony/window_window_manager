@@ -16,6 +16,10 @@
 #include "session_manager.h"
 
 #include <unistd.h>
+#include <condition_variable>
+
+#include "zidl/screen_session_manager_proxy.h"
+
 #include "ability_manager_client.h"
 #include "ability_connect_callback_stub.h"
 #include "session_manager_service/include/session_manager_service_proxy.h"
@@ -24,9 +28,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionManager"};
-constexpr int CONNECT_COUNT = 10;
-constexpr int SLEEP_US = 100;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SessionManager"};
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SessionManager)
@@ -40,6 +42,7 @@ public:
         if (remoteObject_ == nullptr) {
             WLOGFW("RemoteObject_ is nullptr");
         }
+        cv_.notify_all();
     }
 
     void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override
@@ -47,12 +50,21 @@ public:
         remoteObject_ = nullptr;
     }
 
-    sptr<IRemoteObject> GetRemoteObject() const
+    sptr<IRemoteObject> GetRemoteObject()
     {
+        if (!remoteObject_) {
+            std::unique_lock<std::mutex> lock(mutex_);
+            if (cv_.wait_for(lock, std::chrono::seconds(1)) == std::cv_status::timeout) {
+                WLOGFW("Get remote object timeout.");
+            }
+        }
+
         return remoteObject_;
     }
 private:
     sptr<IRemoteObject> remoteObject_;
+    std::mutex mutex_;
+    std::condition_variable cv_;
 };
 
 SessionManager::SessionManager()
@@ -65,7 +77,7 @@ SessionManager::~SessionManager()
 
 void SessionManager::Init()
 {
-    if (!abilityConnection_) {
+    if (!serviceConnected_) {
         ConnectToService();
     }
 }
@@ -75,28 +87,32 @@ sptr<IRemoteObject> SessionManager::GetRemoteObject()
     if (remoteObject_) {
         return remoteObject_;
     }
+
     if (abilityConnection_) {
         remoteObject_ = abilityConnection_->GetRemoteObject();
-        if (remoteObject_) {
-            return remoteObject_;
-        }
+    } else {
+        Init();
     }
 
-    int count = 0;
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    while (remoteObject_ == nullptr && count < CONNECT_COUNT) {
-        usleep(SLEEP_US);
-        if (abilityConnection_) {
-            remoteObject_ = abilityConnection_->GetRemoteObject();
-        }
+    if (!remoteObject_) {
+        WLOGFE("Get session manager service remote object nullptr");
     }
     return remoteObject_;
+}
+
+sptr<IScreenSessionManager> SessionManager::GetScreenSessionManagerProxy()
+{
+    Init();
+    InitSessionManagerServiceProxy();
+    InitScreenSessionManagerProxy();
+
+    return screenSessionManagerProxy_;
 }
 
 void SessionManager::ConnectToService()
 {
     if (!abilityConnection_) {
-        abilityConnection_ = new AbilityConnection();
+        abilityConnection_ = new(std::nothrow) AbilityConnection();
     }
 
     AAFwk::Want want;
@@ -105,18 +121,20 @@ void SessionManager::ConnectToService()
     if (ret != ERR_OK) {
         WLOGFE("ConnectToService failed, errorcode: %{public}d", ret);
     }
+    serviceConnected_ = (ret == ERR_OK);
 }
 
-void SessionManager::CreateSessionManagerServiceProxy()
+void SessionManager::InitSessionManagerServiceProxy()
 {
+    if (sessionManagerServiceProxy_) {
+        return;
+    }
     sptr<IRemoteObject> remoteObject = GetRemoteObject();
     if (remoteObject) {
         sessionManagerServiceProxy_ = iface_cast<ISessionManagerService>(remoteObject);
         if (!sessionManagerServiceProxy_) {
             WLOGFE("sessionManagerServiceProxy_ is nullptr");
         }
-    } else {
-        WLOGFE("GetRemoteObject null");
     }
 }
 
@@ -127,15 +145,32 @@ void SessionManager::GetSceneSessionManagerProxy()
     }
     if (!sessionManagerServiceProxy_) {
         WLOGFE("sessionManagerServiceProxy_ is nullptr");
+        return;
     }
 
     sptr<IRemoteObject> remoteObject = sessionManagerServiceProxy_->GetSceneSessionManager();
+    sceneSessionManagerProxy_ = iface_cast<ISceneSessionManager>(remoteObject);
+    if (!sceneSessionManagerProxy_) {
+        WLOGFW("Get scene session manager proxy failed, nullptr");
+    }
+}
+
+void SessionManager::InitScreenSessionManagerProxy()
+{
+    if (screenSessionManagerProxy_) {
+        return;
+    }
+    if (!sessionManagerServiceProxy_) {
+        WLOGFW("Get screen session manager proxy failed, sessionManagerServiceProxy_ is nullptr");
+        return;
+    }
+    sptr<IRemoteObject> remoteObject = sessionManagerServiceProxy_->GetScreenSessionManagerService();
     if (!remoteObject) {
         WLOGFW("Get screen session manager proxy failed, screen session manager service is null");
         return;
     }
-    sceneSessionManagerProxy_ = iface_cast<ISceneSessionManager>(remoteObject);
-    if (!sceneSessionManagerProxy_) {
+    screenSessionManagerProxy_ = iface_cast<IScreenSessionManager>(remoteObject);
+    if (!screenSessionManagerProxy_) {
         WLOGFW("Get screen session manager proxy failed, nullptr");
     }
 }
@@ -144,7 +179,7 @@ void SessionManager::InitSceneSessionManagerProxy()
 {
     WLOGFD("InitSceneSessionManagerProxy");
     Init();
-    CreateSessionManagerServiceProxy();
+    InitSessionManagerServiceProxy();
     GetSceneSessionManagerProxy();
 }
 
@@ -172,4 +207,5 @@ void SessionManager::DestroyAndDisconnectSpecificSession(const uint64_t& persist
     }
     sceneSessionManagerProxy_->DestroyAndDisconnectSpecificSession(persistentId);
 }
+
 } // namespace OHOS::Rosen
