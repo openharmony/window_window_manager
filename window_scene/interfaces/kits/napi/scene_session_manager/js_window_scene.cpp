@@ -33,8 +33,6 @@ NativeValue* JsWindowScene::CreateWindowSceneConfig(NativeEngine& engine, const 
         return engine.CreateUndefined();
     }
 
-    object->SetProperty("fullScreenCornerRadius", CreateJsValue(engine, config.fullScreenCornerRadius_));
-    object->SetProperty("splitCornerRadius", CreateJsValue(engine, config.splitCornerRadius_));
     object->SetProperty("floatCornerRadius", CreateJsValue(engine, config.floatCornerRadius_));
 
     object->SetProperty("focusedShadow", CreateShadowValue(engine, config, true));
@@ -52,14 +50,10 @@ NativeValue* JsWindowScene::CreateShadowValue(NativeEngine& engine, const AppWin
         return engine.CreateUndefined();
     }
 
-    object->SetProperty("elevation", CreateJsValue(engine,
-        focused ? config.focusedShadow_.elevation_ : config.unfocusedShadow_.elevation_));
     object->SetProperty("offsetX", CreateJsValue(engine,
         focused ? config.focusedShadow_.offsetX_ : config.unfocusedShadow_.offsetX_));
     object->SetProperty("offsetY", CreateJsValue(engine,
         focused ? config.focusedShadow_.offsetY_ : config.unfocusedShadow_.offsetY_));
-    object->SetProperty("alpha", CreateJsValue(engine,
-        focused ? config.focusedShadow_.alpha_ : config.unfocusedShadow_.alpha_));
     object->SetProperty("radius", CreateJsValue(engine,
         focused ? config.focusedShadow_.radius_ : config.unfocusedShadow_.radius_));
     object->SetProperty("color", CreateJsValue(engine,
