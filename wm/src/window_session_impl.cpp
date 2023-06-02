@@ -327,7 +327,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
 uint64_t WindowSessionImpl::GetFloatingWindowParentId()
 {
     if (context_.get() == nullptr) {
-        return INVALID_WINDOW_ID;
+        return INVALID_SESSION_ID;
     }
 
     for (const auto& winPair : windowSessionMap_) {
@@ -339,7 +339,7 @@ uint64_t WindowSessionImpl::GetFloatingWindowParentId()
             return winPair.second.second->GetProperty()->GetPersistentId();
         }
     }
-    return INVALID_WINDOW_ID;
+    return INVALID_SESSION_ID;
 }
 
 Rect WindowSessionImpl::GetRect() const
