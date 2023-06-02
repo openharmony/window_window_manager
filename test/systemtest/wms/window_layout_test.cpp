@@ -19,6 +19,7 @@
 #include "window_manager.h"
 #include "window_test_utils.h"
 #include "wm_common.h"
+#include "window_adapter.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -44,6 +45,8 @@ vector<Rect> WindowLayoutTest::fullScreenExpecteds_;
 
 void WindowLayoutTest::SetUpTestCase()
 {
+    SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(0);
+    sleep(2);
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_TRUE((display != nullptr));
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
@@ -74,6 +77,7 @@ void WindowLayoutTest::SetUpTestCase()
     };
     fullScreenExpecteds_.push_back(expected);
     InitAvoidArea();
+    sleep(2);
 }
 
 void WindowLayoutTest::InitAvoidArea()
