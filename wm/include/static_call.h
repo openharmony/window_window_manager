@@ -31,7 +31,7 @@ public:
     virtual sptr<Window> CreateWindow(const std::string& windowName,
         sptr<WindowOption>& option, std::shared_ptr<AbilityRuntime::Context> context = nullptr);
     virtual sptr<Window> CreateWindow(sptr<WindowOption>& option, std::shared_ptr<AbilityRuntime::Context> context,
-        const sptr<ISession>& iSession);
+        const sptr<IRemoteObject>& iSession);
     virtual std::vector<sptr<Window>> GetSubWindow(uint32_t parentId);
 protected:
     StaticCall() = default;
