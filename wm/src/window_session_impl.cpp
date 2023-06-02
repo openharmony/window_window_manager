@@ -324,6 +324,24 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         property_->GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
 
+uint64_t WindowSessionImpl::GetFloatingWindowParentId()
+{
+    if (context_.get() == nullptr) {
+        return INVALID_WINDOW_ID;
+    }
+
+    for (const auto& winPair : windowSessionMap_) {
+        if (winPair.second.second && WindowHelper::IsMainWindow(winPair.second.second->GetType()) &&
+            winPair.second.second->GetProperty() &&
+            context_.get() == winPair.second.second->GetContext().get()) {
+            WLOGFD("Find parent, [parentName: %{public}s, selfPersistentId: %{public}" PRIu64"]",
+                winPair.second.second->GetProperty()->GetWindowName().c_str(), GetProperty()->GetPersistentId());
+            return winPair.second.second->GetProperty()->GetPersistentId();
+        }
+    }
+    return INVALID_WINDOW_ID;
+}
+
 Rect WindowSessionImpl::GetRect() const
 {
     return property_->GetWindowRect();
