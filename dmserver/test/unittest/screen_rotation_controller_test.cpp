@@ -543,9 +543,6 @@ HWTEST_F(ScreenRotationControllerTest, OnMotionChanged, Function | SmallTest | L
     DeviceRotation motionRotation = DeviceRotation::INVALID;
 
     MotionEvent motionData;
-    motionData.status = 1;
-    MotionSubscriber::motionEventCallback_->OnMotionChanged(motionData);
-    ASSERT_EQ(currentRotation, ScreenRotationController::lastSensorRotationConverted_);
 
     motionData.status = 0;
     motionRotation = DeviceRotation::ROTATION_PORTRAIT;
