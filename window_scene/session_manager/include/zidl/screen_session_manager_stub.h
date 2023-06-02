@@ -13,21 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_STAGE_H
-#define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_STAGE_H
+#ifndef OHOS_ROSEN_SCREEN_SESSION_MANAGER_STUB_H
+#define OHOS_ROSEN_SCREEN_SESSION_MANAGER_STUB_H
 
-#include "interfaces/include/ws_common.h"
-#include "session/container/include/session_stage.h"
+#include "screen_session_manager_interface.h"
+#include "iremote_stub.h"
 
-namespace OHOS::Rosen {
-class SceneSessionStage : public SessionStage {
+namespace OHOS {
+namespace Rosen {
+
+class ScreenSessionManagerStub : public IRemoteStub<IScreenSessionManager> {
 public:
-    SceneSessionStage(const sptr<ISession>& sceneSession);
-    ~SceneSessionStage() = default;
+    ScreenSessionManagerStub() = default;
 
-    WSError Recover() override;
-    WSError Maximize() override;
+    ~ScreenSessionManagerStub() = default;
+
+    virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+        MessageOption &option) override;
 };
-} // namespace OHOS::Rosen
 
-#endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_STAGE_H
+} // namespace Rosen
+} // namespace OHOS
+
+#endif // OHOS_ROSEN_SCREEN_SESSION_MANAGER_INTERFACE_H

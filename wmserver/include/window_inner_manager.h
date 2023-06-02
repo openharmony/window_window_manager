@@ -22,6 +22,7 @@
 
 #include "drag_controller.h"
 #include "inner_window.h"
+#include "pixel_map.h"
 #include "wm_common.h"
 #include "window_node.h"
 #include "wm_single_instance.h"
@@ -52,6 +53,7 @@ public:
     void TerminateAbility(const wptr<WindowNode> &node);
     void CloseAbility(const wptr<WindowNode> &node);
     void CompleteFirstFrameDrawing(const wptr<WindowNode> &node);
+    void UpdateMissionSnapShot(const wptr<WindowNode> &node, std::shared_ptr<Media::PixelMap> pixelMap);
 
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void NotifyDisplayLimitRectChange(const std::map<DisplayId, Rect>& limitRectMap);

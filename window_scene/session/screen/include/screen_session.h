@@ -23,6 +23,8 @@
 #include <ui/rs_display_node.h>
 
 #include "screen_property.h"
+#include "dm_common.h"
+#include "display_info.h"
 
 namespace OHOS::Rosen {
 class IScreenChangeListener : public RefBase {
@@ -48,6 +50,8 @@ public:
 
     void RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
     void UnregisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
+
+    sptr<DisplayInfo> ConvertToDisplayInfo();
 
     ScreenId GetScreenId();
     ScreenProperty GetScreenProperty() const;

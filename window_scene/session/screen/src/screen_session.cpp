@@ -61,6 +61,20 @@ void ScreenSession::UnregisterScreenChangeListener(IScreenChangeListener* screen
         screenChangeListenerList_.end());
 }
 
+sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
+{
+    sptr<DisplayInfo> displayInfo = new(std::nothrow) DisplayInfo();
+    if (displayInfo == nullptr) {
+        return displayInfo;
+    }
+
+    displayInfo->SetWidth(property_.GetBounds().rect_.GetWidth());
+    displayInfo->SetHeight(property_.GetBounds().rect_.GetHeight());
+    displayInfo->SetScreenId(screenId_);
+    displayInfo->SetDisplayId(screenId_);
+
+    return displayInfo;
+}
 ScreenId ScreenSession::GetScreenId()
 {
     return screenId_;

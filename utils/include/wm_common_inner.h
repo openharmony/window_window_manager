@@ -83,6 +83,7 @@ enum class PropertyChangeAction : uint32_t {
     ACTION_UPDATE_ANIMATION_FLAG = 1 << 14,
     ACTION_UPDATE_PRIVACY_MODE = 1 << 15,
     ACTION_UPDATE_ASPECT_RATIO = 1 << 16,
+    ACTION_UPDATE_MAXIMIZE_STATE = 1 << 17,
 };
 
 struct ModeChangeHotZonesConfig {
@@ -121,7 +122,7 @@ struct SystemConfig : public Parcelable {
         config->isStretchable_ = parcel.ReadBool();
         config->decorModeSupportInfo_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
-        KeyboardAnimationConfig* keyboardConfig = parcel.ReadParcelable<KeyboardAnimationConfig>();
+        sptr<KeyboardAnimationConfig> keyboardConfig = parcel.ReadParcelable<KeyboardAnimationConfig>();
         config->keyboardAnimationConfig_ = *keyboardConfig;
         return config;
     }
@@ -180,6 +181,7 @@ enum class TraceTaskId : int32_t {
 enum class PersistentStorageType : uint32_t {
     UKNOWN = 0,
     ASPECT_RATIO,
+    MAXIMIZE_STATE,
 };
 
 struct MoveDragProperty : public Parcelable {

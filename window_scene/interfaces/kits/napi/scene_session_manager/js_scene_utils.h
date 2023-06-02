@@ -23,10 +23,11 @@
 #include "interfaces/include/ws_common.h"
 
 namespace OHOS::Rosen {
-bool GetAbilityInfoFromJs(NativeEngine& engine, NativeObject* jsObject, SessionInfo& sessionInfo);
+bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, SessionInfo& sessionInfo);
 NativeValue* CreateJsSessionInfo(NativeEngine& engine, const SessionInfo& sessionInfo);
 NativeValue* CreateJsSessionState(NativeEngine& engine, const SessionState& state);
 NativeValue* SessionStateInit(NativeEngine* engine);
+NativeValue* CreateJsSessionRect(NativeEngine& engine, const WSRect& rect);
 } // namespace OHOS::Rosen
 
 #endif // OHOS_WINDOW_SCENE_JS_SCENE_UTILS_H

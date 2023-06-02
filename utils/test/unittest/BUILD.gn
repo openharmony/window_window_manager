@@ -194,9 +194,9 @@ ohos_static_library("utils_unittest_common") {
   ]
 
   public_deps = [
-    "${window_base_path}/dm:libdm_static",
-    "${window_base_path}/utils:libwmutil_static",
-    "${window_base_path}/wm:libwm_static",
+    "${window_base_path}/dm:libdm",
+    "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/wm:libwm",
     "//commonlibrary/c_utils/base:utils",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",

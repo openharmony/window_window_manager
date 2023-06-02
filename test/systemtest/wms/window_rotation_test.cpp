@@ -106,6 +106,7 @@ void WindowRotationTest::SetUp()
             .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
             .needAvoid = true,
             .parentLimit = false,
+            .showWhenLocked = true,
             .parentId = INVALID_WINDOW_ID,
     };
 

@@ -423,7 +423,7 @@ NativeValue* JsWindowStage::OnCreateSubWindow(NativeEngine& engine, NativeCallba
                 return;
             }
             task.Resolve(engine, CreateJsWindowObject(engine, window));
-            WLOGI("[NAPI]Create sub widdow %{public}s end", windowName.c_str());
+            WLOGI("[NAPI]Create sub window %{public}s end", windowName.c_str());
         };
     NativeValue* callback = (info.argv[1] != nullptr && info.argv[1]->TypeOf() == NATIVE_FUNCTION) ?
         info.argv[1] : nullptr;

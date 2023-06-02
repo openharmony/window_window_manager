@@ -800,5 +800,11 @@ void WindowLayoutPolicy::FixWindowRectWithinDisplay(const sptr<WindowNode>& node
     WLOGFD("WinId: %{public}d, requestRect: [%{public}d, %{public}d, %{public}u, %{public}u]",
         node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
+
+void WindowLayoutPolicy::GetMaximizeRect(const sptr<WindowNode>& node, Rect& maxRect)
+{
+    WLOGFI("WindowLayoutPolicy GetMaximizeRect maxRect = %{public}d, %{public}d, %{public}u, %{public}u ",
+        maxRect.posX_, maxRect.posY_, maxRect.width_, maxRect.height_);
+}
 }
 }

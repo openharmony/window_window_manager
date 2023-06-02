@@ -20,6 +20,8 @@
 
 #include <iremote_proxy.h>
 
+#include "singleton_delegator.h"
+
 namespace OHOS::Rosen {
 class SessionManagerServiceProxy : public IRemoteProxy<ISessionManagerService> {
 public:
@@ -30,6 +32,7 @@ public:
     int GetValueById(int id) override;
 
     sptr<IRemoteObject> GetSceneSessionManager() override;
+    sptr<IRemoteObject> GetScreenSessionManagerService() override;
 
 private:
     static inline BrokerDelegator<SessionManagerServiceProxy> delegator_;

@@ -75,6 +75,8 @@ public:
         TRANS_ID_DISPATCH_KEY_EVENT,
         TRANS_ID_NOTIFY_DUMP_INFO_RESULT,
         TRANS_ID_GET_WINDOW_ANIMATION_TARGETS,
+        TRANS_ID_SET_MAXIMIZE_MODE,
+        TRANS_ID_GET_MAXIMIZE_MODE,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -121,6 +123,8 @@ public:
     virtual void NotifyDumpInfoResult(const std::vector<std::string>& info) {};
     virtual WMError GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
         std::vector<sptr<RSWindowAnimationTarget>>& targets) = 0;
+    virtual void SetMaximizeMode(MaximizeMode maximizeMode) = 0;
+    virtual MaximizeMode GetMaximizeMode() = 0;
 };
 }
 }

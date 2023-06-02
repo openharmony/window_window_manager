@@ -14,6 +14,10 @@
  */
 
 #include "interfaces/include/ws_common.h"
+#include "zidl/screen_session_manager_interface.h"
+
+#include "session_manager_service_interface.h"
+
 #include "iremote_object.h"
 #include "session/host/include/zidl/session_interface.h"
 #include "session_manager_service/include/session_manager_service_interface.h"
@@ -37,17 +41,22 @@ public:
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session);
     void DestroyAndDisconnectSpecificSession(const uint64_t& persistentId);
+    sptr<IScreenSessionManager> GetScreenSessionManagerProxy();
 
 private:
     void ConnectToService();
     void InitSceneSessionManagerProxy();
-    void CreateSessionManagerServiceProxy();
+    void InitSessionManagerServiceProxy();
     void GetSceneSessionManagerProxy();
 
+    void InitScreenSessionManagerProxy();
+
+    bool serviceConnected_ = false;
     sptr<AbilityConnection> abilityConnection_;
     sptr<IRemoteObject> remoteObject_ = nullptr;
     sptr<ISessionManagerService> sessionManagerServiceProxy_ = nullptr;
     sptr<ISceneSessionManager> sceneSessionManagerProxy_ = nullptr;
+    sptr<IScreenSessionManager> screenSessionManagerProxy_ = nullptr;
     std::recursive_mutex mutex_;
 };
 

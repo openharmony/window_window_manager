@@ -30,13 +30,18 @@ public:
     WSError Background() override;
     WSError Disconnect() override;
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-        const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint64_t& persistentId,
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr) override;
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError PendingSessionActivation(const SessionInfo& info) override;
-    WSError Recover() override;
-    WSError Maximize() override;
+    WSError OnSessionEvent(SessionEvent event) override;
+    WSError RaiseToAppTop() override;
+    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) override;
+    WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session) override;
+    WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

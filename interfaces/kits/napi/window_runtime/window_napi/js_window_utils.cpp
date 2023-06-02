@@ -507,6 +507,7 @@ NativeValue* CreateJsSystemBarRegionTintArrayObject(NativeEngine& engine, const 
 }
 
 bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
+                        std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags,
                         NativeEngine& engine, NativeCallbackInfo& info, sptr<Window>& window)
 {
     NativeArray* nativeArray = nullptr;
@@ -525,6 +526,8 @@ bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProper
     navProperty.enable_ = false;
     systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
     systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
+    systemBarpropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarPropertyFlag();
+    systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = SystemBarPropertyFlag();
     for (uint32_t i = 0; i < size; i++) {
         std::string name;
         if (!ConvertFromJsValue(engine, nativeArray->GetElement(i), name)) {
@@ -537,11 +540,13 @@ bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProper
             systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = true;
         }
     }
+    systemBarpropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].enableFlag = true;
+    systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableFlag = true;
     return true;
 }
 
 static uint32_t GetColorFromJs(NativeEngine& engine, NativeObject* jsObject,
-    const char* name, uint32_t defaultColor)
+    const char* name, uint32_t defaultColor, bool& flag)
 {
     NativeValue* jsColor = jsObject->GetProperty(name);
     if (jsColor->TypeOf() != NATIVE_UNDEFINED) {
@@ -559,6 +564,7 @@ static uint32_t GetColorFromJs(NativeEngine& engine, NativeObject* jsObject,
         if (color.length() == RGB_LENGTH) {
             color = "FF" + color; // ARGB
         }
+        flag = true;
         std::stringstream ss;
         uint32_t hexColor;
         ss << std::hex << color;
@@ -571,25 +577,29 @@ static uint32_t GetColorFromJs(NativeEngine& engine, NativeObject* jsObject,
 }
 
 bool SetSystemBarPropertiesFromJs(NativeEngine& engine, NativeObject* jsObject,
-    std::map<WindowType, SystemBarProperty>& properties, sptr<Window>& window)
+    std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags,
+    sptr<Window>& window)
 {
     auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
     properties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
     properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
-    properties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_ = GetColorFromJs(engine,
-        jsObject, "statusBarColor", statusProperty.backgroundColor_);
+    propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarPropertyFlag();
+    propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = SystemBarPropertyFlag();
+    properties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_ = GetColorFromJs(engine, jsObject, "statusBarColor",
+        statusProperty.backgroundColor_, propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColorFlag);
     properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_ = GetColorFromJs(engine,
-        jsObject, "navigationBarColor", navProperty.backgroundColor_);
+        jsObject, "navigationBarColor", navProperty.backgroundColor_,
+        propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColorFlag);
     NativeValue* jsStatusContentColor = jsObject->GetProperty("statusBarContentColor");
     NativeValue* jsStatusIcon = jsObject->GetProperty("isStatusBarLightIcon");
     if (jsStatusContentColor->TypeOf() != NATIVE_UNDEFINED) {
         properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ =  GetColorFromJs(engine,
-            jsObject, "statusBarContentColor", statusProperty.contentColor_);
+            jsObject, "statusBarContentColor", statusProperty.contentColor_,
+            propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColorFlag);
     } else if (jsStatusIcon->TypeOf() != NATIVE_UNDEFINED) {
         bool isStatusBarLightIcon;
         if (!ConvertFromJsValue(engine, jsStatusIcon, isStatusBarLightIcon)) {
-            WLOGFE("Failed to convert parameter to isStatusBarLightIcon");
             return false;
         }
         if (isStatusBarLightIcon) {
@@ -597,16 +607,17 @@ bool SetSystemBarPropertiesFromJs(NativeEngine& engine, NativeObject* jsObject,
         } else {
             properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ = SYSTEM_COLOR_BLACK;
         }
+        propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColorFlag = true;
     }
     NativeValue* jsNavigationContentColor = jsObject->GetProperty("navigationBarContentColor");
     NativeValue* jsNavigationIcon = jsObject->GetProperty("isNavigationBarLightIcon");
     if (jsNavigationContentColor->TypeOf() != NATIVE_UNDEFINED) {
         properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = GetColorFromJs(engine,
-            jsObject, "navigationBarContentColor", navProperty.contentColor_);
+            jsObject, "navigationBarContentColor", navProperty.contentColor_,
+            propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColorFlag);
     } else if (jsNavigationIcon->TypeOf() != NATIVE_UNDEFINED) {
         bool isNavigationBarLightIcon;
         if (!ConvertFromJsValue(engine, jsNavigationIcon, isNavigationBarLightIcon)) {
-            WLOGFE("Failed to convert parameter to isNavigationBarLightIcon");
             return false;
         }
         if (isNavigationBarLightIcon) {
@@ -614,6 +625,7 @@ bool SetSystemBarPropertiesFromJs(NativeEngine& engine, NativeObject* jsObject,
         } else {
             properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = SYSTEM_COLOR_BLACK;
         }
+        propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColorFlag = true;
     }
     return true;
 }

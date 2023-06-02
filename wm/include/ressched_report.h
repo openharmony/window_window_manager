@@ -33,6 +33,7 @@ namespace {
     constexpr int32_t PERF_CLICK_NORMAL_CODE = 9;
     constexpr int32_t PERF_DRAG_CODE = 31;
     constexpr int32_t PERF_MOVE_CODE = 32;
+    constexpr int32_t PERF_ANIMATION_BOOST_CODE = 33;
     constexpr int32_t PERF_SLIDE_CODE = 11;
     constexpr int32_t PERF_STATUS_BAR_DRAG_CODE = 37;
     const std::string TASK_NAME = "SlideOff";
@@ -75,6 +76,14 @@ class ResSchedReport {
 #endif
     }
 
+    void AnimationBoost()
+    {
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+        std::unordered_map<std::string, std::string> mapPayload;
+        OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(PERF_ANIMATION_BOOST_CODE, 0, mapPayload);
+#endif
+    }
+
     void RequestPerfIfNeed(WindowSizeChangeReason reason, WindowType type, WindowMode mode)
     {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
@@ -110,7 +119,7 @@ class ResSchedReport {
     void TrigSlide(WindowType type, bool isOn)
     {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
-        if (type == WindowType::WINDOW_TYPE_STATUS_BAR) {
+        if (type == WindowType::WINDOW_TYPE_STATUS_BAR || type == WindowType::WINDOW_TYPE_PANEL) {
             StatusBarDrag(isOn);
         }
         if (type == WindowType::WINDOW_TYPE_DESKTOP) {

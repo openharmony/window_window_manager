@@ -193,10 +193,13 @@ public:
 
     virtual bool IsDecorEnable() const override;
     virtual WMError Maximize() override;
+    virtual WMError MaximizeFloating() override;
     virtual WMError Minimize() override;
     virtual WMError Recover() override;
     virtual WMError Close() override;
     virtual void StartMove() override;
+    virtual WMError SetGlobalMaximizeMode(MaximizeMode mode) override;
+    virtual MaximizeMode GetGlobalMaximizeMode() override;
 
     virtual WMError RequestFocus() const override;
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
@@ -543,6 +546,7 @@ private:
     void UpdateViewportConfig(const Rect& rect, const sptr<class Display>& display, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateDecorEnable(bool needNotify = false);
+    WMError SetFloatingMaximize(bool isEnter);
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
         ColorSpace colorSpace;
@@ -552,6 +556,7 @@ private:
     static ColorSpace GetColorSpaceFromSurfaceGamut(ColorGamut colorGamut);
     static ColorGamut GetSurfaceGamutFromColorSpace(ColorSpace colorSpace);
     void ChangePropertyByApiVersion();
+    void PerfLauncherHotAreaIfNeed(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> subWindowMap_;

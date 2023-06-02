@@ -59,11 +59,11 @@ private:
 
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
 using OHOS::Msdp::MotionCallbackStub;
-using OHOS::Msdp::MotionData;
+using OHOS::Msdp::MotionEvent;
 
 class RotationMotionEventCallback : public MotionCallbackStub {
 public:
-    void OnMotionChanged(const MotionData& motionData) override;
+    void OnMotionChanged(const MotionEvent& motionData) override;
 };
 
 class MotionSubscriber {

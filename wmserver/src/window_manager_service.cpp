@@ -37,6 +37,7 @@
 #include "memory_guard.h"
 #include "minimize_app.h"
 #include "permission.h"
+#include "persistent_storage.h"
 #include "remote_animation.h"
 #include "singleton_container.h"
 #include "starting_window.h"
@@ -277,6 +278,14 @@ bool WindowManagerService::Init()
         ConfigureWindowManagerService();
         StartingWindow::SetAnimationConfig(WindowNodeContainer::GetAnimationConfigRef());
     }
+    if (PersistentStorage::HasKey("maximize_state", PersistentStorageType::MAXIMIZE_STATE)) {
+        int32_t storageMode = -1;
+        PersistentStorage::Get("maximize_state", storageMode, PersistentStorageType::MAXIMIZE_STATE);
+        if (storageMode == static_cast<uint32_t>(MaximizeMode::MODE_AVOID_SYSTEM_BAR) ||
+            storageMode == static_cast<uint32_t>(MaximizeMode::MODE_FULL_FILL)) {
+            maximizeMode_ = static_cast<MaximizeMode>(storageMode);
+        }
+    }
     WindowSystemEffect::SetWindowRoot(windowRoot_);
     WLOGI("Init success");
     return true;
@@ -316,6 +325,8 @@ void WindowManagerService::ConfigureWindowManagerService()
              numbers[0] == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
             systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(numbers[0]));
             StartingWindow::SetDefaultWindowMode(systemConfig_.defaultWindowMode_);
+            maximizeMode_ = systemConfig_.defaultWindowMode_ == WindowMode::WINDOW_MODE_FLOATING ?
+                MaximizeMode::MODE_AVOID_SYSTEM_BAR : MaximizeMode::MODE_FULL_FILL;
         }
     }
     item = config["dragFrameGravity"];
@@ -496,7 +507,7 @@ void WindowManagerService::ConfigKeyboardAnimation(const WindowManagerConfig::Co
         auto numbers = *item.intsValue_;
         if (numbers.size() == 1) { // duration
             animationConfig.keyboardAnimationConfig_.durationIn_ = RSAnimationTimingProtocol(numbers[0]);
-            systemConfig_.keyboardAnimationConfig_.durationIn_ = numbers[0];
+            systemConfig_.keyboardAnimationConfig_.durationIn_ = static_cast<uint32_t>(numbers[0]);
         }
     }
     item = animeConfig["timing"]["durationOut"];
@@ -1418,6 +1429,24 @@ void WindowInfoQueriedListener::HasPrivateWindow(DisplayId displayId, bool& hasP
 {
     WLOGI("called");
     WindowManagerService::GetInstance().HasPrivateWindow(displayId, hasPrivateWindow);
+}
+
+void WindowManagerService::SetMaximizeMode(MaximizeMode maximizeMode)
+{
+    maximizeMode_ = maximizeMode;
+    int32_t storageMode = -1;
+    if (PersistentStorage::HasKey("maximize_state", PersistentStorageType::MAXIMIZE_STATE)) {
+        PersistentStorage::Get("maximize_state", storageMode, PersistentStorageType::MAXIMIZE_STATE);
+        PersistentStorage::Delete("maximize_state", PersistentStorageType::MAXIMIZE_STATE);
+    }
+    PersistentStorage::Insert("maximize_state", static_cast<int32_t>(maximizeMode),
+        PersistentStorageType::MAXIMIZE_STATE);
+    WLOGI("globalMaximizeMode changed from %{public}d to %{public}d", storageMode, static_cast<int32_t>(maximizeMode));
+}
+
+MaximizeMode WindowManagerService::GetMaximizeMode()
+{
+    return maximizeMode_;
 }
 } // namespace Rosen
 } // namespace OHOS
