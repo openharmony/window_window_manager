@@ -60,7 +60,8 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
     BindNativeFunction(*engine, *object, "requestSceneSessionDestruction", moduleName,
         JsSceneSessionManager::RequestSceneSessionDestruction);
     BindNativeFunction(*engine, *object, "on", moduleName, JsSceneSessionManager::RegisterCallback);
-    BindNativeFunction(*engine, *object, "getWindowSceneConfig", moduleName, JsSceneSessionManager::GetWindowSceneConfig);
+    BindNativeFunction(*engine, *object, "getWindowSceneConfig", moduleName,
+        JsSceneSessionManager::GetWindowSceneConfig);
     return engine->CreateUndefined();
 }
 
