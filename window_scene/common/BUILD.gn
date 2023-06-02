@@ -45,7 +45,7 @@ ohos_shared_library("window_scene_common") {
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
-
+  innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "window_manager"
   subsystem_name = "window"
 }
