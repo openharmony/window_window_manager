@@ -23,7 +23,7 @@
 #include "js_root_scene_session.h"
 #include "js_scene_session.h"
 #include "js_scene_utils.h"
-#include "js_window_scene.h"
+#include "js_window_scene_config.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
@@ -462,13 +462,13 @@ NativeValue* JsSceneSessionManager::OnGetWindowSceneConfig(NativeEngine& engine,
 {
     WLOGFI("[NAPI]OnGetWindowSceneConfig");
     const AppWindowSceneConfig& windowSceneConfig = SceneSessionManager::GetInstance().GetWindowSceneConfig();
-    NativeValue* jsWindowSceneObj = JsWindowScene::CreateWindowSceneConfig(engine, windowSceneConfig);
-    if (jsWindowSceneObj == nullptr) {
-        WLOGFE("[NAPI]jsWindowSceneObj is nullptr");
+    NativeValue* jsWindowSceneConfigObj = JsWindowSceneConfig::CreateWindowSceneConfig(engine, windowSceneConfig);
+    if (jsWindowSceneConfigObj == nullptr) {
+        WLOGFE("[NAPI]jsWindowSceneConfigObj is nullptr");
         engine.Throw(CreateJsError(engine,
             static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
     }
-    return jsWindowSceneObj;
+    return jsWindowSceneConfigObj;
 }
 
 } // namespace OHOS::Rosen

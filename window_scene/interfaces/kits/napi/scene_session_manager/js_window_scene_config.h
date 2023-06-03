@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_WINDOW_SCENE_SESSION_H
-#define OHOS_WINDOW_SCENE_SESSION_H
+#ifndef OHOS_WINDOW_SCENE_CONFIG_H
+#define OHOS_WINDOW_SCENE_CONFIG_H
 
 #include <js_runtime_utils.h>
 #include <native_engine/native_engine.h>
@@ -24,10 +24,10 @@
 
 namespace OHOS::Rosen {
 
-class JsWindowScene {
+class JsWindowSceneConfig {
 public:
-    JsWindowScene();
-    ~JsWindowScene();
+    JsWindowSceneConfig();
+    ~JsWindowSceneConfig();
     static NativeValue* CreateWindowSceneConfig(NativeEngine& engine, const AppWindowSceneConfig& config);
 
 private:
@@ -35,4 +35,4 @@ private:
 };
 } // namespace OHOS::Rosen
 
-#endif // OHOS_WINDOW_SCENE_SESSION_H
+#endif // OHOS_WINDOW_SCENE_CONFIG_H
