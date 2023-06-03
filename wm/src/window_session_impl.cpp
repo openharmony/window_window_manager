@@ -829,15 +829,8 @@ WMError WindowSessionImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
     if (blurStyle == WindowBlurStyle::WINDOW_BLUR_OFF) {
         surfaceNode_->SetBackgroundFilter(nullptr);
     } else {
-        sptr<Display> display = SingletonContainer::IsDestroyed() ? nullptr :
-            SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-        if (display == nullptr) {
-            WLOGFE("Get display failed, displayId:%{public}" PRIu64", windowId:%{public}" PRIu64"",
-                property_->GetDisplayId(), property_->GetPersistentId());
-            return WMError::WM_ERROR_INVALID_PARAM;
-        }
-        surfaceNode_->SetBackgroundFilter(RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle),
-                                                                         display->GetVirtualPixelRatio()));
+        float density = 3.5f; // get density from screen property
+        surfaceNode_->SetBackgroundFilter(RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle), density));
     }
 
     RSTransaction::FlushImplicitTransaction();

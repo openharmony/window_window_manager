@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-#include "js_window_scene.h"
+#include "js_window_scene_config.h"
 
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowScene" };
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowSceneConfig" };
 } // namespace
 
-NativeValue* JsWindowScene::CreateWindowSceneConfig(NativeEngine& engine, const AppWindowSceneConfig& config)
+NativeValue* JsWindowSceneConfig::CreateWindowSceneConfig(NativeEngine& engine, const AppWindowSceneConfig& config)
 {
     WLOGI("[NAPI]CreateWindowSceneConfig");
     NativeValue* objValue = engine.CreateObject();
@@ -41,7 +41,7 @@ NativeValue* JsWindowScene::CreateWindowSceneConfig(NativeEngine& engine, const 
     return objValue;
 }
 
-NativeValue* JsWindowScene::CreateShadowValue(NativeEngine& engine, const AppWindowSceneConfig& config, bool focused)
+NativeValue* JsWindowSceneConfig::CreateShadowValue(NativeEngine& engine, const AppWindowSceneConfig& config, bool focused)
 {
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
@@ -62,14 +62,14 @@ NativeValue* JsWindowScene::CreateShadowValue(NativeEngine& engine, const AppWin
     return objValue;
 }
 
-JsWindowScene::JsWindowScene()
+JsWindowSceneConfig::JsWindowSceneConfig()
 {
-    WLOGFD("JsWindowScene");
+    WLOGFD("Construct JsWindowSceneConfig");
 }
 
-JsWindowScene::~JsWindowScene()
+JsWindowSceneConfig::~JsWindowSceneConfig()
 {
-    WLOGFD("~JsWindowScene");
+    WLOGFD("Destroy  JsWindowSceneConfig");
 }
 
 } // namespace OHOS::Rosen
