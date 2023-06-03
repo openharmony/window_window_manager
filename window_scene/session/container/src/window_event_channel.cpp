@@ -44,7 +44,11 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
         WLOGFE("session stage is null!");
         return WSError::WS_ERROR_NULLPTR;
     }
+    pointerEvent->SetProcessedCallback(AnrHandler::MarkProcessed); 
     sessionStage_->NotifyPointerEvent(pointerEvent);
+    // WLD : 这里的sessionStage_是啥， WindowSessionImpl ? 
+    // 这俩class 对应的 NotifyPointerEvent 实现完全不同
+    // WindowSessionImpl 继承自 SessionStageStub，且实现了 NotifyPointerEvent接口
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
