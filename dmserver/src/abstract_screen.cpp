@@ -561,16 +561,16 @@ bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& start
     if (!GetRSDisplayNodeConfig(dmsScreen, config)) {
         return false;
     }
-    if (dmsScreen->rsDisplayNode_ != nullptr && dmsScreen->type_ == ScreenType::REAL) {
+    if (dmsScreen->rsDisplayNode_ != nullptr && dmsScreen->type_ == ScreenType::REAL &&
+        defaultScreenId_ == screenId) {
         WLOGFD("Reconnect default screen, screenId: %{public}" PRIu64"", screenId);
         dmsScreen->InitRSDefaultDisplayNode(config, startPoint);
     } else {
         dmsScreen->InitRSDisplayNode(config, startPoint);
+        dmsScreen->lastGroupDmsId_ = dmsScreen->groupDmsId_;
+        dmsScreen->groupDmsId_ = dmsId_;
+        abstractScreenMap_.insert(std::make_pair(screenId, std::make_pair(dmsScreen, startPoint)));
     }
-
-    dmsScreen->lastGroupDmsId_ = dmsScreen->groupDmsId_;
-    dmsScreen->groupDmsId_ = dmsId_;
-    abstractScreenMap_.insert(std::make_pair(screenId, std::make_pair(dmsScreen, startPoint)));
     return true;
 }
 
@@ -627,9 +627,10 @@ bool AbstractScreenGroup::RemoveDefaultScreen(const sptr<AbstractScreen>& dmsScr
             transactionProxy->FlushImplicitTransaction();
         }
     }
+    defaultScreenId_ = screenId;
     WLOGFD("groupDmsId:%{public}" PRIu64", screenId:%{public}" PRIu64"",
         dmsScreen->groupDmsId_, screenId);
-    return abstractScreenMap_.erase(screenId);
+    return true;
 }
 
 bool AbstractScreenGroup::HasChild(ScreenId childScreen) const
