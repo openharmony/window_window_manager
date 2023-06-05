@@ -30,6 +30,7 @@ const std::string SESSION_EVENT_CB = "sessionEvent";
 const std::string SESSION_RECT_CHANGE_CB = "sessionRectChange";
 const std::string CREATE_SPECIFIC_SCENE_CB = "createSpecificSession";
 const std::string RAISE_TO_TOP_CB = "raiseToTop";
+const std::string BACK_PRESSED_CB = "backPressed";
 } // namespace
 
 NativeValue* JsSceneSession::Create(NativeEngine& engine, const sptr<SceneSession>& session)
@@ -64,6 +65,7 @@ JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& s
         { SESSION_RECT_CHANGE_CB,         &JsSceneSession::ProcessSessionRectChangeRegister },
         { CREATE_SPECIFIC_SCENE_CB,       &JsSceneSession::ProcessCreateSpecificSessionRegister },
         { RAISE_TO_TOP_CB,                &JsSceneSession::ProcessRaiseToTopRegister },
+        { BACK_PRESSED_CB,                &JsSceneSession::ProcessBackPressedRegister },
     };
 
     sptr<SceneSession::SessionChangeCallback> sessionchangeCallback = new (std::nothrow)
@@ -174,6 +176,19 @@ void JsSceneSession::OnSessionEvent(uint32_t eventId)
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
     AsyncTask::Schedule("JsSceneSession::OnSessionEvent", engine_,
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsSceneSession::ProcessBackPressedRegister()
+{
+    NotifyBackPressedFunc func = [this]() {
+        this->OnBackPressed();
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    session->SetBackPressedListenser(func);
 }
 
 void JsSceneSession::Finalizer(NativeEngine* engine, void* data, void* hint)
@@ -390,6 +405,25 @@ void JsSceneSession::PendingSessionActivation(const SessionInfo& info)
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
     AsyncTask::Schedule("JsSceneSession::PendingSessionActivation", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsSceneSession::OnBackPressed()
+{
+    WLOGFI("[NAPI]OnBackPressed");
+    auto iter = jsCbMap_.find(BACK_PRESSED_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), {}, 0);
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSession::OnBackPressed", engine_,
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 

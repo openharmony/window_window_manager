@@ -27,6 +27,7 @@ public:
 
     MOCK_METHOD1(SetActive, WSError(bool active));
     MOCK_METHOD2(UpdateRect, WSError(const WSRect& rect, SizeChangeReason reason));
+    MOCK_METHOD0(HandleBackEvent, WSError(void));
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -44,6 +44,7 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
         &SessionStub::HandleDestroyAndDisconnectSpecificSession),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_RAISE_TO_APP_TOP),
         &SessionStub::HandleRaiseToAppTop),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_BACKPRESSED), &SessionStub::HandleBackPressed)
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -206,6 +207,14 @@ int SessionStub::HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("RaiseToAppTop!");
     const WSError& errCode = RaiseToAppTop();
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleBackPressed(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleBackPressed!");
+    WSError errCode = RequestSessionBack();
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

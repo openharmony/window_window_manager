@@ -49,6 +49,7 @@ public:
     WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId);
     void SetCreateSpecificSessionListener(const NotifyCreateSpecificSessionFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
+    WSError ProcessBackEvent();
 
 protected:
     SceneSessionManager();
@@ -69,6 +70,7 @@ private:
     NotifyCreateSpecificSessionFunc createSpecificSessionFunc_;
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
+    uint64_t activeSessionId_;
 };
 } // namespace OHOS::Rosen
 

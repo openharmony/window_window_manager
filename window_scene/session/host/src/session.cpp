@@ -280,6 +280,11 @@ void Session::SetPendingSessionActivationEventListener(const NotifyPendingSessio
     pendingSessionActivationFunc_ = func;
 }
 
+void Session::SetBackPressedListenser(const NotifyBackPressedFunc& func)
+{
+    backPressedFunc_ = func;
+}
+
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     WLOGFD("Session TransferPointEvent, Id: %{public}" PRIu64 "", persistentId_);
@@ -412,5 +417,23 @@ WindowType Session::GetWindowType() const
 void Session::SetSystemConfig(const SystemSessionConfig& systemConfig)
 {
     systemConfig_ = systemConfig;
+}
+
+WSError Session::RequestSessionBack()
+{
+    if (!backPressedFunc_) {
+        WLOGFW("Session didn't register back event consumer!");
+        return WSError::WS_DO_NOTHING;
+    }
+    backPressedFunc_();
+    return WSError::WS_OK;
+}
+
+WSError Session::ProcessBackEvent()
+{
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    return sessionStage_->HandleBackEvent();
 }
 } // namespace OHOS::Rosen
