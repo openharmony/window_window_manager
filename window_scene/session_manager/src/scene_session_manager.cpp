@@ -16,16 +16,24 @@
 #include "session_manager/include/scene_session_manager.h"
 
 #include <sstream>
+
+#include <ability_info.h>
 #include <ability_manager_client.h>
+#include <bundle_mgr_interface.h>
+#include <image_source.h>
+#include <iservice_registry.h>
+#include <locale_config.h>
 #include <parameters.h>
+#include <resource_manager.h>
+#include <session_info.h>
 #include <start_options.h>
+#include <system_ability_definition.h>
 #include <want.h>
 
 #include "color_parser.h"
 #include "common/include/message_scheduler.h"
 #include "root_scene.h"
 #include "session/host/include/scene_session.h"
-#include "session_info.h"
 #include "window_manager_hilog.h"
 #include "common/include/permission.h"
 #include "wm_math.h"
@@ -347,7 +355,6 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         if (!scnSessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        // to add StartAbility
         AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(want, startOptions, scnSessionInfo);
         activeSessionId_ = persistentId;
         return WSError::WS_OK;
@@ -378,7 +385,6 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         if (!scnSessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        // to add MinimizeAbility
         AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo);
         return WSError::WS_OK;
     };
@@ -409,7 +415,6 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         if (!scnSessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        // to add TerminateAbility
         AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
         return WSError::WS_OK;
     };
@@ -500,4 +505,108 @@ WSError SceneSessionManager::ProcessBackEvent()
     return WSError::WS_OK;
 }
 
+sptr<AppExecFwk::IBundleMgr> SceneSessionManager::GetBundleManager()
+{
+    auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityMgr == nullptr) {
+        WLOGFE("Failed to get SystemAbilityManager.");
+        return nullptr;
+    }
+
+    auto bmsObj = systemAbilityMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (bmsObj == nullptr) {
+        WLOGFE("Failed to get BundleManagerService.");
+        return nullptr;
+    }
+
+    return iface_cast<AppExecFwk::IBundleMgr>(bmsObj);
+}
+
+std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::CreateResourceManager(
+    const AppExecFwk::AbilityInfo& abilityInfo)
+{
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    UErrorCode status = U_ZERO_ERROR;
+    icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
+    resConfig->SetLocaleInfo(locale);
+    resConfig->SetColorMode(Global::Resource::ColorMode::LIGHT);
+
+    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
+    resourceMgr->UpdateResConfig(*resConfig);
+
+    std::string loadPath;
+    if (!abilityInfo.hapPath.empty()) {
+        loadPath = abilityInfo.hapPath;
+    } else {
+        loadPath = abilityInfo.resourcePath;
+    }
+
+    if (loadPath.empty()) {
+        WLOGFE("Invalid app resource.");
+        return nullptr;
+    }
+
+    if (!resourceMgr->AddResource(loadPath.c_str())) {
+        WLOGFE("AddResource failed.");
+        return nullptr;
+    }
+    return resourceMgr;
+}
+
+std::shared_ptr<Media::PixelMap> SceneSessionManager::GetStartPage(const SessionInfo& sessionInfo)
+{
+    AAFwk::Want want;
+    want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_);
+    auto bms = GetBundleManager();
+    if (!bms) {
+        WLOGFE("BMS is nullptr.");
+        return nullptr;
+    }
+    AppExecFwk::AbilityInfo abilityInfo;
+    bool ret = bms->QueryAbilityInfo(want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_DISABLE,
+        AppExecFwk::Constants::UNSPECIFIED_USERID, abilityInfo);
+    if (!ret) {
+        WLOGFE("Get ability info from BMS failed!");
+        return nullptr;
+    }
+
+    auto resourceMgr = CreateResourceManager(abilityInfo);
+    if (resourceMgr == nullptr) {
+        WLOGFE("resource manager is nullptr.");
+        return nullptr;
+    }
+
+    Media::SourceOptions opts;
+    uint32_t errorCode = 0;
+    std::unique_ptr<Media::ImageSource> imageSource;
+    if (!abilityInfo.hapPath.empty()) { // zipped hap
+        std::unique_ptr<uint8_t[]> iconOut;
+        size_t len;
+        if (resourceMgr->GetMediaDataById(abilityInfo.startWindowIconId, len, iconOut) !=
+            Global::Resource::RState::SUCCESS) {
+            WLOGFE("GetMediaDataById failed.");
+            return nullptr;
+        }
+        imageSource = Media::ImageSource::CreateImageSource(iconOut.get(), len, opts, errorCode);
+    } else { // unzipped hap
+        std::string iconPath;
+        if (resourceMgr->GetMediaById(abilityInfo.startWindowIconId, iconPath) != Global::Resource::RState::SUCCESS) {
+            WLOGFE("GetMediaById failed.");
+            return nullptr;
+        }
+        imageSource = Media::ImageSource::CreateImageSource(iconPath, opts, errorCode);
+    }
+    if (errorCode != 0 || imageSource == nullptr) {
+        WLOGFE("Failed to create image source id %{private}d err %{public}u", abilityInfo.startWindowIconId, errorCode);
+        return nullptr;
+    }
+
+    Media::DecodeOptions decodeOpts;
+    auto pixelMap = imageSource->CreatePixelMap(decodeOpts, errorCode);
+    if (errorCode != 0 || pixelMap == nullptr) {
+        WLOGFE("Failed to create pixel map id %{private}d err %{public}u", abilityInfo.startWindowIconId, errorCode);
+        return nullptr;
+    }
+    return std::shared_ptr<Media::PixelMap>(pixelMap.release());
+}
 } // namespace OHOS::Rosen
