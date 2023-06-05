@@ -27,7 +27,7 @@ sptr<Window> StaticCall::CreateWindow(const std::string& windowName,
 }
 
 sptr<Window> StaticCall::CreateWindow(sptr<WindowOption>& option, std::shared_ptr<AbilityRuntime::Context> context,
-    const sptr<ISession>& iSession)
+    const sptr<IRemoteObject>& iSession)
 {
     return Window::Create(option, context, iSession);
 }
