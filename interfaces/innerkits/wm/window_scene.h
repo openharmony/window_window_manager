@@ -64,7 +64,7 @@ public:
      * @return the error code of window
      */
     WMError Init(DisplayId displayId, const std::shared_ptr<AbilityRuntime::Context>& context,
-        sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option, const sptr<ISession>& iSession);
+        sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option, const sptr<IRemoteObject>& iSession);
 
     /**
      * Create a window instance based on the parameters windowName and option.
