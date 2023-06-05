@@ -124,6 +124,7 @@ public:
 
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     ScreenId mirrorScreenId_ { SCREEN_ID_INVALID };
+    ScreenId defaultScreenId_ { SCREEN_ID_INVALID };
 
 private:
     bool GetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen, struct RSDisplayNodeConfig& config);
