@@ -29,6 +29,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleSetActive),
     std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_SIZE_CHANGE),
         &SessionStageStub::HandleUpdateRect),
+    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_HANDLE_BACK_EVENT),
+        &SessionStageStub::HandleBackEventInner),
 };
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -63,6 +65,14 @@ int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply
     WSRect rect = { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
     SizeChangeReason reason = static_cast<SizeChangeReason>(data.ReadUint32());
     WSError errCode = UpdateRect(rect, reason);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleBackEventInner(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleBackEventInner!");
+    WSError errCode = HandleBackEvent();
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

@@ -39,6 +39,7 @@ namespace OHOS::Rosen {
 class RSSurfaceNode;
 using NotifyPendingSessionActivationFunc = std::function<void(const SessionInfo& info)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
+using NotifyBackPressedFunc = std::function<void()>;
 
 class ILifecycleListener {
 public:
@@ -97,6 +98,9 @@ public:
         sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session) override;
     WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) override;
     void SetSystemConfig(const SystemSessionConfig& systemConfig);
+    void SetBackPressedListenser(const NotifyBackPressedFunc& func);
+    WSError ProcessBackEvent(); // send back event to session_stage
+    WSError RequestSessionBack() override; // receive back request from session_stage
 
 protected:
     void UpdateSessionState(SessionState state);
@@ -107,6 +111,7 @@ protected:
     SessionInfo sessionInfo_;
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
+    NotifyBackPressedFunc backPressedFunc_;
     sptr<WindowSessionProperty> property_ = nullptr;
     SystemSessionConfig systemConfig_;
 private:

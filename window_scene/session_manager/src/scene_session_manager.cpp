@@ -349,6 +349,7 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         }
         // to add StartAbility
         AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(want, startOptions, scnSessionInfo);
+        activeSessionId_ = persistentId;
         return WSError::WS_OK;
     };
     WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
@@ -480,6 +481,23 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const uint64_t&
 const AppWindowSceneConfig& SceneSessionManager::GetWindowSceneConfig() const
 {
     return appWindowSceneConfig_;
+}
+
+WSError SceneSessionManager::ProcessBackEvent()
+{
+    auto task = [this]() {
+        auto session = GetSceneSession(activeSessionId_);
+        if (!session) {
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+        WLOGFD("ProcessBackEvent session persistentId: %{public}" PRIu64 "", activeSessionId_);
+        session->ProcessBackEvent();
+        return WSError::WS_OK;
+    };
+
+    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
+    msgScheduler_->PostSyncTask(task);
+    return WSError::WS_OK;
 }
 
 } // namespace OHOS::Rosen
