@@ -137,9 +137,7 @@ void SceneSessionManager::ConfigWindowEffect(const WindowSceneConfig::ConfigItem
     // config corner radius
     WindowSceneConfig::ConfigItem item = effectConfig["appWindows"]["cornerRadius"];
     if (item.IsMap()) {
-        if (ConfigAppWindowCornerRadius(item["fullScreen"], config.fullScreenCornerRadius_) &&
-            ConfigAppWindowCornerRadius(item["split"], config.splitCornerRadius_) &&
-            ConfigAppWindowCornerRadius(item["float"], config.floatCornerRadius_)) {
+        if (ConfigAppWindowCornerRadius(item["float"], config.floatCornerRadius_)) {
             appWindowSceneConfig_ = config;
         }
     }
@@ -185,16 +183,7 @@ bool SceneSessionManager::ConfigAppWindowCornerRadius(const WindowSceneConfig::C
 bool SceneSessionManager::ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig,
     WindowShadowConfig& outShadow)
 {
-    WindowSceneConfig::ConfigItem item = shadowConfig["elevation"];
-    if (item.IsFloats()) {
-        auto elevation = *item.floatsValue_;
-        if (elevation.size() != 1 || MathHelper::LessNotEqual(elevation[0], 0.0)) {
-            return false;
-        }
-        outShadow.elevation_ = elevation[0];
-    }
-
-    item = shadowConfig["color"];
+    WindowSceneConfig::ConfigItem item = shadowConfig["color"];
     if (item.IsString()) {
         auto color = item.stringValue_;
         uint32_t colorValue;
