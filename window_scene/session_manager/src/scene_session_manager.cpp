@@ -260,14 +260,13 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
             WLOGFE("rootSceneSession or rootScene is nullptr");
             return sptr<RootSceneSession>(nullptr);
         }
-        rootSceneSession_->SetLoadContentFunc(
-            [rootScene = rootScene_](const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
-                AbilityRuntime::Context* context) {
-                    rootScene->LoadContent(contentUrl, engine, storage, context);
-                    if(!ScenePersistence::CreateSnapshotDir(context->GetFilesDir())) {
-                        WLOGFD("snapshot dir existed");
-                    }
-                });
+        rootSceneSession_->SetLoadContentFunc([rootScene = rootScene_](const std::string &contentUrl,
+            NativeEngine *engine, NativeValue *storage, AbilityRuntime::Context *context) {
+            rootScene->LoadContent(contentUrl, engine, storage, context);
+            if (!ScenePersistence::CreateSnapshotDir(context->GetFilesDir())) {
+                WLOGFD("snapshot dir existed");
+            }
+        });
         AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_);
         return rootSceneSession_;
     };
@@ -299,7 +298,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
     specificCallback->onDestroy_ = std::bind(&SceneSessionManager::DestroyAndDisconnectSpecificSession,
         this, std::placeholders::_1);
     auto task = [this, sessionInfo, specificCallback]() {
-        WLOGFI("sessionInfo: bundleName: %{public}s, abilityName: %{public}s, persistentId : %{public}u", 
+        WLOGFI("sessionInfo: bundleName: %{public}s, abilityName: %{public}s, persistentId : %{public}u",
             sessionInfo.bundleName_.c_str(), sessionInfo.abilityName_.c_str(), sessionInfo.persistentId_);
         sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, specificCallback);
         if (sceneSession == nullptr) {

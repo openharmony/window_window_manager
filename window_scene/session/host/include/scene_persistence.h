@@ -36,7 +36,8 @@ public:
     ScenePersistence(const SessionInfo &info, const uint64_t persistentId);
     ~ScenePersistence() = default;
 
-    static inline bool CreateSnapshotDir(std::string strFilesDir) {
+    static inline bool CreateSnapshotDir(std::string strFilesDir)
+    {
         strPersistPath_ = strFilesDir + "/SceneSnapShot/";
         if (mkdir(strPersistPath_.c_str(), MKDIR_MODE) != 0) {
             return false;

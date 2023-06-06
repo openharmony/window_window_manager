@@ -33,7 +33,8 @@ std::string ScenePersistence::strPersistPath_;
 
 ScenePersistence::ScenePersistence(const SessionInfo &info, const uint64_t persistentId) : sessionInfo_(info)
 {
-    strSnapshotFile_ = strPersistPath_ + sessionInfo_.bundleName_ + UNDERLINE_SEPARATOR + std::to_string(persistentId & 0xff);
+    strSnapshotFile_ =
+        strPersistPath_ + sessionInfo_.bundleName_ + UNDERLINE_SEPARATOR + std::to_string(persistentId & 0xff);
 }
 
 void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap> &pixelMap)
