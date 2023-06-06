@@ -31,6 +31,7 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
     NativeValue* jsBundleName = jsObject->GetProperty("bundleName");
     NativeValue* jsAbilityName = jsObject->GetProperty("abilityName");
     NativeValue* jsIsSystem = jsObject->GetProperty("isSystem");
+    NativeValue* jsPersistentId = jsObject->GetProperty("persistentId");
     if (jsBundleName->TypeOf() != NATIVE_UNDEFINED) {
         std::string bundleName;
         if (!ConvertFromJsValue(engine, jsBundleName, bundleName)) {
@@ -54,6 +55,14 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
             return false;
         }
         sessionInfo.isSystem_ = isSystem;
+    }
+    if (jsPersistentId->TypeOf() != NATIVE_UNDEFINED) {
+        uint32_t persistentId;
+        if (!ConvertFromJsValue(engine, jsPersistentId, persistentId)) {
+            WLOGFE("[NAPI]Failed to convert parameter to prePID");
+            return false;
+        }
+        sessionInfo.persistentId_ = persistentId;
     }
     return true;
 }

@@ -24,6 +24,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Extens
 ExtensionSession::ExtensionSession(const SessionInfo& info) : Session(info)
 {
     WLOGFD("Init extensionSession : %{public}s", info.bundleName_.c_str());
+    GeneratePersistentId(IS_EXTENSION, info);
 }
 
 ExtensionSession::~ExtensionSession() {}

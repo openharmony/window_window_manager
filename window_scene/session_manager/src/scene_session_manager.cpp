@@ -21,13 +21,15 @@
 #include <start_options.h>
 #include <want.h>
 
+#include "ability_context.h"
 #include "color_parser.h"
 #include "common/include/message_scheduler.h"
+#include "common/include/permission.h"
 #include "root_scene.h"
+#include "session/host/include/scene_persistence.h"
 #include "session/host/include/scene_session.h"
 #include "session_info.h"
 #include "window_manager_hilog.h"
-#include "common/include/permission.h"
 #include "wm_math.h"
 
 namespace OHOS::Rosen {
@@ -260,7 +262,12 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
         }
         rootSceneSession_->SetLoadContentFunc(
             [rootScene = rootScene_](const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
-                AbilityRuntime::Context* context) { rootScene->LoadContent(contentUrl, engine, storage, context); });
+                AbilityRuntime::Context* context) {
+                    rootScene->LoadContent(contentUrl, engine, storage, context);
+                    if(!ScenePersistence::CreateSnapshotDir(context->GetFilesDir())) {
+                        WLOGFD("snapshot dir existed");
+                    }
+                });
         AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_);
         return rootSceneSession_;
     };
@@ -292,15 +299,14 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
     specificCallback->onDestroy_ = std::bind(&SceneSessionManager::DestroyAndDisconnectSpecificSession,
         this, std::placeholders::_1);
     auto task = [this, sessionInfo, specificCallback]() {
-        WLOGFI("sessionInfo: bundleName: %{public}s, abilityName: %{public}s", sessionInfo.bundleName_.c_str(),
-            sessionInfo.abilityName_.c_str());
+        WLOGFI("sessionInfo: bundleName: %{public}s, abilityName: %{public}s, persistentId : %{public}u", 
+            sessionInfo.bundleName_.c_str(), sessionInfo.abilityName_.c_str(), sessionInfo.persistentId_);
         sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, specificCallback);
         if (sceneSession == nullptr) {
             WLOGFE("sceneSession is nullptr!");
             return sceneSession;
         }
-        uint64_t persistentId = GeneratePersistentId();
-        sceneSession->SetPersistentId(persistentId);
+        auto persistentId = sceneSession->GetPersistentId();
         sceneSession->SetSystemConfig(systemConfig_);
         abilitySceneMap_.insert({ persistentId, sceneSession });
         WLOGFI("create session persistentId: %{public}" PRIu64 "", persistentId);
