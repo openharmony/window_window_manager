@@ -68,12 +68,12 @@ public:
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
     void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    WSError HandleBackEvent() override { return WSError::WS_OK; };
     // callback
     WMError RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     WMError RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
     WMError UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
-    WSError HandleBackEvent() override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
     uint32_t GetParentId() const;
     uint64_t GetPersistentId() const;

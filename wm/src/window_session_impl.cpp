@@ -855,26 +855,5 @@ WMError WindowSessionImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
     return WMError::WM_OK;
 }
 
-WSError WindowSessionImpl::HandleBackEvent()
-{
-    bool isConsumed = false;
-    if (uiContent_) {
-        WLOGFD("Transfer back event to uiContent");
-        isConsumed = uiContent_->ProcessBackPressed();
-    } else {
-        WLOGFE("There is no back event consumer");
-    }
-    if (isConsumed) {
-        WLOGD("Back key event is consumed");
-        return WSError::WS_OK;
-    }
-    // notify back event to host session
-    if (hostSession_) {
-        WLOGFD("Transfer back event to host session");
-        hostSession_->RequestSessionBack();
-    }
-    return WSError::WS_OK;
-}
-
 } // namespace Rosen
 } // namespace OHOS
