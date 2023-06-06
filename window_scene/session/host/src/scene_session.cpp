@@ -99,7 +99,7 @@ WSError SceneSession::DestroyAndDisconnectSpecificSession(const uint64_t& persis
 WSError SceneSession::Background()
 {
     Session::Background();
-    if (scenePersistence_ && GetSnapshot()) {
+    if (scenePersistence_ != nullptr && GetSnapshot() != nullptr) {
         scenePersistence_->SaveSnapshot(GetSnapshot());
     }
     return WSError::WS_OK;
