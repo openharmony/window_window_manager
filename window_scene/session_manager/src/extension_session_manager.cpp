@@ -59,7 +59,7 @@ sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sp
         return nullptr;
     }
     auto sessionInfo = extSession->GetSessionInfo();
-    abilitySessionInfo->sessionToken = extSession->AsObject();
+    abilitySessionInfo->sessionToken = extSession;
     abilitySessionInfo->callerToken = sessionInfo.callerToken_;
     abilitySessionInfo->persistentId = extSession->GetPersistentId();
     return abilitySessionInfo;
@@ -77,8 +77,7 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
             WLOGFE("extensionSession is nullptr!");
             return extensionSession;
         }
-        uint64_t persistentId = GeneratePersistentId();
-        extensionSession->SetPersistentId(persistentId);
+        auto persistentId = extensionSession->GetPersistentId();
         WLOGFI("create session persistentId: %{public}" PRIu64 ", bundleName: %{public}s, abilityName: %{public}s",
             persistentId, sessionInfo.bundleName_.c_str(), sessionInfo.abilityName_.c_str());
         extensionMap_.insert({ persistentId, extensionSession });
