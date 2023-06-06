@@ -60,7 +60,7 @@ public:
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     WSError ProcessBackEvent();
 
-    std::shared_ptr<Media::PixelMap> GetStartPage(const SessionInfo& sessionInfo);
+    void GetStartPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor);
 
 protected:
     SceneSessionManager();
@@ -79,6 +79,7 @@ private:
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     std::shared_ptr<Global::Resource::ResourceManager> CreateResourceManager(
         const AppExecFwk::AbilityInfo& abilityInfo);
+    void GetStartPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, std::string& path, uint32_t& bgColor);
 
     std::map<uint64_t, sptr<SceneSession>> abilitySceneMap_;
     sptr<RootSceneSession> rootSceneSession_;
@@ -87,6 +88,7 @@ private:
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
     uint64_t activeSessionId_;
+    sptr<AppExecFwk::IBundleMgr> bundleMgr_;
 };
 } // namespace OHOS::Rosen
 
