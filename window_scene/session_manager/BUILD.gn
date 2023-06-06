@@ -36,6 +36,11 @@ config("session_manager_public_config") {
 
     # for window_manager_hilog
     "${window_base_path}/utils/include",
+
+    # for screenlock_manager_interface 
+    "//base/theme/screenlock_mgr/services/include",
+    "//base/theme/screenlock_mgr/utils/include",
+    "//base/theme/screenlock_mgr/frameworks/native/include",
   ]
 }
 

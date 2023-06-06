@@ -46,6 +46,7 @@ ohos_shared_library("session_manager_service") {
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session_manager:scene_session_manager",
     "${window_base_path}/window_scene/session_manager:screen_session_manager",
+    "//base/theme/screenlock_mgr/services:screenlock_server",
   ]
 
   external_deps = [
