@@ -40,13 +40,13 @@ ohos_shared_library("session_manager_service") {
 
   deps = [
     "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "${screenlock_mgr_path}/services:screenlock_server",
     "${window_base_path}/dmserver:libdms",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session_manager:scene_session_manager",
     "${window_base_path}/window_scene/session_manager:screen_session_manager",
-    "${screenlock_mgr_path}/services:screenlock_server",
   ]
 
   external_deps = [
