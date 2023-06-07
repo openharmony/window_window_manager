@@ -42,6 +42,7 @@ public:
     WMError MoveTo(int32_t x, int32_t y) override;
     WMError Resize(uint32_t width, uint32_t height) override;
     WmErrorCode RaiseToAppTop() override;
+    WSError HandleBackEvent() override;
 
 protected:
     void DestroySubWindow();
