@@ -48,6 +48,7 @@ private:
     int HandleDestroyAndDisconnectSpecificSession(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply);
     int HandleBackPressed(MessageParcel& data, MessageParcel& reply);
+    int HandleMarkProcessed(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_STUB_H

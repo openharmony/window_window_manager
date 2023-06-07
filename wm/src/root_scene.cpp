@@ -20,6 +20,7 @@
 #include <ui_content.h>
 #include <viewport_config.h>
 
+#include "anr_manager.h"
 #include "vsync_station.h"
 #include "window_manager_hilog.h"
 
@@ -78,6 +79,7 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
     uiContent_->Foreground();
 
     RegisterInputEventListener();
+    ANRMgr->Init();
 }
 
 void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)

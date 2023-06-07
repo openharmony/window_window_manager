@@ -39,7 +39,8 @@ void ANRManager::Init()
     */
    // TODO
    // 该函数需要在SceneBoard启动的时候执行
-   // 这里需要注册OnSessionLost 到SessionManager， 使得有session死亡之后执行此处的OnSessionLost
+   // 这里需要注册ANRManager::OnSessionLost 到每一个session， 使得有session死亡之后执行此处的OnSessionLost
+   // 
 
 }
 

@@ -43,6 +43,7 @@ public:
         sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session) override;
     WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) override;
     WSError RequestSessionBack() override;
+    WSError MarkProcessed(int32_t eventId) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

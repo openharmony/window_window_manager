@@ -208,7 +208,7 @@ WMError WindowSessionImpl::Connect()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_NULLPTR;
     }
-    sptr<ISessionStage> iSessionStage(this);
+    sptr<ISessionStage> iSessionStage(this); // WindowEventChannel == sessionStage
     sptr<WindowEventChannel> channel = new (std::nothrow) WindowEventChannel(iSessionStage);
     if (channel == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
@@ -663,6 +663,15 @@ void WindowSessionImpl::NotifyForegroundFailed(WMError ret)
 {
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
     CALL_LIFECYCLE_LISTENER_WITH_PARAM(ForegroundFailed, lifecycleListeners, static_cast<int32_t>(ret));
+}
+
+WSError WindowSessionImpl::MarkProcessed(int32_t eventId)
+{
+    if (hostSession_ == nullptr) {
+        WLOGFE("hostSession is nullptr");
+        return WSError::WS_DO_NOTHING;
+    }
+    return hostSession_->MarkProcessed(eventId);
 }
 
 void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reason)
