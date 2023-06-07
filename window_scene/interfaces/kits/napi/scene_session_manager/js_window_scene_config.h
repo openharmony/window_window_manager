@@ -13,19 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ORSEN_WINDOW_SCENE_EXTENSION_SESSION_STAGE_H
-#define OHOS_ORSEN_WINDOW_SCENE_EXTENSION_SESSION_STAGE_H
+#ifndef OHOS_WINDOW_SCENE_CONFIG_H
+#define OHOS_WINDOW_SCENE_CONFIG_H
+
+#include <js_runtime_utils.h>
+#include <native_engine/native_engine.h>
+#include <native_engine/native_value.h>
 
 #include "interfaces/include/ws_common.h"
-#include "session/container/include/session_stage.h"
-#include "session/host/include/zidl/session_interface.h"
 
 namespace OHOS::Rosen {
-class ExtensionSessionStage : public SessionStage {
+
+class JsWindowSceneConfig {
 public:
-    ExtensionSessionStage(const sptr<ISession>& extensionSession);
-    ~ExtensionSessionStage() = default;
+    JsWindowSceneConfig();
+    ~JsWindowSceneConfig();
+    static NativeValue* CreateWindowSceneConfig(NativeEngine& engine, const AppWindowSceneConfig& config);
+
+private:
+    static NativeValue* CreateShadowValue(NativeEngine& engine, const AppWindowSceneConfig& config, bool focused);
 };
 } // namespace OHOS::Rosen
 
-#endif // OHOS_ORSEN_WINDOW_SCENE_EXTENSION_SESSION_STAGE_H
+#endif // OHOS_WINDOW_SCENE_CONFIG_H

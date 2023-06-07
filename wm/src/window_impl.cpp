@@ -38,6 +38,7 @@
 #include "wm_common_inner.h"
 #include "wm_math.h"
 #include "perform_reporter.h"
+#include <hisysevent.h>
 
 namespace OHOS {
 namespace Rosen {
@@ -1934,17 +1935,37 @@ WMError WindowImpl::Close()
     }
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
         auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-        if (abilityContext != nullptr) {
-            WMError ret = NotifyWindowTransition(TransitionReason::CLOSE_BUTTON);
-            if (ret != WMError::WM_OK) {
-                WLOGI("Close without animation ret:%{public}u", static_cast<uint32_t>(ret));
-                abilityContext->CloseAbility();
-            }
-        } else {
-            Destroy();
+        if (!abilityContext) {
+            return Destroy();
+        }
+        sptr<AAFwk::IPrepareTerminateCallback> callback = this;
+        if (AAFwk::AbilityManagerClient::GetInstance()->PrepareTerminateAbility(abilityContext->GetToken(),
+            callback) != ERR_OK) {
+            WLOGFW("RegisterWindowManagerServiceHandler failed, do close window");
+            PendingClose();
+            return WMError::WM_OK;
         }
     }
     return WMError::WM_OK;
+}
+
+void WindowImpl::DoPrepareTerminate()
+{
+    WLOGFI("do pending close by ability");
+    PendingClose();
+}
+
+void WindowImpl::PendingClose()
+{
+    WLOGFD("begin");
+    WMError ret = NotifyWindowTransition(TransitionReason::CLOSE_BUTTON);
+    if (ret != WMError::WM_OK) {
+        WLOGI("Close without animation ret:%{public}u", static_cast<uint32_t>(ret));
+        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+        if (abilityContext != nullptr) {
+            abilityContext->CloseAbility();
+        }
+    }
 }
 
 WMError WindowImpl::RequestFocus() const
@@ -2785,6 +2806,12 @@ void WindowImpl::UpdateFocusStatus(bool focused)
 {
     WLOGFD("IsFocused: %{public}d, id: %{public}u", focused, property_->GetWindowId());
     if (focused) {
+        HiSysEventWrite(
+            OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+            "FOCUS_WINDOW",
+            OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+            "PID", getpid(),
+            "UID", getuid());
         NotifyAfterFocused();
     } else {
         NotifyAfterUnfocused();

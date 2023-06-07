@@ -144,9 +144,9 @@ ohos_static_library("dm_unittest_common") {
   ]
 
   public_deps = [
-    "${window_base_path}/dm:libdm_static",
-    "${window_base_path}/utils:libwmutil_static",
-    "${window_base_path}/wm:libwm_static",
+    "${window_base_path}/dm:libdm",
+    "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/wm:libwm",
     "../../../dmserver:libdms",
     "../../../snapshot:snapshot_display",
     "../../../test/common/utils:libtestutil",

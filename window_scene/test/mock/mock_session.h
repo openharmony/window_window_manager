@@ -14,7 +14,7 @@
  */
 
 #include "interfaces/include/ws_common.h"
-#include "session/container/include/session_stage.h"
+#include "session/container/include/zidl/session_stage_interface.h"
 #include "session/host/include/session.h"
 #include <gmock/gmock.h>
 
@@ -26,7 +26,7 @@ public:
     ~SessionMocker() {}
     MOCK_METHOD5(Connect, WSError(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        uint64_t& persistentId, sptr<WindowSessionProperty> property));
+        SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property));
     MOCK_METHOD0(Foreground, WSError(void));
     MOCK_METHOD0(Background, WSError(void));
     MOCK_METHOD0(Disconnect, WSError(void));
@@ -35,6 +35,7 @@ public:
     MOCK_METHOD0(Maximize, WSError(void));
     MOCK_METHOD1(PendingSessionActivation, WSError(const SessionInfo& info));
     MOCK_METHOD1(UpdateActiveStatus, WSError(bool isActive));
+    MOCK_METHOD0(RequestSessionBack, WSError(void));
 };
 } // namespace Rosen
 } // namespace OHOS

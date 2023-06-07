@@ -18,13 +18,21 @@
 #include <common/rs_common_def.h>
 #include <refbase.h>
 #include <transaction/rs_interfaces.h>
+#include <transaction/rs_transaction.h>
 #include <unistd.h>
 
+#include "color_parser.h"
+#include "display_manager.h"
+#include "permission.h"
 #include "session/container/include/window_event_channel.h"
 #include "session_manager/include/session_manager.h"
+#include "singleton_container.h"
 #include "vsync_station.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
+#include "window_helper.h"
+#include "window_manager_hilog.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -71,15 +79,16 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
         WLOGFE("Property is null");
         return;
     }
-    property_->SetWindowName(option->GetWindowName());
+
+    windowName_ = option->GetWindowName();
+    property_->SetWindowName(windowName_);
     property_->SetRequestRect(option->GetWindowRect());
     property_->SetWindowType(option->GetWindowType());
     property_->SetFocusable(option->GetFocusable());
     property_->SetTouchable(option->GetTouchable());
     property_->SetDisplayId(option->GetDisplayId());
-    property_->SetWindowName(option->GetWindowName());
     property_->SetParentId(option->GetParentId());
-    surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
+    surfaceNode_ = CreateSurfaceNode(windowName_, option->GetWindowType());
 }
 
 RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(std::string name, WindowType type)
@@ -169,8 +178,7 @@ WMError WindowSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>
     const sptr<Rosen::ISession>& iSession)
 {
     WLOGFD("WindowSessionImpl::Create");
-    // allow iSession is nullptr when create from window manager
-    if (!context || !hostSession_) {
+    if (!context || !iSession) {
         WLOGFE("context or hostSession is nullptr!");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -206,9 +214,7 @@ WMError WindowSessionImpl::Connect()
         return WMError::WM_ERROR_NULLPTR;
     }
     sptr<IWindowEventChannel> eventChannel(channel);
-    uint64_t persistentId = INVALID_SESSION_ID;
-    WSError ret = hostSession_->Connect(iSessionStage, eventChannel, surfaceNode_, persistentId, property_);
-    property_->SetPersistentId(persistentId);
+    WSError ret = hostSession_->Connect(iSessionStage, eventChannel, surfaceNode_, windowSystemConfig_, property_);
     // replace WSError with WMError
     WMError res = static_cast<WMError>(ret);
     WLOGFI("Window Connect [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u], ret:%{public}u",
@@ -325,6 +331,24 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     uiContent_->UpdateViewportConfig(config, reason);
     WLOGFD("Id:%{public}" PRIu64 ", windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         property_->GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+}
+
+uint64_t WindowSessionImpl::GetFloatingWindowParentId()
+{
+    if (context_.get() == nullptr) {
+        return INVALID_SESSION_ID;
+    }
+
+    for (const auto& winPair : windowSessionMap_) {
+        if (winPair.second.second && WindowHelper::IsMainWindow(winPair.second.second->GetType()) &&
+            winPair.second.second->GetProperty() &&
+            context_.get() == winPair.second.second->GetContext().get()) {
+            WLOGFD("Find parent, [parentName: %{public}s, selfPersistentId: %{public}" PRIu64"]",
+                winPair.second.second->GetProperty()->GetWindowName().c_str(), GetProperty()->GetPersistentId());
+            return winPair.second.second->GetProperty()->GetPersistentId();
+        }
+    }
+    return INVALID_SESSION_ID;
 }
 
 Rect WindowSessionImpl::GetRect() const
@@ -674,5 +698,183 @@ void WindowSessionImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsync
     }
     VsyncStation::GetInstance().RequestVsync(vsyncCallback);
 }
+
+static float ConvertRadiusToSigma(float radius)
+{
+    constexpr float BlurSigmaScale = 0.57735f;
+    return radius > 0.0f ? BlurSigmaScale * radius + SK_ScalarHalf : 0.0f;
+}
+
+WMError WindowSessionImpl::CheckParmAndPermission()
+{
+    if (surfaceNode_ == nullptr) {
+        WLOGFE("Surface node is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("Check failed, permission denied");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::SetCornerRadius(float cornerRadius)
+{
+    if (surfaceNode_ == nullptr) {
+        WLOGFE("Surface node is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    WLOGFI("Set window %{public}s corner radius %{public}f", windowName_.c_str(), cornerRadius);
+    surfaceNode_->SetCornerRadius(cornerRadius);
+    RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::SetShadowRadius(float radius)
+{
+    WMError ret = CheckParmAndPermission();
+    if (ret != WMError::WM_OK) {
+        return ret;
+    }
+
+    WLOGFI("Set window %{public}s shadow radius %{public}f", windowName_.c_str(), radius);
+    if (MathHelper::LessNotEqual(radius, 0.0)) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    surfaceNode_->SetShadowRadius(radius);
+    RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::SetShadowColor(std::string color)
+{
+    WMError ret = CheckParmAndPermission();
+    if (ret != WMError::WM_OK) {
+        return ret;
+    }
+
+    WLOGFI("Set window %{public}s shadow color %{public}s", windowName_.c_str(), color.c_str());
+    uint32_t colorValue = 0;
+    if (!ColorParser::Parse(color, colorValue)) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    surfaceNode_->SetShadowColor(colorValue);
+    RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::SetShadowOffsetX(float offsetX)
+{
+    WMError ret = CheckParmAndPermission();
+    if (ret != WMError::WM_OK) {
+        return ret;
+    }
+
+    WLOGFI("Set window %{public}s shadow offsetX %{public}f", windowName_.c_str(), offsetX);
+    surfaceNode_->SetShadowOffsetX(offsetX);
+    RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::SetShadowOffsetY(float offsetY)
+{
+    WMError ret = CheckParmAndPermission();
+    if (ret != WMError::WM_OK) {
+        return ret;
+    }
+
+    WLOGFI("Set window %{public}s shadow offsetY %{public}f", windowName_.c_str(), offsetY);
+    surfaceNode_->SetShadowOffsetY(offsetY);
+    RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::SetBlur(float radius)
+{
+    WMError ret = CheckParmAndPermission();
+    if (ret != WMError::WM_OK) {
+        return ret;
+    }
+
+    WLOGFI("Set window %{public}s blur radius %{public}f", windowName_.c_str(), radius);
+    if (MathHelper::LessNotEqual(radius, 0.0)) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    radius = ConvertRadiusToSigma(radius);
+    WLOGFI("Set window %{public}s blur radius after conversion %{public}f", windowName_.c_str(), radius);
+    surfaceNode_->SetFilter(RSFilter::CreateBlurFilter(radius, radius));
+    RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::SetBackdropBlur(float radius)
+{
+    WMError ret = CheckParmAndPermission();
+    if (ret != WMError::WM_OK) {
+        return ret;
+    }
+
+    WLOGFI("Set window %{public}s backdrop blur radius %{public}f", windowName_.c_str(), radius);
+    if (MathHelper::LessNotEqual(radius, 0.0)) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    radius = ConvertRadiusToSigma(radius);
+    WLOGFI("Set window %{public}s backdrop blur radius after conversion %{public}f", windowName_.c_str(), radius);
+    surfaceNode_->SetBackgroundFilter(RSFilter::CreateBlurFilter(radius, radius));
+    RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
+{
+    WMError ret = CheckParmAndPermission();
+    if (ret != WMError::WM_OK) {
+        return ret;
+    }
+
+    WLOGI("Set window %{public}s backdrop blur style %{public}u", windowName_.c_str(), blurStyle);
+    if (blurStyle < WindowBlurStyle::WINDOW_BLUR_OFF || blurStyle > WindowBlurStyle::WINDOW_BLUR_THICK) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    if (blurStyle == WindowBlurStyle::WINDOW_BLUR_OFF) {
+        surfaceNode_->SetBackgroundFilter(nullptr);
+    } else {
+        float density = 3.5f; // get density from screen property
+        surfaceNode_->SetBackgroundFilter(RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle), density));
+    }
+
+    RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
+}
+
+WSError WindowSessionImpl::HandleBackEvent()
+{
+    bool isConsumed = false;
+    if (uiContent_) {
+        WLOGFD("Transfer back event to uiContent");
+        isConsumed = uiContent_->ProcessBackPressed();
+    } else {
+        WLOGFE("There is no back event consumer");
+    }
+    if (isConsumed) {
+        WLOGD("Back key event is consumed");
+        return WSError::WS_OK;
+    }
+    // notify back event to host session
+    if (hostSession_) {
+        WLOGFD("Transfer back event to host session");
+        hostSession_->RequestSessionBack();
+    }
+    return WSError::WS_OK;
+}
+
 } // namespace Rosen
 } // namespace OHOS

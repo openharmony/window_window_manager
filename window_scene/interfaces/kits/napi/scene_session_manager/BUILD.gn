@@ -25,7 +25,7 @@ ohos_shared_library("scenesessionmanager_napi") {
     "js_scene_session.cpp",
     "js_scene_session_manager.cpp",
     "js_scene_utils.cpp",
-    "js_window_scene.cpp",
+    "js_window_scene_config.cpp",
     "scene_session_manager_module.cpp",
   ]
 

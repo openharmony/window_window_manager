@@ -27,6 +27,7 @@
 #include <ui/rs_surface_node.h>
 #include <struct_multimodal.h>
 
+#include "prepare_terminate_callback_stub.h"
 #include "input_transfer_station.h"
 #include "vsync_station.h"
 #include "window.h"
@@ -76,7 +77,7 @@ const std::map<OHOS::AppExecFwk::DisplayOrientation, Orientation> ABILITY_TO_WMS
     {OHOS::AppExecFwk::DisplayOrientation::LOCKED, Orientation::LOCKED},
 };
 
-class WindowImpl : public Window {
+class WindowImpl : public Window, AAFwk::PrepareTerminateCallbackStub {
 #define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, listeners) \
     do {                                                      \
         for (auto& listener : (listeners)) {                  \
@@ -285,6 +286,9 @@ public:
     void RestoreSplitWindowMode(uint32_t mode);
 
     virtual void SetNeedDefaultAnimation(bool needDefaultAnimation) override;
+
+    virtual void DoPrepareTerminate() override;
+    void PendingClose();
 private:
     template<typename T1, typename T2, typename Ret>
     using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;

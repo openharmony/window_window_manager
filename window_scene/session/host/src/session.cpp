@@ -168,10 +168,9 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 }
 
 WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint64_t& persistentId, sptr<WindowSessionProperty> property)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property)
 {
-    persistentId = GetPersistentId();
-    WLOGFI("Connect session, id: %{public}" PRIu64 ", state: %{public}u", persistentId,
+    WLOGFI("Connect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()));
     if (GetSessionState() != SessionState::STATE_DISCONNECT) {
         WLOGFE("state is not disconnect!");
@@ -184,7 +183,12 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     sessionStage_ = sessionStage;
     windowEventChannel_ = eventChannel;
     surfaceNode_ = surfaceNode;
+    systemConfig = systemConfig_;
+    if (property) {
+        property->SetPersistentId(GetPersistentId());
+    }
     property_ = property;
+
     UpdateSessionState(SessionState::STATE_CONNECT);
     // once update rect before connect, update again when connect
     UpdateRect(winRect_, SizeChangeReason::UNDEFINED);
@@ -276,9 +280,14 @@ void Session::SetPendingSessionActivationEventListener(const NotifyPendingSessio
     pendingSessionActivationFunc_ = func;
 }
 
+void Session::SetBackPressedListenser(const NotifyBackPressedFunc& func)
+{
+    backPressedFunc_ = func;
+}
+
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    WLOGFD("Session TransferPointEvent, Id: %{public} " PRIu64"", persistentId_);
+    WLOGFD("Session TransferPointEvent, Id: %{public}" PRIu64 "", persistentId_);
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
@@ -399,9 +408,32 @@ sptr<WindowSessionProperty> Session::GetSessionProperty() const
 WindowType Session::GetWindowType() const
 {
     if (property_ != nullptr) {
-        WLOGFD("Type:%{public}" PRIu64"", property_->GetWindowType());
+        WLOGFD("Type:%{public}" PRIu32 "", static_cast<uint32_t>(property_->GetWindowType()));
         return property_->GetWindowType();
     }
     return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+}
+
+void Session::SetSystemConfig(const SystemSessionConfig& systemConfig)
+{
+    systemConfig_ = systemConfig;
+}
+
+WSError Session::RequestSessionBack()
+{
+    if (!backPressedFunc_) {
+        WLOGFW("Session didn't register back event consumer!");
+        return WSError::WS_DO_NOTHING;
+    }
+    backPressedFunc_();
+    return WSError::WS_OK;
+}
+
+WSError Session::ProcessBackEvent()
+{
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    return sessionStage_->HandleBackEvent();
 }
 } // namespace OHOS::Rosen

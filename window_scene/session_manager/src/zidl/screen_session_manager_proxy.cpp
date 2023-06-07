@@ -100,4 +100,246 @@ DMError ScreenSessionManagerProxy::UnregisterDisplayManagerAgent(const sptr<IDis
     return static_cast<DMError>(reply.ReadInt32());
 }
 
+bool OHOS::Rosen::ScreenSessionManagerProxy::WakeUpBegin(PowerStateChangeReason reason)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("WakeUpBegin remote is nullptr");
+        return false;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WakeUpBegin: WriteInterfaceToken failed");
+        return false;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
+        WLOGFE("WakeUpBegin: Write PowerStateChangeReason failed");
+        return false;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_WAKE_UP_BEGIN),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("WakeUpBegin: SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
+bool OHOS::Rosen::ScreenSessionManagerProxy::WakeUpEnd()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("WakeUpEnd remote is nullptr");
+        return false;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WakeUpEnd: WriteInterfaceToken failed");
+        return false;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_WAKE_UP_END),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("WakeUpEnd: SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
+bool OHOS::Rosen::ScreenSessionManagerProxy::SuspendBegin(PowerStateChangeReason reason)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("SuspendBegin remote is nullptr");
+        return false;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("SuspendBegin: WriteInterfaceToken failed");
+        return false;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
+        WLOGFE("SuspendBegin: Write PowerStateChangeReason failed");
+        return false;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SUSPEND_BEGIN),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("SuspendBegin: SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
+bool OHOS::Rosen::ScreenSessionManagerProxy::SuspendEnd()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("SuspendEnd remote is nullptr");
+        return false;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("SuspendEnd: WriteInterfaceToken failed");
+        return false;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SUSPEND_END),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("SuspendEnd: SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
+bool OHOS::Rosen::ScreenSessionManagerProxy::SetDisplayState(DisplayState state)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("SetDisplayState remote is nullptr");
+        return false;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return false;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(state))) {
+        WLOGFE("Write DisplayState failed");
+        return false;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_DISPLAY_STATE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
+bool OHOS::Rosen::ScreenSessionManagerProxy::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("SetScreenPowerForAll remote is nullptr");
+        return false;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return false;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(state))) {
+        WLOGFE("Write ScreenPowerState failed");
+        return false;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
+        WLOGFE("Write PowerStateChangeReason failed");
+        return false;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_POWER_FOR_ALL),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
+DisplayState OHOS::Rosen::ScreenSessionManagerProxy::GetDisplayState(DisplayId displayId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("GetDisplayState remote is nullptr");
+        return DisplayState::UNKNOWN;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return DisplayState::UNKNOWN;
+    }
+    if (!data.WriteUint64(displayId)) {
+        WLOGFE("Write displayId failed");
+        return DisplayState::UNKNOWN;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_STATE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return DisplayState::UNKNOWN;
+    }
+    return static_cast<DisplayState>(reply.ReadUint32());
+}
+
+void OHOS::Rosen::ScreenSessionManagerProxy::NotifyDisplayEvent(DisplayEvent event)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("NotifyDisplayEvent remote is nullptr");
+        return;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(event))) {
+        WLOGFE("Write DisplayEvent failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_EVENT),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return;
+    }
+}
+
+ScreenPowerState OHOS::Rosen::ScreenSessionManagerProxy::GetScreenPower(ScreenId dmsScreenId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("GetScreenPower remote is nullptr");
+        return ScreenPowerState::INVALID_STATE;
+    }
+    
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return ScreenPowerState::INVALID_STATE;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(dmsScreenId))) {
+        WLOGFE("Write dmsScreenId failed");
+        return ScreenPowerState::INVALID_STATE;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return ScreenPowerState::INVALID_STATE;
+    }
+    return static_cast<ScreenPowerState>(reply.ReadUint32());
+}
+
 } // namespace OHOS::Rosen

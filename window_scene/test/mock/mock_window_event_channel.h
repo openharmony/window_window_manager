@@ -14,7 +14,7 @@
  */
 
 #include "interfaces/include/ws_common.h"
-#include "session/container/include/session_stage.h"
+#include "session/container/include/zidl/session_stage_interface.h"
 #include "session/container/include/window_event_channel.h"
 #include <gmock/gmock.h>
 
@@ -22,7 +22,7 @@ namespace OHOS {
 namespace Rosen {
 class WindowEventChannelMocker : public WindowEventChannel {
 public:
-    WindowEventChannelMocker(sptr<SessionStage> sessionStage) : WindowEventChannel(sessionStage) {};
+    WindowEventChannelMocker(sptr<ISessionStage> sessionStage) : WindowEventChannel(sessionStage) {};
     ~WindowEventChannelMocker() {};
     MOCK_METHOD1(TransferKeyEvent, WSError(const std::shared_ptr<MMI::KeyEvent>& keyEvent));
     MOCK_METHOD1(TransferPointerEvent, WSError(const std::shared_ptr<MMI::PointerEvent>& pointerEvent));

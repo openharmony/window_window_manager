@@ -89,6 +89,10 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         // update subWindowSessionMap_
         subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
     } else { // system window
+        if (WindowHelper::IsAppFloatingWindow(GetType())) {
+            property_->SetParentPersistentId(GetFloatingWindowParentId());
+            WLOGFI("WindowSessionImpl set SetParentPersistentId: %{public}" PRIu64 "", property_->GetParentPersistentId());
+        }
         SessionManager::GetInstance().CreateAndConnectSpecificSession(iSessionStage, eventChannel, surfaceNode_,
             property_, persistentId, session);
     }
@@ -134,13 +138,79 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         windowSessionMap_.insert(std::make_pair(property_->GetWindowName(),
             std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
         state_ = WindowState::STATE_CREATED;
+        if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+            windowMode_ = windowSystemConfig_.defaultWindowMode_;
+        }
     }
-    if (GetDebugPropForPC()) {
-        windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
-    }
-    WLOGFD("Window Create [name:%{public}s, id:%{public}" PRIu64 "], state:%{pubic}u",
-        property_->GetWindowName().c_str(), property_->GetPersistentId(), state_);
+    WLOGFD("Window Create [name:%{public}s, id:%{public}" PRIu64 "], state:%{pubic}u, windowmode:%{public}u",
+        property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, windowMode_);
     return ret;
+}
+
+void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(uint64_t parentPersistentId, const WindowState& newState)
+{
+    auto iter = subWindowSessionMap_.find(parentPersistentId);
+    if (iter == subWindowSessionMap_.end()) {
+        WLOGFD("main window: %{public}" PRIu64" has no child node", parentPersistentId);
+        return;
+    }
+    const auto& subWindows = iter->second;
+    if (subWindows.empty()) {
+        WLOGFD("main window: %{public}" PRIu64", its subWindowMap is empty", parentPersistentId);
+        return;
+    }
+
+    // when main window hide and subwindow whose state is shown should hide and notify user
+    if (newState == WindowState::STATE_HIDDEN) {
+        for (auto subwindow : subWindows) {
+            if (subwindow != nullptr && subwindow->GetWindowState() == WindowState::STATE_SHOWN) {
+                subwindow->NotifyAfterBackground();
+                subwindow->state_ = WindowState::STATE_HIDDEN;
+            }
+        }
+    // when main window show and subwindow whose state is shown should show and notify user
+    } else if (newState == WindowState::STATE_SHOWN) {
+        for (auto subwindow : subWindows) {
+            if (subwindow != nullptr && subwindow->GetWindowState() == WindowState::STATE_HIDDEN) {
+                subwindow->NotifyAfterForeground();
+                subwindow->state_ = WindowState::STATE_SHOWN;
+            }
+        }
+    }
+    return;
+}
+
+WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
+{
+    WLOGFI("Window Show [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u], reason:%{public}u state:%{pubic}u",
+        property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType(), reason, state_);
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (state_ == WindowState::STATE_SHOWN) {
+        WLOGFD("window session is alreay shown [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u]",
+            property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType());
+        return WMError::WM_OK;
+    }
+    if (hostSession_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    WSError ret = hostSession_->Foreground();
+    // delete after replace WSError with WMError
+    WMError res = static_cast<WMError>(ret);
+    if (res == WMError::WM_OK) {
+        // update sub window state if this is main window
+        if (WindowHelper::IsMainWindow(GetType())) {
+            UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
+        }
+        NotifyAfterForeground();
+        state_ = WindowState::STATE_SHOWN;
+    } else {
+        NotifyForegroundFailed(res);
+    }
+    return res;
 }
 
 WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
@@ -170,6 +240,10 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     // delete after replace WSError with WMError
     WMError res = static_cast<WMError>(ret);
     if (res == WMError::WM_OK) {
+        // update sub window state if this is main window
+        if (WindowHelper::IsMainWindow(GetType())) {
+            UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
+        }
         NotifyAfterBackground();
         state_ = WindowState::STATE_HIDDEN;
     }
@@ -196,7 +270,7 @@ WSError WindowSceneSessionImpl::SetActive(bool active)
 void WindowSceneSessionImpl::DestroySubWindow()
 {
     for (auto elem : subWindowSessionMap_) {
-        WLOGFE("Id: %{public}" PRIu64 ", size: %{public}u", elem.first, subWindowSessionMap_.size());
+        WLOGFE("Id: %{public}" PRIu64 ", size: %{public}zu", elem.first, subWindowSessionMap_.size());
     }
 
     const uint64_t& parentPersistentId = property_->GetParentPersistentId();
@@ -339,14 +413,11 @@ WmErrorCode WindowSceneSessionImpl::RaiseToAppTop()
     return static_cast<WmErrorCode>(ret);
 }
 
-bool WindowSceneSessionImpl::GetDebugPropForPC()
-{
-    return system::GetParameter("persist.sceneboard.debugforpc.enabled", "0")  == "1";
-}
-
 bool WindowSceneSessionImpl::IsDecorEnable() const
 {
-    bool enable = WindowHelper::IsMainWindow(property_->GetWindowType()) && enableWindowDecor_;
+    bool enable = WindowHelper::IsMainWindow(property_->GetWindowType()) &&
+        windowSystemConfig_.isSystemDecorEnable_ &&
+        WindowHelper::IsWindowModeSupported(windowSystemConfig_.decorModeSupportInfo_, GetMode());
     WLOGFD("get decor enable %{public}d", enable);
     return enable;
 }
@@ -421,14 +492,13 @@ WMError WindowSceneSessionImpl::DisableAppWindowDecor()
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     WLOGI("disable app window decoration.");
-    enableWindowDecor_ = false;
+    windowSystemConfig_.isSystemDecorEnable_ = false;
     UpdateDecorEnable(true);
     return WMError::WM_OK;
 }
 
 WindowMode WindowSceneSessionImpl::GetMode() const
 {
-    WLOGFD("WindowSceneSessionImpl::GetMode called");
     return windowMode_;
 }
 } // namespace Rosen

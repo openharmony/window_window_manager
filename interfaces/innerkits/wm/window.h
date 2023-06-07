@@ -18,7 +18,6 @@
 
 #include <refbase.h>
 #include <parcel.h>
-#include <pixel_map.h>
 #include <iremote_object.h>
 
 #include "wm_common.h"
@@ -47,6 +46,10 @@ namespace OHOS::AAFwk {
 
 namespace OHOS::Ace {
     class UIContent;
+}
+
+namespace OHOS::Media {
+    class PixelMap;
 }
 
 namespace OHOS {
@@ -400,7 +403,7 @@ public:
      * @return sptr<Window> If create window success, return window instance; Otherwise, return nullptr
      */
     static sptr<Window> Create(sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession, WMError& errCode = DefaultCreateErrCode);
+        const sptr<IRemoteObject>& iSession, WMError& errCode = DefaultCreateErrCode);
 
     /**
      * @brief find window by windowName
@@ -484,7 +487,11 @@ public:
      *
      * @return Name of window.
      */
-    virtual const std::string& GetWindowName() const { return std::string(); }
+    virtual const std::string& GetWindowName() const
+    {
+        static const std::string name;
+        return name;
+    }
     /**
      * @brief Get id of window.
      *
@@ -583,7 +590,11 @@ public:
      *
      * @return Property of transform.
      */
-    virtual const Transform& GetTransform() const { return {}; }
+    virtual const Transform& GetTransform() const
+    {
+        static const Transform trans;
+        return trans;
+    }
     /**
      * @brief Add window flag.
      *

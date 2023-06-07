@@ -542,30 +542,25 @@ HWTEST_F(ScreenRotationControllerTest, OnMotionChanged, Function | SmallTest | L
     DeviceRotation currentRotation = ScreenRotationController::lastSensorRotationConverted_;
     DeviceRotation motionRotation = DeviceRotation::INVALID;
 
-    MotionData motionData;
-    motionData.result = OHOS::Msdp::MotionStatusResult::VALUE_INVALID;
-    motionData.rotateAction = 1;
-    MotionSubscriber::motionEventCallback_->OnMotionChanged(motionData);
-    ASSERT_EQ(currentRotation, ScreenRotationController::lastSensorRotationConverted_);
+    MotionEvent motionData;
 
-    motionData.result = OHOS::Msdp::MotionStatusResult::VALUE_ENTER;
-    motionData.rotateAction = 0;
+    motionData.status = 0;
     motionRotation = DeviceRotation::ROTATION_PORTRAIT;
     MotionSubscriber::motionEventCallback_->OnMotionChanged(motionData);
     ASSERT_EQ(motionRotation, ScreenRotationController::lastSensorRotationConverted_);
 
-    motionData.rotateAction = 1;
+    motionData.status = 1;
     MotionSubscriber::motionEventCallback_->OnMotionChanged(motionData);
     motionRotation = ScreenRotationController::IsDefaultDisplayRotationPortrait() ?
         DeviceRotation::ROTATION_LANDSCAPE_INVERTED : DeviceRotation::ROTATION_LANDSCAPE;
     ASSERT_EQ(motionRotation, ScreenRotationController::lastSensorRotationConverted_);
 
-    motionData.rotateAction = 2;
+    motionData.status = 2;
     MotionSubscriber::motionEventCallback_->OnMotionChanged(motionData);
     motionRotation = DeviceRotation::ROTATION_PORTRAIT_INVERTED;
     ASSERT_EQ(motionRotation, ScreenRotationController::lastSensorRotationConverted_);
 
-    motionData.rotateAction = 3;
+    motionData.status = 3;
     MotionSubscriber::motionEventCallback_->OnMotionChanged(motionData);
     motionRotation = ScreenRotationController::IsDefaultDisplayRotationPortrait() ?
         DeviceRotation::ROTATION_LANDSCAPE : DeviceRotation::ROTATION_LANDSCAPE_INVERTED;

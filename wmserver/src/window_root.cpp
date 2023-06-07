@@ -154,7 +154,7 @@ sptr<WindowNode> WindowRoot::GetWindowNodeByMissionId(uint32_t missionId) const
 {
     using ValueType = const std::map<uint32_t, sptr<WindowNode>>::value_type&;
     auto it = std::find_if(windowNodeMap_.begin(), windowNodeMap_.end(), [missionId] (ValueType item) {
-        return item.second && item.second->abilityInfo_.missionId_ == missionId;
+        return item.second && item.second->abilityInfo_.missionId_ == static_cast<int32_t>(missionId);
     });
     return it == windowNodeMap_.end() ? nullptr : it->second;
 }
@@ -546,7 +546,10 @@ WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<Window
             WLOGFD("[FixOrientation] window is playing show animation, do not update display orientation");
             return WMError::WM_OK;
         }
-        container->SetDisplayOrientationFromWindow(node, true);
+        auto topRotatableWindow = container->GetNextRotatableWindow(INVALID_WINDOW_ID);
+        if (topRotatableWindow == node) {
+            container->SetDisplayOrientationFromWindow(node, true);
+        }
     }
     return WMError::WM_OK;
 }

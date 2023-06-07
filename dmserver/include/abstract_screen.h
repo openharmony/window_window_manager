@@ -50,11 +50,12 @@ public:
     bool SetSourceMode(ScreenSourceMode sourceMode);
     ScreenSourceMode GetSourceMode() const;
 
-    void UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
-    DMError AddSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool onTop);
+    void UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd, bool needToUpdate = true);
+    DMError AddSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool onTop, bool needToRecord = true);
     DMError RemoveSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfaceNode);
     void UpdateDisplayGroupRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, NodeId parentNodeId, bool isAdd);
-    void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint);
+    void InitRSDisplayNode(const RSDisplayNodeConfig& config, const Point& startPoint);
+    void InitRSDefaultDisplayNode(const RSDisplayNodeConfig& config, const Point& startPoint);
     ScreenId GetScreenGroupId() const;
 
     // colorspace, gamut
@@ -84,13 +85,18 @@ public:
     Orientation orientation_ { Orientation::UNSPECIFIED };
     Rotation rotation_ { Rotation::ROTATION_0 };
     Orientation screenRequestedOrientation_ { Orientation::UNSPECIFIED };
-    std::vector<std::shared_ptr<RSSurfaceNode>> children_;
+    // nativeSurfaceNodes_ means th node which is added/removed by interface of dms directly
+    std::vector<std::shared_ptr<RSSurfaceNode>> nativeSurfaceNodes_;
+    // appSurfaceNodes_ means th node which is added/removed by interface of wms
+    std::vector<std::shared_ptr<RSSurfaceNode>> appSurfaceNodes_;
 
 protected:
     void FillScreenInfo(sptr<ScreenInfo>) const;
     const sptr<AbstractScreenController> screenController_;
 
 private:
+    void SetPropertyForDisplayNode(const std::shared_ptr<RSDisplayNode>& rsDisplayNode,
+        const RSDisplayNodeConfig& config, const Point& startPoint);
     std::string name_ { "UNKNOW" };
     uint32_t phyWidth_ { UINT32_MAX };
     uint32_t phyHeight_ { UINT32_MAX };
@@ -107,6 +113,7 @@ public:
     bool AddChild(sptr<AbstractScreen>& dmsScreen, Point& startPoint);
     bool AddChildren(std::vector<sptr<AbstractScreen>>& dmsScreens, std::vector<Point>& startPoints);
     bool RemoveChild(sptr<AbstractScreen>& dmsScreen);
+    bool RemoveDefaultScreen(const sptr<AbstractScreen>& dmsScreen);
     bool HasChild(ScreenId childScreen) const;
     std::vector<sptr<AbstractScreen>> GetChildren() const;
     std::vector<Point> GetChildrenPosition() const;
@@ -117,6 +124,7 @@ public:
 
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     ScreenId mirrorScreenId_ { SCREEN_ID_INVALID };
+    ScreenId defaultScreenId_ { SCREEN_ID_INVALID };
 
 private:
     bool GetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen, struct RSDisplayNodeConfig& config);

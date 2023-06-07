@@ -15,7 +15,9 @@
 
 #include "session_manager/include/scene_session_manager.h"
 
+#include <sstream>
 #include <ability_manager_client.h>
+#include <parameters.h>
 #include <start_options.h>
 #include <want.h>
 
@@ -67,6 +69,66 @@ void SceneSessionManager::ConfigWindowSceneXml()
     if (item.IsMap()) {
         ConfigWindowEffect(item);
     }
+    item = config["decor"];
+    if (item.IsMap()) {
+        ConfigDecor(item);
+    }
+    item = config["defaultWindowMode"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1 &&
+            (numbers[0] == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
+             numbers[0] == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
+            systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(numbers[0]));
+        }
+    }
+}
+
+void SceneSessionManager::ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig)
+{
+    WindowSceneConfig::ConfigItem item = decorConfig.GetProp("enable");
+    if (item.IsBool()) {
+        systemConfig_.isSystemDecorEnable_ = item.boolValue_;
+        std::vector<std::string> supportedModes;
+        item = decorConfig["supportedMode"];
+        if (item.IsStrings()) {
+            systemConfig_.decorModeSupportInfo_ = 0;
+            supportedModes = *item.stringsValue_;
+        }
+        for (auto mode : supportedModes) {
+            if (mode == "fullscreen") {
+                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN;
+            } else if (mode == "floating") {
+                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
+            } else if (mode == "pip") {
+                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_PIP;
+            } else if (mode == "split") {
+                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                    WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY;
+            } else {
+                WLOGFW("Invalid supporedMode");
+                systemConfig_.decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+                break;
+            }
+        }
+    }
+}
+
+static void AddAlphaToColor(float alpha, std::string& color)
+{
+    if (color.size() == 9 || alpha > 1.0f) { // size 9: color is ARGB
+        return;
+    }
+
+    uint32_t alphaValue = 0xFF * alpha;
+    std::stringstream ss;
+    ss << std::hex << alphaValue;
+    std::string strAlpha = ss.str();
+    if (strAlpha.size() == 1) {
+        strAlpha.append(1, '0');
+    }
+
+    color.insert(1, strAlpha);
 }
 
 void SceneSessionManager::ConfigWindowEffect(const WindowSceneConfig::ConfigItem& effectConfig)
@@ -96,6 +158,9 @@ void SceneSessionManager::ConfigWindowEffect(const WindowSceneConfig::ConfigItem
             appWindowSceneConfig_.unfocusedShadow_ = config.unfocusedShadow_;
         }
     }
+
+    AddAlphaToColor(appWindowSceneConfig_.focusedShadow_.alpha_, appWindowSceneConfig_.focusedShadow_.color_);
+    AddAlphaToColor(appWindowSceneConfig_.unfocusedShadow_.alpha_, appWindowSceneConfig_.unfocusedShadow_.color_);
 
     WLOGFI("Config window effect successfully");
 }
@@ -185,8 +250,9 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
         if (rootSceneSession_ != nullptr) {
             return rootSceneSession_;
         }
-
-        rootSceneSession_ = new (std::nothrow) RootSceneSession();
+        system::SetParameter("bootevent.boot.completed", "true");
+        SessionInfo info;
+        rootSceneSession_ = new (std::nothrow) RootSceneSession(info);
         rootScene_ = new (std::nothrow) RootScene();
         if (!rootSceneSession_ || !rootScene_) {
             WLOGFE("rootSceneSession or rootScene is nullptr");
@@ -195,6 +261,7 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
         rootSceneSession_->SetLoadContentFunc(
             [rootScene = rootScene_](const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
                 AbilityRuntime::Context* context) { rootScene->LoadContent(contentUrl, engine, storage, context); });
+        AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_);
         return rootSceneSession_;
     };
 
@@ -234,6 +301,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         }
         uint64_t persistentId = GeneratePersistentId();
         sceneSession->SetPersistentId(persistentId);
+        sceneSession->SetSystemConfig(systemConfig_);
         abilitySceneMap_.insert({ persistentId, sceneSession });
         WLOGFI("create session persistentId: %{public}" PRIu64 "", persistentId);
         return sceneSession;
@@ -250,7 +318,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
         return nullptr;
     }
     auto sessionInfo = scnSession->GetSessionInfo();
-    abilitySessionInfo->sessionToken = scnSession;
+    abilitySessionInfo->sessionToken = scnSession->AsObject();
     abilitySessionInfo->callerToken = sessionInfo.callerToken_;
     abilitySessionInfo->persistentId = scnSession->GetPersistentId();
     return abilitySessionInfo;
@@ -281,6 +349,7 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         }
         // to add StartAbility
         AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(want, startOptions, scnSessionInfo);
+        activeSessionId_ = persistentId;
         return WSError::WS_OK;
     };
     WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
@@ -365,7 +434,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             return WSError::WS_ERROR_NULLPTR;
         }
         // connect specific session and sessionStage
-        WSError errCode = sceneSession->Connect(sessionStage, eventChannel, surfaceNode, persistentId, property);
+        WSError errCode = sceneSession->Connect(sessionStage, eventChannel, surfaceNode, systemConfig_, property);
+        if (property) {
+            persistentId = property->GetPersistentId();
+        }
         if (createSpecificSessionFunc_) {
             createSpecificSessionFunc_(sceneSession);
         }
@@ -409,6 +481,23 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const uint64_t&
 const AppWindowSceneConfig& SceneSessionManager::GetWindowSceneConfig() const
 {
     return appWindowSceneConfig_;
+}
+
+WSError SceneSessionManager::ProcessBackEvent()
+{
+    auto task = [this]() {
+        auto session = GetSceneSession(activeSessionId_);
+        if (!session) {
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+        WLOGFD("ProcessBackEvent session persistentId: %{public}" PRIu64 "", activeSessionId_);
+        session->ProcessBackEvent();
+        return WSError::WS_OK;
+    };
+
+    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
+    msgScheduler_->PostSyncTask(task);
+    return WSError::WS_OK;
 }
 
 } // namespace OHOS::Rosen
