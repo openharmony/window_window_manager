@@ -43,6 +43,11 @@ ANRHandler::ANRHandler() {
 
 ANRHandler::~ANRHandler() {}
 
+void ANRHandler::SetSessionStage(const wptr<ISessionStage> &sessionStage)
+{
+    sessionStage_ = sessionStage; 
+}
+
 void ANRHandler::SetLastProcessedEventStatus(bool status)
 {
     std::lock_guard<std::mutex> guard(anrMtx_);
@@ -104,12 +109,13 @@ void ANRHandler::MarkProcessed()
         return;
     }
     WLOGFD("Processed event id:%{public}d", eventId);
-    // TODO 
-    // 适配, 用session向sceneBoard通知事件被消费的消息
-    int32_t ret = MultimodalInputConnMgr->MarkProcessed(eventId);
-
-    if (ret != 0) {
-        WLOGFE("Send to server failed, ret:%{public}d", ret);
+    /**
+        windowSessionImpl 就是 sessionStage
+        SessionStage 中有 hostSession_
+        hostSession 就是 SessionProxy
+    */
+    if (int32_t ret = 0;  ret = sessionStage_->MarkProcessed(eventId)) {
+        WLOGFE("Send to scene board failed, ret:%{public}d", ret);
     }
     SetLastProcessedEventStatus(false);
 }

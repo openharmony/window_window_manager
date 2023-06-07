@@ -436,4 +436,12 @@ WSError Session::ProcessBackEvent()
     }
     return sessionStage_->HandleBackEvent();
 }
+
+WSError Session::MarkProcessed(int32_t eventId)
+{
+    WLOGFI("WLD>>> Here in Session::MarkProcessed!");
+    int32_t persistentId = GetPersistentId();
+    WLOGFI("WLD>>> persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

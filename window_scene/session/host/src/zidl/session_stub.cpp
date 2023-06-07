@@ -218,4 +218,17 @@ int SessionStub::HandleBackPressed(MessageParcel& data, MessageParcel& reply)
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
+
+int SessionStub::HandleMarkProcessed(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleMarkProcessed!");
+    int32_t eventId = 0;
+    if (!data.ReadInt32(eventId)) {
+        WLOGFE("Read eventId from parcel failed!");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = MarkProcessed(eventId);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
 } // namespace OHOS::Rosen

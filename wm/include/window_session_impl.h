@@ -83,6 +83,7 @@ public:
     void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
     void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
     void NotifyForegroundFailed(WMError ret);
+    WSError MarkProcessed(int32_t eventId);
 
     WindowState state_ { WindowState::STATE_INITIAL };
 

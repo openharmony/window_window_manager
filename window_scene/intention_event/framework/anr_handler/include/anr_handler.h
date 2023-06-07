@@ -26,7 +26,7 @@ class ANRHandler {
 
 public:
     DISALLOW_COPY_AND_MOVE(ANRHandler);
-
+    void SetSessionStage(const wptr<ISessionStage> &sessionStage);
     void SetLastProcessedEventId(int32_t eventId, int64_t actionTime);
     void MarkProcessed();
     void ResetAnrArray();
@@ -45,6 +45,7 @@ private:
     int32_t GetLastProcessedEventId();
     void SendEvent(int64_t delayTime);
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
+    wptr<ISessionStage> sessionStage_ = nullptr;
 };
 
 #define ANRHDL ::OHOS::DelayedSingleton<ANRHandler>::GetInstance()
