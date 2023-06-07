@@ -37,6 +37,16 @@ public:
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
 
+    virtual void NotifyDisplayEvent(DisplayEvent event) override;
+    virtual bool WakeUpBegin(PowerStateChangeReason reason) override;
+    virtual bool WakeUpEnd() override;
+    virtual bool SuspendBegin(PowerStateChangeReason reason) override;
+    virtual bool SuspendEnd() override;
+    virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
+    virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override;
+    virtual bool SetDisplayState(DisplayState state) override;
+    virtual DisplayState GetDisplayState(DisplayId displayId) override;
+
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
 };

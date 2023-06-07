@@ -73,16 +73,32 @@ public:
     WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     WMError RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
     WMError UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
+    WSError HandleBackEvent() override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
     uint32_t GetParentId() const;
     uint64_t GetPersistentId() const;
     sptr<WindowSessionProperty> GetProperty() const;
     sptr<ISession> GetHostSession() const;
+    uint64_t GetFloatingWindowParentId();
+    void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
+    void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
+    void NotifyForegroundFailed(WMError ret);
+
+    WindowState state_ { WindowState::STATE_INITIAL };
+
+    // window effect
+    virtual WMError SetCornerRadius(float cornerRadius) override;
+    virtual WMError SetShadowRadius(float radius) override;
+    virtual WMError SetShadowColor(std::string color) override;
+    virtual WMError SetShadowOffsetX(float offsetX) override;
+    virtual WMError SetShadowOffsetY(float offsetY) override;
+    virtual WMError SetBlur(float radius) override;
+    virtual WMError SetBackdropBlur(float radius) override;
+    virtual WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) override;
 
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
-    void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
     void NotifyAfterActive();
     void NotifyAfterInactive();
     void NotifyBeforeDestroy(std::string windowName);
@@ -96,14 +112,13 @@ protected:
     std::shared_ptr<AbilityRuntime::Context> context_ = nullptr;
     std::shared_ptr<RSSurfaceNode> surfaceNode_ = nullptr;
     sptr<WindowSessionProperty> property_ = nullptr;
-    WindowState state_ { WindowState::STATE_INITIAL };
     // map of windowSession: <sessionName, <persistentId, windowSession>>
     static std::map<std::string, std::pair<uint64_t, sptr<WindowSessionImpl>>> windowSessionMap_;
     // map of subSession: <persistentId, std::vector<windowSession>>
     static std::map<uint64_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
     std::recursive_mutex mutex_;
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_UNDEFINED;
-    bool enableWindowDecor_ = true;
+    SystemSessionConfig windowSystemConfig_ ;
 
 private:
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
@@ -113,14 +128,13 @@ private:
     EnableIfSame<T, IWindowChangeListener, std::vector<sptr<IWindowChangeListener>>> GetListeners();
     template<typename T> void ClearUselessListeners(std::map<uint64_t, T>& listeners, uint64_t persistentId);
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
-    void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
     void NotifyAfterFocused();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
-
-    void NotifyForegroundFailed(WMError ret);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
+    WMError CheckParmAndPermission();
 
+    std::string windowName_;
     static std::map<uint64_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<uint64_t, std::vector<sptr<IWindowChangeListener>>> windowChangeListeners_;
     static std::recursive_mutex globalMutex_;

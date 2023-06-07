@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-#include "js_window_scene.h"
+#include "js_window_scene_config.h"
 
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowScene" };
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowSceneConfig" };
 } // namespace
 
-NativeValue* JsWindowScene::CreateWindowSceneConfig(NativeEngine& engine, const AppWindowSceneConfig& config)
+NativeValue* JsWindowSceneConfig::CreateWindowSceneConfig(NativeEngine& engine, const AppWindowSceneConfig& config)
 {
     WLOGI("[NAPI]CreateWindowSceneConfig");
     NativeValue* objValue = engine.CreateObject();
@@ -33,8 +33,6 @@ NativeValue* JsWindowScene::CreateWindowSceneConfig(NativeEngine& engine, const 
         return engine.CreateUndefined();
     }
 
-    object->SetProperty("fullScreenCornerRadius", CreateJsValue(engine, config.fullScreenCornerRadius_));
-    object->SetProperty("splitCornerRadius", CreateJsValue(engine, config.splitCornerRadius_));
     object->SetProperty("floatCornerRadius", CreateJsValue(engine, config.floatCornerRadius_));
 
     object->SetProperty("focusedShadow", CreateShadowValue(engine, config, true));
@@ -43,7 +41,7 @@ NativeValue* JsWindowScene::CreateWindowSceneConfig(NativeEngine& engine, const 
     return objValue;
 }
 
-NativeValue* JsWindowScene::CreateShadowValue(NativeEngine& engine, const AppWindowSceneConfig& config, bool focused)
+NativeValue* JsWindowSceneConfig::CreateShadowValue(NativeEngine& engine, const AppWindowSceneConfig& config, bool focused)
 {
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
@@ -52,14 +50,10 @@ NativeValue* JsWindowScene::CreateShadowValue(NativeEngine& engine, const AppWin
         return engine.CreateUndefined();
     }
 
-    object->SetProperty("elevation", CreateJsValue(engine,
-        focused ? config.focusedShadow_.elevation_ : config.unfocusedShadow_.elevation_));
     object->SetProperty("offsetX", CreateJsValue(engine,
         focused ? config.focusedShadow_.offsetX_ : config.unfocusedShadow_.offsetX_));
     object->SetProperty("offsetY", CreateJsValue(engine,
         focused ? config.focusedShadow_.offsetY_ : config.unfocusedShadow_.offsetY_));
-    object->SetProperty("alpha", CreateJsValue(engine,
-        focused ? config.focusedShadow_.alpha_ : config.unfocusedShadow_.alpha_));
     object->SetProperty("radius", CreateJsValue(engine,
         focused ? config.focusedShadow_.radius_ : config.unfocusedShadow_.radius_));
     object->SetProperty("color", CreateJsValue(engine,
@@ -68,14 +62,14 @@ NativeValue* JsWindowScene::CreateShadowValue(NativeEngine& engine, const AppWin
     return objValue;
 }
 
-JsWindowScene::JsWindowScene()
+JsWindowSceneConfig::JsWindowSceneConfig()
 {
-    WLOGFD("JsWindowScene");
+    WLOGFD("Construct JsWindowSceneConfig");
 }
 
-JsWindowScene::~JsWindowScene()
+JsWindowSceneConfig::~JsWindowSceneConfig()
 {
-    WLOGFD("~JsWindowScene");
+    WLOGFD("Destroy  JsWindowSceneConfig");
 }
 
 } // namespace OHOS::Rosen

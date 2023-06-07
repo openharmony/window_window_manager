@@ -71,7 +71,7 @@ sptr<ScreenInfo> AbstractScreen::ConvertToScreenInfo() const
     return info;
 }
 
-void AbstractScreen::UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd)
+void AbstractScreen::UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd, bool needToUpdate)
 {
     if (rsDisplayNode_ == nullptr || surfaceNode == nullptr) {
         WLOGFE("node is nullptr");
@@ -86,9 +86,23 @@ void AbstractScreen::UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, b
     } else {
         rsDisplayNode_->RemoveChild(surfaceNode);
     }
+
+    if (needToUpdate) {
+        if (isAdd) {
+            appSurfaceNodes_.push_back(surfaceNode);
+        } else {
+            auto iter = std::find_if(appSurfaceNodes_.begin(), appSurfaceNodes_.end(),
+                [surfaceNode] (std::shared_ptr<RSSurfaceNode> node) {
+                    return surfaceNode->GetId() == node->GetId();
+                });
+            if (iter != appSurfaceNodes_.end()) {
+                appSurfaceNodes_.erase(iter);
+            }
+        }
+    }
 }
 
-DMError AbstractScreen::AddSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool onTop)
+DMError AbstractScreen::AddSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool onTop, bool needToRecord)
 {
     if (rsDisplayNode_ == nullptr || surfaceNode == nullptr) {
         WLOGFE("node is nullptr");
@@ -101,7 +115,9 @@ DMError AbstractScreen::AddSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfaceNo
     } else {
         rsDisplayNode_->AddChild(surfaceNode, -1);
     }
-    children_.push_back(surfaceNode);
+    if (needToRecord) {
+        nativeSurfaceNodes_.push_back(surfaceNode);
+    }
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();
@@ -115,15 +131,16 @@ DMError AbstractScreen::RemoveSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfac
         WLOGFE("Node is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     };
-    auto iter = std::find_if(children_.begin(), children_.end(), [surfaceNode] (std::shared_ptr<RSSurfaceNode> node) {
+    auto iter = std::find_if(nativeSurfaceNodes_.begin(), nativeSurfaceNodes_.end(), [surfaceNode]
+        (std::shared_ptr<RSSurfaceNode> node) {
         return surfaceNode->GetId() == node->GetId();
     });
-    if (iter == children_.end()) {
+    if (iter == nativeSurfaceNodes_.end()) {
         WLOGFW("Child not found");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     rsDisplayNode_->RemoveChild(*iter);
-    children_.erase(iter);
+    nativeSurfaceNodes_.erase(iter);
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();
@@ -149,21 +166,12 @@ void AbstractScreen::UpdateDisplayGroupRSTree(std::shared_ptr<RSSurfaceNode>& su
     }
 }
 
-void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint)
+void AbstractScreen::SetPropertyForDisplayNode(const std::shared_ptr<RSDisplayNode>& rsDisplayNode,
+    const RSDisplayNodeConfig& config, const Point& startPoint)
 {
-    if (rsDisplayNode_ != nullptr) {
-        rsDisplayNode_->SetDisplayNodeMirrorConfig(config);
-    } else {
-        std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config);
-        if (rsDisplayNode == nullptr) {
-            WLOGE("fail to add child. create rsDisplayNode fail!");
-            return;
-        }
-        rsDisplayNode_ = rsDisplayNode;
-    }
     rSDisplayNodeConfig_ = config;
     WLOGFI("SetDisplayOffset: posX:%{public}d, posY:%{public}d", startPoint.posX_, startPoint.posY_);
-    rsDisplayNode_->SetDisplayOffset(startPoint.posX_, startPoint.posY_);
+    rsDisplayNode->SetDisplayOffset(startPoint.posX_, startPoint.posY_);
     uint32_t width = 0;
     uint32_t height = 0;
     sptr<SupportedScreenModes> abstractScreenModes = GetActiveScreenMode();
@@ -174,16 +182,67 @@ void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& start
     RSScreenType screenType;
     auto ret = RSInterfaces::GetInstance().GetScreenType(rsId_, screenType);
     if (ret == StatusCode::SUCCESS && screenType == RSScreenType::VIRTUAL_TYPE_SCREEN) {
-        rsDisplayNode_->SetSecurityDisplay(true);
+        rsDisplayNode->SetSecurityDisplay(true);
         WLOGFI("virtualScreen SetSecurityDisplay success");
     }
     // If setDisplayOffset is not valid for SetFrame/SetBounds
-    rsDisplayNode_->SetFrame(0, 0, width, height);
-    rsDisplayNode_->SetBounds(0, 0, width, height);
+    rsDisplayNode->SetFrame(0, 0, width, height);
+    rsDisplayNode->SetBounds(0, 0, width, height);
+}
+
+void AbstractScreen::InitRSDisplayNode(const RSDisplayNodeConfig& config, const Point& startPoint)
+{
+    if (rsDisplayNode_ != nullptr) {
+        rsDisplayNode_->SetDisplayNodeMirrorConfig(config);
+        WLOGFD("RSDisplayNode is not null");
+    } else {
+        WLOGFD("Create rsDisplayNode");
+        std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config);
+        if (rsDisplayNode == nullptr) {
+            WLOGE("fail to add child. create rsDisplayNode fail!");
+            return;
+        }
+        rsDisplayNode_ = rsDisplayNode;
+    }
+    SetPropertyForDisplayNode(rsDisplayNode_, config, startPoint);
+
+    // flush transaction
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();
     }
+    WLOGFD("InitRSDisplayNode success");
+}
+
+void AbstractScreen::InitRSDefaultDisplayNode(const RSDisplayNodeConfig& config, const Point& startPoint)
+{
+    if (rsDisplayNode_ == nullptr) {
+        WLOGFD("RSDisplayNode is nullptr");
+    }
+
+    WLOGFD("Create defaultRSDisplayNode");
+    std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config);
+    if (rsDisplayNode == nullptr) {
+        WLOGE("fail to add child. create rsDisplayNode fail!");
+        return;
+    }
+    rsDisplayNode_ = rsDisplayNode;
+    SetPropertyForDisplayNode(rsDisplayNode_, config, startPoint);
+
+    // update RSTree for default display
+    for (auto node: appSurfaceNodes_) {
+        UpdateRSTree(node, true, false);
+    }
+    for (auto node: nativeSurfaceNodes_) {
+        AddSurfaceNode(node, false, false);
+    }
+
+    // flush transaction
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    }
+    WLOGFD("InitRSDefaultDisplayNode success");
 }
 
 ScreenId AbstractScreen::GetScreenGroupId() const
@@ -492,6 +551,7 @@ bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& start
         return false;
     }
     ScreenId screenId = dmsScreen->dmsId_;
+    WLOGFD("AbstractScreenGroup AddChild dmsScreenId: %{public}" PRIu64"", screenId);
     auto iter = abstractScreenMap_.find(screenId);
     if (iter != abstractScreenMap_.end()) {
         WLOGE("AddChild, abstractScreenMap_ has dmsScreen:%{public}" PRIu64"", screenId);
@@ -501,10 +561,16 @@ bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& start
     if (!GetRSDisplayNodeConfig(dmsScreen, config)) {
         return false;
     }
-    dmsScreen->InitRSDisplayNode(config, startPoint);
-    dmsScreen->lastGroupDmsId_ = dmsScreen->groupDmsId_;
-    dmsScreen->groupDmsId_ = dmsId_;
-    abstractScreenMap_.insert(std::make_pair(screenId, std::make_pair(dmsScreen, startPoint)));
+    if (dmsScreen->rsDisplayNode_ != nullptr && dmsScreen->type_ == ScreenType::REAL &&
+        defaultScreenId_ == screenId) {
+        WLOGFD("Reconnect default screen, screenId: %{public}" PRIu64"", screenId);
+        dmsScreen->InitRSDefaultDisplayNode(config, startPoint);
+    } else {
+        dmsScreen->InitRSDisplayNode(config, startPoint);
+        dmsScreen->lastGroupDmsId_ = dmsScreen->groupDmsId_;
+        dmsScreen->groupDmsId_ = dmsId_;
+        abstractScreenMap_.insert(std::make_pair(screenId, std::make_pair(dmsScreen, startPoint)));
+    }
     return true;
 }
 
@@ -540,7 +606,31 @@ bool AbstractScreenGroup::RemoveChild(sptr<AbstractScreen>& dmsScreen)
         }
         dmsScreen->rsDisplayNode_ = nullptr;
     }
+    WLOGFD("groupDmsId:%{public}" PRIu64", screenId:%{public}" PRIu64"",
+        dmsScreen->groupDmsId_, screenId);
     return abstractScreenMap_.erase(screenId);
+}
+
+bool AbstractScreenGroup::RemoveDefaultScreen(const sptr<AbstractScreen>& dmsScreen)
+{
+    if (dmsScreen == nullptr) {
+        WLOGE("RemoveChild, dmsScreen is nullptr.");
+        return false;
+    }
+    ScreenId screenId = dmsScreen->dmsId_;
+    dmsScreen->lastGroupDmsId_ = dmsScreen->groupDmsId_;
+    if (dmsScreen->rsDisplayNode_ != nullptr) {
+        dmsScreen->rsDisplayNode_->SetDisplayOffset(0, 0);
+        dmsScreen->rsDisplayNode_->RemoveFromTree();
+        auto transactionProxy = RSTransactionProxy::GetInstance();
+        if (transactionProxy != nullptr) {
+            transactionProxy->FlushImplicitTransaction();
+        }
+    }
+    defaultScreenId_ = screenId;
+    WLOGFD("groupDmsId:%{public}" PRIu64", screenId:%{public}" PRIu64"",
+        dmsScreen->groupDmsId_, screenId);
+    return true;
 }
 
 bool AbstractScreenGroup::HasChild(ScreenId childScreen) const

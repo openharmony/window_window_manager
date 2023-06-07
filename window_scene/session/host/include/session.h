@@ -39,6 +39,7 @@ namespace OHOS::Rosen {
 class RSSurfaceNode;
 using NotifyPendingSessionActivationFunc = std::function<void(const SessionInfo& info)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
+using NotifyBackPressedFunc = std::function<void()>;
 
 class ILifecycleListener {
 public:
@@ -69,7 +70,7 @@ public:
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason);
 
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-        const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint64_t& persistentId,
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr) override;
     WSError Foreground() override;
     WSError Background() override;
@@ -96,6 +97,10 @@ public:
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session) override;
     WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) override;
+    void SetSystemConfig(const SystemSessionConfig& systemConfig);
+    void SetBackPressedListenser(const NotifyBackPressedFunc& func);
+    WSError ProcessBackEvent(); // send back event to session_stage
+    WSError RequestSessionBack() override; // receive back request from session_stage
 
 protected:
     void UpdateSessionState(SessionState state);
@@ -106,7 +111,9 @@ protected:
     SessionInfo sessionInfo_;
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
+    NotifyBackPressedFunc backPressedFunc_;
     sptr<WindowSessionProperty> property_ = nullptr;
+    SystemSessionConfig systemConfig_;
 private:
     template<typename T>
     bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);

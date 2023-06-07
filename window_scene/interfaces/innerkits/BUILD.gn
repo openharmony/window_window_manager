@@ -24,6 +24,7 @@ ohos_shared_library("libwsutils") {
 
   public_configs = [ ":libwsutils_public_config" ]
 
+  innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
 }

@@ -54,7 +54,7 @@ static sptr<Window> CreateWindowWithSession(sptr<WindowOption>& option,
     WMError error = windowSessionImpl->Create(context, iSession);
     if (error != WMError::WM_OK) {
         errCode = error;
-        WLOGFD("CreateWindowWithSession, error: %{public}", static_cast<uint32_t>(errCode));
+        WLOGFD("CreateWindowWithSession, error: %{public}u", static_cast<uint32_t>(errCode));
         return nullptr;
     }
     return windowSessionImpl;
@@ -105,7 +105,7 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
 }
 
 sptr<Window> Window::Create(sptr<WindowOption>& option, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
-    const sptr<ISession>& iSession, WMError& errCode)
+    const sptr<IRemoteObject>& iSession, WMError& errCode)
 {
     // create from ability mgr service
     if (!iSession || !option) {
@@ -122,7 +122,7 @@ sptr<Window> Window::Create(sptr<WindowOption>& option, const std::shared_ptr<OH
         WLOGFE("window type is invalid %{public}d", type);
         return nullptr;
     }
-    return CreateWindowWithSession(option, context, errCode, iSession);
+    return CreateWindowWithSession(option, context, errCode, iface_cast<Rosen::ISession>(iSession));
 }
 
 sptr<Window> Window::Find(const std::string& windowName)

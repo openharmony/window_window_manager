@@ -75,7 +75,10 @@ WSError SceneSession::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
         return WSError::WS_ERROR_NULLPTR;
     }
     // connect specific session and sessionStage
-    WSError errCode = sceneSession->Connect(sessionStage, eventChannel, surfaceNode, persistentId, property);
+    WSError errCode = sceneSession->Connect(sessionStage, eventChannel, surfaceNode, systemConfig_, property);
+    if (property) {
+        persistentId = property->GetPersistentId();
+    }
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onCreateSpecificSession_) {
         sessionChangeCallback_->onCreateSpecificSession_(sceneSession);
     }

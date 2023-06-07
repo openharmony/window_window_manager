@@ -111,7 +111,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowManager)
 
 class WindowManager::Impl {
 public:
-    Impl(std::recursive_mutex& mutex) : mutex_(mutex) {}
+    explicit Impl(std::recursive_mutex& mutex) : mutex_(mutex) {}
     void NotifyFocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
         WindowType windowType, DisplayId displayId);
     void NotifyUnfocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,

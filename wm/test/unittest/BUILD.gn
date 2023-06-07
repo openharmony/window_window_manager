@@ -28,6 +28,7 @@ group("unittest") {
     ":wm_window_manager_test",
     ":wm_window_option_test",
     ":wm_window_proxy_test",
+    ":wm_window_scene_effect_test",
     ":wm_window_scene_test",
     ":wm_window_session_impl_test",
     ":wm_window_stub_test",
@@ -57,6 +58,14 @@ ohos_unittest("wm_window_impl_test") {
   deps = [ ":wm_unittest_common" ]
 
   external_deps = [ "common_event_service:cesfwk_innerkits" ]
+}
+
+ohos_unittest("wm_window_scene_effect_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_scene_effect_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
 }
 
 ohos_unittest("wm_window_session_impl_test") {
@@ -195,12 +204,12 @@ ohos_static_library("wm_unittest_common") {
   public_deps = [
     # need delete it for abilitycontext
     "${ability_runtime_inner_api_path}/ability_manager:ability_manager",
-    "${window_base_path}/dm:libdm_static",
+    "${window_base_path}/dm:libdm",
     "${window_base_path}/dmserver:libdms",
-    "${window_base_path}/utils:libwmutil_static",
+    "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/session:scene_session",
-    "${window_base_path}/wm:libwm_static",
+    "${window_base_path}/wm:libwm",
     "${window_base_path}/wmserver:libwms",
     "//commonlibrary/c_utils/base:utils",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent",

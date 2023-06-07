@@ -41,6 +41,7 @@ ohos_static_library("libwm_static") {
     "../wmserver/src/zidl/window_manager_proxy.cpp",
     "src/color_parser.cpp",
     "src/input_transfer_station.cpp",
+    "src/root_scene.cpp",
     "src/static_call.cpp",
     "src/vsync_station.cpp",
     "src/window.cpp",
@@ -173,7 +174,6 @@ ohos_shared_library("libwm") {
 
   deps = [
     "${window_base_path}/window_scene/common:window_scene_common",
-    "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session_manager:session_manager",
     "../dm:libdm",
@@ -197,8 +197,6 @@ ohos_shared_library("libwm") {
     "multimedia_image_framework:image_native",
     "samgr:samgr_proxy",
   ]
-
-  innerapi_tags = [ "platformsdk" ]  #define the type of the inner API
 
   defines = []
   if (efficiency_manager_enable) {
@@ -237,7 +235,6 @@ ohos_shared_library("libwm") {
     defines += [ "IMF_ENABLE" ]
   }
 
-  version_script = "libwm.map"
   part_name = "window_manager"
   subsystem_name = "window"
 }

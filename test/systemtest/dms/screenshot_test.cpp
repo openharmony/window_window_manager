@@ -53,6 +53,11 @@ Media::Size ScreenshotTest::defaultImage_ = {0, 0};
 
 void ScreenshotTest::SetUpTestCase()
 {
+    CommonTestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
+    const char** perms = new const char *[1];
+    perms[0] = "ohos.permission.CAPTURE_SCREEN";
+    CommonTestUtils::SetAceessTokenPermission("ScreenshotTest", perms, 1);
+
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     if (display == nullptr) {
         WLOGFE("GetDefaultDisplay: failed!\n");
@@ -64,8 +69,6 @@ void ScreenshotTest::SetUpTestCase()
     defaultId_ = display->GetId();
     defaultScreen_ = {0, 0, display->GetWidth(), display->GetHeight()};
     defaultImage_ = {display->GetWidth(), display->GetHeight()};
-
-    CommonTestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
 }
 
 void ScreenshotTest::TearDownTestCase()

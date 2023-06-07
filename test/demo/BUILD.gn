@@ -33,7 +33,7 @@ ohos_executable("demo_mirror_screen_listener") {
   include_dirs = [ "../common/utils/include" ]
 
   deps = [
-    "${window_base_path}/dm:libdm_static",
+    "${window_base_path}/dm:libdm",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
   ]
 
@@ -49,8 +49,8 @@ ohos_executable("demo_screenshot_listener") {
   include_dirs = [ "../common/utils/include" ]
 
   deps = [
-    "${window_base_path}/dm:libdm_static",
-    "${window_base_path}/utils:libwmutil_static",
+    "${window_base_path}/dm:libdm",
+    "${window_base_path}/utils:libwmutil",
   ]
 
   external_deps = [
@@ -94,7 +94,7 @@ ohos_executable("demo_system_sub_window") {
   ]
 
   deps = [
-    "${window_base_path}/wm:libwm_static",
+    "${window_base_path}/wm:libwm",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
   ]
 
@@ -113,7 +113,7 @@ ohos_executable("demo_freeze_display") {
     # pixel_map.h
     "//foundation/multimedia/image_framework/interfaces/innerkits/include",
   ]
-  deps = [ "${window_base_path}/dm:libdm_static" ]
+  deps = [ "${window_base_path}/dm:libdm" ]
   external_deps = [ "multimedia_image_framework:image_native" ]
   part_name = "window_manager"
   subsystem_name = "window"
@@ -129,7 +129,7 @@ ohos_executable("demo_water_mark_listener") {
 
   deps = [
     "${graphic_base_path}/graphic_2d/rosen/modules/render_service_base:librender_service_base",
-    "${window_base_path}/wm:libwm_static",
+    "${window_base_path}/wm:libwm",
   ]
 
   external_deps = [ "c_utils:utils" ]

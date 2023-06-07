@@ -49,6 +49,7 @@ public:
     WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId);
     void SetCreateSpecificSessionListener(const NotifyCreateSpecificSessionFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
+    WSError ProcessBackEvent();
 
 protected:
     SceneSessionManager();
@@ -61,12 +62,15 @@ private:
     void ConfigWindowEffect(const WindowSceneConfig::ConfigItem& effectConfig);
     bool ConfigAppWindowCornerRadius(const WindowSceneConfig::ConfigItem& item, float& out);
     bool ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig, WindowShadowConfig& outShadow);
+    void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig);
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& scnSession);
     std::map<uint64_t, sptr<SceneSession>> abilitySceneMap_;
     sptr<RootSceneSession> rootSceneSession_;
     sptr<RootScene> rootScene_;
     NotifyCreateSpecificSessionFunc createSpecificSessionFunc_;
     AppWindowSceneConfig appWindowSceneConfig_;
+    SystemSessionConfig systemConfig_;
+    uint64_t activeSessionId_;
 };
 } // namespace OHOS::Rosen
 

@@ -42,7 +42,7 @@ WSError SessionProxy::Foreground()
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    uint32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
@@ -61,7 +61,7 @@ WSError SessionProxy::Background()
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    uint32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
@@ -80,12 +80,12 @@ WSError SessionProxy::Disconnect()
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    uint32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
 WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint64_t& persistentId, sptr<WindowSessionProperty> property)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -123,8 +123,12 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    persistentId = reply.ReadUint64();
-    uint32_t ret = reply.ReadUint32();
+    sptr<SystemSessionConfig> config = reply.ReadParcelable<SystemSessionConfig>();
+    systemConfig = *config;
+    if (property) {
+        property->SetPersistentId(reply.ReadUint64());
+    }
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
@@ -157,7 +161,7 @@ WSError SessionProxy::PendingSessionActivation(const SessionInfo& info)
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    uint32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
@@ -180,7 +184,7 @@ WSError SessionProxy::UpdateActiveStatus(bool isActive)
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    uint32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
@@ -203,7 +207,7 @@ WSError SessionProxy::OnSessionEvent(SessionEvent event)
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    uint32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
@@ -236,7 +240,7 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    uint32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
@@ -329,6 +333,24 @@ WSError SessionProxy::RaiseToAppTop()
         return WSError::WS_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
+WSError SessionProxy::RequestSessionBack()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_BACKPRESSED),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadUint32();
     return static_cast<WSError>(ret);
 }
 } // namespace OHOS::Rosen
