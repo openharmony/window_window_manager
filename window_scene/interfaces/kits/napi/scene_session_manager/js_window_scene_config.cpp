@@ -41,7 +41,8 @@ NativeValue* JsWindowSceneConfig::CreateWindowSceneConfig(NativeEngine& engine, 
     return objValue;
 }
 
-NativeValue* JsWindowSceneConfig::CreateShadowValue(NativeEngine& engine, const AppWindowSceneConfig& config, bool focused)
+NativeValue* JsWindowSceneConfig::CreateShadowValue(NativeEngine& engine, const AppWindowSceneConfig& config,
+    bool focused)
 {
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);

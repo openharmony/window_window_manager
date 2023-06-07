@@ -55,7 +55,8 @@ void WindowSceneEffectTest::TearDown()
 
 class WindowEffectTestUtils {
 public:
-    static sptr<WindowSessionImpl> CreateTestWindow(const std::string& name) {
+    static sptr<WindowSessionImpl> CreateTestWindow(const std::string& name)
+    {
         sptr<WindowOption> option = new WindowOption();
         option->SetWindowName(name);
         sptr<WindowSessionImpl> window = new(std::nothrow) WindowSessionImpl(option);
