@@ -60,6 +60,7 @@ ohos_shared_library("scene_session") {
     "ipc:ipc_single",
     "multimedia_image_framework:image_native",
   ]
+
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
@@ -77,6 +78,7 @@ ohos_shared_library("screen_session") {
     "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "${window_base_path}/utils:libwmutil",
   ]
+
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
