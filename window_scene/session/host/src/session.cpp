@@ -273,6 +273,7 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     SessionInfo info;
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
+    info.moduleName_ = abilitySessionInfo->want.GetModuleName();
     info.callerToken_ = abilitySessionInfo->callerToken;
     if (pendingSessionActivationFunc_) {
         pendingSessionActivationFunc_(info);

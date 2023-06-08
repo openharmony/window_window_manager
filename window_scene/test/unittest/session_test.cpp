@@ -260,7 +260,7 @@ HWTEST_F(WindowSessionTest, PendingSessionActivation01, Function | SmallTest | L
         resultValue = 1;
     };
 
-    AAFwk::SessionInfo info;
+    sptr<AAFwk::SessionInfo> info;
     session_->pendingSessionActivationFunc_ = nullptr;
     session_->PendingSessionActivation(info);
     ASSERT_EQ(resultValue, 0);
