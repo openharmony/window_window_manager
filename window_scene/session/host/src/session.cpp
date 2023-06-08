@@ -23,6 +23,7 @@
 
 namespace OHOS::Rosen {
 namespace {
+constexpr bool IS_EXTENSION = true;
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Session" };
 } // namespace
 
