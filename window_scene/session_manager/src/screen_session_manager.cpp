@@ -110,7 +110,7 @@ void ScreenSessionManager::Init()
 {
     msgScheduler_ = std::make_shared<MessageScheduler>(SCREEN_SESSION_MANAGER_THREAD);
     RegisterScreenChangeListener();
-	LoadScreenSceneXml();
+    LoadScreenSceneXml();
 }
 
 void ScreenSessionManager::LoadScreenSceneXml()
