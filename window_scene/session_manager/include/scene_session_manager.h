@@ -26,7 +26,16 @@
 
 namespace OHOS::AAFwk {
 class SessionInfo;
-}
+} // namespace OHOS::AAFwk
+
+namespace OHOS::AppExecFwk {
+class IBundleMgr;
+struct AbilityInfo;
+} // namespace OHOS::AppExecFwk
+
+namespace OHOS::Global::Resource {
+class ResourceManager;
+} // namespace OHOS::Global::Resource
 
 namespace OHOS::Rosen {
 class RootScene;
@@ -51,6 +60,8 @@ public:
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     WSError ProcessBackEvent();
 
+    void GetStartPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor);
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
@@ -64,6 +75,12 @@ private:
     bool ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig, WindowShadowConfig& outShadow);
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig);
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& scnSession);
+
+    sptr<AppExecFwk::IBundleMgr> GetBundleManager();
+    std::shared_ptr<Global::Resource::ResourceManager> CreateResourceManager(
+        const AppExecFwk::AbilityInfo& abilityInfo);
+    void GetStartPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, std::string& path, uint32_t& bgColor);
+
     std::map<uint64_t, sptr<SceneSession>> abilitySceneMap_;
     sptr<RootSceneSession> rootSceneSession_;
     sptr<RootScene> rootScene_;
@@ -71,6 +88,7 @@ private:
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
     uint64_t activeSessionId_;
+    sptr<AppExecFwk::IBundleMgr> bundleMgr_;
 };
 } // namespace OHOS::Rosen
 

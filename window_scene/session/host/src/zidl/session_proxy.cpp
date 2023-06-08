@@ -141,18 +141,19 @@ WSError SessionProxy::PendingSessionActivation(const SessionInfo& info)
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!(data.WriteString(info.bundleName_) && data.WriteString(info.abilityName_))) {
-        WLOGFE("Write ability info failed");
+    if (!(data.WriteString(info.bundleName_) && data.WriteString(info.moduleName_) &&
+        data.WriteString(info.abilityName_))) {
+        WLOGFE("Write session info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (info.callerToken_) {
         if (!data.WriteBool(true) || !data.WriteRemoteObject(info.callerToken_)) {
-            WLOGFE("Write ability info failed");
+            WLOGFE("Write session info failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
     } else {
         if (!data.WriteBool(false)) {
-            WLOGFE("Write ability info failed");
+            WLOGFE("Write session info failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
