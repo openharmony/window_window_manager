@@ -90,6 +90,7 @@ enum class SessionState : uint32_t {
 
 struct SessionInfo {
     std::string bundleName_ = "";
+    std::string moduleName_ = "";
     std::string abilityName_ = "";
     sptr<IRemoteObject> callerToken_ = nullptr;
     bool isSystem_ = false;
@@ -140,7 +141,6 @@ struct WSRect {
 };
 
 struct WindowShadowConfig {
-    float elevation_ = 0.0f;
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
     float alpha_ = 0.0f;
@@ -149,8 +149,6 @@ struct WindowShadowConfig {
 };
 
 struct AppWindowSceneConfig {
-    float fullScreenCornerRadius_ = 0.0f;
-    float splitCornerRadius_ = 0.0f;
     float floatCornerRadius_ = 0.0f;
 
     WindowShadowConfig focusedShadow_;
