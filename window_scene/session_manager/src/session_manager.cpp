@@ -100,6 +100,14 @@ sptr<IRemoteObject> SessionManager::GetRemoteObject()
     return remoteObject_;
 }
 
+sptr<ScreenLockManagerInterface> SessionManager::GetScreenLockManagerProxy()
+{
+    Init();
+    InitSessionManagerServiceProxy();
+    InitScreenLockManagerProxy();
+    return screenLockManagerProxy_;
+}
+
 sptr<IScreenSessionManager> SessionManager::GetScreenSessionManagerProxy()
 {
     Init();
@@ -217,5 +225,26 @@ WMError SessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WS
         return WMError::WM_DO_NOTHING;
     }
     return static_cast<WMError>(sceneSessionManagerProxy_->UpdateProperty(property, action));
+}
+
+void SessionManager::InitScreenLockManagerProxy()
+{
+    if (screenLockManagerProxy_) {
+        return;
+    }
+    if (!sessionManagerServiceProxy_) {
+        WLOGFE("Get screen session manager proxy failed, sessionManagerServiceProxy_ is nullptr");
+        return;
+    }
+    sptr<IRemoteObject> remoteObject = sessionManagerServiceProxy_->GetScreenLockManagerService();
+    if (!remoteObject) {
+        WLOGFE("Get screenlock manager proxy failed, screenlock manager service is null");
+        return;
+    }
+
+    screenLockManagerProxy_ = iface_cast<ScreenLockManagerInterface>(remoteObject);
+    if (!screenLockManagerProxy_) {
+        WLOGFW("Get screenlock manager proxy failed, nullptr");
+    }
 }
 } // namespace OHOS::Rosen
