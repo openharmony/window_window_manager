@@ -94,11 +94,9 @@ public:
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(DisplayId displayId);
 
     sptr<ScreenSession> InitVirtualScreen(ScreenId smsScreenId, ScreenId rsId, VirtualScreenOption option);
-    void ProcessScreenDisconnected(ScreenId rsScreenId);
     ScreenId GetDefaultAbstractScreenId();
     sptr<ScreenSession> InitAndGetScreen(ScreenId rsScreenId);
     bool InitAbstractScreenModesInfo(sptr<ScreenSession>& absScreen);
-    void ProcessScreenConnected(ScreenId rsScreenId);
     std::vector<ScreenId> GetAllValidScreenIds(const std::vector<ScreenId>& screenIds) const;
 
     sptr<ScreenSessionGroup> AddToGroupLocked(sptr<ScreenSession> newScreen);
@@ -136,10 +134,6 @@ protected:
     virtual ~ScreenSessionManager() = default;
 
 private:
-    static inline bool IsVertical(Rotation rotation)
-    {
-        return (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180);
-    }
     void Init();
     void RegisterScreenChangeListener();
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent);
