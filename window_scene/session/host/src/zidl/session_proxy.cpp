@@ -158,6 +158,10 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
+    if (!data.WriteInt32(abilitySessionInfo->requestCode)) {
+        WLOGFE("Write requestCode info failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_ACTIVE_PENDING_SESSION),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -190,6 +194,10 @@ WSError SessionProxy::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
             WLOGFE("Write ability info failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
+    }
+    if (!data.WriteInt32(abilitySessionInfo->resultCode)) {
+        WLOGFE("Write resultCode info failed");
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_TERMINATE),
         data, reply, option) != ERR_NONE) {
