@@ -121,6 +121,7 @@ protected:
     NotifyBackPressedFunc backPressedFunc_;
     sptr<WindowSessionProperty> property_ = nullptr;
     SystemSessionConfig systemConfig_;
+    const bool isExtension = true;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
 
 private:

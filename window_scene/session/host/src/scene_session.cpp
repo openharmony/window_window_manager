@@ -24,7 +24,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneS
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : Session(info)
 {
-    GeneratePersistentId(!IS_EXTENSION, info);
+    GeneratePersistentId(!isExtension, info);
     specificCallback_ = specificCallback;
 }
 
