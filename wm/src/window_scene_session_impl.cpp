@@ -42,6 +42,11 @@ WindowSceneSessionImpl::~WindowSceneSessionImpl()
 
 bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
 {
+    // accept all system type temporarily
+    if (WindowHelper::IsSystemWindow(type)) {
+        return true;
+    }
+    
     if (!(type == WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW || type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
         type == WindowType::WINDOW_TYPE_FLOAT_CAMERA || type == WindowType::WINDOW_TYPE_DIALOG ||
         type == WindowType::WINDOW_TYPE_FLOAT || type == WindowType::WINDOW_TYPE_SCREENSHOT ||
@@ -495,6 +500,27 @@ WMError WindowSceneSessionImpl::DisableAppWindowDecor()
     windowSystemConfig_.isSystemDecorEnable_ = false;
     UpdateDecorEnable(true);
     return WMError::WM_OK;
+}
+
+WSError WindowSceneSessionImpl::HandleBackEvent()
+{
+    bool isConsumed = false;
+    if (uiContent_) {
+        WLOGFD("Transfer back event to uiContent");
+        isConsumed = uiContent_->ProcessBackPressed();
+    } else {
+        WLOGFE("There is no back event consumer");
+    }
+    if (isConsumed) {
+        WLOGD("Back key event is consumed");
+        return WSError::WS_OK;
+    }
+    // notify back event to host session
+    if (hostSession_) {
+        WLOGFD("Transfer back event to host session");
+        hostSession_->RequestSessionBack();
+    }
+    return WSError::WS_OK;
 }
 
 WindowMode WindowSceneSessionImpl::GetMode() const
