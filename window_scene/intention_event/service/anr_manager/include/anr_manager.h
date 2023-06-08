@@ -20,7 +20,6 @@
 
 #include "nocopyable.h"
 #include "singleton.h"
-#include "i_anr_notifier.h"
 
 namespace OHOS {
 namespace Rosen {

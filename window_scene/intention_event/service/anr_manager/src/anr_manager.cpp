@@ -33,19 +33,9 @@ constexpr int32_t MAX_ANR_TIMER_COUNT = 50;
 
 void ANRManager::Init()
 {
-    // 在服务启动的时候执行，主要是初始化用于通信的session
-    /**
-     * SetAnrObserver 传下来的pid是用于向上通知ANR消息的，但是MarkProcessed传下来的pid则是消费者对应的pid，不是同一个东西
-     * 通过MarkProcessed 传递下来的pid能够将该pid对应进程的对应类型的事件删除
-     * AddTimer 在sceneBoard从多模拿到事件之后就执行
-     * MarkProcessed应该绑定到inputEvent->MarkProcessed 中，通过SetProcessedCallback
-     * IsANRTriggered 在事件上报过程中调用，如果该类型事件已经发生ANR，就不上报该类型事件
-    */
    // TODO
    // 该函数需要在SceneBoard启动的时候执行
-   // 这里需要注册ANRManager::OnSessionLost 到每一个session， 使得有session死亡之后执行此处的OnSessionLost
-   // 
-
+   // 这里需要注册ANRManager::OnSessionLost 到每一个 session， 使得有session死亡之后执行此处的OnSessionLost
 }
 
 void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
@@ -88,7 +78,7 @@ int32_t ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
                 eventId, timerId, anrTimerCount_);
         }
     });
-    return RET_OK;
+    return 0;
 }
 
 bool ANRManager::IsANRTriggered(int64_t time, int32_t persistentId)

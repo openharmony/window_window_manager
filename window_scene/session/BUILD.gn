@@ -18,6 +18,7 @@ config("session_public_config") {
   include_dirs = [
     "${window_base_path}/window_scene",
     "${window_base_path}/window_scene/intention_event/service/anr_manager/include",
+    "${window_base_path}/window_scene/intention_event/service/utils/include",
     "${window_base_path}/interfaces/innerkits/dm",
 
     # for window_manager_hilog

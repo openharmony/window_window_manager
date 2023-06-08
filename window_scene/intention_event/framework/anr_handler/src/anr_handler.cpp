@@ -17,10 +17,10 @@
 
 #include <cinttypes>
 #include <functional>
-#include <mutex>
 #include <string>
 
 #include "window_manager_hilog.h"
+#include "util.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -30,7 +30,7 @@ constexpr int64_t MAX_MARK_PROCESS_DELAY_TIME = 3500000;
 constexpr int64_t MIN_MARK_PROCESS_DELAY_TIME = 50000;
 constexpr int32_t INVALID_OR_PROCESSED_ID = -1;
 constexpr int32_t TIME_TRANSITION = 1000;
-constexpr std::string ANR_HANDLER_RUNNER { "ANR_HANDLER" };
+const std::string ANR_HANDLER_RUNNER { "ANR_HANDLER" };
 } // namespace
 
 ANRHandler::ANRHandler() {
@@ -75,7 +75,7 @@ void ANRHandler::SetLastProcessedEventId(int32_t eventId, int64_t actionTime)
 
     if (!event_.sendStatus) {
         if (timeoutTime < MIN_MARK_PROCESS_DELAY_TIME) {
-            SendEvent(0); // 向服务端发送的事件被正常消费的回执
+            SendEvent(0);
         } else {
             int64_t delayTime;
             if (timeoutTime >= MAX_MARK_PROCESS_DELAY_TIME) {

@@ -16,11 +16,14 @@
 #ifndef ANR_HANDLER_H
 #define ANR_HANDLER_H
 
+#include <memory>
+#include <mutex>
+
+#include "event_handler.h"
+#include "nocopyable.h"
+#include "singleton.h"
 namespace OHOS {
 namespace Rosen {
-namespace {
-constexpr ANR_EVENT_TYPE_NUM { 2 };
-}
 class ANRHandler {
     DECLARE_DELAYED_SINGLETON(ANRHandler);
 

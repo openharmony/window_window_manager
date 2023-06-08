@@ -19,6 +19,7 @@
 #include "surface_capture_future.h"
 #include <transaction/rs_interfaces.h>
 #include <ui/rs_surface_node.h>
+#include "util.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
