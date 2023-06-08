@@ -72,7 +72,7 @@ int SceneSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
             break;
         }
         case SceneSessionManagerMessage::TRANS_ID_UPDATE_PROPERTY: {
-            auto action = static_cast<PropertyChangeAction>(data.ReadUint32());
+            auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
             sptr<WindowSessionProperty> property = nullptr;
             if (data.ReadBool()) {
                 property = data.ReadStrongParcelable<WindowSessionProperty>();

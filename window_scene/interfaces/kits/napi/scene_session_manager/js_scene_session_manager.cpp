@@ -317,8 +317,8 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
         return engine.CreateUndefined();
     }
 
-    WLOGFI("[NAPI]SessionInfo [%{public}s, %{public}s], errCode = %{public}d",
-        sessionInfo.bundleName_.c_str(), sessionInfo.abilityName_.c_str(), errCode);
+    WLOGFI("[NAPI]SessionInfo [%{public}s, %{public}s, %{public}s], errCode = %{public}d",
+        sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str(), errCode);
     sptr<SceneSession> sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(sessionInfo);
     if (sceneSession == nullptr) {
         engine.Throw(
@@ -380,8 +380,9 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionActivation(NativeEngine
             task.Reject(
                 engine, CreateJsError(engine, static_cast<int32_t>(ret), "Request scene session activation failed"));
         }
-        WLOGFI("[NAPI]request scene session activation end: [%{public}s, %{public}s]",
-            sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetSessionInfo().abilityName_.c_str());
+        WLOGFI("[NAPI]request scene session activation end: [%{public}s, %{public}s, %{public}s]",
+            sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetSessionInfo().moduleName_.c_str(),
+            sceneSession->GetSessionInfo().abilityName_.c_str());
     };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -437,8 +438,9 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackground(NativeEngine
             task.Reject(
                 engine, CreateJsError(engine, static_cast<int32_t>(ret), "Request scene session background failed"));
         }
-        WLOGFI("[NAPI]request scene session background end: [%{public}s, %{public}s]",
-            sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetSessionInfo().abilityName_.c_str());
+        WLOGFI("[NAPI]request scene session background end: [%{public}s, %{public}s, %{public}s]",
+            sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetSessionInfo().moduleName_.c_str(),
+            sceneSession->GetSessionInfo().abilityName_.c_str());
     };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -494,8 +496,9 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
             task.Reject(
                 engine, CreateJsError(engine, static_cast<int32_t>(ret), "Request scene session destruction failed"));
         }
-        WLOGFI("[NAPI]request scene session destruction end: [%{public}s, %{public}s]",
-            sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetSessionInfo().abilityName_.c_str());
+        WLOGFI("[NAPI]request scene session destruction end: [%{public}s, %{public}s, %{public}s]",
+            sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetSessionInfo().moduleName_.c_str(),
+            sceneSession->GetSessionInfo().abilityName_.c_str());
     };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :

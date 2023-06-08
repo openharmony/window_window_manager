@@ -23,7 +23,7 @@
 #include "session/container/include/zidl/session_stage_interface.h"
 #include "session/container/include/zidl/window_event_channel_interface.h"
 #include "session/host/include/session.h"
-#include "wm_common_inner.h"
+#include "interfaces/include/ws_common_inner.h"
 
 namespace OHOS::Rosen {
 class RSSurfaceNode;
@@ -40,7 +40,7 @@ public:
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session) = 0;
     virtual WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) = 0;
-    virtual WSError UpdateProperty(sptr<WindowSessionProperty>& property, PropertyChangeAction action) = 0;
+    virtual WSError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

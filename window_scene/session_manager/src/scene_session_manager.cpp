@@ -16,16 +16,22 @@
 #include "session_manager/include/scene_session_manager.h"
 
 #include <sstream>
+
+#include <ability_info.h>
 #include <ability_manager_client.h>
+#include <bundle_mgr_interface.h>
+#include <iservice_registry.h>
 #include <parameters.h>
+#include <resource_manager.h>
+#include <session_info.h>
 #include <start_options.h>
+#include <system_ability_definition.h>
 #include <want.h>
 
 #include "color_parser.h"
 #include "common/include/message_scheduler.h"
 #include "root_scene.h"
 #include "session/host/include/scene_session.h"
-#include "session_info.h"
 #include "window_manager_hilog.h"
 #include "common/include/permission.h"
 #include "wm_math.h"
@@ -47,6 +53,7 @@ void SceneSessionManager::Init()
 {
     WLOGFI("scene session manager init");
     msgScheduler_ = std::make_shared<MessageScheduler>(SCENE_SESSION_MANAGER_THREAD);
+    bundleMgr_ = GetBundleManager();
     LoadWindowSceneXml();
 }
 
@@ -281,8 +288,8 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
     specificCallback->onDestroy_ = std::bind(&SceneSessionManager::DestroyAndDisconnectSpecificSession,
         this, std::placeholders::_1);
     auto task = [this, sessionInfo, specificCallback]() {
-        WLOGFI("sessionInfo: bundleName: %{public}s, abilityName: %{public}s", sessionInfo.bundleName_.c_str(),
-            sessionInfo.abilityName_.c_str());
+        WLOGFI("sessionInfo: bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
+            sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());
         sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, specificCallback);
         if (sceneSession == nullptr) {
             WLOGFE("sceneSession is nullptr!");
@@ -330,13 +337,12 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         }
         AAFwk::Want want;
         auto sessionInfo = scnSession->GetSessionInfo();
-        want.SetElementName(sessionInfo.bundleName_, sessionInfo.abilityName_);
+        want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
         AAFwk::StartOptions startOptions;
         auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
         if (!scnSessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        // to add StartAbility
         AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(want, startOptions, scnSessionInfo);
         activeSessionId_ = persistentId;
         return WSError::WS_OK;
@@ -367,7 +373,6 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         if (!scnSessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        // to add MinimizeAbility
         AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo);
         return WSError::WS_OK;
     };
@@ -398,7 +403,6 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         if (!scnSessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        // to add TerminateAbility
         AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
         return WSError::WS_OK;
     };
@@ -489,7 +493,93 @@ WSError SceneSessionManager::ProcessBackEvent()
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, PropertyChangeAction action)
+sptr<AppExecFwk::IBundleMgr> SceneSessionManager::GetBundleManager()
+{
+    auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityMgr == nullptr) {
+        WLOGFE("Failed to get SystemAbilityManager.");
+        return nullptr;
+    }
+
+    auto bmsObj = systemAbilityMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (bmsObj == nullptr) {
+        WLOGFE("Failed to get BundleManagerService.");
+        return nullptr;
+    }
+
+    return iface_cast<AppExecFwk::IBundleMgr>(bmsObj);
+}
+
+std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::CreateResourceManager(
+    const AppExecFwk::AbilityInfo& abilityInfo)
+{
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
+    resourceMgr->UpdateResConfig(*resConfig);
+
+    std::string loadPath;
+    if (!abilityInfo.hapPath.empty()) { // zipped hap
+        loadPath = abilityInfo.hapPath;
+    } else {
+        loadPath = abilityInfo.resourcePath;
+    }
+
+    if (!resourceMgr->AddResource(loadPath.c_str())) {
+        WLOGFE("Add resource %{private}s failed.", loadPath.c_str());
+        return nullptr;
+    }
+    return resourceMgr;
+}
+
+void SceneSessionManager::GetStartPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo,
+    std::string& path, uint32_t& bgColor)
+{
+    auto resourceMgr = CreateResourceManager(abilityInfo);
+    if (resourceMgr == nullptr) {
+        WLOGFE("resource manager is nullptr.");
+        return;
+    }
+
+    if (resourceMgr->GetColorById(abilityInfo.startWindowBackgroundId, bgColor) != Global::Resource::RState::SUCCESS) {
+        WLOGFW("Failed to get background color id %{private}d.", abilityInfo.startWindowBackgroundId);
+    }
+
+    if (resourceMgr->GetMediaById(abilityInfo.startWindowIconId, path) != Global::Resource::RState::SUCCESS) {
+        WLOGFE("Failed to get icon id %{private}d.", abilityInfo.startWindowIconId);
+        return;
+    }
+
+    if (!abilityInfo.hapPath.empty()) { // zipped hap
+        auto pos = path.find_last_of('.');
+        if (pos == std::string::npos) {
+            WLOGFE("Format error, path %{private}s.", path.c_str());
+            return;
+        }
+        path = "resource:///" + std::to_string(abilityInfo.startWindowIconId) + path.substr(pos);
+    }
+}
+
+void SceneSessionManager::GetStartPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor)
+{
+    if (!bundleMgr_) {
+        WLOGFE("bundle manager is nullptr.");
+        return;
+    }
+
+    AAFwk::Want want;
+    want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
+    AppExecFwk::AbilityInfo abilityInfo;
+    bool ret = bundleMgr_->QueryAbilityInfo(
+        want, AppExecFwk::GET_ABILITY_INFO_DEFAULT, AppExecFwk::Constants::ANY_USERID, abilityInfo);
+    if (!ret) {
+        WLOGFE("Get ability info from BMS failed!");
+        return;
+    }
+
+    GetStartPageFromResource(abilityInfo, path, bgColor);
+}
+
+WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
 {
     if (property == nullptr) {
         WLOGFE("property is invalid");
@@ -504,23 +594,23 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
     WLOGI("Id: %{public}" PRIu64", action: %{public}u", sceneSession->GetPersistentId(), static_cast<uint32_t>(action));
     WSError ret = WSError::WS_OK;
     switch (action) {
-        case PropertyChangeAction::ACTION_UPDATE_FLAGS: {
+        case WSPropertyChangeAction::ACTION_UPDATE_FLAGS: {
             // @todo
             break;
         }
-        case PropertyChangeAction::ACTION_UPDATE_FOCUSABLE: {
+        case WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE: {
             sceneSession->SetFocusable(property->GetFocusable());
             break;
         }
-        case PropertyChangeAction::ACTION_UPDATE_TOUCHABLE: {
+        case WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE: {
             // @todo
             break;
         }
-        case PropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS: {
+        case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS: {
             // @todo
             break;
         }
-        case PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
+        case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
             // @todo
             break;
         }
