@@ -76,4 +76,22 @@ WSError WindowEventChannelProxy::TransferPointerEvent(const std::shared_ptr<MMI:
     int32_t ret = reply.ReadUint32();
     return static_cast<WSError>(ret);
 }
+
+int32_t WindowEventChannelProxy::GetApplicationPid()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventChannelMessage::TRANS_ID_GET_APPLICATION_PID),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t applicationPid = reply.ReadInt32();
+    return applicationPid;
+}
 }

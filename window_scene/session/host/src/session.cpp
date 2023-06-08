@@ -15,6 +15,7 @@
 
 #include "session/host/include/session.h"
 
+#include "anr_manager.h"
 #include "surface_capture_future.h"
 #include <transaction/rs_interfaces.h>
 #include <ui/rs_surface_node.h>
@@ -292,7 +293,22 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    return windowEventChannel_->TransferPointerEvent(pointerEvent);
+    
+    auto currentTime = GetSysClockTime();
+    if (ANRMgr->IsANRTriggered(currentTime, persistentId_)) {
+        WLOGFD("The pointer event does not report normally, application not response");
+        return WSError::WS_DO_NOTHING;
+    }
+    if (WSError ret = windowEventChannel_->TransferPointerEvent(pointerEvent); ret != WSError::WS_OK) {
+        WLOGFE("TransferPointer failed");
+        return ret;
+    }
+    // 这里执行添加定时器的逻辑， 需要persistentId_,然后把一些状态信息存储到eventStage
+    ANRMgr->AddTimer(pointerEvent->GetId(), currentTime, persistentId_);
+    if (ANRMgr->GetPidByPersistentId(persistentId_) == -1) {
+        ANRMgr->SetApplicationPid(persistentId_, windowEventChannel_->GetApplicationPid());
+    }
+    return WSError::WS_OK;
 }
 
 WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)

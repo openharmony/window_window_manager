@@ -15,6 +15,8 @@
 
 #include "session/container/include/window_event_channel.h"
 
+#include "unistd.h"
+
 #include <axis_event.h>
 #include <key_event.h>
 #include <pointer_event.h>
@@ -50,5 +52,11 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
         std::placeholders::_1, std::placeholders::_2));
     sessionStage_->NotifyPointerEvent(pointerEvent); // sessionStage_ 就是 windowSessionImpl,windoeSessionImpl 里有 hostSession_
     return WSError::WS_OK;
+}
+
+int32_t WindowEventChannel::GetApplicationPid()
+{
+    WLOGFD("WindowEventChannel GetApplicationPid");
+    return getpid();
 }
 } // namespace OHOS::Rosen

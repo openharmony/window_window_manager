@@ -69,7 +69,7 @@ void ANRHandler::SetLastProcessedEventId(int32_t eventId, int64_t actionTime)
     UpdateLastProcessedEventId(eventId);
 
     int64_t currentTime = GetSysClockTime();
-    int64_t timeoutTime = INPUT_UI_TIMEOUT_TIME - (currentTime - actionTime);
+    int64_t timeoutTime = ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME - (currentTime - actionTime);
     WLOGFD("Processed id:%{public}d, actionTime:%{public}" PRId64 ", "
         "currentTime:%{public}" PRId64 ", timeoutTime:%{public}" PRId64, eventId, actionTime, currentTime, timeoutTime);
 

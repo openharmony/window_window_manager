@@ -37,6 +37,7 @@ private:
 
     int HandleTransferKeyEvent(MessageParcel& data, MessageParcel& reply);
     int HandleTransferPointerEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleGetApplicationPid(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_WINDOW_EVENT_CHANNEL_STUB_H

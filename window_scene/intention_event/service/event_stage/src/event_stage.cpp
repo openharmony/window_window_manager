@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "util.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -80,7 +81,7 @@ std::list<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t id)
         return timerIds;
     }
     int64_t endTime = 0;
-    if (!AddInt64(events.begin()->eventTime, INPUT_UI_TIMEOUT_TIME, endTime)) {
+    if (!AddInt64(events.begin()->eventTime, ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME, endTime)) {
         WLOGFE("The addition of endTime overflows");
         return timerIds;
     }

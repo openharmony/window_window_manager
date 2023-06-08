@@ -34,10 +34,12 @@ public:
     enum class WindowEventChannelMessage : uint32_t {
         TRANS_ID_TRANSFER_KEY_EVENT,
         TRANS_ID_TRANSFER_POINTER_EVENT,
+        TRANS_ID_GET_APPLICATION_PID,
     };
 
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
     virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
+    virtual int32_t GetApplicationPid() = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_WINDOW_EVENT_CHANNEL_INTERFACE_H
