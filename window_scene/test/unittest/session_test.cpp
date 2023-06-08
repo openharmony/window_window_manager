@@ -74,7 +74,8 @@ void WindowSessionTest::SetUp()
 {
     SessionInfo info;
     info.abilityName_ = "testSession1";
-    info.bundleName_ = "testSession2";
+    info.moduleName_ = "testSession2";
+    info.bundleName_ = "testSession3";
     session_ = new (std::nothrow) Session(info);
     session_->surfaceNode_ = CreateRSSurfaceNode();
     EXPECT_NE(nullptr, session_);

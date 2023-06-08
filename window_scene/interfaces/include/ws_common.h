@@ -90,6 +90,7 @@ enum class SessionState : uint32_t {
 
 struct SessionInfo {
     std::string bundleName_ = "";
+    std::string moduleName_ = "";
     std::string abilityName_ = "";
     sptr<IRemoteObject> callerToken_ = nullptr;
     bool isSystem_ = false;
