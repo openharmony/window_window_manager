@@ -268,7 +268,6 @@ WSError Session::SetActive(bool active)
     return WSError::WS_OK;
 }
 
-// override call from ams
 WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
     SessionInfo info;
@@ -291,14 +290,13 @@ void Session::SetBackPressedListenser(const NotifyBackPressedFunc& func)
     backPressedFunc_ = func;
 }
 
-// override call from ams
 WSError Session::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
     SessionInfo info;
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.callerToken_ = abilitySessionInfo->callerToken;
-    if (pendingSessionActivationFunc_) {
+    if (terminateSessionFunc_) {
         terminateSessionFunc_(info);
     }
     return WSError::WS_OK;

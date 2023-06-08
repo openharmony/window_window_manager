@@ -35,7 +35,6 @@ public:
 
     WSError UpdateActiveStatus(bool isActive) override;
 
-    // call from ams
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
 
