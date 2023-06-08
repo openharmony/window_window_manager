@@ -98,6 +98,7 @@ struct SessionInfo {
 
     sptr<AAFwk::Want> want;
     int32_t resultCode;
+    int32_t requestCode;
 };
 
 enum class SizeChangeReason : uint32_t {
