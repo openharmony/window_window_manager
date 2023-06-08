@@ -22,6 +22,7 @@
 #include "event_handler.h"
 #include "nocopyable.h"
 #include "singleton.h"
+#include "session_stage_interface.h"
 namespace OHOS {
 namespace Rosen {
 class ANRHandler {
@@ -29,6 +30,7 @@ class ANRHandler {
 
 public:
     DISALLOW_COPY_AND_MOVE(ANRHandler);
+
     void SetSessionStage(const wptr<ISessionStage> &sessionStage);
     void SetLastProcessedEventId(int32_t eventId, int64_t actionTime);
     void MarkProcessed();

@@ -37,6 +37,6 @@ private:
     std::map<int32_t, std::vector<EventTime>> events_;
     std::map<int32_t, bool> isAnrProcess_; // 该成员标识当前 persistentId 对应的session的事件是否有在队列中的？
 };
-#define EventStageSingleton ::OHOS::DelayedSingleton<EventStage>::GetInstance()
+#define EVStage ::OHOS::DelayedSingleton<EventStage>::GetInstance()
 } // namespace Rosen
 } // namespace OHOS

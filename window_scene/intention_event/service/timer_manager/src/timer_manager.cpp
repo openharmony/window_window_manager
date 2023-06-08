@@ -14,6 +14,9 @@
  */
 
 #include "timer_manager.h"
+
+#include <algorithm>
+
 #include "window_manager_hilog.h"
 
 namespace OHOS {

@@ -97,4 +97,9 @@ WSError SessionStageProxy::HandleBackEvent()
     int32_t ret = reply.ReadUint32();
     return static_cast<WSError>(ret);
 }
+
+WSError SessionStageProxy::MarkProcessed(int32_t eventId)
+{
+    return WSError::WS_DO_NOTHING;
+}
 } // namespace OHOS::Rosen

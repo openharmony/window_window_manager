@@ -15,14 +15,20 @@ import("//build/ohos.gni")
 
 config("intention_event_public_config") {
   include_dirs = [
+    "../framework/anr_handler/include",
+    "anr_manager/include",
+    "event_stage/include",
     "timer_manager/include",
     "../utils/include",
-    "//foundation/window/window_manager/utils/include"
+    "//foundation/window/window_manager/utils/include",
+    "//foundation/window/window_manager/window_scene/session/container/include/zidl",
+    "//foundation/window/window_manager/window_scene/"
   ]
 }
 
 ohos_shared_library("intention_event_anr_manager") {
   sources = [
+    "../framework/anr_handler/src/anr_handler.cpp",
     "anr_manager/src/anr_manager.cpp",
     "event_stage/src/event_stage.cpp",
     "timer_manager/src/timer_manager.cpp",
@@ -32,10 +38,11 @@ ohos_shared_library("intention_event_anr_manager") {
   public_configs = [ ":intention_event_public_config" ]
 
   external_deps = [
-    "ability_runtime:ability_manager",
+    # "ability_runtime:ability_manager",
     "c_utils:utils",
     "hilog_native:libhilog",
     "eventhandler:libeventhandler",
+    "ipc:ipc_single",
   ]
 
   part_name = "window_manager"

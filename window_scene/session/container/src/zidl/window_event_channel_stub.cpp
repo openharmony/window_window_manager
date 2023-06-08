@@ -93,5 +93,6 @@ int WindowEventChannelStub::HandleGetApplicationPid(MessageParcel& data, Message
     WLOGFD("GetApplicationPid!");
     int32_t applicationPid = GetApplicationPid();
     reply.WriteInt32(applicationPid);
+    return ERR_NONE;
 }
 }
