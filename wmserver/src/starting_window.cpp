@@ -21,6 +21,7 @@
 #include <transaction/rs_transaction.h>
 
 #include "display_group_info.h"
+#include "permission.h"
 #include "remote_animation.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
@@ -88,8 +89,13 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInf
     property->SetWindowType(info->GetWindowType());
 
     ChangePropertyByApiVersion(info, orientation, property);
+    property->SetApiCompatibleVersion(info->GetApiCompatibleVersion());
     if (info->GetShowFlagWhenLocked()) {
-        property->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
+        if (property->GetApiCompatibleVersion() < 9 || Permission::IsSystemCalling()) { // 9: api version.
+            property->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
+        } else {
+            WLOGFW("Only API 9- or system calling support showing when locked.");
+        }
     }
     property->SetWindowId(winId);
     sptr<WindowNode> node = new(std::nothrow) WindowNode(property);
