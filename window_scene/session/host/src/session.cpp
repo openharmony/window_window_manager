@@ -305,7 +305,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         return ret;
     }
     // 这里执行添加定时器的逻辑， 需要persistentId_,然后把一些状态信息存储到eventStage
-    ANRMgr->AddTimer(pointerEvent->GetId(), currentTime, persistentId_);
+    // ANRMgr->AddTimer(pointerEvent->GetId(), currentTime, persistentId_);
     if (ANRMgr->GetPidByPersistentId(persistentId_) == -1) {
         ANRMgr->SetApplicationPid(persistentId_, windowEventChannel_->GetApplicationPid());
     }

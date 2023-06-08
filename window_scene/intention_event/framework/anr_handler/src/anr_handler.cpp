@@ -19,8 +19,9 @@
 #include <functional>
 #include <string>
 
-#include "window_manager_hilog.h"
+#include "proto.h"
 #include "util.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -114,7 +115,7 @@ void ANRHandler::MarkProcessed()
         SessionStage 中有 hostSession_
         hostSession 就是 SessionProxy
     */
-    if (int32_t ret = 0;  ret = sessionStage_->MarkProcessed(eventId)) {
+    if (WSError ret = sessionStage_->MarkProcessed(eventId); ret != WSError::WS_OK) {
         WLOGFE("Send to scene board failed, ret:%{public}d", ret);
     }
     SetLastProcessedEventStatus(false);

@@ -355,7 +355,7 @@ WSError SessionProxy::RequestSessionBack()
     return static_cast<WSError>(ret);
 }
 
-WSError MarkProcessed(int32_t eventId)
+WSError SessionProxy::MarkProcessed(int32_t eventId)
 {
     MessageParcel data;
     MessageParcel reply;

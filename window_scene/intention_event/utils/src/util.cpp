@@ -16,17 +16,21 @@
 #include "util.h"
 #include <chrono>
 
+#include <errno.h>
 #include <sys/time.h>
 #include <sys/types.h>
-
+#include <unistd.h>
+#include "window_manager_hilog.h"
 namespace OHOS {
 namespace Rosen {
-
+namespace {
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Util"};
+}
 int64_t GetSysClockTime()
 {
     struct timespec ts = { 0, 0 };
     if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
-        MMI_HILOGD("clock_gettime failed:%{public}d", errno);
+        WLOGFE("clock_gettime failed:%{public}d", errno);
         return 0;
     }
     return (ts.tv_sec * 1000 * 1000) + (ts.tv_nsec / 1000);

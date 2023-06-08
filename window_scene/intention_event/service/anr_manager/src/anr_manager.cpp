@@ -17,9 +17,10 @@
 #include <algorithm>
 #include <vector>
 
-#include "ability_manager_client.h"
+// #include "ability_manager_client.h"
 
 #include "event_stage.h"
+#include "proto.h"
 #include "timer_manager.h"
 #include "window_manager_hilog.h"
 
@@ -45,45 +46,44 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
         return;
     }
     int32_t timerId = TimerMgr->AddTimer(ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME, 1, [this, id, persistentId]() {
-        EventStageSingleton->SetAnrStatus(persistentId, true);
+        EVStage->SetAnrStatus(persistentId, true);
         WLOGFE("Application not responding. persistentId:%{public}d, eventId:%{public}d", persistentId, id);
-        int32_t pid = GetPidByPersistentId(persistentId);
-        if (int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->SendANRProcessID(pid); ret != ERR_OK) {
-            WLOGFE("SendANRProcessedId failed, ret:%{public}d", ret);
-            return;
-        }
-        std::vector<int32_t> timerIds = EventStageSingleton->GetTimerIds(persistentId);
-        std::for_each(timerIds.begin(), timerIds.end(), [](int32_t timerId){
-            if (timerId != -1) {
-                TimerMgr->RemoveTimer(timerId);
+        // int32_t pid = GetPidByPersistentId(persistentId);
+        // if (int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->SendANRProcessID(pid); ret != ERR_OK) {
+        //     WLOGFE("SendANRProcessedId failed, ret:%{public}d", ret);
+        //     return;
+        // }
+        std::vector<int32_t> timerIds = EVStage->GetTimerIds(persistentId);
+        for (int32_t item : timerIds) {
+            if (item != -1) {
+                TimerMgr->RemoveTimer(item);
                 anrTimerCount_--;
-                WLOGFD("Remove anr timer, persistentId:%{public}d, timerId:%{public}d, count:%{public}d",
-                    persistentId, timerId, anrTimerCount_);
+                WLOGFD("Clear anr timer, timer id:%{public}d, count:%{public}d", item, anrTimerCount_);
             }
-        });
+        }
     });
     anrTimerCount_++;
-    EventStageSingleton->SaveANREvent(persistentId, id, currentTime, timerId);
+    EVStage->SaveANREvent(persistentId, id, currentTime, timerId);
 }
 
 int32_t ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
 {
     WLOGFD("eventId:%{public}d, persistentId:%{public}d", eventId, persistentId);
-    std::list<int32_t> timerIds = EventStageSingleton->DelEvents(persistentId, eventId);
-    std::for_each(timerIds.begin(), timerIds.end(), [](int32_t timerId){
-        if (timerId != -1) {
-            TimerMgr->RemoveTimer(timerId);
+    std::list<int32_t> timerIds = EVStage->DelEvents(persistentId, eventId);
+    for (int32_t item : timerIds) {
+        if (item != -1) {
+            TimerMgr->RemoveTimer(item);
             anrTimerCount_--;
-            WLOGFD("Remove anr timer, eventId:%{public}d, timerId:%{public}d, count:%{public}d",
-                eventId, timerId, anrTimerCount_);
+            WLOGFD("Remove anr timer, eventId:%{public}d, timer id:%{public}d,"
+                "count:%{public}d", eventId, item, anrTimerCount_);
         }
-    });
+    }
     return 0;
 }
 
 bool ANRManager::IsANRTriggered(int64_t time, int32_t persistentId)
 {
-    if (EventStageSingleton->CheckAnrStatus(persistentId)) {
+    if (EVStage->CheckAnrStatus(persistentId)) {
         WLOGFD("Application not responding. persistentId:%{public}d", persistentId);
         return true;
     }
@@ -93,13 +93,13 @@ bool ANRManager::IsANRTriggered(int64_t time, int32_t persistentId)
 
 void ANRManager::RemoveTimers(int32_t persistentId)
 {
-    std::vector<int32_t> timerIds = EventStageSingleton->GetTimerIds(persistentId);
-    std::for_each(timerIds.begin(), timerIds.end(), [](int32_t timerId){
-        if (timerId != -1) {
-            TimerMgr->RemoveTimer(timerId);
+    std::vector<int32_t> timerIds = EVStage->GetTimerIds(persistentId);
+    for (int32_t item : timerIds) {
+        if (item != -1) {
+            TimerMgr->RemoveTimer(item);
             anrTimerCount_--;
         }
-    });
+    }
 }
 
 void ANRManager::OnSessionLost(int32_t persistentId)

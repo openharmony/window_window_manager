@@ -17,6 +17,7 @@
 
 #include <algorithm>
 
+#include "proto.h"
 #include "util.h"
 #include "window_manager_hilog.h"
 
@@ -51,7 +52,7 @@ std::vector<int32_t> EventStage::GetTimerIds(int32_t persistentId)
 {
     auto iter = events_.find(persistentId);
     if (iter == events_.end()) {
-        WLOGFE("Current events have no event type:%{public}d");
+        WLOGFD("Current persistentId:%{public}d have no event", persistentId);
         return {};
     }
     std::vector<int32_t> timers;

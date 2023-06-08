@@ -21,6 +21,8 @@
 namespace OHOS {
 namespace Rosen {
 
+int64_t GetSysClockTime();
+
 int64_t GetMillisTime();
 
 template<typename T>
