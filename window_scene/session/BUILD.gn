@@ -59,6 +59,8 @@ ohos_shared_library("scene_session") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "multimedia_image_framework:image_native",
+    "ability_base:session_info",
+    "ability_base:want",
   ]
 
   innerapi_tags = [ "platformsdk" ]
