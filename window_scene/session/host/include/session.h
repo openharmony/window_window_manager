@@ -33,7 +33,7 @@ class AxisEvent;
 
 namespace OHOS::Media {
 class PixelMap;
-}
+} // namespace OHOS::Media
 
 namespace OHOS::Rosen {
 class RSSurfaceNode;
@@ -132,6 +132,7 @@ protected:
     NotifyClickFunc clickFunc_;
     sptr<WindowSessionProperty> property_ = nullptr;
     SystemSessionConfig systemConfig_;
+
 private:
     template<typename T>
     bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
@@ -153,7 +154,7 @@ private:
         return lifecycleListeners;
     }
 
-    std::shared_ptr<RSSurfaceNode> CreateSurfaceNode(std::string name);
+    std::shared_ptr<RSSurfaceNode> CreateSurfaceNode(const std::string& name);
     std::shared_ptr<Media::PixelMap> Snapshot();
 
     uint64_t persistentId_ = INVALID_SESSION_ID;

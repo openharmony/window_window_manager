@@ -129,6 +129,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     WLOGFD("PendingSessionActivation!");
     SessionInfo info;
     info.bundleName_ = data.ReadString();
+    info.moduleName_ = data.ReadString();
     info.abilityName_ = data.ReadString();
     if (data.ReadBool()) {
         info.callerToken_ = data.ReadRemoteObject();

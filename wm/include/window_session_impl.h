@@ -26,7 +26,7 @@
 #include "session/host/include/zidl/session_interface.h"
 #include "window.h"
 #include "window_option.h"
-#include "wm_common_inner.h"
+#include "interfaces/include/ws_common_inner.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -141,7 +141,7 @@ private:
     static std::map<uint64_t, std::vector<sptr<IWindowChangeListener>>> windowChangeListeners_;
     static std::recursive_mutex globalMutex_;
     NotifyNativeWinDestroyFunc notifyNativefunc_;
-    WMError UpdateProperty(PropertyChangeAction action);
+    WMError UpdateProperty(WSPropertyChangeAction action);
 };
 } // namespace Rosen
 } // namespace OHOS

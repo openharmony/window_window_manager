@@ -26,7 +26,16 @@
 
 namespace OHOS::AAFwk {
 class SessionInfo;
-}
+} // namespace OHOS::AAFwk
+
+namespace OHOS::AppExecFwk {
+class IBundleMgr;
+struct AbilityInfo;
+} // namespace OHOS::AppExecFwk
+
+namespace OHOS::Global::Resource {
+class ResourceManager;
+} // namespace OHOS::Global::Resource
 
 namespace OHOS::Rosen {
 class RootScene;
@@ -48,10 +57,12 @@ public:
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session);
     WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId);
-    WSError UpdateProperty(sptr<WindowSessionProperty>& property, PropertyChangeAction action);
+    WSError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
     void SetCreateSpecificSessionListener(const NotifyCreateSpecificSessionFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     WSError ProcessBackEvent();
+
+    void GetStartPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor);
 
     WSError SetFocusedSession(uint64_t persistentId);
     uint64_t GetFocusedSession() const;
@@ -69,6 +80,12 @@ private:
     bool ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig, WindowShadowConfig& outShadow);
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig);
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& scnSession);
+
+    sptr<AppExecFwk::IBundleMgr> GetBundleManager();
+    std::shared_ptr<Global::Resource::ResourceManager> CreateResourceManager(
+        const AppExecFwk::AbilityInfo& abilityInfo);
+    void GetStartPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, std::string& path, uint32_t& bgColor);
+
     std::map<uint64_t, sptr<SceneSession>> abilitySceneMap_;
     sptr<RootSceneSession> rootSceneSession_;
     sptr<RootScene> rootScene_;
@@ -76,6 +93,7 @@ private:
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
     uint64_t activeSessionId_;
+    sptr<AppExecFwk::IBundleMgr> bundleMgr_;
     uint64_t focusedSessionId_ { INVALID_SESSION_ID };
 
     void UpdateFocusableProperty(uint64_t persistentId);

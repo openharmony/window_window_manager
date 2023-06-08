@@ -208,7 +208,7 @@ void SessionManager::DestroyAndDisconnectSpecificSession(const uint64_t& persist
     sceneSessionManagerProxy_->DestroyAndDisconnectSpecificSession(persistentId);
 }
 
-WMError SessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, PropertyChangeAction action)
+WMError SessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
 {
     WLOGFD("UpdateProperty");
     InitSceneSessionManagerProxy();

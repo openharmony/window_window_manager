@@ -100,7 +100,7 @@ WSError SceneSessionManagerProxy::DestroyAndDisconnectSpecificSession(const uint
     return static_cast<WSError>(ret);
 }
 
-WSError SceneSessionManagerProxy::UpdateProperty(sptr<WindowSessionProperty>& property, PropertyChangeAction action)
+WSError SceneSessionManagerProxy::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
 {
     MessageParcel data;
     MessageParcel reply;

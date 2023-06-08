@@ -461,7 +461,7 @@ WMError WindowSessionImpl::SetFocusable(bool isFocusable)
     }
     property_->SetFocusable(isFocusable);
     if (state_ == WindowState::STATE_SHOWN) {
-        return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
+        return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
     }
     return WMError::WM_OK;
 }
@@ -717,7 +717,7 @@ void WindowSessionImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsync
     VsyncStation::GetInstance().RequestVsync(vsyncCallback);
 }
 
-WMError WindowSessionImpl::UpdateProperty(PropertyChangeAction action)
+WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
 {
     WLOGFD("UpdateProperty, action:%{public}u", action);
     return SessionManager::GetInstance().UpdateProperty(property_, action);
