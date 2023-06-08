@@ -23,6 +23,10 @@
 namespace OHOS {
 namespace Rosen {
 
+namespace {
+constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "EventStage" };
+} // namespace
+
 void EventStage::SetAnrStatus(int32_t persistentId, bool status)
 {
     isAnrProcess_[persistentId] = status;
