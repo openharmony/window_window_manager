@@ -299,8 +299,8 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
     specificCallback->onDestroy_ = std::bind(&SceneSessionManager::DestroyAndDisconnectSpecificSession,
         this, std::placeholders::_1);
     auto task = [this, sessionInfo, specificCallback]() {
-        WLOGFI("sessionInfo: bundleName: %{public}s, abilityName: %{public}s", sessionInfo.bundleName_.c_str(),
-            sessionInfo.abilityName_.c_str());
+        WLOGFI("sessionInfo: bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
+            sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());
         sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, specificCallback);
         if (sceneSession == nullptr) {
             WLOGFE("sceneSession is nullptr!");
@@ -348,7 +348,7 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         }
         AAFwk::Want want;
         auto sessionInfo = scnSession->GetSessionInfo();
-        want.SetElementName(sessionInfo.bundleName_, sessionInfo.abilityName_);
+        want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
         AAFwk::StartOptions startOptions;
         auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
         if (!scnSessionInfo) {
@@ -578,7 +578,7 @@ void SceneSessionManager::GetStartPage(const SessionInfo& sessionInfo, std::stri
     }
 
     AAFwk::Want want;
-    want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_);
+    want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
     AppExecFwk::AbilityInfo abilityInfo;
     bool ret = bundleMgr_->QueryAbilityInfo(
         want, AppExecFwk::GET_ABILITY_INFO_DEFAULT, AppExecFwk::Constants::ANY_USERID, abilityInfo);

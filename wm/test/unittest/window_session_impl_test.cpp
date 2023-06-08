@@ -82,7 +82,7 @@ HWTEST_F(WindowSessionImplTest, CreateWindowAndDestroy01, Function | SmallTest |
     option->SetWindowName("CreateWindow01");
     sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
 
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestAbility", nullptr};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->Create(nullptr, session));
@@ -115,7 +115,7 @@ HWTEST_F(WindowSessionImplTest, Connect01, Function | SmallTest | Level2)
     // connect with null session
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->Connect());
 
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestAbility", nullptr};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
@@ -141,7 +141,7 @@ HWTEST_F(WindowSessionImplTest, Show01, Function | SmallTest | Level2)
     // show with null session
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Show());
 
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestAbility", nullptr};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
@@ -169,7 +169,7 @@ HWTEST_F(WindowSessionImplTest, Hide01, Function | SmallTest | Level2)
     // show with null session
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Hide());
 
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestAbility", nullptr};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;

@@ -60,12 +60,12 @@ void WindowSessionProperty::SetDisplayId(DisplayId displayId)
 
 const std::string& WindowSessionProperty::GetWindowName() const
 {
-    return windowName_ ;
+    return windowName_;
 }
 
 const SessionInfo& WindowSessionProperty::GetSessionInfo() const
 {
-    return sessionInfo_ ;
+    return sessionInfo_;
 }
 
 Rect WindowSessionProperty::GetWindowRect() const
@@ -138,7 +138,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
         parcel.WriteBool(focusable_) && parcel.WriteBool(touchable_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteUint64(persistentId_) &&
-        parcel.WriteString(sessionInfo_.bundleName_) &&
+        parcel.WriteString(sessionInfo_.bundleName_) && parcel.WriteString(sessionInfo_.moduleName_) &&
         parcel.WriteString(sessionInfo_.abilityName_) &&
         parcel.WriteUint64(parentPersistentId_);
 }
@@ -159,7 +159,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetTouchable(parcel.ReadBool());
     property->SetDisplayId(parcel.ReadUint64());
     property->SetPersistentId(parcel.ReadUint64());
-    SessionInfo info = { parcel.ReadString(), parcel.ReadString(), nullptr };
+    SessionInfo info = { parcel.ReadString(), parcel.ReadString(), parcel.ReadString() };
     property->SetSessionInfo(info);
     property->SetParentPersistentId(parcel.ReadUint64());
     return property;

@@ -379,8 +379,8 @@ void JsSceneSession::OnRaiseToTop()
 
 void JsSceneSession::PendingSessionActivation(const SessionInfo& info)
 {
-    WLOGFI("[NAPI]pending session activation: bundleName = %{public}s, id = %{public}s", info.bundleName_.c_str(),
-        info.abilityName_.c_str());
+    WLOGI("[NAPI]pending session activation: bundleName %{public}s, moduleName %{public}s, abilityName %{public}s",
+        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
     auto iter = jsCbMap_.find(PENDING_SCENE_CB);
     if (iter == jsCbMap_.end()) {
         return;
