@@ -43,8 +43,8 @@ ohos_shared_library("scene_session_manager") {
   sources = [
     "src/extension_session_manager.cpp",
     "src/scene_session_manager.cpp",
-    "src/window_scene_config.cpp",
     "src/screen_scene_config.cpp",
+    "src/window_scene_config.cpp",
     "src/zidl/scene_session_manager_proxy.cpp",
     "src/zidl/scene_session_manager_stub.cpp",
   ]
