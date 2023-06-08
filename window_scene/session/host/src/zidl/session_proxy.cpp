@@ -180,7 +180,7 @@ WSError SessionProxy::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!(data.WriteParcelable(&(abilitySessionInfo->want)) && data.WriteParcelable(&(abilitySessionInfo->want)))) {
+    if (!data.WriteParcelable(&(abilitySessionInfo->want))) {
         WLOGFE("Write want info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
