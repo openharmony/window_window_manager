@@ -31,7 +31,9 @@ const std::map<uint32_t, WindowEventChannelStubFunc> WindowEventChannelStub::stu
     std::make_pair(static_cast<uint32_t>(WindowEventChannelMessage::TRANS_ID_TRANSFER_KEY_EVENT),
         &WindowEventChannelStub::HandleTransferKeyEvent),
     std::make_pair(static_cast<uint32_t>(WindowEventChannelMessage::TRANS_ID_TRANSFER_POINTER_EVENT),
-        &WindowEventChannelStub::HandleTransferPointerEvent)
+        &WindowEventChannelStub::HandleTransferPointerEvent),
+    std::make_pair(static_cast<uint32_t>(WindowEventChannelMessage::TRANS_ID_GET_APPLICATION_PID),
+        &WindowEventChannelStub::HandleGetApplicationPid)
 };
 
 int WindowEventChannelStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
@@ -84,5 +86,12 @@ int WindowEventChannelStub::HandleTransferPointerEvent(MessageParcel& data, Mess
     WSError errCode = TransferPointerEvent(pointerEvent);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
+}
+
+int WindowEventChannelStub::HandleGetApplicationPid(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("GetApplicationPid!");
+    int32_t applicationPid = GetApplicationPid();
+    reply.WriteInt32(applicationPid);
 }
 }

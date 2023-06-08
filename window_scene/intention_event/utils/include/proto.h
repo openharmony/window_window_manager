@@ -28,14 +28,8 @@ enum TokenType : int32_t {
     TOKEN_SHELL,
 };
 
-enum ANTTimeOutTime : int64_t {
+enum ANRTimeOutTime : int64_t {
     INPUT_UI_TIMEOUT_TIME = 5 * 1000000
-};
-
-enum ANREventType {
-    ANR_DISPATCH,
-    ANR_MONITOR,
-    ANR_EVENT_TYPE_NUM,
 };
 
 } // namespace Rosen

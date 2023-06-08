@@ -1,17 +1,15 @@
-/*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import("//build/ohos.gni")
 
@@ -23,8 +21,10 @@ config("intention_event_public_config") {
   ]
 }
 
-ohos_shared_library("intention_event_timer_manager") {
+ohos_shared_library("intention_event_anr_manager") {
   sources = [
+    "anr_manager/src/anr_manager.cpp",
+    "event_stage/src/event_stage.cpp",
     "timer_manager/src/timer_manager.cpp",
     "../utils/src/util.cpp"
   ]
@@ -32,6 +32,7 @@ ohos_shared_library("intention_event_timer_manager") {
   public_configs = [ ":intention_event_public_config" ]
 
   external_deps = [
+    "ability_runtime:ability_manager",
     "c_utils:utils",
     "hilog_native:libhilog",
   ]

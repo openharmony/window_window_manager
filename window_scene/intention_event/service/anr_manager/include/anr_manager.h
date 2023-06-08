@@ -16,6 +16,8 @@
 #ifndef ANR_MANAGER_H
 #define ANR_MANAGER_H
 
+#include <unordered_map>
+
 #include "nocopyable.h"
 #include "singleton.h"
 #include "i_anr_notifier.h"
@@ -32,9 +34,11 @@ public:
     bool IsANRTriggered(int64_t time, int32_t persistentId);
     void RemoveTimers(int32_t persistentId);
     void OnSessionLost(int32_t persistentId);
+    void SetApplicationPid(int32_t persistentId, int32_t applicationPid);
+    int32_t GetPidByPersistentId(int32_t persistentId);
 private:
     int32_t anrTimerCount_ { 0 };
-    sptr<IANRNotifier> anrNotifier_ { nullptr };
+    std::unordered_map<int32_t, int32_t> applicationMap_;
 };
 #define ANRMgr ::OHOS::DelayedSingleton<ANRManager>::GetInstance()
 } // namespace Rosen

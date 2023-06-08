@@ -14,10 +14,14 @@
  */
 #include "anr_manager.h"
 
+#include <algorithm>
 #include <vector>
+
+#include "ability_manager_client.h"
 
 #include "event_stage.h"
 #include "timer_manager.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -47,22 +51,26 @@ void ANRManager::Init()
 void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
 {
     if (anrTimerCount_ >= MAX_ANR_TIMER_COUNT) {
-        WLOGFD("Add anr timer failed, anrtimer count reached the maximum number:%{public}d", MAX_ANR_TIMER_COUNT);
+        WLOGFD("AddAnrTimer failed, anrTimerCount exceeded %{public}d", MAX_ANR_TIMER_COUNT);
         return;
     }
-    int32_t timerId = TimerMgr->AddTimer(INPUT_UI_TIMEOUT_TIME, 1, [this, id, persistentId]() {
+    int32_t timerId = TimerMgr->AddTimer(ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME, 1, [this, id, persistentId]() {
         EventStageSingleton->SetAnrStatus(persistentId, true);
         WLOGFE("Application not responding. persistentId:%{public}d, eventId:%{public}d", persistentId, id);
-        // TODO 
-        // 通过 anrNoticedPid_ 发送消息向上通知ANR，说是这里会提供一个接口
-        std::vector<int32_t> timerIds = EventStageSingleton->GetTimerIds(persistentId);
-        for (auto id : timerIds) {
-            if (id != -1) {
-                TimerMgr->RemoveTimer(id);
-                anrTimerCount_--;
-                WLOGFD("Clear anr timer, timer id:%{public}d, count:%{public}d", id, anrTimerCount_);
-            }
+        int32_t pid = GetPidByPersistentId(persistentId);
+        if (int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->SendANRProcessID(pid); ret != ERR_OK) {
+            WLOGFE("SendANRProcessedId failed, ret:%{public}d", ret);
+            return;
         }
+        std::vector<int32_t> timerIds = EventStageSingleton->GetTimerIds(persistentId);
+        std::for_each(timerIds.begin(), timerIds.end(), [](int32_t timerId){
+            if (timerId != -1) {
+                TimerMgr->RemoveTimer(timerId);
+                anrTimerCount_--;
+                WLOGFD("Remove anr timer, persistentId:%{public}d, timerId:%{public}d, count:%{public}d",
+                    persistentId, timerId, anrTimerCount_);
+            }
+        });
     });
     anrTimerCount_++;
     EventStageSingleton->SaveANREvent(persistentId, id, currentTime, timerId);
@@ -70,23 +78,21 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
 
 int32_t ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
 {
-    // 这个在事件被正常消费之后通过客户端的 MarkProcessed 调用下来，内部执行对应定时器清理的工作
     WLOGFD("eventId:%{public}d, persistentId:%{public}d", eventId, persistentId);
     std::list<int32_t> timerIds = EventStageSingleton->DelEvents(persistentId, eventId);
-    for (int32_t item : timerIds) {
-        if (item != -1) {
-            TimerMgr->RemoveTimer(item);
+    std::for_each(timerIds.begin(), timerIds.end(), [](int32_t timerId){
+        if (timerId != -1) {
+            TimerMgr->RemoveTimer(timerId);
             anrTimerCount_--;
-            WLOGFD("Remove anr timer, eventId:%{public}d, timer id:%{public}d,"
-                "count:%{public}d", eventId, item, anrTimerCount_);
+            WLOGFD("Remove anr timer, eventId:%{public}d, timerId:%{public}d, count:%{public}d",
+                eventId, timerId, anrTimerCount_);
         }
-    }
+    });
     return RET_OK;
 }
 
 bool ANRManager::IsANRTriggered(int64_t time, int32_t persistentId)
 {
-    // 在事件上报的时候呗调用，如果当前该类型的事件在某进程中已经发生了ANR，则不将该类型事件继续上报
     if (EventStageSingleton->CheckAnrStatus(persistentId)) {
         WLOGFD("Application not responding. persistentId:%{public}d", persistentId);
         return true;
@@ -97,20 +103,32 @@ bool ANRManager::IsANRTriggered(int64_t time, int32_t persistentId)
 
 void ANRManager::RemoveTimers(int32_t persistentId)
 {
-    // 在OnSessionLost的时候被调用，删除当前session对应的所有ANR定时器
     std::vector<int32_t> timerIds = EventStageSingleton->GetTimerIds(persistentId);
-    for (int32_t item : timerIds) {
-        if (item != -1) {
-            TimerMgr->RemoveTimer(item);
+    std::for_each(timerIds.begin(), timerIds.end(), [](int32_t timerId){
+        if (timerId != -1) {
+            TimerMgr->RemoveTimer(timerId);
             anrTimerCount_--;
         }
-    }
+    });
 }
 
 void ANRManager::OnSessionLost(int32_t persistentId)
 {
-    // 当某个session断开之后执行定时器清理逻辑，通常都是通过死亡监听实现的
     RemoveTimers(persistentId);
+}
+
+void ANRManager::SetApplicationPid(int32_t persistentId, int32_t applicationPid)
+{
+    applicationMap_[persistentId] = applicationPid;
+}
+
+int32_t ANRManager::GetPidByPersistentId(int32_t persistentId)
+{
+    if (applicationMap_.find(persistentId) != applicationMap_.end()) {
+        return applicationMap_[persistentId];
+    }
+    WLOGFE("No application matches persistentId:%{public}d", persistentId);
+    return -1;
 }
 
 } // namespace Rosen

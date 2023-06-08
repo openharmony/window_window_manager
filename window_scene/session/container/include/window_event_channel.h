@@ -28,6 +28,7 @@ public:
 
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    int32_t GetApplicationPid() override;
 
 private:
     sptr<ISessionStage> sessionStage_ = nullptr;
