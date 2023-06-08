@@ -79,6 +79,7 @@ protected:
 
 private:
     void Init();
+	void LoadScreenSceneXml();
     void RegisterScreenChangeListener();
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent);
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
