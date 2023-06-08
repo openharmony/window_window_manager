@@ -18,6 +18,7 @@
 #include <transaction/rs_interfaces.h>
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
+#include "screen_scene_config.h"
 #include "permission.h"
 
 namespace OHOS::Rosen {
@@ -109,6 +110,16 @@ void ScreenSessionManager::Init()
 {
     msgScheduler_ = std::make_shared<MessageScheduler>(SCREEN_SESSION_MANAGER_THREAD);
     RegisterScreenChangeListener();
+	LoadScreenSceneXml();
+}
+
+void ScreenSessionManager::LoadScreenSceneXml()
+{
+    WLOGFI("ScreenSession load screen scene xml");
+    if (ScreenSceneConfig::LoadConfigXml()) {
+        ScreenSceneConfig::DumpConfig();
+        //ConfigureDisplayManagerService();
+    }
 }
 
 void ScreenSessionManager::RegisterScreenChangeListener()
