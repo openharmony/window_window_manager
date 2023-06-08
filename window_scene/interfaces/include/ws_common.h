@@ -139,7 +139,6 @@ struct WSRect {
 };
 
 struct WindowShadowConfig {
-    float elevation_ = 0.0f;
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
     float alpha_ = 0.0f;
@@ -148,8 +147,6 @@ struct WindowShadowConfig {
 };
 
 struct AppWindowSceneConfig {
-    float fullScreenCornerRadius_ = 0.0f;
-    float splitCornerRadius_ = 0.0f;
     float floatCornerRadius_ = 0.0f;
 
     WindowShadowConfig focusedShadow_;
