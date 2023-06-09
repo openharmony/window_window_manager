@@ -118,7 +118,50 @@ void ScreenSessionManager::LoadScreenSceneXml()
     WLOGFI("ScreenSession load screen scene xml");
     if (ScreenSceneConfig::LoadConfigXml()) {
         ScreenSceneConfig::DumpConfig();
-        //ConfigureDisplayManagerService();
+        ConfigureDisplayManagerService();
+    }
+}
+
+void ScreenSessionManager::ConfigureDisplayManagerService()
+{
+    auto numbersConfig = ScreenSceneConfig::GetIntNumbersConfig();
+    auto enableConfig = ScreenSceneConfig::GetEnableConfig();
+    auto stringConfig = ScreenSceneConfig::GetStringConfig();
+    if (numbersConfig.count("defaultDeviceRotationOffset") != 0) {
+        uint32_t defaultDeviceRotationOffset = static_cast<uint32_t>(numbersConfig["defaultDeviceRotationOffset"][0]);
+	    WLOGFD("defaultDeviceRotationOffset = %u", defaultDeviceRotationOffset);
+    }
+    if (enableConfig.count("isWaterfallDisplay") != 0) {
+		bool isWaterfallDisplay = static_cast<bool>(enableConfig["isWaterfallDisplay"]);
+	    WLOGFD("isWaterfallDisplay = %d", isWaterfallDisplay);
+    }
+    if (numbersConfig.count("curvedScreenBoundary") != 0) {
+		std::vector<int> vtBoundary = static_cast<std::vector<int>>(numbersConfig["curvedScreenBoundary"]);
+	    WLOGFD("vtBoundary = %u", vtBoundary.size());
+    }
+    if (stringConfig.count("defaultDisplayCutoutPath") != 0) {
+        std::string defaultDisplayCutoutPath = static_cast<std::string>(stringConfig["defaultDisplayCutoutPath"]);
+        WLOGFD("defaultDisplayCutoutPath = %s.", defaultDisplayCutoutPath.c_str());
+    }
+    ConfigureWaterfallDisplayCompressionParams();
+
+    if (numbersConfig.count("buildInDefaultOrientation") != 0) {
+        Orientation orientation = static_cast<Orientation>(numbersConfig["buildInDefaultOrientation"][0]);
+        WLOGFD("orientation = %d", orientation);
+    }
+}
+
+void ScreenSessionManager::ConfigureWaterfallDisplayCompressionParams()
+{
+    auto numbersConfig = ScreenSceneConfig::GetIntNumbersConfig();
+    auto enableConfig = ScreenSceneConfig::GetEnableConfig();
+    if (enableConfig.count("isWaterfallAreaCompressionEnableWhenHorizontal") != 0) {
+		bool enable = static_cast<bool>(enableConfig["isWaterfallAreaCompressionEnableWhenHorizontal"]);
+        WLOGD("isWaterfallAreaCompressionEnableWhenHorizontal=%d.", enable);
+    }
+    if (numbersConfig.count("waterfallAreaCompressionSizeWhenHorzontal") != 0) {
+		uint32_t uSize = static_cast<uint32_t>(numbersConfig["waterfallAreaCompressionSizeWhenHorzontal"][0]);
+        WLOGD("waterfallAreaCompressionSizeWhenHorzontal =%u.", uSize);
     }
 }
 

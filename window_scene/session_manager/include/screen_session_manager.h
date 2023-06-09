@@ -80,6 +80,8 @@ protected:
 private:
     void Init();
 	void LoadScreenSceneXml();
+	void ConfigureDisplayManagerService();
+	void ConfigureWaterfallDisplayCompressionParams();
     void RegisterScreenChangeListener();
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent);
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
