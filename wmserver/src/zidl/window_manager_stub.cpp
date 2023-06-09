@@ -54,6 +54,8 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             WMError errCode = CreateWindow(windowProxy, windowProperty, surfaceNode, windowId, token);
             reply.WriteUint32(windowId);
             reply.WriteInt32(static_cast<int32_t>(errCode));
+            reply.WriteUint32(windowProperty->GetWindowFlags());
+            reply.WriteUint32(windowProperty->GetApiCompatibleVersion());
             break;
         }
         case WindowManagerMessage::TRANS_ID_ADD_WINDOW: {

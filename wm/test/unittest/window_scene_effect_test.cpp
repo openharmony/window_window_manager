@@ -61,7 +61,7 @@ public:
         option->SetWindowName(name);
         sptr<WindowSessionImpl> window = new(std::nothrow) WindowSessionImpl(option);
         window->property_->SetPersistentId(1);
-        SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestAbility", nullptr};
+        SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
         sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
         window->hostSession_ = session;
         return window;

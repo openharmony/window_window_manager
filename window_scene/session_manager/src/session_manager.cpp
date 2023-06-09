@@ -29,6 +29,8 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SessionManager"};
+const int CONNECT_COUNTS = 10;
+const int SLEEP_10MS = 10000;
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SessionManager)
@@ -100,6 +102,14 @@ sptr<IRemoteObject> SessionManager::GetRemoteObject()
     return remoteObject_;
 }
 
+sptr<ScreenLockManagerInterface> SessionManager::GetScreenLockManagerProxy()
+{
+    Init();
+    InitSessionManagerServiceProxy();
+    InitScreenLockManagerProxy();
+    return screenLockManagerProxy_;
+}
+
 sptr<IScreenSessionManager> SessionManager::GetScreenSessionManagerProxy()
 {
     Init();
@@ -118,9 +128,17 @@ void SessionManager::ConnectToService()
     AAFwk::Want want;
     want.SetElementName("com.ohos.sceneboard", "com.ohos.sceneboard.MainAbility");
     ErrCode ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, abilityConnection_, nullptr);
-    if (ret != ERR_OK) {
-        WLOGFE("ConnectToService failed, errorcode: %{public}d", ret);
+
+    for (uint8_t count = 0; count < CONNECT_COUNTS; count++) {
+        if (ret == ERR_OK) {
+            break;
+        } else {
+            WLOGFE("ConnectToService failed, errorcode: %{public}d", ret);
+            ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, abilityConnection_, nullptr);
+        }
+        usleep(SLEEP_10MS);
     }
+
     serviceConnected_ = (ret == ERR_OK);
 }
 
@@ -208,4 +226,24 @@ void SessionManager::DestroyAndDisconnectSpecificSession(const uint64_t& persist
     sceneSessionManagerProxy_->DestroyAndDisconnectSpecificSession(persistentId);
 }
 
+void SessionManager::InitScreenLockManagerProxy()
+{
+    if (screenLockManagerProxy_) {
+        return;
+    }
+    if (!sessionManagerServiceProxy_) {
+        WLOGFE("Get screen session manager proxy failed, sessionManagerServiceProxy_ is nullptr");
+        return;
+    }
+    sptr<IRemoteObject> remoteObject = sessionManagerServiceProxy_->GetScreenLockManagerService();
+    if (!remoteObject) {
+        WLOGFE("Get screenlock manager proxy failed, screenlock manager service is null");
+        return;
+    }
+
+    screenLockManagerProxy_ = iface_cast<ScreenLockManagerInterface>(remoteObject);
+    if (!screenLockManagerProxy_) {
+        WLOGFW("Get screenlock manager proxy failed, nullptr");
+    }
+}
 } // namespace OHOS::Rosen

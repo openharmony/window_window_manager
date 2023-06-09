@@ -23,8 +23,10 @@
 #include "session_manager_service/include/session_manager_service_interface.h"
 #include "wm_single_instance.h"
 #include "zidl/scene_session_manager_interface.h"
+#include "screenlock_manager_interface.h"
 
 namespace OHOS::Rosen {
+using namespace ScreenLock;
 class AbilityConnection;
 class SessionManager {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManager);
@@ -42,6 +44,7 @@ public:
         sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session);
     void DestroyAndDisconnectSpecificSession(const uint64_t& persistentId);
     sptr<IScreenSessionManager> GetScreenSessionManagerProxy();
+    sptr<ScreenLockManagerInterface> GetScreenLockManagerProxy();
 
 private:
     void ConnectToService();
@@ -50,6 +53,7 @@ private:
     void GetSceneSessionManagerProxy();
 
     void InitScreenSessionManagerProxy();
+    void InitScreenLockManagerProxy();
 
     bool serviceConnected_ = false;
     sptr<AbilityConnection> abilityConnection_;
@@ -57,6 +61,7 @@ private:
     sptr<ISessionManagerService> sessionManagerServiceProxy_ = nullptr;
     sptr<ISceneSessionManager> sceneSessionManagerProxy_ = nullptr;
     sptr<IScreenSessionManager> screenSessionManagerProxy_ = nullptr;
+    sptr<ScreenLockManagerInterface> screenLockManagerProxy_ = nullptr;
     std::recursive_mutex mutex_;
 };
 

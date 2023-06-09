@@ -21,6 +21,7 @@
 #include <ipc_skeleton.h>
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
+#include <ui/rs_node.h>
 
 #include "permission.h"
 #include "color_parser.h"
@@ -50,8 +51,8 @@ namespace {
 WM_IMPLEMENT_SINGLE_INSTANCE(ResSchedReport);
 
 const WindowImpl::ColorSpaceConvertMap WindowImpl::colorSpaceConvertMap[] = {
-    { ColorSpace::COLOR_SPACE_DEFAULT, ColorGamut::COLOR_GAMUT_SRGB },
-    { ColorSpace::COLOR_SPACE_WIDE_GAMUT, ColorGamut::COLOR_GAMUT_DCI_P3 },
+    { ColorSpace::COLOR_SPACE_DEFAULT, GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB },
+    { ColorSpace::COLOR_SPACE_WIDE_GAMUT, GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DCI_P3 },
 };
 
 std::map<std::string, std::pair<uint32_t, sptr<Window>>> WindowImpl::windowMap_;
@@ -579,7 +580,7 @@ std::string WindowImpl::GetContentInfo()
     return uiContent_->GetContentInfo();
 }
 
-ColorSpace WindowImpl::GetColorSpaceFromSurfaceGamut(ColorGamut colorGamut)
+ColorSpace WindowImpl::GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut)
 {
     for (auto item: colorSpaceConvertMap) {
         if (item.surfaceColorGamut == colorGamut) {
@@ -589,14 +590,14 @@ ColorSpace WindowImpl::GetColorSpaceFromSurfaceGamut(ColorGamut colorGamut)
     return ColorSpace::COLOR_SPACE_DEFAULT;
 }
 
-ColorGamut WindowImpl::GetSurfaceGamutFromColorSpace(ColorSpace colorSpace)
+GraphicColorGamut WindowImpl::GetSurfaceGamutFromColorSpace(ColorSpace colorSpace)
 {
     for (auto item: colorSpaceConvertMap) {
         if (item.colorSpace == colorSpace) {
             return item.surfaceColorGamut;
         }
     }
-    return ColorGamut::COLOR_GAMUT_SRGB;
+    return GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB;
 }
 
 bool WindowImpl::IsSupportWideGamut()
@@ -2266,12 +2267,39 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
             property_->SetOriginRect(rect);
         }
     }
+    auto task = [this, reason, rsTransaction, rectToAce, lastOriRect, display]() mutable {
+        if (rsTransaction) {
+            RSTransaction::FlushImplicitTransaction();
+            rsTransaction->Begin();
+        }
+        RSAnimationTimingProtocol protocol;
+        protocol.SetDuration(600);
+        auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
+        RSNode::OpenImplicitAnimation(protocol, curve);
+        if ((rectToAce != lastOriRect) || (reason != lastSizeChangeReason_)) {
+            NotifySizeChange(rectToAce, reason, rsTransaction);
+            lastSizeChangeReason_ = reason;
+        }
+        UpdateViewportConfig(rectToAce, display, reason, rsTransaction);
+        RSNode::CloseImplicitAnimation();
+        if (rsTransaction) {
+            rsTransaction->Commit();
+        }
+        postTaskDone_ = true;
+    };
     ResSchedReport::GetInstance().RequestPerfIfNeed(reason, GetType(), GetMode());
-    if ((rectToAce != lastOriRect) || (reason != lastSizeChangeReason_)) {
-        NotifySizeChange(rectToAce, reason, rsTransaction);
-        lastSizeChangeReason_ = reason;
+    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
+    if (handler_ != nullptr && reason == WindowSizeChangeReason::ROTATION) {
+        postTaskDone_ = false;
+        handler_->PostTask(task);
+    } else {
+        if ((rectToAce != lastOriRect) || (reason != lastSizeChangeReason_) || !postTaskDone_) {
+            NotifySizeChange(rectToAce, reason, rsTransaction);
+            lastSizeChangeReason_ = reason;
+            postTaskDone_ = true;
+        }
+        UpdateViewportConfig(rectToAce, display, reason, rsTransaction);
     }
-    UpdateViewportConfig(rectToAce, display, reason, rsTransaction);
 }
 
 void WindowImpl::UpdateMode(WindowMode mode)

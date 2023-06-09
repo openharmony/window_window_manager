@@ -25,17 +25,10 @@ class SessionManagerBase {
 public:
     SessionManagerBase() = default;
     virtual ~SessionManagerBase() = default;
-    uint64_t inline GeneratePersistentId()
-    {
-        return (((uint64_t)pid_ << 32) | (++sessionId_)); // 32: high bit for uint64
-    }
+
 protected:
     std::shared_ptr<MessageScheduler> msgScheduler_ = nullptr;
     std::atomic<bool> mmsSchedulerInit_ = false;
-private:
-    int pid_ = getpid();
-    // shared by scene session and extension session once in same process
-    std::atomic<uint32_t> sessionId_ = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_BASE_H

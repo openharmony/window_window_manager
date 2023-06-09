@@ -554,8 +554,13 @@ bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& start
     WLOGFD("AbstractScreenGroup AddChild dmsScreenId: %{public}" PRIu64"", screenId);
     auto iter = abstractScreenMap_.find(screenId);
     if (iter != abstractScreenMap_.end()) {
-        WLOGE("AddChild, abstractScreenMap_ has dmsScreen:%{public}" PRIu64"", screenId);
-        return false;
+        if (dmsScreen->rsDisplayNode_ != nullptr && dmsScreen->type_ == ScreenType::REAL &&
+            defaultScreenId_ == screenId) {
+            WLOGFD("Add default screen, dmsScreenId: %{public}" PRIu64"", screenId);
+        } else {
+            WLOGE("AddChild, abstractScreenMap_ has dmsScreen:%{public}" PRIu64"", screenId);
+            return false;
+        }
     }
     struct RSDisplayNodeConfig config;
     if (!GetRSDisplayNodeConfig(dmsScreen, config)) {
