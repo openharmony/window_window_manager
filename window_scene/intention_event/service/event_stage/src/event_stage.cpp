@@ -33,11 +33,13 @@ EventStage::~EventStage() {}
 
 void EventStage::SetAnrStatus(int32_t persistentId, bool status)
 {
+    CALL_DEBUG_ENTER;
     isAnrProcess_[persistentId] = status;
 }
 
 bool EventStage::CheckAnrStatus(int32_t persistentId)
 {
+    CALL_DEBUG_ENTER;
     if (isAnrProcess_.find(persistentId) != isAnrProcess_.end()) {
         return isAnrProcess_[persistentId];
     }
@@ -47,6 +49,7 @@ bool EventStage::CheckAnrStatus(int32_t persistentId)
 
 void EventStage::SaveANREvent(int32_t persistentId, int32_t id, int64_t time, int32_t timerId)
 {
+    CALL_DEBUG_ENTER;
     EventTime eventTime { id, time, timerId };
     if (events_.find(persistentId) != events_.end()) {
         events_[persistentId].push_back(eventTime);
@@ -55,6 +58,7 @@ void EventStage::SaveANREvent(int32_t persistentId, int32_t id, int64_t time, in
 
 std::vector<int32_t> EventStage::GetTimerIds(int32_t persistentId)
 {
+    CALL_DEBUG_ENTER;
     std::vector<int32_t> timers;
     if (events_.find(persistentId) != events_.end()) {
         for (auto &item : events_[persistentId]) {
@@ -69,6 +73,7 @@ std::vector<int32_t> EventStage::GetTimerIds(int32_t persistentId)
 
 std::list<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t id)
 {
+    CALL_DEBUG_ENTER;
     WLOGFD("Delete events, persistentId:%{public}d, id:%{public}d", persistentId, id);
     if (events_.find(persistentId) == events_.end()) {
         WLOGFE("Current events have no event persistentId:%{public}d", persistentId);
