@@ -129,15 +129,15 @@ void ScreenSessionManager::ConfigureDisplayManagerService()
     auto stringConfig = ScreenSceneConfig::GetStringConfig();
     if (numbersConfig.count("defaultDeviceRotationOffset") != 0) {
         uint32_t defaultDeviceRotationOffset = static_cast<uint32_t>(numbersConfig["defaultDeviceRotationOffset"][0]);
-	    WLOGFD("defaultDeviceRotationOffset = %u", defaultDeviceRotationOffset);
+        WLOGFD("defaultDeviceRotationOffset = %u", defaultDeviceRotationOffset);
     }
     if (enableConfig.count("isWaterfallDisplay") != 0) {
-		bool isWaterfallDisplay = static_cast<bool>(enableConfig["isWaterfallDisplay"]);
-	    WLOGFD("isWaterfallDisplay = %d", isWaterfallDisplay);
+        bool isWaterfallDisplay = static_cast<bool>(enableConfig["isWaterfallDisplay"]);
+        WLOGFD("isWaterfallDisplay = %d", isWaterfallDisplay);
     }
     if (numbersConfig.count("curvedScreenBoundary") != 0) {
-		std::vector<int> vtBoundary = static_cast<std::vector<int>>(numbersConfig["curvedScreenBoundary"]);
-	    WLOGFD("vtBoundary = %u", vtBoundary.size());
+        std::vector<int> vtBoundary = static_cast<std::vector<int>>(numbersConfig["curvedScreenBoundary"]);
+        WLOGFD("vtBoundary = %u", vtBoundary.size());
     }
     if (stringConfig.count("defaultDisplayCutoutPath") != 0) {
         std::string defaultDisplayCutoutPath = static_cast<std::string>(stringConfig["defaultDisplayCutoutPath"]);
@@ -156,11 +156,11 @@ void ScreenSessionManager::ConfigureWaterfallDisplayCompressionParams()
     auto numbersConfig = ScreenSceneConfig::GetIntNumbersConfig();
     auto enableConfig = ScreenSceneConfig::GetEnableConfig();
     if (enableConfig.count("isWaterfallAreaCompressionEnableWhenHorizontal") != 0) {
-		bool enable = static_cast<bool>(enableConfig["isWaterfallAreaCompressionEnableWhenHorizontal"]);
+        bool enable = static_cast<bool>(enableConfig["isWaterfallAreaCompressionEnableWhenHorizontal"]);
         WLOGD("isWaterfallAreaCompressionEnableWhenHorizontal=%d.", enable);
     }
     if (numbersConfig.count("waterfallAreaCompressionSizeWhenHorzontal") != 0) {
-		uint32_t uSize = static_cast<uint32_t>(numbersConfig["waterfallAreaCompressionSizeWhenHorzontal"][0]);
+        uint32_t uSize = static_cast<uint32_t>(numbersConfig["waterfallAreaCompressionSizeWhenHorzontal"][0]);
         WLOGD("waterfallAreaCompressionSizeWhenHorzontal =%u.", uSize);
     }
 }
