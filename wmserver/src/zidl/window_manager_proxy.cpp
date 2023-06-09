@@ -67,6 +67,8 @@ WMError WindowManagerProxy::CreateWindow(sptr<IWindow>& window, sptr<WindowPrope
     }
     windowId = reply.ReadUint32();
     int32_t ret = reply.ReadInt32();
+    property->SetWindowFlags(reply.ReadUint32());
+    property->SetApiCompatibleVersion(reply.ReadUint32());
     return static_cast<WMError>(ret);
 }
 

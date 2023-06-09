@@ -20,6 +20,7 @@
 #include <fstream>
 #include <map>
 #include <string>
+#include <want.h>
 
 #include "iremote_broker.h"
 
@@ -94,6 +95,10 @@ struct SessionInfo {
     std::string abilityName_ = "";
     sptr<IRemoteObject> callerToken_ = nullptr;
     bool isSystem_ = false;
+
+    sptr<AAFwk::Want> want;
+    int32_t resultCode;
+    int32_t requestCode;
 };
 
 enum class SizeChangeReason : uint32_t {
@@ -119,7 +124,8 @@ enum class SessionEvent : uint32_t {
     EVENT_RECOVER,
     EVENT_MINIMIZE,
     EVENT_CLOSE,
-    EVENT_START_MOVE
+    EVENT_START_MOVE,
+    EVENT_TERMINATE,
 };
 
 struct WSRect {
