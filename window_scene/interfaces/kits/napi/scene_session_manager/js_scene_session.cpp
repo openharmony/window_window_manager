@@ -162,7 +162,7 @@ void JsSceneSession::ProcessSessionEventRegister()
 
 void JsSceneSession::ProcessTerminateSessionRegister()
 {
-    WLOGFD("mdquan begin to run ProcessTerminateSessionRegister");
+    WLOGFD("begin to run ProcessTerminateSessionRegister");
     NotifyTerminateSessionFunc func = [this](const SessionInfo& info) {
         this->TerminateSession(info);
     };
@@ -447,7 +447,7 @@ void JsSceneSession::OnBackPressed()
 
 void JsSceneSession::TerminateSession(const SessionInfo& info)
 {
-    WLOGFI("[NAPI]mdquan run TerminateSession, bundleName = %{public}s, id = %{public}s",
+    WLOGFI("[NAPI]run TerminateSession, bundleName = %{public}s, id = %{public}s",
         info.bundleName_.c_str(), info.abilityName_.c_str());
     auto iter = jsCbMap_.find(TERMINATE_SESSION_CB);
     if (iter == jsCbMap_.end()) {

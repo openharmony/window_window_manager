@@ -127,7 +127,7 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
 
 int SessionStub::HandleTerminateSession(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("mdquan run HandleTerminateSession");
+    WLOGFD("run HandleTerminateSession");
     sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     abilitySessionInfo->want = *want;
