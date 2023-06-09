@@ -33,7 +33,7 @@ public:
 
     MOCK_METHOD0(Recover, WSError(void));
     MOCK_METHOD0(Maximize, WSError(void));
-    MOCK_METHOD1(PendingSessionActivation, WSError(const SessionInfo& info));
+    MOCK_METHOD1(PendingSessionActivation, WSError(const sptr<AAFwk::SessionInfo> info));
     MOCK_METHOD1(UpdateActiveStatus, WSError(bool isActive));
     MOCK_METHOD0(RequestSessionBack, WSError(void));
 };
