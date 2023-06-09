@@ -29,6 +29,8 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SessionManager"};
+const int CONNECT_COUNTS = 10;
+const int SLEEP_10MS = 10000;
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SessionManager)
@@ -118,9 +120,17 @@ void SessionManager::ConnectToService()
     AAFwk::Want want;
     want.SetElementName("com.ohos.sceneboard", "com.ohos.sceneboard.MainAbility");
     ErrCode ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, abilityConnection_, nullptr);
-    if (ret != ERR_OK) {
-        WLOGFE("ConnectToService failed, errorcode: %{public}d", ret);
+
+    for (uint8_t count = 0; count < CONNECT_COUNTS; count++) {
+        if (ret == ERR_OK) {
+            break;
+        } else {
+            WLOGFE("ConnectToService failed, errorcode: %{public}d", ret);
+            ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, abilityConnection_, nullptr);
+        }
+        usleep(SLEEP_10MS);
     }
+
     serviceConnected_ = (ret == ERR_OK);
 }
 
