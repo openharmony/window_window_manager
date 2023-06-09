@@ -46,6 +46,8 @@ public:
     DMError UnregisterScreenGroupListener(sptr<IScreenGroupListener> listener);
     DMError RegisterVirtualScreenGroupListener(sptr<IVirtualScreenGroupListener> listener);
     DMError UnregisterVirtualScreenGroupListener(sptr<IVirtualScreenGroupListener> listener);
+    DMError RegisterDisplayManagerAgent();
+    DMError UnregisterDisplayManagerAgent();
     void OnRemoteDied();
 
 private:
@@ -54,8 +56,7 @@ private:
     void NotifyScreenChange(const sptr<ScreenInfo>& screenInfo);
     void NotifyScreenChange(const std::vector<sptr<ScreenInfo>>& screenInfos);
     bool UpdateScreenInfoLocked(sptr<ScreenInfo>);
-    DMError RegisterDisplayManagerAgent();
-    DMError UnregisterDisplayManagerAgent();
+
     bool isAllListenersRemoved() const;
 
     class ScreenManagerListener;
