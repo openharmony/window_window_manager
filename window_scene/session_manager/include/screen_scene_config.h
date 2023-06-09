@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_SCREEN_MANAGER_CONFIG_H
-#define OHOS_ROSEN_SCREEN_MANAGER_CONFIG_H
+#ifndef OHOS_ROSEN_SCREEN_SCENE_CONFIG_H
+#define OHOS_ROSEN_SCREEN_SCENE_CONFIG_H
 
 
 #include <refbase.h>
@@ -48,4 +48,4 @@ private:
     static inline bool IsNumber(std::string str);
 };
 } // namespace OHOS::Rosen
-#endif // OHOS_ROSEN_SCREEN_MANAGER_CONFIG_H
+#endif // OHOS_ROSEN_SCREEN_SCENE_CONFIG_H
