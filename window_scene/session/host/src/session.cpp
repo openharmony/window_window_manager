@@ -19,12 +19,17 @@
 #include "surface_capture_future.h"
 #include <transaction/rs_interfaces.h>
 #include <ui/rs_surface_node.h>
+
 #include "window_manager_hilog.h"
+#include "surface_capture_future.h"
 
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Session" };
 } // namespace
+
+std::atomic<uint32_t> Session::sessionId_(INVALID_SESSION_ID);
+std::set<uint32_t> Session::persistIdSet_;
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
@@ -33,11 +38,6 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
 Session::~Session()
 {
     WLOGD("~Session");
-}
-
-void Session::SetPersistentId(uint64_t persistentId)
-{
-    persistentId_ = persistentId;
 }
 
 uint64_t Session::GetPersistentId() const
@@ -458,5 +458,26 @@ WSError Session::ProcessBackEvent()
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     return sessionStage_->HandleBackEvent();
+}
+
+void Session::GeneratePersistentId(const bool isExtension, const SessionInfo &sessionInfo)
+{
+    if (sessionInfo.persistentId_ != 0) {
+        persistIdSet_.insert(sessionInfo.persistentId_);
+        persistentId_ = static_cast<uint64_t>(sessionInfo.persistentId_);
+        return;
+    }
+
+    sessionId_++;
+    while (persistIdSet_.count(sessionId_) > 0) {
+        sessionId_++;
+    }
+    persistentId_ = isExtension ? sessionId_.load() | 0x80000000 : sessionId_.load() & 0x7fffffff;
+    persistIdSet_.insert(sessionId_);
+}
+
+sptr<ScenePersistence> Session::GetScenePersistence() const
+{
+    return scenePersistence_;
 }
 } // namespace OHOS::Rosen
