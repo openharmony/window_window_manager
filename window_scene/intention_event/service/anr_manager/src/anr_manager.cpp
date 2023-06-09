@@ -32,6 +32,9 @@ const std::string FOUNDATION = "foundation";
 constexpr int32_t MAX_ANR_TIMER_COUNT = 50;
 } // namespace
 
+ANRManager::ANRManager() {}
+ANRManager::~ANRManager() {}
+
 void ANRManager::Init()
 {
    // TODO

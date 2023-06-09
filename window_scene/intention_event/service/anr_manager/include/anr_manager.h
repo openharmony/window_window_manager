@@ -24,7 +24,7 @@
 namespace OHOS {
 namespace Rosen {
 class ANRManager final {
-DECLARE_DELAYED_SINGLETON(ANRManager);
+    DECLARE_DELAYED_SINGLETON(ANRManager);
 public:
     DISALLOW_COPY_AND_MOVE(ANRManager);
     void Init();

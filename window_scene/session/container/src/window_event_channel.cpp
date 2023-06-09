@@ -48,8 +48,7 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
         return WSError::WS_ERROR_NULLPTR;
     }
     ANRHDL->SetSessionStage(sessionStage_);// 这个可以考虑优化，在应用进程启动的时候只初始化一遍就可以，不必每次都设置
-    // pointerEvent->SetProcessedCallback(std::bind(&ANRHandler::SetLastProcessedEventId,
-    //     std::placeholders::_1, std::placeholders::_2));
+    pointerEvent->SetProcessedCallback(dispatchCallback_);
     sessionStage_->NotifyPointerEvent(pointerEvent); // sessionStage_ 就是 windowSessionImpl,windoeSessionImpl 里有 hostSession_
     return WSError::WS_OK;
 }
@@ -59,4 +58,10 @@ int32_t WindowEventChannel::GetApplicationPid()
     WLOGFD("WindowEventChannel GetApplicationPid");
     return getpid();
 }
+
+void WindowEventChannel::OnDispatchEventProcessed(int32_t eventId, int64_t actionTime)
+{
+    ANRHDL->SetLastProcessedEventId(eventId, actionTime);
+}
+
 } // namespace OHOS::Rosen

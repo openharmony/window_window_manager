@@ -18,11 +18,14 @@
 #include <vector>
 
 #include "noncopyable.h"
+#include "singleton.h"
 
 namespace OHOS {
 namespace Rosen {
 class EventStage {
+    DECLARE_DELAYED_SINGLETON(EventStage);
 public:
+    DISALLOW_COPY_AND_MOVE(EventStage);
     void SetAnrStatus(int32_t persistentId, bool status);
     bool CheckAnrStatus(int32_t persistentId);
     void SaveANREvent(int32_t persistentId, int32_t id, int64_t time, int32_t timerId);
