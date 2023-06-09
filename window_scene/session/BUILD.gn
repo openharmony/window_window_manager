@@ -25,6 +25,7 @@ config("session_public_config") {
 
     # for WMError Code
     "${window_base_path}/interfaces/innerkits/wm",
+    "${window_base_path}/window_scene/session_manager/include",
   ]
 }
 

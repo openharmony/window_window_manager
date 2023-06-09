@@ -102,6 +102,7 @@ ohos_shared_library("screen_session_manager") {
   deps = [
     "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/session:screen_session",
   ]
@@ -112,6 +113,12 @@ ohos_shared_library("screen_session_manager") {
     "hilog_native:libhilog",
     "ipc:ipc_core",
   ]
+
+  if (is_standard_system) {
+    external_deps += [ "init:libbegetutil" ]
+  } else {
+    external_deps += [ "init_lite:libbegetutil" ]
+  }
 
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
@@ -136,6 +143,7 @@ ohos_shared_library("session_manager") {
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/session:scene_session",
+    "${window_base_path}/window_scene/session:screen_session",
   ]
 
   external_deps = [
