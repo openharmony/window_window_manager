@@ -28,12 +28,14 @@
 #include <system_ability_definition.h>
 #include <want.h>
 
+#include "ability_context.h"
 #include "color_parser.h"
 #include "common/include/message_scheduler.h"
+#include "common/include/permission.h"
 #include "root_scene.h"
+#include "session/host/include/scene_persistence.h"
 #include "session/host/include/scene_session.h"
 #include "window_manager_hilog.h"
-#include "common/include/permission.h"
 #include "wm_math.h"
 
 namespace OHOS::Rosen {
@@ -254,9 +256,13 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
             WLOGFE("rootSceneSession or rootScene is nullptr");
             return sptr<RootSceneSession>(nullptr);
         }
-        rootSceneSession_->SetLoadContentFunc(
-            [rootScene = rootScene_](const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
-                AbilityRuntime::Context* context) { rootScene->LoadContent(contentUrl, engine, storage, context); });
+        rootSceneSession_->SetLoadContentFunc([rootScene = rootScene_](const std::string &contentUrl,
+            NativeEngine *engine, NativeValue *storage, AbilityRuntime::Context *context) {
+            rootScene->LoadContent(contentUrl, engine, storage, context);
+            if (!ScenePersistence::CreateSnapshotDir(context->GetFilesDir())) {
+                WLOGFD("snapshot dir existed");
+            }
+        });
         AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_);
         return rootSceneSession_;
     };
@@ -295,8 +301,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             WLOGFE("sceneSession is nullptr!");
             return sceneSession;
         }
-        uint64_t persistentId = GeneratePersistentId();
-        sceneSession->SetPersistentId(persistentId);
+        auto persistentId = sceneSession->GetPersistentId();
         sceneSession->SetSystemConfig(systemConfig_);
         abilitySceneMap_.insert({ persistentId, sceneSession });
         WLOGFI("create session persistentId: %{public}" PRIu64 "", persistentId);

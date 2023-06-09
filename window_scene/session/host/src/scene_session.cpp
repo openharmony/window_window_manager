@@ -24,6 +24,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneS
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : Session(info)
 {
+    GeneratePersistentId(!isExtension, info);
     specificCallback_ = specificCallback;
 }
 
@@ -93,5 +94,14 @@ WSError SceneSession::DestroyAndDisconnectSpecificSession(const uint64_t& persis
         ret = specificCallback_->onDestroy_(persistentId);
     }
     return ret;
+}
+
+WSError SceneSession::Background()
+{
+    Session::Background();
+    if (scenePersistence_ != nullptr && GetSnapshot() != nullptr) {
+        scenePersistence_->SaveSnapshot(GetSnapshot());
+    }
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

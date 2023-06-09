@@ -21,6 +21,7 @@ config("session_manager_service_config") {
   include_dirs = [
     "${window_base_path}/interfaces/kits/napi/screen_runtime/api",
     "${window_base_path}/interfaces/kits/napi/screen_runtime/napi",
+    "${multimedia_image_framework}/interfaces/innerkits/include",
   ]
 }
 
