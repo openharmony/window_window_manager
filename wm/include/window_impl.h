@@ -554,11 +554,11 @@ private:
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
         ColorSpace colorSpace;
-        ColorGamut surfaceColorGamut;
+        GraphicColorGamut surfaceColorGamut;
     };
     static const ColorSpaceConvertMap colorSpaceConvertMap[];
-    static ColorSpace GetColorSpaceFromSurfaceGamut(ColorGamut colorGamut);
-    static ColorGamut GetSurfaceGamutFromColorSpace(ColorSpace colorSpace);
+    static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
+    static GraphicColorGamut GetSurfaceGamutFromColorSpace(ColorSpace colorSpace);
     void ChangePropertyByApiVersion();
     void PerfLauncherHotAreaIfNeed(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
