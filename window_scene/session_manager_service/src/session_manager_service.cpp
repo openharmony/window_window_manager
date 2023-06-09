@@ -17,6 +17,7 @@
 
 #include <system_ability_definition.h>
 #include "session_manager/include/scene_session_manager.h"
+#include "screenlock_system_ability.h"
 #include "window_manager_hilog.h"
 
 #include "screen_session_manager.h"
@@ -44,6 +45,15 @@ sptr<IRemoteObject> SessionManagerService::GetSceneSessionManager()
     }
     sceneSessionManagerObj_ = SceneSessionManager::GetInstance().AsObject();
     return sceneSessionManagerObj_;
+}
+
+sptr<IRemoteObject> SessionManagerService::GetScreenLockManagerService()
+{
+    if (screenLockManager_) {
+        return screenLockManager_;
+    }
+    screenLockManager_ = ScreenLock::ScreenLockSystemAbility::GetInstance()->AsObject();
+    return screenLockManager_;
 }
 
 sptr<IRemoteObject> SessionManagerService::GetRemoteObject()

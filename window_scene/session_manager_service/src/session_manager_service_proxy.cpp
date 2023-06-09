@@ -122,4 +122,33 @@ sptr<IRemoteObject> SessionManagerServiceProxy::GetScreenSessionManagerService()
     return object;
 }
 
+sptr<IRemoteObject> SessionManagerServiceProxy::GetScreenLockManagerService()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("Remote is nullptr");
+        return nullptr;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfacetoken failed");
+        return nullptr;
+    }
+
+    int ret = remote->SendRequest(static_cast<uint32_t>(
+        SessionManagerServiceMessage::TRANS_ID_GET_SCREEN_LOCK_MANAGER_SERVICE),
+        data, reply, option);
+    if (ret != ERR_NONE) {
+        WLOGFW("SendRequest failed, errorCode %{public}d", ret);
+        return nullptr;
+    }
+
+    sptr<IRemoteObject> object = reply.ReadRemoteObject();
+
+    return object;
+}
 } // namespace OHOS::Rosen
