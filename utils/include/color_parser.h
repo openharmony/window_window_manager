@@ -26,10 +26,8 @@ public:
 
 private:
     static bool IsValidHexString(const std::string& colorStr);
-
-    ColorParser() = default;
-    ~ColorParser() = default;
 };
-}
-}
+} // namespace Rosen
+} // namespace OHOS
+
 #endif // OHOS_ROSEN_COLOR_PARSER_H

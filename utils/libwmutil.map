@@ -14,6 +14,7 @@
 {
     global:
         extern "C++" {
+            OHOS::Rosen::ColorParser*;
             OHOS::Rosen::SingletonContainer::*;
             *Unmarshalling*;
             OHOS::Rosen::CutoutInfo::CutoutInfo*;
