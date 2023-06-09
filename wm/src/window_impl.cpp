@@ -50,8 +50,8 @@ namespace {
 WM_IMPLEMENT_SINGLE_INSTANCE(ResSchedReport);
 
 const WindowImpl::ColorSpaceConvertMap WindowImpl::colorSpaceConvertMap[] = {
-    { ColorSpace::COLOR_SPACE_DEFAULT, GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB },
-    { ColorSpace::COLOR_SPACE_WIDE_GAMUT, GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DCI_P3 },
+    { ColorSpace::COLOR_SPACE_DEFAULT, ColorGamut::COLOR_GAMUT_SRGB },
+    { ColorSpace::COLOR_SPACE_WIDE_GAMUT, ColorGamut::COLOR_GAMUT_DCI_P3 },
 };
 
 std::map<std::string, std::pair<uint32_t, sptr<Window>>> WindowImpl::windowMap_;
@@ -579,7 +579,7 @@ std::string WindowImpl::GetContentInfo()
     return uiContent_->GetContentInfo();
 }
 
-ColorSpace WindowImpl::GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut)
+ColorSpace WindowImpl::GetColorSpaceFromSurfaceGamut(ColorGamut colorGamut)
 {
     for (auto item: colorSpaceConvertMap) {
         if (item.surfaceColorGamut == colorGamut) {
@@ -589,14 +589,14 @@ ColorSpace WindowImpl::GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamu
     return ColorSpace::COLOR_SPACE_DEFAULT;
 }
 
-GraphicColorGamut WindowImpl::GetSurfaceGamutFromColorSpace(ColorSpace colorSpace)
+ColorGamut WindowImpl::GetSurfaceGamutFromColorSpace(ColorSpace colorSpace)
 {
     for (auto item: colorSpaceConvertMap) {
         if (item.colorSpace == colorSpace) {
             return item.surfaceColorGamut;
         }
     }
-    return GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB;
+    return ColorGamut::COLOR_GAMUT_SRGB;
 }
 
 bool WindowImpl::IsSupportWideGamut()
