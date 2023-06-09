@@ -24,6 +24,7 @@
 #include "interfaces/include/ws_common.h"
 #include "session/container/include/zidl/session_stage_interface.h"
 #include "session/host/include/zidl/session_stub.h"
+#include "session/host/include/scene_persistence.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -107,10 +108,16 @@ public:
     void SetBackPressedListenser(const NotifyBackPressedFunc& func);
     WSError ProcessBackEvent(); // send back event to session_stage
     WSError RequestSessionBack() override; // receive back request from session_stage
+    sptr<ScenePersistence> GetScenePersistence() const;
+
+    static std::atomic<uint32_t> sessionId_;
+    static std::set<uint32_t> persistIdSet_;
 
 protected:
+    void GeneratePersistentId(const bool isExtension, const SessionInfo& sessionInfo);
     void UpdateSessionState(SessionState state);
     bool IsSessionValid() const;
+
     bool isActive_ = false;
     WSRect winRect_ {0, 0, 0, 0};
     sptr<ISessionStage> sessionStage_;
@@ -121,6 +128,8 @@ protected:
     NotifyTerminateSessionFunc terminateSessionFunc_;
     sptr<WindowSessionProperty> property_ = nullptr;
     SystemSessionConfig systemConfig_;
+    const bool isExtension = true;
+    sptr<ScenePersistence> scenePersistence_ = nullptr;
 
 private:
     template<typename T>

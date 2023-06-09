@@ -77,8 +77,7 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
             WLOGFE("extensionSession is nullptr!");
             return extensionSession;
         }
-        uint64_t persistentId = GeneratePersistentId();
-        extensionSession->SetPersistentId(persistentId);
+        auto persistentId = extensionSession->GetPersistentId();
         WLOGFI("create session persistentId: %{public}" PRIu64
             ", bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
             persistentId, sessionInfo.bundleName_.c_str(),
