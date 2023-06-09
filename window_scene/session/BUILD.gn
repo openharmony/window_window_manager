@@ -54,6 +54,8 @@ ohos_shared_library("scene_session") {
       [ "${window_base_path}/window_scene/interfaces/innerkits:libwsutils" ]
 
   external_deps = [
+    "ability_base:session_info",
+    "ability_base:want",
     "c_utils:utils",
     "hilog_native:libhilog",
     "input:libmmi-client",
