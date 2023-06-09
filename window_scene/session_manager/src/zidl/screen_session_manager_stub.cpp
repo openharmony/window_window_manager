@@ -97,6 +97,47 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 break;
             }
             reply.WriteUint32(static_cast<uint32_t>(GetScreenPower(dmsScreenId)));
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID: {
+            DisplayId displayId = data.ReadUint64();
+            auto info = GetDisplayInfoById(displayId);
+            reply.WriteParcelable(info);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_SCREEN_INFO_BY_ID: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            auto screenInfo = GetScreenInfoById(screenId);
+            reply.WriteStrongParcelable(screenInfo);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_ALL_SCREEN_INFOS: {
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_GAMUTS: {
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_CREATE_VIRTUAL_SCREEN: {
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE: {
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_DESTROY_VIRTUAL_SCREEN: {
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_MIRROR: {
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_SCREEN_GROUP_INFO_BY_ID: {
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_REMOVE_VIRTUAL_SCREEN_FROM_SCREEN_GROUP: {
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT: {
+            DisplayId displayId = data.ReadUint64();
+            std::shared_ptr<Media::PixelMap> displaySnapshot = GetDisplaySnapshot(displayId);
+            reply.WriteParcelable(displaySnapshot == nullptr ? nullptr : displaySnapshot.get());
             break;
         }
         default:

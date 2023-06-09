@@ -24,6 +24,7 @@
 namespace OHOS::Rosen {
 class ScreenGroupInfo : public ScreenInfo {
 friend class AbstractScreenGroup;
+friend class ScreenSessionGroup;
 public:
     ScreenGroupInfo() = default;
     ~ScreenGroupInfo() = default;

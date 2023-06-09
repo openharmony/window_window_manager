@@ -19,11 +19,16 @@
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
 #include "permission.h"
+#include <parameters.h>
+#include "sys_cap_util.h"
+#include "surface_capture_future.h"
 
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSessionManager" };
 const std::string SCREEN_SESSION_MANAGER_THREAD = "ScreenSessionManager";
+const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
+const std::string CONTROLLER_THREAD_ID = "ScreenSessionManagerThread";
 } // namespace
 
 ScreenSessionManager& ScreenSessionManager::GetInstance()
@@ -109,6 +114,8 @@ void ScreenSessionManager::Init()
 {
     msgScheduler_ = std::make_shared<MessageScheduler>(SCREEN_SESSION_MANAGER_THREAD);
     RegisterScreenChangeListener();
+    auto runner = AppExecFwk::EventRunner::Create(CONTROLLER_THREAD_ID);
+    controllerHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
 }
 
 void ScreenSessionManager::RegisterScreenChangeListener()
@@ -125,7 +132,7 @@ void ScreenSessionManager::RegisterScreenChangeListener()
 
 void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenEvent)
 {
-    WLOGFI("On screen change. ScreenId: %{public}" PRIu64 ", ScreenEvent: %{public}d", screenId,
+    WLOGFI("SCB: On screen change. ScreenId: %{public}" PRIu64 ", ScreenEvent: %{public}d", screenId,
         static_cast<int>(screenEvent));
     auto screenSession = GetOrCreateScreenSession(screenId);
     if (!screenSession) {
@@ -142,13 +149,14 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
         for (auto listener : screenConnectionListenerList_) {
             listener->OnScreenDisconnect(screenSession);
         }
+        WLOGFI("SCB: OnScreenChange. screenSessionMap_ delete ScreenId: %{public}" PRIu64 " ", screenId);
         screenSessionMap_.erase(screenId);
     } else {
         WLOGE("Unknown ScreenEvent: %{public}d", static_cast<int>(screenEvent));
     }
 }
 
-sptr<ScreenSession> ScreenSessionManager::GetScreenSession(ScreenId screenId)
+sptr<ScreenSession> ScreenSessionManager::GetScreenSession(ScreenId screenId) const
 {
     auto iter = screenSessionMap_.find(screenId);
     if (iter == screenSessionMap_.end()) {
@@ -170,12 +178,40 @@ sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo()
     }
 }
 
+sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
+{
+    for (auto sessionIt : screenSessionMap_) {
+        auto screenSession = sessionIt.second;
+        sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
+        if (displayId == displayInfo->GetDisplayId()) {
+            return displayInfo;
+        }
+    }
+    WLOGFE("SCB: ScreenSessionManager::GetDisplayInfoById failed.");
+    return nullptr;
+}
+
+sptr<ScreenInfo> ScreenSessionManager::GetScreenInfoById(ScreenId screenId)
+{
+    auto screenSession = GetOrCreateScreenSession(screenId);
+    if (screenSession == nullptr) {
+        WLOGE("SCB: ScreenSessionManager::GetScreenInfoById cannot find screenInfo: %{public}" PRIu64"", screenId);
+        return nullptr;
+    }
+    return screenSession->ConvertToScreenInfo();
+}
+
 sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId screenId)
 {
+    WLOGFE("SCB: ScreenSessionManager::GetOrCreateScreenSession ENTER");
     auto sessionIt = screenSessionMap_.find(screenId);
     if (sessionIt != screenSessionMap_.end()) {
         return sessionIt->second;
     }
+
+    ScreenId rsId = rsInterface_.GetDefaultScreenId();
+    screenIdManager_.rs2SmsScreenIdMap_[rsId] = screenId;
+    screenIdManager_.sms2RsScreenIdMap_[screenId] = rsId;
 
     auto screenMode = rsInterface_.GetScreenActiveMode(screenId);
     auto screenBounds = RRect({ 0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight() }, 0.0f, 0.0f);
@@ -187,9 +223,28 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         WLOGFE("screen session is nullptr");
         return session;
     }
+
+    ScreenId smsGroupScreenId = 1;
+    std::ostringstream buffer;
+    buffer<<"ScreenGroup_"<<smsGroupScreenId;
+    std::string name = buffer.str();
+    isExpandCombination_ = system::GetParameter("persist.display.expand.enabled", "0") == "1";
+    sptr<ScreenSessionGroup> screenGroup;
+    if (isExpandCombination_) {
+        screenGroup = new(std::nothrow) ScreenSessionGroup(smsGroupScreenId,
+            SCREEN_ID_INVALID, name, ScreenCombination::SCREEN_EXPAND);
+    } else {
+        screenGroup = new(std::nothrow) ScreenSessionGroup(smsGroupScreenId,
+            SCREEN_ID_INVALID, name, ScreenCombination::SCREEN_MIRROR);
+    }
+    screenGroup->groupSmsId_ = 1;
+    smsScreenGroupMap_.insert(std::make_pair(smsGroupScreenId, screenGroup));
+    session->groupSmsId_ = 1;
+
     screenSessionMap_[screenId] = session;
     return session;
 }
+
 ScreenId ScreenSessionManager::GetDefaultScreenId()
 {
     if (defaultScreenId_ == INVALID_SCREEN_ID) {
@@ -326,4 +381,289 @@ bool ScreenSessionManager::NotifyDisplayStateChanged(DisplayId id, DisplayState 
     }
     return true;
 }
+DMError ScreenSessionManager::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos)
+{
+    return DMError::DM_OK;
+}
+
+std::vector<ScreenId> ScreenSessionManager::GetAllScreenIds() const
+{
+    std::vector<ScreenId> res;
+    for (const auto& iter : screenSessionMap_) {
+        res.emplace_back(iter.first);
+    }
+    return res;
+}
+
+DMError ScreenSessionManager::GetScreenSupportedColorGamuts(ScreenId screenId,
+    std::vector<ScreenColorGamut>& colorGamuts)
+{
+    return DMError::DM_OK;
+}
+
+ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
+                                                   const sptr<IRemoteObject>& displayManagerAgent)
+{
+    return ScreenId(0);
+}
+
+DMError ScreenSessionManager::SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface)
+{
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
+{
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+                                         ScreenId& screenGroupId)
+{
+    return DMError::DM_OK;
+}
+
+bool ScreenSessionManager::ScreenIdManager::ConvertToRsScreenId(ScreenId smsScreenId, ScreenId& rsScreenId) const
+{
+    return true;
+}
+
+ScreenId ScreenSessionManager::ScreenIdManager::ConvertToRsScreenId(ScreenId dmsScreenId) const
+{
+    ScreenId rsScreenId = SCREEN_ID_INVALID;
+    ConvertToRsScreenId(dmsScreenId, rsScreenId);
+    return rsScreenId;
+}
+
+ScreenId ScreenSessionManager::ScreenIdManager::ConvertToSmsScreenId(ScreenId rsScreenId) const
+{
+    ScreenId smsScreenId = SCREEN_ID_INVALID;
+    ConvertToSmsScreenId(rsScreenId, smsScreenId);
+    return smsScreenId;
+}
+
+bool ScreenSessionManager::ScreenIdManager::ConvertToSmsScreenId(ScreenId rsScreenId, ScreenId& smsScreenId) const
+{
+    return true;
+}
+
+ScreenId ScreenSessionManager::ScreenIdManager::CreateAndGetNewScreenId(ScreenId rsScreenId)
+{
+    return ScreenId(0);
+}
+
+bool ScreenSessionManager::ScreenIdManager::DeleteScreenId(ScreenId smsScreenId)
+{
+    return true;
+}
+
+bool ScreenSessionManager::ScreenIdManager::HasRsScreenId(ScreenId smsScreenId) const
+{
+    return rs2SmsScreenIdMap_.find(smsScreenId) != rs2SmsScreenIdMap_.end();
+}
+
+ScreenId ScreenSessionManager::GetDefaultAbstractScreenId()
+{
+    return ScreenId(1);
+}
+
+sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId, ScreenId rsId,
+    VirtualScreenOption option)
+{
+    return nullptr;
+}
+
+bool ScreenSessionManager::InitAbstractScreenModesInfo(sptr<ScreenSession>& screenSession)
+{
+    return true;
+}
+
+sptr<ScreenSession> ScreenSessionManager::InitAndGetScreen(ScreenId rsScreenId)
+{
+    return nullptr;
+}
+
+void ScreenSessionManager::ProcessScreenConnected(ScreenId rsScreenId)
+{
+}
+
+void ScreenSessionManager::ProcessScreenDisconnected(ScreenId rsScreenId)
+{
+}
+
+sptr<ScreenSessionGroup> ScreenSessionManager::AddToGroupLocked(sptr<ScreenSession> newScreen)
+{
+    return nullptr;
+}
+
+sptr<ScreenSessionGroup> ScreenSessionManager::AddAsFirstScreenLocked(sptr<ScreenSession> newScreen)
+{
+    return nullptr;
+}
+
+sptr<ScreenSessionGroup> ScreenSessionManager::AddAsSuccedentScreenLocked(sptr<ScreenSession> newScreen)
+{
+    return nullptr;
+}
+
+sptr<ScreenSessionGroup> ScreenSessionManager::RemoveFromGroupLocked(sptr<ScreenSession> screen)
+{
+    return nullptr;
+}
+
+bool ScreenSessionManager::RemoveChildFromGroup(sptr<ScreenSession> screen, sptr<ScreenSessionGroup> screenGroup)
+{
+    return true;
+}
+
+DMError ScreenSessionManager::SetMirror(ScreenId screenId, std::vector<ScreenId> screens)
+{
+    return DMError::DM_OK;
+}
+
+sptr<ScreenSessionGroup> ScreenSessionManager::GetAbstractScreenGroup(ScreenId smsScreenId)
+{
+    auto iter = smsScreenGroupMap_.find(smsScreenId);
+    if (iter == smsScreenGroupMap_.end()) {
+        WLOGE("did not find screen:%{public}" PRIu64"", smsScreenId);
+        return nullptr;
+    }
+    return iter->second;
+}
+
+void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, const std::vector<ScreenId>& screens,
+    const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination)
+{
+}
+
+void ScreenSessionManager::AddScreenToGroup(sptr<ScreenSessionGroup> group,
+    const std::vector<ScreenId>& addScreens, const std::vector<Point>& addChildPos,
+    std::map<ScreenId, bool>& removeChildResMap)
+{
+}
+
+void ScreenSessionManager::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
+{
+}
+
+const std::shared_ptr<RSDisplayNode>& ScreenSessionManager::GetRSDisplayNodeByScreenId(ScreenId smsScreenId) const
+{
+    static std::shared_ptr<RSDisplayNode> notFound = nullptr;
+    sptr<ScreenSession> screen = GetScreenSession(smsScreenId);
+    if (screen == nullptr) {
+        WLOGFE("SCB: ScreenSessionManager::GetRSDisplayNodeByScreenId screen == nullptr!");
+        return notFound;
+    }
+    if (screen->displayNode_ == nullptr) {
+        WLOGFE("SCB: ScreenSessionManager::GetRSDisplayNodeByScreenId displayNode_ == nullptr!");
+        return notFound;
+    }
+    WLOGI("GetRSDisplayNodeByScreenId: screen: %{public}" PRIu64", nodeId: %{public}" PRIu64" ",
+        screen->screenId_, screen->displayNode_->GetId());
+    return screen->displayNode_;
+}
+
+std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(DisplayId displayId)
+{
+    ScreenId screenId = SCREEN_ID_INVALID;
+    std::shared_ptr<RSDisplayNode> displayNode = nullptr;
+    for (auto sessionIt : screenSessionMap_) {
+        auto screenSession = sessionIt.second;
+        sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
+        WLOGI("SCB: GetScreenSnapshot: displayId %{public}" PRIu64"", displayInfo->GetDisplayId());
+        if (displayId == displayInfo->GetDisplayId()) {
+            displayNode = screenSession->displayNode_;
+            screenId = sessionIt.first;
+            break;
+        }
+    }
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("SCB: ScreenSessionManager::GetScreenSnapshot screenId == SCREEN_ID_INVALID!");
+        return nullptr;
+    }
+    if (displayNode == nullptr) {
+        WLOGFE("SCB: ScreenSessionManager::GetScreenSnapshot displayNode == nullptr!");
+        return nullptr;
+    }
+
+    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
+    rsInterface_.TakeSurfaceCapture(displayNode, callback);
+    std::shared_ptr<Media::PixelMap> screenshot = callback->GetResult(2000); // wait for <= 2000ms
+    if (screenshot == nullptr) {
+        WLOGFE("SCB: Failed to get pixelmap from RS, return nullptr!");
+    }
+
+    // notify dm listener
+    sptr<ScreenshotInfo> snapshotInfo = new ScreenshotInfo();
+    snapshotInfo->SetTrigger(SysCapUtil::GetClientName());
+    snapshotInfo->SetDisplayId(displayId);
+    OnScreenshot(snapshotInfo);
+
+    return screenshot;
+}
+
+std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode)
+{
+    WLOGFE("SCB: ScreenSessionManager::GetDisplaySnapshot ENTER!");
+    auto res = GetScreenSnapshot(displayId);
+    return res;
+}
+
+bool ScreenSessionManager::OnRemoteDied(const sptr<IRemoteObject>& agent)
+{
+    return true;
+}
+
+std::vector<ScreenId> ScreenSessionManager::GetAllValidScreenIds(const std::vector<ScreenId>& screenIds) const
+{
+    std::vector<ScreenId> validScreenIds;
+    return validScreenIds;
+}
+
+sptr<ScreenGroupInfo> ScreenSessionManager::GetScreenGroupInfoById(ScreenId screenId)
+{
+    auto screenSessionGroup = GetAbstractScreenGroup(screenId);
+    return screenSessionGroup->ConvertToScreenGroupInfo();
+}
+
+void ScreenSessionManager::NotifyScreenConnected(sptr<ScreenInfo> screenInfo)
+{
+}
+
+void ScreenSessionManager::NotifyScreenDisconnected(ScreenId screenId)
+{
+}
+
+void ScreenSessionManager::NotifyScreenGroupChanged(
+    const sptr<ScreenInfo>& screenInfo, ScreenGroupChangeEvent event)
+{
+}
+
+void ScreenSessionManager::NotifyScreenGroupChanged(
+    const std::vector<sptr<ScreenInfo>>& screenInfo, ScreenGroupChangeEvent event)
+{
+}
+
+void ScreenSessionManager::OnScreenGroupChange(const std::string& trigger,
+    const sptr<ScreenInfo>& screenInfo, ScreenGroupChangeEvent groupEvent)
+{
+}
+
+void ScreenSessionManager::OnScreenGroupChange(const std::string& trigger,
+    const std::vector<sptr<ScreenInfo>>& screenInfos, ScreenGroupChangeEvent groupEvent)
+{
+}
+
+void ScreenSessionManager::OnScreenConnect(const sptr<ScreenInfo> screenInfo)
+{
+}
+
+void ScreenSessionManager::OnScreenDisconnect(ScreenId screenId)
+{
+}
+
+void ScreenSessionManager::OnScreenshot(sptr<ScreenshotInfo> info)
+{
+}
+
 } // namespace OHOS::Rosen
