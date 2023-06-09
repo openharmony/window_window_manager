@@ -34,6 +34,7 @@ public:
     WMError DisableAppWindowDecor() override;
     bool IsDecorEnable() const override;
     WMError Minimize() override;
+    WMError MaximizeFloating() override;
     WMError Maximize() override;
     WMError Recover() override;
     void StartMove() override;
