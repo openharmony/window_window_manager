@@ -74,7 +74,8 @@ void WindowSessionTest::SetUp()
 {
     SessionInfo info;
     info.abilityName_ = "testSession1";
-    info.bundleName_ = "testSession2";
+    info.moduleName_ = "testSession2";
+    info.bundleName_ = "testSession3";
     session_ = new (std::nothrow) Session(info);
     session_->surfaceNode_ = CreateRSSurfaceNode();
     EXPECT_NE(nullptr, session_);
@@ -259,7 +260,7 @@ HWTEST_F(WindowSessionTest, PendingSessionActivation01, Function | SmallTest | L
         resultValue = 1;
     };
 
-    SessionInfo info;
+    sptr<AAFwk::SessionInfo> info;
     session_->pendingSessionActivationFunc_ = nullptr;
     session_->PendingSessionActivation(info);
     ASSERT_EQ(resultValue, 0);

@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_SCREEN_SESSION_MANAGER_INTERFACE_H
 
 #include "display_manager_interface.h"
+#include "marshalling_helper.h"
 
 namespace OHOS {
 namespace Rosen {

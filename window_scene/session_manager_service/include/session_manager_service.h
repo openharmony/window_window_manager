@@ -31,6 +31,8 @@ public:
 
     sptr<IRemoteObject> GetScreenSessionManagerService() override;
 
+    sptr<IRemoteObject> GetScreenLockManagerService() override;
+
     sptr<IRemoteObject> GetRemoteObject();
 
     sptr<IRemoteObject> GetSceneSessionManager() override;
@@ -43,6 +45,7 @@ private:
     sptr<IRemoteObject> sceneSessionManagerObj_ = nullptr;
     sptr<IRemoteObject> sessionManagerServiceObj_ = nullptr;
     sptr<IRemoteObject> screenSessionManagerObj_ = nullptr;
+    sptr<IRemoteObject> screenLockManager_ = nullptr;
 };
 } // namesapce OHOS::Rosen
 #endif // FOUNDATION_WINDOW_SCENE_SESSION_MANAGER_SERVICE_H

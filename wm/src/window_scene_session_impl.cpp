@@ -46,7 +46,7 @@ bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
     if (WindowHelper::IsSystemWindow(type)) {
         return true;
     }
-    
+
     if (!(type == WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW || type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
         type == WindowType::WINDOW_TYPE_FLOAT_CAMERA || type == WindowType::WINDOW_TYPE_DIALOG ||
         type == WindowType::WINDOW_TYPE_FLOAT || type == WindowType::WINDOW_TYPE_SCREENSHOT ||
@@ -115,10 +115,9 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<Rosen::ISession>& iSession)
 {
-    // allow iSession is nullptr when create from window manager
+    // allow iSession is nullptr when create window by innerkits
     if (!context) {
-        WLOGFE("context is nullptr!");
-        return WMError::WM_ERROR_INVALID_PARAM;
+        WLOGFW("context is nullptr!");
     }
     WMError ret = WindowSessionCreateCheck();
     if (ret != WMError::WM_OK) {
@@ -434,7 +433,9 @@ WMError WindowSceneSessionImpl::Minimize()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    hostSession_->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
+    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        hostSession_->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
+    }
     return WMError::WM_OK;
 }
 
@@ -445,10 +446,19 @@ WMError WindowSceneSessionImpl::Maximize()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
-    windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
-    UpdateDecorEnable(true);
+    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
+        SetFullScreen(true);
+        windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+        UpdateDecorEnable(true);
+    }
     return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::MaximizeFloating()
+{
+    WLOGFD("WindowSceneSessionImpl::MaximizeFloating called");
+    return Maximize();
 }
 
 WMError WindowSceneSessionImpl::Recover()
@@ -458,9 +468,11 @@ WMError WindowSceneSessionImpl::Recover()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    hostSession_->OnSessionEvent(SessionEvent::EVENT_RECOVER);
-    windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
-    UpdateDecorEnable(true);
+    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        hostSession_->OnSessionEvent(SessionEvent::EVENT_RECOVER);
+        windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
+        UpdateDecorEnable(true);
+    }
     return WMError::WM_OK;
 }
 
@@ -471,7 +483,9 @@ void WindowSceneSessionImpl::StartMove()
         WLOGFE("session is invalid");
         return;
     }
-    hostSession_->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
+    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        hostSession_->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
+    }
     return;
 }
 
@@ -482,7 +496,10 @@ WMError WindowSceneSessionImpl::Close()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    hostSession_->OnSessionEvent(SessionEvent::EVENT_CLOSE);
+    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        hostSession_->OnSessionEvent(SessionEvent::EVENT_CLOSE);
+    }
+
     return WMError::WM_OK;
 }
 

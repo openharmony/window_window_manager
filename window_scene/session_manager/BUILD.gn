@@ -36,6 +36,11 @@ config("session_manager_public_config") {
 
     # for window_manager_hilog
     "${window_base_path}/utils/include",
+
+    # for screenlock_manager_interface
+    "${screenlock_mgr_path}/services/include",
+    "${screenlock_mgr_path}/utils/include",
+    "${screenlock_mgr_path}/frameworks/native/include",
   ]
 }
 
@@ -61,14 +66,21 @@ ohos_shared_library("scene_session_manager") {
   ]
 
   external_deps = [
+    "ability_base:session_info",
     "ability_base:want",
     "ability_runtime:ability_manager",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:app_context",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "config_policy:configpolicy_util",
     "eventhandler:libeventhandler",
     "hilog_native:libhilog",
     "init:libbegetutil",
     "ipc:ipc_single",
+    "resource_management:global_resmgr",
+    "samgr:samgr_proxy",
     "window_manager:libwm",
   ]
 
@@ -93,6 +105,7 @@ ohos_shared_library("screen_session_manager") {
   deps = [
     "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/session:screen_session",
     "//third_party/libxml2:libxml2",
@@ -105,6 +118,12 @@ ohos_shared_library("screen_session_manager") {
     "hilog_native:libhilog",
     "ipc:ipc_core",
   ]
+
+  if (is_standard_system) {
+    external_deps += [ "init:libbegetutil" ]
+  } else {
+    external_deps += [ "init_lite:libbegetutil" ]
+  }
 
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
@@ -129,6 +148,7 @@ ohos_shared_library("session_manager") {
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/session:scene_session",
+    "${window_base_path}/window_scene/session:screen_session",
   ]
 
   external_deps = [
