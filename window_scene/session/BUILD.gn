@@ -54,8 +54,9 @@ ohos_shared_library("scene_session") {
     "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
   ]
 
-  public_deps =
-      [ "${window_base_path}/window_scene/interfaces/innerkits:libwsutils" ]
+  public_deps = [
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils"
+    ]
 
   external_deps = [
     "c_utils:utils",

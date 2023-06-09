@@ -28,6 +28,9 @@ namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "EventStage" };
 } // namespace
 
+EventStage::EventStage() {}
+EventStage::~EventStage() {}
+
 void EventStage::SetAnrStatus(int32_t persistentId, bool status)
 {
     isAnrProcess_[persistentId] = status;
@@ -35,50 +38,53 @@ void EventStage::SetAnrStatus(int32_t persistentId, bool status)
 
 bool EventStage::CheckAnrStatus(int32_t persistentId)
 {
-    return isAnrProcess_[persistentId];
+    if (isAnrProcess_.find(persistentId) != isAnrProcess_.end()) {
+        return isAnrProcess_[persistentId];
+    }
+    WLOGFD("Current persistentId:%{public}d is not in event stage", persistentId);
+    return false;
 }
 
 void EventStage::SaveANREvent(int32_t persistentId, int32_t id, int64_t time, int32_t timerId)
 {
     EventTime eventTime { id, time, timerId };
-
-    auto iter = events_.find(persistentId);
-    if (iter != events_.end()) {
-        iter->second.push_back(eventTime);
+    if (events_.find(persistentId) != events_.end()) {
+        events_[persistentId].push_back(eventTime);
     }
 }
 
 std::vector<int32_t> EventStage::GetTimerIds(int32_t persistentId)
 {
-    auto iter = events_.find(persistentId);
-    if (iter == events_.end()) {
-        WLOGFD("Current persistentId:%{public}d have no event", persistentId);
-        return {};
-    }
     std::vector<int32_t> timers;
-    for (auto &item : iter->second) {
-        timers.push_back(item.timerId);
-        item.timerId = -1;
+    if (events_.find(persistentId) != events_.end()) {
+        for (auto &item : events_[persistentId]) {
+            timers.push_back(item.timerId);
+            item.timerId = -1;
+        }
+        return timers;
     }
+    WLOGFD("Current persistentId:%{public}d have no event", persistentId);
     return timers;
 }
 
 std::list<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t id)
 {
     WLOGFD("Delete events, persistentId:%{public}d, id:%{public}d", persistentId, id);
-    auto iter = events_.find(persistentId);
-    if (iter == events_.end()) {
+    if (events_.find(persistentId) == events_.end()) {
         WLOGFE("Current events have no event persistentId:%{public}d", persistentId);
         return {};
     }
-    auto &events = iter->second;
-    std::list<int32_t> timerIds;
+    auto &events = events_[persistentId];
     auto fistMatchIter = find_if(events.begin(), events.end(), [id](const auto &item){
         return item.id > id;
     });
     if (fistMatchIter == events.end()) {
         WLOGFW("Can not find event:%{public}d", id);
-        return timerIds;
+        return { };
+    }
+    std::list<int32_t> timerIds;
+    for (auto iter = events.begin(); iter != fistMatchIter; iter++) {
+        timerIds.push_back(iter->timerId);
     }
     events.erase(events.begin(), fistMatchIter);
     if (events.empty()) {

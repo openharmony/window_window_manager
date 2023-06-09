@@ -66,8 +66,7 @@
             "//foundation/window/window_manager/interfaces/kits/napi/window_runtime/window_stage_napi:windowstage",
             "//foundation/window/window_manager/interfaces/kits/napi:napi_packages",
             "//foundation/window/window_manager/resources:window_resources",
-            "//foundation/window/window_manager/window_scene/interfaces/kits/napi:window_scene_napi_packages",
-            "//foundation/window/window_manager/window_scene/intention_event/service:intention_event_anr_manager"
+            "//foundation/window/window_manager/window_scene/interfaces/kits/napi:window_scene_napi_packages"
           ],
           "fwk_group": [
             "//foundation/window/window_manager/interfaces/kits/js/declaration:window",
