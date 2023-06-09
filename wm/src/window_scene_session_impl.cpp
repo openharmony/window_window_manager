@@ -46,7 +46,7 @@ bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
     if (WindowHelper::IsSystemWindow(type)) {
         return true;
     }
-    
+
     if (!(type == WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW || type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
         type == WindowType::WINDOW_TYPE_FLOAT_CAMERA || type == WindowType::WINDOW_TYPE_DIALOG ||
         type == WindowType::WINDOW_TYPE_FLOAT || type == WindowType::WINDOW_TYPE_SCREENSHOT ||
@@ -115,10 +115,9 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<Rosen::ISession>& iSession)
 {
-    // allow iSession is nullptr when create from window manager
+    // allow iSession is nullptr when create window by innerkits
     if (!context) {
-        WLOGFE("context is nullptr!");
-        return WMError::WM_ERROR_INVALID_PARAM;
+        WLOGFW("context is nullptr!");
     }
     WMError ret = WindowSessionCreateCheck();
     if (ret != WMError::WM_OK) {

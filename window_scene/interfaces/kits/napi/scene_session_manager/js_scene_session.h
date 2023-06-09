@@ -50,6 +50,7 @@ private:
     void ProcessSessionRectChangeRegister();
     void ProcessRaiseToTopRegister();
     void ProcessBackPressedRegister();
+    void ProcessTerminateSessionRegister();
 
     void PendingSessionActivation(const SessionInfo& info);
     void OnSessionStateChange(const SessionState& state);
@@ -58,6 +59,7 @@ private:
     void OnSessionRectChange(const WSRect& rect);
     void OnRaiseToTop();
     void OnBackPressed();
+    void TerminateSession(const SessionInfo& info);
 
     NativeEngine& engine_;
     wptr<SceneSession> weakSession_ = nullptr;
