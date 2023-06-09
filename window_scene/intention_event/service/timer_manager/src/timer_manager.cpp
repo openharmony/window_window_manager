@@ -35,36 +35,43 @@ TimerManager::~TimerManager() {}
 
 int32_t TimerManager::AddTimer(int32_t intervalMs, int32_t repeatCount, std::function<void()> callback)
 {
+    CALL_DEBUG_ENTER;
     return AddTimerInternal(intervalMs, repeatCount, callback);
 }
 
 int32_t TimerManager::RemoveTimer(int32_t timerId)
 {
+    CALL_DEBUG_ENTER;
     return RemoveTimerInternal(timerId);
 }
 
 int32_t TimerManager::ResetTimer(int32_t timerId)
 {
+    CALL_DEBUG_ENTER;
     return ResetTimerInternal(timerId);
 }
 
 bool TimerManager::IsExist(int32_t timerId)
 {
+    CALL_DEBUG_ENTER;
     return IsExistInternal(timerId);
 }
 
 int32_t TimerManager::CalcNextDelay()
 {
+    CALL_DEBUG_ENTER;
     return CalcNextDelayInternal();
 }
 
 void TimerManager::ProcessTimers()
 {
+    CALL_DEBUG_ENTER;
     ProcessTimersInternal();
 }
 
 int32_t TimerManager::TakeNextTimerId()
 {
+    CALL_DEBUG_ENTER;
     uint64_t timerSlot = 0;
     uint64_t one = 1;
 
@@ -82,6 +89,7 @@ int32_t TimerManager::TakeNextTimerId()
 
 int32_t TimerManager::AddTimerInternal(int32_t intervalMs, int32_t repeatCount, std::function<void()> callback)
 {
+    CALL_DEBUG_ENTER;
     if (intervalMs < MIN_INTERVAL) {
         intervalMs = MIN_INTERVAL;
     } else if (intervalMs > MAX_INTERVAL_MS) {
@@ -111,6 +119,7 @@ int32_t TimerManager::AddTimerInternal(int32_t intervalMs, int32_t repeatCount, 
 
 int32_t TimerManager::RemoveTimerInternal(int32_t timerId)
 {
+    CALL_DEBUG_ENTER;
     for (auto it = timers_.begin(); it != timers_.end(); ++it) {
         if ((*it)->id == timerId) {
             timers_.erase(it);
@@ -122,6 +131,7 @@ int32_t TimerManager::RemoveTimerInternal(int32_t timerId)
 
 int32_t TimerManager::ResetTimerInternal(int32_t timerId)
 {
+    CALL_DEBUG_ENTER;
     for (auto it = timers_.begin(); it != timers_.end(); ++it) {
         if ((*it)->id == timerId) {
             auto timer = std::move(*it);
@@ -141,6 +151,7 @@ int32_t TimerManager::ResetTimerInternal(int32_t timerId)
 
 bool TimerManager::IsExistInternal(int32_t timerId)
 {
+    CALL_DEBUG_ENTER;
     for (auto it = timers_.begin(); it != timers_.end(); ++it) {
         if ((*it)->id == timerId) {
             return true;
@@ -151,6 +162,7 @@ bool TimerManager::IsExistInternal(int32_t timerId)
 
 void TimerManager::InsertTimerInternal(std::unique_ptr<TimerItem>& timer)
 {
+    CALL_DEBUG_ENTER;
     for (auto it = timers_.begin(); it != timers_.end(); ++it) {
         if ((*it)->nextCallTime > timer->nextCallTime) {
             timers_.insert(it, std::move(timer));
@@ -162,6 +174,7 @@ void TimerManager::InsertTimerInternal(std::unique_ptr<TimerItem>& timer)
 
 int32_t TimerManager::CalcNextDelayInternal()
 {
+    CALL_DEBUG_ENTER;
     auto delay = MIN_DELAY;
     if (!timers_.empty()) {
         auto nowTime = GetMillisTime();
@@ -177,6 +190,7 @@ int32_t TimerManager::CalcNextDelayInternal()
 
 void TimerManager::ProcessTimersInternal()
 {
+    CALL_DEBUG_ENTER;
     if (timers_.empty()) {
         return;
     }
