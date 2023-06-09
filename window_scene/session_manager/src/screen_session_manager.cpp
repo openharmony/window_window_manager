@@ -118,11 +118,11 @@ void ScreenSessionManager::LoadScreenSceneXml()
     WLOGFI("ScreenSession load screen scene xml");
     if (ScreenSceneConfig::LoadConfigXml()) {
         ScreenSceneConfig::DumpConfig();
-        ConfigureDisplayManagerService();
+        ConfigureScreenScene();
     }
 }
 
-void ScreenSessionManager::ConfigureDisplayManagerService()
+void ScreenSessionManager::ConfigureScreenScene()
 {
     auto numbersConfig = ScreenSceneConfig::GetIntNumbersConfig();
     auto enableConfig = ScreenSceneConfig::GetEnableConfig();
