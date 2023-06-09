@@ -41,6 +41,7 @@ private:
     int HandleConnect(MessageParcel& data, MessageParcel& reply);
     int HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateActivateStatus(MessageParcel& data, MessageParcel& reply);
+    int HandleTerminateSession(MessageParcel& data, MessageParcel& reply);
     // for scene
     int HandleSessionEvent(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply);

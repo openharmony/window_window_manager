@@ -42,6 +42,7 @@ using NotifySessionStateChangeFunc = std::function<void(const SessionState& stat
 using NotifyBackPressedFunc = std::function<void()>;
 using NotifySessionFocusableChangeFunc = std::function<void(const bool isFocusable)>;
 using NotifyClickFunc = std::function<void()>;
+using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
 
 class ILifecycleListener {
 public:
@@ -92,7 +93,12 @@ public:
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     void SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func);
-    WSError PendingSessionActivation(const SessionInfo& info) override;
+
+    WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
+
+    void SetTerminateSessionListener(const NotifyTerminateSessionFunc& func);
+    WSError TerminateSession(const sptr<AAFwk::SessionInfo> info) override;
+
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
     void NotifySessionStateChange(const SessionState& state);
     WSError UpdateActiveStatus(bool isActive) override; // update active status from session_stage
@@ -130,6 +136,7 @@ protected:
     NotifyBackPressedFunc backPressedFunc_;
     NotifySessionFocusableChangeFunc sessionFocusableChangeFunc_;
     NotifyClickFunc clickFunc_;
+    NotifyTerminateSessionFunc terminateSessionFunc_;
     sptr<WindowSessionProperty> property_ = nullptr;
     SystemSessionConfig systemConfig_;
 
