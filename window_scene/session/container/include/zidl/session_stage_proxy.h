@@ -31,11 +31,8 @@ public:
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
     WSError HandleBackEvent() override;
-<<<<<<< HEAD
     WSError MarkProcessed(int32_t eventId) override;
-=======
     WSError UpdateFocus(bool isFocused) override;
->>>>>>> 7c60a1aa07f40bbf74e6fa37502160f96b49cecd
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
 };

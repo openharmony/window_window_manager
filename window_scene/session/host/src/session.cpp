@@ -366,12 +366,15 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-<<<<<<< HEAD
     
     auto currentTime = GetSysClockTime();
     if (ANRMgr->IsANRTriggered(currentTime, persistentId_)) {
         WLOGFD("The pointer event does not report normally, application not response");
         return WSError::WS_DO_NOTHING;
+    }
+    auto action = pointerEvent->GetPointerAction();
+    if (!isFocused_ && GetFocusable() && action == MMI::PointerEvent::POINTER_ACTION_DOWN) {
+        NotifyClick();
     }
     if (WSError ret = windowEventChannel_->TransferPointerEvent(pointerEvent); ret != WSError::WS_OK) {
         WLOGFE("TransferPointer failed");
@@ -383,13 +386,6 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         ANRMgr->SetApplicationPid(persistentId_, windowEventChannel_->GetApplicationPid());
     }
     return WSError::WS_OK;
-=======
-    auto action = pointerEvent->GetPointerAction();
-    if (!isFocused_ && GetFocusable() && action == MMI::PointerEvent::POINTER_ACTION_DOWN) {
-        NotifyClick();
-    }
-    return windowEventChannel_->TransferPointerEvent(pointerEvent);
->>>>>>> 7c60a1aa07f40bbf74e6fa37502160f96b49cecd
 }
 
 WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -572,14 +568,14 @@ WSError Session::ProcessBackEvent()
     return sessionStage_->HandleBackEvent();
 }
 
-<<<<<<< HEAD
 WSError Session::MarkProcessed(int32_t eventId)
 {
     WLOGFI("WLD>>> Here in Session::MarkProcessed!");
     int32_t persistentId = GetPersistentId();
     WLOGFI("WLD>>> persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
     return WSError::WS_OK;
-=======
+}
+
 void Session::GeneratePersistentId(const bool isExtension, const SessionInfo &sessionInfo)
 {
     if (sessionInfo.persistentId_ != 0) {
@@ -599,6 +595,5 @@ void Session::GeneratePersistentId(const bool isExtension, const SessionInfo &se
 sptr<ScenePersistence> Session::GetScenePersistence() const
 {
     return scenePersistence_;
->>>>>>> 7c60a1aa07f40bbf74e6fa37502160f96b49cecd
 }
 } // namespace OHOS::Rosen
