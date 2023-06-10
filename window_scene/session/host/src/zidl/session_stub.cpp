@@ -45,7 +45,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
         &SessionStub::HandleDestroyAndDisconnectSpecificSession),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_RAISE_TO_APP_TOP),
         &SessionStub::HandleRaiseToAppTop),
-    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_BACKPRESSED), &SessionStub::HandleBackPressed)
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_BACKPRESSED), &SessionStub::HandleBackPressed),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_MARK_PROCESSED), &SessionStub::HandleMarkProcessed)
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -137,6 +138,23 @@ int SessionStub::HandleTerminateSession(MessageParcel& data, MessageParcel& repl
 
     abilitySessionInfo->resultCode = data.ReadInt32();
     const WSError& errCode = TerminateSession(abilitySessionInfo);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("run HandleSessionException");
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
+    std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    abilitySessionInfo->want = *want;
+    if (data.ReadBool()) {
+        abilitySessionInfo->callerToken = data.ReadRemoteObject();
+    }
+
+    abilitySessionInfo->errorCode = data.ReadInt32();
+    abilitySessionInfo->errorReason = data.ReadString();
+    const WSError& errCode = NotifySessionException(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

@@ -42,25 +42,33 @@ WSError WindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent
 
 WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    CALL_DEBUG_ENTER;
     WLOGFD("WindowEventChannel receive pointer event");
     if (!sessionStage_) {
         WLOGFE("session stage is null!");
         return WSError::WS_ERROR_NULLPTR;
     }
     ANRHDL->SetSessionStage(sessionStage_);// 这个可以考虑优化，在应用进程启动的时候只初始化一遍就可以，不必每次都设置
-    pointerEvent->SetProcessedCallback(dispatchCallback_);
+    if (pointerEvent != nullptr) {
+        WLOGFD("SetProcessedCallback enter");
+        pointerEvent->SetProcessedCallback(dispatchCallback_);
+        WLOGFD("SetProcessedCallback leave");
+    }
     sessionStage_->NotifyPointerEvent(pointerEvent); // sessionStage_ 就是 windowSessionImpl,windoeSessionImpl 里有 hostSession_
     return WSError::WS_OK;
 }
 
 int32_t WindowEventChannel::GetApplicationPid()
 {
-    WLOGFD("WindowEventChannel GetApplicationPid");
-    return getpid();
+    CALL_DEBUG_ENTER;
+    int32_t applicationPid = getpid();
+    WLOGFD("WindowEventChannel GetApplicationPid, pid:%{public}d", applicationPid);
+    return applicationPid;
 }
 
 void WindowEventChannel::OnDispatchEventProcessed(int32_t eventId, int64_t actionTime)
 {
+    CALL_DEBUG_ENTER;
     ANRHDL->SetLastProcessedEventId(eventId, actionTime);
 }
 
