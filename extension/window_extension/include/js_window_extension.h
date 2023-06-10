@@ -78,8 +78,9 @@ public:
      *
      * This function can be called only once in the entire lifecycle of an extension.
      * @param Want Indicates the {@link Want} structure containing startup information about the extension.
+     * @param sessionInfo Indicates the {@link SessionInfo} structure containing startup information about the extension.
      */
-    virtual void OnStart(const AAFwk::Want& want) override;
+    virtual void OnStart(const AAFwk::Want& want, sptr<AAFwk::SessionInfo> sessionInfo) override;
 private:
     void GetSrcPath(std::string& srcPath) const;
     NativeValue* CallJsMethod(const char* name, NativeValue* const* argv = nullptr, size_t argc = 0) const;

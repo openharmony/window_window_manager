@@ -24,6 +24,7 @@
 #include <pointer_event.h>
 #include <memory>
 
+#include "session/host/include/extension_session.h"
 #include "wm_common.h"
 
 namespace OHOS {
@@ -98,7 +99,8 @@ public:
      * @return ERR_OK means connect success, others means connect failed.
      */
     int ConnectExtension(const AppExecFwk::ElementName& element, const Rect& rect,
-        uint32_t uid, uint32_t windowId, const sptr<IWindowExtensionCallback>& callback) const;
+        uint32_t uid, uint32_t windowId, const sptr<IWindowExtensionCallback>& callback,
+        const sptr<ExtensionSession>& extensionSession = nullptr) const;
     /**
      * @brief Disconnect window extension.
      */

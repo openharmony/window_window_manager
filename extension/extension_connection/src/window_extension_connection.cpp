@@ -21,6 +21,7 @@
 #include <hitrace_meter.h>
 #include <iremote_object.h>
 
+#include "session_info.h"
 #include "window_extension_proxy.h"
 #include "window_extension_client_stub_impl.h"
 #include "window_manager_hilog.h"
@@ -42,7 +43,8 @@ public:
     void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override;
 
     int ConnectExtension(const AppExecFwk::ElementName& element, const Rect& rect,
-        uint32_t uid, uint32_t windowId, const sptr<IWindowExtensionCallback>& callback);
+        uint32_t uid, uint32_t windowId, const sptr<IWindowExtensionCallback>& callback,
+        const sptr<ExtensionSession>& extensionSession);
     void DisconnectExtension();
     void Show() const;
     void Hide() const;
@@ -58,6 +60,8 @@ private:
     private:
         sptr<IWindowExtensionCallback> callback_;
     };
+
+    sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<ExtensionSession>& extSession);
 
     sptr<IWindowExtensionCallback> componentCallback_;
     sptr<IWindowExtension> proxy_;
@@ -102,7 +106,8 @@ void WindowExtensionConnection::Impl::WindowExtensionClientRecipient::OnRemoteDi
 }
 
 int WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::ElementName& element,
-    const Rect& rect, uint32_t uid, uint32_t windowId, const sptr<IWindowExtensionCallback>& callback)
+    const Rect& rect, uint32_t uid, uint32_t windowId, const sptr<IWindowExtensionCallback>& callback,
+    const sptr<ExtensionSession>& extensionSession)
 {
     AAFwk::Want want;
     want.SetElement(element);
@@ -114,9 +119,24 @@ int WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::ElementN
     want.SetParam(RECT_FORM_KEY_HEIGHT, static_cast<int>(rect.height_));
     want.SetParam(WINDOW_ID, static_cast<int>(windowId));
     componentCallback_ = callback;
-    auto ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, this, nullptr);
-    WLOGI("Connection extension end ret = %{public}d windowId = %{public}u uid = %{public}u", ret, windowId, uid);
+    auto extSessionInfo = SetAbilitySessionInfo(extensionSession);
+    auto ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectUIExtensionAbility(want, this, extSessionInfo, uid);
+    WLOGI("Connection ui extension end ret = %{public}d windowId = %{public}u uid = %{public}u", ret, windowId, uid);
     return ret;
+}
+
+sptr<AAFwk::SessionInfo> WindowExtensionConnection::Impl::SetAbilitySessionInfo(const sptr<ExtensionSession>& extSession)
+{
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = new (std::nothrow) AAFwk::SessionInfo();
+    if (!abilitySessionInfo) {
+        WLOGFE("abilitySessionInfo is nullptr");
+        return nullptr;
+    }
+    auto sessionInfo = extSession->GetSessionInfo();
+    abilitySessionInfo->sessionToken = extSession->AsObject();
+    abilitySessionInfo->callerToken = sessionInfo.callerToken_;
+    abilitySessionInfo->persistentId = extSession->GetPersistentId();
+    return abilitySessionInfo;
 }
 
 void WindowExtensionConnection::Impl::Show() const
@@ -200,9 +220,10 @@ void WindowExtensionConnection::Impl::OnAbilityDisconnectDone(const AppExecFwk::
 }
 
 int WindowExtensionConnection::ConnectExtension(const AppExecFwk::ElementName& element,
-    const Rect& rect, uint32_t uid, uint32_t windowId, const sptr<IWindowExtensionCallback>& callback) const
+    const Rect& rect, uint32_t uid, uint32_t windowId, const sptr<IWindowExtensionCallback>& callback,
+    const sptr<ExtensionSession>& extensionSession) const
 {
-    return pImpl_->ConnectExtension(element, rect, uid, windowId, callback);
+    return pImpl_->ConnectExtension(element, rect, uid, windowId, callback, extensionSession);
 }
 
 void WindowExtensionConnection::Show() const
