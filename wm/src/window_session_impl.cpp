@@ -317,6 +317,17 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     return WSError::WS_OK;
 }
 
+WSError WindowSessionImpl::UpdateFocus(bool isFocused)
+{
+    WLOGFI("update focus: %{public}u", isFocused);
+    if (isFocused) {
+        NotifyAfterFocused();
+    } else {
+        NotifyAfterUnfocused();
+    }
+    return WSError::WS_OK;
+}
+
 void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -444,7 +455,14 @@ WindowState WindowSessionImpl::GetWindowState() const
 
 WMError WindowSessionImpl::SetFocusable(bool isFocusable)
 {
+    WLOGFD("set focusable");
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     property_->SetFocusable(isFocusable);
+    if (state_ == WindowState::STATE_SHOWN) {
+        return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
+    }
     return WMError::WM_OK;
 }
 
@@ -697,6 +715,12 @@ void WindowSessionImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsync
         return;
     }
     VsyncStation::GetInstance().RequestVsync(vsyncCallback);
+}
+
+WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
+{
+    WLOGFD("UpdateProperty, action:%{public}u", action);
+    return SessionManager::GetInstance().UpdateProperty(property_, action);
 }
 
 static float ConvertRadiusToSigma(float radius)
