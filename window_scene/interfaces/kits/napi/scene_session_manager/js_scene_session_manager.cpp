@@ -15,7 +15,7 @@
 
 #include "js_scene_session_manager.h"
 
-#include <ability_context.h>
+#include <context.h>
 #include <js_runtime_utils.h>
 #include "session/host/include/scene_persistence.h"
 #include "session/host/include/session.h"
