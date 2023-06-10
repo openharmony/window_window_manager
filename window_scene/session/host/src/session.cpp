@@ -19,6 +19,7 @@
 #include "key_event.h"
 
 #include "anr_manager.h"
+#include "interfaces/include/ws_common.h"
 #include "surface_capture_future.h"
 #include <transaction/rs_interfaces.h>
 #include <ui/rs_surface_node.h>
@@ -272,8 +273,13 @@ WSError Session::SetActive(bool active)
     return WSError::WS_OK;
 }
 
-WSError Session::PendingSessionActivation(const SessionInfo& info)
+WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
+    SessionInfo info;
+    info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
+    info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
+    info.moduleName_ = abilitySessionInfo->want.GetModuleName();
+    info.callerToken_ = abilitySessionInfo->callerToken;
     if (pendingSessionActivationFunc_) {
         pendingSessionActivationFunc_(info);
     }
@@ -288,6 +294,23 @@ void Session::SetPendingSessionActivationEventListener(const NotifyPendingSessio
 void Session::SetBackPressedListenser(const NotifyBackPressedFunc& func)
 {
     backPressedFunc_ = func;
+}
+
+WSError Session::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
+{
+    SessionInfo info;
+    info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
+    info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
+    info.callerToken_ = abilitySessionInfo->callerToken;
+    if (terminateSessionFunc_) {
+        terminateSessionFunc_(info);
+    }
+    return WSError::WS_OK;
+}
+
+void Session::SetTerminateSessionListener(const NotifyTerminateSessionFunc& func)
+{
+    terminateSessionFunc_ = func;
 }
 
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
