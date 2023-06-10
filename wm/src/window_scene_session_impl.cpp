@@ -71,6 +71,23 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentSessionByParentId(uint
     return nullptr;
 }
 
+sptr<WindowSessionImpl> WindowSceneSessionImpl::FindMainWindowWithContext()
+{
+    if (GetType() != WindowType::WINDOW_TYPE_DIALOG) {
+        return nullptr;
+    }
+
+    for (const auto& winPair : windowSessionMap_) {
+        auto win = winPair.second.second;
+        if (win && win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+            context_.get() == win->GetContext().get()) {
+            return win;
+        }
+    }
+    WLOGFE("Can not find main window to bind dialog!");
+    return nullptr;
+}
+
 WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 {
     sptr<ISessionStage> iSessionStage(this);
@@ -97,6 +114,11 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         if (WindowHelper::IsAppFloatingWindow(GetType())) {
             property_->SetParentPersistentId(GetFloatingWindowParentId());
             WLOGFI("WindowSessionImpl set SetParentPersistentId: %{public}" PRIu64 "", property_->GetParentPersistentId());
+        }
+        if (GetType() == WindowType::WINDOW_TYPE_DIALOG) {
+            auto mainWindow = FindMainWindowWithContext();
+            property_->SetParentPersistentId(mainWindow->GetPersistentId());
+            WLOGFD("Bind dialog to main window");
         }
         SessionManager::GetInstance().CreateAndConnectSpecificSession(iSessionStage, eventChannel, surfaceNode_,
             property_, persistentId, session);

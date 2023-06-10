@@ -116,7 +116,12 @@ public:
     WSError ProcessBackEvent(); // send back event to session_stage
     WSError RequestSessionBack() override; // receive back request from session_stage
     sptr<ScenePersistence> GetScenePersistence() const;
-
+    void SetParentSession(const sptr<Session>& session);
+    void BindDialogToParentSession(const sptr<Session>& session);
+    void RemoveDialogToParentSession(const sptr<Session>& session);
+    std::vector<sptr<Session>> GetDialogVector() const;
+    void NotifyTouchDialogTarget();
+    WSError NotifyDestroy();
     static std::atomic<uint32_t> sessionId_;
     static std::set<uint32_t> persistIdSet_;
 
@@ -153,6 +158,8 @@ protected:
     sptr<ScenePersistence> scenePersistence_ = nullptr;
 
 private:
+    bool CheckDialogOnForeground();
+
     template<typename T>
     bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
     template<typename T>
@@ -185,6 +192,8 @@ private:
     sptr<IWindowEventChannel> windowEventChannel_ = nullptr;
 
     std::shared_ptr<Media::PixelMap> snapshot_;
+    std::vector<sptr<Session>> dialogVec_;
+    sptr<Session> parentSession_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_H

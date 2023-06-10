@@ -21,8 +21,42 @@
 #include <native_engine/native_value.h>
 
 #include "interfaces/include/ws_common.h"
+#include "wm_common.h"
 
 namespace OHOS::Rosen {
+enum class WindowTypeInAPI : uint32_t {
+    TYPE_BASE,
+    TYPE_APP = TYPE_BASE,
+    TYPE_SYSTEM_ALERT,
+    TYPE_INPUT_METHOD,
+    TYPE_STATUS_BAR,
+    TYPE_PANEL,
+    TYPE_KEYGUARD,
+    TYPE_VOLUME_OVERLAY,
+    TYPE_NAVIGATION_BAR,
+    TYPE_FLOAT,
+    TYPE_WALLPAPER,
+    TYPE_DESKTOP,
+    TYPE_LAUNCHER_RECENT,
+    TYPE_LAUNCHER_DOCK,
+    TYPE_VOICE_INTERACTION,
+    TYPE_POINTER,
+    TYPE_FLOAT_CAMERA,
+    TYPE_DIALOG,
+    TYPE_SCREENSHOT,
+    TYPE_END
+};
+const std::map<WindowType, WindowTypeInAPI> WINDOW_TYPE_TO_API_TYPE_MAP {
+    { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,     WindowTypeInAPI::TYPE_END               },
+    { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,      WindowTypeInAPI::TYPE_APP               },
+    { WindowType::WINDOW_TYPE_DIALOG,              WindowTypeInAPI::TYPE_DIALOG            },
+    { WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW, WindowTypeInAPI::TYPE_SYSTEM_ALERT      },
+    { WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,  WindowTypeInAPI::TYPE_INPUT_METHOD      },
+    { WindowType::WINDOW_TYPE_FLOAT,               WindowTypeInAPI::TYPE_FLOAT             },
+    { WindowType::WINDOW_TYPE_FLOAT_CAMERA,        WindowTypeInAPI::TYPE_FLOAT_CAMERA      },
+    { WindowType::WINDOW_TYPE_VOICE_INTERACTION,   WindowTypeInAPI::TYPE_VOICE_INTERACTION },
+    { WindowType::WINDOW_TYPE_SCREENSHOT,          WindowTypeInAPI::TYPE_SCREENSHOT        },
+};
 bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, SessionInfo& sessionInfo);
 NativeValue* CreateJsSessionInfo(NativeEngine& engine, const SessionInfo& sessionInfo);
 NativeValue* CreateJsSessionState(NativeEngine& engine);
