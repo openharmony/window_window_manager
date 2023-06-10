@@ -38,7 +38,6 @@ class ResourceManager;
 } // namespace OHOS::Global::Resource
 
 namespace OHOS::Rosen {
-class RootScene;
 class SceneSession;
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
@@ -88,7 +87,6 @@ private:
 
     std::map<uint64_t, sptr<SceneSession>> abilitySceneMap_;
     sptr<RootSceneSession> rootSceneSession_;
-    sptr<RootScene> rootScene_;
     NotifyCreateSpecificSessionFunc createSpecificSessionFunc_;
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
