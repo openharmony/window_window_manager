@@ -254,13 +254,6 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
         }
         sptr<ISession> iSession(rootSceneSession_);
         AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(iSession->AsObject());
-        rootSceneSession_->SetLoadContentFunc([rootScene = rootScene_](const std::string &contentUrl,
-            NativeEngine *engine, NativeValue *storage, AbilityRuntime::Context *context) {
-            rootScene->LoadContent(contentUrl, engine, storage, context);
-            if (!ScenePersistence::CreateSnapshotDir(context->GetFilesDir())) {
-                WLOGFD("snapshot dir existed");
-            }
-        });
         return rootSceneSession_;
     };
 
