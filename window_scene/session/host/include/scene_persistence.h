@@ -23,13 +23,13 @@
 #include <sys/stat.h>
 #include <vector>
 
-#include "image_packer.h"
 #include "interfaces/include/ws_common.h"
 
+namespace OHOS::Media {
+class PixelMap;
+} // namespace OHOS::Media
 
 namespace OHOS::Rosen {
-constexpr mode_t MKDIR_MODE = 0740;
-
 class ScenePersistence : public RefBase {
 public:
     ScenePersistence() = default;
@@ -39,6 +39,7 @@ public:
     static inline bool CreateSnapshotDir(std::string strFilesDir)
     {
         strPersistPath_ = strFilesDir + "/SceneSnapShot/";
+        constexpr mode_t MKDIR_MODE = 0740;
         if (mkdir(strPersistPath_.c_str(), MKDIR_MODE) != 0) {
             return false;
         }
@@ -55,5 +56,6 @@ private:
     SessionInfo sessionInfo_;
     std::string strSnapshotFile_;
 };
-}
-#endif
+} // namespace OHOS::Rosen
+
+#endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_PERSISTENCE_H
