@@ -29,6 +29,8 @@ public:
     MOCK_METHOD2(UpdateRect, WSError(const WSRect& rect, SizeChangeReason reason));
     MOCK_METHOD0(HandleBackEvent, WSError(void));
     MOCK_METHOD1(UpdateFocus, WSError(bool isFocused));
+    MOCK_METHOD0(NotifyDestroy, WSError(void));
+    MOCK_METHOD0(NotifyTouchDialogTarget, void(void));
 };
 } // namespace Rosen
 } // namespace OHOS

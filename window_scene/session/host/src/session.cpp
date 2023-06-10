@@ -386,8 +386,73 @@ void Session::SetSessionExceptionListener(const NotifySessionExceptionFunc& func
     sessionExceptionFunc_ = func;
 }
 
+void Session::NotifyTouchDialogTarget()
+{
+    if (!sessionStage_) {
+        return;
+    }
+    sessionStage_->NotifyTouchDialogTarget();
+}
+
+WSError Session::NotifyDestroy()
+{
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyDestroy();
+}
+
+void Session::SetParentSession(const sptr<Session>& session)
+{
+    parentSession_ = session;
+}
+
+void Session::BindDialogToParentSession(const sptr<Session>& session)
+{
+    dialogVec_.push_back(session);
+}
+
+void Session::RemoveDialogToParentSession(const sptr<Session>& session)
+{
+    auto iter = std::find(dialogVec_.begin(), dialogVec_.end(), session);
+    if (iter != dialogVec_.end()) {
+        dialogVec_.erase(iter);
+    }
+}
+
+std::vector<sptr<Session>> Session::GetDialogVector() const
+{
+    return dialogVec_;
+}
+
+bool Session::CheckDialogOnForeground()
+{
+    if (dialogVec_.empty()) {
+        return false;
+    }
+    for (auto dialogSession : dialogVec_) {
+        if (dialogSession && dialogSession->GetSessionState() == SessionState::STATE_ACTIVE) {
+            dialogSession->NotifyTouchDialogTarget();
+            WLOGFD("Notify touch dialog window");
+            return true;
+        }
+    }
+    return false;
+}
+
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        if (CheckDialogOnForeground()) {
+            WLOGFD("Has dialog on foreground, not transfer pointer event");
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        }
+    } else if (GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
+        if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
+            WLOGFD("Its main window has dialog on foreground, not transfer pointer event");
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        }
+    }
     WLOGFD("Session TransferPointEvent, Id: %{public}" PRIu64 "", persistentId_);
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
@@ -402,6 +467,17 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
 
 WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
+    if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        if (CheckDialogOnForeground()) {
+            WLOGFD("Has dialog on foreground, not transfer pointer event");
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        }
+    } else if (GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
+        if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
+            WLOGFD("Its main window has dialog on foreground, not transfer pointer event");
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        }
+    }
     WLOGFD("Session TransferKeyEvent");
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
