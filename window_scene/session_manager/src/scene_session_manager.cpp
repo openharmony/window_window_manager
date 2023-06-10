@@ -28,12 +28,9 @@
 #include <system_ability_definition.h>
 #include <want.h>
 
-#include "ability_context.h"
 #include "color_parser.h"
 #include "common/include/message_scheduler.h"
 #include "common/include/permission.h"
-#include "root_scene.h"
-#include "session/host/include/scene_persistence.h"
 #include "session/host/include/scene_session.h"
 #include "window_manager_hilog.h"
 #include "wm_math.h"
@@ -251,18 +248,10 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
         system::SetParameter("bootevent.boot.completed", "true");
         SessionInfo info;
         rootSceneSession_ = new (std::nothrow) RootSceneSession(info);
-        rootScene_ = new (std::nothrow) RootScene();
-        if (!rootSceneSession_ || !rootScene_) {
-            WLOGFE("rootSceneSession or rootScene is nullptr");
+        if (!rootSceneSession_) {
+            WLOGFE("rootSceneSession is nullptr");
             return sptr<RootSceneSession>(nullptr);
         }
-        rootSceneSession_->SetLoadContentFunc([rootScene = rootScene_](const std::string &contentUrl,
-            NativeEngine *engine, NativeValue *storage, AbilityRuntime::Context *context) {
-            rootScene->LoadContent(contentUrl, engine, storage, context);
-            if (!ScenePersistence::CreateSnapshotDir(context->GetFilesDir())) {
-                WLOGFD("snapshot dir existed");
-            }
-        });
         AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_);
         return rootSceneSession_;
     };

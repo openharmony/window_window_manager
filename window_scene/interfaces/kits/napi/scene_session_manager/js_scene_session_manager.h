@@ -18,10 +18,10 @@
 
 #include <map>
 
+#include "interfaces/include/ws_common.h"
 #include <native_engine/native_engine.h>
 #include <native_engine/native_value.h>
-
-#include "interfaces/include/ws_common.h"
+#include "root_scene.h"
 #include "session/host/include/scene_session.h"
 
 namespace OHOS::Rosen {
@@ -62,6 +62,8 @@ private:
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     using Func = void(JsSceneSessionManager::*)();
     std::map<std::string, Func> listenerFunc_;
+
+    sptr<RootScene> rootScene_;
 };
 } // namespace OHOS::Rosen
 

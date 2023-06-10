@@ -15,7 +15,9 @@
 
 #include "js_scene_session_manager.h"
 
+#include <ability_context.h>
 #include <js_runtime_utils.h>
+#include "session/host/include/scene_persistence.h"
 #include "session/host/include/session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
@@ -48,7 +50,7 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
 
     std::unique_ptr<JsSceneSessionManager> jsSceneSessionManager = std::make_unique<JsSceneSessionManager>(*engine);
     object->SetNativePointer(jsSceneSessionManager.release(), JsSceneSessionManager::Finalizer, nullptr);
-    object->SetProperty("SessionState", SessionStateInit(engine));
+    object->SetProperty("SessionState", CreateJsSessionState(*engine));
 
     const char* moduleName = "JsSceneSessionManager";
     BindNativeFunction(*engine, *object, "getRootSceneSession", moduleName, JsSceneSessionManager::GetRootSceneSession);
@@ -273,21 +275,33 @@ NativeValue* JsSceneSessionManager::OnProcessBackEvent(NativeEngine& engine, Nat
 
 NativeValue* JsSceneSessionManager::OnGetRootSceneSession(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("[NAPI]OnGetRootSceneSession");
+    WLOGI("[NAPI]OnGetRootSceneSession");
     sptr<RootSceneSession> rootSceneSession = SceneSessionManager::GetInstance().GetRootSceneSession();
     if (rootSceneSession == nullptr) {
         engine.Throw(
             CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
         return engine.CreateUndefined();
-    } else {
-        NativeValue* jsRootSceneSessionObj = JsRootSceneSession::Create(engine, rootSceneSession);
-        if (jsRootSceneSessionObj == nullptr) {
-            WLOGFE("[NAPI]jsRootSceneSessionObj is nullptr");
-            engine.Throw(CreateJsError(
-                engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
-        }
-        return jsRootSceneSessionObj;
     }
+
+    if (rootScene_ == nullptr) {
+        rootScene_ = new RootScene();
+    }
+    rootSceneSession->SetLoadContentFunc([rootScene = rootScene_]
+        (const std::string& contentUrl, NativeEngine* engine, NativeValue* storage, AbilityRuntime::Context* context) {
+            rootScene->LoadContent(contentUrl, engine, storage, context);
+            if (!ScenePersistence::CreateSnapshotDir(context->GetFilesDir())) {
+                WLOGFD("snapshot dir existed");
+            }
+        });
+
+    NativeValue* jsRootSceneSessionObj = JsRootSceneSession::Create(engine, rootSceneSession);
+    if (jsRootSceneSessionObj == nullptr) {
+        WLOGFE("[NAPI]jsRootSceneSessionObj is nullptr");
+        engine.Throw(
+            CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
+        return engine.CreateUndefined();
+    }
+    return jsRootSceneSessionObj;
 }
 
 NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, NativeCallbackInfo& info)

@@ -14,20 +14,14 @@
  */
 
 #include "color_parser.h"
-#include <cstdlib>
 
-#include "window_manager_hilog.h"
+#include <cstdlib>
 
 namespace OHOS {
 namespace Rosen {
-namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "ColorParser"};
-}
-
 bool ColorParser::Parse(const std::string& colorStr, uint32_t& colorValue)
 {
     if (colorStr.empty()) {
-        WLOGFE("color string is empty");
         return false;
     }
 
@@ -36,8 +30,8 @@ bool ColorParser::Parse(const std::string& colorStr, uint32_t& colorValue)
         if (!IsValidHexString(color)) {
             return false;
         }
-        char* ptr;
-        colorValue = std::strtoul(color.c_str(), &ptr, 16); // convert hex string to number
+        constexpr int HEX = 16;
+        colorValue = std::strtoul(color.c_str(), 0, HEX); // convert hex string to number
         if (colorStr.size() == 7) { // #RRGGBB: RRGGBB -> AARRGGBB
             colorValue |= 0xff000000;
             return true;
