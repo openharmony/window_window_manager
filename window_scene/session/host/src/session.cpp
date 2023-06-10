@@ -321,6 +321,10 @@ WSError Session::SetActive(bool active)
 
 WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
+    if (abilitySessionInfo) {
+        WLOGFE("abilitySessionInfo is null");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
     SessionInfo info;
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -344,6 +348,10 @@ void Session::SetBackPressedListenser(const NotifyBackPressedFunc& func)
 
 WSError Session::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
+    if (abilitySessionInfo) {
+        WLOGFE("abilitySessionInfo is null");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
     SessionInfo info;
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -357,6 +365,29 @@ WSError Session::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionI
 void Session::SetTerminateSessionListener(const NotifyTerminateSessionFunc& func)
 {
     terminateSessionFunc_ = func;
+}
+
+WSError Session::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
+{
+    if (abilitySessionInfo) {
+        WLOGFE("abilitySessionInfo is null");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    SessionInfo info;
+    info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
+    info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
+    info.callerToken_ = abilitySessionInfo->callerToken;
+    info.errorCode = abilitySessionInfo->errorCode;
+    info.errorReason = abilitySessionInfo->errorReason;
+    if (sessionExceptionFunc_) {
+        sessionExceptionFunc_(info);
+    }
+    return WSError::WS_OK;
+}
+
+void Session::SetSessionExceptionListener(const NotifySessionExceptionFunc& func)
+{
+    sessionExceptionFunc_ = func;
 }
 
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -570,6 +601,7 @@ WSError Session::ProcessBackEvent()
 
 WSError Session::MarkProcessed(int32_t eventId)
 {
+    CALL_DEBUG_ENTER;
     WLOGFI("WLD>>> Here in Session::MarkProcessed!");
     int32_t persistentId = GetPersistentId();
     WLOGFI("WLD>>> persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);

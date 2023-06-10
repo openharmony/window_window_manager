@@ -685,6 +685,7 @@ void WindowSessionImpl::NotifyForegroundFailed(WMError ret)
 
 WSError WindowSessionImpl::MarkProcessed(int32_t eventId)
 {
+    CALL_DEBUG_ENTER;
     if (hostSession_ == nullptr) {
         WLOGFE("hostSession is nullptr");
         return WSError::WS_DO_NOTHING;
@@ -704,6 +705,7 @@ void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reaso
 
 void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    CALL_DEBUG_ENTER;
     if (uiContent_) {
         uiContent_->ProcessPointerEvent(pointerEvent);
     }

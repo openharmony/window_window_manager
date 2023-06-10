@@ -44,6 +44,7 @@ using NotifyBackPressedFunc = std::function<void()>;
 using NotifySessionFocusableChangeFunc = std::function<void(const bool isFocusable)>;
 using NotifyClickFunc = std::function<void()>;
 using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
+using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info)>;
 
 class ILifecycleListener {
 public:
@@ -99,7 +100,8 @@ public:
 
     void SetTerminateSessionListener(const NotifyTerminateSessionFunc& func);
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> info) override;
-
+    void SetSessionExceptionListener(const NotifyTerminateSessionFunc& func);
+    WSError NotifySessionException(const sptr<AAFwk::SessionInfo> info) override;
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
     void NotifySessionStateChange(const SessionState& state);
     WSError UpdateActiveStatus(bool isActive) override; // update active status from session_stage
@@ -146,6 +148,7 @@ protected:
     NotifySessionFocusableChangeFunc sessionFocusableChangeFunc_;
     NotifyClickFunc clickFunc_;
     NotifyTerminateSessionFunc terminateSessionFunc_;
+    NotifySessionExceptionFunc sessionExceptionFunc_;
     sptr<WindowSessionProperty> property_ = nullptr;
     SystemSessionConfig systemConfig_;
     const bool isExtension = true;

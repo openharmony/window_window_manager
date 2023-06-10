@@ -37,6 +37,7 @@ public:
 
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
+    WSError NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
 
     WSError OnSessionEvent(SessionEvent event) override;
     WSError RaiseToAppTop() override;
