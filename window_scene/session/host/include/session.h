@@ -24,6 +24,7 @@
 #include "interfaces/include/ws_common.h"
 #include "session/container/include/zidl/session_stage_interface.h"
 #include "session/host/include/zidl/session_stub.h"
+#include "session/host/include/scene_persistence.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -40,6 +41,8 @@ class RSSurfaceNode;
 using NotifyPendingSessionActivationFunc = std::function<void(const SessionInfo& info)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
 using NotifyBackPressedFunc = std::function<void()>;
+using NotifySessionFocusableChangeFunc = std::function<void(const bool isFocusable)>;
+using NotifyClickFunc = std::function<void()>;
 using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
 
 class ILifecycleListener {
@@ -66,6 +69,9 @@ public:
     sptr<WindowSessionProperty> GetSessionProperty() const;
     WSRect GetSessionRect() const;
     WindowType GetWindowType() const;
+
+    void SetWindowSessionProperty(const sptr<WindowSessionProperty>& property);
+    const sptr<WindowSessionProperty>& GetWindowSessionProperty() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason);
@@ -107,21 +113,46 @@ public:
     void SetBackPressedListenser(const NotifyBackPressedFunc& func);
     WSError ProcessBackEvent(); // send back event to session_stage
     WSError RequestSessionBack() override; // receive back request from session_stage
+<<<<<<< HEAD
     WSError MarkProcessed(int32_t eventId) override;
 
+=======
+    sptr<ScenePersistence> GetScenePersistence() const;
+
+    static std::atomic<uint32_t> sessionId_;
+    static std::set<uint32_t> persistIdSet_;
+
+    void SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func);
+    void SetClickListener(const NotifyClickFunc& func);
+    void NotifySessionFocusableChange(bool isFocusable);
+    void NotifyClick();
+    WSError UpdateFocus(bool isFocused);
+    WSError SetFocusable(bool isFocusable);
+    bool GetFocusable() const;
+    WSError SetTouchable(bool touchable);
+    bool GetTouchable() const;
+>>>>>>> 7c60a1aa07f40bbf74e6fa37502160f96b49cecd
 protected:
+    void GeneratePersistentId(const bool isExtension, const SessionInfo& sessionInfo);
     void UpdateSessionState(SessionState state);
+    void UpdateSessionFocusable(bool isFocusable);
     bool IsSessionValid() const;
+
     bool isActive_ = false;
+    bool isFocused_ = false;
     WSRect winRect_ {0, 0, 0, 0};
     sptr<ISessionStage> sessionStage_;
     SessionInfo sessionInfo_;
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
     NotifyBackPressedFunc backPressedFunc_;
+    NotifySessionFocusableChangeFunc sessionFocusableChangeFunc_;
+    NotifyClickFunc clickFunc_;
     NotifyTerminateSessionFunc terminateSessionFunc_;
     sptr<WindowSessionProperty> property_ = nullptr;
     SystemSessionConfig systemConfig_;
+    const bool isExtension = true;
+    sptr<ScenePersistence> scenePersistence_ = nullptr;
 
 private:
     template<typename T>

@@ -69,6 +69,8 @@ ohos_shared_library("scene_session_manager") {
     "ability_base:session_info",
     "ability_base:want",
     "ability_runtime:ability_manager",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:app_context",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -90,6 +92,7 @@ ohos_shared_library("scene_session_manager") {
 ohos_shared_library("screen_session_manager") {
   sources = [
     "../../dm/src/zidl/display_manager_agent_proxy.cpp",
+    "src/screen_scene_config.cpp",
     "src/screen_session_manager.cpp",
     "src/session_display_power_controller.cpp",
     "src/zidl/screen_session_manager_stub.cpp",
@@ -102,16 +105,25 @@ ohos_shared_library("screen_session_manager") {
   deps = [
     "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/session:screen_session",
+    "//third_party/libxml2:libxml2",
   ]
 
   external_deps = [
     "c_utils:utils",
+    "config_policy:configpolicy_util",
     "eventhandler:libeventhandler",
     "hilog_native:libhilog",
     "ipc:ipc_core",
   ]
+
+  if (is_standard_system) {
+    external_deps += [ "init:libbegetutil" ]
+  } else {
+    external_deps += [ "init_lite:libbegetutil" ]
+  }
 
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
@@ -136,6 +148,7 @@ ohos_shared_library("session_manager") {
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/session:scene_session",
+    "${window_base_path}/window_scene/session:screen_session",
   ]
 
   external_deps = [

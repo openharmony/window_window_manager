@@ -95,6 +95,7 @@ struct SessionInfo {
     std::string abilityName_ = "";
     sptr<IRemoteObject> callerToken_ = nullptr;
     bool isSystem_ = false;
+    uint32_t persistentId_ = 0;
 
     sptr<AAFwk::Want> want;
     int32_t resultCode;

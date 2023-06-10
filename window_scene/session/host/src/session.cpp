@@ -22,14 +22,19 @@
 #include "interfaces/include/ws_common.h"
 #include "surface_capture_future.h"
 #include <transaction/rs_interfaces.h>
+#include <pointer_event.h>
 #include <ui/rs_surface_node.h>
 #include "util.h"
 #include "window_manager_hilog.h"
+#include "surface_capture_future.h"
 
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Session" };
 } // namespace
+
+std::atomic<uint32_t> Session::sessionId_(INVALID_SESSION_ID);
+std::set<uint32_t> Session::persistIdSet_;
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
@@ -38,11 +43,6 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
 Session::~Session()
 {
     WLOGD("~Session");
-}
-
-void Session::SetPersistentId(uint64_t persistentId)
-{
-    persistentId_ = persistentId;
 }
 
 uint64_t Session::GetPersistentId() const
@@ -57,6 +57,16 @@ uint64_t Session::GetParentPersistentId() const
         return property_->GetParentPersistentId();
     }
     return INVALID_SESSION_ID;
+}
+
+void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& property)
+{
+    property_ = property;
+}
+
+const sptr<WindowSessionProperty>& Session::GetWindowSessionProperty() const
+{
+    return property_;
 }
 
 std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
@@ -150,6 +160,41 @@ void Session::UpdateSessionState(SessionState state)
     NotifySessionStateChange(state);
 }
 
+void Session::UpdateSessionFocusable(bool isFocusable)
+{
+    property_->SetFocusable(isFocusable);
+    NotifySessionFocusableChange(isFocusable);
+}
+
+WSError Session::SetFocusable(bool isFocusable) 
+{
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (isFocusable == property_->GetFocusable()) {
+        WLOGFD("Session focusable do not change: [%{public}d]", isFocusable);
+        return WSError::WS_DO_NOTHING;
+    }
+    UpdateSessionFocusable(isFocusable);
+    return WSError::WS_OK;
+}
+
+bool Session::GetFocusable() const
+{
+    return property_->GetFocusable();
+}
+
+WSError Session::SetTouchable(bool touchable) 
+{
+    property_->SetTouchable(touchable);
+    return WSError::WS_OK;
+}
+
+bool Session::GetTouchable() const
+{
+    return property_->GetTouchable();
+}
+
 bool Session::IsSessionValid() const
 {
     bool res = state_ > SessionState::STATE_DISCONNECT && state_ < SessionState::STATE_END;
@@ -241,6 +286,7 @@ WSError Session::Disconnect()
     SessionState state = GetSessionState();
     WLOGFI("Disconnect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(state));
+    state_ = SessionState::STATE_INACTIVE;
     Background();
     if (GetSessionState() == SessionState::STATE_BACKGROUND) {
         UpdateSessionState(SessionState::STATE_DISCONNECT);
@@ -320,6 +366,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
+<<<<<<< HEAD
     
     auto currentTime = GetSysClockTime();
     if (ANRMgr->IsANRTriggered(currentTime, persistentId_)) {
@@ -336,6 +383,13 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         ANRMgr->SetApplicationPid(persistentId_, windowEventChannel_->GetApplicationPid());
     }
     return WSError::WS_OK;
+=======
+    auto action = pointerEvent->GetPointerAction();
+    if (!isFocused_ && GetFocusable() && action == MMI::PointerEvent::POINTER_ACTION_DOWN) {
+        NotifyClick();
+    }
+    return windowEventChannel_->TransferPointerEvent(pointerEvent);
+>>>>>>> 7c60a1aa07f40bbf74e6fa37502160f96b49cecd
 }
 
 WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -377,6 +431,44 @@ void Session::NotifySessionStateChange(const SessionState& state)
     if (sessionStateChangeFunc_) {
         sessionStateChangeFunc_(state);
     }
+}
+
+void Session::SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func)
+{
+    sessionFocusableChangeFunc_ = func;
+}
+
+void Session::SetClickListener(const NotifyClickFunc& func)
+{
+    clickFunc_ = func;
+}
+
+void Session::NotifySessionFocusableChange(bool isFocusable)
+{
+    WLOGFI("Notify session focusable change: %{public}u", isFocusable);
+    if (sessionFocusableChangeFunc_) {
+        sessionFocusableChangeFunc_(isFocusable);
+    }
+}
+
+void Session::NotifyClick()
+{
+    WLOGFI("Notify click");
+    if (clickFunc_) {
+        clickFunc_();
+    }
+}
+
+WSError Session::UpdateFocus(bool isFocused)
+{
+    WLOGFI("Session update focus id: %{public}" PRIu64, GetPersistentId());
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    isFocused_ = isFocused;
+    sessionStage_->UpdateFocus(isFocused);
+
+    return WSError::WS_OK;
 }
 
 void Session::SetSessionRect(const WSRect& rect)
@@ -480,11 +572,33 @@ WSError Session::ProcessBackEvent()
     return sessionStage_->HandleBackEvent();
 }
 
+<<<<<<< HEAD
 WSError Session::MarkProcessed(int32_t eventId)
 {
     WLOGFI("WLD>>> Here in Session::MarkProcessed!");
     int32_t persistentId = GetPersistentId();
     WLOGFI("WLD>>> persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
     return WSError::WS_OK;
+=======
+void Session::GeneratePersistentId(const bool isExtension, const SessionInfo &sessionInfo)
+{
+    if (sessionInfo.persistentId_ != 0) {
+        persistIdSet_.insert(sessionInfo.persistentId_);
+        persistentId_ = static_cast<uint64_t>(sessionInfo.persistentId_);
+        return;
+    }
+
+    sessionId_++;
+    while (persistIdSet_.count(sessionId_) > 0) {
+        sessionId_++;
+    }
+    persistentId_ = isExtension ? sessionId_.load() | 0x80000000 : sessionId_.load() & 0x7fffffff;
+    persistIdSet_.insert(sessionId_);
+}
+
+sptr<ScenePersistence> Session::GetScenePersistence() const
+{
+    return scenePersistence_;
+>>>>>>> 7c60a1aa07f40bbf74e6fa37502160f96b49cecd
 }
 } // namespace OHOS::Rosen

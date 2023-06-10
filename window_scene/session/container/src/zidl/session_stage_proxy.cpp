@@ -98,8 +98,33 @@ WSError SessionStageProxy::HandleBackEvent()
     return static_cast<WSError>(ret);
 }
 
+<<<<<<< HEAD
 WSError SessionStageProxy::MarkProcessed(int32_t eventId)
 {
     return WSError::WS_DO_NOTHING;
+=======
+WSError SessionStageProxy::UpdateFocus(bool focus)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteBool(focus)) {
+        WLOGFE("Write focus failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_FOCUS_CHANGE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadUint32();
+    return static_cast<WSError>(ret);
+>>>>>>> 7c60a1aa07f40bbf74e6fa37502160f96b49cecd
 }
 } // namespace OHOS::Rosen

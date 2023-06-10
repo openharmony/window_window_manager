@@ -226,6 +226,17 @@ void SessionManager::DestroyAndDisconnectSpecificSession(const uint64_t& persist
     sceneSessionManagerProxy_->DestroyAndDisconnectSpecificSession(persistentId);
 }
 
+WMError SessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
+{
+    WLOGFD("UpdateProperty");
+    InitSceneSessionManagerProxy();
+    if (!sceneSessionManagerProxy_) {
+        WLOGFE("sceneSessionManagerProxy_ is nullptr");
+        return WMError::WM_DO_NOTHING;
+    }
+    return static_cast<WMError>(sceneSessionManagerProxy_->UpdateProperty(property, action));
+}
+
 void SessionManager::InitScreenLockManagerProxy()
 {
     if (screenLockManagerProxy_) {

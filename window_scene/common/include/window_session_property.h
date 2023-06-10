@@ -94,7 +94,10 @@ struct SystemSessionConfig : public Parcelable {
 
     static SystemSessionConfig* Unmarshalling(Parcel& parcel)
     {
-        SystemSessionConfig* config = new SystemSessionConfig();
+        SystemSessionConfig* config = new (std::nothrow) SystemSessionConfig();
+        if (config == nullptr) {
+            return nullptr;
+        }
         config->isSystemDecorEnable_ = parcel.ReadBool();
         config->isStretchable_ = parcel.ReadBool();
         config->decorModeSupportInfo_ = parcel.ReadUint32();

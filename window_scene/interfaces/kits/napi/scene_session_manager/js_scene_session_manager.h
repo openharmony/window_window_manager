@@ -41,6 +41,7 @@ public:
     static NativeValue* RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* GetWindowSceneConfig(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* ProcessBackEvent(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* UpdateFocus(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
     NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
@@ -51,6 +52,7 @@ private:
     NativeValue* OnRequestSceneSessionDestruction(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetWindowSceneConfig(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnProcessBackEvent(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnUpdateFocus(NativeEngine& engine, NativeCallbackInfo& info);
 
     void OnCreateSpecificSession(const sptr<SceneSession>& sceneSession);
     void ProcessCreateSpecificSessionRegister();
