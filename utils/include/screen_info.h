@@ -29,6 +29,7 @@ enum class ScreenType : uint32_t {
 };
 class ScreenInfo : public Parcelable {
 friend class AbstractScreen;
+friend class ScreenSession;
 public:
     ScreenInfo() = default;
     ~ScreenInfo() = default;

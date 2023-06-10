@@ -28,12 +28,14 @@
 #include <system_ability_definition.h>
 #include <want.h>
 
+#include "ability_context.h"
 #include "color_parser.h"
 #include "common/include/message_scheduler.h"
+#include "common/include/permission.h"
 #include "root_scene.h"
+#include "session/host/include/scene_persistence.h"
 #include "session/host/include/scene_session.h"
 #include "window_manager_hilog.h"
-#include "common/include/permission.h"
 #include "wm_math.h"
 
 namespace OHOS::Rosen {
@@ -254,9 +256,13 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
             WLOGFE("rootSceneSession or rootScene is nullptr");
             return sptr<RootSceneSession>(nullptr);
         }
-        rootSceneSession_->SetLoadContentFunc(
-            [rootScene = rootScene_](const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
-                AbilityRuntime::Context* context) { rootScene->LoadContent(contentUrl, engine, storage, context); });
+        rootSceneSession_->SetLoadContentFunc([rootScene = rootScene_](const std::string &contentUrl,
+            NativeEngine *engine, NativeValue *storage, AbilityRuntime::Context *context) {
+            rootScene->LoadContent(contentUrl, engine, storage, context);
+            if (!ScenePersistence::CreateSnapshotDir(context->GetFilesDir())) {
+                WLOGFD("snapshot dir existed");
+            }
+        });
         AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_);
         return rootSceneSession_;
     };
@@ -295,8 +301,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             WLOGFE("sceneSession is nullptr!");
             return sceneSession;
         }
-        uint64_t persistentId = GeneratePersistentId();
-        sceneSession->SetPersistentId(persistentId);
+        auto persistentId = sceneSession->GetPersistentId();
         sceneSession->SetSystemConfig(systemConfig_);
         abilitySceneMap_.insert({ persistentId, sceneSession });
         WLOGFI("create session persistentId: %{public}" PRIu64 "", persistentId);
@@ -577,5 +582,85 @@ void SceneSessionManager::GetStartPage(const SessionInfo& sessionInfo, std::stri
     }
 
     GetStartPageFromResource(abilityInfo, path, bgColor);
+}
+
+WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
+{
+    if (property == nullptr) {
+        WLOGFE("property is invalid");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    uint64_t persistentId = property->GetPersistentId();
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        WLOGFE("session is invalid");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    WLOGI("Id: %{public}" PRIu64", action: %{public}u", sceneSession->GetPersistentId(), static_cast<uint32_t>(action));
+    WSError ret = WSError::WS_OK;
+    switch (action) {
+        case WSPropertyChangeAction::ACTION_UPDATE_FLAGS: {
+            // @todo
+            break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE: {
+            sceneSession->SetFocusable(property->GetFocusable());
+            break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE: {
+            // @todo
+            break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS: {
+            // @todo
+            break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
+            // @todo
+            break;
+        }
+        default:
+            break;
+    }
+
+    return ret;
+}
+
+WSError SceneSessionManager::SetFocusedSession(uint64_t persistentId)
+{
+    if (focusedSessionId_ == persistentId) {
+        WLOGI("Focus scene not change, id: %{public}" PRIu64, focusedSessionId_);
+        return WSError::WS_DO_NOTHING;
+    }
+    focusedSessionId_ = persistentId;
+    return WSError::WS_OK;
+}
+
+uint64_t SceneSessionManager::GetFocusedSession() const
+{
+    return focusedSessionId_;
+}
+
+WSError SceneSessionManager::UpdateFocus(uint64_t persistentId, bool isFocused)
+{
+    // notify session and client
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        WLOGFE("could not find window");
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    WSError res = WSError::WS_OK;
+    res = sceneSession->UpdateFocus(isFocused);
+    if (res != WSError::WS_OK) {
+        return res;
+    }
+    // focusId change
+    if (isFocused) {
+        return SetFocusedSession(persistentId);
+    }
+    if (persistentId == GetFocusedSession()) {
+        focusedSessionId_ = INVALID_SESSION_ID;
+    }
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

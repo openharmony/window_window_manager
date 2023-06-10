@@ -554,11 +554,11 @@ private:
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
         ColorSpace colorSpace;
-        ColorGamut surfaceColorGamut;
+        GraphicColorGamut surfaceColorGamut;
     };
     static const ColorSpaceConvertMap colorSpaceConvertMap[];
-    static ColorSpace GetColorSpaceFromSurfaceGamut(ColorGamut colorGamut);
-    static ColorGamut GetSurfaceGamutFromColorSpace(ColorSpace colorSpace);
+    static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
+    static GraphicColorGamut GetSurfaceGamutFromColorSpace(ColorSpace colorSpace);
     void ChangePropertyByApiVersion();
     void PerfLauncherHotAreaIfNeed(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
@@ -606,6 +606,7 @@ private:
     bool isIgnoreSafeAreaNeedNotify_ = false;
     bool isIgnoreSafeArea_ = false;
     bool needDefaultAnimation_ = true;
+    bool postTaskDone_ = false;
     const std::map<DragType, uint32_t> STYLEID_MAP = {
         {DragType::DRAG_UNDEFINED, MMI::MOUSE_ICON::DEFAULT},
         {DragType::DRAG_BOTTOM_OR_TOP, MMI::MOUSE_ICON::NORTH_SOUTH},
@@ -618,6 +619,7 @@ private:
         constexpr float BlurSigmaScale = 0.57735f;
         return radius > 0.0f ? BlurSigmaScale * radius + SK_ScalarHalf : 0.0f;
     }
+    std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS
