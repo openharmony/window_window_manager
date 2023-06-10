@@ -141,6 +141,9 @@ private:
         return (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180);
     }
     void Init();
+    void LoadScreenSceneXml();
+    void ConfigureScreenScene();
+    void ConfigureWaterfallDisplayCompressionParams();
     void RegisterScreenChangeListener();
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent);
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
