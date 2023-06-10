@@ -39,7 +39,6 @@ ohos_static_library("libwm_static") {
 
   sources = [
     "../wmserver/src/zidl/window_manager_proxy.cpp",
-    "src/color_parser.cpp",
     "src/input_transfer_station.cpp",
     "src/root_scene.cpp",
     "src/static_call.cpp",
@@ -146,7 +145,6 @@ ohos_shared_library("libwm") {
 
   sources = [
     "../wmserver/src/zidl/window_manager_proxy.cpp",
-    "src/color_parser.cpp",
     "src/input_transfer_station.cpp",
     "src/root_scene.cpp",
     "src/static_call.cpp",
