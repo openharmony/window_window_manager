@@ -50,6 +50,8 @@ private:
     void ProcessSessionRectChangeRegister();
     void ProcessRaiseToTopRegister();
     void ProcessBackPressedRegister();
+    void ProcessSessionFocusableChangeRegister();
+    void ProcessClickRegister();
     void ProcessTerminateSessionRegister();
 
     void PendingSessionActivation(const SessionInfo& info);
@@ -59,6 +61,8 @@ private:
     void OnSessionRectChange(const WSRect& rect);
     void OnRaiseToTop();
     void OnBackPressed();
+    void OnSessionFocusableChange(bool isFocusable);
+    void OnClick();
     void TerminateSession(const SessionInfo& info);
 
     NativeEngine& engine_;

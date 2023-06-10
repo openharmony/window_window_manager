@@ -34,6 +34,7 @@ public:
         TRANS_ID_SET_ACTIVE,
         TRANS_ID_NOTIFY_SIZE_CHANGE,
         TRANS_ID_HANDLE_BACK_EVENT,
+        TRANS_ID_NOTIFY_FOCUS_CHANGE,
     };
 
     virtual void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
@@ -42,6 +43,7 @@ public:
     virtual WSError SetActive(bool active) = 0;
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) = 0;
     virtual WSError HandleBackEvent() = 0;
+    virtual WSError UpdateFocus(bool isFocused) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

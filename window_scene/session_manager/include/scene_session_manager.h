@@ -41,6 +41,7 @@ namespace OHOS::Rosen {
 class RootScene;
 class SceneSession;
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
+using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 class SceneSessionManager : public SceneSessionManagerStub,
                             public SessionManagerBase {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManager)
@@ -56,12 +57,16 @@ public:
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session);
     WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId);
+    WSError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
     void SetCreateSpecificSessionListener(const NotifyCreateSpecificSessionFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     WSError ProcessBackEvent();
 
     void GetStartPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor);
 
+    WSError SetFocusedSession(uint64_t persistentId);
+    uint64_t GetFocusedSession() const;
+    WSError UpdateFocus(uint64_t persistentId, bool isFocused);
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
@@ -89,6 +94,9 @@ private:
     SystemSessionConfig systemConfig_;
     uint64_t activeSessionId_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
+    uint64_t focusedSessionId_ { INVALID_SESSION_ID };
+
+    void UpdateFocusableProperty(uint64_t persistentId);
 };
 } // namespace OHOS::Rosen
 

@@ -44,6 +44,7 @@ public:
         sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session);
     void DestroyAndDisconnectSpecificSession(const uint64_t& persistentId);
     sptr<IScreenSessionManager> GetScreenSessionManagerProxy();
+    WMError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
     sptr<ScreenLockManagerInterface> GetScreenLockManagerProxy();
 
 private:

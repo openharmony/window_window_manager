@@ -63,6 +63,7 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
     BindNativeFunction(*engine, *object, "getWindowSceneConfig", moduleName,
         JsSceneSessionManager::GetWindowSceneConfig);
     BindNativeFunction(*engine, *object, "processBackEvent", moduleName, JsSceneSessionManager::ProcessBackEvent);
+    BindNativeFunction(*engine, *object, "updateFocus", moduleName, JsSceneSessionManager::UpdateFocus);
     return engine->CreateUndefined();
 }
 
@@ -125,6 +126,13 @@ NativeValue* JsSceneSessionManager::RegisterCallback(NativeEngine* engine, Nativ
     WLOGFI("[NAPI]RegisterCallback");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
     return (me != nullptr) ? me->OnRegisterCallback(*engine, *info) : nullptr;
+}
+
+NativeValue* JsSceneSessionManager::UpdateFocus(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGI("[NAPI]UpdateFocus");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
+    return (me != nullptr) ? me->OnUpdateFocus(*engine, *info) : nullptr;
 }
 
 NativeValue* JsSceneSessionManager::ProcessBackEvent(NativeEngine* engine, NativeCallbackInfo* info)
@@ -228,6 +236,32 @@ NativeValue* JsSceneSessionManager::OnRegisterCallback(NativeEngine& engine, Nat
     callbackRef.reset(engine.CreateReference(value, 1));
     jsCbMap_[cbType] = callbackRef;
     WLOGFI("[NAPI]Register end, type = %{public}s", cbType.c_str());
+    return engine.CreateUndefined();
+}
+
+NativeValue* JsSceneSessionManager::OnUpdateFocus(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    if (info.argc < 2) { // 2: params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    int64_t persistentId;
+    if (!ConvertFromJsValue(engine, info.argv[0], persistentId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to persistentId");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    bool isFocused;
+    if (!ConvertFromJsValue(engine, info.argv[1], isFocused)) {
+        WLOGFE("[NAPI]Failed to convert parameter to bool");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    SceneSessionManager::GetInstance().UpdateFocus(static_cast<uint64_t>(persistentId), isFocused);
     return engine.CreateUndefined();
 }
 
