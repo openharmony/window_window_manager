@@ -98,11 +98,11 @@ WSError SessionStageProxy::HandleBackEvent()
     return static_cast<WSError>(ret);
 }
 
-<<<<<<< HEAD
 WSError SessionStageProxy::MarkProcessed(int32_t eventId)
 {
     return WSError::WS_DO_NOTHING;
-=======
+}
+
 WSError SessionStageProxy::UpdateFocus(bool focus)
 {
     MessageParcel data;
@@ -125,6 +125,5 @@ WSError SessionStageProxy::UpdateFocus(bool focus)
     }
     int32_t ret = reply.ReadUint32();
     return static_cast<WSError>(ret);
->>>>>>> 7c60a1aa07f40bbf74e6fa37502160f96b49cecd
 }
 } // namespace OHOS::Rosen

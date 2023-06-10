@@ -113,10 +113,8 @@ public:
     void SetBackPressedListenser(const NotifyBackPressedFunc& func);
     WSError ProcessBackEvent(); // send back event to session_stage
     WSError RequestSessionBack() override; // receive back request from session_stage
-<<<<<<< HEAD
     WSError MarkProcessed(int32_t eventId) override;
 
-=======
     sptr<ScenePersistence> GetScenePersistence() const;
 
     static std::atomic<uint32_t> sessionId_;
@@ -131,7 +129,6 @@ public:
     bool GetFocusable() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
->>>>>>> 7c60a1aa07f40bbf74e6fa37502160f96b49cecd
 protected:
     void GeneratePersistentId(const bool isExtension, const SessionInfo& sessionInfo);
     void UpdateSessionState(SessionState state);

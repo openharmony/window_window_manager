@@ -39,6 +39,7 @@ ohos_shared_library("intention_event_anr_manager") {
 
   external_deps = [
     #"ability_runtime:ability_manager",
+    "ability_base:want",
     "c_utils:utils",
     "hilog_native:libhilog",
     "eventhandler:libeventhandler",
