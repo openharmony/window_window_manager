@@ -36,6 +36,7 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
 
     // for scene only
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_SESSION_EVENT), &SessionStub::HandleSessionEvent),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_TERMINATE), &SessionStub::HandleTerminateSession),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_UPDATE_SESSION_RECT),
         &SessionStub::HandleUpdateSessionRect),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION),
@@ -124,17 +125,34 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
     return ERR_NONE;
 }
 
+int SessionStub::HandleTerminateSession(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("run HandleTerminateSession");
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
+    std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    abilitySessionInfo->want = *want;
+    if (data.ReadBool()) {
+        abilitySessionInfo->callerToken = data.ReadRemoteObject();
+    }
+
+    abilitySessionInfo->resultCode = data.ReadInt32();
+    const WSError& errCode = TerminateSession(abilitySessionInfo);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("PendingSessionActivation!");
-    SessionInfo info;
-    info.bundleName_ = data.ReadString();
-    info.moduleName_ = data.ReadString();
-    info.abilityName_ = data.ReadString();
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
+    std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    abilitySessionInfo->want = *want;
     if (data.ReadBool()) {
-        info.callerToken_ = data.ReadRemoteObject();
+        abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
-    const WSError& errCode = PendingSessionActivation(info);
+    abilitySessionInfo->requestCode = data.ReadInt32();
+
+    const WSError& errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

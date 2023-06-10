@@ -34,7 +34,10 @@ public:
         sptr<WindowSessionProperty> property = nullptr) override;
 
     WSError UpdateActiveStatus(bool isActive) override;
-    WSError PendingSessionActivation(const SessionInfo& info) override;
+
+    WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
+    WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
+
     WSError OnSessionEvent(SessionEvent event) override;
     WSError RaiseToAppTop() override;
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) override;

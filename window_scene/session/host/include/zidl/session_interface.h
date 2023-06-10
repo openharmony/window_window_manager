@@ -21,6 +21,7 @@
 #include "common/include/window_session_property.h"
 #include "session/container/include/zidl/session_stage_interface.h"
 #include "session/container/include/zidl/window_event_channel_interface.h"
+#include "session_info.h"
 
 namespace OHOS::Rosen {
 class RSSurfaceNode;
@@ -36,6 +37,7 @@ public:
         TRANS_ID_DISCONNECT,
         TRANS_ID_ACTIVE_PENDING_SESSION,
         TRANS_ID_UPDATE_ACTIVE_STATUS,
+        TRANS_ID_TERMINATE,
 
         // Scene
         TRANS_ID_SESSION_EVENT = 100,
@@ -52,8 +54,9 @@ public:
     virtual WSError Foreground() = 0;
     virtual WSError Background() = 0;
     virtual WSError Disconnect() = 0;
-    virtual WSError PendingSessionActivation(const SessionInfo& info) = 0;
+    virtual WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo) = 0;
     virtual WSError UpdateActiveStatus(bool isActive) = 0;
+    virtual WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) = 0;
 
     // scene session
     virtual WSError OnSessionEvent(SessionEvent event) = 0;
