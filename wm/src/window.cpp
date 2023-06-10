@@ -118,7 +118,8 @@ sptr<Window> Window::Create(sptr<WindowOption>& option, const std::shared_ptr<OH
         return nullptr;
     }
     WindowType type = option->GetWindowType();
-    if (!(WindowHelper::IsAppWindow(type) || WindowHelper::IsUIExtensionWindow(type))) {
+    if (!(WindowHelper::IsAppWindow(type) || WindowHelper::IsUIExtensionWindow(type)
+        || WindowHelper::IsAppComponentWindow(type))) {
         WLOGFE("window type is invalid %{public}d", type);
         return nullptr;
     }
