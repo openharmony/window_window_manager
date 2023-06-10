@@ -38,6 +38,7 @@ public:
         TRANS_ID_ACTIVE_PENDING_SESSION,
         TRANS_ID_UPDATE_ACTIVE_STATUS,
         TRANS_ID_TERMINATE,
+        TRANS_ID_EXCEPTION,
 
         // Scene
         TRANS_ID_SESSION_EVENT = 100,
@@ -56,6 +57,7 @@ public:
     virtual WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo) = 0;
     virtual WSError UpdateActiveStatus(bool isActive) = 0;
     virtual WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) = 0;
+    virtual WSError NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo) = 0;
 
     // scene session
     virtual WSError OnSessionEvent(SessionEvent event) = 0;

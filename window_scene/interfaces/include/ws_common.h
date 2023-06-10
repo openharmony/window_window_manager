@@ -100,6 +100,8 @@ struct SessionInfo {
     sptr<AAFwk::Want> want;
     int32_t resultCode;
     int32_t requestCode;
+    int32_t errorCode;
+    std::string errorReason;
 };
 
 enum class SizeChangeReason : uint32_t {
@@ -127,6 +129,7 @@ enum class SessionEvent : uint32_t {
     EVENT_CLOSE,
     EVENT_START_MOVE,
     EVENT_TERMINATE,
+    EVENT_EXCEPTION,
 };
 
 struct WSRect {
