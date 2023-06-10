@@ -14,9 +14,9 @@
 import("//build/ohos.gni")
 import("../../../../../windowmanager_aafwk.gni")
 
-config("scene_session_manager_napi_public_config") {
+config("scene_session_manager_napi_config") {
   visibility = [ ":*" ]
-  include_dirs = [ "${window_base_path}/window_scene/interfaces/kits/napi" ]
+  include_dirs = [ "${window_base_path}/wm/include" ]
 }
 
 ohos_shared_library("scenesessionmanager_napi") {
@@ -29,13 +29,7 @@ ohos_shared_library("scenesessionmanager_napi") {
     "scene_session_manager_module.cpp",
   ]
 
-  public_configs = [ ":scene_session_manager_napi_public_config" ]
-
-  deps = [
-    "${window_base_path}/window_scene/common:window_scene_common",
-    "${window_base_path}/window_scene/session:scene_session",
-    "${window_base_path}/window_scene/session_manager:scene_session_manager",
-  ]
+  configs = [ ":scene_session_manager_napi_config" ]
 
   external_deps = [
     "ability_base:configuration",
@@ -45,6 +39,9 @@ ohos_shared_library("scenesessionmanager_napi") {
     "hilog_native:libhilog",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "window_manager:libwm",
+    "window_manager:scene_session",
+    "window_manager:scene_session_manager",
   ]
 
   relative_install_dir = "module"
