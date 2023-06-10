@@ -18,6 +18,7 @@
 #include <transaction/rs_interfaces.h>
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
+#include "screen_scene_config.h"
 #include "permission.h"
 #include <parameters.h>
 #include "sys_cap_util.h"
@@ -116,6 +117,59 @@ void ScreenSessionManager::Init()
     RegisterScreenChangeListener();
     auto runner = AppExecFwk::EventRunner::Create(CONTROLLER_THREAD_ID);
     controllerHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    LoadScreenSceneXml();
+}
+
+void ScreenSessionManager::LoadScreenSceneXml()
+{
+    WLOGFI("ScreenSession load screen scene xml");
+    if (ScreenSceneConfig::LoadConfigXml()) {
+        ScreenSceneConfig::DumpConfig();
+        ConfigureScreenScene();
+    }
+}
+
+void ScreenSessionManager::ConfigureScreenScene()
+{
+    auto numbersConfig = ScreenSceneConfig::GetIntNumbersConfig();
+    auto enableConfig = ScreenSceneConfig::GetEnableConfig();
+    auto stringConfig = ScreenSceneConfig::GetStringConfig();
+    if (numbersConfig.count("defaultDeviceRotationOffset") != 0) {
+        uint32_t defaultDeviceRotationOffset = static_cast<uint32_t>(numbersConfig["defaultDeviceRotationOffset"][0]);
+        WLOGFD("defaultDeviceRotationOffset = %u", defaultDeviceRotationOffset);
+    }
+    if (enableConfig.count("isWaterfallDisplay") != 0) {
+        bool isWaterfallDisplay = static_cast<bool>(enableConfig["isWaterfallDisplay"]);
+        WLOGFD("isWaterfallDisplay = %d", isWaterfallDisplay);
+    }
+    if (numbersConfig.count("curvedScreenBoundary") != 0) {
+        std::vector<int> vtBoundary = static_cast<std::vector<int>>(numbersConfig["curvedScreenBoundary"]);
+        WLOGFD("vtBoundary = %u", vtBoundary.size());
+    }
+    if (stringConfig.count("defaultDisplayCutoutPath") != 0) {
+        std::string defaultDisplayCutoutPath = static_cast<std::string>(stringConfig["defaultDisplayCutoutPath"]);
+        WLOGFD("defaultDisplayCutoutPath = %s.", defaultDisplayCutoutPath.c_str());
+    }
+    ConfigureWaterfallDisplayCompressionParams();
+
+    if (numbersConfig.count("buildInDefaultOrientation") != 0) {
+        Orientation orientation = static_cast<Orientation>(numbersConfig["buildInDefaultOrientation"][0]);
+        WLOGFD("orientation = %d", orientation);
+    }
+}
+
+void ScreenSessionManager::ConfigureWaterfallDisplayCompressionParams()
+{
+    auto numbersConfig = ScreenSceneConfig::GetIntNumbersConfig();
+    auto enableConfig = ScreenSceneConfig::GetEnableConfig();
+    if (enableConfig.count("isWaterfallAreaCompressionEnableWhenHorizontal") != 0) {
+        bool enable = static_cast<bool>(enableConfig["isWaterfallAreaCompressionEnableWhenHorizontal"]);
+        WLOGD("isWaterfallAreaCompressionEnableWhenHorizontal=%d.", enable);
+    }
+    if (numbersConfig.count("waterfallAreaCompressionSizeWhenHorzontal") != 0) {
+        uint32_t uSize = static_cast<uint32_t>(numbersConfig["waterfallAreaCompressionSizeWhenHorzontal"][0]);
+        WLOGD("waterfallAreaCompressionSizeWhenHorzontal =%u.", uSize);
+    }
 }
 
 void ScreenSessionManager::RegisterScreenChangeListener()
