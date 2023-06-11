@@ -16,6 +16,7 @@
 #include "zidl/screen_session_manager_stub.h"
 
 #include <ipc_skeleton.h>
+#include "marshalling_helper.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -102,6 +103,17 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             DisplayId displayId = data.ReadUint64();
             auto info = GetDisplayInfoById(displayId);
             reply.WriteParcelable(info);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_SCREEN: {
+            ScreenId screenId = data.ReadUint64();
+            auto info = GetDisplayInfoByScreen(screenId);
+            reply.WriteParcelable(info);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS: {
+            std::vector<DisplayId> allDisplayIds = GetAllDisplayIds();
+            reply.WriteUInt64Vector(allDisplayIds);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_SCREEN_INFO_BY_ID: {
@@ -212,6 +224,62 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             DisplayId displayId = data.ReadUint64();
             std::shared_ptr<Media::PixelMap> displaySnapshot = GetDisplaySnapshot(displayId);
             reply.WriteParcelable(displaySnapshot == nullptr ? nullptr : displaySnapshot.get());
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_ACTIVE_MODE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            uint32_t modeId = data.ReadUint32();
+            DMError ret = SetScreenActiveMode(screenId, modeId);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_PIXEL_RATIO: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            float virtualPixelRatio = data.ReadFloat();
+            DMError ret = SetVirtualPixelRatio(screenId, virtualPixelRatio);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_COLOR_GAMUT: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            ScreenColorGamut colorGamut;
+            DMError ret = GetScreenColorGamut(screenId, colorGamut);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            reply.WriteUint32(static_cast<uint32_t>(colorGamut));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_GAMUT: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            int32_t colorGamutIdx = data.ReadInt32();
+            DMError ret = SetScreenColorGamut(screenId, colorGamutIdx);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_GAMUT_MAP: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            ScreenGamutMap gamutMap;
+            DMError ret = GetScreenGamutMap(screenId, gamutMap);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            reply.WriteInt32(static_cast<uint32_t>(gamutMap));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_SET_GAMUT_MAP: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            ScreenGamutMap gamutMap = static_cast<ScreenGamutMap>(data.ReadUint32());
+            DMError ret = SetScreenGamutMap(screenId, gamutMap);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_TRANSFORM: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            DMError ret = SetScreenColorTransform(screenId);
+            reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
         default:
