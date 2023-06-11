@@ -86,6 +86,15 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetDisplayId(screenId_);
     displayInfo->SetRefreshRate(60);     // use 60 temporarily, depended on property set
 
+    displayInfo->SetRefreshRate(property_.GetRefreshRate());
+    displayInfo->SetVirtualPixelRatio(property_.GetVirtualPixelRatio());
+    displayInfo->SetXDpi(property_.GetXDpi());
+    displayInfo->SetYDpi(property_.GetYDpi());
+    displayInfo->SetDpi(property_.GetDensity());
+    displayInfo->SetRotation(property_.GetScreenRotation());
+    displayInfo->SetOrientation(property_.GetOrientation());
+    displayInfo->SetOffsetX(property_.GetOffsetX());
+    displayInfo->SetOffsetY(property_.GetOffsetY());
     return displayInfo;
 }
 
@@ -173,6 +182,47 @@ Rotation ScreenSession::CalcRotation(Orientation orientation) const
     }
 }
 
+ScreenSourceMode ScreenSession::GetSourceMode() const
+{
+    return ScreenSourceMode::SCREEN_ALONE;
+}
+
+void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
+{
+    if (info == nullptr) {
+        WLOGE("FillScreenInfo failed! info is nullptr");
+        return;
+    }
+    info->SetScreenId(screenId_);
+    info->SetName(name_);
+    uint32_t width = 0;
+    uint32_t height = 0;
+    sptr<SupportedScreenModes> screenSessionModes = GetActiveScreenMode();
+    if (screenSessionModes != nullptr) {
+        height = screenSessionModes->height_;
+        width = screenSessionModes->width_;
+    }
+    float virtualPixelRatio = virtualPixelRatio_;
+    // "< 1e-set6" means virtualPixelRatio is 0.
+    if (fabsf(virtualPixelRatio) < 1e-6) {
+        virtualPixelRatio = 1.0f;
+    }
+    ScreenSourceMode sourceMode = GetSourceMode();
+    info->SetVirtualPixelRatio(property_.GetVirtualPixelRatio());
+    info->SetVirtualHeight(height / virtualPixelRatio);
+    info->SetVirtualWidth(width / virtualPixelRatio);
+    info->SetRotation(property_.GetScreenRotation());
+    info->SetOrientation(property_.GetOrientation());
+    info->SetSourceMode(sourceMode);
+    info->SetType(property_.GetScreenType());
+    info->SetModeId(activeIdx_);
+
+    info->lastParent_ = lastGroupSmsId_;
+    info->parent_ = groupSmsId_;
+    info->isScreenGroup_ = isScreenGroup_;
+    info->modes_ = modes_;
+}
+
 sptr<ScreenInfo> ScreenSession::ConvertToScreenInfo() const
 {
     sptr<ScreenInfo> info = new(std::nothrow) ScreenInfo();
@@ -183,35 +233,72 @@ sptr<ScreenInfo> ScreenSession::ConvertToScreenInfo() const
     return info;
 }
 
-void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
+DMError ScreenSession::GetScreenColorGamut(ScreenColorGamut& colorGamut)
 {
-    if (info == nullptr) {
-        WLOGE("FillScreenInfo failed! info is nullptr");
-        return;
+    auto ret = RSInterfaces::GetInstance().GetScreenColorGamut(rsId_, colorGamut);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("GetScreenColorGamut fail! rsId %{public}" PRIu64"", rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
-    info->id_ = screenId_;
-    info->name_ = name_;
-    uint32_t width = 0;
-    uint32_t height = 0;
-    sptr<SupportedScreenModes> ScreenSessionModes = GetActiveScreenMode();
-    if (ScreenSessionModes != nullptr) {
-        height = ScreenSessionModes->height_;
-        width = ScreenSessionModes->width_;
+    WLOGI("GetScreenColorGamut ok! rsId %{public}" PRIu64", colorGamut %{public}u",
+        rsId_, static_cast<uint32_t>(colorGamut));
+    return DMError::DM_OK;
+}
+
+DMError ScreenSession::SetScreenColorGamut(int32_t colorGamutIdx)
+{
+    std::vector<ScreenColorGamut> colorGamuts;
+    DMError res = GetScreenSupportedColorGamuts(colorGamuts);
+    if (res != DMError::DM_OK) {
+        WLOGE("SetScreenColorGamut fail! rsId %{public}" PRIu64"", rsId_);
+        return res;
     }
-    float virtualPixelRatio = virtualPixelRatio_;
-    // "< 1e-set6" means virtualPixelRatio is 0.
-    if (fabsf(virtualPixelRatio) < 1e-6) {
-        virtualPixelRatio = 1.0f;
+    if (colorGamutIdx < 0 || colorGamutIdx >= static_cast<int32_t>(colorGamuts.size())) {
+        WLOGE("SetScreenColorGamut fail! rsId %{public}" PRIu64" colorGamutIdx %{public}d invalid.",
+            rsId_, colorGamutIdx);
+        return DMError::DM_ERROR_INVALID_PARAM;
     }
-    info->virtualPixelRatio_ = virtualPixelRatio;
-    info->virtualHeight_ = height / virtualPixelRatio;
-    info->virtualWidth_ = width / virtualPixelRatio;
-    info->lastParent_ = lastGroupSmsId_;
-    info->parent_ = groupSmsId_;
-    info->isScreenGroup_ = isScreenGroup_;
-    info->type_ = type_;
-    info->modeId_ = activeIdx_;
-    info->modes_ = modes_;
+    auto ret = RSInterfaces::GetInstance().SetScreenColorGamut(rsId_, colorGamutIdx);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("SetScreenColorGamut fail! rsId %{public}" PRIu64"", rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("SetScreenColorGamut ok! rsId %{public}" PRIu64", colorGamutIdx %{public}u",
+        rsId_, colorGamutIdx);
+    return DMError::DM_OK;
+}
+
+DMError ScreenSession::GetScreenGamutMap(ScreenGamutMap& gamutMap)
+{
+    auto ret = RSInterfaces::GetInstance().GetScreenGamutMap(rsId_, gamutMap);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("GetScreenGamutMap fail! rsId %{public}" PRIu64"", rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("GetScreenGamutMap ok! rsId %{public}" PRIu64", gamutMap %{public}u",
+        rsId_, static_cast<uint32_t>(gamutMap));
+    return DMError::DM_OK;
+}
+
+DMError ScreenSession::SetScreenGamutMap(ScreenGamutMap gamutMap)
+{
+    if (gamutMap > GAMUT_MAP_HDR_EXTENSION) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    auto ret = RSInterfaces::GetInstance().SetScreenGamutMap(rsId_, gamutMap);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("SetScreenGamutMap fail! rsId %{public}" PRIu64"", rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("SetScreenGamutMap ok! rsId %{public}" PRIu64", gamutMap %{public}u",
+        rsId_, static_cast<uint32_t>(gamutMap));
+    return DMError::DM_OK;
+}
+
+DMError ScreenSession::SetScreenColorTransform()
+{
+    WLOGI("SetScreenColorTransform ok! rsId %{public}" PRIu64"", rsId_);
+    return DMError::DM_OK;
 }
 
 bool ScreenSession::SetOrientation(Orientation orientation)
