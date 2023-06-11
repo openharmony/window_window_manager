@@ -26,6 +26,7 @@ config("we_systemtest_common_public_config") {
     "../../../interfaces/innerkits/extension",
     "../../../interfaces/innerkits/wm",
     "//third_party/googletest/googlemock/include",
+    "../../../window_scene/session/host/include",
   ]
 }
 
@@ -45,6 +46,7 @@ ohos_systemtest("window_extension_connection_test") {
     "../../../extension/extension_connection:libwindow_extension_client",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
+    "../../../window_scene/session:scene_session",
   ]
 
   external_deps = [
