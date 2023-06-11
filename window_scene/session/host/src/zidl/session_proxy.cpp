@@ -134,7 +134,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
 
 WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
-    if (abilitySessionInfo) {
+    if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -178,7 +178,7 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
 
 WSError SessionProxy::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
-    if (abilitySessionInfo) {
+    if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -219,7 +219,7 @@ WSError SessionProxy::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
 
 WSError SessionProxy::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
-    if (abilitySessionInfo) {
+    if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
