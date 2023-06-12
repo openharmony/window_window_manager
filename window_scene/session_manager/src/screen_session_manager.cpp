@@ -137,11 +137,11 @@ void ScreenSessionManager::ConfigureScreenScene()
     }
     if (numbersConfig.count("curvedScreenBoundary") != 0) {
         std::vector<int> vtBoundary = static_cast<std::vector<int>>(numbersConfig["curvedScreenBoundary"]);
-        WLOGFD("vtBoundary = %u", vtBoundary.size());
+        WLOGFD("vtBoundary = %lu", vtBoundary.size());
     }
     if (stringConfig.count("defaultDisplayCutoutPath") != 0) {
         std::string defaultDisplayCutoutPath = static_cast<std::string>(stringConfig["defaultDisplayCutoutPath"]);
-        WLOGFD("defaultDisplayCutoutPath = %s.", defaultDisplayCutoutPath.c_str());
+        WLOGFD("defaultDisplayCutoutPath = %{public}s.", defaultDisplayCutoutPath.c_str());
     }
     ConfigureWaterfallDisplayCompressionParams();
 
