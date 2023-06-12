@@ -317,7 +317,7 @@ WSError Session::SetActive(bool active)
 
 WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
-    if (abilitySessionInfo) {
+    if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -344,7 +344,7 @@ void Session::SetBackPressedListenser(const NotifyBackPressedFunc& func)
 
 WSError Session::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
-    if (abilitySessionInfo) {
+    if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -365,7 +365,7 @@ void Session::SetTerminateSessionListener(const NotifyTerminateSessionFunc& func
 
 WSError Session::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
-    if (abilitySessionInfo) {
+    if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
