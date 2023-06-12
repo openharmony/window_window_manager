@@ -49,7 +49,8 @@ public:
     WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession);
-
+    WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession);
+    void StartAbilityBySpecified(const SessionInfo& sessionInfo);
     sptr<RootSceneSession> GetRootSceneSession();
     sptr<SceneSession> GetSceneSession(uint64_t persistentId);
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,

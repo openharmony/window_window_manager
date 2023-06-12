@@ -494,13 +494,11 @@ void JsSceneSession::PendingSessionActivation(const SessionInfo& info)
     if (iter == jsCbMap_.end()) {
         return;
     }
-    auto sessionWptr = weak_from_this();
     auto jsCallBack = iter->second;
     auto complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [sessionWptr, info, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            auto jsSessionWptr = sessionWptr.lock();
-            if (jsSessionWptr == nullptr || !jsCallBack) {
-                WLOGFE("[NAPI]root session or target session or engine is nullptr");
+        [info, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (!jsCallBack) {
+                WLOGFE("[NAPI]jsCallBack is nullptr");
                 return;
             }
             NativeValue* jsSessionInfo = CreateJsSessionInfo(engine, info);
