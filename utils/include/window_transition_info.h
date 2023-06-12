@@ -70,6 +70,7 @@ public:
     AppExecFwk::DisplayOrientation GetOrientation() const;
     void SetApiCompatibleVersion(uint32_t apiCompatibleVersion);
     uint32_t GetApiCompatibleVersion() const;
+    bool isSystemCalling_ = false;
 private:
     std::string bundleName_;
     std::string abilityName_;
