@@ -78,7 +78,7 @@ public:
      *
      * This function can be called only once in the entire lifecycle of an extension.
      * @param Want Indicates the {@link Want} structure containing startup information about the extension.
-     * @param sessionInfo Indicates the {@link SessionInfo} structure containing startup information about the extension.
+     * @param sessionInfo Indicates the {@link SessionInfo} structure containing session info about the extension.
      */
     virtual void OnStart(const AAFwk::Want& want, sptr<AAFwk::SessionInfo> sessionInfo) override;
 private:
