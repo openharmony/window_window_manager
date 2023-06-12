@@ -707,7 +707,7 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo)
+void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo)
 {
     WLOGFI("StartAbilityBySpecified: bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
         sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());    
