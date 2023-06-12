@@ -52,7 +52,8 @@ NativeValue* JsSceneSession::Create(NativeEngine& engine, const sptr<SceneSessio
     object->SetNativePointer(jsSceneSession.release(), JsSceneSession::Finalizer, nullptr);
     object->SetProperty("persistentId", CreateJsValue(engine, static_cast<int64_t>(session->GetPersistentId())));
     object->SetProperty("parentId", CreateJsValue(engine, static_cast<int64_t>(session->GetParentPersistentId())));
-    object->SetProperty("type", CreateJsValue(engine, static_cast<uint32_t>(session->GetWindowType())));
+    object->SetProperty("type", CreateJsValue(engine, static_cast<uint32_t>(
+        WINDOW_TYPE_TO_API_TYPE_MAP.at(session->GetWindowType()))));
 
     const char* moduleName = "JsSceneSession";
     BindNativeFunction(engine, *object, "on", moduleName, JsSceneSession::RegisterCallback);
