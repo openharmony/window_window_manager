@@ -30,6 +30,14 @@ public:
     ~ScreenSessionManagerProxy() = default;
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() override;
+    virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
+    virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
+
+    virtual DMError GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut) override;
+    virtual DMError SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx) override;
+    virtual DMError GetScreenGamutMap(ScreenId screenId, ScreenGamutMap& gamutMap) override;
+    virtual DMError SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap) override;
+    virtual DMError SetScreenColorTransform(ScreenId screenId) override;
 
     virtual DMError RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
@@ -63,6 +71,8 @@ public:
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode) override;
 
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
+    virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
+    virtual std::vector<DisplayId> GetAllDisplayIds() override;
 
     virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
 

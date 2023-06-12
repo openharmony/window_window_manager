@@ -17,6 +17,9 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SCREEN_PROPERTY_H
 
 #include "common/rs_rect.h"
+#include "dm_common.h"
+#include "class_var_definition.h"
+#include "screen_info.h"
 
 namespace OHOS::Rosen {
 class ScreenProperty {
@@ -29,12 +32,65 @@ public:
 
     void SetBounds(const RRect& bounds);
     RRect GetBounds() const;
+
     float GetDensity();
+
+    void SetPhyWidth(uint32_t phyWidth);
+    int32_t GetPhyWidth() const;
+
+    void SetPhyHeight(uint32_t phyHeight);
+    int32_t GetPhyHeight() const;
+
+    void SetRefreshRate(uint32_t refreshRate);
+    uint32_t GetRefreshRate() const;
+
+    void SetVirtualPixelRatio(float virtualPixelRatio);
+    float GetVirtualPixelRatio() const;
+
+    Rotation GetScreenRotation() const;
+
+    void SetOrientation(Orientation orientation);
+    Orientation GetOrientation() const;
+
+    float GetXDpi();
+    float GetYDpi();
+
+    void SetOffsetX(int32_t offsetX);
+    int32_t GetOffsetX() const;
+    
+    void SetOffsetY(int32_t offsetY);
+    int32_t GetOffsetY() const;
+
+    void SetOffset(int32_t offsetX, int32_t offsetY);
+
+    void SetScreenType(ScreenType type);
+    ScreenType GetScreenType() const;
 
 private:
     float rotation_ { 0.0f };
     RRect bounds_;
     float density_ { 1.5f };
+
+    uint32_t phyWidth_ { UINT32_MAX };
+    uint32_t phyHeight_ { UINT32_MAX };
+
+    uint32_t refreshRate_ { 0 };
+    float virtualPixelRatio_ { 1.0f };
+
+    Orientation orientation_ { Orientation::UNSPECIFIED };
+    Rotation screenRotation_ { Rotation::ROTATION_0 };
+
+    float xDpi_ { 0.0f };
+    float yDpi_ { 0.0f };
+
+    int32_t offsetX_ { 0 };
+    int32_t offsetY_ { 0 };
+
+    ScreenType type_ { ScreenType::REAL };
+
+    void UpdateXDpi();
+    void UpdateYDpi();
+    void CalculateXYDpi(uint32_t phyWidth, uint32_t phyHeight);
 };
 } // namespace OHOS::Rosen
 
