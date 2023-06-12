@@ -15,6 +15,7 @@
 
 #include "session/host/include/session.h"
 
+#include "foundation/ability/ability_base/interfaces/kits/native/want/include/want.h"
 #include "interfaces/include/ws_common.h"
 #include "surface_capture_future.h"
 #include <transaction/rs_interfaces.h>
@@ -331,6 +332,9 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     info.callerPersistentId_ = GetPersistentId();
     sessionInfo_.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
     sessionInfo_.callState_ = info.callState_;
+    info.persistentId_ = abilitySessionInfo->persistentId;
+    sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
+    sessionInfo_.requestCode = abilitySessionInfo->requestCode;    
     WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
     WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}" PRIu64 "",
@@ -363,6 +367,9 @@ WSError Session::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionI
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.callerToken_ = abilitySessionInfo->callerToken;
+    info.persistentId_ = abilitySessionInfo->persistentId;
+    sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
+    sessionInfo_.resultCode = abilitySessionInfo->resultCode;     
     if (terminateSessionFunc_) {
         terminateSessionFunc_(info);
     }
@@ -386,6 +393,10 @@ WSError Session::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySe
     info.callerToken_ = abilitySessionInfo->callerToken;
     info.errorCode = abilitySessionInfo->errorCode;
     info.errorReason = abilitySessionInfo->errorReason;
+    info.persistentId_ = abilitySessionInfo->persistentId;
+    sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
+    sessionInfo_.errorCode = abilitySessionInfo->errorCode;   
+    sessionInfo_.errorReason = abilitySessionInfo->errorReason;       
     if (sessionExceptionFunc_) {
         sessionExceptionFunc_(info);
     }
