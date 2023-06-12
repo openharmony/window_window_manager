@@ -286,6 +286,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
     auto task = [this, sessionInfo, specificCallback]() {
         WLOGFI("sessionInfo: bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
             sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());
+        WLOGFI("RequestSceneSession caller persistentId: %{public}" PRIu64 "", sessionInfo.callerPersistentId_);
         sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, specificCallback);
         if (sceneSession == nullptr) {
             WLOGFE("sceneSession is nullptr!");
@@ -654,4 +655,65 @@ WSError SceneSessionManager::UpdateFocus(uint64_t persistentId, bool isFocused)
     }
     return WSError::WS_OK;
 }
+
+WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession)
+{
+    wptr<SceneSession> weakSceneSession(sceneSession);
+    auto task = [this, weakSceneSession]() {
+        auto scnSession = weakSceneSession.promote();
+        if (scnSession == nullptr) {
+            WLOGFE("session is nullptr");
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        auto persistentId = scnSession->GetPersistentId();
+        WLOGFI("RequestSceneSessionByCall persistentId: %{public}" PRIu64 "", persistentId);
+        if (abilitySceneMap_.count(persistentId) == 0) {
+            WLOGFE("session is invalid with %{public}" PRIu64 "", persistentId);
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+        auto sessionInfo = scnSession->GetSessionInfo();
+        WLOGFI("RequestSceneSessionByCall caller persistentId: %{public}" PRIu64 "", sessionInfo.callerPersistentId_);
+        auto abilitySessionInfo = SetAbilitySessionInfo(scnSession);
+        if (!abilitySessionInfo) {
+             return WSError::WS_ERROR_NULLPTR;
+        }
+
+        auto iter = abilitySceneMap_.find(sessionInfo.callerPersistentId_);
+        if (iter == abilitySceneMap_.end()) {
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+        const auto& callerSession = iter->second;
+        if (callerSession == nullptr) {
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        auto callSessionInfo = callerSession->GetSessionInfo();
+        WLOGFI("get callerSession state:%{public}d, uiAbilityId:%{public}" PRIu64 "", 
+            callSessionInfo.callState_, callSessionInfo.uiAbilityId_);
+        abilitySessionInfo->uiAbilityId = callSessionInfo.uiAbilityId_;
+
+        if (callSessionInfo.callState_ == static_cast<int32_t>(AAFwk::CallToState::BACKGROUND)) {
+            scnSession->SetActive(false);
+        } else if (callSessionInfo.callState_ == static_cast<int32_t>(AAFwk::CallToState::FOREGROUND)) {
+            scnSession->SetActive(true);
+        } else {
+            WLOGFE("wrong callState_");
+        }
+
+        AAFwk::AbilityManagerClient::GetInstance()->CallUIAbilityBySCB(abilitySessionInfo);
+        return WSError::WS_OK;
+    };
+    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
+    msgScheduler_->PostAsyncTask(task);
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo)
+{
+    WLOGFI("StartAbilityBySpecified: bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
+        sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());    
+    AAFwk::Want want;
+    want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
+    // AAFwk::AbilityManagerClient::GetInstance()->StartSpecifiedAbilityBySCB(want);
+}
+
 } // namespace OHOS::Rosen

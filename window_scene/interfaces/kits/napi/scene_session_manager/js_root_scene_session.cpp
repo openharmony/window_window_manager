@@ -102,14 +102,8 @@ NativeValue* JsRootSceneSession::OnRegisterCallback(NativeEngine& engine, Native
         return engine.CreateUndefined();
     }
 
-    wptr<JsRootSceneSession> rootSessionWptr(this);
-    NotifyPendingSessionActivationFunc func = [rootSessionWptr](const SessionInfo& info) {
-        auto jsRootSceneSession = rootSessionWptr.promote();
-        if (jsRootSceneSession == nullptr) {
-            WLOGFE("[NAPI]this scene session");
-            return;
-        }
-        jsRootSceneSession->PendingSessionActivation(info);
+    NotifyPendingSessionActivationFunc func = [this](const SessionInfo& info) {
+        this->PendingSessionActivation(info);
     };
     rootSceneSession_->SetPendingSessionActivationEventListener(func);
     std::shared_ptr<NativeReference> callbackRef;
@@ -195,15 +189,9 @@ void JsRootSceneSession::PendingSessionActivation(const SessionInfo& info)
         return;
     }
 
-    wptr<JsRootSceneSession> rootSessionWptr(this);
     auto jsCallBack = iter->second;
     auto complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [rootSessionWptr, info, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            auto jsRootSceneSession = rootSessionWptr.promote();
-            if (jsRootSceneSession == nullptr) {
-                WLOGFE("[NAPI]root session or target session or engine is nullptr");
-                return;
-            }
+        [info, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
             NativeValue* jsSessionInfo = CreateJsSessionInfo(engine, info);
             if (jsSessionInfo == nullptr) {
                 WLOGFE("[NAPI]this target session info is nullptr");
