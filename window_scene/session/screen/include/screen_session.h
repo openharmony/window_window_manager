@@ -29,6 +29,7 @@
 #include "screen_info.h"
 #include "screen_group.h"
 #include "screen_group_info.h"
+#include "event_handler.h"
 
 namespace OHOS::Rosen {
 class IScreenChangeListener : public RefBase {
@@ -58,18 +59,25 @@ public:
     void UnregisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
 
     sptr<DisplayInfo> ConvertToDisplayInfo();
+    sptr<ScreenInfo> ConvertToScreenInfo() const;
+    sptr<SupportedScreenModes> GetActiveScreenMode() const;
+    ScreenSourceMode GetSourceMode() const;
 
     ScreenId GetScreenId();
     ScreenProperty GetScreenProperty() const;
     std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
 
-    sptr<SupportedScreenModes> GetActiveScreenMode() const;
     Rotation CalcRotation(Orientation orientation) const;
-    sptr<ScreenInfo> ConvertToScreenInfo() const;
     void FillScreenInfo(sptr<ScreenInfo> info) const;
     bool SetOrientation(Orientation orientation);
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint);
+
     DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts);
+    DMError GetScreenColorGamut(ScreenColorGamut& colorGamut);
+    DMError SetScreenColorGamut(int32_t colorGamutIdx);
+    DMError GetScreenGamutMap(ScreenGamutMap& gamutMap);
+    DMError SetScreenGamutMap(ScreenGamutMap gamutMap);
+    DMError SetScreenColorTransform();
 
     std::string name_;
     ScreenId screenId_;
@@ -93,7 +101,6 @@ public:
 
 private:
     ScreenProperty property_;
-    
     ScreenState screenState_ { ScreenState::INIT };
     std::vector<IScreenChangeListener*> screenChangeListenerList_;
 };
