@@ -51,6 +51,15 @@ public:
     std::vector<ScreenId> GetAllScreenIds();
 
     sptr<DisplayInfo> GetDefaultDisplayInfo() override;
+    DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
+    DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
+    void NotifyScreenChanged(sptr<ScreenInfo> screenInfo, ScreenChangeEvent event);
+
+    DMError GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut) override;
+    DMError SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx) override;
+    DMError GetScreenGamutMap(ScreenId screenId, ScreenGamutMap& gamutMap) override;
+    DMError SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap) override;
+    DMError SetScreenColorTransform(ScreenId screenId) override;
 
     void RegisterScreenConnectionListener(sptr<IScreenConnectionListener>& screenConnectionListener);
     void UnregisterScreenConnectionListener(sptr<IScreenConnectionListener>& screenConnectionListener);
@@ -84,6 +93,8 @@ public:
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode) override;
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
+    sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
+    std::vector<DisplayId> GetAllDisplayIds() override;
     virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) override;
     virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId,
