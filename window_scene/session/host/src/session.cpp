@@ -418,7 +418,11 @@ std::shared_ptr<Media::PixelMap> Session::GetSnapshot() const
 std::shared_ptr<Media::PixelMap> Session::Snapshot()
 {
     auto callback = std::make_shared<SurfaceCaptureFuture>();
-    RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
+    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
+    if (!ret) {
+        WLOGFE("TakeSurfaceCapture failed");
+        return nullptr;
+    }
     auto pixelMap = callback->GetResult(2000); // wait for <= 2000ms
     if (pixelMap != nullptr) {
         WLOGFD("Save pixelMap WxH = %{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
