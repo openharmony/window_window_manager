@@ -53,8 +53,7 @@
           "hicollie_native",
           "eventhandler",
           "c_utils",
-          "common",
-          "window_manager"
+          "common"
         ],
         "third_party": [
           "libjpeg-turbo"
