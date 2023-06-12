@@ -751,6 +751,7 @@ void WindowManagerService::StartingWindow(sptr<WindowTransitionInfo> info, std::
         WLOGI("startingWindow not open!");
         return;
     }
+    info->isSystemCalling_ = Permission::IsSystemCalling();
     PostAsyncTask([this, info, pixelMap, isColdStart, bkgColor]() {
         windowController_->StartingWindow(info, pixelMap, bkgColor, isColdStart);
     });
@@ -866,6 +867,7 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
     }
     int pid = IPCSkeleton::GetCallingPid();
     int uid = IPCSkeleton::GetCallingUid();
+    property->isSystemCalling_ = Permission::IsSystemCalling();
     WMError ret = PostSyncTask([this, pid, uid, &window, &property, &surfaceNode, &windowId, &token]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:CreateWindow(%u)", windowId);
         return windowController_->CreateWindow(window, property, surfaceNode, windowId, token, pid, uid);
@@ -1221,6 +1223,7 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
         WLOGFE("SetForbidSplitMove or SetShowWhenLocked or SetTranform or SetTurnScreenOn permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
+    windowProperty->isSystemCalling_ = Permission::IsSystemCalling();
     if (action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY) {
         return PostSyncTask([this, windowProperty, action]() mutable {
             windowController_->UpdateProperty(windowProperty, action);
