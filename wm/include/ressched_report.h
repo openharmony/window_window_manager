@@ -122,7 +122,7 @@ class ResSchedReport {
         if (type == WindowType::WINDOW_TYPE_STATUS_BAR || type == WindowType::WINDOW_TYPE_PANEL) {
             StatusBarDrag(isOn);
         }
-        if (type == WindowType::WINDOW_TYPE_DESKTOP) {
+        if (type == WindowType::WINDOW_TYPE_DESKTOP || type == WindowType::WINDOW_TYPE_KEYGUARD) {
             Slide(isOn);
         }
 #endif

@@ -43,7 +43,7 @@ WSError WindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent
 WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     CALL_DEBUG_ENTER;
-    WLOGFD("WindowEventChannel receive pointer event");
+    WLOGFD("WindowEventChannel receive pointer event, eventId:%{public}d", pointerEvent->GetId());
     if (!sessionStage_) {
         WLOGFE("session stage is null!");
         return WSError::WS_ERROR_NULLPTR;
