@@ -137,7 +137,7 @@ void ScreenSessionManager::ConfigureScreenScene()
     }
     if (numbersConfig.count("curvedScreenBoundary") != 0) {
         std::vector<int> vtBoundary = static_cast<std::vector<int>>(numbersConfig["curvedScreenBoundary"]);
-        WLOGFD("vtBoundary = %lu", vtBoundary.size());
+        WLOGFD("vtBoundary");
     }
     if (stringConfig.count("defaultDisplayCutoutPath") != 0) {
         std::string defaultDisplayCutoutPath = static_cast<std::string>(stringConfig["defaultDisplayCutoutPath"]);
