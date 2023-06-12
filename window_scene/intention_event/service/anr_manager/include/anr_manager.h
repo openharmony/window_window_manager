@@ -38,6 +38,11 @@ public:
 private:
     int32_t anrTimerCount_ { 0 };
     std::unordered_map<int32_t, int32_t> applicationMap_;
+    /**
+     * 加一个成员 sptr<IAnrObserver> anrObserver_; 用于向调用SetAnrObserver的进程通知 ANR
+     * 本质上是一个 proxy 
+     * 需要补上  stub 等一系列 Binder 调用的代码
+    */
 };
 #define ANRMgr ::OHOS::DelayedSingleton<ANRManager>::GetInstance()
 } // namespace Rosen
