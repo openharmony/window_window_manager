@@ -46,7 +46,7 @@ ohos_shared_library("libwindow_extension_client") {
 
   deps = [
     "../../wm:libwm",
-    "window_manager:scene_session",
+    "../../window_scene/session:scene_session",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]
 
