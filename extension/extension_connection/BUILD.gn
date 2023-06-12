@@ -46,6 +46,7 @@ ohos_shared_library("libwindow_extension_client") {
 
   deps = [
     "../../wm:libwm",
+    "window_manager:scene_session",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]
 
@@ -55,7 +56,6 @@ ohos_shared_library("libwindow_extension_client") {
     "hitrace_native:hitrace_meter",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "window_manager:scene_session",
   ]
 
   innerapi_tags = [ "platformsdk_indirect" ]
