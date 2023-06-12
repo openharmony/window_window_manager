@@ -140,7 +140,7 @@ ohos_shared_library("windowstage_kit") {
     "napi:ace_napi",
   ]
 
-  innerapi_tags = [ "platformsdk_indirect" ]
+  innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
 }
