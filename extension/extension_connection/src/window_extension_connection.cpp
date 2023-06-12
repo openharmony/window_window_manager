@@ -125,7 +125,8 @@ int WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::ElementN
     return ret;
 }
 
-sptr<AAFwk::SessionInfo> WindowExtensionConnection::Impl::SetAbilitySessionInfo(const sptr<ExtensionSession>& extSession)
+sptr<AAFwk::SessionInfo> WindowExtensionConnection::Impl::SetAbilitySessionInfo(
+    const sptr<ExtensionSession>& extSession)
 {
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new (std::nothrow) AAFwk::SessionInfo();
     if (!abilitySessionInfo) {
