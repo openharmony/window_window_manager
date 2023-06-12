@@ -252,7 +252,8 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
             WLOGFE("rootSceneSession is nullptr");
             return sptr<RootSceneSession>(nullptr);
         }
-        AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_);
+        sptr<ISession> iSession(rootSceneSession_);
+        AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(iSession->AsObject());
         return rootSceneSession_;
     };
 
@@ -308,7 +309,8 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
         return nullptr;
     }
     auto sessionInfo = scnSession->GetSessionInfo();
-    abilitySessionInfo->sessionToken = scnSession->AsObject();
+    sptr<ISession> iSession(scnSession);
+    abilitySessionInfo->sessionToken = iSession->AsObject();
     abilitySessionInfo->callerToken = sessionInfo.callerToken_;
     abilitySessionInfo->persistentId = scnSession->GetPersistentId();
     return abilitySessionInfo;

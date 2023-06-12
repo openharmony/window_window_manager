@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ability/ability_base/ability_base.gni")
 import("../../windowmanager_aafwk.gni")
 
 config("session_public_config") {
@@ -29,11 +28,6 @@ config("session_public_config") {
 
     # for WMError Code
     "${window_base_path}/interfaces/innerkits/wm",
-    "${window_base_path}/window_scene/session_manager/include",
-
-    # for scene_persistence
-    "${ability_base_path}/interfaces/kits/native/extractortool/include",
-    "${multimedia_image_framework}/interfaces/innerkits/include",
   ]
 }
 

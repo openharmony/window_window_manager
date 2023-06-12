@@ -321,7 +321,7 @@ WSError Session::SetActive(bool active)
 
 WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
-    if (abilitySessionInfo) {
+    if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -348,7 +348,7 @@ void Session::SetBackPressedListenser(const NotifyBackPressedFunc& func)
 
 WSError Session::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
-    if (abilitySessionInfo) {
+    if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -369,7 +369,7 @@ void Session::SetTerminateSessionListener(const NotifyTerminateSessionFunc& func
 
 WSError Session::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
-    if (abilitySessionInfo) {
+    if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -392,7 +392,9 @@ void Session::SetSessionExceptionListener(const NotifySessionExceptionFunc& func
 
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    CALL_DEBUG_ENTER;
     WLOGFD("Session TransferPointEvent, Id: %{public}" PRIu64 "", persistentId_);
+    WLOGFD("Session TransferPointEvent, eventId: %{public}d", pointerEvent->GetId());
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;

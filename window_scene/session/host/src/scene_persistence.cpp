@@ -19,7 +19,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "constants.h"
+#include "image_packer.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -76,4 +76,4 @@ bool ScenePersistence::IsSnapshotExisted() const
     }
     return S_ISREG(buf.st_mode);
 }
-}
+} // namespace OHOS::Rosen
