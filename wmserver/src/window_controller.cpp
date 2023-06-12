@@ -29,7 +29,6 @@
 #include "display_group_info.h"
 #include "display_manager_service_inner.h"
 #include "minimize_app.h"
-#include "permission.h"
 #include "persistent_storage.h"
 #include "remote_animation.h"
 #include "starting_window.h"
@@ -248,7 +247,13 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
         StartingWindow::HandleClientWindowCreate(node, window, windowId, surfaceNode, property, pid, uid);
         windowRoot_->AddDeathRecipient(node);
         windowRoot_->AddSurfaceNodeIdWindowNodePair(surfaceNode->GetId(), node);
-        property->SetWindowFlags(node->GetWindowFlags());
+        WLOGFD("Flags: %{public}u, API version: %{public}u", property->GetWindowFlags(),
+            node->GetWindowProperty()->GetApiCompatibleVersion());
+        if (property->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED) &&
+            node->GetWindowProperty()->GetApiCompatibleVersion() >= 9 && !property->isSystemCalling_) { // 9: API ver.
+            property->SetWindowFlags(property->GetWindowFlags() &
+                ~static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
+        }
         property->SetApiCompatibleVersion(node->GetWindowProperty()->GetApiCompatibleVersion());
         return WMError::WM_OK;
     }
@@ -985,7 +990,7 @@ WMError WindowController::SetWindowFlags(uint32_t windowId, uint32_t flags)
     }
     auto property = node->GetWindowProperty();
     uint32_t oldFlags = property->GetWindowFlags();
-    if (property->GetApiCompatibleVersion() >= 9 && !Permission::IsSystemCalling() && // 9: api version.
+    if (property->GetApiCompatibleVersion() >= 9 && !property->isSystemCalling_ && // 9: api version.
         flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) {
         WLOGFW("Only API 9- or system calling support showing when locked.");
         return WMError::WM_DO_NOTHING;

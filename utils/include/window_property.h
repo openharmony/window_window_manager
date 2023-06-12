@@ -144,6 +144,7 @@ public:
 
     bool Write(Parcel& parcel, PropertyChangeAction action);
     void Read(Parcel& parcel, PropertyChangeAction action);
+    bool isSystemCalling_ { false };
 private:
     bool MapMarshalling(Parcel& parcel) const;
     static void MapUnmarshalling(Parcel& parcel, WindowProperty* property);
