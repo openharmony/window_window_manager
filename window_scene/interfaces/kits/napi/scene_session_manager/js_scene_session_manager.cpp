@@ -68,7 +68,7 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
     BindNativeFunction(*engine, *object, "updateFocus", moduleName, JsSceneSessionManager::UpdateFocus);
     BindNativeFunction(*engine, *object, "requestSceneSessionByCall", moduleName,
         JsSceneSessionManager::RequestSceneSessionByCall);
-        BindNativeFunction(*engine, *object, "startAbilityBySpecified", moduleName,
+    BindNativeFunction(*engine, *object, "startAbilityBySpecified", moduleName,
         JsSceneSessionManager::StartAbilityBySpecified);
     return engine->CreateUndefined();
 }
