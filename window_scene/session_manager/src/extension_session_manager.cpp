@@ -63,6 +63,10 @@ sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sp
     abilitySessionInfo->sessionToken = iSession->AsObject();
     abilitySessionInfo->callerToken = sessionInfo.callerToken_;
     abilitySessionInfo->persistentId = extSession->GetPersistentId();
+    if (sessionInfo.want != nullptr) {
+        AAFwk::Want* ptrWant = const_cast<AAFwk::Want*>(sessionInfo.want.GetRefPtr());
+        abilitySessionInfo->want = *ptrWant;
+    }     
     return abilitySessionInfo;
 }
 
