@@ -44,6 +44,8 @@ public:
     void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override;
 
     int ConnectExtension(const AppExecFwk::ElementName& element, const Rect& rect,
+        uint32_t uid, uint32_t windowId, const sptr<IWindowExtensionCallback>& callback);
+    int ConnectExtension(const AppExecFwk::ElementName& element, const Rect& rect,
         uint32_t uid, uint32_t windowId, const sptr<IWindowExtensionCallback>& callback,
         const sptr<ExtensionSession>& extensionSession);
     void DisconnectExtension();
@@ -104,6 +106,24 @@ void WindowExtensionConnection::Impl::WindowExtensionClientRecipient::OnRemoteDi
         callback_->OnExtensionDisconnected();
     }
     WLOGI("Remote died");
+}
+
+int WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::ElementName& element,
+    const Rect& rect, uint32_t uid, uint32_t windowId, const sptr<IWindowExtensionCallback>& callback)
+{
+    AAFwk::Want want;
+    want.SetElement(element);
+    StartAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::CONNECT_EXTENSION),
+        "WindowExtension %s-%s", element.GetBundleName().c_str(), element.GetAbilityName().c_str());
+    want.SetParam(RECT_FORM_KEY_POS_X, rect.posX_);
+    want.SetParam(RECT_FORM_KEY_POS_Y, rect.posY_);
+    want.SetParam(RECT_FORM_KEY_WIDTH, static_cast<int>(rect.width_));
+    want.SetParam(RECT_FORM_KEY_HEIGHT, static_cast<int>(rect.height_));
+    want.SetParam(WINDOW_ID, static_cast<int>(windowId));
+    componentCallback_ = callback;
+    auto ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, this, nullptr);
+    WLOGI("Connection extension end ret = %{public}d windowId = %{public}u uid = %{public}u", ret, windowId, uid);
+    return ret;
 }
 
 int WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::ElementName& element,
@@ -219,6 +239,12 @@ void WindowExtensionConnection::Impl::OnAbilityDisconnectDone(const AppExecFwk::
         componentCallback_->OnExtensionDisconnected();
     }
     WLOGI("end");
+}
+
+int WindowExtensionConnection::ConnectExtension(const AppExecFwk::ElementName& element,
+    const Rect& rect, uint32_t uid, uint32_t windowId, const sptr<IWindowExtensionCallback>& callback) const
+{
+    return pImpl_->ConnectExtension(element, rect, uid, windowId, callback);
 }
 
 int WindowExtensionConnection::ConnectExtension(const AppExecFwk::ElementName& element,
