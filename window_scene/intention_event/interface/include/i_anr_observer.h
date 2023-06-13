@@ -16,16 +16,22 @@
 #ifndef I_ANR_OBSERVER_H
 #define I_ANR_OBSERVER_H
 
+#include <iremote_broker.h>
+#include <iremote_object.h>
+
 namespace OHOS {
 namespace Rosen {
 class IAnrObserver {
 public:
+    enum {
+            NOTIFY_ANR = 0,
+        };
     IAnrObserver() = default;
     virtual ~IAnrObserver() = default;
     virtual void OnAnr(int32_t pid) const;
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.rosen.IAnrObserver");
 };
 } // namespace MMI
 } // namespace OHOS
-
 
 #endif // I_ANR_OBSERVER_H
