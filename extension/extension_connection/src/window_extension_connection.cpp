@@ -22,6 +22,7 @@
 #include <iremote_object.h>
 
 #include "session_info.h"
+#include "session/host/include/extension_session.h"
 #include "window_extension_proxy.h"
 #include "window_extension_client_stub_impl.h"
 #include "window_manager_hilog.h"
