@@ -53,8 +53,8 @@ ohos_shared_library("libdms") {
   public_configs = [ ":libdms_public_config" ]
 
   deps = [
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "../utils:libwmutil",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//third_party/libxml2:libxml2",
   ]
 
@@ -62,13 +62,13 @@ ohos_shared_library("libdms") {
     "c_utils:utils",
     "config_policy:configpolicy_util",
     "eventhandler:libeventhandler",
+    "graphic_standard:librender_service_client",
     "graphic_standard:surface",
     "hilog_native:libhilog",
     "hitrace_native:hitrace_meter",
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "sensor:sensor_interface_native",
-    "window_manager:libwsutils",
   ]
 
   if (defined(use_new_skia) && use_new_skia) {
