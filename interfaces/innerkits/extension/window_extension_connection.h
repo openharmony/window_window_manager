@@ -24,7 +24,6 @@
 #include <pointer_event.h>
 #include <memory>
 
-#include "session/host/include/extension_session.h"
 #include "wm_common.h"
 
 namespace OHOS {
@@ -38,6 +37,7 @@ namespace {
 }
 
 class RSSurfaceNode;
+class ExtensionSession;
 /**
  * @class IWindowExtensionCallback
  *
@@ -100,7 +100,7 @@ public:
      */
     int ConnectExtension(const AppExecFwk::ElementName& element, const Rect& rect,
         uint32_t uid, uint32_t windowId, const sptr<IWindowExtensionCallback>& callback,
-        const sptr<ExtensionSession>& extensionSession = nullptr) const;
+        const sptr<ExtensionSession>& extensionSession) const;
     /**
      * @brief Disconnect window extension.
      */
