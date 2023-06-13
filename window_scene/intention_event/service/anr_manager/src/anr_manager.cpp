@@ -23,6 +23,7 @@
 #include "proto.h"
 #include "timer_manager.h"
 #include "window_manager_hilog.h"
+#include "ws_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -45,6 +46,7 @@ void ANRManager::Init()
 void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mtx_);
     if (anrTimerCount_ >= MAX_ANR_TIMER_COUNT) {
         WLOGFD("AddAnrTimer failed, anrTimerCount exceeded %{public}d", MAX_ANR_TIMER_COUNT);
         return;
@@ -73,6 +75,7 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
 int32_t ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mtx_);
     WLOGFD("eventId:%{public}d, persistentId:%{public}d", eventId, persistentId);
     std::list<int32_t> timerIds = EVStage->DelEvents(persistentId, eventId);
     for (int32_t item : timerIds) {
@@ -83,12 +86,13 @@ int32_t ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
                 "count:%{public}d", eventId, item, anrTimerCount_);
         }
     }
-    return 0;
+    return WS::WS_OK;
 }
 
 bool ANRManager::IsANRTriggered(int64_t time, int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mtx_);
     if (EVStage->CheckAnrStatus(persistentId)) {
         WLOGFD("Application not responding. persistentId:%{public}d", persistentId);
         return true;
@@ -100,6 +104,7 @@ bool ANRManager::IsANRTriggered(int64_t time, int32_t persistentId)
 void ANRManager::RemoveTimers(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mtx_);
     std::vector<int32_t> timerIds = EVStage->GetTimerIds(persistentId);
     for (int32_t item : timerIds) {
         if (item != -1) {
@@ -112,18 +117,21 @@ void ANRManager::RemoveTimers(int32_t persistentId)
 void ANRManager::OnSessionLost(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mtx_);
     RemoveTimers(persistentId);
 }
 
 void ANRManager::SetApplicationPid(int32_t persistentId, int32_t applicationPid)
 {
     CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mtx_);
     applicationMap_[persistentId] = applicationPid;
 }
 
 int32_t ANRManager::GetPidByPersistentId(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mtx_);
     if (applicationMap_.find(persistentId) != applicationMap_.end()) {
         return applicationMap_[persistentId];
     }
