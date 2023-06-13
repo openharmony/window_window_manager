@@ -354,7 +354,7 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
             return WSError::WS_ERROR_NULLPTR;
         }
         auto iter = abilitySceneMap_.find(sessionInfo.callerPersistentId_);
-        if (iter ！= abilitySceneMap_.end()) {
+        if (iter != abilitySceneMap_.end()) {
             const auto& callerSession = iter->second;
             if (callerSession != nullptr) {
                 auto callerSessionInfo = callerSession->GetSessionInfo();
