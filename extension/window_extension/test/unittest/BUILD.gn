@@ -65,6 +65,7 @@ ohos_static_library("window_extension_unittest_common") {
   deps = [
     "../..:libwindow_extension",
     "../../../../interfaces/kits/napi/window_runtime:window_native_kit",
+    "../../../../window_scene/session:scene_session",
     "../../../../wm:libwm",
     "../../../extension_connection:libwindow_extension_client",
   ]
