@@ -33,6 +33,7 @@ ohos_unittest("extension_window_extension_proxy_test") {
 config("window_extension_unittest_common_public_config") {
   include_dirs = [
     "../../../../interfaces/innerkits/wm",
+    "../../../../window_scene/session/host/include",
     "../../../../wm/include",
     "../../include",
     "../../include/zidl",
@@ -65,11 +66,13 @@ ohos_static_library("window_extension_unittest_common") {
   deps = [
     "../..:libwindow_extension",
     "../../../../interfaces/kits/napi/window_runtime:window_native_kit",
+    "../../../../window_scene/session:scene_session",
     "../../../../wm:libwm",
     "../../../extension_connection:libwindow_extension_client",
   ]
 
   external_deps = [
+    "c_utils:utils",
     "hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
