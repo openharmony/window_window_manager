@@ -19,7 +19,6 @@
 #include "window_extension_stub_impl.h"
 #include "window_extension_client_interface.h"
 #include "window_extension_client_stub_impl.h"
-#include "window_extension_connection.h"
 
 using namespace testing;
 using namespace testing::ext;
