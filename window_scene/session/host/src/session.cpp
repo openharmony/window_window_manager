@@ -332,7 +332,6 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     info.callerPersistentId_ = GetPersistentId();
     sessionInfo_.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
     sessionInfo_.callState_ = info.callState_;
-    info.persistentId_ = abilitySessionInfo->persistentId;
     sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
     sessionInfo_.requestCode = abilitySessionInfo->requestCode;    
     WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s",
