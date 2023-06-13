@@ -99,6 +99,19 @@ public:
      * @return ERR_OK means connect success, others means connect failed.
      */
     int ConnectExtension(const AppExecFwk::ElementName& element, const Rect& rect,
+        uint32_t uid, uint32_t windowId, const sptr<IWindowExtensionCallback>& callback) const;
+    /**
+     * @brief Deconstructor for WindowExtensionConnection.
+     *
+     * @param element Element name.
+     * @param rect Rect of window extension.
+     * @param uid User id.
+     * @param windowId Window id.
+     * @param callback Callback for window extension.
+     * @param extensionSession session for extension
+     * @return ERR_OK means connect success, others means connect failed.
+     */
+    int ConnectExtension(const AppExecFwk::ElementName& element, const Rect& rect,
         uint32_t uid, uint32_t windowId, const sptr<IWindowExtensionCallback>& callback,
         const sptr<ExtensionSession>& extensionSession) const;
     /**
