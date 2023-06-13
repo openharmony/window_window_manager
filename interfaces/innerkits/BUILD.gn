@@ -23,9 +23,7 @@ ohos_shared_library("wm_interface") {
 
   include_dirs = [ "../../interfaces/innerkits" ]
 
-  deps = [
-    "../../window_scene/session:scene_session",
-  ]
+  deps = [ "../../window_scene/session:scene_session" ]
 
   public_deps = [
     "//commonlibrary/c_utils/base:utils",
