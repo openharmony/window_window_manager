@@ -71,6 +71,7 @@ ohos_static_library("window_extension_unittest_common") {
   ]
 
   external_deps = [
+    "c_utils:utils",
     "hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
