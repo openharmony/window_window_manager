@@ -715,7 +715,8 @@ WSError Session::MarkProcessed(int32_t eventId)
      * 看日志发现这块的线程和 WindowEventChannel::TransferPointerEvent 的线程不是同一个线程
      * 因此不需要额外委托，直接用这个线程去处理，但是要注意在合适的地方加锁
     */
-   return ANRMgr->MarkProcessed(eventId, persistentId);
+   ANRMgr->MarkProcessed(eventId, persistentId);
+   return WSError::WS_OK;
 }
 
 void Session::GeneratePersistentId(const bool isExtension, const SessionInfo &sessionInfo)

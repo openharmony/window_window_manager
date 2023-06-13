@@ -22,7 +22,8 @@ config("intention_event_public_config") {
     "../utils/include",
     "//foundation/window/window_manager/utils/include",
     "//foundation/window/window_manager/window_scene/session/container/include/zidl",
-    "//foundation/window/window_manager/window_scene/"
+    "//foundation/window/window_manager/window_scene",
+    "//foundation/window/window_manager/window_scene/interfaces/include"
   ]
 }
 

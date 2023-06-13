@@ -38,7 +38,7 @@ int32_t AnrObserverProxy::OnAnr(int32_t pid)
     }
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);;
     if (!data.WriteInterfaceToken(AnrObserverProxy::GetDescriptor())) {
         WLOGFE("Write descriptor failed");
         return WSError::WS_ERROR_IPC_FAILED;

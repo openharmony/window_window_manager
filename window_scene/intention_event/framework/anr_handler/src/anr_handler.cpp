@@ -115,14 +115,14 @@ void ANRHandler::MarkProcessed()
     if (eventId == INVALID_OR_PROCESSED_ID) {
         return;
     }
-    WLOGFD("Processed event id:%{public}d", eventId);
+    WLOGFD("Processed eventId:%{public}d", eventId);
     /**
         windowSessionImpl 就是 sessionStage
         SessionStage 中有 hostSession_
         hostSession 就是 SessionProxy
     */
     if (WSError ret = sessionStage_->MarkProcessed(eventId); ret != WSError::WS_OK) {
-        WLOGFE("Send to scene board failed, ret:%{public}d", ret);
+        WLOGFE("Send to sceneBoard failed, ret:%{public}d", ret);
     }
     SetLastProcessedEventStatus(false);
 }

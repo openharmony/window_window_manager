@@ -22,6 +22,10 @@
 #include "nocopyable.h"
 #include "singleton.h"
 
+#include "ws_common.h"
+
+// #include "i_anr_observer.h"
+
 namespace OHOS {
 namespace Rosen {
 class ANRManager final {
@@ -30,20 +34,21 @@ public:
     DISALLOW_COPY_AND_MOVE(ANRManager);
     void Init();
     void AddTimer(int32_t id, int64_t currentTime, int32_t persistentId);
-    int32_t MarkProcessed(int32_t eventId, int32_t persistentId);
+    void MarkProcessed(int32_t eventId, int32_t persistentId);
     bool IsANRTriggered(int64_t time, int32_t persistentId);
     void RemoveTimers(int32_t persistentId);
     void OnSessionLost(int32_t persistentId);
     void SetApplicationPid(int32_t persistentId, int32_t applicationPid);
     int32_t GetPidByPersistentId(int32_t persistentId);
+    // void SetAnrObserver(sptr<IAnrObserver> observer);
 private:
     int32_t anrTimerCount_ { 0 };
     std::unordered_map<int32_t, int32_t> applicationMap_;
     std::mutex mtx_;
+    // sptr<IAnrObserver> anrObserver_;
     /**
      * 加一个成员 sptr<IAnrObserver> anrObserver_; 用于向调用SetAnrObserver的进程通知 ANR
      * 本质上是一个 proxy 
-     * 需要补上  stub 等一系列 Binder 调用的代码
     */
 };
 #define ANRMgr ::OHOS::DelayedSingleton<ANRManager>::GetInstance()
