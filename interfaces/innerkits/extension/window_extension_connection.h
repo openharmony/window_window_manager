@@ -24,7 +24,6 @@
 #include <pointer_event.h>
 #include <memory>
 
-#include "session/host/include/extension_session.h"
 #include "wm_common.h"
 
 namespace OHOS {
@@ -38,6 +37,7 @@ namespace {
 }
 
 class RSSurfaceNode;
+class ExtensionSession;
 /**
  * @class IWindowExtensionCallback
  *
