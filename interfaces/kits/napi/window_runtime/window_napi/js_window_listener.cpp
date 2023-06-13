@@ -49,36 +49,31 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
 {
     WLOGI("[NAPI]OnSizeChange, wh[%{public}u, %{public}u], reason = %{public}u", rect.width_, rect.height_, reason);
     // js callback should run in js thread
-    auto callback = [self = weakRef_, rect, eng = engine_] () {
-        auto thisListener = self.promote();
-        if (thisListener == nullptr || eng == nullptr) {
-            WLOGFE("[NAPI]this listener or engine is nullptr");
-            return;
-        }
-        NativeValue* sizeValue = eng->CreateObject();
-        NativeObject* object = ConvertNativeValueTo<NativeObject>(sizeValue);
-        if (object == nullptr) {
-            WLOGFE("Failed to convert rect to jsObject");
-            return;
-        }
-        object->SetProperty("width", CreateJsValue(*eng, rect.width_));
-        object->SetProperty("height", CreateJsValue(*eng, rect.height_));
-        NativeValue* argv[] = {sizeValue};
-        thisListener->CallJsMethod(WINDOW_SIZE_CHANGE_CB.c_str(), argv, ArraySize(argv));
-    };
-    if (reason == WindowSizeChangeReason::ROTATION) {
-        callback();
-    } else {
-        std::unique_ptr<AsyncTask::CompleteCallback> complete =
-            std::make_unique<AsyncTask::CompleteCallback>([callback] (NativeEngine &engine,
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
+        [self = weakRef_, rect, eng = engine_] (NativeEngine &engine,
             AsyncTask &task, int32_t status) {
-                callback();
-            });
-        NativeReference* callback = nullptr;
-        std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-        AsyncTask::Schedule("JsWindowListener::OnSizeChange",
-            *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
-    }
+            auto thisListener = self.promote();
+            if (thisListener == nullptr || eng == nullptr) {
+                WLOGFE("[NAPI]this listener or engine is nullptr");
+                return;
+            }
+            NativeValue* sizeValue = eng->CreateObject();
+            NativeObject* object = ConvertNativeValueTo<NativeObject>(sizeValue);
+            if (object == nullptr) {
+                WLOGFE("Failed to convert rect to jsObject");
+                return;
+            }
+            object->SetProperty("width", CreateJsValue(*eng, rect.width_));
+            object->SetProperty("height", CreateJsValue(*eng, rect.height_));
+            NativeValue* argv[] = {sizeValue};
+            thisListener->CallJsMethod(WINDOW_SIZE_CHANGE_CB.c_str(), argv, ArraySize(argv));
+        }
+    );
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsWindowListener::OnSizeChange",
+        *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsWindowListener::OnModeChange(WindowMode mode, bool hasDeco)
