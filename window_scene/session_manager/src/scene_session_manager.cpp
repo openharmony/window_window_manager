@@ -358,8 +358,8 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
             const auto& callerSession = iter->second;
             if (callerSession != nullptr) {
                 auto callerSessionInfo = callerSession->GetSessionInfo();
-                want = callerSessionInfo.want;
-                scnSessionInfo->want = callerSession.want;
+                want = *callerSessionInfo.want;
+                scnSessionInfo->want = *callerSessionInfo.want;
             }
         }
         AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(want, startOptions, scnSessionInfo);
