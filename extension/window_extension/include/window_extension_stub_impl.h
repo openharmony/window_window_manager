@@ -38,7 +38,8 @@ public:
     virtual void GetExtensionWindow(sptr<IWindowExtensionClient>& token) override;
 
     sptr<Window> CreateWindow(
-        const Rect& rect, uint32_t parentWindowId, const std::shared_ptr<AbilityRuntime::Context>& context);
+        const Rect& rect, uint32_t parentWindowId, const std::shared_ptr<AbilityRuntime::Context>& context,
+        const sptr<IRemoteObject>& iSession = nullptr);
     void DestroyWindow();
     sptr<Window> GetWindow() const;
 private:
