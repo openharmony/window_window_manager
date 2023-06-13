@@ -80,6 +80,7 @@ WSError WindowEventChannelProxy::TransferPointerEvent(const std::shared_ptr<MMI:
 
 int32_t WindowEventChannelProxy::GetApplicationPid()
 {
+    CALL_DEBUG_ENTER;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);

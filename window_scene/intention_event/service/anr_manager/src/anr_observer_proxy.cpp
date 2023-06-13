@@ -15,13 +15,12 @@
 
 #include "anr_observer_proxy.h"
 
-#include <message_parcel.h>
-
 #include "iremote_object.h"
 #include "message_option.h"
+#include <message_parcel.h>
+#include "nocopyable.h"
 
 #include "window_manager_hilog.h"
-
 #include "ws_common.h"
 
 namespace OHOS {

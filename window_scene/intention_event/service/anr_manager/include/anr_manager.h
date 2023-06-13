@@ -16,6 +16,7 @@
 #ifndef ANR_MANAGER_H
 #define ANR_MANAGER_H
 
+#include <mutex>
 #include <unordered_map>
 
 #include "nocopyable.h"
@@ -38,6 +39,7 @@ public:
 private:
     int32_t anrTimerCount_ { 0 };
     std::unordered_map<int32_t, int32_t> applicationMap_;
+    std::mutex mtx_;
     /**
      * 加一个成员 sptr<IAnrObserver> anrObserver_; 用于向调用SetAnrObserver的进程通知 ANR
      * 本质上是一个 proxy 

@@ -695,6 +695,9 @@ WSError WindowSessionImpl::MarkProcessed(int32_t eventId)
         return WSError::WS_DO_NOTHING;
     }
     return hostSession_->MarkProcessed(eventId);
+
+}
+
 void WindowSessionImpl::RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener)
 {
     WLOGFD("Start register DialogDeathRecipientListener");

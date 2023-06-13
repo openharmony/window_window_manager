@@ -698,7 +698,14 @@ WSError Session::MarkProcessed(int32_t eventId)
     WLOGFI("WLD>>> Here in Session::MarkProcessed!");
     int32_t persistentId = GetPersistentId();
     WLOGFI("WLD>>> persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
-    return WSError::WS_OK;
+    /**
+     * 多模的逻辑是在这通过以为委托的线程去执行 ANRMgr 的 MarkProcessed 的逻辑
+     * 如果说现在这个线程和事件的收发线程在同一个线程的话，那就不需要委托了，
+     * 但是事件上报是异步的，这块都丢给一个线程去做的话是不是会有性能的问题
+     * 看日志发现这块的线程和 WindowEventChannel::TransferPointerEvent 的线程不是同一个线程
+     * 因此不需要额外委托，直接用这个线程去处理，但是要注意在合适的地方加锁
+    */
+   return ANRMgr->MarkProcessed(eventId, persistentId);
 }
 
 void Session::GeneratePersistentId(const bool isExtension, const SessionInfo &sessionInfo)
