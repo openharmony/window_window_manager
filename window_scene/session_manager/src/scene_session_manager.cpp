@@ -762,7 +762,7 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
         sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());    
     AAFwk::Want want;
     want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
-    // AAFwk::AbilityManagerClient::GetInstance()->StartSpecifiedAbilityBySCB(want);
+    AAFwk::AbilityManagerClient::GetInstance()->StartSpecifiedAbilityBySCB(want);
 }
 
 } // namespace OHOS::Rosen
