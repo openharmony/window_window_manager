@@ -353,7 +353,7 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         if (!scnSessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(want, startOptions, scnSessionInfo);
+        AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo->want, startOptions, scnSessionInfo);
         activeSessionId_ = persistentId;
         return WSError::WS_OK;
     };
