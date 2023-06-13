@@ -21,7 +21,6 @@
 #include <ipc_skeleton.h>
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
-#include <ui/rs_node.h>
 
 #include "permission.h"
 #include "color_parser.h"
@@ -2267,38 +2266,12 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
             property_->SetOriginRect(rect);
         }
     }
-    auto task = [this, reason, rsTransaction, rectToAce, lastOriRect, display]() mutable {
-        auto sizeChange = [this, reason, rsTransaction, rectToAce, lastOriRect]() mutable {
-            if ((rectToAce != lastOriRect) || (reason != lastSizeChangeReason_)) {
-                NotifySizeChange(rectToAce, reason, rsTransaction);
-                lastSizeChangeReason_ = reason;
-            }
-        };
-        if (rsTransaction) {
-            RSTransaction::FlushImplicitTransaction();
-            rsTransaction->Begin();
-        }
-        RSAnimationTimingProtocol protocol;
-        protocol.SetDuration(600);
-        auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
-        RSNode::OpenImplicitAnimation(protocol, curve);
-        UpdateViewportConfig(rectToAce, display, reason, sizeChange, rsTransaction);
-        RSNode::CloseImplicitAnimation();
-        if (rsTransaction) {
-            rsTransaction->Commit();
-        }
-    };
     ResSchedReport::GetInstance().RequestPerfIfNeed(reason, GetType(), GetMode());
-    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
-    if (handler_ != nullptr && reason == WindowSizeChangeReason::ROTATION) {
-        handler_->PostTask(task);
-    } else {
-        if ((rectToAce != lastOriRect) || (reason != lastSizeChangeReason_)) {
-            NotifySizeChange(rectToAce, reason, rsTransaction);
-            lastSizeChangeReason_ = reason;
-        }
-        UpdateViewportConfig(rectToAce, display, reason, nullptr, rsTransaction);
+    if ((rectToAce != lastOriRect) || (reason != lastSizeChangeReason_)) {
+        NotifySizeChange(rectToAce, reason, rsTransaction);
+        lastSizeChangeReason_ = reason;
     }
+    UpdateViewportConfig(rectToAce, display, reason, rsTransaction);
 }
 
 void WindowImpl::UpdateMode(WindowMode mode)
@@ -2872,13 +2845,10 @@ void WindowImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType
 }
 
 void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& display, WindowSizeChangeReason reason,
-    const std::function<void()>& listener, const std::shared_ptr<RSTransaction>& rsTransaction)
+    const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ == nullptr) {
-        if (listener) {
-            listener();
-        }
         return;
     }
     Ace::ViewportConfig config;
@@ -2887,7 +2857,7 @@ void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& dis
     if (display) {
         config.SetDensity(display->GetVirtualPixelRatio());
     }
-    uiContent_->UpdateViewportConfig(config, reason, listener, rsTransaction);
+    uiContent_->UpdateViewportConfig(config, reason, rsTransaction);
     WLOGFD("Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         property_->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
