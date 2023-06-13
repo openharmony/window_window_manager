@@ -167,6 +167,18 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         WLOGFE("Write requestCode info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
+    if (!(data.WriteInt64(abilitySessionInfo->persistentId))) {
+        WLOGFE("Write persistentId failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!(data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state)))) {
+        WLOGFE("Write callState failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!(data.WriteInt64(abilitySessionInfo->uiAbilityId))) {
+        WLOGFE("Write uiAbilityId failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_ACTIVE_PENDING_SESSION),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");

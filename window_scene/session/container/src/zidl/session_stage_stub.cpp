@@ -33,6 +33,10 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleBackEventInner),
     std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_FOCUS_CHANGE),
         &SessionStageStub::HandleUpdateFocus),
+    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_DESTROY),
+        &SessionStageStub::HandleNotifyDestroy),
+    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_TOUCH_DIALOG_TARGET),
+        &SessionStageStub::HandleNotifyTouchDialogTarget),
 };
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -85,6 +89,21 @@ int SessionStageStub::HandleUpdateFocus(MessageParcel& data, MessageParcel& repl
     bool isFocused = data.ReadBool();
     WSError errCode = UpdateFocus(isFocused);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyDestroy(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("Notify Destroy");
+    WSError errCode = NotifyDestroy();
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyTouchDialogTarget(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("Notify touch dialog target");
+    NotifyTouchDialogTarget();
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
