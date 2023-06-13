@@ -23,13 +23,11 @@
 #include "proto.h"
 #include "timer_manager.h"
 #include "window_manager_hilog.h"
-#include "ws_common.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ANRManager" };
-const std::string FOUNDATION = "foundation";
 constexpr int32_t MAX_ANR_TIMER_COUNT = 50;
 } // namespace
 
@@ -53,12 +51,12 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
     }
     int32_t timerId = TimerMgr->AddTimer(ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME, 1, [this, id, persistentId]() {
         EVStage->SetAnrStatus(persistentId, true);
-        WLOGFE("Application not responding. persistentId:%{public}d, eventId:%{public}d", persistentId, id);
-        // int32_t pid = GetPidByPersistentId(persistentId);
-        // if (int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->SendANRProcessID(pid); ret != ERR_OK) {
-        //     WLOGFE("SendANRProcessedId failed, ret:%{public}d", ret);
-        //     return;
-        // }
+        int32_t pid = GetPidByPersistentId(persistentId);
+        WLOGFE("Application not responding. persistentId:%{public}d, eventId:%{public}d, applicationId:%{public}d",
+            persistentId, id, pid);
+        /**
+         * anrObserver_->OnAnr(pid);
+        */
         std::vector<int32_t> timerIds = EVStage->GetTimerIds(persistentId);
         for (int32_t item : timerIds) {
             if (item != -1) {
@@ -72,7 +70,7 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
     EVStage->SaveANREvent(persistentId, id, currentTime, timerId);
 }
 
-int32_t ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
+void ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
@@ -86,7 +84,6 @@ int32_t ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
                 "count:%{public}d", eventId, item, anrTimerCount_);
         }
     }
-    return WS::WS_OK;
 }
 
 bool ANRManager::IsANRTriggered(int64_t time, int32_t persistentId)
@@ -139,5 +136,11 @@ int32_t ANRManager::GetPidByPersistentId(int32_t persistentId)
     return -1;
 }
 
+// void ANRManager::SetAnrObserver(sptr<IAnrObserver> observer)
+// {
+//     CALL_DEBUG_ENTER;
+//     std::lock_guard<std::mutex> guard(mtx_);
+//     anrObserver_ = observer;
+// }
 } // namespace Rosen
 } // namespace OHOS
