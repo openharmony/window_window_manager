@@ -33,6 +33,8 @@ public:
     WSError HandleBackEvent() override;
     WSError MarkProcessed(int32_t eventId) override;
     WSError UpdateFocus(bool isFocused) override;
+    WSError NotifyDestroy() override;
+    void NotifyTouchDialogTarget() override;
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
 };

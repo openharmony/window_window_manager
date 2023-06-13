@@ -135,7 +135,6 @@ int SessionStub::HandleTerminateSession(MessageParcel& data, MessageParcel& repl
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
-
     abilitySessionInfo->resultCode = data.ReadInt32();
     const WSError& errCode = TerminateSession(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
@@ -169,7 +168,9 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
     abilitySessionInfo->requestCode = data.ReadInt32();
-
+    abilitySessionInfo->persistentId = data.ReadInt64();
+    abilitySessionInfo->state = static_cast<AAFwk::CallToState>(data.ReadInt32());
+    abilitySessionInfo->uiAbilityId = data.ReadInt64();
     const WSError& errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;

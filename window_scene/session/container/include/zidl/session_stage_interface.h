@@ -35,6 +35,8 @@ public:
         TRANS_ID_NOTIFY_SIZE_CHANGE,
         TRANS_ID_HANDLE_BACK_EVENT,
         TRANS_ID_NOTIFY_FOCUS_CHANGE,
+        TRANS_ID_NOTIFY_DESTROY,
+        TRANS_ID_NOTIFY_TOUCH_DIALOG_TARGET,
     };
 
     virtual void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
@@ -45,6 +47,8 @@ public:
     virtual WSError HandleBackEvent() = 0;
     virtual WSError MarkProcessed(int32_t eventId) = 0;
     virtual WSError UpdateFocus(bool isFocused) = 0;
+    virtual WSError NotifyDestroy() = 0;
+    virtual void NotifyTouchDialogTarget() = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H
