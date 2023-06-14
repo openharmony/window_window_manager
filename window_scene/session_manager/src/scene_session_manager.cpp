@@ -75,10 +75,12 @@ void SceneSessionManager::ConfigWindowSceneXml()
     if (item.IsMap()) {
         ConfigWindowEffect(item);
     }
+
     item = config["decor"];
     if (item.IsMap()) {
         ConfigDecor(item);
     }
+
     item = config["defaultWindowMode"];
     if (item.IsInts()) {
         auto numbers = *item.intsValue_;
@@ -87,6 +89,11 @@ void SceneSessionManager::ConfigWindowSceneXml()
              numbers[0] == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
             systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(numbers[0]));
         }
+    }
+
+    item = config["keyboardAnimation"];
+    if (item.IsMap()) {
+        ConfigKeyboardAnimation(item);
     }
 }
 
@@ -237,6 +244,56 @@ bool SceneSessionManager::ConfigAppWindowShadow(const WindowSceneConfig::ConfigI
     }
 
     return true;
+}
+
+void SceneSessionManager::ConfigKeyboardAnimation(const WindowSceneConfig::ConfigItem& animationConfig)
+{
+    WindowSceneConfig::ConfigItem item = animationConfig["timing"];
+    if (item.IsMap() && item.mapValue_->count("curve")) {
+        appWindowSceneConfig_.keyboardAnimation_.curveType_ = CreateCurve(item["curve"]);
+    }
+    item = animationConfig["timing"]["durationIn"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1) { // durationIn
+            appWindowSceneConfig_.keyboardAnimation_.durationIn_ = static_cast<uint32_t>(numbers[0]);
+        }
+    }
+    item = animationConfig["timing"]["durationOut"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1) { // durationOut
+            appWindowSceneConfig_.keyboardAnimation_.durationOut_ = static_cast<uint32_t>(numbers[0]);
+        }
+    }
+}
+
+const std::string& SceneSessionManager::CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig)
+{
+    static std::unordered_set<std::string> curveSet = { "easeOut", "ease", "easeIn", "easeInOut", "default",
+        "linear", "spring", "interactiveSpring" };
+
+    std::string keyboardCurveName = "easeOut";
+    const auto& nameItem = curveConfig.GetProp("name");
+    if (nameItem.IsString()) {
+        std::string name = nameItem.stringValue_;
+        if (name == "cubic" && curveConfig.IsFloats() &&
+            curveConfig.floatsValue_->size() == 4) { // 4 curve parameter
+            const auto& numbers = *curveConfig.floatsValue_;
+            keyboardCurveName = name;
+            appWindowSceneConfig_.keyboardAnimation_.ctrlX1_ = numbers[0]; // 0 ctrlX1
+            appWindowSceneConfig_.keyboardAnimation_.ctrlY1_ = numbers[1]; // 1 ctrlY1
+            appWindowSceneConfig_.keyboardAnimation_.ctrlX2_ = numbers[2]; // 2 ctrlX2
+            appWindowSceneConfig_.keyboardAnimation_.ctrlY2_ = numbers[3]; // 3 ctrlY2
+        } else {
+            auto iter = curveSet.find(name);
+            if (iter != curveSet.end()) {
+                keyboardCurveName = name;
+            }
+        }
+    }
+
+    return keyboardCurveName;
 }
 
 sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
