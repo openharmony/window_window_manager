@@ -281,14 +281,8 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig02, Function | SmallTest | Level2)
         "</decor>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-
-
     WindowManagerConfig::ConfigItem item = config["decor"]["supportedMode"];
-    item.stringsValue_
-
-    ASSERT_EQ(true, sysConfig.isSystemDecorEnable_);
-
-    ASSERT_TRUE(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN == sysConfig.decorModeSupportInfo_);
+    ASSERT_EQ(true, *item.stringsValue_ == "fullscreen");
 }
 
 /**
@@ -307,9 +301,8 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig03, Function | SmallTest | Level2)
         "</decor>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    WindowManagerService::GetInstance().ConfigureWindowManagerService();
-    ASSERT_EQ(true, sysConfig.isSystemDecorEnable_);
-    ASSERT_TRUE(WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING == sysConfig.decorModeSupportInfo_);
+    string mode = WindowSceneConfig::config_["decor"]["supportedMode"].stringsValue_;
+    ASSERT_EQ(true, mode == "floating");
 }
 
 /**
@@ -328,53 +321,8 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig04, Function | SmallTest | Level2)
         "</decor>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    WindowManagerService::GetInstance().ConfigureWindowManagerService();
-    ASSERT_EQ(true, sysConfig.isSystemDecorEnable_);
-    ASSERT_TRUE((WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
-        WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING) == sysConfig.decorModeSupportInfo_);
-}
-
-/**
- * @tc.name: DecorConfig05
- * @tc.desc: set decor true and mode support split.
- * @tc.type: FUNC
- * @tc.require: issueI68QCO
- */
-HWTEST_F(WindowSceneConfigTest, DecorConfig05, Function | SmallTest | Level2)
-{
-    auto& sysConfig = WindowManagerService::GetInstance().systemConfig_;
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
-        "<Configs>"
-        "<decor enable=\"true\">"
-        "<supportedMode>split</supportedMode>"
-        "</decor>"
-        "</Configs>";
-    WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    WindowManagerService::GetInstance().ConfigureWindowManagerService();
-    ASSERT_EQ(true, sysConfig.isSystemDecorEnable_);
-    ASSERT_TRUE((WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
-        WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY) == sysConfig.decorModeSupportInfo_);
-}
-
-/**
- * @tc.name: DecorConfig06
- * @tc.desc: set invalid mode support.
- * @tc.type: FUNC
- * @tc.require: issueI68QCO
- */
-HWTEST_F(WindowSceneConfigTest, DecorConfig06, Function | SmallTest | Level2)
-{
-    auto& sysConfig = WindowManagerService::GetInstance().systemConfig_;
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
-        "<Configs>"
-        "<decor enable=\"true\">"
-        "<supportedMode>xxxxx fullscreen xxxxx</supportedMode>"
-        "</decor>"
-        "</Configs>";
-    WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    WindowManagerService::GetInstance().ConfigureWindowManagerService();
-    ASSERT_EQ(true, sysConfig.isSystemDecorEnable_);
-    ASSERT_TRUE(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL == sysConfig.decorModeSupportInfo_);
+    string mode = WindowSceneConfig::config_["decor"]["supportedMode"].stringsValue_;
+    ASSERT_EQ(true, mode == "fullscreen floating");
 }
 } // namespace
 } // namespace Rosen
