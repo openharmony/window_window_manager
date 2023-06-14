@@ -548,6 +548,7 @@ private:
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
     void UpdateWindowStateUnfrozen();
     void UpdateViewportConfig(const Rect& rect, const sptr<class Display>& display, WindowSizeChangeReason reason,
+        const std::function<void()>& listener = nullptr,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateDecorEnable(bool needNotify = false);
     WMError SetFloatingMaximize(bool isEnter);
@@ -606,7 +607,6 @@ private:
     bool isIgnoreSafeAreaNeedNotify_ = false;
     bool isIgnoreSafeArea_ = false;
     bool needDefaultAnimation_ = true;
-    bool postTaskDone_ = false;
     const std::map<DragType, uint32_t> STYLEID_MAP = {
         {DragType::DRAG_UNDEFINED, MMI::MOUSE_ICON::DEFAULT},
         {DragType::DRAG_BOTTOM_OR_TOP, MMI::MOUSE_ICON::NORTH_SOUTH},
