@@ -67,6 +67,8 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
         }
     });
     anrTimerCount_++;
+    WLOGFD("Add anr timer success, eventId:%{public}d, timer id:%{public}d, count:%{public}d",
+        id, timerId, anrTimerCount_);
     EVStage->SaveANREvent(persistentId, id, currentTime, timerId);
 }
 
