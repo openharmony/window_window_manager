@@ -548,7 +548,6 @@ private:
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
     void UpdateWindowStateUnfrozen();
     void UpdateViewportConfig(const Rect& rect, const sptr<class Display>& display, WindowSizeChangeReason reason,
-        const std::function<void()>& listener = nullptr,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateDecorEnable(bool needNotify = false);
     WMError SetFloatingMaximize(bool isEnter);
@@ -619,7 +618,6 @@ private:
         constexpr float BlurSigmaScale = 0.57735f;
         return radius > 0.0f ? BlurSigmaScale * radius + SK_ScalarHalf : 0.0f;
     }
-    std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS
