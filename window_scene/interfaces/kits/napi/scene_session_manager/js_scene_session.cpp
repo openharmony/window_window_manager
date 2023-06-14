@@ -73,7 +73,7 @@ JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& s
         { RAISE_TO_TOP_CB,                &JsSceneSession::ProcessRaiseToTopRegister },
         { BACK_PRESSED_CB,                &JsSceneSession::ProcessBackPressedRegister },
         { SESSION_FOCUSABLE_CHANGE_CB,    &JsSceneSession::ProcessSessionFocusableChangeRegister },
-        { CLICK_CB,                       &JsSceneSession::ProcessClickRegister }, 
+        { CLICK_CB,                       &JsSceneSession::ProcessClickRegister },
         { TERMINATE_SESSION_CB,        &JsSceneSession::ProcessTerminateSessionRegister },
         { SESSION_EXCEPTION_CB,        &JsSceneSession::ProcessSessionExceptionRegister },
     };
@@ -320,10 +320,10 @@ NativeValue* JsSceneSession::OnRegisterCallback(NativeEngine& engine, NativeCall
         return engine.CreateUndefined();
     }
 
-    (this->*listenerFunc_[cbType])();
     std::shared_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
     jsCbMap_[cbType] = callbackRef;
+    (this->*listenerFunc_[cbType])();
     WLOGFI("[NAPI]Register end, type = %{public}s", cbType.c_str());
     return engine.CreateUndefined();
 }
