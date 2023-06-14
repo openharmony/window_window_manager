@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,27 +13,30 @@
  * limitations under the License.
  */
 
-#ifndef ANR_OBSERVER_PROXY_H
-#define ANR_OBSERVER_PROXY_H
+#ifndef INTENTION_EVENT_STUB_H
+#define INTENTION_EVENT_STUB_H
 
-#include <iremote_proxy.h>
+#include <iremote_stub.h>
 #include "nocopyable.h"
 
-#include "i_anr_observer.h"
+#include "message_option.h"
+#include "message_parcel.h"
+
+#include "i_intention_event.h"
 
 namespace OHOS {
 namespace Rosen {
-class AnrObserverProxy : public IRemoteProxy<IAnrObserver> {
+class IntentionEventStub : public IRemoteStub<IIntentionEvent> {
 public:
-    explicit AnrObserverProxy(const sptr<IRemoteObject>& impl)
-        : IRemoteProxy<IAnrObserver>(impl) {}
-    ~AnrObserverProxy() = default;
-    DISALLOW_COPY_AND_MOVE(AnrObserverProxy);
-    virtual int32_t OnAnr(int32_t pid) override;
+    IntentionEventStub() = default;
+    DISALLOW_COPY_AND_MOVE(IntentionEventStub);
+    virtual ~IntentionEventStub() = default;
+
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 private:
-    static inline BrokerDelegator<AnrObserverProxy> delegator_;
+    int32_t SetAnrObserverStub(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace Rosen
 } // namespace OHOS
-#endif // ANR_OBSERVER_PROXY_H
+#endif // INTENTION_EVENT_STUB_H

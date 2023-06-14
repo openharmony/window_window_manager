@@ -13,27 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef ANR_OBSERVER_PROXY_H
-#define ANR_OBSERVER_PROXY_H
+#ifndef INTENTION_EVENT_PROXY_H
+#define INTENTION_EVENT_PROXY_H
 
-#include <iremote_proxy.h>
+#include "iremote_proxy.h"
 #include "nocopyable.h"
 
-#include "i_anr_observer.h"
+#include "i_anr_observer"
+#include "i_intention_event.h"
 
 namespace OHOS {
 namespace Rosen {
-class AnrObserverProxy : public IRemoteProxy<IAnrObserver> {
+class IntentionEventProxy : public IRemoteProxy<IIntentionEvent> {
 public:
-    explicit AnrObserverProxy(const sptr<IRemoteObject>& impl)
-        : IRemoteProxy<IAnrObserver>(impl) {}
-    ~AnrObserverProxy() = default;
-    DISALLOW_COPY_AND_MOVE(AnrObserverProxy);
-    virtual int32_t OnAnr(int32_t pid) override;
+    explicit IntentionEventProxy(const sptr<IRemoteObject>& impl)
+        : IRemoteProxy<IIntentionEvent>(impl) {}
+    DISALLOW_COPY_AND_MOVE(IntentionEventProxy);
+    ~IntentionEventProxy() = default;
 
+    virtual WSError SetAnrObserver(sptr<IAnrObserver> observer);
 private:
-    static inline BrokerDelegator<AnrObserverProxy> delegator_;
+    static inline BrokerDelegator<IntentionEventProxy> delegator_;
 };
-} // namespace Rosen
-} // namespace OHOS
-#endif // ANR_OBSERVER_PROXY_H
+} // Rosen
+} // OHOS
+#endif // INTENTION_EVENT_PROXY_H
