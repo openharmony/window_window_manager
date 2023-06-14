@@ -13,17 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef INTENTION_EVENT_CLIENT_H
-#define INTENTION_EVENT_CLIENT_H
+#ifndef INTENTION_EVENT_MANAGER_H
+#define INTENTION_EVENT_MANAGER_H
 
 #include "i_anr_observer"
 
-namespace OHOS::Rosen {
-class IntentionEventClient final {
+namespace OHOS {
+namespace Rosen {
+class IntentionEventManager final {
 public:
-    // Judge whether SceneBoard is enabled.
-    void SetAnrObserver(sptr<IAnrObserver> observer);
-};
-} // namespace OHOS::Rosen
+    static IntentionEventManager *GetInstance();
+    virtual ~IntentionEventManager() = default;
 
-#endif // INTENTION_EVENT_CLIENT_H
+    void SetAnrObserver(sptr<IAnrObserver> observer);
+private:
+    IntentionEventManager() = default;
+    DISALLOW_COPY_AND_MOVE(IntentionEventManager);
+    static IntentionEventManager *instance_;
+};
+} // namespace Rosen
+} // namespace OHOS
+
+#define INTENTION_EV_MGR OHOS::Rosen::IntentionEventManager::GetInstance()
+
+#endif // INTENTION_EVENT_MANAGER_H

@@ -18,7 +18,7 @@
 
 #include <input_window_monitor.h>
 #include <map>
-#include <nocopyable.h>
+#include "nocopyable.h"
 #include <system_ability.h>
 #include <transaction/rs_interfaces.h>
 #include <vector>

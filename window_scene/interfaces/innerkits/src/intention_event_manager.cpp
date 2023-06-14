@@ -13,14 +13,23 @@
  * limitations under the License.
  */
 
-#include "intention_event_client.h"
+#include "intention_event_manger.h"
+
+#include "intention_event_impl.h"
 
 namespace OHOS {
 namespace Rosen {
 
-void IntentionEventClient::SetAnrObserver(sptr<IAnrObserver> observer)
-{
+IntentionEventManager *IntentionEventManager::instance_ = new (std::nothrow) IntentionEventManager();
 
+IntentionEventManager *IntentionEventManager::GetInstance()
+{
+    return instance_;
+}
+
+void IntentionEventManager::SetAnrObserver(sptr<IAnrObserver> observer)
+{
+    INTENTION_EV_IMPL->SetAnrObserver(observer);
 }
 } // namespace Rosen
 } // namespace OHOS

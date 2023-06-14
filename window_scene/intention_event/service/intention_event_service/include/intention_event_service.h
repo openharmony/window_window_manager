@@ -16,6 +16,7 @@
 #ifndef ANR_MANAGER_H
 #define ANR_MANAGER_H
 
+#include <mutex>
 #include <unordered_map>
 
 #include "noncopyable.h"
@@ -25,12 +26,13 @@
 
 namespace OHOS {
 namespace Rosen {
-class IntentionEventService final {
+class IntentionEventService final : IntentionEventStub {
+    DECLARE_DELAYED_SP_SINGLETON(DeviceStatusService);
 public:
-    DISALLOW_COPY_AND_MOVE(IntentionEventService);
     void SetAnrObserver(sptr<IAnrObserver> observer);
+private:
+    std::mutex mtx_;
 };
-#define IntentionSrv ::OHOS::DelayedSingleton<IntentionEventService>::GetInstance()
 } // namespace Rosen
 } // namespace OHOS
 #endif // ANR_MANAGER_H

@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,22 +13,25 @@
  * limitations under the License.
  */
 
-#include "intention_event_service.h"
+#ifndef I_INTENTION_EVENT_H
+#define I_INTENTION_EVENT_H
 
-#include <unordered_map>
+#include <iremote_broker.h>
 
-#include "anr_manager.h"
-#include "window_manager_hilog.h"
+#include "noncopyable.h"
+
+#include "i_anr_observer.h"
 
 namespace OHOS {
 namespace Rosen {
-
-void IntentionEventService::SetAnrObserver(sptr<IAnrObserver> observer)
-{
-    CALL_DEBUG_ENTER;
-    std::lock_guard<std::mutex> guard(mtx_);
-    ANRMgr->SetAnrObserver(observer);
-}
-
+class IIntentionEvent : public IRemoteBroker {
+public:
+    enum {
+        SET_ANR_OBSERVER = 0,
+    };
+    virtual void SetAnrObserver(sptr<IAnrObserver> observer);
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.rosen.IIntentionEvent");
+};
 } // namespace Rosen
 } // namespace OHOS
+#endif // I_INTENTION_EVENT_H
