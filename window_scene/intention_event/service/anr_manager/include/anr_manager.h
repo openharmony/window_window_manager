@@ -28,6 +28,10 @@
 
 namespace OHOS {
 namespace Rosen {
+
+// namespace {
+// constexpr MAX_ANR_OBSERVER_NUM { 10 };
+// }
 class ANRManager final {
     DECLARE_DELAYED_SINGLETON(ANRManager);
 public:
@@ -45,10 +49,11 @@ private:
     int32_t anrTimerCount_ { 0 };
     std::unordered_map<int32_t, int32_t> applicationMap_;
     std::mutex mtx_;
-    // sptr<IAnrObserver> anrObserver_;
     /**
-     * 加一个成员 sptr<IAnrObserver> anrObserver_; 用于向调用SetAnrObserver的进程通知 ANR
-     * 本质上是一个 proxy 
+     * std::vector<sptr<IAnrObserver>> anrObservers_;
+     * 用于向调用SetAnrObserver的进程通知 ANR
+     * 本质上是一个 proxy
+     * 这些proxy对象需要加死亡监听，否则加上之后就去不掉了
     */
 };
 #define ANRMgr ::OHOS::DelayedSingleton<ANRManager>::GetInstance()
