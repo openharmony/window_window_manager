@@ -78,6 +78,11 @@ public:
         return (type == WindowType::WINDOW_TYPE_UI_EXTENSION);
     }
 
+    static inline bool IsAppComponentWindow(WindowType type)
+    {
+        return (type == WindowType::WINDOW_TYPE_APP_COMPONENT);
+    }
+
     static inline bool IsMainFloatingWindow(WindowType type, WindowMode mode)
     {
         return ((IsMainWindow(type)) && (mode == WindowMode::WINDOW_MODE_FLOATING));

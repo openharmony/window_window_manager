@@ -35,7 +35,8 @@ WindowExtensionStubImpl::~WindowExtensionStubImpl()
 }
 
 sptr<Window> WindowExtensionStubImpl::CreateWindow(
-    const Rect& rect, uint32_t parentWindowId, const std::shared_ptr<AbilityRuntime::Context>& context)
+    const Rect& rect, uint32_t parentWindowId, const std::shared_ptr<AbilityRuntime::Context>& context,
+    const sptr<IRemoteObject>& iSession)
 {
     sptr<WindowOption> option = new(std::nothrow) WindowOption();
     if (option == nullptr) {
@@ -46,8 +47,10 @@ sptr<Window> WindowExtensionStubImpl::CreateWindow(
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
     option->SetWindowRect(rect);
     option->SetParentId(parentWindowId);
-    WLOGI("Window::Create");
-    window_ = Window::Create(windowName_, option, context);
+    option->SetWindowName(windowName_);
+    option->SetWindowSessionType(WindowSessionType::EXTENSION_SESSION);
+    WLOGI("Window::Create with session.");
+    window_ = Window::Create(option, context, iSession);
     return window_.promote();
 }
 

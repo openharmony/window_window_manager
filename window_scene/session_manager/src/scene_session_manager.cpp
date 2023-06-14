@@ -353,7 +353,15 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         if (!scnSessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        scnSessionInfo->want = want;
+        auto iter = abilitySceneMap_.find(sessionInfo.callerPersistentId_);
+        if (iter != abilitySceneMap_.end()) {
+            const auto& callerSession = iter->second;
+            if (callerSession != nullptr) {
+                auto callerSessionInfo = callerSession->GetSessionInfo();
+                want = *callerSessionInfo.want;
+                scnSessionInfo->want = *callerSessionInfo.want;
+            }
+        }
         AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(want, startOptions, scnSessionInfo);
         activeSessionId_ = persistentId;
         return WSError::WS_OK;
