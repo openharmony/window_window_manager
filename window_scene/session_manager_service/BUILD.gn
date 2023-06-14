@@ -57,6 +57,7 @@ ohos_shared_library("session_manager_service") {
     "eventhandler:libeventhandler",
     "hilog_native:libhilog",
     "ipc:ipc_core",
+    "power_manager:powermgr_client",
   ]
 
   innerapi_tags = [ "platformsdk" ]
