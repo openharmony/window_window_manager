@@ -45,6 +45,7 @@ ohos_shared_library("libwindow_extension_client") {
   public_configs = [ ":libextension_connection_public_config" ]
 
   deps = [
+    "../../window_scene/session:scene_session",
     "../../wm:libwm",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]

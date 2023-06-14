@@ -252,8 +252,9 @@ void JsWindowExtension::OnDisconnect(const AAFwk::Want& want)
     WLOGI("called.");
 }
 
-void JsWindowExtension::OnStart(const AAFwk::Want& want)
+void JsWindowExtension::OnStart(const AAFwk::Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
+    WLOGI("OnStart");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WindowExtension OnStart %s-%s",
         want.GetElement().GetAbilityName().c_str(), want.GetElement().GetAbilityName().c_str());
     Extension::OnStart(want);
@@ -276,7 +277,8 @@ void JsWindowExtension::OnStart(const AAFwk::Want& want)
             WLOGFE("get context failed");
             return;
         }
-        sptr<Window> window = stub_->CreateWindow(rect, windowId, context);
+        sptr<Window> window = stub_->CreateWindow(rect, windowId, context,
+            sessionInfo == nullptr ? nullptr : sessionInfo->sessionToken);
         if (window == nullptr) {
             WLOGFE("create window failed");
             return;
