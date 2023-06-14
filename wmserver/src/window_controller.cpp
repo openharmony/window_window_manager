@@ -981,7 +981,7 @@ WMError WindowController::SetWindowType(uint32_t windowId, WindowType type)
     return res;
 }
 
-WMError WindowController::SetWindowFlags(uint32_t windowId, uint32_t flags)
+WMError WindowController::SetWindowFlags(uint32_t windowId, uint32_t flags, bool isSystemCalling)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node == nullptr) {
@@ -990,10 +990,10 @@ WMError WindowController::SetWindowFlags(uint32_t windowId, uint32_t flags)
     }
     auto property = node->GetWindowProperty();
     uint32_t oldFlags = property->GetWindowFlags();
-    if (property->GetApiCompatibleVersion() >= 9 && !property->isSystemCalling_ && // 9: api version.
-        flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) {
+    if (property->GetApiCompatibleVersion() >= 9 && !isSystemCalling && // 9: api version.
+        (oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) {
         WLOGFW("Only API 9- or system calling support showing when locked.");
-        return WMError::WM_DO_NOTHING;
+        return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     property->SetWindowFlags(flags);
     // only forbid_split_move flag change, just set property
@@ -1434,7 +1434,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_FLAGS: {
-            ret = SetWindowFlags(windowId, property->GetWindowFlags());
+            ret = SetWindowFlags(windowId, property->GetWindowFlags(), property->isSystemCalling_);
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_OTHER_PROPS: {
