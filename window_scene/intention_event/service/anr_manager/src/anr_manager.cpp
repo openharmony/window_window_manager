@@ -17,8 +17,6 @@
 #include <algorithm>
 #include <vector>
 
-// #include "ability_manager_client.h"
-
 #include "event_stage.h"
 #include "proto.h"
 #include "timer_manager.h"
@@ -55,7 +53,11 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
         WLOGFE("Application not responding. persistentId:%{public}d, eventId:%{public}d, applicationId:%{public}d",
             persistentId, id, pid);
         /**
-         * anrObserver_->OnAnr(pid);
+         * if (anrObserver_ != nullptr) {
+         *     anrObserver_->OnAnr(pid); 
+         * } else {
+         *     WLOGFE("anrObserver is nullptr");
+         * }
         */
         std::vector<int32_t> timerIds = EVStage->GetTimerIds(persistentId);
         for (int32_t item : timerIds) {
@@ -67,8 +69,8 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
         }
     });
     anrTimerCount_++;
-    WLOGFD("Add anr timer success, eventId:%{public}d, timer id:%{public}d, count:%{public}d",
-        id, timerId, anrTimerCount_);
+    WLOGFD("Add anr timer success, eventId:%{public}d, timer id:%{public}d, persistentId:%{public}d, count:%{public}d",
+        id, timerId, persistentId, anrTimerCount_);
     EVStage->SaveANREvent(persistentId, id, currentTime, timerId);
 }
 
@@ -124,6 +126,7 @@ void ANRManager::SetApplicationPid(int32_t persistentId, int32_t applicationPid)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
+    WLOGFD("persistentId:%{public}d -> applicationPid:%{public}d", persistentId, applicationPid);
     applicationMap_[persistentId] = applicationPid;
 }
 
@@ -132,17 +135,24 @@ int32_t ANRManager::GetPidByPersistentId(int32_t persistentId)
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
     if (applicationMap_.find(persistentId) != applicationMap_.end()) {
+        WLOGFD("persistentId:%{public}d -> applicationPid:%{public}d", persistentId, applicationMap_[persistentId]);
         return applicationMap_[persistentId];
     }
-    WLOGFE("No application matches persistentId:%{public}d", persistentId);
+    WLOGFD("No application matches persistentId:%{public}d", persistentId);
     return -1;
 }
 
-// void ANRManager::SetAnrObserver(sptr<IAnrObserver> observer)
-// {
-//     CALL_DEBUG_ENTER;
-//     std::lock_guard<std::mutex> guard(mtx_);
-//     anrObserver_ = observer;
-// }
+/*
+ void ANRManager::SetAnrObserver(sptr<IAnrObserver> observer)
+ {
+    CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mtx_);
+    if(anrObservers_.size() < MAX_ANR_OBSERVER_NUM) {
+        anrObservers_.push_back(observer);
+    } else {
+        WLOGFD("anrObservers is exceed maximum:%{public}d", MAX_ANR_OBSERVER_NUM);
+    }
+ }
+*/
 } // namespace Rosen
 } // namespace OHOS

@@ -20,7 +20,7 @@
 
 #include "noncopyable.h"
 
-#include "i_anr_notifier.h"
+#include "i_anr_observer.h"
 #include "intention_event_service.h"
 
 namespace OHOS {
@@ -28,10 +28,7 @@ namespace Rosen {
 class IntentionEventService final {
 public:
     DISALLOW_COPY_AND_MOVE(IntentionEventService);
-    void SetAnrObserver(int32_t pid);
-
-private:
-    int32_t anrObserverPid_ = -1;
+    void SetAnrObserver(sptr<IAnrObserver> observer);
 };
 #define IntentionSrv ::OHOS::DelayedSingleton<IntentionEventService>::GetInstance()
 } // namespace Rosen

@@ -50,6 +50,7 @@ bool EventStage::CheckAnrStatus(int32_t persistentId)
 void EventStage::SaveANREvent(int32_t persistentId, int32_t id, int64_t time, int32_t timerId)
 {
     CALL_DEBUG_ENTER;
+    WLOGFD("Current persistentId:%{public}d, eventId:%{public}d, timerId:%{public}d", persistentId, id, timerId);
     EventTime eventTime { id, time, timerId };
     if (events_.find(persistentId) != events_.end()) {
         events_[persistentId].push_back(eventTime);

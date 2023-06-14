@@ -16,6 +16,7 @@
 #include "session/container/include/window_event_channel.h"
 
 #include "unistd.h"
+#include "sys/types.h"
 
 #include <axis_event.h>
 #include <key_event.h>
@@ -61,7 +62,7 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
 int32_t WindowEventChannel::GetApplicationPid()
 {
     CALL_DEBUG_ENTER;
-    int32_t applicationPid = getpid();
+    int32_t applicationPid = static_cast<int32_t>(::getpid());
     WLOGFD("WindowEventChannel GetApplicationPid, pid:%{public}d", applicationPid);
     return applicationPid;
 }

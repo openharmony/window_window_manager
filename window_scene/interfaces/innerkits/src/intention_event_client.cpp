@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,21 +13,14 @@
  * limitations under the License.
  */
 
-#include "intention_event_service.h"
-
-#include <unordered_map>
-
-#include "anr_manager.h"
-#include "window_manager_hilog.h"
+#include "intention_event_client.h"
 
 namespace OHOS {
 namespace Rosen {
 
-void IntentionEventService::SetAnrObserver(sptr<IAnrObserver> observer)
+void IntentionEventClient::SetAnrObserver(sptr<IAnrObserver> observer)
 {
-    CALL_DEBUG_ENTER;
-    ANRMgr->SetAnrObserver(observer);
-}
 
+}
 } // namespace Rosen
 } // namespace OHOS
