@@ -161,11 +161,22 @@ struct WindowShadowConfig {
     std::string color_ = "#000000";
 };
 
+struct KeyboardSceneAnimationConfig {
+    std::string curveType_ = "easeOut";
+    float ctrlX1_ = 0.2f;
+    float ctrlY1_ = 0.0f;
+    float ctrlX2_ = 0.2f;
+    float ctrlY2_ = 1.0f;
+    uint32_t durationIn_ = 150; // default durationIn time
+    uint32_t durationOut_ = 150; // default durationOut time
+};
+
 struct AppWindowSceneConfig {
     float floatCornerRadius_ = 0.0f;
 
     WindowShadowConfig focusedShadow_;
     WindowShadowConfig unfocusedShadow_;
+    KeyboardSceneAnimationConfig keyboardAnimation_;
 };
 
 } // namespace OHOS::Rosen
