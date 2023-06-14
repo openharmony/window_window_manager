@@ -667,7 +667,7 @@ RSAnimationTimingCurve WindowManagerService::CreateCurve(const WindowManagerConf
         { "easeOut",           RSAnimationTimingCurve::EASE_OUT },
         { "ease",              RSAnimationTimingCurve::EASE },
         { "easeIn",            RSAnimationTimingCurve::EASE_IN },
-        { "easeOut",           RSAnimationTimingCurve::EASE_IN_OUT },
+        { "easeInOut",         RSAnimationTimingCurve::EASE_IN_OUT },
         { "default",           RSAnimationTimingCurve::DEFAULT },
         { "linear",            RSAnimationTimingCurve::LINEAR },
         { "spring",            RSAnimationTimingCurve::SPRING },
