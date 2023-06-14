@@ -21,7 +21,6 @@
 #include <ipc_skeleton.h>
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
-#include <ui/rs_node.h>
 
 #include "permission.h"
 #include "color_parser.h"
@@ -2267,39 +2266,12 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
             property_->SetOriginRect(rect);
         }
     }
-    auto task = [this, reason, rsTransaction, rectToAce, lastOriRect, display]() mutable {
-        if (rsTransaction) {
-            RSTransaction::FlushImplicitTransaction();
-            rsTransaction->Begin();
-        }
-        RSAnimationTimingProtocol protocol;
-        protocol.SetDuration(600);
-        auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
-        RSNode::OpenImplicitAnimation(protocol, curve);
-        if ((rectToAce != lastOriRect) || (reason != lastSizeChangeReason_)) {
-            NotifySizeChange(rectToAce, reason, rsTransaction);
-            lastSizeChangeReason_ = reason;
-        }
-        UpdateViewportConfig(rectToAce, display, reason, rsTransaction);
-        RSNode::CloseImplicitAnimation();
-        if (rsTransaction) {
-            rsTransaction->Commit();
-        }
-        postTaskDone_ = true;
-    };
     ResSchedReport::GetInstance().RequestPerfIfNeed(reason, GetType(), GetMode());
-    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
-    if (handler_ != nullptr && reason == WindowSizeChangeReason::ROTATION) {
-        postTaskDone_ = false;
-        handler_->PostTask(task);
-    } else {
-        if ((rectToAce != lastOriRect) || (reason != lastSizeChangeReason_) || !postTaskDone_) {
-            NotifySizeChange(rectToAce, reason, rsTransaction);
-            lastSizeChangeReason_ = reason;
-            postTaskDone_ = true;
-        }
-        UpdateViewportConfig(rectToAce, display, reason, rsTransaction);
+    if ((rectToAce != lastOriRect) || (reason != lastSizeChangeReason_)) {
+        NotifySizeChange(rectToAce, reason, rsTransaction);
+        lastSizeChangeReason_ = reason;
     }
+    UpdateViewportConfig(rectToAce, display, reason, rsTransaction);
 }
 
 void WindowImpl::UpdateMode(WindowMode mode)
