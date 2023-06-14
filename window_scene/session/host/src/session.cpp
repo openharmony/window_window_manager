@@ -163,7 +163,7 @@ void Session::UpdateSessionFocusable(bool isFocusable)
     NotifySessionFocusableChange(isFocusable);
 }
 
-WSError Session::SetFocusable(bool isFocusable) 
+WSError Session::SetFocusable(bool isFocusable)
 {
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -181,7 +181,7 @@ bool Session::GetFocusable() const
     return property_->GetFocusable();
 }
 
-WSError Session::SetTouchable(bool touchable) 
+WSError Session::SetTouchable(bool touchable)
 {
     property_->SetTouchable(touchable);
     return WSError::WS_OK;
@@ -333,7 +333,7 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     sessionInfo_.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
     sessionInfo_.callState_ = info.callState_;
     sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
-    sessionInfo_.requestCode = abilitySessionInfo->requestCode;    
+    sessionInfo_.requestCode = abilitySessionInfo->requestCode;
     WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
     WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}" PRIu64 "",
@@ -368,7 +368,7 @@ WSError Session::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionI
     info.callerToken_ = abilitySessionInfo->callerToken;
     info.persistentId_ = abilitySessionInfo->persistentId;
     sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
-    sessionInfo_.resultCode = abilitySessionInfo->resultCode;     
+    sessionInfo_.resultCode = abilitySessionInfo->resultCode;
     if (terminateSessionFunc_) {
         terminateSessionFunc_(info);
     }
@@ -394,8 +394,8 @@ WSError Session::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySe
     info.errorReason = abilitySessionInfo->errorReason;
     info.persistentId_ = abilitySessionInfo->persistentId;
     sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
-    sessionInfo_.errorCode = abilitySessionInfo->errorCode;   
-    sessionInfo_.errorReason = abilitySessionInfo->errorReason;       
+    sessionInfo_.errorCode = abilitySessionInfo->errorCode;
+    sessionInfo_.errorReason = abilitySessionInfo->errorReason;
     if (sessionExceptionFunc_) {
         sessionExceptionFunc_(info);
     }
@@ -532,6 +532,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot()
 void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func)
 {
     sessionStateChangeFunc_ = func;
+    NotifySessionStateChange(state_);
 }
 
 void Session::NotifySessionStateChange(const SessionState& state)
