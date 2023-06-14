@@ -96,7 +96,7 @@ private:
     void StopBootAnimationIfNeed(const sptr<WindowNode>& node);
     void RecordBootAnimationEvent() const;
     WMError SetWindowType(uint32_t windowId, WindowType type);
-    WMError SetWindowFlags(uint32_t windowId, uint32_t flags);
+    WMError SetWindowFlags(uint32_t windowId, uint32_t flags, bool isSystemCalling);
     WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property);
     WMError ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason);
     WMError ResizeRectAndFlush(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason);
