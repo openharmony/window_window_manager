@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 
+#include <running_lock.h>
 #include "interfaces/include/ws_common.h"
 #include "session/host/include/session.h"
 
@@ -56,6 +57,13 @@ public:
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
     WSError Background() override;
 
+    WSError SetTurnScreenOn(bool turnScreenOn);
+    bool IsTurnScreenOn() const;
+    WSError SetKeepScreenOn(bool keepScreenOn);
+    bool IsKeepScreenOn() const;
+    const std::string& GetWindowName() const;
+
+    std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 private:
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;

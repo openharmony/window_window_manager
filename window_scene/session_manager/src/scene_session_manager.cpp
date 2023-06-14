@@ -32,6 +32,8 @@
 #include "common/include/message_scheduler.h"
 #include "common/include/permission.h"
 #include "session/host/include/scene_session.h"
+#include "session/screen/include/screen_session.h"
+#include "session_manager/include/screen_session_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_math.h"
 
@@ -709,6 +711,16 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
             // @todo
             break;
         }
+        case WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON: {
+            sceneSession->SetTurnScreenOn(property->IsTurnScreenOn());
+            HandleTurnScreenOn(sceneSession);
+            break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON: {
+            sceneSession->SetKeepScreenOn(property->IsKeepScreenOn());
+            HandleKeepScreenOn(sceneSession, property->IsKeepScreenOn());
+            break;
+        }
         case WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE: {
             sceneSession->SetFocusable(property->GetFocusable());
             break;
@@ -730,6 +742,34 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
     }
 
     return ret;
+}
+
+void SceneSessionManager::HandleTurnScreenOn(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("session is invalid");
+    }
+    WLOGFD("Win: %{public}s, is turn on%{public}d", sceneSession->GetWindowName().c_str(), sceneSession->IsTurnScreenOn());
+    auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);
+    if (screenSession == nullptr) {
+        WLOGFE("failed, screen session could not be found");
+        return;
+    }
+    screenSession->HandleTurnScreenOn(sceneSession);
+}
+
+void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock)
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("session is invalid");
+    }
+    // @todo: get screen session?
+    auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);
+    if (screenSession == nullptr) {
+        WLOGFE("failed, screen session could not be found");
+        return;
+    }
+    screenSession->HandleKeepScreenOn(sceneSession, requireLock);
 }
 
 WSError SceneSessionManager::SetFocusedSession(uint64_t persistentId)

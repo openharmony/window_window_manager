@@ -128,6 +128,26 @@ uint64_t WindowSessionProperty::GetParentPersistentId() const
     return parentPersistentId_;
 }
 
+void WindowSessionProperty::SetTurnScreenOn(bool turnScreenOn)
+{
+    turnScreenOn_ = turnScreenOn;
+}
+
+bool WindowSessionProperty::IsTurnScreenOn() const
+{
+    return turnScreenOn_;
+}
+
+void WindowSessionProperty::SetKeepScreenOn(bool keepScreenOn)
+{
+    keepScreenOn_ = keepScreenOn;
+}
+
+bool WindowSessionProperty::IsKeepScreenOn() const
+{
+    return keepScreenOn_;
+}
+
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&

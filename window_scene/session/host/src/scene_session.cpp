@@ -104,4 +104,31 @@ WSError SceneSession::Background()
     }
     return WSError::WS_OK;
 }
+
+const std::string& SceneSession::GetWindowName() const
+{
+    return property_->GetWindowName();
+}
+
+WSError SceneSession::SetTurnScreenOn(bool turnScreenOn)
+{
+    property_->SetTurnScreenOn(turnScreenOn);
+    return WSError::WS_OK;
+}
+
+bool SceneSession::IsTurnScreenOn() const
+{
+    return property_->IsTurnScreenOn();
+}
+
+WSError SceneSession::SetKeepScreenOn(bool keepScreenOn)
+{
+    property_->SetKeepScreenOn(keepScreenOn);
+    return WSError::WS_OK;
+}
+
+bool SceneSession::IsKeepScreenOn() const
+{
+    return property_->IsKeepScreenOn();
+}
 } // namespace OHOS::Rosen
