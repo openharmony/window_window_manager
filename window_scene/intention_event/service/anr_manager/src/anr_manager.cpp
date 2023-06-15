@@ -128,6 +128,17 @@ void ANRManager::SetApplicationPid(int32_t persistentId, int32_t applicationPid)
     applicationMap_[persistentId] = applicationPid;
 }
 
+void ANRManager::RemovePersistentId(int32_t persistentId)
+{
+    CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mtx_);
+    if (applicationMap_.find(persistentId) != applicationMap_.end()) {
+        WLOGFD("Remove persistentId:%{public}d -> applicationPid:%{public}d", persistentId, applicationMap_[persistentId]);
+        applicationMap_.erase(persistentId);
+    }
+    WLOGFD("No persistentId:%{public}d in applicationMap", persistentId);
+}
+
 int32_t ANRManager::GetPidByPersistentId(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;

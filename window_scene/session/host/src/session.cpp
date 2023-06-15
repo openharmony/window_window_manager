@@ -53,6 +53,7 @@ uint64_t Session::GetPersistentId() const
 
 uint64_t Session::GetParentPersistentId() const
 {
+    CALL_DEBUG_ENTER;
     if (property_ != nullptr) {
         WLOGFD("GetParentPersistentId, id:%{public}" PRIu64"", property_->GetParentPersistentId());
         return property_->GetParentPersistentId();
@@ -122,6 +123,7 @@ bool Session::UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, 
 
 void Session::NotifyConnect()
 {
+    CALL_DEBUG_ENTER;
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
@@ -132,6 +134,7 @@ void Session::NotifyConnect()
 
 void Session::NotifyForeground()
 {
+    CALL_DEBUG_ENTER;
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
@@ -247,13 +250,14 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     UpdateRect(winRect_, SizeChangeReason::UNDEFINED);
     NotifyConnect();
     int32_t applicationPid = IPCSkeleton::GetCallingPid();
-    WLOGFI("SetApplicationPid pid:%{public}d", applicationPid);
     ANRMgr->SetApplicationPid(persistentId_, applicationPid);
+    WLOGFI("SetApplicationPid pid:%{public}d", applicationPid);
     return WSError::WS_OK;
 }
 
 WSError Session::Foreground()
 {
+    CALL_DEBUG_ENTER;
     SessionState state = GetSessionState();
     WLOGFI("Foreground session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(state));
@@ -272,6 +276,7 @@ WSError Session::Foreground()
 
 WSError Session::Background()
 {
+    CALL_DEBUG_ENTER;
     SessionState state = GetSessionState();
     WLOGFI("Background session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(state));
@@ -288,6 +293,7 @@ WSError Session::Background()
 
 WSError Session::Disconnect()
 {
+    CALL_DEBUG_ENTER;
     SessionState state = GetSessionState();
     WLOGFI("Disconnect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(state));
@@ -296,11 +302,13 @@ WSError Session::Disconnect()
     if (GetSessionState() == SessionState::STATE_BACKGROUND) {
         UpdateSessionState(SessionState::STATE_DISCONNECT);
     }
+    ANRMgr->OnSessionLost(persistentId_);
     return WSError::WS_OK;
 }
 
 WSError Session::SetActive(bool active)
 {
+    CALL_DEBUG_ENTER;
     SessionState state = GetSessionState();
     WLOGFI("Session update active: %{public}d, id: %{public}" PRIu64 ", state: %{public}u", active, GetPersistentId(),
         static_cast<uint32_t>(state));
@@ -326,6 +334,7 @@ WSError Session::SetActive(bool active)
 
 WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
+    CALL_DEBUG_ENTER;
     if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -366,6 +375,7 @@ void Session::SetBackPressedListenser(const NotifyBackPressedFunc& func)
 
 WSError Session::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
+    CALL_DEBUG_ENTER;
     if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -385,11 +395,13 @@ WSError Session::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionI
 
 void Session::SetTerminateSessionListener(const NotifyTerminateSessionFunc& func)
 {
+    CALL_DEBUG_ENTER;
     terminateSessionFunc_ = func;
 }
 
 WSError Session::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
+    CALL_DEBUG_ENTER;
     if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -425,6 +437,7 @@ void Session::NotifyTouchDialogTarget()
 
 WSError Session::NotifyDestroy()
 {
+    CALL_DEBUG_ENTER;
     if (!sessionStage_) {
         return WSError::WS_ERROR_NULLPTR;
     }
@@ -502,16 +515,13 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         WLOGFE("TransferPointer failed");
         return ret;
     }
-    // 这里执行添加定时器的逻辑， 需要persistentId_,然后把一些状态信息存储到eventStage
     ANRMgr->AddTimer(pointerEvent->GetId(), currentTime, persistentId_);
-    // if (ANRMgr->GetPidByPersistentId(persistentId_) == -1) {
-    //     ANRMgr->SetApplicationPid(persistentId_, windowEventChannel_->GetApplicationPid());
-    // }
     return WSError::WS_OK;
 }
 
 WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
+    CALL_DEBUG_ENTER;
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         if (CheckDialogOnForeground()) {
             WLOGFD("Has dialog on foreground, not transfer pointer event");
@@ -561,6 +571,7 @@ void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc&
 
 void Session::NotifySessionStateChange(const SessionState& state)
 {
+    CALL_DEBUG_ENTER;
     WLOGFI("state: %{public}u", static_cast<uint32_t>(state));
     if (sessionStateChangeFunc_) {
         sessionStateChangeFunc_(state);
