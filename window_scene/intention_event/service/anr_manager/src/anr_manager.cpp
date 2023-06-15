@@ -52,13 +52,11 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
         int32_t pid = GetPidByPersistentId(persistentId);
         WLOGFE("Application not responding. persistentId:%{public}d, eventId:%{public}d, applicationId:%{public}d",
             persistentId, id, pid);
-        /**
-         * if (anrObserver_ != nullptr) {
-         *     anrObserver_->OnAnr(pid); 
-         * } else {
-         *     WLOGFE("anrObserver is nullptr");
-         * }
-        */
+        if (anrCallback_ != nullptr) {
+            anrCallback_(pid);
+        } else {
+            WLOGFE("anrCallback is nullptr, do nothing");
+        }
         std::vector<int32_t> timerIds = EVStage->GetTimerIds(persistentId);
         for (int32_t item : timerIds) {
             if (item != -1) {
@@ -142,17 +140,11 @@ int32_t ANRManager::GetPidByPersistentId(int32_t persistentId)
     return -1;
 }
 
-/*
- void ANRManager::SetAnrObserver(sptr<IAnrObserver> observer)
- {
+void ANRManager::SetAnrCallback(std::function<void(int32_t)> anrCallback)
+{
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
-    if(anrObservers_.size() < MAX_ANR_OBSERVER_NUM) {
-        anrObservers_.push_back(observer);
-    } else {
-        WLOGFD("anrObservers is exceed maximum:%{public}d", MAX_ANR_OBSERVER_NUM);
-    }
- }
-*/
+    anrCallback_ = anrCallback;
+}
 } // namespace Rosen
 } // namespace OHOS

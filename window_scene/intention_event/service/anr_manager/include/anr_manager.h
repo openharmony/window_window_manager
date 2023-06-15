@@ -16,6 +16,7 @@
 #ifndef ANR_MANAGER_H
 #define ANR_MANAGER_H
 
+#include <functional>
 #include <mutex>
 #include <unordered_map>
 
@@ -24,14 +25,9 @@
 
 #include "ws_common.h"
 
-// #include "i_anr_observer.h"
-
 namespace OHOS {
 namespace Rosen {
 
-// namespace {
-// constexpr MAX_ANR_OBSERVER_NUM { 10 };
-// }
 class ANRManager final {
     DECLARE_DELAYED_SINGLETON(ANRManager);
 public:
@@ -44,17 +40,12 @@ public:
     void OnSessionLost(int32_t persistentId);
     void SetApplicationPid(int32_t persistentId, int32_t applicationPid);
     int32_t GetPidByPersistentId(int32_t persistentId);
-    // void SetAnrObserver(sptr<IAnrObserver> observer);
+    void SetAnrCallback(std::function<void(int32_t)> anrCallback);
 private:
     int32_t anrTimerCount_ { 0 };
     std::unordered_map<int32_t, int32_t> applicationMap_;
     std::mutex mtx_;
-    /**
-     * std::vector<sptr<IAnrObserver>> anrObservers_;
-     * 用于向调用SetAnrObserver的进程通知 ANR
-     * 本质上是一个 proxy
-     * 这些proxy对象需要加死亡监听，否则加上之后就去不掉了
-    */
+    std::function<void(int32_t)> anrCallback_;
 };
 #define ANRMgr ::OHOS::DelayedSingleton<ANRManager>::GetInstance()
 } // namespace Rosen

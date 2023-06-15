@@ -20,6 +20,8 @@
 #include <ui_content.h>
 #include <viewport_config.h>
 
+#include "ability_manager_client.h"
+
 #include "anr_manager.h"
 #include "vsync_station.h"
 #include "window_manager_hilog.h"
@@ -80,6 +82,11 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
 
     RegisterInputEventListener();
     ANRMgr->Init();
+    ANRMgr->SetAnrCallback(([this](int32_t pid) {
+            WLOGFI("Receive anr notice pid:%{public}d", pid);
+            AAFwk::AbilityManagerClient::GetInstance()->SendANRProcessID(pid);
+        }
+    ));
 }
 
 void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)

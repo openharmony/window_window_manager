@@ -15,9 +15,10 @@
 
 #include "session/host/include/session.h"
 
+#include <ipc_skeleton.h>
 #include "pointer_event.h"
 #include "key_event.h"
-
+#include "util.h"
 #include "anr_manager.h"
 #include "foundation/ability/ability_base/interfaces/kits/native/want/include/want.h"
 #include "interfaces/include/ws_common.h"
@@ -25,7 +26,6 @@
 #include <transaction/rs_interfaces.h>
 #include <pointer_event.h>
 #include <ui/rs_surface_node.h>
-#include "util.h"
 #include "window_manager_hilog.h"
 #include "surface_capture_future.h"
 
@@ -222,6 +222,7 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property)
 {
+    CALL_DEBUG_ENTER;
     WLOGFI("Connect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()));
     if (GetSessionState() != SessionState::STATE_DISCONNECT) {
@@ -245,6 +246,9 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     // once update rect before connect, update again when connect
     UpdateRect(winRect_, SizeChangeReason::UNDEFINED);
     NotifyConnect();
+    int32_t applicationPid = IPCSkeleton::GetCallingPid();
+    WLOGFI("SetApplicationPid pid:%{public}d", applicationPid);
+    ANRMgr->SetApplicationPid(persistentId_, applicationPid);
     return WSError::WS_OK;
 }
 
@@ -479,8 +483,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
-    WLOGFD("Session TransferPointEvent, Id: %{public}" PRIu64 "", persistentId_);
-    WLOGFD("Session TransferPointEvent, eventId: %{public}d", pointerEvent->GetId());
+    WLOGFD("Session TransferPointEvent, Id: %{public}" PRIu64 ", eventId: %{public}d", persistentId_, pointerEvent->GetId());
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
@@ -501,9 +504,9 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     }
     // 这里执行添加定时器的逻辑， 需要persistentId_,然后把一些状态信息存储到eventStage
     ANRMgr->AddTimer(pointerEvent->GetId(), currentTime, persistentId_);
-    if (ANRMgr->GetPidByPersistentId(persistentId_) == -1) {
-        ANRMgr->SetApplicationPid(persistentId_, windowEventChannel_->GetApplicationPid());
-    }
+    // if (ANRMgr->GetPidByPersistentId(persistentId_) == -1) {
+    //     ANRMgr->SetApplicationPid(persistentId_, windowEventChannel_->GetApplicationPid());
+    // }
     return WSError::WS_OK;
 }
 
@@ -709,8 +712,8 @@ WSError Session::MarkProcessed(int32_t eventId)
     WLOGFI("WLD>>> Here in Session::MarkProcessed!");
     int32_t persistentId = GetPersistentId();
     WLOGFI("WLD>>> persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
-   ANRMgr->MarkProcessed(eventId, persistentId);
-   return WSError::WS_OK;
+    ANRMgr->MarkProcessed(eventId, persistentId);
+    return WSError::WS_OK;
 }
 
 void Session::GeneratePersistentId(const bool isExtension, const SessionInfo &sessionInfo)
