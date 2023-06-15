@@ -53,7 +53,7 @@ std::vector<std::string> ScreenSceneConfig::Split(std::string str, std::string p
     return result;
 }
 
-bool inline ScreenSceneConfig::IsNumber(std::string str)
+bool ScreenSceneConfig::IsNumber(std::string str)
 {
     for (int32_t i = 0; i < static_cast<int32_t>(str.size()); i++) {
         if (str.at(i) < '0' || str.at(i) > '9') {

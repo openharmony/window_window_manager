@@ -14,7 +14,9 @@
  */
 
 #include <gtest/gtest.h>
-//#include "window_manager_service.h"
+#include <libxml/globals.h>
+#include <libxml/xmlstring.h>
+#include "window_scene_config.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -217,28 +219,32 @@ HWTEST_F(WindowSceneConfigTest, MaxAppWindowNumber, Function | SmallTest | Level
         "<maxAppWindowNumber>0</maxAppWindowNumber>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    ASSERT_EQ(WindowSceneConfig::config_["maxAppWindowNumber"], 100);
+    WindowSceneConfig::ConfigItem item = WindowSceneConfig::config_["maxAppWindowNumber"];
+    ASSERT_EQ((*item.intsValue_)[0], 100);
 
     xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<maxAppWindowNumber>-2</maxAppWindowNumber>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    ASSERT_EQ(WindowSceneConfig::config_ ["maxAppWindowNumber"], -2);
+    item = WindowSceneConfig::config_["maxAppWindowNumber"];
+    ASSERT_EQ((*item.intsValue_)[0], -2);
 
     xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<maxAppWindowNumber>4</maxAppWindowNumber>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    ASSERT_EQ(WindowSceneConfig::config_["maxAppWindowNumber"], 4);
+    item = WindowSceneConfig::config_["maxAppWindowNumber"];
+    ASSERT_EQ((*item.intsValue_)[0], 4);
 
     xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<maxAppWindowNumber>1000</maxAppWindowNumber>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    ASSERT_EQ(true, WindowSceneConfig::config_["maxAppWindowNumber"], 1000);
+    item = WindowSceneConfig::config_["maxAppWindowNumber"];
+    ASSERT_EQ((*item.intsValue_)[0], 1000);
 }
 
 /**
@@ -249,20 +255,19 @@ HWTEST_F(WindowSceneConfigTest, MaxAppWindowNumber, Function | SmallTest | Level
  */
 HWTEST_F(WindowSceneConfigTest, DecorConfig01, Function | SmallTest | Level2)
 {
-    auto& sysConfig = WindowManagerService::GetInstance().systemConfig_;
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<decor enable=\"true\"/>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    ASSERT_EQ(true, config["decor"].GetProp("enable").boolValue_);
+    ASSERT_EQ(true, WindowSceneConfig::config_["decor"].GetProp("enable").boolValue_);
 
     xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<decor enable=\"false\"/>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    ASSERT_EQ(false, config["decor"].GetProp("enable").boolValue_);
+    ASSERT_EQ(false, WindowSceneConfig::config_["decor"].GetProp("enable").boolValue_);
 }
 
 /**
@@ -273,7 +278,6 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSceneConfigTest, DecorConfig02, Function | SmallTest | Level2)
 {
-    auto& sysConfig = WindowManagerService::GetInstance().systemConfig_;
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<decor enable=\"true\">"
@@ -281,8 +285,8 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig02, Function | SmallTest | Level2)
         "</decor>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    WindowManagerConfig::ConfigItem item = config["decor"]["supportedMode"];
-    ASSERT_EQ(true, *item.stringsValue_ == "fullscreen");
+    WindowSceneConfig::ConfigItem item = WindowSceneConfig::config_["decor"]["supportedMode"];
+    ASSERT_EQ("fullscreen", item.stringValue_);
 }
 
 /**
@@ -293,7 +297,6 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig02, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSceneConfigTest, DecorConfig03, Function | SmallTest | Level2)
 {
-    auto& sysConfig = WindowManagerService::GetInstance().systemConfig_;
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<decor enable=\"true\">"
@@ -301,8 +304,8 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig03, Function | SmallTest | Level2)
         "</decor>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    string mode = WindowSceneConfig::config_["decor"]["supportedMode"].stringsValue_;
-    ASSERT_EQ(true, mode == "floating");
+    string mode = WindowSceneConfig::config_["decor"]["supportedMode"].stringValue_;
+    ASSERT_EQ(mode, "floating");
 }
 
 /**
@@ -313,7 +316,6 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig03, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSceneConfigTest, DecorConfig04, Function | SmallTest | Level2)
 {
-    auto& sysConfig = WindowManagerService::GetInstance().systemConfig_;
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<decor enable=\"true\">"
@@ -321,8 +323,8 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig04, Function | SmallTest | Level2)
         "</decor>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    string mode = WindowSceneConfig::config_["decor"]["supportedMode"].stringsValue_;
-    ASSERT_EQ(true, mode == "fullscreen floating");
+    string mode = WindowSceneConfig::config_["decor"]["supportedMode"].stringValue_;
+    ASSERT_EQ(mode, "fullscreen floating");
 }
 } // namespace
 } // namespace Rosen

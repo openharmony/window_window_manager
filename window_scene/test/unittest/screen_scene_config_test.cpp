@@ -17,9 +17,8 @@
 
 #include <libxml/globals.h>
 #include <libxml/xmlstring.h>
-
 #include "screen_scene_config.h"
-#include "screen_scene_config.cpp"
+#include "xml_config_base.h"
 
 using namespace testing;
 using namespace testing::ext;
