@@ -32,7 +32,6 @@ class ANRManager final {
     DECLARE_DELAYED_SINGLETON(ANRManager);
 public:
     DISALLOW_COPY_AND_MOVE(ANRManager);
-    void Init();
     void AddTimer(int32_t id, int64_t currentTime, int32_t persistentId);
     void MarkProcessed(int32_t eventId, int32_t persistentId);
     bool IsANRTriggered(int64_t time, int32_t persistentId);
