@@ -67,6 +67,7 @@ config("ws_unittest_common_public_config") {
     "${window_base_path}/dmserver/include",
     "${window_base_path}/interfaces/innerkits/dm",
     "${window_base_path}/interfaces/innerkits/wm",
+    "${window_base_path}/window_scene/session_manager/include",
     "${window_base_path}/window_scene",
     "${window_base_path}/window_scene/test",
     "//third_party/googletest/googlemock/include",
@@ -92,10 +93,14 @@ ohos_static_library("ws_unittest_common") {
     "${window_base_path}/window_scene/session_manager:scene_session_manager",
     "${window_base_path}/window_scene/session_manager:screen_session_manager",
     "//third_party/googletest:gmock",
+    "//third_party/libxml2:libxml2",
     "//third_party/googletest:gtest_main",
   ]
 
-  public_deps = [ "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+  public_deps = [
+    "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "${window_base_path}/utils:libwmutil",
+  ]
 
   external_deps = [
     "ability_base:configuration",
