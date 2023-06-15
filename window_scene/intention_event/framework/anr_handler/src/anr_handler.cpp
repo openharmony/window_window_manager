@@ -121,6 +121,10 @@ void ANRHandler::MarkProcessed()
         SessionStage 中有 hostSession_
         hostSession 就是 SessionProxy
     */
+    if (sessionStage_ == nullptr) {
+        WLOGFE("sessionStage is nullptr");
+        return;
+    }
     if (WSError ret = sessionStage_->MarkProcessed(eventId); ret != WSError::WS_OK) {
         WLOGFE("Send to sceneBoard failed, ret:%{public}d", ret);
     }
