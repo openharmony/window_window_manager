@@ -202,7 +202,7 @@ WMError WindowSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>
         std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
     WLOGFD("Window Create [name:%{public}s, id:%{public}" PRIu64 "], state:%{pubic}u",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), state_);
-    // ANRHDL->SetSessionStage(this); 貌似只有系统窗口才会走到这，针对普通应用，在这就会Crash
+    // ANRHDL->SetSessionStage(this); 貌似只有系统窗口才会走到这，针对普通应用，不会走这里，在MarkProcessed就会Crash
     return ret;
 }
 
