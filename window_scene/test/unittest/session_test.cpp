@@ -376,6 +376,44 @@ HWTEST_F(WindowSessionTest, GetSessionRect, Function | SmallTest | Level2)
     session_->SetSessionRect(rect);
     ASSERT_EQ(rect, session_->GetSessionRect());
 }
+
+/**
+ * @tc.name: CheckDialogOnForeground
+ * @tc.desc: check func CheckDialogOnForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, CheckDialogOnForeground, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->dialogVec_.clear();
+    ASSERT_EQ(false, session_->CheckDialogOnForeground());
+    SessionInfo info;
+    info.abilityName_ = "dialogAbilityName";
+    info.moduleName_ = "dialogModuleName";
+    info.bundleName_ = "dialogBundleName";
+    sptr<Session> dialogSession = new (std::nothrow) Session(info);
+    ASSERT_NE(dialogSession, nullptr);
+    dialogSession->state_ = SessionState::STATE_INACTIVE;
+    session_->dialogVec_.push_back(dialogSession);
+    ASSERT_EQ(false, session_->CheckDialogOnForeground());
+    session_->dialogVec_.clear();
+}
+
+/**
+ * @tc.name: NotifyDestroy
+ * @tc.desc: check func NotifyDestroy
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyDestroy, Function | SmallTest | Level2)
+{
+    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
+    ASSERT_NE(mockSessionStage, nullptr);
+    session_->sessionStage_ = mockSessionStage;
+    EXPECT_CALL(*(mockSessionStage), NotifyDestroy()).Times(1).WillOnce(Return(WSError::WS_OK));
+    ASSERT_EQ(WSError::WS_OK, session_->NotifyDestroy());
+    session_->sessionStage_ = nullptr;
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->NotifyDestroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
