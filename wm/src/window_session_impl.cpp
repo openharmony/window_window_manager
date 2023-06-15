@@ -16,6 +16,7 @@
 #include "window_session_impl.h"
 
 #include <common/rs_common_def.h>
+#include <ipc_skeleton.h>
 #include <refbase.h>
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
@@ -172,6 +173,9 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
                 return WMError::WM_ERROR_REPEAT_OPERATION;
             }
         }
+        uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
+        property_->SetAccessTokenId(accessTokenId);
+        WLOGI("Create camera float window, TokenId = %{public}u", accessTokenId);
     }
     return WMError::WM_OK;
 }
