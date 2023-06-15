@@ -67,6 +67,7 @@ RootScene::~RootScene()
 void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
     AbilityRuntime::Context* context)
 {
+    CALL_DEBUG_ENTER;
     if (context == nullptr) {
         WLOGFE("context is nullptr!");
         return;
@@ -81,7 +82,7 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
     uiContent_->Foreground();
 
     RegisterInputEventListener();
-    ANRMgr->SetAnrCallback(([this](int32_t pid) {
+    ANRMgr->SetAnrCallback(([this](int32_t pid) { // 在这也没有执行，待确认到底在哪加比较合适
             WLOGFI("Receive anr notice pid:%{public}d", pid);
             AAFwk::AbilityManagerClient::GetInstance()->SendANRProcessID(pid);
         }
