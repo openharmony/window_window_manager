@@ -108,7 +108,6 @@ HWTEST_F(WindowSessionTest, SetActive01, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, mockSessionStage);
     EXPECT_CALL(*(mockSessionStage), SetActive(_)).WillOnce(Return(WSError::WS_OK));
     EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _)).Times(1).WillOnce(Return(WSError::WS_OK));
-    EXPECT_CALL(*(mockSessionStage), HandleBackEvent()).Times(1).WillOnce(Return(WSError::WS_OK));
     session_->sessionStage_ = mockSessionStage;
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->SetActive(true));
 
@@ -413,6 +412,23 @@ HWTEST_F(WindowSessionTest, NotifyDestroy, Function | SmallTest | Level2)
     ASSERT_EQ(WSError::WS_OK, session_->NotifyDestroy());
     session_->sessionStage_ = nullptr;
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->NotifyDestroy());
+}
+
+/**
+ * @tc.name: RequestSessionBack
+ * @tc.desc: request session back
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, RequestSessionBack, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+
+    ASSERT_EQ(WSError::WS_DO_NOTHING, session_->RequestSessionBack());
+
+    NotifyBackPressedFunc callback = []() {};
+
+    session_->SetBackPressedListenser(callback);
+    ASSERT_EQ(WSError::WS_OK, session_->RequestSessionBack());
 }
 }
 } // namespace Rosen
