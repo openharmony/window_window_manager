@@ -23,6 +23,7 @@
 #include "nocopyable.h"
 #include "singleton.h"
 
+#include "event_stage.h"
 #include "ws_common.h"
 
 namespace OHOS {
@@ -47,6 +48,7 @@ private:
     std::unordered_map<int32_t, int32_t> applicationMap_;
     std::mutex mtx_;
     std::function<void(int32_t)> anrCallback_;
+    EventStage eventStage_;
 };
 #define ANRMgr ::OHOS::DelayedSingleton<ANRManager>::GetInstance()
 } // namespace Rosen

@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <vector>
 
-#include "event_stage.h"
 #include "proto.h"
 #include "timer_manager.h"
 #include "window_manager_hilog.h"
@@ -41,7 +40,7 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
         return;
     }
     int32_t timerId = TimerMgr->AddTimer(ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME, 1, [this, id, persistentId]() {
-        EVStage->SetAnrStatus(persistentId, true);
+        eventStage_.SetAnrStatus(persistentId, true);
         int32_t pid = GetPidByPersistentId(persistentId);
         WLOGFE("Application not responding. persistentId:%{public}d, eventId:%{public}d, applicationId:%{public}d",
             persistentId, id, pid);
@@ -50,7 +49,7 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
         } else {
             WLOGFE("anrCallback is nullptr, do nothing");
         }
-        std::vector<int32_t> timerIds = EVStage->GetTimerIds(persistentId);
+        std::vector<int32_t> timerIds = eventStage_.GetTimerIds(persistentId);
         for (int32_t item : timerIds) {
             if (item != -1) {
                 TimerMgr->RemoveTimer(item);
@@ -62,7 +61,7 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
     anrTimerCount_++;
     WLOGFD("Add anr timer success, eventId:%{public}d, timer id:%{public}d, persistentId:%{public}d, count:%{public}d",
         id, timerId, persistentId, anrTimerCount_);
-    EVStage->SaveANREvent(persistentId, id, currentTime, timerId);
+    eventStage_.SaveANREvent(persistentId, id, currentTime, timerId);
 }
 
 void ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
@@ -70,7 +69,7 @@ void ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
     WLOGFD("eventId:%{public}d, persistentId:%{public}d", eventId, persistentId);
-    std::list<int32_t> timerIds = EVStage->DelEvents(persistentId, eventId);
+    std::list<int32_t> timerIds = eventStage_.DelEvents(persistentId, eventId);
     for (int32_t item : timerIds) {
         if (item != -1) {
             TimerMgr->RemoveTimer(item);
@@ -85,7 +84,7 @@ bool ANRManager::IsANRTriggered(int64_t time, int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
-    if (EVStage->CheckAnrStatus(persistentId)) {
+    if (eventStage_.CheckAnrStatus(persistentId)) {
         WLOGFD("Application not responding. persistentId:%{public}d", persistentId);
         return true;
     }
@@ -97,7 +96,7 @@ void ANRManager::RemoveTimers(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
-    std::vector<int32_t> timerIds = EVStage->GetTimerIds(persistentId);
+    std::vector<int32_t> timerIds = eventStage_.GetTimerIds(persistentId);
     for (int32_t item : timerIds) {
         if (item != -1) {
             TimerMgr->RemoveTimer(item);
