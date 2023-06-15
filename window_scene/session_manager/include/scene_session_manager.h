@@ -16,13 +16,13 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_H
 
+#include "event_handler.h"
 #include "interfaces/include/ws_common.h"
+#include "session_manager_base.h"
+#include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "session/host/include/root_scene_session.h"
 #include "wm_single_instance.h"
 #include "window_scene_config.h"
-
-#include "session_manager_base.h"
-#include "session_manager/include/zidl/scene_session_manager_stub.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
@@ -61,8 +61,11 @@ public:
     void SetCreateSpecificSessionListener(const NotifyCreateSpecificSessionFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     WSError ProcessBackEvent();
-
     void GetStartPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor);
+    WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
+    WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
 
     WSError SetFocusedSession(uint64_t persistentId);
     uint64_t GetFocusedSession() const;
@@ -82,6 +85,7 @@ private:
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig);
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& scnSession);
     WSError DestroyDialogWithMainWindow(const sptr<SceneSession>& scnSession);
+    void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     std::shared_ptr<Global::Resource::ResourceManager> CreateResourceManager(
@@ -101,5 +105,4 @@ private:
     void UpdateFocusableProperty(uint64_t persistentId);
 };
 } // namespace OHOS::Rosen
-
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_H
