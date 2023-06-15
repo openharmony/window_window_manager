@@ -32,13 +32,6 @@ constexpr int32_t MAX_ANR_TIMER_COUNT = 50;
 ANRManager::ANRManager() {}
 ANRManager::~ANRManager() {}
 
-void ANRManager::Init()
-{
-   // TODO
-   // 该函数需要在SceneBoard启动的时候执行
-   // 这里需要注册ANRManager::OnSessionLost 到每一个 session， 使得有session死亡之后执行此处的OnSessionLost
-}
-
 void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
 {
     CALL_DEBUG_ENTER;

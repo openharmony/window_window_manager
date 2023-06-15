@@ -81,7 +81,6 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
     uiContent_->Foreground();
 
     RegisterInputEventListener();
-    ANRMgr->Init();
     ANRMgr->SetAnrCallback(([this](int32_t pid) {
             WLOGFI("Receive anr notice pid:%{public}d", pid);
             AAFwk::AbilityManagerClient::GetInstance()->SendANRProcessID(pid);
