@@ -35,7 +35,11 @@ config("libwm_public_config") {
 
 ## Build libwm_static.a
 ohos_static_library("libwm_static") {
-  include_dirs = [ "../utils/include" ]
+  include_dirs = [
+    "../utils/include",
+    "//foundation/window/window_manager/window_scene/intention_event/service/anr_manager/include",
+    "//foundation/window/window_manager/window_scene/intention_event/framework/anr_handler/include"
+    ]
 
   sources = [
     "../wmserver/src/zidl/window_manager_proxy.cpp",
@@ -140,7 +144,8 @@ ohos_static_library("libwm_static") {
 ohos_shared_library("libwm") {
   include_dirs = [
     "../utils/include",
-    "//foundation/window/window_manager/window_scene/intention_event/service/anr_manager/include"
+    "//foundation/window/window_manager/window_scene/intention_event/service/anr_manager/include",
+    "//foundation/window/window_manager/window_scene/intention_event/framework/anr_handler/include"
     ]
 
   sources = [

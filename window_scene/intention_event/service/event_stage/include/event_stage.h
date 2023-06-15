@@ -18,14 +18,11 @@
 #include <vector>
 
 #include "noncopyable.h"
-#include "singleton.h"
 
 namespace OHOS {
 namespace Rosen {
 class EventStage {
-    DECLARE_DELAYED_SINGLETON(EventStage);
 public:
-    DISALLOW_COPY_AND_MOVE(EventStage);
     void SetAnrStatus(int32_t persistentId, bool status);
     bool CheckAnrStatus(int32_t persistentId);
     void SaveANREvent(int32_t persistentId, int32_t id, int64_t time, int32_t timerId);
@@ -39,9 +36,6 @@ private:
     };
     std::map<int32_t, std::vector<EventTime>> events_;
     std::map<int32_t, bool> isAnrProcess_;
-    // 该成员标识当前 persistentId 对应的session的事件是否有在队列中的。
-    // 对 EVStage 的修改只有 ANRMgr， 而两者都是单例，因此只要在 ANRMgr 中加锁就可以保证多线程互斥
 };
-#define EVStage ::OHOS::DelayedSingleton<EventStage>::GetInstance()
 } // namespace Rosen
 } // namespace OHOS

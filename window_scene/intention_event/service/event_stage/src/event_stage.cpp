@@ -28,9 +28,6 @@ namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "EventStage" };
 } // namespace
 
-EventStage::EventStage() {}
-EventStage::~EventStage() {}
-
 void EventStage::SetAnrStatus(int32_t persistentId, bool status)
 {
     CALL_DEBUG_ENTER;

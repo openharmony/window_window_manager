@@ -21,6 +21,7 @@
 #include <transaction/rs_transaction.h>
 #include <unistd.h>
 
+#include "anr_handler.h"
 #include "color_parser.h"
 #include "display_manager.h"
 #include "permission.h"
@@ -201,6 +202,7 @@ WMError WindowSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>
         std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
     WLOGFD("Window Create [name:%{public}s, id:%{public}" PRIu64 "], state:%{pubic}u",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), state_);
+    ANRHDL->SetSessionStage(this);
     return ret;
 }
 
@@ -210,7 +212,7 @@ WMError WindowSessionImpl::Connect()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_NULLPTR;
     }
-    sptr<ISessionStage> iSessionStage(this); // WindowEventChannel == sessionStage
+    sptr<ISessionStage> iSessionStage(this); // WindowSessionImpl == sessionStage
     sptr<WindowEventChannel> channel = new (std::nothrow) WindowEventChannel(iSessionStage);
     if (channel == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
