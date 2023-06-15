@@ -77,7 +77,7 @@ public:
     bool SetDisplayState(DisplayState state) override;
     DisplayState GetDisplayState(DisplayId displayId) override;
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
-    ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override;
+    ScreenPowerState GetScreenPower(ScreenId screenId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
 
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
