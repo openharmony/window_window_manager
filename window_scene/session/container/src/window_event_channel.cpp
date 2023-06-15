@@ -49,7 +49,8 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
         WLOGFE("session stage is null!");
         return WSError::WS_ERROR_NULLPTR;
     }
-    // ANRHDL->SetSessionStage(sessionStage_);// 这个可以考虑优化，在应用进程启动的时候只初始化一遍就可以，不必每次都设置
+    // 这个可以考虑优化，在应用进程启动或应用窗口被创建的时候只初始化一遍就可以，不必每次都设置
+    ANRHDL->SetSessionStage(sessionStage_);
     if (pointerEvent != nullptr) {
         WLOGFD("SetProcessedCallback enter");
         pointerEvent->SetProcessedCallback(dispatchCallback_);
