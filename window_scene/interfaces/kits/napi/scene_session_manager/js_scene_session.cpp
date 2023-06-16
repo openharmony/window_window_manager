@@ -19,8 +19,6 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
 
-#include "js_scene_utils.h"
-
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
@@ -52,13 +50,21 @@ NativeValue* JsSceneSession::Create(NativeEngine& engine, const sptr<SceneSessio
     object->SetNativePointer(jsSceneSession.release(), JsSceneSession::Finalizer, nullptr);
     object->SetProperty("persistentId", CreateJsValue(engine, static_cast<int64_t>(session->GetPersistentId())));
     object->SetProperty("parentId", CreateJsValue(engine, static_cast<int64_t>(session->GetParentPersistentId())));
-    object->SetProperty("type", CreateJsValue(engine, static_cast<uint32_t>(
-        WINDOW_TYPE_TO_API_TYPE_MAP.at(session->GetWindowType()))));
-
+    object->SetProperty("type", CreateJsValue(engine, static_cast<uint32_t>(GetApiType(session->GetWindowType()))));
     const char* moduleName = "JsSceneSession";
     BindNativeFunction(engine, *object, "on", moduleName, JsSceneSession::RegisterCallback);
 
     return objValue;
+}
+
+WindowTypeInAPI JsSceneSession::GetApiType(WindowType type)
+{
+    if (WINDOW_TYPE_TO_API_TYPE_MAP.find(type) == WINDOW_TYPE_TO_API_TYPE_MAP.end()) {
+        WLOGFE("[NAPI]window type cannot map to api type!");
+        return WindowTypeInAPI::TYPE_UNDEFINED;
+    } else {
+        return WINDOW_TYPE_TO_API_TYPE_MAP.at(type);
+    }
 }
 
 JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& session)
@@ -73,7 +79,7 @@ JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& s
         { RAISE_TO_TOP_CB,                &JsSceneSession::ProcessRaiseToTopRegister },
         { BACK_PRESSED_CB,                &JsSceneSession::ProcessBackPressedRegister },
         { SESSION_FOCUSABLE_CHANGE_CB,    &JsSceneSession::ProcessSessionFocusableChangeRegister },
-        { CLICK_CB,                       &JsSceneSession::ProcessClickRegister }, 
+        { CLICK_CB,                       &JsSceneSession::ProcessClickRegister },
         { TERMINATE_SESSION_CB,        &JsSceneSession::ProcessTerminateSessionRegister },
         { SESSION_EXCEPTION_CB,        &JsSceneSession::ProcessSessionExceptionRegister },
     };
@@ -320,10 +326,10 @@ NativeValue* JsSceneSession::OnRegisterCallback(NativeEngine& engine, NativeCall
         return engine.CreateUndefined();
     }
 
-    (this->*listenerFunc_[cbType])();
     std::shared_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
     jsCbMap_[cbType] = callbackRef;
+    (this->*listenerFunc_[cbType])();
     WLOGFI("[NAPI]Register end, type = %{public}s", cbType.c_str());
     return engine.CreateUndefined();
 }

@@ -53,10 +53,20 @@
           "hicollie_native",
           "eventhandler",
           "c_utils",
-          "common"
+          "common",
+          "motion",
+          "soc_perf",
+          "resource_management",
+          "resource_schedule_service",
+          "efficiency_manager",
+          "resourceschedule_frame_aware_sched_override",
+          "imf",
+          "frame_aware_sched",
+          "screenlock_mgr"
         ],
         "third_party": [
-          "libjpeg-turbo"
+          "libjpeg-turbo",
+          "libxml2"
         ]
       },
       "build": {

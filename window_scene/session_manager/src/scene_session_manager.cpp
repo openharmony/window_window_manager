@@ -748,6 +748,7 @@ void SceneSessionManager::HandleTurnScreenOn(const sptr<SceneSession>& sceneSess
 {
     if (sceneSession == nullptr) {
         WLOGFE("session is invalid");
+        return;
     }
     WLOGFD("Win: %{public}s, is turn on%{public}d", sceneSession->GetWindowName().c_str(), sceneSession->IsTurnScreenOn());
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);
@@ -762,6 +763,7 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
 {
     if (sceneSession == nullptr) {
         WLOGFE("session is invalid");
+        return;
     }
     // @todo: get screen session?
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);

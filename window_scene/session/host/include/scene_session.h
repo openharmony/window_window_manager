@@ -16,9 +16,12 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 
-#include <running_lock.h>
 #include "interfaces/include/ws_common.h"
 #include "session/host/include/session.h"
+
+namespace PowerMgr {
+    class RunningLock;
+}
 
 namespace OHOS::Rosen {
 class SceneSession;

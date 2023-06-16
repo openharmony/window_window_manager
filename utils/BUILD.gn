@@ -64,7 +64,6 @@ ohos_static_library("libwmutil_static") {
 
   deps = [
     "${graphic_base_path}/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]
 
   external_deps = [
@@ -75,6 +74,7 @@ ohos_static_library("libwmutil_static") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "graphic_standard:librender_service_client",
     "graphic_standard:surface",
     "hilog_native:libhilog",
     "hisysevent_native:libhisysevent",
@@ -123,11 +123,6 @@ ohos_shared_library("libwmutil") {
 
   public_configs = [ ":libwmutil_public_config" ]
 
-  deps = [
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  ]
-
   external_deps = [
     "ability_base:want",
     "ability_runtime:ability_manager",
@@ -136,6 +131,8 @@ ohos_shared_library("libwmutil") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "graphic_standard:2d_graphics",
+    "graphic_standard:librender_service_client",
     "graphic_standard:surface",
     "hilog_native:libhilog",
     "hisysevent_native:libhisysevent",

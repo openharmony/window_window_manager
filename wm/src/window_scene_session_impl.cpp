@@ -17,6 +17,7 @@
 
 #include <parameters.h>
 
+#include "color_parser.h"
 #include "permission.h"
 #include "session/container/include/window_event_channel.h"
 #include "session_manager/include/session_manager.h"
@@ -42,15 +43,10 @@ WindowSceneSessionImpl::~WindowSceneSessionImpl()
 
 bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
 {
-    // accept all system type temporarily
-    if (WindowHelper::IsSystemWindow(type)) {
-        return true;
-    }
-
     if (!(type == WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW || type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
         type == WindowType::WINDOW_TYPE_FLOAT_CAMERA || type == WindowType::WINDOW_TYPE_DIALOG ||
         type == WindowType::WINDOW_TYPE_FLOAT || type == WindowType::WINDOW_TYPE_SCREENSHOT ||
-        type == WindowType::WINDOW_TYPE_VOICE_INTERACTION)) {
+        type == WindowType::WINDOW_TYPE_VOICE_INTERACTION || type == WindowType::WINDOW_TYPE_POINTER)) {
         return false;
     }
     return true;
@@ -566,6 +562,108 @@ WindowMode WindowSceneSessionImpl::GetMode() const
 {
     return windowMode_;
 }
+
+uint32_t WindowSceneSessionImpl::GetBackgroundColor() const
+{
+    if (uiContent_ != nullptr) {
+        return uiContent_->GetBackgroundColor();
+    }
+    WLOGD("uiContent is nullptr, windowId: %{public}u, use FA mode", GetWindowId());
+    return 0xffffffff; // means no background color been set, default color is white
+}
+
+WMError WindowSceneSessionImpl::SetBackgroundColor(const std::string& color)
+{
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    uint32_t colorValue;
+    if (ColorParser::Parse(color, colorValue)) {
+        WLOGD("SetBackgroundColor: window: %{public}s, value: [%{public}s, %{public}u]",
+            GetWindowName().c_str(), color.c_str(), colorValue);
+        return SetBackgroundColor(colorValue);
+    }
+    WLOGFE("invalid color string: %{public}s", color.c_str());
+    return WMError::WM_ERROR_INVALID_PARAM;
+}
+
+WMError WindowSceneSessionImpl::SetBackgroundColor(uint32_t color)
+{
+    // 0xff000000: ARGB style, means Opaque color.
+    // const bool isAlphaZero = !(color & 0xff000000);
+    // report ZeroOpacityInfo? 
+    if (uiContent_ != nullptr) {
+        uiContent_->SetBackgroundColor(color);
+        return WMError::WM_OK;
+    }
+    return WMError::WM_ERROR_INVALID_OPERATION;
+}
+
+bool WindowSceneSessionImpl::IsTransparent() const
+{
+    WSColorParam backgroundColor;
+    backgroundColor.value = GetBackgroundColor();
+    WLOGFD("color: %{public}u, alpha: %{public}u", backgroundColor.value, backgroundColor.argb.alpha);
+    return backgroundColor.argb.alpha == 0x00; // 0x00: completely transparent
+}
+
+WMError WindowSceneSessionImpl::SetTransparent(bool isTransparent)
+{
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    WSColorParam backgroundColor;
+    backgroundColor.value = GetBackgroundColor();
+    if (isTransparent) {
+        backgroundColor.argb.alpha = 0x00; // 0x00: completely transparent
+        return SetBackgroundColor(backgroundColor.value);
+    } else {
+        backgroundColor.value = GetBackgroundColor();
+        if (backgroundColor.argb.alpha == 0x00) {
+            backgroundColor.argb.alpha = 0xff; // 0xff: completely opaque
+            return SetBackgroundColor(backgroundColor.value);
+        }
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SetTurnScreenOn(bool turnScreenOn)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    property_->SetTurnScreenOn(turnScreenOn);
+    if (state_ == WindowState::STATE_SHOWN) {
+        return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
+    }
+    return WMError::WM_OK;
+}
+
+bool WindowSceneSessionImpl::IsTurnScreenOn() const
+{
+    return property_->IsTurnScreenOn();
+}
+
+WMError WindowSceneSessionImpl::SetKeepScreenOn(bool keepScreenOn)
+{
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    property_->SetKeepScreenOn(keepScreenOn);
+    if (state_ == WindowState::STATE_SHOWN) {
+        return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+    }
+    return WMError::WM_OK;
+}
+
+bool WindowSceneSessionImpl::IsKeepScreenOn() const
+{
+    return property_->IsKeepScreenOn();
+}
+
 } // namespace Rosen
 } // namespace OHOS
 

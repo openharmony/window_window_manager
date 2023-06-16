@@ -45,7 +45,6 @@ ohos_static_library("dm_napi_common") {
   deps = [
     "../../../../utils:libwmutil",
     "../../../../wm:libwm",
-    "//foundation/arkui/napi:ace_napi",
   ]
 
   external_deps = [
@@ -53,6 +52,7 @@ ohos_static_library("dm_napi_common") {
     "bundle_framework:appexecfwk_base",
     "hilog_native:libhilog",
     "ipc:ipc_single",
+    "napi:ace_napi",
   ]
 
   subsystem_name = "window"

@@ -49,8 +49,8 @@ sptr<Window> WindowExtensionStubImpl::CreateWindow(
     option->SetParentId(parentWindowId);
     option->SetWindowName(windowName_);
     option->SetWindowSessionType(WindowSessionType::EXTENSION_SESSION);
-    WLOGI("Window::Create with session.");
-    window_ = Window::Create(option, context, iSession);
+    WLOGI("Window::Create");
+    window_ = Window::Create(windowName_, option, context);
     return window_.promote();
 }
 

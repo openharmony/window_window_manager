@@ -87,8 +87,6 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetHeight(property_.GetBounds().rect_.GetHeight());
     displayInfo->SetScreenId(screenId_);
     displayInfo->SetDisplayId(screenId_);
-    displayInfo->SetRefreshRate(60);     // use 60 temporarily, depended on property set
-
     displayInfo->SetRefreshRate(property_.GetRefreshRate());
     displayInfo->SetVirtualPixelRatio(property_.GetVirtualPixelRatio());
     displayInfo->SetXDpi(property_.GetXDpi());
@@ -127,6 +125,11 @@ ScreenProperty ScreenSession::GetScreenProperty() const
 std::shared_ptr<RSDisplayNode> ScreenSession::GetDisplayNode() const
 {
     return displayNode_;
+}
+
+void ScreenSession::ReleaseDisplayNode()
+{
+    displayNode_ = nullptr;
 }
 
 void ScreenSession::Connect()
@@ -244,7 +247,7 @@ void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
         height = screenSessionModes->height_;
         width = screenSessionModes->width_;
     }
-    float virtualPixelRatio = virtualPixelRatio_;
+    float virtualPixelRatio = property_.GetVirtualPixelRatio();
     // "< 1e-set6" means virtualPixelRatio is 0.
     if (fabsf(virtualPixelRatio) < 1e-6) {
         virtualPixelRatio = 1.0f;
@@ -343,12 +346,6 @@ DMError ScreenSession::SetScreenColorTransform()
     return DMError::DM_OK;
 }
 
-bool ScreenSession::SetOrientation(Orientation orientation)
-{
-    orientation_ = orientation;
-    return true;
-}
-
 void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint)
 {
     if (displayNode_ != nullptr) {
@@ -385,49 +382,49 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
     }
 }
 
-ScreenSessionGroup::ScreenSessionGroup(ScreenId dmsId, ScreenId rsId,
+ScreenSessionGroup::ScreenSessionGroup(ScreenId screenId, ScreenId rsId,
     std::string name, ScreenCombination combination) : combination_(combination)
 {
     name_ = name;
-    screenId_ = dmsId;
+    screenId_ = screenId;
     rsId_ = rsId;
-    type_ = ScreenType::UNDEFINED;
+    GetScreenProperty().SetScreenType(ScreenType::UNDEFINED);
     isScreenGroup_ = true;
 }
 
 ScreenSessionGroup::~ScreenSessionGroup()
 {
-    displayNode_ = nullptr;
+    ReleaseDisplayNode();
     screenSessionMap_.clear();
 }
 
-bool ScreenSessionGroup::GetRSDisplayNodeConfig(sptr<ScreenSession>& dmsScreen, struct RSDisplayNodeConfig& config,
+bool ScreenSessionGroup::GetRSDisplayNodeConfig(sptr<ScreenSession>& screenSession, struct RSDisplayNodeConfig& config,
                                                 sptr<ScreenSession> defaultScreenSession)
 {
-    if (dmsScreen == nullptr) {
-        WLOGE("dmsScreen is nullptr.");
+    if (screenSession == nullptr) {
+        WLOGE("screenSession is nullptr.");
         return false;
     }
-    config = { dmsScreen->rsId_ };
+    config = { screenSession->rsId_ };
     switch (combination_) {
         case ScreenCombination::SCREEN_ALONE:
             [[fallthrough]];
         case ScreenCombination::SCREEN_EXPAND:
             break;
         case ScreenCombination::SCREEN_MIRROR: {
-            if (GetChildCount() == 0 || mirrorScreenId_ == dmsScreen->screenId_) {
+            if (GetChildCount() == 0 || mirrorScreenId_ == screenSession->screenId_) {
                 WLOGI("AddChild, SCREEN_MIRROR, config is not mirror");
                 break;
             }
-            std::shared_ptr<RSDisplayNode> displayNode = defaultScreenSession->displayNode_;
+            std::shared_ptr<RSDisplayNode> displayNode = defaultScreenSession->GetDisplayNode();
             if (displayNode == nullptr) {
                 WLOGFE("AddChild fail, displayNode is nullptr, cannot get DisplayNode");
                 break;
             }
             NodeId nodeId = displayNode->GetId();
             WLOGI("AddChild, mirrorScreenId_:%{public}" PRIu64", rsId_:%{public}" PRIu64", nodeId:%{public}" PRIu64"",
-                mirrorScreenId_, dmsScreen->rsId_, nodeId);
-            config = {dmsScreen->rsId_, true, nodeId};
+                mirrorScreenId_, screenSession->rsId_, nodeId);
+            config = {screenSession->rsId_, true, nodeId};
             break;
         }
         default:
@@ -484,14 +481,14 @@ bool ScreenSessionGroup::RemoveChild(sptr<ScreenSession>& smsScreen)
     ScreenId screenId = smsScreen->screenId_;
     smsScreen->lastGroupSmsId_ = smsScreen->groupSmsId_;
     smsScreen->groupSmsId_ = SCREEN_ID_INVALID;
-    if (smsScreen->displayNode_ != nullptr) {
-        smsScreen->displayNode_->SetDisplayOffset(0, 0);
-        smsScreen->displayNode_->RemoveFromTree();
+    if (smsScreen->GetDisplayNode() != nullptr) {
+        smsScreen->GetDisplayNode()->SetDisplayOffset(0, 0);
+        smsScreen->GetDisplayNode()->RemoveFromTree();
         auto transactionProxy = RSTransactionProxy::GetInstance();
         if (transactionProxy != nullptr) {
             transactionProxy->FlushImplicitTransaction();
         }
-        smsScreen->displayNode_ = nullptr;
+        smsScreen->ReleaseDisplayNode();
     }
     return screenSessionMap_.erase(screenId);
 }
