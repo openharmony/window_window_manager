@@ -43,6 +43,8 @@ public:
     WMError Resize(uint32_t width, uint32_t height) override;
     WmErrorCode RaiseToAppTop() override;
     WSError HandleBackEvent() override;
+    WMError SetGlobalMaximizeMode(MaximizeMode mode) override;
+    MaximizeMode GetGlobalMaximizeMode() const override;
 
     WMError SetBackgroundColor(const std::string& color) override;
     WMError SetTransparent(bool isTransparent) override;

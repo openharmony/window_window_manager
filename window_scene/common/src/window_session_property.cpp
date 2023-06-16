@@ -148,6 +148,16 @@ bool WindowSessionProperty::GetTokenState() const
     return tokenState_;
 }
 
+MaximizeMode WindowSessionProperty::GetMaximizeMode() const
+{
+    return maximizeMode_;
+}
+
+void WindowSessionProperty::SetMaximizeMode(MaximizeMode mode)
+{
+    maximizeMode_ = mode;
+}
+
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
@@ -161,7 +171,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteString(sessionInfo_.bundleName_) && parcel.WriteString(sessionInfo_.moduleName_) &&
         parcel.WriteString(sessionInfo_.abilityName_) &&
         parcel.WriteUint64(parentPersistentId_) &&
-        parcel.WriteUint32(accessTokenId_);
+        parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_));
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -185,6 +195,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetSessionInfo(info);
     property->SetParentPersistentId(parcel.ReadUint64());
     property->SetAccessTokenId(parcel.ReadUint32());
+    property->SetMaximizeMode(static_cast<MaximizeMode>(parcel.ReadUint32()));
     return property;
 }
 } // namespace Rosen

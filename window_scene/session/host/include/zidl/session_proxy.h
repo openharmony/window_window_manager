@@ -44,6 +44,8 @@ public:
         sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session) override;
     WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) override;
     WSError RequestSessionBack() override;
+    WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
+    WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

@@ -87,6 +87,16 @@ void SceneSessionManager::ConfigWindowSceneXml()
         }
     }
 
+    item = config["defaultMaximizeMode"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1 &&
+            (numbers[0] == static_cast<int32_t>(MaximizeMode::MODE_AVOID_SYSTEM_BAR) ||
+            numbers[0] == static_cast<int32_t>(MaximizeMode::MODE_FULL_FILL))) {
+            SceneSession::maximizeMode_ = static_cast<MaximizeMode>(numbers[0]);
+        }
+    }
+
     item = config["keyboardAnimation"];
     if (item.IsMap()) {
         ConfigKeyboardAnimation(item);
@@ -732,6 +742,12 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
         }
         case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
             // @todo
+            break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE: {
+            if (sceneSession->GetSessionProperty() != nullptr) {
+                sceneSession->GetSessionProperty()->SetMaximizeMode(property->GetMaximizeMode());
+            }
             break;
         }
         default:
