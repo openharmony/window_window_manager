@@ -106,6 +106,7 @@ ohos_shared_library("libdm") {
     "samgr:samgr_proxy",
   ]
 
+  innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
 }
