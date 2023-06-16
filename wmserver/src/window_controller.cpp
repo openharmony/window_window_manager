@@ -1097,13 +1097,6 @@ WMError WindowController::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<
                 node->surfaceNode_->SetFrameGravity(static_cast<Gravity>(dragFrameGravity_));
             }
         }
-        if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE && dragFrameGravity_ != INVALID_GRAVITY) {
-            sptr<WindowNodeContainer> container = windowRoot_->GetWindowNodeContainer(node->GetDisplayId());
-            if (container != nullptr) {
-                container->SetWindowPairFrameGravity(
-                    node->GetDisplayId(), static_cast<Gravity>(dragFrameGravity_));
-            }
-        }
         return res;
     }
     return WMError::WM_OK;
@@ -1172,12 +1165,6 @@ WMError WindowController::ProcessPointUp(uint32_t windowId)
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW && dragFrameGravity_ != INVALID_GRAVITY) {
         if (node->surfaceNode_) {
             node->surfaceNode_->SetFrameGravity(Gravity::RESIZE);
-        }
-    }
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE && dragFrameGravity_ != INVALID_GRAVITY) {
-        sptr<WindowNodeContainer> container = windowRoot_->GetWindowNodeContainer(node->GetDisplayId());
-        if (container != nullptr) {
-            container->SetWindowPairFrameGravity(node->GetDisplayId(), Gravity::RESIZE);
         }
     }
     WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_END);

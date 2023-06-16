@@ -73,7 +73,6 @@ ohos_static_library("libwm_static") {
   public_configs = [ ":libwm_public_config" ]
 
   deps = [
-    "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
@@ -88,6 +87,7 @@ ohos_static_library("libwm_static") {
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "graphic_standard:librender_service_client",
     "graphic_standard:window_animation",
     "hilog_native:libhilog",
     "hisysevent_native:libhisysevent",
@@ -195,6 +195,7 @@ ohos_shared_library("libwm") {
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "graphic_standard:librender_service_client",
     "graphic_standard:window_animation",
     "hilog_native:libhilog",
     "hisysevent_native:libhisysevent",
@@ -242,7 +243,7 @@ ohos_shared_library("libwm") {
     external_deps += [ "imf:inputmethod_client" ]
     defines += [ "IMF_ENABLE" ]
   }
-
+  innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
 }
