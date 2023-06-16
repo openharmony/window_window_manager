@@ -15,6 +15,7 @@
 #include "session/host/include/scene_session.h"
 
 #include "window_manager_hilog.h"
+#include <running_lock.h>
 
 namespace OHOS::Rosen {
 namespace {
@@ -25,6 +26,7 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     : Session(info)
 {
     GeneratePersistentId(!isExtension, info);
+    scenePersistence_ = new ScenePersistence(info, GetPersistentId());
     specificCallback_ = specificCallback;
 }
 

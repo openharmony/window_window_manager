@@ -68,10 +68,10 @@ public:
     ScreenId GetScreenId();
     ScreenProperty GetScreenProperty() const;
     std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
+    void ReleaseDisplayNode();
 
     Rotation CalcRotation(Orientation orientation) const;
     void FillScreenInfo(sptr<ScreenInfo> info) const;
-    bool SetOrientation(Orientation orientation);
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint);
 
     DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts);
@@ -84,19 +84,14 @@ public:
     std::string name_;
     ScreenId screenId_;
     ScreenId rsId_;
-    ScreenType type_ { ScreenType::REAL };
-    float virtualPixelRatio_ = { 1.0 };
-    Orientation orientation_ { Orientation::UNSPECIFIED };
 
     int32_t activeIdx_ { 0 };
     std::vector<sptr<SupportedScreenModes>> modes_ = {};
     Orientation screenRequestedOrientation_ { Orientation::UNSPECIFIED };
-    Rotation rotation_ { Rotation::ROTATION_0 };
 
     bool isScreenGroup_ { false };
     ScreenId groupSmsId_ { SCREEN_ID_INVALID };
     ScreenId lastGroupSmsId_ { SCREEN_ID_INVALID };
-    std::shared_ptr<RSDisplayNode> displayNode_;
 
     void Connect();
     void Disconnect();
@@ -105,6 +100,7 @@ public:
     void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
 private:
     ScreenProperty property_;
+    std::shared_ptr<RSDisplayNode> displayNode_;
     ScreenState screenState_ { ScreenState::INIT };
     std::vector<IScreenChangeListener*> screenChangeListenerList_;
 };
@@ -132,7 +128,7 @@ public:
     ScreenId mirrorScreenId_ { SCREEN_ID_INVALID };
 
 private:
-    bool GetRSDisplayNodeConfig(sptr<ScreenSession>& dmsScreen, struct RSDisplayNodeConfig& config,
+    bool GetRSDisplayNodeConfig(sptr<ScreenSession>& screenSession, struct RSDisplayNodeConfig& config,
         sptr<ScreenSession> defaultScreenSession);
 
     std::map<ScreenId, std::pair<sptr<ScreenSession>, Point>> screenSessionMap_;
