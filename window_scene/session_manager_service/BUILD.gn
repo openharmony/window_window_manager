@@ -39,7 +39,6 @@ ohos_shared_library("session_manager_service") {
   public_configs = [ ":session_manager_service_public_config" ]
 
   deps = [
-    "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "${window_base_path}/dmserver:libdms",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
@@ -54,6 +53,7 @@ ohos_shared_library("session_manager_service") {
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "graphic_standard:librender_service_client",
     "hilog_native:libhilog",
     "ipc:ipc_core",
     "screenlock_mgr:screenlock_server",

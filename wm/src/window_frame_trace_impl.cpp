@@ -22,9 +22,9 @@
 namespace FRAME_TRACE {
 
 #ifdef __aarch64__
-const char* g_frameTraceSoPath = "/system/lib64/libframe_trace_intf.z.so";
+const char* g_frameTraceSoPath = "/system/lib64/platformsdk/libframe_trace_intf.z.so";
 #else
-const char* g_frameTraceSoPath = "/system/lib/libframe_trace_intf.z.so";
+const char* g_frameTraceSoPath = "/system/lib/platformsdk/libframe_trace_intf.z.so";
 #endif
 
 WindowFrameTraceImpl* WindowFrameTraceImpl::GetInstance()
