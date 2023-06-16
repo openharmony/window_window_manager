@@ -30,7 +30,6 @@ ohos_shared_library("screensessionmanager_napi") {
   public_configs = [ ":screen_session_manager_napi_public_config" ]
 
   deps = [
-    "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/session:screen_session",
     "${window_base_path}/window_scene/session_manager:screen_session_manager",
@@ -38,6 +37,7 @@ ohos_shared_library("screensessionmanager_napi") {
 
   external_deps = [
     "ability_runtime:runtime",
+    "graphic_standard:librender_service_client",
     "hilog_native:libhilog",
     "napi:ace_napi",
   ]
