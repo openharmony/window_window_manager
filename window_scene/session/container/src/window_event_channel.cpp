@@ -15,6 +15,9 @@
 
 #include "session/container/include/window_event_channel.h"
 
+#include <functional>
+#include <utility>
+
 #include "unistd.h"
 #include "sys/types.h"
 
@@ -56,7 +59,19 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
         pointerEvent->SetProcessedCallback(dispatchCallback_);
         WLOGFD("SetProcessedCallback leave");
     }
-    sessionStage_->NotifyPointerEvent(pointerEvent); // sessionStage_ 就是 windowSessionImpl,windoeSessionImpl 里有 hostSession_
+    static auto checkInAnrRegin = [](const std::shared_ptr<MMI::PointerEvent> pointerEvent) -> bool {
+        std::pair<int32_t, int32_t> leftUp {0, 0};
+        std::pair<int32_t, int32_t> rightDown {500, 500};
+        int32_t displayX = pointerEvent->GetDisplayX();
+        int32_t displayY = pointerEvent->GetDisplayY();
+        return (displayX >= leftUp.first && displayX < rightDown.first &&
+                displayY >= leftUp.second && displayY < rightDown.second);
+    };
+    if (checkInAnrRegin(pointerEvent)) {
+        WLOGFD("The pointerEvent eventId: %{public}d in anr regin, sleep 6 seconds to trigger anr", pointerEvent->GetId());
+        sleep(6);
+    }
+    sessionStage_->NotifyPointerEvent(pointerEvent); // sessionStage_ 就是 windowSessionImpl,windowSessionImpl 里有 hostSession_
     return WSError::WS_OK;
 }
 
