@@ -19,8 +19,6 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
 
-#include "js_scene_utils.h"
-
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
@@ -52,13 +50,21 @@ NativeValue* JsSceneSession::Create(NativeEngine& engine, const sptr<SceneSessio
     object->SetNativePointer(jsSceneSession.release(), JsSceneSession::Finalizer, nullptr);
     object->SetProperty("persistentId", CreateJsValue(engine, static_cast<int64_t>(session->GetPersistentId())));
     object->SetProperty("parentId", CreateJsValue(engine, static_cast<int64_t>(session->GetParentPersistentId())));
-    object->SetProperty("type", CreateJsValue(engine, static_cast<uint32_t>(
-        WINDOW_TYPE_TO_API_TYPE_MAP.at(session->GetWindowType()))));
-
+    object->SetProperty("type", CreateJsValue(engine, static_cast<uint32_t>(GetApiType(session->GetWindowType()))));
     const char* moduleName = "JsSceneSession";
     BindNativeFunction(engine, *object, "on", moduleName, JsSceneSession::RegisterCallback);
 
     return objValue;
+}
+
+WindowTypeInAPI JsSceneSession::GetApiType(WindowType type)
+{
+    if (WINDOW_TYPE_TO_API_TYPE_MAP.find(type) == WINDOW_TYPE_TO_API_TYPE_MAP.end()) {
+        WLOGFE("[NAPI]window type cannot map to api type!");
+        return WindowTypeInAPI::TYPE_UNDEFINED;
+    } else {
+        return WINDOW_TYPE_TO_API_TYPE_MAP.at(type);
+    }
 }
 
 JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& session)
