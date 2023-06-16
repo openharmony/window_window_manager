@@ -737,4 +737,16 @@ sptr<ScenePersistence> Session::GetScenePersistence() const
 {
     return scenePersistence_;
 }
+
+WSError Session::SetGlobalMaximizeMode(MaximizeMode mode)
+{
+    WLOGFD("Session SetGlobalMaximizeMode");
+    return WSError::WS_OK;
+}
+
+WSError Session::GetGlobalMaximizeMode(MaximizeMode& mode)
+{
+    WLOGFD("Session GetGlobalMaximizeMode");
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen
