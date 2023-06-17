@@ -16,6 +16,7 @@
 #include "window_extension_stub_impl.h"
 
 #include "js_window_extension.h"
+#include "scene_board_judgement.h"
 #include "window_extension_connection.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
@@ -49,8 +50,13 @@ sptr<Window> WindowExtensionStubImpl::CreateWindow(
     option->SetParentId(parentWindowId);
     option->SetWindowName(windowName_);
     option->SetWindowSessionType(WindowSessionType::EXTENSION_SESSION);
-    WLOGI("Window::Create");
-    window_ = Window::Create(windowName_, option, context);
+    if (Rosen::SceneBoardJudgement::IsWindowSessionEnabled()) {
+        WLOGI("Window::Create with session.");
+        window_ = Window::Create(option, context, iSession);
+    } else {
+        WLOGI("Window::Create");
+        window_ = Window::Create(windowName_, option, context);
+    }
     return window_.promote();
 }
 
@@ -58,9 +64,14 @@ void WindowExtensionStubImpl::SetBounds(const Rect& rect)
 {
     auto window = window_.promote();
     if (window == nullptr) {
+        WLOGE("null window");
         return;
     }
     Rect orgRect = window->GetRect();
+    WLOGD("oriRect, x = %{public}d, y = %{public}d, w = %{public}d, h = %{public}d", orgRect.posX_,
+        orgRect.posY_, orgRect.width_, orgRect.height_):
+    WLOGD("newRect, x = %{public}d, y = %{public}d, w = %{public}d, h = %{public}d", rect.posX_,
+        rect.posY_, rect.width_, rect.height_):
     if (rect.width_ != orgRect.width_ || rect.height_ != orgRect.height_) {
         window->Resize(rect.width_, rect.height_);
     }

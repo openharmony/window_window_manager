@@ -334,6 +334,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ == nullptr) {
+        WLOGFE("uicontent is null.");
         return;
     }
     Ace::ViewportConfig config;

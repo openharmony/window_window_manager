@@ -91,6 +91,7 @@ private:
     std::unique_ptr<NativeReference> jsObj_;
     sptr<WindowExtensionStubImpl> stub_;
     static int extensionCnt_;
+    sptr<AAFwk::SessionInfo> sessionInfo_;
 };
 } // namespace Rosen
 } // namespace OHOS
