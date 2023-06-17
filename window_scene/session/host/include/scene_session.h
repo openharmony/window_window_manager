@@ -21,7 +21,7 @@
 
 namespace OHOS::Rosen {
 class SceneSession;
-using SpecificSessionCreateCallback = std::function<sptr<SceneSession>(const SessionInfo& info)>;
+using SpecificSessionCreateCallback = std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
 using SpecificSessionDestroyCallback = std::function<WSError(const uint64_t& persistentId)>;
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect)>;
