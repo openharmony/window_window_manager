@@ -68,7 +68,11 @@ void AvoidAreaController::ProcessWindowChange(const sptr<WindowNode>& windowNode
 
 void AvoidAreaController::AddOrRemoveOverlayWindowIfNeed(const sptr<WindowNode>& overlayNode, bool isAdding)
 {
-    if (!WindowHelper::IsOverlayWindow(overlayNode->GetWindowType())) {
+    WindowGravity windowGravity;
+    uint32_t percent;
+    overlayNode->GetWindowGravity(windowGravity, percent);
+    if (!WindowHelper::IsOverlayWindow(overlayNode->GetWindowType()) ||
+        windowGravity == WindowGravity::WINDOW_GRAVITY_FLOAT) {
         WLOGE("IsOverlayWindow Failed.");
         return;
     }
@@ -152,7 +156,11 @@ void AvoidAreaController::UpdateOverlayWindowIfNeed(const sptr<WindowNode>& node
     const std::function<bool(sptr<WindowNode>)>& checkFunc)
 {
     HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
-    if (WindowHelper::IsOverlayWindow(node->GetWindowType())) {
+    WindowGravity windowGravity;
+    uint32_t percent;
+    node->GetWindowGravity(windowGravity, percent);
+    if (WindowHelper::IsOverlayWindow(node->GetWindowType()) &&
+        windowGravity == WindowGravity::WINDOW_GRAVITY_BOTTOM) {
         AvoidAreaType type = WindowHelper::IsSystemBarWindow(node->GetWindowType()) ?
             AvoidAreaType::TYPE_SYSTEM : AvoidAreaType::TYPE_KEYBOARD;
         for (auto& appNode : avoidAreaListenerNodes_) {
