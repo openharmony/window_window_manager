@@ -69,9 +69,9 @@ void WindowExtensionStubImpl::SetBounds(const Rect& rect)
     }
     Rect orgRect = window->GetRect();
     WLOGD("oriRect, x = %{public}d, y = %{public}d, w = %{public}d, h = %{public}d", orgRect.posX_,
-        orgRect.posY_, orgRect.width_, orgRect.height_):
+        orgRect.posY_, orgRect.width_, orgRect.height_);
     WLOGD("newRect, x = %{public}d, y = %{public}d, w = %{public}d, h = %{public}d", rect.posX_,
-        rect.posY_, rect.width_, rect.height_):
+        rect.posY_, rect.width_, rect.height_);
     if (rect.width_ != orgRect.width_ || rect.height_ != orgRect.height_) {
         window->Resize(rect.width_, rect.height_);
     }
