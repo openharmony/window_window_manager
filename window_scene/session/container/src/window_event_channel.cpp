@@ -28,13 +28,8 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Window
 
 WSError WindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    WLOGFD("WindowEventChannel receive key event");
-    if (!sessionStage_) {
-        WLOGFE("session stage is null!");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    sessionStage_->NotifyKeyEvent(keyEvent);
-    return WSError::WS_OK;
+    bool isConsumed = false;
+    return TransferKeyEventForConsumed(keyEvent, isConsumed);
 }
 
 WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -45,6 +40,29 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_->NotifyPointerEvent(pointerEvent);
+    return WSError::WS_OK;
+}
+
+WSError WindowEventChannel::TransferKeyEventForConsumed(
+    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+{
+    WLOGFD("WindowEventChannel receive key event");
+    if (!sessionStage_) {
+        WLOGFE("session stage is null!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    sessionStage_->NotifyKeyEvent(keyEvent, isConsumed);
+    return WSError::WS_OK;
+}
+
+WSError WindowEventChannel::TransferFocusActiveEvent(bool isFocusActive)
+{
+    WLOGFD("WindowEventChannel receive focus active event");
+    if (!sessionStage_) {
+        WLOGFE("session stage is null!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    sessionStage_->NotifyFocusActiveEvent(isFocusActive);
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
