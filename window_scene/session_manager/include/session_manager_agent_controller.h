@@ -31,6 +31,7 @@ public:
         WindowManagerAgentType type);
 
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
+    void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused);
 private:
     SessionManagerAgentController() {}
     virtual ~SessionManagerAgentController() = default;

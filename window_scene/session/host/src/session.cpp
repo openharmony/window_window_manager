@@ -21,6 +21,7 @@
 #include <transaction/rs_interfaces.h>
 #include <pointer_event.h>
 #include <ui/rs_surface_node.h>
+#include <ipc_skeleton.h>
 
 #include "window_manager_hilog.h"
 #include "surface_capture_future.h"
@@ -192,6 +193,26 @@ bool Session::GetTouchable() const
     return property_->GetTouchable();
 }
 
+uint32_t Session::GetWindowId() const
+{
+    return static_cast<uint32_t>(GetPersistentId()) & 0xffffffff;
+}
+
+int32_t Session::GetCallingPid() const
+{
+    return callingPid_;
+}
+
+int32_t Session::GetCallingUid() const
+{
+    return callingUid_;
+}
+
+sptr<IRemoteObject> Session::GetAbilityToken() const
+{
+    return abilityToken_;
+}
+
 bool Session::IsSessionValid() const
 {
     bool res = state_ > SessionState::STATE_DISCONNECT && state_ < SessionState::STATE_END;
@@ -216,7 +237,7 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 }
 
 WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
 {
     WLOGFI("Connect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()));
@@ -231,6 +252,9 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     sessionStage_ = sessionStage;
     windowEventChannel_ = eventChannel;
     surfaceNode_ = surfaceNode;
+    abilityToken_ = token;
+    callingPid_ = IPCSkeleton::GetCallingPid();
+    callingUid_ = IPCSkeleton::GetCallingUid();
     systemConfig = systemConfig_;
     if (property) {
         property->SetPersistentId(GetPersistentId());

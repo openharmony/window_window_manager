@@ -14,6 +14,7 @@
  */
 
 #include "window_transition_info.h"
+#include "window_info.h"
 
 namespace OHOS {
 namespace Rosen {

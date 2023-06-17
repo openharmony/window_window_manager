@@ -79,7 +79,7 @@ public:
 
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
-        sptr<WindowSessionProperty> property = nullptr) override;
+        sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr) override;
     WSError Foreground() override;
     WSError Background() override;
     WSError Disconnect() override;
@@ -134,6 +134,11 @@ public:
     bool GetFocusable() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
+
+    uint32_t GetWindowId() const;
+    int32_t GetCallingPid() const;
+    int32_t GetCallingUid() const;
+    sptr<IRemoteObject> GetAbilityToken() const;
 protected:
     void GeneratePersistentId(const bool isExtension, const SessionInfo& sessionInfo);
     void UpdateSessionState(SessionState state);
@@ -194,6 +199,10 @@ private:
     std::shared_ptr<Media::PixelMap> snapshot_;
     std::vector<sptr<Session>> dialogVec_;
     sptr<Session> parentSession_;
+
+    int32_t callingPid_ = { 0 };
+    int32_t callingUid_ = { 0 };
+    sptr<IRemoteObject> abilityToken_ = nullptr;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_H
