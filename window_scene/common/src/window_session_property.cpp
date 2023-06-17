@@ -138,6 +138,16 @@ uint32_t WindowSessionProperty::GetAccessTokenId() const
     return accessTokenId_;
 }
 
+void WindowSessionProperty::SetTokenState(bool hasToken)
+{
+    tokenState_ = hasToken;
+}
+
+bool WindowSessionProperty::GetTokenState() const
+{
+    return tokenState_;
+}
+
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
@@ -146,7 +156,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(requestRect_.posY_) && parcel.WriteUint32(requestRect_.width_) &&
         parcel.WriteUint32(requestRect_.height_) &&
         parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
-        parcel.WriteBool(focusable_) && parcel.WriteBool(touchable_) &&
+        parcel.WriteBool(focusable_) && parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteUint64(persistentId_) &&
         parcel.WriteString(sessionInfo_.bundleName_) && parcel.WriteString(sessionInfo_.moduleName_) &&
         parcel.WriteString(sessionInfo_.abilityName_) &&
@@ -168,6 +178,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowType(static_cast<WindowType>(parcel.ReadUint32()));
     property->SetFocusable(parcel.ReadBool());
     property->SetTouchable(parcel.ReadBool());
+    property->SetTokenState(parcel.ReadBool());
     property->SetDisplayId(parcel.ReadUint64());
     property->SetPersistentId(parcel.ReadUint64());
     SessionInfo info = { parcel.ReadString(), parcel.ReadString(), parcel.ReadString() };

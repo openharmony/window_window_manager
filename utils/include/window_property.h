@@ -21,13 +21,16 @@
 #include <unordered_map>
 #include <parcel.h>
 #include "class_var_definition.h"
-#include "pointer_event.h"
+// #include "pointer_event.h"
 #include "dm_common.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
 #include "wm_math.h"
 
 namespace OHOS {
+namespace MMI {
+    class PointerEvent;
+}
 namespace Rosen {
 class WindowProperty : public Parcelable {
 public:

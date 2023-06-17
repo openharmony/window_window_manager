@@ -18,6 +18,7 @@
 #include <iremote_broker.h>
 #include <iremote_object.h>
 #include "window_transition_info.h"
+#include "window_info.h"
 #include "iremote_object_mocker.h"
 
 using namespace testing;

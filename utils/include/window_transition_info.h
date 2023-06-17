@@ -19,11 +19,14 @@
 #include <string>
 
 #include "ability_info.h"
-#include "window_info.h"
+// #include "window_info.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
 
 namespace OHOS {
+namespace AAFwk {
+    struct AbilityTransitionInfo;
+}
 namespace Rosen {
 enum class TransitionReason : uint32_t {
     MINIMIZE = 0,
