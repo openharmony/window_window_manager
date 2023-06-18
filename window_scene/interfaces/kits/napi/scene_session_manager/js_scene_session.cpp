@@ -59,11 +59,12 @@ NativeValue* JsSceneSession::Create(NativeEngine& engine, const sptr<SceneSessio
 
 WindowTypeInAPI JsSceneSession::GetApiType(WindowType type)
 {
-    if (WINDOW_TYPE_TO_API_TYPE_MAP.find(type) == WINDOW_TYPE_TO_API_TYPE_MAP.end()) {
+    auto iter = WINDOW_TYPE_TO_API_TYPE_MAP.find(type);
+    if (iter == WINDOW_TYPE_TO_API_TYPE_MAP.end()) {
         WLOGFE("[NAPI]window type cannot map to api type!");
-        return WindowTypeInAPI::TYPE_UNDEFINED;
+        return WindowTypeInAPI::TYPE_END;
     } else {
-        return WINDOW_TYPE_TO_API_TYPE_MAP.at(type);
+        return iter->second;
     }
 }
 

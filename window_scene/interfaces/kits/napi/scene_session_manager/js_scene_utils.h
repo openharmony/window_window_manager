@@ -25,7 +25,6 @@
 
 namespace OHOS::Rosen {
 enum class WindowTypeInAPI : uint32_t {
-    TYPE_UNDEFINED,
     TYPE_BASE,
     TYPE_APP = TYPE_BASE,
     TYPE_SYSTEM_ALERT,
