@@ -859,7 +859,7 @@ WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType t
     auto task = [this, &windowManagerAgent, type]() {
         return SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type);
     };
-    msgScheduler_->PostSyncTask(task);
+    taskScheduler_->PostSyncTask(task);
     return WMError::WM_OK;
 }
 
