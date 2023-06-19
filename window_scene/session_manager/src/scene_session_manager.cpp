@@ -877,7 +877,7 @@ WMError SceneSessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType
     auto task = [this, &windowManagerAgent, type]() {
         return SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type);
     };
-    msgScheduler_->PostSyncTask(task);
+    taskScheduler_->PostSyncTask(task);
     return WMError::WM_OK;
 }
 
