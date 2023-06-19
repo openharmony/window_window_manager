@@ -31,6 +31,12 @@ constexpr int32_t MAX_ANR_TIMER_COUNT = 50;
 ANRManager::ANRManager() {}
 ANRManager::~ANRManager() {}
 
+void ANRManager::Init()
+{
+    CALL_DEBUG_ENTER;
+    TimerMgr->Init();
+}
+
 void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
@@ -51,6 +57,7 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
         }
         std::vector<int32_t> timerIds = eventStage_.GetTimerIds(persistentId);
         for (int32_t item : timerIds) {
+            WLOGFD("timer %{public}d will be removed", item);
             if (item != -1) {
                 TimerMgr->RemoveTimer(item);
                 anrTimerCount_--;
@@ -70,7 +77,11 @@ void ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
     std::lock_guard<std::mutex> guard(mtx_);
     WLOGFD("eventId:%{public}d, persistentId:%{public}d", eventId, persistentId);
     std::list<int32_t> timerIds = eventStage_.DelEvents(persistentId, eventId);
+    if (timerIds.empty()) {
+        WLOGFD("timerIds to remove is empty");
+    }
     for (int32_t item : timerIds) {
+        WLOGFD("timer %{public}d will be removed", item);
         if (item != -1) {
             TimerMgr->RemoveTimer(item);
             anrTimerCount_--;

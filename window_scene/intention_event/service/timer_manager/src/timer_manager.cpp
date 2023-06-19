@@ -22,7 +22,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr int32_t MIN_DELAY = -1;
+constexpr int32_t MIN_DELAY = 5000;
 constexpr int32_t MIN_INTERVAL = 50;
 constexpr int32_t MAX_INTERVAL_MS = 10000;
 constexpr int32_t MAX_TIMER_COUNT = 64;
@@ -33,9 +33,25 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "
 TimerManager::TimerManager() {}
 TimerManager::~TimerManager() {}
 
-int32_t TimerManager::AddTimer(int32_t intervalMs, int32_t repeatCount, std::function<void()> callback)
+void TimerManager::Init()
 {
     CALL_DEBUG_ENTER;
+    if (state_ != TimerMgrState::STATE_RUNNING) {
+        state_ = TimerMgrState::STATE_RUNNING;
+        timerWorker_ = std::thread(std::bind(&TimerManager::OnThread, this));
+    } else {
+        WLOGFD("TimerManager init already");
+    }
+}
+
+void TimerManager::Stop()
+{
+    CALL_DEBUG_ENTER;
+    OnStop();
+}
+
+int32_t TimerManager::AddTimer(int32_t intervalMs, int32_t repeatCount, std::function<void()> callback)
+{
     return AddTimerInternal(intervalMs, repeatCount, callback);
 }
 
@@ -67,6 +83,26 @@ void TimerManager::ProcessTimers()
 {
     CALL_DEBUG_ENTER;
     ProcessTimersInternal();
+}
+
+void TimerManager::OnThread()
+{
+    CALL_DEBUG_ENTER;
+    while (state_ == TimerMgrState::STATE_RUNNING) {
+        int32_t timeout = CalcNextDelay();
+        WLOGFE("CalcNextDelay :%{public}d", timeout);
+        std::this_thread::sleep_for(std::chrono::milliseconds(timeout));
+        ProcessTimers();
+    }
+}
+
+void TimerManager::OnStop()
+{
+    CALL_DEBUG_ENTER;
+    state_ = TimerMgrState::STATE_EXIT;
+    if (timerWorker_.joinable()) {
+        timerWorker_.join();
+    }
 }
 
 int32_t TimerManager::TakeNextTimerId()

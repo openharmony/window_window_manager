@@ -251,10 +251,6 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     NotifyConnect();
     int32_t applicationPid = IPCSkeleton::GetCallingPid();
     ANRMgr->SetApplicationPid(persistentId_, applicationPid);
-    ANRMgr->SetAnrCallback([](int32_t pid) {
-            WLOGFI("WLD << Receive anr notice pid:%{public}d", pid);
-            // AAFwk::AbilityManagerClient::GetInstance()->SendANRProcessID(pid);
-        });
     WLOGFI("SetApplicationPid pid:%{public}d", applicationPid);
     return WSError::WS_OK;
 }

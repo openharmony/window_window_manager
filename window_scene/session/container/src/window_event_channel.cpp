@@ -31,7 +31,7 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannel" };
-constexpr int32_t DELAY_TO_TRIGGER_ANR = 6;
+constexpr int32_t DELAY_TO_TRIGGER_ANR = 10;
 }
 
 WSError WindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -61,6 +61,7 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
         WLOGFD("SetProcessedCallback leave");
     }
     static auto checkInAnrRegin = [](const std::shared_ptr<MMI::PointerEvent> pointerEvent) -> bool {
+        WLOGFD("Here in checkInAnrRegin");
         std::pair<int32_t, int32_t> leftUp {0, 0};
         std::pair<int32_t, int32_t> rightDown {500, 500};
         if (pointerEvent == nullptr) {

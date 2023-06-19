@@ -20,17 +20,26 @@
 #include <functional>
 #include <list>
 #include <memory>
+#include <thread>
 
 #include "singleton.h"
 #include "util.h"
 
 namespace OHOS {
 namespace Rosen {
+
+enum class TimerMgrState {
+    STATE_NOT_START,
+    STATE_RUNNING,
+    STATE_EXIT
+};
 class TimerManager final {
     DECLARE_DELAYED_SINGLETON(TimerManager);
 
 public:
     DISALLOW_COPY_AND_MOVE(TimerManager);
+    void Init();
+    void Stop();
     int32_t AddTimer(int32_t intervalMs, int32_t repeatCount, std::function<void()> callback);
     int32_t RemoveTimer(int32_t timerId);
     int32_t ResetTimer(int32_t timerId);
@@ -48,6 +57,8 @@ private:
         std::function<void()> callback;
     };
 private:
+    void OnThread();
+    void OnStop();
     int32_t TakeNextTimerId();
     int32_t AddTimerInternal(int32_t intervalMs, int32_t repeatCount, std::function<void()> callback);
     int32_t RemoveTimerInternal(int32_t timerId);
@@ -58,6 +69,8 @@ private:
     void ProcessTimersInternal();
 
 private:
+    std::atomic<TimerMgrState> state_ { TimerMgrState::STATE_NOT_START };
+    std::thread timerWorker_;
     std::list<std::unique_ptr<TimerItem>> timers_;
 };
 

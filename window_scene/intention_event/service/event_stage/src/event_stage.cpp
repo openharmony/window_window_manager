@@ -49,9 +49,7 @@ void EventStage::SaveANREvent(int32_t persistentId, int32_t id, int64_t time, in
     CALL_DEBUG_ENTER;
     WLOGFD("Current persistentId:%{public}d, eventId:%{public}d, timerId:%{public}d", persistentId, id, timerId);
     EventTime eventTime { id, time, timerId };
-    if (events_.find(persistentId) != events_.end()) {
-        events_[persistentId].push_back(eventTime);
-    }
+    events_[persistentId].push_back(eventTime);
 }
 
 std::vector<int32_t> EventStage::GetTimerIds(int32_t persistentId)
@@ -91,6 +89,7 @@ std::list<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t id)
     }
     events.erase(events.begin(), fistMatchIter);
     if (events.empty()) {
+        WLOGFD("events is empty");
         SetAnrStatus(persistentId, false);
         return timerIds;
     }
@@ -101,6 +100,7 @@ std::list<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t id)
     }
     auto currentTime = GetSysClockTime();
     if (currentTime < endTime) {
+        WLOGFD("currentTime < endTime");
         SetAnrStatus(persistentId, false);
     }
     return timerIds;
