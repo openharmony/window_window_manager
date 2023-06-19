@@ -20,6 +20,7 @@
 #include "session/host/include/extension_session.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
+#include "session_info.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -260,13 +261,57 @@ HWTEST_F(WindowSessionTest, PendingSessionActivation01, Function | SmallTest | L
         resultValue = 1;
     };
 
-    sptr<AAFwk::SessionInfo> info;
+    sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
     session_->pendingSessionActivationFunc_ = nullptr;
     session_->PendingSessionActivation(info);
     ASSERT_EQ(resultValue, 0);
 
     session_->SetPendingSessionActivationEventListener(callback);
     session_->PendingSessionActivation(info);
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: TerminateSession01
+ * @tc.desc: check func TerminateSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TerminateSession01, Function | SmallTest | Level2)
+{
+    int resultValue = 0;
+    NotifyTerminateSessionFunc callback = [&resultValue](const SessionInfo& info) {
+        resultValue = 1;
+    };
+
+    sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
+    session_->terminateSessionFunc_ = nullptr;
+    session_->TerminateSession(info);
+    ASSERT_EQ(resultValue, 0);
+
+    session_->SetTerminateSessionListener(callback);
+    session_->TerminateSession(info);
+    ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: NotifySessionException01
+ * @tc.desc: check func NotifySessionException
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifySessionException01, Function | SmallTest | Level2)
+{
+    int resultValue = 0;
+    NotifySessionExceptionFunc callback = [&resultValue](const SessionInfo& info) {
+        resultValue = 1;
+    };
+
+    sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
+    session_->sessionExceptionFunc_ = nullptr;
+    session_->NotifySessionException(info);
+    ASSERT_EQ(resultValue, 0);
+
+    session_->SetSessionExceptionListener(callback);
+    session_->NotifySessionException(info);
     ASSERT_EQ(resultValue, 1);
 }
 
