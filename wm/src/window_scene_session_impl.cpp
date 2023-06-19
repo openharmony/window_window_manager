@@ -561,6 +561,25 @@ WindowMode WindowSceneSessionImpl::GetMode() const
 {
     return windowMode_;
 }
+
+WMError WindowSceneSessionImpl::SetPrivacyMode(bool isPrivacyMode)
+{
+    WLOGFD("id : %{public}u, SetPrivacyMode, %{public}u", GetWindowId(), isPrivacyMode);
+    property_->SetPrivacyMode(isPrivacyMode);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
+}
+
+bool WindowSceneSessionImpl::IsPrivacyMode() const
+{
+    return property_->GetPrivacyMode();
+}
+
+void WindowSceneSessionImpl::SetSystemPrivacyMode(bool isSystemPrivacyMode)
+{
+    WLOGFD("id : %{public}u, SetSystemPrivacyMode, %{public}u", GetWindowId(), isSystemPrivacyMode);
+    property_->SetSystemPrivacyMode(isSystemPrivacyMode);
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
+}
 } // namespace Rosen
 } // namespace OHOS
 

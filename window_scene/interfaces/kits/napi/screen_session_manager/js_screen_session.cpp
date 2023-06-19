@@ -46,7 +46,7 @@ NativeValue* JsScreenSession::Create(NativeEngine& engine, const sptr<ScreenSess
 
     const char* moduleName = "JsScreenSession";
     BindNativeFunction(engine, *object, "on", moduleName, JsScreenSession::RegisterCallback);
-
+    
     return objValue;
 }
 

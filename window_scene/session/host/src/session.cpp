@@ -258,6 +258,7 @@ WSError Session::Foreground()
     if (!isActive_) {
         SetActive(true);
     }
+    UpdatePrivateStateAndNotify(true);
     NotifyForeground();
     return WSError::WS_OK;
 }

@@ -88,6 +88,7 @@ private:
         const AppExecFwk::AbilityInfo& abilityInfo);
     void GetStartPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, std::string& path, uint32_t& bgColor);
     const std::string& CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
+    void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
 
     std::map<uint64_t, sptr<SceneSession>> abilitySceneMap_;
     sptr<RootSceneSession> rootSceneSession_;
