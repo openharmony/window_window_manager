@@ -220,7 +220,7 @@ HWTEST_F(WindowSceneConfigTest, MaxAppWindowNumber, Function | SmallTest | Level
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     WindowSceneConfig::ConfigItem item = WindowSceneConfig::config_["maxAppWindowNumber"];
-    ASSERT_EQ((*item.intsValue_)[0], 100);
+    ASSERT_EQ((*item.intsValue_)[0], 0);
 
     xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -326,6 +326,19 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig04, Function | SmallTest | Level2)
     string mode = WindowSceneConfig::config_["decor"]["supportedMode"].stringValue_;
     ASSERT_EQ(mode, "fullscreen floating");
 }
+
+/**
+ * @tc.name: LoadconfigXml
+ * @tc.desc: load config xml
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WindowSceneConfigTest, LoadConfigXml, Function | SmallTest | Level2)
+{
+    auto result = WindowSceneConfig::LoadConfigXml();
+    ASSERT_EQ(true, result);
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

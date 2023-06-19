@@ -64,18 +64,108 @@ HWTEST_F(ScreenSceneConfigTest, IsNumber, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: GetConfigPath
+ * @tc.name: GetConfigPath1
  * @tc.desc: test function : GetConfigPath
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigTest, GetConfigPath, Function | SmallTest | Level1)
+HWTEST_F(ScreenSceneConfigTest, GetConfigPath1, Function | SmallTest | Level1)
 {
     auto result = ScreenSceneConfig::GetConfigPath("");
     ASSERT_STRNE("/system/", result.c_str());
+}
 
-    result = ScreenSceneConfig::GetConfigPath("a.xml");
+/**
+ * @tc.name: GetConfigPath2
+ * @tc.desc: test function : GetConfigPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, GetConfigPath2, Function | SmallTest | Level1)
+{
+    auto result = ScreenSceneConfig::GetConfigPath("a.xml");
     ASSERT_STREQ("/system/a.xml", result.c_str());
 }
+
+/**
+ * @tc.name: LoadConfigXml
+ * @tc.desc: test function : loadConfigXml
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, LoadConfigXml, Function | SmallTest | Level1)
+{
+    auto result = ScreenSceneConfig::LoadConfigXml();
+    ASSERT_EQ(true, result);
+}
+
+/**
+ * @tc.name: IsValidNode1
+ * @tc.desc: test function : IsValidNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, IsValidNode1, Function | SmallTest | Level1)
+{
+    xmlNode node;
+    auto result = ScreenSceneConfig::IsValidNode(node);
+    ASSERT_EQ(false, result);
+}
+
+/**
+ * @tc.name: IsValidNode2
+ * @tc.desc: test function : IsValidNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, IsValidNode2, Function | SmallTest | Level1)
+{
+    const xmlChar xmlStringText[] = { 't', 'e', 'x', 't', 0 };
+    xmlNode node;
+    node.name = xmlStringText;
+    node.type = XML_TEXT_NODE;
+    auto result = ScreenSceneConfig::IsValidNode(node);
+    ASSERT_EQ(true, result);
+}
+
+/**
+ * @tc.name: ReadIntNumbersConfigInfo
+ * @tc.desc: test function : ReadIntNumbersConfigInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, ReadIntNumbersConfigInfo, Function | SmallTest | Level1)
+{
+    ScreenSceneConfig::enableConfig_.clear();
+
+    auto configFilePath = ScreenSceneConfig::GetConfigPath("etc/window/resources/display_manager_config.xml");
+    xmlDocPtr docPtr = xmlReadFile(configFilePath.c_str(), nullptr, XML_PARSE_NOBLANKS);
+    if (docPtr == nullptr) {
+        return;
+    }
+
+    xmlNodePtr rootPtr = xmlDocGetRootElement(docPtr);
+    if (rootPtr == nullptr || rootPtr->name == nullptr ||
+        xmlStrcmp(rootPtr->name, reinterpret_cast<const xmlChar*>("Configs"))) {
+        xmlFreeDoc(docPtr);
+        return;
+    }
+    uint32_t readCount = 0;
+    for (xmlNodePtr curNodePtr = rootPtr->xmlChildrenNode; curNodePtr != nullptr; curNodePtr = curNodePtr->next) {
+        if (!ScreenSceneConfig::IsValidNode(*curNodePtr)) {
+            continue;
+        }
+        auto nodeName = curNodePtr->name;
+        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("dpi")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("defaultDeviceRotationOffset")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("cutoutArea")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("curvedScreenBoundary")) ) {
+            ScreenSceneConfig::ReadIntNumbersConfigInfo(curNodePtr);
+            readCount++;
+            continue;
+        }
+    }
+
+    ASSERT_LE(ScreenSceneConfig::intNumbersConfig_.size(), readCount);
+
+    ScreenSceneConfig::DumpConfig();
+    xmlFreeDoc(docPtr);
+}
+
 
 /**
  * @tc.name: ReadEnableConfigInfo
@@ -168,6 +258,39 @@ HWTEST_F(ScreenSceneConfigTest, ReadStringConfigInfo, Function | SmallTest | Lev
     ASSERT_LE(ScreenSceneConfig::stringConfig_.size(), readCount);
     ScreenSceneConfig::DumpConfig();
     xmlFreeDoc(docPtr);
+}
+
+/**
+ * @tc.name: GetEnableConfig1
+ * @tc.desc: test function : GetEnableConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, GetEnableConfig, Function | SmallTest | Level1)
+{
+    auto result = ScreenSceneConfig::GetEnableConfig();
+    ASSERT_NE(0, result.size());
+}
+
+/**
+ * @tc.name: GetIntNumbersConfig
+ * @tc.desc: test function : GetIntNumbersConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, GetIntNumbersConfig, Function | SmallTest | Level1)
+{
+    auto result = ScreenSceneConfig::GetIntNumbersConfig();
+    ASSERT_NE(0, result.size());
+}
+
+/**
+ * @tc.name: GetStringConfig
+ * @tc.desc: test function : GetStringConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, GetStringConfig, Function | SmallTest | Level1)
+{
+    auto result = ScreenSceneConfig::GetStringConfig();
+    ASSERT_NE(0, result.size());
 }
 
 }
