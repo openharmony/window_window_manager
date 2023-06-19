@@ -53,6 +53,16 @@ void WindowSessionProperty::SetTouchable(bool isTouchable)
     touchable_ = isTouchable;
 }
 
+void WindowSessionProperty::SetPrivacyMode(bool isPrivate)
+{
+    isPrivacyMode_ = isPrivate;
+}
+
+void WindowSessionProperty::SetSystemPrivacyMode(bool isSystemPrivate)
+{
+    isSystemPrivacyMode_ = isSystemPrivate;
+}
+
 void WindowSessionProperty::SetDisplayId(DisplayId displayId)
 {
     displayId_ = displayId;
@@ -91,6 +101,16 @@ bool WindowSessionProperty::GetFocusable() const
 bool WindowSessionProperty::GetTouchable() const
 {
     return touchable_;
+}
+
+bool WindowSessionProperty::GetPrivacyMode() const
+{
+    return isPrivacyMode_;
+}
+
+bool WindowSessionProperty::GetSystemPrivacyMode() const
+{
+    return isSystemPrivacyMode_;
 }
 
 DisplayId WindowSessionProperty::GetDisplayId() const
@@ -137,6 +157,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(requestRect_.height_) &&
         parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
         parcel.WriteBool(focusable_) && parcel.WriteBool(touchable_) &&
+        parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteUint64(persistentId_) &&
         parcel.WriteString(sessionInfo_.bundleName_) && parcel.WriteString(sessionInfo_.moduleName_) &&
         parcel.WriteString(sessionInfo_.abilityName_) &&
@@ -157,6 +178,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowType(static_cast<WindowType>(parcel.ReadUint32()));
     property->SetFocusable(parcel.ReadBool());
     property->SetTouchable(parcel.ReadBool());
+    property->SetPrivacyMode(parcel.ReadBool());
+    property->SetSystemPrivacyMode(parcel.ReadBool());
     property->SetDisplayId(parcel.ReadUint64());
     property->SetPersistentId(parcel.ReadUint64());
     SessionInfo info = { parcel.ReadString(), parcel.ReadString(), parcel.ReadString() };

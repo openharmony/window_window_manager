@@ -45,6 +45,9 @@ public:
     WmErrorCode RaiseToAppTop() override;
     WSError HandleBackEvent() override;
 
+    virtual WMError SetPrivacyMode(bool isPrivacyMode) override;
+    virtual bool IsPrivacyMode() const override;
+    virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
 protected:
     void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();

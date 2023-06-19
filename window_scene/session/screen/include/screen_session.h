@@ -94,6 +94,8 @@ public:
     void Connect();
     void Disconnect();
 
+    void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
+    void TraverseContainer(std::vector<sptr<SceneSession>>& sceneSessions) const;
 private:
     ScreenProperty property_;
     std::shared_ptr<RSDisplayNode> displayNode_;
@@ -128,6 +130,7 @@ private:
         sptr<ScreenSession> defaultScreenSession);
 
     std::map<ScreenId, std::pair<sptr<ScreenSession>, Point>> screenSessionMap_;
+    uint32_t privateSessionCount_ { 0 };
 };
 
 } // namespace OHOS::Rosen

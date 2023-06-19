@@ -27,6 +27,7 @@
 #include <start_options.h>
 #include <system_ability_definition.h>
 #include <want.h>
+#include <transaction/rs_transaction.h>
 
 #include "color_parser.h"
 #include "common/include/message_scheduler.h"
@@ -34,6 +35,7 @@
 #include "session/host/include/scene_session.h"
 #include "window_manager_hilog.h"
 #include "wm_math.h"
+#include "screen_session_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -722,7 +724,15 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
-            // @todo
+            bool prePrivacyMode = sceneSession->GetWindowSessionProperty()->GetPrivacyMode || sceneSession->GetWindowSessionProperty()->GetSystemPrivacyMode();
+            bool isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
+            if (prePrivacyMode ^ isPrivacyMode) {
+                sceneSession->GetWindowSessionProperty()->SetPrivacyMode(isPrivacyMode);
+                sceneSession->GetWindowSessionProperty()->SetSystemPrivacyMode(isPrivacyMode);
+                sceneSession->surfaceNode_->SetSecurityLayer(isPrivacyMode);
+                RSTransaction::FlushImplicitTransaction();
+                UpdatePrivateStateAndNotify(isPrivacyMode);
+            }
             break;
         }
         default:
@@ -768,6 +778,16 @@ WSError SceneSessionManager::UpdateFocus(uint64_t persistentId, bool isFocused)
         focusedSessionId_ = INVALID_SESSION_ID;
     }
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::UpdatePrivateStateAndNotify(bool isAddingPrivateSession)
+{
+    auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);
+    if (screenSession == nullptr) {
+        WLOGFE("screen session is null");
+        return;
+    }
+    screenSession->UpdatePrivateStateAndNotify(isAddingPrivateSession);
 }
 
 WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession)
