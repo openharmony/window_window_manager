@@ -45,7 +45,7 @@ class SceneSessionManager : public SceneSessionManagerStub,
                             public SessionManagerBase {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManager)
 public:
-    sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo);
+    sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property = nullptr);
     WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession);
@@ -82,6 +82,7 @@ private:
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig);
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& scnSession);
     WSError DestroyDialogWithMainWindow(const sptr<SceneSession>& scnSession);
+    WSError UpdateParentSession(const sptr<SceneSession>& sceneSession, sptr<WindowSessionProperty> property);
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     std::shared_ptr<Global::Resource::ResourceManager> CreateResourceManager(
