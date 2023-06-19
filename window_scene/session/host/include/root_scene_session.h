@@ -21,7 +21,7 @@
 
 namespace OHOS::AbilityRuntime {
 class Context;
-}
+} // namespace OHOS::AbilityRuntime
 
 class NativeEngine;
 class NativeValue;
