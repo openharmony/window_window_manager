@@ -27,6 +27,8 @@ public:
     ~WindowExtensionSessionImpl();
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession) override;
+    WMError MoveTo(int32_t x, int32_t y) override;
+    WMError Resize(uint32_t width, uint32_t height) override;
 };
 } // namespace Rosen
 } // namespace OHOS

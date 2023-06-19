@@ -592,7 +592,6 @@ WMError WindowSceneSessionImpl::SetBackgroundColor(uint32_t color)
 {
     // 0xff000000: ARGB style, means Opaque color.
     // const bool isAlphaZero = !(color & 0xff000000);
-    // report ZeroOpacityInfo? 
     if (uiContent_ != nullptr) {
         uiContent_->SetBackgroundColor(color);
         return WMError::WM_OK;

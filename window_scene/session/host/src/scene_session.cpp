@@ -71,7 +71,7 @@ WSError SceneSession::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
     WLOGFI("CreateAndConnectSpecificSession id: %{public}" PRIu64 "", GetPersistentId());
     sptr<SceneSession> sceneSession;
     if (specificCallback_ != nullptr) {
-        sceneSession = specificCallback_->onCreate_(sessionInfo_);
+        sceneSession = specificCallback_->onCreate_(sessionInfo_, property);
     }
     if (sceneSession == nullptr) {
         return WSError::WS_ERROR_NULLPTR;

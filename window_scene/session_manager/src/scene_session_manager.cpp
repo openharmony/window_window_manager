@@ -328,7 +328,37 @@ sptr<SceneSession> SceneSessionManager::GetSceneSession(uint64_t persistentId)
     return iter->second;
 }
 
-sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo)
+WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& sceneSession, sptr<WindowSessionProperty> property)
+{
+    if (property == nullptr) {
+        WLOGFW("Property is null, no need to update parent info");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (sceneSession == nullptr) {
+        WLOGFE("Session is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    auto parentPersistentId = property->GetParentPersistentId();
+    if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
+        if (!abilitySceneMap_.count(parentPersistentId)) {
+            WLOGFD("Session is invalid");
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+        sceneSession->SetParentSession(abilitySceneMap_.at(parentPersistentId));
+    } else if (property->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && parentPersistentId != INVALID_SESSION_ID) {
+        auto parentSession = GetSceneSession(parentPersistentId);
+        if (parentSession == nullptr) {
+            WLOGFE("Parent session is nullptr");
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        WLOGFD("Add dialog id to its parent vector");
+        parentSession->BindDialogToParentSession(sceneSession);
+        sceneSession->SetParentSession(parentSession);
+    }
+    return WSError::WS_OK;
+}
+
+sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property)
 {
     sptr<SceneSession::SpecificSessionCallback> specificCallback = new (std::nothrow)
         SceneSession::SpecificSessionCallback();
@@ -337,10 +367,10 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         return nullptr;
     }
     specificCallback->onCreate_ = std::bind(&SceneSessionManager::RequestSceneSession,
-        this, std::placeholders::_1);
+        this, std::placeholders::_1, std::placeholders::_2);
     specificCallback->onDestroy_ = std::bind(&SceneSessionManager::DestroyAndDisconnectSpecificSession,
         this, std::placeholders::_1);
-    auto task = [this, sessionInfo, specificCallback]() {
+    auto task = [this, sessionInfo, specificCallback, property]() {
         WLOGFI("sessionInfo: bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
             sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());
         WLOGFI("RequestSceneSession caller persistentId: %{public}" PRIu64 "", sessionInfo.callerPersistentId_);
@@ -351,15 +381,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         }
         auto persistentId = sceneSession->GetPersistentId();
         sceneSession->SetSystemConfig(systemConfig_);
-        // set parent session to sub session
-        if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
-            auto parentId = sceneSession->GetParentPersistentId();
-            if (!abilitySceneMap_.count(parentId)) {
-                WLOGFD("session is invalid");
-            } else {
-                sceneSession->SetParentSession(abilitySceneMap_.at(parentId));
-            }
-        }
+        UpdateParentSession(sceneSession, property);
         abilitySceneMap_.insert({ persistentId, sceneSession });
         WLOGFI("create session persistentId: %{public}" PRIu64 "", persistentId);
         return sceneSession;
@@ -518,7 +540,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     auto task = [this, sessionStage, eventChannel, surfaceNode, property, &persistentId, &session]() {
         // create specific session
         SessionInfo info;
-        sptr<SceneSession> sceneSession = RequestSceneSession(info);
+        sptr<SceneSession> sceneSession = RequestSceneSession(info, property);
         if (sceneSession == nullptr) {
             return WSError::WS_ERROR_NULLPTR;
         }
@@ -529,16 +551,6 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         }
         if (createSpecificSessionFunc_) {
             createSpecificSessionFunc_(sceneSession);
-        }
-        // when create dialog, bind to its host
-        if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG &&
-            sceneSession->GetParentPersistentId() != INVALID_SESSION_ID) {
-            auto parentSession = GetSceneSession(sceneSession->GetParentPersistentId());
-            if (parentSession) {
-                WLOGFD("Add dialog id to its parent vector");
-                parentSession->BindDialogToParentSession(sceneSession);
-                sceneSession->SetParentSession(parentSession);
-            }
         }
         session = sceneSession;
         return errCode;
