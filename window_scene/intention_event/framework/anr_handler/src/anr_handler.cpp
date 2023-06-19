@@ -82,7 +82,7 @@ void ANRHandler::SetLastProcessedEventId(int32_t eventId, int64_t actionTime)
         if (timeoutTime < MIN_MARK_PROCESS_DELAY_TIME) {
             SendEvent(0);
         } else {
-            int64_t delayTime;
+            int64_t delayTime = 0;
             if (timeoutTime >= MAX_MARK_PROCESS_DELAY_TIME) {
                 delayTime = MAX_MARK_PROCESS_DELAY_TIME / TIME_TRANSITION;
             } else {

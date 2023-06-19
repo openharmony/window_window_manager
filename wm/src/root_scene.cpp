@@ -82,11 +82,16 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
     uiContent_->Foreground();
 
     RegisterInputEventListener();
-    // ANRMgr->SetAnrCallback(([this](int32_t pid) { // 在这也没有执行，待确认到底在哪加比较合适
-    //         WLOGFI("WLD << Receive anr notice pid:%{public}d", pid);
-    //         // AAFwk::AbilityManagerClient::GetInstance()->SendANRProcessID(pid);
-    //     }
-    // ));
+    ANRMgr->Init();
+    ANRMgr->SetAnrCallback(([](int32_t pid) {
+        WLOGFI("WLD << Receive anr notice pid:%{public}d enter", pid);
+
+        if (int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->SendANRProcessID(pid); ret != 0) {
+            // 2097177 --- CHECK_PERMISSION_FAILED  权限错误 
+            WLOGFE("WLD SendANRProcessID failed, processPid:%{public}d, errcode:%{public}d", pid, ret);
+        }
+        WLOGFI("WLD << Receive anr notice pid:%{public}d leave", pid);
+    }));
 }
 
 void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
