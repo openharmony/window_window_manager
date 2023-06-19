@@ -16,11 +16,11 @@
 #include "session_manager/include/extension_session_manager.h"
 
 #include <ability_manager_client.h>
+#include <session_info.h>
 #include <start_options.h>
 #include <want.h>
 
 #include "session/host/include/extension_session.h"
-#include "session_info.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -37,17 +37,11 @@ ExtensionSessionManager::ExtensionSessionManager()
 
 WSError ExtensionSessionManager::Init()
 {
-    WLOGFI("extension session manager init.");
-    if (mmsSchedulerInit_) {
-        WLOGFW("msgScheduler_ already init!");
+    if (taskScheduler_) {
         return WSError::WS_DO_NOTHING;
     }
-    msgScheduler_ = std::make_shared<MessageScheduler>(EXTENSION_SESSION_MANAGER_THREAD);
-    if (!msgScheduler_) {
-        WLOGFE("new msgScheduler_ failed!");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    mmsSchedulerInit_ = true;
+    WLOGFI("Initialize extension session manager.");
+    taskScheduler_ = std::make_shared<TaskScheduler>(EXTENSION_SESSION_MANAGER_THREAD);
     return WSError::WS_OK;
 }
 
@@ -72,10 +66,6 @@ sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sp
 
 sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const SessionInfo& sessionInfo)
 {
-    if (!mmsSchedulerInit_) {
-        WLOGFE("msgScheduler_ not init!");
-        return nullptr;
-    }
     auto task = [this, sessionInfo]() {
         sptr<ExtensionSession> extensionSession = new (std::nothrow) ExtensionSession(sessionInfo);
         if (extensionSession == nullptr) {
@@ -83,16 +73,13 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
             return extensionSession;
         }
         auto persistentId = extensionSession->GetPersistentId();
-        WLOGFI("create session persistentId: %{public}" PRIu64
-            ", bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
-            persistentId, sessionInfo.bundleName_.c_str(),
-            sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());
-        extensionMap_.insert({ persistentId, extensionSession });
+        WLOGFI("create session persistentId: %{public}" PRIu64 ", bundleName: %{public}s, abilityName: %{public}s",
+            persistentId, sessionInfo.bundleName_.c_str(), sessionInfo.abilityName_.c_str());
+        extensionSessionMap_.insert({ persistentId, extensionSession });
         return extensionSession;
     };
-    // once init but msgScheduler_ is nullptr
-    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
-    return msgScheduler_->PostSyncTask(task);
+    WS_CHECK_NULL_RETURN(taskScheduler_, task);
+    return taskScheduler_->PostSyncTask(task);
 }
 
 WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession)
@@ -106,7 +93,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
         }
         auto persistentId = extSession->GetPersistentId();
         WLOGFI("active persistentId: %{public}" PRIu64 "", persistentId);
-        if (extensionMap_.count(persistentId) == 0) {
+        if (extensionSessionMap_.count(persistentId) == 0) {
             WLOGFE("session is invalid with %{public}" PRIu64 "", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
@@ -123,8 +110,8 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
             AppExecFwk::ExtensionAbilityType::UI);
         return WSError::WS_OK;
     };
-    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
-    msgScheduler_->PostAsyncTask(task);
+    WS_CHECK_NULL_RETURN(taskScheduler_, task);
+    taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
 
@@ -141,7 +128,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
         WLOGFI("background session persistentId: %{public}" PRIu64 "", persistentId);
         extSession->SetActive(false);
         extSession->Background();
-        if (extensionMap_.count(persistentId) == 0) {
+        if (extensionSessionMap_.count(persistentId) == 0) {
             WLOGFE("session is invalid with %{public}" PRIu64 "", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
@@ -152,8 +139,8 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
         AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIExtensionAbility(extSessionInfo);
         return WSError::WS_OK;
     };
-    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
-    msgScheduler_->PostAsyncTask(task);
+    WS_CHECK_NULL_RETURN(taskScheduler_, task);
+    taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
 
@@ -169,7 +156,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
         auto persistentId = extSession->GetPersistentId();
         WLOGFI("destroy session persistentId: %{public}" PRIu64 "", persistentId);
         extSession->Disconnect();
-        if (extensionMap_.count(persistentId) == 0) {
+        if (extensionSessionMap_.count(persistentId) == 0) {
             WLOGFE("session is invalid with %{public}" PRIu64 "", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
@@ -178,11 +165,11 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
             return WSError::WS_ERROR_NULLPTR;
         }
         AAFwk::AbilityManagerClient::GetInstance()->TerminateUIExtensionAbility(extSessionInfo);
-        extensionMap_.erase(persistentId);
+        extensionSessionMap_.erase(persistentId);
         return WSError::WS_OK;
     };
-    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
-    msgScheduler_->PostAsyncTask(task);
+    WS_CHECK_NULL_RETURN(taskScheduler_, task);
+    taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

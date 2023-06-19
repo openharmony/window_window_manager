@@ -21,11 +21,11 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSession" };
 }
+
 ExtensionSession::ExtensionSession(const SessionInfo& info) : Session(info)
 {
-    WLOGFD("Init extensionSession : %{public}s", info.bundleName_.c_str());
-    GeneratePersistentId(isExtension, info);
+    WLOGFD("Create extension session, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s.",
+        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
+    GeneratePersistentId(true, info);
 }
-
-ExtensionSession::~ExtensionSession() {}
 } // namespace OHOS::Rosen
