@@ -86,7 +86,7 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
     //         WLOGFI("WLD << Receive anr notice pid:%{public}d", pid);
     //         // AAFwk::AbilityManagerClient::GetInstance()->SendANRProcessID(pid);
     //     }
-    ));
+    // ));
 }
 
 void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
