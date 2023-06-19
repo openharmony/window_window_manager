@@ -30,6 +30,29 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     specificCallback_ = specificCallback;
 }
 
+WSError SceneSession::Foreground()
+{
+    WSError ret = Session::Foreground();
+    if (ret != WSError::WS_OK) {
+        return ret;
+    }
+    UpdateCameraFloatWindowStatus(true);
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::Background()
+{
+    WSError ret = Session::Background();
+    if (ret != WSError::WS_OK) {
+        return ret;
+    }
+    if (scenePersistence_ != nullptr && GetSnapshot() != nullptr) {
+        scenePersistence_->SaveSnapshot(GetSnapshot());
+    }
+    UpdateCameraFloatWindowStatus(false);
+    return WSError::WS_OK;
+}
+
 WSError SceneSession::OnSessionEvent(SessionEvent event)
 {
     WLOGFD("SceneSession OnSessionEvent event: %{public}d", static_cast<int32_t>(event));
@@ -96,6 +119,13 @@ WSError SceneSession::DestroyAndDisconnectSpecificSession(const uint64_t& persis
         ret = specificCallback_->onDestroy_(persistentId);
     }
     return ret;
+}
+
+void SceneSession::UpdateCameraFloatWindowStatus(bool isShowing)
+{
+    if (GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA && specificCallback_ != nullptr) {
+        specificCallback_->onCameraFloatSessionChange_(property_->GetAccessTokenId(), isShowing);
+    }
 }
 
 WSError SceneSession::Background()

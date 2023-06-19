@@ -33,6 +33,8 @@
 #include "session/host/include/scene_session.h"
 #include "window_manager_hilog.h"
 #include "wm_math.h"
+#include "zidl/window_manager_agent_interface.h"
+#include "session_manager_agent_controller.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -369,6 +371,8 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         this, std::placeholders::_1, std::placeholders::_2);
     specificCallback->onDestroy_ = std::bind(&SceneSessionManager::DestroyAndDisconnectSpecificSession,
         this, std::placeholders::_1);
+    specificCallback->onCameraFloatSessionChange_ = std::bind(&SceneSessionManager::UpdateCameraFloatWindowStatus,
+        this, std::placeholders::_1, std::placeholders::_2);
     auto task = [this, sessionInfo, specificCallback, property]() {
         WLOGFI("sessionInfo: bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
             sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());
@@ -812,7 +816,7 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
             return WSError::WS_ERROR_NULLPTR;
         }
         auto callSessionInfo = callerSession->GetSessionInfo();
-        WLOGFI("get callerSession state:%{public}d, uiAbilityId:%{public}" PRIu64 "", 
+        WLOGFI("get callerSession state:%{public}d, uiAbilityId:%{public}" PRIu64 "",
             callSessionInfo.callState_, callSessionInfo.uiAbilityId_);
         abilitySessionInfo->uiAbilityId = callSessionInfo.uiAbilityId_;
 
@@ -841,4 +845,44 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
     AAFwk::AbilityManagerClient::GetInstance()->StartSpecifiedAbilityBySCB(want);
 }
 
+WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("register windowManager agent permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    if ((windowManagerAgent == nullptr) || (windowManagerAgent->AsObject() == nullptr)) {
+        WLOGFE("windowManagerAgent is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto task = [this, &windowManagerAgent, type]() {
+        return SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type);
+    };
+    msgScheduler_->PostSyncTask(task);
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("unregister windowManager agent permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    if ((windowManagerAgent == nullptr) || (windowManagerAgent->AsObject() == nullptr)) {
+        WLOGFE("windowManagerAgent is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto task = [this, &windowManagerAgent, type]() {
+        return SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type);
+    };
+    msgScheduler_->PostSyncTask(task);
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)
+{
+    SessionManagerAgentController::GetInstance().UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
+}
 } // namespace OHOS::Rosen

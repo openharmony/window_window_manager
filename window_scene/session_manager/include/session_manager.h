@@ -46,12 +46,13 @@ public:
     sptr<IScreenSessionManager> GetScreenSessionManagerProxy();
     WMError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
     sptr<ScreenLockManagerInterface> GetScreenLockManagerProxy();
+    sptr<ISceneSessionManager> GetSceneSessionManagerProxy();
+    void UpdateCameraFloatWindowStatus(bool isShowing);
 
 private:
     void ConnectToService();
     void InitSceneSessionManagerProxy();
     void InitSessionManagerServiceProxy();
-    void GetSceneSessionManagerProxy();
 
     void InitScreenSessionManagerProxy();
     void InitScreenLockManagerProxy();

@@ -31,17 +31,22 @@ ohos_shared_library("scenesessionmanager_napi") {
 
   configs = [ ":scene_session_manager_napi_config" ]
 
+  deps = [
+    "${window_base_path}/window_scene/session:scene_session",
+    "${window_base_path}/window_scene/session_manager:scene_session_manager",
+    "${window_base_path}/wm:libwm",
+  ]
+
   external_deps = [
     "ability_base:configuration",
     "ability_runtime:ability_context_native",
     "ability_runtime:runtime",
     "c_utils:utils",
+    "graphic_standard:window_animation",
     "hilog_native:libhilog",
+    "input:libmmi-client",
     "ipc:ipc_single",
     "napi:ace_napi",
-    "window_manager:libwm",
-    "window_manager:scene_session",
-    "window_manager:scene_session_manager",
   ]
 
   relative_install_dir = "module"
