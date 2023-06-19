@@ -16,21 +16,17 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_MANAGER_H
 #define OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_MANAGER_H
 
-#include <event_handler.h>
-#include <map>
-#include <mutex>
-#include <refbase.h>
-#include <unistd.h>
+#include "common/include/task_scheduler.h"
 #include "interfaces/include/ws_common.h"
-#include "session_manager_base.h"
 #include "wm_single_instance.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
-}
+} // namespace OHOS::AAFwk
+
 namespace OHOS::Rosen {
 class ExtensionSession;
-class ExtensionSessionManager : public SessionManagerBase {
+class ExtensionSessionManager {
 WM_DECLARE_SINGLE_INSTANCE_BASE(ExtensionSessionManager)
 public:
     /**
@@ -46,7 +42,6 @@ public:
      * @return sptr<ExtensionSession> return session if create extension session success;Otherwise, return nullptr
      */
     sptr<ExtensionSession> RequestExtensionSession(const SessionInfo& sessionInfo);
-
     /**
      * @brief active extension session
      *
@@ -54,7 +49,6 @@ public:
      * @return WSError
      */
     WSError RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession);
-
     /**
      * @brief background extension session
      *
@@ -62,7 +56,6 @@ public:
      * @return WSError
      */
     WSError RequestExtensionSessionBackground(const sptr<ExtensionSession>& extensionSession);
-
     /**
      * @brief destroy extension session
      *
@@ -70,13 +63,16 @@ public:
      * @return WSError
      */
     WSError RequestExtensionSessionDestruction(const sptr<ExtensionSession>& extensionSession);
-protected:
-    sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<ExtensionSession>& extensionSession);
+
+private:
     ExtensionSessionManager();
     virtual ~ExtensionSessionManager() = default;
 
-private:
-    std::map<uint64_t, sptr<ExtensionSession>> extensionMap_;
+    sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<ExtensionSession>& extensionSession);
+
+    std::shared_ptr<TaskScheduler> taskScheduler_;
+    std::map<uint64_t, sptr<ExtensionSession>> extensionSessionMap_;
 };
 } // namespace OHOS::Rosen
+
 #endif // OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_MANAGER_H
