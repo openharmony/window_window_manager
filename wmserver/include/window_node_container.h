@@ -183,6 +183,8 @@ private:
     void JudgeToReportSystemBarInfo(const sptr<WindowNode> window,
         const std::unordered_map<WindowType, SystemBarProperty>& systemBarPropInfo) const;
 
+    bool IsWindowFollowParent(WindowType type);
+
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     uint32_t brightnessWindow_ = INVALID_WINDOW_ID;
     uint32_t zOrder_ { 0 };

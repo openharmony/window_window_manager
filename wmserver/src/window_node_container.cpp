@@ -747,6 +747,15 @@ void WindowNodeContainer::OpenInputMethodSyncTransaction()
     WLOGD("OpenInputMethodSyncTransaction");
 }
 
+bool WindowNodeContainer::IsWindowFollowParent(WindowType type)
+{
+    auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
+    if (!isPhone) {
+        return false;
+    }
+    return WindowHelper::IsWindowFollowParent(type);
+}
+
 bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId displayId, DisplayId parentDisplayId,
     WindowUpdateType type, bool animationPlayed)
 {
@@ -761,15 +770,28 @@ bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId disp
         "isMultiDisplay: %{public}d, animationPlayed: %{public}d",
         node->GetWindowId(), displayId, parentDisplayId, isMultiDisplay, animationPlayed);
     auto updateRSTreeFunc = [&]() {
-        auto& dms = DisplayManagerServiceInner::GetInstance();
         if (!node->currentVisibility_) {
             WLOGI("id: %{public}d invisible, no need update RS tree", node->GetWindowId());
             return;
         }
+
+        if (IsWindowFollowParent(node->GetWindowType())) {
+            auto& parentNode = node->parent_;
+            if (parentNode != nullptr && parentNode->surfaceNode_ != nullptr &&
+                node->surfaceNode_ != nullptr) {
+                node->surfaceNode_->SetTranslateX(node->GetWindowRect().posX_ - parentNode->GetWindowRect().posX_);
+                node->surfaceNode_->SetTranslateY(node->GetWindowRect().posY_ - parentNode->GetWindowRect().posY_);
+                node->surfaceNode_->SetVisible(true);
+                parentNode->surfaceNode_->AddChild(node->surfaceNode_, -1);
+                WLOGFD("Add surfaceNode to parent surfaceNode succeed.");
+                return;
+            }
+        }
+        auto& dms = DisplayManagerServiceInner::GetInstance();
         auto& surfaceNode = node->leashWinSurfaceNode_ != nullptr ? node->leashWinSurfaceNode_ : node->surfaceNode_;
         dms.UpdateRSTree(displayId, parentDisplayId, surfaceNode, true, isMultiDisplay);
         for (auto& child : node->children_) {
-            if (child->currentVisibility_) {
+            if (child->currentVisibility_ && !IsWindowFollowParent(child->GetWindowType())) {
                 dms.UpdateRSTree(displayId, parentDisplayId, child->surfaceNode_, true, isMultiDisplay);
             }
         }
@@ -816,11 +838,21 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
         "parentDisplayId: %{public}" PRIu64", animationPlayed: %{public}d",
         node->GetWindowId(), displayId, isMultiDisplay, parentDisplayId, animationPlayed);
     auto updateRSTreeFunc = [&]() {
+        if (IsWindowFollowParent(node->GetWindowType())) {
+            auto& parentNode = node->parent_;
+            if (parentNode != nullptr && parentNode->surfaceNode_ != nullptr &&
+                node->surfaceNode_ != nullptr) {
+                node->surfaceNode_->SetVisible(false);
+                parentNode->surfaceNode_->RemoveChild(node->surfaceNode_);
+                WLOGFD("Remove surfaceNode to parent surfaceNode succeed.");
+                return;
+            }
+        }
         auto& dms = DisplayManagerServiceInner::GetInstance();
         auto& surfaceNode = node->leashWinSurfaceNode_ != nullptr ? node->leashWinSurfaceNode_ : node->surfaceNode_;
         dms.UpdateRSTree(displayId, parentDisplayId, surfaceNode, false, isMultiDisplay);
         for (auto& child : node->children_) {
-            if (child->currentVisibility_) {
+            if (child->currentVisibility_ && !IsWindowFollowParent(child->GetWindowType())) {
                 dms.UpdateRSTree(displayId, parentDisplayId, child->surfaceNode_, false, isMultiDisplay);
             }
         }
