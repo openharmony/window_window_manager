@@ -54,16 +54,19 @@ void EventStage::SaveANREvent(int32_t persistentId, int32_t id, int64_t time, in
 
 std::vector<int32_t> EventStage::GetTimerIds(int32_t persistentId)
 {
+    // 感觉问题出在这个函数上，在ANR的回调中已经将 timerId 置为 -1 了，那么在MarkProcessed 中就会删不掉对应的timerId
     CALL_DEBUG_ENTER;
-    std::vector<int32_t> timers;
-    if (events_.find(persistentId) != events_.end()) {
-        for (auto &item : events_[persistentId]) {
-            timers.push_back(item.timerId);
-            item.timerId = -1;
-        }
-        return timers;
+    auto iter = events_.find(persistentId);
+    if (iter == events_.end()) {
+        WLOGFE("Current events have no event for persistentId:%{public}d", persistentId);
+        return {};
     }
-    WLOGFD("Current persistentId:%{public}d have no event", persistentId);
+    std::vector<int32_t> timers;
+    for (auto &item : iter->second) {
+        timers.push_back(item.timerId);
+        item.timerId = -1;
+    }
+    events_[iter->first] = iter->second;
     return timers;
 }
 
