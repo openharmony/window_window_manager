@@ -544,6 +544,14 @@ public:
         return true;
     }
 
+    static bool IsWindowFollowParent(WindowType type)
+    {
+        if (type == WindowType::WINDOW_TYPE_DIALOG || WindowHelper::IsSubWindow(type)) {
+            return true;
+        }
+        return false;
+    }
+
 private:
     WindowHelper() = default;
     ~WindowHelper() = default;
