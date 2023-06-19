@@ -1332,7 +1332,11 @@ void WindowNodeContainer::NotifyIfSystemBarRegionChanged(DisplayId displayId) co
 void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& node,
     const AvoidControlType avoidType) const
 {
-    if (node->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+    WindowGravity windowGravity;
+    uint32_t percent;
+    node->GetWindowGravity(windowGravity, percent);
+    if (node->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
+        windowGravity == WindowGravity::WINDOW_GRAVITY_FLOAT) {
         WLOGFD("windowType: %{public}u", node->GetWindowType());
         return;
     }
