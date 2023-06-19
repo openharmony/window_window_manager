@@ -20,7 +20,24 @@
 
 namespace OHOS {
 namespace Rosen {
-
+union WSColorParam {
+#if BIG_ENDIANNESS
+    struct {
+        uint8_t alpha;
+        uint8_t red;
+        uint8_t green;
+        uint8_t blue;
+    } argb;
+#else
+    struct {
+        uint8_t blue;
+        uint8_t green;
+        uint8_t red;
+        uint8_t alpha;
+    } argb;
+#endif
+    uint32_t value;
+};
 class WindowSceneSessionImpl : public WindowSessionImpl {
 public:
     explicit WindowSceneSessionImpl(const sptr<WindowOption>& option);
@@ -45,6 +62,12 @@ public:
     WmErrorCode RaiseToAppTop() override;
     WSError HandleBackEvent() override;
 
+    virtual WMError SetBackgroundColor(const std::string& color) override;
+    WMError SetBackgroundColor(uint32_t color);
+    virtual WMError SetTransparent(bool isTransparent) override;
+
+    uint32_t GetBackgroundColor() const;
+    virtual bool IsTransparent() const override;
 protected:
     void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();
