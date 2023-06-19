@@ -756,8 +756,8 @@ WSError WindowSessionImpl::NotifyDestroy()
 {
     auto dialogDeathRecipientListener = GetListeners<IDialogDeathRecipientListener>();
     for (auto& listener : dialogDeathRecipientListener) {
-        if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnDialogDeathRecipient();
+        if (listener != nullptr) {
+            listener->OnDialogDeathRecipient();
         }
     }
     // destroy dialog in client
@@ -769,8 +769,8 @@ void WindowSessionImpl::NotifyTouchDialogTarget()
 {
     auto dialogTargetTouchListener = GetListeners<IDialogTargetTouchListener>();
     for (auto& listener : dialogTargetTouchListener) {
-        if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnDialogTargetTouch();
+        if (listener != nullptr) {
+            listener->OnDialogTargetTouch();
         }
     }
 }
@@ -779,8 +779,8 @@ void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reaso
 {
     auto windowChangeListeners = GetListeners<IWindowChangeListener>();
     for (auto& listener : windowChangeListeners) {
-        if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnSizeChange(rect, reason);
+        if (listener != nullptr) {
+            listener->OnSizeChange(rect, reason);
         }
     }
 }
