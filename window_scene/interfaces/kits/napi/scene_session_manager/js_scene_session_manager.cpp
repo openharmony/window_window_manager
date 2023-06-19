@@ -105,8 +105,7 @@ void JsSceneSessionManager::OnCreateSpecificSession(const sptr<SceneSession>& sc
             NativeValue* jsSceneSessionObj = JsSceneSession::Create(*eng, specificSession);
             if (jsSceneSessionObj == nullptr) {
                 WLOGFE("[NAPI]jsSceneSessionObj is nullptr");
-                engine.Throw(CreateJsError(
-                    engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
+                return;
             }
             NativeValue* argv[] = { jsSceneSessionObj };
             engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));

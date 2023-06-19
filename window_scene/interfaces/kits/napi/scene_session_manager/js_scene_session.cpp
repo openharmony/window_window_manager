@@ -19,8 +19,6 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
 
-#include "js_scene_utils.h"
-
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
@@ -52,13 +50,22 @@ NativeValue* JsSceneSession::Create(NativeEngine& engine, const sptr<SceneSessio
     object->SetNativePointer(jsSceneSession.release(), JsSceneSession::Finalizer, nullptr);
     object->SetProperty("persistentId", CreateJsValue(engine, static_cast<int64_t>(session->GetPersistentId())));
     object->SetProperty("parentId", CreateJsValue(engine, static_cast<int64_t>(session->GetParentPersistentId())));
-    object->SetProperty("type", CreateJsValue(engine, static_cast<uint32_t>(
-        WINDOW_TYPE_TO_API_TYPE_MAP.at(session->GetWindowType()))));
-
+    object->SetProperty("type", CreateJsValue(engine, static_cast<uint32_t>(GetApiType(session->GetWindowType()))));
     const char* moduleName = "JsSceneSession";
     BindNativeFunction(engine, *object, "on", moduleName, JsSceneSession::RegisterCallback);
 
     return objValue;
+}
+
+WindowTypeInAPI JsSceneSession::GetApiType(WindowType type)
+{
+    auto iter = WINDOW_TYPE_TO_API_TYPE_MAP.find(type);
+    if (iter == WINDOW_TYPE_TO_API_TYPE_MAP.end()) {
+        WLOGFE("[NAPI]window type cannot map to api type!");
+        return WindowTypeInAPI::TYPE_END;
+    } else {
+        return iter->second;
+    }
 }
 
 JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& session)
@@ -354,8 +361,7 @@ void JsSceneSession::OnCreateSpecificSession(const sptr<SceneSession>& sceneSess
             NativeValue* jsSceneSessionObj = Create(*eng, specificSession);
             if (jsSceneSessionObj == nullptr || !jsCallBack) {
                 WLOGFE("[NAPI]jsSceneSessionObj or jsCallBack is nullptr");
-                engine.Throw(CreateJsError(
-                    engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
+                return;
             }
             WLOGFI("CreateJsSceneSessionObject success");
             NativeValue* argv[] = { jsSceneSessionObj };
@@ -380,8 +386,7 @@ void JsSceneSession::OnSessionStateChange(const SessionState& state)
         [state, jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (!jsCallBack) {
                 WLOGFE("[NAPI]jsCallBack is nullptr");
-                engine.Throw(CreateJsError(
-                    engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
+                return;
             }
             NativeValue* jsSessionStateObj = CreateJsValue(engine, state);
             NativeValue* argv[] = { jsSessionStateObj };
@@ -406,8 +411,7 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect)
         [rect, jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (!jsCallBack) {
                 WLOGFE("[NAPI]jsCallBack is nullptr");
-                engine.Throw(CreateJsError(
-                    engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
+                return;
             }
             NativeValue* jsSessionStateObj = CreateJsSessionRect(engine, rect);
             NativeValue* argv[] = { jsSessionStateObj };
@@ -432,8 +436,7 @@ void JsSceneSession::OnRaiseToTop()
         [jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (!jsCallBack) {
                 WLOGFE("[NAPI]jsCallBack is nullptr");
-                engine.Throw(CreateJsError(
-                    engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
+                return;
             }
             NativeValue* argv[] = {};
             engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, 0);
@@ -455,6 +458,10 @@ void JsSceneSession::OnSessionFocusableChange(bool isFocusable)
     auto jsCallBack = iter->second;
     auto complete = std::make_unique<AsyncTask::CompleteCallback>(
         [isFocusable, jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (!jsCallBack) {
+                WLOGFE("[NAPI]jsCallBack is nullptr");
+                return;
+            }
             NativeValue* jsSessionFocusableObj = CreateJsValue(engine, isFocusable);
             NativeValue* argv[] = { jsSessionFocusableObj };
             engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
@@ -476,6 +483,10 @@ void JsSceneSession::OnClick()
     auto jsCallBack = iter->second;
     auto complete = std::make_unique<AsyncTask::CompleteCallback>(
         [jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (!jsCallBack) {
+                WLOGFE("[NAPI]jsCallBack is nullptr");
+                return;
+            }
             NativeValue* argv[] = { };
             engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, 0);
         });
@@ -504,6 +515,7 @@ void JsSceneSession::PendingSessionActivation(const SessionInfo& info)
             NativeValue* jsSessionInfo = CreateJsSessionInfo(engine, info);
             if (jsSessionInfo == nullptr) {
                 WLOGFE("[NAPI]this target session info is nullptr");
+                return;
             }
             NativeValue* argv[] = { jsSessionInfo };
             engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
@@ -525,6 +537,10 @@ void JsSceneSession::OnBackPressed()
     auto jsCallBack = iter->second;
     auto complete = std::make_unique<AsyncTask::CompleteCallback>(
         [jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (!jsCallBack) {
+                WLOGFE("[NAPI]jsCallBack is nullptr");
+                return;
+            }
             engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), {}, 0);
         });
 
@@ -552,6 +568,7 @@ void JsSceneSession::TerminateSession(const SessionInfo& info)
             NativeValue* jsSessionInfo = CreateJsSessionInfo(engine, info);
             if (jsSessionInfo == nullptr) {
                 WLOGFE("[NAPI]this target session info is nullptr");
+                return;
             }
             NativeValue* argv[] = { jsSessionInfo };
             engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
@@ -581,6 +598,7 @@ void JsSceneSession::OnSessionException(const SessionInfo& info)
             NativeValue* jsSessionInfo = CreateJsSessionInfo(engine, info);
             if (jsSessionInfo == nullptr) {
                 WLOGFE("[NAPI]this target session info is nullptr");
+                return;
             }
             NativeValue* argv[] = { jsSessionInfo };
             engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
