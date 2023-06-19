@@ -127,13 +127,4 @@ void SceneSession::UpdateCameraFloatWindowStatus(bool isShowing)
         specificCallback_->onCameraFloatSessionChange_(property_->GetAccessTokenId(), isShowing);
     }
 }
-
-WSError SceneSession::Background()
-{
-    Session::Background();
-    if (scenePersistence_ != nullptr && GetSnapshot() != nullptr) {
-        scenePersistence_->SaveSnapshot(GetSnapshot());
-    }
-    return WSError::WS_OK;
-}
 } // namespace OHOS::Rosen
