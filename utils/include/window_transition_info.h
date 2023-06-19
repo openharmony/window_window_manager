@@ -23,6 +23,10 @@
 #include "wm_common.h"
 #include "wm_common_inner.h"
 
+namespace OHOS::AAFwk {
+struct AbilityTransitionInfo;
+} // namespace OHOS::AAFwk
+
 namespace OHOS {
 namespace Rosen {
 enum class TransitionReason : uint32_t {
