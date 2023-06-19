@@ -22,8 +22,10 @@
 #include <js_extension_context.h>
 #include <js_runtime_utils.h>
 
+#include "ability_manager_client.h"
 #include "js_window.h"
 #include "js_window_extension_context.h"
+#include "ui_extension_window_command.h"
 #include "window_extension_connection.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
@@ -233,6 +235,9 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
         return nullptr;
     }
     WLOGFD("Create stub successfully!");
+    auto context = GetContext();
+    AAFwk::AbilityManagerClient::GetInstance()->ScheduleCommandAbilityWindowDone(
+        context->GetToken(), sessionInfo_, AAFwk::WIN_CMD_FOREGROUND, AAFwk::ABILITY_CMD_FOREGROUND);
     return stub_->AsObject();
 }
 
@@ -250,6 +255,9 @@ void JsWindowExtension::OnDisconnect(const AAFwk::Want& want)
         WLOGI("Destroy window.");
     }
     WLOGI("called.");
+    auto context = GetContext();
+    AAFwk::AbilityManagerClient::GetInstance()->ScheduleCommandAbilityWindowDone(
+        context->GetToken(), sessionInfo_, AAFwk::WIN_CMD_DESTROY, AAFwk::ABILITY_CMD_DESTROY);
 }
 
 void JsWindowExtension::OnStart(const AAFwk::Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
@@ -257,6 +265,7 @@ void JsWindowExtension::OnStart(const AAFwk::Want& want, sptr<AAFwk::SessionInfo
     WLOGI("OnStart");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WindowExtension OnStart %s-%s",
         want.GetElement().GetAbilityName().c_str(), want.GetElement().GetAbilityName().c_str());
+    sessionInfo_ = sessionInfo;
     Extension::OnStart(want);
 
     AbilityRuntime::ElementName elementName = want.GetElement();
