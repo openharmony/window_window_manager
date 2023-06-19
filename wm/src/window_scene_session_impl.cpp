@@ -50,7 +50,8 @@ bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
         type == WindowType::WINDOW_TYPE_FLOAT_CAMERA || type == WindowType::WINDOW_TYPE_DIALOG ||
         type == WindowType::WINDOW_TYPE_FLOAT || type == WindowType::WINDOW_TYPE_SCREENSHOT ||
         type == WindowType::WINDOW_TYPE_VOICE_INTERACTION || type == WindowType::WINDOW_TYPE_POINTER ||
-        type == WindowType::WINDOW_TYPE_TOAST)) {
+        type == WindowType::WINDOW_TYPE_TOAST || type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT)) {
+        WLOGFW("Invalid type: %{public}u", GetType());
         return false;
     }
     return true;
@@ -98,7 +99,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     sptr<IWindowEventChannel> eventChannel(channel);
     uint64_t persistentId = INVALID_SESSION_ID;
     sptr<Rosen::ISession> session;
-    if (WindowHelper::IsSubWindow(property_->GetWindowType())) { // sub window
+    if (WindowHelper::IsSubWindow(GetType())) { // sub window
         auto parentSession = FindParentSessionByParentId(property_->GetParentId());
         if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
             return WMError::WM_ERROR_NULLPTR;
@@ -130,7 +131,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         return WMError::WM_ERROR_NULLPTR;
     }
     WLOGFI("CreateAndConnectSpecificSession [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u]",
-        property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType());
+        property_->GetWindowName().c_str(), property_->GetPersistentId(), GetType());
     return WMError::WM_OK;
 }
 
@@ -150,12 +151,12 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     if (hostSession_) { // main window
         ret = Connect();
     } else { // system or sub window
-        if (WindowHelper::IsSystemWindow(property_->GetWindowType())) {
+        if (WindowHelper::IsSystemWindow(GetType())) {
             // Not valid system window type for session should return WMError::WM_OK;
-            if (!IsValidSystemWindowType(property_->GetWindowType())) {
+            if (!IsValidSystemWindowType(GetType())) {
                 return WMError::WM_OK;
             }
-        } else if (!WindowHelper::IsSubWindow(property_->GetWindowType())) {
+        } else if (!WindowHelper::IsSubWindow(GetType())) {
             return WMError::WM_ERROR_INVALID_TYPE;
         }
         ret = CreateAndConnectSpecificSession();
@@ -164,7 +165,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         windowSessionMap_.insert(std::make_pair(property_->GetWindowName(),
             std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
         state_ = WindowState::STATE_CREATED;
-        if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        if (WindowHelper::IsMainWindow(GetType())) {
             windowMode_ = windowSystemConfig_.defaultWindowMode_;
         }
     }
@@ -209,14 +210,14 @@ void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(uint64_t parentPersis
 WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
     WLOGFI("Window Show [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u], reason:%{public}u state:%{pubic}u",
-        property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType(), reason, state_);
+        property_->GetWindowName().c_str(), property_->GetPersistentId(), GetType(), reason, state_);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (state_ == WindowState::STATE_SHOWN) {
         WLOGFD("window session is alreay shown [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u]",
-            property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType());
+            property_->GetWindowName().c_str(), property_->GetPersistentId(), GetType());
         return WMError::WM_OK;
     }
     if (hostSession_ == nullptr) {
@@ -248,7 +249,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     }
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         WLOGFD("window session is alreay hidden [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u]",
-            property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType());
+            property_->GetWindowName().c_str(), property_->GetPersistentId(), GetType());
         return WMError::WM_OK;
     }
     WSError ret = WSError::WS_OK;
@@ -385,8 +386,8 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
     const auto& rect = property_->GetWindowRect();
     Rect newRect = { x, y, rect.width_, rect.height_ }; // must keep x/y
     property_->SetRequestRect(newRect);
-    if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
-        WLOGFD("Window is hidden or created! id: %{public}" PRIu64 ", oriPos: [%{public}d, %{public}d, "
+    if (state_ == WindowState::STATE_HIDDEN || state_ < WindowState::STATE_CREATED) {
+        WLOGFD("Window is hidden or not created! id: %{public}" PRIu64 ", oriPos: [%{public}d, %{public}d, "
             "movePos: [%{public}d, %{public}d]", property_->GetPersistentId(), rect.posX_, rect.posY_, x, y);
         return WMError::WM_OK;
     }
@@ -449,9 +450,10 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
     const auto& rect = property_->GetWindowRect();
     Rect newRect = { rect.posX_, rect.posY_, width, height }; // must keep w/h
     property_->SetRequestRect(newRect);
-    if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
-        WLOGFD("Window is hidden or created! id: %{public}" PRIu64 ", oriSize: [%{public}u, %{public}u, "
-            "newSize [%{public}u, %{public}u]", property_->GetPersistentId(), rect.width_, rect.height_, width, height);
+    if (state_ == WindowState::STATE_HIDDEN || state_ < WindowState::STATE_CREATED) {
+        WLOGFD("Window is hidden or not created! id: %{public}" PRIu64 ", oriSize: [%{public}u, %{public}u, "
+            "newSize [%{public}u, %{public}u], state: %{public}u", property_->GetPersistentId(), rect.width_,
+            rect.height_, width, height, static_cast<uint32_t>(state_));
         return WMError::WM_OK;
     }
 
@@ -484,7 +486,7 @@ WmErrorCode WindowSceneSessionImpl::RaiseToAppTop()
 
 bool WindowSceneSessionImpl::IsDecorEnable() const
 {
-    bool enable = WindowHelper::IsMainWindow(property_->GetWindowType()) &&
+    bool enable = WindowHelper::IsMainWindow(GetType()) &&
         windowSystemConfig_.isSystemDecorEnable_ &&
         WindowHelper::IsWindowModeSupported(windowSystemConfig_.decorModeSupportInfo_, GetMode());
     WLOGFD("get decor enable %{public}d", enable);
@@ -498,7 +500,7 @@ WMError WindowSceneSessionImpl::Minimize()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+    if (WindowHelper::IsMainWindow(GetType())) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
     }
     return WMError::WM_OK;
@@ -511,7 +513,7 @@ WMError WindowSceneSessionImpl::Maximize()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+    if (WindowHelper::IsMainWindow(GetType())) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetFullScreen(true);
         windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
@@ -533,7 +535,7 @@ WMError WindowSceneSessionImpl::Recover()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+    if (WindowHelper::IsMainWindow(GetType())) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_RECOVER);
         windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
         UpdateDecorEnable(true);
@@ -548,7 +550,7 @@ void WindowSceneSessionImpl::StartMove()
         WLOGFE("session is invalid");
         return;
     }
-    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+    if (WindowHelper::IsMainWindow(GetType())) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     }
     return;
@@ -561,7 +563,7 @@ WMError WindowSceneSessionImpl::Close()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+    if (WindowHelper::IsMainWindow(GetType())) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_CLOSE);
     }
 
@@ -574,7 +576,7 @@ WMError WindowSceneSessionImpl::DisableAppWindowDecor()
         WLOGFE("disable app window decor permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
-    if (!WindowHelper::IsMainWindow(property_->GetWindowType())) {
+    if (!WindowHelper::IsMainWindow(GetType())) {
         WLOGFE("window decoration is invalid on sub window");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
