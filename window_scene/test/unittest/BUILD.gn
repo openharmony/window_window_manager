@@ -30,6 +30,11 @@ ohos_unittest("ws_session_test") {
   sources = [ "session_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_base:want",
+  ]
 }
 
 ohos_unittest("ws_screen_session_manager_test") {
