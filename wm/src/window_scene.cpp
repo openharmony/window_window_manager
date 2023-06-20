@@ -52,7 +52,9 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
     }
     option->SetDisplayId(displayId);
     option->SetWindowTag(WindowTag::MAIN_WINDOW);
-
+    if (context != nullptr) {
+        option->SetBundleName(context->GetBundleName());
+    }
     mainWindow_ = SingletonContainer::Get<StaticCall>().CreateWindow(
         GenerateMainWindowName(context), option, context);
     if (mainWindow_ == nullptr) {
@@ -74,6 +76,9 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
     }
     option->SetDisplayId(displayId);
     option->SetWindowName(GenerateMainWindowName(context));
+    if (context != nullptr) {
+        option->SetBundleName(context->GetBundleName());
+    }
     mainWindow_ = SingletonContainer::Get<StaticCall>().CreateWindow(option, context, iSession);
     if (mainWindow_ == nullptr) {
         WLOGFE("mainWindow is null after creat Window!");
