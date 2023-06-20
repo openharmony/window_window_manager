@@ -767,10 +767,17 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     }
 }
 
-void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
 {
     if (uiContent_) {
-        uiContent_->ProcessKeyEvent(keyEvent);
+        isConsumed = uiContent_->ProcessKeyEvent(keyEvent);
+    }
+}
+
+void WindowSessionImpl::NotifyFocusActiveEvent(bool isFocusActive)
+{
+    if (uiContent_) {
+        uiContent_->SetIsFocusActive(isFocusActive);
     }
 }
 

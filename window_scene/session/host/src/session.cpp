@@ -496,6 +496,24 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
     return windowEventChannel_->TransferKeyEvent(keyEvent);
 }
 
+WSError Session::TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+{
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed);
+}
+
+WSError Session::TransferFocusActiveEvent(bool isFocusActive)
+{
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferFocusActiveEvent(isFocusActive);
+}
+
 std::shared_ptr<Media::PixelMap> Session::GetSnapshot() const
 {
     return snapshot_;
