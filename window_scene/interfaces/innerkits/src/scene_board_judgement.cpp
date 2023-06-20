@@ -21,10 +21,21 @@ bool SceneBoardJudgement::IsSceneBoardEnabled()
     static bool isSceneBoardEnabled = false;
     static bool initialized = false;
     if (!initialized) {
-        InitWithConfigFile(isSceneBoardEnabled);
+        InitWithConfigFile("/etc/windowscene.config", isSceneBoardEnabled);
         initialized = true;
     }
     return isSceneBoardEnabled;
+}
+
+bool SceneBoardJudgement::IsWindowSessionEnabled()
+{
+    static bool isWindowSessionEnabled = false;
+    static bool windowSessionInitialized = false;
+    if (!windowSessionInitialized) {
+        InitWithConfigFile("/etc/windowsession.config", isWindowSessionEnabled);
+        windowSessionInitialized = true;
+    }
+    return isWindowSessionEnabled;
 }
 
 std::ifstream& SceneBoardJudgement::SafeGetLine(std::ifstream& configFile, std::string& line)
@@ -36,12 +47,12 @@ std::ifstream& SceneBoardJudgement::SafeGetLine(std::ifstream& configFile, std::
     return configFile;
 }
 
-void SceneBoardJudgement::InitWithConfigFile(bool& isSceneBoardEnabled)
+void SceneBoardJudgement::InitWithConfigFile(const char* filePath, bool& enabled)
 {
-    std::ifstream configFile("/etc/windowscene.config");
+    std::ifstream configFile(filePath);
     std::string line;
     if (configFile.is_open() && SafeGetLine(configFile, line) && line == "ENABLED") {
-        isSceneBoardEnabled = true;
+        enabled = true;
     }
     configFile.close();
 }

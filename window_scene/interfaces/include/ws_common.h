@@ -17,7 +17,6 @@
 #define OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
 
 #include <inttypes.h>
-#include <fstream>
 #include <map>
 #include <string>
 #include <want.h>
@@ -25,9 +24,7 @@
 #include "iremote_broker.h"
 
 namespace OHOS::Rosen {
-namespace {
 constexpr uint64_t INVALID_SESSION_ID = 0;
-}
 
 enum class WSError : int32_t {
     WS_OK = 0,
@@ -80,7 +77,7 @@ const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP {
 };
 
 enum class SessionState : uint32_t {
-    STATE_DISCONNECT = 0, // Invalid state
+    STATE_DISCONNECT = 0,
     STATE_CONNECT,
     STATE_FOREGROUND,
     STATE_ACTIVE,
@@ -102,8 +99,8 @@ struct SessionInfo {
     int32_t errorCode;
     std::string errorReason;
 
-    uint64_t persistentId_ = 0;
-    uint64_t callerPersistentId_ = 0;
+    uint64_t persistentId_ = INVALID_SESSION_ID;
+    uint64_t callerPersistentId_ = INVALID_SESSION_ID;
     uint32_t callState_ = 0;
     int64_t uiAbilityId_ = 0;
 };
