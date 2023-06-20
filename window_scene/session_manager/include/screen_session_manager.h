@@ -16,7 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCREEN_SESSION_MANAGER_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCREEN_SESSION_MANAGER_H
 
-#include "common/include/message_scheduler.h"
+#include "common/include/task_scheduler.h"
 #include "session/screen/include/screen_session.h"
 #include "zidl/screen_session_manager_stub.h"
 #include "client_agent_container.h"
@@ -180,7 +180,7 @@ private:
     };
 
     RSInterfaces& rsInterface_;
-    std::shared_ptr<MessageScheduler> msgScheduler_ = nullptr;
+    std::shared_ptr<TaskScheduler> taskScheduler_ = nullptr;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
 

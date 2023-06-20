@@ -41,6 +41,7 @@ public:
     void SetParentId(uint32_t parentId);
     void SetPersistentId(uint64_t persistentId);
     void SetParentPersistentId(uint64_t persistentId);
+    void SetAccessTokenId(uint32_t accessTokenId);
 
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
@@ -53,6 +54,7 @@ public:
     uint64_t GetDisplayId() const;
     uint64_t GetPersistentId() const;
     uint64_t GetParentPersistentId() const;
+    uint32_t GetAccessTokenId() const;
 
     bool Marshalling(Parcel& parcel) const override;
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
@@ -68,6 +70,7 @@ private:
     uint32_t parentId_ = INVALID_SESSION_ID; // parentId of sceneSession, which is low 32 bite of parentPersistentId_
     uint64_t persistentId_ = INVALID_SESSION_ID;
     uint64_t parentPersistentId_ = INVALID_SESSION_ID;
+    uint32_t accessTokenId_ = INVALID_SESSION_ID;
 };
 
 struct SystemSessionConfig : public Parcelable {

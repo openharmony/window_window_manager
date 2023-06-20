@@ -17,9 +17,11 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_H
 
 #include <mutex>
-#include <refbase.h>
+#include <set>
 #include <string>
 #include <vector>
+
+#include <refbase.h>
 
 #include "interfaces/include/ws_common.h"
 #include "session/container/include/zidl/session_stage_interface.h"
@@ -72,7 +74,7 @@ public:
     WindowType GetWindowType() const;
 
     void SetWindowSessionProperty(const sptr<WindowSessionProperty>& property);
-    const sptr<WindowSessionProperty>& GetWindowSessionProperty() const;
+    sptr<WindowSessionProperty> GetWindowSessionProperty() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason);
@@ -124,8 +126,6 @@ public:
     std::vector<sptr<Session>> GetDialogVector() const;
     void NotifyTouchDialogTarget();
     WSError NotifyDestroy();
-    static std::atomic<uint32_t> sessionId_;
-    static std::set<uint32_t> persistIdSet_;
 
     void SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func);
     void SetClickListener(const NotifyClickFunc& func);
@@ -136,6 +136,7 @@ public:
     bool GetFocusable() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
+
 protected:
     void GeneratePersistentId(const bool isExtension, const SessionInfo& sessionInfo);
     void UpdateSessionState(SessionState state);
@@ -144,7 +145,7 @@ protected:
 
     bool isActive_ = false;
     bool isFocused_ = false;
-    WSRect winRect_ {0, 0, 0, 0};
+    WSRect winRect_;
     sptr<ISessionStage> sessionStage_;
     SessionInfo sessionInfo_;
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
@@ -156,7 +157,6 @@ protected:
     NotifySessionExceptionFunc sessionExceptionFunc_;
     sptr<WindowSessionProperty> property_ = nullptr;
     SystemSessionConfig systemConfig_;
-    const bool isExtension = true;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
 
 private:
@@ -186,6 +186,8 @@ private:
     std::shared_ptr<Media::PixelMap> Snapshot();
 
     uint64_t persistentId_ = INVALID_SESSION_ID;
+    static std::atomic<uint32_t> sessionId_;
+    static std::set<uint32_t> persistIdSet_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_ = nullptr;
     SessionState state_ = SessionState::STATE_DISCONNECT;
 
@@ -194,8 +196,10 @@ private:
     sptr<IWindowEventChannel> windowEventChannel_ = nullptr;
 
     std::shared_ptr<Media::PixelMap> snapshot_;
+
     std::vector<sptr<Session>> dialogVec_;
     sptr<Session> parentSession_;
 };
 } // namespace OHOS::Rosen
+
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_H

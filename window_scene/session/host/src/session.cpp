@@ -22,12 +22,13 @@
 #include "anr_manager.h"
 #include "foundation/ability/ability_base/interfaces/kits/native/want/include/want.h"
 #include "interfaces/include/ws_common.h"
-#include "surface_capture_future.h"
-#include <transaction/rs_interfaces.h>
 #include <pointer_event.h>
+#include <surface_capture_future.h>
+#include <transaction/rs_interfaces.h>
 #include <ui/rs_surface_node.h>
+#include <want.h>
+
 #include "window_manager_hilog.h"
-#include "surface_capture_future.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -66,7 +67,7 @@ void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& proper
     property_ = property;
 }
 
-const sptr<WindowSessionProperty>& Session::GetWindowSessionProperty() const
+sptr<WindowSessionProperty> Session::GetWindowSessionProperty() const
 {
     return property_;
 }
@@ -727,9 +728,9 @@ WSError Session::MarkProcessed(int32_t eventId)
     return WSError::WS_OK;
 }
 
-void Session::GeneratePersistentId(const bool isExtension, const SessionInfo &sessionInfo)
+void Session::GeneratePersistentId(bool isExtension, const SessionInfo& sessionInfo)
 {
-    if (sessionInfo.persistentId_ != 0) {
+    if (sessionInfo.persistentId_ != INVALID_SESSION_ID) {
         persistIdSet_.insert(sessionInfo.persistentId_);
         persistentId_ = static_cast<uint64_t>(sessionInfo.persistentId_);
         return;
