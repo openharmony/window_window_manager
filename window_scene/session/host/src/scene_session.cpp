@@ -141,4 +141,44 @@ void SceneSession::UpdateCameraFloatWindowStatus(bool isShowing)
         specificCallback_->onCameraFloatSessionChange_(property_->GetAccessTokenId(), isShowing);
     }
 }
+
+WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty)
+{
+    property_->SetSystemBarProperty(type, systemBarProperty);
+    WLOGFD("SceneSession SetSystemBarProperty status:%{public}d", static_cast<int32_t>(type));
+    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSystemBarPropertyChange_) {
+        sessionChangeCallback_->OnSystemBarPropertyChange_(systemBarProperty);
+    }
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::OnNeedAvoid(bool status)
+{
+    WLOGFD("SceneSession OnNeedAvoid status:%{public}d", static_cast<int32_t>(status));
+    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnNeedAvoid_) {
+        sessionChangeCallback_->OnNeedAvoid_(status);
+    }
+    return WSError::WS_OK;
+}
+
+AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
+{
+    AvoidArea avoidArea;
+    WLOGFD("GetAvoidAreaByType avoidAreaType:%{public}u", type);
+    switch (type) {
+        case AvoidAreaType::TYPE_SYSTEM : {
+            return avoidArea;
+        }
+        case AvoidAreaType::TYPE_KEYBOARD : {
+            return avoidArea;
+        }
+        case AvoidAreaType::TYPE_CUTOUT : {
+            return avoidArea;
+        }
+        default : {
+            WLOGFD("cannot find avoidAreaType: %{public}u", type);
+            return avoidArea;
+        }
+    }
+}
 } // namespace OHOS::Rosen
