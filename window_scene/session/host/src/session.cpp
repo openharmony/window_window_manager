@@ -38,15 +38,6 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Sessio
 std::atomic<uint32_t> Session::sessionId_(INVALID_SESSION_ID);
 std::set<uint32_t> Session::persistIdSet_;
 
-Session::Session(const SessionInfo& info) : sessionInfo_(info)
-{
-}
-
-Session::~Session()
-{
-    WLOGD("~Session");
-}
-
 uint64_t Session::GetPersistentId() const
 {
     return persistentId_;
@@ -56,7 +47,6 @@ uint64_t Session::GetParentPersistentId() const
 {
     CALL_DEBUG_ENTER;
     if (property_ != nullptr) {
-        WLOGFD("GetParentPersistentId, id:%{public}" PRIu64"", property_->GetParentPersistentId());
         return property_->GetParentPersistentId();
     }
     return INVALID_SESSION_ID;
@@ -512,6 +502,10 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     if (!isFocused_ && GetFocusable() && action == MMI::PointerEvent::POINTER_ACTION_DOWN) {
         NotifyClick();
     }
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     if (WSError ret = windowEventChannel_->TransferPointerEvent(pointerEvent); ret != WSError::WS_OK) {
         WLOGFE("TransferPointer failed");
         return ret;
@@ -534,11 +528,11 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
-    WLOGFD("Session TransferKeyEvent");
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
+    WLOGD("TransferKeyEvent, id: %{public}" PRIu64, persistentId_);
     return windowEventChannel_->TransferKeyEvent(keyEvent);
 }
 
@@ -621,6 +615,7 @@ void Session::SetSessionRect(const WSRect& rect)
 {
     winRect_ = rect;
 }
+
 WSRect Session::GetSessionRect() const
 {
     return winRect_;
@@ -689,7 +684,6 @@ sptr<WindowSessionProperty> Session::GetSessionProperty() const
 WindowType Session::GetWindowType() const
 {
     if (property_ != nullptr) {
-        WLOGFD("Type:%{public}" PRIu32 "", static_cast<uint32_t>(property_->GetWindowType()));
         return property_->GetWindowType();
     }
     return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
