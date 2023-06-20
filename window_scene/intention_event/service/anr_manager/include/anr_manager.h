@@ -40,7 +40,7 @@ public:
     void OnSessionLost(int32_t persistentId);
     void SetApplicationPid(int32_t persistentId, int32_t applicationPid);
     int32_t GetPidByPersistentId(int32_t persistentId);
-    void SetAnrCallback(std::function<void(int32_t)> anrCallback);
+    void SetAnrObserver(std::function<void(int32_t)> anrObserver);
 private:
     void RemoveTimers(int32_t persistentId);
     void RemovePersistentId(int32_t persistentId);
@@ -48,7 +48,7 @@ private:
     int32_t anrTimerCount_ { 0 };
     std::unordered_map<int32_t, int32_t> applicationMap_;
     std::mutex mtx_;
-    std::function<void(int32_t)> anrCallback_;
+    std::function<void(int32_t)> anrObserver_;
     EventStage eventStage_;
 };
 #define ANRMgr ::OHOS::DelayedSingleton<ANRManager>::GetInstance()

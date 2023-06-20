@@ -84,6 +84,7 @@ ohos_static_library("libwm_static") {
   external_deps = [
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
+    "ability_runtime:app_manager",
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "eventhandler:libeventhandler",
@@ -192,6 +193,7 @@ ohos_shared_library("libwm") {
   external_deps = [
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
+    "ability_runtime:app_manager",
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "eventhandler:libeventhandler",
