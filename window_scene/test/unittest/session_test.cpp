@@ -35,6 +35,8 @@ class TestWindowEventChannel : public IWindowEventChannel {
 public:
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    WSError TransferFocusActiveEvent(bool isFocusActive) override;
+    WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
 
     sptr<IRemoteObject> AsObject() override
     {
@@ -48,6 +50,17 @@ WSError TestWindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyE
 }
 
 WSError TestWindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    return WSError::WS_OK;
+}
+
+WSError TestWindowEventChannel::TransferFocusActiveEvent(bool isFocusActive)
+{
+    return WSError::WS_OK;
+}
+
+WSError TestWindowEventChannel::TransferKeyEventForConsumed(
+    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
 {
     return WSError::WS_OK;
 }
