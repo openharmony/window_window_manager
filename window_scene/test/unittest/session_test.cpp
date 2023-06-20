@@ -21,6 +21,7 @@
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "session_info.h"
+#include "session/host/include/scene_session.h"
 
 using namespace testing;
 using namespace testing::ext;
