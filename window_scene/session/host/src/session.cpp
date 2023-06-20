@@ -15,16 +15,15 @@
 
 #include "session/host/include/session.h"
 
-#include "foundation/ability/ability_base/interfaces/kits/native/want/include/want.h"
 #include "interfaces/include/ws_common.h"
-#include "surface_capture_future.h"
-#include <transaction/rs_interfaces.h>
 #include <pointer_event.h>
+#include <surface_capture_future.h>
+#include <transaction/rs_interfaces.h>
 #include <ui/rs_surface_node.h>
 #include <ipc_skeleton.h>
+#include <want.h>
 
 #include "window_manager_hilog.h"
-#include "surface_capture_future.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -62,7 +61,7 @@ void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& proper
     property_ = property;
 }
 
-const sptr<WindowSessionProperty>& Session::GetWindowSessionProperty() const
+sptr<WindowSessionProperty> Session::GetWindowSessionProperty() const
 {
     return property_;
 }
@@ -599,6 +598,10 @@ WSError Session::UpdateFocus(bool isFocused)
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (isFocused_ == isFocused) {
+        WLOGFD("Session focus do not change: [%{public}d]", isFocused);
+        return WSError::WS_DO_NOTHING;
+    }
     isFocused_ = isFocused;
     sessionStage_->UpdateFocus(isFocused);
 
@@ -706,9 +709,9 @@ WSError Session::ProcessBackEvent()
     return sessionStage_->HandleBackEvent();
 }
 
-void Session::GeneratePersistentId(const bool isExtension, const SessionInfo &sessionInfo)
+void Session::GeneratePersistentId(bool isExtension, const SessionInfo& sessionInfo)
 {
-    if (sessionInfo.persistentId_ != 0) {
+    if (sessionInfo.persistentId_ != INVALID_SESSION_ID) {
         persistIdSet_.insert(sessionInfo.persistentId_);
         persistentId_ = static_cast<uint64_t>(sessionInfo.persistentId_);
         return;

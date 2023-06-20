@@ -42,18 +42,9 @@ bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
     }
     switch (state) {
         case DisplayState::ON: {
-            bool isKeyguardDrawn;
             {
                 displayState_ = state;
-                isKeyguardDrawn = isKeyguardDrawn_;
             }
-            if (!isKeyguardDrawn) {
-                std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
-                displayStateChangeListener_(DISPLAY_ID_INVALID, nullptr,
-                    emptyMap, DisplayStateChangeType::BEFORE_UNLOCK);
-            }
-            ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
-                EventStatus::BEGIN);
             break;
         }
         case DisplayState::OFF: {
@@ -86,11 +77,11 @@ void SessionDisplayPowerController::NotifyDisplayEvent(DisplayEvent event)
         displayStateChangeListener_(DISPLAY_ID_INVALID, nullptr, emptyMap, DisplayStateChangeType::BEFORE_UNLOCK);
         ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DESKTOP_READY,
             EventStatus::BEGIN);
-        isKeyguardDrawn_ = false;
         return;
     }
     if (event == DisplayEvent::KEYGUARD_DRAWN) {
-        isKeyguardDrawn_ = true;
+        ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
+            EventStatus::BEGIN);
     }
 }
 }

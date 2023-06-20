@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "session/host/include/scene_session.h"
 
 #include "window_manager_hilog.h"
@@ -24,7 +25,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneS
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : Session(info)
 {
-    GeneratePersistentId(!isExtension, info);
+    GeneratePersistentId(false, info);
     scenePersistence_ = new ScenePersistence(info, GetPersistentId());
     specificCallback_ = specificCallback;
 }
@@ -94,7 +95,7 @@ WSError SceneSession::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
     WLOGFI("CreateAndConnectSpecificSession id: %{public}" PRIu64 "", GetPersistentId());
     sptr<SceneSession> sceneSession;
     if (specificCallback_ != nullptr) {
-        sceneSession = specificCallback_->onCreate_(sessionInfo_);
+        sceneSession = specificCallback_->onCreate_(sessionInfo_, property);
     }
     if (sceneSession == nullptr) {
         return WSError::WS_ERROR_NULLPTR;

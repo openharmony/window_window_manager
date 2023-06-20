@@ -21,7 +21,7 @@
 
 namespace OHOS::Rosen {
 class SceneSession;
-using SpecificSessionCreateCallback = std::function<sptr<SceneSession>(const SessionInfo& info)>;
+using SpecificSessionCreateCallback = std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
 using SpecificSessionDestroyCallback = std::function<WSError(const uint64_t& persistentId)>;
 using CameraFloatSessionChangeCallback = std::function<void(uint32_t accessTokenId, bool isShowing)>;
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;

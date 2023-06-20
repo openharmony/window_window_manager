@@ -16,18 +16,13 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_H
 
-#include "interfaces/include/ws_common.h"
-#include "session/container/include/zidl/session_stage_interface.h"
 #include "session/host/include/session.h"
-#include "session/host/include/zidl/session_stub.h"
 
 namespace OHOS::Rosen {
 class ExtensionSession : public Session {
 public:
     ExtensionSession(const SessionInfo& info);
-    ~ExtensionSession();
-
-private:
+    ~ExtensionSession() = default;
 };
 } // namespace OHOS::Rosen
 
