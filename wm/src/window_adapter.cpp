@@ -22,6 +22,8 @@
 #include "window_manager_proxy.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
+#include "scene_board_judgement.h"
+#include "session_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -32,9 +34,16 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowAdapter)
 
 #define INIT_PROXY_CHECK_RETURN(ret) \
     do { \
-        if (!InitWMSProxy()) { \
-            WLOGFE("InitWMSProxy failed!"); \
-            return ret; \
+        if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) { \
+            if (!InitSSMProxy()) { \
+                WLOGFE("InitSSMProxy failed!"); \
+                return ret; \
+            } \
+        } else { \
+            if (!InitWMSProxy()) { \
+                WLOGFE("InitWMSProxy failed!"); \
+                return ret; \
+            } \
         } \
     } while (false)
 
@@ -179,6 +188,31 @@ bool WindowAdapter::InitWMSProxy()
             WLOGFE("Failed to create death Recipient ptr WMSDeathRecipient");
             return false;
         }
+        if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(wmsDeath_)) {
+            WLOGFE("Failed to add death recipient");
+            return false;
+        }
+        isProxyValid_ = true;
+    }
+    return true;
+}
+
+bool WindowAdapter::InitSSMProxy()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!isProxyValid_) {
+        windowManagerServiceProxy_ = SessionManager::GetInstance().GetSceneSessionManagerProxy();
+        if ((!windowManagerServiceProxy_) || (!windowManagerServiceProxy_->AsObject())) {
+            WLOGFE("Failed to get system scene session manager services");
+            return false;
+        }
+
+        wmsDeath_ = new (std::nothrow) WMSDeathRecipient();
+        if (!wmsDeath_) {
+            WLOGFE("Failed to create death Recipient ptr WMSDeathRecipient");
+            return false;
+        }
+        sptr<IRemoteObject> remoteObject = windowManagerServiceProxy_->AsObject();
         if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(wmsDeath_)) {
             WLOGFE("Failed to add death recipient");
             return false;
