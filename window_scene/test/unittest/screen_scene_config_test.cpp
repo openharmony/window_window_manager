@@ -29,8 +29,8 @@ class ScreenSceneConfigTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    virtual void SetUp() override;
-    virtual void TearDown() override;
+    void SetUp() override;
+    void TearDown() override;
 };
 
 void ScreenSceneConfigTest::SetUpTestCase()
@@ -153,7 +153,7 @@ HWTEST_F(ScreenSceneConfigTest, ReadIntNumbersConfigInfo, Function | SmallTest |
         if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("dpi")) ||
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("defaultDeviceRotationOffset")) ||
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("cutoutArea")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("curvedScreenBoundary")) ) {
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("curvedScreenBoundary"))) {
             ScreenSceneConfig::ReadIntNumbersConfigInfo(curNodePtr);
             readCount++;
             continue;
