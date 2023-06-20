@@ -17,7 +17,6 @@
 #define FOUNDATION_WINDOW_SCENE_SESSION_MANAGER_SERVICE_INTERFACE_H
 
 #include <iremote_broker.h>
-#include "iremote_object.h"
 
 namespace OHOS::Rosen {
 class ISessionManagerService : public IRemoteBroker {

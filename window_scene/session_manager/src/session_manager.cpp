@@ -15,8 +15,8 @@
 
 #include "session_manager.h"
 
-#include <unistd.h>
 #include <condition_variable>
+#include <unistd.h>
 
 #include "zidl/screen_session_manager_proxy.h"
 
@@ -119,6 +119,15 @@ sptr<IScreenSessionManager> SessionManager::GetScreenSessionManagerProxy()
     return screenSessionManagerProxy_;
 }
 
+sptr<ISceneSessionManager> SessionManager::GetSceneSessionManagerProxy()
+{
+    WLOGFD("InitSceneSessionManagerProxy");
+    Init();
+    InitSessionManagerServiceProxy();
+    InitSceneSessionManagerProxy();
+    return sceneSessionManagerProxy_;
+}
+
 void SessionManager::ConnectToService()
 {
     if (!abilityConnection_) {
@@ -156,23 +165,6 @@ void SessionManager::InitSessionManagerServiceProxy()
     }
 }
 
-void SessionManager::GetSceneSessionManagerProxy()
-{
-    if (sceneSessionManagerProxy_) {
-        return;
-    }
-    if (!sessionManagerServiceProxy_) {
-        WLOGFE("sessionManagerServiceProxy_ is nullptr");
-        return;
-    }
-
-    sptr<IRemoteObject> remoteObject = sessionManagerServiceProxy_->GetSceneSessionManager();
-    sceneSessionManagerProxy_ = iface_cast<ISceneSessionManager>(remoteObject);
-    if (!sceneSessionManagerProxy_) {
-        WLOGFW("Get scene session manager proxy failed, nullptr");
-    }
-}
-
 void SessionManager::InitScreenSessionManagerProxy()
 {
     if (screenSessionManagerProxy_) {
@@ -195,10 +187,23 @@ void SessionManager::InitScreenSessionManagerProxy()
 
 void SessionManager::InitSceneSessionManagerProxy()
 {
-    WLOGFD("InitSceneSessionManagerProxy");
-    Init();
-    InitSessionManagerServiceProxy();
-    GetSceneSessionManagerProxy();
+    if (sceneSessionManagerProxy_) {
+        return;
+    }
+    if (!sessionManagerServiceProxy_) {
+        WLOGFE("sessionManagerServiceProxy_ is nullptr");
+        return;
+    }
+
+    sptr<IRemoteObject> remoteObject = sessionManagerServiceProxy_->GetSceneSessionManager();
+    if (!remoteObject) {
+        WLOGFW("Get scene session manager proxy failed, scene session manager service is null");
+        return;
+    }
+    sceneSessionManagerProxy_ = iface_cast<ISceneSessionManager>(remoteObject);
+    if (!sceneSessionManagerProxy_) {
+        WLOGFW("Get scene session manager proxy failed, nullptr");
+    }
 }
 
 void SessionManager::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -206,7 +211,7 @@ void SessionManager::CreateAndConnectSpecificSession(const sptr<ISessionStage>& 
     sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session)
 {
     WLOGFD("CreateAndConnectSpecificSession");
-    InitSceneSessionManagerProxy();
+    GetSceneSessionManagerProxy();
     if (!sceneSessionManagerProxy_) {
         WLOGFE("sceneSessionManagerProxy_ is nullptr");
         return;
@@ -218,7 +223,7 @@ void SessionManager::CreateAndConnectSpecificSession(const sptr<ISessionStage>& 
 void SessionManager::DestroyAndDisconnectSpecificSession(const uint64_t& persistentId)
 {
     WLOGFD("DestroyAndDisconnectSpecificSession");
-    InitSceneSessionManagerProxy();
+    GetSceneSessionManagerProxy();
     if (!sceneSessionManagerProxy_) {
         WLOGFE("sceneSessionManagerProxy_ is nullptr");
         return;

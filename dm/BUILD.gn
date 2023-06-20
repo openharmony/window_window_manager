@@ -59,6 +59,7 @@ ohos_static_library("libdm_static") {
   ]
 
   external_deps = [
+    "ability_runtime:ability_manager",
     "c_utils:utils",
     "graphic_standard:librender_service_client",
     "hilog_native:libhilog",
@@ -98,6 +99,7 @@ ohos_shared_library("libdm") {
   ]
 
   external_deps = [
+    "ability_runtime:ability_manager",
     "c_utils:utils",
     "graphic_standard:librender_service_client",
     "hilog_native:libhilog",

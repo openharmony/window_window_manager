@@ -20,24 +20,6 @@
 
 namespace OHOS {
 namespace Rosen {
-union WSColorParam {
-#if BIG_ENDIANNESS
-    struct {
-        uint8_t alpha;
-        uint8_t red;
-        uint8_t green;
-        uint8_t blue;
-    } argb;
-#else
-    struct {
-        uint8_t blue;
-        uint8_t green;
-        uint8_t red;
-        uint8_t alpha;
-    } argb;
-#endif
-    uint32_t value;
-};
 class WindowSceneSessionImpl : public WindowSessionImpl {
 public:
     explicit WindowSceneSessionImpl(const sptr<WindowOption>& option);
@@ -62,21 +44,22 @@ public:
     WmErrorCode RaiseToAppTop() override;
     WSError HandleBackEvent() override;
 
-    virtual WMError SetBackgroundColor(const std::string& color) override;
-    WMError SetBackgroundColor(uint32_t color);
-    virtual WMError SetTransparent(bool isTransparent) override;
-
-    uint32_t GetBackgroundColor() const;
-    virtual bool IsTransparent() const override;
+    WMError SetBackgroundColor(const std::string& color) override;
+    WMError SetTransparent(bool isTransparent) override;
+    
+    bool IsTransparent() const override;
 protected:
     void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();
     sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
     sptr<WindowSessionImpl> FindMainWindowWithContext();
     void UpdateSubWindowStateAndNotify(uint64_t parentPersistentId, const WindowState& newState);
+    void LimitCameraFloatWindowMininumSize(uint32_t& width, uint32_t& height);
 
 private:
     bool IsValidSystemWindowType(const WindowType& type);
+    WMError SetBackgroundColor(uint32_t color);
+    uint32_t GetBackgroundColor() const;
 };
 } // namespace Rosen
 } // namespace OHOS

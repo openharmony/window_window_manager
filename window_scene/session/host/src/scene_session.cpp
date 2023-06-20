@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "session/host/include/scene_session.h"
 
 #include "window_manager_hilog.h"
@@ -24,9 +25,32 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneS
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : Session(info)
 {
-    GeneratePersistentId(!isExtension, info);
+    GeneratePersistentId(false, info);
     scenePersistence_ = new ScenePersistence(info, GetPersistentId());
     specificCallback_ = specificCallback;
+}
+
+WSError SceneSession::Foreground()
+{
+    WSError ret = Session::Foreground();
+    if (ret != WSError::WS_OK) {
+        return ret;
+    }
+    UpdateCameraFloatWindowStatus(true);
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::Background()
+{
+    WSError ret = Session::Background();
+    if (ret != WSError::WS_OK) {
+        return ret;
+    }
+    if (scenePersistence_ != nullptr && GetSnapshot() != nullptr) {
+        scenePersistence_->SaveSnapshot(GetSnapshot());
+    }
+    UpdateCameraFloatWindowStatus(false);
+    return WSError::WS_OK;
 }
 
 WSError SceneSession::OnSessionEvent(SessionEvent event)
@@ -97,12 +121,10 @@ WSError SceneSession::DestroyAndDisconnectSpecificSession(const uint64_t& persis
     return ret;
 }
 
-WSError SceneSession::Background()
+void SceneSession::UpdateCameraFloatWindowStatus(bool isShowing)
 {
-    Session::Background();
-    if (scenePersistence_ != nullptr && GetSnapshot() != nullptr) {
-        scenePersistence_->SaveSnapshot(GetSnapshot());
+    if (GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA && specificCallback_ != nullptr) {
+        specificCallback_->onCameraFloatSessionChange_(property_->GetAccessTokenId(), isShowing);
     }
-    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

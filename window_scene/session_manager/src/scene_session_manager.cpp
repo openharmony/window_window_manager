@@ -29,11 +29,12 @@
 #include <want.h>
 
 #include "color_parser.h"
-#include "common/include/message_scheduler.h"
 #include "common/include/permission.h"
 #include "session/host/include/scene_session.h"
 #include "window_manager_hilog.h"
 #include "wm_math.h"
+#include "zidl/window_manager_agent_interface.h"
+#include "session_manager_agent_controller.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -51,7 +52,7 @@ SceneSessionManager::SceneSessionManager()
 void SceneSessionManager::Init()
 {
     WLOGFI("scene session manager init");
-    msgScheduler_ = std::make_shared<MessageScheduler>(SCENE_SESSION_MANAGER_THREAD);
+    taskScheduler_ = std::make_shared<TaskScheduler>(SCENE_SESSION_MANAGER_THREAD);
     bundleMgr_ = GetBundleManager();
     LoadWindowSceneXml();
 }
@@ -314,8 +315,8 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
         return rootSceneSession_;
     };
 
-    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
-    return msgScheduler_->PostSyncTask(task);
+    WS_CHECK_NULL_RETURN(taskScheduler_, task);
+    return taskScheduler_->PostSyncTask(task);
 }
 
 sptr<SceneSession> SceneSessionManager::GetSceneSession(uint64_t persistentId)
@@ -370,6 +371,8 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         this, std::placeholders::_1, std::placeholders::_2);
     specificCallback->onDestroy_ = std::bind(&SceneSessionManager::DestroyAndDisconnectSpecificSession,
         this, std::placeholders::_1);
+    specificCallback->onCameraFloatSessionChange_ = std::bind(&SceneSessionManager::UpdateCameraFloatWindowStatus,
+        this, std::placeholders::_1, std::placeholders::_2);
     auto task = [this, sessionInfo, specificCallback, property]() {
         WLOGFI("sessionInfo: bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
             sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());
@@ -386,8 +389,8 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         WLOGFI("create session persistentId: %{public}" PRIu64 "", persistentId);
         return sceneSession;
     };
-    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
-    return msgScheduler_->PostSyncTask(task);
+    WS_CHECK_NULL_RETURN(taskScheduler_, task);
+    return taskScheduler_->PostSyncTask(task);
 }
 
 sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<SceneSession>& scnSession)
@@ -445,8 +448,8 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         activeSessionId_ = persistentId;
         return WSError::WS_OK;
     };
-    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
-    msgScheduler_->PostAsyncTask(task);
+    WS_CHECK_NULL_RETURN(taskScheduler_, task);
+    taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
 
@@ -475,8 +478,8 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         return WSError::WS_OK;
     };
 
-    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
-    msgScheduler_->PostAsyncTask(task);
+    WS_CHECK_NULL_RETURN(taskScheduler_, task);
+    taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
 
@@ -525,8 +528,8 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         return WSError::WS_OK;
     };
 
-    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
-    msgScheduler_->PostAsyncTask(task);
+    WS_CHECK_NULL_RETURN(taskScheduler_, task);
+    taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
 
@@ -555,8 +558,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         session = sceneSession;
         return errCode;
     };
-    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
-    msgScheduler_->PostSyncTask(task);
+    WS_CHECK_NULL_RETURN(taskScheduler_, task);
+    taskScheduler_->PostSyncTask(task);
     return WSError::WS_OK;
 }
 
@@ -589,8 +592,8 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const uint64_t&
         return ret;
     };
 
-    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
-    msgScheduler_->PostSyncTask(task);
+    WS_CHECK_NULL_RETURN(taskScheduler_, task);
+    taskScheduler_->PostSyncTask(task);
     return WSError::WS_OK;
 }
 
@@ -611,8 +614,8 @@ WSError SceneSessionManager::ProcessBackEvent()
         return WSError::WS_OK;
     };
 
-    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
-    msgScheduler_->PostSyncTask(task);
+    WS_CHECK_NULL_RETURN(taskScheduler_, task);
+    taskScheduler_->PostSyncTask(task);
     return WSError::WS_OK;
 }
 
@@ -813,7 +816,7 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
             return WSError::WS_ERROR_NULLPTR;
         }
         auto callSessionInfo = callerSession->GetSessionInfo();
-        WLOGFI("get callerSession state:%{public}d, uiAbilityId:%{public}" PRIu64 "", 
+        WLOGFI("get callerSession state:%{public}d, uiAbilityId:%{public}" PRIu64 "",
             callSessionInfo.callState_, callSessionInfo.uiAbilityId_);
         abilitySessionInfo->uiAbilityId = callSessionInfo.uiAbilityId_;
 
@@ -828,8 +831,8 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
         AAFwk::AbilityManagerClient::GetInstance()->CallUIAbilityBySCB(abilitySessionInfo);
         return WSError::WS_OK;
     };
-    WS_CHECK_NULL_SCHE_RETURN(msgScheduler_, task);
-    msgScheduler_->PostAsyncTask(task);
+    WS_CHECK_NULL_RETURN(taskScheduler_, task);
+    taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
 
@@ -842,4 +845,44 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
     AAFwk::AbilityManagerClient::GetInstance()->StartSpecifiedAbilityBySCB(want);
 }
 
+WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("register windowManager agent permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    if ((windowManagerAgent == nullptr) || (windowManagerAgent->AsObject() == nullptr)) {
+        WLOGFE("windowManagerAgent is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto task = [this, &windowManagerAgent, type]() {
+        return SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type);
+    };
+    taskScheduler_->PostSyncTask(task);
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("unregister windowManager agent permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    if ((windowManagerAgent == nullptr) || (windowManagerAgent->AsObject() == nullptr)) {
+        WLOGFE("windowManagerAgent is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto task = [this, &windowManagerAgent, type]() {
+        return SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type);
+    };
+    taskScheduler_->PostSyncTask(task);
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)
+{
+    SessionManagerAgentController::GetInstance().UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
+}
 } // namespace OHOS::Rosen
