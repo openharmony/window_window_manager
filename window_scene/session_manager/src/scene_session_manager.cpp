@@ -423,7 +423,6 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         AAFwk::Want want;
         auto sessionInfo = scnSession->GetSessionInfo();
         want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
-        AAFwk::StartOptions startOptions;
         auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
         if (!scnSessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
@@ -433,11 +432,13 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
             const auto& callerSession = iter->second;
             if (callerSession != nullptr) {
                 auto callerSessionInfo = callerSession->GetSessionInfo();
-                want = *callerSessionInfo.want;
                 scnSessionInfo->want = *callerSessionInfo.want;
+                scnSessionInfo->callerToken = callerSessionInfo.callerToken_;
             }
+        } else {
+            scnSessionInfo->want = want;
         }
-        AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(want, startOptions, scnSessionInfo);
+        AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
         activeSessionId_ = persistentId;
         return WSError::WS_OK;
     };
