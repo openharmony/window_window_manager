@@ -16,8 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_ROOT_SCENE_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_ROOT_SCENE_SESSION_H
 
-#include "interfaces/include/ws_common.h"
-#include "scene_session.h"
+#include "session/host/include/scene_session.h"
 
 namespace OHOS::AbilityRuntime {
 class Context;
@@ -37,6 +36,7 @@ public:
     void SetLoadContentFunc(const LoadContentFunc& loadContentFunc);
     void LoadContent(
         const std::string& contentUrl, NativeEngine* engine, NativeValue* storage, AbilityRuntime::Context* context);
+
 private:
     LoadContentFunc loadContentFunc_;
 };

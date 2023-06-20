@@ -58,9 +58,8 @@ sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sp
     abilitySessionInfo->callerToken = sessionInfo.callerToken_;
     abilitySessionInfo->persistentId = extSession->GetPersistentId();
     if (sessionInfo.want != nullptr) {
-        AAFwk::Want* ptrWant = const_cast<AAFwk::Want*>(sessionInfo.want.GetRefPtr());
-        abilitySessionInfo->want = *ptrWant;
-    }     
+        abilitySessionInfo->want = *sessionInfo.want;
+    }
     return abilitySessionInfo;
 }
 
@@ -92,9 +91,9 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
             return WSError::WS_ERROR_NULLPTR;
         }
         auto persistentId = extSession->GetPersistentId();
-        WLOGFI("active persistentId: %{public}" PRIu64 "", persistentId);
+        WLOGFI("Activate session with persistentId: %{public}" PRIu64, persistentId);
         if (extensionSessionMap_.count(persistentId) == 0) {
-            WLOGFE("session is invalid with %{public}" PRIu64 "", persistentId);
+            WLOGFE("Session is invalid!");
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         AAFwk::Want want;
@@ -125,11 +124,11 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
             return WSError::WS_ERROR_NULLPTR;
         }
         auto persistentId = extSession->GetPersistentId();
-        WLOGFI("background session persistentId: %{public}" PRIu64 "", persistentId);
+        WLOGFI("Background session with persistentId: %{public}" PRIu64, persistentId);
         extSession->SetActive(false);
         extSession->Background();
         if (extensionSessionMap_.count(persistentId) == 0) {
-            WLOGFE("session is invalid with %{public}" PRIu64 "", persistentId);
+            WLOGFE("Session is invalid!");
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         auto extSessionInfo = SetAbilitySessionInfo(extSession);
@@ -154,10 +153,10 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
             return WSError::WS_ERROR_NULLPTR;
         }
         auto persistentId = extSession->GetPersistentId();
-        WLOGFI("destroy session persistentId: %{public}" PRIu64 "", persistentId);
+        WLOGFI("Destroy session with persistentId: %{public}" PRIu64, persistentId);
         extSession->Disconnect();
         if (extensionSessionMap_.count(persistentId) == 0) {
-            WLOGFE("session is invalid with %{public}" PRIu64 "", persistentId);
+            WLOGFE("Session is invalid!");
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         auto extSessionInfo = SetAbilitySessionInfo(extSession);

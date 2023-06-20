@@ -74,7 +74,6 @@ protected:
     virtual ~SceneSessionManager() = default;
 
 private:
-    void Init();
     void LoadWindowSceneXml();
     void ConfigWindowSceneXml();
     void ConfigWindowEffect(const WindowSceneConfig::ConfigItem& effectConfig);
