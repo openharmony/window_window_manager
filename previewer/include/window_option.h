@@ -97,6 +97,13 @@ public:
     void SetWindowName(const std::string& windowName);
 
     /**
+     * @brief Set bundle name.
+     *
+     * @param bundleName The bundle name.
+     */
+    void SetBundleName(const std::string bundleName);
+
+    /**
      * @brief Add window flag.
      *
      * @param flag The flag value added.
@@ -259,6 +266,13 @@ public:
     const std::string& GetWindowName() const;
 
     /**
+     * @brief Get bundle name.
+     *
+     * @return Return the bundle name.
+     */
+    const std::string GetBundleName() const;
+
+    /**
      * @brief Get window flags.
      *
      * @return Return the window flags.
@@ -330,6 +344,7 @@ private:
     DisplayId displayId_ { 0 };
     uint32_t parentId_ = INVALID_WINDOW_ID;
     std::string windowName_ { "" };
+    std::string bundleName_ { "" };
     uint32_t flags_ { 0 };
     PointInfo hitOffset_ { 0, 0 };
     WindowTag windowTag_;

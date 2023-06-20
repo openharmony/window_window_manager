@@ -229,6 +229,16 @@ void WindowOption::SetRequestedOrientation(Orientation orientation)
 {
     requestedOrientation_ = orientation;
 }
+
+void WindowOption::SetBundleName(const std::string bundleName)
+{
+    bundleName_ = bundleName;
+}
+
+const std::string WindowOption::GetBundleName() const
+{
+    return bundleName_;
+}
 } // namespace Rosen
 } // namespace OHOS
 
