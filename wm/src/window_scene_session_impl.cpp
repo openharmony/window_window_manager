@@ -17,6 +17,7 @@
 
 #include <parameters.h>
 
+#include "color_parser.h"
 #include "display_manager.h"
 #include "permission.h"
 #include "session/container/include/window_event_channel.h"
@@ -32,6 +33,24 @@
 
 namespace OHOS {
 namespace Rosen {
+union WSColorParam {
+#if BIG_ENDIANNESS
+    struct {
+        uint8_t alpha;
+        uint8_t red;
+        uint8_t green;
+        uint8_t blue;
+    } argb;
+#else
+    struct {
+        uint8_t blue;
+        uint8_t green;
+        uint8_t red;
+        uint8_t alpha;
+    } argb;
+#endif
+    uint32_t value;
+};
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSceneSessionImpl"};
 }
@@ -609,6 +628,71 @@ WSError WindowSceneSessionImpl::HandleBackEvent()
 WindowMode WindowSceneSessionImpl::GetMode() const
 {
     return windowMode_;
+}
+
+uint32_t WindowSceneSessionImpl::GetBackgroundColor() const
+{
+    if (uiContent_ != nullptr) {
+        return uiContent_->GetBackgroundColor();
+    }
+    WLOGD("uiContent is nullptr, windowId: %{public}u, use FA mode", GetWindowId());
+    return 0xffffffff; // means no background color been set, default color is white
+}
+
+WMError WindowSceneSessionImpl::SetBackgroundColor(const std::string& color)
+{
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    uint32_t colorValue;
+    if (ColorParser::Parse(color, colorValue)) {
+        WLOGD("SetBackgroundColor: window: %{public}s, value: [%{public}s, %{public}u]",
+            GetWindowName().c_str(), color.c_str(), colorValue);
+        return SetBackgroundColor(colorValue);
+    }
+    WLOGFE("invalid color string: %{public}s", color.c_str());
+    return WMError::WM_ERROR_INVALID_PARAM;
+}
+
+WMError WindowSceneSessionImpl::SetBackgroundColor(uint32_t color)
+{
+    // 0xff000000: ARGB style, means Opaque color.
+    // const bool isAlphaZero = !(color & 0xff000000);
+    if (uiContent_ != nullptr) {
+        uiContent_->SetBackgroundColor(color);
+        return WMError::WM_OK;
+    }
+    return WMError::WM_ERROR_INVALID_OPERATION;
+}
+
+bool WindowSceneSessionImpl::IsTransparent() const
+{
+    WSColorParam backgroundColor;
+    backgroundColor.value = GetBackgroundColor();
+    WLOGFD("color: %{public}u, alpha: %{public}u", backgroundColor.value, backgroundColor.argb.alpha);
+    return backgroundColor.argb.alpha == 0x00; // 0x00: completely transparent
+}
+
+WMError WindowSceneSessionImpl::SetTransparent(bool isTransparent)
+{
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    WSColorParam backgroundColor;
+    backgroundColor.value = GetBackgroundColor();
+    if (isTransparent) {
+        backgroundColor.argb.alpha = 0x00; // 0x00: completely transparent
+        return SetBackgroundColor(backgroundColor.value);
+    } else {
+        backgroundColor.value = GetBackgroundColor();
+        if (backgroundColor.argb.alpha == 0x00) {
+            backgroundColor.argb.alpha = 0xff; // 0xff: completely opaque
+            return SetBackgroundColor(backgroundColor.value);
+        }
+    }
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS
