@@ -203,7 +203,6 @@ void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(uint64_t parentPersis
             }
         }
     }
-    return;
 }
 
 WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
@@ -611,4 +610,3 @@ WindowMode WindowSceneSessionImpl::GetMode() const
 }
 } // namespace Rosen
 } // namespace OHOS
-

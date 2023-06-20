@@ -184,50 +184,22 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
 WMError WindowSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<Rosen::ISession>& iSession)
 {
-    WLOGFD("WindowSessionImpl::Create");
-    if (!context || !iSession) {
-        WLOGFE("context or hostSession is nullptr!");
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-    WMError ret = WindowSessionCreateCheck();
-    if (ret != WMError::WM_OK) {
-        return ret;
-    }
-    hostSession_ = iSession;
-    context_ = context;
-    ret = Connect();
-    if (ret != WMError::WM_OK) {
-        WLOGFE("Window Create failed [name:%{public}s, id:%{public}" PRIu64 "], ret: %{pubic}u",
-            property_->GetWindowName().c_str(), property_->GetPersistentId(), ret);
-        return ret;
-    }
-    state_ = WindowState::STATE_CREATED;
-    windowSessionMap_.insert(std::make_pair(property_->GetWindowName(),
-        std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
-    WLOGFD("Window Create [name:%{public}s, id:%{public}" PRIu64 "], state:%{pubic}u",
-        property_->GetWindowName().c_str(), property_->GetPersistentId(), state_);
-    // ANRHDL->SetSessionStage(this); 貌似只有系统窗口才会走到这，针对普通应用，不会走这里，在MarkProcessed就会Crash
-    return ret;
+    return WMError::WM_OK;
 }
 
 WMError WindowSessionImpl::Connect()
 {
     if (hostSession_ == nullptr) {
-        WLOGFE("session is invalid");
+        WLOGFE("Session is null!");
         return WMError::WM_ERROR_NULLPTR;
     }
-    sptr<ISessionStage> iSessionStage(this); // WindowSessionImpl == sessionStage
-    sptr<WindowEventChannel> channel = new (std::nothrow) WindowEventChannel(iSessionStage);
-    if (channel == nullptr) {
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    sptr<IWindowEventChannel> eventChannel(channel);
-    WSError ret = hostSession_->Connect(iSessionStage, eventChannel, surfaceNode_, windowSystemConfig_, property_);
-    // replace WSError with WMError
-    WMError res = static_cast<WMError>(ret);
-    WLOGFI("Window Connect [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u], ret:%{public}u",
-        property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType(), res);
-    return res;
+    sptr<ISessionStage> iSessionStage(this);
+    auto windowEventChannel = new (std::nothrow) WindowEventChannel(iSessionStage);
+    sptr<IWindowEventChannel> iWindowEventChannel(windowEventChannel);
+    auto ret = hostSession_->Connect(iSessionStage, iWindowEventChannel, surfaceNode_, windowSystemConfig_, property_);
+    WLOGFI("Window Connect [name:%{public}s, id:%{public}" PRIu64 ", type:%{public}u], ret:%{public}u",
+        property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType(), ret);
+    return static_cast<WMError>(ret);
 }
 
 WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
@@ -301,7 +273,6 @@ WMError WindowSessionImpl::Destroy()
 
 WSError WindowSessionImpl::SetActive(bool active)
 {
-    // main/uiExtension window no need to inform session
     WLOGFD("active status: %{public}d", active);
     if (active) {
         NotifyAfterActive();
@@ -340,7 +311,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ == nullptr) {
-        WLOGFE("uicontent is null.");
+        WLOGFE("uiContent_ is null!");
         return;
     }
     Ace::ViewportConfig config;
@@ -412,7 +383,6 @@ WMError WindowSessionImpl::SetUIContent(const std::string& contentInfo,
 
 void WindowSessionImpl::UpdateDecorEnable(bool needNotify)
 {
-    WLOGFD("Start");
     if (needNotify) {
         if (uiContent_ != nullptr) {
             uiContent_->UpdateWindowMode(GetMode(), IsDecorEnable());
@@ -621,7 +591,7 @@ void WindowSessionImpl::ClearListenersById(uint64_t persistentId)
 
 void WindowSessionImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func)
 {
-    notifyNativefunc_ = std::move(func);
+    notifyNativeFunc_ = std::move(func);
 }
 
 void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool needNotifyUiContent)
@@ -671,8 +641,8 @@ void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
         uiContent_ = nullptr;
         uiContent->Destroy();
     }
-    if (notifyNativefunc_) {
-        notifyNativefunc_(windowName);
+    if (notifyNativeFunc_) {
+        notifyNativeFunc_(windowName);
     }
 }
 
@@ -988,6 +958,5 @@ WMError WindowSessionImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
     RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
 }
-
 } // namespace Rosen
 } // namespace OHOS

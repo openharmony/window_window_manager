@@ -20,11 +20,11 @@
 
 namespace OHOS {
 namespace Rosen {
-
 class WindowExtensionSessionImpl : public WindowSessionImpl {
 public:
     explicit WindowExtensionSessionImpl(const sptr<WindowOption>& option);
     ~WindowExtensionSessionImpl();
+
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession) override;
     WMError MoveTo(int32_t x, int32_t y) override;
@@ -32,4 +32,5 @@ public:
 };
 } // namespace Rosen
 } // namespace OHOS
+
 #endif // OHOS_ROSEN_WINDOW_EXTENSION_SESSION_IMPL_H

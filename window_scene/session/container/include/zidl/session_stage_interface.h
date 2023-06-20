@@ -25,6 +25,7 @@ class PointerEvent;
 class KeyEvent;
 class AxisEvent;
 } // namespace MMI
+
 namespace OHOS::Rosen {
 class ISessionStage : public IRemoteBroker {
 public:
