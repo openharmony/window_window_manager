@@ -57,10 +57,9 @@ public:
 
 class Session : public SessionStub, public virtual RefBase {
 public:
-    explicit Session(const SessionInfo& info);
-    ~Session();
+    explicit Session(const SessionInfo& info) : sessionInfo_(info) {}
+    virtual ~Session() = default;
 
-    void SetPersistentId(uint64_t persistentId);
     uint64_t GetPersistentId() const;
     uint64_t GetParentPersistentId() const;
     void SetSessionRect(const WSRect& rect);
