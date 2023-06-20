@@ -178,7 +178,7 @@ namespace {
  */
 HWTEST_F(WindowSceneConfigTest, AnimationConfig, Function | SmallTest | Level2)
 {
-    WLOGFE("AnimationConfig");
+    WLOGFE("AnimationConfig");
     WindowSceneConfig::config_ = ReadConfig(XML_STR);
     // SceneSessionManager::GetInstance().ConfigWindowSceneXml();
     // WindowManagerService::GetInstance().ConfigureWindowManagerService();
@@ -219,7 +219,7 @@ HWTEST_F(WindowSceneConfigTest, AnimationConfig, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSceneConfigTest, MaxAppWindowNumber, Function | SmallTest | Level2)
 {
-    WLOGFE("MaxAppWindowNumber");
+    WLOGFE("MaxAppWindowNumber");
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<maxAppWindowNumber>0</maxAppWindowNumber>"
