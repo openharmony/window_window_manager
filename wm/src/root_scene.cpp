@@ -20,7 +20,8 @@
 #include <ui_content.h>
 #include <viewport_config.h>
 
-#include "ability_manager_client.h"
+#include "app_mgr_client.h"
+#include "singleton.h"
 
 #include "anr_manager.h"
 #include "vsync_station.h"
@@ -83,12 +84,16 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
 
     RegisterInputEventListener();
     ANRMgr->Init();
-    ANRMgr->SetAnrCallback(([](int32_t pid) {
+    ANRMgr->SetAnrObserver(([](int32_t pid) {
         WLOGFI("WLD << Receive anr notice pid:%{public}d enter", pid);
-
-        if (int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->SendANRProcessID(pid); ret != 0) {
-            // 2097177 --- CHECK_PERMISSION_FAILED  权限错误 
-            WLOGFE("WLD SendANRProcessID failed, processPid:%{public}d, errcode:%{public}d", pid, ret);
+        AppExecFwk::AppFaultDataBySA faultData;
+        faultData.faultType = AppExecFwk::FaultDataType::APP_FREEZE;
+        faultData.pid = pid;
+        faultData.errorObject.name = "APPLICATION_BLOCK_INPUT";
+        faultData.errorObject.message = "";
+        faultData.errorObject.stack = "";
+        if (int32_t ret = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFaultBySA(faultData); ret != 0) {
+            WLOGFE("WLD << NotifyAppFaultBySA failed, pid:%{public}d, errcode:%{public}d", pid, ret);
         }
         WLOGFI("WLD << Receive anr notice pid:%{public}d leave", pid);
     }));

@@ -22,7 +22,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr int32_t MIN_DELAY = 1000;
+constexpr int32_t MIN_DELAY = 5000;
 constexpr int32_t MIN_INTERVAL = 50;
 constexpr int32_t MAX_INTERVAL_MS = 10000;
 constexpr int32_t MAX_TIMER_COUNT = 64;
