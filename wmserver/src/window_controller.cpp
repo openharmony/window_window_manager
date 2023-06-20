@@ -1498,7 +1498,9 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             node->GetWindowProperty()->SetPrivacyMode(isPrivacyMode);
             node->GetWindowProperty()->SetSystemPrivacyMode(isPrivacyMode);
             node->surfaceNode_->SetSecurityLayer(isPrivacyMode);
-            node->leashWinSurfaceNode_->SetSecurityLayer(isPrivacyMode);
+            if (node->leashWinSurfaceNode_ != nullptr) {
+                node->leashWinSurfaceNode_->SetSecurityLayer(isPrivacyMode);
+            }
             RSTransaction::FlushImplicitTransaction();
             UpdatePrivateStateAndNotify(node);
             break;
