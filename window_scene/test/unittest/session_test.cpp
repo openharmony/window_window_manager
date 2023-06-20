@@ -645,7 +645,8 @@ HWTEST_F(WindowSessionTest, CreateAndConnectSpecificSession2, Function | SmallTe
     auto result = scensession->CreateAndConnectSpecificSession(mockSessionStage, testWindowEventChannel, surfaceNode_,
                                                                property_, persistentId, session_);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
-    specificCallback_->onCreate_ = [&resultValue, specificCallback_](const SessionInfo &info, sptr<WindowSessionProperty> property) -> sptr<SceneSession>
+    specificCallback_->onCreate_ = [&resultValue, specificCallback_](const SessionInfo &info,
+                                                                     sptr<WindowSessionProperty> property) -> sptr<SceneSession>
     {
         sptr<SceneSession> scensessionreturn = new SceneSession(info, specificCallback_);
         EXPECT_NE(scensessionreturn, nullptr);
