@@ -15,10 +15,7 @@
 
 #include "window_extension_session_impl.h"
 
-#include "interfaces/include/ws_common.h"
 #include "window_manager_hilog.h"
-#include "window_session_impl.h"
-#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -76,4 +73,3 @@ WMError WindowExtensionSessionImpl::Resize(uint32_t width, uint32_t height)
 }
 } // namespace Rosen
 } // namespace OHOS
-
