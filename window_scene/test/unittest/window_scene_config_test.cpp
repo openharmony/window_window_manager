@@ -17,12 +17,16 @@
 #include <libxml/globals.h>
 #include <libxml/xmlstring.h>
 #include "window_scene_config.h"
+#include "window_manager_hilog.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSceneConfigTest"};
+}
 using ConfigItem = WindowSceneConfig::ConfigItem;
 const std::string XML_STR = R"(<?xml version='1.0' encoding="utf-8"?>
 <!--
@@ -174,6 +178,7 @@ namespace {
  */
 HWTEST_F(WindowSceneConfigTest, AnimationConfig, Function | SmallTest | Level2)
 {
+    WLOGFE("AnimationConfig");
     WindowSceneConfig::config_ = ReadConfig(XML_STR);
     // SceneSessionManager::GetInstance().ConfigWindowSceneXml();
     // WindowManagerService::GetInstance().ConfigureWindowManagerService();
@@ -214,13 +219,20 @@ HWTEST_F(WindowSceneConfigTest, AnimationConfig, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSceneConfigTest, MaxAppWindowNumber, Function | SmallTest | Level2)
 {
+    WLOGFE("MaxAppWindowNumber");
     std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<maxAppWindowNumber>0</maxAppWindowNumber>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    WindowSceneConfig::ConfigItem item = WindowSceneConfig::config_["maxAppWindowNumber"];
-    ASSERT_EQ((*item.intsValue_)[0], 0);
+    WindowSceneConfig::ConfigItem item;
+    std::vector<int> value;
+    item = WindowSceneConfig::config_["maxAppWindowNumber"];
+    ASSERT_EQ(false, item.IsMap());
+    ASSERT_EQ(true, item.Isints());
+    ASSERT_EQ(1, item.intsValue_->size());
+    value = *item.intsValue_;
+    ASSERT_EQ(0, value[0]);
 
     xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -228,7 +240,9 @@ HWTEST_F(WindowSceneConfigTest, MaxAppWindowNumber, Function | SmallTest | Level
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     item = WindowSceneConfig::config_["maxAppWindowNumber"];
-    ASSERT_EQ((*item.intsValue_)[0], -2);
+    ASSERT_EQ(false, item.IsMap());
+    ASSERT_EQ(true, item.Isints());
+    ASSERT_EQ(0, item.intsValue_->size());
 
     xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -236,7 +250,11 @@ HWTEST_F(WindowSceneConfigTest, MaxAppWindowNumber, Function | SmallTest | Level
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     item = WindowSceneConfig::config_["maxAppWindowNumber"];
-    ASSERT_EQ((*item.intsValue_)[0], 4);
+    ASSERT_EQ(false, item.IsMap());
+    ASSERT_EQ(true, item.Isints());
+    ASSERT_EQ(1, item.intsValue_->size());
+    value = *item.intsValue_;
+    ASSERT_EQ(4, value[0]);
 
     xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -244,7 +262,11 @@ HWTEST_F(WindowSceneConfigTest, MaxAppWindowNumber, Function | SmallTest | Level
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     item = WindowSceneConfig::config_["maxAppWindowNumber"];
-    ASSERT_EQ((*item.intsValue_)[0], 1000);
+    ASSERT_EQ(false, item.IsMap());
+    ASSERT_EQ(true, item.Isints());
+    ASSERT_EQ(1, item.intsValue_->size());
+    value = *item.intsValue_;
+    ASSERT_EQ(1000, value[0]);
 }
 
 /**
@@ -286,7 +308,13 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig02, Function | SmallTest | Level2)
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     WindowSceneConfig::ConfigItem item = WindowSceneConfig::config_["decor"]["supportedMode"];
-    ASSERT_EQ("fullscreen", item.stringValue_);
+    ASSERT_EQ(false, item.IsMap());
+    ASSERT_EQ(false, item.IsString());
+    ASSERT_EQ(true, item.IsStrings());
+    ASSERT_EQ(1, item.stringsValue_->size());
+    std::vector<std::string> supportedModes;
+    supportedModes = *item.stringsValue_;
+    ASSERT_EQ("fullscreen", supportedModes[0]);
 }
 
 /**
@@ -304,8 +332,14 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig03, Function | SmallTest | Level2)
         "</decor>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    string mode = WindowSceneConfig::config_["decor"]["supportedMode"].stringValue_;
-    ASSERT_EQ(mode, "floating");
+    WindowSceneConfig::ConfigItem item = WindowSceneConfig::config_["decor"]["supportedMode"];
+    ASSERT_EQ(false, item.IsMap());
+    ASSERT_EQ(false, item.IsString());
+    ASSERT_EQ(true, item.IsStrings());
+    ASSERT_EQ(1, item.stringsValue_->size());
+    std::vector<std::string> supportedModes;
+    supportedModes = *item.stringsValue_;
+    ASSERT_EQ("floating", supportedModes[0]);
 }
 
 /**
@@ -323,8 +357,14 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig04, Function | SmallTest | Level2)
         "</decor>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    string mode = WindowSceneConfig::config_["decor"]["supportedMode"].stringValue_;
-    ASSERT_EQ(mode, "fullscreen floating");
+    WindowSceneConfig::ConfigItem item = WindowSceneConfig::config_["decor"]["supportedMode"];
+    ASSERT_EQ(false, item.IsMap());
+    ASSERT_EQ(false, item.IsString());
+    ASSERT_EQ(true, item.IsStrings());
+    ASSERT_EQ(1, item.stringsValue_->size());
+    std::vector<std::string> supportedModes;
+    supportedModes = *item.stringsValue_;
+    ASSERT_NE("fullscreen floating", supportedModes[0]);
 }
 
 /**
