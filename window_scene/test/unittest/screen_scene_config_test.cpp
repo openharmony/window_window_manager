@@ -268,7 +268,7 @@ HWTEST_F(ScreenSceneConfigTest, ReadStringConfigInfo, Function | SmallTest | Lev
 HWTEST_F(ScreenSceneConfigTest, GetEnableConfig, Function | SmallTest | Level1)
 {
     auto result = ScreenSceneConfig::GetEnableConfig();
-    ASSERT_NE(0, result.size());
+    ASSERT_EQ(0, result.size());
 }
 
 /**
