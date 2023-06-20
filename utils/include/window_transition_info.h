@@ -19,9 +19,12 @@
 #include <string>
 
 #include "ability_info.h"
-// #include "window_info.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
+
+namespace OHOS::AAFwk {
+struct AbilityTransitionInfo;
+} // namespace OHOS::AAFwk
 
 namespace OHOS {
 namespace AAFwk {

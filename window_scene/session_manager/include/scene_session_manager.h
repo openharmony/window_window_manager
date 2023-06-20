@@ -17,10 +17,12 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_H
 
 #include "event_handler.h"
+#include "common/include/task_scheduler.h"
 #include "interfaces/include/ws_common.h"
-#include "session_manager_base.h"
+// #include "session_manager_base.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "session/host/include/root_scene_session.h"
+#include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "wm_single_instance.h"
 #include "window_scene_config.h"
 
@@ -41,11 +43,10 @@ namespace OHOS::Rosen {
 class SceneSession;
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
-class SceneSessionManager : public SceneSessionManagerStub,
-                            public SessionManagerBase {
+class SceneSessionManager : public SceneSessionManagerStub {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManager)
 public:
-    sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo);
+    sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property = nullptr);
     WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession);
@@ -70,6 +71,7 @@ public:
     WSError SetFocusedSession(uint64_t persistentId);
     uint64_t GetFocusedSession() const;
     WSError UpdateFocus(uint64_t persistentId, bool isFocused);
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
@@ -85,6 +87,7 @@ private:
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig);
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& scnSession);
     WSError DestroyDialogWithMainWindow(const sptr<SceneSession>& scnSession);
+    WSError UpdateParentSession(const sptr<SceneSession>& sceneSession, sptr<WindowSessionProperty> property);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
@@ -93,6 +96,7 @@ private:
     void GetStartPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, std::string& path, uint32_t& bgColor);
     const std::string& CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
 
+    std::shared_ptr<TaskScheduler> taskScheduler_;
     std::map<uint64_t, sptr<SceneSession>> abilitySceneMap_;
     sptr<RootSceneSession> rootSceneSession_;
     NotifyCreateSpecificSessionFunc createSpecificSessionFunc_;
