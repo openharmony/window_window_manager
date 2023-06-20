@@ -101,6 +101,7 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
 
 void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
 {
+    CALL_DEBUG_ENTER;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ == nullptr) {
         WLOGFE("uiContent_ is nullptr!");
@@ -115,6 +116,7 @@ void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason re
 
 void RootScene::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent)
 {
+    CALL_DEBUG_ENTER;
     if (uiContent_) {
         uiContent_->ProcessPointerEvent(inputEvent);
     }
@@ -122,6 +124,7 @@ void RootScene::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& in
 
 void RootScene::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent)
 {
+    CALL_DEBUG_ENTER;
     if (uiContent_) {
         uiContent_->ProcessKeyEvent(inputEvent);
     }
@@ -129,6 +132,7 @@ void RootScene::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent)
 
 void RootScene::RegisterInputEventListener()
 {
+    CALL_DEBUG_ENTER;
     auto listener = std::make_shared<InputEventListener>(this);
     auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
     if (mainEventRunner) {
@@ -149,6 +153,7 @@ void RootScene::RegisterInputEventListener()
 
 void RootScene::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
+    CALL_DEBUG_ENTER;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     VsyncStation::GetInstance().RequestVsync(vsyncCallback);
 }
