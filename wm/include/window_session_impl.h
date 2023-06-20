@@ -71,7 +71,8 @@ public:
     WSError HandleBackEvent() override { return WSError::WS_OK; }
 
     void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
-    void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
+    void NotifyFocusActiveEvent(bool isFocusActive) override;
 
     WMError RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
@@ -160,5 +161,4 @@ private:
 };
 } // namespace Rosen
 } // namespace OHOS
-
 #endif // OHOS_ROSEN_WINDOW_SESSION_IMPL_H

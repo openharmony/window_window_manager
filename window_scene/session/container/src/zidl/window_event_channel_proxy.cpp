@@ -49,6 +49,7 @@ WSError WindowEventChannelProxy::TransferKeyEvent(const std::shared_ptr<MMI::Key
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
+    reply.ReadBool();
     int32_t ret = reply.ReadUint32();
     return static_cast<WSError>(ret);
 }
@@ -78,22 +79,50 @@ WSError WindowEventChannelProxy::TransferPointerEvent(const std::shared_ptr<MMI:
     return static_cast<WSError>(ret);
 }
 
-int32_t WindowEventChannelProxy::GetApplicationPid()
+WSError WindowEventChannelProxy::TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
 {
-    CALL_DEBUG_ENTER;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
-        return static_cast<int32_t>(WSError::WS_ERROR_IPC_FAILED);
+        return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventChannelMessage::TRANS_ID_GET_APPLICATION_PID),
+
+    if (!keyEvent->WriteToParcel(data)) {
+        WLOGFE("Failed to write key event");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventChannelMessage::TRANS_ID_TRANSFER_KEY_EVENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
-        return static_cast<int32_t>(WSError::WS_ERROR_IPC_FAILED);
+        return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t applicationPid = reply.ReadInt32();
-    return applicationPid;
+    isConsumed = reply.ReadBool();
+    int32_t ret = reply.ReadUint32();
+    return static_cast<WSError>(ret);
+}
+
+WSError WindowEventChannelProxy::TransferFocusActiveEvent(bool isFocusActive)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isFocusActive)) {
+        WLOGFE("Write bool failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventChannelMessage::TRANS_ID_TRANSFER_FOCUS_ACTIVE_EVENT),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadUint32();
+    return static_cast<WSError>(ret);
 }
 }

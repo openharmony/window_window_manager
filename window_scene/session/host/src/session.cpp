@@ -488,11 +488,6 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         }
     }
     WLOGFD("Session TransferPointEvent, Id: %{public}" PRIu64 ", eventId: %{public}d", persistentId_, pointerEvent->GetId());
-    if (!windowEventChannel_) {
-        WLOGFE("windowEventChannel_ is null");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    
     auto currentTime = GetSysClockTime();
     if (ANRMgr->IsANRTriggered(currentTime, persistentId_)) {
         WLOGFD("The pointer event does not report normally, application not response");
@@ -534,6 +529,24 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
     }
     WLOGD("TransferKeyEvent, id: %{public}" PRIu64, persistentId_);
     return windowEventChannel_->TransferKeyEvent(keyEvent);
+}
+
+WSError Session::TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+{
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed);
+}
+
+WSError Session::TransferFocusActiveEvent(bool isFocusActive)
+{
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferFocusActiveEvent(isFocusActive);
 }
 
 std::shared_ptr<Media::PixelMap> Session::GetSnapshot() const

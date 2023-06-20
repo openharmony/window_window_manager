@@ -32,8 +32,8 @@ const std::map<uint32_t, WindowEventChannelStubFunc> WindowEventChannelStub::stu
         &WindowEventChannelStub::HandleTransferKeyEvent),
     std::make_pair(static_cast<uint32_t>(WindowEventChannelMessage::TRANS_ID_TRANSFER_POINTER_EVENT),
         &WindowEventChannelStub::HandleTransferPointerEvent),
-    std::make_pair(static_cast<uint32_t>(WindowEventChannelMessage::TRANS_ID_GET_APPLICATION_PID),
-        &WindowEventChannelStub::HandleGetApplicationPid)
+    std::make_pair(static_cast<uint32_t>(WindowEventChannelMessage::TRANS_ID_TRANSFER_FOCUS_ACTIVE_EVENT),
+        &WindowEventChannelStub::HandleTransferFocusActiveEvent)
 };
 
 int WindowEventChannelStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
@@ -66,7 +66,10 @@ int WindowEventChannelStub::HandleTransferKeyEvent(MessageParcel& data, MessageP
         WLOGFE("Read Key Event failed");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = TransferKeyEvent(keyEvent);
+    bool isConsumed = false;
+    WSError errCode = TransferKeyEventForConsumed(keyEvent, isConsumed);
+
+    reply.WriteBool(isConsumed);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -88,11 +91,12 @@ int WindowEventChannelStub::HandleTransferPointerEvent(MessageParcel& data, Mess
     return ERR_NONE;
 }
 
-int WindowEventChannelStub::HandleGetApplicationPid(MessageParcel& data, MessageParcel& reply)
+int WindowEventChannelStub::HandleTransferFocusActiveEvent(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("GetApplicationPid!");
-    int32_t applicationPid = GetApplicationPid();
-    reply.WriteInt32(applicationPid);
+    bool isFocusActive = data.ReadBool();
+    WSError errCode = TransferFocusActiveEvent(isFocusActive);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
-}
+
+} // namespace OHOS::Rosen

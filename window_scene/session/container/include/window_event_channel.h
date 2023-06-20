@@ -33,9 +33,11 @@ public:
 
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
-    int32_t GetApplicationPid() override;
 private:
     static void OnDispatchEventProcessed(int32_t eventId, int64_t actionTime);
+    WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
+    WSError TransferFocusActiveEvent(bool isFocusActive) override;
+
 private:
     sptr<ISessionStage> sessionStage_ = nullptr;
     std::function<void(int32_t, int64_t)> dispatchCallback_ { nullptr };
