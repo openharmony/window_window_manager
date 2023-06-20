@@ -13,44 +13,36 @@
  * limitations under the License.
  */
 
-#include "common/include/message_scheduler.h"
+#include "common/include/task_scheduler.h"
+
+#include "window_manager_hilog.h"
+
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WSMessageScheduler"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WSTaskScheduler" };
 }
-MessageScheduler::MessageScheduler(const std::string& threadName)
+
+TaskScheduler::TaskScheduler(const std::string& threadName)
 {
     auto runner = AppExecFwk::EventRunner::Create(threadName);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
 }
 
-MessageScheduler::~MessageScheduler()
-{
-    handler_ = nullptr;
-}
-
-void MessageScheduler::PostVoidSyncTask(Task task)
+void TaskScheduler::PostVoidSyncTask(Task task)
 {
     if (handler_ == nullptr) {
         WLOGFE("Failed to post task, handler is null!");
         return;
     }
-
-    bool ret = handler_->PostSyncTask(std::move(task), AppExecFwk::EventQueue::Priority::IMMEDIATE);
-    if (!ret) {
-        WLOGFE("EventHandler PostTask Failed");
-    }
+    handler_->PostSyncTask(std::move(task), AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
-void MessageScheduler::PostAsyncTask(Task task, int64_t delayTime)
+void TaskScheduler::PostAsyncTask(Task task, int64_t delayTime)
 {
     if (handler_ == nullptr) {
         WLOGFE("Failed to post task, handler is null!");
         return;
     }
-    bool ret = handler_->PostTask(std::move(task), delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
-    if (!ret) {
-        WLOGFE("EventHandler PostTask Failed");
-    }
+    handler_->PostTask(std::move(task), delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 } // namespace OHOS::Rosen

@@ -115,7 +115,7 @@ DMError ScreenSessionManager::UnregisterDisplayManagerAgent(
 
 void ScreenSessionManager::Init()
 {
-    msgScheduler_ = std::make_shared<MessageScheduler>(SCREEN_SESSION_MANAGER_THREAD);
+    taskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_THREAD);
     RegisterScreenChangeListener();
     auto runner = AppExecFwk::EventRunner::Create(CONTROLLER_THREAD_ID);
     controllerHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
@@ -181,8 +181,8 @@ void ScreenSessionManager::RegisterScreenChangeListener()
         [this](ScreenId screenId, ScreenEvent screenEvent) { OnScreenChange(screenId, screenEvent); });
     if (res != StatusCode::SUCCESS) {
         auto task = [this]() { RegisterScreenChangeListener(); };
-        WS_CHECK_NULL_SCHE_VOID(msgScheduler_, task);
-        msgScheduler_->PostAsyncTask(task, 50); // Retry after 50 ms.
+        WS_CHECK_NULL_RETURN(taskScheduler_, task);
+        taskScheduler_->PostAsyncTask(task, 50); // Retry after 50 ms.
     }
 }
 

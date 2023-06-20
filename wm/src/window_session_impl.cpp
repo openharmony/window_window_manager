@@ -16,6 +16,7 @@
 #include "window_session_impl.h"
 
 #include <common/rs_common_def.h>
+#include <ipc_skeleton.h>
 #include <refbase.h>
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
@@ -172,6 +173,9 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
                 return WMError::WM_ERROR_REPEAT_OPERATION;
             }
         }
+        uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
+        property_->SetAccessTokenId(accessTokenId);
+        WLOGI("Create camera float window, TokenId = %{public}u", accessTokenId);
     }
     return WMError::WM_OK;
 }
@@ -756,8 +760,8 @@ WSError WindowSessionImpl::NotifyDestroy()
 {
     auto dialogDeathRecipientListener = GetListeners<IDialogDeathRecipientListener>();
     for (auto& listener : dialogDeathRecipientListener) {
-        if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnDialogDeathRecipient();
+        if (listener != nullptr) {
+            listener->OnDialogDeathRecipient();
         }
     }
     // destroy dialog in client
@@ -769,8 +773,8 @@ void WindowSessionImpl::NotifyTouchDialogTarget()
 {
     auto dialogTargetTouchListener = GetListeners<IDialogTargetTouchListener>();
     for (auto& listener : dialogTargetTouchListener) {
-        if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnDialogTargetTouch();
+        if (listener != nullptr) {
+            listener->OnDialogTargetTouch();
         }
     }
 }
@@ -779,8 +783,8 @@ void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reaso
 {
     auto windowChangeListeners = GetListeners<IWindowChangeListener>();
     for (auto& listener : windowChangeListeners) {
-        if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnSizeChange(rect, reason);
+        if (listener != nullptr) {
+            listener->OnSizeChange(rect, reason);
         }
     }
 }
