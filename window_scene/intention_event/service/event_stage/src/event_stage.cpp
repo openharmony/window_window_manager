@@ -83,11 +83,11 @@ std::list<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t id)
         return item.id > id;
     });
     if (fistMatchIter == events.end()) {
-        WLOGFW("Can not find event:%{public}d", id);
-        return { };
+        WLOGFW("All timerId < eventId:%{public}d", id);
     }
     std::list<int32_t> timerIds;
     for (auto iter = events.begin(); iter != fistMatchIter; iter++) {
+        WLOGFD("Push iter:%{public}d before firstMatchIter", iter->timerId);
         timerIds.push_back(iter->timerId);
     }
     events.erase(events.begin(), fistMatchIter);
