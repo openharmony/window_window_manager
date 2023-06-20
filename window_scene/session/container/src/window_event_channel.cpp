@@ -19,7 +19,6 @@
 #include <utility>
 
 #include "unistd.h"
-#include "sys/types.h"
 
 #include <axis_event.h>
 #include <key_event.h>
@@ -36,19 +35,13 @@ constexpr int32_t DELAY_TO_TRIGGER_ANR = 5;
 
 WSError WindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    WLOGFD("WindowEventChannel receive key event");
-    if (!sessionStage_) {
-        WLOGFE("session stage is null!");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    sessionStage_->NotifyKeyEvent(keyEvent);
-    return WSError::WS_OK;
+    bool isConsumed = false;
+    return TransferKeyEventForConsumed(keyEvent, isConsumed);
 }
 
 WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    CALL_DEBUG_ENTER;
-    WLOGFD("WindowEventChannel receive pointer event, eventId:%{public}d", pointerEvent->GetId());
+    WLOGFD("WindowEventChannel receive pointer event");
     if (!sessionStage_) {
         WLOGFE("session stage is null!");
         return WSError::WS_ERROR_NULLPTR;
@@ -86,12 +79,27 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
     return WSError::WS_OK;
 }
 
-int32_t WindowEventChannel::GetApplicationPid()
+WSError WindowEventChannel::TransferKeyEventForConsumed(
+    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
 {
-    CALL_DEBUG_ENTER;
-    int32_t applicationPid = static_cast<int32_t>(::getpid());
-    WLOGFD("WindowEventChannel GetApplicationPid, pid:%{public}d", applicationPid);
-    return applicationPid;
+    WLOGFD("WindowEventChannel receive key event");
+    if (!sessionStage_) {
+        WLOGFE("session stage is null!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    sessionStage_->NotifyKeyEvent(keyEvent, isConsumed);
+    return WSError::WS_OK;
+}
+
+WSError WindowEventChannel::TransferFocusActiveEvent(bool isFocusActive)
+{
+    WLOGFD("WindowEventChannel receive focus active event");
+    if (!sessionStage_) {
+        WLOGFE("session stage is null!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    sessionStage_->NotifyFocusActiveEvent(isFocusActive);
+    return WSError::WS_OK;
 }
 
 void WindowEventChannel::OnDispatchEventProcessed(int32_t eventId, int64_t actionTime)
