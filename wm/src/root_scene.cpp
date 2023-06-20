@@ -119,6 +119,8 @@ void RootScene::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& in
     CALL_DEBUG_ENTER;
     if (uiContent_) {
         uiContent_->ProcessPointerEvent(inputEvent);
+    } else {
+        WLOGFD("uiContent_ is nullptr");
     }
 }
 
@@ -127,6 +129,8 @@ void RootScene::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent)
     CALL_DEBUG_ENTER;
     if (uiContent_) {
         uiContent_->ProcessKeyEvent(inputEvent);
+    } else {
+        WLOGFD("uiContent_ is nullptr");
     }
 }
 
