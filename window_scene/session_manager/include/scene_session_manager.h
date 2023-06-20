@@ -16,10 +16,8 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_H
 
-#include "event_handler.h"
 #include "common/include/task_scheduler.h"
 #include "interfaces/include/ws_common.h"
-// #include "session_manager_base.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "session/host/include/root_scene_session.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"

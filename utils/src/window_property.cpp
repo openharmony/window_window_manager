@@ -16,7 +16,6 @@
 #include "window_property.h"
 #include "window_helper.h"
 #include "wm_common.h"
-#include "pointer_event.h"
 
 namespace OHOS {
 namespace Rosen {
