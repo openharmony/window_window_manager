@@ -598,7 +598,7 @@ HWTEST_F(WindowSessionTest, CreateAndConnectSpecificSession01, Function | SmallT
     };
     scensession = new SceneSession(info, specificCallback_);
     EXPECT_NE(scensession, nullptr);
-    result = scensession->CreateAndConnectSpecificSession(mockSessionStage, testWindowEventChannel, surfaceNode_,
+    auto result = scensession->CreateAndConnectSpecificSession(mockSessionStage, testWindowEventChannel, surfaceNode_,
                                                           property_, persistentId, session_);
     ASSERT_EQ(result, WSError::WS_OK);
     sptr<SceneSession::SessionChangeCallback> scensessionchangeCallBack =
