@@ -676,6 +676,11 @@ WSError Session::OnSessionEvent(SessionEvent event)
     return WSError::WS_OK;
 }
 
+WSError Session::OnNeedAvoid(bool status)
+{
+    return WSError::WS_OK;
+}
+
 WSError Session::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
 {
     WLOGFD("UpdateSessionRect");
@@ -766,5 +771,11 @@ WSError Session::GetGlobalMaximizeMode(MaximizeMode& mode)
 {
     WLOGFD("Session GetGlobalMaximizeMode");
     return WSError::WS_OK;
+}
+
+AvoidArea Session::GetAvoidAreaByType(AvoidAreaType type)
+{
+    AvoidArea avoidArea;
+    return avoidArea;
 }
 } // namespace OHOS::Rosen
