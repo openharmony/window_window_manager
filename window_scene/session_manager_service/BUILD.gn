@@ -12,20 +12,11 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/window/window_manager/windowmanager_aafwk.gni")
+import("../../windowmanager_aafwk.gni")
 
 config("session_manager_service_public_config") {
-  include_dirs = [
-    "${window_base_path}/window_scene",
-
-    "${window_base_path}/interfaces/innerkits/wm",
-
-    # for window_manager_hilog
-    "${window_base_path}/utils/include",
-    "${window_base_path}/window_scene/session_manager/include",
-    "${window_base_path}/window_scene/session_manager_service/include",
-    "${window_base_path}/window_scene/session_manager/include",
-  ]
+  include_dirs =
+      [ "${window_base_path}/window_scene/session_manager_service/include" ]
 }
 
 ohos_shared_library("session_manager_service") {
@@ -39,23 +30,15 @@ ohos_shared_library("session_manager_service") {
   public_configs = [ ":session_manager_service_public_config" ]
 
   deps = [
-    "${window_base_path}/dmserver:libdms",
     "${window_base_path}/utils:libwmutil",
-    "${window_base_path}/window_scene/common:window_scene_common",
-    "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session_manager:scene_session_manager",
     "${window_base_path}/window_scene/session_manager:screen_session_manager",
   ]
 
   external_deps = [
-    "ability_base:want",
-    "ability_runtime:ability_manager",
-    "ace_engine:ace_uicontent",
-    "c_utils:utils",
-    "eventhandler:libeventhandler",
     "graphic_standard:librender_service_client",
     "hilog_native:libhilog",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "screenlock_mgr:screenlock_server",
   ]
 
