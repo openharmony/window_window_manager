@@ -315,8 +315,8 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
 
 sptr<SceneSession> SceneSessionManager::GetSceneSession(uint64_t persistentId)
 {
-    auto iter = abilitySceneMap_.find(persistentId);
-    if (iter == abilitySceneMap_.end()) {
+    auto iter = sceneSessionMap_.find(persistentId);
+    if (iter == sceneSessionMap_.end()) {
         WLOGFE("Error found scene session with id: %{public}" PRIu64, persistentId);
         return nullptr;
     }
@@ -335,11 +335,11 @@ WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& scene
     }
     auto parentPersistentId = property->GetParentPersistentId();
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
-        if (!abilitySceneMap_.count(parentPersistentId)) {
+        if (!sceneSessionMap_.count(parentPersistentId)) {
             WLOGFD("Session is invalid");
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        sceneSession->SetParentSession(abilitySceneMap_.at(parentPersistentId));
+        sceneSession->SetParentSession(sceneSessionMap_.at(parentPersistentId));
     } else if (property->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && parentPersistentId != INVALID_SESSION_ID) {
         auto parentSession = GetSceneSession(parentPersistentId);
         if (parentSession == nullptr) {
@@ -379,7 +379,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         auto persistentId = sceneSession->GetPersistentId();
         sceneSession->SetSystemConfig(systemConfig_);
         UpdateParentSession(sceneSession, property);
-        abilitySceneMap_.insert({ persistentId, sceneSession });
+        sceneSessionMap_.insert({ persistentId, sceneSession });
         WLOGFI("create session persistentId: %{public}" PRIu64 "", persistentId);
         return sceneSession;
     };
@@ -416,7 +416,7 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         }
         auto persistentId = scnSession->GetPersistentId();
         WLOGFI("active persistentId: %{public}" PRIu64 "", persistentId);
-        if (abilitySceneMap_.count(persistentId) == 0) {
+        if (sceneSessionMap_.count(persistentId) == 0) {
             WLOGFE("session is invalid with %{public}" PRIu64 "", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
@@ -428,8 +428,8 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         if (!scnSessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        auto iter = abilitySceneMap_.find(sessionInfo.callerPersistentId_);
-        if (iter != abilitySceneMap_.end()) {
+        auto iter = sceneSessionMap_.find(sessionInfo.callerPersistentId_);
+        if (iter != sceneSessionMap_.end()) {
             const auto& callerSession = iter->second;
             if (callerSession != nullptr) {
                 auto callerSessionInfo = callerSession->GetSessionInfo();
@@ -459,7 +459,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         WLOGFI("background session persistentId: %{public}" PRIu64 "", persistentId);
         scnSession->SetActive(false);
         scnSession->Background();
-        if (abilitySceneMap_.count(persistentId) == 0) {
+        if (sceneSessionMap_.count(persistentId) == 0) {
             WLOGFE("session is invalid with %{public}" PRIu64 "", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
@@ -482,13 +482,13 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
         WLOGFD("Begin to destroy its dialog");
         auto dialogVec = scnSession->GetDialogVector();
         for (auto dialog : dialogVec) {
-            if (abilitySceneMap_.count(dialog->GetPersistentId()) == 0) {
+            if (sceneSessionMap_.count(dialog->GetPersistentId()) == 0) {
                 WLOGFE("session is invalid with %{public}" PRIu64 "", dialog->GetPersistentId());
                 return WSError::WS_ERROR_INVALID_SESSION;
             }
             dialog->NotifyDestroy();
             dialog->Disconnect();
-            abilitySceneMap_.erase(dialog->GetPersistentId());
+            sceneSessionMap_.erase(dialog->GetPersistentId());
         }
         return WSError::WS_OK;
     }
@@ -508,7 +508,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         DestroyDialogWithMainWindow(scnSession);
         WLOGFI("destroy session persistentId: %{public}" PRIu64 "", persistentId);
         scnSession->Disconnect();
-        if (abilitySceneMap_.count(persistentId) == 0) {
+        if (sceneSessionMap_.count(persistentId) == 0) {
             WLOGFE("session is invalid with %{public}" PRIu64 "", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
@@ -517,7 +517,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
             return WSError::WS_ERROR_NULLPTR;
         }
         AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
-        abilitySceneMap_.erase(persistentId);
+        sceneSessionMap_.erase(persistentId);
         return WSError::WS_OK;
     };
 
@@ -565,8 +565,8 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const uint64_t&
 {
     auto task = [this, persistentId]() {
         WLOGFI("Destroy session persistentId: %{public}" PRIu64 "", persistentId);
-        auto iter = abilitySceneMap_.find(persistentId);
-        if (iter == abilitySceneMap_.end()) {
+        auto iter = sceneSessionMap_.find(persistentId);
+        if (iter == sceneSessionMap_.end()) {
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         const auto& sceneSession = iter->second;
@@ -580,7 +580,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const uint64_t&
             sceneSession->NotifyDestroy();
         }
         ret = sceneSession->Disconnect();
-        abilitySceneMap_.erase(persistentId);
+        sceneSessionMap_.erase(persistentId);
         return ret;
     };
 
@@ -788,7 +788,7 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
         }
         auto persistentId = scnSession->GetPersistentId();
         WLOGFI("RequestSceneSessionByCall persistentId: %{public}" PRIu64 "", persistentId);
-        if (abilitySceneMap_.count(persistentId) == 0) {
+        if (sceneSessionMap_.count(persistentId) == 0) {
             WLOGFE("session is invalid with %{public}" PRIu64 "", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
@@ -799,8 +799,8 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
             return WSError::WS_ERROR_NULLPTR;
         }
 
-        auto iter = abilitySceneMap_.find(sessionInfo.callerPersistentId_);
-        if (iter == abilitySceneMap_.end()) {
+        auto iter = sceneSessionMap_.find(sessionInfo.callerPersistentId_);
+        if (iter == sceneSessionMap_.end()) {
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         const auto& callerSession = iter->second;

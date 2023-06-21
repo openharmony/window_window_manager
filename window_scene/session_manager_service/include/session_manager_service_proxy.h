@@ -16,20 +16,16 @@
 #ifndef FOUNDATION_WINDOW_SCENE_SESSION_MANAGER_SERVICE_PROXY_H
 #define FOUNDATION_WINDOW_SCENE_SESSION_MANAGER_SERVICE_PROXY_H
 
-#include "session_manager_service_interface.h"
-
 #include <iremote_proxy.h>
 
-#include "singleton_delegator.h"
+#include "session_manager_service_interface.h"
 
 namespace OHOS::Rosen {
 class SessionManagerServiceProxy : public IRemoteProxy<ISessionManagerService> {
 public:
-    explicit SessionManagerServiceProxy(const sptr<IRemoteObject>& remoteObject);
-
-    ~SessionManagerServiceProxy() override;
-
-    int GetValueById(int id) override;
+    explicit SessionManagerServiceProxy(const sptr<IRemoteObject>& object)
+        : IRemoteProxy<ISessionManagerService>(object) {}
+    virtual ~SessionManagerServiceProxy() = default;
 
     sptr<IRemoteObject> GetSceneSessionManager() override;
     sptr<IRemoteObject> GetScreenSessionManagerService() override;
@@ -39,4 +35,5 @@ private:
     static inline BrokerDelegator<SessionManagerServiceProxy> delegator_;
 };
 } // namespace OHOS::Rosen
+
 #endif // FOUNDATION_WINDOW_SCENE_SESSION_MANAGER_SERVICE_PROXY_H
