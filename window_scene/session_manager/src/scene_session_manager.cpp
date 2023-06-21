@@ -35,6 +35,7 @@
 #include "wm_math.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "session_manager_agent_controller.h"
+#include "window_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -770,11 +771,21 @@ WSError SceneSessionManager::UpdateFocus(uint64_t persistentId, bool isFocused)
     }
     // focusId change
     if (isFocused) {
-        return SetFocusedSession(persistentId);
+        SetFocusedSession(persistentId);
     }
     if (persistentId == GetFocusedSession()) {
-        focusedSessionId_ = INVALID_SESSION_ID;
+        SetFocusedSession(INVALID_SESSION_ID);
     }
+    // notify window manager
+    sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo(
+        sceneSession->GetWindowId(),
+        static_cast<DisplayId>(0),
+        sceneSession->GetCallingPid(),
+        sceneSession->GetCallingUid(),
+        sceneSession->GetWindowType(),
+        sceneSession->GetAbilityToken()
+    );
+    SessionManagerAgentController::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, isFocused);
     return WSError::WS_OK;
 }
 

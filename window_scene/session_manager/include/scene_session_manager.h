@@ -18,6 +18,7 @@
 
 #include "common/include/task_scheduler.h"
 #include "interfaces/include/ws_common.h"
+#include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "session/host/include/root_scene_session.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "wm_single_instance.h"

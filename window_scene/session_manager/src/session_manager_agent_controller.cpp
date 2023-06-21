@@ -47,5 +47,15 @@ void SessionManagerAgentController::UpdateCameraFloatWindowStatus(uint32_t acces
         }
     }
 }
+
+void SessionManagerAgentController::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool isFocused)
+{
+    for (auto& agent : smAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS)) {
+        if (agent != nullptr) {
+            agent->UpdateFocusChangeInfo(focusChangeInfo, isFocused);
+        }
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
