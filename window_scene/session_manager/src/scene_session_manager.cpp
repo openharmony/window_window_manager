@@ -28,6 +28,7 @@
 #include <system_ability_definition.h>
 #include <want.h>
 #include <transaction/rs_transaction.h>
+#include <transaction/rs_interfaces.h>
 
 #include "color_parser.h"
 #include "common/include/message_scheduler.h"
@@ -35,7 +36,7 @@
 #include "session/host/include/scene_session.h"
 #include "window_manager_hilog.h"
 #include "wm_math.h"
-#include "screen_session_manager.h"
+#include "session_manager/include/screen_session_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -363,6 +364,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             }
         }
         abilitySceneMap_.insert({ persistentId, sceneSession });
+        RegisterSessionStateChangeFunc(sceneSession);
         WLOGFI("create session persistentId: %{public}" PRIu64 "", persistentId);
         return sceneSession;
     };
@@ -724,12 +726,12 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
-            bool prePrivacyMode = sceneSession->GetWindowSessionProperty()->GetPrivacyMode || sceneSession->GetWindowSessionProperty()->GetSystemPrivacyMode();
+            bool prePrivacyMode = sceneSession->GetWindowSessionProperty()->GetPrivacyMode() || sceneSession->GetWindowSessionProperty()->GetSystemPrivacyMode();
             bool isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
             if (prePrivacyMode ^ isPrivacyMode) {
                 sceneSession->GetWindowSessionProperty()->SetPrivacyMode(isPrivacyMode);
                 sceneSession->GetWindowSessionProperty()->SetSystemPrivacyMode(isPrivacyMode);
-                sceneSession->surfaceNode_->SetSecurityLayer(isPrivacyMode);
+                sceneSession->GetSurfaceNode()->SetSecurityLayer(isPrivacyMode);
                 RSTransaction::FlushImplicitTransaction();
                 UpdatePrivateStateAndNotify(isPrivacyMode);
             }
@@ -787,7 +789,51 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(bool isAddingPrivateSessio
         WLOGFE("screen session is null");
         return;
     }
-    screenSession->UpdatePrivateStateAndNotify(isAddingPrivateSession);
+    ScreenSessionManager::GetInstance().UpdatePrivateStateAndNotify(screenSession, isAddingPrivateSession);
+}
+
+// void JsSceneSession::ProcessSessionStateChangeRegister()
+// {
+//     NotifySessionStateChangeFunc func = [this](const SessionState& state) {
+//         this->OnSessionStateChange(state);
+//     };
+//     auto session = weakSession_.promote();
+//     if (session == nullptr) {
+//         WLOGFE("session is nullptr");
+//         return;
+//     }
+//     session->SetSessionStateChangeListenser(func);
+//     WLOGFD("ProcessSessionStateChangeRegister success");
+// }
+
+void SceneSessionManager::RegisterSessionStateChangeFunc(sptr<SceneSession>& sceneSession)
+{
+    NotifySessionStateChangeFunc func = [this, &sceneSession](const SessionState& state) {
+        this->OnSessionStateChange(sceneSession, state);
+    };
+    if (sceneSession == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    sceneSession->SetSessionStateChangeListenser(func);
+    WLOGFD("RegisterSessionStateChangeFunc success");
+}
+
+void SceneSessionManager::OnSessionStateChange(sptr<SceneSession>& sceneSession, const SessionState& state)
+{
+    switch (state) {
+    case SessionState::STATE_FOREGROUND:
+        if (sceneSession->GetWindowSessionProperty()->GetPrivacyMode()) {
+            UpdatePrivateStateAndNotify(true);
+        }
+        break;
+    case SessionState::STATE_BACKGROUND:
+        if (sceneSession->GetWindowSessionProperty()->GetPrivacyMode()) {
+            UpdatePrivateStateAndNotify(false);
+        }
+    default:
+        break;
+    }
 }
 
 WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession)
