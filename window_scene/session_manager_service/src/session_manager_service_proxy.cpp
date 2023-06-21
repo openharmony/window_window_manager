@@ -14,78 +14,30 @@
  */
 
 #include "session_manager_service_proxy.h"
+
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionManagerServiceProxy"};
-}
-
-SessionManagerServiceProxy::SessionManagerServiceProxy(const sptr<IRemoteObject>& remoteObject)
-    : IRemoteProxy(remoteObject)
-{
-}
-
-SessionManagerServiceProxy::~SessionManagerServiceProxy()
-{
-}
-
-int SessionManagerServiceProxy::GetValueById(int id)
-{
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        WLOGFE("GetValueById remote is nullptr");
-        return -1;
-    }
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("GetValueById: WriteInterfacetoken failed");
-        return -1;
-    }
-
-    if (!data.WriteInt32(id)) {
-        WLOGFE("GetValueById: Write id failed");
-        return -1;
-    }
-    int ret = remote->SendRequest(static_cast<uint32_t>(SessionManagerServiceMessage::TRANS_ID_GET_SCREEN_INFO_BY_ID),
-        data, reply, option);
-    if (ret != ERR_NONE) {
-        WLOGFW("GetValueById: SendRequest failed, errorCode %{public}d", ret);
-        return -1;
-    }
-
-    int value = reply.ReadInt32();
-    WLOGFI("GetValueById: value: %{public}d", value);
-
-    return value;
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionManagerServiceProxy" };
 }
 
 sptr<IRemoteObject> SessionManagerServiceProxy::GetSceneSessionManager()
 {
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        WLOGFE("GetValueById remote is nullptr");
-        return nullptr;
-    }
-
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_SYNC);
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("GetValueById: WriteInterfacetoken failed");
+        WLOGFE("WriteInterfaceToken failed");
         return nullptr;
     }
 
-    int ret = remote->SendRequest(static_cast<uint32_t>(
-        SessionManagerServiceMessage::TRANS_ID_GET_SCENE_SESSION_MANAGER),
+    auto ret = Remote()->SendRequest(
+        static_cast<uint32_t>(SessionManagerServiceMessage::TRANS_ID_GET_SCENE_SESSION_MANAGER),
         data, reply, option);
     if (ret != ERR_NONE) {
-        WLOGFW("GetValueById: SendRequest failed, errorCode %{public}d", ret);
+        WLOGFE("SendRequest failed, errorCode %{public}d", ret);
         return nullptr;
     }
 
@@ -94,61 +46,45 @@ sptr<IRemoteObject> SessionManagerServiceProxy::GetSceneSessionManager()
 
 sptr<IRemoteObject> SessionManagerServiceProxy::GetScreenSessionManagerService()
 {
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        WLOGFE("Remote is nullptr");
-        return nullptr;
-    }
-
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_SYNC);
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfacetoken failed");
+        WLOGFE("WriteInterfaceToken failed");
         return nullptr;
     }
 
-    int ret = remote->SendRequest(
-        static_cast<uint32_t>(SessionManagerServiceMessage::TRANS_ID_GET_SCREEN_SESSION_MANAGER_SERVICE), data, reply,
-        option);
+    auto ret = Remote()->SendRequest(
+        static_cast<uint32_t>(SessionManagerServiceMessage::TRANS_ID_GET_SCREEN_SESSION_MANAGER_SERVICE),
+        data, reply, option);
     if (ret != ERR_NONE) {
-        WLOGFW("SendRequest failed, errorCode %{public}d", ret);
+        WLOGFE("SendRequest failed, errorCode %{public}d", ret);
         return nullptr;
     }
 
-    sptr<IRemoteObject> object = reply.ReadRemoteObject();
-
-    return object;
+    return reply.ReadRemoteObject();
 }
 
 sptr<IRemoteObject> SessionManagerServiceProxy::GetScreenLockManagerService()
 {
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        WLOGFE("Remote is nullptr");
-        return nullptr;
-    }
-
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_SYNC);
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfacetoken failed");
+        WLOGFE("WriteInterfaceToken failed");
         return nullptr;
     }
 
-    int ret = remote->SendRequest(static_cast<uint32_t>(
-        SessionManagerServiceMessage::TRANS_ID_GET_SCREEN_LOCK_MANAGER_SERVICE),
+    auto ret = Remote()->SendRequest(
+        static_cast<uint32_t>(SessionManagerServiceMessage::TRANS_ID_GET_SCREEN_LOCK_MANAGER_SERVICE),
         data, reply, option);
     if (ret != ERR_NONE) {
-        WLOGFW("SendRequest failed, errorCode %{public}d", ret);
+        WLOGFE("SendRequest failed, errorCode %{public}d", ret);
         return nullptr;
     }
 
-    sptr<IRemoteObject> object = reply.ReadRemoteObject();
-
-    return object;
+    return reply.ReadRemoteObject();
 }
 } // namespace OHOS::Rosen
