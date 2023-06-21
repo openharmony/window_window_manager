@@ -15,31 +15,17 @@
 
 #include "session_manager_service.h"
 
-#include <system_ability_definition.h>
-#include "session_manager/include/scene_session_manager.h"
 #include "screenlock_system_ability.h"
-#include "window_manager_hilog.h"
 
-#include "screen_session_manager.h"
+#include "session_manager/include/scene_session_manager.h"
+#include "session_manager/include/screen_session_manager.h"
 
 namespace OHOS::Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionManagerService"};
-}
 WM_IMPLEMENT_SINGLE_INSTANCE(SessionManagerService)
-
-SessionManagerService::SessionManagerService()
-{
-}
-
-int SessionManagerService::GetValueById(int id)
-{
-    return id + 1;
-}
 
 sptr<IRemoteObject> SessionManagerService::GetSceneSessionManager()
 {
-    WLOGFD("GetSceneSessionManager success");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (sceneSessionManagerObj_) {
         return sceneSessionManagerObj_;
     }
@@ -49,21 +35,27 @@ sptr<IRemoteObject> SessionManagerService::GetSceneSessionManager()
 
 sptr<IRemoteObject> SessionManagerService::GetScreenLockManagerService()
 {
-    if (screenLockManager_) {
-        return screenLockManager_;
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (screenLockManagerObj_) {
+        return screenLockManagerObj_;
     }
-    screenLockManager_ = ScreenLock::ScreenLockSystemAbility::GetInstance()->AsObject();
-    return screenLockManager_;
+    screenLockManagerObj_ = ScreenLock::ScreenLockSystemAbility::GetInstance()->AsObject();
+    return screenLockManagerObj_;
 }
 
 sptr<IRemoteObject> SessionManagerService::GetRemoteObject()
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (sessionManagerServiceObj_) {
+        return sessionManagerServiceObj_;
+    }
     sessionManagerServiceObj_ = this->AsObject();
     return sessionManagerServiceObj_;
 }
 
 sptr<IRemoteObject> SessionManagerService::GetScreenSessionManagerService()
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (screenSessionManagerObj_) {
         return screenSessionManagerObj_;
     }

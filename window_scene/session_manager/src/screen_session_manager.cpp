@@ -29,7 +29,6 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSessionManager" };
 const std::string SCREEN_SESSION_MANAGER_THREAD = "ScreenSessionManager";
 const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
-const std::string CONTROLLER_THREAD_ID = "ScreenSessionManagerThread";
 } // namespace
 
 ScreenSessionManager& ScreenSessionManager::GetInstance()
@@ -43,9 +42,9 @@ ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetIns
         std::bind(&ScreenSessionManager::NotifyDisplayStateChange, this,
             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4)))
 {
-    Init();
-    auto runner = AppExecFwk::EventRunner::Create(CONTROLLER_THREAD_ID);
-    controllerHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    taskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_THREAD);
+    RegisterScreenChangeListener();
+    LoadScreenSceneXml();
 }
 
 void ScreenSessionManager::RegisterScreenConnectionListener(sptr<IScreenConnectionListener>& screenConnectionListener)
@@ -113,18 +112,8 @@ DMError ScreenSessionManager::UnregisterDisplayManagerAgent(
     return dmAgentContainer_.UnregisterAgent(displayManagerAgent, type) ? DMError::DM_OK :DMError::DM_ERROR_NULLPTR;
 }
 
-void ScreenSessionManager::Init()
-{
-    taskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_THREAD);
-    RegisterScreenChangeListener();
-    auto runner = AppExecFwk::EventRunner::Create(CONTROLLER_THREAD_ID);
-    controllerHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
-    LoadScreenSceneXml();
-}
-
 void ScreenSessionManager::LoadScreenSceneXml()
 {
-    WLOGFI("ScreenSession load screen scene xml");
     if (ScreenSceneConfig::LoadConfigXml()) {
         ScreenSceneConfig::DumpConfig();
         ConfigureScreenScene();
@@ -326,7 +315,7 @@ void ScreenSessionManager::NotifyScreenChanged(sptr<ScreenInfo> screenInfo, Scre
             agent->OnScreenChange(screenInfo, event);
         }
     };
-    controllerHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
+    taskScheduler_->PostAsyncTask(task);
 }
 
 DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio)
@@ -1279,7 +1268,7 @@ void ScreenSessionManager::NotifyScreenConnected(sptr<ScreenInfo> screenInfo)
         WLOGFI("SCB: NotifyScreenConnected,  screenId:%{public}" PRIu64"", screenInfo->GetScreenId());
         OnScreenConnect(screenInfo);
     };
-    controllerHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
+    taskScheduler_->PostAsyncTask(task);
 }
 
 void ScreenSessionManager::NotifyScreenDisconnected(ScreenId screenId)
@@ -1288,7 +1277,7 @@ void ScreenSessionManager::NotifyScreenDisconnected(ScreenId screenId)
         WLOGFI("NotifyScreenDisconnected,  screenId:%{public}" PRIu64"", screenId);
         OnScreenDisconnect(screenId);
     };
-    controllerHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
+    taskScheduler_->PostAsyncTask(task);
 }
 
 void ScreenSessionManager::NotifyScreenGroupChanged(
@@ -1303,7 +1292,7 @@ void ScreenSessionManager::NotifyScreenGroupChanged(
         WLOGFI("SCB: screenId:%{public}" PRIu64", trigger:[%{public}s]", screenInfo->GetScreenId(), trigger.c_str());
         OnScreenGroupChange(trigger, screenInfo, event);
     };
-    controllerHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
+    taskScheduler_->PostAsyncTask(task);
 }
 
 void ScreenSessionManager::NotifyScreenGroupChanged(
@@ -1317,7 +1306,7 @@ void ScreenSessionManager::NotifyScreenGroupChanged(
         WLOGFI("SCB: trigger:[%{public}s]", trigger.c_str());
         OnScreenGroupChange(trigger, screenInfo, event);
     };
-    controllerHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
+    taskScheduler_->PostAsyncTask(task);
 }
 
 void ScreenSessionManager::OnScreenGroupChange(const std::string& trigger,
@@ -1390,5 +1379,4 @@ void ScreenSessionManager::OnScreenshot(sptr<ScreenshotInfo> info)
         agent->OnScreenshot(info);
     }
 }
-
 } // namespace OHOS::Rosen
