@@ -20,6 +20,7 @@
 #include "proto.h"
 #include "timer_manager.h"
 #include "window_manager_hilog.h"
+#include "dfx_hisysevent.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -48,6 +49,7 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
     int32_t timerId = TimerMgr->AddTimer(ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME, 1, [this, id, persistentId]() {
         eventStage_.SetAnrStatus(persistentId, true);
         int32_t pid = GetPidByPersistentId(persistentId);
+        DfxHisysevent::ApplicationBlockInput(id, pid, persistentId);
         WLOGFE("Application not responding. persistentId:%{public}d, eventId:%{public}d, applicationId:%{public}d",
             persistentId, id, pid);
         if (anrObserver_ != nullptr) {
