@@ -39,9 +39,9 @@ public:
     bool IsANRTriggered(int64_t time, int32_t persistentId);
     void OnSessionLost(int32_t persistentId);
     void SetApplicationPid(int32_t persistentId, int32_t applicationPid);
-    int32_t GetPidByPersistentId(int32_t persistentId);
     void SetAnrObserver(std::function<void(int32_t)> anrObserver);
 private:
+    int32_t GetPidByPersistentId(int32_t persistentId);
     void RemoveTimers(int32_t persistentId);
     void RemovePersistentId(int32_t persistentId);
 private:

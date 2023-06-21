@@ -103,24 +103,12 @@ bool ANRManager::IsANRTriggered(int64_t time, int32_t persistentId)
     return false;
 }
 
-void ANRManager::RemoveTimers(int32_t persistentId)
-{
-    CALL_DEBUG_ENTER;
-    std::lock_guard<std::mutex> guard(mtx_);
-    std::vector<int32_t> timerIds = eventStage_.GetTimerIds(persistentId);
-    for (int32_t item : timerIds) {
-        if (item != -1) {
-            TimerMgr->RemoveTimer(item);
-            anrTimerCount_--;
-        }
-    }
-}
-
 void ANRManager::OnSessionLost(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
     RemoveTimers(persistentId);
+    RemovePersistentId(persistentId);
 }
 
 void ANRManager::SetApplicationPid(int32_t persistentId, int32_t applicationPid)
@@ -131,21 +119,17 @@ void ANRManager::SetApplicationPid(int32_t persistentId, int32_t applicationPid)
     applicationMap_[persistentId] = applicationPid;
 }
 
-void ANRManager::RemovePersistentId(int32_t persistentId)
+void ANRManager::SetAnrObserver(std::function<void(int32_t)> anrObserver)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
-    if (applicationMap_.find(persistentId) != applicationMap_.end()) {
-        WLOGFD("Remove persistentId:%{public}d -> applicationPid:%{public}d", persistentId, applicationMap_[persistentId]);
-        applicationMap_.erase(persistentId);
-    }
-    WLOGFD("No persistentId:%{public}d in applicationMap", persistentId);
+    anrObserver_ = anrObserver;
 }
+
 
 int32_t ANRManager::GetPidByPersistentId(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
-    std::lock_guard<std::mutex> guard(mtx_);
     if (applicationMap_.find(persistentId) != applicationMap_.end()) {
         WLOGFD("persistentId:%{public}d -> applicationPid:%{public}d", persistentId, applicationMap_[persistentId]);
         return applicationMap_[persistentId];
@@ -154,11 +138,27 @@ int32_t ANRManager::GetPidByPersistentId(int32_t persistentId)
     return -1;
 }
 
-void ANRManager::SetAnrObserver(std::function<void(int32_t)> anrObserver)
+void ANRManager::RemoveTimers(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
-    std::lock_guard<std::mutex> guard(mtx_);
-    anrObserver_ = anrObserver;
+    std::vector<int32_t> timerIds = eventStage_.GetTimerIds(persistentId);
+    for (int32_t item : timerIds) {
+        if (item != -1) {
+            TimerMgr->RemoveTimer(item);
+            anrTimerCount_--;
+        }
+    }
 }
+
+void ANRManager::RemovePersistentId(int32_t persistentId)
+{
+    CALL_DEBUG_ENTER;
+    if (applicationMap_.find(persistentId) != applicationMap_.end()) {
+        WLOGFD("Remove persistentId:%{public}d -> applicationPid:%{public}d", persistentId, applicationMap_[persistentId]);
+        applicationMap_.erase(persistentId);
+    }
+    WLOGFD("No persistentId:%{public}d in applicationMap", persistentId);
+}
+
 } // namespace Rosen
 } // namespace OHOS
