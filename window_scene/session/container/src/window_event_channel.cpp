@@ -71,7 +71,7 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
         return (displayX >= leftUp.first && displayX < rightDown.first &&
                 displayY >= leftUp.second && displayY < rightDown.second);
     };
-    if (checkInAnrRegin(pointerEvent)) {
+    if (checkInAnrRegin(pointerEvent) && pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_DOWN) {
         WLOGFD("The pointerEvent eventId: %{public}d in anr regin, sleep 5 seconds to trigger anr", pointerEvent->GetId());
         sleep(DELAY_TO_TRIGGER_ANR);
     }
