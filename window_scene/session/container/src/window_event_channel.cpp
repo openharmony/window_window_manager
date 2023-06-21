@@ -30,7 +30,7 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannel" };
-constexpr int32_t DELAY_TO_TRIGGER_ANR = 5;
+constexpr int32_t DELAY_TO_TRIGGER_ANR = 10;
 }
 
 WSError WindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -72,7 +72,7 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
                 displayY >= leftUp.second && displayY < rightDown.second);
     };
     if (checkInAnrRegin(pointerEvent) && pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_DOWN) {
-        WLOGFD("The pointerEvent eventId: %{public}d in anr regin, sleep 5 seconds to trigger anr", pointerEvent->GetId());
+        WLOGFD("The pointerEvent eventId: %{public}d in anr regin, sleep 10 seconds to trigger anr", pointerEvent->GetId());
         sleep(DELAY_TO_TRIGGER_ANR);
     }
     sessionStage_->NotifyPointerEvent(pointerEvent); // sessionStage_ 就是 windowSessionImpl,windowSessionImpl 里有 hostSession_
