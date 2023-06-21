@@ -145,7 +145,6 @@ protected:
     virtual ~ScreenSessionManager() = default;
 
 private:
-    void Init();
     void LoadScreenSceneXml();
     void ConfigureScreenScene();
     void ConfigureWaterfallDisplayCompressionParams();
@@ -180,25 +179,21 @@ private:
     };
 
     RSInterfaces& rsInterface_;
-    std::shared_ptr<TaskScheduler> taskScheduler_ = nullptr;
+    std::shared_ptr<TaskScheduler> taskScheduler_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
 
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
-
     ScreenIdManager screenIdManager_;
 
-    std::atomic<ScreenId> defaultRsScreenId_ {SCREEN_ID_INVALID };
+    std::atomic<ScreenId> defaultRsScreenId_ { SCREEN_ID_INVALID };
     std::map<sptr<IRemoteObject>, std::vector<ScreenId>> screenAgentMap_;
     std::map<ScreenId, sptr<ScreenSessionGroup>> smsScreenGroupMap_;
 
     bool isExpandCombination_ = false;
     sptr<AgentDeathRecipient> deathRecipient_ { nullptr };
 
-    std::shared_ptr<AppExecFwk::EventHandler> controllerHandler_;
-
     std::vector<sptr<IScreenConnectionListener>> screenConnectionListenerList_;
-
     sptr<IDisplayChangeListener> displayChangeListener_;
     sptr<SessionDisplayPowerController> sessionDisplayPowerController_;
 };
