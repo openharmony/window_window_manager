@@ -18,6 +18,7 @@
 
 #include "common/include/task_scheduler.h"
 #include "interfaces/include/ws_common.h"
+#include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "session/host/include/root_scene_session.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "wm_single_instance.h"
@@ -81,10 +82,12 @@ private:
     bool ConfigAppWindowCornerRadius(const WindowSceneConfig::ConfigItem& item, float& out);
     bool ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig, WindowShadowConfig& outShadow);
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig);
+
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& scnSession);
     WSError DestroyDialogWithMainWindow(const sptr<SceneSession>& scnSession);
     WSError UpdateParentSession(const sptr<SceneSession>& sceneSession, sptr<WindowSessionProperty> property);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
+    void UpdateFocusableProperty(uint64_t persistentId);
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     std::shared_ptr<Global::Resource::ResourceManager> CreateResourceManager(
@@ -92,17 +95,18 @@ private:
     void GetStartPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, std::string& path, uint32_t& bgColor);
     const std::string& CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
 
-    std::shared_ptr<TaskScheduler> taskScheduler_;
-    std::map<uint64_t, sptr<SceneSession>> abilitySceneMap_;
     sptr<RootSceneSession> rootSceneSession_;
+    std::map<uint64_t, sptr<SceneSession>> sceneSessionMap_;
+
     NotifyCreateSpecificSessionFunc createSpecificSessionFunc_;
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
-    uint64_t activeSessionId_;
-    sptr<AppExecFwk::IBundleMgr> bundleMgr_;
-    uint64_t focusedSessionId_ { INVALID_SESSION_ID };
+    uint64_t activeSessionId_ = INVALID_SESSION_ID;
+    uint64_t focusedSessionId_ = INVALID_SESSION_ID;
 
-    void UpdateFocusableProperty(uint64_t persistentId);
+    std::shared_ptr<TaskScheduler> taskScheduler_;
+    sptr<AppExecFwk::IBundleMgr> bundleMgr_;
 };
 } // namespace OHOS::Rosen
+
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_H

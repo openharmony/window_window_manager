@@ -86,7 +86,7 @@ WSError SessionProxy::Disconnect()
 }
 
 WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
 {
     CALL_DEBUG_ENTER;
     MessageParcel data;
@@ -120,6 +120,14 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
+
+    if (token != nullptr) {
+        if (!data.WriteRemoteObject(token)) {
+            WLOGFE("Write abilityToken failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    }
+
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_CONNECT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
