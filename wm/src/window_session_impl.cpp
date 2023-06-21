@@ -460,6 +460,23 @@ WMError WindowSessionImpl::SetWindowType(WindowType type)
     return WMError::WM_OK;
 }
 
+WMError WindowSessionImpl::SetBrightness(float brightness)
+{
+    if (brightness < MINIMUM_BRIGHTNESS || brightness > MAXIMUM_BRIGHTNESS) {
+        WLOGFE("invalid brightness value: %{public}f", brightness);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (!WindowHelper::IsAppWindow(GetType())) {
+        WLOGFE("non app window does not support set brightness, type: %{public}u", GetType());
+        return WMError::WM_ERROR_INVALID_TYPE;
+    }
+    property_->SetBrightness(brightness);
+    if (state_ == WindowState::STATE_SHOWN) {
+        return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS);
+    }
+    return WMError::WM_OK;
+}
+
 std::string WindowSessionImpl::GetContentInfo()
 {
     WLOGFD("GetContentInfo");
