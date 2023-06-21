@@ -15,34 +15,39 @@ import("//build/ohos.gni")
 
 config("intention_event_public_config") {
   include_dirs = [
-    "../framework/anr_handler/include",
     "anr_manager/include",
     "event_stage/include",
     "timer_manager/include",
-    "../utils/include",
     "//foundation/window/window_manager/utils/include",
     "//foundation/window/window_manager/window_scene/session/container/include/zidl",
     "//foundation/window/window_manager/window_scene",
-    "//foundation/window/window_manager/window_scene/interfaces/include"
+    "//foundation/window/window_manager/window_scene/interfaces/include",
+    "../dfx/include",
+    "../framework/anr_handler/include",
+    "../utils/include"
   ]
 }
 
 ohos_shared_library("intention_event_anr_manager") {
   sources = [
-    "../framework/anr_handler/src/anr_handler.cpp",
     "anr_manager/src/anr_manager.cpp",
     "event_stage/src/event_stage.cpp",
     "timer_manager/src/timer_manager.cpp",
+    "../dfx/src/dfx_hisysevent.cpp",
+    "../framework/anr_handler/src/anr_handler.cpp",
     "../utils/src/util.cpp"
   ]
 
   public_configs = [ ":intention_event_public_config" ]
 
   external_deps = [
-    # "ability_runtime:ability_manager",
     "ability_base:want",
     "c_utils:utils",
     "hilog_native:libhilog",
+    "hicollie:libhicollie",
+    "hisysevent_native:libhisysevent",
+    "hitrace_native:hitrace_meter",
+    "hiviewdfx_hilog_native:libhilog",
     "eventhandler:libeventhandler",
     "ipc:ipc_single",
   ]
