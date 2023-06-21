@@ -128,6 +128,7 @@ protected:
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_UNDEFINED;
     SystemSessionConfig windowSystemConfig_ ;
 
+    WMError UpdateProperty(WSPropertyChangeAction action);
 private:
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
@@ -153,7 +154,6 @@ private:
     static std::map<uint64_t, std::vector<sptr<IDialogTargetTouchListener>>> dialogTargetTouchListener_;
     static std::recursive_mutex globalMutex_;
     NotifyNativeWinDestroyFunc notifyNativefunc_;
-    WMError UpdateProperty(WSPropertyChangeAction action);
 };
 } // namespace Rosen
 } // namespace OHOS

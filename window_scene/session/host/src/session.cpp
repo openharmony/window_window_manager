@@ -24,6 +24,7 @@
 
 #include "window_manager_hilog.h"
 #include "surface_capture_future.h"
+// #include "session_manager/include/scene_session_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -258,7 +259,9 @@ WSError Session::Foreground()
     if (!isActive_) {
         SetActive(true);
     }
-    UpdatePrivateStateAndNotify(true);
+    // if (property_->GetPrivacyMode()) {
+    //     SceneSessionManager::GetInstance().UpdatePrivateStateAndNotify(true);
+    // }
     NotifyForeground();
     return WSError::WS_OK;
 }
@@ -273,7 +276,9 @@ WSError Session::Background()
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
-
+    // if (property_->GetPrivacyMode()) {
+    //     SceneSessionManager::GetInstance().UpdatePrivateStateAndNotify(true);
+    // }
     snapshot_ = Snapshot();
     NotifyBackground();
     return WSError::WS_OK;
@@ -569,6 +574,16 @@ void Session::NotifyClick()
         clickFunc_();
     }
 }
+
+// void Session::UpdatePrivateStateAndNotify(bool isAddingPrivateSession)
+// {
+//     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);
+//     if (screenSession == nullptr) {
+//         WLOGFE("screen session is null");
+//         return;
+//     }
+//     screenSession->UpdatePrivateStateAndNotify(isAddingPrivateSession);
+// }
 
 WSError Session::UpdateFocus(bool isFocused)
 {

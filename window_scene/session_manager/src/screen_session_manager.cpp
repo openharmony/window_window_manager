@@ -1332,6 +1332,18 @@ void ScreenSessionManager::NotifyPrivateSessionStateChanged(bool hasPrivate)
     }
 }
 
+void ScreenSessionManager::UpdatePrivateStateAndNotify(sptr<ScreenSession>& screenSession, bool isAddingPrivateSession)
+{
+    uint32_t prePrivateSessionCount = screenSession->GetPrivateSessionCount();
+    WLOGFD("before update : privateWindow count: %{public}u", prePrivateSessionCount);
+    screenSession->SetPrivateSessionCount(prePrivateSessionCount + (isAddingPrivateSession ? 1 : -1));
+    if (prePrivateSessionCount == 0 && isAddingPrivateSession) {
+        NotifyPrivateSessionStateChanged(true);
+    } else if (prePrivateSessionCount == 1 && !isAddingPrivateSession) {
+        NotifyPrivateSessionStateChanged(false);
+    }
+}
+
 void ScreenSessionManager::OnScreenGroupChange(const std::string& trigger,
     const sptr<ScreenInfo>& screenInfo, ScreenGroupChangeEvent groupEvent)
 {

@@ -129,6 +129,7 @@ public:
     void SetClickListener(const NotifyClickFunc& func);
     void NotifySessionFocusableChange(bool isFocusable);
     void NotifyClick();
+    // void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
     WSError UpdateFocus(bool isFocused);
     WSError SetFocusable(bool isFocusable);
     bool GetFocusable() const;
