@@ -723,7 +723,7 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE: {
-            // @todo
+            sceneSession->SetTouchable(property->GetTouchable());
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS: {
