@@ -737,4 +737,12 @@ sptr<ScenePersistence> Session::GetScenePersistence() const
 {
     return scenePersistence_;
 }
+WSError Session::UpdateAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
+{
+    return WSError::WS_OK;
+}
+WSError Session::SendExtensionData(const AAFwk::WantParams& wantParams)
+{
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

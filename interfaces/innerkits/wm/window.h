@@ -42,6 +42,7 @@ namespace OHOS::AbilityRuntime {
 
 namespace OHOS::AAFwk {
     class Want;
+    class WantParams;
 }
 
 namespace OHOS::Ace {
@@ -1325,6 +1326,16 @@ public:
      * @param needDefaultAnimation True means need default animation, false means not need.
      */
     virtual void SetNeedDefaultAnimation(bool needDefaultAnimation) {}
+    /**
+     * @brief Send Ability Result.
+     * @return WMError
+     */
+    virtual WMError UpdateAbilityResult(uint32_t resultCode, const AAFwk::Want& want) { return WMError::WM_OK; }
+    /**
+     * @brief Send UIExtension data to Extension Component.
+     * @return WMError
+     */
+    virtual WMError SendExtensionData(const AAFwk::WantParams& wantParams) { return WMError::WM_OK; }
 };
 }
 }

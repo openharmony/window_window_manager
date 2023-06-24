@@ -17,12 +17,24 @@
 #define OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_H
 
 #include "session/host/include/session.h"
+#include "want.h"
+#include "want_params.h"
 
 namespace OHOS::Rosen {
+using NotifyUpdateAbilityResultFunc = std::function<void(uint32_t resultCode, const AAFwk::Want& want)>;
+using NotifySendExtensionDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
 class ExtensionSession : public Session {
 public:
     ExtensionSession(const SessionInfo& info);
     ~ExtensionSession() = default;
+
+    WSError UpdateAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
+    void SetUpdateAbilityResultListener(const NotifyUpdateAbilityResultFunc& func);
+    WSError SendExtensionData(const AAFwk::WantParams& wantParams) override;
+    void SetSendExtensionDataListener(const NotifySendExtensionDataFunc& func);
+private:
+    NotifyUpdateAbilityResultFunc updateAbilityResultFunc_;
+    NotifySendExtensionDataFunc sendExtensionDataFunc_;
 };
 } // namespace OHOS::Rosen
 

@@ -17,6 +17,8 @@
 
 #include <ipc_types.h>
 #include <ui/rs_surface_node.h>
+#include "want.h"
+#include "want_params.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -45,7 +47,13 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
         &SessionStub::HandleDestroyAndDisconnectSpecificSession),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_RAISE_TO_APP_TOP),
         &SessionStub::HandleRaiseToAppTop),
-    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_BACKPRESSED), &SessionStub::HandleBackPressed)
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_BACKPRESSED), &SessionStub::HandleBackPressed),
+
+    // for extension only
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_UPDATE_ABILITY_RESULT),
+        &SessionStub::HandleUpdateAbilityResult),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_SEND_EXTENSION_DATA),
+        &SessionStub::HandleSendExtensionData)
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -259,6 +267,33 @@ int SessionStub::HandleBackPressed(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleBackPressed!");
     WSError errCode = RequestSessionBack();
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateAbilityResult(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleUpdateAbilityResult!");
+    uint32_t resultCode = data.ReadUint32();
+    std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    if (want == nullptr) {
+        WLOGFE("want is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    WSError errCode = UpdateAbilityResult(resultCode, *want);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSendExtensionData(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleSendExtensionData!");
+    std::shared_ptr<AAFwk::WantParams> wantParams(data.ReadParcelable<AAFwk::WantParams>());
+    if (wantParams == nullptr) {
+        WLOGFE("wantParams is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    WSError errCode = SendExtensionData(*wantParams);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
