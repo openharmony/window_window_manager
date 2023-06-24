@@ -28,4 +28,30 @@ ExtensionSession::ExtensionSession(const SessionInfo& info) : Session(info)
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
     GeneratePersistentId(true, info);
 }
+
+WSError ExtensionSession::UpdateAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
+{
+    if (updateAbilityResultFunc_) {
+        updateAbilityResultFunc_(resultCode, want);
+    }
+    return WSError::WS_OK;
+}
+
+void ExtensionSession::SetUpdateAbilityResultListener(const NotifyUpdateAbilityResultFunc& func)
+{
+    updateAbilityResultFunc_ = func;
+}
+
+WSError ExtensionSession::SendExtensionData(const AAFwk::WantParams& wantParams)
+{
+    if (sendExtensionDataFunc_) {
+        sendExtensionDataFunc_(wantParams);
+    }
+    return WSError::WS_OK;
+}
+
+void ExtensionSession::SetSendExtensionDataListener(const NotifySendExtensionDataFunc& func)
+{
+    sendExtensionDataFunc_ = func;
+}
 } // namespace OHOS::Rosen
