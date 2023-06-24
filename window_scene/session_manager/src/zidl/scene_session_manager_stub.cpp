@@ -18,6 +18,7 @@
 #include <ipc_types.h>
 #include <ui/rs_surface_node.h>
 #include "session/host/include/scene_session.h"
+#include "window_manager_agent_proxy.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -25,8 +26,8 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManagerStub"};
 }
 
-int SceneSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
-    MessageParcel &reply, MessageOption &option)
+int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
+    MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     WLOGFD("Scene session on remote request!, code: %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
@@ -81,6 +82,24 @@ int SceneSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
             }
             const WSError& ret = UpdateProperty(property, action);
             reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case SceneSessionManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT: {
+            auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
+            sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
+            sptr<IWindowManagerAgent> windowManagerAgentProxy =
+                iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
+            WMError errCode = RegisterWindowManagerAgent(type, windowManagerAgentProxy);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
+        case SceneSessionManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT: {
+            auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
+            sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
+            sptr<IWindowManagerAgent> windowManagerAgentProxy =
+                iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
+            WMError errCode = UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
         default:

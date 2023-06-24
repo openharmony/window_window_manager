@@ -16,7 +16,6 @@
 #include "window_extension_session_impl.h"
 
 #include "window_manager_hilog.h"
-#include "window_session_impl.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -46,6 +45,31 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     state_ = WindowState::STATE_CREATED;
     return WMError::WM_OK;
 }
+
+WMError WindowExtensionSessionImpl::MoveTo(int32_t x, int32_t y)
+{
+    WLOGFD("Id:%{public}" PRIu64 " MoveTo %{public}d %{public}d", property_->GetPersistentId(), x, y);
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("Window session invalid.");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    const auto& rect = property_->GetWindowRect();
+    WSRect wsRect = { x, y, rect.width_, rect.height_ };
+    WSError error = UpdateRect(wsRect, SizeChangeReason::MOVE);
+    return static_cast<WMError>(error);
+}
+
+WMError WindowExtensionSessionImpl::Resize(uint32_t width, uint32_t height)
+{
+    WLOGFD("Id:%{public}" PRIu64 " Resize %{public}u %{public}u", property_->GetPersistentId(), width, height);
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("Window session invalid.");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    const auto& rect = property_->GetWindowRect();
+    WSRect wsRect = { rect.posX_, rect.posY_, width, height };
+    WSError error = UpdateRect(wsRect, SizeChangeReason::RESIZE);
+    return static_cast<WMError>(error);
+}
 } // namespace Rosen
 } // namespace OHOS
-

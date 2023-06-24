@@ -15,16 +15,16 @@
 
 #include "session/host/include/session.h"
 
-#include "foundation/ability/ability_base/interfaces/kits/native/want/include/want.h"
 #include "interfaces/include/ws_common.h"
-#include "surface_capture_future.h"
-#include <transaction/rs_interfaces.h>
 #include <pointer_event.h>
+#include <surface_capture_future.h>
+#include <transaction/rs_interfaces.h>
 #include <ui/rs_surface_node.h>
+#include <ipc_skeleton.h>
+#include <want.h>
 
 #include "window_manager_hilog.h"
 #include "surface_capture_future.h"
-// #include "session_manager/include/scene_session_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -34,15 +34,6 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Sessio
 std::atomic<uint32_t> Session::sessionId_(INVALID_SESSION_ID);
 std::set<uint32_t> Session::persistIdSet_;
 
-Session::Session(const SessionInfo& info) : sessionInfo_(info)
-{
-}
-
-Session::~Session()
-{
-    WLOGD("~Session");
-}
-
 uint64_t Session::GetPersistentId() const
 {
     return persistentId_;
@@ -51,7 +42,6 @@ uint64_t Session::GetPersistentId() const
 uint64_t Session::GetParentPersistentId() const
 {
     if (property_ != nullptr) {
-        WLOGFD("GetParentPersistentId, id:%{public}" PRIu64"", property_->GetParentPersistentId());
         return property_->GetParentPersistentId();
     }
     return INVALID_SESSION_ID;
@@ -62,7 +52,7 @@ void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& proper
     property_ = property;
 }
 
-const sptr<WindowSessionProperty>& Session::GetWindowSessionProperty() const
+sptr<WindowSessionProperty> Session::GetWindowSessionProperty() const
 {
     return property_;
 }
@@ -193,6 +183,26 @@ bool Session::GetTouchable() const
     return property_->GetTouchable();
 }
 
+uint32_t Session::GetWindowId() const
+{
+    return static_cast<uint32_t>(GetPersistentId()) & 0xffffffff;
+}
+
+int32_t Session::GetCallingPid() const
+{
+    return callingPid_;
+}
+
+int32_t Session::GetCallingUid() const
+{
+    return callingUid_;
+}
+
+sptr<IRemoteObject> Session::GetAbilityToken() const
+{
+    return abilityToken_;
+}
+
 bool Session::IsSessionValid() const
 {
     bool res = state_ > SessionState::STATE_DISCONNECT && state_ < SessionState::STATE_END;
@@ -217,7 +227,7 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 }
 
 WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
 {
     WLOGFI("Connect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()));
@@ -232,6 +242,9 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     sessionStage_ = sessionStage;
     windowEventChannel_ = eventChannel;
     surfaceNode_ = surfaceNode;
+    abilityToken_ = token;
+    callingPid_ = IPCSkeleton::GetCallingPid();
+    callingUid_ = IPCSkeleton::GetCallingUid();
     systemConfig = systemConfig_;
     if (property) {
         property->SetPersistentId(GetPersistentId());
@@ -332,7 +345,6 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.moduleName_ = abilitySessionInfo->want.GetModuleName();
-    info.callerToken_ = abilitySessionInfo->callerToken;
     info.persistentId_ = abilitySessionInfo->persistentId;
     info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
     info.callerPersistentId_ = GetPersistentId();
@@ -340,6 +352,7 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     sessionInfo_.callState_ = info.callState_;
     sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
     sessionInfo_.requestCode = abilitySessionInfo->requestCode;
+    sessionInfo_.callerToken_ = abilitySessionInfo->callerToken;
     WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
     WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}" PRIu64 "",
@@ -480,15 +493,15 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
-    WLOGFD("Session TransferPointEvent, Id: %{public}" PRIu64 "", persistentId_);
-    if (!windowEventChannel_) {
-        WLOGFE("windowEventChannel_ is null");
-        return WSError::WS_ERROR_NULLPTR;
-    }
     auto action = pointerEvent->GetPointerAction();
     if (!isFocused_ && GetFocusable() && action == MMI::PointerEvent::POINTER_ACTION_DOWN) {
         NotifyClick();
     }
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    WLOGD("TransferPointEvent, id: %{public}" PRIu64, persistentId_);
     return windowEventChannel_->TransferPointerEvent(pointerEvent);
 }
 
@@ -505,12 +518,30 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
-    WLOGFD("Session TransferKeyEvent");
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
+    WLOGD("TransferKeyEvent, id: %{public}" PRIu64, persistentId_);
     return windowEventChannel_->TransferKeyEvent(keyEvent);
+}
+
+WSError Session::TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+{
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed);
+}
+
+WSError Session::TransferFocusActiveEvent(bool isFocusActive)
+{
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferFocusActiveEvent(isFocusActive);
 }
 
 std::shared_ptr<Media::PixelMap> Session::GetSnapshot() const
@@ -591,6 +622,10 @@ WSError Session::UpdateFocus(bool isFocused)
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (isFocused_ == isFocused) {
+        WLOGFD("Session focus do not change: [%{public}d]", isFocused);
+        return WSError::WS_DO_NOTHING;
+    }
     isFocused_ = isFocused;
     sessionStage_->UpdateFocus(isFocused);
 
@@ -601,6 +636,7 @@ void Session::SetSessionRect(const WSRect& rect)
 {
     winRect_ = rect;
 }
+
 WSRect Session::GetSessionRect() const
 {
     return winRect_;
@@ -669,7 +705,6 @@ sptr<WindowSessionProperty> Session::GetSessionProperty() const
 WindowType Session::GetWindowType() const
 {
     if (property_ != nullptr) {
-        WLOGFD("Type:%{public}" PRIu32 "", static_cast<uint32_t>(property_->GetWindowType()));
         return property_->GetWindowType();
     }
     return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
@@ -698,9 +733,9 @@ WSError Session::ProcessBackEvent()
     return sessionStage_->HandleBackEvent();
 }
 
-void Session::GeneratePersistentId(const bool isExtension, const SessionInfo &sessionInfo)
+void Session::GeneratePersistentId(bool isExtension, const SessionInfo& sessionInfo)
 {
-    if (sessionInfo.persistentId_ != 0) {
+    if (sessionInfo.persistentId_ != INVALID_SESSION_ID) {
         persistIdSet_.insert(sessionInfo.persistentId_);
         persistentId_ = static_cast<uint64_t>(sessionInfo.persistentId_);
         return;

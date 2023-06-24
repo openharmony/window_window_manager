@@ -20,7 +20,6 @@
 
 namespace OHOS {
 namespace Rosen {
-
 class WindowSceneSessionImpl : public WindowSessionImpl {
 public:
     explicit WindowSceneSessionImpl(const sptr<WindowOption>& option);
@@ -45,18 +44,25 @@ public:
     WmErrorCode RaiseToAppTop() override;
     WSError HandleBackEvent() override;
 
+    WMError SetBackgroundColor(const std::string& color) override;
+    WMError SetTransparent(bool isTransparent) override;
     virtual WMError SetPrivacyMode(bool isPrivacyMode) override;
-    virtual bool IsPrivacyMode() const override;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
+    
+    bool IsTransparent() const override;
+    virtual bool IsPrivacyMode() const override;
 protected:
     void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();
     sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
     sptr<WindowSessionImpl> FindMainWindowWithContext();
     void UpdateSubWindowStateAndNotify(uint64_t parentPersistentId, const WindowState& newState);
+    void LimitCameraFloatWindowMininumSize(uint32_t& width, uint32_t& height);
 
 private:
     bool IsValidSystemWindowType(const WindowType& type);
+    WMError SetBackgroundColor(uint32_t color);
+    uint32_t GetBackgroundColor() const;
 };
 } // namespace Rosen
 } // namespace OHOS

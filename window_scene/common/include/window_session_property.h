@@ -43,6 +43,8 @@ public:
     void SetParentId(uint32_t parentId);
     void SetPersistentId(uint64_t persistentId);
     void SetParentPersistentId(uint64_t persistentId);
+    void SetAccessTokenId(uint32_t accessTokenId);
+    void SetTokenState(bool hasToken);
 
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
@@ -57,6 +59,8 @@ public:
     uint64_t GetDisplayId() const;
     uint64_t GetPersistentId() const;
     uint64_t GetParentPersistentId() const;
+    uint32_t GetAccessTokenId() const;
+    bool GetTokenState() const;
 
     bool Marshalling(Parcel& parcel) const override;
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
@@ -68,12 +72,14 @@ private:
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW }; // type main window
     bool focusable_ { true };
     bool touchable_ { true };
+    bool tokenState_ { false };
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };
     uint64_t displayId_ = 0;
     uint32_t parentId_ = INVALID_SESSION_ID; // parentId of sceneSession, which is low 32 bite of parentPersistentId_
     uint64_t persistentId_ = INVALID_SESSION_ID;
     uint64_t parentPersistentId_ = INVALID_SESSION_ID;
+    uint32_t accessTokenId_ = INVALID_SESSION_ID;
 };
 
 struct SystemSessionConfig : public Parcelable {

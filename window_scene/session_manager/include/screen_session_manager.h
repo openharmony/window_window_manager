@@ -16,7 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCREEN_SESSION_MANAGER_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCREEN_SESSION_MANAGER_H
 
-#include "common/include/message_scheduler.h"
+#include "common/include/task_scheduler.h"
 #include "session/screen/include/screen_session.h"
 #include "zidl/screen_session_manager_stub.h"
 #include "client_agent_container.h"
@@ -148,7 +148,6 @@ protected:
     virtual ~ScreenSessionManager() = default;
 
 private:
-    void Init();
     void LoadScreenSceneXml();
     void ConfigureScreenScene();
     void ConfigureWaterfallDisplayCompressionParams();
@@ -183,25 +182,21 @@ private:
     };
 
     RSInterfaces& rsInterface_;
-    std::shared_ptr<MessageScheduler> msgScheduler_ = nullptr;
+    std::shared_ptr<TaskScheduler> taskScheduler_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
 
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
-
     ScreenIdManager screenIdManager_;
 
-    std::atomic<ScreenId> defaultRsScreenId_ {SCREEN_ID_INVALID };
+    std::atomic<ScreenId> defaultRsScreenId_ { SCREEN_ID_INVALID };
     std::map<sptr<IRemoteObject>, std::vector<ScreenId>> screenAgentMap_;
     std::map<ScreenId, sptr<ScreenSessionGroup>> smsScreenGroupMap_;
 
     bool isExpandCombination_ = false;
     sptr<AgentDeathRecipient> deathRecipient_ { nullptr };
 
-    std::shared_ptr<AppExecFwk::EventHandler> controllerHandler_;
-
     std::vector<sptr<IScreenConnectionListener>> screenConnectionListenerList_;
-
     sptr<IDisplayChangeListener> displayChangeListener_;
     sptr<SessionDisplayPowerController> sessionDisplayPowerController_;
 };

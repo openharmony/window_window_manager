@@ -22,11 +22,11 @@
 #include <ui/rs_surface_node.h>
 
 #include "common/include/window_session_property.h"
+#include "interfaces/include/ws_common_inner.h"
 #include "session/container/include/zidl/session_stage_stub.h"
 #include "session/host/include/zidl/session_interface.h"
 #include "window.h"
 #include "window_option.h"
-#include "interfaces/include/ws_common_inner.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -34,11 +34,11 @@ namespace {
 template<typename T1, typename T2, typename Ret>
 using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
 }
-class WindowSessionImpl : public Window, virtual public SessionStageStub {
+class WindowSessionImpl : public Window, public virtual SessionStageStub {
 public:
     explicit WindowSessionImpl(const sptr<WindowOption>& option);
     ~WindowSessionImpl();
-    // inherits from window
+
     virtual WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession);
     WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
@@ -68,10 +68,12 @@ public:
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
     WSError UpdateFocus(bool focus) override;
+    WSError HandleBackEvent() override { return WSError::WS_OK; }
+
     void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
-    void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
-    WSError HandleBackEvent() override { return WSError::WS_OK; };
-    // callback
+    void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
+    void NotifyFocusActiveEvent(bool isFocusActive) override;
+
     WMError RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     WMError RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
@@ -81,6 +83,7 @@ public:
     WMError RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
     WMError UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
+
     uint32_t GetParentId() const;
     uint64_t GetPersistentId() const;
     sptr<WindowSessionProperty> GetProperty() const;
@@ -115,18 +118,20 @@ protected:
     void UpdateDecorEnable(bool needNotify = false);
     void NotifyModeChange(WindowMode mode, bool hasDeco = true);
 
-    std::unique_ptr<Ace::UIContent> uiContent_ = nullptr;
-    sptr<ISession> hostSession_ = nullptr;
-    std::shared_ptr<AbilityRuntime::Context> context_ = nullptr;
-    std::shared_ptr<RSSurfaceNode> surfaceNode_ = nullptr;
-    sptr<WindowSessionProperty> property_ = nullptr;
-    // map of windowSession: <sessionName, <persistentId, windowSession>>
-    static std::map<std::string, std::pair<uint64_t, sptr<WindowSessionImpl>>> windowSessionMap_;
-    // map of subSession: <persistentId, std::vector<windowSession>>
-    static std::map<uint64_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
-    std::recursive_mutex mutex_;
+    sptr<ISession> hostSession_;
+    std::unique_ptr<Ace::UIContent> uiContent_;
+    std::shared_ptr<AbilityRuntime::Context> context_;
+    std::shared_ptr<RSSurfaceNode> surfaceNode_;
+
+    std::string windowName_;
+    sptr<WindowSessionProperty> property_;
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_UNDEFINED;
-    SystemSessionConfig windowSystemConfig_ ;
+    SystemSessionConfig windowSystemConfig_;
+    NotifyNativeWinDestroyFunc notifyNativeFunc_;
+
+    std::recursive_mutex mutex_;
+    static std::map<std::string, std::pair<uint64_t, sptr<WindowSessionImpl>>> windowSessionMap_;
+    static std::map<uint64_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
 
     WMError UpdateProperty(WSPropertyChangeAction action);
 private:
@@ -147,13 +152,11 @@ private:
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     WMError CheckParmAndPermission();
 
-    std::string windowName_;
+    static std::recursive_mutex globalMutex_;
     static std::map<uint64_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<uint64_t, std::vector<sptr<IWindowChangeListener>>> windowChangeListeners_;
     static std::map<uint64_t, std::vector<sptr<IDialogDeathRecipientListener>>> dialogDeathRecipientListeners_;
     static std::map<uint64_t, std::vector<sptr<IDialogTargetTouchListener>>> dialogTargetTouchListener_;
-    static std::recursive_mutex globalMutex_;
-    NotifyNativeWinDestroyFunc notifyNativefunc_;
 };
 } // namespace Rosen
 } // namespace OHOS

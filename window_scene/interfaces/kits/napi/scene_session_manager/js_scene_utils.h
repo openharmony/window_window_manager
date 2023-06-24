@@ -57,6 +57,7 @@ const std::map<WindowType, WindowTypeInAPI> WINDOW_TYPE_TO_API_TYPE_MAP {
     { WindowType::WINDOW_TYPE_VOICE_INTERACTION,   WindowTypeInAPI::TYPE_VOICE_INTERACTION },
     { WindowType::WINDOW_TYPE_SCREENSHOT,          WindowTypeInAPI::TYPE_SCREENSHOT        },
     { WindowType::WINDOW_TYPE_POINTER,             WindowTypeInAPI::TYPE_POINTER           },
+    { WindowType::WINDOW_TYPE_TOAST,               WindowTypeInAPI::TYPE_SYSTEM_ALERT      },
 };
 bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, SessionInfo& sessionInfo);
 NativeValue* CreateJsSessionInfo(NativeEngine& engine, const SessionInfo& sessionInfo);
