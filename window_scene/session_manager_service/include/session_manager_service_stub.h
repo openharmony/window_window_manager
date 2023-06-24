@@ -16,20 +16,18 @@
 #ifndef FOUNDATION_WINDOW_SCENE_SESSION_MANAGER_SERVICE_STUB_H
 #define FOUNDATION_WINDOW_SCENE_SESSION_MANAGER_SERVICE_STUB_H
 
-#include "session_manager_service_interface.h"
-
 #include <iremote_stub.h>
-#include "interfaces/include/ws_common.h"
-#include "session/host/include/session.h"
+
+#include "session_manager_service_interface.h"
 
 namespace OHOS::Rosen {
 class SessionManagerServiceStub : public IRemoteStub<ISessionManagerService> {
 public:
     SessionManagerServiceStub() = default;
-    ~SessionManagerServiceStub() = default;
+    virtual ~SessionManagerServiceStub() = default;
 
-    virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-        MessageOption &option) override;
+    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 };
 } // namespace OHOS::Rosen
+
 #endif // FOUNDATION_WINDOW_SCENE_SESSION_MANAGER_SERVICE_STUB_H

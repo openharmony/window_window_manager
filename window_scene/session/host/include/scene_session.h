@@ -16,13 +16,13 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 
-#include "interfaces/include/ws_common.h"
 #include "session/host/include/session.h"
 
 namespace OHOS::Rosen {
 class SceneSession;
-using SpecificSessionCreateCallback = std::function<sptr<SceneSession>(const SessionInfo& info)>;
+using SpecificSessionCreateCallback = std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
 using SpecificSessionDestroyCallback = std::function<WSError(const uint64_t& persistentId)>;
+using CameraFloatSessionChangeCallback = std::function<void(uint32_t accessTokenId, bool isShowing)>;
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId)>;
@@ -33,6 +33,7 @@ public:
     struct SpecificSessionCallback : public RefBase {
         SpecificSessionCreateCallback onCreate_;
         SpecificSessionDestroyCallback onDestroy_;
+        CameraFloatSessionChangeCallback onCameraFloatSessionChange_;
     };
 
     // callback for notify SceneBoard
@@ -46,6 +47,9 @@ public:
     SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
     ~SceneSession() = default;
 
+    WSError Foreground() override;
+    WSError Background() override;
+
     WSError OnSessionEvent(SessionEvent event) override;
     WSError RaiseToAppTop() override;
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) override;
@@ -54,9 +58,9 @@ public:
         sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session) override;
     WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) override;
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
-    WSError Background() override;
 
 private:
+    void UpdateCameraFloatWindowStatus(bool isShowing);
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
 };

@@ -148,6 +148,26 @@ uint64_t WindowSessionProperty::GetParentPersistentId() const
     return parentPersistentId_;
 }
 
+void WindowSessionProperty::SetAccessTokenId(uint32_t accessTokenId)
+{
+    accessTokenId_ = accessTokenId;
+}
+
+uint32_t WindowSessionProperty::GetAccessTokenId() const
+{
+    return accessTokenId_;
+}
+
+void WindowSessionProperty::SetTokenState(bool hasToken)
+{
+    tokenState_ = hasToken;
+}
+
+bool WindowSessionProperty::GetTokenState() const
+{
+    return tokenState_;
+}
+
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
@@ -156,12 +176,13 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(requestRect_.posY_) && parcel.WriteUint32(requestRect_.width_) &&
         parcel.WriteUint32(requestRect_.height_) &&
         parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
-        parcel.WriteBool(focusable_) && parcel.WriteBool(touchable_) &&
+        parcel.WriteBool(focusable_) && parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
         parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteUint64(persistentId_) &&
         parcel.WriteString(sessionInfo_.bundleName_) && parcel.WriteString(sessionInfo_.moduleName_) &&
         parcel.WriteString(sessionInfo_.abilityName_) &&
-        parcel.WriteUint64(parentPersistentId_);
+        parcel.WriteUint64(parentPersistentId_) &&
+        parcel.WriteUint32(accessTokenId_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -178,6 +199,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowType(static_cast<WindowType>(parcel.ReadUint32()));
     property->SetFocusable(parcel.ReadBool());
     property->SetTouchable(parcel.ReadBool());
+    property->SetTokenState(parcel.ReadBool());
     property->SetPrivacyMode(parcel.ReadBool());
     property->SetSystemPrivacyMode(parcel.ReadBool());
     property->SetDisplayId(parcel.ReadUint64());
@@ -185,6 +207,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     SessionInfo info = { parcel.ReadString(), parcel.ReadString(), parcel.ReadString() };
     property->SetSessionInfo(info);
     property->SetParentPersistentId(parcel.ReadUint64());
+    property->SetAccessTokenId(parcel.ReadUint32());
     return property;
 }
 } // namespace Rosen

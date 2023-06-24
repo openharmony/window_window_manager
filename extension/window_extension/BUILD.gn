@@ -25,6 +25,7 @@ config("libwindow_extension_private_config") {
     "../../interfaces/kits/napi/window_runtime/window_napi",
     "../../interfaces/innerkits/extension",
     "../../interfaces/innerkits/wm",
+    "../../window_scene/interfaces/innerkits/include",
   ]
 }
 
@@ -47,6 +48,7 @@ ohos_shared_library("libwindow_extension") {
 
   deps = [
     "../../interfaces/kits/napi/window_runtime:window_native_kit",
+    "../../window_scene/interfaces/innerkits:libwsutils",
     "../../wm:libwm",
   ]
 
