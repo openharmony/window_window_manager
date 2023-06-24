@@ -46,6 +46,7 @@ public:
 
     WMError SetBackgroundColor(const std::string& color) override;
     WMError SetTransparent(bool isTransparent) override;
+    virtual WMError SetSnapshotSkip(bool isSkip) override;
     
     bool IsTransparent() const override;
 protected:

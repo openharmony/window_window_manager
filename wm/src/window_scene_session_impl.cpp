@@ -16,6 +16,7 @@
 #include "window_scene_session_impl.h"
 
 #include <parameters.h>
+#include <transaction/rs_transaction.h>
 
 #include "color_parser.h"
 #include "display_manager.h"
@@ -692,6 +693,17 @@ WMError WindowSceneSessionImpl::SetTransparent(bool isTransparent)
             return SetBackgroundColor(backgroundColor.value);
         }
     }
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SetSnapshotSkip(bool isSkip)
+{
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("set snapshot skip permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    surfaceNode_->SetSecurityLayer(isSkip || property_->GetSystemPrivacyMode());
+    RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
 }
 } // namespace Rosen
