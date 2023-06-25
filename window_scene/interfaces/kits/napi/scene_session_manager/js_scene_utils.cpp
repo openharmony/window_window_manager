@@ -33,7 +33,6 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
     NativeValue* jsAbilityName = jsObject->GetProperty("abilityName");
     NativeValue* jsIsSystem = jsObject->GetProperty("isSystem");
     NativeValue* jsPersistentId = jsObject->GetProperty("persistentId");
-    NativeValue* jsCallerPersistentId = jsObject->GetProperty("callerPersistentId");
     NativeValue* jsCallState = jsObject->GetProperty("callState");
 
     if (jsBundleName->TypeOf() != NATIVE_UNDEFINED) {
@@ -76,14 +75,6 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
         }
         sessionInfo.persistentId_ = persistentId;
     }
-    if (jsCallerPersistentId->TypeOf() != NATIVE_UNDEFINED) {
-        int64_t callerPersistentId;
-        if (!ConvertFromJsValue(engine, jsCallerPersistentId, callerPersistentId)) {
-            WLOGFE("[NAPI]Failed to convert parameter to callerPersistentId");
-            return false;
-        }
-        sessionInfo.callerPersistentId_ = callerPersistentId;
-    }
     if (jsCallState->TypeOf() != NATIVE_UNDEFINED) {
         int32_t callState;
         if (!ConvertFromJsValue(engine, jsCallState, callState)) {
@@ -108,8 +99,6 @@ NativeValue* CreateJsSessionInfo(NativeEngine& engine, const SessionInfo& sessio
     object->SetProperty("abilityName", CreateJsValue(engine, sessionInfo.abilityName_));
     object->SetProperty("isSystem", CreateJsValue(engine, sessionInfo.isSystem_));
     object->SetProperty("persistentId", CreateJsValue(engine, static_cast<int64_t>(sessionInfo.persistentId_)));
-    object->SetProperty("callerPersistentId", CreateJsValue(engine,
-        static_cast<int64_t>(sessionInfo.callerPersistentId_)));
     object->SetProperty("callState", CreateJsValue(engine, static_cast<int32_t>(sessionInfo.callState_)));
     return objValue;
 }
