@@ -50,21 +50,15 @@ void TimerManager::Stop()
     OnStop();
 }
 
-int32_t TimerManager::AddTimer(int32_t intervalMs, int32_t repeatCount, std::function<void()> callback)
+int32_t TimerManager::AddTimer(int32_t intervalMs, std::function<void()> callback)
 {
-    return AddTimerInternal(intervalMs, repeatCount, callback);
+    return AddTimerInternal(intervalMs, callback);
 }
 
 int32_t TimerManager::RemoveTimer(int32_t timerId)
 {
     CALL_DEBUG_ENTER;
     return RemoveTimerInternal(timerId);
-}
-
-int32_t TimerManager::ResetTimer(int32_t timerId)
-{
-    CALL_DEBUG_ENTER;
-    return ResetTimerInternal(timerId);
 }
 
 bool TimerManager::IsExist(int32_t timerId)
@@ -123,7 +117,7 @@ int32_t TimerManager::TakeNextTimerId()
     return NONEXISTENT_ID;
 }
 
-int32_t TimerManager::AddTimerInternal(int32_t intervalMs, int32_t repeatCount, std::function<void()> callback)
+int32_t TimerManager::AddTimerInternal(int32_t intervalMs, std::function<void()> callback)
 {
     CALL_DEBUG_ENTER;
     if (intervalMs < MIN_INTERVAL) {
@@ -141,8 +135,6 @@ int32_t TimerManager::AddTimerInternal(int32_t intervalMs, int32_t repeatCount, 
     auto timer = std::make_unique<TimerItem>();
     timer->id = timerId;
     timer->intervalMs = intervalMs;
-    timer->repeatCount = repeatCount;
-    timer->callbackCount = 0;
     auto nowTime = GetMillisTime();
     if (!AddInt64(nowTime, timer->intervalMs, timer->nextCallTime)) {
         WLOGFE("The addition of nextCallTime in TimerItem overflows");
@@ -165,26 +157,6 @@ int32_t TimerManager::RemoveTimerInternal(int32_t timerId)
     return -1;
 }
 
-int32_t TimerManager::ResetTimerInternal(int32_t timerId)
-{
-    CALL_DEBUG_ENTER;
-    for (auto it = timers_.begin(); it != timers_.end(); ++it) {
-        if ((*it)->id == timerId) {
-            auto timer = std::move(*it);
-            timers_.erase(it);
-            auto nowTime = GetMillisTime();
-            if (!AddInt64(nowTime, timer->intervalMs, timer->nextCallTime)) {
-                WLOGFE("The addition of nextCallTime in TimerItem overflows");
-                return -1;
-            }
-            timer->callbackCount = 0;
-            InsertTimerInternal(timer);
-            return 0;
-        }
-    }
-    return -1;
-}
-
 bool TimerManager::IsExistInternal(int32_t timerId)
 {
     CALL_DEBUG_ENTER;
@@ -199,6 +171,7 @@ bool TimerManager::IsExistInternal(int32_t timerId)
 void TimerManager::InsertTimerInternal(std::unique_ptr<TimerItem>& timer)
 {
     CALL_DEBUG_ENTER;
+    WLOGFD("timerId:%{public}d, nextCallTime:%" PRIu64"", timer->id, timer->nextCallTime);
     for (auto it = timers_.begin(); it != timers_.end(); ++it) {
         if ((*it)->nextCallTime > timer->nextCallTime) {
             timers_.insert(it, std::move(timer));
@@ -215,6 +188,7 @@ int32_t TimerManager::CalcNextDelayInternal()
     if (!timers_.empty()) {
         auto nowTime = GetMillisTime();
         const auto& item = *timers_.begin();
+        WLOGFD("timerId:%{public}d, nextCallTime:%" PRIu64"", item->id, item->nextCallTime);
         if (nowTime >= item->nextCallTime) {
             delay = 0;
         } else {
@@ -232,27 +206,22 @@ void TimerManager::ProcessTimersInternal()
     }
     auto nowTime = GetMillisTime();
     for (;;) {
+        WLOGFD("for (;;)");
         auto it = timers_.begin();
         if (it == timers_.end()) {
             break;
         }
         if ((*it)->nextCallTime > nowTime) {
+            WLOGFD("(*it)->nextCallTime > nowTime");
             break;
         }
         auto curTimer = std::move(*it);
         timers_.erase(it);
-        ++curTimer->callbackCount;
-        if ((curTimer->repeatCount >= 1) && (curTimer->callbackCount >= curTimer->repeatCount)) {
+        if (curTimer->callback != nullptr) {
+            WLOGFD("Execute timer callback start");
             curTimer->callback();
-            continue;
+            WLOGFD("Execute timer callback end");
         }
-        if (!AddInt64(curTimer->nextCallTime, curTimer->intervalMs, curTimer->nextCallTime)) {
-            WLOGFE("The addition of nextCallTime in TimerItem overflows");
-            return;
-        }
-        auto callback = curTimer->callback;
-        InsertTimerInternal(curTimer);
-        callback();
     }
 }
 } // namespace Rosen
