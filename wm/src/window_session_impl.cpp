@@ -34,6 +34,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowS
 
 std::map<uint64_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
 std::map<uint64_t, std::vector<sptr<IWindowChangeListener>>> WindowSessionImpl::windowChangeListeners_;
+std::map<uint64_t, std::vector<sptr<IAvoidAreaChangedListener>>> WindowSessionImpl::avoidAreaChangeListeners_;
 std::map<uint64_t, std::vector<sptr<IDialogDeathRecipientListener>>> WindowSessionImpl::dialogDeathRecipientListeners_;
 std::map<uint64_t, std::vector<sptr<IDialogTargetTouchListener>>> WindowSessionImpl::dialogTargetTouchListener_;
 std::recursive_mutex WindowSessionImpl::globalMutex_;
@@ -365,6 +366,9 @@ WMError WindowSessionImpl::SetUIContent(const std::string& contentInfo,
     }
     // make uiContent available after Initialize/Restore
     uiContent_ = std::move(uiContent);
+    if (isIgnoreSafeAreaNeedNotify_) {
+        uiContent_->SetIgnoreViewSafeArea(isIgnoreSafeArea_);
+    }
     UpdateDecorEnable(true);
     if (state_ == WindowState::STATE_SHOWN) {
         // UIContent may be nullptr when show window, need to notify again when window is shown
@@ -596,6 +600,7 @@ void WindowSessionImpl::ClearListenersById(uint64_t persistentId)
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
     ClearUselessListeners(lifecycleListeners_, persistentId);
     ClearUselessListeners(windowChangeListeners_, persistentId);
+    ClearUselessListeners(avoidAreaChangeListeners_, persistentId);
     ClearUselessListeners(dialogDeathRecipientListeners_, persistentId);
     ClearUselessListeners(dialogTargetTouchListener_, persistentId);
 }
@@ -726,8 +731,7 @@ EnableIfSame<T, IDialogDeathRecipientListener, std::vector<sptr<IDialogDeathReci
 }
 
 template<typename T>
-EnableIfSame<T, IDialogTargetTouchListener, std::vector<sptr<IDialogTargetTouchListener>>> WindowSessionImpl::
-    GetListeners()
+EnableIfSame<T, IDialogTargetTouchListener, std::vector<sptr<IDialogTargetTouchListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IDialogTargetTouchListener>> dialogTargetTouchListener;
     {
@@ -768,6 +772,51 @@ void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reaso
     for (auto& listener : windowChangeListeners) {
         if (listener != nullptr) {
             listener->OnSizeChange(rect, reason);
+        }
+    }
+}
+
+WMError WindowSessionImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+{
+    WLOGFD("Start register");
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+    return RegisterListener(avoidAreaChangeListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+{
+    WLOGFD("Start unregister");
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+    return UnregisterListener(avoidAreaChangeListeners_[GetPersistentId()], listener);
+}
+
+template<typename T>
+EnableIfSame<T, IAvoidAreaChangedListener, std::vector<sptr<IAvoidAreaChangedListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IAvoidAreaChangedListener>> windowChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+        for (auto& listener : avoidAreaChangeListeners_[GetPersistentId()]) {
+            windowChangeListeners.push_back(listener);
+        }
+    }
+    return windowChangeListeners;
+}
+
+void WindowSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
+{
+    auto avoidAreaChangeListeners = GetListeners<IAvoidAreaChangedListener>();
+    for (auto& listener : avoidAreaChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnAvoidAreaChanged(*avoidArea, type);
         }
     }
 }

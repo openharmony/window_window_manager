@@ -49,7 +49,11 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_SET_MAXIMIZE_MODE),
         &SessionStub::HandleSetGlobalMaximizeMode),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_GET_MAXIMIZE_MODE),
-        &SessionStub::HandleGetGlobalMaximizeMode)
+        &SessionStub::HandleGetGlobalMaximizeMode),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_NEED_AVOID),
+        &SessionStub::HandleNeedAvoid),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_GET_AVOID_AREA),
+        &SessionStub::HandleGetAvoidAreaByType),
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -283,6 +287,24 @@ int SessionStub::HandleGetGlobalMaximizeMode(MessageParcel &data, MessageParcel 
     WSError errCode = GetGlobalMaximizeMode(mode);
     reply.WriteUint32(static_cast<uint32_t>(mode));
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNeedAvoid(MessageParcel& data, MessageParcel& reply)
+{
+    bool status = static_cast<bool>(data.ReadUint32());
+    WLOGFD("HandleNeedAvoid status:%{public}d", static_cast<int32_t>(status));
+    WSError errCode = OnNeedAvoid(status);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& reply)
+{
+    AvoidAreaType type = static_cast<AvoidAreaType>(data.ReadUint32());
+    WLOGFD("HandleGetAvoidArea type:%{public}d", static_cast<int32_t>(type));
+    AvoidArea avoidArea = GetAvoidAreaByType(type);
+    reply.WriteParcelable(&avoidArea);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -503,6 +503,133 @@ WmErrorCode WindowSceneSessionImpl::RaiseToAppTop()
     return static_cast<WmErrorCode>(ret);
 }
 
+WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
+{
+    uint32_t windowId = GetWindowId();
+    WLOGFI("GetAvoidAreaByType windowId:%{public}u type:%{public}u", windowId, static_cast<uint32_t>(type));
+    if (type != AvoidAreaType::TYPE_KEYBOARD &&
+        windowMode_ != WindowMode::WINDOW_MODE_FULLSCREEN &&
+        windowMode_ != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
+        windowMode_ != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        WLOGI("avoidAreaType:%{public}u, windowMode:%{public}u, return default avoid area.",
+            static_cast<uint32_t>(type), static_cast<uint32_t>(windowMode_));
+        return WMError::WM_OK;
+    }
+    avoidArea = hostSession_->GetAvoidAreaByType(type);
+    return WMError::WM_OK;
+}
+
+SystemBarProperty WindowSceneSessionImpl::GetSystemBarPropertyByType(WindowType type) const
+{
+    WLOGFI("GetSystemBarPropertyByType windowId:%{public}u type:%{public}u",
+        GetWindowId(), static_cast<uint32_t>(type));
+    auto curProperties = property_->GetSystemBarProperty();
+    return curProperties[type];
+}
+
+WMError WindowSceneSessionImpl::NotifyWindowSessionProperty()
+{
+    WLOGFD("NotifyWindowSessionProperty called windowId:%{public}u", GetWindowId());
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
+{
+    WLOGFI("SetSystemBarProperty windowId:%{public}u type:%{public}u"
+        "enable:%{public}u bgColor:%{public}x Color:%{public}x",
+        GetWindowId(), static_cast<uint32_t>(type),
+        property.enable_, property.backgroundColor_, property.contentColor_);
+    if (!((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM))) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    } else if (GetSystemBarPropertyByType(type) == property) {
+        return WMError::WM_OK;
+    }
+
+    property_->SetSystemBarProperty(type, property);
+    if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
+        return WMError::WM_OK;
+    }
+    WMError ret = NotifyWindowSessionProperty();
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetSystemBarProperty winId:%{public}u errCode:%{public}d",
+            GetWindowId(), static_cast<int32_t>(ret));
+    }
+    return ret;
+}
+
+WMError WindowSceneSessionImpl::NotifyWindowNeedAvoid(bool status)
+{
+    WLOGFD("NotifyWindowNeedAvoid called windowId:%{public}u status:%{public}d",
+        GetWindowId(), static_cast<int32_t>(status));
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    hostSession_->OnNeedAvoid(status);
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
+{
+    uint32_t version = 0;
+    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
+        version = context_->GetApplicationInfo()->apiCompatibleVersion;
+    }
+    hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
+    windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    // 10 ArkUI new framework support after API10
+    if (version >= 10) {
+        if (uiContent_ != nullptr) {
+            uiContent_->SetIgnoreViewSafeArea(status);
+        } else {
+            isIgnoreSafeAreaNeedNotify_ = true;
+            isIgnoreSafeArea_ = status;
+        }
+    } else {
+        WMError ret = NotifyWindowNeedAvoid(!status);
+        if (ret != WMError::WM_OK) {
+            WLOGFE("NotifyWindowNeedAvoid errCode:%{public}d winId:%{public}u",
+                static_cast<int32_t>(ret), GetWindowId());
+            return ret;
+        }
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
+{
+    WLOGFI("winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
+    WMError ret = SetLayoutFullScreenByApiVersion(status);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetLayoutFullScreenByApiVersion errCode:%{public}d winId:%{public}u",
+            static_cast<int32_t>(ret), GetWindowId());
+    }
+    return ret;
+}
+
+WMError WindowSceneSessionImpl::SetFullScreen(bool status)
+{
+    WLOGFI("winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
+    WMError ret = SetLayoutFullScreenByApiVersion(status);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetLayoutFullScreenByApiVersion errCode:%{public}d winId:%{public}u",
+            static_cast<int32_t>(ret), GetWindowId());
+    }
+    SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    statusProperty.enable_ = status;
+    ret = SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusProperty);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetSystemBarProperty errCode:%{public}d winId:%{public}u",
+            static_cast<int32_t>(ret), GetWindowId());
+    }
+    return ret;
+}
+
 bool WindowSceneSessionImpl::IsDecorEnable() const
 {
     bool enable = WindowHelper::IsMainWindow(GetType()) &&
@@ -533,9 +660,7 @@ WMError WindowSceneSessionImpl::Maximize()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(GetType())) {
-        hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetFullScreen(true);
-        windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
         UpdateDecorEnable(true);
     }
     return WMError::WM_OK;
