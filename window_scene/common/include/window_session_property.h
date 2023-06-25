@@ -36,6 +36,7 @@ public:
     void SetWindowRect(const struct Rect& rect);
     void SetFocusable(bool isFocusable);
     void SetTouchable(bool isTouchable);
+    void SetBrightness(float brightness);
     void SetDisplayId(uint64_t displayId);
     void SetWindowType(WindowType type);
     void SetParentId(uint32_t parentId);
@@ -43,6 +44,7 @@ public:
     void SetParentPersistentId(uint64_t persistentId);
     void SetAccessTokenId(uint32_t accessTokenId);
     void SetTokenState(bool hasToken);
+    void SetMaximizeMode(MaximizeMode mode);
 
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
@@ -51,12 +53,14 @@ public:
     WindowType GetWindowType() const;
     bool GetFocusable() const;
     bool GetTouchable() const;
+    float GetBrightness() const;
     uint32_t GetParentId() const;
     uint64_t GetDisplayId() const;
     uint64_t GetPersistentId() const;
     uint64_t GetParentPersistentId() const;
     uint32_t GetAccessTokenId() const;
     bool GetTokenState() const;
+    MaximizeMode GetMaximizeMode() const;
 
     bool Marshalling(Parcel& parcel) const override;
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
@@ -69,11 +73,13 @@ private:
     bool focusable_ { true };
     bool touchable_ { true };
     bool tokenState_ { false };
+    float brightness_ = UNDEFINED_BRIGHTNESS;
     uint64_t displayId_ = 0;
     uint32_t parentId_ = INVALID_SESSION_ID; // parentId of sceneSession, which is low 32 bite of parentPersistentId_
     uint64_t persistentId_ = INVALID_SESSION_ID;
     uint64_t parentPersistentId_ = INVALID_SESSION_ID;
     uint32_t accessTokenId_ = INVALID_SESSION_ID;
+    MaximizeMode maximizeMode_ = MaximizeMode::MODE_RECOVER;
 };
 
 struct SystemSessionConfig : public Parcelable {

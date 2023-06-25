@@ -61,7 +61,7 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
     return surfaceNode_;
 }
 
-const SessionInfo& Session::GetSessionInfo() const
+SessionInfo& Session::GetSessionInfo()
 {
     return sessionInfo_;
 }
@@ -132,6 +132,16 @@ void Session::NotifyBackground()
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
             listener.lock()->OnBackground();
+        }
+    }
+}
+
+void Session::NotifyDisconnect()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (!listener.expired()) {
+            listener.lock()->OnDisconnect();
         }
     }
 }
@@ -213,6 +223,17 @@ int32_t Session::GetCallingUid() const
 sptr<IRemoteObject> Session::GetAbilityToken() const
 {
     return abilityToken_;
+}
+
+WSError Session::SetBrightness(float brightness)
+{
+    property_->SetBrightness(brightness);
+    return WSError::WS_OK;
+}
+
+float Session::GetBrightness() const
+{
+    return property_->GetBrightness();
 }
 
 bool Session::IsSessionValid() const
@@ -310,6 +331,7 @@ WSError Session::Disconnect()
     WLOGFI("Disconnect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(state));
     state_ = SessionState::STATE_INACTIVE;
+    NotifyDisconnect();
     Background();
     if (GetSessionState() == SessionState::STATE_BACKGROUND) {
         UpdateSessionState(SessionState::STATE_DISCONNECT);
@@ -354,18 +376,14 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     info.moduleName_ = abilitySessionInfo->want.GetModuleName();
     info.persistentId_ = abilitySessionInfo->persistentId;
     info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
-    info.callerPersistentId_ = GetPersistentId();
-    sessionInfo_.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
-    sessionInfo_.callState_ = info.callState_;
-    sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
-    sessionInfo_.requestCode = abilitySessionInfo->requestCode;
-    sessionInfo_.callerToken_ = abilitySessionInfo->callerToken;
+    info.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
+    info.want = new AAFwk::Want(abilitySessionInfo->want);
+    info.requestCode = abilitySessionInfo->requestCode;
+    info.callerToken_ = abilitySessionInfo->callerToken;
     WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
-    WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}" PRIu64 "",
-        info.callState_, info.persistentId_);
-    WLOGFI("PendingSessionActivation uiAbilityId_: %{public}" PRIu64 "", sessionInfo_.uiAbilityId_);
-    WLOGFI("PendingSessionActivation current persistentId: %{public}" PRIu64 "", info.callerPersistentId_);
+    WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}" PRIu64 ", \
+        uiAbilityId: %{public}" PRIu64 "", info.callState_, info.persistentId_, info.uiAbilityId_);
     if (pendingSessionActivationFunc_) {
         pendingSessionActivationFunc_(info);
     }
@@ -762,5 +780,17 @@ void Session::GeneratePersistentId(bool isExtension, const SessionInfo& sessionI
 sptr<ScenePersistence> Session::GetScenePersistence() const
 {
     return scenePersistence_;
+}
+
+WSError Session::SetGlobalMaximizeMode(MaximizeMode mode)
+{
+    WLOGFD("Session SetGlobalMaximizeMode");
+    return WSError::WS_OK;
+}
+
+WSError Session::GetGlobalMaximizeMode(MaximizeMode& mode)
+{
+    WLOGFD("Session GetGlobalMaximizeMode");
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

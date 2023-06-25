@@ -38,7 +38,8 @@ class WindowSessionImpl : public Window, public virtual SessionStageStub {
 public:
     explicit WindowSessionImpl(const sptr<WindowOption>& option);
     ~WindowSessionImpl();
-
+    static sptr<Window> Find(const std::string& name);
+    // inherits from window
     virtual WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession);
     WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
@@ -56,6 +57,7 @@ public:
     WMError SetFocusable(bool isFocusable) override;
     WMError SetTouchable(bool isTouchable) override;
     WMError SetWindowType(WindowType type) override;
+    WMError SetBrightness(float brightness) override;
     bool GetTouchable() const override;
     uint32_t GetWindowId() const override;
     Rect GetRect() const override;
@@ -97,16 +99,6 @@ public:
 
     WindowState state_ { WindowState::STATE_INITIAL };
 
-    // window effect
-    virtual WMError SetCornerRadius(float cornerRadius) override;
-    virtual WMError SetShadowRadius(float radius) override;
-    virtual WMError SetShadowColor(std::string color) override;
-    virtual WMError SetShadowOffsetX(float offsetX) override;
-    virtual WMError SetShadowOffsetY(float offsetY) override;
-    virtual WMError SetBlur(float radius) override;
-    virtual WMError SetBackdropBlur(float radius) override;
-    virtual WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) override;
-
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -117,13 +109,13 @@ protected:
     WMError WindowSessionCreateCheck();
     void UpdateDecorEnable(bool needNotify = false);
     void NotifyModeChange(WindowMode mode, bool hasDeco = true);
+    WMError UpdateProperty(WSPropertyChangeAction action);
 
     sptr<ISession> hostSession_;
     std::unique_ptr<Ace::UIContent> uiContent_;
     std::shared_ptr<AbilityRuntime::Context> context_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
 
-    std::string windowName_;
     sptr<WindowSessionProperty> property_;
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_UNDEFINED;
     SystemSessionConfig windowSystemConfig_;
@@ -149,8 +141,6 @@ private:
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
-    WMError CheckParmAndPermission();
-    WMError UpdateProperty(WSPropertyChangeAction action);
 
     static std::recursive_mutex globalMutex_;
     static std::map<uint64_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
