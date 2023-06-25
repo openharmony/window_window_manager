@@ -37,8 +37,8 @@ config("libwm_public_config") {
 ohos_static_library("libwm_static") {
   include_dirs = [
     "../utils/include",
-    "//foundation/window/window_manager/window_scene/intention_event/service/anr_manager/include",
-    "//foundation/window/window_manager/window_scene/intention_event/framework/anr_handler/include"
+    "../window_scene/intention_event/service/anr_manager/include",
+    "../window_scene/intention_event/framework/anr_handler/include"
     ]
 
   sources = [
@@ -145,8 +145,8 @@ ohos_static_library("libwm_static") {
 ohos_shared_library("libwm") {
   include_dirs = [
     "../utils/include",
-    "//foundation/window/window_manager/window_scene/intention_event/service/anr_manager/include",
-    "//foundation/window/window_manager/window_scene/intention_event/framework/anr_handler/include"
+    "../window_scene/intention_event/service/anr_manager/include",
+    "../window_scene/intention_event/framework/anr_handler/include"
     ]
 
   sources = [
@@ -186,7 +186,6 @@ ohos_shared_library("libwm") {
     "${window_base_path}/window_scene/session_manager:session_manager",
     "../dm:libdm",
     "../utils:libwmutil",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
   ]
 

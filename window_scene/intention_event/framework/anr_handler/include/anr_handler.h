@@ -46,7 +46,7 @@ private:
     ANREvent event_;
 
     void UpdateLastProcessedEventId(int32_t eventId);
-    void SetLastProcessedEventStatus( bool status);
+    void SetLastProcessedEventStatus(bool status);
     int32_t GetLastProcessedEventId();
     void SendEvent(int64_t delayTime);
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;

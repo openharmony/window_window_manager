@@ -18,10 +18,9 @@ config("intention_event_public_config") {
     "anr_manager/include",
     "event_stage/include",
     "timer_manager/include",
-    "//foundation/window/window_manager/utils/include",
-    "//foundation/window/window_manager/window_scene/session/container/include/zidl",
-    "//foundation/window/window_manager/window_scene",
-    "//foundation/window/window_manager/window_scene/interfaces/include",
+    "../../../utils/include",
+    "../../session/container/include/zidl",
+    "../../interfaces/include",
     "../dfx/include",
     "../framework/anr_handler/include",
     "../utils/include"

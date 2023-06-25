@@ -108,7 +108,6 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         WLOGFE("Write surfaceNode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
     if (property) {
         if (!data.WriteBool(true) || !data.WriteParcelable(property.GetRefPtr())) {
             WLOGFE("Write property failed");
@@ -120,14 +119,12 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
-
     if (token != nullptr) {
         if (!data.WriteRemoteObject(token)) {
             WLOGFE("Write abilityToken failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
-
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_CONNECT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
