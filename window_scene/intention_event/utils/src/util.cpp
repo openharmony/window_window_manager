@@ -16,7 +16,7 @@
 #include "util.h"
 #include <chrono>
 
-#include <errno.h>
+#include <cerrno>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>

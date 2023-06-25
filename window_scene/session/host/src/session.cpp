@@ -507,7 +507,8 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
-    WLOGFD("Session TransferPointEvent, Id: %{public}" PRIu64 ", eventId: %{public}d", persistentId_, pointerEvent->GetId());
+    WLOGFD("Session TransferPointEvent, Id: %{public}" PRIu64 ", eventId: %{public}d",
+        persistentId_, pointerEvent->GetId());
     auto currentTime = GetSysClockTime();
     if (ANRMgr->IsANRTriggered(currentTime, persistentId_)) {
         WLOGFD("The pointer event does not report normally, application not response");

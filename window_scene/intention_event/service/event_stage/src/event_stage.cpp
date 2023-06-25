@@ -79,7 +79,7 @@ std::list<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t id)
         return {};
     }
     auto &events = events_[persistentId];
-    auto fistMatchIter = find_if(events.begin(), events.end(), [id](const auto &item){
+    auto fistMatchIter = find_if(events.begin(), events.end(), [id](const auto &item) {
         return item.id > id;
     });
     if (fistMatchIter == events.end()) {

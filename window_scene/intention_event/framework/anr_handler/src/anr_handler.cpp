@@ -34,7 +34,8 @@ constexpr int32_t TIME_TRANSITION = 1000;
 const std::string ANR_HANDLER_RUNNER { "ANR_HANDLER" };
 } // namespace
 
-ANRHandler::ANRHandler() {
+ANRHandler::ANRHandler()
+{
     auto runner = AppExecFwk::EventRunner::Create(ANR_HANDLER_RUNNER);
     if (runner == nullptr) {
         WLOGFE("Create eventRunner failed");
@@ -47,7 +48,7 @@ ANRHandler::~ANRHandler() {}
 void ANRHandler::SetSessionStage(const wptr<ISessionStage> &sessionStage)
 {
     CALL_DEBUG_ENTER;
-    sessionStage_ = sessionStage; 
+    sessionStage_ = sessionStage;
 }
 
 void ANRHandler::SetLastProcessedEventStatus(bool status)
@@ -99,7 +100,8 @@ int32_t ANRHandler::GetLastProcessedEventId()
     std::lock_guard<std::mutex> guard(anrMtx_);
     if (event_.lastEventId == INVALID_OR_PROCESSED_ID
         || event_.lastEventId <= event_.lastReportId) {
-        WLOGFD("Invalid or processed, lastEventId:%{public}d, lastReportId:%{public}d", event_.lastEventId, event_.lastReportId);
+        WLOGFD("Invalid or processed, lastEventId:%{public}d, lastReportId:%{public}d",
+            event_.lastEventId, event_.lastReportId);
         return INVALID_OR_PROCESSED_ID;
     }
 

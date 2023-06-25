@@ -92,7 +92,8 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
         faultData.errorObject.name = "APPLICATION_BLOCK_INPUT";
         faultData.errorObject.message = "";
         faultData.errorObject.stack = "";
-        if (int32_t ret = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFaultBySA(faultData); ret != 0) {
+        if (int32_t ret = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFaultBySA(faultData);
+            ret != 0) {
             WLOGFE("WLD << NotifyAppFaultBySA failed, pid:%{public}d, errcode:%{public}d", pid, ret);
         }
         WLOGFI("WLD << Receive anr notice pid:%{public}d leave", pid);

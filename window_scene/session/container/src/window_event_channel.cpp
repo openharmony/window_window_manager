@@ -50,7 +50,8 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
         pointerEvent->SetProcessedCallback(dispatchCallback_);
         WLOGFD("SetProcessedCallback leave");
     }
-    sessionStage_->NotifyPointerEvent(pointerEvent); // sessionStage_ 就是 windowSessionImpl,windowSessionImpl 里有 hostSession_
+    // sessionStage_ 就是 windowSessionImpl,windowSessionImpl 里有 hostSession_
+    sessionStage_->NotifyPointerEvent(pointerEvent);
     return WSError::WS_OK;
 }
 
