@@ -93,7 +93,7 @@ private:
     std::shared_ptr<Global::Resource::ResourceManager> CreateResourceManager(
         const AppExecFwk::AbilityInfo& abilityInfo);
     void GetStartPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, std::string& path, uint32_t& bgColor);
-    const std::string& CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
+    std::string CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
 
     sptr<RootSceneSession> rootSceneSession_;
     std::map<uint64_t, sptr<SceneSession>> sceneSessionMap_;

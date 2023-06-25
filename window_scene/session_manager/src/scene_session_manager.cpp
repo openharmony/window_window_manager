@@ -264,7 +264,7 @@ void SceneSessionManager::ConfigKeyboardAnimation(const WindowSceneConfig::Confi
     }
 }
 
-const std::string& SceneSessionManager::CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig)
+std::string SceneSessionManager::CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig)
 {
     static std::unordered_set<std::string> curveSet = { "easeOut", "ease", "easeIn", "easeInOut", "default",
         "linear", "spring", "interactiveSpring" };

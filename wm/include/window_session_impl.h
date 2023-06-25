@@ -97,16 +97,6 @@ public:
 
     WindowState state_ { WindowState::STATE_INITIAL };
 
-    // window effect
-    virtual WMError SetCornerRadius(float cornerRadius) override;
-    virtual WMError SetShadowRadius(float radius) override;
-    virtual WMError SetShadowColor(std::string color) override;
-    virtual WMError SetShadowOffsetX(float offsetX) override;
-    virtual WMError SetShadowOffsetY(float offsetY) override;
-    virtual WMError SetBlur(float radius) override;
-    virtual WMError SetBackdropBlur(float radius) override;
-    virtual WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) override;
-
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -123,7 +113,6 @@ protected:
     std::shared_ptr<AbilityRuntime::Context> context_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
 
-    std::string windowName_;
     sptr<WindowSessionProperty> property_;
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_UNDEFINED;
     SystemSessionConfig windowSystemConfig_;
@@ -149,7 +138,6 @@ private:
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason);
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
-    WMError CheckParmAndPermission();
     WMError UpdateProperty(WSPropertyChangeAction action);
 
     static std::recursive_mutex globalMutex_;
