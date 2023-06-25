@@ -18,8 +18,6 @@
 #include <functional>
 #include <utility>
 
-#include "unistd.h"
-
 #include <axis_event.h>
 #include <key_event.h>
 #include <pointer_event.h>
@@ -30,7 +28,6 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannel" };
-constexpr int32_t DELAY_TO_TRIGGER_ANR = 10;
 }
 
 WSError WindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -52,28 +49,6 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
         WLOGFD("SetProcessedCallback enter");
         pointerEvent->SetProcessedCallback(dispatchCallback_);
         WLOGFD("SetProcessedCallback leave");
-    }
-    static auto checkInAnrRegin = [](const std::shared_ptr<MMI::PointerEvent> pointerEvent) -> bool {
-        WLOGFD("Here in checkInAnrRegin");
-        std::pair<int32_t, int32_t> leftUp {0, 0};
-        std::pair<int32_t, int32_t> rightDown {300, 300};
-        if (pointerEvent == nullptr) {
-            return false;
-        }
-        int32_t pointerId = pointerEvent->GetPointerId();
-        MMI::PointerEvent::PointerItem pointerItem;
-        if (!pointerEvent->GetPointerItem(pointerId, pointerItem)) {
-            WLOGFE("Can't find pointer item, pointer:%{public}d", pointerId);
-            return false;
-        }
-        int32_t displayX = pointerItem.GetDisplayX();
-        int32_t displayY = pointerItem.GetDisplayY();
-        return (displayX >= leftUp.first && displayX < rightDown.first &&
-                displayY >= leftUp.second && displayY < rightDown.second);
-    };
-    if (checkInAnrRegin(pointerEvent) && pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_DOWN) {
-        WLOGFD("The pointerEvent eventId: %{public}d in anr regin, sleep 10 seconds to trigger anr", pointerEvent->GetId());
-        sleep(DELAY_TO_TRIGGER_ANR);
     }
     sessionStage_->NotifyPointerEvent(pointerEvent); // sessionStage_ 就是 windowSessionImpl,windowSessionImpl 里有 hostSession_
     return WSError::WS_OK;
