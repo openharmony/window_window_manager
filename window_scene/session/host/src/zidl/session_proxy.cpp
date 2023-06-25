@@ -509,5 +509,4 @@ WSError SessionProxy::GetGlobalMaximizeMode(MaximizeMode& mode)
     int32_t ret = reply.ReadUint32();
     return static_cast<WSError>(ret);
 }
-
 } // namespace OHOS::Rosen

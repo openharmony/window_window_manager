@@ -53,6 +53,7 @@ public:
     virtual void OnConnect() = 0;
     virtual void OnForeground() = 0;
     virtual void OnBackground() = 0;
+    virtual void OnDisconnect() = 0;
 };
 
 class Session : public SessionStub, public virtual RefBase {
@@ -89,6 +90,7 @@ public:
     void NotifyConnect();
     void NotifyForeground();
     void NotifyBackground();
+    void NotifyDisconnect();
 
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
