@@ -87,6 +87,7 @@ public:
     WSError Disconnect() override;
 
     WSError OnSessionEvent(SessionEvent event) override;
+    WSError OnNeedAvoid(bool status) override;
     void NotifyConnect();
     void NotifyForeground();
     void NotifyBackground();
@@ -139,6 +140,7 @@ public:
     bool GetTouchable() const;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
+    AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
     WSError SetBrightness(float brightness);
     float GetBrightness() const;
 

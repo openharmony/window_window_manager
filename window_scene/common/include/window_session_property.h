@@ -45,6 +45,7 @@ public:
     void SetAccessTokenId(uint32_t accessTokenId);
     void SetTokenState(bool hasToken);
     void SetMaximizeMode(MaximizeMode mode);
+    void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
 
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
@@ -61,6 +62,7 @@ public:
     uint32_t GetAccessTokenId() const;
     bool GetTokenState() const;
     MaximizeMode GetMaximizeMode() const;
+    const std::unordered_map<WindowType, SystemBarProperty>& GetSystemBarProperty() const;
 
     bool Marshalling(Parcel& parcel) const override;
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
@@ -80,6 +82,9 @@ private:
     uint64_t parentPersistentId_ = INVALID_SESSION_ID;
     uint32_t accessTokenId_ = INVALID_SESSION_ID;
     MaximizeMode maximizeMode_ = MaximizeMode::MODE_RECOVER;
+    std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
+        { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },
+    };
 };
 
 struct SystemSessionConfig : public Parcelable {

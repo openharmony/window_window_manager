@@ -715,13 +715,11 @@ void SceneSessionManager::GetStartPage(const SessionInfo& sessionInfo, std::stri
 WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
 {
     if (property == nullptr) {
-        WLOGFE("property is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }
     uint64_t persistentId = property->GetPersistentId();
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        WLOGFE("session is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }
     WLOGI("Id: %{public}" PRIu64", action: %{public}u", sceneSession->GetPersistentId(), static_cast<uint32_t>(action));
@@ -757,6 +755,12 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
                 sceneSession->GetSessionProperty()->SetMaximizeMode(property->GetMaximizeMode());
             }
             break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS: {
+            auto& systemBarProperties = property->GetSystemBarProperty();
+            for (auto& iter : systemBarProperties) {
+                sceneSession->SetSystemBarProperty(iter.first, iter.second);
+            }
         }
         default:
             break;
