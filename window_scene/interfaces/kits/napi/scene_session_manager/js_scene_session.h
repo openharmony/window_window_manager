@@ -56,7 +56,7 @@ private:
     void ProcessTerminateSessionRegister();
     void ProcessSessionExceptionRegister();
 
-    void PendingSessionActivation(const SessionInfo& info);
+    void PendingSessionActivation(SessionInfo& info);
     void OnSessionStateChange(const SessionState& state);
     void OnSessionEvent(uint32_t actionId);
     void OnCreateSpecificSession(const sptr<SceneSession>& session);

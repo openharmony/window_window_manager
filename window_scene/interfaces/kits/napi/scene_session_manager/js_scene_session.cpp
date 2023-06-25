@@ -103,7 +103,7 @@ JsSceneSession::~JsSceneSession()
 
 void JsSceneSession::ProcessPendingSceneSessionActivationRegister()
 {
-    NotifyPendingSessionActivationFunc func = [this](const SessionInfo& info) {
+    NotifyPendingSessionActivationFunc func = [this](SessionInfo& info) {
         this->PendingSessionActivation(info);
     };
     auto session = weakSession_.promote();
@@ -497,10 +497,27 @@ void JsSceneSession::OnClick()
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsSceneSession::PendingSessionActivation(const SessionInfo& info)
+void JsSceneSession::PendingSessionActivation(SessionInfo& info)
 {
     WLOGI("[NAPI]pending session activation: bundleName %{public}s, moduleName %{public}s, abilityName %{public}s",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
+    if (info.persistentId_ == 0) {
+        auto sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
+        if (sceneSession == nullptr) {
+            WLOGFE("RequestSceneSession return nullptr");
+            return;
+        }
+        info.persistentId_ = sceneSession->GetPersistentId();
+    } else {
+        auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
+        if (sceneSession == nullptr) {
+            WLOGFE("GetSceneSession return nullptr");
+            return;
+        }
+        sceneSession->GetSessionInfo().want = info.want;
+        sceneSession->GetSessionInfo().callerToken_ = info.callerToken_;
+        sceneSession->GetSessionInfo().requestCode = info.requestCode;
+    }
     auto iter = jsCbMap_.find(PENDING_SCENE_CB);
     if (iter == jsCbMap_.end()) {
         return;
