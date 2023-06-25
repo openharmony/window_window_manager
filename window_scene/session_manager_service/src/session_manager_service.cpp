@@ -15,12 +15,11 @@
 
 #include "session_manager_service.h"
 
+#include "ability_manager_client.h"
 #include "screenlock_system_ability.h"
 
 #include "session_manager/include/scene_session_manager.h"
 #include "session_manager/include/screen_session_manager.h"
-
-#include "ability_manager_client.h"
 
 namespace OHOS::Rosen {
 WM_IMPLEMENT_SINGLE_INSTANCE(SessionManagerService)

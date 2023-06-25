@@ -16,7 +16,6 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H
 
-
 #include "common/include/window_session_property.h"
 #include <iremote_broker.h>
 #include "interfaces/include/ws_common.h"
