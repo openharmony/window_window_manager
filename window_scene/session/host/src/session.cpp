@@ -212,6 +212,17 @@ sptr<IRemoteObject> Session::GetAbilityToken() const
     return abilityToken_;
 }
 
+WSError Session::SetBrightness(float brightness)
+{
+    property_->SetBrightness(brightness);
+    return WSError::WS_OK;
+}
+
+float Session::GetBrightness() const
+{
+    return property_->GetBrightness();
+}
+
 bool Session::IsSessionValid() const
 {
     bool res = state_ > SessionState::STATE_DISCONNECT && state_ < SessionState::STATE_END;
