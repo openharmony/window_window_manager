@@ -27,7 +27,6 @@
 
 namespace OHOS::Rosen {
 using namespace ScreenLock;
-class AbilityConnection;
 class SessionManager {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManager);
 public:
@@ -57,8 +56,6 @@ private:
     void InitScreenSessionManagerProxy();
     void InitScreenLockManagerProxy();
 
-    bool serviceConnected_ = false;
-    sptr<AbilityConnection> abilityConnection_;
     sptr<IRemoteObject> remoteObject_ = nullptr;
     sptr<ISessionManagerService> sessionManagerServiceProxy_ = nullptr;
     sptr<ISceneSessionManager> sceneSessionManagerProxy_ = nullptr;

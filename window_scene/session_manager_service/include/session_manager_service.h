@@ -30,6 +30,7 @@ public:
     sptr<IRemoteObject> GetSceneSessionManager() override;
     sptr<IRemoteObject> GetScreenSessionManagerService() override;
     sptr<IRemoteObject> GetScreenLockManagerService() override;
+    void Init();
 
 private:
     sptr<IRemoteObject> sessionManagerServiceObj_;
