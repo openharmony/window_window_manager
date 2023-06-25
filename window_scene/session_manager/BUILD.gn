@@ -21,11 +21,20 @@ config("session_manager_public_config") {
     "${window_base_path}/window_scene/session_manager/include/zidl",
     "${window_base_path}/window_scene/session_manager_service/include",
 
+    # for session_manager
+    "${multimodalinput_path}/input/interfaces/native/innerkits/event/include",
+    "${ability_runtime_inner_api_path}/ability_manager/include",
+
     # for screen_session_manager
     "${window_base_path}/utils/include",
     "${window_base_path}/dm/include",
     "${window_base_path}/interfaces/innerkits/dm",
     "${window_base_path}/dmserver/include",
+
+    # for scene session manager
+    "${window_base_path}/interfaces/innerkits/wm",
+    "${window_base_path}/wmserver/include/zidl",
+    "${graphic_base_path}/graphic_2d/rosen/modules/animation/window_animation/include",
 
     # for window_manager_hilog
     "${window_base_path}/utils/include",
@@ -34,13 +43,17 @@ config("session_manager_public_config") {
     "${screenlock_mgr_path}/services/include",
     "${screenlock_mgr_path}/utils/include",
     "${screenlock_mgr_path}/frameworks/native/include",
+    "${window_base_path}/wm/include",
+    "${window_base_path}/wm/include/zidl",
   ]
 }
 
 ohos_shared_library("scene_session_manager") {
   sources = [
+    "../../wm/src/zidl/window_manager_agent_proxy.cpp",
     "src/extension_session_manager.cpp",
     "src/scene_session_manager.cpp",
+    "src/session_manager_agent_controller.cpp",
     "src/window_scene_config.cpp",
     "src/zidl/scene_session_manager_proxy.cpp",
     "src/zidl/scene_session_manager_stub.cpp",
@@ -54,6 +67,7 @@ ohos_shared_library("scene_session_manager") {
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session:screen_session",
     "${window_base_path}/window_scene/session_manager:screen_session_manager",
+    "${window_base_path}/wm:libwm",
     "//third_party/libxml2:libxml2",
   ]
 
@@ -65,8 +79,10 @@ ohos_shared_library("scene_session_manager") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "config_policy:configpolicy_util",
+    "display_manager:displaymgr",
     "eventhandler:libeventhandler",
     "graphic_standard:librender_service_client",
+    "graphic_standard:window_animation",
     "hilog_native:libhilog",
     "init:libbegetutil",
     "ipc:ipc_single",
@@ -94,7 +110,6 @@ ohos_shared_library("screen_session_manager") {
   public_configs = [ ":session_manager_public_config" ]
 
   deps = [
-    "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/session:screen_session",
@@ -134,7 +149,6 @@ ohos_shared_library("session_manager") {
   public_configs = [ ":session_manager_public_config" ]
 
   deps = [
-    "${window_base_path}/dmserver:libdms",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/session:scene_session",

@@ -34,6 +34,11 @@ public:
     WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) override;
     WSError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) override;
 
+    WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+    WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+
 private:
     static inline BrokerDelegator<SceneSessionManagerProxy> delegator_;
 };

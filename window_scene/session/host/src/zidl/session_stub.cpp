@@ -45,7 +45,11 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
         &SessionStub::HandleDestroyAndDisconnectSpecificSession),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_RAISE_TO_APP_TOP),
         &SessionStub::HandleRaiseToAppTop),
-    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_BACKPRESSED), &SessionStub::HandleBackPressed)
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_BACKPRESSED), &SessionStub::HandleBackPressed),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_SET_MAXIMIZE_MODE),
+        &SessionStub::HandleSetGlobalMaximizeMode),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_GET_MAXIMIZE_MODE),
+        &SessionStub::HandleGetGlobalMaximizeMode)
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -108,8 +112,15 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
     } else {
         WLOGFW("Property not exist!");
     }
+
+    sptr<IRemoteObject> token = nullptr;
+    if (property && property->GetTokenState()) {
+        token = data.ReadRemoteObject();
+    } else {
+        WLOGI("accept token is nullptr");
+    }
     SystemSessionConfig systemConfig;
-    WSError errCode = Connect(sessionStage, eventChannel, surfaceNode, systemConfig, property);
+    WSError errCode = Connect(sessionStage, eventChannel, surfaceNode, systemConfig, property, token);
     reply.WriteParcelable(&systemConfig);
     reply.WriteUint64(property->GetPersistentId());
     reply.WriteUint32(static_cast<uint32_t>(errCode));
@@ -252,6 +263,25 @@ int SessionStub::HandleBackPressed(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleBackPressed!");
     WSError errCode = RequestSessionBack();
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetGlobalMaximizeMode(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFD("HandleSetGlobalMaximizeMode!");
+    auto mode = data.ReadUint32();
+    WSError errCode = SetGlobalMaximizeMode(static_cast<MaximizeMode>(mode));
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetGlobalMaximizeMode(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFD("HandleGetGlobalMaximizeMode!");
+    MaximizeMode mode = MaximizeMode::MODE_FULL_FILL;
+    WSError errCode = GetGlobalMaximizeMode(mode);
+    reply.WriteUint32(static_cast<uint32_t>(mode));
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

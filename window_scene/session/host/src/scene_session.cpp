@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "session/host/include/scene_session.h"
 
 #include "window_manager_hilog.h"
@@ -21,13 +22,36 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSession" };
 }
-
+MaximizeMode SceneSession::maximizeMode_ = MaximizeMode::MODE_RECOVER;
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : Session(info)
 {
-    GeneratePersistentId(!isExtension, info);
+    GeneratePersistentId(false, info);
     scenePersistence_ = new ScenePersistence(info, GetPersistentId());
     specificCallback_ = specificCallback;
+}
+
+WSError SceneSession::Foreground()
+{
+    WSError ret = Session::Foreground();
+    if (ret != WSError::WS_OK) {
+        return ret;
+    }
+    UpdateCameraFloatWindowStatus(true);
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::Background()
+{
+    WSError ret = Session::Background();
+    if (ret != WSError::WS_OK) {
+        return ret;
+    }
+    if (scenePersistence_ != nullptr && GetSnapshot() != nullptr) {
+        scenePersistence_->SaveSnapshot(GetSnapshot());
+    }
+    UpdateCameraFloatWindowStatus(false);
+    return WSError::WS_OK;
 }
 
 WSError SceneSession::OnSessionEvent(SessionEvent event)
@@ -45,7 +69,21 @@ void SceneSession::RegisterSessionChangeCallback(const sptr<SceneSession::Sessio
     sessionChangeCallback_ = sessionChangeCallback;
 }
 
-WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
+WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
+{
+    WLOGFD("SceneSession SetGlobalMaximizeMode mode: %{public}u", static_cast<uint32_t>(mode));
+    maximizeMode_ = mode;
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode &mode)
+{
+    WLOGFD("SceneSession GetGlobalMaximizeMode");
+    mode = maximizeMode_;
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::UpdateSessionRect(const WSRect &rect, const SizeChangeReason &reason)
 {
     WLOGFI("UpdateSessionRect [%{public}d, %{public}d, %{public}u, %{public}u]", rect.posX_, rect.posY_,
         rect.width_, rect.height_);
@@ -72,7 +110,7 @@ WSError SceneSession::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
     WLOGFI("CreateAndConnectSpecificSession id: %{public}" PRIu64 "", GetPersistentId());
     sptr<SceneSession> sceneSession;
     if (specificCallback_ != nullptr) {
-        sceneSession = specificCallback_->onCreate_(sessionInfo_);
+        sceneSession = specificCallback_->onCreate_(sessionInfo_, property);
     }
     if (sceneSession == nullptr) {
         return WSError::WS_ERROR_NULLPTR;
@@ -98,13 +136,11 @@ WSError SceneSession::DestroyAndDisconnectSpecificSession(const uint64_t& persis
     return ret;
 }
 
-WSError SceneSession::Background()
+void SceneSession::UpdateCameraFloatWindowStatus(bool isShowing)
 {
-    Session::Background();
-    if (scenePersistence_ != nullptr && GetSnapshot() != nullptr) {
-        scenePersistence_->SaveSnapshot(GetSnapshot());
+    if (GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA && specificCallback_ != nullptr) {
+        specificCallback_->onCameraFloatSessionChange_(property_->GetAccessTokenId(), isShowing);
     }
-    return WSError::WS_OK;
 }
 
 const std::string& SceneSession::GetWindowName() const
