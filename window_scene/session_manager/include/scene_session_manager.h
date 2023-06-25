@@ -41,6 +41,7 @@ namespace OHOS::Rosen {
 class SceneSession;
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
+using EventHandler = OHOS::AppExecFwk::EventHandler;
 class SceneSessionManager : public SceneSessionManagerStub {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManager)
 public:
@@ -69,6 +70,7 @@ public:
     WSError SetFocusedSession(uint64_t persistentId);
     uint64_t GetFocusedSession() const;
     WSError UpdateFocus(uint64_t persistentId, bool isFocused);
+    void StartWindowInfoReportLoop();
 
 protected:
     SceneSessionManager();
@@ -113,6 +115,9 @@ private:
 
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
+    
+    std::shared_ptr<EventHandler> eventHandler_;
+    bool isReportTaskStart_ = false;
 };
 } // namespace OHOS::Rosen
 

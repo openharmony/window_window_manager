@@ -37,6 +37,7 @@
 #include "zidl/window_manager_agent_interface.h"
 #include "session_manager_agent_controller.h"
 #include "window_manager.h"
+#include "perform_reporter.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -52,6 +53,7 @@ SceneSessionManager::SceneSessionManager()
     taskScheduler_ = std::make_shared<TaskScheduler>(SCENE_SESSION_MANAGER_THREAD);
     bundleMgr_ = GetBundleManager();
     LoadWindowSceneXml();
+    StartWindowInfoReportLoop();
 }
 
 void SceneSessionManager::LoadWindowSceneXml()
@@ -966,5 +968,24 @@ WMError SceneSessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType
 void SceneSessionManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)
 {
     SessionManagerAgentController::GetInstance().UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
+}
+
+void SceneSessionManager::StartWindowInfoReportLoop()
+{
+    if (isReportTaskStart_ || eventHandler_ == nullptr) {
+        return;
+    }
+    auto task = [this]() {
+        WindowInfoReporter::GetInstance().ReportRecordedInfos();
+        isReportTaskStart_ = false;
+        StartWindowInfoReportLoop();
+    };
+    int64_t delayTime = 1000 * 60 * 60; // an hour.
+    bool ret = eventHandler_->PostTask(task, "WindowInfoReport", delayTime);
+    if (!ret) {
+        WLOGFE("post listener callback task failed. the task name is WindowInfoReport");
+        return;
+    }
+    isReportTaskStart_ = true;
 }
 } // namespace OHOS::Rosen
