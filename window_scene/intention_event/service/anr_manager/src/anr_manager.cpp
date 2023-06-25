@@ -46,10 +46,13 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
         WLOGFD("AddAnrTimer failed, anrTimerCount exceeded %{public}d", MAX_ANR_TIMER_COUNT);
         return;
     }
-    int32_t timerId = TimerMgr->AddTimer(ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME, 1, [this, id, persistentId]() {
+    int32_t timerId = TimerMgr->AddTimer(ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME, [this, id, persistentId]() {
+        WLOGFD("WLD >>> Anr callback enter. persistentId:%{public}d, eventId:%{public}d", persistentId, id);
         eventStage_.SetAnrStatus(persistentId, true);
         int32_t pid = GetPidByPersistentId(persistentId);
+        WLOGFD("DfxHisysevent start");
         DfxHisysevent::ApplicationBlockInput(id, pid, persistentId);
+        WLOGFD("DfxHisysevent end");
         WLOGFE("Application not responding. persistentId:%{public}d, eventId:%{public}d, applicationId:%{public}d",
             persistentId, id, pid);
         if (anrObserver_ != nullptr) {
@@ -66,6 +69,7 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
                 WLOGFD("Clear anr timer, timer id:%{public}d, count:%{public}d", item, anrTimerCount_);
             }
         }
+        WLOGFD("WLD >>> Anr callback leave. persistentId:%{public}d, eventId:%{public}d", persistentId, id);
     });
     anrTimerCount_++;
     WLOGFD("Add anr timer success, eventId:%{public}d, timer id:%{public}d, persistentId:%{public}d, count:%{public}d",

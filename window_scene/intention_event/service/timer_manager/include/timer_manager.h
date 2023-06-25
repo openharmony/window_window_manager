@@ -40,9 +40,8 @@ public:
     DISALLOW_COPY_AND_MOVE(TimerManager);
     void Init();
     void Stop();
-    int32_t AddTimer(int32_t intervalMs, int32_t repeatCount, std::function<void()> callback);
+    int32_t AddTimer(int32_t intervalMs, std::function<void()> callback);
     int32_t RemoveTimer(int32_t timerId);
-    int32_t ResetTimer(int32_t timerId);
     bool IsExist(int32_t timerId);
     int32_t CalcNextDelay();
     void ProcessTimers();
@@ -51,8 +50,6 @@ private:
     struct TimerItem {
         int32_t id { 0 };
         int32_t intervalMs  { 0 };
-        int32_t repeatCount  { 0 };
-        int32_t callbackCount  { 0 };
         int64_t nextCallTime  { 0 };
         std::function<void()> callback;
     };
@@ -60,9 +57,8 @@ private:
     void OnThread();
     void OnStop();
     int32_t TakeNextTimerId();
-    int32_t AddTimerInternal(int32_t intervalMs, int32_t repeatCount, std::function<void()> callback);
+    int32_t AddTimerInternal(int32_t intervalMs, std::function<void()> callback);
     int32_t RemoveTimerInternal(int32_t timerId);
-    int32_t ResetTimerInternal(int32_t timerId);
     bool IsExistInternal(int32_t timerId);
     void InsertTimerInternal(std::unique_ptr<TimerItem>& timer);
     int32_t CalcNextDelayInternal();
