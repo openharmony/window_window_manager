@@ -786,8 +786,7 @@ WSError SceneSessionManager::UpdateFocus(uint64_t persistentId, bool isFocused)
     // focusId change
     if (isFocused) {
         SetFocusedSession(persistentId);
-    }
-    if (persistentId == GetFocusedSession()) {
+    } else if (persistentId == GetFocusedSession()) {
         SetFocusedSession(INVALID_SESSION_ID);
     }
     // notify window manager
