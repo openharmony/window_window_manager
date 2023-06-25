@@ -53,6 +53,7 @@ public:
     virtual void OnConnect() = 0;
     virtual void OnForeground() = 0;
     virtual void OnBackground() = 0;
+    virtual void OnDisconnect() = 0;
 };
 
 class Session : public SessionStub, public virtual RefBase {
@@ -89,6 +90,7 @@ public:
     void NotifyConnect();
     void NotifyForeground();
     void NotifyBackground();
+    void NotifyDisconnect();
 
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
@@ -138,6 +140,10 @@ public:
     bool GetTouchable() const;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
+    WSError SetBrightness(float brightness);
+    float GetBrightness() const;
+
+    bool IsSessionValid() const;
 
     uint32_t GetWindowId() const;
     int32_t GetCallingPid() const;
@@ -147,7 +153,6 @@ protected:
     void GeneratePersistentId(const bool isExtension, const SessionInfo& sessionInfo);
     void UpdateSessionState(SessionState state);
     void UpdateSessionFocusable(bool isFocusable);
-    bool IsSessionValid() const;
 
     bool isActive_ = false;
     bool isFocused_ = false;

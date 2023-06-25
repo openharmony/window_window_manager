@@ -57,6 +57,7 @@ public:
     WMError SetFocusable(bool isFocusable) override;
     WMError SetTouchable(bool isTouchable) override;
     WMError SetWindowType(WindowType type) override;
+    WMError SetBrightness(float brightness) override;
     bool GetTouchable() const override;
     uint32_t GetWindowId() const override;
     Rect GetRect() const override;
