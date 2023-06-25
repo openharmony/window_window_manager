@@ -29,29 +29,29 @@ ExtensionSession::ExtensionSession(const SessionInfo& info) : Session(info)
     GeneratePersistentId(true, info);
 }
 
-WSError ExtensionSession::UpdateAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
+WSError ExtensionSession::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
 {
-    if (updateAbilityResultFunc_) {
-        updateAbilityResultFunc_(resultCode, want);
+    if (transferAbilityResultFunc_) {
+        transferAbilityResultFunc_(resultCode, want);
     }
     return WSError::WS_OK;
 }
 
-void ExtensionSession::SetUpdateAbilityResultListener(const NotifyUpdateAbilityResultFunc& func)
+void ExtensionSession::RegisterTransferAbilityResultListener(const NotifyTransferAbilityResultFunc& func)
 {
-    updateAbilityResultFunc_ = func;
+    transferAbilityResultFunc_ = func;
 }
 
-WSError ExtensionSession::SendExtensionData(const AAFwk::WantParams& wantParams)
+WSError ExtensionSession::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
-    if (sendExtensionDataFunc_) {
-        sendExtensionDataFunc_(wantParams);
+    if (transferExtensionDataFunc_) {
+        transferExtensionDataFunc_(wantParams);
     }
     return WSError::WS_OK;
 }
 
-void ExtensionSession::SetSendExtensionDataListener(const NotifySendExtensionDataFunc& func)
+void ExtensionSession::RegisterTransferExtensionDataListener(const NotifyTransferExtensionDataFunc& func)
 {
-    sendExtensionDataFunc_ = func;
+    transferExtensionDataFunc_ = func;
 }
 } // namespace OHOS::Rosen

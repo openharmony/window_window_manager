@@ -72,24 +72,24 @@ WMError WindowExtensionSessionImpl::Resize(uint32_t width, uint32_t height)
     return static_cast<WMError>(error);
 }
 
-WMError WindowExtensionSessionImpl::UpdateAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
+WMError WindowExtensionSessionImpl::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
 {
     if (state_ < WindowState::STATE_CREATED) {
         WLOGFE("Extension invalid [name:%{public}s, id:%{public}" PRIu64 "], state:%{public}u",
             property_->GetWindowName().c_str(), property_->GetPersistentId(), state_);
         return WMError::WM_ERROR_REPEAT_OPERATION;
     }
-    return static_cast<WMError>(hostSession_->UpdateAbilityResult(resultCode, want));
+    return static_cast<WMError>(hostSession_->TransferAbilityResult(resultCode, want));
 }
 
-WMError WindowExtensionSessionImpl::SendExtensionData(const AAFwk::WantParams& wantParams)
+WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
     if (state_ < WindowState::STATE_CREATED) {
         WLOGFE("Extension invalid [name:%{public}s, id:%{public}" PRIu64 "], state:%{public}u",
             property_->GetWindowName().c_str(), property_->GetPersistentId(), state_);
         return WMError::WM_ERROR_REPEAT_OPERATION;
     }
-    return static_cast<WMError>(hostSession_->SendExtensionData(wantParams));
+    return static_cast<WMError>(hostSession_->TransferExtensionData(wantParams));
 }
 } // namespace Rosen
 } // namespace OHOS

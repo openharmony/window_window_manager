@@ -52,8 +52,8 @@ private:
     int HandleBackPressed(MessageParcel& data, MessageParcel& reply);
 
     // for extension
-    int HandleUpdateAbilityResult(MessageParcel& data, MessageParcel& reply);
-    int HandleSendExtensionData(MessageParcel& data, MessageParcel& reply);
+    int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);
+    int HandleTransferExtensionData(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_STUB_H

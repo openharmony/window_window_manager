@@ -86,8 +86,9 @@ public:
     WSError Disconnect() override;
 
     WSError OnSessionEvent(SessionEvent event) override;
-    WSError UpdateAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
-    WSError SendExtensionData(const AAFwk::WantParams& wantParams) override;
+    WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
+    WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
+    WSError TransferComponentData(const AAFwk::WantParams& wantParams);
     void NotifyConnect();
     void NotifyForeground();
     void NotifyBackground();
