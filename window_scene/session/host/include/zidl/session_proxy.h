@@ -45,6 +45,8 @@ public:
     WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) override;
     WSError RequestSessionBack() override;
     WSError MarkProcessed(int32_t eventId) override;
+    WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
+    WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

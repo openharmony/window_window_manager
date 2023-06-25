@@ -48,6 +48,8 @@ public:
         TRANS_ID_RAISE_TO_APP_TOP,
         TRANS_ID_BACKPRESSED,
         TRANS_ID_MARK_PROCESSED,
+        TRANS_ID_SET_MAXIMIZE_MODE,
+        TRANS_ID_GET_MAXIMIZE_MODE
     };
     virtual WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
@@ -70,6 +72,8 @@ public:
     virtual WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) = 0;
     virtual WSError RequestSessionBack() = 0;
     virtual WSError MarkProcessed(int32_t eventId) = 0;
+    virtual WSError SetGlobalMaximizeMode(MaximizeMode mode) = 0;
+    virtual WSError GetGlobalMaximizeMode(MaximizeMode& mode) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_INTERFACE_H

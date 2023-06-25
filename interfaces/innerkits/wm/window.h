@@ -1257,7 +1257,7 @@ public:
      *
      * @return MaximizeMode
      */
-    virtual MaximizeMode GetGlobalMaximizeMode() {return MaximizeMode::MODE_FULL_FILL;}
+    virtual MaximizeMode GetGlobalMaximizeMode() const {return MaximizeMode::MODE_FULL_FILL;}
 
     // colorspace, gamut
     /**

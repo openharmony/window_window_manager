@@ -544,7 +544,29 @@ WMError WindowSceneSessionImpl::Maximize()
 WMError WindowSceneSessionImpl::MaximizeFloating()
 {
     WLOGFD("WindowSceneSessionImpl::MaximizeFloating called");
-    return Maximize();
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        WLOGFW("SetGlobalMaximizeMode fail, not main window");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (GetGlobalMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+        hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
+        SetFullScreen(true);
+        windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+        UpdateDecorEnable(true);
+        property_->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
+    } else {
+        hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE_FLOATING);
+        windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
+        property_->SetMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
+        UpdateDecorEnable(true);
+    }
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
+
+    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::Recover()
@@ -557,7 +579,9 @@ WMError WindowSceneSessionImpl::Recover()
     if (WindowHelper::IsMainWindow(GetType())) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_RECOVER);
         windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
+        property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
         UpdateDecorEnable(true);
+        UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
     }
     return WMError::WM_OK;
 }
@@ -624,6 +648,30 @@ WSError WindowSceneSessionImpl::HandleBackEvent()
         hostSession_->RequestSessionBack();
     }
     return WSError::WS_OK;
+}
+
+WMError WindowSceneSessionImpl::SetGlobalMaximizeMode(MaximizeMode mode)
+{
+    WLOGFD("WindowSceneSessionImpl::SetGlobalMaximizeMode %{public}u", static_cast<uint32_t>(mode));
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        hostSession_->SetGlobalMaximizeMode(mode);
+        return WMError::WM_OK;
+    } else {
+        WLOGFW("SetGlobalMaximizeMode fail, not main window");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+}
+
+MaximizeMode WindowSceneSessionImpl::GetGlobalMaximizeMode() const
+{
+    WLOGFD("WindowSceneSessionImpl::GetGlobalMaximizeMode");
+    MaximizeMode mode = MaximizeMode::MODE_RECOVER;
+    hostSession_->GetGlobalMaximizeMode(mode);
+    return mode;
 }
 
 WindowMode WindowSceneSessionImpl::GetMode() const
