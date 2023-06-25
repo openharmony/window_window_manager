@@ -3264,34 +3264,6 @@ HWTEST_F(WindowImplTest, UpdateDecorEnable, Function | SmallTest | Level3)
     ASSERT_FALSE(window->property_->GetDecorEnable());
     window->UnregisterWindowChangeListener(sptr<IWindowChangeListener>(listener));
 }
-
-/*
- * @tc.name: ShowWhenLocked
- * @tc.desc: Add window flag WINDOW_FLAG_SHOW_WHEN_LOCKED for different api version.
- * @tc.type: FUNC
- * tc.require: issueI7BETP
- */
-HWTEST_F(WindowImplTest, ShowWhenLocked, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = new WindowOption();
-    option->parentId_ = INVALID_WINDOW_ID;
-    sptr<WindowImpl> window = new WindowImpl(option);
-    EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
-
-    window->property_->apiCompatibleVersion_ = 9; // 9: api version.
-    ASSERT_EQ(WMError::WM_DO_NOTHING, window->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
-
-    window->property_->apiCompatibleVersion_ = 10; // 10: api version.
-    ASSERT_EQ(WMError::WM_DO_NOTHING, window->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
-
-    window->property_->apiCompatibleVersion_ = 8; // 8: api version.
-    ASSERT_EQ(WMError::WM_OK, window->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
-
-    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
-}
 }
 } // namespace Rosen
 } // namespace OHOS

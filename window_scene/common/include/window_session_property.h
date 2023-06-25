@@ -36,11 +36,15 @@ public:
     void SetWindowRect(const struct Rect& rect);
     void SetFocusable(bool isFocusable);
     void SetTouchable(bool isTouchable);
+    void SetBrightness(float brightness);
     void SetDisplayId(uint64_t displayId);
     void SetWindowType(WindowType type);
     void SetParentId(uint32_t parentId);
     void SetPersistentId(uint64_t persistentId);
     void SetParentPersistentId(uint64_t persistentId);
+    void SetAccessTokenId(uint32_t accessTokenId);
+    void SetTokenState(bool hasToken);
+    void SetMaximizeMode(MaximizeMode mode);
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
 
@@ -51,10 +55,14 @@ public:
     WindowType GetWindowType() const;
     bool GetFocusable() const;
     bool GetTouchable() const;
+    float GetBrightness() const;
     uint32_t GetParentId() const;
     uint64_t GetDisplayId() const;
     uint64_t GetPersistentId() const;
     uint64_t GetParentPersistentId() const;
+    uint32_t GetAccessTokenId() const;
+    bool GetTokenState() const;
+    MaximizeMode GetMaximizeMode() const;
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
 
@@ -68,12 +76,16 @@ private:
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW }; // type main window
     bool focusable_ { true };
     bool touchable_ { true };
+    bool tokenState_ { false };
+    bool turnScreenOn_ = false;
+    bool keepScreenOn_ = false;
+    float brightness_ = UNDEFINED_BRIGHTNESS;
     uint64_t displayId_ = 0;
     uint32_t parentId_ = INVALID_SESSION_ID; // parentId of sceneSession, which is low 32 bite of parentPersistentId_
     uint64_t persistentId_ = INVALID_SESSION_ID;
     uint64_t parentPersistentId_ = INVALID_SESSION_ID;
-    bool turnScreenOn_ = false;
-    bool keepScreenOn_ = false;
+    uint32_t accessTokenId_ = INVALID_SESSION_ID;
+    MaximizeMode maximizeMode_ = MaximizeMode::MODE_RECOVER;
 };
 
 struct SystemSessionConfig : public Parcelable {

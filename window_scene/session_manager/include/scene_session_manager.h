@@ -16,13 +16,13 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_H
 
+#include "common/include/task_scheduler.h"
 #include "interfaces/include/ws_common.h"
+#include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "session/host/include/root_scene_session.h"
+#include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "wm_single_instance.h"
 #include "window_scene_config.h"
-
-#include "session_manager_base.h"
-#include "session_manager/include/zidl/scene_session_manager_stub.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
@@ -41,11 +41,10 @@ namespace OHOS::Rosen {
 class SceneSession;
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
-class SceneSessionManager : public SceneSessionManagerStub,
-                            public SessionManagerBase {
+class SceneSessionManager : public SceneSessionManagerStub {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManager)
 public:
-    sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo);
+    sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property = nullptr);
     WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession);
@@ -61,20 +60,23 @@ public:
     void SetCreateSpecificSessionListener(const NotifyCreateSpecificSessionFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     WSError ProcessBackEvent();
-
     void GetStartPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor);
+    WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
+    WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
 
     WSError SetFocusedSession(uint64_t persistentId);
     uint64_t GetFocusedSession() const;
     WSError UpdateFocus(uint64_t persistentId, bool isFocused);
     void HandleTurnScreenOn(const sptr<SceneSession>& sceneSession);
     void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
 
 private:
-    void Init();
     void LoadWindowSceneXml();
     void ConfigWindowSceneXml();
     void ConfigWindowEffect(const WindowSceneConfig::ConfigItem& effectConfig);
@@ -82,25 +84,37 @@ private:
     bool ConfigAppWindowCornerRadius(const WindowSceneConfig::ConfigItem& item, float& out);
     bool ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig, WindowShadowConfig& outShadow);
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig);
+
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& scnSession);
     WSError DestroyDialogWithMainWindow(const sptr<SceneSession>& scnSession);
+    WSError UpdateParentSession(const sptr<SceneSession>& sceneSession, sptr<WindowSessionProperty> property);
+    void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
+    void UpdateFocusableProperty(uint64_t persistentId);
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     std::shared_ptr<Global::Resource::ResourceManager> CreateResourceManager(
         const AppExecFwk::AbilityInfo& abilityInfo);
     void GetStartPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, std::string& path, uint32_t& bgColor);
-    const std::string& CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
+    std::string CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
 
-    std::map<uint64_t, sptr<SceneSession>> abilitySceneMap_;
+    WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
+    WSError UpdateBrightness(uint64_t persistentId);
+    void SetDisplayBrightness(float brightness);
+    float GetDisplayBrightness() const;
+
     sptr<RootSceneSession> rootSceneSession_;
+    std::map<uint64_t, sptr<SceneSession>> sceneSessionMap_;
+
     NotifyCreateSpecificSessionFunc createSpecificSessionFunc_;
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
-    uint64_t activeSessionId_;
-    sptr<AppExecFwk::IBundleMgr> bundleMgr_;
-    uint64_t focusedSessionId_ { INVALID_SESSION_ID };
+    uint64_t activeSessionId_ = INVALID_SESSION_ID;
+    uint64_t focusedSessionId_ = INVALID_SESSION_ID;
+    uint64_t brightnessSessionId_ = INVALID_SESSION_ID;
+    float displayBrightness_ = UNDEFINED_BRIGHTNESS;
 
-    void UpdateFocusableProperty(uint64_t persistentId);
+    std::shared_ptr<TaskScheduler> taskScheduler_;
+    sptr<AppExecFwk::IBundleMgr> bundleMgr_;
 };
 } // namespace OHOS::Rosen
 

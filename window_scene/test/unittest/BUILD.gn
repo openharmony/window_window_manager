@@ -19,8 +19,11 @@ group("unittest") {
   testonly = true
 
   deps = [
+    ":ws_scene_session_manager_test",
+    ":ws_screen_scene_config_test",
     ":ws_screen_session_manager_test",
     ":ws_session_test",
+    ":ws_window_scene_config_test",
   ]
 }
 
@@ -28,6 +31,19 @@ ohos_unittest("ws_session_test") {
   module_out_path = module_out_path
 
   sources = [ "session_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_base:want",
+  ]
+}
+
+ohos_unittest("ws_screen_scene_config_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screen_scene_config_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 }
@@ -40,6 +56,22 @@ ohos_unittest("ws_screen_session_manager_test") {
   deps = [ ":ws_unittest_common" ]
 }
 
+ohos_unittest("ws_window_scene_config_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_scene_config_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+}
+
+ohos_unittest("ws_scene_session_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_manager_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+}
+
 ## Build ws_unittest_common.a {{{
 config("ws_unittest_common_public_config") {
   include_dirs = [
@@ -48,9 +80,18 @@ config("ws_unittest_common_public_config") {
     "${window_base_path}/dmserver/include",
     "${window_base_path}/interfaces/innerkits/dm",
     "${window_base_path}/interfaces/innerkits/wm",
+    "${window_base_path}/window_scene/session_manager/include",
     "${window_base_path}/window_scene",
     "${window_base_path}/window_scene/test",
     "//third_party/googletest/googlemock/include",
+
+    # for window_manager_interface
+    "${window_base_path}/wmserver/include/zidl",
+    "${graphic_base_path}/graphic_2d/rosen/modules/animation/window_animation/include",
+    "${multimodalinput_path}/input/interfaces/native/innerkits/event/include",
+    "${ability_runtime_inner_api_path}/ability_manager/include",
+    "${window_base_path}/wm/include",
+    "${window_base_path}/wm/include/zidl",
 
     # for window_manager_hilog
     "${window_base_path}/utils/include",
@@ -69,14 +110,20 @@ ohos_static_library("ws_unittest_common") {
 
   deps = [
     "${window_base_path}/dm:libdm",
+    "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session_manager:scene_session_manager",
     "${window_base_path}/window_scene/session_manager:screen_session_manager",
+    "${window_base_path}/wm:libwm",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
+    "//third_party/libxml2:libxml2",
   ]
 
-  public_deps = [ "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+  public_deps = [
+    "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "${window_base_path}/utils:libwmutil",
+  ]
 
   external_deps = [
     "ability_base:configuration",

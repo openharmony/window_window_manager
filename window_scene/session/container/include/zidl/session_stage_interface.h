@@ -25,6 +25,7 @@ class PointerEvent;
 class KeyEvent;
 class AxisEvent;
 } // namespace MMI
+
 namespace OHOS::Rosen {
 class ISessionStage : public IRemoteBroker {
 public:
@@ -40,7 +41,8 @@ public:
     };
 
     virtual void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
-    virtual void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) {}
+    virtual void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) {}
+    virtual void NotifyFocusActiveEvent(bool isFocusActive) {}
 
     virtual WSError SetActive(bool active) = 0;
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) = 0;

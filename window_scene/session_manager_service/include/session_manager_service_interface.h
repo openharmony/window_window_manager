@@ -17,7 +17,6 @@
 #define FOUNDATION_WINDOW_SCENE_SESSION_MANAGER_SERVICE_INTERFACE_H
 
 #include <iremote_broker.h>
-#include "iremote_object.h"
 
 namespace OHOS::Rosen {
 class ISessionManagerService : public IRemoteBroker {
@@ -25,19 +24,15 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISessionManagerService");
 
     enum class SessionManagerServiceMessage : uint32_t {
-        TRANS_ID_SCREEN_BASE = 0,
-        TRANS_ID_GET_SCREEN_INFO_BY_ID,
-        TRANS_ID_GET_SCENE_SESSION_MANAGER,
+        TRANS_ID_GET_SCENE_SESSION_MANAGER = 0,
         TRANS_ID_GET_SCREEN_SESSION_MANAGER_SERVICE,
         TRANS_ID_GET_SCREEN_LOCK_MANAGER_SERVICE,
     };
 
-    virtual int GetValueById(int id) = 0;
     virtual sptr<IRemoteObject> GetSceneSessionManager() = 0;
     virtual sptr<IRemoteObject> GetScreenSessionManagerService() = 0;
     virtual sptr<IRemoteObject> GetScreenLockManagerService() = 0;
 };
-
 } // namespace OHOS::Rosen
 
 #endif // FOUNDATION_WINDOW_SCENE_SESSION_MANAGER_SERVICE_INTERFACE_H

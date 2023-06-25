@@ -16,23 +16,15 @@
 #include "window_session_impl.h"
 
 #include <common/rs_common_def.h>
-#include <refbase.h>
+#include <ipc_skeleton.h>
 #include <transaction/rs_interfaces.h>
-#include <transaction/rs_transaction.h>
-#include <unistd.h>
 
-#include "color_parser.h"
-#include "display_manager.h"
-#include "permission.h"
+#include "key_event.h"
 #include "session/container/include/window_event_channel.h"
 #include "session_manager/include/session_manager.h"
-#include "singleton_container.h"
 #include "vsync_station.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
-#include "window_helper.h"
-#include "window_manager_hilog.h"
-#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -82,8 +74,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
         return;
     }
 
-    windowName_ = option->GetWindowName();
-    property_->SetWindowName(windowName_);
+    property_->SetWindowName(option->GetWindowName());
     property_->SetRequestRect(option->GetWindowRect());
     property_->SetWindowType(option->GetWindowType());
     property_->SetFocusable(option->GetFocusable());
@@ -92,7 +83,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetParentId(option->GetParentId());
     property_->SetTurnScreenOn(option->IsTurnScreenOn());
     property_->SetKeepScreenOn(option->IsKeepScreenOn());
-    surfaceNode_ = CreateSurfaceNode(windowName_, option->GetWindowType());
+    surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
 }
 
 RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(std::string name, WindowType type)
@@ -174,6 +165,9 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
                 return WMError::WM_ERROR_REPEAT_OPERATION;
             }
         }
+        uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
+        property_->SetAccessTokenId(accessTokenId);
+        WLOGI("Create camera float window, TokenId = %{public}u", accessTokenId);
     }
     return WMError::WM_OK;
 }
@@ -181,49 +175,26 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
 WMError WindowSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<Rosen::ISession>& iSession)
 {
-    WLOGFD("WindowSessionImpl::Create");
-    if (!context || !iSession) {
-        WLOGFE("context or hostSession is nullptr!");
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-    WMError ret = WindowSessionCreateCheck();
-    if (ret != WMError::WM_OK) {
-        return ret;
-    }
-    hostSession_ = iSession;
-    context_ = context;
-    ret = Connect();
-    if (ret != WMError::WM_OK) {
-        WLOGFE("Window Create failed [name:%{public}s, id:%{public}" PRIu64 "], ret: %{pubic}u",
-            property_->GetWindowName().c_str(), property_->GetPersistentId(), ret);
-        return ret;
-    }
-    state_ = WindowState::STATE_CREATED;
-    windowSessionMap_.insert(std::make_pair(property_->GetWindowName(),
-        std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
-    WLOGFD("Window Create [name:%{public}s, id:%{public}" PRIu64 "], state:%{pubic}u",
-        property_->GetWindowName().c_str(), property_->GetPersistentId(), state_);
-    return ret;
+    return WMError::WM_OK;
 }
 
 WMError WindowSessionImpl::Connect()
 {
     if (hostSession_ == nullptr) {
-        WLOGFE("session is invalid");
+        WLOGFE("Session is null!");
         return WMError::WM_ERROR_NULLPTR;
     }
     sptr<ISessionStage> iSessionStage(this);
-    sptr<WindowEventChannel> channel = new (std::nothrow) WindowEventChannel(iSessionStage);
-    if (channel == nullptr) {
-        return WMError::WM_ERROR_NULLPTR;
+    auto windowEventChannel = new (std::nothrow) WindowEventChannel(iSessionStage);
+    sptr<IWindowEventChannel> iWindowEventChannel(windowEventChannel);
+    sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
+    if (token) {
+        property_->SetTokenState(true);
     }
-    sptr<IWindowEventChannel> eventChannel(channel);
-    WSError ret = hostSession_->Connect(iSessionStage, eventChannel, surfaceNode_, windowSystemConfig_, property_);
-    // replace WSError with WMError
-    WMError res = static_cast<WMError>(ret);
-    WLOGFI("Window Connect [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u], ret:%{public}u",
-        property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType(), res);
-    return res;
+    auto ret = hostSession_->Connect(iSessionStage, iWindowEventChannel, surfaceNode_, windowSystemConfig_, property_, token);
+    WLOGFI("Window Connect [name:%{public}s, id:%{public}" PRIu64 ", type:%{public}u], ret:%{public}u",
+        property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType(), ret);
+    return static_cast<WMError>(ret);
 }
 
 WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
@@ -277,6 +248,7 @@ WMError WindowSessionImpl::Destroy(bool needClearListener)
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    hostSession_->Disconnect();
     NotifyBeforeDestroy(GetWindowName());
     if (needClearListener) {
         ClearListenersById(GetPersistentId());
@@ -297,7 +269,6 @@ WMError WindowSessionImpl::Destroy()
 
 WSError WindowSessionImpl::SetActive(bool active)
 {
-    // main/uiExtension window no need to inform session
     WLOGFD("active status: %{public}d", active);
     if (active) {
         NotifyAfterActive();
@@ -336,6 +307,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ == nullptr) {
+        WLOGFE("uiContent_ is null!");
         return;
     }
     Ace::ViewportConfig config;
@@ -407,7 +379,6 @@ WMError WindowSessionImpl::SetUIContent(const std::string& contentInfo,
 
 void WindowSessionImpl::UpdateDecorEnable(bool needNotify)
 {
-    WLOGFD("Start");
     if (needNotify) {
         if (uiContent_ != nullptr) {
             uiContent_->UpdateWindowMode(GetMode(), IsDecorEnable());
@@ -489,6 +460,23 @@ bool WindowSessionImpl::GetTouchable() const
 WMError WindowSessionImpl::SetWindowType(WindowType type)
 {
     property_->SetWindowType(type);
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::SetBrightness(float brightness)
+{
+    if (brightness < MINIMUM_BRIGHTNESS || brightness > MAXIMUM_BRIGHTNESS) {
+        WLOGFE("invalid brightness value: %{public}f", brightness);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (!WindowHelper::IsAppWindow(GetType())) {
+        WLOGFE("non app window does not support set brightness, type: %{public}u", GetType());
+        return WMError::WM_ERROR_INVALID_TYPE;
+    }
+    property_->SetBrightness(brightness);
+    if (state_ == WindowState::STATE_SHOWN) {
+        return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS);
+    }
     return WMError::WM_OK;
 }
 
@@ -616,7 +604,7 @@ void WindowSessionImpl::ClearListenersById(uint64_t persistentId)
 
 void WindowSessionImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func)
 {
-    notifyNativefunc_ = std::move(func);
+    notifyNativeFunc_ = std::move(func);
 }
 
 void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool needNotifyUiContent)
@@ -666,8 +654,8 @@ void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
         uiContent_ = nullptr;
         uiContent->Destroy();
     }
-    if (notifyNativefunc_) {
-        notifyNativefunc_(windowName);
+    if (notifyNativeFunc_) {
+        notifyNativeFunc_(windowName);
     }
 }
 
@@ -757,8 +745,8 @@ WSError WindowSessionImpl::NotifyDestroy()
 {
     auto dialogDeathRecipientListener = GetListeners<IDialogDeathRecipientListener>();
     for (auto& listener : dialogDeathRecipientListener) {
-        if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnDialogDeathRecipient();
+        if (listener != nullptr) {
+            listener->OnDialogDeathRecipient();
         }
     }
     // destroy dialog in client
@@ -770,8 +758,8 @@ void WindowSessionImpl::NotifyTouchDialogTarget()
 {
     auto dialogTargetTouchListener = GetListeners<IDialogTargetTouchListener>();
     for (auto& listener : dialogTargetTouchListener) {
-        if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnDialogTargetTouch();
+        if (listener != nullptr) {
+            listener->OnDialogTargetTouch();
         }
     }
 }
@@ -780,8 +768,8 @@ void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reaso
 {
     auto windowChangeListeners = GetListeners<IWindowChangeListener>();
     for (auto& listener : windowChangeListeners) {
-        if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnSizeChange(rect, reason);
+        if (listener != nullptr) {
+            listener->OnSizeChange(rect, reason);
         }
     }
 }
@@ -793,10 +781,28 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     }
 }
 
-void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+{
+    if (keyEvent == nullptr) {
+        WLOGFE("keyEvent is nullptr");
+        return;
+    }
+    int32_t keyCode = keyEvent->GetKeyCode();
+    if (uiContent_) {
+        isConsumed = uiContent_->ProcessKeyEvent(keyEvent);
+        if (!isConsumed && keyCode == MMI::KeyEvent::KEYCODE_ESCAPE &&
+            windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN &&
+            property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL) {
+            WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
+            Recover();
+        }
+    }
+}
+
+void WindowSessionImpl::NotifyFocusActiveEvent(bool isFocusActive)
 {
     if (uiContent_) {
-        uiContent_->ProcessKeyEvent(keyEvent);
+        uiContent_->SetIsFocusActive(isFocusActive);
     }
 }
 
@@ -816,160 +822,13 @@ WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
     return SessionManager::GetInstance().UpdateProperty(property_, action);
 }
 
-static float ConvertRadiusToSigma(float radius)
+sptr<Window> WindowSessionImpl::Find(const std::string& name)
 {
-    constexpr float BlurSigmaScale = 0.57735f;
-    return radius > 0.0f ? BlurSigmaScale * radius + SK_ScalarHalf : 0.0f;
-}
-
-WMError WindowSessionImpl::CheckParmAndPermission()
-{
-    if (surfaceNode_ == nullptr) {
-        WLOGFE("Surface node is null");
-        return WMError::WM_ERROR_NULLPTR;
+    auto iter = windowSessionMap_.find(name);
+    if (iter == windowSessionMap_.end()) {
+        return nullptr;
     }
-
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        WLOGFE("Check failed, permission denied");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
-
-    return WMError::WM_OK;
-}
-
-WMError WindowSessionImpl::SetCornerRadius(float cornerRadius)
-{
-    if (surfaceNode_ == nullptr) {
-        WLOGFE("Surface node is null");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-
-    WLOGFI("Set window %{public}s corner radius %{public}f", windowName_.c_str(), cornerRadius);
-    surfaceNode_->SetCornerRadius(cornerRadius);
-    RSTransaction::FlushImplicitTransaction();
-    return WMError::WM_OK;
-}
-
-WMError WindowSessionImpl::SetShadowRadius(float radius)
-{
-    WMError ret = CheckParmAndPermission();
-    if (ret != WMError::WM_OK) {
-        return ret;
-    }
-
-    WLOGFI("Set window %{public}s shadow radius %{public}f", windowName_.c_str(), radius);
-    if (MathHelper::LessNotEqual(radius, 0.0)) {
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-
-    surfaceNode_->SetShadowRadius(radius);
-    RSTransaction::FlushImplicitTransaction();
-    return WMError::WM_OK;
-}
-
-WMError WindowSessionImpl::SetShadowColor(std::string color)
-{
-    WMError ret = CheckParmAndPermission();
-    if (ret != WMError::WM_OK) {
-        return ret;
-    }
-
-    WLOGFI("Set window %{public}s shadow color %{public}s", windowName_.c_str(), color.c_str());
-    uint32_t colorValue = 0;
-    if (!ColorParser::Parse(color, colorValue)) {
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-
-    surfaceNode_->SetShadowColor(colorValue);
-    RSTransaction::FlushImplicitTransaction();
-    return WMError::WM_OK;
-}
-
-WMError WindowSessionImpl::SetShadowOffsetX(float offsetX)
-{
-    WMError ret = CheckParmAndPermission();
-    if (ret != WMError::WM_OK) {
-        return ret;
-    }
-
-    WLOGFI("Set window %{public}s shadow offsetX %{public}f", windowName_.c_str(), offsetX);
-    surfaceNode_->SetShadowOffsetX(offsetX);
-    RSTransaction::FlushImplicitTransaction();
-    return WMError::WM_OK;
-}
-
-WMError WindowSessionImpl::SetShadowOffsetY(float offsetY)
-{
-    WMError ret = CheckParmAndPermission();
-    if (ret != WMError::WM_OK) {
-        return ret;
-    }
-
-    WLOGFI("Set window %{public}s shadow offsetY %{public}f", windowName_.c_str(), offsetY);
-    surfaceNode_->SetShadowOffsetY(offsetY);
-    RSTransaction::FlushImplicitTransaction();
-    return WMError::WM_OK;
-}
-
-WMError WindowSessionImpl::SetBlur(float radius)
-{
-    WMError ret = CheckParmAndPermission();
-    if (ret != WMError::WM_OK) {
-        return ret;
-    }
-
-    WLOGFI("Set window %{public}s blur radius %{public}f", windowName_.c_str(), radius);
-    if (MathHelper::LessNotEqual(radius, 0.0)) {
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-
-    radius = ConvertRadiusToSigma(radius);
-    WLOGFI("Set window %{public}s blur radius after conversion %{public}f", windowName_.c_str(), radius);
-    surfaceNode_->SetFilter(RSFilter::CreateBlurFilter(radius, radius));
-    RSTransaction::FlushImplicitTransaction();
-    return WMError::WM_OK;
-}
-
-WMError WindowSessionImpl::SetBackdropBlur(float radius)
-{
-    WMError ret = CheckParmAndPermission();
-    if (ret != WMError::WM_OK) {
-        return ret;
-    }
-
-    WLOGFI("Set window %{public}s backdrop blur radius %{public}f", windowName_.c_str(), radius);
-    if (MathHelper::LessNotEqual(radius, 0.0)) {
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-
-    radius = ConvertRadiusToSigma(radius);
-    WLOGFI("Set window %{public}s backdrop blur radius after conversion %{public}f", windowName_.c_str(), radius);
-    surfaceNode_->SetBackgroundFilter(RSFilter::CreateBlurFilter(radius, radius));
-    RSTransaction::FlushImplicitTransaction();
-    return WMError::WM_OK;
-}
-
-WMError WindowSessionImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
-{
-    WMError ret = CheckParmAndPermission();
-    if (ret != WMError::WM_OK) {
-        return ret;
-    }
-
-    WLOGI("Set window %{public}s backdrop blur style %{public}u", windowName_.c_str(), blurStyle);
-    if (blurStyle < WindowBlurStyle::WINDOW_BLUR_OFF || blurStyle > WindowBlurStyle::WINDOW_BLUR_THICK) {
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-
-    if (blurStyle == WindowBlurStyle::WINDOW_BLUR_OFF) {
-        surfaceNode_->SetBackgroundFilter(nullptr);
-    } else {
-        float density = 3.5f; // get density from screen property
-        surfaceNode_->SetBackgroundFilter(RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle), density));
-    }
-
-    RSTransaction::FlushImplicitTransaction();
-    return WMError::WM_OK;
+    return iter->second.second;
 }
 } // namespace Rosen
 } // namespace OHOS

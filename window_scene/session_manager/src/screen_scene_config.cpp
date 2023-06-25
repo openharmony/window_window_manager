@@ -53,8 +53,11 @@ std::vector<std::string> ScreenSceneConfig::Split(std::string str, std::string p
     return result;
 }
 
-bool inline ScreenSceneConfig::IsNumber(std::string str)
+bool ScreenSceneConfig::IsNumber(std::string str)
 {
+    if (str.size() == 0) {
+        return false;
+    }
     for (int32_t i = 0; i < static_cast<int32_t>(str.size()); i++) {
         if (str.at(i) < '0' || str.at(i) > '9') {
             return false;
@@ -69,7 +72,7 @@ std::string ScreenSceneConfig::GetConfigPath(const std::string& configFileName)
     char* configPath = GetOneCfgFile(configFileName.c_str(), buf, PATH_MAX + 1);
     char tmpPath[PATH_MAX + 1] = { 0 };
     if (!configPath || strlen(configPath) == 0 || strlen(configPath) > PATH_MAX || !realpath(configPath, tmpPath)) {
-        WLOGFI("[DmConfig] can not get customization config file");
+        WLOGFI("[SsConfig] can not get customization config file");
         return "/system/" + configFileName;
     }
     return std::string(tmpPath);
@@ -83,23 +86,23 @@ bool ScreenSceneConfig::LoadConfigXml()
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         docPtr = xmlReadFile(configFilePath.c_str(), nullptr, XML_PARSE_NOBLANKS);
     }
-    WLOGFI("[DmConfig] filePath: %{public}s", configFilePath.c_str());
+    WLOGFI("[SsConfig] filePath: %{public}s", configFilePath.c_str());
     if (docPtr == nullptr) {
-        WLOGFE("[DmConfig] load xml error!");
+        WLOGFE("[SsConfig] load xml error!");
         return false;
     }
 
     xmlNodePtr rootPtr = xmlDocGetRootElement(docPtr);
     if (rootPtr == nullptr || rootPtr->name == nullptr ||
         xmlStrcmp(rootPtr->name, reinterpret_cast<const xmlChar*>("Configs"))) {
-        WLOGFE("[DmConfig] get root element failed!");
+        WLOGFE("[SsConfig] get root element failed!");
         xmlFreeDoc(docPtr);
         return false;
     }
 
     for (xmlNodePtr curNodePtr = rootPtr->xmlChildrenNode; curNodePtr != nullptr; curNodePtr = curNodePtr->next) {
         if (!IsValidNode(*curNodePtr)) {
-            WLOGFE("DmConfig]: invalid node!");
+            WLOGFE("SsConfig]: invalid node!");
             continue;
         }
 
@@ -139,7 +142,7 @@ void ScreenSceneConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode)
 {
     xmlChar* context = xmlNodeGetContent(currNode);
     if (context == nullptr) {
-        WLOGFE("[DmConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
+        WLOGFE("[SsConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
         return;
     }
 
@@ -152,7 +155,7 @@ void ScreenSceneConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode)
     auto numbers = Split(numbersStr, " ");
     for (auto& num : numbers) {
         if (!IsNumber(num)) {
-            WLOGFE("[DmConfig] read number error: nodeName:(%{public}s)", currNode->name);
+            WLOGFE("[SsConfig] read number error: nodeName:(%{public}s)", currNode->name);
             xmlFree(context);
             return;
         }
@@ -168,7 +171,7 @@ void ScreenSceneConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)
 {
     xmlChar* enable = xmlGetProp(currNode, reinterpret_cast<const xmlChar*>("enable"));
     if (enable == nullptr) {
-        WLOGFE("[DmConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
+        WLOGFE("[SsConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
         return;
     }
 
@@ -185,7 +188,7 @@ void ScreenSceneConfig::ReadStringConfigInfo(const xmlNodePtr& currNode)
 {
     xmlChar* context = xmlNodeGetContent(currNode);
     if (context == nullptr) {
-        WLOGFE("[DmConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
+        WLOGFE("[SsConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
         return;
     }
 
@@ -213,16 +216,16 @@ const std::map<std::string, std::string>& ScreenSceneConfig::GetStringConfig()
 void ScreenSceneConfig::DumpConfig()
 {
     for (auto& enable : enableConfig_) {
-        WLOGFI("[DmConfig] Enable: %{public}s %{public}u", enable.first.c_str(), enable.second);
+        WLOGFI("[SsConfig] Enable: %{public}s %{public}u", enable.first.c_str(), enable.second);
     }
     for (auto& numbers : intNumbersConfig_) {
-        WLOGFI("[DmConfig] Numbers: %{public}s %{public}zu", numbers.first.c_str(), numbers.second.size());
+        WLOGFI("[SsConfig] Numbers: %{public}s %{public}zu", numbers.first.c_str(), numbers.second.size());
         for (auto& num : numbers.second) {
-            WLOGFI("[DmConfig] Num: %{public}d", num);
+            WLOGFI("[SsConfig] Num: %{public}d", num);
         }
     }
     for (auto& string : stringConfig_) {
-        WLOGFI("[DmConfig] String: %{public}s", string.first.c_str());
+        WLOGFI("[SsConfig] String: %{public}s", string.first.c_str());
     }
 }
 } // namespace OHOS::Rosen

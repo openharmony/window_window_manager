@@ -20,24 +20,6 @@
 
 namespace OHOS {
 namespace Rosen {
-union WSColorParam {
-#if BIG_ENDIANNESS
-    struct {
-        uint8_t alpha;
-        uint8_t red;
-        uint8_t green;
-        uint8_t blue;
-    } argb;
-#else
-    struct {
-        uint8_t blue;
-        uint8_t green;
-        uint8_t red;
-        uint8_t alpha;
-    } argb;
-#endif
-    uint32_t value;
-};
 class WindowSceneSessionImpl : public WindowSessionImpl {
 public:
     explicit WindowSceneSessionImpl(const sptr<WindowOption>& option);
@@ -61,14 +43,24 @@ public:
     WMError Resize(uint32_t width, uint32_t height) override;
     WmErrorCode RaiseToAppTop() override;
     WSError HandleBackEvent() override;
+    WMError SetGlobalMaximizeMode(MaximizeMode mode) override;
+    MaximizeMode GetGlobalMaximizeMode() const override;
+
+    // window effect
+    virtual WMError SetCornerRadius(float cornerRadius) override;
+    virtual WMError SetShadowRadius(float radius) override;
+    virtual WMError SetShadowColor(std::string color) override;
+    virtual WMError SetShadowOffsetX(float offsetX) override;
+    virtual WMError SetShadowOffsetY(float offsetY) override;
+    virtual WMError SetBlur(float radius) override;
+    virtual WMError SetBackdropBlur(float radius) override;
+    virtual WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) override;
 
     virtual WMError SetBackgroundColor(const std::string& color) override;
-    WMError SetBackgroundColor(uint32_t color);
     virtual WMError SetTransparent(bool isTransparent) override;
     virtual WMError SetTurnScreenOn(bool turnScreenOn) override;
     virtual WMError SetKeepScreenOn(bool keepScreenOn) override;
 
-    uint32_t GetBackgroundColor() const;
     virtual bool IsTransparent() const override;
     virtual bool IsTurnScreenOn() const override;
     virtual bool IsKeepScreenOn() const override;
@@ -78,9 +70,13 @@ protected:
     sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
     sptr<WindowSessionImpl> FindMainWindowWithContext();
     void UpdateSubWindowStateAndNotify(uint64_t parentPersistentId, const WindowState& newState);
+    void LimitCameraFloatWindowMininumSize(uint32_t& width, uint32_t& height);
 
 private:
     bool IsValidSystemWindowType(const WindowType& type);
+    WMError SetBackgroundColor(uint32_t color);
+    uint32_t GetBackgroundColor() const;
+    WMError CheckParmAndPermission();
 };
 } // namespace Rosen
 } // namespace OHOS

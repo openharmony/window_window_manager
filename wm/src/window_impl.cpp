@@ -21,6 +21,7 @@
 #include <ipc_skeleton.h>
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
+#include <ui/rs_node.h>
 
 #include "permission.h"
 #include "color_parser.h"
@@ -783,7 +784,9 @@ WMError WindowImpl::SetFullScreen(bool status)
 WMError WindowImpl::SetFloatingMaximize(bool isEnter)
 {
     WLOGFI("id:%{public}d SetFloatingMaximize status: %{public}d", property_->GetWindowId(), isEnter);
-    if (!IsWindowValid()) {
+    if (!IsWindowValid() ||
+        !WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        WLOGFE("invalid window or maximize mode is not be supported, winId:%{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
@@ -1857,7 +1860,7 @@ WMError WindowImpl::SetGlobalMaximizeMode(MaximizeMode mode)
     }
 }
 
-MaximizeMode WindowImpl::GetGlobalMaximizeMode()
+MaximizeMode WindowImpl::GetGlobalMaximizeMode() const
 {
     return SingletonContainer::Get<WindowAdapter>().GetMaximizeMode();
 }
@@ -2266,12 +2269,39 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
             property_->SetOriginRect(rect);
         }
     }
+    auto task = [this, reason, rsTransaction, rectToAce, lastOriRect, display]() mutable {
+        if (rsTransaction) {
+            RSTransaction::FlushImplicitTransaction();
+            rsTransaction->Begin();
+        }
+        RSAnimationTimingProtocol protocol;
+        protocol.SetDuration(600);
+        auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
+        RSNode::OpenImplicitAnimation(protocol, curve);
+        if ((rectToAce != lastOriRect) || (reason != lastSizeChangeReason_)) {
+            NotifySizeChange(rectToAce, reason, rsTransaction);
+            lastSizeChangeReason_ = reason;
+        }
+        UpdateViewportConfig(rectToAce, display, reason, rsTransaction);
+        RSNode::CloseImplicitAnimation();
+        if (rsTransaction) {
+            rsTransaction->Commit();
+        }
+        postTaskDone_ = true;
+    };
     ResSchedReport::GetInstance().RequestPerfIfNeed(reason, GetType(), GetMode());
-    if ((rectToAce != lastOriRect) || (reason != lastSizeChangeReason_)) {
-        NotifySizeChange(rectToAce, reason, rsTransaction);
-        lastSizeChangeReason_ = reason;
+    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
+    if (handler_ != nullptr && reason == WindowSizeChangeReason::ROTATION) {
+        postTaskDone_ = false;
+        handler_->PostTask(task);
+    } else {
+        if ((rectToAce != lastOriRect) || (reason != lastSizeChangeReason_) || !postTaskDone_) {
+            NotifySizeChange(rectToAce, reason, rsTransaction);
+            lastSizeChangeReason_ = reason;
+            postTaskDone_ = true;
+        }
+        UpdateViewportConfig(rectToAce, display, reason, rsTransaction);
     }
-    UpdateViewportConfig(rectToAce, display, reason, rsTransaction);
 }
 
 void WindowImpl::UpdateMode(WindowMode mode)

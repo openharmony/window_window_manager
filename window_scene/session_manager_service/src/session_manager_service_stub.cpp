@@ -15,17 +15,14 @@
 
 #include "session_manager_service_stub.h"
 
-#include <ipc_skeleton.h>
-
-#include "marshalling_helper.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionManagerServiceStub"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionManagerServiceStub" };
 }
 
-int32_t SessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+int SessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
     MessageOption &option)
 {
     WLOGFD("OnRemoteRequest code is %{public}u", code);
@@ -34,24 +31,14 @@ int32_t SessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessageParcel 
         return -1;
     }
 
-    SessionManagerServiceMessage msgId = static_cast<SessionManagerServiceMessage>(code);
+    auto msgId = static_cast<SessionManagerServiceMessage>(code);
     switch (msgId) {
-        case SessionManagerServiceMessage::TRANS_ID_SCREEN_BASE: {
-            break;
-        }
-        case SessionManagerServiceMessage::TRANS_ID_GET_SCREEN_INFO_BY_ID: {
-            int id = data.ReadInt32();
-            int value = GetValueById(id);
-            reply.WriteInt32(value);
-            break;
-        }
         case SessionManagerServiceMessage::TRANS_ID_GET_SCENE_SESSION_MANAGER: {
             reply.WriteRemoteObject(GetSceneSessionManager());
             break;
         }
         case SessionManagerServiceMessage::TRANS_ID_GET_SCREEN_SESSION_MANAGER_SERVICE: {
-            sptr<IRemoteObject> remoteObj = GetScreenSessionManagerService();
-            reply.WriteRemoteObject(remoteObj);
+            reply.WriteRemoteObject(GetScreenSessionManagerService());
             break;
         }
         case SessionManagerServiceMessage::TRANS_ID_GET_SCREEN_LOCK_MANAGER_SERVICE: {
@@ -65,5 +52,4 @@ int32_t SessionManagerServiceStub::OnRemoteRequest(uint32_t code, MessageParcel 
     }
     return 0;
 }
-
 } // namespace OHOS::Rosen
