@@ -178,7 +178,11 @@ WSError Session::SetFocusable(bool isFocusable)
 
 bool Session::GetFocusable() const
 {
-    return property_->GetFocusable();
+    if (property_ != nullptr) {
+        return property_->GetFocusable();
+    }
+    WLOGFD("property is null");
+    return true;
 }
 
 WSError Session::SetTouchable(bool touchable)
