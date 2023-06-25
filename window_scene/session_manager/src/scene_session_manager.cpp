@@ -437,20 +437,6 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         if (!scnSessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
         }
-<<<<<<< Updated upstream
-        auto iter = sceneSessionMap_.find(sessionInfo.callerPersistentId_);
-        if (iter != sceneSessionMap_.end()) {
-            const auto& callerSession = iter->second;
-            if (callerSession != nullptr) {
-                auto callerSessionInfo = callerSession->GetSessionInfo();
-                scnSessionInfo->want = *callerSessionInfo.want;
-                scnSessionInfo->callerToken = callerSessionInfo.callerToken_;
-            }
-        } else {
-            scnSessionInfo->want = want;
-        }
-=======
->>>>>>> Stashed changes
         AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
         activeSessionId_ = persistentId;
         return WSError::WS_OK;
