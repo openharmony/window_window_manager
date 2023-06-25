@@ -1309,6 +1309,30 @@ void ScreenSessionManager::NotifyScreenGroupChanged(
     taskScheduler_->PostAsyncTask(task);
 }
 
+void ScreenSessionManager::NotifyPrivateSessionStateChanged(bool hasPrivate)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    WLOGI("PrivateSession status : %{public}u", hasPrivate);
+    for (auto& agent : agents) {
+        agent->NotifyPrivateWindowStateChanged(hasPrivate);
+    }
+}
+
+void ScreenSessionManager::UpdatePrivateStateAndNotify(sptr<ScreenSession>& screenSession, bool isAddingPrivateSession)
+{
+    uint32_t prePrivateSessionCount = screenSession->GetPrivateSessionCount();
+    WLOGFD("before update : privateWindow count: %{public}u", prePrivateSessionCount);
+    screenSession->SetPrivateSessionCount(prePrivateSessionCount + (isAddingPrivateSession ? 1 : -1));
+    if (prePrivateSessionCount == 0 && isAddingPrivateSession) {
+        NotifyPrivateSessionStateChanged(true);
+    } else if (prePrivateSessionCount == 1 && !isAddingPrivateSession) {
+        NotifyPrivateSessionStateChanged(false);
+    }
+}
+
 void ScreenSessionManager::OnScreenGroupChange(const std::string& trigger,
     const sptr<ScreenInfo>& screenInfo, ScreenGroupChangeEvent groupEvent)
 {
