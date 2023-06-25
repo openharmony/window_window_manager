@@ -53,6 +53,11 @@ void WindowSessionProperty::SetTouchable(bool isTouchable)
     touchable_ = isTouchable;
 }
 
+void WindowSessionProperty::SetBrightness(float brightness)
+{
+    brightness_ = brightness;
+}
+
 void WindowSessionProperty::SetPrivacyMode(bool isPrivate)
 {
     isPrivacyMode_ = isPrivate;
@@ -101,6 +106,11 @@ bool WindowSessionProperty::GetFocusable() const
 bool WindowSessionProperty::GetTouchable() const
 {
     return touchable_;
+}
+
+float WindowSessionProperty::GetBrightness() const
+{
+    return brightness_;
 }
 
 bool WindowSessionProperty::GetPrivacyMode() const
@@ -192,7 +202,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteString(sessionInfo_.bundleName_) && parcel.WriteString(sessionInfo_.moduleName_) &&
         parcel.WriteString(sessionInfo_.abilityName_) &&
         parcel.WriteUint64(parentPersistentId_) &&
-        parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_));
+        parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
+        parcel.WriteFloat(brightness_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -219,6 +230,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetParentPersistentId(parcel.ReadUint64());
     property->SetAccessTokenId(parcel.ReadUint32());
     property->SetMaximizeMode(static_cast<MaximizeMode>(parcel.ReadUint32()));
+    property->SetBrightness(parcel.ReadFloat());
     return property;
 }
 } // namespace Rosen

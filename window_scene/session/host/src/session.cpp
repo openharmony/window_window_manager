@@ -137,6 +137,16 @@ void Session::NotifyBackground()
     }
 }
 
+void Session::NotifyDisconnect()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (!listener.expired()) {
+            listener.lock()->OnDisconnect();
+        }
+    }
+}
+
 SessionState Session::GetSessionState() const
 {
     return state_;
@@ -201,6 +211,17 @@ int32_t Session::GetCallingUid() const
 sptr<IRemoteObject> Session::GetAbilityToken() const
 {
     return abilityToken_;
+}
+
+WSError Session::SetBrightness(float brightness)
+{
+    property_->SetBrightness(brightness);
+    return WSError::WS_OK;
+}
+
+float Session::GetBrightness() const
+{
+    return property_->GetBrightness();
 }
 
 bool Session::IsSessionValid() const
@@ -303,6 +324,7 @@ WSError Session::Disconnect()
     WLOGFI("Disconnect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(state));
     state_ = SessionState::STATE_INACTIVE;
+    NotifyDisconnect();
     Background();
     if (GetSessionState() == SessionState::STATE_BACKGROUND) {
         UpdateSessionState(SessionState::STATE_DISCONNECT);

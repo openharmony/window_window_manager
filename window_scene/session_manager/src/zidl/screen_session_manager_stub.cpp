@@ -95,9 +95,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ScreenId dmsScreenId;
             if (!data.ReadUint64(dmsScreenId)) {
                 WLOGFE("fail to read dmsScreenId.");
-                break;
+                return -1;
             }
             reply.WriteUint32(static_cast<uint32_t>(GetScreenPower(dmsScreenId)));
+            break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID: {
             DisplayId displayId = data.ReadUint64();

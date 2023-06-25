@@ -36,6 +36,7 @@ public:
     void SetWindowRect(const struct Rect& rect);
     void SetFocusable(bool isFocusable);
     void SetTouchable(bool isTouchable);
+    void SetBrightness(float brightness);
     void SetPrivacyMode(bool isPrivate);
     void SetSystemPrivacyMode(bool isSystemPrivate);
     void SetDisplayId(uint64_t displayId);
@@ -54,6 +55,7 @@ public:
     WindowType GetWindowType() const;
     bool GetFocusable() const;
     bool GetTouchable() const;
+    float GetBrightness() const;
     bool GetPrivacyMode() const;
     bool GetSystemPrivacyMode() const;
     uint32_t GetParentId() const;
@@ -75,6 +77,7 @@ private:
     bool focusable_ { true };
     bool touchable_ { true };
     bool tokenState_ { false };
+    float brightness_ = UNDEFINED_BRIGHTNESS;
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };
     uint64_t displayId_ = 0;
