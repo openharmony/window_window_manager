@@ -17,9 +17,11 @@
 
 #include <context.h>
 #include <js_runtime_utils.h>
+#include "napi_common_want.h"
 #include "session/host/include/scene_persistence.h"
 #include "session/host/include/session.h"
 #include "session_manager/include/scene_session_manager.h"
+#include "want.h"
 #include "window_manager_hilog.h"
 
 #include "js_root_scene_session.h"
@@ -331,6 +333,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
     }
 
     SessionInfo sessionInfo;
+    AAFwk::Want want;
     if (errCode == WSErrorCode::WS_OK) {
         NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
         if (nativeObj == nullptr) {
@@ -341,11 +344,15 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
             errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
         }
     }
-
     if (errCode == WSErrorCode::WS_ERROR_INVALID_PARAM) {
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
+    }
+    if (info.argc == 2 && info.argv[1]->TypeOf() != NATIVE_UNDEFINED) {
+        OHOS::AppExecFwk::UnwrapWant(reinterpret_cast<napi_env>(&engine),
+            reinterpret_cast<napi_value>(info.argv[1]), want);
+        sessionInfo.want = new(std::nothrow) AAFwk::Want(want);
     }
 
     WLOGFI("[NAPI]SessionInfo [%{public}s, %{public}s, %{public}s], errCode = %{public}d",
