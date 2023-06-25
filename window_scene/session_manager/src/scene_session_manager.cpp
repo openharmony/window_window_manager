@@ -366,6 +366,13 @@ WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& scene
 
 sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property)
 {
+    if (sessionInfo.persistentId_ != 0) {
+        auto session = GetSceneSession(sessionInfo.persistentId_);
+        if (session != nullptr) {
+            WLOGFI("get exist session persistentId: %{public}" PRIu64 "", sessionInfo.persistentId_);
+            return session;
+        }
+    }
     sptr<SceneSession::SpecificSessionCallback> specificCallback = new (std::nothrow)
         SceneSession::SpecificSessionCallback();
     if (specificCallback == nullptr) {
@@ -381,7 +388,6 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
     auto task = [this, sessionInfo, specificCallback, property]() {
         WLOGFI("sessionInfo: bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
             sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());
-        WLOGFI("RequestSceneSession caller persistentId: %{public}" PRIu64 "", sessionInfo.callerPersistentId_);
         sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, specificCallback);
         if (sceneSession == nullptr) {
             WLOGFE("sceneSession is nullptr!");
@@ -410,9 +416,15 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     abilitySessionInfo->sessionToken = iSession->AsObject();
     abilitySessionInfo->callerToken = sessionInfo.callerToken_;
     abilitySessionInfo->persistentId = scnSession->GetPersistentId();
+    abilitySessionInfo->requestCode = sessionInfo.requestCode;
+    abilitySessionInfo->resultCode = sessionInfo.resultCode;
+    abilitySessionInfo->uiAbilityId = sessionInfo.uiAbilityId_;
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = *sessionInfo.want;
-    }    
+    } else {
+        abilitySessionInfo->want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_,
+            sessionInfo.moduleName_);
+    }
     return abilitySessionInfo;
 }
 
@@ -431,23 +443,9 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
             WLOGFE("session is invalid with %{public}" PRIu64 "", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        AAFwk::Want want;
-        auto sessionInfo = scnSession->GetSessionInfo();
-        want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
         auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
         if (!scnSessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
-        }
-        auto iter = sceneSessionMap_.find(sessionInfo.callerPersistentId_);
-        if (iter != sceneSessionMap_.end()) {
-            const auto& callerSession = iter->second;
-            if (callerSession != nullptr) {
-                auto callerSessionInfo = callerSession->GetSessionInfo();
-                scnSessionInfo->want = *callerSessionInfo.want;
-                scnSessionInfo->callerToken = callerSessionInfo.callerToken_;
-            }
-        } else {
-            scnSessionInfo->want = want;
         }
         AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
         activeSessionId_ = persistentId;
@@ -821,28 +819,15 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         auto sessionInfo = scnSession->GetSessionInfo();
-        WLOGFI("RequestSceneSessionByCall caller persistentId: %{public}" PRIu64 "", sessionInfo.callerPersistentId_);
+        WLOGFI("RequestSceneSessionByCall callState:%{public}d, persistentId: %{public}" PRIu64 "",
+            sessionInfo.callState_, persistentId);
         auto abilitySessionInfo = SetAbilitySessionInfo(scnSession);
         if (!abilitySessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
         }
-
-        auto iter = sceneSessionMap_.find(sessionInfo.callerPersistentId_);
-        if (iter == sceneSessionMap_.end()) {
-            return WSError::WS_ERROR_INVALID_SESSION;
-        }
-        const auto& callerSession = iter->second;
-        if (callerSession == nullptr) {
-            return WSError::WS_ERROR_NULLPTR;
-        }
-        auto callSessionInfo = callerSession->GetSessionInfo();
-        WLOGFI("get callerSession state:%{public}d, uiAbilityId:%{public}" PRIu64,
-            callSessionInfo.callState_, callSessionInfo.uiAbilityId_);
-        abilitySessionInfo->uiAbilityId = callSessionInfo.uiAbilityId_;
-
-        if (callSessionInfo.callState_ == static_cast<int32_t>(AAFwk::CallToState::BACKGROUND)) {
+        if (sessionInfo.callState_ == static_cast<int32_t>(AAFwk::CallToState::BACKGROUND)) {
             scnSession->SetActive(false);
-        } else if (callSessionInfo.callState_ == static_cast<int32_t>(AAFwk::CallToState::FOREGROUND)) {
+        } else if (sessionInfo.callState_ == static_cast<int32_t>(AAFwk::CallToState::FOREGROUND)) {
             scnSession->SetActive(true);
         } else {
             WLOGFE("wrong callState_");
