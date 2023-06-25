@@ -38,6 +38,7 @@ const std::map<std::string, WindowSceneConfig::ValueType> WindowSceneConfig::con
     { "defaultFloatingWindow",                        WindowSceneConfig::ValueType::INTS },
     { "maxMainFloatingWindowNumber",                  WindowSceneConfig::ValueType::INTS },
     { "maxFloatingWindowSize",                        WindowSceneConfig::ValueType::INTS },
+    { "defaultMaximizeMode",                          WindowSceneConfig::ValueType::INTS },
     { "windowAnimation",                              WindowSceneConfig::ValueType::MAP },
     { "keyboardAnimation",                            WindowSceneConfig::ValueType::MAP },
     { "timing",                                       WindowSceneConfig::ValueType::MAP },

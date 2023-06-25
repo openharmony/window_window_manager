@@ -40,7 +40,7 @@ class PixelMap;
 
 namespace OHOS::Rosen {
 class RSSurfaceNode;
-using NotifyPendingSessionActivationFunc = std::function<void(const SessionInfo& info)>;
+using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
 using NotifyBackPressedFunc = std::function<void()>;
 using NotifySessionFocusableChangeFunc = std::function<void(const bool isFocusable)>;
@@ -54,6 +54,7 @@ public:
     virtual void OnConnect() = 0;
     virtual void OnForeground() = 0;
     virtual void OnBackground() = 0;
+    virtual void OnDisconnect() = 0;
 };
 
 class Session : public SessionStub, public virtual RefBase {
@@ -68,7 +69,7 @@ public:
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     SessionState GetSessionState() const;
-    const SessionInfo& GetSessionInfo() const;
+    SessionInfo& GetSessionInfo();
     sptr<WindowSessionProperty> GetSessionProperty() const;
     WSRect GetSessionRect() const;
     WindowType GetWindowType() const;
@@ -90,6 +91,7 @@ public:
     void NotifyConnect();
     void NotifyForeground();
     void NotifyBackground();
+    void NotifyDisconnect();
 
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
@@ -138,6 +140,12 @@ public:
     bool GetFocusable() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
+    WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
+    WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
+    WSError SetBrightness(float brightness);
+    float GetBrightness() const;
+
+    bool IsSessionValid() const;
 
     uint32_t GetWindowId() const;
     int32_t GetCallingPid() const;
@@ -148,7 +156,6 @@ protected:
     void UpdateSessionState(SessionState state);
     void UpdateSessionFocusable(bool isFocusable);
     void UpdateSessionTouchable(bool touchable);
-    bool IsSessionValid() const;
 
     bool isActive_ = false;
     bool isFocused_ = false;
