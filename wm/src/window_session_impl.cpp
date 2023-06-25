@@ -190,6 +190,18 @@ WMError WindowSessionImpl::Connect()
     if (token) {
         property_->SetTokenState(true);
     }
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    if (abilityContext != nullptr) {
+        auto abilityInfo = abilityContext->GetAbilityInfo();
+        if (abilityInfo != nullptr) {
+            property_->SetWindowLimits({
+                abilityInfo->maxWindowWidth, abilityInfo->maxWindowHeight,
+                abilityInfo->minWindowWidth, abilityInfo->minWindowHeight,
+                abilityInfo->maxWindowRatio, abilityInfo->minWindowRatio
+            });
+        }
+    }
+
     auto ret = hostSession_->Connect(iSessionStage, iWindowEventChannel, surfaceNode_, windowSystemConfig_, property_, token);
     WLOGFI("Window Connect [name:%{public}s, id:%{public}" PRIu64 ", type:%{public}u], ret:%{public}u",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType(), ret);
@@ -397,6 +409,10 @@ void WindowSessionImpl::NotifyModeChange(WindowMode mode, bool hasDeco)
         if (listener.GetRefPtr() != nullptr) {
             listener.GetRefPtr()->OnModeChange(mode, hasDeco);
         }
+    }
+    if (hostSession_) {
+        property_->SetWindowMode(mode);
+        hostSession_->UpdateWindowSessionProperty(property_);
     }
 }
 

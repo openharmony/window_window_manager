@@ -54,6 +54,10 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
         &SessionStub::HandleNeedAvoid),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_GET_AVOID_AREA),
         &SessionStub::HandleGetAvoidAreaByType),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_UPDATE_WINDOW_SESSION_PROPERTY),
+        &SessionStub::HandleUpdateWindowSessionProperty),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_SET_ASPECT_RATIO),
+        &SessionStub::HandleSetAspectRatio)
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -305,6 +309,25 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
     WLOGFD("HandleGetAvoidArea type:%{public}d", static_cast<int32_t>(type));
     AvoidArea avoidArea = GetAvoidAreaByType(type);
     reply.WriteParcelable(&avoidArea);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateWindowSessionProperty(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("UpdateWindowSessionProperty!");
+    sptr<WindowSessionProperty> property = nullptr;
+    property = data.ReadStrongParcelable<WindowSessionProperty>();
+    const WSError& errCode = UpdateWindowSessionProperty(property);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleSetAspectRatio!");
+    float ratio = data.ReadFloat();
+    const WSError& errCode = SetAspectRatio(ratio);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
