@@ -44,8 +44,8 @@ public:
         sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session) override;
     WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) override;
     WSError RequestSessionBack() override;
-    WSError UpdateAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
-    WSError SendExtensionData(const AAFwk::WantParams& wantParams) override;
+    WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
+    WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

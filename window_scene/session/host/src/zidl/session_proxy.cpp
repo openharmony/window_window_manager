@@ -471,7 +471,7 @@ WSError SessionProxy::RequestSessionBack()
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::UpdateAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
+WSError SessionProxy::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -497,7 +497,7 @@ WSError SessionProxy::UpdateAbilityResult(uint32_t resultCode, const AAFwk::Want
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::SendExtensionData(const AAFwk::WantParams& wantParams)
+WSError SessionProxy::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -510,7 +510,7 @@ WSError SessionProxy::SendExtensionData(const AAFwk::WantParams& wantParams)
         WLOGFE("wantParams write failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_SEND_EXTENSION_DATA),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_TRANS_EXTENSION_DATA),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;

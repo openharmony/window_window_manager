@@ -21,20 +21,20 @@
 #include "want_params.h"
 
 namespace OHOS::Rosen {
-using NotifyUpdateAbilityResultFunc = std::function<void(uint32_t resultCode, const AAFwk::Want& want)>;
-using NotifySendExtensionDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
+using NotifyTransferAbilityResultFunc = std::function<void(uint32_t resultCode, const AAFwk::Want& want)>;
+using NotifyTransferExtensionDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
 class ExtensionSession : public Session {
 public:
     ExtensionSession(const SessionInfo& info);
     ~ExtensionSession() = default;
 
-    WSError UpdateAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
-    void SetUpdateAbilityResultListener(const NotifyUpdateAbilityResultFunc& func);
-    WSError SendExtensionData(const AAFwk::WantParams& wantParams) override;
-    void SetSendExtensionDataListener(const NotifySendExtensionDataFunc& func);
+    WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
+    void RegisterTransferAbilityResultListener(const NotifyTransferAbilityResultFunc& func);
+    WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
+    void RegisterTransferExtensionDataListener(const NotifyTransferExtensionDataFunc& func);
 private:
-    NotifyUpdateAbilityResultFunc updateAbilityResultFunc_;
-    NotifySendExtensionDataFunc sendExtensionDataFunc_;
+    NotifyTransferAbilityResultFunc transferAbilityResultFunc_;
+    NotifyTransferExtensionDataFunc transferExtensionDataFunc_;
 };
 } // namespace OHOS::Rosen
 

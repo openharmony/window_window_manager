@@ -56,6 +56,7 @@ namespace OHOS::Media {
 namespace OHOS {
 namespace Rosen {
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
+using NotifyTransferComponentDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
 class RSSurfaceNode;
 class RSTransaction;
 class ISession;
@@ -1330,12 +1331,18 @@ public:
      * @brief Send Ability Result.
      * @return WMError
      */
-    virtual WMError UpdateAbilityResult(uint32_t resultCode, const AAFwk::Want& want) { return WMError::WM_OK; }
+    virtual WMError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) { return WMError::WM_OK; }
     /**
      * @brief Send UIExtension data to Extension Component.
      * @return WMError
      */
-    virtual WMError SendExtensionData(const AAFwk::WantParams& wantParams) { return WMError::WM_OK; }
+    virtual WMError TransferExtensionData(const AAFwk::WantParams& wantParams) { return WMError::WM_OK; }
+    /**
+     * @brief Register send component data callback.
+     *
+     * @param func Function to notify send component data.
+     */
+    virtual void RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func) {}
 };
 }
 }

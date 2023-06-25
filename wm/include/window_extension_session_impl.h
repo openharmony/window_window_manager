@@ -29,8 +29,8 @@ public:
         const sptr<Rosen::ISession>& iSession) override;
     WMError MoveTo(int32_t x, int32_t y) override;
     WMError Resize(uint32_t width, uint32_t height) override;
-    WMError UpdateAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
-    WMError SendExtensionData(const AAFwk::WantParams& wantParams) override;
+    WMError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
+    WMError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
 };
 } // namespace Rosen
 } // namespace OHOS

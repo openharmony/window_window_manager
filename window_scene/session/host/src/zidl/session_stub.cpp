@@ -51,9 +51,9 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
 
     // for extension only
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_UPDATE_ABILITY_RESULT),
-        &SessionStub::HandleUpdateAbilityResult),
-    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_SEND_EXTENSION_DATA),
-        &SessionStub::HandleSendExtensionData)
+        &SessionStub::HandleTransferAbilityResult),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_TRANS_EXTENSION_DATA),
+        &SessionStub::HandleTransferExtensionData)
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -271,29 +271,29 @@ int SessionStub::HandleBackPressed(MessageParcel& data, MessageParcel& reply)
     return ERR_NONE;
 }
 
-int SessionStub::HandleUpdateAbilityResult(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleUpdateAbilityResult!");
+    WLOGFD("HandleTransferAbilityResult!");
     uint32_t resultCode = data.ReadUint32();
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
         WLOGFE("want is nullptr");
         return ERR_INVALID_VALUE;
     }
-    WSError errCode = UpdateAbilityResult(resultCode, *want);
+    WSError errCode = TransferAbilityResult(resultCode, *want);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 
-int SessionStub::HandleSendExtensionData(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleTransferExtensionData(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleSendExtensionData!");
+    WLOGFD("HandleTransferExtensionData!");
     std::shared_ptr<AAFwk::WantParams> wantParams(data.ReadParcelable<AAFwk::WantParams>());
     if (wantParams == nullptr) {
         WLOGFE("wantParams is nullptr");
         return ERR_INVALID_VALUE;
     }
-    WSError errCode = SendExtensionData(*wantParams);
+    WSError errCode = TransferExtensionData(*wantParams);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
