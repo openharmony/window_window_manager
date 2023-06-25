@@ -136,6 +136,16 @@ void Session::NotifyBackground()
     }
 }
 
+void Session::NotifyDisconnect()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (!listener.expired()) {
+            listener.lock()->OnDisconnect();
+        }
+    }
+}
+
 SessionState Session::GetSessionState() const
 {
     return state_;
@@ -297,6 +307,7 @@ WSError Session::Disconnect()
     WLOGFI("Disconnect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(state));
     state_ = SessionState::STATE_INACTIVE;
+    NotifyDisconnect();
     Background();
     if (GetSessionState() == SessionState::STATE_BACKGROUND) {
         UpdateSessionState(SessionState::STATE_DISCONNECT);
