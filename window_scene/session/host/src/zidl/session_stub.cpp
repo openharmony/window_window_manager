@@ -46,7 +46,11 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_RAISE_TO_APP_TOP),
         &SessionStub::HandleRaiseToAppTop),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_BACKPRESSED), &SessionStub::HandleBackPressed),
-    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_MARK_PROCESSED), &SessionStub::HandleMarkProcessed)
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_MARK_PROCESSED), &SessionStub::HandleMarkProcessed),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_SET_MAXIMIZE_MODE),
+        &SessionStub::HandleSetGlobalMaximizeMode),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_GET_MAXIMIZE_MODE),
+        &SessionStub::HandleGetGlobalMaximizeMode)
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -273,6 +277,25 @@ int SessionStub::HandleMarkProcessed(MessageParcel& data, MessageParcel& reply)
         return ERR_INVALID_DATA;
     }
     WSError errCode = MarkProcessed(eventId);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetGlobalMaximizeMode(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFD("HandleSetGlobalMaximizeMode!");
+    auto mode = data.ReadUint32();
+    WSError errCode = SetGlobalMaximizeMode(static_cast<MaximizeMode>(mode));
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetGlobalMaximizeMode(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFD("HandleGetGlobalMaximizeMode!");
+    MaximizeMode mode = MaximizeMode::MODE_FULL_FILL;
+    WSError errCode = GetGlobalMaximizeMode(mode);
+    reply.WriteUint32(static_cast<uint32_t>(mode));
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

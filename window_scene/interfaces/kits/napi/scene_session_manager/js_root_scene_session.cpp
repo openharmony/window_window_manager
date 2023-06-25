@@ -14,6 +14,7 @@
  */
 
 #include "js_root_scene_session.h"
+#include "session_manager/include/scene_session_manager.h"
 
 #include "context.h"
 #include <js_runtime_utils.h>
@@ -102,7 +103,7 @@ NativeValue* JsRootSceneSession::OnRegisterCallback(NativeEngine& engine, Native
         return engine.CreateUndefined();
     }
 
-    NotifyPendingSessionActivationFunc func = [this](const SessionInfo& info) {
+    NotifyPendingSessionActivationFunc func = [this](SessionInfo& info) {
         this->PendingSessionActivation(info);
     };
     rootSceneSession_->SetPendingSessionActivationEventListener(func);
@@ -180,10 +181,27 @@ bool JsRootSceneSession::IsCallbackRegistered(std::string type, NativeValue* jsL
     return false;
 }
 
-void JsRootSceneSession::PendingSessionActivation(const SessionInfo& info)
+void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
 {
     WLOGI("[NAPI]pending session activation: bundleName %{public}s, moduleName %{public}s, abilityName %{public}s",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
+    if (info.persistentId_ == 0) {
+        auto sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
+        if (sceneSession == nullptr) {
+            WLOGFE("RequestSceneSession return nullptr");
+            return;
+        }
+        info.persistentId_ = sceneSession->GetPersistentId();
+    } else {
+        auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
+        if (sceneSession == nullptr) {
+            WLOGFE("GetSceneSession return nullptr");
+            return;
+        }
+        sceneSession->GetSessionInfo().want = info.want;
+        sceneSession->GetSessionInfo().callerToken_ = info.callerToken_;
+        sceneSession->GetSessionInfo().requestCode = info.requestCode;
+    }
     auto iter = jsCbMap_.find(PENDING_SCENE_CB);
     if (iter == jsCbMap_.end()) {
         return;
@@ -195,6 +213,7 @@ void JsRootSceneSession::PendingSessionActivation(const SessionInfo& info)
             NativeValue* jsSessionInfo = CreateJsSessionInfo(engine, info);
             if (jsSessionInfo == nullptr) {
                 WLOGFE("[NAPI]this target session info is nullptr");
+                return;
             }
             NativeValue* argv[] = { jsSessionInfo };
             engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));

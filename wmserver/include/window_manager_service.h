@@ -209,7 +209,7 @@ private:
     bool startingOpen_ = true;
     std::shared_ptr<RSUIDirector> rsUiDirector_;
     std::shared_ptr<PerformReporter> windowShowPerformReport_;
-    MaximizeMode maximizeMode_ = MaximizeMode::MODE_FULL_FILL;
+    MaximizeMode maximizeMode_ = MaximizeMode::MODE_RECOVER;
 };
 } // namespace Rosen
 } // namespace OHOS
