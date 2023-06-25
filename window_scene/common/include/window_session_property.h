@@ -45,6 +45,7 @@ public:
     void SetParentPersistentId(uint64_t persistentId);
     void SetAccessTokenId(uint32_t accessTokenId);
     void SetTokenState(bool hasToken);
+    void SetMaximizeMode(MaximizeMode mode);
 
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
@@ -61,6 +62,7 @@ public:
     uint64_t GetParentPersistentId() const;
     uint32_t GetAccessTokenId() const;
     bool GetTokenState() const;
+    MaximizeMode GetMaximizeMode() const;
 
     bool Marshalling(Parcel& parcel) const override;
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
@@ -80,6 +82,7 @@ private:
     uint64_t persistentId_ = INVALID_SESSION_ID;
     uint64_t parentPersistentId_ = INVALID_SESSION_ID;
     uint32_t accessTokenId_ = INVALID_SESSION_ID;
+    MaximizeMode maximizeMode_ = MaximizeMode::MODE_RECOVER;
 };
 
 struct SystemSessionConfig : public Parcelable {
