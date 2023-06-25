@@ -78,7 +78,7 @@ public:
     DMError GetScreenGamutMap(ScreenGamutMap& gamutMap);
     DMError SetScreenGamutMap(ScreenGamutMap gamutMap);
     DMError SetScreenColorTransform();
-    
+
     int32_t GetPrivateSessionCount() const;
     DMError SetPrivateSessionCount(int32_t count);
 

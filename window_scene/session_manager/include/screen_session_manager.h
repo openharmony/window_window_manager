@@ -131,7 +131,7 @@ public:
     void NotifyScreenDisconnected(ScreenId screenId);
     void NotifyScreenGroupChanged(const sptr<ScreenInfo>& screenInfo, ScreenGroupChangeEvent event);
     void NotifyScreenGroupChanged(const std::vector<sptr<ScreenInfo>>& screenInfo, ScreenGroupChangeEvent event);
-    
+
     void NotifyPrivateSessionStateChanged(bool hasPrivate);
     void UpdatePrivateStateAndNotify(sptr<ScreenSession>& screenSession, bool isAddingPrivateSession);
 

@@ -21,7 +21,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSession" };
 }
-
+MaximizeMode SceneSession::maximizeMode_ = MaximizeMode::MODE_RECOVER;
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : Session(info)
 {
@@ -68,7 +68,21 @@ void SceneSession::RegisterSessionChangeCallback(const sptr<SceneSession::Sessio
     sessionChangeCallback_ = sessionChangeCallback;
 }
 
-WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
+WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
+{
+    WLOGFD("SceneSession SetGlobalMaximizeMode mode: %{public}u", static_cast<uint32_t>(mode));
+    maximizeMode_ = mode;
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode &mode)
+{
+    WLOGFD("SceneSession GetGlobalMaximizeMode");
+    mode = maximizeMode_;
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::UpdateSessionRect(const WSRect &rect, const SizeChangeReason &reason)
 {
     WLOGFI("UpdateSessionRect [%{public}d, %{public}d, %{public}u, %{public}u]", rect.posX_, rect.posY_,
         rect.width_, rect.height_);
