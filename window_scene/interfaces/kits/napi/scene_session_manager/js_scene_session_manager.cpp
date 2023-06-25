@@ -349,7 +349,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
-    if (info.argc == 2) {
+    if (info.argc == 2 && info.argv[1]->TypeOf() != NATIVE_UNDEFINED) {
         OHOS::AppExecFwk::UnwrapWant(reinterpret_cast<napi_env>(&engine),
             reinterpret_cast<napi_value>(info.argv[1]), want);
         sessionInfo.want = new(std::nothrow) AAFwk::Want(want);
