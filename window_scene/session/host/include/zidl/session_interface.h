@@ -51,6 +51,8 @@ public:
         TRANS_ID_GET_MAXIMIZE_MODE,
         TRANS_ID_NEED_AVOID,
         TRANS_ID_GET_AVOID_AREA,
+        TRANS_ID_UPDATE_WINDOW_SESSION_PROPERTY,
+        TRANS_ID_SET_ASPECT_RATIO
     };
     virtual WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
@@ -76,6 +78,8 @@ public:
     virtual WSError RequestSessionBack() = 0;
     virtual WSError SetGlobalMaximizeMode(MaximizeMode mode) = 0;
     virtual WSError GetGlobalMaximizeMode(MaximizeMode& mode) = 0;
+    virtual WSError UpdateWindowSessionProperty(sptr<WindowSessionProperty>) = 0;
+    virtual WSError SetAspectRatio(float ratio) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_INTERFACE_H

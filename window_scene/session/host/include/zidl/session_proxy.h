@@ -48,6 +48,8 @@ public:
     WSError RequestSessionBack() override;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
+    WSError UpdateWindowSessionProperty(sptr<WindowSessionProperty> property) override;
+    WSError SetAspectRatio(float ratio) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

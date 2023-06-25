@@ -556,4 +556,49 @@ WSError SessionProxy::GetGlobalMaximizeMode(MaximizeMode& mode)
     int32_t ret = reply.ReadUint32();
     return static_cast<WSError>(ret);
 }
+
+WSError SessionProxy::UpdateWindowSessionProperty(sptr<WindowSessionProperty> property)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteParcelable(property.GetRefPtr())) {
+        WLOGFE("Write property failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_UPDATE_WINDOW_SESSION_PROPERTY),
+                              data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
+WSError SessionProxy::SetAspectRatio(float ratio)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteFloat(ratio)) {
+        WLOGFE("Write ratio failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_SET_ASPECT_RATIO),
+                              data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
 } // namespace OHOS::Rosen
