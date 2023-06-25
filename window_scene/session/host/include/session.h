@@ -135,6 +135,8 @@ public:
     bool GetFocusable() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
+    WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
+    WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
 
     uint32_t GetWindowId() const;
     int32_t GetCallingPid() const;

@@ -281,8 +281,8 @@ bool WindowManagerService::Init()
     if (PersistentStorage::HasKey("maximize_state", PersistentStorageType::MAXIMIZE_STATE)) {
         int32_t storageMode = -1;
         PersistentStorage::Get("maximize_state", storageMode, PersistentStorageType::MAXIMIZE_STATE);
-        if (storageMode == static_cast<uint32_t>(MaximizeMode::MODE_AVOID_SYSTEM_BAR) ||
-            storageMode == static_cast<uint32_t>(MaximizeMode::MODE_FULL_FILL)) {
+        if (storageMode == static_cast<int32_t>(MaximizeMode::MODE_AVOID_SYSTEM_BAR) ||
+            storageMode == static_cast<int32_t>(MaximizeMode::MODE_FULL_FILL)) {
             maximizeMode_ = static_cast<MaximizeMode>(storageMode);
         }
     }
@@ -325,8 +325,6 @@ void WindowManagerService::ConfigureWindowManagerService()
              numbers[0] == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
             systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(numbers[0]));
             StartingWindow::SetDefaultWindowMode(systemConfig_.defaultWindowMode_);
-            maximizeMode_ = systemConfig_.defaultWindowMode_ == WindowMode::WINDOW_MODE_FLOATING ?
-                MaximizeMode::MODE_AVOID_SYSTEM_BAR : MaximizeMode::MODE_FULL_FILL;
         }
     }
     item = config["dragFrameGravity"];
@@ -400,6 +398,15 @@ void WindowManagerService::ConfigureWindowManagerService()
         auto numbers = *item.intsValue_;
         if (numbers.size() == 1 && numbers[0] > 0) {
             WindowLayoutPolicy::SetMaxFloatingWindowSize(static_cast<uint32_t>(numbers[0]));
+        }
+    }
+    item = config["defaultMaximizeMode"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1 &&
+            (numbers[0] == static_cast<int32_t>(MaximizeMode::MODE_AVOID_SYSTEM_BAR) ||
+            numbers[0] == static_cast<int32_t>(MaximizeMode::MODE_FULL_FILL))) {
+            maximizeMode_ = static_cast<MaximizeMode>(numbers[0]);
         }
     }
 }

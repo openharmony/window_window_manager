@@ -19,6 +19,7 @@
 #include <ipc_skeleton.h>
 #include <transaction/rs_interfaces.h>
 
+#include "key_event.h"
 #include "session/container/include/window_event_channel.h"
 #include "session_manager/include/session_manager.h"
 #include "vsync_station.h"
@@ -762,8 +763,19 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
 
 void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
 {
+    if (keyEvent == nullptr) {
+        WLOGFE("keyEvent is nullptr");
+        return;
+    }
+    int32_t keyCode = keyEvent->GetKeyCode();
     if (uiContent_) {
         isConsumed = uiContent_->ProcessKeyEvent(keyEvent);
+        if (!isConsumed && keyCode == MMI::KeyEvent::KEYCODE_ESCAPE &&
+            windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN &&
+            property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL) {
+            WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
+            Recover();
+        }
     }
 }
 
@@ -790,5 +802,13 @@ WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
     return SessionManager::GetInstance().UpdateProperty(property_, action);
 }
 
+sptr<Window> WindowSessionImpl::Find(const std::string& name)
+{
+    auto iter = windowSessionMap_.find(name);
+    if (iter == windowSessionMap_.end()) {
+        return nullptr;
+    }
+    return iter->second.second;
+}
 } // namespace Rosen
 } // namespace OHOS
