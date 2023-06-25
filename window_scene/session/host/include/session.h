@@ -40,7 +40,7 @@ class PixelMap;
 
 namespace OHOS::Rosen {
 class RSSurfaceNode;
-using NotifyPendingSessionActivationFunc = std::function<void(const SessionInfo& info)>;
+using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
 using NotifyBackPressedFunc = std::function<void()>;
 using NotifySessionFocusableChangeFunc = std::function<void(const bool isFocusable)>;
@@ -67,7 +67,7 @@ public:
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     SessionState GetSessionState() const;
-    const SessionInfo& GetSessionInfo() const;
+    SessionInfo& GetSessionInfo();
     sptr<WindowSessionProperty> GetSessionProperty() const;
     WSRect GetSessionRect() const;
     WindowType GetWindowType() const;
@@ -130,11 +130,14 @@ public:
     void SetClickListener(const NotifyClickFunc& func);
     void NotifySessionFocusableChange(bool isFocusable);
     void NotifyClick();
+    // void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
     WSError UpdateFocus(bool isFocused);
     WSError SetFocusable(bool isFocusable);
     bool GetFocusable() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
+    WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
+    WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
 
     uint32_t GetWindowId() const;
     int32_t GetCallingPid() const;

@@ -53,6 +53,16 @@ void WindowSessionProperty::SetTouchable(bool isTouchable)
     touchable_ = isTouchable;
 }
 
+void WindowSessionProperty::SetPrivacyMode(bool isPrivate)
+{
+    isPrivacyMode_ = isPrivate;
+}
+
+void WindowSessionProperty::SetSystemPrivacyMode(bool isSystemPrivate)
+{
+    isSystemPrivacyMode_ = isSystemPrivate;
+}
+
 void WindowSessionProperty::SetDisplayId(DisplayId displayId)
 {
     displayId_ = displayId;
@@ -91,6 +101,16 @@ bool WindowSessionProperty::GetFocusable() const
 bool WindowSessionProperty::GetTouchable() const
 {
     return touchable_;
+}
+
+bool WindowSessionProperty::GetPrivacyMode() const
+{
+    return isPrivacyMode_;
+}
+
+bool WindowSessionProperty::GetSystemPrivacyMode() const
+{
+    return isSystemPrivacyMode_;
 }
 
 DisplayId WindowSessionProperty::GetDisplayId() const
@@ -148,6 +168,16 @@ bool WindowSessionProperty::GetTokenState() const
     return tokenState_;
 }
 
+MaximizeMode WindowSessionProperty::GetMaximizeMode() const
+{
+    return maximizeMode_;
+}
+
+void WindowSessionProperty::SetMaximizeMode(MaximizeMode mode)
+{
+    maximizeMode_ = mode;
+}
+
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
@@ -157,11 +187,12 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(requestRect_.height_) &&
         parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
         parcel.WriteBool(focusable_) && parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
+        parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteUint64(persistentId_) &&
         parcel.WriteString(sessionInfo_.bundleName_) && parcel.WriteString(sessionInfo_.moduleName_) &&
         parcel.WriteString(sessionInfo_.abilityName_) &&
         parcel.WriteUint64(parentPersistentId_) &&
-        parcel.WriteUint32(accessTokenId_);
+        parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_));
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -179,12 +210,15 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetFocusable(parcel.ReadBool());
     property->SetTouchable(parcel.ReadBool());
     property->SetTokenState(parcel.ReadBool());
+    property->SetPrivacyMode(parcel.ReadBool());
+    property->SetSystemPrivacyMode(parcel.ReadBool());
     property->SetDisplayId(parcel.ReadUint64());
     property->SetPersistentId(parcel.ReadUint64());
     SessionInfo info = { parcel.ReadString(), parcel.ReadString(), parcel.ReadString() };
     property->SetSessionInfo(info);
     property->SetParentPersistentId(parcel.ReadUint64());
     property->SetAccessTokenId(parcel.ReadUint32());
+    property->SetMaximizeMode(static_cast<MaximizeMode>(parcel.ReadUint32()));
     return property;
 }
 } // namespace Rosen

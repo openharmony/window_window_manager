@@ -27,6 +27,8 @@
 #include <start_options.h>
 #include <system_ability_definition.h>
 #include <want.h>
+#include <transaction/rs_transaction.h>
+#include <transaction/rs_interfaces.h>
 
 #include "color_parser.h"
 #include "common/include/permission.h"
@@ -36,6 +38,7 @@
 #include "zidl/window_manager_agent_interface.h"
 #include "session_manager_agent_controller.h"
 #include "window_manager.h"
+#include "session_manager/include/screen_session_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -84,6 +87,16 @@ void SceneSessionManager::ConfigWindowSceneXml()
             (numbers[0] == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
              numbers[0] == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
             systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(numbers[0]));
+        }
+    }
+
+    item = config["defaultMaximizeMode"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1 &&
+            (numbers[0] == static_cast<int32_t>(MaximizeMode::MODE_AVOID_SYSTEM_BAR) ||
+            numbers[0] == static_cast<int32_t>(MaximizeMode::MODE_FULL_FILL))) {
+            SceneSession::maximizeMode_ = static_cast<MaximizeMode>(numbers[0]);
         }
     }
 
@@ -264,7 +277,7 @@ void SceneSessionManager::ConfigKeyboardAnimation(const WindowSceneConfig::Confi
     }
 }
 
-const std::string& SceneSessionManager::CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig)
+std::string SceneSessionManager::CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig)
 {
     static std::unordered_set<std::string> curveSet = { "easeOut", "ease", "easeIn", "easeInOut", "default",
         "linear", "spring", "interactiveSpring" };
@@ -356,6 +369,13 @@ WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& scene
 
 sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property)
 {
+    if (sessionInfo.persistentId_ != 0) {
+        auto session = GetSceneSession(sessionInfo.persistentId_);
+        if (session != nullptr) {
+            WLOGFI("get exist session persistentId: %{public}" PRIu64 "", sessionInfo.persistentId_);
+            return session;
+        }
+    }
     sptr<SceneSession::SpecificSessionCallback> specificCallback = new (std::nothrow)
         SceneSession::SpecificSessionCallback();
     if (specificCallback == nullptr) {
@@ -371,7 +391,6 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
     auto task = [this, sessionInfo, specificCallback, property]() {
         WLOGFI("sessionInfo: bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
             sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());
-        WLOGFI("RequestSceneSession caller persistentId: %{public}" PRIu64 "", sessionInfo.callerPersistentId_);
         sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, specificCallback);
         if (sceneSession == nullptr) {
             WLOGFE("sceneSession is nullptr!");
@@ -381,6 +400,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         sceneSession->SetSystemConfig(systemConfig_);
         UpdateParentSession(sceneSession, property);
         sceneSessionMap_.insert({ persistentId, sceneSession });
+        RegisterSessionStateChangeFunc(sceneSession);
         WLOGFI("create session persistentId: %{public}" PRIu64 "", persistentId);
         return sceneSession;
     };
@@ -400,9 +420,15 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     abilitySessionInfo->sessionToken = iSession->AsObject();
     abilitySessionInfo->callerToken = sessionInfo.callerToken_;
     abilitySessionInfo->persistentId = scnSession->GetPersistentId();
+    abilitySessionInfo->requestCode = sessionInfo.requestCode;
+    abilitySessionInfo->resultCode = sessionInfo.resultCode;
+    abilitySessionInfo->uiAbilityId = sessionInfo.uiAbilityId_;
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = *sessionInfo.want;
-    }    
+    } else {
+        abilitySessionInfo->want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_,
+            sessionInfo.moduleName_);
+    }
     return abilitySessionInfo;
 }
 
@@ -421,23 +447,9 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
             WLOGFE("session is invalid with %{public}" PRIu64 "", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        AAFwk::Want want;
-        auto sessionInfo = scnSession->GetSessionInfo();
-        want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
         auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
         if (!scnSessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
-        }
-        auto iter = sceneSessionMap_.find(sessionInfo.callerPersistentId_);
-        if (iter != sceneSessionMap_.end()) {
-            const auto& callerSession = iter->second;
-            if (callerSession != nullptr) {
-                auto callerSessionInfo = callerSession->GetSessionInfo();
-                scnSessionInfo->want = *callerSessionInfo.want;
-                scnSessionInfo->callerToken = callerSessionInfo.callerToken_;
-            }
-        } else {
-            scnSessionInfo->want = want;
         }
         AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
         activeSessionId_ = persistentId;
@@ -731,7 +743,21 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
-            // @todo
+            bool prePrivacyMode = sceneSession->GetWindowSessionProperty()->GetPrivacyMode() || sceneSession->GetWindowSessionProperty()->GetSystemPrivacyMode();
+            bool isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
+            if (prePrivacyMode ^ isPrivacyMode) {
+                sceneSession->GetWindowSessionProperty()->SetPrivacyMode(isPrivacyMode);
+                sceneSession->GetWindowSessionProperty()->SetSystemPrivacyMode(isPrivacyMode);
+                sceneSession->GetSurfaceNode()->SetSecurityLayer(isPrivacyMode);
+                RSTransaction::FlushImplicitTransaction();
+                UpdatePrivateStateAndNotify(isPrivacyMode);
+            }
+            break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE: {
+            if (sceneSession->GetSessionProperty() != nullptr) {
+                sceneSession->GetSessionProperty()->SetMaximizeMode(property->GetMaximizeMode());
+            }
             break;
         }
         default:
@@ -789,6 +815,60 @@ WSError SceneSessionManager::UpdateFocus(uint64_t persistentId, bool isFocused)
     return WSError::WS_OK;
 }
 
+void SceneSessionManager::UpdatePrivateStateAndNotify(bool isAddingPrivateSession)
+{
+    auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);
+    if (screenSession == nullptr) {
+        WLOGFE("screen session is null");
+        return;
+    }
+    ScreenSessionManager::GetInstance().UpdatePrivateStateAndNotify(screenSession, isAddingPrivateSession);
+}
+
+// void JsSceneSession::ProcessSessionStateChangeRegister()
+// {
+//     NotifySessionStateChangeFunc func = [this](const SessionState& state) {
+//         this->OnSessionStateChange(state);
+//     };
+//     auto session = weakSession_.promote();
+//     if (session == nullptr) {
+//         WLOGFE("session is nullptr");
+//         return;
+//     }
+//     session->SetSessionStateChangeListenser(func);
+//     WLOGFD("ProcessSessionStateChangeRegister success");
+// }
+
+void SceneSessionManager::RegisterSessionStateChangeFunc(sptr<SceneSession>& sceneSession)
+{
+    NotifySessionStateChangeFunc func = [this, &sceneSession](const SessionState& state) {
+        this->OnSessionStateChange(sceneSession, state);
+    };
+    if (sceneSession == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    sceneSession->SetSessionStateChangeListenser(func);
+    WLOGFD("RegisterSessionStateChangeFunc success");
+}
+
+void SceneSessionManager::OnSessionStateChange(sptr<SceneSession>& sceneSession, const SessionState& state)
+{
+    switch (state) {
+    case SessionState::STATE_FOREGROUND:
+        if (sceneSession->GetWindowSessionProperty()->GetPrivacyMode()) {
+            UpdatePrivateStateAndNotify(true);
+        }
+        break;
+    case SessionState::STATE_BACKGROUND:
+        if (sceneSession->GetWindowSessionProperty()->GetPrivacyMode()) {
+            UpdatePrivateStateAndNotify(false);
+        }
+    default:
+        break;
+    }
+}
+
 WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession)
 {
     wptr<SceneSession> weakSceneSession(sceneSession);
@@ -805,28 +885,15 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         auto sessionInfo = scnSession->GetSessionInfo();
-        WLOGFI("RequestSceneSessionByCall caller persistentId: %{public}" PRIu64 "", sessionInfo.callerPersistentId_);
+        WLOGFI("RequestSceneSessionByCall callState:%{public}d, persistentId: %{public}" PRIu64 "",
+            sessionInfo.callState_, persistentId);
         auto abilitySessionInfo = SetAbilitySessionInfo(scnSession);
         if (!abilitySessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
         }
-
-        auto iter = sceneSessionMap_.find(sessionInfo.callerPersistentId_);
-        if (iter == sceneSessionMap_.end()) {
-            return WSError::WS_ERROR_INVALID_SESSION;
-        }
-        const auto& callerSession = iter->second;
-        if (callerSession == nullptr) {
-            return WSError::WS_ERROR_NULLPTR;
-        }
-        auto callSessionInfo = callerSession->GetSessionInfo();
-        WLOGFI("get callerSession state:%{public}d, uiAbilityId:%{public}" PRIu64,
-            callSessionInfo.callState_, callSessionInfo.uiAbilityId_);
-        abilitySessionInfo->uiAbilityId = callSessionInfo.uiAbilityId_;
-
-        if (callSessionInfo.callState_ == static_cast<int32_t>(AAFwk::CallToState::BACKGROUND)) {
+        if (sessionInfo.callState_ == static_cast<int32_t>(AAFwk::CallToState::BACKGROUND)) {
             scnSession->SetActive(false);
-        } else if (callSessionInfo.callState_ == static_cast<int32_t>(AAFwk::CallToState::FOREGROUND)) {
+        } else if (sessionInfo.callState_ == static_cast<int32_t>(AAFwk::CallToState::FOREGROUND)) {
             scnSession->SetActive(true);
         } else {
             WLOGFE("wrong callState_");

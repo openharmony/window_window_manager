@@ -70,6 +70,7 @@ public:
     uint64_t GetFocusedSession() const;
     WSError UpdateFocus(uint64_t persistentId, bool isFocused);
 
+    void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
@@ -93,7 +94,7 @@ private:
     std::shared_ptr<Global::Resource::ResourceManager> CreateResourceManager(
         const AppExecFwk::AbilityInfo& abilityInfo);
     void GetStartPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, std::string& path, uint32_t& bgColor);
-    const std::string& CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
+    std::string CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
 
     sptr<RootSceneSession> rootSceneSession_;
     std::map<uint64_t, sptr<SceneSession>> sceneSessionMap_;
@@ -106,6 +107,8 @@ private:
 
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
+    void RegisterSessionStateChangeFunc(sptr<SceneSession>& sceneSession);
+    void OnSessionStateChange(sptr<SceneSession>& sceneSession, const SessionState& state);
 };
 } // namespace OHOS::Rosen
 
