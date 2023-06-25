@@ -432,6 +432,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
 
 WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession)
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionActivation");
     wptr<SceneSession> weakSceneSession(sceneSession);
     auto task = [this, weakSceneSession]() {
         auto scnSession = weakSceneSession.promote();
@@ -460,6 +461,7 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
 
 WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession)
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionBackground");
     wptr<SceneSession> weakSceneSession(sceneSession);
     auto task = [this, weakSceneSession]() {
         auto scnSession = weakSceneSession.promote();
@@ -493,6 +495,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
 
 WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession>& scnSession)
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:DestroyDialogWithMainWindow");
     if (scnSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         WLOGFD("Begin to destroy its dialog");
         auto dialogVec = scnSession->GetDialogVector();
@@ -512,6 +515,7 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
 
 WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession)
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionDestruction");
     wptr<SceneSession> weakSceneSession(sceneSession);
     auto task = [this, weakSceneSession]() {
         auto scnSession = weakSceneSession.promote();
