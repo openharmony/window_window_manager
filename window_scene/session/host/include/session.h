@@ -20,7 +20,6 @@
 #include <set>
 #include <string>
 #include <vector>
-
 #include <refbase.h>
 
 #include "interfaces/include/ws_common.h"
