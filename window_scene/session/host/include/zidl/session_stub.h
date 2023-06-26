@@ -50,6 +50,12 @@ private:
     int HandleDestroyAndDisconnectSpecificSession(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply);
     int HandleBackPressed(MessageParcel& data, MessageParcel& reply);
+    int HandleSetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply);
+    int HandleGetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply);
+    int HandleNeedAvoid(MessageParcel& data, MessageParcel& reply);
+    int HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateWindowSessionProperty(MessageParcel& data, MessageParcel& reply);
+    int HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply);
 
     // for extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);

@@ -98,7 +98,6 @@ struct SessionInfo {
     int32_t requestCode;
     int32_t errorCode;
     std::string errorReason;
-
     uint64_t persistentId_ = INVALID_SESSION_ID;
     uint64_t callerPersistentId_ = INVALID_SESSION_ID;
     uint32_t callState_ = 0;
@@ -129,6 +128,8 @@ enum class SessionEvent : uint32_t {
     EVENT_MINIMIZE,
     EVENT_CLOSE,
     EVENT_START_MOVE,
+    EVENT_END_MOVE,
+    EVENT_MAXIMIZE_FLOATING,
     EVENT_TERMINATE,
     EVENT_EXCEPTION,
 };

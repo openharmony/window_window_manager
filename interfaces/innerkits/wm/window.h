@@ -1259,7 +1259,7 @@ public:
      *
      * @return MaximizeMode
      */
-    virtual MaximizeMode GetGlobalMaximizeMode() {return MaximizeMode::MODE_FULL_FILL;}
+    virtual MaximizeMode GetGlobalMaximizeMode() const {return MaximizeMode::MODE_FULL_FILL;}
 
     // colorspace, gamut
     /**
@@ -1328,19 +1328,19 @@ public:
      */
     virtual void SetNeedDefaultAnimation(bool needDefaultAnimation) {}
     /**
-     * @brief Send Ability Result.
+     * @brief Transfer Ability Result.
      * @return WMError
      */
     virtual WMError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) { return WMError::WM_OK; }
     /**
-     * @brief Send UIExtension data to Extension Component.
+     * @brief Transfer UIExtension data to Extension Component.
      * @return WMError
      */
     virtual WMError TransferExtensionData(const AAFwk::WantParams& wantParams) { return WMError::WM_OK; }
     /**
-     * @brief Register send component data callback.
+     * @brief Register transfer component data callback.
      *
-     * @param func Function to notify send component data.
+     * @param func Function to notify transfer component data.
      */
     virtual void RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func) {}
 };

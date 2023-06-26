@@ -443,6 +443,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         WLOGFE("screen session is nullptr");
         return session;
     }
+    InitAbstractScreenModesInfo(session);
     session->groupSmsId_ = 1;
     screenSessionMap_[screenId] = session;
     return session;
@@ -551,6 +552,26 @@ ScreenPowerState ScreenSessionManager::GetScreenPower(ScreenId screenId)
     auto state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(screenId));
     WLOGFI("GetScreenPower:%{public}u, rsscreen:%{public}" PRIu64".", state, screenId);
     return state;
+}
+
+DMError ScreenSessionManager::IsScreenRotationLocked(bool& isLocked)
+{
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("SCB: ScreenSessionManager is screen rotation locked permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    WLOGFI("SCB: IsScreenRotationLocked:isLocked: %{public}u", isLocked);
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::SetScreenRotationLocked(bool isLocked)
+{
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("SCB: ScreenSessionManager set screen rotation locked permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    WLOGFI("SCB: SetScreenRotationLocked: isLocked: %{public}u", isLocked);
+    return DMError::DM_OK;
 }
 
 void ScreenSessionManager::RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener)
@@ -851,7 +872,8 @@ sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId
 
 bool ScreenSessionManager::InitAbstractScreenModesInfo(sptr<ScreenSession>& screenSession)
 {
-    std::vector<RSScreenModeInfo> allModes = rsInterface_.GetScreenSupportedModes(screenSession->rsId_);
+    std::vector<RSScreenModeInfo> allModes = rsInterface_.GetScreenSupportedModes(
+        screenIdManager_.ConvertToRsScreenId(screenSession->screenId_));
     if (allModes.size() == 0) {
         WLOGE("SCB: allModes.size() == 0, screenId=%{public}" PRIu64"", screenSession->rsId_);
         return false;

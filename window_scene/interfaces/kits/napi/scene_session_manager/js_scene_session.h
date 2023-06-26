@@ -55,8 +55,10 @@ private:
     void ProcessClickRegister();
     void ProcessTerminateSessionRegister();
     void ProcessSessionExceptionRegister();
+    void ProcessSystemBarPropertyChangeRegister();
+    void ProcessNeedAvoidRegister();
 
-    void PendingSessionActivation(const SessionInfo& info);
+    void PendingSessionActivation(SessionInfo& info);
     void OnSessionStateChange(const SessionState& state);
     void OnSessionEvent(uint32_t actionId);
     void OnCreateSpecificSession(const sptr<SceneSession>& session);
@@ -68,6 +70,8 @@ private:
     void TerminateSession(const SessionInfo& info);
     void OnSessionException(const SessionInfo& info);
     static WindowTypeInAPI GetApiType(WindowType type);
+    void OnSystemBarPropertyChange(const SystemBarProperty& property);
+    void OnNeedAvoid(bool status);
 
     NativeEngine& engine_;
     wptr<SceneSession> weakSession_ = nullptr;

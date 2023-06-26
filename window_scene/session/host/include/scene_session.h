@@ -27,6 +27,8 @@ using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSessi
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
+using NotifySystemBarPropertyChangeFunc = std::function<void(const SystemBarProperty& property)>;
+using NotifyNeedAvoidFunc = std::function<void(bool status)>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -42,6 +44,8 @@ public:
         NotifySessionRectChangeFunc onRectChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
         NotifySessionEventFunc OnSessionEvent_;
+        NotifySystemBarPropertyChangeFunc OnSystemBarPropertyChange_;
+        NotifyNeedAvoidFunc OnNeedAvoid_;
     };
 
     SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
@@ -57,7 +61,15 @@ public:
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session) override;
     WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) override;
+    WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
+    WSError OnNeedAvoid(bool status) override;
+    AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
+    WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    WSError SetAspectRatio(float ratio) override;
+    WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
+    WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
+    static MaximizeMode maximizeMode_;
 
 private:
     void UpdateCameraFloatWindowStatus(bool isShowing);

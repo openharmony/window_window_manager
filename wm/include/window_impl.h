@@ -200,7 +200,7 @@ public:
     virtual WMError Close() override;
     virtual void StartMove() override;
     virtual WMError SetGlobalMaximizeMode(MaximizeMode mode) override;
-    virtual MaximizeMode GetGlobalMaximizeMode() override;
+    virtual MaximizeMode GetGlobalMaximizeMode() const override;
 
     virtual WMError RequestFocus() const override;
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;

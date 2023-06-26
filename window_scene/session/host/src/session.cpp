@@ -61,7 +61,7 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
     return surfaceNode_;
 }
 
-const SessionInfo& Session::GetSessionInfo() const
+SessionInfo& Session::GetSessionInfo()
 {
     return sessionInfo_;
 }
@@ -136,6 +136,27 @@ void Session::NotifyBackground()
     }
 }
 
+void Session::NotifyDisconnect()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (!listener.expired()) {
+            listener.lock()->OnDisconnect();
+        }
+    }
+}
+
+float Session::GetAspectRatio() const
+{
+    return aspectRatio_;
+}
+
+WSError Session::SetAspectRatio(float ratio)
+{
+    aspectRatio_ = ratio;
+    return WSError::WS_OK;
+}
+
 SessionState Session::GetSessionState() const
 {
     return state_;
@@ -168,7 +189,11 @@ WSError Session::SetFocusable(bool isFocusable)
 
 bool Session::GetFocusable() const
 {
-    return property_->GetFocusable();
+    if (property_ != nullptr) {
+        return property_->GetFocusable();
+    }
+    WLOGFD("property is null");
+    return true;
 }
 
 WSError Session::SetTouchable(bool touchable)
@@ -200,6 +225,17 @@ int32_t Session::GetCallingUid() const
 sptr<IRemoteObject> Session::GetAbilityToken() const
 {
     return abilityToken_;
+}
+
+WSError Session::SetBrightness(float brightness)
+{
+    property_->SetBrightness(brightness);
+    return WSError::WS_OK;
+}
+
+float Session::GetBrightness() const
+{
+    return property_->GetBrightness();
 }
 
 bool Session::IsSessionValid() const
@@ -257,6 +293,12 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     return WSError::WS_OK;
 }
 
+WSError Session::UpdateWindowSessionProperty(sptr<WindowSessionProperty> property)
+{
+    property_ = property;
+    return WSError::WS_OK;
+}
+
 WSError Session::Foreground()
 {
     SessionState state = GetSessionState();
@@ -297,6 +339,7 @@ WSError Session::Disconnect()
     WLOGFI("Disconnect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(state));
     state_ = SessionState::STATE_INACTIVE;
+    NotifyDisconnect();
     Background();
     if (GetSessionState() == SessionState::STATE_BACKGROUND) {
         UpdateSessionState(SessionState::STATE_DISCONNECT);
@@ -340,19 +383,16 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.moduleName_ = abilitySessionInfo->want.GetModuleName();
     info.persistentId_ = abilitySessionInfo->persistentId;
-    info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
     info.callerPersistentId_ = GetPersistentId();
-    sessionInfo_.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
-    sessionInfo_.callState_ = info.callState_;
-    sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
-    sessionInfo_.requestCode = abilitySessionInfo->requestCode;
-    sessionInfo_.callerToken_ = abilitySessionInfo->callerToken;
+    info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
+    info.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
+    info.want = new AAFwk::Want(abilitySessionInfo->want);
+    info.requestCode = abilitySessionInfo->requestCode;
+    info.callerToken_ = abilitySessionInfo->callerToken;
     WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
-    WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}" PRIu64 "",
-        info.callState_, info.persistentId_);
-    WLOGFI("PendingSessionActivation uiAbilityId_: %{public}" PRIu64 "", sessionInfo_.uiAbilityId_);
-    WLOGFI("PendingSessionActivation current persistentId: %{public}" PRIu64 "", info.callerPersistentId_);
+    WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}" PRIu64 ", \
+        uiAbilityId: %{public}" PRIu64 "", info.callState_, info.persistentId_, info.uiAbilityId_);
     if (pendingSessionActivationFunc_) {
         pendingSessionActivationFunc_(info);
     }
@@ -658,6 +698,11 @@ WSError Session::OnSessionEvent(SessionEvent event)
     return WSError::WS_OK;
 }
 
+WSError Session::OnNeedAvoid(bool status)
+{
+    return WSError::WS_OK;
+}
+
 WSError Session::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
 {
     WLOGFD("UpdateSessionRect");
@@ -737,6 +782,25 @@ sptr<ScenePersistence> Session::GetScenePersistence() const
 {
     return scenePersistence_;
 }
+
+WSError Session::SetGlobalMaximizeMode(MaximizeMode mode)
+{
+    WLOGFD("Session SetGlobalMaximizeMode");
+    return WSError::WS_OK;
+}
+
+WSError Session::GetGlobalMaximizeMode(MaximizeMode& mode)
+{
+    WLOGFD("Session GetGlobalMaximizeMode");
+    return WSError::WS_OK;
+}
+
+AvoidArea Session::GetAvoidAreaByType(AvoidAreaType type)
+{
+    AvoidArea avoidArea;
+    return avoidArea;
+}
+
 WSError Session::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
 {
     return WSError::WS_OK;

@@ -95,9 +95,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ScreenId dmsScreenId;
             if (!data.ReadUint64(dmsScreenId)) {
                 WLOGFE("fail to read dmsScreenId.");
-                break;
+                return -1;
             }
             reply.WriteUint32(static_cast<uint32_t>(GetScreenPower(dmsScreenId)));
+            break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID: {
             DisplayId displayId = data.ReadUint64();
@@ -280,6 +281,19 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             DMError ret = SetScreenColorTransform(screenId);
             reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_ROTATION_LOCKED: {
+            bool isLocked = static_cast<bool>(data.ReadBool());
+            DMError ret = SetScreenRotationLocked(isLocked);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_IS_SCREEN_ROTATION_LOCKED: {
+            bool isLocked = false;
+            DMError ret = IsScreenRotationLocked(isLocked);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            reply.WriteBool(isLocked);
             break;
         }
         default:
