@@ -45,6 +45,7 @@ public:
     WMError RemoveWindowNode(uint32_t windowId, bool fromAnimation = false);
     WMError NotifyWindowTransition(sptr<WindowTransitionInfo>& fromInfo, sptr<WindowTransitionInfo>& toInfo);
     WMError GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken);
+    WMError GetFocusWindowInfo(FocusChangeInfo& focusInfo);
     WMError DestroyWindow(uint32_t windowId, bool onlySelf);
     WMError RequestFocus(uint32_t windowId);
     WMError SetAlpha(uint32_t windowId, float alpha);
