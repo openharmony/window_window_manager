@@ -34,6 +34,8 @@ const std::string SESSION_FOCUSABLE_CHANGE_CB = "sessionFocusableChange";
 const std::string CLICK_CB = "click";
 const std::string TERMINATE_SESSION_CB = "terminateSession";
 const std::string SESSION_EXCEPTION_CB = "sessionException";
+const std::string SYSTEMBAR_PROPERTY_CHANGE_CB = "systemBarPropertyChange";
+const std::string NEED_AVOID_CB = "needAvoid";
 } // namespace
 
 NativeValue* JsSceneSession::Create(NativeEngine& engine, const sptr<SceneSession>& session)
@@ -81,8 +83,10 @@ JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& s
         { BACK_PRESSED_CB,                &JsSceneSession::ProcessBackPressedRegister },
         { SESSION_FOCUSABLE_CHANGE_CB,    &JsSceneSession::ProcessSessionFocusableChangeRegister },
         { CLICK_CB,                       &JsSceneSession::ProcessClickRegister },
-        { TERMINATE_SESSION_CB,        &JsSceneSession::ProcessTerminateSessionRegister },
-        { SESSION_EXCEPTION_CB,        &JsSceneSession::ProcessSessionExceptionRegister },
+        { TERMINATE_SESSION_CB,           &JsSceneSession::ProcessTerminateSessionRegister },
+        { SESSION_EXCEPTION_CB,           &JsSceneSession::ProcessSessionExceptionRegister },
+        { SYSTEMBAR_PROPERTY_CHANGE_CB,   &JsSceneSession::ProcessSystemBarPropertyChangeRegister },
+        { NEED_AVOID_CB,          &JsSceneSession::ProcessNeedAvoidRegister },
     };
 
     sptr<SceneSession::SessionChangeCallback> sessionchangeCallback = new (std::nothrow)
@@ -264,6 +268,30 @@ void JsSceneSession::ProcessBackPressedRegister()
         return;
     }
     session->SetBackPressedListenser(func);
+}
+
+void JsSceneSession::ProcessSystemBarPropertyChangeRegister()
+{
+    auto sessionchangeCallback = sessionchangeCallback_.promote();
+    if (sessionchangeCallback == nullptr) {
+        WLOGFE("sessionchangeCallback is nullptr");
+        return;
+    }
+    sessionchangeCallback->OnSystemBarPropertyChange_ = std::bind(
+        &JsSceneSession::OnSystemBarPropertyChange, this, std::placeholders::_1);
+    WLOGFD("ProcessSystemBarPropertyChangeRegister success");
+}
+
+void JsSceneSession::ProcessNeedAvoidRegister()
+{
+    auto sessionchangeCallback = sessionchangeCallback_.promote();
+    if (sessionchangeCallback == nullptr) {
+        WLOGFE("sessionchangeCallback is nullptr");
+        return;
+    }
+    sessionchangeCallback->OnNeedAvoid_ = std::bind(
+        &JsSceneSession::OnNeedAvoid, this, std::placeholders::_1);
+    WLOGFD("ProcessNeedAvoidRegister success");
 }
 
 void JsSceneSession::Finalizer(NativeEngine* engine, void* data, void* hint)
@@ -627,6 +655,47 @@ void JsSceneSession::OnSessionException(const SessionInfo& info)
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
+void JsSceneSession::OnSystemBarPropertyChange(const SystemBarProperty& property)
+{
+    WLOGFI("[NAPI]OnSystemBarPropertyChange");
+    auto iter = jsCbMap_.find(SYSTEMBAR_PROPERTY_CHANGE_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [jsCallBack, property, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            NativeValue* jsSessionStateObj = CreateJsValue(engine, property);
+            NativeValue* argv[] = { jsSessionStateObj };
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSession::OnSystemBarPropertyChange", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsSceneSession::OnNeedAvoid(bool status)
+{
+    WLOGFI("[NAPI]OnNeedAvoid %{public}d", status);
+    auto iter = jsCbMap_.find(NEED_AVOID_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [jsCallBack, needAvoid = status, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            NativeValue* jsSessionStateObj = CreateJsValue(engine, needAvoid);
+            NativeValue* argv[] = { jsSessionStateObj };
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSession::OnNeedAvoid", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
 
 sptr<SceneSession> JsSceneSession::GetNativeSession() const
 {

@@ -43,8 +43,15 @@ public:
     WMError Resize(uint32_t width, uint32_t height) override;
     WmErrorCode RaiseToAppTop() override;
     WSError HandleBackEvent() override;
+    WMError SetAspectRatio(float ratio) override;
+    WMError ResetAspectRatio() override;
     WMError SetGlobalMaximizeMode(MaximizeMode mode) override;
     MaximizeMode GetGlobalMaximizeMode() const override;
+    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
+    SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
+    WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
+    WMError SetLayoutFullScreen(bool status) override;
+    WMError SetFullScreen(bool status) override;
 
     WMError SetBackgroundColor(const std::string& color) override;
     WMError SetTransparent(bool isTransparent) override;
@@ -71,6 +78,9 @@ protected:
     sptr<WindowSessionImpl> FindMainWindowWithContext();
     void UpdateSubWindowStateAndNotify(uint64_t parentPersistentId, const WindowState& newState);
     void LimitCameraFloatWindowMininumSize(uint32_t& width, uint32_t& height);
+    WMError NotifyWindowSessionProperty();
+    WMError NotifyWindowNeedAvoid(bool status = false);
+    WMError SetLayoutFullScreenByApiVersion(bool status);
 
 private:
     bool IsValidSystemWindowType(const WindowType& type);

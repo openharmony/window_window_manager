@@ -481,6 +481,69 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
     return static_cast<WMError>(ret);
 }
 
+WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
+{
+    if (property_ == nullptr) {
+        WLOGFE("SetAspectRatio failed because of property is null");
+        return  WMError::WM_ERROR_NULLPTR;
+    }
+
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr) {
+        WLOGFE("get display failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
+        return  WMError::WM_ERROR_NULLPTR;
+    }
+    float vpr = display->GetVirtualPixelRatio();
+    auto limits = property_->GetWindowLimits();
+
+    auto ToLayoutWidth = [&, vpr](int32_t winWidth) -> int32_t {
+        return IsDecorEnable() ? (winWidth - WINDOW_FRAME_WIDTH * vpr * 2) : winWidth; // 2: left and right edge
+    };
+
+    auto ToLayoutHeight = [&, vpr](int32_t winHeight) -> int32_t {
+        return IsDecorEnable() ? (winHeight - WINDOW_FRAME_WIDTH * vpr - WINDOW_TITLE_BAR_HEIGHT * vpr) : winHeight;
+    };
+    if (limits.minWidth_ != 0 && MathHelper::LessNotEqual(ratio,
+        static_cast<float>(ToLayoutWidth(limits.minWidth_)) / ToLayoutHeight(limits.maxHeight_))) {
+        WLOGE("Failed, because aspectRation is smaller than minWidth/maxHeight");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    } else if (limits.minHeight_ != 0 && MathHelper::GreatNotEqual(ratio,
+        static_cast<float>(ToLayoutWidth(limits.maxWidth_)) / ToLayoutHeight(limits.minHeight_))) {
+        WLOGE("Failed, because aspectRation is bigger than maxWidth/minHeight");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    Rect rect = property_->GetWindowRect();
+    if (hostSession_) {
+        float currentRatio = static_cast<float>(ToLayoutWidth(rect.width_)) / ToLayoutHeight(rect.height_);
+        if (MathHelper::GreatNotEqual(currentRatio, ratio)) {
+            rect.height_ = ToLayoutWidth(rect.width_) / ratio + WINDOW_FRAME_WIDTH * vpr +
+                           WINDOW_TITLE_BAR_HEIGHT * vpr;
+        } else if (MathHelper::LessNotEqual(currentRatio, ratio)) {
+            rect.width_ = ToLayoutHeight(rect.height_) * ratio + WINDOW_FRAME_WIDTH * vpr * 2; // 2: left and right edge
+        } else {
+            return WMError::WM_DO_NOTHING;
+        }
+        Resize(rect.width_, rect.height_);
+        hostSession_->SetAspectRatio(ratio);
+        return WMError::WM_OK;
+    } else {
+        WLOGE("no host session found");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+}
+
+WMError WindowSceneSessionImpl::ResetAspectRatio()
+{
+    if (hostSession_) {
+        hostSession_->SetAspectRatio(0.0f);
+        return WMError::WM_OK;
+    } else {
+        WLOGE("no host session found");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+}
+
 WmErrorCode WindowSceneSessionImpl::RaiseToAppTop()
 {
     auto parentId = GetParentId();
@@ -501,6 +564,133 @@ WmErrorCode WindowSceneSessionImpl::RaiseToAppTop()
 
     const WSError& ret = hostSession_->RaiseToAppTop();
     return static_cast<WmErrorCode>(ret);
+}
+
+WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
+{
+    uint32_t windowId = GetWindowId();
+    WLOGFI("GetAvoidAreaByType windowId:%{public}u type:%{public}u", windowId, static_cast<uint32_t>(type));
+    if (type != AvoidAreaType::TYPE_KEYBOARD &&
+        windowMode_ != WindowMode::WINDOW_MODE_FULLSCREEN &&
+        windowMode_ != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
+        windowMode_ != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        WLOGI("avoidAreaType:%{public}u, windowMode:%{public}u, return default avoid area.",
+            static_cast<uint32_t>(type), static_cast<uint32_t>(windowMode_));
+        return WMError::WM_OK;
+    }
+    avoidArea = hostSession_->GetAvoidAreaByType(type);
+    return WMError::WM_OK;
+}
+
+SystemBarProperty WindowSceneSessionImpl::GetSystemBarPropertyByType(WindowType type) const
+{
+    WLOGFI("GetSystemBarPropertyByType windowId:%{public}u type:%{public}u",
+        GetWindowId(), static_cast<uint32_t>(type));
+    auto curProperties = property_->GetSystemBarProperty();
+    return curProperties[type];
+}
+
+WMError WindowSceneSessionImpl::NotifyWindowSessionProperty()
+{
+    WLOGFD("NotifyWindowSessionProperty called windowId:%{public}u", GetWindowId());
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
+{
+    WLOGFI("SetSystemBarProperty windowId:%{public}u type:%{public}u"
+        "enable:%{public}u bgColor:%{public}x Color:%{public}x",
+        GetWindowId(), static_cast<uint32_t>(type),
+        property.enable_, property.backgroundColor_, property.contentColor_);
+    if (!((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM))) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    } else if (GetSystemBarPropertyByType(type) == property) {
+        return WMError::WM_OK;
+    }
+
+    property_->SetSystemBarProperty(type, property);
+    if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
+        return WMError::WM_OK;
+    }
+    WMError ret = NotifyWindowSessionProperty();
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetSystemBarProperty winId:%{public}u errCode:%{public}d",
+            GetWindowId(), static_cast<int32_t>(ret));
+    }
+    return ret;
+}
+
+WMError WindowSceneSessionImpl::NotifyWindowNeedAvoid(bool status)
+{
+    WLOGFD("NotifyWindowNeedAvoid called windowId:%{public}u status:%{public}d",
+        GetWindowId(), static_cast<int32_t>(status));
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    hostSession_->OnNeedAvoid(status);
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
+{
+    uint32_t version = 0;
+    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
+        version = context_->GetApplicationInfo()->apiCompatibleVersion;
+    }
+    hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
+    windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    // 10 ArkUI new framework support after API10
+    if (version >= 10) {
+        if (uiContent_ != nullptr) {
+            uiContent_->SetIgnoreViewSafeArea(status);
+        } else {
+            isIgnoreSafeAreaNeedNotify_ = true;
+            isIgnoreSafeArea_ = status;
+        }
+    } else {
+        WMError ret = NotifyWindowNeedAvoid(!status);
+        if (ret != WMError::WM_OK) {
+            WLOGFE("NotifyWindowNeedAvoid errCode:%{public}d winId:%{public}u",
+                static_cast<int32_t>(ret), GetWindowId());
+            return ret;
+        }
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
+{
+    WLOGFI("winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
+    WMError ret = SetLayoutFullScreenByApiVersion(status);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetLayoutFullScreenByApiVersion errCode:%{public}d winId:%{public}u",
+            static_cast<int32_t>(ret), GetWindowId());
+    }
+    return ret;
+}
+
+WMError WindowSceneSessionImpl::SetFullScreen(bool status)
+{
+    WLOGFI("winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
+    WMError ret = SetLayoutFullScreenByApiVersion(status);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetLayoutFullScreenByApiVersion errCode:%{public}d winId:%{public}u",
+            static_cast<int32_t>(ret), GetWindowId());
+    }
+    SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    statusProperty.enable_ = status;
+    ret = SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusProperty);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetSystemBarProperty errCode:%{public}d winId:%{public}u",
+            static_cast<int32_t>(ret), GetWindowId());
+    }
+    return ret;
 }
 
 bool WindowSceneSessionImpl::IsDecorEnable() const
@@ -533,9 +723,7 @@ WMError WindowSceneSessionImpl::Maximize()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(GetType())) {
-        hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetFullScreen(true);
-        windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
         UpdateDecorEnable(true);
     }
     return WMError::WM_OK;

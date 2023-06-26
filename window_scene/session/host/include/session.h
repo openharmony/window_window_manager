@@ -72,6 +72,8 @@ public:
     sptr<WindowSessionProperty> GetSessionProperty() const;
     WSRect GetSessionRect() const;
     WindowType GetWindowType() const;
+    float GetAspectRatio() const;
+    WSError SetAspectRatio(float ratio) override;
 
     void SetWindowSessionProperty(const sptr<WindowSessionProperty>& property);
     sptr<WindowSessionProperty> GetWindowSessionProperty() const;
@@ -87,13 +89,15 @@ public:
     WSError Disconnect() override;
 
     WSError OnSessionEvent(SessionEvent event) override;
+    WSError UpdateWindowSessionProperty(sptr<WindowSessionProperty> property) override;
+    WSError OnNeedAvoid(bool status) override;
     void NotifyConnect();
     void NotifyForeground();
     void NotifyBackground();
     void NotifyDisconnect();
 
-    WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     WSError TransferFocusActiveEvent(bool isFocusActive);
 
@@ -108,6 +112,7 @@ public:
     void SetSessionExceptionListener(const NotifyTerminateSessionFunc& func);
     WSError NotifySessionException(const sptr<AAFwk::SessionInfo> info) override;
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
+    void SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeFunc& func);
     void NotifySessionStateChange(const SessionState& state);
     WSError UpdateActiveStatus(bool isActive) override; // update active status from session_stage
     WSError RaiseToAppTop() override;
@@ -140,6 +145,7 @@ public:
     bool GetTouchable() const;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
+    AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
     WSError SetBrightness(float brightness);
     float GetBrightness() const;
 
@@ -156,11 +162,13 @@ protected:
 
     bool isActive_ = false;
     bool isFocused_ = false;
+    float aspectRatio_ = 0.0f;
     WSRect winRect_;
     sptr<ISessionStage> sessionStage_;
     SessionInfo sessionInfo_;
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
+    NotifySessionStateChangeFunc sessionStateChangeNotifyManagerFunc_;
     NotifyBackPressedFunc backPressedFunc_;
     NotifySessionFocusableChangeFunc sessionFocusableChangeFunc_;
     NotifyClickFunc clickFunc_;
