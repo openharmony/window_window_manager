@@ -893,18 +893,5 @@ sptr<Window> WindowSessionImpl::Find(const std::string& name)
     }
     return iter->second.second;
 }
-
-void WindowSessionImpl::RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func)
-{
-    notifyTransferComponentDataFunc_ = std::move(func);
-}
-
-WSError WindowSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
-{
-    if (notifyTransferComponentDataFunc_) {
-        notifyTransferComponentDataFunc_(wantParams);
-    }
-    return WSError::WS_OK;
-}
 } // namespace Rosen
 } // namespace OHOS

@@ -809,12 +809,4 @@ WSError Session::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
     return WSError::WS_OK;
 }
-WSError Session::TransferComponentData(const AAFwk::WantParams& wantParams)
-{
-    if (!IsSessionValid()) {
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
-    sessionStage_->NotifyTransferComponentData(wantParams);
-    return WSError::WS_OK;
-}
 } // namespace OHOS::Rosen

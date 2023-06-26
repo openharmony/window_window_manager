@@ -31,6 +31,11 @@ public:
     WMError Resize(uint32_t width, uint32_t height) override;
     WMError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WMError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
+    WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
+    void RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func) override;
+
+protected:
+    NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
 };
 } // namespace Rosen
 } // namespace OHOS
