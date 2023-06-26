@@ -77,6 +77,7 @@ protected:
     virtual ~SceneSessionManager() = default;
 
 private:
+    bool Init();
     void LoadWindowSceneXml();
     void ConfigWindowSceneXml();
     void ConfigWindowEffect(const WindowSceneConfig::ConfigItem& effectConfig);
@@ -116,6 +117,7 @@ private:
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
     
+    std::shared_ptr<EventRunner> eventLoop_;
     std::shared_ptr<EventHandler> eventHandler_;
     bool isReportTaskStart_ = false;
 };

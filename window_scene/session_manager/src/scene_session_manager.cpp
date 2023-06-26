@@ -53,8 +53,30 @@ SceneSessionManager::SceneSessionManager()
     taskScheduler_ = std::make_shared<TaskScheduler>(SCENE_SESSION_MANAGER_THREAD);
     bundleMgr_ = GetBundleManager();
     LoadWindowSceneXml();
+    Init();
     StartWindowInfoReportLoop();
 }
+
+bool SceneSessionManager::Init()
+{
+    // create handler for inner command at server
+    eventLoop_ = AppExecFwk::EventRunner::Create(INNER_WM_THREAD_NAME);
+    if (eventLoop_ == nullptr) {
+        return false;
+    }
+    eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
+    if (eventHandler_ == nullptr) {
+        return false;
+    }
+    int ret = HiviewDFX::Watchdog::GetInstance().AddThread(INNER_WM_THREAD_NAME, eventHandler_);
+    if (ret != 0) {
+        WLOGFE("Add watchdog thread failed");
+    }
+    // eventHandler_->PostTask([]() { MemoryGuard cacheGuard; }, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    WLOGI("SceneSessionManager init success.");
+    return true;
+}
+
 
 void SceneSessionManager::LoadWindowSceneXml()
 {
@@ -464,7 +486,6 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
 
 WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession)
 {
-//    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionBackground");
     wptr<SceneSession> weakSceneSession(sceneSession);
     auto task = [this, weakSceneSession]() {
         auto scnSession = weakSceneSession.promote();
@@ -519,7 +540,6 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
 
 WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession)
 {
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionDestruction", sceneSession->GetPersistentId());
     wptr<SceneSession> weakSceneSession(sceneSession);
     auto task = [this, weakSceneSession]() {
         auto scnSession = weakSceneSession.promote();
