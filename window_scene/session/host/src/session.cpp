@@ -147,6 +147,17 @@ void Session::NotifyDisconnect()
     }
 }
 
+float Session::GetAspectRatio() const
+{
+    return aspectRatio_;
+}
+
+WSError Session::SetAspectRatio(float ratio)
+{
+    aspectRatio_ = ratio;
+    return WSError::WS_OK;
+}
+
 SessionState Session::GetSessionState() const
 {
     return state_;
@@ -179,7 +190,11 @@ WSError Session::SetFocusable(bool isFocusable)
 
 bool Session::GetFocusable() const
 {
-    return property_->GetFocusable();
+    if (property_ != nullptr) {
+        return property_->GetFocusable();
+    }
+    WLOGFD("property is null");
+    return true;
 }
 
 WSError Session::SetTouchable(bool touchable)
@@ -276,6 +291,12 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     // once update rect before connect, update again when connect
     UpdateRect(winRect_, SizeChangeReason::UNDEFINED);
     NotifyConnect();
+    return WSError::WS_OK;
+}
+
+WSError Session::UpdateWindowSessionProperty(sptr<WindowSessionProperty> property)
+{
+    property_ = property;
     return WSError::WS_OK;
 }
 
@@ -590,11 +611,20 @@ void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc&
     NotifySessionStateChange(state_);
 }
 
+void Session::SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeFunc& func)
+{
+    sessionStateChangeNotifyManagerFunc_ = func;
+    NotifySessionStateChange(state_);
+}
+
 void Session::NotifySessionStateChange(const SessionState& state)
 {
     WLOGFI("state: %{public}u", static_cast<uint32_t>(state));
     if (sessionStateChangeFunc_) {
         sessionStateChangeFunc_(state);
+    }
+    if (sessionStateChangeNotifyManagerFunc_) {
+        sessionStateChangeNotifyManagerFunc_(state);
     }
 }
 
@@ -692,6 +722,11 @@ WSError Session::OnSessionEvent(SessionEvent event)
     return WSError::WS_OK;
 }
 
+WSError Session::OnNeedAvoid(bool status)
+{
+    return WSError::WS_OK;
+}
+
 WSError Session::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
 {
     WLOGFD("UpdateSessionRect");
@@ -782,5 +817,11 @@ WSError Session::GetGlobalMaximizeMode(MaximizeMode& mode)
 {
     WLOGFD("Session GetGlobalMaximizeMode");
     return WSError::WS_OK;
+}
+
+AvoidArea Session::GetAvoidAreaByType(AvoidAreaType type)
+{
+    AvoidArea avoidArea;
+    return avoidArea;
 }
 } // namespace OHOS::Rosen

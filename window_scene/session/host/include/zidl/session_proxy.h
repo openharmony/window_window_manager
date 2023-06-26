@@ -43,9 +43,13 @@ public:
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session) override;
     WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) override;
+    WSError OnNeedAvoid(bool status) override;
+    AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
     WSError RequestSessionBack() override;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
+    WSError UpdateWindowSessionProperty(sptr<WindowSessionProperty> property) override;
+    WSError SetAspectRatio(float ratio) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };
