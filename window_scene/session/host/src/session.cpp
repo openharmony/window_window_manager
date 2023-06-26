@@ -383,6 +383,7 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.moduleName_ = abilitySessionInfo->want.GetModuleName();
     info.persistentId_ = abilitySessionInfo->persistentId;
+    info.callerPersistentId_ = GetPersistentId();
     info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
     info.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
     info.want = new AAFwk::Want(abilitySessionInfo->want);
