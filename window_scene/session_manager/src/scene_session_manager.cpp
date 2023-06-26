@@ -845,6 +845,21 @@ uint64_t SceneSessionManager::GetFocusedSession() const
     return focusedSessionId_;
 }
 
+void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+{
+    auto sceneSession = GetSceneSession(focusedSessionId_);
+    if (sceneSession) {
+        WLOGFD("Get focus session info success");
+        focusInfo.windowId_ = sceneSession->GetWindowId();
+        focusInfo.displayId_ = static_cast<DisplayId>(0);
+        focusInfo.pid_ = sceneSession->GetCallingPid();
+        focusInfo.uid_ = sceneSession->GetCallingUid();
+        focusInfo.windowType_ = sceneSession->GetWindowType();
+        focusInfo.abilityToken_ = sceneSession->GetAbilityToken();
+    }
+    return;
+}
+
 WSError SceneSessionManager::UpdateFocus(uint64_t persistentId, bool isFocused)
 {
     // notify session and client
