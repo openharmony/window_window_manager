@@ -927,10 +927,6 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
 WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    if (!Permission::IsSystemCalling()) {
-        WLOGFE("register windowManager agent permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
     if ((windowManagerAgent == nullptr) || (windowManagerAgent->AsObject() == nullptr)) {
         WLOGFE("windowManagerAgent is null");
         return WMError::WM_ERROR_NULLPTR;
@@ -945,10 +941,6 @@ WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType t
 WMError SceneSessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    if (!Permission::IsSystemCalling()) {
-        WLOGFE("unregister windowManager agent permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
     if ((windowManagerAgent == nullptr) || (windowManagerAgent->AsObject() == nullptr)) {
         WLOGFE("windowManagerAgent is null");
         return WMError::WM_ERROR_NULLPTR;
