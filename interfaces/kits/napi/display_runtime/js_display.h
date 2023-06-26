@@ -22,7 +22,6 @@
 
 #include "cutout_info.h"
 #include "display.h"
-#include "screen_cutout_controller.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -39,13 +38,9 @@ public:
     ~JsDisplay();
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
     static NativeValue* GetCutoutInfo(NativeEngine* engine, NativeCallbackInfo* info);
-    
 private:
     sptr<Display> display_ = nullptr;
-    sptr<ScreenCutoutController> screenCutoutController_;
-
     NativeValue* OnGetCutoutInfo(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnGetSCBCutoutInfo(NativeEngine& engine, NativeCallbackInfo& info);
 };
 enum class DisplayStateMode : uint32_t {
     STATE_UNKNOWN = 0,

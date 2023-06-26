@@ -23,10 +23,6 @@ config("display_config") {
 
     # because of pixle_map.h
     "//foundation/multimedia/image_framework/interfaces/innerkits/include",
-
-    # cutoutinfo deps.
-    "${window_base_path}/window_scene/interfaces/innerkits/include",
-    "${window_base_path}/window_scene/session_manager/include",
   ]
 }
 
@@ -45,8 +41,6 @@ ohos_shared_library("display_napi") {
   ]
 
   deps = [
-    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
-    "${window_base_path}/window_scene/session_manager:screen_session_manager",
     "../../../../dm:libdm",
     "../../../../utils:libwmutil",
     "../common:dm_napi_common",
