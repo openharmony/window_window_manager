@@ -18,9 +18,9 @@
 #include <cinttypes>
 #include <map>
 
-#include "cutout_info.h"
 #include "display.h"
 #include "display_info.h"
+#include "scene_board_judgement.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -45,6 +45,7 @@ std::recursive_mutex g_mutex;
 
 JsDisplay::JsDisplay(const sptr<Display>& display) : display_(display)
 {
+    screenCutoutController_ = new ScreenCutoutController();
 }
 
 JsDisplay::~JsDisplay()
@@ -78,7 +79,11 @@ NativeValue* JsDisplay::GetCutoutInfo(NativeEngine* engine, NativeCallbackInfo* 
 {
     WLOGI("GetCutoutInfo is called");
     JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(engine, info);
-    return (me != nullptr) ? me->OnGetCutoutInfo(*engine, *info) : nullptr;
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return (me != nullptr) ? me->OnGetCutoutInfo(*engine, *info) : nullptr;
+    } else {
+        return (me != nullptr) ? me->OnGetSCBCutoutInfo(*engine, *info) : nullptr;
+    }
 }
 
 NativeValue* JsDisplay::OnGetCutoutInfo(NativeEngine& engine, NativeCallbackInfo& info)
@@ -224,6 +229,36 @@ NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& display)
         g_JsDisplayMap[displayId] = jsDisplayRef;
     }
     return objValue;
+}
+
+NativeValue* JsDisplay::OnGetSCBCutoutInfo(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGI("on get SCB cutout info is called");
+    if (!screenCutoutController_) {
+        return nullptr;
+    }
+
+    AsyncTask::CompleteCallback complete = [this](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        sptr<CutoutInfo> cutoutInfo = screenCutoutController_->GetScreenCutoutInfo();
+        if (cutoutInfo != nullptr) {
+            WLOGI("on get cutout info. success");
+            task.Resolve(engine, CreateJsCutoutInfoObject(engine, cutoutInfo));
+        } else {
+            WLOGI("on get cutout info. failed");
+            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN),
+                "JsScreenSessionManager::OnGetCutoutInfo failed."));
+        }
+    };
+
+    NativeValue* lastParam = nullptr;
+    if (info.argc >= ARGC_ONE && info.argv[ARGC_ONE - 1] != nullptr &&
+        info.argv[ARGC_ONE - 1]->TypeOf() == NATIVE_FUNCTION) {
+        lastParam = info.argv[ARGC_ONE - 1];
+    }
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsScreenSessionManager::OnGetCutoutInfo", engine,
+        CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
 }
 }  // namespace Rosen
 }  // namespace OHOS
