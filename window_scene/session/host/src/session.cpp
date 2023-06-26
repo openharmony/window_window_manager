@@ -588,12 +588,24 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
+    WLOGFD("Session TransferKeyEvent, Id: %{public}" PRIu64 ", eventId: %{public}d",
+        persistentId_, keyEvent->GetId());
+    auto currentTime = GetSysClockTime();
+    if (ANRMgr->IsANRTriggered(currentTime, persistentId_)) {
+        WLOGFD("The pointer event does not report normally, application not response");
+        return WSError::WS_DO_NOTHING;
+    }
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
     WLOGD("TransferKeyEvent, id: %{public}" PRIu64, persistentId_);
-    return windowEventChannel_->TransferKeyEvent(keyEvent);
+    if (WSError ret = windowEventChannel_->TransferKeyEvent(keyEvent); ret != WSError::WS_OK) {
+        WLOGFE("TransferKeyEvent failed");
+        return ret;
+    }
+    ANRMgr->AddTimer(keyEvent->GetId(), currentTime, persistentId_);
+    return WSError::WS_OK;
 }
 
 WSError Session::TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)

@@ -63,7 +63,14 @@ WSError WindowEventChannel::TransferKeyEventForConsumed(
         WLOGFE("session stage is null!");
         return WSError::WS_ERROR_NULLPTR;
     }
+    ANRHDL->SetSessionStage(sessionStage_);
+    if (keyEvent != nullptr) {
+        WLOGFD("SetProcessedCallback enter");
+        keyEvent->SetProcessedCallback(dispatchCallback_);
+        WLOGFD("SetProcessedCallback leave");
+    }
     sessionStage_->NotifyKeyEvent(keyEvent, isConsumed);
+    keyEvent->MarkProcessed();
     return WSError::WS_OK;
 }
 
