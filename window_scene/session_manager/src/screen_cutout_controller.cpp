@@ -34,14 +34,12 @@ sptr<CutoutInfo> ScreenCutoutController::GetScreenCutoutInfo()
 {
     WLOGFD("get screen cutout info.");
     std::vector<DMRect> boundaryRects;
-    WaterfallDisplayAreaRects waterfallDisplayAreaRects;
     if (!ScreenSceneConfig::GetCutoutBoundaryRect().empty()) {
         ConvertBoundaryRectsByRotation(boundaryRects);
     }
 
     CalcWaterfallRects();
-    waterfallDisplayAreaRects = waterfallDisplayAreaRects_;
-    sptr<CutoutInfo> cutoutInfo = new CutoutInfo(boundaryRects, waterfallDisplayAreaRects);
+    sptr<CutoutInfo> cutoutInfo = new CutoutInfo(boundaryRects, waterfallDisplayAreaRects_);
     return cutoutInfo;
 }
 
