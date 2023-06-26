@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 
 #include "session/host/include/session.h"
+#include "session/host/include/move_drag_controller.h"
 
 namespace OHOS::Rosen {
 class SceneSession;
@@ -73,8 +74,12 @@ public:
 
 private:
     void UpdateCameraFloatWindowStatus(bool isShowing);
+    void NotifySessionRectChange(const WSRect& rect);
+    void ProcessVsyncHandleRegister();
+    void OnVsyncHandle();
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
+    sptr<MoveDragController> moveDragController_ = nullptr;
 };
 } // namespace OHOS::Rosen
 
