@@ -784,7 +784,9 @@ WMError WindowImpl::SetFullScreen(bool status)
 WMError WindowImpl::SetFloatingMaximize(bool isEnter)
 {
     WLOGFI("id:%{public}d SetFloatingMaximize status: %{public}d", property_->GetWindowId(), isEnter);
-    if (!IsWindowValid()) {
+    if (!IsWindowValid() ||
+        !WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        WLOGFE("invalid window or maximize mode is not be supported, winId:%{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
@@ -1858,7 +1860,7 @@ WMError WindowImpl::SetGlobalMaximizeMode(MaximizeMode mode)
     }
 }
 
-MaximizeMode WindowImpl::GetGlobalMaximizeMode()
+MaximizeMode WindowImpl::GetGlobalMaximizeMode() const
 {
     return SingletonContainer::Get<WindowAdapter>().GetMaximizeMode();
 }
@@ -2343,6 +2345,14 @@ void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>&
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
     if (abilityContext == nullptr) {
         WLOGFE("abilityContext is null");
+        return;
+    }
+    bool needMoveToBackground = false;
+    int ret = abilityContext->OnBackPressedCallBack(needMoveToBackground);
+    if (ret == ERR_OK && needMoveToBackground) {
+        abilityContext->MoveAbilityToBackground();
+        WLOGD("id: %{public}u closed, to move Ability: %{public}u",
+            property_->GetWindowId(), needMoveToBackground);
         return;
     }
     // TerminateAbility will invoke last ability, CloseAbility will not.

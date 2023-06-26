@@ -33,7 +33,6 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
     NativeValue* jsAbilityName = jsObject->GetProperty("abilityName");
     NativeValue* jsIsSystem = jsObject->GetProperty("isSystem");
     NativeValue* jsPersistentId = jsObject->GetProperty("persistentId");
-    NativeValue* jsCallerPersistentId = jsObject->GetProperty("callerPersistentId");
     NativeValue* jsCallState = jsObject->GetProperty("callState");
 
     if (jsBundleName->TypeOf() != NATIVE_UNDEFINED) {
@@ -75,14 +74,6 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
             return false;
         }
         sessionInfo.persistentId_ = persistentId;
-    }
-    if (jsCallerPersistentId->TypeOf() != NATIVE_UNDEFINED) {
-        int64_t callerPersistentId;
-        if (!ConvertFromJsValue(engine, jsCallerPersistentId, callerPersistentId)) {
-            WLOGFE("[NAPI]Failed to convert parameter to callerPersistentId");
-            return false;
-        }
-        sessionInfo.callerPersistentId_ = callerPersistentId;
     }
     if (jsCallState->TypeOf() != NATIVE_UNDEFINED) {
         int32_t callState;

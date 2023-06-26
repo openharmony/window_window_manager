@@ -14,9 +14,8 @@
  */
 
 #include <gtest/gtest.h>
-#include "ability_context_impl.h"
 #include "mock_session.h"
-#include "window_session_impl.h"
+#include "window_scene_session_impl.h"
 #include "mock_uicontent.h"
 
 using namespace testing;
@@ -31,8 +30,6 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-
-    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
 };
 
 void WindowSceneEffectTest::SetUpTestCase()
@@ -45,29 +42,26 @@ void WindowSceneEffectTest::TearDownTestCase()
 
 void WindowSceneEffectTest::SetUp()
 {
-    abilityContext_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
 }
 
 void WindowSceneEffectTest::TearDown()
 {
-    abilityContext_ = nullptr;
 }
 
 class WindowEffectTestUtils {
 public:
-    static sptr<WindowSessionImpl> CreateTestWindow(const std::string& name)
+    static sptr<WindowSceneSessionImpl> CreateTestWindow(const std::string& name)
     {
-        sptr<WindowOption> option = new WindowOption();
+        sptr<WindowOption> option = new (std::nothrow) WindowOption();
         option->SetWindowName(name);
-        sptr<WindowSessionImpl> window = new(std::nothrow) WindowSessionImpl(option);
+        sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
         window->property_->SetPersistentId(1);
         SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-        sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+        sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
         window->hostSession_ = session;
         return window;
     }
 };
-
 
 namespace {
 using Utils = WindowEffectTestUtils;
@@ -79,7 +73,7 @@ using Utils = WindowEffectTestUtils;
  */
 HWTEST_F(WindowSceneEffectTest, WindowEffect01, Function | MediumTest | Level3)
 {
-    const sptr<WindowSessionImpl>& window = Utils::CreateTestWindow("CornerRadius");
+    const sptr<WindowSceneSessionImpl>& window = Utils::CreateTestWindow("CornerRadius");
     ASSERT_NE(nullptr, window);
 
     ASSERT_EQ(WMError::WM_OK, window->SetCornerRadius(0.0));
@@ -87,7 +81,7 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect01, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->SetCornerRadius(1000.0));
     ASSERT_EQ(WMError::WM_OK, window->SetCornerRadius(-1.0));
 
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
 /**
@@ -97,7 +91,7 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect01, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowSceneEffectTest, WindowEffect02, Function | MediumTest | Level3)
 {
-    const sptr<WindowSessionImpl>& window = Utils::CreateTestWindow("shadowRadius");
+    const sptr<WindowSceneSessionImpl>& window = Utils::CreateTestWindow("shadowRadius");
     ASSERT_NE(nullptr, window);
 
     ASSERT_EQ(WMError::WM_OK, window->SetShadowRadius(0.0));
@@ -105,7 +99,7 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect02, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->SetShadowRadius(1000.0));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowRadius(-1.0));
 
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
 /**
@@ -115,7 +109,7 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect02, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowSceneEffectTest, WindowEffect03, Function | MediumTest | Level3)
 {
-    const sptr<WindowSessionImpl>& window = Utils::CreateTestWindow("WindowEffect03");
+    const sptr<WindowSceneSessionImpl>& window = Utils::CreateTestWindow("WindowEffect03");
     ASSERT_NE(nullptr, window);
 
     ASSERT_EQ(WMError::WM_OK, window->SetShadowColor("#FF22EE44"));
@@ -130,7 +124,7 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect03, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowColor("#ff22ee4422"));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowColor("#ff"));
 
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
 /**
@@ -140,7 +134,7 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect03, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowSceneEffectTest, WindowEffect04, Function | MediumTest | Level3)
 {
-    const sptr<WindowSessionImpl>& window = Utils::CreateTestWindow("WindowEffect04");
+    const sptr<WindowSceneSessionImpl>& window = Utils::CreateTestWindow("WindowEffect04");
     ASSERT_NE(nullptr, window);
 
     ASSERT_EQ(WMError::WM_OK, window->SetShadowOffsetX(0.0));
@@ -153,7 +147,7 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect04, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->SetShadowOffsetY(1000.0));
     ASSERT_EQ(WMError::WM_OK, window->SetShadowOffsetY(-1.0));
 
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
 /**
@@ -163,7 +157,7 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect04, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowSceneEffectTest, WindowEffect05, Function | MediumTest | Level3)
 {
-    const sptr<WindowSessionImpl>& window = Utils::CreateTestWindow("WindowEffect05");
+    const sptr<WindowSceneSessionImpl>& window = Utils::CreateTestWindow("WindowEffect05");
     ASSERT_NE(nullptr, window);
 
     ASSERT_EQ(WMError::WM_OK, window->SetBlur(0.0));
@@ -171,7 +165,7 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect05, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->SetBlur(1000.0));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBlur(-1.0));
 
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
 /**
@@ -181,7 +175,7 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect05, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowSceneEffectTest, WindowEffect06, Function | MediumTest | Level3)
 {
-    const sptr<WindowSessionImpl>& window = Utils::CreateTestWindow("WindowEffect06");
+    const sptr<WindowSceneSessionImpl>& window = Utils::CreateTestWindow("WindowEffect06");
     ASSERT_NE(nullptr, window);
 
     ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlur(0.0));
@@ -189,7 +183,7 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect06, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlur(1000.0));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlur(-1.0));
 
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
 /**
@@ -199,7 +193,7 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect06, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowSceneEffectTest, WindowEffect07, Function | MediumTest | Level3)
 {
-    const sptr<WindowSessionImpl>& window = Utils::CreateTestWindow("WindowEffect07");
+    const sptr<WindowSceneSessionImpl>& window = Utils::CreateTestWindow("WindowEffect07");
     ASSERT_NE(nullptr, window);
 
     ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF));
@@ -210,7 +204,7 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect07, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlurStyle(static_cast<WindowBlurStyle>(-1)));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlurStyle(static_cast<WindowBlurStyle>(5)));
 
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
 }

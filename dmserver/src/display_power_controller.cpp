@@ -50,11 +50,6 @@ bool DisplayPowerController::SetDisplayState(DisplayState state)
                 displayState_ = state;
                 isKeyguardDrawn = isKeyguardDrawn_;
             }
-            if (!isKeyguardDrawn) {
-                std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
-                displayStateChangeListener_(DISPLAY_ID_INVALID, nullptr,
-                    emptyMap, DisplayStateChangeType::BEFORE_UNLOCK);
-            }
             DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
                 EventStatus::BEGIN);
             break;
