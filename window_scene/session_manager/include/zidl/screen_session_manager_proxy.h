@@ -81,6 +81,9 @@ public:
     virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId,
         std::vector<ScreenColorGamut>& colorGamuts) override;
 
+    virtual DMError SetScreenRotationLocked(bool isLocked) override;
+    virtual DMError IsScreenRotationLocked(bool& isLocked) override;
+
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
 };
