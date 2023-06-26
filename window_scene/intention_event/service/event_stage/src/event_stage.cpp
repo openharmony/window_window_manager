@@ -90,23 +90,29 @@ std::list<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t id)
         WLOGFD("Push iter:%{public}d before firstMatchIter", iter->timerId);
         timerIds.push_back(iter->timerId);
     }
+    /**
+     * 既然比列表中事件id更大的都收到回执了，那说明这个窗口本质上还是没有发生ANR的，
+     * 因此前面的这些定时器都应该去掉，且把ANR的状态位设置为False
+    */
     events.erase(events.begin(), fistMatchIter);
-    if (events.empty()) {
-        WLOGFD("events is empty");
-        SetAnrStatus(persistentId, false);
-        return timerIds;
-    }
-    int64_t endTime = 0;
-    if (!AddInt64(events.begin()->eventTime, ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME, endTime)) {
-        WLOGFE("The addition of endTime overflows");
-        return timerIds;
-    }
-    auto currentTime = GetSysClockTime();
-    if (currentTime < endTime) {
-        WLOGFD("currentTime < endTime");
-        SetAnrStatus(persistentId, false);
-    }
+    SetAnrStatus(persistentId, false);
     return timerIds;
+    // if (events.empty()) {
+    //     WLOGFD("events is empty");
+    //     SetAnrStatus(persistentId, false);
+    //     return timerIds;
+    // }
+    // int64_t endTime = 0;
+    // if (!AddInt64(events.begin()->eventTime, ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME, endTime)) {
+    //     WLOGFE("The addition of endTime overflows");
+    //     return timerIds;
+    // }
+    // auto currentTime = GetSysClockTime();
+    // if (currentTime < endTime) {
+    //     WLOGFD("currentTime < endTime");
+    //     SetAnrStatus(persistentId, false);
+    // }
+    // return timerIds;
 }
 
 } // namespace MMI
