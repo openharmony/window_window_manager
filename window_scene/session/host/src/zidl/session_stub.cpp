@@ -17,6 +17,8 @@
 
 #include <ipc_types.h>
 #include <ui/rs_surface_node.h>
+#include "want.h"
+#include "want_params.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -57,7 +59,13 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_UPDATE_WINDOW_SESSION_PROPERTY),
         &SessionStub::HandleUpdateWindowSessionProperty),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_SET_ASPECT_RATIO),
-        &SessionStub::HandleSetAspectRatio)
+        &SessionStub::HandleSetAspectRatio),
+
+    // for extension only
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_TRANSFER_ABILITY_RESULT),
+        &SessionStub::HandleTransferAbilityResult),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_TRANSFER_EXTENSION_DATA),
+        &SessionStub::HandleTransferExtensionData)
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -327,6 +335,33 @@ int SessionStub::HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply)
     WLOGFD("HandleSetAspectRatio!");
     float ratio = data.ReadFloat();
     const WSError& errCode = SetAspectRatio(ratio);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleTransferAbilityResult!");
+    uint32_t resultCode = data.ReadUint32();
+    std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    if (want == nullptr) {
+        WLOGFE("want is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    WSError errCode = TransferAbilityResult(resultCode, *want);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleTransferExtensionData(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleTransferExtensionData!");
+    std::shared_ptr<AAFwk::WantParams> wantParams(data.ReadParcelable<AAFwk::WantParams>());
+    if (wantParams == nullptr) {
+        WLOGFE("wantParams is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    WSError errCode = TransferExtensionData(*wantParams);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

@@ -23,6 +23,9 @@
 #include "session/container/include/zidl/window_event_channel_interface.h"
 #include "session_info.h"
 
+namespace OHOS::AAFwk {
+class Want;
+}
 namespace OHOS::Rosen {
 class RSSurfaceNode;
 class ISession : public IRemoteBroker {
@@ -52,7 +55,11 @@ public:
         TRANS_ID_NEED_AVOID,
         TRANS_ID_GET_AVOID_AREA,
         TRANS_ID_UPDATE_WINDOW_SESSION_PROPERTY,
-        TRANS_ID_SET_ASPECT_RATIO
+        TRANS_ID_SET_ASPECT_RATIO,
+
+        // Extension
+        TRANS_ID_TRANSFER_ABILITY_RESULT = 500,
+        TRANS_ID_TRANSFER_EXTENSION_DATA = 501
     };
     virtual WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
@@ -80,6 +87,10 @@ public:
     virtual WSError GetGlobalMaximizeMode(MaximizeMode& mode) = 0;
     virtual WSError UpdateWindowSessionProperty(sptr<WindowSessionProperty>) = 0;
     virtual WSError SetAspectRatio(float ratio) = 0;
+
+    // extension session
+    virtual WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) = 0;
+    virtual WSError TransferExtensionData(const AAFwk::WantParams& wantParams) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_INTERFACE_H
