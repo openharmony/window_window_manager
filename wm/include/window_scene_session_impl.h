@@ -58,6 +58,11 @@ public:
     
     bool IsTransparent() const override;
 
+    virtual WMError AddWindowFlag(WindowFlag flag) override;
+    virtual WMError RemoveWindowFlag(WindowFlag flag) override;
+    virtual WMError SetWindowFlags(uint32_t flags) override;
+    virtual uint32_t GetWindowFlags() const override;
+
     // window effect
     virtual WMError SetCornerRadius(float cornerRadius) override;
     virtual WMError SetShadowRadius(float radius) override;
