@@ -32,6 +32,7 @@ public:
     void RegisterTransferAbilityResultListener(const NotifyTransferAbilityResultFunc& func);
     WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     void RegisterTransferExtensionDataListener(const NotifyTransferExtensionDataFunc& func);
+    WSError TransferComponentData(const AAFwk::WantParams& wantParams);
 private:
     NotifyTransferAbilityResultFunc transferAbilityResultFunc_;
     NotifyTransferExtensionDataFunc transferExtensionDataFunc_;

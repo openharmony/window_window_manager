@@ -54,4 +54,13 @@ void ExtensionSession::RegisterTransferExtensionDataListener(const NotifyTransfe
 {
     transferExtensionDataFunc_ = func;
 }
+
+WSError ExtensionSession::TransferComponentData(const AAFwk::WantParams& wantParams)
+{
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    sessionStage_->NotifyTransferComponentData(wantParams);
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

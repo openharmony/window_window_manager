@@ -75,8 +75,6 @@ public:
     void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
     void NotifyFocusActiveEvent(bool isFocusActive) override;
-    WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
-    void RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func) override;
 
     WMError RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
@@ -125,7 +123,6 @@ protected:
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_UNDEFINED;
     SystemSessionConfig windowSystemConfig_;
     NotifyNativeWinDestroyFunc notifyNativeFunc_;
-    NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
 
     std::recursive_mutex mutex_;
     static std::map<std::string, std::pair<uint64_t, sptr<WindowSessionImpl>>> windowSessionMap_;
