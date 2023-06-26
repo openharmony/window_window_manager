@@ -22,20 +22,43 @@
 #include <parcel.h>
 #include "interfaces/include/ws_common.h"
 #include "wm_common.h"
+#include <cfloat>
 
 namespace OHOS {
 namespace Rosen {
+
+struct WindowLimits {
+    uint32_t maxWidth_;
+    uint32_t maxHeight_;
+    uint32_t minWidth_;
+    uint32_t minHeight_;
+    float maxRatio_;
+    float minRatio_;
+    WindowLimits() : maxWidth_(UINT32_MAX), maxHeight_(UINT32_MAX), minWidth_(0), minHeight_(0), maxRatio_(FLT_MAX),
+        minRatio_(0.0f) {}
+    WindowLimits(uint32_t maxWidth, uint32_t maxHeight, uint32_t minWidth, uint32_t minHeight, float maxRatio,
+        float minRatio) : maxWidth_(maxWidth), maxHeight_(maxHeight), minWidth_(minWidth), minHeight_(minHeight),
+        maxRatio_(maxRatio), minRatio_(minRatio) {}
+
+    bool IsEmpty() const
+    {
+        return (maxWidth_ == 0 || minWidth_ == 0 || maxHeight_ == 0 || minHeight_ == 0);
+    }
+};
+
 class WindowSessionProperty : public Parcelable {
 public:
     WindowSessionProperty() = default;
     ~WindowSessionProperty() = default;
-
+    explicit WindowSessionProperty(const sptr<WindowSessionProperty>& property);
+    void CopyFrom(const sptr<WindowSessionProperty>& property);
     void SetWindowName(const std::string& name);
     void SetSessionInfo(const SessionInfo& info);
     void SetRequestRect(const struct Rect& rect);
     void SetWindowRect(const struct Rect& rect);
     void SetFocusable(bool isFocusable);
     void SetTouchable(bool isTouchable);
+    void SetBrightness(float brightness);
     void SetDisplayId(uint64_t displayId);
     void SetWindowType(WindowType type);
     void SetParentId(uint32_t parentId);
@@ -44,6 +67,9 @@ public:
     void SetAccessTokenId(uint32_t accessTokenId);
     void SetTokenState(bool hasToken);
     void SetMaximizeMode(MaximizeMode mode);
+    void SetWindowMode(WindowMode mode);
+    void SetWindowLimits(const WindowLimits& windowLimits);
+    void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
 
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
@@ -52,6 +78,7 @@ public:
     WindowType GetWindowType() const;
     bool GetFocusable() const;
     bool GetTouchable() const;
+    float GetBrightness() const;
     uint32_t GetParentId() const;
     uint64_t GetDisplayId() const;
     uint64_t GetPersistentId() const;
@@ -59,7 +86,12 @@ public:
     uint32_t GetAccessTokenId() const;
     bool GetTokenState() const;
     MaximizeMode GetMaximizeMode() const;
+    WindowMode GetWindowMode() const;
+    WindowLimits GetWindowLimits() const;
+    const std::unordered_map<WindowType, SystemBarProperty>& GetSystemBarProperty() const;
 
+    bool MarshallingWindowLimits(Parcel& parcel) const;
+    static void UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property);
     bool Marshalling(Parcel& parcel) const override;
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
 private:
@@ -71,12 +103,18 @@ private:
     bool focusable_ { true };
     bool touchable_ { true };
     bool tokenState_ { false };
+    float brightness_ = UNDEFINED_BRIGHTNESS;
     uint64_t displayId_ = 0;
     uint32_t parentId_ = INVALID_SESSION_ID; // parentId of sceneSession, which is low 32 bite of parentPersistentId_
     uint64_t persistentId_ = INVALID_SESSION_ID;
     uint64_t parentPersistentId_ = INVALID_SESSION_ID;
     uint32_t accessTokenId_ = INVALID_SESSION_ID;
     MaximizeMode maximizeMode_ = MaximizeMode::MODE_RECOVER;
+    WindowMode windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    WindowLimits limits_;
+    std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
+        { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },
+    };
 };
 
 struct SystemSessionConfig : public Parcelable {

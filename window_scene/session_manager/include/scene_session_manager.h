@@ -95,6 +95,11 @@ private:
     void GetStartPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, std::string& path, uint32_t& bgColor);
     std::string CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
 
+    WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
+    WSError UpdateBrightness(uint64_t persistentId);
+    void SetDisplayBrightness(float brightness);
+    float GetDisplayBrightness() const;
+
     sptr<RootSceneSession> rootSceneSession_;
     std::map<uint64_t, sptr<SceneSession>> sceneSessionMap_;
 
@@ -103,6 +108,8 @@ private:
     SystemSessionConfig systemConfig_;
     uint64_t activeSessionId_ = INVALID_SESSION_ID;
     uint64_t focusedSessionId_ = INVALID_SESSION_ID;
+    uint64_t brightnessSessionId_ = INVALID_SESSION_ID;
+    float displayBrightness_ = UNDEFINED_BRIGHTNESS;
 
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;

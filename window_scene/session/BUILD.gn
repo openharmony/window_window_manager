@@ -41,8 +41,10 @@ ohos_shared_library("scene_session") {
     "host/src/extension_session.cpp",
     "host/src/root_scene_session.cpp",
     "host/src/scene_persistence.cpp",
+    "host/src/scene_persistent_storage.cpp",
     "host/src/scene_session.cpp",
     "host/src/session.cpp",
+    "host/src/session_vsync_station.cpp",
     "host/src/zidl/session_proxy.cpp",
     "host/src/zidl/session_stub.cpp",
   ]
@@ -63,11 +65,13 @@ ohos_shared_library("scene_session") {
     "ability_base:session_info",
     "ability_base:want",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "graphic_standard:librender_service_client",
     "hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
     "multimedia_image_framework:image_native",
+    "preferences:native_preferences",
   ]
 
   innerapi_tags = [ "platformsdk" ]

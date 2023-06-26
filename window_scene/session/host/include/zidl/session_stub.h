@@ -53,6 +53,10 @@ private:
     int HandleMarkProcessed(MessageParcel& data, MessageParcel& reply);
     int HandleSetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply);
     int HandleGetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply);
+    int HandleNeedAvoid(MessageParcel& data, MessageParcel& reply);
+    int HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateWindowSessionProperty(MessageParcel& data, MessageParcel& reply);
+    int HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_STUB_H
