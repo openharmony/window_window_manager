@@ -16,6 +16,7 @@
 #include "session_manager/include/screen_session_manager.h"
 
 #include <transaction/rs_interfaces.h>
+#include <hitrace_meter.h>
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
 #include "screen_scene_config.h"

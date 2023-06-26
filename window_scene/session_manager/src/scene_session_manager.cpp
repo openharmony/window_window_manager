@@ -35,6 +35,7 @@
 #include "session/host/include/scene_session.h"
 #include "window_manager_hilog.h"
 #include "wm_math.h"
+#include "xcollie/watchdog.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "session_manager_agent_controller.h"
 #include "window_manager.h"
@@ -61,7 +62,7 @@ SceneSessionManager::SceneSessionManager()
 bool SceneSessionManager::Init()
 {
     // create handler for inner command at server
-    eventLoop_ = AppExecFwk::EventRunner::Create(INNER_WM_THREAD_NAME);
+    eventLoop_ = AppExecFwk::EventRunner::Create(SCENE_SESSION_MANAGER_THREAD);
     if (eventLoop_ == nullptr) {
         return false;
     }
@@ -69,7 +70,7 @@ bool SceneSessionManager::Init()
     if (eventHandler_ == nullptr) {
         return false;
     }
-    int ret = HiviewDFX::Watchdog::GetInstance().AddThread(INNER_WM_THREAD_NAME, eventHandler_);
+    int ret = HiviewDFX::Watchdog::GetInstance().AddThread(SCENE_SESSION_MANAGER_THREAD, eventHandler_);
     if (ret != 0) {
         WLOGFE("Add watchdog thread failed");
     }
