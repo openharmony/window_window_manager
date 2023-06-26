@@ -2347,6 +2347,14 @@ void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>&
         WLOGFE("abilityContext is null");
         return;
     }
+    bool needMoveToBackground = false;
+    int ret = abilityContext->OnBackPressedCallBack(needMoveToBackground);
+    if (ret == ERR_OK && needMoveToBackground) {
+        abilityContext->MoveAbilityToBackground();
+        WLOGD("id: %{public}u closed, to move Ability: %{public}u",
+            property_->GetWindowId(), needMoveToBackground);
+        return;
+    }
     // TerminateAbility will invoke last ability, CloseAbility will not.
     bool shouldTerminateAbility = WindowHelper::IsFullScreenWindow(property_->GetWindowMode());
     if (shouldTerminateAbility) {
