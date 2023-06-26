@@ -28,4 +28,39 @@ ExtensionSession::ExtensionSession(const SessionInfo& info) : Session(info)
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
     GeneratePersistentId(true, info);
 }
+
+WSError ExtensionSession::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
+{
+    if (transferAbilityResultFunc_) {
+        transferAbilityResultFunc_(resultCode, want);
+    }
+    return WSError::WS_OK;
+}
+
+void ExtensionSession::RegisterTransferAbilityResultListener(const NotifyTransferAbilityResultFunc& func)
+{
+    transferAbilityResultFunc_ = func;
+}
+
+WSError ExtensionSession::TransferExtensionData(const AAFwk::WantParams& wantParams)
+{
+    if (transferExtensionDataFunc_) {
+        transferExtensionDataFunc_(wantParams);
+    }
+    return WSError::WS_OK;
+}
+
+void ExtensionSession::RegisterTransferExtensionDataListener(const NotifyTransferExtensionDataFunc& func)
+{
+    transferExtensionDataFunc_ = func;
+}
+
+WSError ExtensionSession::TransferComponentData(const AAFwk::WantParams& wantParams)
+{
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    sessionStage_->NotifyTransferComponentData(wantParams);
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen
