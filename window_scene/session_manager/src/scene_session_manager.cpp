@@ -20,6 +20,7 @@
 #include <ability_info.h>
 #include <ability_manager_client.h>
 #include <bundle_mgr_interface.h>
+#include <display_power_mgr_client.h>
 #include <iservice_registry.h>
 #include <parameters.h>
 #include <resource_manager.h>
@@ -41,6 +42,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManager" };
 const std::string SCENE_SESSION_MANAGER_THREAD = "SceneSessionManager";
+constexpr uint32_t MAX_BRIGHTNESS = 255;
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SceneSessionManager)
@@ -473,6 +475,9 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             WLOGFE("session is invalid with %{public}" PRIu64 "", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
+        if (persistentId == brightnessSessionId_) {
+            UpdateBrightness(focusedSessionId_);
+        }
         auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
         if (!scnSessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
@@ -710,13 +715,11 @@ void SceneSessionManager::GetStartPage(const SessionInfo& sessionInfo, std::stri
 WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
 {
     if (property == nullptr) {
-        WLOGFE("property is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }
     uint64_t persistentId = property->GetPersistentId();
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        WLOGFE("session is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }
     WLOGI("Id: %{public}" PRIu64", action: %{public}u", sceneSession->GetPersistentId(), static_cast<uint32_t>(action));
@@ -735,7 +738,12 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS: {
-            // @todo
+            if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+                WLOGW("only app main window can set brightness");
+                return WSError::WS_DO_NOTHING;
+            }
+            // @todo if sceneSession is inactive, return
+            ret = SetBrightness(sceneSession, property->GetBrightness());
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
@@ -748,11 +756,78 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
             }
             break;
         }
+        case WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS: {
+            auto& systemBarProperties = property->GetSystemBarProperty();
+            for (auto& iter : systemBarProperties) {
+                sceneSession->SetSystemBarProperty(iter.first, iter.second);
+            }
+        }
         default:
             break;
     }
 
     return ret;
+}
+
+WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSession, float brightness)
+{
+    if (!sceneSession->IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (brightness == sceneSession->GetBrightness()) {
+        WLOGFD("Session brightness do not change: [%{public}f]", brightness);
+        return WSError::WS_DO_NOTHING;
+    }
+    sceneSession->SetBrightness(brightness);
+    if (GetDisplayBrightness() != brightness) {
+        DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
+            static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
+        SetDisplayBrightness(brightness);
+    }
+    brightnessSessionId_ = sceneSession->GetPersistentId();
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::UpdateBrightness(uint64_t persistentId)
+{
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        WLOGFE("session is invalid");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        WLOGW("only app main window can set brightness");
+        return WSError::WS_DO_NOTHING;
+    }
+    auto brightness = sceneSession->GetBrightness();
+    WLOGI("Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
+    if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
+        if (GetDisplayBrightness() != brightness) {
+            WLOGI("adjust brightness with default value");
+            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
+            SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
+        }
+        brightnessSessionId_ = INVALID_WINDOW_ID;
+    } else {
+        if (GetDisplayBrightness() != brightness) {
+            WLOGI("adjust brightness with value");
+            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
+                static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
+            SetDisplayBrightness(brightness);
+        }
+        brightnessSessionId_ = sceneSession->GetPersistentId();
+    }
+    return WSError::WS_OK;
+}
+
+void SceneSessionManager::SetDisplayBrightness(float brightness)
+{
+    displayBrightness_ = brightness;
+}
+
+float SceneSessionManager::GetDisplayBrightness() const
+{
+    return displayBrightness_;
 }
 
 WSError SceneSessionManager::SetFocusedSession(uint64_t persistentId)
@@ -786,8 +861,7 @@ WSError SceneSessionManager::UpdateFocus(uint64_t persistentId, bool isFocused)
     // focusId change
     if (isFocused) {
         SetFocusedSession(persistentId);
-    }
-    if (persistentId == GetFocusedSession()) {
+    } else if (persistentId == GetFocusedSession()) {
         SetFocusedSession(INVALID_SESSION_ID);
     }
     // notify window manager

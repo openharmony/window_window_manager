@@ -57,6 +57,7 @@ public:
     WMError SetFocusable(bool isFocusable) override;
     WMError SetTouchable(bool isTouchable) override;
     WMError SetWindowType(WindowType type) override;
+    WMError SetBrightness(float brightness) override;
     bool GetTouchable() const override;
     uint32_t GetWindowId() const override;
     Rect GetRect() const override;
@@ -79,6 +80,8 @@ public:
     WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     WMError RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
     WMError UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
+    WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
+    WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
     void RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) override;
     void UnregisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) override;
     WMError RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
@@ -95,6 +98,7 @@ public:
     void NotifyForegroundFailed(WMError ret);
     WSError MarkProcessed(int32_t eventId) override;
     WSError NotifyDestroy() override;
+    void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void NotifyTouchDialogTarget() override;
 
     WindowState state_ { WindowState::STATE_INITIAL };
@@ -125,12 +129,17 @@ protected:
     static std::map<std::string, std::pair<uint64_t, sptr<WindowSessionImpl>>> windowSessionMap_;
     static std::map<uint64_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
 
+    bool isIgnoreSafeAreaNeedNotify_ = false;
+    bool isIgnoreSafeArea_ = false;
+
 private:
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowChangeListener, std::vector<sptr<IWindowChangeListener>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IAvoidAreaChangedListener, std::vector<sptr<IAvoidAreaChangedListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IDialogDeathRecipientListener, std::vector<sptr<IDialogDeathRecipientListener>>> GetListeners();
     template<typename T>
@@ -145,6 +154,7 @@ private:
     static std::recursive_mutex globalMutex_;
     static std::map<uint64_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<uint64_t, std::vector<sptr<IWindowChangeListener>>> windowChangeListeners_;
+    static std::map<uint64_t, std::vector<sptr<IAvoidAreaChangedListener>>> avoidAreaChangeListeners_;
     static std::map<uint64_t, std::vector<sptr<IDialogDeathRecipientListener>>> dialogDeathRecipientListeners_;
     static std::map<uint64_t, std::vector<sptr<IDialogTargetTouchListener>>> dialogTargetTouchListener_;
 };
