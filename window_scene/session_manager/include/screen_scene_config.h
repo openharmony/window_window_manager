@@ -18,6 +18,8 @@
 
 
 #include <refbase.h>
+
+#include "cutout_info.h"
 #include "xml_config_base.h"
 #include "libxml/parser.h"
 
@@ -32,11 +34,16 @@ public:
     static const std::map<std::string, std::vector<int>>& GetIntNumbersConfig();
     static const std::map<std::string, std::string>& GetStringConfig();
     static void DumpConfig();
+    static std::vector<DMRect> GetCutoutBoundaryRect();
+    static void SetCutoutSvgPath(const std::string& svgPath);
+    static bool IsWaterfallDisplay();
 
 private:
     static std::map<std::string, bool> enableConfig_;
     static std::map<std::string, std::vector<int>> intNumbersConfig_;
     static std::map<std::string, std::string> stringConfig_;
+    static std::vector<DMRect> cutoutBoundaryRect_;
+    static bool isWaterfallDisplay_;
 
     static bool IsValidNode(const xmlNode& currNode);
     static void ReadEnableConfigInfo(const xmlNodePtr& currNode);
@@ -46,6 +53,7 @@ private:
 
     static std::vector<std::string> Split(std::string str, std::string pattern);
     static bool IsNumber(std::string str);
+    static DMRect CalcCutoutBoundaryRect(const std::string svgPath);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_SCREEN_SCENE_CONFIG_H
