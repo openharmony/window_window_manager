@@ -28,6 +28,7 @@
 #include <start_options.h>
 #include <system_ability_definition.h>
 #include <want.h>
+#include <hitrace_meter.h>
 
 #include "color_parser.h"
 #include "common/include/permission.h"
