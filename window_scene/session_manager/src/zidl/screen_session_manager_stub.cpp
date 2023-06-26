@@ -296,6 +296,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteBool(isLocked);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_CUTOUT_INFO: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            sptr<CutoutInfo> cutoutInfo = GetCutoutInfo(displayId);
+            reply.WriteParcelable(cutoutInfo);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
