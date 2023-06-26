@@ -70,6 +70,8 @@ public:
     void SetWindowMode(WindowMode mode);
     void SetWindowLimits(const WindowLimits& windowLimits);
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
+    void SetWindowFlags(uint32_t flags);
+    void AddWindowFlag(WindowFlag flag);
 
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
@@ -80,6 +82,7 @@ public:
     bool GetTouchable() const;
     float GetBrightness() const;
     uint32_t GetParentId() const;
+    uint32_t GetWindowFlags() const;
     uint64_t GetDisplayId() const;
     uint64_t GetPersistentId() const;
     uint64_t GetParentPersistentId() const;
@@ -106,6 +109,7 @@ private:
     float brightness_ = UNDEFINED_BRIGHTNESS;
     uint64_t displayId_ = 0;
     uint32_t parentId_ = INVALID_SESSION_ID; // parentId of sceneSession, which is low 32 bite of parentPersistentId_
+    uint32_t flags_ = 0;
     uint64_t persistentId_ = INVALID_SESSION_ID;
     uint64_t parentPersistentId_ = INVALID_SESSION_ID;
     uint32_t accessTokenId_ = INVALID_SESSION_ID;

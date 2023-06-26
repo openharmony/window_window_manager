@@ -69,7 +69,7 @@ public:
     WSError SetFocusedSession(uint64_t persistentId);
     uint64_t GetFocusedSession() const;
     WSError UpdateFocus(uint64_t persistentId, bool isFocused);
-
+    WSError SetWindowFlags(const sptr<SceneSession>& sceneSession, uint32_t flags);
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;

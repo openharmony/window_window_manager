@@ -730,11 +730,12 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE: {
-            sceneSession->SetFocusable(property->GetFocusable());
+            ret = sceneSession->SetFocusable(property->GetFocusable());
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE: {
-            // @todo
+            // @todo systemCalling permission
+            ret = SetWindowFlags(sceneSession, property->GetWindowFlags());
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS: {
@@ -875,6 +876,36 @@ WSError SceneSessionManager::UpdateFocus(uint64_t persistentId, bool isFocused)
     );
     SessionManagerAgentController::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, isFocused);
     return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::SetWindowFlags(const sptr<SceneSession>& sceneSession, uint32_t flags)
+{
+    auto sceneSession = 
+    // auto node = windowRoot_->GetWindowNode(windowId);
+    // if (node == nullptr) {
+    //     WLOGFE("could not find window");
+    //     return WMError::WM_ERROR_NULLPTR;
+    // }
+    // auto property = node->GetWindowProperty();
+    // uint32_t oldFlags = property->GetWindowFlags();
+    // if (property->GetApiCompatibleVersion() >= 9 && !isSystemCalling && // 9: api version.
+    //     (oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) {
+    //     WLOGFW("Only API 9- or system calling support showing when locked.");
+    //     return WMError::WM_ERROR_INVALID_PERMISSION;
+    // }
+    // property->SetWindowFlags(flags);
+    // // only forbid_split_move flag change, just set property
+    // if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE)) {
+    //     return WMError::WM_OK;
+    // }
+    // WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_FLAGS);
+    // if (res != WMError::WM_OK) {
+    //     return res;
+    // }
+    // FlushWindowInfo(windowId);
+    // accessibilityConnection_->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+    // WLOGI("SetWindowFlags end");
+    // return res;
 }
 
 WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession)

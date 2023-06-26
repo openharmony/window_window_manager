@@ -932,6 +932,54 @@ WMError WindowSceneSessionImpl::SetTransparent(bool isTransparent)
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::AddWindowFlag(WindowFlag flag)
+{
+    if (flag == WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED && state_ != WindowState::STATE_CREATED) {
+        WLOGFE("Only support add show when locked when window create, id: %{public}u", property_->GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    uint32_t updateFlags = property_->GetWindowFlags() | (static_cast<uint32_t>(flag));
+    return SetWindowFlags(updateFlags);
+}
+
+WMError WindowSceneSessionImpl::RemoveWindowFlag(WindowFlag flag)
+{
+    if (flag == WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED && state_ != WindowState::STATE_CREATED) {
+        WLOGFE("Only support remove show when locked when window create, id: %{public}u", property_->GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    uint32_t updateFlags = property_->GetWindowFlags() & (~(static_cast<uint32_t>(flag)));
+    return SetWindowFlags(updateFlags);
+}
+
+WMError WindowSceneSessionImpl::SetWindowFlags(uint32_t flags)
+{
+    WLOGI("Window %{public}u flags %{public}u", GetWindowId(), flags);
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (property_->GetWindowFlags() == flags) {
+        return WMError::WM_OK;
+    }
+    auto oriFlags = property_->GetWindowFlags();
+    property_->SetWindowFlags(flags);
+    if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
+        return WMError::WM_OK;
+    }
+    WMError ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_FLAGS);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetWindowFlags errCode:%{public}d winId:%{public}u",
+            static_cast<int32_t>(ret), GetWindowId());
+        property_->SetWindowFlags(oriFlags);
+    }
+    return ret;
+}
+
+uint32_t WindowSceneSessionImpl::GetWindowFlags() const
+{
+    return property_->GetWindowFlags();
+}
+
 static float ConvertRadiusToSigma(float radius)
 {
     return radius > 0.0f ? 0.57735f * radius + SK_ScalarHalf : 0.0f; // 0.57735f is blur sigma scale
