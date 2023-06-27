@@ -19,7 +19,8 @@
 #include <message_option.h>
 #include <message_parcel.h>
 #include <ui/rs_surface_node.h>
-
+#include "want.h"
+#include "want_params.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -304,7 +305,6 @@ WSError SessionProxy::UpdateActiveStatus(bool isActive)
     return static_cast<WSError>(ret);
 }
 
-
 WSError SessionProxy::OnSessionEvent(SessionEvent event)
 {
     MessageParcel data;
@@ -452,6 +452,54 @@ WSError SessionProxy::RaiseToAppTop()
     return static_cast<WSError>(ret);
 }
 
+WSError SessionProxy::OnNeedAvoid(bool status)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!(data.WriteUint32(static_cast<uint32_t>(status)))) {
+        WLOGFE("Write status failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_NEED_AVOID),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
+AvoidArea SessionProxy::GetAvoidAreaByType(AvoidAreaType type)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    AvoidArea avoidArea;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return avoidArea;
+    }
+    if (!(data.WriteUint32(static_cast<uint32_t>(type)))) {
+        WLOGFE("Write type failed");
+        return avoidArea;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_GET_AVOID_AREA),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return avoidArea;
+    }
+    sptr<AvoidArea> area = reply.ReadParcelable<AvoidArea>();
+    if (area == nullptr) {
+        return avoidArea;
+    }
+    return *area;
+}
+
 WSError SessionProxy::RequestSessionBack()
 {
     MessageParcel data;
@@ -506,6 +554,98 @@ WSError SessionProxy::GetGlobalMaximizeMode(MaximizeMode& mode)
         return WSError::WS_ERROR_IPC_FAILED;
     }
     mode = static_cast<MaximizeMode>(reply.ReadUint32());
+    int32_t ret = reply.ReadUint32();
+    return static_cast<WSError>(ret);
+}
+
+WSError SessionProxy::UpdateWindowSessionProperty(sptr<WindowSessionProperty> property)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteParcelable(property.GetRefPtr())) {
+        WLOGFE("Write property failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_UPDATE_WINDOW_SESSION_PROPERTY),
+                              data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
+WSError SessionProxy::SetAspectRatio(float ratio)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteFloat(ratio)) {
+        WLOGFE("Write ratio failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_SET_ASPECT_RATIO),
+                              data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
+WSError SessionProxy::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(resultCode)) {
+        WLOGFE("resultCode write failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteParcelable(&want)) {
+        WLOGFE("want write failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_TRANSFER_ABILITY_RESULT),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadUint32();
+    return static_cast<WSError>(ret);
+}
+
+WSError SessionProxy::TransferExtensionData(const AAFwk::WantParams& wantParams)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteParcelable(&wantParams)) {
+        WLOGFE("wantParams write failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_TRANSFER_EXTENSION_DATA),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     int32_t ret = reply.ReadUint32();
     return static_cast<WSError>(ret);
 }

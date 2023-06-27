@@ -46,6 +46,7 @@ ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetIns
     taskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_THREAD);
     RegisterScreenChangeListener();
     LoadScreenSceneXml();
+    screenCutoutController_ = new ScreenCutoutController();
 }
 
 void ScreenSessionManager::RegisterScreenConnectionListener(sptr<IScreenConnectionListener>& screenConnectionListener)
@@ -141,6 +142,7 @@ void ScreenSessionManager::ConfigureScreenScene()
     if (stringConfig.count("defaultDisplayCutoutPath") != 0) {
         std::string defaultDisplayCutoutPath = static_cast<std::string>(stringConfig["defaultDisplayCutoutPath"]);
         WLOGFD("defaultDisplayCutoutPath = %{public}s.", defaultDisplayCutoutPath.c_str());
+        ScreenSceneConfig::SetCutoutSvgPath(defaultDisplayCutoutPath);
     }
     ConfigureWaterfallDisplayCompressionParams();
 
@@ -447,6 +449,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         WLOGFE("screen session is nullptr");
         return session;
     }
+    InitAbstractScreenModesInfo(session);
     session->groupSmsId_ = 1;
     screenSessionMap_[screenId] = session;
     return session;
@@ -559,6 +562,26 @@ ScreenPowerState ScreenSessionManager::GetScreenPower(ScreenId screenId)
     auto state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(screenId));
     WLOGFI("GetScreenPower:%{public}u, rsscreen:%{public}" PRIu64".", state, screenId);
     return state;
+}
+
+DMError ScreenSessionManager::IsScreenRotationLocked(bool& isLocked)
+{
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("SCB: ScreenSessionManager is screen rotation locked permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    WLOGFI("SCB: IsScreenRotationLocked:isLocked: %{public}u", isLocked);
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::SetScreenRotationLocked(bool isLocked)
+{
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("SCB: ScreenSessionManager set screen rotation locked permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    WLOGFI("SCB: SetScreenRotationLocked: isLocked: %{public}u", isLocked);
+    return DMError::DM_OK;
 }
 
 void ScreenSessionManager::RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener)
@@ -861,7 +884,8 @@ sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId
 
 bool ScreenSessionManager::InitAbstractScreenModesInfo(sptr<ScreenSession>& screenSession)
 {
-    std::vector<RSScreenModeInfo> allModes = rsInterface_.GetScreenSupportedModes(screenSession->rsId_);
+    std::vector<RSScreenModeInfo> allModes = rsInterface_.GetScreenSupportedModes(
+        screenIdManager_.ConvertToRsScreenId(screenSession->screenId_));
     if (allModes.size() == 0) {
         WLOGE("SCB: allModes.size() == 0, screenId=%{public}" PRIu64"", screenSession->rsId_);
         return false;
@@ -1389,5 +1413,10 @@ void ScreenSessionManager::OnScreenshot(sptr<ScreenshotInfo> info)
     for (auto& agent : agents) {
         agent->OnScreenshot(info);
     }
+}
+
+sptr<CutoutInfo> ScreenSessionManager::GetCutoutInfo(DisplayId displayId)
+{
+    return screenCutoutController_ ? screenCutoutController_->GetScreenCutoutInfo() : nullptr;
 }
 } // namespace OHOS::Rosen

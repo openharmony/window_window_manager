@@ -72,6 +72,7 @@ public:
     uint64_t GetFocusedSession() const;
     WSError UpdateFocus(uint64_t persistentId, bool isFocused);
     void StartWindowInfoReportLoop();
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
 
 protected:
     SceneSessionManager();

@@ -746,13 +746,11 @@ void SceneSessionManager::GetStartPage(const SessionInfo& sessionInfo, std::stri
 WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
 {
     if (property == nullptr) {
-        WLOGFE("property is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }
     uint64_t persistentId = property->GetPersistentId();
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        WLOGFE("session is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }
     WLOGI("Id: %{public}" PRIu64", action: %{public}u", sceneSession->GetPersistentId(), static_cast<uint32_t>(action));
@@ -788,6 +786,12 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
                 sceneSession->GetSessionProperty()->SetMaximizeMode(property->GetMaximizeMode());
             }
             break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS: {
+            auto& systemBarProperties = property->GetSystemBarProperty();
+            for (auto& iter : systemBarProperties) {
+                sceneSession->SetSystemBarProperty(iter.first, iter.second);
+            }
         }
         default:
             break;
@@ -872,6 +876,21 @@ uint64_t SceneSessionManager::GetFocusedSession() const
     return focusedSessionId_;
 }
 
+void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+{
+    auto sceneSession = GetSceneSession(focusedSessionId_);
+    if (sceneSession) {
+        WLOGFD("Get focus session info success");
+        focusInfo.windowId_ = sceneSession->GetWindowId();
+        focusInfo.displayId_ = static_cast<DisplayId>(0);
+        focusInfo.pid_ = sceneSession->GetCallingPid();
+        focusInfo.uid_ = sceneSession->GetCallingUid();
+        focusInfo.windowType_ = sceneSession->GetWindowType();
+        focusInfo.abilityToken_ = sceneSession->GetAbilityToken();
+    }
+    return;
+}
+
 WSError SceneSessionManager::UpdateFocus(uint64_t persistentId, bool isFocused)
 {
     // notify session and client
@@ -954,10 +973,6 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
 WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    if (!Permission::IsSystemCalling()) {
-        WLOGFE("register windowManager agent permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
     if ((windowManagerAgent == nullptr) || (windowManagerAgent->AsObject() == nullptr)) {
         WLOGFE("windowManagerAgent is null");
         return WMError::WM_ERROR_NULLPTR;
@@ -972,10 +987,6 @@ WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType t
 WMError SceneSessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    if (!Permission::IsSystemCalling()) {
-        WLOGFE("unregister windowManager agent permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
     if ((windowManagerAgent == nullptr) || (windowManagerAgent->AsObject() == nullptr)) {
         WLOGFE("windowManagerAgent is null");
         return WMError::WM_ERROR_NULLPTR;

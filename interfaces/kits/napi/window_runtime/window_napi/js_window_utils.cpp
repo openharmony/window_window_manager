@@ -496,7 +496,7 @@ NativeValue* CreateJsSystemBarRegionTintArrayObject(NativeEngine& engine, const 
     NativeValue* objValue = engine.CreateArray(tints.size());
     NativeArray* array = ConvertNativeValueTo<NativeArray>(objValue);
     if (array == nullptr) {
-        WLOGFE("Failed to convert SystemBarPropertys to jsArrayObject");
+        WLOGFE("Failed to convert SystemBarProperties to jsArrayObject");
         return nullptr;
     }
     uint32_t index = 0;
