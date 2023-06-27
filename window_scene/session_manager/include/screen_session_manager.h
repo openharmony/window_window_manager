@@ -136,6 +136,7 @@ public:
 
     void NotifyPrivateSessionStateChanged(bool hasPrivate);
     void UpdatePrivateStateAndNotify(sptr<ScreenSession>& screenSession, bool isAddingPrivateSession);
+    DMError HasPrivateWindow(DisplayId id, bool& hasPrivateWindow) override;
 
     void OnScreenConnect(const sptr<ScreenInfo> screenInfo);
     void OnScreenDisconnect(ScreenId screenId);

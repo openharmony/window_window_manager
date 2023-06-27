@@ -315,6 +315,11 @@ DMError ScreenSession::SetPrivateSessionCount(int32_t count)
     return DMError::DM_OK;
 }
 
+bool ScreenSession::HasPrivateSession() const
+{
+    return privateSessionCount_ > 0 ? true : false;
+}
+
 void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint)
 {
     if (displayNode_ != nullptr) {
@@ -350,18 +355,6 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
         transactionProxy->FlushImplicitTransaction();
     }
 }
-
-// void ScreenSession::UpdatePrivateStateAndNotify(bool isAddingPrivateSession)
-// {
-//     uint32_t prePrivateSessionCount = privateSessionCount_;
-//     WLOGFD("before update : privateWindow count: %{public}u", prePrivateSessionCount);
-//     privateSessionCount_ += (isAddingPrivateSession ? 1 : -1);
-//     if (prePrivateSessionCount == 0 && privateSessionCount_ == 1) {
-//         ScreenSessionManager::GetInstance().NotifyPrivateSessionStateChanged(true);
-//     } else if (prePrivateSessionCount == 1 && privateSessionCount_ == 0) {
-//         ScreenSessionManager::GetInstance().NotifyPrivateSessionStateChanged(false);
-//     }
-// }
 
 ScreenSessionGroup::ScreenSessionGroup(ScreenId screenId, ScreenId rsId,
     std::string name, ScreenCombination combination) : combination_(combination)

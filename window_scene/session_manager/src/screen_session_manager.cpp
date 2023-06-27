@@ -1355,6 +1355,24 @@ void ScreenSessionManager::UpdatePrivateStateAndNotify(sptr<ScreenSession>& scre
     }
 }
 
+DMError ScreenSessionManager::HasPrivateWindow(DisplayId id, bool& hasPrivateWindow)
+{
+    // delete permission
+    std::vector<ScreenId> screenIds = GetAllScreenIds();
+    auto iter = std::find(screenIds.begin(), screenIds.end(), id);
+    if (iter == screenIds.end()) {
+        WLOGFE("invalid displayId");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    auto screenSession = GetScreenSession(id);
+    if (screenSession == nullptr) {
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    hasPrivateWindow = screenSession->HasPrivateSession();
+    WLOGFD("id: %{public}" PRIu64" has private window: %{public}u", id, static_cast<uint32_t>(hasPrivateWindow));
+    return DMError::DM_OK;
+}
+
 void ScreenSessionManager::OnScreenGroupChange(const std::string& trigger,
     const sptr<ScreenInfo>& screenInfo, ScreenGroupChangeEvent groupEvent)
 {

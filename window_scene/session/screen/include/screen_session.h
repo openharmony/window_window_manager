@@ -81,6 +81,7 @@ public:
 
     int32_t GetPrivateSessionCount() const;
     DMError SetPrivateSessionCount(int32_t count);
+    bool HasPrivateSession() const;
 
     std::string name_;
     ScreenId screenId_;
@@ -96,8 +97,6 @@ public:
 
     void Connect();
     void Disconnect();
-
-    // void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
 private:
     ScreenProperty property_;
     std::shared_ptr<RSDisplayNode> displayNode_;
