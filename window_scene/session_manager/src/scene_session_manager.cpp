@@ -402,7 +402,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         sceneSession->SetSystemConfig(systemConfig_);
         UpdateParentSession(sceneSession, property);
         sceneSessionMap_.insert({ persistentId, sceneSession });
-        RegisterSessionStateChangeFunc(sceneSession);
+        RegisterSessionStateChangeNotifyManagerFunc(sceneSession);
         WLOGFI("create session persistentId: %{public}" PRIu64 "", persistentId);
         return sceneSession;
     };
@@ -900,24 +900,10 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(bool isAddingPrivateSessio
     ScreenSessionManager::GetInstance().UpdatePrivateStateAndNotify(screenSession, isAddingPrivateSession);
 }
 
-// void JsSceneSession::ProcessSessionStateChangeRegister()
-// {
-//     NotifySessionStateChangeFunc func = [this](const SessionState& state) {
-//         this->OnSessionStateChange(state);
-//     };
-//     auto session = weakSession_.promote();
-//     if (session == nullptr) {
-//         WLOGFE("session is nullptr");
-//         return;
-//     }
-//     session->SetSessionStateChangeListenser(func);
-//     WLOGFD("ProcessSessionStateChangeRegister success");
-// }
-
-void SceneSessionManager::RegisterSessionStateChangeFunc(sptr<SceneSession>& sceneSession)
+void SceneSessionManager::RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession)
 {
-    NotifySessionStateChangeFunc func = [this, &sceneSession](const SessionState& state) {
-        this->OnSessionStateChange(sceneSession, state);
+    NotifySessionStateChangeNotifyManagerFunc func = [this](int64_t persistentId) {
+        this->OnSessionStateChange(persistentId);
     };
     if (sceneSession == nullptr) {
         WLOGFE("session is nullptr");
@@ -927,8 +913,15 @@ void SceneSessionManager::RegisterSessionStateChangeFunc(sptr<SceneSession>& sce
     WLOGFD("RegisterSessionStateChangeFunc success");
 }
 
-void SceneSessionManager::OnSessionStateChange(sptr<SceneSession>& sceneSession, const SessionState& state)
+void SceneSessionManager::OnSessionStateChange(uint64_t persistentId)
 {
+    WLOGFD("Session state change, id: %{public}" PRIu64, persistentId);
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        WLOGFD("session is nullptr");
+        return;
+    }
+    SessionState state = sceneSession->GetSessionState();
     switch (state) {
     case SessionState::STATE_FOREGROUND:
         if (sceneSession->GetWindowSessionProperty()->GetPrivacyMode()) {
@@ -939,6 +932,7 @@ void SceneSessionManager::OnSessionStateChange(sptr<SceneSession>& sceneSession,
         if (sceneSession->GetWindowSessionProperty()->GetPrivacyMode()) {
             UpdatePrivateStateAndNotify(false);
         }
+        break;
     default:
         break;
     }

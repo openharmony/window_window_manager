@@ -314,9 +314,6 @@ WSError Session::Foreground()
     if (!isActive_) {
         SetActive(true);
     }
-    // if (property_->GetPrivacyMode()) {
-    //     SceneSessionManager::GetInstance().UpdatePrivateStateAndNotify(true);
-    // }
     NotifyForeground();
     return WSError::WS_OK;
 }
@@ -331,9 +328,6 @@ WSError Session::Background()
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
-    // if (property_->GetPrivacyMode()) {
-    //     SceneSessionManager::GetInstance().UpdatePrivateStateAndNotify(true);
-    // }
     snapshot_ = Snapshot();
     NotifyBackground();
     return WSError::WS_OK;
@@ -611,7 +605,7 @@ void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc&
     NotifySessionStateChange(state_);
 }
 
-void Session::SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeFunc& func)
+void Session::SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func)
 {
     sessionStateChangeNotifyManagerFunc_ = func;
     NotifySessionStateChange(state_);
@@ -624,7 +618,7 @@ void Session::NotifySessionStateChange(const SessionState& state)
         sessionStateChangeFunc_(state);
     }
     if (sessionStateChangeNotifyManagerFunc_) {
-        sessionStateChangeNotifyManagerFunc_(state);
+        sessionStateChangeNotifyManagerFunc_(GetPersistentId());
     }
 }
 
@@ -653,16 +647,6 @@ void Session::NotifyClick()
         clickFunc_();
     }
 }
-
-// void Session::UpdatePrivateStateAndNotify(bool isAddingPrivateSession)
-// {
-//     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);
-//     if (screenSession == nullptr) {
-//         WLOGFE("screen session is null");
-//         return;
-//     }
-//     screenSession->UpdatePrivateStateAndNotify(isAddingPrivateSession);
-// }
 
 WSError Session::UpdateFocus(bool isFocused)
 {
