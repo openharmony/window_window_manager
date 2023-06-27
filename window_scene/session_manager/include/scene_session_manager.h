@@ -75,6 +75,8 @@ public:
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
 
     void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
+    void InitPersistentStorage();
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
