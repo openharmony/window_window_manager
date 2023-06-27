@@ -37,6 +37,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleNotifyDestroy),
     std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_TOUCH_DIALOG_TARGET),
         &SessionStageStub::HandleNotifyTouchDialogTarget),
+    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA),
+        &SessionStageStub::HandleNotifyTransferComponentData),
 };
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -104,6 +106,19 @@ int SessionStageStub::HandleNotifyTouchDialogTarget(MessageParcel& data, Message
 {
     WLOGFD("Notify touch dialog target");
     NotifyTouchDialogTarget();
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyTransferComponentData(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleNotifyTransferComponentData!");
+    std::shared_ptr<AAFwk::WantParams> wantParams(data.ReadParcelable<AAFwk::WantParams>());
+    if (wantParams == nullptr) {
+        WLOGFE("wantParams is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    WSError errCode = NotifyTransferComponentData(*wantParams);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

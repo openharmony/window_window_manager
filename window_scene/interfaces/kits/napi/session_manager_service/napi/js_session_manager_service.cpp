@@ -46,6 +46,12 @@ public:
         return (me != nullptr) ? me->OnGetRemoteObject(*engine, *info) : nullptr;
     }
 
+    static NativeValue* InitSessionManagerService(NativeEngine* engine, NativeCallbackInfo* info)
+    {
+        JsSessionManagerService* me = CheckParamsAndGetThis<JsSessionManagerService>(engine, info);
+        return (me != nullptr) ? me->OnInitSessionManagerService(*engine, *info) : nullptr;
+    }
+
 private:
     NativeValue* OnGetRemoteObject(NativeEngine& engine, NativeCallbackInfo& info)
     {
@@ -55,6 +61,17 @@ private:
 
         napi_env env = reinterpret_cast<napi_env>(&engine);
         napi_value value = NAPI_ohos_rpc_CreateJsRemoteObject(env, remoteObject);
+        return reinterpret_cast<NativeValue*>(value);
+    }
+
+    NativeValue* OnInitSessionManagerService(NativeEngine& engine, NativeCallbackInfo& info)
+    {
+        WLOGI("JsSessionManagerService: OnInitSessionManagerService is called");
+        auto& sessionManagerService = SingletonContainer::Get<SessionManagerService>();
+        sessionManagerService.Init();
+
+        napi_env env = reinterpret_cast<napi_env>(&engine);
+        napi_value value = NAPI_ohos_rpc_CreateJsRemoteObject(env, nullptr);
         return reinterpret_cast<NativeValue*>(value);
     }
 };
@@ -80,6 +97,8 @@ NativeValue* JsSessionManagerServiceInit(NativeEngine* engine, NativeValue* expo
     // bind function
     const char* moduleName = "JsSessionManagerService";
     BindNativeFunction(*engine, *object, "getRemoteObject", moduleName, JsSessionManagerService::GetRemoteObject);
+    BindNativeFunction(*engine, *object, "initSessionManagerService", moduleName,
+        JsSessionManagerService::InitSessionManagerService);
     return engine->CreateUndefined();
 }
 } // namespace OHOS::Rosen

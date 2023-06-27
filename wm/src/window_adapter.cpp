@@ -24,6 +24,7 @@
 #include "wm_common.h"
 #include "scene_board_judgement.h"
 #include "session_manager.h"
+#include "focus_change_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -367,6 +368,12 @@ MaximizeMode WindowAdapter::GetMaximizeMode()
 {
     INIT_PROXY_CHECK_RETURN(MaximizeMode::MODE_FULL_FILL);
     return windowManagerServiceProxy_->GetMaximizeMode();
+}
+
+void WindowAdapter::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+{
+    INIT_PROXY_CHECK_RETURN();
+    return windowManagerServiceProxy_->GetFocusWindowInfo(focusInfo);
 }
 } // namespace Rosen
 } // namespace OHOS
