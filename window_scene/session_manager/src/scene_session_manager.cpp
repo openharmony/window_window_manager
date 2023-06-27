@@ -74,7 +74,6 @@ bool SceneSessionManager::Init()
     if (ret != 0) {
         WLOGFE("Add watchdog thread failed");
     }
-    // eventHandler_->PostTask([]() { MemoryGuard cacheGuard; }, AppExecFwk::EventQueue::Priority::IMMEDIATE);
     WLOGI("SceneSessionManager init success.");
     return true;
 }
