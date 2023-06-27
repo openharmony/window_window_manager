@@ -17,30 +17,29 @@
 #define FOUNDATION_WINDOW_SCENE_SESSION_MANAGER_SERVICE_H
 
 #include "session_manager_service_stub.h"
-#include "singleton_delegator.h"
+#include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
 class SessionManagerService : public SessionManagerServiceStub {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManagerService);
 public:
-    SessionManagerService() = default;
-    virtual ~SessionManagerService() = default;
-
+    void Init();
     sptr<IRemoteObject> GetRemoteObject();
     sptr<IRemoteObject> GetSceneSessionManager() override;
     sptr<IRemoteObject> GetScreenSessionManagerService() override;
     sptr<IRemoteObject> GetScreenLockManagerService() override;
-    void Init();
+
+protected:
+    SessionManagerService() = default;
+    virtual ~SessionManagerService() = default;
 
 private:
+    std::recursive_mutex mutex_;
+
     sptr<IRemoteObject> sessionManagerServiceObj_;
     sptr<IRemoteObject> sceneSessionManagerObj_;
     sptr<IRemoteObject> screenSessionManagerObj_;
     sptr<IRemoteObject> screenLockManagerObj_;
-
-    std::recursive_mutex mutex_;
-
-    static inline SingletonDelegator<SessionManagerService> delegator_;
 };
 } // namesapce OHOS::Rosen
 

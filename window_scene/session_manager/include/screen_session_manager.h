@@ -20,9 +20,9 @@
 #include "session/screen/include/screen_session.h"
 #include "zidl/screen_session_manager_stub.h"
 #include "client_agent_container.h"
-#include "singleton_delegator.h"
 #include "display_change_listener.h"
 #include "session_display_power_controller.h"
+#include "wm_single_instance.h"
 
 #include "agent_death_recipient.h"
 #include "screen.h"
@@ -41,13 +41,8 @@ public:
 class RSInterfaces;
 
 class ScreenSessionManager : public ScreenSessionManagerStub {
+WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenSessionManager)
 public:
-    static ScreenSessionManager& GetInstance();
-    ScreenSessionManager(const ScreenSessionManager&) = delete;
-    ScreenSessionManager(ScreenSessionManager&&) = delete;
-    ScreenSessionManager& operator=(const ScreenSessionManager&) = delete;
-    ScreenSessionManager& operator=(ScreenSessionManager&&) = delete;
-
     sptr<ScreenSession> GetScreenSession(ScreenId screenId) const;
     std::vector<ScreenId> GetAllScreenIds();
 
@@ -67,7 +62,6 @@ public:
 
     virtual DMError RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
-
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
 
@@ -184,8 +178,10 @@ private:
 
     RSInterfaces& rsInterface_;
     std::shared_ptr<TaskScheduler> taskScheduler_;
-    std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
+
+    mutable std::recursive_mutex screenSessionMapMutex_;
+    std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
 
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
     ScreenIdManager screenIdManager_;
