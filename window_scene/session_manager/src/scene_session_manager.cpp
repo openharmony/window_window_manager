@@ -29,6 +29,7 @@
 #include <system_ability_definition.h>
 #include <want.h>
 
+#include "ability_start_setting.h"
 #include "color_parser.h"
 #include "common/include/permission.h"
 #include "session/host/include/scene_session.h"
@@ -421,6 +422,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     abilitySessionInfo->requestCode = sessionInfo.requestCode;
     abilitySessionInfo->resultCode = sessionInfo.resultCode;
     abilitySessionInfo->uiAbilityId = sessionInfo.uiAbilityId_;
+    abilitySessionInfo->startSetting = sessionInfo.startSetting;
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = *sessionInfo.want;
     } else {
