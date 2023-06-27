@@ -40,6 +40,12 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
             WLOGD("SceneSession init aspectRatio , key %{public}s, value: %{public}f", key.c_str(), aspectRatio_);
         }
     }
+    if (info.isSystem_ && info.windowType_ != 0) {
+        property_ = new(std::nothrow) WindowSessionProperty();
+        if (property_) {
+            property_->SetWindowType(static_cast<WindowType>(info.windowType_));
+        }
+    }
 }
 
 WSError SceneSession::Foreground()

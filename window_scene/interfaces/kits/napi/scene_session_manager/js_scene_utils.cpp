@@ -34,6 +34,7 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
     NativeValue* jsIsSystem = jsObject->GetProperty("isSystem");
     NativeValue* jsPersistentId = jsObject->GetProperty("persistentId");
     NativeValue* jsCallState = jsObject->GetProperty("callState");
+    NativeValue* jsSessionType = jsObject->GetProperty("sessionType");
 
     if (jsBundleName->TypeOf() != NATIVE_UNDEFINED) {
         std::string bundleName;
@@ -82,6 +83,17 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
             return false;
         }
         sessionInfo.callState_ = callState;
+    }
+    if (jsSessionType->TypeOf() != NATIVE_UNDEFINED) {
+        uint32_t windowType = 0;
+        if (!ConvertFromJsValue(engine, jsSessionType, windowType)) {
+            WLOGFE("[NAPI]Failed to convert parameter to windowType");
+            return false;
+        }
+        if (JS_SESSION_TO_WINDOW_TYPE_MAP.count(static_cast<JsSessionType>(windowType)) != 0) {
+            sessionInfo.windowType_ = static_cast<uint32_t>(
+                JS_SESSION_TO_WINDOW_TYPE_MAP.at(static_cast<JsSessionType>(windowType)));
+        }
     }
     return true;
 }
@@ -151,6 +163,61 @@ NativeValue* CreateJsSessionRect(NativeEngine& engine, const WSRect& rect)
     object->SetProperty("posY_", CreateJsValue(engine, rect.posY_));
     object->SetProperty("width_", CreateJsValue(engine, rect.width_));
     object->SetProperty("height_", CreateJsValue(engine, rect.height_));
+    return objValue;
+}
+
+NativeValue* SessionTypeInit(NativeEngine* engine)
+{
+    WLOGFD("SessionTypeInit");
+
+    if (engine == nullptr) {
+        WLOGFE("Engine is nullptr");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("TYPE_UNDEFINED", CreateJsValue(*engine,
+        static_cast<int32_t>(JsSessionType::TYPE_UNDEFINED)));
+    object->SetProperty("TYPE_APP", CreateJsValue(*engine,
+        static_cast<int32_t>(JsSessionType::TYPE_APP)));
+    object->SetProperty("TYPE_SUB_APP", CreateJsValue(*engine,
+        static_cast<int32_t>(JsSessionType::TYPE_SUB_APP)));
+    object->SetProperty("TYPE_SYSTEM_ALERT", CreateJsValue(*engine,
+        static_cast<int32_t>(JsSessionType::TYPE_SYSTEM_ALERT)));
+    object->SetProperty("TYPE_INPUT_METHOD", CreateJsValue(*engine,
+        static_cast<int32_t>(JsSessionType::TYPE_INPUT_METHOD)));
+    object->SetProperty("TYPE_STATUS_BAR", CreateJsValue(*engine,
+        static_cast<int32_t>(JsSessionType::TYPE_STATUS_BAR)));
+    object->SetProperty("TYPE_PANEL", CreateJsValue(*engine,
+        static_cast<int32_t>(JsSessionType::TYPE_PANEL)));
+    object->SetProperty("TYPE_KEYGUARD", CreateJsValue(*engine,
+        static_cast<int32_t>(JsSessionType::TYPE_KEYGUARD)));
+    object->SetProperty("TYPE_VOLUME_OVERLAY", CreateJsValue(*engine,
+        static_cast<int32_t>(JsSessionType::TYPE_VOLUME_OVERLAY)));
+    object->SetProperty("TYPE_NAVIGATION_BAR", CreateJsValue(*engine,
+        static_cast<int32_t>(JsSessionType::TYPE_NAVIGATION_BAR)));
+    object->SetProperty("TYPE_FLOAT", CreateJsValue(*engine,
+        static_cast<int32_t>(JsSessionType::TYPE_FLOAT)));
+    object->SetProperty("TYPE_WALLPAPER", CreateJsValue(*engine,
+        static_cast<int32_t>(JsSessionType::TYPE_WALLPAPER)));
+    object->SetProperty("TYPE_DESKTOP", CreateJsValue(*engine,
+        static_cast<int32_t>(JsSessionType::TYPE_DESKTOP)));
+    object->SetProperty("TYPE_LAUNCHER_DOCK", CreateJsValue(*engine,
+        static_cast<int32_t>(JsSessionType::TYPE_LAUNCHER_DOCK)));
+    object->SetProperty("TYPE_FLOAT_CAMERA", CreateJsValue(*engine,
+        static_cast<int32_t>(JsSessionType::TYPE_FLOAT_CAMERA)));
+    object->SetProperty("TYPE_DIALOG", CreateJsValue(*engine,
+        static_cast<int32_t>(JsSessionType::TYPE_DIALOG)));
+    object->SetProperty("TYPE_SCREENSHOT", CreateJsValue(*engine,
+        static_cast<int32_t>(JsSessionType::TYPE_SCREENSHOT)));
+    object->SetProperty("TYPE_TOAST", CreateJsValue(*engine,
+        static_cast<int32_t>(JsSessionType::TYPE_TOAST)));
     return objValue;
 }
 } // namespace OHOS::Rosen
