@@ -114,8 +114,8 @@ private:
 
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
-    void RegisterSessionStateChangeFunc(sptr<SceneSession>& sceneSession);
-    void OnSessionStateChange(sptr<SceneSession>& sceneSession, const SessionState& state);
+    void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
+    void OnSessionStateChange(uint64_t persistentId);
 };
 } // namespace OHOS::Rosen
 
