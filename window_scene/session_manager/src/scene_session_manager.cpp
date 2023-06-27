@@ -36,7 +36,7 @@
 #include "wm_math.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "session_manager_agent_controller.h"
-#include "window_manager.h"
+#include "focus_change_info.h"
 
 namespace OHOS::Rosen {
 namespace {
