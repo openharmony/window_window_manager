@@ -97,6 +97,7 @@ ohos_shared_library("scene_session_manager") {
 ohos_shared_library("screen_session_manager") {
   sources = [
     "../../dm/src/zidl/display_manager_agent_proxy.cpp",
+    "src/screen_cutout_controller.cpp",
     "src/screen_scene_config.cpp",
     "src/screen_session_manager.cpp",
     "src/session_display_power_controller.cpp",

@@ -45,6 +45,7 @@ ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetIns
     taskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_THREAD);
     RegisterScreenChangeListener();
     LoadScreenSceneXml();
+    screenCutoutController_ = new ScreenCutoutController();
 }
 
 void ScreenSessionManager::RegisterScreenConnectionListener(sptr<IScreenConnectionListener>& screenConnectionListener)
@@ -140,6 +141,7 @@ void ScreenSessionManager::ConfigureScreenScene()
     if (stringConfig.count("defaultDisplayCutoutPath") != 0) {
         std::string defaultDisplayCutoutPath = static_cast<std::string>(stringConfig["defaultDisplayCutoutPath"]);
         WLOGFD("defaultDisplayCutoutPath = %{public}s.", defaultDisplayCutoutPath.c_str());
+        ScreenSceneConfig::SetCutoutSvgPath(defaultDisplayCutoutPath);
     }
     ConfigureWaterfallDisplayCompressionParams();
 
@@ -1400,5 +1402,10 @@ void ScreenSessionManager::OnScreenshot(sptr<ScreenshotInfo> info)
     for (auto& agent : agents) {
         agent->OnScreenshot(info);
     }
+}
+
+sptr<CutoutInfo> ScreenSessionManager::GetCutoutInfo(DisplayId displayId)
+{
+    return screenCutoutController_ ? screenCutoutController_->GetScreenCutoutInfo() : nullptr;
 }
 } // namespace OHOS::Rosen
