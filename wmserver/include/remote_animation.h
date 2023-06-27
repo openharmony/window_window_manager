@@ -36,6 +36,7 @@ enum class TransitionEvent : uint32_t {
     CLOSE,
     BACK_TRANSITION,
     CLOSE_BUTTON,
+    BACKGROUND_TRANSITION,
     UNKNOWN,
 };
 
@@ -56,7 +57,7 @@ public:
         TransitionEvent event);
     static WMError NotifyAnimationBackTransition(sptr<WindowTransitionInfo> srcInfo,
         sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& srcNode,
-        const sptr<WindowNode>& dstNode);
+        const sptr<WindowNode>& dstNode, const TransitionEvent event);
     static void NotifyAnimationUpdateWallpaper(sptr<WindowNode> node);
     static void OnRemoteDie(const sptr<IRemoteObject>& remoteObject);
     static bool CheckAnimationController();
