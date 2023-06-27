@@ -758,7 +758,9 @@ void WindowManagerService::StartingWindow(sptr<WindowTransitionInfo> info, std::
         WLOGI("startingWindow not open!");
         return;
     }
-    info->isSystemCalling_ = Permission::IsSystemCalling();
+    if (info) {
+        info->isSystemCalling_ = Permission::IsSystemCalling();
+    }
     PostAsyncTask([this, info, pixelMap, isColdStart, bkgColor]() {
         windowController_->StartingWindow(info, pixelMap, bkgColor, isColdStart);
     });
