@@ -312,6 +312,7 @@ NativeValue* JsSceneSessionManager::OnGetRootSceneSession(NativeEngine& engine, 
         (const std::string& contentUrl, NativeEngine* engine, NativeValue* storage, AbilityRuntime::Context* context) {
             rootScene->LoadContent(contentUrl, engine, storage, context);
             ScenePersistentStorage::InitDir(context->GetFilesDir());
+            SceneSessionManager::GetInstance().InitPersistentStorage();
             if (!ScenePersistence::CreateSnapshotDir(context->GetFilesDir())) {
                 WLOGFD("snapshot dir existed");
             }

@@ -804,7 +804,7 @@ WMError WindowImpl::SetFloatingMaximize(bool isEnter)
         return ret;
     }
 
-    if (isEnter && GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+    if (isEnter && GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
         if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
             SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         }
