@@ -78,7 +78,8 @@ WSError WindowEventChannelProxy::TransferPointerEvent(const std::shared_ptr<MMI:
     return static_cast<WSError>(ret);
 }
 
-WSError WindowEventChannelProxy::TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+WSError WindowEventChannelProxy::TransferKeyEventForConsumed(
+    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
 {
     MessageParcel data;
     MessageParcel reply;
