@@ -146,6 +146,17 @@ void Session::NotifyDisconnect()
     }
 }
 
+float Session::GetAspectRatio() const
+{
+    return aspectRatio_;
+}
+
+WSError Session::SetAspectRatio(float ratio)
+{
+    aspectRatio_ = ratio;
+    return WSError::WS_OK;
+}
+
 SessionState Session::GetSessionState() const
 {
     return state_;
@@ -178,7 +189,11 @@ WSError Session::SetFocusable(bool isFocusable)
 
 bool Session::GetFocusable() const
 {
-    return property_->GetFocusable();
+    if (property_ != nullptr) {
+        return property_->GetFocusable();
+    }
+    WLOGFD("property is null");
+    return true;
 }
 
 WSError Session::SetTouchable(bool touchable)
@@ -278,6 +293,12 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     return WSError::WS_OK;
 }
 
+WSError Session::UpdateWindowSessionProperty(sptr<WindowSessionProperty> property)
+{
+    property_ = property;
+    return WSError::WS_OK;
+}
+
 WSError Session::Foreground()
 {
     SessionState state = GetSessionState();
@@ -362,6 +383,7 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.moduleName_ = abilitySessionInfo->want.GetModuleName();
     info.persistentId_ = abilitySessionInfo->persistentId;
+    info.callerPersistentId_ = GetPersistentId();
     info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
     info.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
     info.want = new AAFwk::Want(abilitySessionInfo->want);
@@ -676,6 +698,11 @@ WSError Session::OnSessionEvent(SessionEvent event)
     return WSError::WS_OK;
 }
 
+WSError Session::OnNeedAvoid(bool status)
+{
+    return WSError::WS_OK;
+}
+
 WSError Session::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
 {
     WLOGFD("UpdateSessionRect");
@@ -765,6 +792,21 @@ WSError Session::SetGlobalMaximizeMode(MaximizeMode mode)
 WSError Session::GetGlobalMaximizeMode(MaximizeMode& mode)
 {
     WLOGFD("Session GetGlobalMaximizeMode");
+    return WSError::WS_OK;
+}
+
+AvoidArea Session::GetAvoidAreaByType(AvoidAreaType type)
+{
+    AvoidArea avoidArea;
+    return avoidArea;
+}
+
+WSError Session::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
+{
+    return WSError::WS_OK;
+}
+WSError Session::TransferExtensionData(const AAFwk::WantParams& wantParams)
+{
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

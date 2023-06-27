@@ -20,6 +20,8 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "session_manager/include/screen_session_manager.h"
 
+#include "ability_manager_client.h"
+
 namespace OHOS::Rosen {
 WM_IMPLEMENT_SINGLE_INSTANCE(SessionManagerService)
 
@@ -61,5 +63,10 @@ sptr<IRemoteObject> SessionManagerService::GetScreenSessionManagerService()
     }
     screenSessionManagerObj_ = ScreenSessionManager::GetInstance().AsObject();
     return screenSessionManagerObj_;
+}
+
+void SessionManagerService::Init()
+{
+    AAFwk::AbilityManagerClient::GetInstance()->SetSessionManagerService(this->AsObject());
 }
 } // namesapce OHOS::Rosen

@@ -300,6 +300,15 @@ void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
     RSTransaction::FlushImplicitTransaction();
 }
 
+bool StartingWindow::IsWindowFollowParent(WindowType type)
+{
+    auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
+    if (!isPhone) {
+        return false;
+    }
+    return WindowHelper::IsWindowFollowParent(type);
+}
+
 void StartingWindow::AddNodeOnRSTree(sptr<WindowNode>& node, bool isMultiDisplay)
 {
     auto updateRSTreeFunc = [&]() {
@@ -321,6 +330,9 @@ void StartingWindow::AddNodeOnRSTree(sptr<WindowNode>& node, bool isMultiDisplay
                     dms.UpdateRSTree(shownDisplayId, shownDisplayId, node->surfaceNode_, true, isMultiDisplay);
                 }
                 for (auto& child : node->children_) {
+                    if (IsWindowFollowParent(child->GetWindowType())) {
+                        continue;
+                    }
                     if (child->currentVisibility_) {
                         dms.UpdateRSTree(shownDisplayId, shownDisplayId, child->surfaceNode_, true, isMultiDisplay);
                     }

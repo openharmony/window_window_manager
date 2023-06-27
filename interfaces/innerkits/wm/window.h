@@ -42,6 +42,7 @@ namespace OHOS::AbilityRuntime {
 
 namespace OHOS::AAFwk {
     class Want;
+    class WantParams;
 }
 
 namespace OHOS::Ace {
@@ -55,6 +56,7 @@ namespace OHOS::Media {
 namespace OHOS {
 namespace Rosen {
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
+using NotifyTransferComponentDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
 class RSSurfaceNode;
 class RSTransaction;
 class ISession;
@@ -1325,6 +1327,22 @@ public:
      * @param needDefaultAnimation True means need default animation, false means not need.
      */
     virtual void SetNeedDefaultAnimation(bool needDefaultAnimation) {}
+    /**
+     * @brief Transfer Ability Result.
+     * @return WMError
+     */
+    virtual WMError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) { return WMError::WM_OK; }
+    /**
+     * @brief Transfer UIExtension data to Extension Component.
+     * @return WMError
+     */
+    virtual WMError TransferExtensionData(const AAFwk::WantParams& wantParams) { return WMError::WM_OK; }
+    /**
+     * @brief Register transfer component data callback.
+     *
+     * @param func Function to notify transfer component data.
+     */
+    virtual void RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func) {}
 };
 }
 }

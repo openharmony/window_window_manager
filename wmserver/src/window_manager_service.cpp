@@ -1458,5 +1458,11 @@ MaximizeMode WindowManagerService::GetMaximizeMode()
 {
     return maximizeMode_;
 }
+
+void WindowManagerService::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+{
+    WLOGFD("Get Focus window info in wms");
+    windowController_->GetFocusWindowInfo(focusInfo);
+}
 } // namespace Rosen
 } // namespace OHOS

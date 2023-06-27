@@ -149,6 +149,7 @@ public:
     void PostAsyncTask(Task task);
     void SetMaximizeMode(MaximizeMode maximizeMode) override;
     MaximizeMode GetMaximizeMode() override;
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
 
 protected:
     WindowManagerService();
