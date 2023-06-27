@@ -23,6 +23,10 @@
 
 #include "iremote_broker.h"
 
+namespace OHOS::AAFwk {
+class AbilityStartSetting;
+}
+
 namespace OHOS::Rosen {
 constexpr uint64_t INVALID_SESSION_ID = 0;
 
@@ -94,6 +98,7 @@ struct SessionInfo {
     bool isSystem_ = false;
 
     sptr<AAFwk::Want> want;
+    std::shared_ptr<AAFwk::AbilityStartSetting> startSetting = nullptr;
     int32_t resultCode;
     int32_t requestCode;
     int32_t errorCode;
