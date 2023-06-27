@@ -26,6 +26,7 @@
 
 #include "agent_death_recipient.h"
 #include "screen.h"
+#include "screen_cutout_controller.h"
 
 namespace OHOS::Rosen {
 class IScreenConnectionListener : public RefBase {
@@ -99,6 +100,8 @@ public:
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) override;
     virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId,
         std::vector<ScreenColorGamut>& colorGamuts) override;
+    DMError IsScreenRotationLocked(bool& isLocked) override;
+    DMError SetScreenRotationLocked(bool isLocked) override;
 
     std::vector<ScreenId> GetAllScreenIds() const;
     const std::shared_ptr<RSDisplayNode>& GetRSDisplayNodeByScreenId(ScreenId smsScreenId) const;
@@ -139,6 +142,7 @@ public:
     void OnScreenGroupChange(const std::string& trigger,
         const std::vector<sptr<ScreenInfo>>& screenInfos, ScreenGroupChangeEvent groupEvent);
     void OnScreenshot(sptr<ScreenshotInfo> info);
+    sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
 
 protected:
     ScreenSessionManager();
@@ -196,6 +200,7 @@ private:
     std::vector<sptr<IScreenConnectionListener>> screenConnectionListenerList_;
     sptr<IDisplayChangeListener> displayChangeListener_;
     sptr<SessionDisplayPowerController> sessionDisplayPowerController_;
+    sptr<ScreenCutoutController> screenCutoutController_;
 };
 } // namespace OHOS::Rosen
 

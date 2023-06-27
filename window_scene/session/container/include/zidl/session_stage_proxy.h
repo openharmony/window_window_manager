@@ -34,6 +34,7 @@ public:
     WSError UpdateFocus(bool isFocused) override;
     WSError NotifyDestroy() override;
     void NotifyTouchDialogTarget() override;
+    WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
 };

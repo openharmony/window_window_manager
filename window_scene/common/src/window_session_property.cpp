@@ -18,6 +18,12 @@
 
 namespace OHOS {
 namespace Rosen {
+
+WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
+{
+    CopyFrom(property);
+}
+
 void WindowSessionProperty::SetWindowName(const std::string& name)
 {
     windowName_ = name;
@@ -168,6 +174,56 @@ void WindowSessionProperty::SetMaximizeMode(MaximizeMode mode)
     maximizeMode_ = mode;
 }
 
+void WindowSessionProperty::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
+{
+    if (type == WindowType::WINDOW_TYPE_STATUS_BAR) {
+        sysBarPropMap_[type] = property;
+    }
+}
+
+const std::unordered_map<WindowType, SystemBarProperty>& WindowSessionProperty::GetSystemBarProperty() const
+{
+    return sysBarPropMap_;
+}
+
+void WindowSessionProperty::SetWindowLimits(const WindowLimits& windowLimits)
+{
+    limits_ = windowLimits;
+}
+
+WindowLimits WindowSessionProperty::GetWindowLimits() const
+{
+    return limits_;
+}
+
+void WindowSessionProperty::SetWindowMode(WindowMode mode)
+{
+    windowMode_ = mode;
+}
+
+WindowMode WindowSessionProperty::GetWindowMode() const
+{
+    return windowMode_;
+}
+
+bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
+{
+    if (parcel.WriteUint32(limits_.maxWidth_) &&
+        parcel.WriteUint32(limits_.maxHeight_) && parcel.WriteUint32(limits_.minWidth_) &&
+        parcel.WriteUint32(limits_.minHeight_) && parcel.WriteFloat(limits_.maxRatio_) &&
+        parcel.WriteFloat(limits_.minRatio_)) {
+        return true;
+    }
+    return false;
+}
+
+void WindowSessionProperty::UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property)
+{
+    WindowLimits windowLimits = { parcel.ReadUint32(), parcel.ReadUint32(), parcel.ReadUint32(),
+                                  parcel.ReadUint32(), parcel.ReadFloat(), parcel.ReadFloat() };
+    property->SetWindowLimits(windowLimits);
+}
+
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
@@ -182,7 +238,9 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteString(sessionInfo_.abilityName_) &&
         parcel.WriteUint64(parentPersistentId_) &&
         parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
-        parcel.WriteFloat(brightness_);
+        parcel.WriteFloat(brightness_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
+        MarshallingWindowLimits(parcel);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -208,7 +266,30 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetAccessTokenId(parcel.ReadUint32());
     property->SetMaximizeMode(static_cast<MaximizeMode>(parcel.ReadUint32()));
     property->SetBrightness(parcel.ReadFloat());
+    property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
+    UnmarshallingWindowLimits(parcel, property);
     return property;
+}
+
+void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property)
+{
+    windowName_ = property->windowName_;
+    sessionInfo_ = property->sessionInfo_;
+    requestRect_ = property->requestRect_;
+    windowRect_ = property->windowRect_;
+    type_ = property->type_;
+    focusable_= property->focusable_;
+    touchable_ = property->touchable_;
+    tokenState_ = property->tokenState_;
+    displayId_ = property->displayId_;
+    parentId_ = property->parentId_;
+    persistentId_ = property->persistentId_;
+    parentPersistentId_ = property->parentPersistentId_;
+    accessTokenId_ = property->accessTokenId_;
+    maximizeMode_ = property->maximizeMode_;
+    brightness_ = property->brightness_;
+    windowMode_ = property->windowMode_;
+    limits_ = property->limits_;
 }
 } // namespace Rosen
 } // namespace OHOS

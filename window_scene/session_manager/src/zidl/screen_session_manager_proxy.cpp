@@ -960,4 +960,82 @@ DMError ScreenSessionManagerProxy::GetScreenSupportedColorGamuts(ScreenId screen
     return ret;
 }
 
+DMError OHOS::Rosen::ScreenSessionManagerProxy::SetScreenRotationLocked(bool isLocked)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteBool(isLocked)) {
+        WLOGFE("write isLocked failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_ROTATION_LOCKED),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
+
+DMError OHOS::Rosen::ScreenSessionManagerProxy::IsScreenRotationLocked(bool& isLocked)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_IS_SCREEN_ROTATION_LOCKED),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    isLocked = reply.ReadBool();
+    return ret;
+}
+
+sptr<CutoutInfo> ScreenSessionManagerProxy::GetCutoutInfo(DisplayId displayId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("get cutout info : remote is null");
+        return nullptr;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("get cutout info : failed");
+        return nullptr;
+    }
+    if (!data.WriteUint64(displayId)) {
+        WLOGFE("get cutout info: write displayId failed");
+        return nullptr;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_CUTOUT_INFO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("GetCutoutInfo: GetCutoutInfo failed");
+        return nullptr;
+    }
+    sptr<CutoutInfo> info = reply.ReadParcelable<CutoutInfo>();
+    return info;
+}
 } // namespace OHOS::Rosen

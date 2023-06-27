@@ -17,6 +17,8 @@
 
 #include <ipc_types.h>
 #include <ui/rs_surface_node.h>
+#include "want.h"
+#include "want_params.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -49,7 +51,21 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_SET_MAXIMIZE_MODE),
         &SessionStub::HandleSetGlobalMaximizeMode),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_GET_MAXIMIZE_MODE),
-        &SessionStub::HandleGetGlobalMaximizeMode)
+        &SessionStub::HandleGetGlobalMaximizeMode),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_NEED_AVOID),
+        &SessionStub::HandleNeedAvoid),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_GET_AVOID_AREA),
+        &SessionStub::HandleGetAvoidAreaByType),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_UPDATE_WINDOW_SESSION_PROPERTY),
+        &SessionStub::HandleUpdateWindowSessionProperty),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_SET_ASPECT_RATIO),
+        &SessionStub::HandleSetAspectRatio),
+
+    // for extension only
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_TRANSFER_ABILITY_RESULT),
+        &SessionStub::HandleTransferAbilityResult),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_TRANSFER_EXTENSION_DATA),
+        &SessionStub::HandleTransferExtensionData)
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -282,6 +298,70 @@ int SessionStub::HandleGetGlobalMaximizeMode(MessageParcel &data, MessageParcel 
     MaximizeMode mode = MaximizeMode::MODE_FULL_FILL;
     WSError errCode = GetGlobalMaximizeMode(mode);
     reply.WriteUint32(static_cast<uint32_t>(mode));
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNeedAvoid(MessageParcel& data, MessageParcel& reply)
+{
+    bool status = static_cast<bool>(data.ReadUint32());
+    WLOGFD("HandleNeedAvoid status:%{public}d", static_cast<int32_t>(status));
+    WSError errCode = OnNeedAvoid(status);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& reply)
+{
+    AvoidAreaType type = static_cast<AvoidAreaType>(data.ReadUint32());
+    WLOGFD("HandleGetAvoidArea type:%{public}d", static_cast<int32_t>(type));
+    AvoidArea avoidArea = GetAvoidAreaByType(type);
+    reply.WriteParcelable(&avoidArea);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateWindowSessionProperty(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("UpdateWindowSessionProperty!");
+    sptr<WindowSessionProperty> property = nullptr;
+    property = data.ReadStrongParcelable<WindowSessionProperty>();
+    const WSError& errCode = UpdateWindowSessionProperty(property);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleSetAspectRatio!");
+    float ratio = data.ReadFloat();
+    const WSError& errCode = SetAspectRatio(ratio);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleTransferAbilityResult!");
+    uint32_t resultCode = data.ReadUint32();
+    std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    if (want == nullptr) {
+        WLOGFE("want is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    WSError errCode = TransferAbilityResult(resultCode, *want);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleTransferExtensionData(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleTransferExtensionData!");
+    std::shared_ptr<AAFwk::WantParams> wantParams(data.ReadParcelable<AAFwk::WantParams>());
+    if (wantParams == nullptr) {
+        WLOGFE("wantParams is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    WSError errCode = TransferExtensionData(*wantParams);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

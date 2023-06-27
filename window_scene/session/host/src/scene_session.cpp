@@ -15,6 +15,11 @@
 
 #include "session/host/include/scene_session.h"
 
+#include <iterator>
+#include <pointer_event.h>
+
+#include "interfaces/include/ws_common.h"
+#include "session/host/include/scene_persistent_storage.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -28,6 +33,13 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     GeneratePersistentId(false, info);
     scenePersistence_ = new ScenePersistence(info, GetPersistentId());
     specificCallback_ = specificCallback;
+    if (!info.bundleName_.empty() && !info.abilityName_.empty()) {
+        std::string key = info.bundleName_ + "_" + info.abilityName_;
+        if (ScenePersistentStorage::HasKey(key, ScenePersistentStorageType::ASPECT_RATIO)) {
+            ScenePersistentStorage::Get(key, aspectRatio_, ScenePersistentStorageType::ASPECT_RATIO);
+            WLOGD("SceneSession init aspectRatio , key %{public}s, value: %{public}f", key.c_str(), aspectRatio_);
+        }
+    }
 }
 
 WSError SceneSession::Foreground()
@@ -79,6 +91,17 @@ WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode &mode)
 {
     WLOGFD("SceneSession GetGlobalMaximizeMode");
     mode = maximizeMode_;
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::SetAspectRatio(float ratio)
+{
+    aspectRatio_ = ratio;
+    if (!sessionInfo_.bundleName_.empty() && !sessionInfo_.abilityName_.empty()) {
+        std::string key = sessionInfo_.bundleName_ + "_" + sessionInfo_.abilityName_;
+        ScenePersistentStorage::Insert(key, aspectRatio_, ScenePersistentStorageType::ASPECT_RATIO);
+        WLOGD("SceneSession save aspectRatio , key %{public}s, value: %{public}f", key.c_str(), aspectRatio_);
+    }
     return WSError::WS_OK;
 }
 
@@ -140,5 +163,51 @@ void SceneSession::UpdateCameraFloatWindowStatus(bool isShowing)
     if (GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA && specificCallback_ != nullptr) {
         specificCallback_->onCameraFloatSessionChange_(property_->GetAccessTokenId(), isShowing);
     }
+}
+
+WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty)
+{
+    property_->SetSystemBarProperty(type, systemBarProperty);
+    WLOGFD("SceneSession SetSystemBarProperty status:%{public}d", static_cast<int32_t>(type));
+    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSystemBarPropertyChange_) {
+        sessionChangeCallback_->OnSystemBarPropertyChange_(systemBarProperty);
+    }
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::OnNeedAvoid(bool status)
+{
+    WLOGFD("SceneSession OnNeedAvoid status:%{public}d", static_cast<int32_t>(status));
+    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnNeedAvoid_) {
+        sessionChangeCallback_->OnNeedAvoid_(status);
+    }
+    return WSError::WS_OK;
+}
+
+AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
+{
+    AvoidArea avoidArea;
+    WLOGFD("GetAvoidAreaByType avoidAreaType:%{public}u", type);
+    switch (type) {
+        case AvoidAreaType::TYPE_SYSTEM : {
+            return avoidArea;
+        }
+        case AvoidAreaType::TYPE_KEYBOARD : {
+            return avoidArea;
+        }
+        case AvoidAreaType::TYPE_CUTOUT : {
+            return avoidArea;
+        }
+        default : {
+            WLOGFD("cannot find avoidAreaType: %{public}u", type);
+            return avoidArea;
+        }
+    }
+}
+
+WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    WLOGFD("SceneSession TransferPointEvent");
+    return Session::TransferPointerEvent(pointerEvent);
 }
 } // namespace OHOS::Rosen
