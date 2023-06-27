@@ -768,31 +768,33 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationClose01, Function | SmallTest | Lev
 HWTEST_F(RemoteAnimationTest, NotifyAnimationBackTransition01, Function | SmallTest | Level2)
 {
     sptr<WindowNode> srcNode = new WindowNode(CreateWindowProperty(2)); // 2 is windowId
+    TransitionEvent event = TransitionEvent::BACK_TRANSITION;
     srcNode->leashWinSurfaceNode_ = nullptr;
-    WMError ret = RemoteAnimation::NotifyAnimationBackTransition(transitionInfo_, transitionInfo_, srcNode, node_);
+    WMError ret = RemoteAnimation::NotifyAnimationBackTransition(transitionInfo_, transitionInfo_, srcNode, node_,
+        event);
     EXPECT_EQ(WMError::WM_ERROR_NO_MEM, ret); // only src Target is null
 
     sptr<WindowNode> dstNode = new WindowNode(CreateWindowProperty(3)); // 3 is windowId
     dstNode->leashWinSurfaceNode_ = nullptr;
-    ret = RemoteAnimation::NotifyAnimationBackTransition(transitionInfo_, transitionInfo_, node_, dstNode);
+    ret = RemoteAnimation::NotifyAnimationBackTransition(transitionInfo_, transitionInfo_, node_, dstNode, event);
     EXPECT_EQ(WMError::WM_ERROR_NO_MEM, ret); // only dstTarget is null
 
-    ret = RemoteAnimation::NotifyAnimationBackTransition(transitionInfo_, transitionInfo_, srcNode, dstNode);
+    ret = RemoteAnimation::NotifyAnimationBackTransition(transitionInfo_, transitionInfo_, srcNode, dstNode, event);
     EXPECT_EQ(WMError::WM_ERROR_NO_MEM, ret); // both srcTarget and dstTarget art null
 
     srcNode = nullptr;
-    ret = RemoteAnimation::NotifyAnimationBackTransition(transitionInfo_, transitionInfo_, srcNode, node_);
+    ret = RemoteAnimation::NotifyAnimationBackTransition(transitionInfo_, transitionInfo_, srcNode, node_, event);
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret); // only srcNode is null
 
     dstNode = nullptr;
-    ret = RemoteAnimation::NotifyAnimationBackTransition(transitionInfo_, transitionInfo_, node_, dstNode);
+    ret = RemoteAnimation::NotifyAnimationBackTransition(transitionInfo_, transitionInfo_, node_, dstNode, event);
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret); // only dstNode is null
 
-    ret = RemoteAnimation::NotifyAnimationBackTransition(transitionInfo_, transitionInfo_, srcNode, dstNode);
+    ret = RemoteAnimation::NotifyAnimationBackTransition(transitionInfo_, transitionInfo_, srcNode, dstNode, event);
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret); // both srcNode and dstNode are null
 
     RemoteAnimation::SetAnimationFirst(false);
-    ret = RemoteAnimation::NotifyAnimationBackTransition(transitionInfo_, transitionInfo_, node_, node_);
+    ret = RemoteAnimation::NotifyAnimationBackTransition(transitionInfo_, transitionInfo_, node_, node_, event);
     EXPECT_EQ(WMError::WM_ERROR_NO_REMOTE_ANIMATION, ret);
 }
 
@@ -804,8 +806,10 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationBackTransition01, Function | SmallT
 HWTEST_F(RemoteAnimationTest, NotifyAnimationBackTransition02, Function | SmallTest | Level2)
 {
     sptr<WindowNode> srcNode = new WindowNode(CreateWindowProperty(2)); // 2 is windowId
+    TransitionEvent event = TransitionEvent::BACK_TRANSITION;
     srcNode->leashWinSurfaceNode_ = CreateRSSurfaceNode(2); // 2 is windowId
-    WMError ret = RemoteAnimation::NotifyAnimationBackTransition(transitionInfo_, transitionInfo_, srcNode, node_);
+    WMError ret = RemoteAnimation::NotifyAnimationBackTransition(transitionInfo_, transitionInfo_, srcNode, node_,
+        event);
     EXPECT_EQ(WMError::WM_OK, ret);
     RSIWindowAnimationControllerMocker* testController = reinterpret_cast<RSIWindowAnimationControllerMocker*>(
         animationController_.GetRefPtr());
@@ -814,7 +818,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationBackTransition02, Function | SmallT
     usleep(SLEEP_TIME_IN_US);
 
     RemoteAnimation::windowController_ = nullptr;
-    ret = RemoteAnimation::NotifyAnimationBackTransition(transitionInfo_, transitionInfo_, srcNode, node_);
+    ret = RemoteAnimation::NotifyAnimationBackTransition(transitionInfo_, transitionInfo_, srcNode, node_, event);
     EXPECT_EQ(WMError::WM_OK, ret);
     testController = reinterpret_cast<RSIWindowAnimationControllerMocker*>(
         animationController_.GetRefPtr());
