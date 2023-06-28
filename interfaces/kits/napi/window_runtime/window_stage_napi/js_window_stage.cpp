@@ -21,6 +21,7 @@
 #include "js_window_utils.h"
 #include "window_manager_hilog.h"
 #include "permission.h"
+#include "hitrace_meter.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -48,6 +49,7 @@ void JsWindowStage::Finalizer(NativeEngine* engine, void* data, void* hint)
 
 NativeValue* JsWindowStage::SetUIContent(NativeEngine* engine, NativeCallbackInfo* info)
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, __PRETTY_FUNCTION__);
     WLOGFD("[NAPI]SetUIContent");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
     return (me != nullptr) ? me->OnSetUIContent(*engine, *info) : nullptr;
