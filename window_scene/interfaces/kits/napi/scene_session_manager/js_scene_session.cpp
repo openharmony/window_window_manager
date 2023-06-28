@@ -31,6 +31,7 @@ const std::string CREATE_SPECIFIC_SCENE_CB = "createSpecificSession";
 const std::string RAISE_TO_TOP_CB = "raiseToTop";
 const std::string BACK_PRESSED_CB = "backPressed";
 const std::string SESSION_FOCUSABLE_CHANGE_CB = "sessionFocusableChange";
+const std::string SESSION_TOUCHABLE_CHANGE_CB = "sessionTouchableChange";
 const std::string CLICK_CB = "click";
 const std::string TERMINATE_SESSION_CB = "terminateSession";
 const std::string SESSION_EXCEPTION_CB = "sessionException";
@@ -82,6 +83,7 @@ JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& s
         { RAISE_TO_TOP_CB,                &JsSceneSession::ProcessRaiseToTopRegister },
         { BACK_PRESSED_CB,                &JsSceneSession::ProcessBackPressedRegister },
         { SESSION_FOCUSABLE_CHANGE_CB,    &JsSceneSession::ProcessSessionFocusableChangeRegister },
+        { SESSION_TOUCHABLE_CHANGE_CB,    &JsSceneSession::ProcessSessionTouchableChangeRegister },
         { CLICK_CB,                       &JsSceneSession::ProcessClickRegister },
         { TERMINATE_SESSION_CB,           &JsSceneSession::ProcessTerminateSessionRegister },
         { SESSION_EXCEPTION_CB,           &JsSceneSession::ProcessSessionExceptionRegister },
@@ -205,6 +207,20 @@ void JsSceneSession::ProcessSessionFocusableChangeRegister()
     }
     session->SetSessionFocusableChangeListener(func);
     WLOGFD("ProcessSessionFocusableChangeRegister success");
+}
+
+void JsSceneSession::ProcessSessionTouchableChangeRegister()
+{
+    NotifySessionTouchableChangeFunc func = [this](bool touchable) {
+        this->OnSessionTouchableChange(touchable);
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    session->SetSessionTouchableChangeListener(func);
+    WLOGFD("ProcessSessionTouchableChangeRegister success");
 }
 
 void JsSceneSession::ProcessSessionExceptionRegister()
@@ -498,6 +514,31 @@ void JsSceneSession::OnSessionFocusableChange(bool isFocusable)
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
     AsyncTask::Schedule("JsSceneSession::OnSessionFocusableChange", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsSceneSession::OnSessionTouchableChange(bool touchable)
+{
+    WLOGFI("[NAPI]OnSessionTouchableChange, state: %{public}u", touchable);
+    auto iter = jsCbMap_.find(SESSION_TOUCHABLE_CHANGE_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [touchable, jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (!jsCallBack) {
+                WLOGFE("[NAPI]jsCallBack is nullptr");
+                return;
+            }
+            NativeValue* jsSessionTouchableObj = CreateJsValue(engine, touchable);
+            NativeValue* argv[] = { jsSessionTouchableObj };
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSession::OnSessionTouchableChange", engine_,
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 

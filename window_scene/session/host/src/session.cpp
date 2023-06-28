@@ -174,6 +174,12 @@ void Session::UpdateSessionFocusable(bool isFocusable)
     NotifySessionFocusableChange(isFocusable);
 }
 
+void Session::UpdateSessionTouchable(bool touchable)
+{
+    property_->SetFocusable(touchable);
+    NotifySessionFocusableChange(touchable);
+}
+
 WSError Session::SetFocusable(bool isFocusable)
 {
     if (!IsSessionValid()) {
@@ -198,7 +204,14 @@ bool Session::GetFocusable() const
 
 WSError Session::SetTouchable(bool touchable)
 {
-    property_->SetTouchable(touchable);
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (touchable == property_->GetTouchable()) {
+        WLOGFD("Session touchable do not change: [%{public}d]", touchable);
+        return WSError::WS_DO_NOTHING;
+    }
+    UpdateSessionTouchable(touchable);
     return WSError::WS_OK;
 }
 
@@ -627,6 +640,11 @@ void Session::SetSessionFocusableChangeListener(const NotifySessionFocusableChan
     sessionFocusableChangeFunc_ = func;
 }
 
+void Session::SetSessionTouchableChangeListener(const NotifySessionTouchableChangeFunc& func)
+{
+    sessionTouchableChangeFunc_ = func;
+}
+
 void Session::SetClickListener(const NotifyClickFunc& func)
 {
     clickFunc_ = func;
@@ -637,6 +655,14 @@ void Session::NotifySessionFocusableChange(bool isFocusable)
     WLOGFI("Notify session focusable change: %{public}u", isFocusable);
     if (sessionFocusableChangeFunc_) {
         sessionFocusableChangeFunc_(isFocusable);
+    }
+}
+
+void Session::NotifySessionTouchableChange(bool touchable)
+{
+    WLOGFI("Notify session focusable change: %{public}u", touchable);
+    if (sessionTouchableChangeFunc_) {
+        sessionTouchableChangeFunc_(touchable);
     }
 }
 
