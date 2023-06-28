@@ -71,7 +71,7 @@ private:
     void OnClick();
     void TerminateSession(const SessionInfo& info);
     void OnSessionException(const SessionInfo& info);
-    static WindowTypeInAPI GetApiType(WindowType type);
+    static JsSessionType GetApiType(WindowType type);
     void OnSystemBarPropertyChange(const SystemBarProperty& property);
     void OnNeedAvoid(bool status);
 
