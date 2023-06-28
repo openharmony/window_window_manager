@@ -311,6 +311,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     accessTokenId_ = property->accessTokenId_;
     maximizeMode_ = property->maximizeMode_;
     brightness_ = property->brightness_;
+    sysBarPropMap_ = property->sysBarPropMap_;
     windowMode_ = property->windowMode_;
     limits_ = property->limits_;
 }

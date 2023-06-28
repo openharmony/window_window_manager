@@ -317,7 +317,7 @@ DMError ScreenSession::SetPrivateSessionCount(int32_t count)
 
 bool ScreenSession::HasPrivateSession() const
 {
-    return privateSessionCount_ > 0 ? true : false;
+    return privateSessionCount_ > 0;
 }
 
 void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint)

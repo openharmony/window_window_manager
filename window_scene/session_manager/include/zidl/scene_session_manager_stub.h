@@ -16,10 +16,8 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H
 
-#include <map>
-
 #include <iremote_stub.h>
-#include <refbase.h>
+
 #include "session_manager/include/zidl/scene_session_manager_interface.h"
 
 namespace OHOS::Rosen {
@@ -28,8 +26,8 @@ public:
     SceneSessionManagerStub() = default;
     virtual ~SceneSessionManagerStub() = default;
 
-    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-        MessageOption &option) override;
+    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 };
 } // namespace OHOS::Rosen
-#endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_STUB_H
+
+#endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H

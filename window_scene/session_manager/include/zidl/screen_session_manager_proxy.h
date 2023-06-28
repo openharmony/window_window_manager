@@ -83,6 +83,7 @@ public:
 
     virtual DMError SetScreenRotationLocked(bool isLocked) override;
     virtual DMError IsScreenRotationLocked(bool& isLocked) override;
+    virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
 
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override;
 private:

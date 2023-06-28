@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include <fcntl.h>
 #include <gtest/gtest.h>
 
 #include "display_manager.h"
@@ -32,7 +32,10 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    static const std::string dumpFile_;
 };
+
+const std::string WindowDumperTest::dumpFile_ = "data/window_dump_test.txt";
 
 void WindowDumperTest::SetUpTestCase()
 {
@@ -47,6 +50,7 @@ void WindowDumperTest::SetUpTestCase()
 
 void WindowDumperTest::TearDownTestCase()
 {
+    unlink(dumpFile_.c_str());
 }
 
 void WindowDumperTest::SetUp()
@@ -67,10 +71,14 @@ HWTEST_F(WindowDumperTest, Dump01, Function | SmallTest | Level1)
 {
     sptr<WindowDumper> windowDumper;
     windowDumper = new WindowDumper(WindowManagerService::GetInstance().windowRoot_);
-    int fd = 0;
+    int fd = open(dumpFile_.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0666);
+    if (fd == -1) {
+        return;
+    }
     std::vector<std::u16string> args;
     WMError ret = windowDumper->Dump(fd, args);
     ASSERT_EQ(ret, WMError::WM_OK);
+    close(fd);
 }
 
 /**
