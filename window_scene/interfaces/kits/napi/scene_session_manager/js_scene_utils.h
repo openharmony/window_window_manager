@@ -24,9 +24,10 @@
 #include "wm_common.h"
 
 namespace OHOS::Rosen {
-enum class WindowTypeInAPI : uint32_t {
-    TYPE_BASE,
-    TYPE_APP = TYPE_BASE,
+enum class JsSessionType : uint32_t {
+    TYPE_UNDEFINED = 0,
+    TYPE_APP,
+    TYPE_SUB_APP,
     TYPE_SYSTEM_ALERT,
     TYPE_INPUT_METHOD,
     TYPE_STATUS_BAR,
@@ -37,32 +38,57 @@ enum class WindowTypeInAPI : uint32_t {
     TYPE_FLOAT,
     TYPE_WALLPAPER,
     TYPE_DESKTOP,
-    TYPE_LAUNCHER_RECENT,
     TYPE_LAUNCHER_DOCK,
-    TYPE_VOICE_INTERACTION,
-    TYPE_POINTER,
     TYPE_FLOAT_CAMERA,
     TYPE_DIALOG,
     TYPE_SCREENSHOT,
-    TYPE_END
+    TYPE_TOAST
 };
-const std::map<WindowType, WindowTypeInAPI> WINDOW_TYPE_TO_API_TYPE_MAP {
-    { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,     WindowTypeInAPI::TYPE_END               },
-    { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,      WindowTypeInAPI::TYPE_APP               },
-    { WindowType::WINDOW_TYPE_DIALOG,              WindowTypeInAPI::TYPE_DIALOG            },
-    { WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW, WindowTypeInAPI::TYPE_SYSTEM_ALERT      },
-    { WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,  WindowTypeInAPI::TYPE_INPUT_METHOD      },
-    { WindowType::WINDOW_TYPE_FLOAT,               WindowTypeInAPI::TYPE_FLOAT             },
-    { WindowType::WINDOW_TYPE_FLOAT_CAMERA,        WindowTypeInAPI::TYPE_FLOAT_CAMERA      },
-    { WindowType::WINDOW_TYPE_VOICE_INTERACTION,   WindowTypeInAPI::TYPE_VOICE_INTERACTION },
-    { WindowType::WINDOW_TYPE_SCREENSHOT,          WindowTypeInAPI::TYPE_SCREENSHOT        },
-    { WindowType::WINDOW_TYPE_POINTER,             WindowTypeInAPI::TYPE_POINTER           },
-    { WindowType::WINDOW_TYPE_TOAST,               WindowTypeInAPI::TYPE_SYSTEM_ALERT      },
+
+const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
+    { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,     JsSessionType::TYPE_APP               },
+    { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,      JsSessionType::TYPE_SUB_APP           },
+    { WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW, JsSessionType::TYPE_SYSTEM_ALERT      },
+    { WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,  JsSessionType::TYPE_INPUT_METHOD      },
+    { WindowType::WINDOW_TYPE_STATUS_BAR,          JsSessionType::TYPE_STATUS_BAR        },
+    { WindowType::WINDOW_TYPE_PANEL,               JsSessionType::TYPE_PANEL             },
+    { WindowType::WINDOW_TYPE_KEYGUARD,            JsSessionType::TYPE_KEYGUARD          },
+    { WindowType::WINDOW_TYPE_VOLUME_OVERLAY,      JsSessionType::TYPE_VOLUME_OVERLAY    },
+    { WindowType::WINDOW_TYPE_NAVIGATION_BAR,      JsSessionType::TYPE_NAVIGATION_BAR    },
+    { WindowType::WINDOW_TYPE_FLOAT,               JsSessionType::TYPE_FLOAT             },
+    { WindowType::WINDOW_TYPE_WALLPAPER,           JsSessionType::TYPE_WALLPAPER         },
+    { WindowType::WINDOW_TYPE_DESKTOP,             JsSessionType::TYPE_DESKTOP           },
+    { WindowType::WINDOW_TYPE_LAUNCHER_DOCK,       JsSessionType::TYPE_LAUNCHER_DOCK     },
+    { WindowType::WINDOW_TYPE_FLOAT_CAMERA,        JsSessionType::TYPE_FLOAT_CAMERA      },
+    { WindowType::WINDOW_TYPE_DIALOG,              JsSessionType::TYPE_DIALOG            },
+    { WindowType::WINDOW_TYPE_SCREENSHOT,          JsSessionType::TYPE_SCREENSHOT        },
+    { WindowType::WINDOW_TYPE_TOAST,               JsSessionType::TYPE_TOAST             }
+};
+
+const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
+    { JsSessionType::TYPE_APP,               WindowType::WINDOW_TYPE_APP_MAIN_WINDOW     },
+    { JsSessionType::TYPE_SUB_APP,           WindowType::WINDOW_TYPE_APP_SUB_WINDOW      },
+    { JsSessionType::TYPE_SYSTEM_ALERT,      WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW },
+    { JsSessionType::TYPE_INPUT_METHOD,      WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT  },
+    { JsSessionType::TYPE_STATUS_BAR,        WindowType::WINDOW_TYPE_STATUS_BAR          },
+    { JsSessionType::TYPE_PANEL,             WindowType::WINDOW_TYPE_PANEL               },
+    { JsSessionType::TYPE_KEYGUARD,          WindowType::WINDOW_TYPE_KEYGUARD            },
+    { JsSessionType::TYPE_VOLUME_OVERLAY,    WindowType::WINDOW_TYPE_VOLUME_OVERLAY      },
+    { JsSessionType::TYPE_NAVIGATION_BAR,    WindowType::WINDOW_TYPE_NAVIGATION_BAR      },
+    { JsSessionType::TYPE_FLOAT,             WindowType::WINDOW_TYPE_FLOAT               },
+    { JsSessionType::TYPE_WALLPAPER,         WindowType::WINDOW_TYPE_WALLPAPER           },
+    { JsSessionType::TYPE_DESKTOP,           WindowType::WINDOW_TYPE_DESKTOP             },
+    { JsSessionType::TYPE_LAUNCHER_DOCK,     WindowType::WINDOW_TYPE_LAUNCHER_DOCK       },
+    { JsSessionType::TYPE_FLOAT_CAMERA,      WindowType::WINDOW_TYPE_FLOAT_CAMERA        },
+    { JsSessionType::TYPE_DIALOG,            WindowType::WINDOW_TYPE_DIALOG              },
+    { JsSessionType::TYPE_SCREENSHOT,        WindowType::WINDOW_TYPE_SCREENSHOT          },
+    { JsSessionType::TYPE_TOAST,             WindowType::WINDOW_TYPE_TOAST               }
 };
 bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, SessionInfo& sessionInfo);
 NativeValue* CreateJsSessionInfo(NativeEngine& engine, const SessionInfo& sessionInfo);
 NativeValue* CreateJsSessionState(NativeEngine& engine);
 NativeValue* CreateJsSessionRect(NativeEngine& engine, const WSRect& rect);
+NativeValue* SessionTypeInit(NativeEngine* engine);
 } // namespace OHOS::Rosen
 
 #endif // OHOS_WINDOW_SCENE_JS_SCENE_UTILS_H
