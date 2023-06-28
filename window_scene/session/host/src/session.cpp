@@ -327,7 +327,6 @@ WSError Session::Background()
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
-
     snapshot_ = Snapshot();
     NotifyBackground();
     return WSError::WS_OK;
@@ -606,11 +605,20 @@ void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc&
     NotifySessionStateChange(state_);
 }
 
+void Session::SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func)
+{
+    sessionStateChangeNotifyManagerFunc_ = func;
+    NotifySessionStateChange(state_);
+}
+
 void Session::NotifySessionStateChange(const SessionState& state)
 {
     WLOGFI("state: %{public}u", static_cast<uint32_t>(state));
     if (sessionStateChangeFunc_) {
         sessionStateChangeFunc_(state);
+    }
+    if (sessionStateChangeNotifyManagerFunc_) {
+        sessionStateChangeNotifyManagerFunc_(GetPersistentId());
     }
 }
 

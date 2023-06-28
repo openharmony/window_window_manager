@@ -79,6 +79,10 @@ public:
     DMError SetScreenGamutMap(ScreenGamutMap gamutMap);
     DMError SetScreenColorTransform();
 
+    int32_t GetPrivateSessionCount() const;
+    DMError SetPrivateSessionCount(int32_t count);
+    bool HasPrivateSession() const;
+
     std::string name_;
     ScreenId screenId_;
     ScreenId rsId_;
@@ -93,12 +97,12 @@ public:
 
     void Connect();
     void Disconnect();
-
 private:
     ScreenProperty property_;
     std::shared_ptr<RSDisplayNode> displayNode_;
     ScreenState screenState_ { ScreenState::INIT };
     std::vector<IScreenChangeListener*> screenChangeListenerList_;
+    uint32_t privateSessionCount_ { 0 };
 };
 
 class ScreenSessionGroup : public ScreenSession {

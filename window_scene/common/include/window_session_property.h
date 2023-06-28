@@ -59,6 +59,8 @@ public:
     void SetFocusable(bool isFocusable);
     void SetTouchable(bool isTouchable);
     void SetBrightness(float brightness);
+    void SetPrivacyMode(bool isPrivate);
+    void SetSystemPrivacyMode(bool isSystemPrivate);
     void SetDisplayId(uint64_t displayId);
     void SetWindowType(WindowType type);
     void SetParentId(uint32_t parentId);
@@ -79,6 +81,8 @@ public:
     bool GetFocusable() const;
     bool GetTouchable() const;
     float GetBrightness() const;
+    bool GetPrivacyMode() const;
+    bool GetSystemPrivacyMode() const;
     uint32_t GetParentId() const;
     uint64_t GetDisplayId() const;
     uint64_t GetPersistentId() const;
@@ -104,6 +108,8 @@ private:
     bool touchable_ { true };
     bool tokenState_ { false };
     float brightness_ = UNDEFINED_BRIGHTNESS;
+    bool isPrivacyMode_ { false };
+    bool isSystemPrivacyMode_ { false };
     uint64_t displayId_ = 0;
     uint32_t parentId_ = INVALID_SESSION_ID; // parentId of sceneSession, which is low 32 bite of parentPersistentId_
     uint64_t persistentId_ = INVALID_SESSION_ID;

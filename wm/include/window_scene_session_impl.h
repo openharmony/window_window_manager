@@ -55,8 +55,11 @@ public:
 
     WMError SetBackgroundColor(const std::string& color) override;
     WMError SetTransparent(bool isTransparent) override;
+    virtual WMError SetPrivacyMode(bool isPrivacyMode) override;
+    virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
     
     bool IsTransparent() const override;
+    virtual bool IsPrivacyMode() const override;
 
     // window effect
     virtual WMError SetCornerRadius(float cornerRadius) override;
