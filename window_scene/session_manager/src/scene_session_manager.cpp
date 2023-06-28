@@ -21,9 +21,12 @@
 #include <ability_manager_client.h>
 #include <bundle_mgr_interface.h>
 #include <display_power_mgr_client.h>
+#include <ipc_skeleton.h>
 #include <iservice_registry.h>
 #include <parameters.h>
+#include <power_mgr_client.h>
 #include <resource_manager.h>
+#include <running_lock.h>
 #include <session_info.h>
 #include <start_options.h>
 #include <system_ability_definition.h>
@@ -34,6 +37,8 @@
 #include "color_parser.h"
 #include "common/include/permission.h"
 #include "session/host/include/scene_session.h"
+#include "session/screen/include/screen_session.h"
+#include "session_manager/include/screen_session_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_math.h"
 #include "zidl/window_manager_agent_interface.h"
@@ -719,6 +724,16 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
         }
         WLOGI("Id: %{public}" PRIu64 ", action: %{public}u", sceneSession->GetPersistentId(), action);
         switch (action) {
+            case WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON: {
+                sceneSession->SetTurnScreenOn(property->IsTurnScreenOn());
+                HandleTurnScreenOn(sceneSession);
+                break;
+            }
+            case WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON: {
+                sceneSession->SetKeepScreenOn(property->IsKeepScreenOn());
+                HandleKeepScreenOn(sceneSession, property->IsKeepScreenOn());
+                break;
+            }
             case WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE: {
                 sceneSession->SetFocusable(property->GetFocusable());
                 break;
@@ -767,6 +782,54 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
     };
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::HandleTurnScreenOn(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("session is invalid");
+        return;
+    }
+    WLOGFD("Win: %{public}s, is turn on%{public}d", sceneSession->GetWindowName().c_str(), sceneSession->IsTurnScreenOn());
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    if (sceneSession->IsTurnScreenOn() && !PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
+        WLOGI("turn screen on");
+        PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+    }
+    // set ipc identity to raw
+    IPCSkeleton::SetCallingIdentity(identity);
+}
+
+void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock)
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("session is invalid");
+        return;
+    }
+    if (requireLock && sceneSession->keepScreenLock_ == nullptr) {
+        // reset ipc identity
+        std::string identity = IPCSkeleton::ResetCallingIdentity();
+        sceneSession->keepScreenLock_ = PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock(sceneSession->GetWindowName(),
+            PowerMgr::RunningLockType::RUNNINGLOCK_SCREEN);
+        // set ipc identity to raw
+        IPCSkeleton::SetCallingIdentity(identity);
+    }
+    if (sceneSession->keepScreenLock_ == nullptr) {
+        return;
+    }
+    WLOGI("keep screen on: [%{public}s, %{public}d]", sceneSession->GetWindowName().c_str(), requireLock);
+    ErrCode res;
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    if (requireLock) {
+        res = sceneSession->keepScreenLock_->Lock();
+    } else {
+        res = sceneSession->keepScreenLock_->UnLock();
+    }
+    // set ipc identity to raw
+    IPCSkeleton::SetCallingIdentity(identity);
+    if (res != ERR_OK) {
+        WLOGFE("handle keep screen running lock failed: [operation: %{public}d, err: %{public}d]", requireLock, res);
+    }
 }
 
 WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSession, float brightness)

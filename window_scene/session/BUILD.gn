@@ -68,6 +68,7 @@ ohos_shared_library("scene_session") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "multimedia_image_framework:image_native",
+    "power_manager:powermgr_client",
     "preferences:native_preferences",
   ]
 
@@ -84,9 +85,13 @@ ohos_shared_library("screen_session") {
 
   public_configs = [ ":session_public_config" ]
 
-  deps = [ "${window_base_path}/utils:libwmutil" ]
+  deps = [
+    "${window_base_path}/utils:libwmutil",
+  ]
 
-  external_deps = [ "graphic_standard:librender_service_client" ]
+  external_deps = [
+    "graphic_standard:librender_service_client",
+  ]
 
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"

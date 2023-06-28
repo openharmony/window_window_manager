@@ -19,6 +19,10 @@
 #include "session/host/include/session.h"
 #include "session/host/include/move_drag_controller.h"
 
+namespace OHOS::PowerMgr {
+    class RunningLock;
+}
+
 namespace OHOS::Rosen {
 class SceneSession;
 using SpecificSessionCreateCallback = std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
@@ -72,6 +76,13 @@ public:
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
     static MaximizeMode maximizeMode_;
 
+    WSError SetTurnScreenOn(bool turnScreenOn);
+    bool IsTurnScreenOn() const;
+    WSError SetKeepScreenOn(bool keepScreenOn);
+    bool IsKeepScreenOn() const;
+    const std::string& GetWindowName() const;
+
+    std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 private:
     void UpdateCameraFloatWindowStatus(bool isShowing);
     void NotifySessionRectChange(const WSRect& rect);
