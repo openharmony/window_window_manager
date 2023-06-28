@@ -199,6 +199,24 @@
               ],
               "header_base": "//foundation/window/window_manager/window_scene"
             }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/interfaces/kits/napi/window_runtime:window_native_kit",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/kits/napi/window_runtime"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/interfaces/kits/napi/window_runtime:windowstage_kit",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/kits/napi/window_runtime"
+            }
           }
         ],
         "test": [

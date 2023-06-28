@@ -758,7 +758,9 @@ void WindowManagerService::StartingWindow(sptr<WindowTransitionInfo> info, std::
         WLOGI("startingWindow not open!");
         return;
     }
-    info->isSystemCalling_ = Permission::IsSystemCalling();
+    if (info) {
+        info->isSystemCalling_ = Permission::IsSystemCalling();
+    }
     PostAsyncTask([this, info, pixelMap, isColdStart, bkgColor]() {
         windowController_->StartingWindow(info, pixelMap, bkgColor, isColdStart);
     });
@@ -1457,6 +1459,12 @@ void WindowManagerService::SetMaximizeMode(MaximizeMode maximizeMode)
 MaximizeMode WindowManagerService::GetMaximizeMode()
 {
     return maximizeMode_;
+}
+
+void WindowManagerService::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+{
+    WLOGFD("Get Focus window info in wms");
+    windowController_->GetFocusWindowInfo(focusInfo);
 }
 } // namespace Rosen
 } // namespace OHOS

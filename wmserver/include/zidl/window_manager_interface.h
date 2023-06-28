@@ -77,6 +77,7 @@ public:
         TRANS_ID_GET_WINDOW_ANIMATION_TARGETS,
         TRANS_ID_SET_MAXIMIZE_MODE,
         TRANS_ID_GET_MAXIMIZE_MODE,
+        TRANS_ID_GET_FOCUS_WINDOW_INFO,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -125,6 +126,7 @@ public:
         std::vector<sptr<RSWindowAnimationTarget>>& targets) = 0;
     virtual void SetMaximizeMode(MaximizeMode maximizeMode) = 0;
     virtual MaximizeMode GetMaximizeMode() = 0;
+    virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo) = 0;
 };
 }
 }

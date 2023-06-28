@@ -39,6 +39,7 @@ ohos_shared_library("scene_session") {
     "container/src/zidl/window_event_channel_proxy.cpp",
     "container/src/zidl/window_event_channel_stub.cpp",
     "host/src/extension_session.cpp",
+    "host/src/move_drag_controller.cpp",
     "host/src/root_scene_session.cpp",
     "host/src/scene_persistence.cpp",
     "host/src/scene_persistent_storage.cpp",
@@ -53,8 +54,10 @@ ohos_shared_library("scene_session") {
 
   deps = [
     "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
+    "${window_base_path}/window_scene/session_manager:screen_session_manager",
   ]
 
   public_deps = [

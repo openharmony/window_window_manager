@@ -71,5 +71,38 @@ WMError WindowExtensionSessionImpl::Resize(uint32_t width, uint32_t height)
     WSError error = UpdateRect(wsRect, SizeChangeReason::RESIZE);
     return static_cast<WMError>(error);
 }
+
+WMError WindowExtensionSessionImpl::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
+{
+    if (state_ < WindowState::STATE_CREATED) {
+        WLOGFE("Extension invalid [name:%{public}s, id:%{public}" PRIu64 "], state:%{public}u",
+            property_->GetWindowName().c_str(), property_->GetPersistentId(), state_);
+        return WMError::WM_ERROR_REPEAT_OPERATION;
+    }
+    return static_cast<WMError>(hostSession_->TransferAbilityResult(resultCode, want));
+}
+
+WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParams& wantParams)
+{
+    if (state_ < WindowState::STATE_CREATED) {
+        WLOGFE("Extension invalid [name:%{public}s, id:%{public}" PRIu64 "], state:%{public}u",
+            property_->GetWindowName().c_str(), property_->GetPersistentId(), state_);
+        return WMError::WM_ERROR_REPEAT_OPERATION;
+    }
+    return static_cast<WMError>(hostSession_->TransferExtensionData(wantParams));
+}
+
+void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func)
+{
+    notifyTransferComponentDataFunc_ = std::move(func);
+}
+
+WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
+{
+    if (notifyTransferComponentDataFunc_) {
+        notifyTransferComponentDataFunc_(wantParams);
+    }
+    return WSError::WS_OK;
+}
 } // namespace Rosen
 } // namespace OHOS

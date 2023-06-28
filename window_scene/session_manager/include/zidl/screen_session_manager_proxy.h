@@ -83,6 +83,7 @@ public:
 
     virtual DMError SetScreenRotationLocked(bool isLocked) override;
     virtual DMError IsScreenRotationLocked(bool& isLocked) override;
+    virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
