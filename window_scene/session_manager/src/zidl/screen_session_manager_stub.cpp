@@ -283,6 +283,25 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_ROTATION_LOCKED: {
+            bool isLocked = static_cast<bool>(data.ReadBool());
+            DMError ret = SetScreenRotationLocked(isLocked);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_IS_SCREEN_ROTATION_LOCKED: {
+            bool isLocked = false;
+            DMError ret = IsScreenRotationLocked(isLocked);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            reply.WriteBool(isLocked);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_CUTOUT_INFO: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            sptr<CutoutInfo> cutoutInfo = GetCutoutInfo(displayId);
+            reply.WriteParcelable(cutoutInfo);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

@@ -52,6 +52,7 @@ private:
     static std::recursive_mutex mutex_;
     static WindowMode defaultMode_;
     static AnimationConfig animationConfig_;
+    static bool IsWindowFollowParent(WindowType type);
 };
 } // Rosen
 } // OHOS

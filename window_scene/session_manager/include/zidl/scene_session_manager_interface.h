@@ -16,7 +16,6 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H
 
-
 #include "common/include/window_session_property.h"
 #include <iremote_broker.h>
 #include "interfaces/include/ws_common.h"
@@ -25,6 +24,7 @@
 #include "session/container/include/zidl/window_event_channel_interface.h"
 #include "session/host/include/session.h"
 
+#include "focus_change_info.h"
 #include "window_manager_interface.h"
 
 namespace OHOS::Rosen {
@@ -39,6 +39,7 @@ public:
         TRANS_ID_UPDATE_PROPERTY,
         TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT,
         TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT,
+        TRANS_ID_GET_FOCUS_SESSION_INFO,
     };
 
     virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -104,6 +105,7 @@ public:
         std::vector<sptr<RSWindowAnimationTarget>>& targets) override { return WMError::WM_OK; }
     void SetMaximizeMode(MaximizeMode maximizeMode) override {}
     MaximizeMode GetMaximizeMode() override { return MaximizeMode::MODE_AVOID_SYSTEM_BAR; }
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override {}
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

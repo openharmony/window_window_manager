@@ -55,7 +55,6 @@ ohos_shared_library("scene_session_manager") {
     "src/scene_session_manager.cpp",
     "src/session_manager_agent_controller.cpp",
     "src/window_scene_config.cpp",
-    "src/zidl/scene_session_manager_proxy.cpp",
     "src/zidl/scene_session_manager_stub.cpp",
   ]
 
@@ -65,7 +64,6 @@ ohos_shared_library("scene_session_manager") {
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/session:scene_session",
-    "${window_base_path}/wm:libwm",
     "//third_party/libxml2:libxml2",
   ]
 
@@ -97,6 +95,7 @@ ohos_shared_library("scene_session_manager") {
 ohos_shared_library("screen_session_manager") {
   sources = [
     "../../dm/src/zidl/display_manager_agent_proxy.cpp",
+    "src/screen_cutout_controller.cpp",
     "src/screen_scene_config.cpp",
     "src/screen_session_manager.cpp",
     "src/session_display_power_controller.cpp",
@@ -135,31 +134,14 @@ ohos_shared_library("screen_session_manager") {
 }
 
 ohos_shared_library("session_manager") {
-  sources = [
-    "../session_manager_service/src/session_manager_service_proxy.cpp",
-    "src/session_manager.cpp",
-    "src/zidl/scene_session_manager_proxy.cpp",
-    "src/zidl/screen_session_manager_proxy.cpp",
-  ]
+  sources = [ "src/session_manager.cpp" ]
 
   cflags_cc = [ "-std=c++17" ]
 
   public_configs = [ ":session_manager_public_config" ]
 
-  deps = [
-    "${window_base_path}/utils:libwmutil",
-    "${window_base_path}/window_scene/common:window_scene_common",
-    "${window_base_path}/window_scene/session:scene_session",
-    "${window_base_path}/window_scene/session:screen_session",
-  ]
-
   external_deps = [
-    "ability_base:want",
-    "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
-    "ace_engine:ace_uicontent",
-    "c_utils:utils",
-    "eventhandler:libeventhandler",
     "graphic_standard:librender_service_client",
     "hilog_native:libhilog",
     "ipc:ipc_single",

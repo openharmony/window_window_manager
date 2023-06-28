@@ -102,6 +102,12 @@ int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
+        case SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_INFO: {
+            FocusChangeInfo focusInfo;
+            GetFocusWindowInfo(focusInfo);
+            reply.WriteParcelable(&focusInfo);
+            break;
+        }
         default:
             WLOGFE("Unknown session message!");
     }

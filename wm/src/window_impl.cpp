@@ -129,6 +129,11 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
         case WindowType::WINDOW_TYPE_APP_MAIN_WINDOW:
             rsSurfaceNodeType = RSSurfaceNodeType::APP_WINDOW_NODE;
             break;
+        case WindowType::WINDOW_TYPE_DIALOG:
+        case WindowType::WINDOW_TYPE_APP_SUB_WINDOW:
+        case WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW:
+            rsSurfaceNodeType = RSSurfaceNodeType::ABILITY_COMPONENT_NODE;
+            break;
         default:
             rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
             break;
@@ -2345,6 +2350,14 @@ void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>&
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
     if (abilityContext == nullptr) {
         WLOGFE("abilityContext is null");
+        return;
+    }
+    bool needMoveToBackground = false;
+    int ret = abilityContext->OnBackPressedCallBack(needMoveToBackground);
+    if (ret == ERR_OK && needMoveToBackground) {
+        abilityContext->MoveAbilityToBackground();
+        WLOGD("id: %{public}u closed, to move Ability: %{public}u",
+            property_->GetWindowId(), needMoveToBackground);
         return;
     }
     // TerminateAbility will invoke last ability, CloseAbility will not.
