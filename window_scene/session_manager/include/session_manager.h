@@ -13,55 +13,45 @@
  * limitations under the License.
  */
 
-#include "interfaces/include/ws_common.h"
-#include "zidl/screen_session_manager_interface.h"
+#ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_H
+#define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_H
 
-#include "session_manager_service_interface.h"
-
-#include "iremote_object.h"
-#include "session/host/include/zidl/session_interface.h"
-#include "session_manager_service/include/session_manager_service_interface.h"
-#include "wm_single_instance.h"
-#include "zidl/scene_session_manager_interface.h"
 #include "screenlock_manager_interface.h"
 
+#include "session_manager_service_interface.h"
+#include "zidl/scene_session_manager_interface.h"
+#include "zidl/screen_session_manager_interface.h"
+#include "wm_single_instance.h"
+
 namespace OHOS::Rosen {
-using namespace ScreenLock;
 class SessionManager {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManager);
 public:
-    SessionManager();
-
-    ~SessionManager();
-
-    void Init();
-
-    sptr<IRemoteObject> GetRemoteObject();
-
     void CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session);
     void DestroyAndDisconnectSpecificSession(const uint64_t& persistentId);
-    sptr<IScreenSessionManager> GetScreenSessionManagerProxy();
     WMError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
-    sptr<ScreenLockManagerInterface> GetScreenLockManagerProxy();
+
     sptr<ISceneSessionManager> GetSceneSessionManagerProxy();
-    void UpdateCameraFloatWindowStatus(bool isShowing);
+    sptr<IScreenSessionManager> GetScreenSessionManagerProxy();
+    sptr<ScreenLock::ScreenLockManagerInterface> GetScreenLockManagerProxy();
+
+protected:
+    SessionManager() = default;
+    virtual ~SessionManager() = default;
 
 private:
-    void ConnectToService();
-    void InitSceneSessionManagerProxy();
     void InitSessionManagerServiceProxy();
-
+    void InitSceneSessionManagerProxy();
     void InitScreenSessionManagerProxy();
     void InitScreenLockManagerProxy();
 
-    sptr<IRemoteObject> remoteObject_ = nullptr;
     sptr<ISessionManagerService> sessionManagerServiceProxy_ = nullptr;
     sptr<ISceneSessionManager> sceneSessionManagerProxy_ = nullptr;
     sptr<IScreenSessionManager> screenSessionManagerProxy_ = nullptr;
-    sptr<ScreenLockManagerInterface> screenLockManagerProxy_ = nullptr;
-    std::recursive_mutex mutex_;
+    sptr<ScreenLock::ScreenLockManagerInterface> screenLockManagerProxy_ = nullptr;
 };
-
 } // namespace OHOS::Rosen
+
+#endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_H

@@ -115,6 +115,12 @@ ohos_shared_library("libwms") {
   ]
 
   if (defined(global_parts_info) &&
+      defined(global_parts_info.resourceschedule_memmgr_plugin)) {
+    external_deps += [ "memmgr_plugin:memmgrclient" ]
+    defines += [ "MEMMGR_WINDOW_ENABLE" ]
+  }
+
+  if (defined(global_parts_info) &&
       defined(global_parts_info.resourceschedule_resource_schedule_service)) {
     external_deps += [ "resource_schedule_service:ressched_client" ]
     defines += [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]

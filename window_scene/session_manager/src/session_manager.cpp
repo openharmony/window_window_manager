@@ -15,54 +15,19 @@
 
 #include "session_manager.h"
 
-#include <condition_variable>
-#include <unistd.h>
-
-#include "zidl/screen_session_manager_proxy.h"
-
 #include "ability_manager_client.h"
-#include "ability_connect_callback_stub.h"
-#include "session_manager_service/include/session_manager_service_proxy.h"
+
 #include "window_manager_hilog.h"
-#include "zidl/scene_session_manager_proxy.h"
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SessionManager"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "SessionManager" };
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SessionManager)
 
-SessionManager::SessionManager()
+sptr<ScreenLock::ScreenLockManagerInterface> SessionManager::GetScreenLockManagerProxy()
 {
-}
-
-SessionManager::~SessionManager()
-{
-}
-
-void SessionManager::Init()
-{
-    GetRemoteObject();
-}
-
-sptr<IRemoteObject> SessionManager::GetRemoteObject()
-{
-    if (remoteObject_) {
-        WLOGFE("Get session manager service remote object ok");
-        return remoteObject_;
-    }
-
-    remoteObject_ = AAFwk::AbilityManagerClient::GetInstance()->GetSessionManagerService();
-    if (!remoteObject_) {
-        WLOGFE("Get session manager service remote object nullptr");
-    }
-    return remoteObject_;
-}
-
-sptr<ScreenLockManagerInterface> SessionManager::GetScreenLockManagerProxy()
-{
-    Init();
     InitSessionManagerServiceProxy();
     InitScreenLockManagerProxy();
     return screenLockManagerProxy_;
@@ -70,17 +35,13 @@ sptr<ScreenLockManagerInterface> SessionManager::GetScreenLockManagerProxy()
 
 sptr<IScreenSessionManager> SessionManager::GetScreenSessionManagerProxy()
 {
-    Init();
     InitSessionManagerServiceProxy();
     InitScreenSessionManagerProxy();
-
     return screenSessionManagerProxy_;
 }
 
 sptr<ISceneSessionManager> SessionManager::GetSceneSessionManagerProxy()
 {
-    WLOGFD("InitSceneSessionManagerProxy");
-    Init();
     InitSessionManagerServiceProxy();
     InitSceneSessionManagerProxy();
     return sceneSessionManagerProxy_;
@@ -91,12 +52,14 @@ void SessionManager::InitSessionManagerServiceProxy()
     if (sessionManagerServiceProxy_) {
         return;
     }
-    sptr<IRemoteObject> remoteObject = GetRemoteObject();
-    if (remoteObject) {
-        sessionManagerServiceProxy_ = iface_cast<ISessionManagerService>(remoteObject);
-        if (!sessionManagerServiceProxy_) {
-            WLOGFE("sessionManagerServiceProxy_ is nullptr");
-        }
+    auto remoteObject = AAFwk::AbilityManagerClient::GetInstance()->GetSessionManagerService();
+    if (!remoteObject) {
+        WLOGFE("Remote object is nullptr");
+        return;
+    }
+    sessionManagerServiceProxy_ = iface_cast<ISessionManagerService>(remoteObject);
+    if (!sessionManagerServiceProxy_) {
+        WLOGFE("sessionManagerServiceProxy_ is nullptr");
     }
 }
 
@@ -192,7 +155,7 @@ void SessionManager::InitScreenLockManagerProxy()
         return;
     }
 
-    screenLockManagerProxy_ = iface_cast<ScreenLockManagerInterface>(remoteObject);
+    screenLockManagerProxy_ = iface_cast<ScreenLock::ScreenLockManagerInterface>(remoteObject);
     if (!screenLockManagerProxy_) {
         WLOGFW("Get screenlock manager proxy failed, nullptr");
     }

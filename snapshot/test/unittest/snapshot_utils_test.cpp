@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include <fcntl.h>
 #include <gtest/gtest.h>
 #include "display.h"
 #include "display_manager.h"
@@ -113,7 +113,11 @@ HWTEST_F(SnapshotUtilsTest, WriteRgb888ToJpeg01, Function | SmallTest | Level3)
 {
     uint8_t *data = nullptr;
     FILE *file = fopen(defaultFile_.c_str(), "wb");
+    if (file == nullptr) {
+        return;
+    }
     ASSERT_FALSE(SnapShotUtils::WriteRgb888ToJpeg(file, 100, 100, data));
+    fclose(file);
 }
 
 /**
@@ -190,7 +194,12 @@ HWTEST_F(SnapshotUtilsTest, Write04, Function | MediumTest | Level3)
 {
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenshot(id);
-    ASSERT_EQ(true, SnapShotUtils::WriteToJpegWithPixelMap(0, *pixelMap));
+    int fd = open(defaultFile_.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0666);
+    if (fd == -1) {
+        return;
+    }
+    ASSERT_EQ(true, SnapShotUtils::WriteToJpegWithPixelMap(fd, *pixelMap));
+    close(fd);
 }
 
 /**

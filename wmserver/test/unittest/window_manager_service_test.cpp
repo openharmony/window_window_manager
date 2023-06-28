@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <fcntl.h>
 #include <gtest/gtest.h>
 #include "common_test_utils.h"
 #include "iremote_object_mocker.h"
@@ -126,8 +127,15 @@ HWTEST_F(WindowManagerServiceTest, Dump01, Function | SmallTest | Level2)
 {
     wms->windowDumper_ = nullptr;
     std::vector<std::u16string> args;
+    const std::string dumpFile = "data/window_dump_test.txt";
+    int fd = open(dumpFile.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0666);
+    if (fd == -1) {
+        return;
+    }
     ASSERT_EQ(static_cast<int>(WMError::WM_ERROR_INVALID_PARAM), wms->Dump(-1, args));
-    ASSERT_EQ(static_cast<int>(WMError::WM_OK), wms->Dump(0, args));
+    ASSERT_EQ(static_cast<int>(WMError::WM_OK), wms->Dump(fd, args));
+    close(fd);
+    unlink(dumpFile.c_str());
 }
 /**
  * @tc.name: NotifyWindowTransition

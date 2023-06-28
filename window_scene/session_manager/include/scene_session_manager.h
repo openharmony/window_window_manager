@@ -74,6 +74,7 @@ public:
     void StartWindowInfoReportLoop();
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
 
+    void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
@@ -122,6 +123,8 @@ private:
     std::shared_ptr<EventRunner> eventLoop_;
     std::shared_ptr<EventHandler> eventHandler_;
     bool isReportTaskStart_ = false;
+    void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
+    void OnSessionStateChange(uint64_t persistentId);
 };
 } // namespace OHOS::Rosen
 
