@@ -952,6 +952,29 @@ WMError WindowSceneSessionImpl::CheckParmAndPermission()
     return WMError::WM_OK;
 }
 
+void WindowSceneSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (uiContent_ != nullptr) {
+        WLOGFD("notify ace winId:%{public}u", GetWindowId());
+        uiContent_->UpdateConfiguration(configuration);
+    }
+    if (subWindowSessionMap_.count(GetPersistentId()) == 0) {
+        return;
+    }
+    for (auto& subWindowSession : subWindowSessionMap_.at(GetPersistentId())) {
+        subWindowSession->UpdateConfiguration(configuration);
+    }
+    
+}
+void WindowSceneSessionImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    WLOGD("notify scene ace update config");
+    for (const auto& winPair : windowSessionMap_) {
+        auto window = winPair.second.second;
+        window->UpdateConfiguration(configuration);
+    }
+}
+
 WMError WindowSceneSessionImpl::SetCornerRadius(float cornerRadius)
 {
     if (surfaceNode_ == nullptr) {
