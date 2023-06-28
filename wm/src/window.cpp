@@ -15,6 +15,7 @@
 
 #include "window.h"
 
+#include "root_scene.h"
 #include "scene_board_judgement.h"
 #include "session/host/include/zidl/session_interface.h"
 #include "window_helper.h"
@@ -148,7 +149,12 @@ std::vector<sptr<Window>> Window::GetSubWindow(uint32_t parentId)
 
 void Window::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    return WindowImpl::UpdateConfigurationForAll(configuration);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        WindowSceneSessionImpl::UpdateConfigurationForAll(configuration);
+        RootScene::UpdateConfigurationForAll(configuration);
+    } else {
+        WindowImpl::UpdateConfigurationForAll(configuration);
+    }
 }
 
 bool OccupiedAreaChangeInfo::Marshalling(Parcel& parcel) const
