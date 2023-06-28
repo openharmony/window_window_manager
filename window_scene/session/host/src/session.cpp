@@ -815,7 +815,7 @@ WSError Session::MarkProcessed(int32_t eventId)
 {
     CALL_DEBUG_ENTER;
     int32_t persistentId = GetPersistentId();
-    WLOGFI("WLD>>> persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
+    WLOGFI("persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
     ANRMgr->MarkProcessed(eventId, persistentId);
     return WSError::WS_OK;
 }

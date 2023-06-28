@@ -54,19 +54,16 @@ void EventStage::SaveANREvent(int32_t persistentId, int32_t id, int64_t time, in
 
 std::vector<int32_t> EventStage::GetTimerIds(int32_t persistentId)
 {
-    // 感觉问题出在这个函数上，在ANR的回调中已经将 timerId 置为 -1 了，那么在MarkProcessed 中就会删不掉对应的timerId
     CALL_DEBUG_ENTER;
-    auto iter = events_.find(persistentId);
-    if (iter == events_.end()) {
+    if (events_.find(persistentId) == events_.end()) {
         WLOGFE("Current events have no event for persistentId:%{public}d", persistentId);
         return {};
     }
     std::vector<int32_t> timers;
-    for (auto &item : iter->second) {
+    for (auto &item : events_[persistentId]) {
         timers.push_back(item.timerId);
         item.timerId = -1;
     }
-    events_[iter->first] = iter->second;
     return timers;
 }
 
@@ -82,38 +79,14 @@ std::list<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t id)
     auto fistMatchIter = find_if(events.begin(), events.end(), [id](const auto &item) {
         return item.id > id;
     });
-    if (fistMatchIter == events.end()) {
-        WLOGFW("All timerId < eventId:%{public}d", id);
-    }
     std::list<int32_t> timerIds;
     for (auto iter = events.begin(); iter != fistMatchIter; iter++) {
-        WLOGFD("Push iter:%{public}d before firstMatchIter", iter->timerId);
+        WLOGFD("Push timer:%{public}d, eventId:%{public}d in timerIds to remove", iter->timerId, iter->id);
         timerIds.push_back(iter->timerId);
     }
-    /**
-     * 既然比列表中事件id更大的都收到回执了，那说明这个窗口本质上还是没有发生ANR的，
-     * 因此前面的这些定时器都应该去掉，且把ANR的状态位设置为False
-    */
     events.erase(events.begin(), fistMatchIter);
     SetAnrStatus(persistentId, false);
     return timerIds;
-    // if (events.empty()) {
-    //     WLOGFD("events is empty");
-    //     SetAnrStatus(persistentId, false);
-    //     return timerIds;
-    // }
-    // int64_t endTime = 0;
-    // if (!AddInt64(events.begin()->eventTime, ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME, endTime)) {
-    //     WLOGFE("The addition of endTime overflows");
-    //     return timerIds;
-    // }
-    // auto currentTime = GetSysClockTime();
-    // if (currentTime < endTime) {
-    //     WLOGFD("currentTime < endTime");
-    //     SetAnrStatus(persistentId, false);
-    // }
-    // return timerIds;
 }
-
 } // namespace MMI
 } // namespace OHOS

@@ -85,7 +85,7 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
     RegisterInputEventListener();
     ANRMgr->Init();
     ANRMgr->SetAnrObserver(([](int32_t pid) {
-        WLOGFI("WLD << Receive anr notice pid:%{public}d enter", pid);
+        WLOGFI("Receive anr notice pid:%{public}d enter", pid);
         AppExecFwk::AppFaultDataBySA faultData;
         faultData.faultType = AppExecFwk::FaultDataType::APP_FREEZE;
         faultData.pid = pid;
@@ -94,9 +94,9 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
         faultData.errorObject.stack = "";
         if (int32_t ret = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFaultBySA(faultData);
             ret != 0) {
-            WLOGFE("WLD << NotifyAppFaultBySA failed, pid:%{public}d, errcode:%{public}d", pid, ret);
+            WLOGFE("NotifyAppFaultBySA failed, pid:%{public}d, errcode:%{public}d", pid, ret);
         }
-        WLOGFI("WLD << Receive anr notice pid:%{public}d leave", pid);
+        WLOGFI("Receive anr notice pid:%{public}d leave", pid);
     }));
 }
 
