@@ -16,6 +16,7 @@
 #include "timer_manager.h"
 
 #include <algorithm>
+#include <cinttypes>
 
 #include "window_manager_hilog.h"
 
@@ -136,7 +137,7 @@ int32_t TimerManager::AddTimerInternal(int32_t intervalMs, std::function<void()>
     timer->id = timerId;
     timer->intervalMs = intervalMs;
     auto nowTime = GetMillisTime();
-    WLOGFD("nowTime:%{public}lld", nowTime);
+    WLOGFD("nowTime:%{public}" PRId64 "", nowTime);
     if (!AddInt64(nowTime, timer->intervalMs, timer->nextCallTime)) {
         WLOGFE("The addition of nextCallTime in TimerItem overflows");
         return NONEXISTENT_ID;
@@ -172,7 +173,7 @@ bool TimerManager::IsExistInternal(int32_t timerId)
 void TimerManager::InsertTimerInternal(std::unique_ptr<TimerItem>& timer)
 {
     CALL_DEBUG_ENTER;
-    WLOGFD("timerId:%{public}d, nextCallTime:%{public}lld", timer->id, timer->nextCallTime);
+    WLOGFD("timerId:%{public}d, nextCallTime:%{public}" PRId64 "", timer->id, timer->nextCallTime);
     for (auto it = timers_.begin(); it != timers_.end(); ++it) {
         if ((*it)->nextCallTime > timer->nextCallTime) {
             timers_.insert(it, std::move(timer));
@@ -189,7 +190,7 @@ int32_t TimerManager::CalcNextDelayInternal()
     if (!timers_.empty()) {
         auto nowTime = GetMillisTime();
         const auto& item = *timers_.begin();
-        WLOGFD("timerId:%{public}d, nextCallTime:%{public}lld, nowTime:%{public}lld", item->id, item->nextCallTime, nowTime);
+        WLOGFD("timerId:%{public}d, nextCallTime:%{public}" PRId64 ", nowTime:%{public}" PRId64 "", item->id, item->nextCallTime, nowTime);
         if (nowTime >= item->nextCallTime) {
             delay = 0;
         } else {
@@ -206,7 +207,7 @@ void TimerManager::ProcessTimersInternal()
         return;
     }
     auto nowTime = GetMillisTime();
-    WLOGFD("nowTime:%{public}lld", nowTime);
+    WLOGFD("nowTime:%{public}" PRId64 "", nowTime);
     for (;;) {
         WLOGFD("for (;;)");
         auto it = timers_.begin();
