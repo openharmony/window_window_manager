@@ -40,6 +40,7 @@ public:
         destroyed_ = true;
     }
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback);
+    int64_t GetVSyncPeriod();
     void RemoveCallback();
     void SetIsMainHandlerAvailable(bool available)
     {
@@ -56,6 +57,7 @@ private:
     static void OnVsync(int64_t nanoTimestamp, void* client);
     void VsyncCallbackInner(int64_t nanoTimestamp);
     void OnVsyncTimeOut();
+    void Init();
 
     std::mutex mtx_;
     bool hasRequestedVsync_ = false;
