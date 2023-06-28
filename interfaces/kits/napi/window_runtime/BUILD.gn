@@ -137,6 +137,7 @@ ohos_shared_library("windowstage_kit") {
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "napi:ace_napi",
+    "hitrace_native:hitrace_meter",
   ]
 
   innerapi_tags = [ "platformsdk" ]

@@ -39,6 +39,7 @@
 #include "wm_common_inner.h"
 #include "wm_math.h"
 #include "perform_reporter.h"
+#include "hitrace_meter.h"
 #include <hisysevent.h>
 
 namespace OHOS {
@@ -1385,6 +1386,7 @@ WMError WindowImpl::PreProcessShow(uint32_t reason, bool withAnimation)
 
 WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, __PRETTY_FUNCTION__);
     WLOGFD("Window Show [name:%{public}s, id:%{public}u, mode: %{public}u], reason:%{public}u, "
         "withAnimation:%{public}d", name_.c_str(), property_->GetWindowId(), GetMode(), reason, withAnimation);
     if (!IsWindowValid()) {
