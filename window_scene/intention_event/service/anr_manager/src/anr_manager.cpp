@@ -17,10 +17,10 @@
 #include <algorithm>
 #include <vector>
 
+#include "dfx_hisysevent.h"
 #include "proto.h"
 #include "timer_manager.h"
 #include "window_manager_hilog.h"
-#include "dfx_hisysevent.h"
 
 namespace OHOS {
 namespace Rosen {
