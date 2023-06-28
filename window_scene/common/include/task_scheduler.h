@@ -13,23 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_WINDOW_SCENE_MESSAGE_SCHEDULER_H
-#define OHOS_ROSEN_WINDOW_SCENE_MESSAGE_SCHEDULER_H
+#ifndef OHOS_ROSEN_WINDOW_SCENE_TASK_SCHEDULER_H
+#define OHOS_ROSEN_WINDOW_SCENE_TASK_SCHEDULER_H
 
 #include <event_handler.h>
 
 namespace OHOS::Rosen {
-#define WS_CHECK_NULL_RETURN(ptr, task)                    \
-    do {                                                   \
-        if (!(ptr)) {                                      \
-            return task();                                 \
-        }                                                  \
-    } while (0)
-
 class TaskScheduler {
 public:
     TaskScheduler(const std::string& threadName);
-    TaskScheduler(const std::shared_ptr<AppExecFwk::EventHandler>& handler) : handler_(handler) {}
     ~TaskScheduler() = default;
 
     using Task = std::function<void()>;
@@ -51,4 +43,4 @@ private:
 };
 } // namespace OHOS::Rosen
 
-#endif // OHOS_ROSEN_WINDOW_SCENE_MESSAGE_SCHEDULER_H
+#endif // OHOS_ROSEN_WINDOW_SCENE_TASK_SCHEDULER_H
