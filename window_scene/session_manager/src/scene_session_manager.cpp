@@ -723,6 +723,10 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
                 sceneSession->SetFocusable(property->GetFocusable());
                 break;
             }
+            case WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE: {
+                sceneSession->SetTouchable(property->GetTouchable());
+                break;
+            }
             case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS: {
                 if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
                     WLOGW("only app main window can set brightness");
