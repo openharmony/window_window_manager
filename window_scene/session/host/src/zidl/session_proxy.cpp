@@ -606,7 +606,7 @@ WSError SessionProxy::TransferAbilityResult(uint32_t resultCode, const AAFwk::Wa
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -632,7 +632,7 @@ WSError SessionProxy::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -648,5 +648,21 @@ WSError SessionProxy::TransferExtensionData(const AAFwk::WantParams& wantParams)
     }
     int32_t ret = reply.ReadUint32();
     return static_cast<WSError>(ret);
+}
+
+void SessionProxy::NotifyRemoteReady()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_NOTIFY_REMOTE_READY),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
 }
 } // namespace OHOS::Rosen

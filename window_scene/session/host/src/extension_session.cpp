@@ -31,28 +31,21 @@ ExtensionSession::ExtensionSession(const SessionInfo& info) : Session(info)
 
 WSError ExtensionSession::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
 {
-    if (transferAbilityResultFunc_) {
-        transferAbilityResultFunc_(resultCode, want);
+    if (extSessionEventCallback_ != nullptr &&
+        extSessionEventCallback_->transferAbilityResultFunc_ != nullptr) {
+        extSessionEventCallback_->transferAbilityResultFunc_(resultCode, want);
     }
     return WSError::WS_OK;
-}
-
-void ExtensionSession::RegisterTransferAbilityResultListener(const NotifyTransferAbilityResultFunc& func)
-{
-    transferAbilityResultFunc_ = func;
 }
 
 WSError ExtensionSession::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
-    if (transferExtensionDataFunc_) {
-        transferExtensionDataFunc_(wantParams);
+    TransferComponentData(wantParams);
+    if (extSessionEventCallback_ != nullptr &&
+        extSessionEventCallback_->transferExtensionDataFunc_ != nullptr) {
+        extSessionEventCallback_->transferExtensionDataFunc_(wantParams);
     }
     return WSError::WS_OK;
-}
-
-void ExtensionSession::RegisterTransferExtensionDataListener(const NotifyTransferExtensionDataFunc& func)
-{
-    transferExtensionDataFunc_ = func;
 }
 
 WSError ExtensionSession::TransferComponentData(const AAFwk::WantParams& wantParams)
@@ -62,5 +55,19 @@ WSError ExtensionSession::TransferComponentData(const AAFwk::WantParams& wantPar
     }
     sessionStage_->NotifyTransferComponentData(wantParams);
     return WSError::WS_OK;
+}
+
+void ExtensionSession::NotifyRemoteReady()
+{
+    if (extSessionEventCallback_ != nullptr &&
+        extSessionEventCallback_->notifyRemoteReadyFunc_ != nullptr) {
+        extSessionEventCallback_->notifyRemoteReadyFunc_();
+    }
+}
+
+void ExtensionSession::RegisterExtensionSessionEventCallback(
+    const sptr<ExtensionSessionEventCallback>& extSessionEventCallback)
+{
+    extSessionEventCallback_ = extSessionEventCallback;
 }
 } // namespace OHOS::Rosen
