@@ -57,6 +57,7 @@ public:
     WMError SetTransparent(bool isTransparent) override;
     virtual WMError SetPrivacyMode(bool isPrivacyMode) override;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
+    virtual WMError SetSnapshotSkip(bool isSkip) override;
     
     bool IsTransparent() const override;
     virtual bool IsPrivacyMode() const override;

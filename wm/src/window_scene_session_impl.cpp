@@ -1129,5 +1129,16 @@ void WindowSceneSessionImpl::SetSystemPrivacyMode(bool isSystemPrivacyMode)
     property_->SetSystemPrivacyMode(isSystemPrivacyMode);
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
 }
+
+WMError WindowSceneSessionImpl::SetSnapshotSkip(bool isSkip)
+{
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("set snapshot skip permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    surfaceNode_->SetSecurityLayer(isSkip || property_->GetSystemPrivacyMode());
+    RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
