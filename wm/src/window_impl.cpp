@@ -2846,6 +2846,15 @@ void WindowImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallbac
     }
 }
 
+int64_t WindowImpl::GetVSyncPeriod()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!SingletonContainer::IsDestroyed()) {
+        return VsyncStation::GetInstance().GetVSyncPeriod();
+    }
+    return 0;
+}
+
 void WindowImpl::UpdateFocusStatus(bool focused)
 {
     WLOGFD("IsFocused: %{public}d, id: %{public}u", focused, property_->GetWindowId());
