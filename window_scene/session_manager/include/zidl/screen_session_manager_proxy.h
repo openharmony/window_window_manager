@@ -84,6 +84,7 @@ public:
     virtual DMError SetScreenRotationLocked(bool isLocked) override;
     virtual DMError IsScreenRotationLocked(bool& isLocked) override;
 
+    virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
 };
