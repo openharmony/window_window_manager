@@ -60,9 +60,8 @@ ohos_shared_library("scene_session") {
     "${window_base_path}/window_scene/session_manager:screen_session_manager",
   ]
 
-  public_deps = [
-    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils"
-    ]
+  public_deps =
+      [ "${window_base_path}/window_scene/interfaces/innerkits:libwsutils" ]
 
   external_deps = [
     "ability_base:session_info",

@@ -24,18 +24,18 @@ config("intention_event_public_config") {
     "../../",
     "../dfx/include",
     "../framework/anr_handler/include",
-    "../utils/include"
+    "../utils/include",
   ]
 }
 
 ohos_shared_library("intention_event_anr_manager") {
   sources = [
+    "../dfx/src/dfx_hisysevent.cpp",
+    "../framework/anr_handler/src/anr_handler.cpp",
+    "../utils/src/util.cpp",
     "anr_manager/src/anr_manager.cpp",
     "event_stage/src/event_stage.cpp",
     "timer_manager/src/timer_manager.cpp",
-    "../dfx/src/dfx_hisysevent.cpp",
-    "../framework/anr_handler/src/anr_handler.cpp",
-    "../utils/src/util.cpp"
   ]
 
   public_configs = [ ":intention_event_public_config" ]
@@ -43,12 +43,12 @@ ohos_shared_library("intention_event_anr_manager") {
   external_deps = [
     "ability_base:want",
     "c_utils:utils",
-    "hilog_native:libhilog",
+    "eventhandler:libeventhandler",
     "hicollie:libhicollie",
+    "hilog_native:libhilog",
     "hisysevent_native:libhisysevent",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
-    "eventhandler:libeventhandler",
     "ipc:ipc_single",
   ]
 
