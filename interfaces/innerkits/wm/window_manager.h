@@ -23,6 +23,7 @@
 #include <iremote_object.h>
 #include "wm_single_instance.h"
 #include "wm_common.h"
+#include "focus_change_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -36,50 +37,6 @@ struct SystemBarRegionTint {
         : type_(type), prop_(prop), region_(region) {}
 };
 using SystemBarRegionTints = std::vector<SystemBarRegionTint>;
-
-/**
- * @class FocusChangeInfo
- *
- * @brief Window info while its focus status changed
- */
-class FocusChangeInfo : public Parcelable {
-public:
-    /**
-     * @brief Default construct of FocusChangeInfo
-     */
-    FocusChangeInfo() = default;
-    /**
-     * @brief Construct of FocusChangeInfo
-     */
-    FocusChangeInfo(uint32_t winId, DisplayId displayId, int32_t pid, int32_t uid, WindowType type,
-        const sptr<IRemoteObject>& abilityToken): windowId_(winId), displayId_(displayId), pid_(pid), uid_(uid),
-        windowType_(type),  abilityToken_(abilityToken) {};
-    /**
-     * @brief Deconstruct of FocusChangeInfo
-     */
-    ~FocusChangeInfo() = default;
-    /**
-     * @brief Marshalling FocusChangeInfo.
-     *
-     * @param parcel Package of FocusChangeInfo.
-     * @return True means marshall FocusChangeInfo success, false means marshall failed.
-     */
-    virtual bool Marshalling(Parcel& parcel) const override;
-    /**
-     * @brief Unmarshalling FocusChangeInfo.
-     *
-     * @param parcel Package of FocusChangeInfo.
-     * @return FocusChangeInfo object.
-     */
-    static FocusChangeInfo* Unmarshalling(Parcel& parcel);
-
-    uint32_t windowId_ = INVALID_WINDOW_ID;
-    DisplayId displayId_ = 0;
-    int32_t pid_ = 0;
-    int32_t uid_ = 0;
-    WindowType windowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
-    sptr<IRemoteObject> abilityToken_;
-};
 
 /**
  * @class IFocusChangedListener
@@ -436,6 +393,14 @@ public:
      * @return WM_OK means set success, others means set failed.
      */
     WMError SetGestureNavigaionEnabled(bool enable) const;
+
+    /**
+     * @brief Get focus window.
+     *
+     * @param focusInfo Focus window info.
+     * @return FocusChangeInfo object about focus window.
+     */
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
 
 private:
     WindowManager();

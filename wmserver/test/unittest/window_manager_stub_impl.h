@@ -153,6 +153,7 @@ MaximizeMode GetMaximizeMode() override
 {
     return MaximizeMode::MODE_FULL_FILL;
 }
+void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override {}
 };
 }
 }

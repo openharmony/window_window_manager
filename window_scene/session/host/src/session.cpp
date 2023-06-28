@@ -858,4 +858,13 @@ AvoidArea Session::GetAvoidAreaByType(AvoidAreaType type)
     AvoidArea avoidArea;
     return avoidArea;
 }
+
+WSError Session::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
+{
+    return WSError::WS_OK;
+}
+WSError Session::TransferExtensionData(const AAFwk::WantParams& wantParams)
+{
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

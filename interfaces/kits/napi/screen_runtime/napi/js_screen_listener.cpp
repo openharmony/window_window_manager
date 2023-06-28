@@ -94,9 +94,9 @@ void JsScreenListener::OnConnect(ScreenId id)
         WLOGE("JsScreenListener::OnConnect not this event, return");
         return;
     }
-
+    sptr<JsScreenListener> listener = this; // Avoid this be destroyed when using.
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+        [this, listener, id] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(id))};
             CallJsMethod(EVENT_CONNECT, argv, ArraySize(argv));
         }
@@ -120,9 +120,9 @@ void JsScreenListener::OnDisconnect(ScreenId id)
         WLOGE("JsScreenListener::OnDisconnect not this event, return");
         return;
     }
-
+    sptr<JsScreenListener> listener = this; // Avoid this be destroyed when using.
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+        [this, listener, id] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(id))};
             CallJsMethod(EVENT_DISCONNECT, argv, ArraySize(argv));
         }
@@ -146,9 +146,9 @@ void JsScreenListener::OnChange(ScreenId id)
         WLOGE("JsScreenListener::OnChange not this event, return");
         return;
     }
-
+    sptr<JsScreenListener> listener = this; // Avoid this be destroyed when using.
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+        [this, listener, id] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(id))};
             CallJsMethod(EVENT_CHANGE, argv, ArraySize(argv));
         }
