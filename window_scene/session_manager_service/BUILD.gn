@@ -15,8 +15,10 @@ import("//build/ohos.gni")
 import("../../windowmanager_aafwk.gni")
 
 config("session_manager_service_public_config") {
-  include_dirs =
-      [ "${window_base_path}/window_scene/session_manager_service/include" ]
+  include_dirs = [
+    "${window_base_path}/utils/include",
+    "${window_base_path}/window_scene/session_manager_service/include",
+  ]
 }
 
 ohos_shared_library("session_manager_service") {
@@ -30,12 +32,12 @@ ohos_shared_library("session_manager_service") {
   public_configs = [ ":session_manager_service_public_config" ]
 
   deps = [
-    "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/session_manager:scene_session_manager",
     "${window_base_path}/window_scene/session_manager:screen_session_manager",
   ]
 
   external_deps = [
+    "ability_runtime:ability_manager",
     "graphic_standard:librender_service_client",
     "hilog_native:libhilog",
     "ipc:ipc_single",

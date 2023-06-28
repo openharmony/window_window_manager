@@ -20,7 +20,6 @@
 #include <set>
 #include <string>
 #include <vector>
-
 #include <refbase.h>
 
 #include "interfaces/include/ws_common.h"
@@ -92,6 +91,8 @@ public:
     WSError OnSessionEvent(SessionEvent event) override;
     WSError UpdateWindowSessionProperty(sptr<WindowSessionProperty> property) override;
     WSError OnNeedAvoid(bool status) override;
+    WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
+    WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     void NotifyConnect();
     void NotifyForeground();
     void NotifyBackground();

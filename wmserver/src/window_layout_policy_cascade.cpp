@@ -279,19 +279,25 @@ bool WindowLayoutPolicyCascade::CheckAspectRatioBySizeLimits(const sptr<WindowNo
 {
     // get new limit config with the settings of system and app
     const auto& sizeLimits = node->GetWindowUpdatedSizeLimits();
-    float vpr = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId());
-    uint32_t winFrameW = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * vpr) * 2; // 2 mean double decor width
-    uint32_t winFrameH = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * vpr) +
-        static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * vpr); // decor height
+    if (node->GetWindowProperty() != nullptr && !node->GetWindowProperty()->GetDecorEnable()) {
+        newLimits = sizeLimits;
+    } else {
+        float vpr = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId());
+        uint32_t winFrameW = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * vpr) * 2; // 2 mean double decor width
+        uint32_t winFrameH = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * vpr) +
+            static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * vpr); // decor height
 
-    newLimits.maxWidth_ = sizeLimits.maxWidth_ - winFrameW;
-    newLimits.minWidth_ = sizeLimits.minWidth_ - winFrameW;
-    newLimits.maxHeight_ = sizeLimits.maxHeight_ - winFrameH;
-    newLimits.minHeight_ = sizeLimits.minHeight_ - winFrameH;
+        newLimits.maxWidth_ = sizeLimits.maxWidth_ - winFrameW;
+        newLimits.minWidth_ = sizeLimits.minWidth_ - winFrameW;
+        newLimits.maxHeight_ = sizeLimits.maxHeight_ - winFrameH;
+        newLimits.minHeight_ = sizeLimits.minHeight_ - winFrameH;
+    }
+
     float maxRatio = static_cast<float>(newLimits.maxWidth_) / static_cast<float>(newLimits.minHeight_);
     float minRatio = static_cast<float>(newLimits.minWidth_) / static_cast<float>(newLimits.maxHeight_);
     float aspectRatio = node->GetAspectRatio();
-    if (maxRatio < aspectRatio || aspectRatio < minRatio) {
+    if (MathHelper::GreatNotEqual(aspectRatio, maxRatio) ||
+        MathHelper::LessNotEqual(aspectRatio, minRatio)) {
         return false;
     }
     uint32_t newMaxWidth = static_cast<uint32_t>(static_cast<float>(newLimits.maxHeight_) * aspectRatio);
@@ -324,10 +330,12 @@ void WindowLayoutPolicyCascade::ComputeRectByAspectRatio(const sptr<WindowNode>&
     uint32_t winFrameH = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * vpr) +
         static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * vpr); // decor height
 
-    // 2. get rect without decoration
+    // 2. get rect without decoration if enable decoration
     auto newRect = node->GetRequestRect();
-    newRect.width_ -= winFrameW;
-    newRect.height_ -= winFrameH;
+    if (node->GetWindowProperty() != nullptr && node->GetWindowProperty()->GetDecorEnable()) {
+        newRect.width_ -= winFrameW;
+        newRect.height_ -= winFrameH;
+    }
     auto oriRect = newRect;
 
     // 3. update window rect by new limits and aspect ratio

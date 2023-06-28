@@ -24,7 +24,6 @@
 #include <want.h>
 
 #include "window_manager_hilog.h"
-#include "surface_capture_future.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -383,6 +382,7 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.moduleName_ = abilitySessionInfo->want.GetModuleName();
     info.persistentId_ = abilitySessionInfo->persistentId;
+    info.callerPersistentId_ = GetPersistentId();
     info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
     info.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
     info.want = new AAFwk::Want(abilitySessionInfo->want);
@@ -807,5 +807,14 @@ AvoidArea Session::GetAvoidAreaByType(AvoidAreaType type)
 {
     AvoidArea avoidArea;
     return avoidArea;
+}
+
+WSError Session::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
+{
+    return WSError::WS_OK;
+}
+WSError Session::TransferExtensionData(const AAFwk::WantParams& wantParams)
+{
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

@@ -25,8 +25,6 @@ using namespace OHOS::Rosen;
 int main(int argc, char *argv[])
 {
     SessionManager sessionManager;
-    sessionManager.Init();
-    sleep(1);
 
     auto remoteObject = sessionManager.GetRemoteObject();
     if (!remoteObject) {

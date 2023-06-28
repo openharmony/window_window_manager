@@ -1020,5 +1020,23 @@ MaximizeMode WindowManagerProxy::GetMaximizeMode()
     return static_cast<MaximizeMode>(ret);
 }
 
+void WindowManagerProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_FOCUS_WINDOW_INFO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+    sptr<FocusChangeInfo> info = reply.ReadParcelable<FocusChangeInfo>();
+    focusInfo = *info;
+}
 } // namespace Rosen
 } // namespace OHOS

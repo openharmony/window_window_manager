@@ -87,26 +87,6 @@ AccessibilityWindowInfo* AccessibilityWindowInfo::Unmarshalling(Parcel &parcel)
     return info;
 }
 
-bool FocusChangeInfo::Marshalling(Parcel &parcel) const
-{
-    return parcel.WriteUint32(windowId_) && parcel.WriteUint64(displayId_) &&
-        parcel.WriteInt32(pid_) && parcel.WriteInt32(uid_) &&
-        parcel.WriteUint32(static_cast<uint32_t>(windowType_));
-}
-
-FocusChangeInfo* FocusChangeInfo::Unmarshalling(Parcel &parcel)
-{
-    auto focusChangeInfo = new FocusChangeInfo();
-    bool res = parcel.ReadUint32(focusChangeInfo->windowId_) && parcel.ReadUint64(focusChangeInfo->displayId_) &&
-        parcel.ReadInt32(focusChangeInfo->pid_) && parcel.ReadInt32(focusChangeInfo->uid_);
-    if (!res) {
-        delete focusChangeInfo;
-        return nullptr;
-    }
-    focusChangeInfo->windowType_ = static_cast<WindowType>(parcel.ReadUint32());
-    return focusChangeInfo;
-}
-
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowManager)
 
 class WindowManager::Impl {
@@ -700,6 +680,11 @@ WMError WindowManager::UnregisterGestureNavigationEnabledChangedListener(
     WLOGFD("Try to unregisterGestureNavigationEnabledChangedListener and result is %{public}u",
         static_cast<uint32_t>(ret));
     return ret;
+}
+
+void WindowManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+{
+    SingletonContainer::Get<WindowAdapter>().GetFocusWindowInfo(focusInfo);
 }
 
 void WindowManager::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) const

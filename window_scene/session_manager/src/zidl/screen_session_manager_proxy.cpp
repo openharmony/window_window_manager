@@ -1012,6 +1012,32 @@ DMError OHOS::Rosen::ScreenSessionManagerProxy::IsScreenRotationLocked(bool& isL
     return ret;
 }
 
+sptr<CutoutInfo> ScreenSessionManagerProxy::GetCutoutInfo(DisplayId displayId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("get cutout info : remote is null");
+        return nullptr;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("get cutout info : failed");
+        return nullptr;
+    }
+    if (!data.WriteUint64(displayId)) {
+        WLOGFE("get cutout info: write displayId failed");
+        return nullptr;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_CUTOUT_INFO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("GetCutoutInfo: GetCutoutInfo failed");
+        return nullptr;
+    }
+    sptr<CutoutInfo> info = reply.ReadParcelable<CutoutInfo>();
+    return info;
+}
 DMError OHOS::Rosen::ScreenSessionManagerProxy::HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow)
 {
     sptr<IRemoteObject> remote = Remote();
