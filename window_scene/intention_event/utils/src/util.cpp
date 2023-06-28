@@ -14,12 +14,14 @@
  */
 
 #include "util.h"
-#include <chrono>
 
 #include <cerrno>
+#include <chrono>
+
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+
 #include "window_manager_hilog.h"
 namespace OHOS {
 namespace Rosen {

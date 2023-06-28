@@ -16,19 +16,17 @@
 #include "session/host/include/session.h"
 
 #include <ipc_skeleton.h>
-#include "pointer_event.h"
 #include "key_event.h"
-#include "util.h"
+#include "pointer_event.h"
+
 #include "anr_manager.h"
 #include "foundation/ability/ability_base/interfaces/kits/native/want/include/want.h"
 #include "interfaces/include/ws_common.h"
-#include <pointer_event.h>
 #include <surface_capture_future.h>
 #include <transaction/rs_interfaces.h>
 #include <ui/rs_surface_node.h>
-#include <ipc_skeleton.h>
+#include "util.h"
 #include <want.h>
-
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
