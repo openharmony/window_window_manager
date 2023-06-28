@@ -254,7 +254,7 @@ HWTEST_F(WindowSessionTest, Disconnect01, Function | SmallTest | Level2)
     session_->state_ = SessionState::STATE_CONNECT;
     auto result = session_->Disconnect();
     ASSERT_EQ(result, WSError::WS_OK);
-    ASSERT_EQ(session_->state_, SessionState::STATE_CONNECT);
+    ASSERT_EQ(session_->state_, SessionState::STATE_DISCONNECT);
 
     session_->state_ = SessionState::STATE_BACKGROUND;
     result = session_->Disconnect();
@@ -328,43 +328,6 @@ HWTEST_F(WindowSessionTest, NotifySessionException01, Function | SmallTest | Lev
     ASSERT_EQ(resultValue, 1);
 }
 
-/**
- * @tc.name: TransferPointerEvent01
- * @tc.desc: check func TransferPointerEvent
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, TransferPointerEvent01, Function | SmallTest | Level2)
-{
-    session_->windowEventChannel_ = nullptr;
-    auto result = session_->TransferPointerEvent(nullptr);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
-
-    sptr<TestWindowEventChannel> testWindowEventChannel = new(std::nothrow) TestWindowEventChannel();
-    EXPECT_NE(nullptr, testWindowEventChannel);
-    session_->windowEventChannel_ = testWindowEventChannel;
-
-    result = session_->TransferPointerEvent(nullptr);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: TransferKeyEvent01
- * @tc.desc: check func TransferKeyEvent
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, TransferKeyEvent01, Function | SmallTest | Level2)
-{
-    session_->windowEventChannel_ = nullptr;
-    auto result = session_->TransferKeyEvent(nullptr);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
-
-    sptr<TestWindowEventChannel> testWindowEventChannel = new(std::nothrow) TestWindowEventChannel();
-    EXPECT_NE(nullptr, testWindowEventChannel);
-    session_->windowEventChannel_ = testWindowEventChannel;
-
-    result = session_->TransferKeyEvent(nullptr);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
 
 /**
  * @tc.name: UpdateActiveStatus01

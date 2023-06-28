@@ -96,9 +96,9 @@ void JsDisplayListener::OnCreate(DisplayId id)
         WLOGE("JsDisplayListener::OnCreate not this event, return");
         return;
     }
-
+    sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+        [this, listener, id] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(id))};
             CallJsMethod(EVENT_ADD, argv, ArraySize(argv));
         }
@@ -122,9 +122,9 @@ void JsDisplayListener::OnDestroy(DisplayId id)
         WLOGE("JsDisplayListener::OnDestroy not this event, return");
         return;
     }
-
+    sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+        [this, listener, id] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(id))};
             CallJsMethod(EVENT_REMOVE, argv, ArraySize(argv));
         }
@@ -148,9 +148,9 @@ void JsDisplayListener::OnChange(DisplayId id)
         WLOGE("JsDisplayListener::OnChange not this event, return");
         return;
     }
-
+    sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+        [this, listener, id] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(id))};
             CallJsMethod(EVENT_CHANGE, argv, ArraySize(argv));
         }
@@ -174,9 +174,9 @@ void JsDisplayListener::OnPrivateWindow(bool hasPrivate)
         WLOGE("OnPrivateWindow not this event, return");
         return;
     }
-
+    sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+        [this, listener, hasPrivate] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             NativeValue* argv[] = {CreateJsValue(*engine_, hasPrivate)};
             CallJsMethod(EVENT_PRIVATE_MODE_CHANGE, argv, ArraySize(argv));
         }

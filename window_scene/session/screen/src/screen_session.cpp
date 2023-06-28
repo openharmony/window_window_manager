@@ -17,9 +17,6 @@
 
 #include "window_manager_hilog.h"
 #include <transaction/rs_interfaces.h>
-#include <power_mgr_client.h>
-#include <ipc_skeleton.h>
-#include "session/host/include/scene_session.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -145,45 +142,6 @@ void ScreenSession::Disconnect()
     screenState_ = ScreenState::DISCONNECTION;
     for (auto& listener : screenChangeListenerList_) {
         listener->OnDisconnect();
-    }
-}
-
-void ScreenSession::HandleTurnScreenOn(const sptr<SceneSession>& sceneSession)
-{
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-    if (sceneSession->IsTurnScreenOn() && !PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
-        WLOGI("turn screen on");
-        PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
-    }
-    // set ipc identity to raw
-    IPCSkeleton::SetCallingIdentity(identity);
-}
-
-void ScreenSession::HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock)
-{
-    if (requireLock && sceneSession->keepScreenLock_ == nullptr) {
-        // reset ipc identtiy
-        std::string identity = IPCSkeleton::ResetCallingIdentity();
-        sceneSession->keepScreenLock_ = PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock(sceneSession->GetWindowName(),
-            PowerMgr::RunningLockType::RUNNINGLOCK_SCREEN);
-        // set ipc identity to raw
-        IPCSkeleton::SetCallingIdentity(identity);
-    }
-    if (sceneSession->keepScreenLock_ == nullptr) {
-        return;
-    }
-    WLOGI("keep screen on: [%{public}s, %{public}d]", sceneSession->GetWindowName().c_str(), requireLock);
-    ErrCode res;
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-    if (requireLock) {
-        res = sceneSession->keepScreenLock_->Lock();
-    } else {
-        res = sceneSession->keepScreenLock_->UnLock();
-    }
-    // set ipc identity to raw
-    IPCSkeleton::SetCallingIdentity(identity);
-    if (res != ERR_OK) {
-        WLOGFE("handle keep screen running lock failed: [operation: %{public}d, err: %{public}d]", requireLock, res);
     }
 }
 

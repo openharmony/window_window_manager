@@ -69,9 +69,9 @@ public:
     WSError SetFocusedSession(uint64_t persistentId);
     uint64_t GetFocusedSession() const;
     WSError UpdateFocus(uint64_t persistentId, bool isFocused);
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
     void HandleTurnScreenOn(const sptr<SceneSession>& sceneSession);
     void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
-
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;

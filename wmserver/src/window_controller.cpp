@@ -191,6 +191,23 @@ WMError WindowController::GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken)
     return res;
 }
 
+WMError WindowController::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+{
+    DisplayId displayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
+    sptr<WindowNode> windowNode;
+    WMError res = GetFocusWindowNode(displayId, windowNode);
+    if (res == WMError::WM_OK) {
+        WLOGFD("Get focus window info success");
+        focusInfo.windowId_ = windowNode->GetWindowId();
+        focusInfo.displayId_ = windowNode->GetDisplayId();
+        focusInfo.pid_ = windowNode->GetCallingPid();
+        focusInfo.uid_ = windowNode->GetCallingUid();
+        focusInfo.windowType_ = windowNode->GetWindowType();
+        focusInfo.abilityToken_ = windowNode->abilityToken_;
+    }
+    return res;
+}
+
 bool WindowController::CheckParentWindowValid(const sptr<WindowProperty>& property)
 {
     if (WindowHelper::IsSubWindow(property->GetWindowType())) {

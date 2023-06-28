@@ -36,17 +36,24 @@ ohos_shared_library("scene_session") {
     "container/src/zidl/window_event_channel_proxy.cpp",
     "container/src/zidl/window_event_channel_stub.cpp",
     "host/src/extension_session.cpp",
+    "host/src/move_drag_controller.cpp",
     "host/src/root_scene_session.cpp",
     "host/src/scene_persistence.cpp",
+    "host/src/scene_persistent_storage.cpp",
     "host/src/scene_session.cpp",
     "host/src/session.cpp",
+    "host/src/session_vsync_station.cpp",
     "host/src/zidl/session_proxy.cpp",
     "host/src/zidl/session_stub.cpp",
   ]
 
   public_configs = [ ":session_public_config" ]
 
-  deps = [ "${window_base_path}/window_scene/common:window_scene_common" ]
+  deps = [
+    "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/window_scene/session_manager:screen_session_manager",
+  ]
 
   public_deps =
       [ "${window_base_path}/window_scene/interfaces/innerkits:libwsutils" ]
@@ -55,12 +62,14 @@ ohos_shared_library("scene_session") {
     "ability_base:session_info",
     "ability_base:want",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "graphic_standard:librender_service_client",
     "hilog_native:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
     "multimedia_image_framework:image_native",
     "power_manager:powermgr_client",
+    "preferences:native_preferences",
   ]
 
   innerapi_tags = [ "platformsdk" ]
@@ -78,13 +87,10 @@ ohos_shared_library("screen_session") {
 
   deps = [
     "${window_base_path}/utils:libwmutil",
-    "${window_base_path}/window_scene/session:scene_session",
   ]
 
   external_deps = [
     "graphic_standard:librender_service_client",
-    "ipc:ipc_single",
-    "power_manager:powermgr_client",
   ]
 
   innerapi_tags = [ "platformsdk" ]
