@@ -52,6 +52,7 @@ private:
     void ProcessRaiseToTopRegister();
     void ProcessBackPressedRegister();
     void ProcessSessionFocusableChangeRegister();
+    void ProcessSessionTouchableChangeRegister();
     void ProcessClickRegister();
     void ProcessTerminateSessionRegister();
     void ProcessSessionExceptionRegister();
@@ -66,6 +67,7 @@ private:
     void OnRaiseToTop();
     void OnBackPressed();
     void OnSessionFocusableChange(bool isFocusable);
+    void OnSessionTouchableChange(bool touchable);
     void OnClick();
     void TerminateSession(const SessionInfo& info);
     void OnSessionException(const SessionInfo& info);

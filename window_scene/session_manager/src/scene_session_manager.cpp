@@ -29,6 +29,8 @@
 #include <system_ability_definition.h>
 #include <want.h>
 #include <hitrace_meter.h>
+#include <transaction/rs_transaction.h>
+#include <transaction/rs_interfaces.h>
 
 #include "color_parser.h"
 #include "common/include/permission.h"
@@ -40,6 +42,8 @@
 #include "session_manager_agent_controller.h"
 #include "window_manager.h"
 #include "perform_reporter.h"
+#include "focus_change_info.h"
+#include "session_manager/include/screen_session_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -331,7 +335,7 @@ std::string SceneSessionManager::CreateCurve(const WindowSceneConfig::ConfigItem
 
 sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
 {
-    auto task = [this]() {
+    auto task = [this]() -> sptr<RootSceneSession> {
         if (rootSceneSession_ != nullptr) {
             return rootSceneSession_;
         }
@@ -340,25 +344,26 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
         rootSceneSession_ = new (std::nothrow) RootSceneSession(info);
         if (!rootSceneSession_) {
             WLOGFE("rootSceneSession is nullptr");
-            return sptr<RootSceneSession>(nullptr);
+            return nullptr;
         }
         sptr<ISession> iSession(rootSceneSession_);
         AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(iSession->AsObject());
         return rootSceneSession_;
     };
 
-    WS_CHECK_NULL_RETURN(taskScheduler_, task);
     return taskScheduler_->PostSyncTask(task);
 }
 
 sptr<SceneSession> SceneSessionManager::GetSceneSession(uint64_t persistentId)
 {
-    auto iter = sceneSessionMap_.find(persistentId);
-    if (iter == sceneSessionMap_.end()) {
-        WLOGFE("Error found scene session with id: %{public}" PRIu64, persistentId);
-        return nullptr;
-    }
-    return iter->second;
+    return taskScheduler_->PostSyncTask([this, persistentId]() -> sptr<SceneSession> {
+        auto iter = sceneSessionMap_.find(persistentId);
+        if (iter == sceneSessionMap_.end()) {
+            WLOGFE("Error found scene session with id: %{public}" PRIu64, persistentId);
+            return nullptr;
+        }
+        return iter->second;
+    });
 }
 
 WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& sceneSession, sptr<WindowSessionProperty> property)
@@ -425,10 +430,11 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         sceneSession->SetSystemConfig(systemConfig_);
         UpdateParentSession(sceneSession, property);
         sceneSessionMap_.insert({ persistentId, sceneSession });
+        RegisterSessionStateChangeNotifyManagerFunc(sceneSession);
         WLOGFI("create session persistentId: %{public}" PRIu64 "", persistentId);
         return sceneSession;
     };
-    WS_CHECK_NULL_RETURN(taskScheduler_, task);
+
     return taskScheduler_->PostSyncTask(task);
 }
 
@@ -480,7 +486,7 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         activeSessionId_ = persistentId;
         return WSError::WS_OK;
     };
-    WS_CHECK_NULL_RETURN(taskScheduler_, task);
+
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
@@ -514,7 +520,6 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         return WSError::WS_OK;
     };
 
-    WS_CHECK_NULL_RETURN(taskScheduler_, task);
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
@@ -566,7 +571,6 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         return WSError::WS_OK;
     };
 
-    WS_CHECK_NULL_RETURN(taskScheduler_, task);
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
@@ -596,9 +600,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         session = sceneSession;
         return errCode;
     };
-    WS_CHECK_NULL_RETURN(taskScheduler_, task);
-    taskScheduler_->PostSyncTask(task);
-    return WSError::WS_OK;
+
+    return taskScheduler_->PostSyncTask(task);
 }
 
 void SceneSessionManager::SetCreateSpecificSessionListener(const NotifyCreateSpecificSessionFunc& func)
@@ -609,12 +612,8 @@ void SceneSessionManager::SetCreateSpecificSessionListener(const NotifyCreateSpe
 WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const uint64_t& persistentId)
 {
     auto task = [this, persistentId]() {
-        WLOGFI("Destroy session persistentId: %{public}" PRIu64 "", persistentId);
-        auto iter = sceneSessionMap_.find(persistentId);
-        if (iter == sceneSessionMap_.end()) {
-            return WSError::WS_ERROR_INVALID_SESSION;
-        }
-        const auto& sceneSession = iter->second;
+        WLOGFI("Destroy specific session persistentId: %{public}" PRIu64, persistentId);
+        auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
             return WSError::WS_ERROR_NULLPTR;
         }
@@ -629,9 +628,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const uint64_t&
         return ret;
     };
 
-    WS_CHECK_NULL_RETURN(taskScheduler_, task);
-    taskScheduler_->PostSyncTask(task);
-    return WSError::WS_OK;
+    return taskScheduler_->PostSyncTask(task);
 }
 
 const AppWindowSceneConfig& SceneSessionManager::GetWindowSceneConfig() const
@@ -651,8 +648,7 @@ WSError SceneSessionManager::ProcessBackEvent()
         return WSError::WS_OK;
     };
 
-    WS_CHECK_NULL_RETURN(taskScheduler_, task);
-    taskScheduler_->PostSyncTask(task);
+    taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
 
@@ -744,59 +740,64 @@ void SceneSessionManager::GetStartPage(const SessionInfo& sessionInfo, std::stri
 
 WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
 {
-    if (property == nullptr) {
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    uint64_t persistentId = property->GetPersistentId();
-    auto sceneSession = GetSceneSession(persistentId);
-    if (sceneSession == nullptr) {
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    WLOGI("Id: %{public}" PRIu64", action: %{public}u", sceneSession->GetPersistentId(), static_cast<uint32_t>(action));
-    WSError ret = WSError::WS_OK;
-    switch (action) {
-        case WSPropertyChangeAction::ACTION_UPDATE_FLAGS: {
-            // @todo
-            break;
+    auto task = [this, property, action]() {
+        if (property == nullptr) {
+            return;
         }
-        case WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE: {
-            sceneSession->SetFocusable(property->GetFocusable());
-            break;
+        auto sceneSession = GetSceneSession(property->GetPersistentId());
+        if (sceneSession == nullptr) {
+            return;
         }
-        case WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE: {
-            // @todo
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS: {
-            if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-                WLOGW("only app main window can set brightness");
-                return WSError::WS_DO_NOTHING;
+        WLOGI("Id: %{public}" PRIu64 ", action: %{public}u", sceneSession->GetPersistentId(), action);
+        switch (action) {
+            case WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE: {
+                sceneSession->SetFocusable(property->GetFocusable());
+                break;
             }
-            // @todo if sceneSession is inactive, return
-            ret = SetBrightness(sceneSession, property->GetBrightness());
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
-            // @todo
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE: {
-            if (sceneSession->GetSessionProperty() != nullptr) {
-                sceneSession->GetSessionProperty()->SetMaximizeMode(property->GetMaximizeMode());
+            case WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE: {
+                sceneSession->SetTouchable(property->GetTouchable());
+                break;
             }
-            break;
-        }
-        case WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS: {
-            auto& systemBarProperties = property->GetSystemBarProperty();
-            for (auto& iter : systemBarProperties) {
-                sceneSession->SetSystemBarProperty(iter.first, iter.second);
+            case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS: {
+                if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+                    WLOGW("only app main window can set brightness");
+                    return;
+                }
+                // @todo if sceneSession is inactive, return
+                SetBrightness(sceneSession, property->GetBrightness());
+                break;
             }
-        }
-        default:
+            case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
+                bool prePrivacyMode = sceneSession->GetWindowSessionProperty()->GetPrivacyMode() || sceneSession->GetWindowSessionProperty()->GetSystemPrivacyMode();
+                bool isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
+                if (prePrivacyMode ^ isPrivacyMode) {
+                    sceneSession->GetWindowSessionProperty()->SetPrivacyMode(isPrivacyMode);
+                    sceneSession->GetWindowSessionProperty()->SetSystemPrivacyMode(isPrivacyMode);
+                    sceneSession->GetSurfaceNode()->SetSecurityLayer(isPrivacyMode);
+                    RSTransaction::FlushImplicitTransaction();
+                    UpdatePrivateStateAndNotify(isPrivacyMode);
+                }
             break;
-    }
-
-    return ret;
+            }
+            case WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE: {
+                if (sceneSession->GetSessionProperty() != nullptr) {
+                    sceneSession->GetSessionProperty()->SetMaximizeMode(property->GetMaximizeMode());
+                }
+                break;
+            }
+            case WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS: {
+                auto& systemBarProperties = property->GetSystemBarProperty();
+                for (auto& iter : systemBarProperties) {
+                    sceneSession->SetSystemBarProperty(iter.first, iter.second);
+                }
+                break;
+            }
+            default:
+                break;
+        }
+    };
+    taskScheduler_->PostAsyncTask(task);
+    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSession, float brightness)
@@ -892,34 +893,87 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
 
 WSError SceneSessionManager::UpdateFocus(uint64_t persistentId, bool isFocused)
 {
-    // notify session and client
+    auto task = [this, persistentId, isFocused]() {
+        // notify session and client
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            WLOGFE("could not find window");
+            return WSError::WS_ERROR_INVALID_WINDOW;
+        }
+        WSError res = WSError::WS_OK;
+        res = sceneSession->UpdateFocus(isFocused);
+        if (res != WSError::WS_OK) {
+            return res;
+        }
+        // focusId change
+        if (isFocused) {
+            SetFocusedSession(persistentId);
+        } else if (persistentId == GetFocusedSession()) {
+            SetFocusedSession(INVALID_SESSION_ID);
+        }
+        // notify window manager
+        sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo(
+            sceneSession->GetWindowId(),
+            static_cast<DisplayId>(0),
+            sceneSession->GetCallingPid(),
+            sceneSession->GetCallingUid(),
+            sceneSession->GetWindowType(),
+            sceneSession->GetAbilityToken()
+        );
+        SessionManagerAgentController::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, isFocused);
+        return WSError::WS_OK;
+    };
+
+    taskScheduler_->PostAsyncTask(task);
+    return WSError::WS_OK;
+}
+
+void SceneSessionManager::UpdatePrivateStateAndNotify(bool isAddingPrivateSession)
+{
+    auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);
+    if (screenSession == nullptr) {
+        WLOGFE("screen session is null");
+        return;
+    }
+    ScreenSessionManager::GetInstance().UpdatePrivateStateAndNotify(screenSession, isAddingPrivateSession);
+}
+
+void SceneSessionManager::RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession)
+{
+    NotifySessionStateChangeNotifyManagerFunc func = [this](int64_t persistentId) {
+        this->OnSessionStateChange(persistentId);
+    };
+    if (sceneSession == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    sceneSession->SetSessionStateChangeNotifyManagerListener(func);
+    WLOGFD("RegisterSessionStateChangeFunc success");
+}
+
+void SceneSessionManager::OnSessionStateChange(uint64_t persistentId)
+{
+    WLOGFD("Session state change, id: %{public}" PRIu64, persistentId);
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        WLOGFE("could not find window");
-        return WSError::WS_ERROR_INVALID_WINDOW;
+        WLOGFD("session is nullptr");
+        return;
     }
-    WSError res = WSError::WS_OK;
-    res = sceneSession->UpdateFocus(isFocused);
-    if (res != WSError::WS_OK) {
-        return res;
+    SessionState state = sceneSession->GetSessionState();
+    switch (state) {
+    case SessionState::STATE_FOREGROUND:
+        if (sceneSession->GetWindowSessionProperty()->GetPrivacyMode()) {
+            UpdatePrivateStateAndNotify(true);
+        }
+        break;
+    case SessionState::STATE_BACKGROUND:
+        if (sceneSession->GetWindowSessionProperty()->GetPrivacyMode()) {
+            UpdatePrivateStateAndNotify(false);
+        }
+        break;
+    default:
+        break;
     }
-    // focusId change
-    if (isFocused) {
-        SetFocusedSession(persistentId);
-    } else if (persistentId == GetFocusedSession()) {
-        SetFocusedSession(INVALID_SESSION_ID);
-    }
-    // notify window manager
-    sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo(
-        sceneSession->GetWindowId(),
-        static_cast<DisplayId>(0),
-        sceneSession->GetCallingPid(),
-        sceneSession->GetCallingUid(),
-        sceneSession->GetWindowType(),
-        sceneSession->GetAbilityToken()
-    );
-    SessionManagerAgentController::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, isFocused);
-    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession)
@@ -955,18 +1009,22 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
         AAFwk::AbilityManagerClient::GetInstance()->CallUIAbilityBySCB(abilitySessionInfo);
         return WSError::WS_OK;
     };
-    WS_CHECK_NULL_RETURN(taskScheduler_, task);
+
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
 
 void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo)
 {
-    WLOGFI("StartAbilityBySpecified: bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
-        sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());
-    AAFwk::Want want;
-    want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
-    AAFwk::AbilityManagerClient::GetInstance()->StartSpecifiedAbilityBySCB(want);
+    auto task = [this, sessionInfo]() {
+        WLOGFI("StartAbilityBySpecified: bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
+            sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());
+        AAFwk::Want want;
+        want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
+        AAFwk::AbilityManagerClient::GetInstance()->StartSpecifiedAbilityBySCB(want);
+    };
+
+    taskScheduler_->PostAsyncTask(task);
 }
 
 WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType type,
@@ -979,8 +1037,7 @@ WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType t
     auto task = [this, &windowManagerAgent, type]() {
         return SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type);
     };
-    taskScheduler_->PostSyncTask(task);
-    return WMError::WM_OK;
+    return taskScheduler_->PostSyncTask(task);
 }
 
 WMError SceneSessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType type,
@@ -993,8 +1050,7 @@ WMError SceneSessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType
     auto task = [this, &windowManagerAgent, type]() {
         return SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type);
     };
-    taskScheduler_->PostSyncTask(task);
-    return WMError::WM_OK;
+    return taskScheduler_->PostSyncTask(task);
 }
 
 void SceneSessionManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)

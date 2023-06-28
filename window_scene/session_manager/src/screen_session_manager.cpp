@@ -18,7 +18,6 @@
 #include <transaction/rs_interfaces.h>
 #include <hitrace_meter.h>
 #include "window_manager_hilog.h"
-#include "screen_session_manager.h"
 #include "screen_scene_config.h"
 #include "permission.h"
 #include <parameters.h>
@@ -32,11 +31,7 @@ const std::string SCREEN_SESSION_MANAGER_THREAD = "ScreenSessionManager";
 const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
 } // namespace
 
-ScreenSessionManager& ScreenSessionManager::GetInstance()
-{
-    static ScreenSessionManager screenSessionManager;
-    return screenSessionManager;
-}
+WM_IMPLEMENT_SINGLE_INSTANCE(ScreenSessionManager)
 
 ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetInstance()),
     sessionDisplayPowerController_(new SessionDisplayPowerController(
@@ -63,8 +58,10 @@ void ScreenSessionManager::RegisterScreenConnectionListener(sptr<IScreenConnecti
     }
 
     screenConnectionListenerList_.emplace_back(screenConnectionListener);
-    for (auto sessionIt : screenSessionMap_) {
-        screenConnectionListener->OnScreenConnect(sessionIt.second);
+
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    for (auto& iter : screenSessionMap_) {
+        screenConnectionListener->OnScreenConnect(iter.second);
     }
 }
 
@@ -173,7 +170,6 @@ void ScreenSessionManager::RegisterScreenChangeListener()
         [this](ScreenId screenId, ScreenEvent screenEvent) { OnScreenChange(screenId, screenEvent); });
     if (res != StatusCode::SUCCESS) {
         auto task = [this]() { RegisterScreenChangeListener(); };
-        WS_CHECK_NULL_RETURN(taskScheduler_, task);
         taskScheduler_->PostAsyncTask(task, 50); // Retry after 50 ms.
     }
 }
@@ -197,15 +193,14 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
         for (auto listener : screenConnectionListenerList_) {
             listener->OnScreenDisconnect(screenSession);
         }
-        WLOGFI("SCB: OnScreenChange. screenSessionMap_ delete ScreenId: %{public}" PRIu64 " ", screenId);
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
         screenSessionMap_.erase(screenId);
-    } else {
-        WLOGE("Unknown ScreenEvent: %{public}d", static_cast<int>(screenEvent));
     }
 }
 
 sptr<ScreenSession> ScreenSessionManager::GetScreenSession(ScreenId screenId) const
 {
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     auto iter = screenSessionMap_.find(screenId);
     if (iter == screenSessionMap_.end()) {
         WLOGFE("Error found screen session with id: %{public}" PRIu64, screenId);
@@ -228,6 +223,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo()
 
 sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
 {
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (auto sessionIt : screenSessionMap_) {
         auto screenSession = sessionIt.second;
         sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
@@ -241,6 +237,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
 
 sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoByScreen(ScreenId screenId)
 {
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (auto sessionIt : screenSessionMap_) {
         auto screenSession = sessionIt.second;
         sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
@@ -255,6 +252,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoByScreen(ScreenId screenId
 std::vector<DisplayId> ScreenSessionManager::GetAllDisplayIds()
 {
     std::vector<DisplayId> res;
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (auto sessionIt : screenSessionMap_) {
         auto screenSession = sessionIt.second;
         sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
@@ -421,13 +419,15 @@ DMError ScreenSessionManager::SetScreenColorTransform(ScreenId screenId)
     return screenSession->SetScreenColorTransform();
 }
 
-
 sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId screenId)
 {
     WLOGFI("SCB: ScreenSessionManager::GetOrCreateScreenSession ENTER");
-    auto sessionIt = screenSessionMap_.find(screenId);
-    if (sessionIt != screenSessionMap_.end()) {
-        return sessionIt->second;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        auto sessionIt = screenSessionMap_.find(screenId);
+        if (sessionIt != screenSessionMap_.end()) {
+            return sessionIt->second;
+        }
     }
 
     ScreenId rsId = rsInterface_.GetDefaultScreenId();
@@ -451,6 +451,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     }
     InitAbstractScreenModesInfo(session);
     session->groupSmsId_ = 1;
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     screenSessionMap_[screenId] = session;
     return session;
 }
@@ -536,6 +537,7 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
 std::vector<ScreenId> ScreenSessionManager::GetAllScreenIds()
 {
     std::vector<ScreenId> res;
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (const auto& iter : screenSessionMap_) {
         res.emplace_back(iter.first);
     }
@@ -554,11 +556,6 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
 
 ScreenPowerState ScreenSessionManager::GetScreenPower(ScreenId screenId)
 {
-    if (screenSessionMap_.find(screenId) == screenSessionMap_.end()) {
-        WLOGFE("cannot find screen %{public}" PRIu64"", screenId);
-        return ScreenPowerState::INVALID_STATE;
-    }
-
     auto state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(screenId));
     WLOGFI("GetScreenPower:%{public}u, rsscreen:%{public}" PRIu64".", state, screenId);
     return state;
@@ -636,6 +633,7 @@ DMError ScreenSessionManager::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& s
 std::vector<ScreenId> ScreenSessionManager::GetAllScreenIds() const
 {
     std::vector<ScreenId> res;
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (const auto& iter : screenSessionMap_) {
         res.emplace_back(iter.first);
     }
@@ -676,7 +674,10 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
             screenIdManager_.DeleteScreenId(smsScreenId);
             return SCREEN_ID_INVALID;
         }
-        screenSessionMap_.insert(std::make_pair(smsScreenId, screenSession));
+        {
+            std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+            screenSessionMap_.insert(std::make_pair(smsScreenId, screenSession));
+        }
         NotifyScreenConnected(screenSession->ConvertToScreenInfo());
         if (deathRecipient_ == nullptr) {
             WLOGFI("SCB: ScreenSessionManager::CreateVirtualScreen Create deathRecipient");
@@ -734,6 +735,7 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:DestroyVirtualScreen(%" PRIu64")", screenId);
     if (rsScreenId != SCREEN_ID_INVALID && GetScreenSession(screenId) != nullptr) {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
         auto smsScreenMapIter = screenSessionMap_.find(screenId);
         screenSessionMap_.erase(smsScreenMapIter);
     }
@@ -933,6 +935,7 @@ sptr<ScreenSession> ScreenSessionManager::InitAndGetScreen(ScreenId rsScreenId)
         return nullptr;
     }
     WLOGI("SCB: InitAndGetScreen: screenSessionMap_ add screenId=%{public}" PRIu64"", smsScreenId);
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     screenSessionMap_.insert(std::make_pair(smsScreenId, screenSession));
     return screenSession;
 }
@@ -983,6 +986,7 @@ sptr<ScreenSessionGroup> ScreenSessionManager::AddAsFirstScreenLocked(sptr<Scree
         smsScreenGroupMap_.erase(iter);
     }
     smsScreenGroupMap_.insert(std::make_pair(smsGroupScreenId, screenGroup));
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     screenSessionMap_.insert(std::make_pair(smsGroupScreenId, screenGroup));
     screenGroup->mirrorScreenId_ = newScreen->screenId_;
     WLOGI("connect new group screen, screenId: %{public}" PRIu64", screenGroupId: %{public}" PRIu64", "
@@ -994,6 +998,7 @@ sptr<ScreenSessionGroup> ScreenSessionManager::AddAsFirstScreenLocked(sptr<Scree
 sptr<ScreenSessionGroup> ScreenSessionManager::AddAsSuccedentScreenLocked(sptr<ScreenSession> newScreen)
 {
     ScreenId defaultScreenId = GetDefaultAbstractScreenId();
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     auto iter = screenSessionMap_.find(defaultScreenId);
     if (iter == screenSessionMap_.end()) {
         WLOGE("AddAsSuccedentScreenLocked. defaultScreenId:%{public}" PRIu64" is not in screenSessionMap_.",
@@ -1045,6 +1050,7 @@ bool ScreenSessionManager::RemoveChildFromGroup(sptr<ScreenSession> screen, sptr
         smsScreenGroupMap_.erase(screenGroup->screenId_);
 
         WLOGE("SCB: RemoveFromGroupLocked. screenSessionMap_ remove screen:%{public}" PRIu64"", screenGroup->screenId_);
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
         screenSessionMap_.erase(screenGroup->screenId_);
     }
     return true;
@@ -1199,14 +1205,17 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
 {
     ScreenId screenId = SCREEN_ID_INVALID;
     std::shared_ptr<RSDisplayNode> displayNode = nullptr;
-    for (auto sessionIt : screenSessionMap_) {
-        auto screenSession = sessionIt.second;
-        sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
-        WLOGI("SCB: GetScreenSnapshot: displayId %{public}" PRIu64"", displayInfo->GetDisplayId());
-        if (displayId == displayInfo->GetDisplayId()) {
-            displayNode = screenSession->GetDisplayNode();
-            screenId = sessionIt.first;
-            break;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        for (auto sessionIt : screenSessionMap_) {
+            auto screenSession = sessionIt.second;
+            sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
+            WLOGI("SCB: GetScreenSnapshot: displayId %{public}" PRIu64"", displayInfo->GetDisplayId());
+            if (displayId == displayInfo->GetDisplayId()) {
+                displayNode = screenSession->GetDisplayNode();
+                screenId = sessionIt.first;
+                break;
+            }
         }
     }
     if (screenId == SCREEN_ID_INVALID) {
@@ -1274,6 +1283,7 @@ std::vector<ScreenId> ScreenSessionManager::GetAllValidScreenIds(const std::vect
         if (screenIdIter != validScreenIds.end()) {
             continue;
         }
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
         auto iter = screenSessionMap_.find(screenId);
         if (iter != screenSessionMap_.end() &&
                 iter->second->GetScreenProperty().GetScreenType() != ScreenType::UNDEFINED) {
@@ -1342,6 +1352,48 @@ void ScreenSessionManager::NotifyScreenGroupChanged(
         OnScreenGroupChange(trigger, screenInfo, event);
     };
     taskScheduler_->PostAsyncTask(task);
+}
+
+void ScreenSessionManager::NotifyPrivateSessionStateChanged(bool hasPrivate)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    WLOGI("PrivateSession status : %{public}u", hasPrivate);
+    for (auto& agent : agents) {
+        agent->NotifyPrivateWindowStateChanged(hasPrivate);
+    }
+}
+
+void ScreenSessionManager::UpdatePrivateStateAndNotify(sptr<ScreenSession>& screenSession, bool isAddingPrivateSession)
+{
+    uint32_t prePrivateSessionCount = screenSession->GetPrivateSessionCount();
+    WLOGFD("before update : privateWindow count: %{public}u", prePrivateSessionCount);
+    screenSession->SetPrivateSessionCount(prePrivateSessionCount + (isAddingPrivateSession ? 1 : -1));
+    if (prePrivateSessionCount == 0 && isAddingPrivateSession) {
+        NotifyPrivateSessionStateChanged(true);
+    } else if (prePrivateSessionCount == 1 && !isAddingPrivateSession) {
+        NotifyPrivateSessionStateChanged(false);
+    }
+}
+
+DMError ScreenSessionManager::HasPrivateWindow(DisplayId id, bool& hasPrivateWindow)
+{
+    // delete permission
+    std::vector<ScreenId> screenIds = GetAllScreenIds();
+    auto iter = std::find(screenIds.begin(), screenIds.end(), id);
+    if (iter == screenIds.end()) {
+        WLOGFE("invalid displayId");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    auto screenSession = GetScreenSession(id);
+    if (screenSession == nullptr) {
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    hasPrivateWindow = screenSession->HasPrivateSession();
+    WLOGFD("id: %{public}" PRIu64" has private window: %{public}u", id, static_cast<uint32_t>(hasPrivateWindow));
+    return DMError::DM_OK;
 }
 
 void ScreenSessionManager::OnScreenGroupChange(const std::string& trigger,

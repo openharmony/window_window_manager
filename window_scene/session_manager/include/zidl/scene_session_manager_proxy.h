@@ -17,16 +17,15 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_PROXY_H
 
 #include <iremote_proxy.h>
-#include <refbase.h>
+
 #include "session_manager/include/zidl/scene_session_manager_interface.h"
 
 namespace OHOS::Rosen {
 class SceneSessionManagerProxy : public IRemoteProxy<ISceneSessionManager> {
 public:
     explicit SceneSessionManagerProxy(const sptr<IRemoteObject>& impl)
-        : IRemoteProxy<ISceneSessionManager>(impl) {};
-
-    ~SceneSessionManagerProxy() {};
+        : IRemoteProxy<ISceneSessionManager>(impl) {}
+    virtual ~SceneSessionManagerProxy() = default;
 
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -44,4 +43,5 @@ private:
     static inline BrokerDelegator<SceneSessionManagerProxy> delegator_;
 };
 } // namespace OHOS::Rosen
+
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_PROXY_H

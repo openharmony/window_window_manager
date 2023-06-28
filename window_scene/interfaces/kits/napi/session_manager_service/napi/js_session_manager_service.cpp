@@ -14,8 +14,8 @@
  */
 
 #include "js_session_manager_service.h"
+
 #include "js_runtime_utils.h"
-#include "singleton_container.h"
 #include "session_manager_service.h"
 #include "window_manager_hilog.h"
 
@@ -56,8 +56,7 @@ private:
     NativeValue* OnGetRemoteObject(NativeEngine& engine, NativeCallbackInfo& info)
     {
         WLOGI("JsSessionManagerService: OnGetRemoteObject is called");
-        auto& sessionManagerService = SingletonContainer::Get<SessionManagerService>();
-        sptr<IRemoteObject> remoteObject = sessionManagerService.GetRemoteObject();
+        sptr<IRemoteObject> remoteObject = SessionManagerService::GetInstance().GetRemoteObject();
 
         napi_env env = reinterpret_cast<napi_env>(&engine);
         napi_value value = NAPI_ohos_rpc_CreateJsRemoteObject(env, remoteObject);
@@ -67,8 +66,7 @@ private:
     NativeValue* OnInitSessionManagerService(NativeEngine& engine, NativeCallbackInfo& info)
     {
         WLOGI("JsSessionManagerService: OnInitSessionManagerService is called");
-        auto& sessionManagerService = SingletonContainer::Get<SessionManagerService>();
-        sessionManagerService.Init();
+        SessionManagerService::GetInstance().Init();
 
         napi_env env = reinterpret_cast<napi_env>(&engine);
         napi_value value = NAPI_ohos_rpc_CreateJsRemoteObject(env, nullptr);

@@ -77,7 +77,7 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
         extensionSessionMap_.insert({ persistentId, extensionSession });
         return extensionSession;
     };
-    WS_CHECK_NULL_RETURN(taskScheduler_, task);
+
     return taskScheduler_->PostSyncTask(task);
 }
 
@@ -109,7 +109,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
             AppExecFwk::ExtensionAbilityType::UI);
         return WSError::WS_OK;
     };
-    WS_CHECK_NULL_RETURN(taskScheduler_, task);
+
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
@@ -138,7 +138,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
         AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIExtensionAbility(extSessionInfo);
         return WSError::WS_OK;
     };
-    WS_CHECK_NULL_RETURN(taskScheduler_, task);
+
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
@@ -167,7 +167,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
         extensionSessionMap_.erase(persistentId);
         return WSError::WS_OK;
     };
-    WS_CHECK_NULL_RETURN(taskScheduler_, task);
+
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
