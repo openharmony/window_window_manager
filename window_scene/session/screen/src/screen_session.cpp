@@ -304,6 +304,22 @@ DMError ScreenSession::SetScreenColorTransform()
     return DMError::DM_OK;
 }
 
+int32_t ScreenSession::GetPrivateSessionCount() const
+{
+    return privateSessionCount_;
+}
+
+DMError ScreenSession::SetPrivateSessionCount(int32_t count)
+{
+    privateSessionCount_ = count;
+    return DMError::DM_OK;
+}
+
+bool ScreenSession::HasPrivateSession() const
+{
+    return privateSessionCount_ > 0;
+}
+
 void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint)
 {
     if (displayNode_ != nullptr) {
