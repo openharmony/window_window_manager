@@ -1343,6 +1343,48 @@ void ScreenSessionManager::NotifyScreenGroupChanged(
     taskScheduler_->PostAsyncTask(task);
 }
 
+void ScreenSessionManager::NotifyPrivateSessionStateChanged(bool hasPrivate)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    WLOGI("PrivateSession status : %{public}u", hasPrivate);
+    for (auto& agent : agents) {
+        agent->NotifyPrivateWindowStateChanged(hasPrivate);
+    }
+}
+
+void ScreenSessionManager::UpdatePrivateStateAndNotify(sptr<ScreenSession>& screenSession, bool isAddingPrivateSession)
+{
+    uint32_t prePrivateSessionCount = screenSession->GetPrivateSessionCount();
+    WLOGFD("before update : privateWindow count: %{public}u", prePrivateSessionCount);
+    screenSession->SetPrivateSessionCount(prePrivateSessionCount + (isAddingPrivateSession ? 1 : -1));
+    if (prePrivateSessionCount == 0 && isAddingPrivateSession) {
+        NotifyPrivateSessionStateChanged(true);
+    } else if (prePrivateSessionCount == 1 && !isAddingPrivateSession) {
+        NotifyPrivateSessionStateChanged(false);
+    }
+}
+
+DMError ScreenSessionManager::HasPrivateWindow(DisplayId id, bool& hasPrivateWindow)
+{
+    // delete permission
+    std::vector<ScreenId> screenIds = GetAllScreenIds();
+    auto iter = std::find(screenIds.begin(), screenIds.end(), id);
+    if (iter == screenIds.end()) {
+        WLOGFE("invalid displayId");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    auto screenSession = GetScreenSession(id);
+    if (screenSession == nullptr) {
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    hasPrivateWindow = screenSession->HasPrivateSession();
+    WLOGFD("id: %{public}" PRIu64" has private window: %{public}u", id, static_cast<uint32_t>(hasPrivateWindow));
+    return DMError::DM_OK;
+}
+
 void ScreenSessionManager::OnScreenGroupChange(const std::string& trigger,
     const sptr<ScreenInfo>& screenInfo, ScreenGroupChangeEvent groupEvent)
 {

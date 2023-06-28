@@ -71,6 +71,7 @@ public:
     WSError UpdateFocus(uint64_t persistentId, bool isFocused);
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
 
+    void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
@@ -114,6 +115,8 @@ private:
 
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
+    void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
+    void OnSessionStateChange(uint64_t persistentId);
 };
 } // namespace OHOS::Rosen
 
