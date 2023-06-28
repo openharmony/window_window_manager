@@ -15,6 +15,7 @@
 
 #include "session_manager_service.h"
 
+#include "ability_manager_client.h"
 #include "screenlock_system_ability.h"
 
 #include "session_manager/include/scene_session_manager.h"
@@ -61,5 +62,10 @@ sptr<IRemoteObject> SessionManagerService::GetScreenSessionManagerService()
     }
     screenSessionManagerObj_ = ScreenSessionManager::GetInstance().AsObject();
     return screenSessionManagerObj_;
+}
+
+void SessionManagerService::Init()
+{
+    AAFwk::AbilityManagerClient::GetInstance()->SetSessionManagerService(this->AsObject());
 }
 } // namesapce OHOS::Rosen

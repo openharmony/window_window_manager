@@ -25,6 +25,10 @@
 #include <vector>
 
 #include "config_policy_utils.h"
+#include "include/core/SkMatrix.h"
+#include "include/core/SkPath.h"
+#include "include/core/SkPathMeasure.h"
+#include "include/utils/SkParsePath.h"
 #include "window_manager_hilog.h"
 
 
@@ -36,6 +40,8 @@ namespace {
 std::map<std::string, bool> ScreenSceneConfig::enableConfig_;
 std::map<std::string, std::vector<int>> ScreenSceneConfig::intNumbersConfig_;
 std::map<std::string, std::string> ScreenSceneConfig::stringConfig_;
+std::vector<DMRect> ScreenSceneConfig::cutoutBoundaryRect_;
+bool ScreenSceneConfig::isWaterfallDisplay_ = false;
 
 std::vector<std::string> ScreenSceneConfig::Split(std::string str, std::string pattern)
 {
@@ -178,6 +184,9 @@ void ScreenSceneConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)
     std::string nodeName = reinterpret_cast<const char *>(currNode->name);
     if (!xmlStrcmp(enable, reinterpret_cast<const xmlChar*>("true"))) {
         enableConfig_[nodeName] = true;
+        if ("isWaterfallDisplay" == nodeName) {
+            isWaterfallDisplay_ = true;
+        }
     } else {
         enableConfig_[nodeName] = false;
     }
@@ -227,5 +236,54 @@ void ScreenSceneConfig::DumpConfig()
     for (auto& string : stringConfig_) {
         WLOGFI("[SsConfig] String: %{public}s", string.first.c_str());
     }
+}
+
+void ScreenSceneConfig::SetCutoutSvgPath(const std::string& svgPath)
+{
+    cutoutBoundaryRect_.clear();
+    cutoutBoundaryRect_.emplace_back(CalcCutoutBoundaryRect(svgPath));
+}
+
+DMRect ScreenSceneConfig::CalcCutoutBoundaryRect(std::string svgPath)
+{
+    DMRect emptyRect = { 0, 0, 0, 0 };
+    SkPath skCutoutSvgPath;
+    if (!SkParsePath::FromSVGString(svgPath.c_str(), &skCutoutSvgPath)) {
+        WLOGFE("Parse svg string path failed.");
+        return emptyRect;
+    }
+    SkRect skRect = skCutoutSvgPath.computeTightBounds();
+    if (skRect.isEmpty()) {
+        WLOGFW("Get empty skRect");
+        return emptyRect;
+    }
+    SkIRect skiRect = skRect.roundOut();
+    if (skiRect.isEmpty()) {
+        WLOGFW("Get empty skiRect");
+        return emptyRect;
+    }
+    int32_t left = static_cast<int32_t>(skiRect.left());
+    int32_t top = static_cast<int32_t>(skiRect.top());
+    uint32_t width = static_cast<uint32_t>(skiRect.width());
+    uint32_t height = static_cast<uint32_t>(skiRect.height());
+    WLOGFI("calc cutout boundary rect - left: [%{public}d top: %{public}d width: %{public}u height: %{public}u]", left,
+        top, width, height);
+    DMRect cutoutMinOuterRect = {
+        .posX_ = left,
+        .posY_ = top,
+        .width_ = width,
+        .height_ = height
+    };
+    return cutoutMinOuterRect;
+}
+
+std::vector<DMRect> ScreenSceneConfig::GetCutoutBoundaryRect()
+{
+    return cutoutBoundaryRect_;
+}
+
+bool ScreenSceneConfig::IsWaterfallDisplay()
+{
+    return isWaterfallDisplay_;
 }
 } // namespace OHOS::Rosen

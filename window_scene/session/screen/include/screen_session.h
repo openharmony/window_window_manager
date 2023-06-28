@@ -48,8 +48,6 @@ enum class ScreenState : int32_t {
     DISCONNECTION,
 };
 
-class SceneSession;
-
 class ScreenSession : public RefBase {
 public:
     explicit ScreenSession(ScreenId screenId, const ScreenProperty& property);
@@ -96,8 +94,6 @@ public:
     void Connect();
     void Disconnect();
 
-    void HandleTurnScreenOn(const sptr<SceneSession>& sceneSession);
-    void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
 private:
     ScreenProperty property_;
     std::shared_ptr<RSDisplayNode> displayNode_;

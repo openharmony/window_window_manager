@@ -30,6 +30,10 @@
 #include "window_manager_service_utils.h"
 #include "window_manager_agent_controller.h"
 #include "window_system_effect.h"
+#ifdef MEMMGR_WINDOW_ENABLE
+#include "mem_mgr_client.h"
+#include "mem_mgr_window_info.h"
+#endif
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -391,6 +395,9 @@ void WindowRoot::NotifyWindowVisibilityChange(std::shared_ptr<RSOcclusionData> o
 {
     std::vector<std::pair<uint64_t, bool>> visibilityChangeInfo = GetWindowVisibilityChangeInfo(occlusionData);
     std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+#ifdef MEMMGR_WINDOW_ENABLE
+    std::vector<sptr<Memory::MemMgrWindowInfo>> memMgrWindowInfos;
+#endif
     for (const auto& elem : visibilityChangeInfo) {
         uint64_t surfaceId = elem.first;
         bool isVisible = elem.second;
@@ -405,6 +412,10 @@ void WindowRoot::NotifyWindowVisibilityChange(std::shared_ptr<RSOcclusionData> o
         node->isVisible_ = isVisible;
         windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(node->GetWindowId(), node->GetCallingPid(),
             node->GetCallingUid(), isVisible, node->GetWindowType()));
+#ifdef MEMMGR_WINDOW_ENABLE
+        memMgrWindowInfos.emplace_back(new Memory::MemMgrWindowInfo(node->GetWindowId(), node->GetCallingPid(),
+            node->GetCallingUid(), isVisible));
+#endif
         WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
             node->GetWindowId(), isVisible);
     }
@@ -413,6 +424,12 @@ void WindowRoot::NotifyWindowVisibilityChange(std::shared_ptr<RSOcclusionData> o
         WLOGI("Notify windowvisibilityinfo changed start");
         WindowManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
+#ifdef MEMMGR_WINDOW_ENABLE
+    if (memMgrWindowInfos.size() != 0) {
+        WLOGI("Notify memMgrWindowInfos changed start");
+        Memory::MemMgrClient::GetInstance().OnWindowVisibilityChanged(memMgrWindowInfos);
+    }
+#endif
 }
 
 AvoidArea WindowRoot::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
@@ -926,7 +943,8 @@ WMError WindowRoot::DestroyWindowSelf(sptr<WindowNode>& node, const sptr<WindowN
             child->GetWindowToken()->NotifyDestroy();
         }
     }
-    WMError res = container->RemoveWindowNode(node);
+    std::vector<uint32_t> windowIds;
+    WMError res = container->DestroyWindowNode(node, windowIds);
     if (res != WMError::WM_OK) {
         WLOGFE("RemoveWindowNode failed");
     }

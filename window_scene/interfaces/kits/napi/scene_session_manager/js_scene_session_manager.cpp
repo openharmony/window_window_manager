@@ -19,6 +19,7 @@
 #include <js_runtime_utils.h>
 #include "napi_common_want.h"
 #include "session/host/include/scene_persistence.h"
+#include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "want.h"
@@ -308,6 +309,7 @@ NativeValue* JsSceneSessionManager::OnGetRootSceneSession(NativeEngine& engine, 
     rootSceneSession->SetLoadContentFunc([rootScene = rootScene_]
         (const std::string& contentUrl, NativeEngine* engine, NativeValue* storage, AbilityRuntime::Context* context) {
             rootScene->LoadContent(contentUrl, engine, storage, context);
+            ScenePersistentStorage::InitDir(context->GetFilesDir());
             if (!ScenePersistence::CreateSnapshotDir(context->GetFilesDir())) {
                 WLOGFD("snapshot dir existed");
             }

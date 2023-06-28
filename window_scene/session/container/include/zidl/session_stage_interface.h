@@ -38,11 +38,16 @@ public:
         TRANS_ID_NOTIFY_FOCUS_CHANGE,
         TRANS_ID_NOTIFY_DESTROY,
         TRANS_ID_NOTIFY_TOUCH_DIALOG_TARGET,
+        TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA,
     };
 
     virtual void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
     virtual void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) {}
     virtual void NotifyFocusActiveEvent(bool isFocusActive) {}
+    virtual WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
+    {
+        return WSError::WS_OK;
+    }
 
     virtual WSError SetActive(bool active) = 0;
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) = 0;
