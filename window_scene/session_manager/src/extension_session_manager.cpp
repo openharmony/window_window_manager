@@ -18,7 +18,6 @@
 #include <ability_manager_client.h>
 #include <session_info.h>
 #include <start_options.h>
-#include <want.h>
 
 #include "session/host/include/extension_session.h"
 #include "window_manager_hilog.h"
@@ -102,9 +101,8 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
         if (!extSessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        AAFwk::AbilityManagerClient::GetInstance()->StartUIExtensionAbility(*sessionInfo.want, extSessionInfo,
-            AAFwk::DEFAULT_INVAL_VALUE,
-            AppExecFwk::ExtensionAbilityType::UI);
+        AAFwk::AbilityManagerClient::GetInstance()->StartUIExtensionAbility(extSessionInfo,
+            AAFwk::DEFAULT_INVAL_VALUE);
         return WSError::WS_OK;
     };
 
