@@ -208,7 +208,7 @@ void WindowManagerService::InitWithAbilityManagerServiceAdded()
 }
 
 void WindowManagerServiceHandler::NotifyWindowTransition(
-    sptr<AAFwk::AbilityTransitionInfo> from, sptr<AAFwk::AbilityTransitionInfo> to)
+    sptr<AAFwk::AbilityTransitionInfo> from, sptr<AAFwk::AbilityTransitionInfo> to, bool& animaEnabled)
 {
     sptr<WindowTransitionInfo> fromInfo = nullptr;
     sptr<WindowTransitionInfo> toInfo = nullptr;
@@ -218,6 +218,7 @@ void WindowManagerServiceHandler::NotifyWindowTransition(
     if (to) {
         toInfo = new WindowTransitionInfo(to);
     }
+    animaEnabled = RemoteAnimation::CheckAnimationController();
     WindowManagerService::GetInstance().NotifyWindowTransition(fromInfo, toInfo, false);
 }
 
