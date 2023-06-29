@@ -57,6 +57,8 @@ private:
 };
 } // namespace
 
+sptr<RootScene> RootScene::staticRootScene_;
+
 RootScene::RootScene()
 {
 }
@@ -112,6 +114,21 @@ void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason re
     config.SetPosition(rect.posX_, rect.posY_);
     config.SetDensity(density_);
     uiContent_->UpdateViewportConfig(config, reason);
+}
+
+void RootScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (uiContent_) {
+        WLOGFD("notify root scene ace");
+        uiContent_->UpdateConfiguration(configuration);
+    }
+}
+void RootScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    WLOGD("notify root scene ace for all");
+    if (staticRootScene_) {
+        staticRootScene_->UpdateConfiguration(configuration);
+    }
 }
 
 void RootScene::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent)

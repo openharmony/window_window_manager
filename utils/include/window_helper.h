@@ -546,7 +546,7 @@ public:
 
     static bool IsWindowFollowParent(WindowType type)
     {
-        if (type == WindowType::WINDOW_TYPE_DIALOG || WindowHelper::IsSubWindow(type)) {
+        if (type == WindowType::WINDOW_TYPE_DIALOG || type == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
             return true;
         }
         return false;
