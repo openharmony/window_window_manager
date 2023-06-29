@@ -21,6 +21,7 @@
 #include "session_manager_service_interface.h"
 #include "zidl/scene_session_manager_interface.h"
 #include "zidl/screen_session_manager_interface.h"
+#include "window_manager.h"
 #include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
@@ -37,6 +38,7 @@ public:
     sptr<IScreenSessionManager> GetScreenSessionManagerProxy();
     sptr<ScreenLock::ScreenLockManagerInterface> GetScreenLockManagerProxy();
 
+    WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
 protected:
     SessionManager() = default;
     virtual ~SessionManager() = default;

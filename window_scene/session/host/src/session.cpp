@@ -856,4 +856,29 @@ void Session::NotifyRemoteReady()
 {
     return;
 }
+
+WindowMode Session::GetWindowMode()
+{
+    if (!sessionStage_) {
+        return systemConfig_.defaultWindowMode_;
+    }
+    return sessionStage_->GetWindowMode();
+}
+
+bool Session::IsDecorEnable()
+{
+    if (!sessionStage_) {
+        return systemConfig_.isSystemDecorEnable_;
+    }
+    return sessionStage_->IsWindowDecorEnable();
+}
+
+void Session::SetZOrder(uint32_t zOrder)
+{
+    if (property_ == nullptr) {
+        WLOGFW("null property.");
+        return;
+    }
+    property_->SetZOrder(zOrder);
+}
 } // namespace OHOS::Rosen
