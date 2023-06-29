@@ -1384,7 +1384,7 @@ WMError WindowImpl::PreProcessShow(uint32_t reason, bool withAnimation)
     return WMError::WM_OK;
 }
 
-bool Log(const uint32_t& reason, const bool& withAnimation)
+bool Log(uint32_t reason, bool withAnimation)
 {
     WLOGFD("Window Show [name:%{public}s, id:%{public}u, mode: %{public}u], reason:%{public}u, "
         "withAnimation:%{public}d", name_.c_str(), property_->GetWindowId(), GetMode(), reason, withAnimation);
