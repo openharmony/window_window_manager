@@ -79,9 +79,12 @@ ohos_shared_library("scene_session_manager") {
     "config_policy:configpolicy_util",
     "display_manager:displaymgr",
     "eventhandler:libeventhandler",
+    "eventhandler:libeventhandler",
     "graphic_standard:librender_service_client",
     "graphic_standard:window_animation",
+    "hicollie:libhicollie",
     "hilog_native:libhilog",
+    "hitrace_native:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_single",
     "power_manager:powermgr_client",
@@ -121,6 +124,7 @@ ohos_shared_library("screen_session_manager") {
     "eventhandler:libeventhandler",
     "graphic_standard:librender_service_client",
     "hilog_native:libhilog",
+    "hitrace_native:hitrace_meter",
     "ipc:ipc_core",
   ]
 
