@@ -45,9 +45,9 @@ private:
     void RemoveTimers(int32_t persistentId);
     void RemovePersistentId(int32_t persistentId);
 private:
+    std::mutex mtx_;
     int32_t anrTimerCount_ { 0 };
     std::unordered_map<int32_t, int32_t> applicationMap_;
-    std::mutex mtx_;
     std::function<void(int32_t)> anrObserver_;
     EventStage eventStage_;
 };

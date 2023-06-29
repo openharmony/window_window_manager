@@ -30,7 +30,6 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Util"};
 }
 int64_t GetSysClockTime()
 {
-    CALL_DEBUG_ENTER;
     struct timespec ts = { 0, 0 };
     if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
         WLOGFE("clock_gettime failed:%{public}d", errno);
@@ -41,7 +40,6 @@ int64_t GetSysClockTime()
 
 int64_t GetMillisTime()
 {
-    CALL_DEBUG_ENTER;
     auto timeNow = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now());
     auto tmp = std::chrono::duration_cast<std::chrono::milliseconds>(timeNow.time_since_epoch());
     return tmp.count();

@@ -24,6 +24,7 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "
 
 void DfxHisysevent::ApplicationBlockInput(int32_t eventId, int32_t pid, int32_t persistentId)
 {
+    CALL_DEBUG_ENTER;
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
         "APPLICATION_BLOCK_INPUT",

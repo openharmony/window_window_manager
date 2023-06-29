@@ -56,7 +56,7 @@ std::vector<int32_t> EventStage::GetTimerIds(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
     if (events_.find(persistentId) == events_.end()) {
-        WLOGFE("Current events have no event for persistentId:%{public}d", persistentId);
+        WLOGFD("Current events have no event for persistentId:%{public}d", persistentId);
         return {};
     }
     std::vector<int32_t> timers;
@@ -72,7 +72,7 @@ std::list<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t id)
     CALL_DEBUG_ENTER;
     WLOGFD("Delete events, persistentId:%{public}d, id:%{public}d", persistentId, id);
     if (events_.find(persistentId) == events_.end()) {
-        WLOGFE("Current events have no event persistentId:%{public}d", persistentId);
+        WLOGFD("Current events have no event persistentId:%{public}d", persistentId);
         return {};
     }
     auto &events = events_[persistentId];
