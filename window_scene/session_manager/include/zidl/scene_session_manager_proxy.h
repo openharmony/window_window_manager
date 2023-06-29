@@ -42,6 +42,7 @@ public:
     WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) override;
     WSError RegisterSessionListener(const sptr<ISessionListener> sessionListener) override;
     void UnregisterSessionListener() override;
+    WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
 
 private:
     static inline BrokerDelegator<SceneSessionManagerProxy> delegator_;

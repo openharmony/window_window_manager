@@ -667,6 +667,11 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
     return enable;
 }
 
+bool WindowSceneSessionImpl::IsWindowDecorEnable()
+{
+    return IsDecorEnable();
+}
+
 WMError WindowSceneSessionImpl::Minimize()
 {
     WLOGFD("WindowSceneSessionImpl::Minimize called");
@@ -677,6 +682,7 @@ WMError WindowSceneSessionImpl::Minimize()
     if (WindowHelper::IsMainWindow(GetType())) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
     }
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
     return WMError::WM_OK;
 }
 
@@ -691,6 +697,7 @@ WMError WindowSceneSessionImpl::Maximize()
         SetFullScreen(true);
         UpdateDecorEnable(true);
     }
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
     return WMError::WM_OK;
 }
 
@@ -717,7 +724,6 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         property_->SetMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
         UpdateDecorEnable(true);
     }
-    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
 
     return WMError::WM_OK;
 }
@@ -734,7 +740,6 @@ WMError WindowSceneSessionImpl::Recover()
         windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
         property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
         UpdateDecorEnable(true);
-        UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
     }
     return WMError::WM_OK;
 }
@@ -830,6 +835,11 @@ MaximizeMode WindowSceneSessionImpl::GetGlobalMaximizeMode() const
 WindowMode WindowSceneSessionImpl::GetMode() const
 {
     return windowMode_;
+}
+
+WindowMode WindowSceneSessionImpl::GetWindowMode()
+{
+    return GetMode();
 }
 
 bool WindowSceneSessionImpl::IsTransparent() const

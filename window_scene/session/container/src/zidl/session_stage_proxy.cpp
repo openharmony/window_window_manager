@@ -19,7 +19,9 @@
 #include <message_option.h>
 #include <message_parcel.h>
 
+#include "interfaces/include/ws_common.h"
 #include "window_manager_hilog.h"
+#include "wm_common.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -180,5 +182,42 @@ WSError SessionStageProxy::NotifyTransferComponentData(const AAFwk::WantParams& 
     }
     int32_t ret = reply.ReadUint32();
     return static_cast<WSError>(ret);
+}
+
+WindowMode SessionStageProxy::GetWindowMode()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WindowMode::WINDOW_MODE_UNDEFINED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_GET_WINDOW_MODE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WindowMode::WINDOW_MODE_UNDEFINED;
+    }
+    return static_cast<WindowMode>(reply.ReadUint32());
+}
+
+bool SessionStageProxy::IsWindowDecorEnable()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return false;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_IS_WINDOW_DECOR_ENABLE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return false;
+    }
+
+    return reply.ReadBool();
 }
 } // namespace OHOS::Rosen

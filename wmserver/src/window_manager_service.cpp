@@ -1283,6 +1283,15 @@ WMError WindowManagerService::GetAccessibilityWindowInfo(std::vector<sptr<Access
     });
 }
 
+WMError WindowManagerService::NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
+    WindowUpdateType type)
+{
+    return PostSyncTask([this, &infos, type]() {
+        WindowManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(infos, type);
+        return WMError::WM_OK;
+    });
+}
+
 WMError WindowManagerService::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     return PostSyncTask([this, &infos]() {

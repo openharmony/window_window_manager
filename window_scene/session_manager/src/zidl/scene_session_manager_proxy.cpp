@@ -20,6 +20,8 @@
 #include <message_parcel.h>
 #include <ui/rs_surface_node.h>
 
+#include "marshalling_helper.h"
+#include "window_manager.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -319,4 +321,27 @@ void SceneSessionManagerProxy::UnregisterSessionListener()
     }
 }
 
+WMError SceneSessionManagerProxy::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
+{
+    MessageOption option;
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("Write InterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (!MarshallingHelper::UnmarshallingVectorParcelableObj<AccessibilityWindowInfo>(reply, infos)) {
+        WLOGFE("read window info failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadUint32());
+}
 } // namespace OHOS::Rosen

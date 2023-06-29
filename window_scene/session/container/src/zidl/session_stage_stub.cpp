@@ -17,7 +17,9 @@
 
 #include <ipc_types.h>
 
+#include "interfaces/include/ws_common.h"
 #include "window_manager_hilog.h"
+#include "wm_common.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -39,6 +41,10 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleNotifyTouchDialogTarget),
     std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA),
         &SessionStageStub::HandleNotifyTransferComponentData),
+    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_GET_WINDOW_MODE),
+        &SessionStageStub::HandleGetWindowMode),
+    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_IS_WINDOW_DECOR_ENABLE),
+        &SessionStageStub::HandleIsWindowDecorEnable),
 };
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -119,6 +125,21 @@ int SessionStageStub::HandleNotifyTransferComponentData(MessageParcel& data, Mes
     }
     WSError errCode = NotifyTransferComponentData(*wantParams);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+int SessionStageStub::HandleGetWindowMode(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleGetWindowMode");
+    WindowMode winMode = GetWindowMode();
+    reply.WriteUint32(static_cast<uint32_t>(winMode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleIsWindowDecorEnable(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleIsWindowDecorEnable");
+    bool isDecorEnable = IsWindowDecorEnable();
+    reply.WriteBool(isDecorEnable);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

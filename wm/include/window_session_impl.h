@@ -107,6 +107,8 @@ public:
     WSError NotifyDestroy() override;
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void NotifyTouchDialogTarget() override;
+    bool IsWindowDecorEnable() override;
+    WindowMode GetWindowMode() override;
 
     WindowState state_ { WindowState::STATE_INITIAL };
 

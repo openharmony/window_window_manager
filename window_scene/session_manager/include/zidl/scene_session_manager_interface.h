@@ -25,6 +25,7 @@
 #include "session/host/include/session.h"
 
 #include "focus_change_info.h"
+#include "window_manager.h"
 #include "window_manager_interface.h"
 #include "session_listener_interface.h"
 
@@ -49,6 +50,7 @@ public:
         TRANS_ID_SET_SESSION_ICON,
         TRANS_ID_REGISTER_SESSION_LISTENER,
         TRANS_ID_UNREGISTER_SESSION_LISTENER,
+        TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO;
     };
 
     virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -89,6 +91,11 @@ public:
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override { return WMError::WM_OK; }
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError NotifyAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,
+        WindowUpdateType type) override
     {
         return WMError::WM_OK;
     }
