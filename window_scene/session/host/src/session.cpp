@@ -176,8 +176,8 @@ void Session::UpdateSessionFocusable(bool isFocusable)
 
 void Session::UpdateSessionTouchable(bool touchable)
 {
-    property_->SetFocusable(touchable);
-    NotifySessionFocusableChange(touchable);
+    property_->SetTouchable(touchable);
+    NotifySessionTouchableChange(touchable);
 }
 
 WSError Session::SetFocusable(bool isFocusable)
@@ -644,7 +644,7 @@ void Session::SetSessionFocusableChangeListener(const NotifySessionFocusableChan
 void Session::SetSessionTouchableChangeListener(const NotifySessionTouchableChangeFunc& func)
 {
     sessionTouchableChangeFunc_ = func;
-    NotifySessionFocusableChange(GetTouchable());
+    NotifySessionTouchableChange(GetTouchable());
 }
 
 void Session::SetClickListener(const NotifyClickFunc& func)
@@ -662,7 +662,7 @@ void Session::NotifySessionFocusableChange(bool isFocusable)
 
 void Session::NotifySessionTouchableChange(bool touchable)
 {
-    WLOGFI("Notify session focusable change: %{public}u", touchable);
+    WLOGFI("Notify session touchable change: %{public}u", touchable);
     if (sessionTouchableChangeFunc_) {
         sessionTouchableChangeFunc_(touchable);
     }

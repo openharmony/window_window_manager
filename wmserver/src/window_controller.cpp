@@ -155,7 +155,8 @@ WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& src
         case TransitionEvent::CLOSE_BUTTON:
             return RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode, transitionEvent);
         case TransitionEvent::BACK_TRANSITION:
-            return RemoteAnimation::NotifyAnimationBackTransition(srcInfo, dstInfo, srcNode, dstNode);
+        case TransitionEvent::BACKGROUND_TRANSITION:
+            return RemoteAnimation::NotifyAnimationBackTransition(srcInfo, dstInfo, srcNode, dstNode, transitionEvent);
         default:
             return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     }
