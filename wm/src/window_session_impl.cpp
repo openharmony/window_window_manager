@@ -466,7 +466,14 @@ bool WindowSessionImpl::GetFocusable() const
 
 WMError WindowSessionImpl::SetTouchable(bool isTouchable)
 {
+    WLOGFD("set touchable");
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     property_->SetTouchable(isTouchable);
+    if (state_ == WindowState::STATE_SHOWN) {
+        return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
+    }
     return WMError::WM_OK;
 }
 
