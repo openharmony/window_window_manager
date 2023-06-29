@@ -31,6 +31,9 @@ public:
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
     WSError TransferFocusActiveEvent(bool isFocusActive) override;
 
+    void PrintKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event);
+    void PrintPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event);
+
 private:
     sptr<ISessionStage> sessionStage_ = nullptr;
 };
