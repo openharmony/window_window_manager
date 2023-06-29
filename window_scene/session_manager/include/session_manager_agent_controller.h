@@ -32,6 +32,7 @@ public:
 
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused);
+    void NotifyWaterMarkFlagChangedResult(bool hasWaterMark);
 private:
     SessionManagerAgentController() {}
     virtual ~SessionManagerAgentController() = default;

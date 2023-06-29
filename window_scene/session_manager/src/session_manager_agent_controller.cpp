@@ -57,5 +57,16 @@ void SessionManagerAgentController::UpdateFocusChangeInfo(const sptr<FocusChange
         }
     }
 }
+
+void SessionManagerAgentController::NotifyWaterMarkFlagChangedResult(bool hasWaterMark)
+{
+    WLOGFD("NotifyWaterMarkFlagChanged with result:%{public}u", static_cast<uint32_t>(hasWaterMark));
+    for (auto& agent : smAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG)) {
+        if (agent != nullptr) {
+            agent->NotifyWaterMarkFlagChangedResult(hasWaterMark);
+        }
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
