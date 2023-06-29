@@ -1257,4 +1257,24 @@ void SceneSessionManager::InitPersistentStorage()
         }
     }
 }
+
+std::string SceneSessionManager::GetSessionSnapshot(uint64_t persistentId)
+{
+    WLOGFI("GetSessionSnapshot persistentId %{public}" PRIu64 "", persistentId);
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        WLOGFE("GetSessionSnapshot sceneSession nullptr!");
+        return "";
+    }
+    wptr<SceneSession> weakSceneSession(sceneSession);
+    auto task = [this, weakSceneSession]() {
+        auto scnSession = weakSceneSession.promote();
+        if (scnSession == nullptr) {
+            WLOGFE("session is nullptr");
+            return std::string("");
+        }
+        return scnSession->GetSessionSnapshot();
+    };
+    return taskScheduler_->PostSyncTask(task);
+}
 } // namespace OHOS::Rosen

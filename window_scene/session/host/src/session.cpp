@@ -856,4 +856,10 @@ void Session::NotifyRemoteReady()
 {
     return;
 }
+
+WSError Session::UpdateSnapshot()
+{
+    snapshot_ = Snapshot();
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

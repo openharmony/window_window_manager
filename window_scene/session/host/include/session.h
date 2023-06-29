@@ -161,6 +161,7 @@ public:
     int32_t GetCallingPid() const;
     int32_t GetCallingUid() const;
     sptr<IRemoteObject> GetAbilityToken() const;
+    WSError UpdateSnapshot();
 protected:
     void GeneratePersistentId(const bool isExtension, const SessionInfo& sessionInfo);
     void UpdateSessionState(SessionState state);
