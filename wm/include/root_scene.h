@@ -43,9 +43,6 @@ public:
 
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
 
-    void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent) override;
-    void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
-
     void SetDisplayDensity(float density)
     {
         density_ = density;
