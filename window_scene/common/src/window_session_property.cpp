@@ -144,6 +144,21 @@ uint32_t WindowSessionProperty::GetParentId() const
     return parentId_;
 }
 
+void WindowSessionProperty::SetWindowFlags(uint32_t flags)
+{
+    flags_ = flags;
+}
+
+void WindowSessionProperty::AddWindowFlag(WindowFlag flag)
+{
+    flags_ |= static_cast<uint32_t>(flag);
+}
+
+uint32_t WindowSessionProperty::GetWindowFlags() const
+{
+    return flags_;
+}
+
 void WindowSessionProperty::SetPersistentId(uint64_t persistentId)
 {
     persistentId_ = persistentId;
