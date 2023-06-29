@@ -42,7 +42,10 @@ enum class JsSessionType : uint32_t {
     TYPE_FLOAT_CAMERA,
     TYPE_DIALOG,
     TYPE_SCREENSHOT,
-    TYPE_TOAST
+    TYPE_TOAST,
+    TYPE_POINTER,
+    TYPE_LAUNCHER_RECENT,
+    TYPE_SCENE_BOARD
 };
 
 const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
@@ -62,7 +65,10 @@ const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
     { WindowType::WINDOW_TYPE_FLOAT_CAMERA,        JsSessionType::TYPE_FLOAT_CAMERA      },
     { WindowType::WINDOW_TYPE_DIALOG,              JsSessionType::TYPE_DIALOG            },
     { WindowType::WINDOW_TYPE_SCREENSHOT,          JsSessionType::TYPE_SCREENSHOT        },
-    { WindowType::WINDOW_TYPE_TOAST,               JsSessionType::TYPE_TOAST             }
+    { WindowType::WINDOW_TYPE_TOAST,               JsSessionType::TYPE_TOAST             },
+    { WindowType::WINDOW_TYPE_POINTER,             JsSessionType::TYPE_POINTER           },
+    { WindowType::WINDOW_TYPE_LAUNCHER_RECENT,     JsSessionType::TYPE_LAUNCHER_RECENT   },
+    { WindowType::WINDOW_TYPE_SCENE_BOARD,         JsSessionType::TYPE_SCENE_BOARD       }
 };
 
 const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
@@ -82,8 +88,12 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_FLOAT_CAMERA,      WindowType::WINDOW_TYPE_FLOAT_CAMERA        },
     { JsSessionType::TYPE_DIALOG,            WindowType::WINDOW_TYPE_DIALOG              },
     { JsSessionType::TYPE_SCREENSHOT,        WindowType::WINDOW_TYPE_SCREENSHOT          },
-    { JsSessionType::TYPE_TOAST,             WindowType::WINDOW_TYPE_TOAST               }
+    { JsSessionType::TYPE_TOAST,             WindowType::WINDOW_TYPE_TOAST               },
+    { JsSessionType::TYPE_POINTER,           WindowType::WINDOW_TYPE_POINTER             },
+    { JsSessionType::TYPE_LAUNCHER_RECENT,   WindowType::WINDOW_TYPE_LAUNCHER_RECENT     },
+    { JsSessionType::TYPE_SCENE_BOARD,       WindowType::WINDOW_TYPE_SCENE_BOARD         }
 };
+
 bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, SessionInfo& sessionInfo);
 NativeValue* CreateJsSessionInfo(NativeEngine& engine, const SessionInfo& sessionInfo);
 NativeValue* CreateJsSessionState(NativeEngine& engine);
