@@ -83,6 +83,7 @@ public:
     void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
     void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
     void InitPersistentStorage();
+    std::string GetSessionSnapshot(uint64_t persistentId);
 
 protected:
     SceneSessionManager();
