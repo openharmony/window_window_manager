@@ -52,6 +52,8 @@ public:
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     WMError SetLayoutFullScreen(bool status) override;
     WMError SetFullScreen(bool status) override;
+    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
 
     // window effect
     virtual WMError SetCornerRadius(float cornerRadius) override;
@@ -63,7 +65,6 @@ public:
     virtual WMError SetBackdropBlur(float radius) override;
     virtual WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) override;
 
-    virtual WMError SetBackgroundColor(const std::string& color) override;
     virtual WMError SetTransparent(bool isTransparent) override;
     virtual WMError SetTurnScreenOn(bool turnScreenOn) override;
     virtual WMError SetKeepScreenOn(bool keepScreenOn) override;
@@ -87,8 +88,6 @@ protected:
 
 private:
     bool IsValidSystemWindowType(const WindowType& type);
-    WMError SetBackgroundColor(uint32_t color);
-    uint32_t GetBackgroundColor() const;
     WMError CheckParmAndPermission();
 };
 } // namespace Rosen
