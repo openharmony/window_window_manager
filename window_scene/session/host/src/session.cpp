@@ -176,8 +176,8 @@ void Session::UpdateSessionFocusable(bool isFocusable)
 
 void Session::UpdateSessionTouchable(bool touchable)
 {
-    property_->SetFocusable(touchable);
-    NotifySessionFocusableChange(touchable);
+    property_->SetTouchable(touchable);
+    NotifySessionTouchableChange(touchable);
 }
 
 WSError Session::SetFocusable(bool isFocusable)
@@ -660,7 +660,7 @@ void Session::NotifySessionFocusableChange(bool isFocusable)
 
 void Session::NotifySessionTouchableChange(bool touchable)
 {
-    WLOGFI("Notify session focusable change: %{public}u", touchable);
+    WLOGFI("Notify session touchable change: %{public}u", touchable);
     if (sessionTouchableChangeFunc_) {
         sessionTouchableChangeFunc_(touchable);
     }

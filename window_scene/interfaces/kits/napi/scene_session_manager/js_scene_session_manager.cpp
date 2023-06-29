@@ -54,6 +54,7 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
     std::unique_ptr<JsSceneSessionManager> jsSceneSessionManager = std::make_unique<JsSceneSessionManager>(*engine);
     object->SetNativePointer(jsSceneSessionManager.release(), JsSceneSessionManager::Finalizer, nullptr);
     object->SetProperty("SessionState", CreateJsSessionState(*engine));
+    object->SetProperty("SessionType", SessionTypeInit(engine));
 
     const char* moduleName = "JsSceneSessionManager";
     BindNativeFunction(*engine, *object, "getRootSceneSession", moduleName, JsSceneSessionManager::GetRootSceneSession);
@@ -306,6 +307,7 @@ NativeValue* JsSceneSessionManager::OnGetRootSceneSession(NativeEngine& engine, 
     if (rootScene_ == nullptr) {
         rootScene_ = new RootScene();
     }
+    RootScene::staticRootScene_ = rootScene_;
     rootSceneSession->SetLoadContentFunc([rootScene = rootScene_]
         (const std::string& contentUrl, NativeEngine* engine, NativeValue* storage, AbilityRuntime::Context* context) {
             rootScene->LoadContent(contentUrl, engine, storage, context);

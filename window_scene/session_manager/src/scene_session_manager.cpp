@@ -397,8 +397,9 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
     specificCallback->onCameraFloatSessionChange_ = std::bind(&SceneSessionManager::UpdateCameraFloatWindowStatus,
         this, std::placeholders::_1, std::placeholders::_2);
     auto task = [this, sessionInfo, specificCallback, property]() {
-        WLOGFI("sessionInfo: bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
-            sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());
+        WLOGFI("sessionInfo: bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, type %{public}u",
+            sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
+            sessionInfo.abilityName_.c_str(), sessionInfo.windowType_);
         sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, specificCallback);
         if (sceneSession == nullptr) {
             WLOGFE("sceneSession is nullptr!");
@@ -994,11 +995,13 @@ void SceneSessionManager::OnSessionStateChange(uint64_t persistentId)
     SessionState state = sceneSession->GetSessionState();
     switch (state) {
     case SessionState::STATE_FOREGROUND:
+        HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
         if (sceneSession->GetWindowSessionProperty()->GetPrivacyMode()) {
             UpdatePrivateStateAndNotify(true);
         }
         break;
     case SessionState::STATE_BACKGROUND:
+        HandleKeepScreenOn(sceneSession, false);
         if (sceneSession->GetWindowSessionProperty()->GetPrivacyMode()) {
             UpdatePrivateStateAndNotify(false);
         }
