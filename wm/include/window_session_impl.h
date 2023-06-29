@@ -16,6 +16,8 @@
 #ifndef OHOS_ROSEN_WINDOW_SESSION_IMPL_H
 #define OHOS_ROSEN_WINDOW_SESSION_IMPL_H
 
+#include <atomic>
+
 #include <ability_context.h>
 #include <refbase.h>
 #include <ui_content.h>
@@ -75,6 +77,7 @@ public:
     void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
     void NotifyFocusActiveEvent(bool isFocusActive) override;
+    void NotifyFocusWindowIdEvent(uint32_t windowId) override;
 
     WMError RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
@@ -164,6 +167,7 @@ private:
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;
+    std::atomic<uint32_t> focusWindowId_ = INVALID_WINDOW_ID;
 };
 } // namespace Rosen
 } // namespace OHOS
