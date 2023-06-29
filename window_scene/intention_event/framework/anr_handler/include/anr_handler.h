@@ -37,13 +37,13 @@ public:
     void ResetAnrArray();
 
 private:
+    std::mutex anrMtx_;
     struct ANREvent {
         bool sendStatus { false };
         int32_t lastEventId { -1 };
         int32_t lastReportId { -1 };
     };
     ANREvent event_;
-    std::mutex anrMtx_;
     void UpdateLastProcessedEventId(int32_t eventId);
     void SetLastProcessedEventStatus(bool status);
     int32_t GetLastProcessedEventId();

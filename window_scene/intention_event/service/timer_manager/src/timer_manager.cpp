@@ -85,7 +85,7 @@ void TimerManager::OnThread()
     CALL_DEBUG_ENTER;
     while (state_ == TimerMgrState::STATE_RUNNING) {
         int32_t timeout = CalcNextDelay();
-        WLOGFE("CalcNextDelay :%{public}d", timeout);
+        WLOGFD("CalcNextDelay :%{public}d", timeout);
         std::this_thread::sleep_for(std::chrono::milliseconds(timeout));
         ProcessTimers();
     }
@@ -190,7 +190,8 @@ int32_t TimerManager::CalcNextDelayInternal()
     if (!timers_.empty()) {
         auto nowTime = GetMillisTime();
         const auto& item = *timers_.begin();
-        WLOGFD("timerId:%{public}d, nextCallTime:%{public}" PRId64 ", nowTime:%{public}" PRId64 "", item->id, item->nextCallTime, nowTime);
+        WLOGFD("timerId:%{public}d, nextCallTime:%{public}" PRId64 ", nowTime:%{public}" PRId64 "",
+            item->id, item->nextCallTime, nowTime);
         if (nowTime >= item->nextCallTime) {
             delay = 0;
         } else {
@@ -209,21 +210,17 @@ void TimerManager::ProcessTimersInternal()
     auto nowTime = GetMillisTime();
     WLOGFD("nowTime:%{public}" PRId64 "", nowTime);
     for (;;) {
-        WLOGFD("for (;;)");
         auto it = timers_.begin();
         if (it == timers_.end()) {
             break;
         }
         if ((*it)->nextCallTime > nowTime) {
-            WLOGFD("(*it)->nextCallTime > nowTime");
             break;
         }
         auto curTimer = std::move(*it);
         timers_.erase(it);
         if (curTimer->callback != nullptr) {
-            WLOGFD("Execute timer callback start");
             curTimer->callback();
-            WLOGFD("Execute timer callback end");
         }
     }
 }

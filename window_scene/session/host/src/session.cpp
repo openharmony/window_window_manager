@@ -44,7 +44,6 @@ uint64_t Session::GetPersistentId() const
 
 uint64_t Session::GetParentPersistentId() const
 {
-    CALL_DEBUG_ENTER;
     if (property_ != nullptr) {
         return property_->GetParentPersistentId();
     }
@@ -376,7 +375,6 @@ WSError Session::Disconnect()
 
 WSError Session::SetActive(bool active)
 {
-    CALL_DEBUG_ENTER;
     SessionState state = GetSessionState();
     WLOGFI("Session update active: %{public}d, id: %{public}" PRIu64 ", state: %{public}u", active, GetPersistentId(),
         static_cast<uint32_t>(state));
@@ -402,7 +400,6 @@ WSError Session::SetActive(bool active)
 
 WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
-    CALL_DEBUG_ENTER;
     if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -460,7 +457,6 @@ WSError Session::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionI
 
 void Session::SetTerminateSessionListener(const NotifyTerminateSessionFunc& func)
 {
-    CALL_DEBUG_ENTER;
     terminateSessionFunc_ = func;
 }
 

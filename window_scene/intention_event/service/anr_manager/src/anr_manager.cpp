@@ -50,9 +50,7 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
         WLOGFD("Anr callback enter. persistentId:%{public}d, eventId:%{public}d", persistentId, id);
         eventStage_.SetAnrStatus(persistentId, true);
         int32_t pid = GetPidByPersistentId(persistentId);
-        WLOGFD("DfxHisysevent start");
         DfxHisysevent::ApplicationBlockInput(id, pid, persistentId);
-        WLOGFD("DfxHisysevent end");
         WLOGFE("Application not responding. persistentId:%{public}d, eventId:%{public}d, applicationId:%{public}d",
             persistentId, id, pid);
         if (anrObserver_ != nullptr) {
@@ -72,7 +70,7 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
         WLOGFD("Anr callback leave. persistentId:%{public}d, eventId:%{public}d", persistentId, id);
     });
     anrTimerCount_++;
-    WLOGFD("Add anr timer success, eventId:%{public}d, timer id:%{public}d, persistentId:%{public}d, count:%{public}d",
+    WLOGFI("Add anr timer success, eventId:%{public}d, timer id:%{public}d, persistentId:%{public}d, count:%{public}d",
         id, timerId, persistentId, anrTimerCount_);
     eventStage_.SaveANREvent(persistentId, id, currentTime, timerId);
 }
@@ -132,7 +130,6 @@ void ANRManager::SetAnrObserver(std::function<void(int32_t)> anrObserver)
     anrObserver_ = anrObserver;
 }
 
-
 int32_t ANRManager::GetPidByPersistentId(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
@@ -166,6 +163,5 @@ void ANRManager::RemovePersistentId(int32_t persistentId)
     }
     WLOGFD("No persistentId:%{public}d in applicationMap", persistentId);
 }
-
 } // namespace Rosen
 } // namespace OHOS

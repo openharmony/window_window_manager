@@ -73,12 +73,11 @@ void ANRHandler::SetLastProcessedEventId(int32_t eventId, int64_t actionTime)
         return;
     }
     UpdateLastProcessedEventId(eventId);
-
     int64_t currentTime = GetSysClockTime();
     int64_t timeoutTime = ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME - (currentTime - actionTime);
     WLOGFD("Processed eventId:%{public}d, actionTime:%{public}" PRId64 ", "
-        "currentTime:%{public}" PRId64 ", timeoutTime:%{public}" PRId64, eventId, actionTime, currentTime, timeoutTime);
-
+        "currentTime:%{public}" PRId64 ", timeoutTime:%{public}" PRId64,
+        eventId, actionTime, currentTime, timeoutTime);
     if (!event_.sendStatus) {
         if (timeoutTime < MIN_MARK_PROCESS_DELAY_TIME) {
             SendEvent(0);
@@ -104,7 +103,6 @@ int32_t ANRHandler::GetLastProcessedEventId()
             event_.lastEventId, event_.lastReportId);
         return INVALID_OR_PROCESSED_ID;
     }
-
     event_.lastReportId = event_.lastEventId;
     WLOGFD("Processed lastEventId:%{public}d, lastReportId:%{public}d", event_.lastEventId, event_.lastReportId);
     return event_.lastEventId;
@@ -118,11 +116,6 @@ void ANRHandler::MarkProcessed()
         return;
     }
     WLOGFD("Processed eventId:%{public}d", eventId);
-    /**
-        windowSessionImpl 就是 sessionStage
-        SessionStage 中有 hostSession_
-        hostSession 就是 SessionProxy
-    */
     if (sessionStage_ == nullptr) {
         WLOGFE("sessionStage is nullptr");
         return;

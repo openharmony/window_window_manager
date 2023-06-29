@@ -85,7 +85,7 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
     RegisterInputEventListener();
     ANRMgr->Init();
     ANRMgr->SetAnrObserver(([](int32_t pid) {
-        WLOGFI("Receive anr notice pid:%{public}d enter", pid);
+        WLOGFD("Receive anr notice enter");
         AppExecFwk::AppFaultDataBySA faultData;
         faultData.faultType = AppExecFwk::FaultDataType::APP_FREEZE;
         faultData.pid = pid;
@@ -96,13 +96,12 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
             ret != 0) {
             WLOGFE("NotifyAppFaultBySA failed, pid:%{public}d, errcode:%{public}d", pid, ret);
         }
-        WLOGFI("Receive anr notice pid:%{public}d leave", pid);
+        WLOGFD("Receive anr notice leave");
     }));
 }
 
 void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
 {
-    CALL_DEBUG_ENTER;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ == nullptr) {
         WLOGFE("uiContent_ is nullptr!");
@@ -158,7 +157,6 @@ void RootScene::RegisterInputEventListener()
 
 void RootScene::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
-    CALL_DEBUG_ENTER;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     VsyncStation::GetInstance().RequestVsync(vsyncCallback);
 }
