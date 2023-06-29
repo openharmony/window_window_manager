@@ -35,6 +35,7 @@ enum class TransitionReason : uint32_t {
     ABILITY_TRANSITION,
     BACK_TRANSITION, // BACK need start last one
     CLOSE_BUTTON, // close button on decor
+    BACKGROUND_TRANSITION,
 };
 
 class WindowTransitionInfo : public Parcelable {

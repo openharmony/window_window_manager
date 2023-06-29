@@ -40,6 +40,7 @@ public:
     void NotifyRemoteReady() override;
     void RegisterExtensionSessionEventCallback(const sptr<ExtensionSessionEventCallback>&
         extSessionEventCallback);
+    sptr<ExtensionSessionEventCallback> GetExtensionSessionEventCallback();
 private:
     sptr<ExtensionSessionEventCallback> extSessionEventCallback_ = nullptr;
 };
