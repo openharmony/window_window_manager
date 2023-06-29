@@ -52,12 +52,10 @@ public:
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     WMError SetLayoutFullScreen(bool status) override;
     WMError SetFullScreen(bool status) override;
-
-    WMError SetBackgroundColor(const std::string& color) override;
     WMError SetTransparent(bool isTransparent) override;
     virtual WMError SetPrivacyMode(bool isPrivacyMode) override;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
-    
+
     bool IsTransparent() const override;
     virtual bool IsPrivacyMode() const override;
 
@@ -87,8 +85,6 @@ protected:
 
 private:
     bool IsValidSystemWindowType(const WindowType& type);
-    WMError SetBackgroundColor(uint32_t color);
-    uint32_t GetBackgroundColor() const;
     WMError CheckParmAndPermission();
 };
 } // namespace Rosen
