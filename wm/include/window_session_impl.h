@@ -88,6 +88,8 @@ public:
     WMError UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
 
+    WMError SetBackgroundColor(const std::string& color) override;
+
     uint32_t GetParentId() const;
     uint64_t GetPersistentId() const;
     sptr<WindowSessionProperty> GetProperty() const;
@@ -114,6 +116,8 @@ protected:
     void UpdateDecorEnable(bool needNotify = false);
     void NotifyModeChange(WindowMode mode, bool hasDeco = true);
     WMError UpdateProperty(WSPropertyChangeAction action);
+    WMError SetBackgroundColor(uint32_t color);
+    uint32_t GetBackgroundColor() const;
 
     sptr<ISession> hostSession_;
     std::unique_ptr<Ace::UIContent> uiContent_;
