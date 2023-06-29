@@ -522,6 +522,7 @@ void WindowImpl::OnNewWant(const AAFwk::Want& want)
 WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     NativeEngine* engine, NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability)
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "loadContent");
     WLOGFD("SetUIContent: %{public}s", contentInfo.c_str());
     if (uiContent_) {
         uiContent_->Destroy();
