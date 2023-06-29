@@ -74,6 +74,8 @@ public:
     virtual WMError SetBackdropBlur(float radius) override;
     virtual WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) override;
 
+    WMError NotifyMemoryLevel(int32_t level) const override;
+
 protected:
     void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();
