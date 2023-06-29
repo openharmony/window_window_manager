@@ -61,7 +61,7 @@ public:
 class WindowManagerServiceHandler : public AAFwk::WindowManagerServiceHandlerStub {
 public:
     virtual void NotifyWindowTransition(
-        sptr<AAFwk::AbilityTransitionInfo> from, sptr<AAFwk::AbilityTransitionInfo> to) override;
+        sptr<AAFwk::AbilityTransitionInfo> from, sptr<AAFwk::AbilityTransitionInfo> to, bool& animaEnabled) override;
     int32_t GetFocusWindow(sptr<IRemoteObject>& abilityToken) override;
     virtual void StartingWindow(
         sptr<AAFwk::AbilityTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap, uint32_t bgColor) override;
