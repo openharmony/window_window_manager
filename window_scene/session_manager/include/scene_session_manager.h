@@ -72,6 +72,7 @@ public:
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
 
     void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
+    WSError SetWindowFlags(const sptr<SceneSession>& sceneSession, uint32_t flags);
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;

@@ -65,6 +65,11 @@ public:
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
 
+    virtual WMError AddWindowFlag(WindowFlag flag) override;
+    virtual WMError RemoveWindowFlag(WindowFlag flag) override;
+    virtual WMError SetWindowFlags(uint32_t flags) override;
+    virtual uint32_t GetWindowFlags() const override;
+
     // window effect
     virtual WMError SetCornerRadius(float cornerRadius) override;
     virtual WMError SetShadowRadius(float radius) override;
