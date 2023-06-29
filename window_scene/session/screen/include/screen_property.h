@@ -44,6 +44,7 @@ public:
     void SetRefreshRate(uint32_t refreshRate);
     uint32_t GetRefreshRate() const;
 
+    void UpdateVirtualPixelRatio(const RRect& bounds);
     void SetVirtualPixelRatio(float virtualPixelRatio);
     float GetVirtualPixelRatio() const;
 
@@ -51,6 +52,9 @@ public:
 
     void SetOrientation(Orientation orientation);
     Orientation GetOrientation() const;
+
+    void SetDisplayOrientation(DisplayOrientation displayOrientation);
+    DisplayOrientation GetDisplayOrientation() const;
 
     float GetXDpi();
     float GetYDpi();
@@ -69,7 +73,6 @@ public:
 private:
     float rotation_ { 0.0f };
     RRect bounds_;
-    float density_ { 1.5f };
 
     uint32_t phyWidth_ { UINT32_MAX };
     uint32_t phyHeight_ { UINT32_MAX };
@@ -78,6 +81,7 @@ private:
     float virtualPixelRatio_ { 1.0f };
 
     Orientation orientation_ { Orientation::UNSPECIFIED };
+    DisplayOrientation displayOrientation_ { DisplayOrientation::UNKNOWN };
     Rotation screenRotation_ { Rotation::ROTATION_0 };
 
     float xDpi_ { 0.0f };
@@ -90,6 +94,7 @@ private:
 
     void UpdateXDpi();
     void UpdateYDpi();
+    void UpdateDisplayOrientation();
     void CalculateXYDpi(uint32_t phyWidth, uint32_t phyHeight);
 };
 } // namespace OHOS::Rosen

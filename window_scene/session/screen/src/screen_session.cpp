@@ -26,15 +26,15 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Screen
 ScreenSession::ScreenSession()
 {}
 
-ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property)
-    : screenId_(screenId), property_(property)
+ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, ScreenId defaultScreenId)
+    : screenId_(screenId), defaultScreenId_(defaultScreenId), property_(property)
 {
     Rosen::RSDisplayNodeConfig config = { .screenId = screenId_ };
     displayNode_ = Rosen::RSDisplayNode::Create(config);
 }
 
-ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId rsId)
-    : name_(name), screenId_(smsId), rsId_(rsId)
+ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId rsId, ScreenId defaultScreenId)
+    : name_(name), screenId_(smsId), rsId_(rsId), defaultScreenId_(defaultScreenId)
 {
     (void)rsId_;
     Rosen::RSDisplayNodeConfig config = { .screenId = screenId_ };
@@ -85,7 +85,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetScreenId(screenId_);
     displayInfo->SetDisplayId(screenId_);
     displayInfo->SetRefreshRate(property_.GetRefreshRate());
-    displayInfo->SetVirtualPixelRatio(property_.GetDensity());
+    displayInfo->SetVirtualPixelRatio(property_.GetVirtualPixelRatio());
     displayInfo->SetXDpi(property_.GetXDpi());
     displayInfo->SetYDpi(property_.GetYDpi());
     displayInfo->SetDpi(property_.GetDensity());
@@ -93,6 +93,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetOrientation(property_.GetOrientation());
     displayInfo->SetOffsetX(property_.GetOffsetX());
     displayInfo->SetOffsetY(property_.GetOffsetY());
+    displayInfo->SetDisplayOrientation(property_.GetDisplayOrientation());
     return displayInfo;
 }
 
@@ -187,7 +188,34 @@ Rotation ScreenSession::CalcRotation(Orientation orientation) const
 
 ScreenSourceMode ScreenSession::GetSourceMode() const
 {
-    return ScreenSourceMode::SCREEN_ALONE;
+    if (screenId_ == defaultScreenId_) {
+        return ScreenSourceMode::SCREEN_MAIN;
+    }
+    ScreenCombination combination = GetScreenCombination();
+    switch (combination) {
+        case ScreenCombination::SCREEN_MIRROR: {
+            return ScreenSourceMode::SCREEN_MIRROR;
+        }
+        case ScreenCombination::SCREEN_EXPAND: {
+            return ScreenSourceMode::SCREEN_EXTEND;
+        }
+        case ScreenCombination::SCREEN_ALONE: {
+            return ScreenSourceMode::SCREEN_ALONE;
+        }
+        default: {
+            return ScreenSourceMode::SCREEN_ALONE;
+        }
+    }
+}
+
+void ScreenSession::SetScreenCombination(ScreenCombination combination)
+{
+    combination_ = combination;
+}
+
+ScreenCombination ScreenSession::GetScreenCombination() const
+{
+    return combination_;
 }
 
 void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
