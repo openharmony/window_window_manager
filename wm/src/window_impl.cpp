@@ -1384,25 +1384,15 @@ WMError WindowImpl::PreProcessShow(uint32_t reason, bool withAnimation)
     return WMError::WM_OK;
 }
 
-bool Log(uint32_t reason, bool withAnimation)
-{
-    WLOGFD("Window Show [name:%{public}s, id:%{public}u, mode: %{public}u], reason:%{public}u, "
-        "withAnimation:%{public}d", name_.c_str(), property_->GetWindowId(), GetMode(), reason, withAnimation);
-    if (!IsWindowValid()) {
-        return false;
-    } else {
-        UpdateDecorEnable(true);
-        return true;
-    }
-}
-
 WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, __PRETTY_FUNCTION__);
-    bool res = Log(reason, withAnimation);
-    if(!res) {
+    WLOGFD("Window Show [name:%{public}s, id:%{public}u, mode: %{public}u], reason:%{public}u, "
+        "withAnimation:%{public}d", name_.c_str(), property_->GetWindowId(), GetMode(), reason, withAnimation);
+    if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    UpdateDecorEnable(true);
     if (static_cast<WindowStateChangeReason>(reason) == WindowStateChangeReason::KEYGUARD ||
         static_cast<WindowStateChangeReason>(reason) == WindowStateChangeReason::TOGGLING) {
         state_ = WindowState::STATE_SHOWN;
@@ -1411,7 +1401,6 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
     }
     if (state_ == WindowState::STATE_SHOWN) {
         if (property_->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
-            WLOGI("desktop window [id:%{public}u] is shown, minimize all app windows", property_->GetWindowId());
             SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(property_->GetDisplayId());
         } else {
             WLOGI("window is already shown id: %{public}u", property_->GetWindowId());
