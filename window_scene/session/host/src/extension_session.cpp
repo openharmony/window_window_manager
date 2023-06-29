@@ -70,4 +70,13 @@ void ExtensionSession::RegisterExtensionSessionEventCallback(
 {
     extSessionEventCallback_ = extSessionEventCallback;
 }
+
+sptr<ExtensionSession::ExtensionSessionEventCallback> ExtensionSession::GetExtensionSessionEventCallback()
+{
+    if (extSessionEventCallback_ == nullptr) {
+        extSessionEventCallback_ = new(std::nothrow) ExtensionSessionEventCallback();
+    }
+
+    return extSessionEventCallback_;
+}
 } // namespace OHOS::Rosen
