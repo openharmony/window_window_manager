@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "js_scene_utils.h"
 #include "js_scene_session.h"
 
 #include "session/host/include/session.h"
@@ -696,7 +697,7 @@ void JsSceneSession::OnSessionException(const SessionInfo& info)
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsSceneSession::OnSystemBarPropertyChange(const SystemBarProperty& property)
+void JsSceneSession::OnSystemBarPropertyChange(const std::unordered_map<WindowType, SystemBarProperty>& propertyMap)
 {
     WLOGFI("[NAPI]OnSystemBarPropertyChange");
     auto iter = jsCbMap_.find(SYSTEMBAR_PROPERTY_CHANGE_CB);
@@ -705,8 +706,8 @@ void JsSceneSession::OnSystemBarPropertyChange(const SystemBarProperty& property
     }
     auto jsCallBack = iter->second;
     auto complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [jsCallBack, property, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            NativeValue* jsSessionStateObj = CreateJsValue(engine, property);
+        [jsCallBack, propertyMap, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            NativeValue* jsSessionStateObj = CreateJsSystemBarPropertyArrayObject(engine, propertyMap);
             NativeValue* argv[] = { jsSessionStateObj };
             engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
         });
