@@ -96,15 +96,13 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
             WLOGFE("Session is invalid!");
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        AAFwk::Want want;
         auto sessionInfo = extSession->GetSessionInfo();
-        want.SetElementName(sessionInfo.bundleName_, sessionInfo.abilityName_);
         AAFwk::StartOptions startOptions;
         auto extSessionInfo = SetAbilitySessionInfo(extSession);
         if (!extSessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        AAFwk::AbilityManagerClient::GetInstance()->StartUIExtensionAbility(want, extSessionInfo,
+        AAFwk::AbilityManagerClient::GetInstance()->StartUIExtensionAbility(*sessionInfo.want, extSessionInfo,
             AAFwk::DEFAULT_INVAL_VALUE,
             AppExecFwk::ExtensionAbilityType::UI);
         return WSError::WS_OK;
