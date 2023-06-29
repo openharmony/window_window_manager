@@ -15,6 +15,7 @@ import("//build/ohos.gni")
 
 group("window_scene") {
   public_deps = [
+    "intention_event:libintention_event",
     "session:scene_session",
     "session:screen_session",
     "session_manager:scene_session_manager",
