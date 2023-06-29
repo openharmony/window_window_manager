@@ -22,6 +22,8 @@
 #include <refbase.h>
 #include <ui_content.h>
 #include <ui/rs_surface_node.h>
+#include "display_manager.h"
+#include "singleton_container.h"
 
 #include "common/include/window_session_property.h"
 #include "interfaces/include/ws_common_inner.h"
@@ -105,6 +107,8 @@ public:
     void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
     void NotifyForegroundFailed(WMError ret);
     WSError MarkProcessed(int32_t eventId) override;
+    void UpdateWindowSizeLimits();
+    void UpdateTitleButtonVisibility();
     WSError NotifyDestroy() override;
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void NotifyTouchDialogTarget() override;
@@ -138,7 +142,6 @@ protected:
     std::recursive_mutex mutex_;
     static std::map<std::string, std::pair<uint64_t, sptr<WindowSessionImpl>>> windowSessionMap_;
     static std::map<uint64_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
-
     bool isIgnoreSafeAreaNeedNotify_ = false;
     bool isIgnoreSafeArea_ = false;
 

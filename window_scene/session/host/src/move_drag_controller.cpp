@@ -206,7 +206,6 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
         pointerEvent->GetButtonId() != MMI::PointerEvent::MOUSE_BUTTON_LEFT) {
         return false;
     }
-    maxFloatingWindowSize_ = sysConfig.maxFloatingWindowSize_;
     int32_t pointerId = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerId, pointerItem);
@@ -304,6 +303,25 @@ WSRect MoveDragController::CalcFreeformTargetRect(AreaType type, int32_t tranX, 
     } else if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::BOTTOM)) {
         targetRect.height_ += tranY;
     }
+    // check current ratio limits
+    if (targetRect.height_ == 0) {
+        return targetRect;
+    }
+    float curRatio = static_cast<float>(targetRect.width_) / static_cast<float>(targetRect.height_);
+    if (!MathHelper::GreatNotEqual(limits_.minRatio_, curRatio) &&
+        !MathHelper::GreatNotEqual(curRatio, limits_.maxRatio_)) {
+        return targetRect;
+    }
+    float newRatio = MathHelper::LessNotEqual(curRatio, limits_.minRatio_) ? limits_.minRatio_ : limits_.maxRatio_;
+    if (MathHelper::NearZero(newRatio)) {
+        return targetRect;
+    }
+    if ((static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::LEFT)) ||
+        (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::RIGHT))) {
+        targetRect.height_ = static_cast<uint32_t>(static_cast<float>(targetRect.width_) / newRatio);
+    } else {
+        targetRect.width_ = static_cast<uint32_t>(static_cast<float>(targetRect.height_) * newRatio);
+    }
     return targetRect;
 }
 
@@ -359,34 +377,28 @@ WSRect MoveDragController::CalcFixedAspectRatioTargetRect(AreaType type, int32_t
 
 void MoveDragController::CalcFreeformTranslateLimits(AreaType type)
 {
-    int32_t minW;
-    int32_t maxW;
-    int32_t minH;
-    int32_t maxH;
-    SessionUtils::CalcFloatWindowRectLimits(limits_, maxFloatingWindowSize_, vpr_, minW, maxW, minH, maxH);
     if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::LEFT)) {
-        minTranX_ = moveDragProperty_.originalRect_.width_ - maxW;
-        maxTranX_ = moveDragProperty_.originalRect_.width_ - minW;
+        minTranX_ = moveDragProperty_.originalRect_.width_ - limits_.maxWidth_;
+        maxTranX_ = moveDragProperty_.originalRect_.width_ - limits_.minWidth_;
     } else if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::RIGHT)) {
-        minTranX_ = minW - moveDragProperty_.originalRect_.width_;
-        maxTranX_ = maxW - moveDragProperty_.originalRect_.width_;
+        minTranX_ = limits_.minWidth_ - moveDragProperty_.originalRect_.width_;
+        maxTranX_ = limits_.maxWidth_ - moveDragProperty_.originalRect_.width_;
     }
     if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::TOP)) {
-        minTranY_ = moveDragProperty_.originalRect_.height_ - maxH;
-        maxTranY_ = moveDragProperty_.originalRect_.height_ - minH;
+        minTranY_ = moveDragProperty_.originalRect_.height_ - limits_.maxHeight_;
+        maxTranY_ = moveDragProperty_.originalRect_.height_ - limits_.minHeight_;
     } else if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::BOTTOM)) {
-        minTranY_ = minH - moveDragProperty_.originalRect_.height_;
-        maxTranY_ = maxH - moveDragProperty_.originalRect_.height_;
+        minTranY_ = limits_.minHeight_ - moveDragProperty_.originalRect_.height_;
+        maxTranY_ = limits_.maxHeight_ - moveDragProperty_.originalRect_.height_;
     }
 }
 
 void MoveDragController::CalcFixedAspectRatioTranslateLimits(AreaType type, AxisType axis)
 {
-    int32_t minW;
-    int32_t maxW;
-    int32_t minH;
-    int32_t maxH;
-    SessionUtils::CalcFloatWindowRectLimits(limits_, maxFloatingWindowSize_, vpr_, minW, maxW, minH, maxH);
+    int32_t minW = limits_.minWidth_;
+    int32_t maxW = limits_.maxWidth_;
+    int32_t minH = limits_.minHeight_;
+    int32_t maxH = limits_.maxHeight_;
     if (isDecorEnable_) {
         if (SessionUtils::ToLayoutWidth(minW, vpr_) < SessionUtils::ToLayoutHeight(minH, vpr_) * aspectRatio_) {
             minW = SessionUtils::ToWinWidth(SessionUtils::ToLayoutHeight(minH, vpr_) * aspectRatio_, vpr_);

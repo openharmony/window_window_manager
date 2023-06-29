@@ -78,6 +78,7 @@ public:
     void SetZOrder(uint32_t zOrder);
     void SetWindowFlags(uint32_t flags);
     void AddWindowFlag(WindowFlag flag);
+    void SetModeSupportInfo(uint32_t modeSupportInfo);
 
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
@@ -101,6 +102,7 @@ public:
     MaximizeMode GetMaximizeMode() const;
     WindowMode GetWindowMode() const;
     WindowLimits GetWindowLimits() const;
+    uint32_t GetModeSupportInfo() const;
     const std::unordered_map<WindowType, SystemBarProperty>& GetSystemBarProperty() const;
     bool IsDecorEnable();
     uint32_t GetZOrder();
@@ -134,6 +136,7 @@ private:
     MaximizeMode maximizeMode_ = MaximizeMode::MODE_RECOVER;
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     WindowLimits limits_;
+    uint32_t modeSupportInfo_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },
     };
