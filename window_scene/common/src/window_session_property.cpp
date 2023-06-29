@@ -281,6 +281,16 @@ bool WindowSessionProperty::IsDecorEnable()
     return isDecorEnable_;
 }
 
+void WindowSessionProperty::SetModeSupportInfo(uint32_t modeSupportInfo)
+{
+    modeSupportInfo_ = modeSupportInfo;
+}
+
+uint32_t WindowSessionProperty::GetModeSupportInfo() const
+{
+    return modeSupportInfo_;
+}
+
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
 {
     if (parcel.WriteUint32(limits_.maxWidth_) &&

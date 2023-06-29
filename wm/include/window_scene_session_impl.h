@@ -71,6 +71,7 @@ public:
     virtual WMError SetBlur(float radius) override;
     virtual WMError SetBackdropBlur(float radius) override;
     virtual WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) override;
+    virtual WMError SetWindowMode(WindowMode mode) override;
 
     virtual WMError SetTransparent(bool isTransparent) override;
     virtual WMError SetTurnScreenOn(bool turnScreenOn) override;
@@ -92,13 +93,18 @@ protected:
     sptr<WindowSessionImpl> FindMainWindowWithContext();
     void UpdateSubWindowStateAndNotify(uint64_t parentPersistentId, const WindowState& newState);
     void LimitCameraFloatWindowMininumSize(uint32_t& width, uint32_t& height);
+    void UpdateFloatingWindowSizeBySizeLimits(uint32_t& width, uint32_t& height) const;
     WMError NotifyWindowSessionProperty();
     WMError NotifyWindowNeedAvoid(bool status = false);
     WMError SetLayoutFullScreenByApiVersion(bool status);
+    void UpdateWindowSizeLimits();
+    WindowLimits GetSystemSizeLimits(uint32_t displayWidth, uint32_t displayHeight, float vpr);
+    void GetConfigurationFromAbilityInfo();
 
 private:
     bool IsValidSystemWindowType(const WindowType& type);
     WMError CheckParmAndPermission();
+    static uint32_t maxFloatingWindowSize_;
 };
 } // namespace Rosen
 } // namespace OHOS
