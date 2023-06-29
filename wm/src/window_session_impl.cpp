@@ -25,6 +25,7 @@
 #include "vsync_station.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
+#include "color_parser.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -471,7 +472,10 @@ WMError WindowSessionImpl::SetTouchable(bool isTouchable)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     property_->SetTouchable(isTouchable);
-    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
+    if (state_ == WindowState::STATE_SHOWN) {
+        return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
+    }
+    return WMError::WM_OK;
 }
 
 bool WindowSessionImpl::GetTouchable() const
@@ -896,6 +900,42 @@ sptr<Window> WindowSessionImpl::Find(const std::string& name)
         return nullptr;
     }
     return iter->second.second;
+}
+
+WMError WindowSessionImpl::SetBackgroundColor(const std::string& color)
+{
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    uint32_t colorValue;
+    if (ColorParser::Parse(color, colorValue)) {
+        WLOGD("SetBackgroundColor: window: %{public}s, value: [%{public}s, %{public}u]",
+            GetWindowName().c_str(), color.c_str(), colorValue);
+        return SetBackgroundColor(colorValue);
+    }
+    WLOGFE("invalid color string: %{public}s", color.c_str());
+    return WMError::WM_ERROR_INVALID_PARAM;
+}
+
+WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
+{
+    // 0xff000000: ARGB style, means Opaque color.
+    // const bool isAlphaZero = !(color & 0xff000000);
+    if (uiContent_ != nullptr) {
+        uiContent_->SetBackgroundColor(color);
+        return WMError::WM_OK;
+    }
+    return WMError::WM_ERROR_INVALID_OPERATION;
+}
+
+uint32_t WindowSessionImpl::GetBackgroundColor() const
+{
+    if (uiContent_ != nullptr) {
+        return uiContent_->GetBackgroundColor();
+    }
+    WLOGD("uiContent is nullptr, windowId: %{public}u, use FA mode", GetWindowId());
+    return 0xffffffff; // means no background color been set, default color is white
 }
 } // namespace Rosen
 } // namespace OHOS
