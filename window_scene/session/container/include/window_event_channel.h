@@ -30,6 +30,7 @@ public:
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
     WSError TransferFocusActiveEvent(bool isFocusActive) override;
+    WSError TransferFocusWindowId(uint32_t windowId) override;
 
 private:
     sptr<ISessionStage> sessionStage_ = nullptr;
