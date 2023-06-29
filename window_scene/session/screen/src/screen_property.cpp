@@ -39,6 +39,7 @@ void ScreenProperty::SetBounds(const RRect& bounds)
     bounds_ = bounds;
     UpdateXDpi();
     UpdateYDpi();
+    UpdateDisplayOrientation();
 }
 
 RRect ScreenProperty::GetBounds() const
@@ -48,15 +49,7 @@ RRect ScreenProperty::GetBounds() const
 
 float ScreenProperty::GetDensity()
 {
-    int32_t width = bounds_.rect_.width_;
-    int32_t height = bounds_.rect_.height_;
-
-    if (width == PHONE_SCREEN_WIDTH && height == PHONE_SCREEN_HEIGHT) { // telephone
-        density_ = PHONE_SCREEN_DENSITY;
-    } else {
-        density_ = ELSE_SCREEN_DENSITY;
-    }
-    return density_;
+    return DOT_PER_INCH * virtualPixelRatio_;
 }
 
 void ScreenProperty::SetPhyWidth(uint32_t phyWidth)
@@ -114,6 +107,16 @@ Orientation ScreenProperty::GetOrientation() const
     return orientation_;
 }
 
+void ScreenProperty::SetDisplayOrientation(DisplayOrientation displayOrientation)
+{
+    displayOrientation_ = displayOrientation;
+}
+
+DisplayOrientation ScreenProperty::GetDisplayOrientation() const
+{
+    return displayOrientation_;
+}
+
 void ScreenProperty::UpdateXDpi()
 {
     if (phyWidth_ != UINT32_MAX) {
@@ -127,6 +130,27 @@ void ScreenProperty::UpdateYDpi()
     if (phyHeight_ != UINT32_MAX) {
         int32_t height_ = bounds_.rect_.height_;
         yDpi_ = height_ * INCH_2_MM / phyHeight_;
+    }
+}
+
+void ScreenProperty::UpdateVirtualPixelRatio(const RRect& bounds)
+{
+    int32_t width = bounds.rect_.width_;
+    int32_t height = bounds.rect_.height_;
+
+    if (width == PHONE_SCREEN_WIDTH && height == PHONE_SCREEN_HEIGHT) { // telephone
+        virtualPixelRatio_ = PHONE_SCREEN_DENSITY;
+    } else {
+        virtualPixelRatio_ = ELSE_SCREEN_DENSITY;
+    }
+}
+
+void ScreenProperty::UpdateDisplayOrientation()
+{
+    if (bounds_.rect_.width_ > bounds_.rect_.height_) {
+        displayOrientation_ = DisplayOrientation::LANDSCAPE;
+    } else {
+        displayOrientation_ = DisplayOrientation::PORTRAIT;
     }
 }
 
