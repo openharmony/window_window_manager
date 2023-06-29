@@ -950,6 +950,15 @@ void SceneSessionManager::OnSessionStateChange(uint64_t persistentId)
     }
 }
 
+void SceneSessionManager::SetWaterMarkSessionCount(int32_t count)
+{
+    waterMarkSessionCount_ = count;
+}
+int32_t SceneSessionManager::GetWaterMarkSessionCount() const
+{
+    return waterMarkSessionCount_;
+}
+
 WSError SceneSessionManager::SetWindowFlags(const sptr<SceneSession>& sceneSession, uint32_t flags)
 {
     if (sceneSession == nullptr) {
@@ -959,27 +968,34 @@ WSError SceneSessionManager::SetWindowFlags(const sptr<SceneSession>& sceneSessi
     auto property = sceneSession->GetWindowSessionProperty();
     uint32_t oldFlags = property->GetWindowFlags();
     property->SetWindowFlags(flags);
-    // if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::))
-    // auto property = node->GetWindowProperty();
-    // uint32_t oldFlags = property->GetWindowFlags();
-    // if (property->GetApiCompatibleVersion() >= 9 && !isSystemCalling && // 9: api version.
-    //     (oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) {
-    //     WLOGFW("Only API 9- or system calling support showing when locked.");
-    //     return WMError::WM_ERROR_INVALID_PERMISSION;
-    // }
-    // property->SetWindowFlags(flags);
-    // // only forbid_split_move flag change, just set property
-    // if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE)) {
-    //     return WMError::WM_OK;
-    // }
-    // WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_FLAGS);
-    // if (res != WMError::WM_OK) {
-    //     return res;
-    // }
-    // FlushWindowInfo(windowId);
-    // accessibilityConnection_->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-    // WLOGI("SetWindowFlags end");
-    // return res;
+    // notify when visibility change
+    if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) {
+        CheckAndNotifyWaterMarkChangedResult(flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK));
+    }
+    WLOGFI("SetWindowFlags end");
+    return WSError::WS_OK;
+}
+
+void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult(bool isAddingWaterMark)
+{
+    int32_t preWaterMarkSessionCount = GetWaterMarkSessionCount();
+    WLOGFD("before update : water mark count: %{public}u", preWaterMarkSessionCount);
+    SetWaterMarkSessionCount(preWaterMarkSessionCount + (isAddingWaterMark ? 1 : -1));
+    if (preWaterMarkSessionCount == 0 && isAddingWaterMark) {
+        NotifyWaterMarkFlagChangedResult(true);
+        return;
+    }
+    if (preWaterMarkSessionCount == 1 && !isAddingWaterMark) {
+        NotifyWaterMarkFlagChangedResult(false);
+        return;
+    }
+}
+
+WSError SceneSessionManager::NotifyWaterMarkFlagChangedResult(bool hasWaterMark)
+{
+    WLOGFI("WaterMark status : %{public}u", static_cast<uint32_t>(hasWaterMark));
+    SessionManagerAgentController::GetInstance().NotifyWaterMarkFlagChangedResult(hasWaterMark);
+    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession)

@@ -73,6 +73,9 @@ public:
 
     void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
     WSError SetWindowFlags(const sptr<SceneSession>& sceneSession, uint32_t flags);
+
+    void SetWaterMarkSessionCount(int32_t count);
+    int32_t GetWaterMarkSessionCount() const;
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
@@ -118,6 +121,10 @@ private:
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
     void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void OnSessionStateChange(uint64_t persistentId);
+
+    void CheckAndNotifyWaterMarkChangedResult(bool isAddingWaterMark);
+    WSError NotifyWaterMarkFlagChangedResult(bool hasWaterMark);
+    int32_t waterMarkSessionCount_ { 0 };
 };
 } // namespace OHOS::Rosen
 

@@ -638,11 +638,13 @@ void Session::NotifySessionStateChange(const SessionState& state)
 void Session::SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func)
 {
     sessionFocusableChangeFunc_ = func;
+    NotifySessionFocusableChange(GetFocusable());
 }
 
 void Session::SetSessionTouchableChangeListener(const NotifySessionTouchableChangeFunc& func)
 {
     sessionTouchableChangeFunc_ = func;
+    NotifySessionFocusableChange(GetTouchable());
 }
 
 void Session::SetClickListener(const NotifyClickFunc& func)

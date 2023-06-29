@@ -102,7 +102,7 @@ private:
     std::shared_ptr<RSDisplayNode> displayNode_;
     ScreenState screenState_ { ScreenState::INIT };
     std::vector<IScreenChangeListener*> screenChangeListenerList_;
-    uint32_t privateSessionCount_ { 0 };
+    int32_t privateSessionCount_ { 0 };
 };
 
 class ScreenSessionGroup : public ScreenSession {
