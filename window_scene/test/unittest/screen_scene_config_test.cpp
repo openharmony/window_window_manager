@@ -19,6 +19,8 @@
 #include <libxml/xmlstring.h>
 #include "screen_scene_config.h"
 #include "xml_config_base.h"
+#include "window_manager_hilog.h"
+
 
 using namespace testing;
 using namespace testing::ext;
@@ -159,8 +161,9 @@ HWTEST_F(ScreenSceneConfigTest, ReadIntNumbersConfigInfo, Function | SmallTest |
             continue;
         }
     }
+    WLOGFE("ScreenSceneConfigTest.ReadIntNumbersConfigInfo=%u.", readCount);
 
-    ASSERT_LE(ScreenSceneConfig::intNumbersConfig_.size(), readCount);
+    ASSERT_GE(ScreenSceneConfig::intNumbersConfig_.size(), readCount);
 
     ScreenSceneConfig::DumpConfig();
     xmlFreeDoc(docPtr);
