@@ -33,7 +33,9 @@ const std::map<uint32_t, WindowEventChannelStubFunc> WindowEventChannelStub::stu
     std::make_pair(static_cast<uint32_t>(WindowEventChannelMessage::TRANS_ID_TRANSFER_POINTER_EVENT),
         &WindowEventChannelStub::HandleTransferPointerEvent),
     std::make_pair(static_cast<uint32_t>(WindowEventChannelMessage::TRANS_ID_TRANSFER_FOCUS_ACTIVE_EVENT),
-        &WindowEventChannelStub::HandleTransferFocusActiveEvent)
+        &WindowEventChannelStub::HandleTransferFocusActiveEvent),
+    std::make_pair(static_cast<uint32_t>(WindowEventChannelMessage::TRANS_ID_TRANSFER_FOCUS_WINDOW_ID_EVENT),
+        &WindowEventChannelStub::HandleTransferFocusWindowIdEvent)
 };
 
 int WindowEventChannelStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
@@ -99,4 +101,11 @@ int WindowEventChannelStub::HandleTransferFocusActiveEvent(MessageParcel& data, 
     return ERR_NONE;
 }
 
-} // namespace OHOS::Rosen
+int WindowEventChannelStub::HandleTransferFocusWindowIdEvent(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t focusWindowId = data.ReadUint32();
+    WSError errCode = TransferFocusWindowId(focusWindowId);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+}
