@@ -85,7 +85,6 @@ WSError WindowEventChannel::TransferFocusActiveEvent(bool isFocusActive)
 
 void WindowEventChannel::OnDispatchEventProcessed(int32_t eventId, int64_t actionTime)
 {
-    CALL_DEBUG_ENTER;
     ANRHDL->SetLastProcessedEventId(eventId, actionTime);
 }
 

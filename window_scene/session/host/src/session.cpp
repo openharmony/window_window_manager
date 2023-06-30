@@ -112,7 +112,6 @@ bool Session::UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, 
 
 void Session::NotifyConnect()
 {
-    CALL_DEBUG_ENTER;
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
@@ -123,7 +122,6 @@ void Session::NotifyConnect()
 
 void Session::NotifyForeground()
 {
-    CALL_DEBUG_ENTER;
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     for (auto& listener : lifecycleListeners) {
         if (!listener.expired()) {
@@ -283,7 +281,6 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
 {
-    CALL_DEBUG_ENTER;
     WLOGFI("Connect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()));
     if (GetSessionState() != SessionState::STATE_DISCONNECT) {
@@ -324,7 +321,6 @@ WSError Session::UpdateWindowSessionProperty(sptr<WindowSessionProperty> propert
 
 WSError Session::Foreground()
 {
-    CALL_DEBUG_ENTER;
     SessionState state = GetSessionState();
     WLOGFI("Foreground session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(state));
@@ -343,7 +339,6 @@ WSError Session::Foreground()
 
 WSError Session::Background()
 {
-    CALL_DEBUG_ENTER;
     SessionState state = GetSessionState();
     WLOGFI("Background session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(state));
@@ -359,7 +354,6 @@ WSError Session::Background()
 
 WSError Session::Disconnect()
 {
-    CALL_DEBUG_ENTER;
     SessionState state = GetSessionState();
     WLOGFI("Disconnect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(state));
@@ -437,7 +431,6 @@ void Session::SetBackPressedListenser(const NotifyBackPressedFunc& func)
 
 WSError Session::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
-    CALL_DEBUG_ENTER;
     if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -462,7 +455,6 @@ void Session::SetTerminateSessionListener(const NotifyTerminateSessionFunc& func
 
 WSError Session::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
-    CALL_DEBUG_ENTER;
     if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -498,7 +490,6 @@ void Session::NotifyTouchDialogTarget()
 
 WSError Session::NotifyDestroy()
 {
-    CALL_DEBUG_ENTER;
     if (!sessionStage_) {
         return WSError::WS_ERROR_NULLPTR;
     }
@@ -545,7 +536,6 @@ bool Session::CheckDialogOnForeground()
 
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    CALL_DEBUG_ENTER;
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         if (CheckDialogOnForeground()) {
             WLOGFD("Has dialog on foreground, not transfer pointer event");
@@ -582,7 +572,6 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
 
 WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    CALL_DEBUG_ENTER;
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         if (CheckDialogOnForeground()) {
             WLOGFD("Has dialog on foreground, not transfer pointer event");
@@ -668,7 +657,6 @@ void Session::SetSessionStateChangeNotifyManagerListener(const NotifySessionStat
 
 void Session::NotifySessionStateChange(const SessionState& state)
 {
-    CALL_DEBUG_ENTER;
     WLOGFI("state: %{public}u", static_cast<uint32_t>(state));
     if (sessionStateChangeFunc_) {
         sessionStateChangeFunc_(state);
@@ -841,7 +829,6 @@ WSError Session::ProcessBackEvent()
 
 WSError Session::MarkProcessed(int32_t eventId)
 {
-    CALL_DEBUG_ENTER;
     int32_t persistentId = GetPersistentId();
     WLOGFI("persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
     ANRMgr->MarkProcessed(eventId, persistentId);

@@ -17,6 +17,7 @@
 
 #include <algorithm>
 
+#include "entrance_log.h"
 #include "proto.h"
 #include "util.h"
 #include "window_manager_hilog.h"

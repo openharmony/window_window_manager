@@ -68,7 +68,6 @@ WSError SessionProxy::Background()
 
 WSError SessionProxy::Disconnect()
 {
-    CALL_DEBUG_ENTER;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -197,7 +196,6 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
 
 WSError SessionProxy::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
-    CALL_DEBUG_ENTER;
     if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -239,7 +237,6 @@ WSError SessionProxy::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
 
 WSError SessionProxy::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
-    CALL_DEBUG_ENTER;
     if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -364,7 +361,6 @@ WSError SessionProxy::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session)
 {
-    CALL_DEBUG_ENTER;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -415,7 +411,6 @@ WSError SessionProxy::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
 
 WSError SessionProxy::DestroyAndDisconnectSpecificSession(const uint64_t& persistentId)
 {
-    CALL_DEBUG_ENTER;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -522,7 +517,6 @@ WSError SessionProxy::RequestSessionBack()
 
 WSError SessionProxy::MarkProcessed(int32_t eventId)
 {
-    CALL_DEBUG_ENTER;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);

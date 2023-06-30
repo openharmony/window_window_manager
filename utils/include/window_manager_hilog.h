@@ -15,11 +15,6 @@
 
 #ifndef OHOS_WM_INCLUDE_WINDOW_MANAGER_HILOG_H
 #define OHOS_WM_INCLUDE_WINDOW_MANAGER_HILOG_H
-#include <cinttypes>
-#include <functional>
-#include <future>
-#include <string>
-#include <sstream>
 
 #include "hilog/log.h"
 namespace OHOS {
@@ -52,45 +47,6 @@ static constexpr OHOS::HiviewDFX::HiLogLabel LOG_LABEL = {LOG_CORE, HILOG_DOMAIN
 #define WLOGFI(fmt, ...) WLOGI("%{public}s: " fmt, _W_FUNC, ##__VA_ARGS__)
 #define WLOGFW(fmt, ...) WLOGW("%{public}s: " fmt, _W_FUNC, ##__VA_ARGS__)
 #define WLOGFE(fmt, ...) WLOGE("%{public}s: " fmt, _W_FUNC, ##__VA_ARGS__)
-
-class InnerFunctionTracer {
-public:
-    using HilogFunc = std::function<int(const char *)>;
-
-public:
-    InnerFunctionTracer(HilogFunc logfn, const char* tag, LogLevel level)
-        : logfn_ { logfn }, tag_ { tag }, level_ { level }
-    {
-        if (HiLogIsLoggable(OHOS::Rosen::HILOG_DOMAIN_WINDOW, tag_, level_)) {
-            if (logfn_ != nullptr) {
-                logfn_("in %{public}s, enter");
-            }
-        }
-    }
-    ~InnerFunctionTracer()
-    {
-        if (HiLogIsLoggable(OHOS::Rosen::HILOG_DOMAIN_WINDOW, tag_, level_)) {
-            if (logfn_ != nullptr) {
-                logfn_("in %{public}s, leave");
-            }
-        }
-    }
-private:
-    HilogFunc logfn_ { nullptr };
-    const char* tag_ { nullptr };
-    LogLevel level_ { LOG_LEVEL_MIN };
-};
-
-#define CALL_DEBUG_ENTER        OHOS::Rosen::InnerFunctionTracer ___innerFuncTracer_Debug___    \
-    { std::bind(&OHOS::HiviewDFX::HiLog::Debug, LABEL, std::placeholders::_1, __FUNCTION__), LABEL.tag, LOG_DEBUG }
-
-#define CALL_INFO_TRACE         OHOS::Rosen::InnerFunctionTracer ___innerFuncTracer_Info___     \
-    { std::bind(&OHOS::HiviewDFX::HiLog::Info, LABEL, std::placeholders::_1, __FUNCTION__), LABEL.tag, LOG_INFO }
-
-#define CALL_TEST_DEBUG         OHOS::Rosen::InnerFunctionTracer ___innerFuncTracer_Info___     \
-    { std::bind(&OHOS::HiviewDFX::HiLog::Info, LABEL, std::placeholders::_1,     \
-    (test_info_ == nullptr ? "TestBody" : test_info_->name())), LABEL.tag, LOG_DEBUG }
-
 } // namespace Rosen
 }
 #endif // FRAMEWORKS_WM_INCLUDE_WINDOW_MANAGER_HILOG_H

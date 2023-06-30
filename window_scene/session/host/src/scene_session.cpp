@@ -225,7 +225,7 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
 WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     WLOGFD("SceneSession TransferPointEvent");
-    if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+    if (property_ != nullptr && property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
         WindowHelper::IsMainWindow(property_->GetWindowType()) &&
         property_->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
         if (!moveDragController_) {
