@@ -20,14 +20,11 @@
 #include <ui_content.h>
 #include <viewport_config.h>
 
-<<<<<<< HEAD
 #include "app_mgr_client.h"
 #include "singleton.h"
 
 #include "anr_manager.h"
-=======
 #include "intention_event_manager.h"
->>>>>>> 5831bc69c26fbbf0d7532dbc637d3c6ed733cec0
 #include "vsync_station.h"
 #include "window_manager_hilog.h"
 
