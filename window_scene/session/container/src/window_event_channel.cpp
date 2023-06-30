@@ -65,4 +65,15 @@ WSError WindowEventChannel::TransferFocusActiveEvent(bool isFocusActive)
     sessionStage_->NotifyFocusActiveEvent(isFocusActive);
     return WSError::WS_OK;
 }
+
+WSError WindowEventChannel::TransferFocusWindowId(uint32_t windowId)
+{
+    WLOGFD("WindowEventChannel receive focus window Id event: %{public}zu", windowId);
+    if (!sessionStage_) {
+        WLOGFE("session stage is null!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    sessionStage_->NotifyFocusWindowIdEvent(windowId);
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen
