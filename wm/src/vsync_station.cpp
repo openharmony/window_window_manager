@@ -39,25 +39,7 @@ void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallb
         }
         vsyncCallbacks_.insert(vsyncCallback);
 
-        if (!hasInitVsyncReceiver_ || !vsyncHandler_) {
-            auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
-            if (mainEventRunner != nullptr && isMainHandlerAvailable_) {
-                WLOGI("MainEventRunner is available");
-                vsyncHandler_ = std::make_shared<AppExecFwk::EventHandler>(mainEventRunner);
-            } else {
-                WLOGI("MainEventRunner is not available");
-                if (!vsyncHandler_) {
-                    vsyncHandler_ = std::make_shared<AppExecFwk::EventHandler>(
-                        AppExecFwk::EventRunner::Create(VSYNC_THREAD_ID));
-                }
-            }
-            auto& rsClient = OHOS::Rosen::RSInterfaces::GetInstance();
-            while (receiver_ == nullptr) {
-                receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(::getpid()), vsyncHandler_);
-            }
-            receiver_->Init();
-            hasInitVsyncReceiver_ = true;
-        }
+        Init();
         if (hasRequestedVsync_) {
             return;
         }
@@ -69,6 +51,42 @@ void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallb
     }
     WindowFrameTraceImpl::GetInstance()->VsyncStartFrameTrace();
     receiver_->RequestNextVSync(frameCallback_);
+}
+
+int64_t VsyncStation::GetVSyncPeriod()
+{
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        Init();
+    }
+    int64_t period = 0;
+    if (receiver_ != nullptr) {
+        receiver_->GetVSyncPeriod(period);
+    }
+    return period;
+}
+
+void VsyncStation::Init()
+{
+    if (!hasInitVsyncReceiver_ || !vsyncHandler_) {
+        auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
+        if (mainEventRunner != nullptr && isMainHandlerAvailable_) {
+            WLOGI("MainEventRunner is available");
+            vsyncHandler_ = std::make_shared<AppExecFwk::EventHandler>(mainEventRunner);
+        } else {
+            WLOGI("MainEventRunner is not available");
+            if (!vsyncHandler_) {
+                vsyncHandler_ = std::make_shared<AppExecFwk::EventHandler>(
+                    AppExecFwk::EventRunner::Create(VSYNC_THREAD_ID));
+            }
+        }
+        auto& rsClient = OHOS::Rosen::RSInterfaces::GetInstance();
+        while (receiver_ == nullptr) {
+            receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(::getpid()), vsyncHandler_);
+        }
+        receiver_->Init();
+        hasInitVsyncReceiver_ = true;
+    }
 }
 
 void VsyncStation::RemoveCallback()

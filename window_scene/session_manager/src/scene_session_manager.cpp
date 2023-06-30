@@ -833,7 +833,7 @@ void SceneSessionManager::HandleTurnScreenOn(const sptr<SceneSession>& sceneSess
         }
         // set ipc identity to raw
         IPCSkeleton::SetCallingIdentity(identity);
-    }
+    };
     taskScheduler_->PostAsyncTask(task);
 }
 
@@ -868,7 +868,7 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
         if (res != ERR_OK) {
             WLOGFE("handle keep screen running lock failed: [operation: %{public}d, err: %{public}d]", requireLock, res);
         }
-    }
+    };
     taskScheduler_->PostAsyncTask(task);
 }
 
@@ -1048,6 +1048,51 @@ void SceneSessionManager::OnSessionStateChange(uint64_t persistentId)
     default:
         break;
     }
+}
+
+WSError SceneSessionManager::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label)
+{
+    WLOGFI("run SetSessionLabel");
+    for (auto iter : sceneSessionMap_) {
+        auto& sceneSession = iter.second;
+        if (sceneSession->GetAbilityToken() == token) {
+            WLOGFI("try to update session label.");
+            sessionListener_->OnSessionLabelChange(iter.first, label);
+            return WSError::WS_OK;
+        }
+    }
+    return WSError::WS_ERROR_SET_SESSION_LABEL_FAILED;
+}
+
+WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject> &token,
+    const std::shared_ptr<Media::PixelMap> &icon)
+{
+    WLOGFI("run SetSessionIcon");
+    for (auto iter : sceneSessionMap_) {
+        auto& sceneSession = iter.second;
+        if (sceneSession->GetAbilityToken() == token) {
+            WLOGFI("try to update session icon.");
+            sessionListener_->OnSessionIconChange(iter.first, icon);
+            return WSError::WS_OK;
+        }
+    }
+    return WSError::WS_ERROR_SET_SESSION_ICON_FAILED;
+}
+
+WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionListener> sessionListener)
+{
+    WLOGFI("run RegisterSessionListener");
+    if (sessionListener == nullptr) {
+        return WSError::WS_ERROR_INVALID_SESSION_LISTENER;
+    }
+    sessionListener_ = sessionListener;
+    return WSError::WS_OK;
+}
+
+void SceneSessionManager::UnregisterSessionListener()
+{
+    WLOGFI("run UnregisterSessionListener");
+    sessionListener_ = nullptr;
 }
 
 WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession)

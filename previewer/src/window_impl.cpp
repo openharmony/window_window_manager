@@ -637,6 +637,11 @@ void WindowImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallbac
     return;
 }
 
+int64_t WindowImpl::GetVSyncPeriod()
+{
+    return 0;
+}
+
 void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_ != nullptr) {

@@ -73,6 +73,10 @@ public:
     WSError UpdateFocus(uint64_t persistentId, bool isFocused);
     void StartWindowInfoReportLoop();
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
+    WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label);
+    WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon);
+    WSError RegisterSessionListener(const sptr<ISessionListener> sessionListener);
+    void UnregisterSessionListener();
     void HandleTurnScreenOn(const sptr<SceneSession>& sceneSession);
     void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
     void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
@@ -126,6 +130,7 @@ private:
     bool isReportTaskStart_ = false;
     void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void OnSessionStateChange(uint64_t persistentId);
+    sptr<ISessionListener> sessionListener_;
 };
 } // namespace OHOS::Rosen
 

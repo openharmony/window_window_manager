@@ -907,6 +907,12 @@ public:
      */
     virtual void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) {}
     /**
+     * @brief get vsync period.
+     *
+     * @return vsync period.
+     */
+    virtual int64_t GetVSyncPeriod() { return 0; }
+    /**
      * @brief Update Configuration.
      *
      * @param configuration Window configuration.
