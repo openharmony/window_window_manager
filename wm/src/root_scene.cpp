@@ -85,8 +85,8 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
     uiContent_->Foreground();
 
     RegisterInputEventListener();
-    ANRMgr->Init();
-    ANRMgr->SetAnrObserver(([](int32_t pid) {
+    DelayedSingleton<ANRManager>::GetInstance()->Init();
+    DelayedSingleton<ANRManager>::GetInstance()->SetAnrObserver(([](int32_t pid) {
         WLOGFD("Receive anr notice enter");
         AppExecFwk::AppFaultDataBySA faultData;
         faultData.faultType = AppExecFwk::FaultDataType::APP_FREEZE;

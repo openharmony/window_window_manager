@@ -51,7 +51,6 @@ private:
     std::function<void(int32_t)> anrObserver_;
     EventStage eventStage_;
 };
-#define ANRMgr ::OHOS::DelayedSingleton<ANRManager>::GetInstance()
 } // namespace Rosen
 } // namespace OHOS
 #endif // ANR_MANAGER_H
