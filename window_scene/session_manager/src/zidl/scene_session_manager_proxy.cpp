@@ -308,7 +308,7 @@ void SceneSessionManagerProxy::UnregisterSessionListener()
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        WLOGFE("UnregisterSessionListener WriteInterfaceToken failed");
         return;
     }
 
