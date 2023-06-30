@@ -20,10 +20,14 @@
 #include <ui_content.h>
 #include <viewport_config.h>
 
+<<<<<<< HEAD
 #include "app_mgr_client.h"
 #include "singleton.h"
 
 #include "anr_manager.h"
+=======
+#include "intention_event_manager.h"
+>>>>>>> 5831bc69c26fbbf0d7532dbc637d3c6ed733cec0
 #include "vsync_station.h"
 #include "window_manager_hilog.h"
 
@@ -130,24 +134,6 @@ void RootScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Conf
     }
 }
 
-void RootScene::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent)
-{
-    if (uiContent_) {
-        uiContent_->ProcessPointerEvent(inputEvent);
-    } else {
-        WLOGFD("uiContent_ is nullptr");
-    }
-}
-
-void RootScene::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent)
-{
-    if (uiContent_) {
-        uiContent_->ProcessKeyEvent(inputEvent);
-    } else {
-        WLOGFD("uiContent_ is nullptr");
-    }
-}
-
 void RootScene::RegisterInputEventListener()
 {
     auto listener = std::make_shared<InputEventListener>(this);
@@ -165,7 +151,10 @@ void RootScene::RegisterInputEventListener()
         VsyncStation::GetInstance().SetIsMainHandlerAvailable(false);
         VsyncStation::GetInstance().SetVsyncEventHandler(eventHandler_);
     }
-    MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler_);
+    if (!(DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(
+            uiContent_.get(), eventHandler_))) {
+        WLOGFE("EnableInputEventListener fail");
+    }
 }
 
 void RootScene::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
