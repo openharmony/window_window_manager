@@ -19,6 +19,7 @@
 #include "screenlock_manager_interface.h"
 
 #include "session_manager_service_interface.h"
+#include "mock_session_manager_service_interface.h"
 #include "zidl/scene_session_manager_interface.h"
 #include "zidl/screen_session_manager_interface.h"
 #include "wm_single_instance.h"
@@ -47,6 +48,7 @@ private:
     void InitScreenSessionManagerProxy();
     void InitScreenLockManagerProxy();
 
+    sptr<IMockSessionManagerInterface> mockSessionManagerServiceProxy_ = nullptr;
     sptr<ISessionManagerService> sessionManagerServiceProxy_ = nullptr;
     sptr<ISceneSessionManager> sceneSessionManagerProxy_ = nullptr;
     sptr<IScreenSessionManager> screenSessionManagerProxy_ = nullptr;
