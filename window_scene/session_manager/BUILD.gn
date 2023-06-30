@@ -73,6 +73,7 @@ ohos_shared_library("scene_session_manager") {
     "ability_base:session_info",
     "ability_base:want",
     "ability_runtime:ability_manager",
+    "ability_runtime:ability_start_setting",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
