@@ -904,6 +904,15 @@ sptr<Window> WindowSessionImpl::Find(const std::string& name)
     return iter->second.second;
 }
 
+void WindowSessionImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
+{
+    if (handler == nullptr) {
+        WLOGE("ace ability handler is nullptr");
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    aceAbilityHandler_ = handler;
+}
+
 WMError WindowSessionImpl::SetBackgroundColor(const std::string& color)
 {
     if (IsWindowSessionInvalid()) {
@@ -928,6 +937,11 @@ WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
         uiContent_->SetBackgroundColor(color);
         return WMError::WM_OK;
     }
+    if (aceAbilityHandler_ != nullptr) {
+        aceAbilityHandler_->SetBackgroundColor(color);
+        return WMError::WM_OK;
+    }
+    WLOGFE("FA mode could not set bg color: %{public}u", GetWindowId());
     return WMError::WM_ERROR_INVALID_OPERATION;
 }
 
@@ -937,6 +951,10 @@ uint32_t WindowSessionImpl::GetBackgroundColor() const
         return uiContent_->GetBackgroundColor();
     }
     WLOGD("uiContent is nullptr, windowId: %{public}u, use FA mode", GetWindowId());
+    if (aceAbilityHandler_ != nullptr) {
+        return aceAbilityHandler_->GetBackgroundColor();
+    }
+    WLOGFE("FA mode does not get bg color: %{public}u", GetWindowId());
     return 0xffffffff; // means no background color been set, default color is white
 }
 } // namespace Rosen
