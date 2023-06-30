@@ -202,6 +202,16 @@
           },
           {
             "type": "so",
+            "name": "//foundation/window/window_manager/wmserver:sms",
+            "header": {
+              "header_files": [
+                "mock_session_manager_service.h"
+              ],
+              "header_base": "//foundation/window/window_manager/wmserver/include"
+            }
+          },
+          {
+            "type": "so",
             "name": "//foundation/window/window_manager/interfaces/kits/napi/window_runtime:window_native_kit",
             "header": {
               "header_files": [
