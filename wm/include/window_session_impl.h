@@ -87,6 +87,7 @@ public:
     WMError RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
     WMError UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
+    void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
 
     WMError SetBackgroundColor(const std::string& color) override;
 
@@ -160,6 +161,9 @@ private:
     static std::map<uint64_t, std::vector<sptr<IAvoidAreaChangedListener>>> avoidAreaChangeListeners_;
     static std::map<uint64_t, std::vector<sptr<IDialogDeathRecipientListener>>> dialogDeathRecipientListeners_;
     static std::map<uint64_t, std::vector<sptr<IDialogTargetTouchListener>>> dialogTargetTouchListener_;
+
+    // FA only
+    sptr<IAceAbilityHandler> aceAbilityHandler_;
 };
 } // namespace Rosen
 } // namespace OHOS
