@@ -1098,5 +1098,18 @@ void WindowSceneSessionImpl::SetSystemPrivacyMode(bool isSystemPrivacyMode)
     property_->SetSystemPrivacyMode(isSystemPrivacyMode);
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
 }
+
+WMError WindowSceneSessionImpl::NotifyMemoryLevel(int32_t level) const
+{
+    WLOGFD("id: %{public}u, notify memory level: %{public}d", GetWindowId(), level);
+    if (uiContent_ == nullptr) {
+        WLOGFE("Window %{public}s notify memory level failed, ace is null.", GetWindowName().c_str());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    // notify memory level
+    uiContent_->NotifyMemoryLevel(level);
+    WLOGFD("WindowSceneSessionImpl::NotifyMemoryLevel End!");
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
