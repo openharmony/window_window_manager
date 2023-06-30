@@ -80,7 +80,7 @@ void ANRHandler::SetLastProcessedEventId(int32_t eventId, int64_t actionTime)
     WLOGFD("Processed eventId:%{public}d, actionTime:%{public}" PRId64 ", "
         "currentTime:%{public}" PRId64 ", timeoutTime:%{public}" PRId64,
         eventId, actionTime, currentTime, timeoutTime);
-    if(event_.sendStatus) {
+    if (event_.sendStatus) {
         return;
     }
     if (timeoutTime < MIN_MARK_PROCESS_DELAY_TIME) {
