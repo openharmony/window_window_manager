@@ -27,6 +27,8 @@
 #include <ui/rs_surface_node.h>
 #include "util.h"
 #include <want.h>
+
+#include "ability_start_setting.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -409,6 +411,7 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     info.want = new AAFwk::Want(abilitySessionInfo->want);
     info.requestCode = abilitySessionInfo->requestCode;
     info.callerToken_ = abilitySessionInfo->callerToken;
+    info.startSetting = abilitySessionInfo->startSetting;
     WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
     WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}" PRIu64 ", \

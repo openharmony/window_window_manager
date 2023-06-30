@@ -41,6 +41,7 @@ ohos_shared_library("scenesessionmanager_napi") {
     "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_context_native",
+    "ability_runtime:ability_start_setting",
     "ability_runtime:napi_common",
     "ability_runtime:runtime",
     "c_utils:utils",

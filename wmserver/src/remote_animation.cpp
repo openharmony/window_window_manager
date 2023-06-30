@@ -56,7 +56,8 @@ std::map<TransitionReason, TransitionEvent> eventMap_ = {
     {TransitionReason::CLOSE, TransitionEvent::CLOSE},
     {TransitionReason::MINIMIZE, TransitionEvent::MINIMIZE},
     {TransitionReason::BACK_TRANSITION, TransitionEvent::BACK_TRANSITION},
-    {TransitionReason::CLOSE_BUTTON, TransitionEvent::CLOSE_BUTTON}
+    {TransitionReason::CLOSE_BUTTON, TransitionEvent::CLOSE_BUTTON},
+    {TransitionReason::BACKGROUND_TRANSITION, TransitionEvent::BACKGROUND_TRANSITION}
 };
 
 void RemoteAnimation::SetAnimationFirst(bool animationFirst)
@@ -485,7 +486,7 @@ void RemoteAnimation::NotifyAnimationAbilityDied(sptr<WindowTransitionInfo> info
 
 WMError RemoteAnimation::NotifyAnimationBackTransition(sptr<WindowTransitionInfo> srcInfo,
     sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& srcNode,
-    const sptr<WindowNode>& dstNode)
+    const sptr<WindowNode>& dstNode, const TransitionEvent event)
 {
     if (!animationFirst_) {
         WLOGFE("not animation first!");
@@ -508,7 +509,12 @@ WMError RemoteAnimation::NotifyAnimationBackTransition(sptr<WindowTransitionInfo
     auto winController = windowController_.promote();
     if (winController) {
         winController->RemoveWindowNode(srcNode->GetWindowId(), true);
-        GetAndDrawSnapShot(srcNode);
+        if (event == TransitionEvent::BACK_TRANSITION) {
+            GetAndDrawSnapShot(srcNode);
+        }
+    }
+    if (animationFirst_ && event == TransitionEvent::BACKGROUND_TRANSITION) {
+        MinimizeApp::ExecuteMinimizeAll();
     }
     dstNode->isPlayAnimationShow_ = true;
     dstNode->stateMachine_.TransitionTo(WindowNodeState::SHOW_ANIMATION_PLAYING);
