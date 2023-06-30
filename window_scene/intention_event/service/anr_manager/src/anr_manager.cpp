@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "dfx_hisysevent.h"
+#include "entrance_log.h"
 #include "proto.h"
 #include "timer_manager.h"
 #include "window_manager_hilog.h"

@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <cinttypes>
 
+#include "entrance_log.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {

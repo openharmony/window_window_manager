@@ -70,7 +70,6 @@ RootScene::~RootScene()
 void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
     AbilityRuntime::Context* context)
 {
-    CALL_DEBUG_ENTER;
     if (context == nullptr) {
         WLOGFE("context is nullptr!");
         return;
@@ -133,7 +132,6 @@ void RootScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Conf
 
 void RootScene::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent)
 {
-    CALL_DEBUG_ENTER;
     if (uiContent_) {
         uiContent_->ProcessPointerEvent(inputEvent);
     } else {
@@ -143,7 +141,6 @@ void RootScene::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& in
 
 void RootScene::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent)
 {
-    CALL_DEBUG_ENTER;
     if (uiContent_) {
         uiContent_->ProcessKeyEvent(inputEvent);
     } else {
@@ -153,7 +150,6 @@ void RootScene::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent)
 
 void RootScene::RegisterInputEventListener()
 {
-    CALL_DEBUG_ENTER;
     auto listener = std::make_shared<InputEventListener>(this);
     auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
     if (mainEventRunner) {

@@ -100,7 +100,6 @@ WSError SessionStageProxy::HandleBackEvent()
 
 WSError SessionStageProxy::MarkProcessed(int32_t eventId)
 {
-    CALL_DEBUG_ENTER;
     return WSError::WS_DO_NOTHING;
 }
 

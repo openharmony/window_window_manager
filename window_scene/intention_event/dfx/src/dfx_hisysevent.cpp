@@ -14,6 +14,7 @@
  */
 
 #include "dfx_hisysevent.h"
+#include "entrance_log.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
