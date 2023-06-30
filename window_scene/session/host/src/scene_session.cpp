@@ -185,7 +185,7 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
     property_->SetSystemBarProperty(type, systemBarProperty);
     WLOGFD("SceneSession SetSystemBarProperty status:%{public}d", static_cast<int32_t>(type));
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSystemBarPropertyChange_) {
-        sessionChangeCallback_->OnSystemBarPropertyChange_(systemBarProperty);
+        sessionChangeCallback_->OnSystemBarPropertyChange_(property_->GetSystemBarProperty());
     }
     return WSError::WS_OK;
 }
