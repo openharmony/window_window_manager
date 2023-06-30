@@ -33,8 +33,15 @@ public:
 
     void SetSessionStage(const wptr<ISessionStage> &sessionStage);
     void SetLastProcessedEventId(int32_t eventId, int64_t actionTime);
+
+private:
     void MarkProcessed();
-    void ResetAnrArray();
+    void UpdateLastProcessedEventId(int32_t eventId);
+    void SetLastProcessedEventStatus(bool status);
+    int32_t GetLastProcessedEventId();
+    void SendEvent(int64_t delayTime);
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ { nullptr };
+    wptr<ISessionStage> sessionStage_ = nullptr;
 
 private:
     std::mutex anrMtx_;
@@ -44,16 +51,7 @@ private:
         int32_t lastReportId { -1 };
     };
     ANREvent event_;
-    void UpdateLastProcessedEventId(int32_t eventId);
-    void SetLastProcessedEventStatus(bool status);
-    int32_t GetLastProcessedEventId();
-    void SendEvent(int64_t delayTime);
-    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
-    wptr<ISessionStage> sessionStage_ = nullptr;
 };
-
-#define ANRHDL ::OHOS::DelayedSingleton<ANRHandler>::GetInstance()
-
 } // namespace Rosen
 } // namespace OHOS
 #endif // ANR_HANDLER_H

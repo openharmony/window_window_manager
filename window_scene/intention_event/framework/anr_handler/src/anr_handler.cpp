@@ -40,6 +40,7 @@ ANRHandler::ANRHandler()
     auto runner = AppExecFwk::EventRunner::Create(ANR_HANDLER_RUNNER);
     if (runner == nullptr) {
         WLOGFE("Create eventRunner failed");
+        return;
     }
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
 }
@@ -49,26 +50,26 @@ ANRHandler::~ANRHandler() {}
 void ANRHandler::SetSessionStage(const wptr<ISessionStage> &sessionStage)
 {
     CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(anrMtx_);
     sessionStage_ = sessionStage;
 }
 
 void ANRHandler::SetLastProcessedEventStatus(bool status)
 {
     CALL_DEBUG_ENTER;
-    std::lock_guard<std::mutex> guard(anrMtx_);
     event_.sendStatus = status;
 }
 
 void ANRHandler::UpdateLastProcessedEventId(int32_t eventId)
 {
     CALL_DEBUG_ENTER;
-    std::lock_guard<std::mutex> guard(anrMtx_);
     event_.lastEventId = eventId;
 }
 
 void ANRHandler::SetLastProcessedEventId(int32_t eventId, int64_t actionTime)
 {
     CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(anrMtx_);
     if (event_.lastEventId > eventId) {
         WLOGFE("Event id %{public}d less then last processed lastEventId %{public}d", eventId, event_.lastEventId);
         return;
@@ -79,25 +80,25 @@ void ANRHandler::SetLastProcessedEventId(int32_t eventId, int64_t actionTime)
     WLOGFD("Processed eventId:%{public}d, actionTime:%{public}" PRId64 ", "
         "currentTime:%{public}" PRId64 ", timeoutTime:%{public}" PRId64,
         eventId, actionTime, currentTime, timeoutTime);
-    if (!event_.sendStatus) {
-        if (timeoutTime < MIN_MARK_PROCESS_DELAY_TIME) {
-            SendEvent(0);
+    if(event_.sendStatus) {
+        return;
+    }
+    if (timeoutTime < MIN_MARK_PROCESS_DELAY_TIME) {
+        SendEvent(0);
+    } else {
+        int64_t delayTime = 0;
+        if (timeoutTime >= MAX_MARK_PROCESS_DELAY_TIME) {
+            delayTime = MAX_MARK_PROCESS_DELAY_TIME / TIME_TRANSITION;
         } else {
-            int64_t delayTime = 0;
-            if (timeoutTime >= MAX_MARK_PROCESS_DELAY_TIME) {
-                delayTime = MAX_MARK_PROCESS_DELAY_TIME / TIME_TRANSITION;
-            } else {
-                delayTime = timeoutTime / TIME_TRANSITION;
-            }
-            SendEvent(delayTime);
+            delayTime = timeoutTime / TIME_TRANSITION;
         }
+        SendEvent(delayTime);
     }
 }
 
 int32_t ANRHandler::GetLastProcessedEventId()
 {
     CALL_DEBUG_ENTER;
-    std::lock_guard<std::mutex> guard(anrMtx_);
     if (event_.lastEventId == INVALID_OR_PROCESSED_ID
         || event_.lastEventId <= event_.lastReportId) {
         WLOGFD("Invalid or processed, lastEventId:%{public}d, lastReportId:%{public}d",
@@ -140,14 +141,6 @@ void ANRHandler::SendEvent(int64_t delayTime)
     if (!eventHandler_->PostHighPriorityTask(eventFunc, delayTime)) {
         WLOGFE("Send dispatch event failed");
     }
-}
-
-void ANRHandler::ResetAnrArray()
-{
-    CALL_DEBUG_ENTER;
-    event_.sendStatus = false;
-    event_.lastEventId = -1;
-    event_.lastReportId = -1;
 }
 } // namespace Rosen
 } // namespace OHOS

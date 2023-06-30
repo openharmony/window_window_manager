@@ -310,7 +310,7 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     UpdateRect(winRect_, SizeChangeReason::UNDEFINED);
     NotifyConnect();
     int32_t applicationPid = IPCSkeleton::GetCallingPid();
-    ANRMgr->SetApplicationPid(persistentId_, applicationPid);
+    DelayedSingleton<ANRManager>::GetInstance()->SetApplicationPid(persistentId_, applicationPid);
     WLOGFI("SetApplicationPid pid:%{public}d", applicationPid);
     return WSError::WS_OK;
 }
@@ -365,7 +365,7 @@ WSError Session::Disconnect()
     if (GetSessionState() == SessionState::STATE_BACKGROUND) {
         UpdateSessionState(SessionState::STATE_DISCONNECT);
     }
-    ANRMgr->OnSessionLost(persistentId_);
+    DelayedSingleton<ANRManager>::GetInstance()->OnSessionLost(persistentId_);
     return WSError::WS_OK;
 }
 
@@ -553,7 +553,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     WLOGFD("Session TransferPointEvent, Id: %{public}" PRIu64 ", eventId: %{public}d",
         persistentId_, pointerEvent->GetId());
     auto currentTime = GetSysClockTime();
-    if (ANRMgr->IsANRTriggered(currentTime, persistentId_)) {
+    if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(currentTime, persistentId_)) {
         WLOGFD("The pointer event does not report normally, application not response");
         return WSError::WS_DO_NOTHING;
     }
@@ -569,7 +569,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         WLOGFE("TransferPointer failed");
         return ret;
     }
-    ANRMgr->AddTimer(pointerEvent->GetId(), currentTime, persistentId_);
+    DelayedSingleton<ANRManager>::GetInstance()->AddTimer(pointerEvent->GetId(), currentTime, persistentId_);
     return WSError::WS_OK;
 }
 
@@ -589,7 +589,7 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
     WLOGFD("Session TransferKeyEvent, Id: %{public}" PRIu64 ", eventId: %{public}d",
         persistentId_, keyEvent->GetId());
     auto currentTime = GetSysClockTime();
-    if (ANRMgr->IsANRTriggered(currentTime, persistentId_)) {
+    if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(currentTime, persistentId_)) {
         WLOGFD("The pointer event does not report normally, application not response");
         return WSError::WS_DO_NOTHING;
     }
@@ -602,7 +602,7 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
         WLOGFE("TransferKeyEvent failed");
         return ret;
     }
-    ANRMgr->AddTimer(keyEvent->GetId(), currentTime, persistentId_);
+    DelayedSingleton<ANRManager>::GetInstance()->AddTimer(keyEvent->GetId(), currentTime, persistentId_);
     return WSError::WS_OK;
 }
 
@@ -843,7 +843,7 @@ WSError Session::MarkProcessed(int32_t eventId)
 {
     int32_t persistentId = GetPersistentId();
     WLOGFI("persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
-    ANRMgr->MarkProcessed(eventId, persistentId);
+    DelayedSingleton<ANRManager>::GetInstance()->MarkProcessed(eventId, persistentId);
     return WSError::WS_OK;
 }
 
