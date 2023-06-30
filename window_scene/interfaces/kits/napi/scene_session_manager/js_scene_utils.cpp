@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "js_scene_utils.h"
-
+#include <iomanip>
 #include <js_runtime_utils.h>
+#include "js_scene_utils.h"
 
 #include "interfaces/include/ws_common.h"
 #include "window_manager_hilog.h"
@@ -163,6 +163,62 @@ NativeValue* CreateJsSessionRect(NativeEngine& engine, const WSRect& rect)
     object->SetProperty("posY_", CreateJsValue(engine, rect.posY_));
     object->SetProperty("width_", CreateJsValue(engine, rect.width_));
     object->SetProperty("height_", CreateJsValue(engine, rect.height_));
+    return objValue;
+}
+
+static std::string GetHexColor(uint32_t color)
+{
+    const int32_t rgbaLength = 8;
+
+    std::stringstream ioss;
+    std::string temp;
+    ioss << std::setiosflags(std::ios::uppercase) << std::hex << color;
+    ioss >> temp;
+    int count = rgbaLength - static_cast<int>(temp.length());
+    std::string finalColor("#");
+    std::string tmpColor(count, '0');
+    tmpColor += temp;
+    finalColor += tmpColor;
+
+    return finalColor;
+}
+
+static NativeValue* CreateJsSystemBarPropertyObject(
+    NativeEngine& engine, const WindowType type, const SystemBarProperty& property)
+{
+    NativeValue* objValue = engine.CreateObject();
+    NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to convert SystemBarProperty to jsObject");
+        return nullptr;
+    }
+    if (WINDOW_TO_JS_SESSION_TYPE_MAP.count(type) != 0) {
+        object->SetProperty("type", CreateJsValue(engine, WINDOW_TO_JS_SESSION_TYPE_MAP.at(type)));
+    } else {
+        object->SetProperty("type", CreateJsValue(engine, type));
+    }
+    object->SetProperty("enable", CreateJsValue(engine, property.enable_));
+    std::string bkgColor = GetHexColor(property.backgroundColor_);
+    object->SetProperty("backgroundcolor", CreateJsValue(engine, bkgColor));
+    std::string contentColor = GetHexColor(property.contentColor_);
+    object->SetProperty("contentcolor", CreateJsValue(engine, contentColor));
+
+    return objValue;
+}
+
+NativeValue* CreateJsSystemBarPropertyArrayObject(
+    NativeEngine& engine, const std::unordered_map<WindowType, SystemBarProperty>& propertyMap)
+{
+    NativeValue* objValue = engine.CreateArray(propertyMap.size());
+    NativeArray* array = ConvertNativeValueTo<NativeArray>(objValue);
+    if (array == nullptr) {
+        WLOGFE("Failed to convert SystemBarPropertyMap to jsArrayObject");
+        return nullptr;
+    }
+    uint32_t index = 0;
+    for (auto iter: propertyMap) {
+        array->SetElement(index++, CreateJsSystemBarPropertyObject(engine, iter.first, iter.second));
+    }
     return objValue;
 }
 

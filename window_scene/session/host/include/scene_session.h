@@ -28,7 +28,8 @@ using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSessi
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
-using NotifySystemBarPropertyChangeFunc = std::function<void(const SystemBarProperty& property)>;
+using NotifySystemBarPropertyChangeFunc = std::function<void(
+    const std::unordered_map<WindowType, SystemBarProperty>& propertyMap)>;
 using NotifyNeedAvoidFunc = std::function<void(bool status)>;
 class SceneSession : public Session {
 public:

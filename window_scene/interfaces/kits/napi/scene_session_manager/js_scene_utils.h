@@ -88,6 +88,8 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
 NativeValue* CreateJsSessionInfo(NativeEngine& engine, const SessionInfo& sessionInfo);
 NativeValue* CreateJsSessionState(NativeEngine& engine);
 NativeValue* CreateJsSessionRect(NativeEngine& engine, const WSRect& rect);
+NativeValue* CreateJsSystemBarPropertyArrayObject(
+    NativeEngine& engine, const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
 NativeValue* SessionTypeInit(NativeEngine* engine);
 } // namespace OHOS::Rosen
 
