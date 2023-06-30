@@ -17,6 +17,8 @@
 
 #include <ipc_types.h>
 #include <ui/rs_surface_node.h>
+
+#include "ability_start_setting.h"
 #include "want.h"
 #include "want_params.h"
 #include "window_manager_hilog.h"
@@ -197,6 +199,9 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     abilitySessionInfo->persistentId = data.ReadInt64();
     abilitySessionInfo->state = static_cast<AAFwk::CallToState>(data.ReadInt32());
     abilitySessionInfo->uiAbilityId = data.ReadInt64();
+    if (data.ReadBool()) {
+        abilitySessionInfo->startSetting.reset(data.ReadParcelable<AAFwk::AbilityStartSetting>());
+    }
     const WSError& errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;

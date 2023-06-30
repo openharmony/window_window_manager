@@ -31,9 +31,11 @@
 #include <start_options.h>
 #include <system_ability_definition.h>
 #include <want.h>
+#include <hitrace_meter.h>
 #include <transaction/rs_transaction.h>
 #include <transaction/rs_interfaces.h>
 
+#include "ability_start_setting.h"
 #include "color_parser.h"
 #include "common/include/permission.h"
 #include "session/host/include/scene_session.h"
@@ -41,8 +43,11 @@
 #include "session_manager/include/screen_session_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_math.h"
+#include "xcollie/watchdog.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "session_manager_agent_controller.h"
+#include "window_manager.h"
+#include "perform_reporter.h"
 #include "focus_change_info.h"
 #include "session_manager/include/screen_session_manager.h"
 
@@ -60,7 +65,29 @@ SceneSessionManager::SceneSessionManager()
     taskScheduler_ = std::make_shared<TaskScheduler>(SCENE_SESSION_MANAGER_THREAD);
     bundleMgr_ = GetBundleManager();
     LoadWindowSceneXml();
+    Init();
+    StartWindowInfoReportLoop();
 }
+
+bool SceneSessionManager::Init()
+{
+    // create handler for inner command at server
+    eventLoop_ = AppExecFwk::EventRunner::Create(SCENE_SESSION_MANAGER_THREAD);
+    if (eventLoop_ == nullptr) {
+        return false;
+    }
+    eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
+    if (eventHandler_ == nullptr) {
+        return false;
+    }
+    int ret = HiviewDFX::Watchdog::GetInstance().AddThread(SCENE_SESSION_MANAGER_THREAD, eventHandler_);
+    if (ret != 0) {
+        WLOGFE("Add watchdog thread failed");
+    }
+    WLOGI("SceneSessionManager init success.");
+    return true;
+}
+
 
 void SceneSessionManager::LoadWindowSceneXml()
 {
@@ -406,6 +433,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             return sceneSession;
         }
         auto persistentId = sceneSession->GetPersistentId();
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSession(%" PRIu64" )", persistentId);
         sceneSession->SetSystemConfig(systemConfig_);
         UpdateParentSession(sceneSession, property);
         sceneSessionMap_.insert({ persistentId, sceneSession });
@@ -432,6 +460,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     abilitySessionInfo->requestCode = sessionInfo.requestCode;
     abilitySessionInfo->resultCode = sessionInfo.resultCode;
     abilitySessionInfo->uiAbilityId = sessionInfo.uiAbilityId_;
+    abilitySessionInfo->startSetting = sessionInfo.startSetting;
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = *sessionInfo.want;
     } else {
@@ -451,6 +480,7 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
             return WSError::WS_ERROR_NULLPTR;
         }
         auto persistentId = scnSession->GetPersistentId();
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionActivation(%" PRIu64" )", persistentId);
         WLOGFI("active persistentId: %{public}" PRIu64 "", persistentId);
         if (sceneSessionMap_.count(persistentId) == 0) {
             WLOGFE("session is invalid with %{public}" PRIu64 "", persistentId);
@@ -480,6 +510,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         }
         auto persistentId = scnSession->GetPersistentId();
         WLOGFI("background session persistentId: %{public}" PRIu64 "", persistentId);
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionBackground (%" PRIu64" )", persistentId);
         scnSession->SetActive(false);
         scnSession->Background();
         if (sceneSessionMap_.count(persistentId) == 0) {
@@ -503,6 +534,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
 
 WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession>& scnSession)
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:DestroyDialogWithMainWindow");
     if (scnSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         WLOGFD("Begin to destroy its dialog");
         auto dialogVec = scnSession->GetDialogVector();
@@ -532,6 +564,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         auto persistentId = scnSession->GetPersistentId();
         DestroyDialogWithMainWindow(scnSession);
         WLOGFI("destroy session persistentId: %{public}" PRIu64 "", persistentId);
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionDestruction (%" PRIu64" )", persistentId);
         scnSession->Disconnect();
         if (sceneSessionMap_.count(persistentId) == 0) {
             WLOGFE("session is invalid with %{public}" PRIu64 "", persistentId);
@@ -787,50 +820,56 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
 
 void SceneSessionManager::HandleTurnScreenOn(const sptr<SceneSession>& sceneSession)
 {
-    if (sceneSession == nullptr) {
-        WLOGFE("session is invalid");
-        return;
+    auto task = [this, sceneSession]() {
+        if (sceneSession == nullptr) {
+            WLOGFE("session is invalid");
+            return;
+        }
+        WLOGFD("Win: %{public}s, is turn on%{public}d", sceneSession->GetWindowName().c_str(), sceneSession->IsTurnScreenOn());
+        std::string identity = IPCSkeleton::ResetCallingIdentity();
+        if (sceneSession->IsTurnScreenOn() && !PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
+            WLOGI("turn screen on");
+            PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+        }
+        // set ipc identity to raw
+        IPCSkeleton::SetCallingIdentity(identity);
     }
-    WLOGFD("Win: %{public}s, is turn on%{public}d", sceneSession->GetWindowName().c_str(), sceneSession->IsTurnScreenOn());
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-    if (sceneSession->IsTurnScreenOn() && !PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
-        WLOGI("turn screen on");
-        PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
-    }
-    // set ipc identity to raw
-    IPCSkeleton::SetCallingIdentity(identity);
+    taskScheduler_->PostAsyncTask(task);
 }
 
 void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock)
 {
-    if (sceneSession == nullptr) {
-        WLOGFE("session is invalid");
-        return;
-    }
-    if (requireLock && sceneSession->keepScreenLock_ == nullptr) {
-        // reset ipc identity
+    auto task = [this, sceneSession, requireLock]() {
+        if (sceneSession == nullptr) {
+            WLOGFE("session is invalid");
+            return;
+        }
+        if (requireLock && sceneSession->keepScreenLock_ == nullptr) {
+            // reset ipc identity
+            std::string identity = IPCSkeleton::ResetCallingIdentity();
+            sceneSession->keepScreenLock_ = PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock(sceneSession->GetWindowName(),
+                PowerMgr::RunningLockType::RUNNINGLOCK_SCREEN);
+            // set ipc identity to raw
+            IPCSkeleton::SetCallingIdentity(identity);
+        }
+        if (sceneSession->keepScreenLock_ == nullptr) {
+            return;
+        }
+        WLOGI("keep screen on: [%{public}s, %{public}d]", sceneSession->GetWindowName().c_str(), requireLock);
+        ErrCode res;
         std::string identity = IPCSkeleton::ResetCallingIdentity();
-        sceneSession->keepScreenLock_ = PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock(sceneSession->GetWindowName(),
-            PowerMgr::RunningLockType::RUNNINGLOCK_SCREEN);
+        if (requireLock) {
+            res = sceneSession->keepScreenLock_->Lock();
+        } else {
+            res = sceneSession->keepScreenLock_->UnLock();
+        }
         // set ipc identity to raw
         IPCSkeleton::SetCallingIdentity(identity);
+        if (res != ERR_OK) {
+            WLOGFE("handle keep screen running lock failed: [operation: %{public}d, err: %{public}d]", requireLock, res);
+        }
     }
-    if (sceneSession->keepScreenLock_ == nullptr) {
-        return;
-    }
-    WLOGI("keep screen on: [%{public}s, %{public}d]", sceneSession->GetWindowName().c_str(), requireLock);
-    ErrCode res;
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-    if (requireLock) {
-        res = sceneSession->keepScreenLock_->Lock();
-    } else {
-        res = sceneSession->keepScreenLock_->UnLock();
-    }
-    // set ipc identity to raw
-    IPCSkeleton::SetCallingIdentity(identity);
-    if (res != ERR_OK) {
-        WLOGFE("handle keep screen running lock failed: [operation: %{public}d, err: %{public}d]", requireLock, res);
-    }
+    taskScheduler_->PostAsyncTask(task);
 }
 
 WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSession, float brightness)
@@ -1091,5 +1130,24 @@ WMError SceneSessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType
 void SceneSessionManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)
 {
     SessionManagerAgentController::GetInstance().UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
+}
+
+void SceneSessionManager::StartWindowInfoReportLoop()
+{
+    if (isReportTaskStart_ || eventHandler_ == nullptr) {
+        return;
+    }
+    auto task = [this]() {
+        WindowInfoReporter::GetInstance().ReportRecordedInfos();
+        isReportTaskStart_ = false;
+        StartWindowInfoReportLoop();
+    };
+    int64_t delayTime = 1000 * 60 * 60; // an hour.
+    bool ret = eventHandler_->PostTask(task, "WindowInfoReport", delayTime);
+    if (!ret) {
+        WLOGFE("post listener callback task failed. the task name is WindowInfoReport");
+        return;
+    }
+    isReportTaskStart_ = true;
 }
 } // namespace OHOS::Rosen
