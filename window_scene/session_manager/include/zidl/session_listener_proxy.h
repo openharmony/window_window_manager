@@ -13,22 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H
-#define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H
+#ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_LISTENER_PROXY_H
+#define OHOS_ROSEN_WINDOW_SCENE_SESSION_LISTENER_PROXY_H
 
-#include <iremote_stub.h>
-
-#include "session_manager/include/zidl/scene_session_manager_interface.h"
+#include "iremote_proxy.h"
+#include "session_listener_interface.h"
 
 namespace OHOS::Rosen {
-class SceneSessionManagerStub : public IRemoteStub<ISceneSessionManager> {
+class SessionListenerProxy : public IRemoteProxy<ISessionListener> {
 public:
-    SceneSessionManagerStub() = default;
-    virtual ~SceneSessionManagerStub() = default;
+    explicit SessionListenerProxy(const sptr<IRemoteObject>& impl)
+        : IRemoteProxy<ISessionListener>(impl) {};
+    ~SessionListenerProxy() {};
 
-    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
-    void HandleUpdateProperty(MessageParcel &data, MessageParcel &reply);
+    virtual void OnSessionLabelChange(int persistentId, const std::string &label) override;
+    virtual void OnSessionIconChange(int persistentId, const std::shared_ptr<Media::PixelMap> &icon) override;
 };
 } // namespace OHOS::Rosen
-
-#endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H
+#endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_LISTENER_PROXY_H
