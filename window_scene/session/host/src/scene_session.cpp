@@ -46,11 +46,9 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
             }
         }
     }
-    if (info.isSystem_ && info.windowType_ != 0) {
-        property_ = new(std::nothrow) WindowSessionProperty();
-        if (property_) {
-            property_->SetWindowType(static_cast<WindowType>(info.windowType_));
-        }
+    property_ = new(std::nothrow) WindowSessionProperty();
+    if (property_) {
+        property_->SetWindowType(static_cast<WindowType>(info.windowType_));
     }
 }
 
