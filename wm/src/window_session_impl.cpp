@@ -530,6 +530,32 @@ void WindowSessionImpl::OnNewWant(const AAFwk::Want& want)
     }
 }
 
+WMError WindowSessionImpl::SetAPPWindowLabel(const std::string& label)
+{
+    if (uiContent_ == nullptr) {
+        WLOGFE("uicontent is empty");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    uiContent_->SetAppWindowTitle(label);
+    WLOGI("Set app window label success, label : %{public}s", label.c_str());
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon)
+{
+    if (icon == nullptr) {
+        WLOGFE("window icon is empty");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (uiContent_ == nullptr) {
+        WLOGFE("uicontent is empty");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    uiContent_->SetAppWindowIcon(icon);
+    WLOGI("Set app window icon success");
+    return WMError::WM_OK;
+}
+
 WMError WindowSessionImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
 {
     WLOGFD("Start register");
