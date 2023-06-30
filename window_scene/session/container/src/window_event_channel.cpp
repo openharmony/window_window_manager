@@ -88,4 +88,14 @@ void WindowEventChannel::OnDispatchEventProcessed(int32_t eventId, int64_t actio
     ANRHDL->SetLastProcessedEventId(eventId, actionTime);
 }
 
+WSError WindowEventChannel::TransferFocusWindowId(uint32_t windowId)
+{
+    WLOGFD("WindowEventChannel receive focus window Id event: %{public}zu", windowId);
+    if (!sessionStage_) {
+        WLOGFE("session stage is null!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    sessionStage_->NotifyFocusWindowIdEvent(windowId);
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

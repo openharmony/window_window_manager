@@ -383,6 +383,10 @@ WMError WindowSessionImpl::SetUIContent(const std::string& contentInfo,
     }
     // make uiContent available after Initialize/Restore
     uiContent_ = std::move(uiContent);
+
+    if (focusWindowId_ != INVALID_WINDOW_ID) {
+        uiContent_->SetFocusWindowId(focusWindowId_);
+    }
     if (isIgnoreSafeAreaNeedNotify_) {
         uiContent_->SetIgnoreViewSafeArea(isIgnoreSafeArea_);
     }
@@ -888,6 +892,14 @@ void WindowSessionImpl::NotifyFocusActiveEvent(bool isFocusActive)
     if (uiContent_) {
         uiContent_->SetIsFocusActive(isFocusActive);
     }
+}
+
+void WindowSessionImpl::NotifyFocusWindowIdEvent(uint32_t windowId)
+{
+    if (uiContent_) {
+        uiContent_->SetFocusWindowId(windowId);
+    }
+    focusWindowId_ = windowId;
 }
 
 void WindowSessionImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
