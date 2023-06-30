@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WINDOW_SCENE_MOVE_DRAG_CONTROLLER_H
 
 #include <refbase.h>
+#include <struct_multimodal.h>
 
 #include "common/include/window_session_property.h"
 
@@ -55,7 +56,7 @@ public:
         }
     };
 
-    MoveDragController();
+    MoveDragController(uint64_t persistentId);
     ~MoveDragController();
 
     void SetVsyncHandleListenser(const NotifyVsyncHandleFunc& func);
@@ -67,6 +68,7 @@ public:
     WSError ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
     bool ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
         const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
+    void HandleMouseStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& winRect);
 
 private:
     enum AxisType { UNDEFINED, X_AXIS, Y_AXIS };
@@ -89,6 +91,12 @@ private:
     void OnReceiveVsync(int64_t timeStamp);
     void InitDecorValue(const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
 
+    float GetVirtualPixelRatio() const;
+    void UpdateDragType(int32_t startPointPosX, int32_t startPointPosY);
+    bool IsPointInDragHotZone(int32_t startPointPosX, int32_t startPointPosY,
+        int32_t sourceType, const WSRect& winRect);
+    void CalculateStartRectExceptHotZone(float vpr, const WSRect& winRect);
+
     bool isStartMove_ = false;
     bool isStartDrag_ = false;
     bool isDecorEnable_ = true;
@@ -105,6 +113,26 @@ private:
     MoveDragProperty moveDragProperty_ = { -1, -1, -1, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } };
     std::shared_ptr<VsyncCallback> vsyncCallback_ = std::make_shared<VsyncCallback>(VsyncCallback());
     NotifyVsyncHandleFunc vsyncHandleFunc_;
+    uint64_t persistentId_;
+
+    enum class DragType : uint32_t {
+        DRAG_UNDEFINED,
+        DRAG_LEFT_OR_RIGHT,
+        DRAG_BOTTOM_OR_TOP,
+        DRAG_LEFT_TOP_CORNER,
+        DRAG_RIGHT_TOP_CORNER,
+    };
+    const std::map<DragType, uint32_t> STYLEID_MAP = {
+        {DragType::DRAG_UNDEFINED,        MMI::MOUSE_ICON::DEFAULT},
+        {DragType::DRAG_BOTTOM_OR_TOP,    MMI::MOUSE_ICON::NORTH_SOUTH},
+        {DragType::DRAG_LEFT_OR_RIGHT,    MMI::MOUSE_ICON::WEST_EAST},
+        {DragType::DRAG_LEFT_TOP_CORNER,  MMI::MOUSE_ICON::NORTH_WEST_SOUTH_EAST},
+        {DragType::DRAG_RIGHT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_EAST_SOUTH_WEST}
+    };
+    Rect rectExceptFrame_;
+    Rect rectExceptCorner_;
+    uint32_t mouseStyleID_ = 0;
+    DragType dragType_ = DragType::DRAG_UNDEFINED;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MOVE_DRAG_CONTROLLER_H

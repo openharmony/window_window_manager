@@ -89,6 +89,7 @@ config("ws_unittest_common_public_config") {
     "${window_base_path}/wmserver/include/zidl",
     "${graphic_base_path}/graphic_2d/rosen/modules/animation/window_animation/include",
     "${multimodalinput_path}/input/interfaces/native/innerkits/event/include",
+    "${multimodalinput_path}/input/util/common/include",
     "${ability_runtime_inner_api_path}/ability_manager/include",
     "${window_base_path}/wm/include",
     "${window_base_path}/wm/include/zidl",
