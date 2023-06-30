@@ -19,6 +19,8 @@
 #include <message_option.h>
 #include <message_parcel.h>
 #include <ui/rs_surface_node.h>
+
+#include "ability_start_setting.h"
 #include "want.h"
 #include "want_params.h"
 #include "window_manager_hilog.h"
@@ -187,6 +189,17 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
     if (!(data.WriteInt64(abilitySessionInfo->uiAbilityId))) {
         WLOGFE("Write uiAbilityId failed");
         return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (abilitySessionInfo->startSetting) {
+        if (!data.WriteBool(true) || !data.WriteParcelable(abilitySessionInfo->startSetting.get())) {
+            WLOGFE("Write startSetting failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    } else {
+        if (!data.WriteBool(false)) {
+            WLOGFE("Write startSetting failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_ACTIVE_PENDING_SESSION),
         data, reply, option) != ERR_NONE) {
