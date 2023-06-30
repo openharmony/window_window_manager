@@ -451,6 +451,8 @@ WMError WindowNodeContainer::DestroyWindowNode(sptr<WindowNode>& node, std::vect
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER) {
         RemoteAnimation::NotifyAnimationUpdateWallpaper(nullptr);
     }
+
+    UpdateAvoidAreaListener(node, false);
     WLOGFD("DestroyWindowNode windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }
