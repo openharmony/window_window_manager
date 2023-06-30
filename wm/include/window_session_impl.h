@@ -67,6 +67,8 @@ public:
     std::string GetContentInfo() override;
     Ace::UIContent* GetUIContent() const override;
     void OnNewWant(const AAFwk::Want& want) override;
+    WMError SetAPPWindowLabel(const std::string& label) override;
+    WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     // inherits from session stage
     WSError SetActive(bool active) override;
