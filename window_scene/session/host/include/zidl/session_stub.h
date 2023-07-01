@@ -50,6 +50,7 @@ private:
     int HandleDestroyAndDisconnectSpecificSession(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply);
     int HandleBackPressed(MessageParcel& data, MessageParcel& reply);
+    int HandleMarkProcessed(MessageParcel& data, MessageParcel& reply);
     int HandleSetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply);
     int HandleGetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply);
     int HandleNeedAvoid(MessageParcel& data, MessageParcel& reply);

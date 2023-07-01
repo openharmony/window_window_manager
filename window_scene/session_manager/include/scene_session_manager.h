@@ -41,6 +41,7 @@ namespace OHOS::Rosen {
 class SceneSession;
 class AccessibilityWindowInfo;
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
+using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using EventHandler = OHOS::AppExecFwk::EventHandler;
 using EventRunner = OHOS::AppExecFwk::EventRunner;
@@ -61,9 +62,11 @@ public:
     WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId);
     WSError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
     void SetCreateSpecificSessionListener(const NotifyCreateSpecificSessionFunc& func);
+    void SetGestureNavigationEnabledChangeListener(const ProcessGestureNavigationEnabledChangeFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     WSError ProcessBackEvent();
     void GetStartPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor);
+    WMError SetGestureNavigaionEnabled(bool enable);
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
@@ -72,6 +75,8 @@ public:
     WSError SetFocusedSession(uint64_t persistentId);
     uint64_t GetFocusedSession() const;
     WSError UpdateFocus(uint64_t persistentId, bool isFocused);
+    WSError SwitchUser(int32_t oldUserId, int32_t newUserId, std::string &fileDir);
+    int32_t GetCurrentUserId() const;
     void StartWindowInfoReportLoop();
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
     WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label);
@@ -82,6 +87,7 @@ public:
     void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
     void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
     void InitPersistentStorage();
+    std::string GetSessionSnapshot(uint64_t persistentId);
 
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
 protected:
@@ -123,12 +129,14 @@ private:
     std::map<uint64_t, sptr<SceneSession>> sceneSessionMap_;
 
     NotifyCreateSpecificSessionFunc createSpecificSessionFunc_;
+    ProcessGestureNavigationEnabledChangeFunc gestureNavigationEnabledChangeFunc_;
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
     uint64_t activeSessionId_ = INVALID_SESSION_ID;
     uint64_t focusedSessionId_ = INVALID_SESSION_ID;
     uint64_t brightnessSessionId_ = INVALID_SESSION_ID;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
+    int32_t currentUserId_;
 
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;

@@ -62,6 +62,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManager" };
 const std::string SCENE_SESSION_MANAGER_THREAD = "SceneSessionManager";
 constexpr uint32_t MAX_BRIGHTNESS = 255;
+constexpr int32_t DEFAULT_USERID = -1;
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SceneSessionManager)
@@ -70,6 +71,7 @@ SceneSessionManager::SceneSessionManager()
 {
     taskScheduler_ = std::make_shared<TaskScheduler>(SCENE_SESSION_MANAGER_THREAD);
     bundleMgr_ = GetBundleManager();
+    currentUserId_ = DEFAULT_USERID;
     LoadWindowSceneXml();
     Init();
     StartWindowInfoReportLoop();
@@ -636,6 +638,16 @@ void SceneSessionManager::SetCreateSpecificSessionListener(const NotifyCreateSpe
     createSpecificSessionFunc_ = func;
 }
 
+void SceneSessionManager::SetGestureNavigationEnabledChangeListener(
+    const ProcessGestureNavigationEnabledChangeFunc& func)
+{
+    WLOGFD("SetGestureNavigationEnabledChangeListener");
+    if (!func) {
+        WLOGFD("set func is null");
+    }
+    gestureNavigationEnabledChangeFunc_ = func;
+}
+
 WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const uint64_t& persistentId)
 {
     auto task = [this, persistentId]() {
@@ -677,6 +689,40 @@ WSError SceneSessionManager::ProcessBackEvent()
     };
 
     taskScheduler_->PostAsyncTask(task);
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::SwitchUser(int32_t oldUserId, int32_t newUserId, std::string &fileDir)
+{
+    if (oldUserId != currentUserId_ || oldUserId == newUserId || fileDir.empty()) {
+        WLOGFE("SwitchUser params invalid");
+        return WSError::WS_DO_NOTHING;
+    }
+    WLOGFD("SwitchUser oldUserId : %{public}d newUserId : %{public}d path : %{public}s",
+        oldUserId, newUserId, fileDir.c_str());
+    auto task = [this, newUserId, &fileDir]() {
+        if (!ScenePersistence::CreateSnapshotDir(fileDir)) {
+            WLOGFD("snapshot dir existed");
+        }
+        currentUserId_ = newUserId;
+        for (const auto &item : sceneSessionMap_) {
+            auto scnSession = item.second;
+            auto persistentId = scnSession->GetPersistentId();
+            scnSession->SetActive(false);
+            scnSession->Background();
+            if (persistentId == brightnessSessionId_) {
+                UpdateBrightness(focusedSessionId_);
+            }
+            auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
+            if (!scnSessionInfo) {
+                return WSError::WS_ERROR_NULLPTR;
+            }
+            AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo);
+        }
+        sceneSessionMap_.clear();
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostSyncTask(task);
     return WSError::WS_OK;
 }
 
@@ -961,6 +1007,10 @@ WSError SceneSessionManager::UpdateBrightness(uint64_t persistentId)
     return WSError::WS_OK;
 }
 
+int32_t SceneSessionManager::GetCurrentUserId() const {
+    return currentUserId_;
+}
+
 void SceneSessionManager::SetDisplayBrightness(float brightness)
 {
     displayBrightness_ = brightness;
@@ -969,6 +1019,21 @@ void SceneSessionManager::SetDisplayBrightness(float brightness)
 float SceneSessionManager::GetDisplayBrightness() const
 {
     return displayBrightness_;
+}
+
+WMError SceneSessionManager::SetGestureNavigaionEnabled(bool enable)
+{
+    WLOGFD("SetGestureNavigationEnabled, enable: %{public}d", enable);
+    auto task = [this, enable]() {
+        if (!gestureNavigationEnabledChangeFunc_) {
+            WLOGFE("callback func is null");
+            return WMError::WM_DO_NOTHING;
+        } else {
+            gestureNavigationEnabledChangeFunc_(enable);
+        }
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task);
 }
 
 WSError SceneSessionManager::SetFocusedSession(uint64_t persistentId)
@@ -1293,5 +1358,25 @@ void SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
         info->layer_ = property->GetZOrder();
     }
     infos.emplace_back(info);
+}
+
+std::string SceneSessionManager::GetSessionSnapshot(uint64_t persistentId)
+{
+    WLOGFI("GetSessionSnapshot persistentId %{public}" PRIu64 "", persistentId);
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        WLOGFE("GetSessionSnapshot sceneSession nullptr!");
+        return "";
+    }
+    wptr<SceneSession> weakSceneSession(sceneSession);
+    auto task = [this, weakSceneSession]() {
+        auto scnSession = weakSceneSession.promote();
+        if (scnSession == nullptr) {
+            WLOGFE("session is nullptr");
+            return std::string("");
+        }
+        return scnSession->GetSessionSnapshot();
+    };
+    return taskScheduler_->PostSyncTask(task);
 }
 } // namespace OHOS::Rosen

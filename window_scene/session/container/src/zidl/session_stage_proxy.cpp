@@ -100,6 +100,11 @@ WSError SessionStageProxy::HandleBackEvent()
     return static_cast<WSError>(ret);
 }
 
+WSError SessionStageProxy::MarkProcessed(int32_t eventId)
+{
+    return WSError::WS_DO_NOTHING;
+}
+
 WSError SessionStageProxy::UpdateFocus(bool focus)
 {
     MessageParcel data;

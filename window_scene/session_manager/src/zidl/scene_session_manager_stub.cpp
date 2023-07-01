@@ -115,6 +115,12 @@ int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
             reply.WriteParcelable(&focusInfo);
             break;
         }
+        case SceneSessionManagerMessage::TRANS_ID_SET_GESTURE_NAVIGATION_ENABLED: {
+            bool enable = data.ReadBool();
+            const WMError &ret = SetGestureNavigaionEnabled(enable);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
         case SceneSessionManagerMessage::TRANS_ID_SET_SESSION_LABEL: {
             sptr<IRemoteObject> token = data.ReadRemoteObject();
             std::string label = data.ReadString();

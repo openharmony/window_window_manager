@@ -44,6 +44,8 @@ public:
     static NativeValue* GetWindowSceneConfig(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* ProcessBackEvent(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* UpdateFocus(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SwitchUser(NativeEngine* engin, NativeCallbackInfo* info);
+    static NativeValue* GetSessionSnapshot(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
     NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
@@ -57,9 +59,13 @@ private:
     NativeValue* OnGetWindowSceneConfig(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnProcessBackEvent(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnUpdateFocus(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSwitchUser(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnGetSessionSnapshot(NativeEngine& engine, NativeCallbackInfo& info);
 
+    void OnGestureNavigationEnabledUpdate(bool enable);
     void OnCreateSpecificSession(const sptr<SceneSession>& sceneSession);
     void ProcessCreateSpecificSessionRegister();
+    void ProcessGestureNavigationEnabledChangeListener();
     bool IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject);
 
     NativeEngine& engine_;
