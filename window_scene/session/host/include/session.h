@@ -94,6 +94,7 @@ public:
     WSError OnNeedAvoid(bool status) override;
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
+    void NotifyRemoteReady() override;
     void NotifyConnect();
     void NotifyForeground();
     void NotifyBackground();
@@ -103,6 +104,7 @@ public:
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     WSError TransferFocusActiveEvent(bool isFocusActive);
+    WSError TransferFocusWindowIdEvent(uint32_t windowId);
 
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);

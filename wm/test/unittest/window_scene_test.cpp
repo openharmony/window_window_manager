@@ -20,6 +20,8 @@
 #include "window_impl.h"
 #include <configuration.h>
 
+#include "window_scene_session_impl.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -402,6 +404,26 @@ HWTEST_F(WindowSceneTest, NotifyMemoryLevel02, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext_, listener));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->NotifyMemoryLevel(0)); // ui content is null
 }
+
+/**
+ * @tc.name: NotifyMemoryLevel03
+ * @tc.desc: NotifyMemoryLevel with windowsession
+ * @tc.type: FUNC
+ * @tc.require: issueI5JQ04
+ */
+
+HWTEST_F(WindowSceneTest, NotifyMemoryLevel03, Function | SmallTest | Level2)
+{
+    DisplayId displayId = 0;
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowScene> scene = new WindowScene();
+    sptr<WindowOption> option = new WindowOption();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowSceneSessionImpl(option)));
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext_, listener));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->NotifyMemoryLevel(0)); // ui content is null
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

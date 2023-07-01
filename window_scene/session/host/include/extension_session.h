@@ -23,19 +23,26 @@
 namespace OHOS::Rosen {
 using NotifyTransferAbilityResultFunc = std::function<void(uint32_t resultCode, const AAFwk::Want& want)>;
 using NotifyTransferExtensionDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
+using NotifyRemoteReadyFunc = std::function<void()>;
 class ExtensionSession : public Session {
 public:
+    struct ExtensionSessionEventCallback : public RefBase {
+        NotifyTransferAbilityResultFunc transferAbilityResultFunc_;
+        NotifyTransferExtensionDataFunc transferExtensionDataFunc_;
+        NotifyRemoteReadyFunc notifyRemoteReadyFunc_;
+    };
     ExtensionSession(const SessionInfo& info);
     ~ExtensionSession() = default;
 
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
-    void RegisterTransferAbilityResultListener(const NotifyTransferAbilityResultFunc& func);
     WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
-    void RegisterTransferExtensionDataListener(const NotifyTransferExtensionDataFunc& func);
     WSError TransferComponentData(const AAFwk::WantParams& wantParams);
+    void NotifyRemoteReady() override;
+    void RegisterExtensionSessionEventCallback(const sptr<ExtensionSessionEventCallback>&
+        extSessionEventCallback);
+    sptr<ExtensionSessionEventCallback> GetExtensionSessionEventCallback();
 private:
-    NotifyTransferAbilityResultFunc transferAbilityResultFunc_;
-    NotifyTransferExtensionDataFunc transferExtensionDataFunc_;
+    sptr<ExtensionSessionEventCallback> extSessionEventCallback_ = nullptr;
 };
 } // namespace OHOS::Rosen
 

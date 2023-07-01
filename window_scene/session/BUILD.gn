@@ -61,6 +61,7 @@ ohos_shared_library("scene_session") {
   external_deps = [
     "ability_base:session_info",
     "ability_base:want",
+    "ability_runtime:ability_start_setting",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "graphic_standard:librender_service_client",
@@ -68,6 +69,7 @@ ohos_shared_library("scene_session") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "multimedia_image_framework:image_native",
+    "power_manager:powermgr_client",
     "preferences:native_preferences",
   ]
 

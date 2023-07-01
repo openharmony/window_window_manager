@@ -55,13 +55,15 @@ ohos_shared_library("scene_session_manager") {
     "src/scene_session_manager.cpp",
     "src/session_manager_agent_controller.cpp",
     "src/window_scene_config.cpp",
-    "src/zidl/scene_session_manager_proxy.cpp",
     "src/zidl/scene_session_manager_stub.cpp",
+    "src/zidl/session_listener_proxy.cpp",
+    "src/zidl/session_listener_stub.cpp",
   ]
 
   public_configs = [ ":session_manager_public_config" ]
 
   deps = [
+    "${multimedia_path}/interfaces/innerkits:image_native",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/session:scene_session",
@@ -73,6 +75,7 @@ ohos_shared_library("scene_session_manager") {
     "ability_base:session_info",
     "ability_base:want",
     "ability_runtime:ability_manager",
+    "ability_runtime:ability_start_setting",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",

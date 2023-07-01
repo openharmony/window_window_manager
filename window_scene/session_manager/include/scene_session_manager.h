@@ -71,10 +71,19 @@ public:
     WSError SetFocusedSession(uint64_t persistentId);
     uint64_t GetFocusedSession() const;
     WSError UpdateFocus(uint64_t persistentId, bool isFocused);
+    WSError SwitchUser(int32_t oldUserId, int32_t newUserId, std::string &fileDir);
+    int32_t GetCurrentUserId() const;
     void StartWindowInfoReportLoop();
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
-
+    WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label);
+    WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon);
+    WSError RegisterSessionListener(const sptr<ISessionListener> sessionListener);
+    void UnregisterSessionListener();
+    void HandleTurnScreenOn(const sptr<SceneSession>& sceneSession);
+    void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
     void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
+    void InitPersistentStorage();
+
     WSError SetWindowFlags(const sptr<SceneSession>& sceneSession, uint32_t flags);
 
     void SetWaterMarkSessionCount(int32_t count);
@@ -120,6 +129,7 @@ private:
     uint64_t focusedSessionId_ = INVALID_SESSION_ID;
     uint64_t brightnessSessionId_ = INVALID_SESSION_ID;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
+    int32_t currentUserId_;
 
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
@@ -129,6 +139,7 @@ private:
     bool isReportTaskStart_ = false;
     void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void OnSessionStateChange(uint64_t persistentId);
+    sptr<ISessionListener> sessionListener_;
 
     void CheckAndNotifyWaterMarkChangedResult(bool isAddingWaterMark);
     WSError NotifyWaterMarkFlagChangedResult(bool hasWaterMark);

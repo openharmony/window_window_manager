@@ -83,6 +83,8 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetTouchable(option->GetTouchable());
     property_->SetDisplayId(option->GetDisplayId());
     property_->SetParentId(option->GetParentId());
+    property_->SetTurnScreenOn(option->IsTurnScreenOn());
+    property_->SetKeepScreenOn(option->IsKeepScreenOn());
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
 }
 
@@ -379,6 +381,10 @@ WMError WindowSessionImpl::SetUIContent(const std::string& contentInfo,
     }
     // make uiContent available after Initialize/Restore
     uiContent_ = std::move(uiContent);
+
+    if (focusWindowId_ != INVALID_WINDOW_ID) {
+        uiContent_->SetFocusWindowId(focusWindowId_);
+    }
     if (isIgnoreSafeAreaNeedNotify_) {
         uiContent_->SetIgnoreViewSafeArea(isIgnoreSafeArea_);
     }
@@ -528,6 +534,32 @@ void WindowSessionImpl::OnNewWant(const AAFwk::Want& want)
     if (uiContent_ != nullptr) {
         uiContent_->OnNewWant(want);
     }
+}
+
+WMError WindowSessionImpl::SetAPPWindowLabel(const std::string& label)
+{
+    if (uiContent_ == nullptr) {
+        WLOGFE("uicontent is empty");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    uiContent_->SetAppWindowTitle(label);
+    WLOGI("Set app window label success, label : %{public}s", label.c_str());
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon)
+{
+    if (icon == nullptr) {
+        WLOGFE("window icon is empty");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (uiContent_ == nullptr) {
+        WLOGFE("uicontent is empty");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    uiContent_->SetAppWindowIcon(icon);
+    WLOGI("Set app window icon success");
+    return WMError::WM_OK;
 }
 
 WMError WindowSessionImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
@@ -877,6 +909,14 @@ void WindowSessionImpl::NotifyFocusActiveEvent(bool isFocusActive)
     }
 }
 
+void WindowSessionImpl::NotifyFocusWindowIdEvent(uint32_t windowId)
+{
+    if (uiContent_) {
+        uiContent_->SetFocusWindowId(windowId);
+    }
+    focusWindowId_ = windowId;
+}
+
 void WindowSessionImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -900,6 +940,15 @@ sptr<Window> WindowSessionImpl::Find(const std::string& name)
         return nullptr;
     }
     return iter->second.second;
+}
+
+void WindowSessionImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
+{
+    if (handler == nullptr) {
+        WLOGE("ace ability handler is nullptr");
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    aceAbilityHandler_ = handler;
 }
 
 WMError WindowSessionImpl::SetBackgroundColor(const std::string& color)
@@ -926,6 +975,11 @@ WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
         uiContent_->SetBackgroundColor(color);
         return WMError::WM_OK;
     }
+    if (aceAbilityHandler_ != nullptr) {
+        aceAbilityHandler_->SetBackgroundColor(color);
+        return WMError::WM_OK;
+    }
+    WLOGFE("FA mode could not set bg color: %{public}u", GetWindowId());
     return WMError::WM_ERROR_INVALID_OPERATION;
 }
 
@@ -935,6 +989,10 @@ uint32_t WindowSessionImpl::GetBackgroundColor() const
         return uiContent_->GetBackgroundColor();
     }
     WLOGD("uiContent is nullptr, windowId: %{public}u, use FA mode", GetWindowId());
+    if (aceAbilityHandler_ != nullptr) {
+        return aceAbilityHandler_->GetBackgroundColor();
+    }
+    WLOGFE("FA mode does not get bg color: %{public}u", GetWindowId());
     return 0xffffffff; // means no background color been set, default color is white
 }
 } // namespace Rosen

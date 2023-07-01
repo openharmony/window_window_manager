@@ -35,6 +35,7 @@ public:
         TRANS_ID_TRANSFER_KEY_EVENT,
         TRANS_ID_TRANSFER_POINTER_EVENT,
         TRANS_ID_TRANSFER_FOCUS_ACTIVE_EVENT,
+        TRANS_ID_TRANSFER_FOCUS_WINDOW_ID_EVENT,
     };
 
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
@@ -43,6 +44,7 @@ public:
     // transfer sync key event for weather consumed
     virtual WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) = 0;
     virtual WSError TransferFocusActiveEvent(bool isFocusActive) = 0;
+    virtual WSError TransferFocusWindowId(uint32_t windowId) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_WINDOW_EVENT_CHANNEL_INTERFACE_H
