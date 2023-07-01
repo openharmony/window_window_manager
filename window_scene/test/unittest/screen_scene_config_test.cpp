@@ -27,6 +27,9 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSceneConfigTest"};
+}
 class ScreenSceneConfigTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -271,7 +274,7 @@ HWTEST_F(ScreenSceneConfigTest, ReadStringConfigInfo, Function | SmallTest | Lev
 HWTEST_F(ScreenSceneConfigTest, GetEnableConfig, Function | SmallTest | Level1)
 {
     auto result = ScreenSceneConfig::GetEnableConfig();
-    ASSERT_EQ(0, result.size());
+    ASSERT_EQ(true, result.size() == 0);
 }
 
 /**
@@ -282,7 +285,7 @@ HWTEST_F(ScreenSceneConfigTest, GetEnableConfig, Function | SmallTest | Level1)
 HWTEST_F(ScreenSceneConfigTest, GetIntNumbersConfig, Function | SmallTest | Level1)
 {
     auto result = ScreenSceneConfig::GetIntNumbersConfig();
-    ASSERT_NE(0, result.size());
+    ASSERT_NE(true, result.size() == 0);
 }
 
 /**
