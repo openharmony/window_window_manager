@@ -21,7 +21,6 @@
 #include "xml_config_base.h"
 #include "window_manager_hilog.h"
 
-
 using namespace testing;
 using namespace testing::ext;
 
