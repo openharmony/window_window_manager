@@ -44,7 +44,7 @@ public:
     MOCK_METHOD1(OnSessionEvent, WSError(SessionEvent event));
     MOCK_METHOD0(RequestSessionBack, WSError(void));
     MOCK_METHOD0(RaiseToAppTop, WSError(void));
-    MOCK_METHOD0(UpdateSessionRect, WSError(const WSRect& rect, const SizeChangeReason& reason));
+    MOCK_METHOD2(UpdateSessionRect, WSError(const WSRect& rect, const SizeChangeReason& reason));
 
 
 
