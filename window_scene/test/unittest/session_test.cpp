@@ -29,7 +29,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string UNDEFINED = "undefined";
+const std::string UNDEFINED = "undefined";
 }
 
 class TestWindowEventChannel : public IWindowEventChannel {
@@ -282,6 +282,8 @@ HWTEST_F(WindowSessionTest, PendingSessionActivation01, Function | SmallTest | L
     session_->SetPendingSessionActivationEventListener(callback);
     session_->PendingSessionActivation(info);
     ASSERT_EQ(resultValue, 1);
+
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->PendingSessionActivation(nullptr));
 }
 
 /**
@@ -304,6 +306,8 @@ HWTEST_F(WindowSessionTest, TerminateSession01, Function | SmallTest | Level2)
     session_->SetTerminateSessionListener(callback);
     session_->TerminateSession(info);
     ASSERT_EQ(resultValue, 1);
+
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->TerminateSession(nullptr));
 }
 
 /**
@@ -326,8 +330,9 @@ HWTEST_F(WindowSessionTest, NotifySessionException01, Function | SmallTest | Lev
     session_->SetSessionExceptionListener(callback);
     session_->NotifySessionException(info);
     ASSERT_EQ(resultValue, 1);
-}
 
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->NotifySessionException(nullptr));
+}
 
 /**
  * @tc.name: UpdateActiveStatus01
