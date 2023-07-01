@@ -130,6 +130,8 @@ public:
     void SetBackPressedListenser(const NotifyBackPressedFunc& func);
     WSError ProcessBackEvent(); // send back event to session_stage
     WSError RequestSessionBack() override; // receive back request from session_stage
+    WSError MarkProcessed(int32_t eventId) override;
+
     sptr<ScenePersistence> GetScenePersistence() const;
     void SetParentSession(const sptr<Session>& session);
     void BindDialogToParentSession(const sptr<Session>& session);

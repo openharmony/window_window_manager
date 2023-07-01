@@ -15,12 +15,17 @@
 
 #include "session/host/include/session.h"
 
+#include <ipc_skeleton.h>
+#include "key_event.h"
+#include "pointer_event.h"
+
+#include "anr_manager.h"
+#include "foundation/ability/ability_base/interfaces/kits/native/want/include/want.h"
 #include "interfaces/include/ws_common.h"
-#include <pointer_event.h>
 #include <surface_capture_future.h>
 #include <transaction/rs_interfaces.h>
 #include <ui/rs_surface_node.h>
-#include <ipc_skeleton.h>
+#include "util.h"
 #include <want.h>
 
 #include "ability_start_setting.h"
@@ -300,6 +305,9 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     // once update rect before connect, update again when connect
     UpdateRect(winRect_, SizeChangeReason::UNDEFINED);
     NotifyConnect();
+    int32_t applicationPid = IPCSkeleton::GetCallingPid();
+    DelayedSingleton<ANRManager>::GetInstance()->SetApplicationPid(persistentId_, applicationPid);
+    WLOGFI("SetApplicationPid pid:%{public}d", applicationPid);
     return WSError::WS_OK;
 }
 
@@ -353,6 +361,7 @@ WSError Session::Disconnect()
     if (GetSessionState() == SessionState::STATE_BACKGROUND) {
         UpdateSessionState(SessionState::STATE_DISCONNECT);
     }
+    DelayedSingleton<ANRManager>::GetInstance()->OnSessionLost(persistentId_);
     return WSError::WS_OK;
 }
 
@@ -537,6 +546,13 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
+    WLOGFD("Session TransferPointEvent, Id: %{public}" PRIu64 ", eventId: %{public}d",
+        persistentId_, pointerEvent->GetId());
+    auto currentTime = GetSysClockTime();
+    if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(currentTime, persistentId_)) {
+        WLOGFD("The pointer event does not report normally, application not response");
+        return WSError::WS_DO_NOTHING;
+    }
     auto action = pointerEvent->GetPointerAction();
     if (!isFocused_ && GetFocusable() && action == MMI::PointerEvent::POINTER_ACTION_DOWN) {
         NotifyClick();
@@ -545,8 +561,12 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    WLOGD("TransferPointEvent, id: %{public}" PRIu64, persistentId_);
-    return windowEventChannel_->TransferPointerEvent(pointerEvent);
+    if (WSError ret = windowEventChannel_->TransferPointerEvent(pointerEvent); ret != WSError::WS_OK) {
+        WLOGFE("TransferPointer failed");
+        return ret;
+    }
+    DelayedSingleton<ANRManager>::GetInstance()->AddTimer(pointerEvent->GetId(), currentTime, persistentId_);
+    return WSError::WS_OK;
 }
 
 WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -562,12 +582,24 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
+    WLOGFD("Session TransferKeyEvent, Id: %{public}" PRIu64 ", eventId: %{public}d",
+        persistentId_, keyEvent->GetId());
+    auto currentTime = GetSysClockTime();
+    if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(currentTime, persistentId_)) {
+        WLOGFD("The pointer event does not report normally, application not response");
+        return WSError::WS_DO_NOTHING;
+    }
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
     WLOGD("TransferKeyEvent, id: %{public}" PRIu64, persistentId_);
-    return windowEventChannel_->TransferKeyEvent(keyEvent);
+    if (WSError ret = windowEventChannel_->TransferKeyEvent(keyEvent); ret != WSError::WS_OK) {
+        WLOGFE("TransferKeyEvent failed");
+        return ret;
+    }
+    DelayedSingleton<ANRManager>::GetInstance()->AddTimer(keyEvent->GetId(), currentTime, persistentId_);
+    return WSError::WS_OK;
 }
 
 WSError Session::TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
@@ -801,6 +833,14 @@ WSError Session::ProcessBackEvent()
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     return sessionStage_->HandleBackEvent();
+}
+
+WSError Session::MarkProcessed(int32_t eventId)
+{
+    int32_t persistentId = GetPersistentId();
+    WLOGFI("persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
+    DelayedSingleton<ANRManager>::GetInstance()->MarkProcessed(eventId, persistentId);
+    return WSError::WS_OK;
 }
 
 void Session::GeneratePersistentId(bool isExtension, const SessionInfo& sessionInfo)
