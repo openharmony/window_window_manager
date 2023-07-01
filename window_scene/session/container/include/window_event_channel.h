@@ -33,6 +33,9 @@ public:
     WSError TransferFocusWindowId(uint32_t windowId) override;
 
 private:
+    void PrintKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event);
+    void PrintPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event);
+
     sptr<ISessionStage> sessionStage_ = nullptr;
 };
 } // namespace OHOS::Rosen
