@@ -35,6 +35,7 @@ using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSessionManager" };
 const std::string CREATE_SPECIFIC_SCENE_CB = "createSpecificSession";
+const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 } // namespace
 
 NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* exportObj)
@@ -81,6 +82,8 @@ JsSceneSessionManager::JsSceneSessionManager(NativeEngine& engine) : engine_(eng
 {
     listenerFunc_ = {
         { CREATE_SPECIFIC_SCENE_CB, &JsSceneSessionManager::ProcessCreateSpecificSessionRegister },
+        { GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
+            &JsSceneSessionManager::ProcessGestureNavigationEnabledChangeListener },
     };
 }
 
@@ -121,6 +124,28 @@ void JsSceneSessionManager::OnCreateSpecificSession(const sptr<SceneSession>& sc
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
+
+void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable)
+{
+    WLOGFI("[NAPI]OnGestureNavigationEnabledUpdate");
+    auto iter = jsCbMap_.find(GESTURE_NAVIGATION_ENABLED_CHANGE_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [this, enable, jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            NativeValue* argv[] = {CreateJsValue(*eng, enable)};
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSessionManager::OnGestureNavigationEnabledUpdate", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
 void JsSceneSessionManager::ProcessCreateSpecificSessionRegister()
 {
     NotifyCreateSpecificSessionFunc func = [this](const sptr<SceneSession>& session) {
@@ -128,6 +153,15 @@ void JsSceneSessionManager::ProcessCreateSpecificSessionRegister()
         this->OnCreateSpecificSession(session);
     };
     SceneSessionManager::GetInstance().SetCreateSpecificSessionListener(func);
+}
+
+void JsSceneSessionManager::ProcessGestureNavigationEnabledChangeListener()
+{
+    ProcessGestureNavigationEnabledChangeFunc func = [this](bool enable) {
+        WLOGFD("GestureNavigationEnabledUpdate");
+        this->OnGestureNavigationEnabledUpdate(enable);
+    };
+    SceneSessionManager::GetInstance().SetGestureNavigationEnabledChangeListener(func);
 }
 
 NativeValue* JsSceneSessionManager::RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info)

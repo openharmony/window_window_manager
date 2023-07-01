@@ -58,8 +58,10 @@ private:
     NativeValue* OnProcessBackEvent(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnUpdateFocus(NativeEngine& engine, NativeCallbackInfo& info);
 
+    void OnGestureNavigationEnabledUpdate(bool enable);
     void OnCreateSpecificSession(const sptr<SceneSession>& sceneSession);
     void ProcessCreateSpecificSessionRegister();
+    void ProcessGestureNavigationEnabledChangeListener();
     bool IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject);
 
     NativeEngine& engine_;
