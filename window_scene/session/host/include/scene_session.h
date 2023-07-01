@@ -76,6 +76,7 @@ public:
     WSError SetAspectRatio(float ratio) override;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
+    std::string GetSessionSnapshot();
     static MaximizeMode maximizeMode_;
 
     WSError SetTurnScreenOn(bool turnScreenOn);
