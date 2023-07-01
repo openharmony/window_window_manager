@@ -26,6 +26,11 @@
 
 #include "focus_change_info.h"
 #include "window_manager_interface.h"
+#include "session_listener_interface.h"
+
+namespace OHOS::Media {
+class PixelMap;
+} // namespace OHOS::Media
 
 namespace OHOS::Rosen {
 class RSSurfaceNode;
@@ -40,6 +45,10 @@ public:
         TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT,
         TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT,
         TRANS_ID_GET_FOCUS_SESSION_INFO,
+        TRANS_ID_SET_SESSION_LABEL,
+        TRANS_ID_SET_SESSION_ICON,
+        TRANS_ID_REGISTER_SESSION_LISTENER,
+        TRANS_ID_UNREGISTER_SESSION_LISTENER,
     };
 
     virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -47,6 +56,10 @@ public:
         sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session) = 0;
     virtual WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) = 0;
     virtual WSError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) = 0;
+    virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
+    virtual WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) = 0;
+    virtual WSError RegisterSessionListener(const sptr<ISessionListener> sessionListener) = 0;
+    virtual void UnregisterSessionListener() = 0;
 
     // interfaces of IWindowManager
     WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,

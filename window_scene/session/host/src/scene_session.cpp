@@ -22,6 +22,7 @@
 #include "session/host/include/scene_persistent_storage.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
+#include <running_lock.h>
 
 namespace OHOS::Rosen {
 namespace {
@@ -46,11 +47,9 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
             }
         }
     }
-    if (info.isSystem_ && info.windowType_ != 0) {
-        property_ = new(std::nothrow) WindowSessionProperty();
-        if (property_) {
-            property_->SetWindowType(static_cast<WindowType>(info.windowType_));
-        }
+    property_ = new(std::nothrow) WindowSessionProperty();
+    if (property_) {
+        property_->SetWindowType(static_cast<WindowType>(info.windowType_));
     }
 }
 
@@ -98,8 +97,10 @@ void SceneSession::RegisterSessionChangeCallback(const sptr<SceneSession::Sessio
 
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
 {
-    WLOGFD("SceneSession SetGlobalMaximizeMode mode: %{public}u", static_cast<uint32_t>(mode));
+    WLOGFI("SceneSession SetGlobalMaximizeMode mode: %{public}u", static_cast<uint32_t>(mode));
     maximizeMode_ = mode;
+    ScenePersistentStorage::Insert("maximize_state", static_cast<int32_t>(maximizeMode_),
+        ScenePersistentStorageType::MAXIMIZE_STATE);
     return WSError::WS_OK;
 }
 
@@ -187,7 +188,7 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
     property_->SetSystemBarProperty(type, systemBarProperty);
     WLOGFD("SceneSession SetSystemBarProperty status:%{public}d", static_cast<int32_t>(type));
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSystemBarPropertyChange_) {
-        sessionChangeCallback_->OnSystemBarPropertyChange_(systemBarProperty);
+        sessionChangeCallback_->OnSystemBarPropertyChange_(property_->GetSystemBarProperty());
     }
     return WSError::WS_OK;
 }
@@ -264,5 +265,32 @@ void SceneSession::OnVsyncHandle()
     WSRect rect = moveDragController_->GetTargetRect();
     WLOGFD("rect: [%{public}d, %{public}d, %{public}u, %{public}u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
     NotifySessionRectChange(rect);
+}
+
+const std::string& SceneSession::GetWindowName() const
+{
+    return property_->GetWindowName();
+}
+
+WSError SceneSession::SetTurnScreenOn(bool turnScreenOn)
+{
+    property_->SetTurnScreenOn(turnScreenOn);
+    return WSError::WS_OK;
+}
+
+bool SceneSession::IsTurnScreenOn() const
+{
+    return property_->IsTurnScreenOn();
+}
+
+WSError SceneSession::SetKeepScreenOn(bool keepScreenOn)
+{
+    property_->SetKeepScreenOn(keepScreenOn);
+    return WSError::WS_OK;
+}
+
+bool SceneSession::IsKeepScreenOn() const
+{
+    return property_->IsKeepScreenOn();
 }
 } // namespace OHOS::Rosen

@@ -23,6 +23,7 @@
 #include <ipc_skeleton.h>
 #include <want.h>
 
+#include "ability_start_setting.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -206,10 +207,6 @@ WSError Session::SetTouchable(bool touchable)
 {
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
-    }
-    if (touchable == property_->GetTouchable()) {
-        WLOGFD("Session touchable do not change: [%{public}d]", touchable);
-        return WSError::WS_DO_NOTHING;
     }
     UpdateSessionTouchable(touchable);
     return WSError::WS_OK;
@@ -401,6 +398,7 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     info.want = new AAFwk::Want(abilitySessionInfo->want);
     info.requestCode = abilitySessionInfo->requestCode;
     info.callerToken_ = abilitySessionInfo->callerToken;
+    info.startSetting = abilitySessionInfo->startSetting;
     WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
     WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}" PRIu64 ", \
@@ -588,6 +586,15 @@ WSError Session::TransferFocusActiveEvent(bool isFocusActive)
         return WSError::WS_ERROR_NULLPTR;
     }
     return windowEventChannel_->TransferFocusActiveEvent(isFocusActive);
+}
+
+WSError Session::TransferFocusWindowIdEvent(uint32_t windowId)
+{
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferFocusWindowId(windowId);
 }
 
 std::shared_ptr<Media::PixelMap> Session::GetSnapshot() const

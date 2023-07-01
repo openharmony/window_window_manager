@@ -40,6 +40,7 @@
 #include "wm_common_inner.h"
 #include "wm_math.h"
 #include "perform_reporter.h"
+#include "hitrace_meter.h"
 #include <hisysevent.h>
 
 namespace OHOS {
@@ -522,6 +523,7 @@ void WindowImpl::OnNewWant(const AAFwk::Want& want)
 WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     NativeEngine* engine, NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability)
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "loadContent");
     WLOGFD("SetUIContent: %{public}s", contentInfo.c_str());
     if (uiContent_) {
         uiContent_->Destroy();
@@ -804,7 +806,7 @@ WMError WindowImpl::SetFloatingMaximize(bool isEnter)
         return ret;
     }
 
-    if (isEnter && GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+    if (isEnter && GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
         if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
             SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         }
@@ -943,6 +945,7 @@ void WindowImpl::GetConfigurationFromAbilityInfo()
 void WindowImpl::UpdateTitleButtonVisibility()
 {
     WLOGFD("[Client] UpdateTitleButtonVisibility");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ == nullptr || !IsDecorEnable()) {
         return;
     }
@@ -1386,6 +1389,7 @@ WMError WindowImpl::PreProcessShow(uint32_t reason, bool withAnimation)
 
 WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, __PRETTY_FUNCTION__);
     WLOGFD("Window Show [name:%{public}s, id:%{public}u, mode: %{public}u], reason:%{public}u, "
         "withAnimation:%{public}d", name_.c_str(), property_->GetWindowId(), GetMode(), reason, withAnimation);
     if (!IsWindowValid()) {
@@ -1400,7 +1404,6 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
     }
     if (state_ == WindowState::STATE_SHOWN) {
         if (property_->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
-            WLOGI("desktop window [id:%{public}u] is shown, minimize all app windows", property_->GetWindowId());
             SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(property_->GetDisplayId());
         } else {
             WLOGI("window is already shown id: %{public}u", property_->GetWindowId());
@@ -2844,6 +2847,15 @@ void WindowImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallbac
     if (!SingletonContainer::IsDestroyed()) {
         VsyncStation::GetInstance().RequestVsync(vsyncCallback);
     }
+}
+
+int64_t WindowImpl::GetVSyncPeriod()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!SingletonContainer::IsDestroyed()) {
+        return VsyncStation::GetInstance().GetVSyncPeriod();
+    }
+    return 0;
 }
 
 void WindowImpl::UpdateFocusStatus(bool focused)
