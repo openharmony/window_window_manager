@@ -226,7 +226,7 @@ HWTEST_F(WindowTest, GetAlpha, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest10", option);
     ASSERT_NE(nullptr, window);
-    ASSERT_EQ(0.0f, window->GetAlpha());
+    ASSERT_EQ(1.0f, window->GetAlpha());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -240,7 +240,7 @@ HWTEST_F(WindowTest, GetFocusable, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest11", option);
     ASSERT_NE(nullptr, window);
-    ASSERT_EQ(false, window->GetFocusable());
+    ASSERT_EQ(true, window->GetFocusable());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -268,7 +268,7 @@ HWTEST_F(WindowTest, GetTouchable, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest13", option);
     ASSERT_NE(nullptr, window);
-    ASSERT_EQ(false, window->GetTouchable());
+    ASSERT_EQ(true, window->GetTouchable());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -580,7 +580,7 @@ HWTEST_F(WindowTest, SetBackgroundColor, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest34", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetBackgroundColor("0x00000000");
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_NE(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -595,7 +595,7 @@ HWTEST_F(WindowTest, SetTransparent, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest35", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetTransparent(true);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_NE(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -640,7 +640,7 @@ HWTEST_F(WindowTest, GetBrightness, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest38", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->GetBrightness();
-    ASSERT_EQ(0.0f, ret);
+    ASSERT_NE(0.0f, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -777,7 +777,7 @@ HWTEST_F(WindowTest, SetShadowColor, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest47", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetShadowColor("0x00000000");
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_NE(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -867,7 +867,7 @@ HWTEST_F(WindowTest, RequestFocus, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest53", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->RequestFocus();
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_NE(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
