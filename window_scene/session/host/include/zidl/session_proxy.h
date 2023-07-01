@@ -52,6 +52,7 @@ public:
     WSError SetAspectRatio(float ratio) override;
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
+    void NotifyRemoteReady() override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };
