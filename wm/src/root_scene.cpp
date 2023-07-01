@@ -20,6 +20,10 @@
 #include <ui_content.h>
 #include <viewport_config.h>
 
+#include "app_mgr_client.h"
+#include "singleton.h"
+
+#include "anr_manager.h"
 #include "intention_event_manager.h"
 #include "vsync_station.h"
 #include "window_manager_hilog.h"
@@ -81,6 +85,21 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
     uiContent_->Foreground();
 
     RegisterInputEventListener();
+    DelayedSingleton<ANRManager>::GetInstance()->Init();
+    DelayedSingleton<ANRManager>::GetInstance()->SetAnrObserver(([](int32_t pid) {
+        WLOGFD("Receive anr notice enter");
+        AppExecFwk::AppFaultDataBySA faultData;
+        faultData.faultType = AppExecFwk::FaultDataType::APP_FREEZE;
+        faultData.pid = pid;
+        faultData.errorObject.name = "APPLICATION_BLOCK_INPUT";
+        faultData.errorObject.message = "";
+        faultData.errorObject.stack = "";
+        if (int32_t ret = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFaultBySA(faultData);
+            ret != 0) {
+            WLOGFE("NotifyAppFaultBySA failed, pid:%{public}d, errcode:%{public}d", pid, ret);
+        }
+        WLOGFD("Receive anr notice leave");
+    }));
 }
 
 void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)

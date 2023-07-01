@@ -37,6 +37,8 @@ config("libwm_public_config") {
 ohos_static_library("libwm_static") {
   include_dirs = [
     "../utils/include",
+    "../window_scene/intention_event/service/anr_manager/include",
+    "../window_scene/intention_event/framework/anr_handler/include",
     "${window_base_path}/window_scene/intention_event/include",
   ]
 
@@ -76,6 +78,7 @@ ohos_static_library("libwm_static") {
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/intention_event:libintention_event",
+    "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session_manager:session_manager",
   ]
@@ -84,6 +87,7 @@ ohos_static_library("libwm_static") {
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
+    "ability_runtime:app_manager",
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "eventhandler:libeventhandler",
@@ -145,6 +149,8 @@ ohos_static_library("libwm_static") {
 ohos_shared_library("libwm") {
   include_dirs = [
     "../utils/include",
+    "../window_scene/intention_event/service/anr_manager/include",
+    "../window_scene/intention_event/framework/anr_handler/include",
     "${window_base_path}/window_scene/intention_event/include",
   ]
 
@@ -182,6 +188,7 @@ ohos_shared_library("libwm") {
   deps = [
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/intention_event:libintention_event",
+    "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session_manager:session_manager",
     "../dm:libdm",
@@ -192,6 +199,7 @@ ohos_shared_library("libwm") {
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
+    "ability_runtime:app_manager",
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "eventhandler:libeventhandler",

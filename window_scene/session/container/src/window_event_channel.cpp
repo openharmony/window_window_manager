@@ -15,10 +15,14 @@
 
 #include "session/container/include/window_event_channel.h"
 
+#include <functional>
+#include <utility>
+
 #include <axis_event.h>
 #include <key_event.h>
 #include <pointer_event.h>
 
+#include "anr_handler.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -42,6 +46,12 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
         WLOGFE("session stage is null!");
         return WSError::WS_ERROR_NULLPTR;
     }
+    DelayedSingleton<ANRHandler>::GetInstance()->SetSessionStage(sessionStage_);
+    if (pointerEvent != nullptr) {
+        WLOGFD("SetProcessedCallback enter");
+        pointerEvent->SetProcessedCallback(dispatchCallback_);
+        WLOGFD("SetProcessedCallback leave");
+    }
     sessionStage_->NotifyPointerEvent(pointerEvent);
     return WSError::WS_OK;
 }
@@ -54,7 +64,14 @@ WSError WindowEventChannel::TransferKeyEventForConsumed(
         WLOGFE("session stage is null!");
         return WSError::WS_ERROR_NULLPTR;
     }
+    DelayedSingleton<ANRHandler>::GetInstance()->SetSessionStage(sessionStage_);
+    if (keyEvent != nullptr) {
+        WLOGFD("SetProcessedCallback enter");
+        keyEvent->SetProcessedCallback(dispatchCallback_);
+        WLOGFD("SetProcessedCallback leave");
+    }
     sessionStage_->NotifyKeyEvent(keyEvent, isConsumed);
+    keyEvent->MarkProcessed();
     return WSError::WS_OK;
 }
 
@@ -67,6 +84,11 @@ WSError WindowEventChannel::TransferFocusActiveEvent(bool isFocusActive)
     }
     sessionStage_->NotifyFocusActiveEvent(isFocusActive);
     return WSError::WS_OK;
+}
+
+void WindowEventChannel::OnDispatchEventProcessed(int32_t eventId, int64_t actionTime)
+{
+    DelayedSingleton<ANRHandler>::GetInstance()->SetLastProcessedEventId(eventId, actionTime);
 }
 
 void WindowEventChannel::PrintKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event)
