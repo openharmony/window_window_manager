@@ -368,7 +368,6 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig04, Function | SmallTest | Level2)
     ASSERT_EQ(2, item.stringsValue_->size());
     std::vector<std::string> supportedModes;
     supportedModes = *item.stringsValue_;
-    // WLOGFE("WindowSceneConfigTest.value=%{public}s,=%{public}s", supportedModes[0].c_str(), supportedModes[1].c_str());  del
     ASSERT_NE("fullscreen floating", supportedModes[0]);
 }
 
