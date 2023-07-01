@@ -483,54 +483,14 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 
 WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
 {
-    if (property_ == nullptr) {
-        WLOGFE("SetAspectRatio failed because of property is null");
+    if (property_ == nullptr || hostSession_ == nullptr) {
+        WLOGFE("SetAspectRatio failed because of nullptr");
         return  WMError::WM_ERROR_NULLPTR;
     }
-
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr) {
-        WLOGFE("get display failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
-        return  WMError::WM_ERROR_NULLPTR;
-    }
-    float vpr = display->GetVirtualPixelRatio();
-    auto limits = property_->GetWindowLimits();
-
-    auto ToLayoutWidth = [&, vpr](int32_t winWidth) -> int32_t {
-        return IsDecorEnable() ? (winWidth - WINDOW_FRAME_WIDTH * vpr * 2) : winWidth; // 2: left and right edge
-    };
-
-    auto ToLayoutHeight = [&, vpr](int32_t winHeight) -> int32_t {
-        return IsDecorEnable() ? (winHeight - WINDOW_FRAME_WIDTH * vpr - WINDOW_TITLE_BAR_HEIGHT * vpr) : winHeight;
-    };
-    if (limits.minWidth_ != 0 && MathHelper::LessNotEqual(ratio,
-        static_cast<float>(ToLayoutWidth(limits.minWidth_)) / ToLayoutHeight(limits.maxHeight_))) {
-        WLOGE("Failed, because aspectRation is smaller than minWidth/maxHeight");
-        return WMError::WM_ERROR_INVALID_PARAM;
-    } else if (limits.minHeight_ != 0 && MathHelper::GreatNotEqual(ratio,
-        static_cast<float>(ToLayoutWidth(limits.maxWidth_)) / ToLayoutHeight(limits.minHeight_))) {
-        WLOGE("Failed, because aspectRation is bigger than maxWidth/minHeight");
+    if (hostSession_->SetAspectRatio(ratio) != WSError::WS_OK) {
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-
-    Rect rect = property_->GetWindowRect();
-    if (hostSession_) {
-        float currentRatio = static_cast<float>(ToLayoutWidth(rect.width_)) / ToLayoutHeight(rect.height_);
-        if (MathHelper::GreatNotEqual(currentRatio, ratio)) {
-            rect.height_ = ToLayoutWidth(rect.width_) / ratio + WINDOW_FRAME_WIDTH * vpr +
-                           WINDOW_TITLE_BAR_HEIGHT * vpr;
-        } else if (MathHelper::LessNotEqual(currentRatio, ratio)) {
-            rect.width_ = ToLayoutHeight(rect.height_) * ratio + WINDOW_FRAME_WIDTH * vpr * 2; // 2: left and right edge
-        } else {
-            return WMError::WM_DO_NOTHING;
-        }
-        Resize(rect.width_, rect.height_);
-        hostSession_->SetAspectRatio(ratio);
-        return WMError::WM_OK;
-    } else {
-        WLOGE("no host session found");
-        return WMError::WM_ERROR_NULLPTR;
-    }
+    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::ResetAspectRatio()
