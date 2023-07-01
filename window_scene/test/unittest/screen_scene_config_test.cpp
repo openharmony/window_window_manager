@@ -164,10 +164,7 @@ HWTEST_F(ScreenSceneConfigTest, ReadIntNumbersConfigInfo, Function | SmallTest |
             continue;
         }
     }
-    WLOGFE("ScreenSceneConfigTest.ReadIntNumbersConfigInfo=%u.", readCount);
-
     ASSERT_GE(ScreenSceneConfig::intNumbersConfig_.size(), readCount);
-
     ScreenSceneConfig::DumpConfig();
     xmlFreeDoc(docPtr);
 }
