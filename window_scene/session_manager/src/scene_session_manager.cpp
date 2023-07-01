@@ -510,10 +510,10 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession)
+WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession, const bool isDelegator)
 {
     wptr<SceneSession> weakSceneSession(sceneSession);
-    auto task = [this, weakSceneSession]() {
+    auto task = [this, weakSceneSession, isDelegator]() {
         auto scnSession = weakSceneSession.promote();
         if (scnSession == nullptr) {
             WLOGFE("session is nullptr");
@@ -535,7 +535,13 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         if (!scnSessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo);
+
+        if (isDelegator) {
+            // todo: wait for ams change
+            AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo);
+        } else {
+            AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo);
+        }
         return WSError::WS_OK;
     };
 
@@ -1302,4 +1308,39 @@ std::string SceneSessionManager::GetSessionSnapshot(uint64_t persistentId)
     };
     return taskScheduler_->PostSyncTask(task);
 }
+WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject> &token)
+{
+    WLOGFI("run PendingSessionToForeground");
+    for (auto iter : sceneSessionMap_) {
+        sptr<Session> sceneSession = iface_cast<Session>(iter.second->AsObject());
+        if (sceneSession->GetAbilityToken() == token) {
+            return sceneSession->PendingSessionToForeground();
+        }
+    }
+    return WSError::WS_ERROR_INVALID_PARAM;
+}
+
+WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token)
+{
+    WLOGFI("run PendingSessionToBackgroundForDelegator");
+    for (auto iter : sceneSessionMap_) {
+        sptr<Session> sceneSession = iface_cast<Session>(iter.second->AsObject());
+        if (sceneSession->GetAbilityToken() == token) {
+            return sceneSession->PendingSessionToBackgroundForDelegator();
+        }
+    }
+    return WSError::WS_ERROR_INVALID_PARAM;
+}
+
+WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject> &token)
+{
+    WLOGFI("run GetFocusSessionToken");
+    auto sceneSession = GetSceneSession(focusedSessionId_);
+    if (sceneSession) {
+        token = sceneSession->GetAbilityToken();
+        return WSError::WS_OK;
+    }
+    return WSError::WS_ERROR_INVALID_PARAM;
+}
+
 } // namespace OHOS::Rosen

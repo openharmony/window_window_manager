@@ -16,19 +16,39 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H
 
+#include <map>
 #include <iremote_stub.h>
 
 #include "session_manager/include/zidl/scene_session_manager_interface.h"
 
 namespace OHOS::Rosen {
+class SceneSessionManagerStub;
+using SceneSessionManagerStubFunc = int (SceneSessionManagerStub::*)(MessageParcel &data, MessageParcel &reply);
+
 class SceneSessionManagerStub : public IRemoteStub<ISceneSessionManager> {
 public:
     SceneSessionManagerStub() = default;
-    virtual ~SceneSessionManagerStub() = default;
+    ~SceneSessionManagerStub() = default;
 
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
-    void HandleUpdateProperty(MessageParcel &data, MessageParcel &reply);
+
+private:
+    static const std::map<uint32_t, SceneSessionManagerStubFunc> stubFuncMap_;
+
+    int HandleUpdateProperty(MessageParcel &data, MessageParcel &reply);
+    int HandleCreateAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply);
+    int HandleDestroyAndDisconnectSpcificSession(MessageParcel &data, MessageParcel &reply);
+    int HandleRegisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply);
+    int HandleUnregisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply);
+    int HandleGetFocusSessionInfo(MessageParcel &data, MessageParcel &reply);
+    int HandleSetSessionLabel(MessageParcel &data, MessageParcel &reply);
+    int HandleSetSessionIcon(MessageParcel &data, MessageParcel &reply);
+    int HandleRegisterSessionListener(MessageParcel &data, MessageParcel &reply);
+    int HandleUnregisterSessionListener(MessageParcel &data, MessageParcel &reply);
+    int HandlePendingSessionToForeground(MessageParcel &data, MessageParcel &reply);
+    int HandlePendingSessionToBackgroundForDelegator(MessageParcel &data, MessageParcel &reply);
+    int HandleGetFocusSessionToken(MessageParcel &data, MessageParcel &reply);
+    int HandleSetGestureNavigationEnabled(MessageParcel &data, MessageParcel &reply);
 };
 } // namespace OHOS::Rosen
-
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H
