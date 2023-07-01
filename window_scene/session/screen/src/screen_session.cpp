@@ -88,7 +88,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetVirtualPixelRatio(property_.GetVirtualPixelRatio());
     displayInfo->SetXDpi(property_.GetXDpi());
     displayInfo->SetYDpi(property_.GetYDpi());
-    displayInfo->SetDpi(property_.GetDensity());
+    displayInfo->SetDpi(property_.GetVirtualPixelRatio() * DOT_PER_INCH);
     displayInfo->SetRotation(property_.GetScreenRotation());
     displayInfo->SetOrientation(property_.GetOrientation());
     displayInfo->SetOffsetX(property_.GetOffsetX());
