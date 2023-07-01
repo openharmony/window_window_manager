@@ -52,16 +52,10 @@ public:
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     WMError SetLayoutFullScreen(bool status) override;
     WMError SetFullScreen(bool status) override;
-    WMError SetTransparent(bool isTransparent) override;
-    virtual WMError SetPrivacyMode(bool isPrivacyMode) override;
-    virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
-    virtual WMError SetSnapshotSkip(bool isSkip) override;
-
-    bool IsTransparent() const override;
-    virtual bool IsPrivacyMode() const override;
-
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+
+    WMError NotifyMemoryLevel(int32_t level) const override;
 
     virtual WMError AddWindowFlag(WindowFlag flag) override;
     virtual WMError RemoveWindowFlag(WindowFlag flag) override;
@@ -78,6 +72,17 @@ public:
     virtual WMError SetBackdropBlur(float radius) override;
     virtual WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) override;
 
+    virtual WMError SetTransparent(bool isTransparent) override;
+    virtual WMError SetTurnScreenOn(bool turnScreenOn) override;
+    virtual WMError SetKeepScreenOn(bool keepScreenOn) override;
+    virtual WMError SetPrivacyMode(bool isPrivacyMode) override;
+    virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
+    virtual WMError SetSnapshotSkip(bool isSkip) override;
+
+    virtual bool IsTransparent() const override;
+    virtual bool IsTurnScreenOn() const override;
+    virtual bool IsKeepScreenOn() const override;
+    virtual bool IsPrivacyMode() const override;
 protected:
     void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();
