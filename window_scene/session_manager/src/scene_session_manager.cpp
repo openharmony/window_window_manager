@@ -57,6 +57,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManager" };
 const std::string SCENE_SESSION_MANAGER_THREAD = "SceneSessionManager";
 constexpr uint32_t MAX_BRIGHTNESS = 255;
+constexpr int32_t DEFAULT_USERID = -1;
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SceneSessionManager)
@@ -65,6 +66,7 @@ SceneSessionManager::SceneSessionManager()
 {
     taskScheduler_ = std::make_shared<TaskScheduler>(SCENE_SESSION_MANAGER_THREAD);
     bundleMgr_ = GetBundleManager();
+    currentUserId_ = DEFAULT_USERID;
     LoadWindowSceneXml();
     Init();
     StartWindowInfoReportLoop();
@@ -661,6 +663,40 @@ WSError SceneSessionManager::ProcessBackEvent()
     return WSError::WS_OK;
 }
 
+WSError SceneSessionManager::SwitchUser(int32_t oldUserId, int32_t newUserId, std::string &fileDir)
+{
+    if (oldUserId != currentUserId_ || oldUserId == newUserId || fileDir.empty()) {
+        WLOGFE("SwitchUser params invalid");
+        return WSError::WS_DO_NOTHING;
+    }
+    WLOGFD("SwitchUser oldUserId : %{public}d newUserId : %{public}d path : %{public}s",
+        oldUserId, newUserId, fileDir.c_str());
+    auto task = [this, newUserId, &fileDir]() {
+        if (!ScenePersistence::CreateSnapshotDir(fileDir)) {
+            WLOGFD("snapshot dir existed");
+        }
+        currentUserId_ = newUserId;
+        for (const auto &item : sceneSessionMap_) {
+            auto scnSession = item.second;
+            auto persistentId = scnSession->GetPersistentId();
+            scnSession->SetActive(false);
+            scnSession->Background();
+            if (persistentId == brightnessSessionId_) {
+                UpdateBrightness(focusedSessionId_);
+            }
+            auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
+            if (!scnSessionInfo) {
+                return WSError::WS_ERROR_NULLPTR;
+            }
+            AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo);
+        }
+        sceneSessionMap_.clear();
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostSyncTask(task);
+    return WSError::WS_OK;
+}
+
 sptr<AppExecFwk::IBundleMgr> SceneSessionManager::GetBundleManager()
 {
     auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -922,6 +958,10 @@ WSError SceneSessionManager::UpdateBrightness(uint64_t persistentId)
         brightnessSessionId_ = sceneSession->GetPersistentId();
     }
     return WSError::WS_OK;
+}
+
+int32_t SceneSessionManager::GetCurrentUserId() const {
+    return currentUserId_;
 }
 
 void SceneSessionManager::SetDisplayBrightness(float brightness)
