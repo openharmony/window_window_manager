@@ -58,6 +58,8 @@ private:
     void ProcessSessionExceptionRegister();
     void ProcessSystemBarPropertyChangeRegister();
     void ProcessNeedAvoidRegister();
+    void ProcessPendingSessionToForegroundRegister();
+    void ProcessPendingSessionToBackgroundForDelegatorRegister();
 
     void PendingSessionActivation(SessionInfo& info);
     void OnSessionStateChange(const SessionState& state);
@@ -74,6 +76,8 @@ private:
     static JsSessionType GetApiType(WindowType type);
     void OnSystemBarPropertyChange(const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
     void OnNeedAvoid(bool status);
+    void PendingSessionToForeground(const SessionInfo& info);
+    void PendingSessionToBackgroundForDelegator(const SessionInfo& info);
 
     NativeEngine& engine_;
     wptr<SceneSession> weakSession_ = nullptr;
