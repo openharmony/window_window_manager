@@ -94,7 +94,13 @@ WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParam
 
 void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func)
 {
+    if (state_ < WindowState::STATE_CREATED) {
+        WLOGFE("Extension invalid [name:%{public}s, id:%{public}" PRIu64 "], state:%{public}u",
+            property_->GetWindowName().c_str(), property_->GetPersistentId(), state_);
+        return;
+    }
     notifyTransferComponentDataFunc_ = std::move(func);
+    hostSession_->NotifyRemoteReady();
 }
 
 WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)

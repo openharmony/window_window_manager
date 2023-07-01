@@ -72,7 +72,7 @@ private:
     void TerminateSession(const SessionInfo& info);
     void OnSessionException(const SessionInfo& info);
     static JsSessionType GetApiType(WindowType type);
-    void OnSystemBarPropertyChange(const SystemBarProperty& property);
+    void OnSystemBarPropertyChange(const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
     void OnNeedAvoid(bool status);
 
     NativeEngine& engine_;

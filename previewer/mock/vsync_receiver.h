@@ -46,6 +46,10 @@ public:
     {
         return GSERROR_OK;
     }
+    VsyncError GetVSyncPeriod(int64_t &period)
+    {
+        return GSERROR_OK;
+    }
 };
 } // namespace Rosen
 } // namespace OHOS
