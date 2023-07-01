@@ -138,6 +138,14 @@ void SceneSessionManager::ConfigWindowSceneXml()
     if (item.IsMap()) {
         ConfigKeyboardAnimation(item);
     }
+
+    item = config["maxFloatingWindowSize"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1) {
+            systemConfig_.maxFloatingWindowSize_ = numbers[0];
+        }
+    }
 }
 
 void SceneSessionManager::ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig)

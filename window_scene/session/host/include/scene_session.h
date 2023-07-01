@@ -25,6 +25,7 @@ namespace OHOS::PowerMgr {
 
 namespace OHOS::Rosen {
 class SceneSession;
+
 using SpecificSessionCreateCallback = std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
 using SpecificSessionDestroyCallback = std::function<WSError(const uint64_t& persistentId)>;
 using CameraFloatSessionChangeCallback = std::function<void(uint32_t accessTokenId, bool isShowing)>;
@@ -89,9 +90,13 @@ private:
     void NotifySessionRectChange(const WSRect& rect);
     void ProcessVsyncHandleRegister();
     void OnVsyncHandle();
+    bool IsDecorEnable();
+    bool FixRectByAspectRatio(WSRect& rect);
+    bool SaveAspectRatio(float ratio);
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
     sptr<MoveDragController> moveDragController_ = nullptr;
+    bool isFirstStart_ = true;
 };
 } // namespace OHOS::Rosen
 

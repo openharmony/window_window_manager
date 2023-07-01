@@ -135,6 +135,7 @@ struct SystemSessionConfig : public Parcelable {
     bool isStretchable_ = false;
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     KeyboardAnimationConfig keyboardAnimationConfig_;
+    int32_t maxFloatingWindowSize_ = INT32_MAX;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -144,7 +145,8 @@ struct SystemSessionConfig : public Parcelable {
         }
 
         if (!parcel.WriteUint32(static_cast<uint32_t>(defaultWindowMode_)) ||
-            !parcel.WriteParcelable(&keyboardAnimationConfig_)) {
+            !parcel.WriteParcelable(&keyboardAnimationConfig_) ||
+            !parcel.WriteInt32(maxFloatingWindowSize_)) {
             return false;
         }
 
@@ -163,6 +165,7 @@ struct SystemSessionConfig : public Parcelable {
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
         sptr<KeyboardAnimationConfig> keyboardConfig = parcel.ReadParcelable<KeyboardAnimationConfig>();
         config->keyboardAnimationConfig_ = *keyboardConfig;
+        config->maxFloatingWindowSize_ = parcel.ReadInt32();
         return config;
     }
 };
