@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_H
 
+#include <transaction/rs_interfaces.h>
 #include "common/include/task_scheduler.h"
 #include "interfaces/include/ws_common.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
@@ -84,6 +85,8 @@ public:
     void UnregisterSessionListener();
     void HandleTurnScreenOn(const sptr<SceneSession>& sceneSession);
     void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
+    void InitWithRenderServiceAdded();
+
     void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
     void InitPersistentStorage();
     std::string GetSessionSnapshot(uint64_t persistentId);
@@ -118,6 +121,9 @@ private:
     WSError UpdateBrightness(uint64_t persistentId);
     void SetDisplayBrightness(float brightness);
     float GetDisplayBrightness() const;
+    std::vector<std::pair<uint64_t, bool>> GetWindowVisibilityChangeInfo(
+        std::shared_ptr<RSOcclusionData> occlusionData);
+    void WindowVisibilityChangeCallback(std::shared_ptr<RSOcclusionData> occlusiontionData);
 
     sptr<RootSceneSession> rootSceneSession_;
     std::map<uint64_t, sptr<SceneSession>> sceneSessionMap_;
@@ -138,6 +144,8 @@ private:
     std::shared_ptr<EventRunner> eventLoop_;
     std::shared_ptr<EventHandler> eventHandler_;
     bool isReportTaskStart_ = false;
+    std::shared_ptr<RSOcclusionData> lastOcclusionData_ = std::make_shared<RSOcclusionData>();
+    RSInterfaces& rsInterface_;
     void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void OnSessionStateChange(uint64_t persistentId);
     sptr<ISessionListener> sessionListener_;
