@@ -51,7 +51,7 @@ public:
         TRANS_ID_SET_SESSION_ICON,
         TRANS_ID_REGISTER_SESSION_LISTENER,
         TRANS_ID_UNREGISTER_SESSION_LISTENER,
-        TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO;
+        TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO,
     };
 
     virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -95,7 +95,7 @@ public:
     {
         return WMError::WM_OK;
     }
-    WMError NotifyAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,
+    WMError NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
         WindowUpdateType type) override
     {
         return WMError::WM_OK;
