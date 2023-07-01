@@ -14,38 +14,32 @@
 import("//build/ohos.gni")
 import("../../windowmanager_aafwk.gni")
 
-config("session_manager_service_public_config") {
+ohos_shared_library("libintention_event") {
   include_dirs = [
-    "${window_base_path}/utils/include",
-    "${window_base_path}/window_scene/session_manager_service/include",
-  ]
-}
-
-ohos_shared_library("session_manager_service") {
-  sources = [
-    "src/session_manager_service.cpp",
-    "src/session_manager_service_stub.cpp",
+    "./include",
+    "${window_base_path}/wm/include",
   ]
 
-  cflags_cc = [ "-std=c++17" ]
-
-  public_configs = [ ":session_manager_service_public_config" ]
+  sources = [ "src/intention_event_manager.cpp" ]
 
   deps = [
-    "${window_base_path}/window_scene/session_manager:scene_session_manager",
-    "${window_base_path}/window_scene/session_manager:screen_session_manager",
+    "${window_base_path}/utils:libwmutil",
+    "../common:window_scene_common",
+    "../session:scene_session",
+    "../session_manager:scene_session_manager",
   ]
 
   external_deps = [
-    "ability_runtime:ability_manager",
-    "graphic_standard:librender_service_client",
+    "ace_engine:ace_uicontent",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "graphic_standard:libcomposer",
+    "graphic_standard:window_animation",
     "hilog_native:libhilog",
-    "ipc:ipc_single",
-    "power_manager:powermgr_client",
-    "screenlock_mgr:screenlock_server",
+    "hisysevent_native:libhisysevent",
+    "hitrace_native:hitrace_meter",
+    "input:libmmi-client",
   ]
-
-  innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
 }

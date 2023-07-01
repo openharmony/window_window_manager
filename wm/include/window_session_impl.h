@@ -16,6 +16,8 @@
 #ifndef OHOS_ROSEN_WINDOW_SESSION_IMPL_H
 #define OHOS_ROSEN_WINDOW_SESSION_IMPL_H
 
+#include <atomic>
+
 #include <ability_context.h>
 #include <refbase.h>
 #include <ui_content.h>
@@ -65,6 +67,8 @@ public:
     std::string GetContentInfo() override;
     Ace::UIContent* GetUIContent() const override;
     void OnNewWant(const AAFwk::Want& want) override;
+    WMError SetAPPWindowLabel(const std::string& label) override;
+    WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     // inherits from session stage
     WSError SetActive(bool active) override;
@@ -75,6 +79,7 @@ public:
     void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
     void NotifyFocusActiveEvent(bool isFocusActive) override;
+    void NotifyFocusWindowIdEvent(uint32_t windowId) override;
 
     WMError RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
@@ -87,6 +92,7 @@ public:
     WMError RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
     WMError UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
+    void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
 
     WMError SetBackgroundColor(const std::string& color) override;
 
@@ -160,6 +166,10 @@ private:
     static std::map<uint64_t, std::vector<sptr<IAvoidAreaChangedListener>>> avoidAreaChangeListeners_;
     static std::map<uint64_t, std::vector<sptr<IDialogDeathRecipientListener>>> dialogDeathRecipientListeners_;
     static std::map<uint64_t, std::vector<sptr<IDialogTargetTouchListener>>> dialogTargetTouchListener_;
+
+    // FA only
+    sptr<IAceAbilityHandler> aceAbilityHandler_;
+    std::atomic<uint32_t> focusWindowId_ = INVALID_WINDOW_ID;
 };
 } // namespace Rosen
 } // namespace OHOS

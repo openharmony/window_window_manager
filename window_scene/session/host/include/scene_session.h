@@ -19,6 +19,10 @@
 #include "session/host/include/session.h"
 #include "session/host/include/move_drag_controller.h"
 
+namespace OHOS::PowerMgr {
+    class RunningLock;
+}
+
 namespace OHOS::Rosen {
 class SceneSession;
 using SpecificSessionCreateCallback = std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
@@ -28,7 +32,8 @@ using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSessi
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
-using NotifySystemBarPropertyChangeFunc = std::function<void(const SystemBarProperty& property)>;
+using NotifySystemBarPropertyChangeFunc = std::function<void(
+    const std::unordered_map<WindowType, SystemBarProperty>& propertyMap)>;
 using NotifyNeedAvoidFunc = std::function<void(bool status)>;
 class SceneSession : public Session {
 public:
@@ -72,6 +77,13 @@ public:
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
     static MaximizeMode maximizeMode_;
 
+    WSError SetTurnScreenOn(bool turnScreenOn);
+    bool IsTurnScreenOn() const;
+    WSError SetKeepScreenOn(bool keepScreenOn);
+    bool IsKeepScreenOn() const;
+    const std::string& GetWindowName() const;
+
+    std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 private:
     void UpdateCameraFloatWindowStatus(bool isShowing);
     void NotifySessionRectChange(const WSRect& rect);

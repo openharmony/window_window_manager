@@ -23,6 +23,10 @@
 
 #include "iremote_broker.h"
 
+namespace OHOS::AAFwk {
+class AbilityStartSetting;
+}
+
 namespace OHOS::Rosen {
 constexpr uint64_t INVALID_SESSION_ID = 0;
 
@@ -53,6 +57,9 @@ enum class WSError : int32_t {
     WS_ERROR_IPC_FAILED,
     WS_ERROR_NEED_REPORT_END,
     WS_ERROR_START_ABILITY_FAILED,
+    WS_ERROR_SET_SESSION_LABEL_FAILED,
+    WS_ERROR_SET_SESSION_ICON_FAILED,
+    WS_ERROR_INVALID_SESSION_LISTENER,
 };
 
 enum class WSErrorCode : int32_t {
@@ -95,6 +102,7 @@ struct SessionInfo {
     uint32_t windowType_ = 0;
 
     sptr<AAFwk::Want> want;
+    std::shared_ptr<AAFwk::AbilityStartSetting> startSetting = nullptr;
     int32_t resultCode;
     int32_t requestCode;
     int32_t errorCode;

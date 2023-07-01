@@ -21,9 +21,12 @@
 #include <ability_manager_client.h>
 #include <bundle_mgr_interface.h>
 #include <display_power_mgr_client.h>
+#include <ipc_skeleton.h>
 #include <iservice_registry.h>
 #include <parameters.h>
+#include <power_mgr_client.h>
 #include <resource_manager.h>
+#include <running_lock.h>
 #include <session_info.h>
 #include <start_options.h>
 #include <system_ability_definition.h>
@@ -32,9 +35,13 @@
 #include <transaction/rs_transaction.h>
 #include <transaction/rs_interfaces.h>
 
+#include "ability_start_setting.h"
 #include "color_parser.h"
 #include "common/include/permission.h"
+#include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/scene_session.h"
+#include "session/screen/include/screen_session.h"
+#include "session_manager/include/screen_session_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_math.h"
 #include "xcollie/watchdog.h"
@@ -454,6 +461,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     abilitySessionInfo->requestCode = sessionInfo.requestCode;
     abilitySessionInfo->resultCode = sessionInfo.resultCode;
     abilitySessionInfo->uiAbilityId = sessionInfo.uiAbilityId_;
+    abilitySessionInfo->startSetting = sessionInfo.startSetting;
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = *sessionInfo.want;
     } else {
@@ -751,6 +759,16 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
         }
         WLOGI("Id: %{public}" PRIu64 ", action: %{public}u", sceneSession->GetPersistentId(), action);
         switch (action) {
+            case WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON: {
+                sceneSession->SetTurnScreenOn(property->IsTurnScreenOn());
+                HandleTurnScreenOn(sceneSession);
+                break;
+            }
+            case WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON: {
+                sceneSession->SetKeepScreenOn(property->IsKeepScreenOn());
+                HandleKeepScreenOn(sceneSession, property->IsKeepScreenOn());
+                break;
+            }
             case WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE: {
                 sceneSession->SetFocusable(property->GetFocusable());
                 break;
@@ -799,6 +817,60 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
     };
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::HandleTurnScreenOn(const sptr<SceneSession>& sceneSession)
+{
+    auto task = [this, sceneSession]() {
+        if (sceneSession == nullptr) {
+            WLOGFE("session is invalid");
+            return;
+        }
+        WLOGFD("Win: %{public}s, is turn on%{public}d", sceneSession->GetWindowName().c_str(), sceneSession->IsTurnScreenOn());
+        std::string identity = IPCSkeleton::ResetCallingIdentity();
+        if (sceneSession->IsTurnScreenOn() && !PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
+            WLOGI("turn screen on");
+            PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+        }
+        // set ipc identity to raw
+        IPCSkeleton::SetCallingIdentity(identity);
+    };
+    taskScheduler_->PostAsyncTask(task);
+}
+
+void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock)
+{
+    auto task = [this, sceneSession, requireLock]() {
+        if (sceneSession == nullptr) {
+            WLOGFE("session is invalid");
+            return;
+        }
+        if (requireLock && sceneSession->keepScreenLock_ == nullptr) {
+            // reset ipc identity
+            std::string identity = IPCSkeleton::ResetCallingIdentity();
+            sceneSession->keepScreenLock_ = PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock(sceneSession->GetWindowName(),
+                PowerMgr::RunningLockType::RUNNINGLOCK_SCREEN);
+            // set ipc identity to raw
+            IPCSkeleton::SetCallingIdentity(identity);
+        }
+        if (sceneSession->keepScreenLock_ == nullptr) {
+            return;
+        }
+        WLOGI("keep screen on: [%{public}s, %{public}d]", sceneSession->GetWindowName().c_str(), requireLock);
+        ErrCode res;
+        std::string identity = IPCSkeleton::ResetCallingIdentity();
+        if (requireLock) {
+            res = sceneSession->keepScreenLock_->Lock();
+        } else {
+            res = sceneSession->keepScreenLock_->UnLock();
+        }
+        // set ipc identity to raw
+        IPCSkeleton::SetCallingIdentity(identity);
+        if (res != ERR_OK) {
+            WLOGFE("handle keep screen running lock failed: [operation: %{public}d, err: %{public}d]", requireLock, res);
+        }
+    };
+    taskScheduler_->PostAsyncTask(task);
 }
 
 WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSession, float brightness)
@@ -963,11 +1035,13 @@ void SceneSessionManager::OnSessionStateChange(uint64_t persistentId)
     SessionState state = sceneSession->GetSessionState();
     switch (state) {
     case SessionState::STATE_FOREGROUND:
+        HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
         if (sceneSession->GetWindowSessionProperty()->GetPrivacyMode()) {
             UpdatePrivateStateAndNotify(true);
         }
         break;
     case SessionState::STATE_BACKGROUND:
+        HandleKeepScreenOn(sceneSession, false);
         if (sceneSession->GetWindowSessionProperty()->GetPrivacyMode()) {
             UpdatePrivateStateAndNotify(false);
         }
@@ -975,6 +1049,51 @@ void SceneSessionManager::OnSessionStateChange(uint64_t persistentId)
     default:
         break;
     }
+}
+
+WSError SceneSessionManager::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label)
+{
+    WLOGFI("run SetSessionLabel");
+    for (auto iter : sceneSessionMap_) {
+        auto& sceneSession = iter.second;
+        if (sceneSession->GetAbilityToken() == token) {
+            WLOGFI("try to update session label.");
+            sessionListener_->OnSessionLabelChange(iter.first, label);
+            return WSError::WS_OK;
+        }
+    }
+    return WSError::WS_ERROR_SET_SESSION_LABEL_FAILED;
+}
+
+WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject> &token,
+    const std::shared_ptr<Media::PixelMap> &icon)
+{
+    WLOGFI("run SetSessionIcon");
+    for (auto iter : sceneSessionMap_) {
+        auto& sceneSession = iter.second;
+        if (sceneSession->GetAbilityToken() == token) {
+            WLOGFI("try to update session icon.");
+            sessionListener_->OnSessionIconChange(iter.first, icon);
+            return WSError::WS_OK;
+        }
+    }
+    return WSError::WS_ERROR_SET_SESSION_ICON_FAILED;
+}
+
+WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionListener> sessionListener)
+{
+    WLOGFI("run RegisterSessionListener");
+    if (sessionListener == nullptr) {
+        return WSError::WS_ERROR_INVALID_SESSION_LISTENER;
+    }
+    sessionListener_ = sessionListener;
+    return WSError::WS_OK;
+}
+
+void SceneSessionManager::UnregisterSessionListener()
+{
+    WLOGFI("run UnregisterSessionListener");
+    sessionListener_ = nullptr;
 }
 
 WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession)
@@ -1076,5 +1195,18 @@ void SceneSessionManager::StartWindowInfoReportLoop()
         return;
     }
     isReportTaskStart_ = true;
+}
+
+void SceneSessionManager::InitPersistentStorage()
+{
+    if (ScenePersistentStorage::HasKey("maximize_state", ScenePersistentStorageType::MAXIMIZE_STATE)) {
+        int32_t storageMode = -1;
+        ScenePersistentStorage::Get("maximize_state", storageMode, ScenePersistentStorageType::MAXIMIZE_STATE);
+        if (storageMode == static_cast<int32_t>(MaximizeMode::MODE_AVOID_SYSTEM_BAR) ||
+            storageMode == static_cast<int32_t>(MaximizeMode::MODE_FULL_FILL)) {
+            WLOGFI("init MaximizeMode as %{public}d from persistent storage", storageMode);
+            SceneSession::maximizeMode_ = static_cast<MaximizeMode>(storageMode);
+        }
+    }
 }
 } // namespace OHOS::Rosen

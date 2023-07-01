@@ -30,11 +30,12 @@ public:
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
     WSError TransferFocusActiveEvent(bool isFocusActive) override;
+    WSError TransferFocusWindowId(uint32_t windowId) override;
 
+private:
     void PrintKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event);
     void PrintPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event);
 
-private:
     sptr<ISessionStage> sessionStage_ = nullptr;
 };
 } // namespace OHOS::Rosen
