@@ -628,6 +628,16 @@ void SceneSessionManager::SetCreateSpecificSessionListener(const NotifyCreateSpe
     createSpecificSessionFunc_ = func;
 }
 
+void SceneSessionManager::SetGestureNavigationEnabledChangeListener(
+    const ProcessGestureNavigationEnabledChangeFunc& func)
+{
+    WLOGFD("SetGestureNavigationEnabledChangeListener");
+    if (!func) {
+        WLOGFD("set func is null");
+    }
+    gestureNavigationEnabledChangeFunc_ = func;
+}
+
 WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const uint64_t& persistentId)
 {
     auto task = [this, persistentId]() {
@@ -980,6 +990,21 @@ void SceneSessionManager::SetDisplayBrightness(float brightness)
 float SceneSessionManager::GetDisplayBrightness() const
 {
     return displayBrightness_;
+}
+
+WMError SceneSessionManager::SetGestureNavigaionEnabled(bool enable)
+{
+    WLOGFD("SetGestureNavigationEnabled, enable: %{public}d", enable);
+    auto task = [this, enable]() {
+        if (!gestureNavigationEnabledChangeFunc_) {
+            WLOGFE("callback func is null");
+            return WMError::WM_DO_NOTHING;
+        } else {
+            gestureNavigationEnabledChangeFunc_(enable);
+        }
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task);
 }
 
 WSError SceneSessionManager::SetFocusedSession(uint64_t persistentId)

@@ -40,6 +40,7 @@ class ResourceManager;
 namespace OHOS::Rosen {
 class SceneSession;
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
+using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using EventHandler = OHOS::AppExecFwk::EventHandler;
 using EventRunner = OHOS::AppExecFwk::EventRunner;
@@ -60,9 +61,11 @@ public:
     WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId);
     WSError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
     void SetCreateSpecificSessionListener(const NotifyCreateSpecificSessionFunc& func);
+    void SetGestureNavigationEnabledChangeListener(const ProcessGestureNavigationEnabledChangeFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     WSError ProcessBackEvent();
     void GetStartPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor);
+    WMError SetGestureNavigaionEnabled(bool enable);
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
@@ -120,6 +123,7 @@ private:
     std::map<uint64_t, sptr<SceneSession>> sceneSessionMap_;
 
     NotifyCreateSpecificSessionFunc createSpecificSessionFunc_;
+    ProcessGestureNavigationEnabledChangeFunc gestureNavigationEnabledChangeFunc_;
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
     uint64_t activeSessionId_ = INVALID_SESSION_ID;
