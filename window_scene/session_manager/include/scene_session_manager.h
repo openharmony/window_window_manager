@@ -77,7 +77,8 @@ public:
     WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon);
     WSError RegisterSessionListener(const sptr<ISessionListener> sessionListener);
     void UnregisterSessionListener();
-
+    void HandleTurnScreenOn(const sptr<SceneSession>& sceneSession);
+    void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
     void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
 protected:
     SceneSessionManager();

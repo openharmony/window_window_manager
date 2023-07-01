@@ -1111,5 +1111,39 @@ WMError WindowSceneSessionImpl::NotifyMemoryLevel(int32_t level) const
     WLOGFD("WindowSceneSessionImpl::NotifyMemoryLevel End!");
     return WMError::WM_OK;
 }
+WMError WindowSceneSessionImpl::SetTurnScreenOn(bool turnScreenOn)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    property_->SetTurnScreenOn(turnScreenOn);
+    if (state_ == WindowState::STATE_SHOWN) {
+        return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
+    }
+    return WMError::WM_OK;
+}
+
+bool WindowSceneSessionImpl::IsTurnScreenOn() const
+{
+    return property_->IsTurnScreenOn();
+}
+
+WMError WindowSceneSessionImpl::SetKeepScreenOn(bool keepScreenOn)
+{
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    property_->SetKeepScreenOn(keepScreenOn);
+    if (state_ == WindowState::STATE_SHOWN) {
+        return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+    }
+    return WMError::WM_OK;
+}
+
+bool WindowSceneSessionImpl::IsKeepScreenOn() const
+{
+    return property_->IsKeepScreenOn();
+}
 } // namespace Rosen
 } // namespace OHOS

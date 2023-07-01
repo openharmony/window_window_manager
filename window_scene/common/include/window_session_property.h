@@ -58,6 +58,8 @@ public:
     void SetWindowRect(const struct Rect& rect);
     void SetFocusable(bool isFocusable);
     void SetTouchable(bool isTouchable);
+    void SetTurnScreenOn(bool turnScreenOn);
+    void SetKeepScreenOn(bool keepScreenOn);
     void SetBrightness(float brightness);
     void SetPrivacyMode(bool isPrivate);
     void SetSystemPrivacyMode(bool isSystemPrivate);
@@ -80,6 +82,8 @@ public:
     WindowType GetWindowType() const;
     bool GetFocusable() const;
     bool GetTouchable() const;
+    bool IsTurnScreenOn() const;
+    bool IsKeepScreenOn() const;
     float GetBrightness() const;
     bool GetPrivacyMode() const;
     bool GetSystemPrivacyMode() const;
@@ -107,6 +111,8 @@ private:
     bool focusable_ { true };
     bool touchable_ { true };
     bool tokenState_ { false };
+    bool turnScreenOn_ = false;
+    bool keepScreenOn_ = false;
     float brightness_ = UNDEFINED_BRIGHTNESS;
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };

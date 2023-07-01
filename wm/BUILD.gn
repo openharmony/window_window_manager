@@ -96,6 +96,7 @@ ohos_static_library("libwm_static") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "multimedia_image_framework:image_native",
+    "power_manager:powermgr_client",
     "samgr:samgr_proxy",
   ]
 
@@ -203,6 +204,7 @@ ohos_shared_library("libwm") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "multimedia_image_framework:image_native",
+    "power_manager:powermgr_client",
     "samgr:samgr_proxy",
   ]
 
