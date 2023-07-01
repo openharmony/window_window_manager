@@ -179,8 +179,6 @@ namespace {
 HWTEST_F(WindowSceneConfigTest, AnimationConfig, Function | SmallTest | Level2)
 {
     WindowSceneConfig::config_ = ReadConfig(XML_STR);
-    // SceneSessionManager::GetInstance().ConfigWindowSceneXml();
-    // WindowManagerService::GetInstance().ConfigureWindowManagerService();
     ConfigItem item = WindowSceneConfig::config_["windowAnimation"];
     ASSERT_EQ(true, item.IsMap());
     item = WindowSceneConfig::config_["windowAnimation"]["timing"]["duration"];
