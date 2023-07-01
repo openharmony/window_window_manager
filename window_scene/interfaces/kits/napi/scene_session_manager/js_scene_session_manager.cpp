@@ -70,6 +70,7 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
         JsSceneSessionManager::GetWindowSceneConfig);
     BindNativeFunction(*engine, *object, "processBackEvent", moduleName, JsSceneSessionManager::ProcessBackEvent);
     BindNativeFunction(*engine, *object, "updateFocus", moduleName, JsSceneSessionManager::UpdateFocus);
+    BindNativeFunction(*engine, *object, "switchUser", moduleName, JsSceneSessionManager::SwitchUser);
     BindNativeFunction(*engine, *object, "requestSceneSessionByCall", moduleName,
         JsSceneSessionManager::RequestSceneSessionByCall);
     BindNativeFunction(*engine, *object, "startAbilityBySpecified", moduleName,
@@ -149,6 +150,13 @@ NativeValue* JsSceneSessionManager::ProcessBackEvent(NativeEngine* engine, Nativ
     WLOGFI("[NAPI]ProcessBackEvent");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
     return (me != nullptr) ? me->OnProcessBackEvent(*engine, *info) : nullptr;
+}
+
+NativeValue* JsSceneSessionManager::SwitchUser(NativeEngine *engine, NativeCallbackInfo *info)
+{
+    WLOGFI("[NAPI]SwitchUser");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
+    return (me != nullptr) ? me->OnSwitchUser(*engine, *info) : nullptr;
 }
 
 void JsSceneSessionManager::Finalizer(NativeEngine* engine, void* data, void* hint)
@@ -294,6 +302,44 @@ NativeValue* JsSceneSessionManager::OnProcessBackEvent(NativeEngine& engine, Nat
     return engine.CreateUndefined();
 }
 
+NativeValue* JsSceneSessionManager::OnSwitchUser(NativeEngine& engine, NativeCallbackInfo& info) 
+{
+    if (info.argc < 3) { // 3: params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    int32_t oldUserId;
+    if (!ConvertFromJsValue(engine, info.argv[0], oldUserId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to oldUserId");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    int32_t newUserId;
+    if (!ConvertFromJsValue(engine, info.argv[1], newUserId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to newUserId");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    std::string fileDir;
+    if (!ConvertFromJsValue(engine, info.argv[2], fileDir)) {
+        WLOGFE("[NAPI]Failed to convert parameter to fileDir");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    WSErrorCode ret =
+        WS_JS_TO_ERROR_CODE_MAP.at(SceneSessionManager::GetInstance().SwitchUser(oldUserId, newUserId, fileDir));
+    if (ret != WSErrorCode::WS_OK) {
+        engine.Throw(CreateJsError(engine,static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+            "System is abnormal"));
+    }
+    return engine.CreateUndefined();
+}
+
 NativeValue* JsSceneSessionManager::OnGetRootSceneSession(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGI("[NAPI]OnGetRootSceneSession");
@@ -313,9 +359,6 @@ NativeValue* JsSceneSessionManager::OnGetRootSceneSession(NativeEngine& engine, 
             rootScene->LoadContent(contentUrl, engine, storage, context);
             ScenePersistentStorage::InitDir(context->GetFilesDir());
             SceneSessionManager::GetInstance().InitPersistentStorage();
-            if (!ScenePersistence::CreateSnapshotDir(context->GetFilesDir())) {
-                WLOGFD("snapshot dir existed");
-            }
         });
 
     NativeValue* jsRootSceneSessionObj = JsRootSceneSession::Create(engine, rootSceneSession);

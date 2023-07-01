@@ -32,6 +32,8 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Window
 
 WSError WindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
+    WLOGFD("WindowEventChannel receive key event");
+    PrintKeyEvent(keyEvent);
     bool isConsumed = false;
     return TransferKeyEventForConsumed(keyEvent, isConsumed);
 }
@@ -39,6 +41,7 @@ WSError WindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent
 WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     WLOGFD("WindowEventChannel receive pointer event");
+    PrintPointerEvent(pointerEvent);
     if (!sessionStage_) {
         WLOGFE("session stage is null!");
         return WSError::WS_ERROR_NULLPTR;
@@ -86,6 +89,55 @@ WSError WindowEventChannel::TransferFocusActiveEvent(bool isFocusActive)
 void WindowEventChannel::OnDispatchEventProcessed(int32_t eventId, int64_t actionTime)
 {
     DelayedSingleton<ANRHandler>::GetInstance()->SetLastProcessedEventId(eventId, actionTime);
+}
+
+void WindowEventChannel::PrintKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event)
+{
+    if (event == nullptr) {
+        WLOGFE("event is nullptr");
+        return;
+    }
+    std::vector<MMI::KeyEvent::KeyItem> eventItems = event->GetKeyItems();
+    WLOGFD("KeyCode:%{public}d,KeyAction:%{public}s,keyItemsCount:%{public}zu", event->GetKeyCode(),
+        MMI::KeyEvent::ActionToString(event->GetKeyAction()), eventItems.size());
+    for (const auto &item : eventItems) {
+        WLOGFD("KeyCode:%{public}d,IsPressed:%{public}d,GetUnicode:%{public}d",
+            item.GetKeyCode(), item.IsPressed(), item.GetUnicode());
+    }
+}
+
+void WindowEventChannel::PrintPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event)
+{
+    if (event == nullptr) {
+        WLOGFE("event is nullptr");
+        return;
+    }
+    std::vector<int32_t> pointerIds = event->GetPointerIds();
+    std::string str;
+    std::vector<uint8_t> buffer = event->GetBuffer();
+    for (const auto &buff : buffer) {
+        str += std::to_string(buff);
+    }
+    WLOGFD("PointerAction:%{public}s,SourceType:%{public}s,ButtonId:%{public}d,"
+        "VerticalAxisValue:%{public}.2f,HorizontalAxisValue:%{public}.2f,"
+        "PointerId:%{public}d,PointerCount:%{public}zu,EventNumber:%{public}d,"
+        "BufferCount:%{public}zu,Buffer:%{public}s",
+        event->DumpPointerAction(), event->DumpSourceType(), event->GetButtonId(),
+        event->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_SCROLL_VERTICAL),
+        event->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_SCROLL_HORIZONTAL),
+        event->GetPointerId(), pointerIds.size(), event->GetId(), buffer.size(), str.c_str());
+
+    for (const auto &pointerId : pointerIds) {
+        MMI::PointerEvent::PointerItem item;
+        if (!event->GetPointerItem(pointerId, item)) {
+            WLOGFE("Invalid pointer: %{public}d.", pointerId);
+            return;
+        }
+        WLOGFD("pointerId:%{public}d,DownTime:%{public}" PRId64 ",IsPressed:%{public}d,"
+            "DisplayX:%{public}d,DisplayY:%{public}d,WindowX:%{public}d,WindowY:%{public}d,",
+            pointerId, item.GetDownTime(), item.IsPressed(), item.GetDisplayX(), item.GetDisplayY(),
+            item.GetWindowX(), item.GetWindowY());
+    }
 }
 
 WSError WindowEventChannel::TransferFocusWindowId(uint32_t windowId)
