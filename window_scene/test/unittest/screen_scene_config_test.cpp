@@ -26,9 +26,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSceneConfigTest"};
-}
 class ScreenSceneConfigTest : public testing::Test {
 public:
     static void SetUpTestCase();

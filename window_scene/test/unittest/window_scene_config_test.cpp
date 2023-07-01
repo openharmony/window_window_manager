@@ -24,9 +24,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSceneConfigTest"};
-}
 using ConfigItem = WindowSceneConfig::ConfigItem;
 const std::string XML_STR = R"(<?xml version='1.0' encoding="utf-8"?>
 <!--
@@ -238,7 +235,7 @@ HWTEST_F(WindowSceneConfigTest, MaxAppWindowNumber, Function | SmallTest | Level
     item = WindowSceneConfig::config_["maxAppWindowNumber"];
     ASSERT_EQ(false, item.IsMap());
     ASSERT_EQ(true, item.IsInts());
-    ASSERT_EQ(0, item.intsValue_->size());
+    ASSERT_EQ(true, item.intsValue_->size() == 0);
 
     xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
