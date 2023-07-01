@@ -67,7 +67,9 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_TRANSFER_ABILITY_RESULT),
         &SessionStub::HandleTransferAbilityResult),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_TRANSFER_EXTENSION_DATA),
-        &SessionStub::HandleTransferExtensionData)
+        &SessionStub::HandleTransferExtensionData),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_NOTIFY_REMOTE_READY),
+        &SessionStub::HandleNotifyRemoteReady)
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -368,6 +370,13 @@ int SessionStub::HandleTransferExtensionData(MessageParcel& data, MessageParcel&
     }
     WSError errCode = TransferExtensionData(*wantParams);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyRemoteReady(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleNotifyRemoteReady!");
+    NotifyRemoteReady();
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

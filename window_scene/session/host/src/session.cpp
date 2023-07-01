@@ -846,8 +846,14 @@ WSError Session::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& w
 {
     return WSError::WS_OK;
 }
+
 WSError Session::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
     return WSError::WS_OK;
+}
+
+void Session::NotifyRemoteReady()
+{
+    return;
 }
 } // namespace OHOS::Rosen
