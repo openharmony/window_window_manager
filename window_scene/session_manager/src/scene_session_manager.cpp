@@ -45,6 +45,7 @@
 #include "session/host/include/scene_session.h"
 #include "session/screen/include/screen_session.h"
 #include "session_manager/include/screen_session_manager.h"
+#include "singleton_container.h"
 #include "window_adapter.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
@@ -455,7 +456,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         sceneSessionMap_.insert({ persistentId, sceneSession });
         RegisterSessionStateChangeNotifyManagerFunc(sceneSession);
         WLOGFI("create session persistentId: %{public}" PRIu64 "", persistentId);
-        NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
+        NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
         return sceneSession;
     };
 
@@ -509,7 +510,7 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         }
         AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
         activeSessionId_ = persistentId;
-        NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
+        NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
         return WSError::WS_OK;
     };
 
@@ -543,7 +544,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             return WSError::WS_ERROR_NULLPTR;
         }
         AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo);
-        NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
+        NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
         return WSError::WS_OK;
     };
 
@@ -565,7 +566,7 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
             dialog->NotifyDestroy();
             dialog->Disconnect();
             sceneSessionMap_.erase(dialog->GetPersistentId());
-            NotifyWindowInfoChange(dialog->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
+            NotifyAccessibilityWindowInfo(dialog->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
         }
         return WSError::WS_OK;
     }
@@ -596,7 +597,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         }
         AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
         sceneSessionMap_.erase(persistentId);
-        NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
+        NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
         return WSError::WS_OK;
     };
 
@@ -664,7 +665,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const uint64_t&
         }
         ret = sceneSession->Disconnect();
         sceneSessionMap_.erase(persistentId);
-        NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
+        NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
         return ret;
     };
 
@@ -845,12 +846,12 @@ void SceneSessionManager::HandleUpdateProperty(sptr<WindowSessionProperty>& prop
         }
         case WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE: {
             sceneSession->SetFocusable(property->GetFocusable());
-            NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+            NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE: {
             sceneSession->SetTouchable(property->GetTouchable());
-            NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+            NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS: {
@@ -878,7 +879,7 @@ void SceneSessionManager::HandleUpdateProperty(sptr<WindowSessionProperty>& prop
             if (sceneSession->GetSessionProperty() != nullptr) {
                 sceneSession->GetSessionProperty()->SetMaximizeMode(property->GetMaximizeMode());
             }
-            NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+            NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS: {
@@ -886,7 +887,7 @@ void SceneSessionManager::HandleUpdateProperty(sptr<WindowSessionProperty>& prop
             for (auto& iter : systemBarProperties) {
                 sceneSession->SetSystemBarProperty(iter.first, iter.second);
             }
-            NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+            NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_FLAGS:
@@ -894,7 +895,7 @@ void SceneSessionManager::HandleUpdateProperty(sptr<WindowSessionProperty>& prop
         case WSPropertyChangeAction::ACTION_UPDATE_MODE:
         // fall through
         case WSPropertyChangeAction::ACTION_UPDATE_RECT: {
-            NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+            NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             break;
         }
         default:
@@ -1043,7 +1044,7 @@ WSError SceneSessionManager::SetFocusedSession(uint64_t persistentId)
         return WSError::WS_DO_NOTHING;
     }
     focusedSessionId_ = persistentId;
-    NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
+    NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
     return WSError::WS_OK;
 }
 
@@ -1334,7 +1335,7 @@ void SceneSessionManager::NotifyAccessibilityWindowInfo(uint64_t persistentId, W
 
     const auto& sceneSession = iter->second;
     FillWindowInfo(infos, sceneSession);
-    SessionManager::GetInstance().NotifyWindowInfoChange(infos, type);
+    SingletonContainer::Get<WindowAdapter>().NotifyAccessibilityWindowInfo(infos, type);
 }
 
 void SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,
