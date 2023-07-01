@@ -230,8 +230,8 @@ HWTEST_F(WindowSceneConfigTest, MaxAppWindowNumber, Function | SmallTest | Level
     item = WindowSceneConfig::config_["maxAppWindowNumber"];
     ASSERT_EQ(false, item.IsMap());
     ASSERT_EQ(true, item.IsInts());
-    // ASSERT_EQ(1, item.intsValue_->size());
     value = *item.intsValue_;
+    ASSERT_EQ(true, value.size() >= 1);
     ASSERT_EQ(0, value[0]);
 
     xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
@@ -368,7 +368,7 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig04, Function | SmallTest | Level2)
     ASSERT_EQ(2, item.stringsValue_->size());
     std::vector<std::string> supportedModes;
     supportedModes = *item.stringsValue_;
-    WLOGFE("WindowSceneConfigTest.value=%{public}s,=%{public}s", supportedModes[0].c_str(), supportedModes[1].c_str());
+    // WLOGFE("WindowSceneConfigTest.value=%{public}s,=%{public}s", supportedModes[0].c_str(), supportedModes[1].c_str());  del
     ASSERT_NE("fullscreen floating", supportedModes[0]);
 }
 
