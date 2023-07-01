@@ -80,6 +80,8 @@ public:
     void HandleTurnScreenOn(const sptr<SceneSession>& sceneSession);
     void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
     void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
+    void InitPersistentStorage();
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;

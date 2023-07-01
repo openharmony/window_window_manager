@@ -38,6 +38,7 @@
 #include "ability_start_setting.h"
 #include "color_parser.h"
 #include "common/include/permission.h"
+#include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/scene_session.h"
 #include "session/screen/include/screen_session.h"
 #include "session_manager/include/screen_session_manager.h"
@@ -1194,5 +1195,18 @@ void SceneSessionManager::StartWindowInfoReportLoop()
         return;
     }
     isReportTaskStart_ = true;
+}
+
+void SceneSessionManager::InitPersistentStorage()
+{
+    if (ScenePersistentStorage::HasKey("maximize_state", ScenePersistentStorageType::MAXIMIZE_STATE)) {
+        int32_t storageMode = -1;
+        ScenePersistentStorage::Get("maximize_state", storageMode, ScenePersistentStorageType::MAXIMIZE_STATE);
+        if (storageMode == static_cast<int32_t>(MaximizeMode::MODE_AVOID_SYSTEM_BAR) ||
+            storageMode == static_cast<int32_t>(MaximizeMode::MODE_FULL_FILL)) {
+            WLOGFI("init MaximizeMode as %{public}d from persistent storage", storageMode);
+            SceneSession::maximizeMode_ = static_cast<MaximizeMode>(storageMode);
+        }
+    }
 }
 } // namespace OHOS::Rosen

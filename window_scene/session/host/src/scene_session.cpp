@@ -97,8 +97,10 @@ void SceneSession::RegisterSessionChangeCallback(const sptr<SceneSession::Sessio
 
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
 {
-    WLOGFD("SceneSession SetGlobalMaximizeMode mode: %{public}u", static_cast<uint32_t>(mode));
+    WLOGFI("SceneSession SetGlobalMaximizeMode mode: %{public}u", static_cast<uint32_t>(mode));
     maximizeMode_ = mode;
+    ScenePersistentStorage::Insert("maximize_state", static_cast<int32_t>(maximizeMode_),
+        ScenePersistentStorageType::MAXIMIZE_STATE);
     return WSError::WS_OK;
 }
 
