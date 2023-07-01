@@ -142,7 +142,8 @@ HWTEST_F(WindowTest, GetSurfaceNode, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest04", option);
     ASSERT_NE(nullptr, window);
-    ASSERT_EQ(nullptr, window->GetSurfaceNode());
+    ASSERT_NE(nullptr, window->GetSurfaceNode());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -156,6 +157,7 @@ HWTEST_F(WindowTest, GetContext, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest04", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(nullptr, window->GetContext());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -169,6 +171,7 @@ HWTEST_F(WindowTest, GetRect, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest04", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(Rect(), window->GetRect());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -182,6 +185,7 @@ HWTEST_F(WindowTest, GetRequestRect, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest04", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(Rect(), window->GetRequestRect());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -195,6 +199,7 @@ HWTEST_F(WindowTest, GetType, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest04", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, window->GetType());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -208,6 +213,7 @@ HWTEST_F(WindowTest, GetMode, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest04", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window->GetMode());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -221,6 +227,7 @@ HWTEST_F(WindowTest, GetAlpha, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest04", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(0.0f, window->GetAlpha());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -234,6 +241,7 @@ HWTEST_F(WindowTest, GetFocusable, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest04", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(false, window->GetFocusable());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -247,6 +255,7 @@ HWTEST_F(WindowTest, SetFocusable, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest04", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(WMError::WM_OK, window->SetFocusable(true));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -260,6 +269,7 @@ HWTEST_F(WindowTest, GetTouchable, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest04", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(false, window->GetTouchable());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -273,6 +283,7 @@ HWTEST_F(WindowTest, SetTouchable, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest04", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(WMError::WM_OK, window->SetTouchable(true));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -286,6 +297,7 @@ HWTEST_F(WindowTest, GetSystemBarPropertyByType, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest04", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(SystemBarProperty(), window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -301,6 +313,7 @@ HWTEST_F(WindowTest, SetSystemBarProperty, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetSystemBarProperty(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, prop);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -314,6 +327,7 @@ HWTEST_F(WindowTest, IsFullScreen, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest04", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(false, window->IsFullScreen());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -327,6 +341,7 @@ HWTEST_F(WindowTest, IsLayoutFullScreen, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest04", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(false, window->IsLayoutFullScreen());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -340,6 +355,7 @@ HWTEST_F(WindowTest, SetAlpha, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest04", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(WMError::WM_OK, window->SetAlpha(0.0f));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -354,6 +370,7 @@ HWTEST_F(WindowTest, SetTransform, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     Transform trans;
     ASSERT_EQ(WMError::WM_OK, window->SetTransform(trans));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -368,6 +385,7 @@ HWTEST_F(WindowTest, GetTransform, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     Transform trans;
     ASSERT_EQ(trans, window->GetTransform());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -383,6 +401,7 @@ HWTEST_F(WindowTest, GetAvoidAreaByType, Function | SmallTest | Level2)
     AvoidArea avoidArea;
     auto ret = window->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, avoidArea);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -397,6 +416,7 @@ HWTEST_F(WindowTest, SetLayoutFullScreen, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetLayoutFullScreen(true);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -411,6 +431,7 @@ HWTEST_F(WindowTest, SetFullScreen, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetFullScreen(true);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -425,6 +446,7 @@ HWTEST_F(WindowTest, Destroy, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->Destroy();
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -439,6 +461,7 @@ HWTEST_F(WindowTest, Show, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->Show();
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -453,6 +476,7 @@ HWTEST_F(WindowTest, Hide, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->Hide();
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -467,6 +491,7 @@ HWTEST_F(WindowTest, MoveTo, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->MoveTo(0, 0);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -481,6 +506,7 @@ HWTEST_F(WindowTest, Resize, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->Resize(0, 0);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -495,6 +521,7 @@ HWTEST_F(WindowTest, SetKeepScreenOn, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetKeepScreenOn(true);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -509,6 +536,7 @@ HWTEST_F(WindowTest, IsKeepScreenOn, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->IsKeepScreenOn();
     ASSERT_EQ(false, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -523,6 +551,7 @@ HWTEST_F(WindowTest, SetTurnScreenOn, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetTurnScreenOn(true);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -537,6 +566,7 @@ HWTEST_F(WindowTest, IsTurnScreenOn, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->IsTurnScreenOn();
     ASSERT_EQ(false, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -551,6 +581,7 @@ HWTEST_F(WindowTest, SetBackgroundColor, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetBackgroundColor("0x00000000");
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -565,6 +596,7 @@ HWTEST_F(WindowTest, SetTransparent, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetTransparent(true);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -579,6 +611,7 @@ HWTEST_F(WindowTest, IsTransparent, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->IsTransparent();
     ASSERT_EQ(false, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -593,6 +626,7 @@ HWTEST_F(WindowTest, SetBrightness, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetBrightness(0.0f);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -607,6 +641,7 @@ HWTEST_F(WindowTest, GetBrightness, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->GetBrightness();
     ASSERT_EQ(0.0f, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -621,6 +656,7 @@ HWTEST_F(WindowTest, SetPrivacyMode, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetPrivacyMode(0.0f);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -635,6 +671,7 @@ HWTEST_F(WindowTest, IsPrivacyMode, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->IsPrivacyMode();
     ASSERT_EQ(false, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -650,6 +687,7 @@ HWTEST_F(WindowTest, SetSystemPrivacyMode, Function | SmallTest | Level2)
     auto ret = false;
     window->SetSystemPrivacyMode(true);
     ASSERT_EQ(false, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -665,6 +703,7 @@ HWTEST_F(WindowTest, BindDialogTarget, Function | SmallTest | Level2)
     sptr<IRemoteObject> targetToken;
     auto ret = window->BindDialogTarget(targetToken);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -679,6 +718,7 @@ HWTEST_F(WindowTest, RaiseToAppTop, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->RaiseToAppTop();
     ASSERT_EQ( true, WmErrorCode::WM_OK == ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -693,6 +733,7 @@ HWTEST_F(WindowTest, SetSnapshotSkip, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetSnapshotSkip(true);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -707,6 +748,7 @@ HWTEST_F(WindowTest, SetCornerRadius, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetCornerRadius(1.0f);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -721,6 +763,7 @@ HWTEST_F(WindowTest, SetShadowRadius, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetShadowRadius(1.0f);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -735,6 +778,7 @@ HWTEST_F(WindowTest, SetShadowColor, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetShadowColor("0x00000000");
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -749,6 +793,7 @@ HWTEST_F(WindowTest, SetShadowOffsetX, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetShadowOffsetX(0.0f);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -763,6 +808,7 @@ HWTEST_F(WindowTest, SetShadowOffsetY, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetShadowOffsetY(0.0f);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -777,6 +823,7 @@ HWTEST_F(WindowTest, SetBlur, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetBlur(0.0f);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -791,6 +838,7 @@ HWTEST_F(WindowTest, SetBackdropBlur, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetBackdropBlur(0.0f);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -805,6 +853,7 @@ HWTEST_F(WindowTest, SetBackdropBlurStyle, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -819,6 +868,7 @@ HWTEST_F(WindowTest, RequestFocus, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->RequestFocus();
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -833,6 +883,7 @@ HWTEST_F(WindowTest, IsFocused, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->IsFocused();
     ASSERT_EQ(false, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -847,6 +898,7 @@ HWTEST_F(WindowTest, UpdateSurfaceNodeAfterCustomAnimation, Function | SmallTest
     ASSERT_NE(nullptr, window);
     auto ret = window->UpdateSurfaceNodeAfterCustomAnimation(false);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -863,6 +915,7 @@ HWTEST_F(WindowTest, SetInputEventConsumer, Function | SmallTest | Level2)
     std::shared_ptr<IInputEventConsumer> inputEventConsumer;
     window->SetInputEventConsumer(inputEventConsumer);
     ASSERT_EQ(true, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -879,6 +932,7 @@ HWTEST_F(WindowTest, ConsumeKeyEvent, Function | SmallTest | Level2)
     std::shared_ptr<MMI::KeyEvent> inputEvent;
     window->ConsumeKeyEvent(inputEvent);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -895,6 +949,7 @@ HWTEST_F(WindowTest, ConsumePointerEvent, Function | SmallTest | Level2)
     std::shared_ptr<MMI::PointerEvent> inputEvent;
     window->ConsumePointerEvent(inputEvent);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -912,6 +967,7 @@ HWTEST_F(WindowTest, RequestVsync, Function | SmallTest | Level2)
     window->RequestVsync(vsyncCallback);
     // no reture
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -929,6 +985,7 @@ HWTEST_F(WindowTest, UpdateConfiguration, Function | SmallTest | Level2)
     window->UpdateConfiguration(conf);
     // no reture
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -944,6 +1001,7 @@ HWTEST_F(WindowTest, RegisterLifeCycleListener, Function | SmallTest | Level2)
     sptr<IWindowLifeCycle> listener;
     auto ret = window->RegisterLifeCycleListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -959,6 +1017,7 @@ HWTEST_F(WindowTest, UnregisterLifeCycleListener, Function | SmallTest | Level2)
     sptr<IWindowLifeCycle> listener;
     auto ret = window->UnregisterLifeCycleListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -974,6 +1033,7 @@ HWTEST_F(WindowTest, RegisterWindowChangeListener, Function | SmallTest | Level2
     sptr<IWindowChangeListener> listener;
     auto ret = window->RegisterWindowChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -989,6 +1049,7 @@ HWTEST_F(WindowTest, UnregisterWindowChangeListener, Function | SmallTest | Leve
     sptr<IWindowChangeListener> listener;
     auto ret = window->UnregisterWindowChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1004,6 +1065,7 @@ HWTEST_F(WindowTest, RegisterAvoidAreaChangeListener, Function | SmallTest | Lev
     sptr<IAvoidAreaChangedListener> listener;
     auto ret = window->RegisterAvoidAreaChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1019,6 +1081,7 @@ HWTEST_F(WindowTest, UnregisterAvoidAreaChangeListener, Function | SmallTest | L
     sptr<IAvoidAreaChangedListener> listener;
     auto ret = window->UnregisterAvoidAreaChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1034,6 +1097,7 @@ HWTEST_F(WindowTest, RegisterDragListener, Function | SmallTest | Level2)
     sptr<IWindowDragListener> listener;
     auto ret = window->RegisterDragListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1049,6 +1113,7 @@ HWTEST_F(WindowTest, UnregisterDragListener, Function | SmallTest | Level2)
     sptr<IWindowDragListener> listener;
     auto ret = window->UnregisterDragListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1064,6 +1129,7 @@ HWTEST_F(WindowTest, RegisterDisplayMoveListener, Function | SmallTest | Level2)
     sptr<IDisplayMoveListener> listener;
     auto ret = window->RegisterDisplayMoveListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1079,6 +1145,7 @@ HWTEST_F(WindowTest, UnregisterDisplayMoveListener, Function | SmallTest | Level
     sptr<IDisplayMoveListener> listener;
     auto ret = window->UnregisterDisplayMoveListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1096,6 +1163,7 @@ HWTEST_F(WindowTest, RegisterWindowDestroyedListener, Function | SmallTest | Lev
     window->RegisterWindowDestroyedListener(func);
     // no reture
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1111,6 +1179,7 @@ HWTEST_F(WindowTest, RegisterOccupiedAreaChangeListener, Function | SmallTest | 
     sptr<IOccupiedAreaChangeListener> listener;
     auto ret = window->RegisterOccupiedAreaChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1126,6 +1195,7 @@ HWTEST_F(WindowTest, UnregisterOccupiedAreaChangeListener, Function | SmallTest 
     sptr<IOccupiedAreaChangeListener> listener;
     auto ret = window->UnregisterOccupiedAreaChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1141,6 +1211,7 @@ HWTEST_F(WindowTest, RegisterTouchOutsideListener, Function | SmallTest | Level2
     sptr<ITouchOutsideListener> listener;
     auto ret = window->RegisterTouchOutsideListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1156,6 +1227,7 @@ HWTEST_F(WindowTest, UnregisterTouchOutsideListener, Function | SmallTest | Leve
     sptr<ITouchOutsideListener> listener;
     auto ret = window->UnregisterTouchOutsideListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1171,6 +1243,7 @@ HWTEST_F(WindowTest, RegisterAnimationTransitionController, Function | SmallTest
     sptr<IAnimationTransitionController> listener;
     auto ret = window->RegisterAnimationTransitionController(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1186,6 +1259,7 @@ HWTEST_F(WindowTest, RegisterScreenshotListener, Function | SmallTest | Level2)
     sptr<IScreenshotListener> listener;
     auto ret = window->RegisterScreenshotListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1201,6 +1275,7 @@ HWTEST_F(WindowTest, UnregisterScreenshotListener, Function | SmallTest | Level2
     sptr<IScreenshotListener> listener;
     auto ret = window->UnregisterScreenshotListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1216,6 +1291,7 @@ HWTEST_F(WindowTest, RegisterDialogTargetTouchListener, Function | SmallTest | L
     sptr<IDialogTargetTouchListener> listener;
     auto ret = window->RegisterDialogTargetTouchListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1231,6 +1307,7 @@ HWTEST_F(WindowTest, UnregisterDialogTargetTouchListener, Function | SmallTest |
     sptr<IDialogTargetTouchListener> listener;
     auto ret = window->UnregisterDialogTargetTouchListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1247,6 +1324,7 @@ HWTEST_F(WindowTest, RegisterDialogDeathRecipientListener, Function | SmallTest 
     sptr<IDialogDeathRecipientListener> listener;
     window->RegisterDialogDeathRecipientListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1263,6 +1341,7 @@ HWTEST_F(WindowTest, UnregisterDialogDeathRecipientListener, Function | SmallTes
     sptr<IDialogDeathRecipientListener> listener;
     window->UnregisterDialogDeathRecipientListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1279,6 +1358,7 @@ HWTEST_F(WindowTest, NotifyTouchDialogTarget, Function | SmallTest | Level2)
     sptr<IDialogTargetTouchListener> listener;
     window->NotifyTouchDialogTarget();
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1295,6 +1375,7 @@ HWTEST_F(WindowTest, SetAceAbilityHandler, Function | SmallTest | Level2)
     sptr<IAceAbilityHandler> handler;
     window->SetAceAbilityHandler(handler);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1311,6 +1392,7 @@ HWTEST_F(WindowTest, SetUIContent, Function | SmallTest | Level2)
     NativeValue* storage = nullptr;
     auto ret = window->SetUIContent("info", engine, storage);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1325,6 +1407,7 @@ HWTEST_F(WindowTest, GetContentInfo, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->GetContentInfo();
     ASSERT_EQ(std::string(), ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1339,6 +1422,7 @@ HWTEST_F(WindowTest, GetUIContent, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->GetUIContent();
     ASSERT_EQ(nullptr, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1355,6 +1439,7 @@ HWTEST_F(WindowTest, OnNewWant, Function | SmallTest | Level2)
     auto ret = true;
     window->OnNewWant(want);
     ASSERT_EQ(true, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1371,6 +1456,7 @@ HWTEST_F(WindowTest, SetRequestedOrientation, Function | SmallTest | Level2)
     Orientation ori = Orientation::UNSPECIFIED;
     window->SetRequestedOrientation(ori);
     ASSERT_EQ(true, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1385,6 +1471,7 @@ HWTEST_F(WindowTest, GetRequestedOrientation, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->GetRequestedOrientation();
     ASSERT_EQ(Orientation::UNSPECIFIED, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1400,6 +1487,7 @@ HWTEST_F(WindowTest, SetRequestModeSupportInfo, Function | SmallTest | Level2)
     uint32_t modeSupportInfo = 0;
     window->SetRequestModeSupportInfo(modeSupportInfo);
     ASSERT_EQ(static_cast<uint32_t>(Orientation::UNSPECIFIED), modeSupportInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1414,6 +1502,7 @@ HWTEST_F(WindowTest, GetRequestModeSupportInfo, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     uint32_t ret = window->GetRequestModeSupportInfo();
     ASSERT_EQ(true, ret == 0);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1429,6 +1518,7 @@ HWTEST_F(WindowTest, SetTouchHotAreas, Function | SmallTest | Level2)
     std::vector<Rect> rects;
     auto ret = window->SetTouchHotAreas(rects);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1445,6 +1535,7 @@ HWTEST_F(WindowTest, GetRequestedTouchHotAreas, Function | SmallTest | Level2)
     auto ret = WMError::WM_OK;
     window->GetRequestedTouchHotAreas(rects);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1459,6 +1550,7 @@ HWTEST_F(WindowTest, IsMainHandlerAvailable, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->IsMainHandlerAvailable();
     ASSERT_EQ(false, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1473,6 +1565,7 @@ HWTEST_F(WindowTest, SetAPPWindowLabel, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetAPPWindowLabel("");
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1487,6 +1580,7 @@ HWTEST_F(WindowTest, IsDecorEnable, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->IsDecorEnable();
     ASSERT_EQ(false, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1501,6 +1595,7 @@ HWTEST_F(WindowTest, Maximize, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->Maximize();
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1515,6 +1610,7 @@ HWTEST_F(WindowTest, MaximizeFloating, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->MaximizeFloating();
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1529,6 +1625,7 @@ HWTEST_F(WindowTest, Minimize, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->Minimize();
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1543,6 +1640,7 @@ HWTEST_F(WindowTest, Recover, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->Recover();
     ASSERT_EQ(true, ret == WMError::WM_OK);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1557,6 +1655,7 @@ HWTEST_F(WindowTest, Close, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->Close();
     ASSERT_EQ(true, ret == WMError::WM_OK);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1572,6 +1671,7 @@ HWTEST_F(WindowTest, StartMove, Function | SmallTest | Level2)
     auto ret = WMError::WM_OK;
     window->StartMove();
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1586,6 +1686,7 @@ HWTEST_F(WindowTest, SetGlobalMaximizeMode, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetGlobalMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1600,6 +1701,7 @@ HWTEST_F(WindowTest, GetGlobalMaximizeMode, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->GetGlobalMaximizeMode();
     ASSERT_EQ(MaximizeMode::MODE_FULL_FILL, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1614,6 +1716,7 @@ HWTEST_F(WindowTest, IsSupportWideGamut, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->IsSupportWideGamut();
     ASSERT_EQ(false, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1629,6 +1732,7 @@ HWTEST_F(WindowTest, SetColorSpace, Function | SmallTest | Level2)
     bool ret = true;
     window->SetColorSpace(ColorSpace::COLOR_SPACE_DEFAULT);
     ASSERT_EQ(true, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1643,6 +1747,7 @@ HWTEST_F(WindowTest, GetColorSpace, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->GetColorSpace();
     ASSERT_EQ(ColorSpace::COLOR_SPACE_DEFAULT, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1660,6 +1765,7 @@ HWTEST_F(WindowTest, DumpInfo, Function | SmallTest | Level2)
     auto ret = true;
     window->DumpInfo(params, info);
     ASSERT_EQ(true, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1674,6 +1780,7 @@ HWTEST_F(WindowTest, Snapshot, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto pixmap = window->Snapshot();
     ASSERT_EQ(pixmap, nullptr);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1688,6 +1795,7 @@ HWTEST_F(WindowTest, NotifyMemoryLevel, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->NotifyMemoryLevel(0);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1702,6 +1810,7 @@ HWTEST_F(WindowTest, IsAllowHaveSystemSubWindow, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->IsAllowHaveSystemSubWindow();
     ASSERT_EQ(false, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1716,6 +1825,7 @@ HWTEST_F(WindowTest, SetAspectRatio, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->SetAspectRatio(0.0f);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1730,6 +1840,7 @@ HWTEST_F(WindowTest, ResetAspectRatio, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     auto ret = window->ResetAspectRatio();
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1745,6 +1856,7 @@ HWTEST_F(WindowTest, GetKeyboardAnimationConfig, Function | SmallTest | Level2)
     KeyboardAnimationConfig config;
     auto ret = window->GetKeyboardAnimationConfig();
     ASSERT_EQ(true, ret.durationIn_ == config.durationIn_);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1760,6 +1872,7 @@ HWTEST_F(WindowTest, SetNeedDefaultAnimation, Function | SmallTest | Level2)
     auto ret = true;
     window->SetNeedDefaultAnimation(true);
     ASSERT_EQ(true, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1775,6 +1888,7 @@ HWTEST_F(WindowTest, TransferAbilityResult, Function | SmallTest | Level2)
     AAFwk::Want want;
     auto ret = window->TransferAbilityResult(0, want);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1790,6 +1904,7 @@ HWTEST_F(WindowTest, TransferExtensionData, Function | SmallTest | Level2)
     AAFwk::WantParams wantParams;
     auto ret = window->TransferExtensionData(wantParams);
     ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1806,6 +1921,7 @@ HWTEST_F(WindowTest, RegisterTransferComponentDataListener, Function | SmallTest
     auto ret = true;
     window->RegisterTransferComponentDataListener(func);
     ASSERT_EQ(true, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 }
