@@ -26,6 +26,19 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManagerStub"};
 }
 
+void SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessageParcel &reply)
+{
+    auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
+    sptr<WindowSessionProperty> property = nullptr;
+    if (data.ReadBool()) {
+        property = data.ReadStrongParcelable<WindowSessionProperty>();
+    } else {
+        WLOGFW("Property not exist!");
+    }
+    const WSError& ret = UpdateProperty(property, action);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+}
+
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
     MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
@@ -73,15 +86,7 @@ int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
             break;
         }
         case SceneSessionManagerMessage::TRANS_ID_UPDATE_PROPERTY: {
-            auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
-            sptr<WindowSessionProperty> property = nullptr;
-            if (data.ReadBool()) {
-                property = data.ReadStrongParcelable<WindowSessionProperty>();
-            } else {
-                WLOGFW("Property not exist!");
-            }
-            const WSError& ret = UpdateProperty(property, action);
-            reply.WriteInt32(static_cast<int32_t>(ret));
+            HandleUpdateProperty(data, reply);
             break;
         }
         case SceneSessionManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT: {
@@ -106,6 +111,30 @@ int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
             FocusChangeInfo focusInfo;
             GetFocusWindowInfo(focusInfo);
             reply.WriteParcelable(&focusInfo);
+            break;
+        }
+        case SceneSessionManagerMessage::TRANS_ID_SET_SESSION_LABEL: {
+            sptr<IRemoteObject> token = data.ReadRemoteObject();
+            std::string label = data.ReadString();
+            WSError errCode = SetSessionLabel(token, label);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
+        case SceneSessionManagerMessage::TRANS_ID_SET_SESSION_ICON: {
+            sptr<IRemoteObject> token = data.ReadRemoteObject();
+            std::shared_ptr<Media::PixelMap> icon(data.ReadParcelable<Media::PixelMap>());
+            WSError errCode = SetSessionIcon(token, icon);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
+        case SceneSessionManagerMessage::TRANS_ID_REGISTER_SESSION_LISTENER: {
+            sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
+            WSError errCode = RegisterSessionListener(listener);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
+        case SceneSessionManagerMessage::TRANS_ID_UNREGISTER_SESSION_LISTENER: {
+            UnregisterSessionListener();
             break;
         }
         default:

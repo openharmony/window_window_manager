@@ -118,18 +118,18 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
         WLOGE("ConsumeDragEvent stop because of nullptr");
         return false;
     }
-    if (!isStartDrag_ && pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_DOWN) {
+    if (!isStartDrag_ && pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_DOWN &&
+        pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         return false;
     }
     int32_t pointerId = pointerEvent->GetPointerId();
     int32_t startPointerId = moveDragProperty_.pointerId_;
     if (isStartDrag_ && startPointerId != -1 && startPointerId != pointerId) {
-        WLOGD("point id is changed, skip this event");
         return false;
     }
     MMI::PointerEvent::PointerItem pointerItem;
     if (!pointerEvent->GetPointerItem(pointerId, pointerItem)) {
-        WLOGE("Get PointerItem faile");
+        WLOGE("Get PointerItem failed");
         return false;
     }
 
@@ -205,6 +205,7 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
         pointerEvent->GetButtonId() != MMI::PointerEvent::MOUSE_BUTTON_LEFT) {
         return false;
     }
+    maxFloatingWindowSize_ = sysConfig.maxFloatingWindowSize_;
     int32_t pointerId = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerId, pointerItem);
@@ -357,14 +358,11 @@ WSRect MoveDragController::CalcFixedAspectRatioTargetRect(AreaType type, int32_t
 
 void MoveDragController::CalcFreeformTranslateLimits(AreaType type)
 {
-    int32_t minW = limits_.minWidth_;
-    int32_t maxW = (limits_.maxWidth_ == 0 || limits_.maxWidth_ >= INT32_MAX) ? INT32_MAX : limits_.maxWidth_;
-    int32_t minH = limits_.minHeight_;
-    int32_t maxH = (limits_.maxHeight_ == 0 || limits_.maxHeight_ >= INT32_MAX) ? INT32_MAX : limits_.maxHeight_;
-    minW = std::max(minW, static_cast<int32_t>(MIN_FLOATING_WIDTH)) * vpr_;
-    maxW = std::min(maxW, maxFloatingWindowSize_) * vpr_;
-    minH = std::max(minH, static_cast<int32_t>(MIN_FLOATING_HEIGHT)) * vpr_;
-    maxH = std::min(maxH, maxFloatingWindowSize_) * vpr_;
+    int32_t minW;
+    int32_t maxW;
+    int32_t minH;
+    int32_t maxH;
+    SessionUtils::CalcFloatWindowRectLimits(limits_, maxFloatingWindowSize_, vpr_, minW, maxW, minH, maxH);
     if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::LEFT)) {
         minTranX_ = moveDragProperty_.originalRect_.width_ - maxW;
         maxTranX_ = moveDragProperty_.originalRect_.width_ - minW;
@@ -383,14 +381,11 @@ void MoveDragController::CalcFreeformTranslateLimits(AreaType type)
 
 void MoveDragController::CalcFixedAspectRatioTranslateLimits(AreaType type, AxisType axis)
 {
-    int32_t minW = limits_.minWidth_;
-    int32_t maxW = (limits_.maxWidth_ == 0 || limits_.maxWidth_ >= INT32_MAX) ? INT32_MAX : limits_.maxWidth_;
-    int32_t minH = limits_.minHeight_;
-    int32_t maxH = (limits_.maxHeight_ == 0 || limits_.maxHeight_ >= INT32_MAX) ? INT32_MAX : limits_.maxHeight_;
-    minW = std::max(minW, static_cast<int32_t>(MIN_FLOATING_WIDTH)) * vpr_;
-    maxW = std::min(maxW, maxFloatingWindowSize_) * vpr_;
-    minH = std::max(minH, static_cast<int32_t>(MIN_FLOATING_HEIGHT)) * vpr_;
-    maxH = std::min(maxH, maxFloatingWindowSize_) * vpr_;
+    int32_t minW;
+    int32_t maxW;
+    int32_t minH;
+    int32_t maxH;
+    SessionUtils::CalcFloatWindowRectLimits(limits_, maxFloatingWindowSize_, vpr_, minW, maxW, minH, maxH);
     if (isDecorEnable_) {
         if (SessionUtils::ToLayoutWidth(minW, vpr_) < SessionUtils::ToLayoutHeight(minH, vpr_) * aspectRatio_) {
             minW = SessionUtils::ToWinWidth(SessionUtils::ToLayoutHeight(minH, vpr_) * aspectRatio_, vpr_);

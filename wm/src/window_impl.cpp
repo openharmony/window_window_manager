@@ -806,7 +806,7 @@ WMError WindowImpl::SetFloatingMaximize(bool isEnter)
         return ret;
     }
 
-    if (isEnter && GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+    if (isEnter && GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
         if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
             SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         }
@@ -2847,6 +2847,15 @@ void WindowImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallbac
     if (!SingletonContainer::IsDestroyed()) {
         VsyncStation::GetInstance().RequestVsync(vsyncCallback);
     }
+}
+
+int64_t WindowImpl::GetVSyncPeriod()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!SingletonContainer::IsDestroyed()) {
+        return VsyncStation::GetInstance().GetVSyncPeriod();
+    }
+    return 0;
 }
 
 void WindowImpl::UpdateFocusStatus(bool focused)

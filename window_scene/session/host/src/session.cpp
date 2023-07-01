@@ -213,10 +213,6 @@ WSError Session::SetTouchable(bool touchable)
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    if (touchable == property_->GetTouchable()) {
-        WLOGFD("Session touchable do not change: [%{public}d]", touchable);
-        return WSError::WS_DO_NOTHING;
-    }
     UpdateSessionTouchable(touchable);
     return WSError::WS_OK;
 }
@@ -890,8 +886,14 @@ WSError Session::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& w
 {
     return WSError::WS_OK;
 }
+
 WSError Session::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
     return WSError::WS_OK;
+}
+
+void Session::NotifyRemoteReady()
+{
+    return;
 }
 } // namespace OHOS::Rosen
