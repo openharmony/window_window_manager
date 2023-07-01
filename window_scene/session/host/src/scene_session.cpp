@@ -22,6 +22,7 @@
 #include "session/host/include/scene_persistent_storage.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
+#include <running_lock.h>
 
 namespace OHOS::Rosen {
 namespace {
@@ -262,5 +263,32 @@ void SceneSession::OnVsyncHandle()
     WSRect rect = moveDragController_->GetTargetRect();
     WLOGFD("rect: [%{public}d, %{public}d, %{public}u, %{public}u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
     NotifySessionRectChange(rect);
+}
+
+const std::string& SceneSession::GetWindowName() const
+{
+    return property_->GetWindowName();
+}
+
+WSError SceneSession::SetTurnScreenOn(bool turnScreenOn)
+{
+    property_->SetTurnScreenOn(turnScreenOn);
+    return WSError::WS_OK;
+}
+
+bool SceneSession::IsTurnScreenOn() const
+{
+    return property_->IsTurnScreenOn();
+}
+
+WSError SceneSession::SetKeepScreenOn(bool keepScreenOn)
+{
+    property_->SetKeepScreenOn(keepScreenOn);
+    return WSError::WS_OK;
+}
+
+bool SceneSession::IsKeepScreenOn() const
+{
+    return property_->IsKeepScreenOn();
 }
 } // namespace OHOS::Rosen

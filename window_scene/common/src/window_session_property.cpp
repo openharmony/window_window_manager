@@ -164,6 +164,26 @@ uint64_t WindowSessionProperty::GetParentPersistentId() const
     return parentPersistentId_;
 }
 
+void WindowSessionProperty::SetTurnScreenOn(bool turnScreenOn)
+{
+    turnScreenOn_ = turnScreenOn;
+}
+
+bool WindowSessionProperty::IsTurnScreenOn() const
+{
+    return turnScreenOn_;
+}
+
+void WindowSessionProperty::SetKeepScreenOn(bool keepScreenOn)
+{
+    keepScreenOn_ = keepScreenOn;
+}
+
+bool WindowSessionProperty::IsKeepScreenOn() const
+{
+    return keepScreenOn_;
+}
+
 void WindowSessionProperty::SetAccessTokenId(uint32_t accessTokenId)
 {
     accessTokenId_ = accessTokenId;
@@ -253,6 +273,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(requestRect_.height_) &&
         parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
         parcel.WriteBool(focusable_) && parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
+        parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
         parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteUint64(persistentId_) &&
         parcel.WriteString(sessionInfo_.bundleName_) && parcel.WriteString(sessionInfo_.moduleName_) &&
@@ -279,6 +300,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetFocusable(parcel.ReadBool());
     property->SetTouchable(parcel.ReadBool());
     property->SetTokenState(parcel.ReadBool());
+    property->SetTurnScreenOn(parcel.ReadBool());
+    property->SetKeepScreenOn(parcel.ReadBool());
     property->SetPrivacyMode(parcel.ReadBool());
     property->SetSystemPrivacyMode(parcel.ReadBool());
     property->SetDisplayId(parcel.ReadUint64());
