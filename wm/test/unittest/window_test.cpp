@@ -154,7 +154,7 @@ HWTEST_F(WindowTest, GetSurfaceNode, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetContext, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest05", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(nullptr, window->GetContext());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -168,7 +168,7 @@ HWTEST_F(WindowTest, GetContext, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetRect, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest06", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(Rect(), window->GetRect());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -182,7 +182,7 @@ HWTEST_F(WindowTest, GetRect, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetRequestRect, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest07", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(Rect(), window->GetRequestRect());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -196,7 +196,7 @@ HWTEST_F(WindowTest, GetRequestRect, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetType, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest08", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, window->GetType());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -210,9 +210,9 @@ HWTEST_F(WindowTest, GetType, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetMode, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest09", option);
     ASSERT_NE(nullptr, window);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window->GetMode());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -224,7 +224,7 @@ HWTEST_F(WindowTest, GetMode, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetAlpha, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest10", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(0.0f, window->GetAlpha());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -238,7 +238,7 @@ HWTEST_F(WindowTest, GetAlpha, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetFocusable, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest11", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(false, window->GetFocusable());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -252,7 +252,7 @@ HWTEST_F(WindowTest, GetFocusable, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetFocusable, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest12", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(WMError::WM_OK, window->SetFocusable(true));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -266,7 +266,7 @@ HWTEST_F(WindowTest, SetFocusable, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetTouchable, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest13", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(false, window->GetTouchable());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -280,7 +280,7 @@ HWTEST_F(WindowTest, GetTouchable, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetTouchable, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest14", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(WMError::WM_OK, window->SetTouchable(true));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -294,7 +294,7 @@ HWTEST_F(WindowTest, SetTouchable, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetSystemBarPropertyByType, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest15", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(SystemBarProperty(), window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -308,7 +308,7 @@ HWTEST_F(WindowTest, GetSystemBarPropertyByType, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetSystemBarProperty, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest16", option);
     SystemBarProperty prop;
     ASSERT_NE(nullptr, window);
     auto ret = window->SetSystemBarProperty(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, prop);
@@ -324,7 +324,7 @@ HWTEST_F(WindowTest, SetSystemBarProperty, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, IsFullScreen, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest17", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(false, window->IsFullScreen());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -338,7 +338,7 @@ HWTEST_F(WindowTest, IsFullScreen, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, IsLayoutFullScreen, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest18", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(false, window->IsLayoutFullScreen());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -352,7 +352,7 @@ HWTEST_F(WindowTest, IsLayoutFullScreen, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetAlpha, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest19", option);
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(WMError::WM_OK, window->SetAlpha(0.0f));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -366,7 +366,7 @@ HWTEST_F(WindowTest, SetAlpha, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetTransform, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest20", option);
     ASSERT_NE(nullptr, window);
     Transform trans;
     ASSERT_EQ(WMError::WM_OK, window->SetTransform(trans));
@@ -381,7 +381,7 @@ HWTEST_F(WindowTest, SetTransform, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetTransform, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest21", option);
     ASSERT_NE(nullptr, window);
     Transform trans;
     ASSERT_EQ(trans, window->GetTransform());
@@ -396,7 +396,7 @@ HWTEST_F(WindowTest, GetTransform, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetAvoidAreaByType, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest22", option);
     ASSERT_NE(nullptr, window);
     AvoidArea avoidArea;
     auto ret = window->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, avoidArea);
@@ -412,7 +412,7 @@ HWTEST_F(WindowTest, GetAvoidAreaByType, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetLayoutFullScreen, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest23", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetLayoutFullScreen(true);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -427,7 +427,7 @@ HWTEST_F(WindowTest, SetLayoutFullScreen, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetFullScreen, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest24", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetFullScreen(true);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -442,7 +442,7 @@ HWTEST_F(WindowTest, SetFullScreen, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, Destroy, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest25", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->Destroy();
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -457,7 +457,7 @@ HWTEST_F(WindowTest, Destroy, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, Show, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest26", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->Show();
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -472,7 +472,7 @@ HWTEST_F(WindowTest, Show, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, Hide, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest27", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->Hide();
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -487,7 +487,7 @@ HWTEST_F(WindowTest, Hide, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, MoveTo, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest28", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->MoveTo(0, 0);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -502,7 +502,7 @@ HWTEST_F(WindowTest, MoveTo, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, Resize, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest29", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->Resize(0, 0);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -517,7 +517,7 @@ HWTEST_F(WindowTest, Resize, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetKeepScreenOn, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest30", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetKeepScreenOn(true);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -532,7 +532,7 @@ HWTEST_F(WindowTest, SetKeepScreenOn, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, IsKeepScreenOn, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest31", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->IsKeepScreenOn();
     ASSERT_EQ(false, ret);
@@ -547,7 +547,7 @@ HWTEST_F(WindowTest, IsKeepScreenOn, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetTurnScreenOn, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest32", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetTurnScreenOn(true);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -562,7 +562,7 @@ HWTEST_F(WindowTest, SetTurnScreenOn, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, IsTurnScreenOn, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest33", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->IsTurnScreenOn();
     ASSERT_EQ(false, ret);
@@ -577,7 +577,7 @@ HWTEST_F(WindowTest, IsTurnScreenOn, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetBackgroundColor, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest34", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetBackgroundColor("0x00000000");
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -592,7 +592,7 @@ HWTEST_F(WindowTest, SetBackgroundColor, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetTransparent, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest35", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetTransparent(true);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -607,7 +607,7 @@ HWTEST_F(WindowTest, SetTransparent, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, IsTransparent, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest36", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->IsTransparent();
     ASSERT_EQ(false, ret);
@@ -622,7 +622,7 @@ HWTEST_F(WindowTest, IsTransparent, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetBrightness, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest37", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetBrightness(0.0f);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -637,7 +637,7 @@ HWTEST_F(WindowTest, SetBrightness, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetBrightness, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest38", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->GetBrightness();
     ASSERT_EQ(0.0f, ret);
@@ -652,7 +652,7 @@ HWTEST_F(WindowTest, GetBrightness, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetPrivacyMode, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest39", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetPrivacyMode(0.0f);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -667,7 +667,7 @@ HWTEST_F(WindowTest, SetPrivacyMode, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, IsPrivacyMode, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest40", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->IsPrivacyMode();
     ASSERT_EQ(false, ret);
@@ -682,7 +682,7 @@ HWTEST_F(WindowTest, IsPrivacyMode, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetSystemPrivacyMode, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest41", option);
     ASSERT_NE(nullptr, window);
     auto ret = false;
     window->SetSystemPrivacyMode(true);
@@ -698,7 +698,7 @@ HWTEST_F(WindowTest, SetSystemPrivacyMode, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, BindDialogTarget, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest42", option);
     ASSERT_NE(nullptr, window);
     sptr<IRemoteObject> targetToken;
     auto ret = window->BindDialogTarget(targetToken);
@@ -714,7 +714,7 @@ HWTEST_F(WindowTest, BindDialogTarget, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, RaiseToAppTop, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest43", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->RaiseToAppTop();
     ASSERT_EQ( true, WmErrorCode::WM_OK == ret);
@@ -729,7 +729,7 @@ HWTEST_F(WindowTest, RaiseToAppTop, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetSnapshotSkip, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest44", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetSnapshotSkip(true);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -744,7 +744,7 @@ HWTEST_F(WindowTest, SetSnapshotSkip, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetCornerRadius, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest45", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetCornerRadius(1.0f);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -759,7 +759,7 @@ HWTEST_F(WindowTest, SetCornerRadius, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetShadowRadius, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest46", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetShadowRadius(1.0f);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -774,7 +774,7 @@ HWTEST_F(WindowTest, SetShadowRadius, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetShadowColor, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest47", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetShadowColor("0x00000000");
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -789,7 +789,7 @@ HWTEST_F(WindowTest, SetShadowColor, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetShadowOffsetX, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest48", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetShadowOffsetX(0.0f);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -804,7 +804,7 @@ HWTEST_F(WindowTest, SetShadowOffsetX, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetShadowOffsetY, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest49", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetShadowOffsetY(0.0f);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -819,7 +819,7 @@ HWTEST_F(WindowTest, SetShadowOffsetY, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetBlur, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest50", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetBlur(0.0f);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -834,7 +834,7 @@ HWTEST_F(WindowTest, SetBlur, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetBackdropBlur, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest51", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetBackdropBlur(0.0f);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -849,7 +849,7 @@ HWTEST_F(WindowTest, SetBackdropBlur, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetBackdropBlurStyle, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest52", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -864,7 +864,7 @@ HWTEST_F(WindowTest, SetBackdropBlurStyle, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, RequestFocus, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest53", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->RequestFocus();
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -879,7 +879,7 @@ HWTEST_F(WindowTest, RequestFocus, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, IsFocused, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest54", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->IsFocused();
     ASSERT_EQ(false, ret);
@@ -894,7 +894,7 @@ HWTEST_F(WindowTest, IsFocused, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, UpdateSurfaceNodeAfterCustomAnimation, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest55", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->UpdateSurfaceNodeAfterCustomAnimation(false);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -909,7 +909,7 @@ HWTEST_F(WindowTest, UpdateSurfaceNodeAfterCustomAnimation, Function | SmallTest
 HWTEST_F(WindowTest, SetInputEventConsumer, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest56", option);
     ASSERT_NE(nullptr, window);
     auto ret = true;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer;
@@ -926,7 +926,7 @@ HWTEST_F(WindowTest, SetInputEventConsumer, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, ConsumeKeyEvent, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest57", option);
     ASSERT_NE(nullptr, window);
     auto ret = WMError::WM_OK;
     std::shared_ptr<MMI::KeyEvent> inputEvent;
@@ -943,7 +943,7 @@ HWTEST_F(WindowTest, ConsumeKeyEvent, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, ConsumePointerEvent, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest58", option);
     ASSERT_NE(nullptr, window);
     auto ret = WMError::WM_OK;
     std::shared_ptr<MMI::PointerEvent> inputEvent;
@@ -960,7 +960,7 @@ HWTEST_F(WindowTest, ConsumePointerEvent, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, RequestVsync, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest59", option);
     ASSERT_NE(nullptr, window);
     std::shared_ptr<VsyncCallback> vsyncCallback;
     auto ret = WMError::WM_OK;
@@ -978,7 +978,7 @@ HWTEST_F(WindowTest, RequestVsync, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, UpdateConfiguration, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest60", option);
     ASSERT_NE(nullptr, window);
     std::shared_ptr<AppExecFwk::Configuration> conf;
     auto ret = WMError::WM_OK;
@@ -996,7 +996,7 @@ HWTEST_F(WindowTest, UpdateConfiguration, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, RegisterLifeCycleListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest61", option);
     ASSERT_NE(nullptr, window);
     sptr<IWindowLifeCycle> listener;
     auto ret = window->RegisterLifeCycleListener(listener);
@@ -1012,7 +1012,7 @@ HWTEST_F(WindowTest, RegisterLifeCycleListener, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, UnregisterLifeCycleListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest62", option);
     ASSERT_NE(nullptr, window);
     sptr<IWindowLifeCycle> listener;
     auto ret = window->UnregisterLifeCycleListener(listener);
@@ -1028,7 +1028,7 @@ HWTEST_F(WindowTest, UnregisterLifeCycleListener, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, RegisterWindowChangeListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest63", option);
     ASSERT_NE(nullptr, window);
     sptr<IWindowChangeListener> listener;
     auto ret = window->RegisterWindowChangeListener(listener);
@@ -1044,7 +1044,7 @@ HWTEST_F(WindowTest, RegisterWindowChangeListener, Function | SmallTest | Level2
 HWTEST_F(WindowTest, UnregisterWindowChangeListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest64", option);
     ASSERT_NE(nullptr, window);
     sptr<IWindowChangeListener> listener;
     auto ret = window->UnregisterWindowChangeListener(listener);
@@ -1060,7 +1060,7 @@ HWTEST_F(WindowTest, UnregisterWindowChangeListener, Function | SmallTest | Leve
 HWTEST_F(WindowTest, RegisterAvoidAreaChangeListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest65", option);
     ASSERT_NE(nullptr, window);
     sptr<IAvoidAreaChangedListener> listener;
     auto ret = window->RegisterAvoidAreaChangeListener(listener);
@@ -1076,7 +1076,7 @@ HWTEST_F(WindowTest, RegisterAvoidAreaChangeListener, Function | SmallTest | Lev
 HWTEST_F(WindowTest, UnregisterAvoidAreaChangeListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest66", option);
     ASSERT_NE(nullptr, window);
     sptr<IAvoidAreaChangedListener> listener;
     auto ret = window->UnregisterAvoidAreaChangeListener(listener);
@@ -1092,7 +1092,7 @@ HWTEST_F(WindowTest, UnregisterAvoidAreaChangeListener, Function | SmallTest | L
 HWTEST_F(WindowTest, RegisterDragListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest67", option);
     ASSERT_NE(nullptr, window);
     sptr<IWindowDragListener> listener;
     auto ret = window->RegisterDragListener(listener);
@@ -1108,7 +1108,7 @@ HWTEST_F(WindowTest, RegisterDragListener, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, UnregisterDragListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest68", option);
     ASSERT_NE(nullptr, window);
     sptr<IWindowDragListener> listener;
     auto ret = window->UnregisterDragListener(listener);
@@ -1124,7 +1124,7 @@ HWTEST_F(WindowTest, UnregisterDragListener, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, RegisterDisplayMoveListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest69", option);
     ASSERT_NE(nullptr, window);
     sptr<IDisplayMoveListener> listener;
     auto ret = window->RegisterDisplayMoveListener(listener);
@@ -1140,7 +1140,7 @@ HWTEST_F(WindowTest, RegisterDisplayMoveListener, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, UnregisterDisplayMoveListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest70", option);
     ASSERT_NE(nullptr, window);
     sptr<IDisplayMoveListener> listener;
     auto ret = window->UnregisterDisplayMoveListener(listener);
@@ -1156,7 +1156,7 @@ HWTEST_F(WindowTest, UnregisterDisplayMoveListener, Function | SmallTest | Level
 HWTEST_F(WindowTest, RegisterWindowDestroyedListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest71", option);
     ASSERT_NE(nullptr, window);
     NotifyNativeWinDestroyFunc func;
     auto ret = WMError::WM_OK;
@@ -1174,7 +1174,7 @@ HWTEST_F(WindowTest, RegisterWindowDestroyedListener, Function | SmallTest | Lev
 HWTEST_F(WindowTest, RegisterOccupiedAreaChangeListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest72", option);
     ASSERT_NE(nullptr, window);
     sptr<IOccupiedAreaChangeListener> listener;
     auto ret = window->RegisterOccupiedAreaChangeListener(listener);
@@ -1190,7 +1190,7 @@ HWTEST_F(WindowTest, RegisterOccupiedAreaChangeListener, Function | SmallTest | 
 HWTEST_F(WindowTest, UnregisterOccupiedAreaChangeListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest73", option);
     ASSERT_NE(nullptr, window);
     sptr<IOccupiedAreaChangeListener> listener;
     auto ret = window->UnregisterOccupiedAreaChangeListener(listener);
@@ -1206,7 +1206,7 @@ HWTEST_F(WindowTest, UnregisterOccupiedAreaChangeListener, Function | SmallTest 
 HWTEST_F(WindowTest, RegisterTouchOutsideListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest74", option);
     ASSERT_NE(nullptr, window);
     sptr<ITouchOutsideListener> listener;
     auto ret = window->RegisterTouchOutsideListener(listener);
@@ -1222,7 +1222,7 @@ HWTEST_F(WindowTest, RegisterTouchOutsideListener, Function | SmallTest | Level2
 HWTEST_F(WindowTest, UnregisterTouchOutsideListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest75", option);
     ASSERT_NE(nullptr, window);
     sptr<ITouchOutsideListener> listener;
     auto ret = window->UnregisterTouchOutsideListener(listener);
@@ -1238,7 +1238,7 @@ HWTEST_F(WindowTest, UnregisterTouchOutsideListener, Function | SmallTest | Leve
 HWTEST_F(WindowTest, RegisterAnimationTransitionController, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest76", option);
     ASSERT_NE(nullptr, window);
     sptr<IAnimationTransitionController> listener;
     auto ret = window->RegisterAnimationTransitionController(listener);
@@ -1254,7 +1254,7 @@ HWTEST_F(WindowTest, RegisterAnimationTransitionController, Function | SmallTest
 HWTEST_F(WindowTest, RegisterScreenshotListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest77", option);
     ASSERT_NE(nullptr, window);
     sptr<IScreenshotListener> listener;
     auto ret = window->RegisterScreenshotListener(listener);
@@ -1270,7 +1270,7 @@ HWTEST_F(WindowTest, RegisterScreenshotListener, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, UnregisterScreenshotListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest78", option);
     ASSERT_NE(nullptr, window);
     sptr<IScreenshotListener> listener;
     auto ret = window->UnregisterScreenshotListener(listener);
@@ -1286,7 +1286,7 @@ HWTEST_F(WindowTest, UnregisterScreenshotListener, Function | SmallTest | Level2
 HWTEST_F(WindowTest, RegisterDialogTargetTouchListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest79", option);
     ASSERT_NE(nullptr, window);
     sptr<IDialogTargetTouchListener> listener;
     auto ret = window->RegisterDialogTargetTouchListener(listener);
@@ -1302,7 +1302,7 @@ HWTEST_F(WindowTest, RegisterDialogTargetTouchListener, Function | SmallTest | L
 HWTEST_F(WindowTest, UnregisterDialogTargetTouchListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest80", option);
     ASSERT_NE(nullptr, window);
     sptr<IDialogTargetTouchListener> listener;
     auto ret = window->UnregisterDialogTargetTouchListener(listener);
@@ -1318,7 +1318,7 @@ HWTEST_F(WindowTest, UnregisterDialogTargetTouchListener, Function | SmallTest |
 HWTEST_F(WindowTest, RegisterDialogDeathRecipientListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest81", option);
     ASSERT_NE(nullptr, window);
     auto ret = WMError::WM_OK;
     sptr<IDialogDeathRecipientListener> listener;
@@ -1335,7 +1335,7 @@ HWTEST_F(WindowTest, RegisterDialogDeathRecipientListener, Function | SmallTest 
 HWTEST_F(WindowTest, UnregisterDialogDeathRecipientListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest82", option);
     ASSERT_NE(nullptr, window);
     auto ret = WMError::WM_OK;
     sptr<IDialogDeathRecipientListener> listener;
@@ -1352,7 +1352,7 @@ HWTEST_F(WindowTest, UnregisterDialogDeathRecipientListener, Function | SmallTes
 HWTEST_F(WindowTest, NotifyTouchDialogTarget, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest83", option);
     ASSERT_NE(nullptr, window);
     auto ret = WMError::WM_OK;
     sptr<IDialogTargetTouchListener> listener;
@@ -1369,7 +1369,7 @@ HWTEST_F(WindowTest, NotifyTouchDialogTarget, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetAceAbilityHandler, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest84", option);
     ASSERT_NE(nullptr, window);
     auto ret = WMError::WM_OK;
     sptr<IAceAbilityHandler> handler;
@@ -1386,7 +1386,7 @@ HWTEST_F(WindowTest, SetAceAbilityHandler, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetUIContent, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest85", option);
     ASSERT_NE(nullptr, window);
     NativeEngine* engine = nullptr;
     NativeValue* storage = nullptr;
@@ -1403,7 +1403,7 @@ HWTEST_F(WindowTest, SetUIContent, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetContentInfo, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest86", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->GetContentInfo();
     ASSERT_EQ(std::string(), ret);
@@ -1418,7 +1418,7 @@ HWTEST_F(WindowTest, GetContentInfo, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetUIContent, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest87", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->GetUIContent();
     ASSERT_EQ(nullptr, ret);
@@ -1433,7 +1433,7 @@ HWTEST_F(WindowTest, GetUIContent, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, OnNewWant, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest88", option);
     ASSERT_NE(nullptr, window);
     AAFwk::Want want;
     auto ret = true;
@@ -1450,7 +1450,7 @@ HWTEST_F(WindowTest, OnNewWant, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetRequestedOrientation, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest89", option);
     ASSERT_NE(nullptr, window);
     auto ret = true;
     Orientation ori = Orientation::UNSPECIFIED;
@@ -1467,7 +1467,7 @@ HWTEST_F(WindowTest, SetRequestedOrientation, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetRequestedOrientation, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest90", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->GetRequestedOrientation();
     ASSERT_EQ(Orientation::UNSPECIFIED, ret);
@@ -1482,7 +1482,7 @@ HWTEST_F(WindowTest, GetRequestedOrientation, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetRequestModeSupportInfo, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest91", option);
     ASSERT_NE(nullptr, window);
     uint32_t modeSupportInfo = 0;
     window->SetRequestModeSupportInfo(modeSupportInfo);
@@ -1498,7 +1498,7 @@ HWTEST_F(WindowTest, SetRequestModeSupportInfo, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetRequestModeSupportInfo, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest92", option);
     ASSERT_NE(nullptr, window);
     uint32_t ret = window->GetRequestModeSupportInfo();
     ASSERT_EQ(true, ret == 0);
@@ -1513,7 +1513,7 @@ HWTEST_F(WindowTest, GetRequestModeSupportInfo, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetTouchHotAreas, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest93", option);
     ASSERT_NE(nullptr, window);
     std::vector<Rect> rects;
     auto ret = window->SetTouchHotAreas(rects);
@@ -1529,7 +1529,7 @@ HWTEST_F(WindowTest, SetTouchHotAreas, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetRequestedTouchHotAreas, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest94", option);
     ASSERT_NE(nullptr, window);
     std::vector<Rect> rects;
     auto ret = WMError::WM_OK;
@@ -1546,7 +1546,7 @@ HWTEST_F(WindowTest, GetRequestedTouchHotAreas, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, IsMainHandlerAvailable, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest95", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->IsMainHandlerAvailable();
     ASSERT_EQ(false, ret);
@@ -1561,7 +1561,7 @@ HWTEST_F(WindowTest, IsMainHandlerAvailable, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetAPPWindowLabel, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest96", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetAPPWindowLabel("");
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -1576,7 +1576,7 @@ HWTEST_F(WindowTest, SetAPPWindowLabel, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, IsDecorEnable, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest97", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->IsDecorEnable();
     ASSERT_EQ(false, ret);
@@ -1591,7 +1591,7 @@ HWTEST_F(WindowTest, IsDecorEnable, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, Maximize, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest98", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->Maximize();
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -1606,7 +1606,7 @@ HWTEST_F(WindowTest, Maximize, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, MaximizeFloating, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTest99", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->MaximizeFloating();
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -1621,7 +1621,7 @@ HWTEST_F(WindowTest, MaximizeFloating, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, Minimize, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTes100", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->Minimize();
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -1636,7 +1636,7 @@ HWTEST_F(WindowTest, Minimize, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, Recover, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTes100", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->Recover();
     ASSERT_EQ(true, ret == WMError::WM_OK);
@@ -1651,7 +1651,7 @@ HWTEST_F(WindowTest, Recover, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, Close, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTes102", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->Close();
     ASSERT_EQ(true, ret == WMError::WM_OK);
@@ -1666,7 +1666,7 @@ HWTEST_F(WindowTest, Close, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, StartMove, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTes103", option);
     ASSERT_NE(nullptr, window);
     auto ret = WMError::WM_OK;
     window->StartMove();
@@ -1682,7 +1682,7 @@ HWTEST_F(WindowTest, StartMove, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetGlobalMaximizeMode, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTes104", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetGlobalMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -1697,7 +1697,7 @@ HWTEST_F(WindowTest, SetGlobalMaximizeMode, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetGlobalMaximizeMode, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTes105", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->GetGlobalMaximizeMode();
     ASSERT_EQ(MaximizeMode::MODE_FULL_FILL, ret);
@@ -1712,7 +1712,7 @@ HWTEST_F(WindowTest, GetGlobalMaximizeMode, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, IsSupportWideGamut, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTes106", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->IsSupportWideGamut();
     ASSERT_EQ(false, ret);
@@ -1727,7 +1727,7 @@ HWTEST_F(WindowTest, IsSupportWideGamut, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetColorSpace, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTes107", option);
     ASSERT_NE(nullptr, window);
     bool ret = true;
     window->SetColorSpace(ColorSpace::COLOR_SPACE_DEFAULT);
@@ -1743,7 +1743,7 @@ HWTEST_F(WindowTest, SetColorSpace, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetColorSpace, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTes108", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->GetColorSpace();
     ASSERT_EQ(ColorSpace::COLOR_SPACE_DEFAULT, ret);
@@ -1758,7 +1758,7 @@ HWTEST_F(WindowTest, GetColorSpace, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, DumpInfo, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTes109", option);
     ASSERT_NE(nullptr, window);
     std::vector<std::string> params;
     std::vector<std::string> info;
@@ -1776,7 +1776,7 @@ HWTEST_F(WindowTest, DumpInfo, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, Snapshot, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTes110", option);
     ASSERT_NE(nullptr, window);
     auto pixmap = window->Snapshot();
     ASSERT_EQ(pixmap, nullptr);
@@ -1791,7 +1791,7 @@ HWTEST_F(WindowTest, Snapshot, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, NotifyMemoryLevel, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTes111", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->NotifyMemoryLevel(0);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -1806,7 +1806,7 @@ HWTEST_F(WindowTest, NotifyMemoryLevel, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, IsAllowHaveSystemSubWindow, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTes112", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->IsAllowHaveSystemSubWindow();
     ASSERT_EQ(false, ret);
@@ -1821,7 +1821,7 @@ HWTEST_F(WindowTest, IsAllowHaveSystemSubWindow, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetAspectRatio, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTes113", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetAspectRatio(0.0f);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -1836,7 +1836,7 @@ HWTEST_F(WindowTest, SetAspectRatio, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, ResetAspectRatio, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTes114", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->ResetAspectRatio();
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -1851,7 +1851,7 @@ HWTEST_F(WindowTest, ResetAspectRatio, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetKeyboardAnimationConfig, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTes115", option);
     ASSERT_NE(nullptr, window);
     KeyboardAnimationConfig config;
     auto ret = window->GetKeyboardAnimationConfig();
@@ -1867,7 +1867,7 @@ HWTEST_F(WindowTest, GetKeyboardAnimationConfig, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetNeedDefaultAnimation, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTes116", option);
     ASSERT_NE(nullptr, window);
     auto ret = true;
     window->SetNeedDefaultAnimation(true);
@@ -1883,7 +1883,7 @@ HWTEST_F(WindowTest, SetNeedDefaultAnimation, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, TransferAbilityResult, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTes117", option);
     ASSERT_NE(nullptr, window);
     AAFwk::Want want;
     auto ret = window->TransferAbilityResult(0, want);
@@ -1899,7 +1899,7 @@ HWTEST_F(WindowTest, TransferAbilityResult, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, TransferExtensionData, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTes118", option);
     ASSERT_NE(nullptr, window);
     AAFwk::WantParams wantParams;
     auto ret = window->TransferExtensionData(wantParams);
@@ -1915,7 +1915,7 @@ HWTEST_F(WindowTest, TransferExtensionData, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, RegisterTransferComponentDataListener, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest04", option);
+    auto window = Window::Create("WindowTes119", option);
     ASSERT_NE(nullptr, window);
     NotifyTransferComponentDataFunc func;
     auto ret = true;
