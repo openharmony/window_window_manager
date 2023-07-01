@@ -1259,9 +1259,10 @@ HWTEST_F(WindowTest, UnregisterDialogDeathRecipientListener, Function | SmallTes
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest04", option);
     ASSERT_NE(nullptr, window);
+    auto ret = WMError::WM_OK;
     sptr<IDialogDeathRecipientListener> listener;
     window->UnregisterDialogDeathRecipientListener(listener);
-    ASSERT_EQ(WMError::WM_OK, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -1274,9 +1275,10 @@ HWTEST_F(WindowTest, NotifyTouchDialogTarget, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest04", option);
     ASSERT_NE(nullptr, window);
+    auto ret = WMError::WM_OK;
     sptr<IDialogTargetTouchListener> listener;
     window->NotifyTouchDialogTarget();
-    ASSERT_EQ(WMError::WM_OK, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -1289,9 +1291,10 @@ HWTEST_F(WindowTest, SetAceAbilityHandler, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest04", option);
     ASSERT_NE(nullptr, window);
+    auto ret = WMError::WM_OK;
     sptr<IAceAbilityHandler> handler;
     window->SetAceAbilityHandler(handler);
-    ASSERT_EQ(WMError::WM_OK, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -1439,8 +1442,9 @@ HWTEST_F(WindowTest, GetRequestedTouchHotAreas, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest04", option);
     ASSERT_NE(nullptr, window);
     std::vector<Rect> rects;
+    auto ret = WMError::WM_OK;
     window->GetRequestedTouchHotAreas(rects);
-    ASSERT_EQ(WMError::WM_OK, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -1565,8 +1569,9 @@ HWTEST_F(WindowTest, StartMove, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest04", option);
     ASSERT_NE(nullptr, window);
+    auto ret = WMError::WM_OK;
     window->StartMove();
-    ASSERT_EQ(WMError::WM_OK, 0);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
