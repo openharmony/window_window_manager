@@ -246,7 +246,7 @@ HWTEST_F(WindowTest, GetFocusable, Function | SmallTest | Level2)
 
 /**
  * @tc.name: SetFocusable
- * @tc.desc: set 
+ * @tc.desc: set Focusable
  * @tc.type: FUNC
  */
 HWTEST_F(WindowTest, SetFocusable, Function | SmallTest | Level2)
@@ -260,7 +260,7 @@ HWTEST_F(WindowTest, SetFocusable, Function | SmallTest | Level2)
 
 /**
  * @tc.name: GetTouchable
- * @tc.desc: get 
+ * @tc.desc: get Touchable
  * @tc.type: FUNC
  */
 HWTEST_F(WindowTest, GetTouchable, Function | SmallTest | Level2)
@@ -274,7 +274,7 @@ HWTEST_F(WindowTest, GetTouchable, Function | SmallTest | Level2)
 
 /**
  * @tc.name: SetTouchable
- * @tc.desc: set 
+ * @tc.desc: set Touchable
  * @tc.type: FUNC
  */
 HWTEST_F(WindowTest, SetTouchable, Function | SmallTest | Level2)
@@ -288,7 +288,7 @@ HWTEST_F(WindowTest, SetTouchable, Function | SmallTest | Level2)
 
 /**
  * @tc.name: GetSystemBarPropertyByType
- * @tc.desc: get 
+ * @tc.desc: get SystemBarPropertyByType
  * @tc.type: FUNC
  */
 HWTEST_F(WindowTest, GetSystemBarPropertyByType, Function | SmallTest | Level2)
@@ -302,7 +302,7 @@ HWTEST_F(WindowTest, GetSystemBarPropertyByType, Function | SmallTest | Level2)
 
 /**
  * @tc.name: SetSystemBarProperty
- * @tc.desc: set 
+ * @tc.desc: set SystemBarProperty
  * @tc.type: FUNC
  */
 HWTEST_F(WindowTest, SetSystemBarProperty, Function | SmallTest | Level2)
@@ -318,7 +318,7 @@ HWTEST_F(WindowTest, SetSystemBarProperty, Function | SmallTest | Level2)
 
 /**
  * @tc.name: IsFullScreen
- * @tc.desc: get
+ * @tc.desc: get FullScreen
  * @tc.type: FUNC
  */
 HWTEST_F(WindowTest, IsFullScreen, Function | SmallTest | Level2)
