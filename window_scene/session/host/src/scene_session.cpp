@@ -406,4 +406,18 @@ bool SceneSession::IsKeepScreenOn() const
 {
     return property_->IsKeepScreenOn();
 }
+
+std::string SceneSession::GetSessionSnapshot()
+{
+    WLOGFI("GetSessionSnapshot id %{public}" PRIu64 "", GetPersistentId());
+    if (Session::GetSessionState() >= SessionState::STATE_BACKGROUND) {
+        Session::UpdateSnapshot();
+    }
+    if (scenePersistence_ != nullptr && GetSnapshot()) {
+        WLOGFI("GetSessionSnapshot SaveSnapshot");
+        scenePersistence_->SaveSnapshot(GetSnapshot());
+        return scenePersistence_->GetSnapshotFilePath();
+    }
+    return "";
+}
 } // namespace OHOS::Rosen
