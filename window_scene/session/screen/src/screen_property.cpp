@@ -49,7 +49,7 @@ RRect ScreenProperty::GetBounds() const
 
 float ScreenProperty::GetDensity()
 {
-    return DOT_PER_INCH * virtualPixelRatio_;
+    return virtualPixelRatio_;
 }
 
 void ScreenProperty::SetPhyWidth(uint32_t phyWidth)
