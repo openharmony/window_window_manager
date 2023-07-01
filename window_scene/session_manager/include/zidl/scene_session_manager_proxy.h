@@ -38,6 +38,7 @@ public:
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
+    WMError SetGestureNavigaionEnabled(bool enable) override;
     WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) override;
     WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) override;
     WSError RegisterSessionListener(const sptr<ISessionListener> sessionListener) override;
