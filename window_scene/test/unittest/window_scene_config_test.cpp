@@ -336,7 +336,8 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig03, Function | SmallTest | Level2)
     ASSERT_EQ(false, item.IsMap());
     ASSERT_EQ(false, item.IsString());
     ASSERT_EQ(true, item.IsStrings());
-    WLOGFE("WindowSceneConfigTest.value.size=%u.", item.stringsValue_->size());
+    int32_t nSize = static_cast<int32_t>(item.stringsValue_->size());
+    WLOGFE("WindowSceneConfigTest.value.size=%d.", nSize);
     ASSERT_EQ(1, item.stringsValue_->size());
     std::vector<std::string> supportedModes;
     supportedModes = *item.stringsValue_;
@@ -362,7 +363,8 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig04, Function | SmallTest | Level2)
     ASSERT_EQ(false, item.IsMap());
     ASSERT_EQ(false, item.IsString());
     ASSERT_EQ(true, item.IsStrings());
-    WLOGFE("WindowSceneConfigTest.value.size=%u.", item.stringsValue_->size());
+    int32_t nSize = static_cast<int32_t>(item.stringsValue_->size());
+    WLOGFE("WindowSceneConfigTest.value.size=%d.", nSize);
     ASSERT_EQ(2, item.stringsValue_->size());
     std::vector<std::string> supportedModes;
     supportedModes = *item.stringsValue_;
