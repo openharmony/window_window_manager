@@ -64,8 +64,6 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
         JsSceneSessionManager::RequestSceneSessionActivation);
     BindNativeFunction(*engine, *object, "requestSceneSessionBackground", moduleName,
         JsSceneSessionManager::RequestSceneSessionBackground);
-    BindNativeFunction(*engine, *object, "requestSceneSessionBackgroundForDelegator", moduleName,
-        JsSceneSessionManager::RequestSceneSessionBackgroundForDelegator);
     BindNativeFunction(*engine, *object, "requestSceneSessionDestruction", moduleName,
         JsSceneSessionManager::RequestSceneSessionDestruction);
     BindNativeFunction(*engine, *object, "on", moduleName, JsSceneSessionManager::RegisterCallback);
@@ -228,13 +226,6 @@ NativeValue* JsSceneSessionManager::RequestSceneSessionBackground(NativeEngine* 
     WLOGI("[NAPI]RequestSceneSessionBackground");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
     return (me != nullptr) ? me->OnRequestSceneSessionBackground(*engine, *info) : nullptr;
-}
-
-NativeValue* JsSceneSessionManager::RequestSceneSessionBackgroundForDelegator(NativeEngine* engine, NativeCallbackInfo* info)
-{
-    WLOGI("[NAPI]RequestSceneSessionBackgroundForDelegator");
-    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
-    return (me != nullptr) ? me->OnRequestSceneSessionBackgroundForDelegator(*engine, *info) : nullptr;
 }
 
 NativeValue* JsSceneSessionManager::RequestSceneSessionDestruction(NativeEngine* engine, NativeCallbackInfo* info)
@@ -561,14 +552,19 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackground(NativeEngine
         return engine.CreateUndefined();
     }
 
-    AsyncTask::CompleteCallback complete = [sceneSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
+    bool isDelegator = false;
+    if (info.argc == 2 && info.argv[1]->TypeOf() != NATIVE_UNDEFINED) {
+        isDelegator = ConvertFromJsValue(engine, info.argv[1], isDelegator);
+    }
+
+    AsyncTask::CompleteCallback complete = [sceneSession, isDelegator](NativeEngine& engine, AsyncTask& task, int32_t status) {
         if (sceneSession == nullptr) {
             task.Reject(engine,
                 CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "Invalid params."));
             return;
         }
         WSErrorCode ret =
-            WS_JS_TO_ERROR_CODE_MAP.at(SceneSessionManager::GetInstance().RequestSceneSessionBackground(sceneSession));
+            WS_JS_TO_ERROR_CODE_MAP.at(SceneSessionManager::GetInstance().RequestSceneSessionBackground(sceneSession, isDelegator));
         if (ret == WSErrorCode::WS_OK) {
             task.Resolve(engine, engine.CreateUndefined());
         } else {
@@ -584,64 +580,6 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackground(NativeEngine
         ((info.argv[1] != nullptr && info.argv[1]->TypeOf() == NATIVE_FUNCTION) ? info.argv[1] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule("JsSceneSessionManager::OnRequestSceneSessionBackground", engine,
-        CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
-    return result;
-}
-
-NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackgroundForDelegator(NativeEngine& engine, NativeCallbackInfo& info)
-{
-    WLOGI("[NAPI]OnRequestSceneSessionBackgroundForDelegator.");
-    WSErrorCode errCode = WSErrorCode::WS_OK;
-    if (info.argc < 1) { // 1: params num
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
-        errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
-    }
-
-    sptr<SceneSession> sceneSession = nullptr;
-    if (errCode == WSErrorCode::WS_OK) {
-        auto jsSceneSessionObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
-        if (jsSceneSessionObj == nullptr) {
-            WLOGFE("[NAPI]Failed to get js scene session object");
-            errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
-        } else {
-            auto jsSceneSession = static_cast<JsSceneSession*>(jsSceneSessionObj->GetNativePointer());
-            if (jsSceneSession == nullptr) {
-                WLOGFE("[NAPI]Failed to get scene session from js object");
-                errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
-            }
-            sceneSession = jsSceneSession->GetNativeSession();
-        }
-    }
-
-    if (errCode == WSErrorCode::WS_ERROR_INVALID_PARAM) {
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return engine.CreateUndefined();
-    }
-
-    AsyncTask::CompleteCallback complete = [sceneSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
-        if (sceneSession == nullptr) {
-            task.Reject(engine,
-                CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "Invalid params."));
-            return;
-        }
-        WSErrorCode ret =
-            WS_JS_TO_ERROR_CODE_MAP.at(SceneSessionManager::GetInstance().RequestSceneSessionBackground(sceneSession, true));
-        if (ret == WSErrorCode::WS_OK) {
-            task.Resolve(engine, engine.CreateUndefined());
-        } else {
-            task.Reject(
-                engine, CreateJsError(engine, static_cast<int32_t>(ret), "pending scene session to background failed"));
-        }
-        WLOGFI("[NAPI]pending scene session to background for delegator end: [%{public}s, %{public}s, %{public}s]",
-            sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetSessionInfo().moduleName_.c_str(),
-            sceneSession->GetSessionInfo().abilityName_.c_str());
-    };
-
-    NativeValue* lastParam = (info.argc <= 1) ? nullptr :
-        ((info.argv[1] != nullptr && info.argv[1]->TypeOf() == NATIVE_FUNCTION) ? info.argv[1] : nullptr);
-    NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsSceneSessionManager::OnRequestSceneSessionBackgroundForDelegator", engine,
         CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
