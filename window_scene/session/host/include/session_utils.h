@@ -21,24 +21,37 @@
 namespace OHOS::Rosen {
 namespace SessionUtils {
 
-inline int32_t ToLayoutWidth(const int32_t winWidth, float vpr)
+inline float ToLayoutWidth(const int32_t winWidth, float vpr)
 {
     return winWidth - 2 * WINDOW_FRAME_WIDTH * vpr; // 2: left and right edge
 }
 
-inline int32_t ToLayoutHeight(const int32_t winHeight, float vpr)
+inline float ToLayoutHeight(const int32_t winHeight, float vpr)
 {
     return winHeight - (WINDOW_FRAME_WIDTH + WINDOW_TITLE_BAR_HEIGHT) * vpr;
 }
 
-inline int32_t ToWinWidth(const int32_t layoutWidth, float vpr)
+inline float ToWinWidth(const int32_t layoutWidth, float vpr)
 {
     return layoutWidth + 2 * WINDOW_FRAME_WIDTH * vpr; // 2: left and right edge
 }
 
-inline int32_t ToWinHeight(const int32_t layoutHeight, float vpr)
+inline float ToWinHeight(const int32_t layoutHeight, float vpr)
 {
     return layoutHeight + (WINDOW_FRAME_WIDTH + WINDOW_TITLE_BAR_HEIGHT) * vpr;
+}
+
+inline void CalcFloatWindowRectLimits(const WindowLimits& limits, int32_t maxFloatingWindowSize, float vpr,
+    int32_t& minWidth, int32_t& maxWidth, int32_t& minHeight, int32_t& maxHeight)
+{
+    minWidth = limits.minWidth_;
+    maxWidth = (limits.maxWidth_ == 0 || limits.maxWidth_ >= INT32_MAX) ? INT32_MAX : limits.maxWidth_;
+    minHeight = limits.minHeight_;
+    maxHeight = (limits.maxHeight_ == 0 || limits.maxHeight_ >= INT32_MAX) ? INT32_MAX : limits.maxHeight_;
+    minWidth = std::max(minWidth, static_cast<int32_t>(MIN_FLOATING_WIDTH)) * vpr;
+    maxWidth = std::min(maxWidth, maxFloatingWindowSize) * vpr;
+    minHeight = std::max(minHeight, static_cast<int32_t>(MIN_FLOATING_HEIGHT)) * vpr;
+    maxHeight = std::min(maxHeight, maxFloatingWindowSize) * vpr;
 }
 
 } // namespace SessionUtils
