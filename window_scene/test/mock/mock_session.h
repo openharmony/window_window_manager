@@ -40,8 +40,8 @@ public:
     MOCK_METHOD0(Recover, WSError(void));
     MOCK_METHOD0(Maximize, WSError(void));
     MOCK_METHOD1(PendingSessionActivation, WSError(const sptr<AAFwk::SessionInfo> info));
-    MOCK_METHOD1(UpdateActiveStatus, WSError(SessionEvent event));
-    MOCK_METHOD1(OnSessionEvent, WSError(bool isActive));
+    MOCK_METHOD1(UpdateActiveStatus, WSError(bool isActive));
+    MOCK_METHOD1(OnSessionEvent, WSError(SessionEvent event));
     MOCK_METHOD0(RequestSessionBack, WSError(void));
     MOCK_METHOD0(UpdateSessionRect, WSError(const WSRect& rect, const SizeChangeReason& reason));
 
