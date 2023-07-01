@@ -28,7 +28,7 @@ using SceneSessionManagerStubFunc = int (SceneSessionManagerStub::*)(MessageParc
 class SceneSessionManagerStub : public IRemoteStub<ISceneSessionManager> {
 public:
     SceneSessionManagerStub() = default;
-    ~SceneSessionManagerStub() = default;
+    virtual ~SceneSessionManagerStub() = default;
 
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
