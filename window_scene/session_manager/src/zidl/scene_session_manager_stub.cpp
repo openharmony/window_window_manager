@@ -161,7 +161,7 @@ int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
             UnregisterSessionListener();
             break;
         }
-        case SceneSessionManagerMessage::TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO: {
+        case SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_INFO: {
             HandleGetAccessibilityWindowInfo(data, reply);
             break;
         }
