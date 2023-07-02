@@ -122,7 +122,7 @@ private:
     float GetDisplayBrightness() const;
     void HandleUpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action,
         const sptr<SceneSession>& sceneSession);
-    void NotifyAccessibilityWindowInfo(uint64_t persistentId, WindowUpdateType type);
+    void NotifyWindowInfoChange(uint64_t persistentId, WindowUpdateType type);
     void FillWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,
         const sptr<SceneSession> sceneSession);
     sptr<RootSceneSession> rootSceneSession_;
