@@ -905,7 +905,7 @@ WindowMode Session::GetWindowMode()
     return sessionStage_->GetWindowMode();
 }
 
-bool Session::IsDecorEnable()
+bool Session::IsWindowDecorEnable()
 {
     if (!sessionStage_) {
         return systemConfig_.isSystemDecorEnable_;
