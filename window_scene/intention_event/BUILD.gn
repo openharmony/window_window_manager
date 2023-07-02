@@ -17,6 +17,7 @@ import("../../windowmanager_aafwk.gni")
 ohos_shared_library("libintention_event") {
   include_dirs = [
     "./include",
+    "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/wm/include",
   ]
 
