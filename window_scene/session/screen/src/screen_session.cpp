@@ -79,7 +79,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     if (displayInfo == nullptr) {
         return displayInfo;
     }
-
+    displayInfo->name_ = name_;
     displayInfo->SetWidth(property_.GetBounds().rect_.GetWidth());
     displayInfo->SetHeight(property_.GetBounds().rect_.GetHeight());
     displayInfo->SetScreenId(screenId_);
