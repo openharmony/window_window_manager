@@ -1326,7 +1326,7 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
 
 void SceneSessionManager::NotifyWindowInfoChange(uint64_t persistentId, WindowUpdateType type)
 {
-    std::vector<sptr<AccessibilityWindowInfo>>& infos;
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
     auto iter = sceneSessionMap_.find(persistentId);
     if (iter == sceneSessionMap_.end()) {
         WLOGFW("Error find session for id = %{public}" PRIu64, persistentId);
