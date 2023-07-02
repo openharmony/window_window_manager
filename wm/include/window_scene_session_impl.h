@@ -32,7 +32,7 @@ public:
     WSError SetActive(bool active) override;
     WMError DisableAppWindowDecor() override;
     bool IsDecorEnable() const override;
-    boos IsWindowDecorEnable() override;
+    bool IsWindowDecorEnable() override;
     WMError Minimize() override;
     WMError MaximizeFloating() override;
     WMError Maximize() override;
