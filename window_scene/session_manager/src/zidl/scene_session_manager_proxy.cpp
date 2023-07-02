@@ -366,6 +366,6 @@ WMError SceneSessionManagerProxy::GetAccessibilityWindowInfo(std::vector<sptr<Ac
         WLOGFE("read window info failed.");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    return static_cast<WSError>(reply.ReadUint32());
+    return static_cast<WMError>(reply.ReadUint32());
 }
 } // namespace OHOS::Rosen
