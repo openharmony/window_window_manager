@@ -161,7 +161,7 @@ void SessionManager::InitScreenLockManagerProxy()
     }
 }
 
-WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
+WMError SessionManager::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
 {
     WLOGFD("GetAccessibilityWindowInfo");
     GetSceneSessionManagerProxy();
