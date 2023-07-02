@@ -1352,7 +1352,7 @@ void SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     info->focused_ = sceneSession->GetPersistentId() == focusedSessionId_;
     info->type_ = sceneSession->GetWindowType();
     info->mode_ = sceneSession->GetWindowMode();
-    info->isDecorEnable_ = sceneSession->IsDecorEnable();
+    info->isDecorEnable_ = sceneSession->IsWindowDecorEnable();
     auto property = sceneSession->GetSessionProperty();
     if (property != nullptr) {
         info->displayId_ = property->GetDisplayId();
