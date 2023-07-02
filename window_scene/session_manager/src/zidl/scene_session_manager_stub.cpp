@@ -28,6 +28,36 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManagerStub"};
 }
 
+void SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
+    sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(sessionStageObject);
+    sptr<IRemoteObject> eventChannelObject = data.ReadRemoteObject();
+    sptr<IWindowEventChannel> eventChannel = iface_cast<IWindowEventChannel>(eventChannelObject);
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(data);
+    if (sessionStage == nullptr || eventChannel == nullptr || surfaceNode == nullptr) {
+        WLOGFE("Failed to read scene session stage object or event channel object!");
+        return ERR_INVALID_DATA;
+    }
+
+    sptr<WindowSessionProperty> property = nullptr;
+    if (data.ReadBool()) {
+        property = data.ReadStrongParcelable<WindowSessionProperty>();
+    } else {
+        WLOGFW("Property not exist!");
+    }
+    uint64_t persistentId = INVALID_SESSION_ID;
+    sptr<ISession> sceneSession;
+    CreateAndConnectSpecificSession(sessionStage, eventChannel, surfaceNode,
+        property, persistentId, sceneSession);
+    if (sceneSession== nullptr) {
+        return ERR_INVALID_STATE;
+    }
+    reply.WriteUint64(persistentId);
+    reply.WriteRemoteObject(sceneSession->AsObject());
+    reply.WriteUint32(static_cast<uint32_t>(WSError::WS_OK));
+}
+
 void SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessageParcel &reply)
 {
     auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
@@ -39,6 +69,17 @@ void SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessageP
     }
     const WSError& ret = UpdateProperty(property, action);
     reply.WriteInt32(static_cast<int32_t>(ret));
+}
+
+void SceneSessionManagerStub::HandleGetAccessibilityWindowInfo(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    WMError errCode = GetAccessibilityWindowInfo(infos);
+    if (!MarshallingHelper::MarshallingVectorParcelableObj<AccessibilityWindowInfo>(reply, infos)) {
+        WLOGFE("Write window infos failed.");
+        return ERR_TRANSACTION_FAILED;
+    }
+    reply.WriteInt32(static_cast<int32_t>(errCode));
 }
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -53,32 +94,7 @@ int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
     SceneSessionManagerMessage msgId = static_cast<SceneSessionManagerMessage>(code);
     switch (msgId) {
         case SceneSessionManagerMessage::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION : {
-            sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
-            sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(sessionStageObject);
-            sptr<IRemoteObject> eventChannelObject = data.ReadRemoteObject();
-            sptr<IWindowEventChannel> eventChannel = iface_cast<IWindowEventChannel>(eventChannelObject);
-            std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(data);
-            if (sessionStage == nullptr || eventChannel == nullptr || surfaceNode == nullptr) {
-                WLOGFE("Failed to read scene session stage object or event channel object!");
-                return ERR_INVALID_DATA;
-            }
-
-            sptr<WindowSessionProperty> property = nullptr;
-            if (data.ReadBool()) {
-                property = data.ReadStrongParcelable<WindowSessionProperty>();
-            } else {
-                WLOGFW("Property not exist!");
-            }
-            uint64_t persistentId = INVALID_SESSION_ID;
-            sptr<ISession> sceneSession;
-            CreateAndConnectSpecificSession(sessionStage, eventChannel, surfaceNode,
-                property, persistentId, sceneSession);
-            if (sceneSession== nullptr) {
-                return ERR_INVALID_STATE;
-            }
-            reply.WriteUint64(persistentId);
-            reply.WriteRemoteObject(sceneSession->AsObject());
-            reply.WriteUint32(static_cast<uint32_t>(WSError::WS_OK));
+            HandleCreateAndConnectSpecificSession(data, reply);
             break;
         }
         case SceneSessionManagerMessage::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION: {
@@ -146,13 +162,7 @@ int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
             break;
         }
         case SceneSessionManagerMessage::TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO: {
-            std::vector<sptr<AccessibilityWindowInfo>> infos;
-            WMError errCode = GetAccessibilityWindowInfo(infos);
-            if (!MarshallingHelper::MarshallingVectorParcelableObj<AccessibilityWindowInfo>(reply, infos)) {
-                WLOGFE("Write window infos failed.");
-                return ERR_TRANSACTION_FAILED;
-            }
-            reply.WriteInt32(static_cast<int32_t>(errCode));
+            HandleGetAccessibilityWindowInfo(data, reply);
             break;
         }
         default:
