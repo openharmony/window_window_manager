@@ -27,7 +27,7 @@ class AxisEvent;
 } // namespace MMI
 
 namespace OHOS::Rosen {
-class WindowMode;
+enum class WindowMode: uint32_t;
 class ISessionStage : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISessionStage");
