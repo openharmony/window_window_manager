@@ -120,7 +120,7 @@ private:
     WSError UpdateBrightness(uint64_t persistentId);
     void SetDisplayBrightness(float brightness);
     float GetDisplayBrightness() const;
-    void HandleUpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action,
+    void HandleUpdateProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action,
         const sptr<SceneSession>& sceneSession);
     void NotifyWindowInfoChange(uint64_t persistentId, WindowUpdateType type);
     void FillWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,
