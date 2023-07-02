@@ -51,7 +51,7 @@ public:
         TRANS_ID_SET_SESSION_ICON,
         TRANS_ID_REGISTER_SESSION_LISTENER,
         TRANS_ID_UNREGISTER_SESSION_LISTENER,
-        TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO,
+        TRANS_ID_GET_WINDOW_INFO,
     };
 
     virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
