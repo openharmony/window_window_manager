@@ -562,7 +562,7 @@ WMError NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindow
         WLOGFE("Write windowUpdateType failed.");
         return;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_NOTIFY_ACCESSIBILITY_WINDOW_INFO),
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_NOTIFY_WINDOW_INFO),
         data, reply, option) != ERR_NONE) {
         WLOGFE("Send window info failed.");
         return WMError::WM_ERROR_IPC_FAILED;
