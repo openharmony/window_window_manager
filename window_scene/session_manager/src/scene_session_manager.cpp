@@ -830,8 +830,8 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action,
-    const sptr<SceneSession>& sceneSession)
+void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action, const sptr<SceneSession>& sceneSession)
 {
     switch (action) {
         case WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON: {
