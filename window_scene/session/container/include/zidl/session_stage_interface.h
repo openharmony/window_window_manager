@@ -19,7 +19,6 @@
 #include <iremote_broker.h>
 
 #include "interfaces/include/ws_common.h"
-#include "wm_common.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -28,6 +27,7 @@ class AxisEvent;
 } // namespace MMI
 
 namespace OHOS::Rosen {
+class WindowMode;
 class ISessionStage : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISessionStage");
