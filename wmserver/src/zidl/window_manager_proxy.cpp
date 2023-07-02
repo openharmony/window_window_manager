@@ -544,7 +544,7 @@ WMError WindowManagerProxy::GetAccessibilityWindowInfo(std::vector<sptr<Accessib
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
+WMError WindowManagerProxy::NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
     WindowUpdateType type)
 {
     MessageParcel data;
@@ -556,11 +556,11 @@ WMError NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindow
     }
     if (!MarshallingHelper::MarshallingVectorParcelableObj<AccessibilityWindowInfo>(data, infos)) {
         WLOGFE("Write window infos failed.");
-        return;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(type))) {
         WLOGFE("Write windowUpdateType failed.");
-        return;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_NOTIFY_WINDOW_INFO),
         data, reply, option) != ERR_NONE) {
