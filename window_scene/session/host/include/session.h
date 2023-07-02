@@ -165,7 +165,7 @@ public:
     int32_t GetCallingUid() const;
     sptr<IRemoteObject> GetAbilityToken() const;
     WindowMode GetWindowMode();
-    bool IsDecorEnable();
+    bool IsWindowDecorEnable();
     void SetZOrder(uint32_t zOrder);
     WSError UpdateSnapshot();
 protected:
