@@ -28,7 +28,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManagerStub"};
 }
 
-void SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply)
 {
     sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
     sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(sessionStageObject);
@@ -56,6 +56,7 @@ void SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParce
     reply.WriteUint64(persistentId);
     reply.WriteRemoteObject(sceneSession->AsObject());
     reply.WriteUint32(static_cast<uint32_t>(WSError::WS_OK));
+    return ERR_NONE;
 }
 
 void SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessageParcel &reply)
@@ -71,7 +72,7 @@ void SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessageP
     reply.WriteInt32(static_cast<int32_t>(ret));
 }
 
-void SceneSessionManagerStub::HandleGetAccessibilityWindowInfo(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleGetAccessibilityWindowInfo(MessageParcel &data, MessageParcel &reply)
 {
     std::vector<sptr<AccessibilityWindowInfo>> infos;
     WMError errCode = GetAccessibilityWindowInfo(infos);
@@ -80,6 +81,7 @@ void SceneSessionManagerStub::HandleGetAccessibilityWindowInfo(MessageParcel &da
         return ERR_TRANSACTION_FAILED;
     }
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
 }
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -94,8 +96,7 @@ int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
     SceneSessionManagerMessage msgId = static_cast<SceneSessionManagerMessage>(code);
     switch (msgId) {
         case SceneSessionManagerMessage::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION : {
-            HandleCreateAndConnectSpecificSession(data, reply);
-            break;
+            return HandleCreateAndConnectSpecificSession(data, reply);
         }
         case SceneSessionManagerMessage::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION: {
             uint64_t persistentId = data.ReadUint64();
@@ -162,8 +163,7 @@ int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
             break;
         }
         case SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_INFO: {
-            HandleGetAccessibilityWindowInfo(data, reply);
-            break;
+            return HandleGetAccessibilityWindowInfo(data, reply);
         }
         default:
             WLOGFE("Unknown session message!");
