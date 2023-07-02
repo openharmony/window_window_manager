@@ -171,10 +171,10 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case WindowManagerMessage::TRANS_ID_NOTIFY_ACCESSIBILITY_WINDOW_INFO: {
+        case WindowManagerMessage::TRANS_ID_NOTIFY_WINDOW_INFO: {
             std::vector<sptr<AccessibilityWindowInfo>> infos;
             if (!MarshallingHelper::UnmarshallingVectorParcelableObj<AccessibilityWindowInfo>(data, infos)) {
-                WLOGFE("Read accessibility window infos failed.");
+                WLOGFE("Read window infos failed.");
                 return -1;
             }
             WindowUpdateType type = static_cast<WindowUpdateType>(data.ReadUint32());
