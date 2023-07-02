@@ -28,6 +28,7 @@ public:
 
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
     void HandleUpdateProperty(MessageParcel &data, MessageParcel &reply);
+    void HandleGetAccessibilityWindowInfo(MessageParcel &data, MessageParcel &reply);
 };
 } // namespace OHOS::Rosen
 
