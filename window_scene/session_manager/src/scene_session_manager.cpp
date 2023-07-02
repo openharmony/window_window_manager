@@ -456,7 +456,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         sceneSessionMap_.insert({ persistentId, sceneSession });
         RegisterSessionStateChangeNotifyManagerFunc(sceneSession);
         WLOGFI("create session persistentId: %{public}" PRIu64 "", persistentId);
-        NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
+        NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
         return sceneSession;
     };
 
@@ -510,7 +510,7 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         }
         AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
         activeSessionId_ = persistentId;
-        NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
+        NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
         return WSError::WS_OK;
     };
 
@@ -544,7 +544,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             return WSError::WS_ERROR_NULLPTR;
         }
         AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo);
-        NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
+        NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
         return WSError::WS_OK;
     };
 
@@ -566,7 +566,7 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
             dialog->NotifyDestroy();
             dialog->Disconnect();
             sceneSessionMap_.erase(dialog->GetPersistentId());
-            NotifyAccessibilityWindowInfo(dialog->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
+            NotifyWindowInfoChange(dialog->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
         }
         return WSError::WS_OK;
     }
@@ -597,7 +597,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         }
         AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
         sceneSessionMap_.erase(persistentId);
-        NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
+        NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
         return WSError::WS_OK;
     };
 
@@ -665,7 +665,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const uint64_t&
         }
         ret = sceneSession->Disconnect();
         sceneSessionMap_.erase(persistentId);
-        NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
+        NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
         return ret;
     };
 
@@ -846,12 +846,12 @@ void SceneSessionManager::HandleUpdateProperty(sptr<WindowSessionProperty>& prop
         }
         case WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE: {
             sceneSession->SetFocusable(property->GetFocusable());
-            NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+            NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE: {
             sceneSession->SetTouchable(property->GetTouchable());
-            NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+            NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS: {
@@ -879,7 +879,7 @@ void SceneSessionManager::HandleUpdateProperty(sptr<WindowSessionProperty>& prop
             if (sceneSession->GetSessionProperty() != nullptr) {
                 sceneSession->GetSessionProperty()->SetMaximizeMode(property->GetMaximizeMode());
             }
-            NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+            NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS: {
@@ -887,7 +887,7 @@ void SceneSessionManager::HandleUpdateProperty(sptr<WindowSessionProperty>& prop
             for (auto& iter : systemBarProperties) {
                 sceneSession->SetSystemBarProperty(iter.first, iter.second);
             }
-            NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+            NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_FLAGS:
@@ -895,7 +895,7 @@ void SceneSessionManager::HandleUpdateProperty(sptr<WindowSessionProperty>& prop
         case WSPropertyChangeAction::ACTION_UPDATE_MODE:
         // fall through
         case WSPropertyChangeAction::ACTION_UPDATE_RECT: {
-            NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+            NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             break;
         }
         default:
@@ -1044,7 +1044,7 @@ WSError SceneSessionManager::SetFocusedSession(uint64_t persistentId)
         return WSError::WS_DO_NOTHING;
     }
     focusedSessionId_ = persistentId;
-    NotifyAccessibilityWindowInfo(persistentId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
+    NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
     return WSError::WS_OK;
 }
 
@@ -1324,7 +1324,7 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
     return WMError::WM_OK;
 }
 
-void SceneSessionManager::NotifyAccessibilityWindowInfo(uint64_t persistentId, WindowUpdateType type)
+void SceneSessionManager::NotifyWindowInfoChange(uint64_t persistentId, WindowUpdateType type)
 {
     std::vector<sptr<AccessibilityWindowInfo>>& infos;
     auto iter = abilitySceneMap_.find(persistentId);
