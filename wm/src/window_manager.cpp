@@ -697,7 +697,7 @@ void WindowManager::UpdateWindowVisibilityInfo(
 
 WMError WindowManager::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const
 {
-    WMError ret
+    WMError ret;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ret = SingletonContainer::Get<SessionManager>().GetAccessibilityWindowInfo(infos);
     } else {
