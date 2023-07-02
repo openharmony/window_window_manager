@@ -34,7 +34,7 @@ config("session_manager_public_config") {
 
     # for scene session manager
     "${window_base_path}/interfaces/innerkits/wm",
-    "${window_base_path}/wmserver/include/zidl",
+    "${window_base_path}/wmserver/include",
     "${graphic_base_path}/graphic_2d/rosen/modules/animation/window_animation/include",
 
     # for window_manager_hilog
