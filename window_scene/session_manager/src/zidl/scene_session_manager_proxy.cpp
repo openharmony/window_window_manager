@@ -356,7 +356,7 @@ WMError SceneSessionManagerProxy::GetAccessibilityWindowInfo(std::vector<sptr<Ac
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO),
+        SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_INFO),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
