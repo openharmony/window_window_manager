@@ -73,9 +73,7 @@ public:
     void SetUp() override;
     void TearDown() override;
 private:
-    
-    
-
+    RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
     sptr<Session> session_ = nullptr;
 };
 
@@ -88,7 +86,6 @@ void WindowSessionTest::TearDownTestCase()
 }
 
 void WindowSessionTest::SetUp()
-
 {
     SessionInfo info;
     info.abilityName_ = "testSession1";
