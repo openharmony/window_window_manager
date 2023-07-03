@@ -552,14 +552,19 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackground(NativeEngine
         return engine.CreateUndefined();
     }
 
-    AsyncTask::CompleteCallback complete = [sceneSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
+    bool isDelegator = false;
+    if (info.argc == 2 && info.argv[1]->TypeOf() != NATIVE_UNDEFINED) { // 2: params total num
+        isDelegator = ConvertFromJsValue(engine, info.argv[1], isDelegator);
+    }
+
+    AsyncTask::CompleteCallback complete = [sceneSession, isDelegator](NativeEngine& engine, AsyncTask& task, int32_t status) {
         if (sceneSession == nullptr) {
             task.Reject(engine,
                 CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "Invalid params."));
             return;
         }
         WSErrorCode ret =
-            WS_JS_TO_ERROR_CODE_MAP.at(SceneSessionManager::GetInstance().RequestSceneSessionBackground(sceneSession));
+            WS_JS_TO_ERROR_CODE_MAP.at(SceneSessionManager::GetInstance().RequestSceneSessionBackground(sceneSession, isDelegator));
         if (ret == WSErrorCode::WS_OK) {
             task.Resolve(engine, engine.CreateUndefined());
         } else {

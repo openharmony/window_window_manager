@@ -43,6 +43,9 @@ public:
     WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) override;
     WSError RegisterSessionListener(const sptr<ISessionListener> sessionListener) override;
     void UnregisterSessionListener() override;
+    WSError PendingSessionToForeground(const sptr<IRemoteObject> &token) override;
+    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token) override;
+    WSError GetFocusSessionToken(sptr<IRemoteObject> &token) override;
 
 private:
     static inline BrokerDelegator<SceneSessionManagerProxy> delegator_;
