@@ -48,6 +48,8 @@ using NotifySessionTouchableChangeFunc = std::function<void(const bool touchable
 using NotifyClickFunc = std::function<void()>;
 using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
 using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info)>;
+using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
+using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info)>;
 
 class ILifecycleListener {
 public:
@@ -140,6 +142,11 @@ public:
     void NotifyTouchDialogTarget();
     WSError NotifyDestroy();
 
+    void SetPendingSessionToForegroundListener(const NotifyPendingSessionToForegroundFunc& func);
+    WSError PendingSessionToForeground();
+    void SetPendingSessionToBackgroundForDelegatorListener(const NotifyPendingSessionToBackgroundForDelegatorFunc& func);
+    WSError PendingSessionToBackgroundForDelegator();
+
     void SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func);
     void SetSessionTouchableChangeListener(const NotifySessionTouchableChangeFunc& func);
     void SetClickListener(const NotifyClickFunc& func);
@@ -185,6 +192,8 @@ protected:
     NotifyClickFunc clickFunc_;
     NotifyTerminateSessionFunc terminateSessionFunc_;
     NotifySessionExceptionFunc sessionExceptionFunc_;
+    NotifyPendingSessionToForegroundFunc pendingSessionToForegroundFunc_;
+    NotifyPendingSessionToBackgroundForDelegatorFunc pendingSessionToBackgroundForDelegatorFunc_;
     sptr<WindowSessionProperty> property_ = nullptr;
     SystemSessionConfig systemConfig_;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
