@@ -54,6 +54,7 @@ void TimerManager::Stop()
 
 int32_t TimerManager::AddTimer(int32_t intervalMs, std::function<void()> callback)
 {
+    CALL_DEBUG_ENTER;
     return AddTimerInternal(intervalMs, callback);
 }
 
@@ -71,13 +72,11 @@ bool TimerManager::IsExist(int32_t timerId)
 
 int32_t TimerManager::CalcNextDelay()
 {
-    CALL_DEBUG_ENTER;
     return CalcNextDelayInternal();
 }
 
 void TimerManager::ProcessTimers()
 {
-    CALL_DEBUG_ENTER;
     ProcessTimersInternal();
 }
 
@@ -103,7 +102,6 @@ void TimerManager::OnStop()
 
 int32_t TimerManager::TakeNextTimerId()
 {
-    CALL_DEBUG_ENTER;
     uint64_t timerSlot = 0;
     uint64_t one = 1;
 
@@ -121,7 +119,6 @@ int32_t TimerManager::TakeNextTimerId()
 
 int32_t TimerManager::AddTimerInternal(int32_t intervalMs, std::function<void()> callback)
 {
-    CALL_DEBUG_ENTER;
     if (intervalMs < MIN_INTERVAL) {
         intervalMs = MIN_INTERVAL;
     } else if (intervalMs > MAX_INTERVAL_MS) {
@@ -138,7 +135,6 @@ int32_t TimerManager::AddTimerInternal(int32_t intervalMs, std::function<void()>
     timer->id = timerId;
     timer->intervalMs = intervalMs;
     auto nowTime = GetMillisTime();
-    WLOGFD("nowTime:%{public}" PRId64 "", nowTime);
     if (!AddInt64(nowTime, timer->intervalMs, timer->nextCallTime)) {
         WLOGFE("The addition of nextCallTime in TimerItem overflows");
         return NONEXISTENT_ID;
@@ -150,7 +146,6 @@ int32_t TimerManager::AddTimerInternal(int32_t intervalMs, std::function<void()>
 
 int32_t TimerManager::RemoveTimerInternal(int32_t timerId)
 {
-    CALL_DEBUG_ENTER;
     for (auto it = timers_.begin(); it != timers_.end(); ++it) {
         if ((*it)->id == timerId) {
             timers_.erase(it);
@@ -162,7 +157,6 @@ int32_t TimerManager::RemoveTimerInternal(int32_t timerId)
 
 bool TimerManager::IsExistInternal(int32_t timerId)
 {
-    CALL_DEBUG_ENTER;
     for (auto it = timers_.begin(); it != timers_.end(); ++it) {
         if ((*it)->id == timerId) {
             return true;
@@ -173,7 +167,6 @@ bool TimerManager::IsExistInternal(int32_t timerId)
 
 void TimerManager::InsertTimerInternal(std::unique_ptr<TimerItem>& timer)
 {
-    CALL_DEBUG_ENTER;
     WLOGFD("timerId:%{public}d, nextCallTime:%{public}" PRId64 "", timer->id, timer->nextCallTime);
     for (auto it = timers_.begin(); it != timers_.end(); ++it) {
         if ((*it)->nextCallTime > timer->nextCallTime) {
@@ -186,13 +179,10 @@ void TimerManager::InsertTimerInternal(std::unique_ptr<TimerItem>& timer)
 
 int32_t TimerManager::CalcNextDelayInternal()
 {
-    CALL_DEBUG_ENTER;
     auto delay = MIN_DELAY;
     if (!timers_.empty()) {
         auto nowTime = GetMillisTime();
         const auto& item = *timers_.begin();
-        WLOGFD("timerId:%{public}d, nextCallTime:%{public}" PRId64 ", nowTime:%{public}" PRId64 "",
-            item->id, item->nextCallTime, nowTime);
         if (nowTime >= item->nextCallTime) {
             delay = 0;
         } else {
@@ -204,12 +194,10 @@ int32_t TimerManager::CalcNextDelayInternal()
 
 void TimerManager::ProcessTimersInternal()
 {
-    CALL_DEBUG_ENTER;
     if (timers_.empty()) {
         return;
     }
     auto nowTime = GetMillisTime();
-    WLOGFD("nowTime:%{public}" PRId64 "", nowTime);
     for (;;) {
         auto it = timers_.begin();
         if (it == timers_.end()) {
