@@ -994,6 +994,10 @@ float SceneSessionManager::GetDisplayBrightness() const
 
 WMError SceneSessionManager::SetGestureNavigaionEnabled(bool enable)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("SetGestureNavigationEnabled permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
     WLOGFD("SetGestureNavigationEnabled, enable: %{public}d", enable);
     auto task = [this, enable]() {
         if (!gestureNavigationEnabledChangeFunc_) {
