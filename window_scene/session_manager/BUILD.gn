@@ -27,6 +27,8 @@ config("session_manager_public_config") {
     "${multimodalinput_path}/input/interfaces/native/innerkits/event/include",
     "${multimodalinput_path}/input/util/common/include",
     "${ability_runtime_inner_api_path}/ability_manager/include",
+    "${window_base_path}/wmserver/include",
+    "${window_base_path}/wmserver/include/zidl",
 
     # for screen_session_manager
     "${window_base_path}/utils/include",
@@ -154,6 +156,7 @@ ohos_shared_library("screen_session_manager") {
 
 ohos_shared_library("session_manager") {
   sources = [
+    "../../wmserver/src/zidl/mock_session_manager_service_proxy.cpp",
     "../session_manager_service/src/session_manager_service_proxy.cpp",
     "src/session_manager.cpp",
     "src/zidl/scene_session_manager_proxy.cpp",
@@ -164,7 +167,10 @@ ohos_shared_library("session_manager") {
 
   public_configs = [ ":session_manager_public_config" ]
 
-  deps = [ "${window_base_path}/utils:libwmutil" ]
+  deps = [
+    "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/wmserver:sms",
+  ]
 
   external_deps = [
     "ability_runtime:ability_manager",
@@ -172,6 +178,8 @@ ohos_shared_library("session_manager") {
     "hilog_native:libhilog",
     "ipc:ipc_single",
     "multimedia_image_framework:image_native",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
 
   innerapi_tags = [ "platformsdk_indirect" ]

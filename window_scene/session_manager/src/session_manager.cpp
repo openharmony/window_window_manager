@@ -15,9 +15,12 @@
 
 #include "session_manager.h"
 
+#include <iservice_registry.h>
+#include <system_ability_definition.h>
 #include "ability_manager_client.h"
 
 #include "window_manager_hilog.h"
+#include "mock_session_manager_service_interface.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -52,12 +55,20 @@ void SessionManager::InitSessionManagerServiceProxy()
     if (sessionManagerServiceProxy_) {
         return;
     }
-    auto remoteObject = AAFwk::AbilityManagerClient::GetInstance()->GetSessionManagerService();
+    sptr<ISystemAbilityManager> systemAbilityManager =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManager) {
+            WLOGFE("Failed to get system ability mgr.");
+            return;
+        }
+    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(WINDOW_MANAGER_SERVICE_ID);
     if (!remoteObject) {
         WLOGFE("Remote object is nullptr");
         return;
     }
-    sessionManagerServiceProxy_ = iface_cast<ISessionManagerService>(remoteObject);
+    mockSessionManagerServiceProxy_ = iface_cast<IMockSessionManagerInterface>(remoteObject);
+    sessionManagerServiceProxy_ = iface_cast<ISessionManagerService>(
+            mockSessionManagerServiceProxy_->GetSessionManagerService());
     if (!sessionManagerServiceProxy_) {
         WLOGFE("sessionManagerServiceProxy_ is nullptr");
     }
