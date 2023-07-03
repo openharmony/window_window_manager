@@ -32,7 +32,6 @@ public:
     WSError SetActive(bool active) override;
     WMError DisableAppWindowDecor() override;
     bool IsDecorEnable() const override;
-    bool IsWindowDecorEnable() override;
     WMError Minimize() override;
     WMError MaximizeFloating() override;
     WMError Maximize() override;
@@ -40,7 +39,6 @@ public:
     void StartMove() override;
     WMError Close() override;
     WindowMode GetMode() const override;
-    WindowMode GetWindowMode() override;
     WMError MoveTo(int32_t x, int32_t y) override;
     WMError Resize(uint32_t width, uint32_t height) override;
     WmErrorCode RaiseToAppTop() override;

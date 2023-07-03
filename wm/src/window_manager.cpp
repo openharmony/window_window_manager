@@ -19,8 +19,6 @@
 #include <cinttypes>
 
 #include "marshalling_helper.h"
-#include "scene_board_judgement.h"
-#include "session_manager.h"
 #include "window_adapter.h"
 #include "window_manager_agent.h"
 #include "window_manager_hilog.h"
@@ -348,13 +346,8 @@ WMError WindowManager::RegisterWindowUpdateListener(const sptr<IWindowUpdateList
     WMError ret = WMError::WM_OK;
     if (pImpl_->windowUpdateListenerAgent_ == nullptr) {
         pImpl_->windowUpdateListenerAgent_ = new WindowManagerAgent();
-        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-            ret = SingletonContainer::Get<SessionManager>().RegisterWindowManagerAgent(
-                WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE, pImpl_->windowUpdateListenerAgent_);
-        } else {
-            ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
-                WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE, pImpl_->windowUpdateListenerAgent_);
-        }
+        ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE, pImpl_->windowUpdateListenerAgent_);
     }
     if (ret != WMError::WM_OK) {
         WLOGFW("RegisterWindowManagerAgent failed !");
@@ -385,13 +378,8 @@ WMError WindowManager::UnregisterWindowUpdateListener(const sptr<IWindowUpdateLi
     pImpl_->windowUpdateListeners_.erase(iter);
     WMError ret = WMError::WM_OK;
     if (pImpl_->windowUpdateListeners_.empty() && pImpl_->windowUpdateListenerAgent_ != nullptr) {
-        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-            ret = SingletonContainer::Get<SessionManager>().UnregisterWindowManagerAgent(
-                WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE, pImpl_->windowUpdateListenerAgent_);
-        } else {
-            ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
-                WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE, pImpl_->windowUpdateListenerAgent_);
-        }
+        ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE, pImpl_->windowUpdateListenerAgent_);
         if (ret == WMError::WM_OK) {
             pImpl_->windowUpdateListenerAgent_ = nullptr;
         }
@@ -683,12 +671,7 @@ void WindowManager::UpdateWindowVisibilityInfo(
 
 WMError WindowManager::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const
 {
-    WMError ret;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ret = SingletonContainer::Get<SessionManager>().GetAccessibilityWindowInfo(infos);
-    } else {
-        ret = SingletonContainer::Get<WindowAdapter>().GetAccessibilityWindowInfo(infos);
-    }
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAccessibilityWindowInfo(infos);
     if (ret != WMError::WM_OK) {
         WLOGFE("get window info failed");
     }

@@ -12,8 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef OHOS_ROSEN_AGENT_DEATH_RECIPIENT_H
-#define OHOS_ROSEN_AGENT_DEATH_RECIPIENT_H
 
 #include <refbase.h>
 #include <iremote_object.h>
@@ -54,4 +52,3 @@ AccessibilityWindowInfo* AccessibilityWindowInfo::Unmarshalling(Parcel& parcel)
 }
 }
 }
-#endif // OHOS_ROSEN_AGENT_DEATH_RECIPIENT_H

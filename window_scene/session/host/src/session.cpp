@@ -929,18 +929,11 @@ void Session::NotifyRemoteReady()
 
 WindowMode Session::GetWindowMode()
 {
-    if (!sessionStage_) {
-        return systemConfig_.defaultWindowMode_;
+    if (property_ == nullptr) {
+        WLOGFW("null property.");
+        return WindowMode::WINDOW_MODE_UNDEFINED;
     }
-    return sessionStage_->GetWindowMode();
-}
-
-bool Session::IsWindowDecorEnable()
-{
-    if (!sessionStage_) {
-        return systemConfig_.isSystemDecorEnable_;
-    }
-    return sessionStage_->IsWindowDecorEnable();
+    return property_->GetWindowMode();
 }
 
 void Session::SetZOrder(uint32_t zOrder)

@@ -16,7 +16,7 @@
 #include "session_manager.h"
 
 #include "ability_manager_client.h"
-#include "scene_session_manager_interface.h"
+
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -159,40 +159,5 @@ void SessionManager::InitScreenLockManagerProxy()
     if (!screenLockManagerProxy_) {
         WLOGFW("Get screenlock manager proxy failed, nullptr");
     }
-}
-
-WMError SessionManager::RegisterWindowManagerAgent(WindowManagerAgentType type,
-    const sptr<IWindowManagerAgent>& windowManagerAgent)
-{
-    WLOGFD("RegisterWindowManagerAgent");
-    GetSceneSessionManagerProxy();
-    if (!sceneSessionManagerProxy_) {
-        WLOGFE("sceneSessionManagerProxy_ is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    return static_cast<WMError>(sceneSessionManagerProxy_->RegisterWindowManagerAgent(type, windowManagerAgent));
-}
-
-WMError SessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType type,
-    const sptr<IWindowManagerAgent>& windowManagerAgent)
-{
-    WLOGFD("UnregisterWindowManagerAgent");
-    GetSceneSessionManagerProxy();
-    if (!sceneSessionManagerProxy_) {
-        WLOGFE("sceneSessionManagerProxy_ is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    return static_cast<WMError>(sceneSessionManagerProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent));
-}
-
-WMError SessionManager::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
-{
-    WLOGFD("GetAccessibilityWindowInfo");
-    GetSceneSessionManagerProxy();
-    if (!sceneSessionManagerProxy_) {
-        WLOGFE("sceneSessionManagerProxy_ is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    return static_cast<WMError>(sceneSessionManagerProxy_->GetAccessibilityWindowInfo(infos));
 }
 } // namespace OHOS::Rosen
