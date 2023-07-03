@@ -611,8 +611,8 @@ HWTEST_F(WindowSceneSessionImplTest, LimitCameraFloatWindowMininumSize, Function
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
-    uint32_t width =33;
-    uint32_t height =31;
+    uint32_t width = 33;
+    uint32_t height = 31;
     window->LimitCameraFloatWindowMininumSize(width, height);
 }
 }
