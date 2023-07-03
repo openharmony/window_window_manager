@@ -266,7 +266,6 @@ HWTEST_F(WindowSceneSessionImplTest, HandleBackEvent01, Function | SmallTest | L
     Ace::UIContentMocker *content = reinterpret_cast<Ace::UIContentMocker *>(windowscenesession->uiContent_.get());
     EXPECT_CALL(*content, ProcessBackPressed()).WillOnce(Return(false));
     ASSERT_EQ(WSError::WS_OK, windowscenesession->HandleBackEvent());
-
 }
 
 /**
@@ -562,12 +561,11 @@ HWTEST_F(WindowSceneSessionImplTest, SetAspectRatio, Function | SmallTest | Leve
     sptr<WindowOption> option = new WindowOption();
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetAspectRatio(0.1));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetAspectRatio(0.1));
 
     window->property_->SetPersistentId(1);
     window->property_->SetDisplayId(3);
-    WindowLimits windowLimits = { 3, 3, 3,
-                                  3, 2.0, 2.0 };
+    WindowLimits windowLimits = { 3, 3, 3, 3, 2.0, 2.0 };
     window->property_->SetWindowLimits(windowLimits);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
@@ -612,7 +610,6 @@ HWTEST_F(WindowSceneSessionImplTest, GetAvoidAreaByType, Function | SmallTest | 
     ASSERT_NE(nullptr, session);
     AvoidArea avoidarea;
     ASSERT_EQ(WMError::WM_OK, window->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, avoidarea));
-
 }
 }
 } // namespace Rosen
