@@ -30,7 +30,8 @@ sptr<IRemoteObject> MockSessionManagerServiceProxy::GetSessionManagerService()
         WLOGFE("WriteInterfaceToken failed");
         return nullptr;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(MockSessionManagerServiceMessage::TRANS_ID_GET_SESSION_MANAGER_SERVICE),
+    if (Remote()->SendRequest(static_cast<uint32_t>(
+        MockSessionManagerServiceMessage::TRANS_ID_GET_SESSION_MANAGER_SERVICE),
         data, reply, option) != ERR_NONE) {
         return nullptr;
     }
