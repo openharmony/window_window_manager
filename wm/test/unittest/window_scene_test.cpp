@@ -407,7 +407,7 @@ HWTEST_F(WindowSceneTest, NotifyMemoryLevel02, Function | SmallTest | Level2)
 
 /**
  * @tc.name: NotifyMemoryLevel03
- * @tc.desc: NotifyMemoryLevel with windowsession
+ * @tc.desc: NotifyMemoryLevel with windowScenesession
  * @tc.type: FUNC
  * @tc.require: issueI5JQ04
  */

@@ -24,6 +24,7 @@
 #include "wm_single_instance.h"
 #include "wm_common.h"
 #include "focus_change_info.h"
+#include "window_visibility_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -90,54 +91,6 @@ public:
     virtual void OnGestureNavigationEnabledUpdate(bool enable) = 0;
 };
 
-/**
- * @class WindowVisibilityInfo
- *
- * @brief Visibility info of window.
- */
-class WindowVisibilityInfo : public Parcelable {
-public:
-    /**
-     * @brief Default construct of WindowVisibilityInfo.
-     */
-    WindowVisibilityInfo() = default;
-    /**
-     * @brief Construct of WindowVisibilityInfo.
-     *
-     * @param winId Window id.
-     * @param pid Process id.
-     * @param uid User id.
-     * @param visibility True means window is visible, false means the opposite.
-     * @param winType Type of window.
-     */
-    WindowVisibilityInfo(uint32_t winId, int32_t pid, int32_t uid, bool visibility, WindowType winType)
-        : windowId_(winId), pid_(pid), uid_(uid), isVisible_(visibility), windowType_(winType) {};
-    /**
-     * @brief Deconstruct of WindowVisibilityInfo.
-     */
-    ~WindowVisibilityInfo() = default;
-
-    /**
-     * @brief Marshalling WindowVisibilityInfo.
-     *
-     * @param parcel Package of WindowVisibilityInfo.
-     * @return True means marshall success, false means marshall failed.
-     */
-    virtual bool Marshalling(Parcel& parcel) const override;
-    /**
-     * @brief Unmarshalling WindowVisibilityInfo.
-     *
-     * @param parcel Package of WindowVisibilityInfo.
-     * @return WindowVisibilityInfo object.
-     */
-    static WindowVisibilityInfo* Unmarshalling(Parcel& parcel);
-
-    uint32_t windowId_ { INVALID_WINDOW_ID };
-    int32_t pid_ { 0 };
-    int32_t uid_ { 0 };
-    bool isVisible_ { false };
-    WindowType windowType_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
-};
 
 /**
  * @class IVisibilityChangedListener
