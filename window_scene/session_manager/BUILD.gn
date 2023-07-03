@@ -70,7 +70,7 @@ ohos_shared_library("scene_session_manager") {
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session_manager:screen_session_manager",
     "${window_base_path}/window_scene/session_manager:session_manager",
-    "${window_base_path}/wm:libwm",
+    # "${window_base_path}/wm:libwm",
     "//third_party/libxml2:libxml2",
   ]
 
