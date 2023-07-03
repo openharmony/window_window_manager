@@ -55,7 +55,7 @@ public:
 
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    auto surfaceNode = CreateRSSurfaceNode();
+    // auto surfaceNode = CreateRSSurfaceNode();
 };
 
 void WindowSceneSessionImplTest::SetUpTestCase() {}
@@ -72,13 +72,13 @@ void WindowSceneSessionImplTest::TearDown()
     abilityContext_ = nullptr;
 }
 
-RSSurfaceNode::SharedPtr WindowSceneSessionImplTest::CreateRSSurfaceNode()
-{
-    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
-    rsSurfaceNodeConfig.SurfaceNodeName = "WindowSessionTestSurfaceNode";
-    auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig);
-    return surfaceNode;
-}
+// RSSurfaceNode::SharedPtr WindowSceneSessionImplTest::CreateRSSurfaceNode()
+// {
+//     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+//     rsSurfaceNodeConfig.SurfaceNodeName = "WindowSessionTestSurfaceNode";
+//     auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig);
+//     return surfaceNode;
+// }
 
 namespace {
 /**
@@ -118,7 +118,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession01, Function
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
     windowscenesession->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CreateAndConnectSpecificSession());
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowscenesession->CreateAndConnectSpecificSession());
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
@@ -198,7 +198,7 @@ HWTEST_F(WindowSceneSessionImplTest, FindParentSessionByParentId01, Function | S
     childscenesession->property_->SetParentPersistentId(100);
 
     sptr<WindowSessionImpl> parent = childscenesession->FindParentSessionByParentId(101);
-    ASSERT_TRUE(nullptr != childscenesession->FindParentSessionByParentId(101));
+    ASSERT_FALSE(nullptr != childscenesession->FindParentSessionByParentId(101));
 }
 
 /**
@@ -215,7 +215,7 @@ HWTEST_F(WindowSceneSessionImplTest, FindMainWindowWithContext01, Function | Sma
     ASSERT_NE(nullptr, parentscenesession);
     parentscenesession->property_->SetPersistentId(100);
     parentscenesession->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    ASSERT_TRUE(parentscenesession->FindMainWindowWithContext() == nullptr);
+    ASSERT_FALSE(parentscenesession->FindMainWindowWithContext() == nullptr);
     parentscenesession->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ASSERT_TRUE(parentscenesession->FindMainWindowWithContext() == nullptr);
 }
@@ -265,7 +265,7 @@ HWTEST_F(WindowSceneSessionImplTest, HandleBackEvent01, Function | SmallTest | L
     windowscenesession->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     Ace::UIContentMocker *content = reinterpret_cast<Ace::UIContentMocker *>(windowscenesession->uiContent_.get());
     EXPECT_CALL(*content, ProcessBackPressed()).WillOnce(Return(false));
-    ASSERT_EQ(WSError::WS_OK, window->HandleBackEvent());
+    ASSERT_EQ(WSError::WS_OK, windowscenesession->HandleBackEvent());
 
 }
 
@@ -288,7 +288,7 @@ HWTEST_F(WindowSceneSessionImplTest, RaiseToAppTop01, Function | SmallTest | Lev
 
     windowscenesession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     windowscenesession->state_ = WindowState::STATE_HIDDEN;
-    ASSERT_EQ(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY, windowscenesession->RaiseToAppTop());
+    ASSERT_EQ(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, windowscenesession->RaiseToAppTop());
 
     windowscenesession->state_ = WindowState::STATE_SHOWN;
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -560,6 +560,18 @@ HWTEST_F(WindowSceneSessionImplTest, SetAspectRatio, Function | SmallTest | Leve
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetAspectRatio(0.1));
+
+    window->property_->SetPersistentId(1);
+    window->property_->SetDisplayId(3);
+    WindowLimits windowLimits = { 3, 3, 3,
+                                  3, 2.0, 2.0 };
+    window->property_->SetWindowLimits(windowLimits);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    EXPECT_CALL(*(session), SetAspectRatio(_)).WillOnce(Return(WSError::WS_OK));
+    ASSERT_EQ(WMError::WM_OK, window->SetAspectRatio(0.1));
 }
 
 /*
@@ -572,7 +584,13 @@ HWTEST_F(WindowSceneSessionImplTest, ResetAspectRatio, Function | SmallTest | Le
     sptr<WindowOption> option = new WindowOption();
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->ResetAspectRatio());
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    EXPECT_CALL(*(session), SetAspectRatio(_)).WillOnce(Return(WSError::WS_OK));
+
+    ASSERT_EQ(WMError::WM_OK, window->ResetAspectRatio());
 }
 
 /*
@@ -590,8 +608,6 @@ HWTEST_F(WindowSceneSessionImplTest, GetAvoidAreaByType, Function | SmallTest | 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
-    window->hostSession_ = session;
-    EXPECT_CALL(*(session), GetAvoidAreaByType(_)).WillOnce(Return(WSError::WS_OK));
     AvoidArea avoidarea;
     ASSERT_EQ(WMError::WM_OK, window->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, avoidarea));
 

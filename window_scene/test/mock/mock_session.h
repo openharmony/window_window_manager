@@ -45,6 +45,8 @@ public:
     MOCK_METHOD0(RequestSessionBack, WSError(void));
     MOCK_METHOD0(RaiseToAppTop, WSError(void));
     MOCK_METHOD1(GetAvoidAreaByType, AvoidArea(AvoidAreaType type));
+    MOCK_METHOD1(SetAspectRatio, WSError(float ratio));
+    MOCK_METHOD1(ResetAspectRatio, WSError(float ratio));
 
 
 
