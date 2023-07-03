@@ -78,7 +78,7 @@ namespace {
  */
 HWTEST_F(WindowSceneSessionImplTest, CreateWindowAndDestroy01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("CreateWindow01");
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
 
@@ -103,7 +103,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateWindowAndDestroy01, Function | SmallT
  */
 HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("Connect01");
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
@@ -123,7 +123,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession01, Function
  */
 HWTEST_F(WindowSceneSessionImplTest, IsValidSystemWindowType01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("Connect01");
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
@@ -147,8 +147,8 @@ HWTEST_F(WindowSceneSessionImplTest, IsValidSystemWindowType01, Function | Small
  */
 HWTEST_F(WindowSceneSessionImplTest, InvalidWindow, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->MoveTo(0, 0));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Resize(0, 0));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetBackgroundColor(std::string("???")));
@@ -170,7 +170,7 @@ HWTEST_F(WindowSceneSessionImplTest, InvalidWindow, Function | SmallTest | Level
  */
 HWTEST_F(WindowSceneSessionImplTest, FindParentSessionByParentId01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowTag(WindowTag::MAIN_WINDOW);
     option->SetWindowName("Connect01");
     sptr<WindowSceneSessionImpl> parentscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
@@ -198,7 +198,7 @@ HWTEST_F(WindowSceneSessionImplTest, FindParentSessionByParentId01, Function | S
  */
 HWTEST_F(WindowSceneSessionImplTest, FindMainWindowWithContext01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowTag(WindowTag::MAIN_WINDOW);
     option->SetWindowName("Connect01");
     sptr<WindowSceneSessionImpl> parentscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
@@ -217,7 +217,7 @@ HWTEST_F(WindowSceneSessionImplTest, FindMainWindowWithContext01, Function | Sma
  */
 HWTEST_F(WindowSceneSessionImplTest, DisableAppWindowDecor01, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("Connect01");
     sptr<WindowSessionImpl> windowession = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(nullptr, windowession);
@@ -246,7 +246,7 @@ HWTEST_F(WindowSceneSessionImplTest, DisableAppWindowDecor01, Function | SmallTe
  */
 HWTEST_F(WindowSceneSessionImplTest, HandleBackEvent01, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("Connect01");
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
@@ -265,7 +265,7 @@ HWTEST_F(WindowSceneSessionImplTest, HandleBackEvent01, Function | SmallTest | L
  */
 HWTEST_F(WindowSceneSessionImplTest, RaiseToAppTop01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("Connect01");
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
@@ -295,7 +295,7 @@ HWTEST_F(WindowSceneSessionImplTest, RaiseToAppTop01, Function | SmallTest | Lev
  */
 HWTEST_F(WindowSceneSessionImplTest, Resize01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("Connect01");
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
@@ -309,7 +309,7 @@ HWTEST_F(WindowSceneSessionImplTest, Resize01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSceneSessionImplTest, MoveTo01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("Connect01");
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
@@ -325,7 +325,7 @@ HWTEST_F(WindowSceneSessionImplTest, MoveTo01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSceneSessionImplTest, Minimize01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("Connect01");
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
@@ -347,7 +347,7 @@ HWTEST_F(WindowSceneSessionImplTest, Minimize01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSceneSessionImplTest, StartMove01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("Connect01");
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
@@ -370,7 +370,7 @@ HWTEST_F(WindowSceneSessionImplTest, StartMove01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSceneSessionImplTest, Close01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("Connect01");
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
@@ -391,7 +391,7 @@ HWTEST_F(WindowSceneSessionImplTest, Close01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSceneSessionImplTest, SetActive01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("Connect01");
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
@@ -413,7 +413,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetActive01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSceneSessionImplTest, Recover01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("Connect01");
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
@@ -435,7 +435,7 @@ HWTEST_F(WindowSceneSessionImplTest, Recover01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSceneSessionImplTest, Maximize01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("Connect01");
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
@@ -450,7 +450,7 @@ HWTEST_F(WindowSceneSessionImplTest, Maximize01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSceneSessionImplTest, Hide01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("Hide01");
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
@@ -483,7 +483,7 @@ HWTEST_F(WindowSceneSessionImplTest, Hide01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSceneSessionImplTest, Show01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("Show01");
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
@@ -510,11 +510,11 @@ HWTEST_F(WindowSceneSessionImplTest, Show01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSceneSessionImplTest, SetBackgroundColor01, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("SetBackgroundColor01");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
@@ -534,8 +534,8 @@ HWTEST_F(WindowSceneSessionImplTest, SetBackgroundColor01, Function | SmallTest 
  */
 HWTEST_F(WindowSceneSessionImplTest, SetTransparent, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetTransparent(true));
     window->property_->SetPersistentId(1);
     ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
@@ -548,8 +548,8 @@ HWTEST_F(WindowSceneSessionImplTest, SetTransparent, Function | SmallTest | Leve
  */
 HWTEST_F(WindowSceneSessionImplTest, SetAspectRatio, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetAspectRatio(0.1));
 
@@ -571,8 +571,8 @@ HWTEST_F(WindowSceneSessionImplTest, SetAspectRatio, Function | SmallTest | Leve
  */
 HWTEST_F(WindowSceneSessionImplTest, ResetAspectRatio, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
@@ -589,9 +589,9 @@ HWTEST_F(WindowSceneSessionImplTest, ResetAspectRatio, Function | SmallTest | Le
  */
 HWTEST_F(WindowSceneSessionImplTest, GetAvoidAreaByType, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
 
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -608,9 +608,9 @@ HWTEST_F(WindowSceneSessionImplTest, GetAvoidAreaByType, Function | SmallTest | 
  */
 HWTEST_F(WindowSceneSessionImplTest, LimitCameraFloatWindowMininumSize, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
-    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     uint32_t width = 33;
     uint32_t height = 31;
     window->LimitCameraFloatWindowMininumSize(width, height);
