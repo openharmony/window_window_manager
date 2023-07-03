@@ -16,6 +16,7 @@
 #include "session/host/include/move_drag_controller.h"
 
 #include <pointer_event.h>
+#include "input_manager.h"
 
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session_utils.h"
@@ -30,7 +31,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "MoveDragController" };
 }
 
-MoveDragController::MoveDragController()
+MoveDragController::MoveDragController(uint64_t persistentId) : persistentId_(persistentId)
 {
     vsyncCallback_->onCallback = std::bind(&MoveDragController::OnReceiveVsync, this, std::placeholders::_1);
 }
@@ -491,6 +492,133 @@ void MoveDragController::OnReceiveVsync(int64_t timeStamp)
     WLOGFD("[OnReceiveVsync] receive event, time: %{public}" PRId64"", timeStamp);
     if (vsyncHandleFunc_) {
         vsyncHandleFunc_();
+    }
+}
+
+float MoveDragController::GetVirtualPixelRatio() const
+{
+    float vpr = 1.5;
+    auto displayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+    if (displayInfo != nullptr) {
+        vpr = displayInfo->GetVirtualPixelRatio();
+    }
+    WLOGFD("vpr: %{public}f", vpr);
+    return vpr;
+}
+
+void MoveDragController::UpdateDragType(int32_t startPointPosX, int32_t startPointPosY)
+{
+    if (startPointPosX > rectExceptCorner_.posX_ &&
+        (startPointPosX < rectExceptCorner_.posX_ +
+        static_cast<int32_t>(rectExceptCorner_.width_))) {
+        dragType_ = DragType::DRAG_BOTTOM_OR_TOP;
+    } else if (startPointPosY > rectExceptCorner_.posY_ &&
+        (startPointPosY < rectExceptCorner_.posY_ +
+        static_cast<int32_t>(rectExceptCorner_.height_))) {
+        dragType_ = DragType::DRAG_LEFT_OR_RIGHT;
+    } else if ((startPointPosX <= rectExceptCorner_.posX_ && startPointPosY <= rectExceptCorner_.posY_) ||
+        (startPointPosX >= rectExceptCorner_.posX_ + static_cast<int32_t>(rectExceptCorner_.width_) &&
+         startPointPosY >= rectExceptCorner_.posY_ + static_cast<int32_t>(rectExceptCorner_.height_))) {
+        dragType_ = DragType::DRAG_LEFT_TOP_CORNER;
+    } else {
+        dragType_ = DragType::DRAG_RIGHT_TOP_CORNER;
+    }
+}
+
+bool MoveDragController::IsPointInDragHotZone(int32_t startPointPosX, int32_t startPointPosY,
+    int32_t sourceType, const WSRect& winRect)
+{
+    // calculate rect with hotzone
+    Rect rectWithHotzone;
+    rectWithHotzone.posX_ = winRect.posX_ - static_cast<int32_t>(HOTZONE_POINTER);
+    rectWithHotzone.posY_ = winRect.posY_ - static_cast<int32_t>(HOTZONE_POINTER);
+    rectWithHotzone.width_ = winRect.width_ + static_cast<int32_t>(HOTZONE_POINTER) * 2; // double hotZone
+    rectWithHotzone.height_ = winRect.height_ + static_cast<int32_t>(HOTZONE_POINTER) * 2; // double hotZone
+
+    if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+        !WindowHelper::IsPointInTargetRectWithBound(startPointPosX, startPointPosY, rectWithHotzone)) {
+        return false;
+    } else if ((!WindowHelper::IsPointInTargetRect(startPointPosX,
+        startPointPosY, rectExceptFrame_)) ||
+        (!WindowHelper::IsPointInWindowExceptCorner(startPointPosX,
+        startPointPosY, rectExceptCorner_))) {
+        return true;
+    }
+    return false;
+}
+
+void MoveDragController::CalculateStartRectExceptHotZone(float vpr, const WSRect& winRect)
+{
+    rectExceptFrame_.posX_ = winRect.posX_ +
+        static_cast<int32_t>(WINDOW_FRAME_WIDTH * vpr);
+    rectExceptFrame_.posY_ = winRect.posY_ +
+        static_cast<int32_t>(WINDOW_FRAME_WIDTH * vpr);
+    rectExceptFrame_.width_ = winRect.width_ -
+        static_cast<uint32_t>((WINDOW_FRAME_WIDTH + WINDOW_FRAME_WIDTH) * vpr);
+    rectExceptFrame_.height_ = winRect.height_ -
+        static_cast<uint32_t>((WINDOW_FRAME_WIDTH + WINDOW_FRAME_WIDTH) * vpr);
+
+    rectExceptCorner_.posX_ = winRect.posX_ +
+        static_cast<int32_t>(WINDOW_FRAME_CORNER_WIDTH * vpr);
+    rectExceptCorner_.posY_ = winRect.posY_ +
+        static_cast<int32_t>(WINDOW_FRAME_CORNER_WIDTH * vpr);
+    rectExceptCorner_.width_ = winRect.width_ -
+        static_cast<uint32_t>((WINDOW_FRAME_CORNER_WIDTH + WINDOW_FRAME_CORNER_WIDTH) * vpr);
+    rectExceptCorner_.height_ = winRect.height_ -
+        static_cast<uint32_t>((WINDOW_FRAME_CORNER_WIDTH + WINDOW_FRAME_CORNER_WIDTH) * vpr);
+}
+
+void MoveDragController::HandleMouseStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& winRect)
+{
+    if (pointerEvent == nullptr) {
+        WLOGFE("pointerEvent is nullptr");
+        return;
+    }
+    int32_t action = pointerEvent->GetPointerAction();
+    int32_t sourceType = pointerEvent->GetSourceType();
+    if (!(sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+        (action == MMI::PointerEvent::POINTER_ACTION_MOVE ||
+         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
+         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN))) {
+        WLOGFD("Not mouse type or not dowm/move/up event");
+        return;
+    }
+
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+        WLOGFE("Get pointeritem failed");
+        pointerEvent->MarkProcessed();
+        return;
+    }
+
+    int32_t mousePointX = pointerItem.GetDisplayX();
+    int32_t mousePointY = pointerItem.GetDisplayY();
+    uint32_t oriStyleID = mouseStyleID_;
+    uint32_t newStyleID = 0;
+
+    float vpr = GetVirtualPixelRatio();
+    CalculateStartRectExceptHotZone(vpr, winRect);
+    if (IsPointInDragHotZone(mousePointX, mousePointY, sourceType, winRect)) {
+        UpdateDragType(mousePointX, mousePointY);
+        newStyleID = STYLEID_MAP.at(dragType_);
+    } else if (action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
+        newStyleID = MMI::MOUSE_ICON::DEFAULT;
+    }
+
+    WLOGFI("Id: %{public}" PRIu64 ", Mouse posX : %{public}u, posY %{public}u, Pointer action : %{public}u, "
+        "winRect posX : %{public}u, posY : %{public}u, W : %{public}u, H : %{public}u, "
+        "newStyle : %{public}u, oldStyle : %{public}u",
+        persistentId_, mousePointX, mousePointY, action, winRect.posX_,
+        winRect.posY_, winRect.width_, winRect.height_, newStyleID, oriStyleID);
+    if (oriStyleID != newStyleID) {
+        MMI::PointerStyle pointerStyle;
+        pointerStyle.id = newStyleID;
+        int32_t res = MMI::InputManager::GetInstance()->SetPointerStyle(0, pointerStyle);
+        if (res != 0) {
+            WLOGFE("set pointer style failed, res is %{public}u", res);
+            return;
+        }
+        mouseStyleID_ = newStyleID;
     }
 }
 } // namespace OHOS::Rosen

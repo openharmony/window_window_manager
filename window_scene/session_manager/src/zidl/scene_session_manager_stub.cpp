@@ -28,8 +28,60 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManagerStub"};
 }
 
+const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::stubFuncMap_{
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION),
+        &SceneSessionManagerStub::HandleCreateAndConnectSpecificSession),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION),
+        &SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSession),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_PROPERTY),
+        &SceneSessionManagerStub::HandleUpdateProperty),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT),
+        &SceneSessionManagerStub::HandleRegisterWindowManagerAgent),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT),
+        &SceneSessionManagerStub::HandleUnregisterWindowManagerAgent),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_INFO),
+        &SceneSessionManagerStub::HandleGetFocusSessionInfo),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_LABEL),
+        &SceneSessionManagerStub::HandleSetSessionLabel),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_ICON),
+        &SceneSessionManagerStub::HandleSetSessionIcon),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_SESSION_LISTENER),
+        &SceneSessionManagerStub::HandleRegisterSessionListener),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNREGISTER_SESSION_LISTENER),
+        &SceneSessionManagerStub::HandleUnregisterSessionListener),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_PENDING_SESSION_TO_FOREGROUND),
+        &SceneSessionManagerStub::HandlePendingSessionToForeground),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR),
+        &SceneSessionManagerStub::HandlePendingSessionToBackgroundForDelegator),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_TOKEN),
+        &SceneSessionManagerStub::HandleGetFocusSessionToken),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_GESTURE_NAVIGATION_ENABLED),
+        &SceneSessionManagerStub::HandleSetGestureNavigationEnabled),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_INFO),
+        &SceneSessionManagerStub::HandleGetAccessibilityWindowInfo)
+};
+
+int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
+    MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    WLOGFD("Scene session on remote request!, code: %{public}u", code);
+    if (data.ReadInterfaceToken() != GetDescriptor()) {
+        WLOGFE("Failed to check interface token!");
+        return ERR_INVALID_STATE;
+    }
+
+    const auto& func = stubFuncMap_.find(code);
+    if (func == stubFuncMap_.end()) {
+        WLOGFE("Failed to find function handler!");
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
+
+    return (this->*(func->second))(data, reply);
+}
+
 int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel &data, MessageParcel &reply)
 {
+    WLOGFI("run HandleCreateAndConnectSpecificSession!");
     sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
     sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(sessionStageObject);
     sptr<IRemoteObject> eventChannelObject = data.ReadRemoteObject();
@@ -59,8 +111,18 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
     return ERR_NONE;
 }
 
-void SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessageParcel &reply)
+int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSession(MessageParcel &data, MessageParcel &reply)
 {
+    WLOGFI("run HandleDestroyAndDisconnectSpcificSession!");
+    uint64_t persistentId = data.ReadUint64();
+    const WSError& ret = DestroyAndDisconnectSpecificSession(persistentId);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleUpdateProperty!");
     auto action = static_cast<WSPropertyChangeAction>(data.ReadUint32());
     sptr<WindowSessionProperty> property = nullptr;
     if (data.ReadBool()) {
@@ -70,6 +132,112 @@ void SceneSessionManagerStub::HandleUpdateProperty(MessageParcel &data, MessageP
     }
     const WSError& ret = UpdateProperty(property, action);
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRegisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleRegisterWindowManagerAgent!");
+    auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
+    sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
+    sptr<IWindowManagerAgent> windowManagerAgentProxy =
+        iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
+    WMError errCode = RegisterWindowManagerAgent(type, windowManagerAgentProxy);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleUnregisterWindowManagerAgent(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleUnregisterWindowManagerAgent!");
+    auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
+    sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
+    sptr<IWindowManagerAgent> windowManagerAgentProxy =
+        iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
+    WMError errCode = UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetFocusSessionInfo(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleGetFocusSessionInfo!");
+    FocusChangeInfo focusInfo;
+    GetFocusWindowInfo(focusInfo);
+    reply.WriteParcelable(&focusInfo);
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetSessionLabel(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleSetSessionLabel!");
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    std::string label = data.ReadString();
+    WSError errCode = SetSessionLabel(token, label);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetSessionIcon(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleSetSessionIcon!");
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    std::shared_ptr<Media::PixelMap> icon(data.ReadParcelable<Media::PixelMap>());
+    WSError errCode = SetSessionIcon(token, icon);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRegisterSessionListener(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleRegisterSessionListener!");
+    sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
+    WSError errCode = RegisterSessionListener(listener);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleUnregisterSessionListener(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleUnregisterSessionListener!");
+    UnregisterSessionListener();
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandlePendingSessionToForeground(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandlePendingSessionToForeground!");
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    const WSError& errCode = PendingSessionToForeground(token);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandlePendingSessionToBackgroundForDelegator(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandlePendingSessionToBackground!");
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    const WSError& errCode = PendingSessionToBackgroundForDelegator(token);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetFocusSessionToken(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleGetFocusSessionToken!");
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    const WSError& errCode = GetFocusSessionToken(token);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetGestureNavigationEnabled(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleGetFocusSessionToken!");
+    bool enable = data.ReadBool();
+    const WMError &ret = SetGestureNavigaionEnabled(enable);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
 }
 
 int SceneSessionManagerStub::HandleGetAccessibilityWindowInfo(MessageParcel &data, MessageParcel &reply)
@@ -81,93 +249,6 @@ int SceneSessionManagerStub::HandleGetAccessibilityWindowInfo(MessageParcel &dat
         return ERR_TRANSACTION_FAILED;
     }
     reply.WriteInt32(static_cast<int32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
-    MessageParcel &data, MessageParcel &reply, MessageOption &option)
-{
-    WLOGFD("Scene session on remote request!, code: %{public}u", code);
-    if (data.ReadInterfaceToken() != GetDescriptor()) {
-        WLOGFE("Failed to check interface token!");
-        return ERR_INVALID_STATE;
-    }
-
-    SceneSessionManagerMessage msgId = static_cast<SceneSessionManagerMessage>(code);
-    switch (msgId) {
-        case SceneSessionManagerMessage::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION : {
-            return HandleCreateAndConnectSpecificSession(data, reply);
-        }
-        case SceneSessionManagerMessage::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION: {
-            uint64_t persistentId = data.ReadUint64();
-            const WSError& ret = DestroyAndDisconnectSpecificSession(persistentId);
-            reply.WriteUint32(static_cast<uint32_t>(ret));
-            break;
-        }
-        case SceneSessionManagerMessage::TRANS_ID_UPDATE_PROPERTY: {
-            HandleUpdateProperty(data, reply);
-            break;
-        }
-        case SceneSessionManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT: {
-            auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
-            sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
-            sptr<IWindowManagerAgent> windowManagerAgentProxy =
-                iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
-            WMError errCode = RegisterWindowManagerAgent(type, windowManagerAgentProxy);
-            reply.WriteInt32(static_cast<int32_t>(errCode));
-            break;
-        }
-        case SceneSessionManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT: {
-            auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
-            sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
-            sptr<IWindowManagerAgent> windowManagerAgentProxy =
-                iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
-            WMError errCode = UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
-            reply.WriteInt32(static_cast<int32_t>(errCode));
-            break;
-        }
-        case SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_INFO: {
-            FocusChangeInfo focusInfo;
-            GetFocusWindowInfo(focusInfo);
-            reply.WriteParcelable(&focusInfo);
-            break;
-        }
-        case SceneSessionManagerMessage::TRANS_ID_SET_GESTURE_NAVIGATION_ENABLED: {
-            bool enable = data.ReadBool();
-            const WMError &ret = SetGestureNavigaionEnabled(enable);
-            reply.WriteInt32(static_cast<int32_t>(ret));
-            break;
-        }
-        case SceneSessionManagerMessage::TRANS_ID_SET_SESSION_LABEL: {
-            sptr<IRemoteObject> token = data.ReadRemoteObject();
-            std::string label = data.ReadString();
-            WSError errCode = SetSessionLabel(token, label);
-            reply.WriteInt32(static_cast<int32_t>(errCode));
-            break;
-        }
-        case SceneSessionManagerMessage::TRANS_ID_SET_SESSION_ICON: {
-            sptr<IRemoteObject> token = data.ReadRemoteObject();
-            std::shared_ptr<Media::PixelMap> icon(data.ReadParcelable<Media::PixelMap>());
-            WSError errCode = SetSessionIcon(token, icon);
-            reply.WriteInt32(static_cast<int32_t>(errCode));
-            break;
-        }
-        case SceneSessionManagerMessage::TRANS_ID_REGISTER_SESSION_LISTENER: {
-            sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
-            WSError errCode = RegisterSessionListener(listener);
-            reply.WriteInt32(static_cast<int32_t>(errCode));
-            break;
-        }
-        case SceneSessionManagerMessage::TRANS_ID_UNREGISTER_SESSION_LISTENER: {
-            UnregisterSessionListener();
-            break;
-        }
-        case SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_INFO: {
-            return HandleGetAccessibilityWindowInfo(data, reply);
-        }
-        default:
-            WLOGFE("Unknown session message!");
-    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

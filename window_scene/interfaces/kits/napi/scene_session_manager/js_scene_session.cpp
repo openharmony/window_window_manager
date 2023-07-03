@@ -38,6 +38,8 @@ const std::string TERMINATE_SESSION_CB = "terminateSession";
 const std::string SESSION_EXCEPTION_CB = "sessionException";
 const std::string SYSTEMBAR_PROPERTY_CHANGE_CB = "systemBarPropertyChange";
 const std::string NEED_AVOID_CB = "needAvoid";
+const std::string PENDING_SESSION_TO_FOREGROUND_CB = "pendingSessionToForeground";
+const std::string PENDING_SESSION_TO_BACKROUND_FOR_DELEGATOR_CB = "pendingSessionToBackgroundForDelegator";
 } // namespace
 
 NativeValue* JsSceneSession::Create(NativeEngine& engine, const sptr<SceneSession>& session)
@@ -90,6 +92,8 @@ JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& s
         { SESSION_EXCEPTION_CB,           &JsSceneSession::ProcessSessionExceptionRegister },
         { SYSTEMBAR_PROPERTY_CHANGE_CB,   &JsSceneSession::ProcessSystemBarPropertyChangeRegister },
         { NEED_AVOID_CB,          &JsSceneSession::ProcessNeedAvoidRegister },
+        { PENDING_SESSION_TO_FOREGROUND_CB,           &JsSceneSession::ProcessPendingSessionToForegroundRegister },
+        { PENDING_SESSION_TO_BACKROUND_FOR_DELEGATOR_CB,           &JsSceneSession::ProcessPendingSessionToBackgroundForDelegatorRegister },
     };
 
     sptr<SceneSession::SessionChangeCallback> sessionchangeCallback = new (std::nothrow)
@@ -194,6 +198,44 @@ void JsSceneSession::ProcessTerminateSessionRegister()
     }
     session->SetTerminateSessionListener(func);
     WLOGFD("ProcessTerminateSessionRegister success");
+}
+
+void JsSceneSession::ProcessPendingSessionToForegroundRegister()
+{
+    WLOGFD("begin to run ProcessPendingSessionToForegroundRegister");
+    auto weak = weak_from_this();
+    NotifyPendingSessionToForegroundFunc func = [weak](const SessionInfo& info) {
+        auto self = weak.lock();
+        if (self) {
+            self->PendingSessionToForeground(info);
+        }
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    session->SetPendingSessionToForegroundListener(func);
+    WLOGFD("ProcessPendingSessionToForegroundRegister success");
+}
+
+void JsSceneSession::ProcessPendingSessionToBackgroundForDelegatorRegister()
+{
+    WLOGFD("begin to run ProcessPendingSessionToBackgroundForDelegatorRegister");
+    auto weak = weak_from_this();
+    NotifyPendingSessionToBackgroundForDelegatorFunc func = [weak](const SessionInfo& info) {
+        auto self = weak.lock();
+        if (self) {
+            self->PendingSessionToBackgroundForDelegator(info);
+        }
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    session->SetPendingSessionToBackgroundForDelegatorListener(func);
+    WLOGFD("ProcessPendingSessionToBackgroundForDelegatorRegister success");
 }
 
 void JsSceneSession::ProcessSessionFocusableChangeRegister()
@@ -695,6 +737,68 @@ void JsSceneSession::OnSessionException(const SessionInfo& info)
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
     AsyncTask::Schedule("JsSceneSession::TerminateSession", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsSceneSession::PendingSessionToForeground(const SessionInfo& info)
+{
+    WLOGFI("[NAPI]run PendingSessionToForeground, bundleName = %{public}s, id = %{public}s",
+        info.bundleName_.c_str(), info.abilityName_.c_str());
+    auto iter = jsCbMap_.find(PENDING_SESSION_TO_FOREGROUND_CB);
+    if (iter == jsCbMap_.end()) {
+        WLOGFE("[NAPI]fail to find pending session to foreground callback");
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [info, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (!jsCallBack) {
+                WLOGFE("[NAPI]jsCallBack is nullptr");
+                return;
+            }
+            NativeValue* jsSessionInfo = CreateJsSessionInfo(engine, info);
+            if (jsSessionInfo == nullptr) {
+                WLOGFE("[NAPI]this target session info is nullptr");
+                return;
+            }
+            NativeValue* argv[] = { jsSessionInfo };
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSession::PendingSessionToForeground", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& info)
+{
+    WLOGFI("[NAPI]run PendingSessionToBackgroundForDelegator, bundleName = %{public}s, id = %{public}s",
+        info.bundleName_.c_str(), info.abilityName_.c_str());
+    auto iter = jsCbMap_.find(PENDING_SESSION_TO_BACKROUND_FOR_DELEGATOR_CB);
+    if (iter == jsCbMap_.end()) {
+        WLOGFE("[NAPI]fail to find pending session to background for delegator callback");
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [info, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (!jsCallBack) {
+                WLOGFE("[NAPI]jsCallBack is nullptr");
+                return;
+            }
+            NativeValue* jsSessionInfo = CreateJsSessionInfo(engine, info);
+            if (jsSessionInfo == nullptr) {
+                WLOGFE("[NAPI]this target session info is nullptr");
+                return;
+            }
+            NativeValue* argv[] = { jsSessionInfo };
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSession::PendingSessionToBackgroundForDelegator", engine_,
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 

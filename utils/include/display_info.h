@@ -28,6 +28,7 @@
 namespace OHOS::Rosen {
 class DisplayInfo : public Parcelable {
 friend class AbstractDisplay;
+friend class ScreenSession;
 public:
     DisplayInfo() = default;
     ~DisplayInfo() = default;
