@@ -466,10 +466,7 @@ WMError WindowSessionImpl::SetFocusable(bool isFocusable)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     property_->SetFocusable(isFocusable);
-    if (state_ == WindowState::STATE_SHOWN) {
-        return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
-    }
-    return WMError::WM_OK;
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
 }
 
 bool WindowSessionImpl::GetFocusable() const
@@ -484,10 +481,7 @@ WMError WindowSessionImpl::SetTouchable(bool isTouchable)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     property_->SetTouchable(isTouchable);
-    if (state_ == WindowState::STATE_SHOWN) {
-        return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
-    }
-    return WMError::WM_OK;
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
 }
 
 bool WindowSessionImpl::GetTouchable() const
