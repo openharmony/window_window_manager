@@ -161,6 +161,30 @@ void SessionManager::InitScreenLockManagerProxy()
     }
 }
 
+WMError SessionManager::RegisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    WLOGFD("RegisterWindowManagerAgent");
+    GetSceneSessionManagerProxy();
+    if (!sceneSessionManagerProxy_) {
+        WLOGFE("sceneSessionManagerProxy_ is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    return static_cast<WMError>(sceneSessionManagerProxy_->RegisterWindowManagerAgent(type, windowManagerAgent));
+}
+
+WMError SessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    WLOGFD("UnregisterWindowManagerAgent");
+    GetSceneSessionManagerProxy();
+    if (!sceneSessionManagerProxy_) {
+        WLOGFE("sceneSessionManagerProxy_ is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    return static_cast<WMError>(sceneSessionManagerProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent));
+}
+
 WMError SessionManager::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
 {
     WLOGFD("GetAccessibilityWindowInfo");

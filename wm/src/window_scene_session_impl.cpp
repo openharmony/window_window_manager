@@ -724,6 +724,7 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         property_->SetMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
         UpdateDecorEnable(true);
     }
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
 
     return WMError::WM_OK;
 }
@@ -740,6 +741,7 @@ WMError WindowSceneSessionImpl::Recover()
         windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
         property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
         UpdateDecorEnable(true);
+        UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
     }
     return WMError::WM_OK;
 }

@@ -99,13 +99,6 @@ WMError WindowAdapter::GetAccessibilityWindowInfo(std::vector<sptr<Accessibility
     return windowManagerServiceProxy_->GetAccessibilityWindowInfo(infos);
 }
 
-WMError WindowAdapter::NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
-    WindowUpdateType type)
-{
-    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-    return windowManagerServiceProxy_->NotifyAccessibilityWindowInfo(infos, type);
-}
-
 WMError WindowAdapter::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);

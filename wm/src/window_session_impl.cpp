@@ -426,7 +426,9 @@ void WindowSessionImpl::NotifyModeChange(WindowMode mode, bool hasDeco)
         property_->SetWindowMode(mode);
         hostSession_->UpdateWindowSessionProperty(property_);
     }
-    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE);
+    if (state_ == WindowState::STATE_SHOWN) {
+        UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE);
+    }
 }
 
 std::shared_ptr<RSSurfaceNode> WindowSessionImpl::GetSurfaceNode() const
@@ -487,7 +489,6 @@ WMError WindowSessionImpl::SetTouchable(bool isTouchable)
     if (state_ == WindowState::STATE_SHOWN) {
         return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
     }
-    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
     return WMError::WM_OK;
 }
 
@@ -499,7 +500,9 @@ bool WindowSessionImpl::GetTouchable() const
 WMError WindowSessionImpl::SetWindowType(WindowType type)
 {
     property_->SetWindowType(type);
-    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
+    if (state_ == WindowState::STATE_SHOWN) {
+        UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
+    }
     return WMError::WM_OK;
 }
 
