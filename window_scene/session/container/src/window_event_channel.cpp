@@ -142,7 +142,7 @@ void WindowEventChannel::PrintPointerEvent(const std::shared_ptr<MMI::PointerEve
 
 WSError WindowEventChannel::TransferFocusWindowId(uint32_t windowId)
 {
-    WLOGFD("WindowEventChannel receive focus window Id event: %{public}zu", windowId);
+    WLOGFD("WindowEventChannel receive focus window Id event: %{public}u", windowId);
     if (!sessionStage_) {
         WLOGFE("session stage is null!");
         return WSError::WS_ERROR_NULLPTR;
