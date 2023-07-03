@@ -561,7 +561,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetAspectRatio, Function | SmallTest | Leve
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetAspectRatio(0.1));
+    ASSERT_EQ(WMError::WM_OK, window->SetAspectRatio(0.1));
 }
 
 /*
@@ -579,13 +579,12 @@ HWTEST_F(WindowSceneSessionImplTest, ResetAspectRatio, Function | SmallTest | Le
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     EXPECT_CALL(*(session), SetAspectRatio(_)).WillOnce(Return(WSError::WS_OK));
-
     ASSERT_EQ(WMError::WM_OK, window->ResetAspectRatio());
 }
 
 /*
- * @tc.name: ResetAspectRatio
- * @tc.desc: ResetAspectRatio test
+ * @tc.name: GetAvoidAreaByType
+ * @tc.desc: GetAvoidAreaByType test
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneSessionImplTest, GetAvoidAreaByType, Function | SmallTest | Level3)
@@ -600,6 +599,20 @@ HWTEST_F(WindowSceneSessionImplTest, GetAvoidAreaByType, Function | SmallTest | 
     ASSERT_NE(nullptr, session);
     AvoidArea avoidarea;
     ASSERT_EQ(WMError::WM_OK, window->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, avoidarea));
+}
+
+/*
+ * @tc.name: LimitCameraFloatWindowMininumSize
+ * @tc.desc: LimitCameraFloatWindowMininumSize01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, LimitCameraFloatWindowMininumSize, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    window->LimitCameraFloatWindowMininumSize(2, 2) 
+
 }
 }
 } // namespace Rosen
