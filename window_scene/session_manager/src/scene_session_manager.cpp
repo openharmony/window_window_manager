@@ -536,9 +536,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             return WSError::WS_ERROR_NULLPTR;
         }
 
-        if (isDelegator) {
-            AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo);
-        } else {
+        if (!isDelegator) {
             AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo);
         }
         return WSError::WS_OK;
