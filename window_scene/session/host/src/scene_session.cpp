@@ -159,26 +159,36 @@ WSError SceneSession::SetAspectRatio(float ratio)
     }
     SaveAspectRatio(aspectRatio_);
     if (FixRectByAspectRatio(winRect_)) {
-        SetSessionRect(winRect_);
         NotifySessionRectChange(winRect_);
         UpdateRect(winRect_, SizeChangeReason::RESIZE);
     }
     return WSError::WS_OK;
 }
 
-WSError SceneSession::UpdateSessionRect(const WSRect &rect, const SizeChangeReason &reason)
+WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason)
+{
+    WLOGFD("UpdateRect [%{public}d, %{public}d, %{public}u, %{public}u]", rect.posX_, rect.posY_,
+        rect.width_, rect.height_);
+    if (isFirstStart_) {
+        WSRect newRect = rect;
+        if (FixRectByAspectRatio(newRect)) {
+            isFirstStart_ = false;
+            WLOGFD("FixedRect [%{public}d, %{public}d, %{public}u, %{public}u]", newRect.posX_, newRect.posY_,
+                newRect.width_, newRect.height_);
+            NotifySessionRectChange(newRect);
+            return Session::UpdateRect(newRect, reason);
+        }
+    }
+    return Session::UpdateRect(rect, reason);
+}
+
+WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
 {
     WLOGFI("UpdateSessionRect [%{public}d, %{public}d, %{public}u, %{public}u]", rect.posX_, rect.posY_,
         rect.width_, rect.height_);
-    WSRect newRect = rect;
-    if (isFirstStart_ && FixRectByAspectRatio(newRect)) {
-        WLOGFD("FixedRect [%{public}d, %{public}d, %{public}u, %{public}u]", newRect.posX_, newRect.posY_,
-            newRect.width_, newRect.height_);
-    }
-    isFirstStart_ = false;
-    SetSessionRect(newRect);
-    NotifySessionRectChange(newRect);
-    UpdateRect(newRect, reason);
+    SetSessionRect(rect);
+    NotifySessionRectChange(rect);
+    UpdateRect(rect, reason);
     return WSError::WS_OK;
 }
 
@@ -324,7 +334,8 @@ bool SceneSession::FixRectByAspectRatio(WSRect& rect)
         return false;
     }
 
-    if (MathHelper::NearZero(aspectRatio_)) {
+    if (MathHelper::NearZero(aspectRatio_ || aspectRatio_ == MathHelper::INF ||
+        aspectRatio_ == MathHelper::NAG_INF)) {
         return false;
     }
     float vpr = 1.5f; // 1.5f: default virtual pixel ratio
