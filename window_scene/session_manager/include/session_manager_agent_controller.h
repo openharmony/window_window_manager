@@ -36,6 +36,7 @@ public:
     void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused);
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
         WindowUpdateType type);
+    void NotifyWaterMarkFlagChangedResult(bool hasWaterMark);
     void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
 private:
     SessionManagerAgentController() {}

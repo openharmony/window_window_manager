@@ -100,7 +100,7 @@ int32_t ANRHandler::GetLastProcessedEventId()
 {
     CALL_DEBUG_ENTER;
     if (event_.lastEventId == INVALID_OR_PROCESSED_ID
-        || event_.lastEventId <= event_.lastReportId) {
+        || event_.lastEventId < event_.lastReportId) {
         WLOGFD("Invalid or processed, lastEventId:%{public}d, lastReportId:%{public}d",
             event_.lastEventId, event_.lastReportId);
         return INVALID_OR_PROCESSED_ID;
