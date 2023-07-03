@@ -53,6 +53,7 @@ public:
     virtual WSError SetActive(bool active) = 0;
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) = 0;
     virtual WSError HandleBackEvent() = 0;
+    virtual WSError MarkProcessed(int32_t eventId) = 0;
     virtual WSError UpdateFocus(bool isFocused) = 0;
     virtual WSError NotifyDestroy() = 0;
     virtual void NotifyTouchDialogTarget() = 0;

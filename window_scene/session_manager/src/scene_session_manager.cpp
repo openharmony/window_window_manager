@@ -628,6 +628,16 @@ void SceneSessionManager::SetCreateSpecificSessionListener(const NotifyCreateSpe
     createSpecificSessionFunc_ = func;
 }
 
+void SceneSessionManager::SetGestureNavigationEnabledChangeListener(
+    const ProcessGestureNavigationEnabledChangeFunc& func)
+{
+    WLOGFD("SetGestureNavigationEnabledChangeListener");
+    if (!func) {
+        WLOGFD("set func is null");
+    }
+    gestureNavigationEnabledChangeFunc_ = func;
+}
+
 WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const uint64_t& persistentId)
 {
     auto task = [this, persistentId]() {
@@ -986,6 +996,21 @@ float SceneSessionManager::GetDisplayBrightness() const
     return displayBrightness_;
 }
 
+WMError SceneSessionManager::SetGestureNavigaionEnabled(bool enable)
+{
+    WLOGFD("SetGestureNavigationEnabled, enable: %{public}d", enable);
+    auto task = [this, enable]() {
+        if (!gestureNavigationEnabledChangeFunc_) {
+            WLOGFE("callback func is null");
+            return WMError::WM_DO_NOTHING;
+        } else {
+            gestureNavigationEnabledChangeFunc_(enable);
+        }
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task);
+}
+
 WSError SceneSessionManager::SetFocusedSession(uint64_t persistentId)
 {
     if (focusedSessionId_ == persistentId) {
@@ -1019,6 +1044,7 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
 WSError SceneSessionManager::UpdateFocus(uint64_t persistentId, bool isFocused)
 {
     auto task = [this, persistentId, isFocused]() {
+        WLOGFD("Update focus, id: %{public}" PRIu64", isFocused: %{public}u", persistentId, static_cast<uint32_t>(isFocused));
         // notify session and client
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
@@ -1308,5 +1334,25 @@ void SceneSessionManager::InitPersistentStorage()
             SceneSession::maximizeMode_ = static_cast<MaximizeMode>(storageMode);
         }
     }
+}
+
+std::string SceneSessionManager::GetSessionSnapshot(uint64_t persistentId)
+{
+    WLOGFI("GetSessionSnapshot persistentId %{public}" PRIu64 "", persistentId);
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        WLOGFE("GetSessionSnapshot sceneSession nullptr!");
+        return "";
+    }
+    wptr<SceneSession> weakSceneSession(sceneSession);
+    auto task = [this, weakSceneSession]() {
+        auto scnSession = weakSceneSession.promote();
+        if (scnSession == nullptr) {
+            WLOGFE("session is nullptr");
+            return std::string("");
+        }
+        return scnSession->GetSessionSnapshot();
+    };
+    return taskScheduler_->PostSyncTask(task);
 }
 } // namespace OHOS::Rosen
