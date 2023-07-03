@@ -55,6 +55,7 @@ public:
 
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    auto surfaceNode = CreateRSSurfaceNode();
 };
 
 void WindowSceneSessionImplTest::SetUpTestCase() {}
@@ -263,6 +264,9 @@ HWTEST_F(WindowSceneSessionImplTest, HandleBackEvent01, Function | SmallTest | L
     std::shared_ptr<AbilityRuntime::AbilityContext> context = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     windowscenesession->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     Ace::UIContentMocker *content = reinterpret_cast<Ace::UIContentMocker *>(windowscenesession->uiContent_.get());
+    EXPECT_CALL(*content, ProcessBackPressed()).WillOnce(Return(false));
+    ASSERT_EQ(WSError::WS_OK, window->HandleBackEvent());
+
 }
 
 /**
@@ -303,7 +307,6 @@ HWTEST_F(WindowSceneSessionImplTest, RaiseToAppTop01, Function | SmallTest | Lev
 HWTEST_F(WindowSceneSessionImplTest, Resize01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    WSRect wsRect = { 1, 2, 2, 2 };
     option->SetWindowName("Connect01");
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
@@ -389,7 +392,7 @@ HWTEST_F(WindowSceneSessionImplTest, Close01, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, session);
     windowscenesession->hostSession_ = session;
     EXPECT_CALL(*(session), OnSessionEvent(SessionEvent::EVENT_CLOSE)).WillOnce(Return(WSError::WS_OK));
-    ASSERT_EQ(WMError::WS_OK, windowscenesession->Close());
+    ASSERT_EQ(WMError::WM_OK, windowscenesession->Close());
 }
 
 /**
@@ -582,8 +585,16 @@ HWTEST_F(WindowSceneSessionImplTest, GetAvoidAreaByType, Function | SmallTest | 
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
-    AvoidArea &avoidArea;
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    EXPECT_CALL(*(session), GetAvoidAreaByType(_)).WillOnce(Return(WSError::WS_OK));
+    AvoidArea avoidarea;
     ASSERT_EQ(WMError::WM_OK, window->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, avoidarea));
+
 }
 }
 } // namespace Rosen
