@@ -77,6 +77,8 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
     BindNativeFunction(*engine, *object, "startAbilityBySpecified", moduleName,
         JsSceneSessionManager::StartAbilityBySpecified);
     BindNativeFunction(*engine, *object, "getSessionSnapshot", moduleName, JsSceneSessionManager::GetSessionSnapshot);
+    BindNativeFunction(*engine, *object, "InitWithRenderServiceAdded", moduleName,
+        JsSceneSessionManager::InitWithRenderServiceAdded);
     return engine->CreateUndefined();
 }
 
@@ -261,6 +263,13 @@ NativeValue* JsSceneSessionManager::GetSessionSnapshot(NativeEngine* engine, Nat
     WLOGI("[NAPI]GetSessionSnapshot");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
     return (me != nullptr) ? me->OnGetSessionSnapshot(*engine, *info) : nullptr;
+}
+
+NativeValue* JsSceneSessionManager::InitWithRenderServiceAdded(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGI("[NAPI]InitWithRenderServiceAdded");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
+    return (me != nullptr) ? me->OnInitWithRenderServiceAdded(*engine, *info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject)
@@ -765,4 +774,10 @@ NativeValue* JsSceneSessionManager::OnGetSessionSnapshot(NativeEngine& engine, N
     return result;
 }
 
+NativeValue* JsSceneSessionManager::OnInitWithRenderServiceAdded(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGI("[NAPI]OnInitWithRenderServiceAdded");
+    SceneSessionManager::GetInstance().InitWithRenderServiceAdded();
+    return engine.CreateUndefined();
+}
 } // namespace OHOS::Rosen

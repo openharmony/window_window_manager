@@ -46,6 +46,7 @@ public:
     static NativeValue* UpdateFocus(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SwitchUser(NativeEngine* engin, NativeCallbackInfo* info);
     static NativeValue* GetSessionSnapshot(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* InitWithRenderServiceAdded(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
     NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
@@ -61,6 +62,7 @@ private:
     NativeValue* OnUpdateFocus(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSwitchUser(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetSessionSnapshot(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnInitWithRenderServiceAdded(NativeEngine& engine, NativeCallbackInfo& info);
 
     void OnGestureNavigationEnabledUpdate(bool enable);
     void OnCreateSpecificSession(const sptr<SceneSession>& sceneSession);

@@ -57,5 +57,16 @@ void SessionManagerAgentController::UpdateFocusChangeInfo(const sptr<FocusChange
         }
     }
 }
+
+void SessionManagerAgentController::UpdateWindowVisibilityInfo(
+    const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos)
+{
+    WLOGFD("Size:%{public}zu", windowVisibilityInfos.size());
+    for (auto& agent : smAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY)) {
+        agent->UpdateWindowVisibilityInfo(windowVisibilityInfos);
+    }
+}
+
 } // namespace Rosen
 } // namespace OHOS

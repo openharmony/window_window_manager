@@ -19,6 +19,7 @@
 #include "client_agent_container.h"
 #include "wm_single_instance.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "window_visibility_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -32,6 +33,7 @@ public:
 
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused);
+    void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
 private:
     SessionManagerAgentController() {}
     virtual ~SessionManagerAgentController() = default;
