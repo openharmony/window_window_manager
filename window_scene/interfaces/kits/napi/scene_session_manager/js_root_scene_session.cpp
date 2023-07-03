@@ -148,14 +148,14 @@ NativeValue* JsRootSceneSession::OnLoadContent(NativeEngine& engine, NativeCallb
 
     std::shared_ptr<NativeReference> contentStorage =
         (storage == nullptr) ? nullptr : std::shared_ptr<NativeReference>(engine.CreateReference(storage, 1));
-    NativeValue* nativeStorage = contentStorage ? contentStorage->Get() : nullptr;
-    AsyncTask::CompleteCallback complete = [rootSceneSession = rootSceneSession_, contentUrl, contextWeakPtr,
-                                               nativeStorage](NativeEngine& engine, AsyncTask& task, int32_t status) {
+    AsyncTask::CompleteCallback complete = [rootSceneSession = rootSceneSession_,
+        contentUrl, contextWeakPtr, contentStorage](NativeEngine& engine, AsyncTask& task, int32_t status) {
         if (rootSceneSession == nullptr) {
             WLOGFE("[NAPI]rootSceneSession is nullptr");
             task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
             return;
         }
+        NativeValue* nativeStorage = contentStorage ? contentStorage->Get() : nullptr;
         rootSceneSession->LoadContent(contentUrl, &engine, nativeStorage, contextWeakPtr.lock().get());
     };
     NativeValue* lastParam = nullptr;
