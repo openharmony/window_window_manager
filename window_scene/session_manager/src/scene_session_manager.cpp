@@ -52,6 +52,12 @@
 #include "focus_change_info.h"
 #include "session_manager/include/screen_session_manager.h"
 
+#include "window_visibility_info.h"
+#ifdef MEMMGR_WINDOW_ENABLE
+#include "mem_mgr_client.h"
+#include "mem_mgr_window_info.h"
+#endif
+
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManager" };
@@ -62,7 +68,7 @@ constexpr int32_t DEFAULT_USERID = -1;
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SceneSessionManager)
 
-SceneSessionManager::SceneSessionManager()
+SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInstance())
 {
     taskScheduler_ = std::make_shared<TaskScheduler>(SCENE_SESSION_MANAGER_THREAD);
     bundleMgr_ = GetBundleManager();
@@ -1357,6 +1363,102 @@ std::string SceneSessionManager::GetSessionSnapshot(uint64_t persistentId)
         return scnSession->GetSessionSnapshot();
     };
     return taskScheduler_->PostSyncTask(task);
+}
+
+std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowVisibilityChangeInfo(
+    std::shared_ptr<RSOcclusionData> occlusionData)
+{
+    std::vector<std::pair<uint64_t, bool>> visibilityChangeInfo;
+    VisibleData& currentVisibleWindow = occlusionData->GetVisibleData();
+    std::sort(currentVisibleWindow.begin(), currentVisibleWindow.end());
+    VisibleData& lastVisibleWindow = lastOcclusionData_->GetVisibleData();
+    uint32_t i, j;
+    i = j = 0;
+    for (; i < lastVisibleWindow.size() && j < currentVisibleWindow.size();) {
+        if (lastVisibleWindow[i] < currentVisibleWindow[j]) {
+            visibilityChangeInfo.emplace_back(lastVisibleWindow[i], false);
+            i++;
+        } else if (lastVisibleWindow[i] > currentVisibleWindow[j]) {
+            visibilityChangeInfo.emplace_back(currentVisibleWindow[j], true);
+            j++;
+        } else {
+            i++;
+            j++;
+        }
+    }
+    for (; i < lastVisibleWindow.size(); ++i) {
+        visibilityChangeInfo.emplace_back(lastVisibleWindow[i], false);
+    }
+    for (; j < currentVisibleWindow.size(); ++j) {
+        visibilityChangeInfo.emplace_back(currentVisibleWindow[j], true);
+    }
+    lastOcclusionData_ = occlusionData;
+    return visibilityChangeInfo;
+}
+
+void SceneSessionManager::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclusionData> occlusiontionData)
+{
+    WLOGFI("WindowVisibilityChangeCallback: entry");
+    std::weak_ptr<RSOcclusionData> weak(occlusiontionData);
+
+    taskScheduler_->PostVoidSyncTask([this, weak]() {
+    auto weakOcclusionData = weak.lock();
+    if (weakOcclusionData == nullptr) {
+        WLOGFE("weak occlusionData is nullptr");
+        return;
+    }
+
+    std::vector<std::pair<uint64_t, bool>> visibilityChangeInfo = GetWindowVisibilityChangeInfo(weakOcclusionData);
+    std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+#ifdef MEMMGR_WINDOW_ENABLE
+    std::vector<sptr<Memory::MemMgrWindowInfo>> memMgrWindowInfos;
+#endif
+    for (const auto& elem : visibilityChangeInfo) {
+        uint64_t surfaceId = elem.first;
+        bool isVisible = elem.second;
+        auto iter = sceneSessionMap_.begin();
+        for (; iter != sceneSessionMap_.end(); iter++) {
+            if (surfaceId == iter->second->GetSurfaceNode()->GetId()) {
+                break;
+            }
+        }
+        if (iter == sceneSessionMap_.end()) {
+            continue;
+        }
+        sptr<SceneSession> session = iter->second;
+        if (session == nullptr) {
+            continue;
+        }
+        windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(session->GetWindowId(), session->GetCallingPid(),
+            session->GetCallingUid(), isVisible, session->GetWindowType()));
+#ifdef MEMMGR_WINDOW_ENABLE
+        memMgrWindowInfos.emplace_back(new Memory::MemMgrWindowInfo(session->GetWindowId(), session->GetCallingPid(),
+            session->GetCallingUid(), isVisible));
+#endif
+        WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
+            session->GetWindowId(), isVisible);
+}
+        if (windowVisibilityInfos.size() != 0) {
+            WLOGI("Notify windowvisibilityinfo changed start");
+            SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
+        }
+#ifdef MEMMGR_WINDOW_ENABLE
+        if (memMgrWindowInfos.size() != 0) {
+            WLOGI("Notify memMgrWindowInfos changed start");
+            Memory::MemMgrClient::GetInstance().OnWindowVisibilityChanged(memMgrWindowInfos);
+        }
+#endif
+    });
+}
+
+void SceneSessionManager::InitWithRenderServiceAdded()
+{
+    auto windowVisibilityChangeCb = std::bind(&SceneSessionManager::WindowVisibilityChangeCallback, this,
+        std::placeholders::_1);
+    WLOGI("RegisterWindowVisibilityChangeCallback");
+    if (rsInterface_.RegisterOcclusionChangeCallback(windowVisibilityChangeCb) != WM_OK) {
+        WLOGFE("RegisterWindowVisibilityChangeCallback failed");
+    }
 }
 
 sptr<SceneSession> SceneSessionManager::FindSessionByToken(const sptr<IRemoteObject> &token)
