@@ -14,7 +14,6 @@
  */
 
 #include <gtest/gtest.h>
-#include <ui/rs_surface_node.h>
 #include "ability_context_impl.h"
 #include "mock_session.h"
 #include "window_session_impl.h"
