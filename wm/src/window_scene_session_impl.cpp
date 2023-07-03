@@ -485,7 +485,8 @@ WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
 {
     if (property_ == nullptr) {
         WLOGFE("SetAspectRatio failed because of property is null");
-        return  WMError::WM_ERROR_NULLPTR;
+        return  WMError::
+        ;
     }
 
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());

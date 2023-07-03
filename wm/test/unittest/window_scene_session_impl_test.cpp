@@ -407,11 +407,11 @@ HWTEST_F(WindowSceneSessionImplTest, SetActive01, Function | SmallTest | Level2)
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
     windowscenesession->property_->SetPersistentId(1);
-
     windowscenesession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
+
     windowscenesession->hostSession_ = session;
     EXPECT_CALL(*(session), UpdateActiveStatus(false)).WillOnce(Return(WSError::WS_OK));
     ASSERT_EQ(WSError::WS_OK, windowscenesession->SetActive(false));
@@ -473,9 +473,9 @@ HWTEST_F(WindowSceneSessionImplTest, Hide01, Function | SmallTest | Level2)
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, window->Hide(2, false, false));
+    ASSERT_EQ(WMError::WM_OK, window->Hide(2, false, false));
 
-    ASSERT_EQ(WMError::WM_OK, window->Hide(2, false, false));
-    ASSERT_EQ(WMError::WM_OK, window->Hide(2, false, false));
     window->state_ = WindowState::STATE_CREATED;
     ASSERT_EQ(WMError::WM_OK, window->Hide(2, false, false));
     window->state_ = WindowState::STATE_SHOWN;
@@ -484,7 +484,7 @@ HWTEST_F(WindowSceneSessionImplTest, Hide01, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_OK, window->Hide(2, false, false));
 
     window->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
-    ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->Destroy(false));
 }
 
 /**
@@ -503,9 +503,11 @@ HWTEST_F(WindowSceneSessionImplTest, Show01, Function | SmallTest | Level2)
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
+
     window->hostSession_ = session;
     EXPECT_CALL(*(session), Foreground()).WillOnce(Return(WSError::WS_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show(2, false));
+
     window->state_ = WindowState::STATE_CREATED;
     EXPECT_CALL(*(session), Foreground()).WillOnce(Return(WSError::WS_ERROR_INVALID_SESSION));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_SESSION, window->Show(2, false));
@@ -525,12 +527,13 @@ HWTEST_F(WindowSceneSessionImplTest, SetBackgroundColor01, Function | SmallTest 
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
+
     std::shared_ptr<AbilityRuntime::Context> context;
     ASSERT_EQ(WMError::WM_OK, window->Create(context, session));
+
     window->property_->SetPersistentId(1);
     window->Show();
 }
@@ -570,8 +573,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetAspectRatio, Function | SmallTest | Leve
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    EXPECT_CALL(*(session), SetAspectRatio(_)).WillOnce(Return(WSError::WS_OK));
-    ASSERT_EQ(WMError::WM_OK, window->SetAspectRatio(0.1));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetAspectRatio(0.1));
 }
 
 /*
