@@ -113,3 +113,10 @@ FOCUS_WINDOW:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: PowerStats, desc: Window focus changed}
   PID: {type: INT32, desc: app pid}
   UID: {type: INT32, desc: app uid}
+
+APPLICATION_BLOCK_INPUT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: The event is not consumed}
+  EVENT_ID: {type: INT32, desc: eventId}
+  PID: {type: INT32, desc: pid}
+  PERSISTENT_ID: { type: INT32, desc: persistentId}
+  MSG: {type: STRING, desc: event not consumed}
