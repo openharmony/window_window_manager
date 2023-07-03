@@ -822,6 +822,10 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
         }
         WLOGI("Id: %{public}" PRIu64 ", action: %{public}u", sceneSession->GetPersistentId(), action);
         switch (action) {
+            case WSPropertyChangeAction::ACTION_UPDATE_FLAGS: {
+                SetWindowFlags(sceneSession, property->GetWindowFlags());
+                break;
+            }
             case WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON: {
                 sceneSession->SetTurnScreenOn(property->IsTurnScreenOn());
                 HandleTurnScreenOn(sceneSession);
@@ -1053,6 +1057,7 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
 WSError SceneSessionManager::UpdateFocus(uint64_t persistentId, bool isFocused)
 {
     auto task = [this, persistentId, isFocused]() {
+        WLOGFD("Update focus, id: %{public}" PRIu64", isFocused: %{public}u", persistentId, static_cast<uint32_t>(isFocused));
         // notify session and client
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
@@ -1135,6 +1140,54 @@ void SceneSessionManager::OnSessionStateChange(uint64_t persistentId)
     default:
         break;
     }
+}
+
+void SceneSessionManager::SetWaterMarkSessionCount(int32_t count)
+{
+    waterMarkSessionCount_ = count;
+}
+int32_t SceneSessionManager::GetWaterMarkSessionCount() const
+{
+    return waterMarkSessionCount_;
+}
+
+WSError SceneSessionManager::SetWindowFlags(const sptr<SceneSession>& sceneSession, uint32_t flags)
+{
+    if (sceneSession == nullptr) {
+        WLOGFD("session is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    auto property = sceneSession->GetWindowSessionProperty();
+    uint32_t oldFlags = property->GetWindowFlags();
+    property->SetWindowFlags(flags);
+    // notify when visibility change
+    if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) {
+        CheckAndNotifyWaterMarkChangedResult(flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK));
+    }
+    WLOGFI("SetWindowFlags end");
+    return WSError::WS_OK;
+}
+
+void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult(bool isAddingWaterMark)
+{
+    int32_t preWaterMarkSessionCount = GetWaterMarkSessionCount();
+    WLOGFD("before update : water mark count: %{public}u", preWaterMarkSessionCount);
+    SetWaterMarkSessionCount(preWaterMarkSessionCount + (isAddingWaterMark ? 1 : -1));
+    if (preWaterMarkSessionCount == 0 && isAddingWaterMark) {
+        NotifyWaterMarkFlagChangedResult(true);
+        return;
+    }
+    if (preWaterMarkSessionCount == 1 && !isAddingWaterMark) {
+        NotifyWaterMarkFlagChangedResult(false);
+        return;
+    }
+}
+
+WSError SceneSessionManager::NotifyWaterMarkFlagChangedResult(bool hasWaterMark)
+{
+    WLOGFI("WaterMark status : %{public}u", static_cast<uint32_t>(hasWaterMark));
+    SessionManagerAgentController::GetInstance().NotifyWaterMarkFlagChangedResult(hasWaterMark);
+    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label)

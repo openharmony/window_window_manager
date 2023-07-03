@@ -861,6 +861,43 @@ WMError WindowSceneSessionImpl::SetTransparent(bool isTransparent)
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::AddWindowFlag(WindowFlag flag)
+{
+    uint32_t updateFlags = property_->GetWindowFlags() | (static_cast<uint32_t>(flag));
+    return SetWindowFlags(updateFlags);
+}
+
+WMError WindowSceneSessionImpl::RemoveWindowFlag(WindowFlag flag)
+{
+    uint32_t updateFlags = property_->GetWindowFlags() & (~(static_cast<uint32_t>(flag)));
+    return SetWindowFlags(updateFlags);
+}
+
+WMError WindowSceneSessionImpl::SetWindowFlags(uint32_t flags)
+{
+    WLOGI("Session %{public}u flags %{public}u", GetWindowId(), flags);
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (property_->GetWindowFlags() == flags) {
+        return WMError::WM_OK;
+    }
+    auto oriFlags = property_->GetWindowFlags();
+    property_->SetWindowFlags(flags);
+    WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_FLAGS);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetWindowFlags errCode:%{public}d winId:%{public}u",
+            static_cast<int32_t>(ret), GetWindowId());
+        property_->SetWindowFlags(oriFlags);
+    }
+    return ret;
+}
+
+uint32_t WindowSceneSessionImpl::GetWindowFlags() const
+{
+    return property_->GetWindowFlags();
+}
+
 static float ConvertRadiusToSigma(float radius)
 {
     return radius > 0.0f ? 0.57735f * radius + SK_ScalarHalf : 0.0f; // 0.57735f is blur sigma scale
@@ -1057,6 +1094,17 @@ void WindowSceneSessionImpl::SetSystemPrivacyMode(bool isSystemPrivacyMode)
     WLOGFD("id : %{public}u, SetSystemPrivacyMode, %{public}u", GetWindowId(), isSystemPrivacyMode);
     property_->SetSystemPrivacyMode(isSystemPrivacyMode);
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
+}
+
+WMError WindowSceneSessionImpl::SetSnapshotSkip(bool isSkip)
+{
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("set snapshot skip permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    surfaceNode_->SetSecurityLayer(isSkip || property_->GetSystemPrivacyMode());
+    RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::NotifyMemoryLevel(int32_t level) const

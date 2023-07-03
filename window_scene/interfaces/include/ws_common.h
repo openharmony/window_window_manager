@@ -113,6 +113,15 @@ struct SessionInfo {
     int64_t uiAbilityId_ = 0;
 };
 
+enum class SessionFlag : uint32_t {
+    SESSION_FLAG_NEED_AVOID = 1,
+    SESSION_FLAG_PARENT_LIMIT = 1 << 1,
+    SESSION_FLAG_SHOW_WHEN_LOCKED = 1 << 2,
+    SESSION_FLAG_FORBID_SPLIT_MOVE = 1 << 3,
+    SESSION_FLAG_WATER_MARK = 1 << 4,
+    SESSION_FLAG_END = 1 << 5,
+};
+
 enum class SizeChangeReason : uint32_t {
     UNDEFINED = 0,
     MAXIMIZE,
