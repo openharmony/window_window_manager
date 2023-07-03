@@ -28,6 +28,9 @@ config("session_public_config") {
 
     # for WMError Code
     "${window_base_path}/interfaces/innerkits/wm",
+
+    # for mouse style
+    "${multimodalinput_path}/input/util/common/include",
   ]
 }
 
