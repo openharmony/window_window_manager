@@ -55,7 +55,6 @@ public:
 
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    // auto surfaceNode = CreateRSSurfaceNode();
 };
 
 void WindowSceneSessionImplTest::SetUpTestCase() {}
@@ -71,14 +70,6 @@ void WindowSceneSessionImplTest::TearDown()
 {
     abilityContext_ = nullptr;
 }
-
-// RSSurfaceNode::SharedPtr WindowSceneSessionImplTest::CreateRSSurfaceNode()
-// {
-//     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
-//     rsSurfaceNodeConfig.SurfaceNodeName = "WindowSessionTestSurfaceNode";
-//     auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig);
-//     return surfaceNode;
-// }
 
 namespace {
 /**
