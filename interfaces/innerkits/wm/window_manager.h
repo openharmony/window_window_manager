@@ -130,7 +130,6 @@ public:
      * @return True means marshall success, false means marshall failed.
      */
     virtual bool Marshalling(Parcel& parcel) const override;
-
     /**
      * @brief Unmarshalling AccessibilityWindowInfo.
      *

@@ -15,8 +15,6 @@
 
 #include "window_transition_info.h"
 
-#include "window_info.h"
-
 namespace OHOS {
 namespace Rosen {
 WindowTransitionInfo::WindowTransitionInfo(sptr<AAFwk::AbilityTransitionInfo> info)

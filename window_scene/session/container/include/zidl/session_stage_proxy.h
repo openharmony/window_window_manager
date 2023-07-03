@@ -36,8 +36,6 @@ public:
     WSError NotifyDestroy() override;
     void NotifyTouchDialogTarget() override;
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
-    WindowMode GetWindowMode() override;
-    bool IsWindowDecorEnable() override;
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
 };

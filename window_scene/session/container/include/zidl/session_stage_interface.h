@@ -27,7 +27,6 @@ class AxisEvent;
 } // namespace MMI
 
 namespace OHOS::Rosen {
-enum class WindowMode: uint32_t;
 class ISessionStage : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISessionStage");
@@ -40,8 +39,6 @@ public:
         TRANS_ID_NOTIFY_DESTROY,
         TRANS_ID_NOTIFY_TOUCH_DIALOG_TARGET,
         TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA,
-        TRANS_ID_GET_WINDOW_MODE,
-        TRANS_ID_IS_WINDOW_DECOR_ENABLE,
     };
 
     virtual void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
@@ -60,8 +57,6 @@ public:
     virtual WSError UpdateFocus(bool isFocused) = 0;
     virtual WSError NotifyDestroy() = 0;
     virtual void NotifyTouchDialogTarget() = 0;
-    virtual WindowMode GetWindowMode() = 0;
-    virtual bool IsWindowDecorEnable() = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H
