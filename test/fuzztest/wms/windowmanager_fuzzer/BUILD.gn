@@ -34,7 +34,10 @@ ohos_fuzztest("WindowManagerFuzzTest") {
   ]
 
   sources = [ "windowmanager_fuzzer.cpp" ]
-  deps = [ "${window_base_path}/wm:libwm" ]
+  deps = [
+    "${window_base_path}/wm:libwm",
+    "${window_base_path}/utils:libwmutil",
+  ]
 
   external_deps = [
     "c_utils:utils",
