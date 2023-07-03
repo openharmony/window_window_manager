@@ -49,7 +49,7 @@ WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManager)
 public:
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property = nullptr);
     WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession);
-    WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession);
+    WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession, const bool isDelegator = false);
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession);
     void StartAbilityBySpecified(const SessionInfo& sessionInfo);
@@ -84,6 +84,10 @@ public:
     void UnregisterSessionListener();
     void HandleTurnScreenOn(const sptr<SceneSession>& sceneSession);
     void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
+    WSError PendingSessionToForeground(const sptr<IRemoteObject> &token);
+    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token);
+    WSError GetFocusSessionToken(sptr<IRemoteObject> &token);
+
     void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
     void InitPersistentStorage();
     std::string GetSessionSnapshot(uint64_t persistentId);
@@ -145,6 +149,7 @@ private:
     void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void OnSessionStateChange(uint64_t persistentId);
     sptr<ISessionListener> sessionListener_;
+    sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject> &token);
 
     void CheckAndNotifyWaterMarkChangedResult(bool isAddingWaterMark);
     WSError NotifyWaterMarkFlagChangedResult(bool hasWaterMark);
