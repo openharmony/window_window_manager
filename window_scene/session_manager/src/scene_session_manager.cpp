@@ -46,7 +46,6 @@
 #include "session/screen/include/screen_session.h"
 #include "session_manager/include/screen_session_manager.h"
 #include "singleton_container.h"
-// #include "window_adapter.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "wm_math.h"
