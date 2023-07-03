@@ -1334,7 +1334,7 @@ void SceneSessionManager::NotifyWindowInfoChange(uint64_t persistentId, WindowUp
 
     const auto& sceneSession = iter->second;
     FillWindowInfo(infos, sceneSession);
-    // SingletonContainer::Get<WindowAdapter>().NotifyAccessibilityWindowInfo(infos, type);
+    SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(infos, type);
 }
 
 void SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,

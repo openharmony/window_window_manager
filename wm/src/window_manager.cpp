@@ -372,8 +372,13 @@ WMError WindowManager::RegisterWindowUpdateListener(const sptr<IWindowUpdateList
     WMError ret = WMError::WM_OK;
     if (pImpl_->windowUpdateListenerAgent_ == nullptr) {
         pImpl_->windowUpdateListenerAgent_ = new WindowManagerAgent();
-        ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
-            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE, pImpl_->windowUpdateListenerAgent_);
+        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            ret = SingletonContainer::Get<SessionManager>().RegisterWindowManagerAgent(
+                WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE, pImpl_->windowUpdateListenerAgent_);
+        } else {
+            ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
+                WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE, pImpl_->windowUpdateListenerAgent_);
+        }
     }
     if (ret != WMError::WM_OK) {
         WLOGFW("RegisterWindowManagerAgent failed !");
@@ -404,8 +409,13 @@ WMError WindowManager::UnregisterWindowUpdateListener(const sptr<IWindowUpdateLi
     pImpl_->windowUpdateListeners_.erase(iter);
     WMError ret = WMError::WM_OK;
     if (pImpl_->windowUpdateListeners_.empty() && pImpl_->windowUpdateListenerAgent_ != nullptr) {
-        ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
-            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE, pImpl_->windowUpdateListenerAgent_);
+        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            ret = SingletonContainer::Get<SessionManager>().UnregisterWindowManagerAgent(
+                WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE, pImpl_->windowUpdateListenerAgent_);
+        } else {
+            ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
+                WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE, pImpl_->windowUpdateListenerAgent_);
+        }
         if (ret == WMError::WM_OK) {
             pImpl_->windowUpdateListenerAgent_ = nullptr;
         }

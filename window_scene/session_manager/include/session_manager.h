@@ -38,6 +38,10 @@ public:
     sptr<IScreenSessionManager> GetScreenSessionManagerProxy();
     sptr<ScreenLock::ScreenLockManagerInterface> GetScreenLockManagerProxy();
 
+    WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
+    WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
 protected:
     SessionManager() = default;
