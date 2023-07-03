@@ -33,6 +33,7 @@ public:
 
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused);
+    void NotifyWaterMarkFlagChangedResult(bool hasWaterMark);
     void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
 private:
     SessionManagerAgentController() {}

@@ -106,7 +106,7 @@ private:
     ScreenState screenState_ { ScreenState::INIT };
     std::vector<IScreenChangeListener*> screenChangeListenerList_;
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
-    uint32_t privateSessionCount_ { 0 };
+    int32_t privateSessionCount_ { 0 };
 };
 
 class ScreenSessionGroup : public ScreenSession {

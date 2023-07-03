@@ -94,6 +94,10 @@ public:
     void InitPersistentStorage();
     std::string GetSessionSnapshot(uint64_t persistentId);
 
+    WSError SetWindowFlags(const sptr<SceneSession>& sceneSession, uint32_t flags);
+
+    void SetWaterMarkSessionCount(int32_t count);
+    int32_t GetWaterMarkSessionCount() const;
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
@@ -153,6 +157,10 @@ private:
     void OnSessionStateChange(uint64_t persistentId);
     sptr<ISessionListener> sessionListener_;
     sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject> &token);
+
+    void CheckAndNotifyWaterMarkChangedResult(bool isAddingWaterMark);
+    WSError NotifyWaterMarkFlagChangedResult(bool hasWaterMark);
+    int32_t waterMarkSessionCount_ { 0 };
 };
 } // namespace OHOS::Rosen
 

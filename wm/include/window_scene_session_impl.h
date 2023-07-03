@@ -57,6 +57,11 @@ public:
 
     WMError NotifyMemoryLevel(int32_t level) const override;
 
+    virtual WMError AddWindowFlag(WindowFlag flag) override;
+    virtual WMError RemoveWindowFlag(WindowFlag flag) override;
+    virtual WMError SetWindowFlags(uint32_t flags) override;
+    virtual uint32_t GetWindowFlags() const override;
+
     // window effect
     virtual WMError SetCornerRadius(float cornerRadius) override;
     virtual WMError SetShadowRadius(float radius) override;
@@ -72,6 +77,7 @@ public:
     virtual WMError SetKeepScreenOn(bool keepScreenOn) override;
     virtual WMError SetPrivacyMode(bool isPrivacyMode) override;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
+    virtual WMError SetSnapshotSkip(bool isSkip) override;
 
     virtual bool IsTransparent() const override;
     virtual bool IsTurnScreenOn() const override;
