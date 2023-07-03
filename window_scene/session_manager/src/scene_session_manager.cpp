@@ -1307,27 +1307,45 @@ std::string SceneSessionManager::GetSessionSnapshot(uint64_t persistentId)
     };
     return taskScheduler_->PostSyncTask(task);
 }
+
+sptr<SceneSession> SceneSessionManager::FindSessionByToken(const sptr<IRemoteObject> &token)
+{
+    sptr<SceneSession> session = nullptr;
+    auto cmpFunc = [token](const std::map<uint64_t, sptr<SceneSession>>::value_type& pair) {
+        if (pair.second == nullptr) {
+            return false;
+        }
+        if (pair.second -> GetAbilityToken() == token) {
+            return true;
+        }
+        return false;
+    };
+    auto iter = std::find_if(sceneSessionMap_.begin(), sceneSessionMap_.end(), cmpFunc);
+    if (iter != sceneSessionMap_.end()) {
+        session = iter->second;
+    }
+    return session;
+}
+
 WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject> &token)
 {
     WLOGFI("run PendingSessionToForeground");
-    for (auto iter : sceneSessionMap_) {
-        sptr<Session> sceneSession = iface_cast<Session>(iter.second->AsObject());
-        if (sceneSession->GetAbilityToken() == token) {
-            return sceneSession->PendingSessionToForeground();
-        }
+    auto session = FindSessionByToken(token);
+    if (session != nullptr) {
+        return session->PendingSessionToForeground();
     }
+    WLOGFE("fail to find token");
     return WSError::WS_ERROR_INVALID_PARAM;
 }
 
 WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token)
 {
     WLOGFI("run PendingSessionToBackgroundForDelegator");
-    for (auto iter : sceneSessionMap_) {
-        sptr<Session> sceneSession = iface_cast<Session>(iter.second->AsObject());
-        if (sceneSession->GetAbilityToken() == token) {
-            return sceneSession->PendingSessionToBackgroundForDelegator();
-        }
+    auto session = FindSessionByToken(token);
+    if (session != nullptr) {
+        return session->PendingSessionToBackgroundForDelegator();
     }
+    WLOGFE("fail to find token");
     return WSError::WS_ERROR_INVALID_PARAM;
 }
 

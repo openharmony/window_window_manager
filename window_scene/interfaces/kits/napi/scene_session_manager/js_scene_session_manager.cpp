@@ -553,7 +553,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackground(NativeEngine
     }
 
     bool isDelegator = false;
-    if (info.argc == 2 && info.argv[1]->TypeOf() != NATIVE_UNDEFINED) {
+    if (info.argc == 2 && info.argv[1]->TypeOf() != NATIVE_UNDEFINED) { // 2: params total num
         isDelegator = ConvertFromJsValue(engine, info.argv[1], isDelegator);
     }
 

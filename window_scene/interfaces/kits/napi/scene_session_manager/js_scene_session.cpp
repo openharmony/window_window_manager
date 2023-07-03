@@ -203,8 +203,12 @@ void JsSceneSession::ProcessTerminateSessionRegister()
 void JsSceneSession::ProcessPendingSessionToForegroundRegister()
 {
     WLOGFD("begin to run ProcessPendingSessionToForegroundRegister");
-    NotifyPendingSessionToForegroundFunc func = [this](const SessionInfo& info) {
-        this->PendingSessionToForeground(info);
+    auto weak = weak_from_this();
+    NotifyPendingSessionToForegroundFunc func = [weak](const SessionInfo& info) {
+        auto self = weak.lock();
+        if (self) {
+            self->PendingSessionToForeground(info);
+        }
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -218,8 +222,12 @@ void JsSceneSession::ProcessPendingSessionToForegroundRegister()
 void JsSceneSession::ProcessPendingSessionToBackgroundForDelegatorRegister()
 {
     WLOGFD("begin to run ProcessPendingSessionToBackgroundForDelegatorRegister");
-    NotifyPendingSessionToBackgroundForDelegatorFunc func = [this](const SessionInfo& info) {
-        this->PendingSessionToBackgroundForDelegator(info);
+    auto weak = weak_from_this();
+    NotifyPendingSessionToBackgroundForDelegatorFunc func = [weak](const SessionInfo& info) {
+        auto self = weak.lock();
+        if (self) {
+            self->PendingSessionToBackgroundForDelegator(info);
+        }
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -738,6 +746,7 @@ void JsSceneSession::PendingSessionToForeground(const SessionInfo& info)
         info.bundleName_.c_str(), info.abilityName_.c_str());
     auto iter = jsCbMap_.find(PENDING_SESSION_TO_FOREGROUND_CB);
     if (iter == jsCbMap_.end()) {
+        WLOGFE("[NAPI]fail to find pending session to foreground callback");
         return;
     }
     auto jsCallBack = iter->second;
@@ -768,6 +777,7 @@ void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& i
         info.bundleName_.c_str(), info.abilityName_.c_str());
     auto iter = jsCbMap_.find(PENDING_SESSION_TO_BACKROUND_FOR_DELEGATOR_CB);
     if (iter == jsCbMap_.end()) {
+        WLOGFE("[NAPI]fail to find pending session to background for delegator callback");
         return;
     }
     auto jsCallBack = iter->second;
