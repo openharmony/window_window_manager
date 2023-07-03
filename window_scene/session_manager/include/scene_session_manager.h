@@ -145,6 +145,7 @@ private:
     void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void OnSessionStateChange(uint64_t persistentId);
     sptr<ISessionListener> sessionListener_;
+    sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject> &token);
 };
 } // namespace OHOS::Rosen
 
