@@ -20,6 +20,7 @@
 #include "window_manager.h"
 #include "wm_single_instance.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "window_visibility_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -35,6 +36,7 @@ public:
     void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused);
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
         WindowUpdateType type);
+    void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
 private:
     SessionManagerAgentController() {}
     virtual ~SessionManagerAgentController() = default;
