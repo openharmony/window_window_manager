@@ -44,6 +44,9 @@ public:
     WSError RegisterSessionListener(const sptr<ISessionListener> sessionListener) override;
     void UnregisterSessionListener() override;
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
+    WSError PendingSessionToForeground(const sptr<IRemoteObject> &token) override;
+    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token) override;
+    WSError GetFocusSessionToken(sptr<IRemoteObject> &token) override;
 
 private:
     static inline BrokerDelegator<SceneSessionManagerProxy> delegator_;
