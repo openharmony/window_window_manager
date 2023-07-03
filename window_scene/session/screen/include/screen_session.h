@@ -50,9 +50,9 @@ enum class ScreenState : int32_t {
 
 class ScreenSession : public RefBase {
 public:
-    explicit ScreenSession(ScreenId screenId, const ScreenProperty& property);
+    explicit ScreenSession(ScreenId screenId, const ScreenProperty& property, ScreenId defaultScreenId);
     ScreenSession();
-    ScreenSession(const std::string& name, ScreenId smsId, ScreenId rsId);
+    ScreenSession(const std::string& name, ScreenId smsId, ScreenId rsId, ScreenId defaultScreenId);
     ~ScreenSession() = default;
 
     void RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
@@ -62,6 +62,8 @@ public:
     sptr<ScreenInfo> ConvertToScreenInfo() const;
     sptr<SupportedScreenModes> GetActiveScreenMode() const;
     ScreenSourceMode GetSourceMode() const;
+    void SetScreenCombination(ScreenCombination combination);
+    ScreenCombination GetScreenCombination() const; 
 
     ScreenId GetScreenId();
     ScreenProperty GetScreenProperty() const;
@@ -83,9 +85,10 @@ public:
     DMError SetPrivateSessionCount(int32_t count);
     bool HasPrivateSession() const;
 
-    std::string name_;
+    std::string name_ { "UNKNOW" };
     ScreenId screenId_;
     ScreenId rsId_;
+    ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
 
     int32_t activeIdx_ { 0 };
     std::vector<sptr<SupportedScreenModes>> modes_ = {};
@@ -102,6 +105,7 @@ private:
     std::shared_ptr<RSDisplayNode> displayNode_;
     ScreenState screenState_ { ScreenState::INIT };
     std::vector<IScreenChangeListener*> screenChangeListenerList_;
+    ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     uint32_t privateSessionCount_ { 0 };
 };
 

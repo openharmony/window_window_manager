@@ -50,6 +50,9 @@ public:
         TRANS_ID_SET_SESSION_ICON,
         TRANS_ID_REGISTER_SESSION_LISTENER,
         TRANS_ID_UNREGISTER_SESSION_LISTENER,
+        TRANS_ID_PENDING_SESSION_TO_FOREGROUND,
+        TRANS_ID_PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR,
+        TRANS_ID_GET_FOCUS_SESSION_TOKEN,
     };
 
     virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -61,6 +64,9 @@ public:
     virtual WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) = 0;
     virtual WSError RegisterSessionListener(const sptr<ISessionListener> sessionListener) = 0;
     virtual void UnregisterSessionListener() = 0;
+    virtual WSError PendingSessionToForeground(const sptr<IRemoteObject> &token) = 0;
+    virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token) = 0;
+    virtual WSError GetFocusSessionToken(sptr<IRemoteObject> &token) = 0;
 
     // interfaces of IWindowManager
     WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
