@@ -134,7 +134,7 @@ HWTEST_F(WindowTest, Find02, Function | SmallTest | Level2)
 
 /**
  * @tc.name: GetSurfaceNode
- * @tc.desc: get surface node
+ * @tc.desc: get node
  * @tc.type: FUNC
  */
 HWTEST_F(WindowTest, GetSurfaceNode, Function | SmallTest | Level2)
