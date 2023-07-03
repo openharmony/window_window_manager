@@ -35,6 +35,7 @@ using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSessionManager" };
 const std::string CREATE_SPECIFIC_SCENE_CB = "createSpecificSession";
+const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 } // namespace
 
 NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* exportObj)
@@ -75,6 +76,7 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
         JsSceneSessionManager::RequestSceneSessionByCall);
     BindNativeFunction(*engine, *object, "startAbilityBySpecified", moduleName,
         JsSceneSessionManager::StartAbilityBySpecified);
+    BindNativeFunction(*engine, *object, "getSessionSnapshot", moduleName, JsSceneSessionManager::GetSessionSnapshot);
     return engine->CreateUndefined();
 }
 
@@ -82,6 +84,8 @@ JsSceneSessionManager::JsSceneSessionManager(NativeEngine& engine) : engine_(eng
 {
     listenerFunc_ = {
         { CREATE_SPECIFIC_SCENE_CB, &JsSceneSessionManager::ProcessCreateSpecificSessionRegister },
+        { GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
+            &JsSceneSessionManager::ProcessGestureNavigationEnabledChangeListener },
     };
 }
 
@@ -122,6 +126,28 @@ void JsSceneSessionManager::OnCreateSpecificSession(const sptr<SceneSession>& sc
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
+
+void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable)
+{
+    WLOGFI("[NAPI]OnGestureNavigationEnabledUpdate");
+    auto iter = jsCbMap_.find(GESTURE_NAVIGATION_ENABLED_CHANGE_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [this, enable, jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            NativeValue* argv[] = {CreateJsValue(*eng, enable)};
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSessionManager::OnGestureNavigationEnabledUpdate", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
 void JsSceneSessionManager::ProcessCreateSpecificSessionRegister()
 {
     NotifyCreateSpecificSessionFunc func = [this](const sptr<SceneSession>& session) {
@@ -129,6 +155,15 @@ void JsSceneSessionManager::ProcessCreateSpecificSessionRegister()
         this->OnCreateSpecificSession(session);
     };
     SceneSessionManager::GetInstance().SetCreateSpecificSessionListener(func);
+}
+
+void JsSceneSessionManager::ProcessGestureNavigationEnabledChangeListener()
+{
+    ProcessGestureNavigationEnabledChangeFunc func = [this](bool enable) {
+        WLOGFD("GestureNavigationEnabledUpdate");
+        this->OnGestureNavigationEnabledUpdate(enable);
+    };
+    SceneSessionManager::GetInstance().SetGestureNavigationEnabledChangeListener(func);
 }
 
 NativeValue* JsSceneSessionManager::RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info)
@@ -219,6 +254,13 @@ NativeValue* JsSceneSessionManager::GetWindowSceneConfig(NativeEngine* engine, N
     WLOGI("[NAPI]GetWindowSceneConfig");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
     return (me != nullptr) ? me->OnGetWindowSceneConfig(*engine, *info) : nullptr;
+}
+
+NativeValue* JsSceneSessionManager::GetSessionSnapshot(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGI("[NAPI]GetSessionSnapshot");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
+    return (me != nullptr) ? me->OnGetSessionSnapshot(*engine, *info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject)
@@ -696,6 +738,26 @@ NativeValue* JsSceneSessionManager::OnGetWindowSceneConfig(NativeEngine& engine,
             static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
     }
     return jsWindowSceneConfigObj;
+}
+
+NativeValue* JsSceneSessionManager::OnGetSessionSnapshot(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    if (info.argc < 1) { // 1: params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    int64_t persistentId;
+    if (!ConvertFromJsValue(engine, info.argv[0], persistentId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to persistentId");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    std::string path = SceneSessionManager::GetInstance().GetSessionSnapshot(static_cast<uint64_t>(persistentId));
+    NativeValue* result = engine.CreateString(path.c_str(), path.length());
+    return result;
 }
 
 } // namespace OHOS::Rosen

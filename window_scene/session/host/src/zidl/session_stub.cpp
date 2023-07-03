@@ -50,6 +50,7 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_RAISE_TO_APP_TOP),
         &SessionStub::HandleRaiseToAppTop),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_BACKPRESSED), &SessionStub::HandleBackPressed),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_MARK_PROCESSED), &SessionStub::HandleMarkProcessed),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_SET_MAXIMIZE_MODE),
         &SessionStub::HandleSetGlobalMaximizeMode),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_GET_MAXIMIZE_MODE),
@@ -286,6 +287,19 @@ int SessionStub::HandleBackPressed(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleBackPressed!");
     WSError errCode = RequestSessionBack();
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleMarkProcessed(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleMarkProcessed!");
+    int32_t eventId = 0;
+    if (!data.ReadInt32(eventId)) {
+        WLOGFE("Read eventId from parcel failed!");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = MarkProcessed(eventId);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

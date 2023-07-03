@@ -39,7 +39,7 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     GeneratePersistentId(false, info);
     scenePersistence_ = new ScenePersistence(info, GetPersistentId());
     specificCallback_ = specificCallback;
-    moveDragController_ = new (std::nothrow) MoveDragController();
+    moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
     ProcessVsyncHandleRegister();
     if (!info.bundleName_.empty() && !info.abilityName_.empty()) {
         std::string key = info.bundleName_ + "_" + info.abilityName_;
@@ -280,6 +280,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             WLOGE("moveDragController_ is null");
             return Session::TransferPointerEvent(pointerEvent);
         }
+        moveDragController_->HandleMouseStyle(pointerEvent, winRect_);
         if (moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property_, systemConfig_)) {
             return  WSError::WS_OK;
         }
@@ -405,5 +406,19 @@ WSError SceneSession::SetKeepScreenOn(bool keepScreenOn)
 bool SceneSession::IsKeepScreenOn() const
 {
     return property_->IsKeepScreenOn();
+}
+
+std::string SceneSession::GetSessionSnapshot()
+{
+    WLOGFI("GetSessionSnapshot id %{public}" PRIu64 "", GetPersistentId());
+    if (Session::GetSessionState() >= SessionState::STATE_BACKGROUND) {
+        Session::UpdateSnapshot();
+    }
+    if (scenePersistence_ != nullptr && GetSnapshot()) {
+        WLOGFI("GetSessionSnapshot SaveSnapshot");
+        scenePersistence_->SaveSnapshot(GetSnapshot());
+        return scenePersistence_->GetSnapshotFilePath();
+    }
+    return "";
 }
 } // namespace OHOS::Rosen

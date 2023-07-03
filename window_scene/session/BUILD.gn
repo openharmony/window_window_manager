@@ -17,6 +17,9 @@ import("../../windowmanager_aafwk.gni")
 config("session_public_config") {
   include_dirs = [
     "${window_base_path}/window_scene",
+    "${window_base_path}/window_scene/intention_event/service/anr_manager/include",
+    "${window_base_path}/window_scene/intention_event/framework/anr_handler/include",
+    "${window_base_path}/window_scene/intention_event/utils/include",
     "${window_base_path}/interfaces/innerkits/dm",
 
     # for window_manager_hilog
@@ -25,6 +28,9 @@ config("session_public_config") {
 
     # for WMError Code
     "${window_base_path}/interfaces/innerkits/wm",
+
+    # for mouse style
+    "${multimodalinput_path}/input/util/common/include",
   ]
 }
 
@@ -50,8 +56,10 @@ ohos_shared_library("scene_session") {
   public_configs = [ ":session_public_config" ]
 
   deps = [
+    "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
     "${window_base_path}/window_scene/session_manager:screen_session_manager",
   ]
 

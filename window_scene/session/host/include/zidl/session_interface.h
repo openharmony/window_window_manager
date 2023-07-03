@@ -50,6 +50,7 @@ public:
         TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION,
         TRANS_ID_RAISE_TO_APP_TOP,
         TRANS_ID_BACKPRESSED,
+        TRANS_ID_MARK_PROCESSED,
         TRANS_ID_SET_MAXIMIZE_MODE,
         TRANS_ID_GET_MAXIMIZE_MODE,
         TRANS_ID_NEED_AVOID,
@@ -84,6 +85,7 @@ public:
     virtual WSError OnNeedAvoid(bool status) = 0;
     virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type) = 0;
     virtual WSError RequestSessionBack() = 0;
+    virtual WSError MarkProcessed(int32_t eventId) = 0;
     virtual WSError SetGlobalMaximizeMode(MaximizeMode mode) = 0;
     virtual WSError GetGlobalMaximizeMode(MaximizeMode& mode) = 0;
     virtual WSError UpdateWindowSessionProperty(sptr<WindowSessionProperty>) = 0;

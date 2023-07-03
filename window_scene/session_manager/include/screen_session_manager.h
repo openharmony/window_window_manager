@@ -201,6 +201,9 @@ private:
     sptr<IDisplayChangeListener> displayChangeListener_;
     sptr<SessionDisplayPowerController> sessionDisplayPowerController_;
     sptr<ScreenCutoutController> screenCutoutController_;
+
+    bool isDensityDpiLoad_ = false;
+    float densityDpi_ { 1.0f };
 };
 } // namespace OHOS::Rosen
 

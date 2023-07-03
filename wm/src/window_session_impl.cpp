@@ -19,6 +19,10 @@
 #include <ipc_skeleton.h>
 #include <transaction/rs_interfaces.h>
 
+#include "anr_handler.h"
+#include "color_parser.h"
+#include "display_manager.h"
+#include "permission.h"
 #include "key_event.h"
 #include "session/container/include/window_event_channel.h"
 #include "session_manager/include/session_manager.h"
@@ -460,10 +464,7 @@ WMError WindowSessionImpl::SetFocusable(bool isFocusable)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     property_->SetFocusable(isFocusable);
-    if (state_ == WindowState::STATE_SHOWN) {
-        return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
-    }
-    return WMError::WM_OK;
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
 }
 
 bool WindowSessionImpl::GetFocusable() const
@@ -478,10 +479,7 @@ WMError WindowSessionImpl::SetTouchable(bool isTouchable)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     property_->SetTouchable(isTouchable);
-    if (state_ == WindowState::STATE_SHOWN) {
-        return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
-    }
-    return WMError::WM_OK;
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
 }
 
 bool WindowSessionImpl::GetTouchable() const
@@ -734,6 +732,15 @@ void WindowSessionImpl::NotifyForegroundFailed(WMError ret)
 {
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
     CALL_LIFECYCLE_LISTENER_WITH_PARAM(ForegroundFailed, lifecycleListeners, static_cast<int32_t>(ret));
+}
+
+WSError WindowSessionImpl::MarkProcessed(int32_t eventId)
+{
+    if (hostSession_ == nullptr) {
+        WLOGFE("hostSession is nullptr");
+        return WSError::WS_DO_NOTHING;
+    }
+    return hostSession_->MarkProcessed(eventId);
 }
 
 void WindowSessionImpl::RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener)
