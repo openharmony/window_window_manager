@@ -271,6 +271,16 @@ uint32_t WindowSessionProperty::GetZOrder()
     return zOrder_;
 }
 
+void WindowSessionProperty::SetDecorEnable(bool isDecorEnable)
+{
+    isDecorEnable_ = isDecorEnable;
+}
+
+bool WindowSessionProperty::IsDecorEnable()
+{
+    return isDecorEnable_;
+}
+
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
 {
     if (parcel.WriteUint32(limits_.maxWidth_) &&
@@ -308,6 +318,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteFloat(brightness_) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
         parcel.WriteUint32(zOrder_) &&
+        parcel.WriteBool(isDecorEnable_) &&
         MarshallingWindowLimits(parcel);
 }
 
@@ -340,6 +351,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetBrightness(parcel.ReadFloat());
     property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
     property->SetZOrder(parcel.ReadUint32());
+    property->SetDecorEnable(parcel.ReadBool());
     UnmarshallingWindowLimits(parcel, property);
     return property;
 }

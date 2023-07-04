@@ -87,8 +87,10 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
         moveDragController_->InitMoveDragProperty();
         moveDragController_->SetStartMoveFlag(true);
     }
-    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSessionEvent_) {
-        sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event));
+    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
+        if (sessionChangeCallback != nullptr && sessionChangeCallback->OnSessionEvent_) {
+            sessionChangeCallback->OnSessionEvent_(static_cast<uint32_t>(event));
+        }
     }
     return WSError::WS_OK;
 }
@@ -96,7 +98,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
 void SceneSession::RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>&
     sessionChangeCallback)
 {
-    sessionChangeCallback_ = sessionChangeCallback;
+    sessionChangeCallbackList_.push_back(sessionChangeCallback);
 }
 
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
@@ -194,8 +196,10 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
 
 WSError SceneSession::RaiseToAppTop()
 {
-    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onRaiseToTop_) {
-        sessionChangeCallback_->onRaiseToTop_();
+    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
+        if (sessionChangeCallback != nullptr && sessionChangeCallback->onRaiseToTop_) {
+            sessionChangeCallback->onRaiseToTop_();
+        }
     }
     return WSError::WS_OK;
 }
@@ -217,8 +221,10 @@ WSError SceneSession::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
     if (property) {
         persistentId = property->GetPersistentId();
     }
-    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onCreateSpecificSession_) {
-        sessionChangeCallback_->onCreateSpecificSession_(sceneSession);
+    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
+        if (sessionChangeCallback != nullptr && sessionChangeCallback->onCreateSpecificSession_) {
+            sessionChangeCallback->onCreateSpecificSession_(sceneSession);
+        }
     }
     session = sceneSession;
     return errCode;
@@ -244,8 +250,10 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
 {
     property_->SetSystemBarProperty(type, systemBarProperty);
     WLOGFD("SceneSession SetSystemBarProperty status:%{public}d", static_cast<int32_t>(type));
-    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSystemBarPropertyChange_) {
-        sessionChangeCallback_->OnSystemBarPropertyChange_(property_->GetSystemBarProperty());
+    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
+        if (sessionChangeCallback != nullptr && sessionChangeCallback->OnSystemBarPropertyChange_) {
+            sessionChangeCallback->OnSystemBarPropertyChange_(property_->GetSystemBarProperty());
+        }
     }
     return WSError::WS_OK;
 }
@@ -253,8 +261,10 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
 WSError SceneSession::OnNeedAvoid(bool status)
 {
     WLOGFD("SceneSession OnNeedAvoid status:%{public}d", static_cast<int32_t>(status));
-    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnNeedAvoid_) {
-        sessionChangeCallback_->OnNeedAvoid_(status);
+    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
+        if (sessionChangeCallback != nullptr && sessionChangeCallback->OnNeedAvoid_) {
+            sessionChangeCallback->OnNeedAvoid_(status);
+        }
     }
     return WSError::WS_OK;
 }
@@ -303,8 +313,10 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
 
 void SceneSession::NotifySessionRectChange(const WSRect& rect)
 {
-    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onRectChange_) {
-        sessionChangeCallback_->onRectChange_(rect);
+    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
+        if (sessionChangeCallback != nullptr && sessionChangeCallback->onRectChange_) {
+            sessionChangeCallback->onRectChange_(rect);
+        }
     }
 }
 
