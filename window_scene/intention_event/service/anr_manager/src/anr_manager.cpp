@@ -86,7 +86,6 @@ void ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
         WLOGFD("timerIds to remove is empty");
     }
     for (int32_t item : timerIds) {
-        WLOGFD("timer %{public}d will be removed", item);
         if (item != -1) {
             TimerMgr->RemoveTimer(item);
             anrTimerCount_--;
