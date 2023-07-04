@@ -98,7 +98,7 @@ public:
     DMError SetScreenRotationLocked(bool isLocked) override;
 
     std::vector<ScreenId> GetAllScreenIds() const;
-    const std::shared_ptr<RSDisplayNode>& GetRSDisplayNodeByScreenId(ScreenId smsScreenId) const;
+    const std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByScreenId(ScreenId smsScreenId) const;
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(DisplayId displayId);
 
     sptr<ScreenSession> InitVirtualScreen(ScreenId smsScreenId, ScreenId rsId, VirtualScreenOption option);

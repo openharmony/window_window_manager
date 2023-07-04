@@ -36,6 +36,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSessionManager" };
 const std::string CREATE_SPECIFIC_SCENE_CB = "createSpecificSession";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
+constexpr int32_t STATE_ABNORMALLY = static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY);
 } // namespace
 
 NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* exportObj)
@@ -492,8 +493,9 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionActivation(NativeEngine
             if (jsSceneSession == nullptr) {
                 WLOGFE("[NAPI]Failed to get scene session from js object");
                 errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
+            } else {
+                sceneSession = jsSceneSession->GetNativeSession();
             }
-            sceneSession = jsSceneSession->GetNativeSession();
         }
     }
 
@@ -505,8 +507,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionActivation(NativeEngine
 
     AsyncTask::CompleteCallback complete = [sceneSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
         if (sceneSession == nullptr) {
-            task.Reject(engine,
-                CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "Invalid params."));
+            task.Reject(engine, CreateJsError(engine, STATE_ABNORMALLY, "Invalid params."));
             return;
         }
         WSErrorCode ret =
@@ -550,8 +551,9 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackground(NativeEngine
             if (jsSceneSession == nullptr) {
                 WLOGFE("[NAPI]Failed to get scene session from js object");
                 errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
+            } else {
+                sceneSession = jsSceneSession->GetNativeSession();
             }
-            sceneSession = jsSceneSession->GetNativeSession();
         }
     }
 
@@ -613,8 +615,9 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
             if (jsSceneSession == nullptr) {
                 WLOGFE("[NAPI]Failed to get scene session from js object");
                 errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
+            } else {
+                sceneSession = jsSceneSession->GetNativeSession();
             }
-            sceneSession = jsSceneSession->GetNativeSession();
         }
     }
 
@@ -626,8 +629,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
 
     AsyncTask::CompleteCallback complete = [sceneSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
         if (sceneSession == nullptr) {
-            task.Reject(engine,
-                CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "Invalid params."));
+            task.Reject(engine, CreateJsError(engine, STATE_ABNORMALLY, "Invalid params."));
             return;
         }
         WSErrorCode ret =
@@ -671,8 +673,9 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionByCall(NativeEngine& en
             if (jsSceneSession == nullptr) {
                 WLOGFE("[NAPI]Failed to get scene session from js object");
                 errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
+            } else {
+                sceneSession = jsSceneSession->GetNativeSession();
             }
-            sceneSession = jsSceneSession->GetNativeSession();
         }
     }
 
@@ -684,8 +687,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionByCall(NativeEngine& en
 
     AsyncTask::CompleteCallback complete = [sceneSession](NativeEngine& engine, AsyncTask& task, int32_t status) {
         if (sceneSession == nullptr) {
-            task.Reject(engine,
-                CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "Invalid params."));
+            task.Reject(engine, CreateJsError(engine, STATE_ABNORMALLY, "Invalid params."));
             return;
         }
         WSErrorCode ret =
@@ -693,8 +695,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionByCall(NativeEngine& en
         if (ret == WSErrorCode::WS_OK) {
             task.Resolve(engine, engine.CreateUndefined());
         } else {
-            task.Reject(
-                engine, CreateJsError(engine, static_cast<int32_t>(ret), "Request scene session by call failed"));
+            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "RequestSceneSessionByCall failed"));
         }
         WLOGFI("[NAPI]request scene session by call end: [%{public}s, %{public}s]",
             sceneSession->GetSessionInfo().bundleName_.c_str(), sceneSession->GetSessionInfo().abilityName_.c_str());

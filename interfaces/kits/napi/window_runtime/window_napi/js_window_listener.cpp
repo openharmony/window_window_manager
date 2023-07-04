@@ -49,7 +49,7 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
 {
     WLOGI("[NAPI]OnSizeChange, wh[%{public}u, %{public}u], reason = %{public}u", rect.width_, rect.height_, reason);
     // js callback should run in js thread
-    auto callback = [self = weakRef_, rect, eng = engine_] () {
+    auto jsCallback = [self = weakRef_, rect, eng = engine_] () {
         auto thisListener = self.promote();
         if (thisListener == nullptr || eng == nullptr) {
             WLOGFE("[NAPI]this listener or engine is nullptr");
@@ -67,12 +67,12 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
         thisListener->CallJsMethod(WINDOW_SIZE_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
     if (reason == WindowSizeChangeReason::ROTATION) {
-        callback();
+        jsCallback();
     } else {
         std::unique_ptr<AsyncTask::CompleteCallback> complete =
-            std::make_unique<AsyncTask::CompleteCallback>([callback] (NativeEngine &engine,
+            std::make_unique<AsyncTask::CompleteCallback>([jsCallback] (NativeEngine &engine,
             AsyncTask &task, int32_t status) {
-                callback();
+                jsCallback();
             });
         NativeReference* callback = nullptr;
         std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
