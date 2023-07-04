@@ -141,7 +141,10 @@ bool WindowSessionImpl::IsWindowSessionInvalid() const
 
 uint64_t WindowSessionImpl::GetPersistentId() const
 {
-    return property_->GetPersistentId();
+    if (property_) {
+        return property_->GetPersistentId();
+    }
+    return INVALID_SESSION_ID;
 }
 
 sptr<WindowSessionProperty> WindowSessionImpl::GetProperty() const
@@ -156,6 +159,9 @@ sptr<ISession> WindowSessionImpl::GetHostSession() const
 
 WMError WindowSessionImpl::WindowSessionCreateCheck()
 {
+    if (!property_) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
     const auto& name = property_->GetWindowName();
     // check window name, same window names are forbidden
     if (windowSessionMap_.find(name) != windowSessionMap_.end()) {
@@ -212,21 +218,21 @@ WMError WindowSessionImpl::Connect()
 
     auto ret = hostSession_->Connect(iSessionStage, iWindowEventChannel, surfaceNode_, windowSystemConfig_, property_, token);
     WLOGFI("Window Connect [name:%{public}s, id:%{public}" PRIu64 ", type:%{public}u], ret:%{public}u",
-        property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType(), ret);
+        property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType(), ret);
     return static_cast<WMError>(ret);
 }
 
 WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
     WLOGFI("Window Show [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u], reason:%{public}u state:%{pubic}u",
-        property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType(), reason, state_);
+        property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType(), reason, state_);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (state_ == WindowState::STATE_SHOWN) {
         WLOGFD("window session is alreay shown [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u]",
-            property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType());
+            property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType());
         return WMError::WM_OK;
     }
 
@@ -245,14 +251,14 @@ WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
 WMError WindowSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
     WLOGFI("id:%{public}" PRIu64 " Hide, reason:%{public}u, state:%{public}u",
-        property_->GetPersistentId(), reason, state_);
+        GetPersistentId(), reason, state_);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         WLOGFD("window session is alreay hidden [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u]",
-            property_->GetWindowName().c_str(), property_->GetPersistentId(), property_->GetWindowType());
+            property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType());
         return WMError::WM_OK;
     }
     NotifyAfterBackground();
@@ -262,7 +268,7 @@ WMError WindowSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFrom
 
 WMError WindowSessionImpl::Destroy(bool needClearListener)
 {
-    WLOGFI("Id:%{public}" PRIu64 " Destroy, state_:%{public}u", property_->GetPersistentId(), state_);
+    WLOGFI("Id:%{public}" PRIu64 " Destroy, state_:%{public}u", GetPersistentId(), state_);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -336,7 +342,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     config.SetDensity(density);
     uiContent_->UpdateViewportConfig(config, reason);
     WLOGFD("Id:%{public}" PRIu64 ", windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
-        property_->GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+        GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
 
 uint64_t WindowSessionImpl::GetFloatingWindowParentId()
@@ -350,7 +356,7 @@ uint64_t WindowSessionImpl::GetFloatingWindowParentId()
             winPair.second.second->GetProperty() &&
             context_.get() == winPair.second.second->GetContext().get()) {
             WLOGFD("Find parent, [parentName: %{public}s, selfPersistentId: %{public}" PRIu64"]",
-                winPair.second.second->GetProperty()->GetWindowName().c_str(), GetProperty()->GetPersistentId());
+                winPair.second.second->GetProperty()->GetWindowName().c_str(), GetPersistentId());
             return winPair.second.second->GetProperty()->GetPersistentId();
         }
     }
@@ -376,7 +382,7 @@ WMError WindowSessionImpl::SetUIContent(const std::string& contentInfo,
         uiContent = Ace::UIContent::Create(context_.get(), engine);
     }
     if (uiContent == nullptr) {
-        WLOGFE("fail to SetUIContent id: %{public}" PRIu64 "", property_->GetPersistentId());
+        WLOGFE("fail to SetUIContent id: %{public}" PRIu64 "", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
     }
     if (isdistributed) {
@@ -506,6 +512,9 @@ WMError WindowSessionImpl::SetBrightness(float brightness)
         WLOGFE("non app window does not support set brightness, type: %{public}u", GetType());
         return WMError::WM_ERROR_INVALID_TYPE;
     }
+    if (!property_) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
     property_->SetBrightness(brightness);
     if (state_ == WindowState::STATE_SHOWN) {
         return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS);
@@ -517,7 +526,7 @@ std::string WindowSessionImpl::GetContentInfo()
 {
     WLOGFD("GetContentInfo");
     if (uiContent_ == nullptr) {
-        WLOGFE("fail to GetContentInfo id: %{public}" PRIu64 "", property_->GetPersistentId());
+        WLOGFE("fail to GetContentInfo id: %{public}" PRIu64 "", GetPersistentId());
         return "";
     }
     return uiContent_->GetContentInfo();
@@ -531,7 +540,7 @@ Ace::UIContent* WindowSessionImpl::GetUIContent() const
 void WindowSessionImpl::OnNewWant(const AAFwk::Want& want)
 {
     WLOGFI("Window [name:%{public}s, id:%{public}" PRIu64 "]",
-        property_->GetWindowName().c_str(), property_->GetPersistentId());
+        property_->GetWindowName().c_str(), GetPersistentId());
     if (uiContent_ != nullptr) {
         uiContent_->OnNewWant(want);
     }
