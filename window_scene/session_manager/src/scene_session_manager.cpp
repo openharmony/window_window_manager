@@ -550,6 +550,8 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
 
         if (!isDelegator) {
             AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo);
+        } else {
+            AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo, true);
         }
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
         return WSError::WS_OK;
