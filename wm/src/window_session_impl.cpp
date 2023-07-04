@@ -424,6 +424,7 @@ void WindowSessionImpl::NotifyModeChange(WindowMode mode, bool hasDeco)
     }
     if (hostSession_) {
         property_->SetWindowMode(mode);
+        property_->SetDecorEnable(hasDeco);
         hostSession_->UpdateWindowSessionProperty(property_);
     }
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE);
