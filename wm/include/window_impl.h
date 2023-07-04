@@ -597,7 +597,7 @@ private:
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
 
     sptr<MoveDragProperty> moveDragProperty_;
-    SystemConfig windowSystemConfig_ ;
+    SystemConfig windowSystemConfig_;
     bool isOriginRectSet_ = false;
     bool needRemoveWindowInputChannel_ = false;
     bool isMainHandlerAvailable_ = true;

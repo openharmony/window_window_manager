@@ -37,5 +37,4 @@ class WindowManager {
 };
 } // namespace Rosen
 } // namespace OHOS
-
 #endif // OHOS_ROSEN_WINDOW_MANAGER_H
