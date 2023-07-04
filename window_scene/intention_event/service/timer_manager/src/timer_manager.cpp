@@ -85,7 +85,6 @@ void TimerManager::OnThread()
     CALL_DEBUG_ENTER;
     while (state_ == TimerMgrState::STATE_RUNNING) {
         int32_t timeout = CalcNextDelay();
-        WLOGFD("CalcNextDelay :%{public}d", timeout);
         std::this_thread::sleep_for(std::chrono::milliseconds(timeout));
         ProcessTimers();
     }
@@ -167,7 +166,6 @@ bool TimerManager::IsExistInternal(int32_t timerId)
 
 void TimerManager::InsertTimerInternal(std::unique_ptr<TimerItem>& timer)
 {
-    WLOGFD("timerId:%{public}d, nextCallTime:%{public}" PRId64 "", timer->id, timer->nextCallTime);
     for (auto it = timers_.begin(); it != timers_.end(); ++it) {
         if ((*it)->nextCallTime > timer->nextCallTime) {
             timers_.insert(it, std::move(timer));
