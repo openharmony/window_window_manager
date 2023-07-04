@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_WINDOW_INFO_H
 
 #include "parcel.h"
+#include "context.h"
 
 namespace OHOS {
 namespace AAFwk {

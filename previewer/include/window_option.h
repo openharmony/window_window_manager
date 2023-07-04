@@ -28,7 +28,7 @@ namespace Rosen {
  * @class WindowOption
  * WindowOption is used to create a window.
  */
-class WindowOption : public RefBase {
+class WINDOW_EXPORT WindowOption : public RefBase {
 public:
     /**
      * @brief Default construct of WindowOption.
