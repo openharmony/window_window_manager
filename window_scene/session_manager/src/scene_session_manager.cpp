@@ -1138,7 +1138,7 @@ void SceneSessionManager::RegisterSessionRectChangeNotifyManagerFunc(sptr<SceneS
         this->OnSessionRectChange(persistentId, rect);
     };
     sptr<SceneSession::SessionChangeCallback> callback;
-    callback.onRectChange_ = onRectChange;
+    callback->onRectChange_ = onRectChange;
     sceneSession->RegisterSessionChangeCallback(callback);
     WLOGFD("RegisterSessionRectChangeFunc success");
 }
