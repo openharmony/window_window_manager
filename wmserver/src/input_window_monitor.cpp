@@ -202,8 +202,6 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
         auto iter = (windowNode->GetParentId() == INVALID_WINDOW_ID) ?
             dialogWindowMap.find(windowNode->GetWindowId()) : dialogWindowMap.find(windowNode->GetParentId());
         if (iter != dialogWindowMap.end()) {
-            windowInfo.pid = iter->second->GetCallingPid();
-            windowInfo.uid = iter->second->GetCallingUid();
             windowInfo.agentWindowId = static_cast<int32_t>(iter->second->GetWindowId());
         }
         convertRectsToMmiRects(touchHotAreas, windowInfo.defaultHotAreas);
