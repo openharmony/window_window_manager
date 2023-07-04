@@ -138,6 +138,8 @@ private:
     std::vector<std::pair<uint64_t, bool>> GetWindowVisibilityChangeInfo(
         std::shared_ptr<RSOcclusionData> occlusionData);
     void WindowVisibilityChangeCallback(std::shared_ptr<RSOcclusionData> occlusiontionData);
+    void RegisterSessionRectChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
+    void OnSessionRectChange(uint64_t persistentId, const WSRect& rect);
 
     sptr<RootSceneSession> rootSceneSession_;
     std::map<uint64_t, sptr<SceneSession>> sceneSessionMap_;
