@@ -22,6 +22,7 @@
 #include "anr_handler.h"
 #include "color_parser.h"
 #include "display_manager.h"
+#include "interfaces/include/ws_common.h"
 #include "permission.h"
 #include "key_event.h"
 #include "session/container/include/window_event_channel.h"
@@ -425,6 +426,7 @@ void WindowSessionImpl::NotifyModeChange(WindowMode mode, bool hasDeco)
         property_->SetWindowMode(mode);
         hostSession_->UpdateWindowSessionProperty(property_);
     }
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE);
 }
 
 std::shared_ptr<RSSurfaceNode> WindowSessionImpl::GetSurfaceNode() const
@@ -490,6 +492,7 @@ bool WindowSessionImpl::GetTouchable() const
 WMError WindowSessionImpl::SetWindowType(WindowType type)
 {
     property_->SetWindowType(type);
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
     return WMError::WM_OK;
 }
 

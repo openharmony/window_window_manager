@@ -26,6 +26,7 @@
 #include "session/container/include/zidl/session_stage_interface.h"
 #include "session/host/include/zidl/session_stub.h"
 #include "session/host/include/scene_persistence.h"
+#include "wm_common.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -170,6 +171,8 @@ public:
     int32_t GetCallingPid() const;
     int32_t GetCallingUid() const;
     sptr<IRemoteObject> GetAbilityToken() const;
+    WindowMode GetWindowMode();
+    void SetZOrder(uint32_t zOrder);
     WSError UpdateSnapshot();
 protected:
     void GeneratePersistentId(const bool isExtension, const SessionInfo& sessionInfo);

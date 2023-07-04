@@ -40,6 +40,7 @@ class ResourceManager;
 
 namespace OHOS::Rosen {
 class SceneSession;
+class AccessibilityWindowInfo;
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
@@ -94,6 +95,7 @@ public:
     void InitPersistentStorage();
     std::string GetSessionSnapshot(uint64_t persistentId);
 
+    WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
     WSError SetWindowFlags(const sptr<SceneSession>& sceneSession, uint32_t flags);
 
     void SetWaterMarkSessionCount(int32_t count);
@@ -128,6 +130,11 @@ private:
     WSError UpdateBrightness(uint64_t persistentId);
     void SetDisplayBrightness(float brightness);
     float GetDisplayBrightness() const;
+    void HandleUpdateProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action,
+        const sptr<SceneSession>& sceneSession);
+    void NotifyWindowInfoChange(uint64_t persistentId, WindowUpdateType type);
+    void FillWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,
+        const sptr<SceneSession> sceneSession);
     std::vector<std::pair<uint64_t, bool>> GetWindowVisibilityChangeInfo(
         std::shared_ptr<RSOcclusionData> occlusionData);
     void WindowVisibilityChangeCallback(std::shared_ptr<RSOcclusionData> occlusiontionData);

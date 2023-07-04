@@ -85,6 +85,7 @@ public:
     WSError SetKeepScreenOn(bool keepScreenOn);
     bool IsKeepScreenOn() const;
     const std::string& GetWindowName() const;
+    bool IsDecorEnable();
 
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 private:
@@ -92,7 +93,6 @@ private:
     void NotifySessionRectChange(const WSRect& rect);
     void ProcessVsyncHandleRegister();
     void OnVsyncHandle();
-    bool IsDecorEnable();
     bool FixRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;

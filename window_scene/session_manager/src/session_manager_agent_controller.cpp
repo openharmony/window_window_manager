@@ -58,6 +58,17 @@ void SessionManagerAgentController::UpdateFocusChangeInfo(const sptr<FocusChange
     }
 }
 
+void SessionManagerAgentController::NotifyAccessibilityWindowInfo(
+    const std::vector<sptr<AccessibilityWindowInfo>>& infos, WindowUpdateType type)
+{
+    for (auto& agent : smAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE)) {
+        if (agent != nullptr) {
+            agent->NotifyAccessibilityWindowInfo(infos, type);
+        }
+    }
+}
+
 void SessionManagerAgentController::NotifyWaterMarkFlagChangedResult(bool hasWaterMark)
 {
     WLOGFD("NotifyWaterMarkFlagChanged with result:%{public}u", static_cast<uint32_t>(hasWaterMark));

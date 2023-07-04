@@ -17,7 +17,9 @@
 
 #include <ipc_types.h>
 #include <ui/rs_surface_node.h>
+#include "marshalling_helper.h"
 #include "session/host/include/scene_session.h"
+#include "window_manager.h"
 #include "window_manager_agent_proxy.h"
 #include "window_manager_hilog.h"
 
@@ -54,7 +56,9 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_TOKEN),
         &SceneSessionManagerStub::HandleGetFocusSessionToken),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_GESTURE_NAVIGATION_ENABLED),
-        &SceneSessionManagerStub::HandleSetGestureNavigationEnabled)
+        &SceneSessionManagerStub::HandleSetGestureNavigationEnabled),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_INFO),
+        &SceneSessionManagerStub::HandleGetAccessibilityWindowInfo)
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -233,6 +237,18 @@ int SceneSessionManagerStub::HandleSetGestureNavigationEnabled(MessageParcel &da
     bool enable = data.ReadBool();
     const WMError &ret = SetGestureNavigaionEnabled(enable);
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetAccessibilityWindowInfo(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    WMError errCode = GetAccessibilityWindowInfo(infos);
+    if (!MarshallingHelper::MarshallingVectorParcelableObj<AccessibilityWindowInfo>(reply, infos)) {
+        WLOGFE("Write window infos failed.");
+        return ERR_TRANSACTION_FAILED;
+    }
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

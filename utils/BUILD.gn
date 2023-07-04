@@ -32,6 +32,7 @@ config("libwmutil_public_config") {
 ## build libwmutil_static.a
 ohos_static_library("libwmutil_static") {
   sources = [
+    "src/accessibility_window_info.cpp",
     "src/agent_death_recipient.cpp",
     "src/color_parser.cpp",
     "src/cutout_info.cpp",
@@ -94,6 +95,7 @@ ohos_static_library("libwmutil_static") {
 ## Build libwmutil.so
 ohos_shared_library("libwmutil") {
   sources = [
+    "src/accessibility_window_info.cpp",
     "src/agent_death_recipient.cpp",
     "src/color_parser.cpp",
     "src/cutout_info.cpp",
