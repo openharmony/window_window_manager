@@ -839,7 +839,7 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
         node->GetWindowId(), displayId, isMultiDisplay, parentDisplayId, animationPlayed);
     auto updateRSTreeFunc = [&]() {
         if (IsWindowFollowParent(node->GetWindowType())) {
-            auto& parentNode = node->parent_;
+            const auto& parentNode = node->parent_;
             if (parentNode != nullptr && parentNode->surfaceNode_ != nullptr &&
                 node->surfaceNode_ != nullptr) {
                 node->surfaceNode_->SetVisible(false);

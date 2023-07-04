@@ -143,7 +143,9 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
     SystemSessionConfig systemConfig;
     WSError errCode = Connect(sessionStage, eventChannel, surfaceNode, systemConfig, property, token);
     reply.WriteParcelable(&systemConfig);
-    reply.WriteUint64(property->GetPersistentId());
+    if (property) {
+        reply.WriteUint64(property->GetPersistentId());
+    }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
