@@ -44,11 +44,9 @@ bool DisplayPowerController::SetDisplayState(DisplayState state)
     }
     switch (state) {
         case DisplayState::ON: {
-            bool isKeyguardDrawn;
             {
                 std::lock_guard<std::recursive_mutex> lock(mutex_);
                 displayState_ = state;
-                isKeyguardDrawn = isKeyguardDrawn_;
             }
             DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
                 EventStatus::BEGIN);

@@ -136,7 +136,7 @@ void ScreenCutoutController::CalcWaterfallRects()
     }
 
     std::vector<uint32_t> realNumVec = { 0, 0, 0, 0 };
-    for (int i = LEFT; i <= BOTTOM; i++) {
+    for (auto i = LEFT; i <= BOTTOM; i++) {
         if (numberVec.size() > i) {
             realNumVec[i] = numberVec[i];
         }

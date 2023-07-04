@@ -1199,7 +1199,7 @@ void ScreenSessionManager::RemoveVirtualScreenFromGroup(std::vector<ScreenId> sc
     NotifyScreenGroupChanged(removeFromGroup, ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
 }
 
-const std::shared_ptr<RSDisplayNode>& ScreenSessionManager::GetRSDisplayNodeByScreenId(ScreenId smsScreenId) const
+const std::shared_ptr<RSDisplayNode> ScreenSessionManager::GetRSDisplayNodeByScreenId(ScreenId smsScreenId) const
 {
     static std::shared_ptr<RSDisplayNode> notFound = nullptr;
     sptr<ScreenSession> screen = GetScreenSession(smsScreenId);
