@@ -576,7 +576,23 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
             isIgnoreSafeArea_ = status;
         }
     } else {
-        WMError ret = NotifyWindowNeedAvoid(!status);
+        WMError ret = WMError::WM_OK;
+        if (status) {
+            RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+            if (ret != WMError::WM_OK) {
+                WLOGFE("RemoveWindowFlag errCode:%{public}d winId:%{public}u",
+                    static_cast<int32_t>(ret), GetWindowId());
+                return ret;
+            }
+        } else {
+            AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+            if (ret != WMError::WM_OK) {
+                WLOGFE("RemoveWindowFlag errCode:%{public}d winId:%{public}u",
+                    static_cast<int32_t>(ret), GetWindowId());
+                return ret;
+            }
+        }
+        ret = NotifyWindowNeedAvoid(!status);
         if (ret != WMError::WM_OK) {
             WLOGFE("NotifyWindowNeedAvoid errCode:%{public}d winId:%{public}u",
                 static_cast<int32_t>(ret), GetWindowId());
@@ -595,6 +611,14 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
             static_cast<int32_t>(ret), GetWindowId());
     }
     return ret;
+}
+
+bool WindowSceneSessionImpl::IsLayoutFullScreen() const
+{
+    uint32_t flags = GetWindowFlags();
+    WindowMode mode = GetMode();
+    bool needAvoid = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
+    return (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !needAvoid);
 }
 
 SystemBarProperty WindowSceneSessionImpl::GetSystemBarPropertyByType(WindowType type) const
@@ -644,6 +668,7 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
             static_cast<int32_t>(ret), GetWindowId());
     }
     SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    UpdateDecorEnable(true);
     statusProperty.enable_ = !status;
     ret = SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusProperty);
     if (ret != WMError::WM_OK) {
@@ -656,6 +681,12 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
             GetWindowId(), static_cast<int32_t>(ret));
     }
     return ret;
+}
+
+bool WindowSceneSessionImpl::IsFullScreen() const
+{
+    SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    return (IsLayoutFullScreen() && !statusProperty.enable_);
 }
 
 bool WindowSceneSessionImpl::IsDecorEnable() const
@@ -689,7 +720,6 @@ WMError WindowSceneSessionImpl::Maximize()
     }
     if (WindowHelper::IsMainWindow(GetType())) {
         SetFullScreen(true);
-        UpdateDecorEnable(true);
     }
     return WMError::WM_OK;
 }
@@ -706,10 +736,7 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (GetGlobalMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-        hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetFullScreen(true);
-        windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
-        UpdateDecorEnable(true);
         property_->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
     } else {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE_FLOATING);
