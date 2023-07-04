@@ -299,6 +299,34 @@ void WindowSessionProperty::UnmarshallingWindowLimits(Parcel& parcel, WindowSess
     property->SetWindowLimits(windowLimits);
 }
 
+bool WindowSessionProperty::MarshallingSystemBarMap(Parcel& parcel) const
+{
+    auto size = sysBarPropMap_.size();
+    if (!parcel.WriteUint32(static_cast<uint32_t>(size))) {
+        return false;
+    }
+    for (auto it : sysBarPropMap_) {
+        if (!parcel.WriteUint32(static_cast<uint32_t>(it.first))) {
+            return false;
+        }
+        if (!(parcel.WriteBool(it.second.enable_) && parcel.WriteUint32(it.second.backgroundColor_) &&
+            parcel.WriteUint32(it.second.contentColor_))) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void WindowSessionProperty::UnMarshallingSystemBarMap(Parcel& parcel, WindowSessionProperty* property)
+{
+    uint32_t size = parcel.ReadUint32();
+    for (uint32_t i = 0; i < size; i++) {
+        WindowType type = static_cast<WindowType>(parcel.ReadUint32());
+        SystemBarProperty prop = { parcel.ReadBool(), parcel.ReadUint32(), parcel.ReadUint32() };
+        property->SetSystemBarProperty(type, prop);
+    }
+}
+
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
@@ -319,7 +347,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
         parcel.WriteUint32(zOrder_) &&
         parcel.WriteBool(isDecorEnable_) &&
-        MarshallingWindowLimits(parcel);
+        MarshallingWindowLimits(parcel) &&
+        MarshallingSystemBarMap(parcel);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -353,6 +382,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetZOrder(parcel.ReadUint32());
     property->SetDecorEnable(parcel.ReadBool());
     UnmarshallingWindowLimits(parcel, property);
+    UnMarshallingSystemBarMap(parcel, property);
     return property;
 }
 
