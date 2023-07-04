@@ -433,6 +433,30 @@ HWTEST_F(ScreenManagerTest, RegisterVirtualScreenGroupListener, Function | Small
         ASSERT_EQ(DMError::DM_OK, result);
     }
 }
+
+/**
+ * @tc.name: StopExpand_001
+ * @tc.desc: StopExpand_001 id
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, StopExpand_001, Function | SmallTest | Level1)
+{
+    std::vector<ScreenId> screenIds;
+    ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().StopExpand(screenIds));
+}
+
+/**
+ * @tc.name: StopMirror
+ * @tc.desc: StopMirror id
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, StopMirror, Function | SmallTest | Level1)
+{
+    ScreenManagerUtils utils;
+    ASSERT_TRUE(utils.CreateSurface());
+    std::vector<ScreenId> screenIds;
+    ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().StopMirror(screenIds));
+}
 }
 } // namespace Rosen
 } // namespace OHOS
