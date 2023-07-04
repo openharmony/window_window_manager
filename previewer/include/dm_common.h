@@ -20,6 +20,12 @@
 #include <string>
 #include <map>
 
+#ifdef _WIN32
+#define WINDOW_EXPORT __attribute__((dllexport))
+#else
+#define WINDOW_EXPORT __attribute__((visibility("default")))
+#endif
+
 namespace OHOS {
 namespace Rosen {
 using DisplayId = uint64_t;
