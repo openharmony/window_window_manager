@@ -1137,7 +1137,7 @@ void SceneSessionManager::RegisterSessionRectChangeNotifyManagerFunc(sptr<SceneS
     NotifySessionRectChangeFunc onRectChange = [this, persistentId](const WSRect& rect) {
         this->OnSessionRectChange(persistentId, rect);
     };
-    sptr<SceneSession::SessionChangeCallback> callback;
+    sptr<SceneSession::SessionChangeCallback> callback = new (std::nothrow)SceneSession::SessionChangeCallback();
     callback->onRectChange_ = onRectChange;
     sceneSession->RegisterSessionChangeCallback(callback);
     WLOGFD("RegisterSessionRectChangeFunc success");
