@@ -514,6 +514,17 @@ WMError WindowSessionImpl::SetBrightness(float brightness)
     return WMError::WM_OK;
 }
 
+void WindowSessionImpl::SetRequestedOrientation(Orientation orientation)
+{
+    if (property_->GetRequestedOrientation() == orientation) {
+        return;
+    }
+    property_->SetRequestedOrientation(orientation);
+    if (state_ == WindowState::STATE_SHOWN) {
+        UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
+    }
+}
+
 std::string WindowSessionImpl::GetContentInfo()
 {
     WLOGFD("GetContentInfo");

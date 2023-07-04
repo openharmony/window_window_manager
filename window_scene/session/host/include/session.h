@@ -164,6 +164,8 @@ public:
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
     WSError SetBrightness(float brightness);
     float GetBrightness() const;
+    void SetRequestedOrientation(Orientation orientation);
+    Orientation GetRequestedOrientation() const;
 
     bool IsSessionValid() const;
 

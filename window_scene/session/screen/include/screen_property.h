@@ -48,6 +48,7 @@ public:
     void SetVirtualPixelRatio(float virtualPixelRatio);
     float GetVirtualPixelRatio() const;
 
+    void SetScreenRotation(Rotation rotation);
     Rotation GetScreenRotation() const;
 
     void SetOrientation(Orientation orientation);
@@ -70,7 +71,14 @@ public:
     void SetScreenType(ScreenType type);
     ScreenType GetScreenType() const;
 
+    void SetScreenRequestedOrientation(Orientation orientation);
+    Orientation GetScreenRequestedOrientation() const;
+
 private:
+    static inline bool IsVertical(Rotation rotation)
+    {
+        return (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180);
+    }
     float rotation_ { 0.0f };
     RRect bounds_;
 
@@ -83,6 +91,7 @@ private:
     Orientation orientation_ { Orientation::UNSPECIFIED };
     DisplayOrientation displayOrientation_ { DisplayOrientation::UNKNOWN };
     Rotation screenRotation_ { Rotation::ROTATION_0 };
+    Orientation screenRequestedOrientation_ { Orientation::UNSPECIFIED };
 
     float xDpi_ { 0.0f };
     float yDpi_ { 0.0f };

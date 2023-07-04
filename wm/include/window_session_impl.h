@@ -60,6 +60,7 @@ public:
     WMError SetTouchable(bool isTouchable) override;
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;
+    void SetRequestedOrientation(Orientation orientation) override;
     bool GetTouchable() const override;
     uint32_t GetWindowId() const override;
     Rect GetRect() const override;

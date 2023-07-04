@@ -21,6 +21,7 @@ config("window_scene_common_public_config") {
     # for window_manager_hilog
     "${window_base_path}/utils/include",
     "${window_base_path}/interfaces/innerkits/wm",
+    "${window_base_path}/interfaces/innerkits/dm",
   ]
 }
 

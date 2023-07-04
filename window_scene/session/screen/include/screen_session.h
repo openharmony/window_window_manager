@@ -65,6 +65,16 @@ public:
     void SetScreenCombination(ScreenCombination combination);
     ScreenCombination GetScreenCombination() const; 
 
+    Orientation GetOrientation() const;
+    void SetOrientation(Orientation orientation);
+    Rotation GetRotation() const;
+    void SetRotation(Rotation rotation);
+    void SetScreenRequestedOrientation(Orientation orientation);
+    Orientation GetScreenRequestedOrientation() const;
+
+    void SetVirtualPixelRatio(float virtualPixelRatio);
+    void SetScreenType(ScreenType type);
+
     ScreenId GetScreenId();
     ScreenProperty GetScreenProperty() const;
     std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
@@ -92,7 +102,6 @@ public:
 
     int32_t activeIdx_ { 0 };
     std::vector<sptr<SupportedScreenModes>> modes_ = {};
-    Orientation screenRequestedOrientation_ { Orientation::UNSPECIFIED };
 
     bool isScreenGroup_ { false };
     ScreenId groupSmsId_ { SCREEN_ID_INVALID };
@@ -100,6 +109,7 @@ public:
 
     void Connect();
     void Disconnect();
+    void PropertyChange(const ScreenProperty& newProperty);
 private:
     ScreenProperty property_;
     std::shared_ptr<RSDisplayNode> displayNode_;

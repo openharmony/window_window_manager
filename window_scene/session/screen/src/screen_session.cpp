@@ -146,6 +146,13 @@ void ScreenSession::Disconnect()
     }
 }
 
+void ScreenSession::PropertyChange(const ScreenProperty& newProperty)
+{
+    for (auto& listener : screenChangeListenerList_) {
+        listener->OnPropertyChange(newProperty);
+    }
+}
+
 sptr<SupportedScreenModes> ScreenSession::GetActiveScreenMode() const
 {
     if (activeIdx_ < 0 || activeIdx_ >= static_cast<int32_t>(modes_.size())) {
@@ -153,6 +160,46 @@ sptr<SupportedScreenModes> ScreenSession::GetActiveScreenMode() const
         return nullptr;
     }
     return modes_[activeIdx_];
+}
+
+Orientation ScreenSession::GetOrientation() const
+{
+    return property_.GetOrientation();
+}
+
+void ScreenSession::SetOrientation(Orientation orientation)
+{
+    property_.SetOrientation(orientation);
+}
+
+Rotation ScreenSession::GetRotation() const
+{
+    return property_.GetScreenRotation();
+}
+
+void ScreenSession::SetRotation(Rotation rotation)
+{
+    property_.SetScreenRotation(rotation);
+}
+
+void ScreenSession::SetScreenRequestedOrientation(Orientation orientation)
+{
+    property_.SetScreenRequestedOrientation(orientation);
+}
+
+Orientation ScreenSession::GetScreenRequestedOrientation() const
+{
+    return property_.GetScreenRequestedOrientation();
+}
+
+void ScreenSession::SetVirtualPixelRatio(float virtualPixelRatio)
+{
+    property_.SetVirtualPixelRatio(virtualPixelRatio);
+}
+
+void ScreenSession::SetScreenType(ScreenType type)
+{
+    property_.SetScreenType(type);
 }
 
 Rotation ScreenSession::CalcRotation(Orientation orientation) const
@@ -390,7 +437,7 @@ ScreenSessionGroup::ScreenSessionGroup(ScreenId screenId, ScreenId rsId,
     name_ = name;
     screenId_ = screenId;
     rsId_ = rsId;
-    GetScreenProperty().SetScreenType(ScreenType::UNDEFINED);
+    SetScreenType(ScreenType::UNDEFINED);
     isScreenGroup_ = true;
 }
 

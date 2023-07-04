@@ -137,7 +137,8 @@ void JsScreenSession::CallJsCallback(const std::string& callbackType)
                 return;
             }
 
-            if (callbackType == ON_CONNECTION_CALLBACK || callbackType == ON_DISCONNECTION_CALLBACK) {
+            if (callbackType == ON_CONNECTION_CALLBACK || callbackType == ON_DISCONNECTION_CALLBACK
+                || callbackType == ON_PROPERTY_CHANGE_CALLBACK) {
                 auto screenSession = screenSessionWeak.promote();
                 if (screenSession == nullptr) {
                     WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
