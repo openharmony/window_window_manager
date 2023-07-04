@@ -15,9 +15,10 @@
 
 #include "vsync_station.h"
 
+#include <unistd.h>
 #include "transaction/rs_interfaces.h"
 #include "window_manager_hilog.h"
-#include <unistd.h>
+
 
 namespace OHOS {
 namespace Rosen {
@@ -30,60 +31,39 @@ WM_IMPLEMENT_SINGLE_INSTANCE(VsyncStation)
 
 void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
-    {
-        std::lock_guard<std::mutex> lock(mtx_);
-        if (destroyed_) {
-            return;
-        }
-        vsyncCallbacks_.insert(vsyncCallback);
-
-        Init();
-        if (hasRequestedVsync_) {
-            return;
-        }
-        hasRequestedVsync_ = true;
-        if (vsyncHandler_) {
-            vsyncHandler_->RemoveTask(VSYNC_TIME_OUT_TASK);
-            vsyncHandler_->PostTask(vsyncTimeoutCallback_, VSYNC_TIME_OUT_TASK, VSYNC_TIME_OUT_MILLISECONDS);
-        }
+    std::lock_guard<std::mutex> lock(mtx_);
+    if (destroyed_) {
+        return;
     }
+    vsyncCallbacks_.insert(vsyncCallback);
+
+    if (!hasInitVsyncReceiver_ || !vsyncHandler_) {
+        if (!vsyncHandler_) {
+            vsyncHandler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>();
+        }
+
+        auto& rsClient = OHOS::Rosen::RSInterfaces::GetInstance();
+        while (receiver_ == nullptr) {
+            receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(getpid()), vsyncHandler_);
+        }
+        receiver_->Init();
+        hasInitVsyncReceiver_ = true;
+    }
+    if (hasRequestedVsync_) {
+        return;
+    }
+    hasRequestedVsync_ = true;
+    OHOS::AppExecFwk::EventHandler::Current().PostTask(vsyncTimeoutCallback_, VSYNC_TIME_OUT_MILLISECONDS);
     receiver_->RequestNextVSync(frameCallback_);
 }
 
 int64_t VsyncStation::GetVSyncPeriod()
 {
-    {
-        std::lock_guard<std::mutex> lock(mtx_);
-        Init();
-    }
-    int64_t period = 0;
-    if (receiver_ != nullptr) {
-        receiver_->GetVSyncPeriod(period);
-    }
-    return period;
+    return 0;
 }
 
 void VsyncStation::Init()
 {
-    if (!hasInitVsyncReceiver_ || !vsyncHandler_) {
-        auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
-        if (mainEventRunner != nullptr && isMainHandlerAvailable_) {
-            WLOGI("MainEventRunner is available");
-            vsyncHandler_ = std::make_shared<AppExecFwk::EventHandler>(mainEventRunner);
-        } else {
-            WLOGI("MainEventRunner is not available");
-            if (!vsyncHandler_) {
-                vsyncHandler_ = std::make_shared<AppExecFwk::EventHandler>(
-                    AppExecFwk::EventRunner::Create(VSYNC_THREAD_ID));
-            }
-        }
-        auto& rsClient = OHOS::Rosen::RSInterfaces::GetInstance();
-        while (receiver_ == nullptr) {
-            receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(::getpid()), vsyncHandler_);
-        }
-        receiver_->Init();
-        hasInitVsyncReceiver_ = true;
-    }
 }
 
 void VsyncStation::RemoveCallback()
@@ -101,7 +81,6 @@ void VsyncStation::VsyncCallbackInner(int64_t timestamp)
         hasRequestedVsync_ = false;
         vsyncCallbacks = vsyncCallbacks_;
         vsyncCallbacks_.clear();
-        vsyncHandler_->RemoveTask(VSYNC_TIME_OUT_TASK);
     }
     for (const auto& callback: vsyncCallbacks) {
         callback->onCallback(timestamp);
