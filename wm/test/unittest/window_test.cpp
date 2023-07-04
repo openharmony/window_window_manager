@@ -1924,6 +1924,25 @@ HWTEST_F(WindowTest, RegisterTransferComponentDataListener, Function | SmallTest
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
+/**
+ * @tc.name: WindowChangeListener
+ * @tc.desc: WindowChangeListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, WindowChangeListener, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    auto window = Window::Create("WindowTest64", option);
+    ASSERT_NE(nullptr, window);
+    auto ret = true;
+    sptr<IWindowChangeListener> listener =new  WindowChangeListener();
+    window->RegisterWindowChangeListener(windowChangeListener);
+    windowChangeListener->OnSizeChange(nullptr,nullptr,nullptr);
+    window->UnregisterWindowChangeListener(windowChangeListener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
