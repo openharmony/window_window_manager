@@ -18,6 +18,8 @@
 
 #include <iremote_proxy.h>
 #include "window_manager_interface.h"
+#include <transaction/rs_transaction.h>
+#include <ui/rs_surface_node.h>
 
 namespace OHOS {
 namespace Rosen {
