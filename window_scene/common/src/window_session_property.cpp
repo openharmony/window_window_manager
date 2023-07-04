@@ -318,7 +318,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteFloat(brightness_) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
         parcel.WriteUint32(zOrder_) &&
-        Parcel.WriteBool(isDecorEnable_) &&
+        parcel.WriteBool(isDecorEnable_) &&
         MarshallingWindowLimits(parcel);
 }
 
