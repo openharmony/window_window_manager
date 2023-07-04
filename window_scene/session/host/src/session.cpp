@@ -253,6 +253,16 @@ float Session::GetBrightness() const
     return property_->GetBrightness();
 }
 
+void Session::SetRequestedOrientation(Orientation orientation)
+{
+    property_->SetRequestedOrientation(orientation);
+}
+
+Orientation Session::GetRequestedOrientation() const
+{
+    return property_->GetRequestedOrientation();
+}
+
 bool Session::IsSessionValid() const
 {
     bool res = state_ > SessionState::STATE_DISCONNECT && state_ < SessionState::STATE_END;

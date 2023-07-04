@@ -64,6 +64,11 @@ void WindowSessionProperty::SetBrightness(float brightness)
     brightness_ = brightness;
 }
 
+void WindowSessionProperty::SetRequestedOrientation(Orientation orientation)
+{
+    requestedOrientation_ = orientation;
+}
+
 void WindowSessionProperty::SetPrivacyMode(bool isPrivate)
 {
     isPrivacyMode_ = isPrivate;
@@ -117,6 +122,11 @@ bool WindowSessionProperty::GetTouchable() const
 float WindowSessionProperty::GetBrightness() const
 {
     return brightness_;
+}
+
+Orientation WindowSessionProperty::GetRequestedOrientation() const
+{
+    return requestedOrientation_;
 }
 
 bool WindowSessionProperty::GetPrivacyMode() const
@@ -316,6 +326,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint64(parentPersistentId_) &&
         parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
         parcel.WriteFloat(brightness_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
         parcel.WriteUint32(zOrder_) &&
         parcel.WriteBool(isDecorEnable_) &&
@@ -349,6 +360,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetAccessTokenId(parcel.ReadUint32());
     property->SetMaximizeMode(static_cast<MaximizeMode>(parcel.ReadUint32()));
     property->SetBrightness(parcel.ReadFloat());
+    property->SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));
     property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
     property->SetZOrder(parcel.ReadUint32());
     property->SetDecorEnable(parcel.ReadBool());
@@ -373,6 +385,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     accessTokenId_ = property->accessTokenId_;
     maximizeMode_ = property->maximizeMode_;
     brightness_ = property->brightness_;
+    requestedOrientation_ = property->requestedOrientation_;
     sysBarPropMap_ = property->sysBarPropMap_;
     windowMode_ = property->windowMode_;
     limits_ = property->limits_;
