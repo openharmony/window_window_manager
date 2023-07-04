@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_SESSION_MANAGER_AGENT_CONTROLLER_H
 
 #include "client_agent_container.h"
+#include "window_manager.h"
 #include "wm_single_instance.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "window_visibility_info.h"
@@ -33,6 +34,8 @@ public:
 
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused);
+    void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
+        WindowUpdateType type);
     void NotifyWaterMarkFlagChangedResult(bool hasWaterMark);
     void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
 private:

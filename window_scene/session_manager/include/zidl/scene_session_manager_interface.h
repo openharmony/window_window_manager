@@ -25,8 +25,9 @@
 #include "session/host/include/session.h"
 
 #include "focus_change_info.h"
-#include "window_manager_interface.h"
 #include "session_listener_interface.h"
+#include "window_manager.h"
+#include "zidl/window_manager_interface.h"
 
 namespace OHOS::Media {
 class PixelMap;
@@ -50,6 +51,7 @@ public:
         TRANS_ID_SET_SESSION_ICON,
         TRANS_ID_REGISTER_SESSION_LISTENER,
         TRANS_ID_UNREGISTER_SESSION_LISTENER,
+        TRANS_ID_GET_WINDOW_INFO,
         TRANS_ID_PENDING_SESSION_TO_FOREGROUND,
         TRANS_ID_PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR,
         TRANS_ID_GET_FOCUS_SESSION_TOKEN,

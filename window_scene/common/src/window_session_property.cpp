@@ -261,6 +261,16 @@ WindowMode WindowSessionProperty::GetWindowMode() const
     return windowMode_;
 }
 
+void WindowSessionProperty::SetZOrder(uint32_t zOrder)
+{
+    zOrder_ = zOrder;
+}
+
+uint32_t WindowSessionProperty::GetZOrder()
+{
+    return zOrder_;
+}
+
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
 {
     if (parcel.WriteUint32(limits_.maxWidth_) &&
@@ -297,6 +307,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
         parcel.WriteFloat(brightness_) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
+        parcel.WriteUint32(zOrder_) &&
         MarshallingWindowLimits(parcel);
 }
 
@@ -328,6 +339,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetMaximizeMode(static_cast<MaximizeMode>(parcel.ReadUint32()));
     property->SetBrightness(parcel.ReadFloat());
     property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
+    property->SetZOrder(parcel.ReadUint32());
     UnmarshallingWindowLimits(parcel, property);
     return property;
 }

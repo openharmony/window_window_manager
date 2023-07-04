@@ -927,6 +927,24 @@ void Session::NotifyRemoteReady()
     return;
 }
 
+WindowMode Session::GetWindowMode()
+{
+    if (property_ == nullptr) {
+        WLOGFW("null property.");
+        return WindowMode::WINDOW_MODE_UNDEFINED;
+    }
+    return property_->GetWindowMode();
+}
+
+void Session::SetZOrder(uint32_t zOrder)
+{
+    if (property_ == nullptr) {
+        WLOGFW("null property.");
+        return;
+    }
+    property_->SetZOrder(zOrder);
+}
+
 WSError Session::UpdateSnapshot()
 {
     snapshot_ = Snapshot();
