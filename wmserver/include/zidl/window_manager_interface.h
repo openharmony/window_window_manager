@@ -18,7 +18,6 @@
 
 #include <iremote_broker.h>
 #include <rs_iwindow_animation_finished_callback.h>
-#include <ui/rs_surface_node.h>
 
 #include "pixel_map.h"
 #include "window_property.h"
@@ -29,6 +28,7 @@
 namespace OHOS {
 namespace Rosen {
 class RSIWindowAnimationController;
+class RSSurfaceNode;
 
 class IWindowManager : public IRemoteBroker {
 public:

@@ -21,10 +21,10 @@
 #include "window_property.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
-#include <transaction/rs_transaction.h>
 
 namespace OHOS {
 namespace Rosen {
+class RSTransaction;
 class IWindow : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IWindow");

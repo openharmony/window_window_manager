@@ -174,7 +174,7 @@ ohos_shared_library("session_manager") {
   ]
 
   external_deps = [
-    "ability_runtime:ability_manager",
+    "ability_base:session_info",
     "graphic_standard:librender_service_client",
     "hilog_native:libhilog",
     "ipc:ipc_single",
