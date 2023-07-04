@@ -18,6 +18,7 @@
 
 #include <iremote_stub.h>
 #include "window_manager_interface.h"
+#include <ui/rs_surface_node.h>
 
 namespace OHOS {
 namespace Rosen {

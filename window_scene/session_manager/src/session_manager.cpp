@@ -17,7 +17,6 @@
 
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
-#include "ability_manager_client.h"
 
 #include "window_manager_hilog.h"
 #include "mock_session_manager_service_interface.h"
