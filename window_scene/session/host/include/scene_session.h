@@ -56,7 +56,11 @@ public:
     };
 
     SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
-    ~SceneSession() = default;
+    ~SceneSession()
+    {
+        sessionChangeCallbackList_.clear();
+        sessionChangeCallbackList_.shrink_to_fit();
+    }
 
     WSError Foreground() override;
     WSError Background() override;
@@ -96,7 +100,7 @@ private:
     bool FixRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
-    sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
+    std::vector<sptr<SessionChangeCallback>> sessionChangeCallbackList_ = nullptr;
     sptr<MoveDragController> moveDragController_ = nullptr;
     bool isFirstStart_ = true;
 };

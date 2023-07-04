@@ -459,6 +459,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         UpdateParentSession(sceneSession, property);
         sceneSessionMap_.insert({ persistentId, sceneSession });
         RegisterSessionStateChangeNotifyManagerFunc(sceneSession);
+        RegisterSessionRectChangeNotifyManagerFunc(sceneSession);
         WLOGFI("create session persistentId: %{public}" PRIu64 "", persistentId);
         return sceneSession;
     };
@@ -1126,6 +1127,22 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(bool isAddingPrivateSessio
     ScreenSessionManager::GetInstance().UpdatePrivateStateAndNotify(screenSession, isAddingPrivateSession);
 }
 
+void SceneSessionManager::RegisterSessionRectChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    uint64_t persistentId = sceneSession->GetPersistentId();
+    NotifySessionRectChangeFunc onRectChange = [this, persistentId](const WSRect& rect) {
+        this->OnSessionRectChange(persistentId, rect);
+    };
+    sptr<SceneSession::SessionChangeCallback> callback;
+    callback.onRectChange_ = onRectChange;
+    sceneSession->RegisterSessionChangeCallback(callback);
+    WLOGFD("RegisterSessionRectChangeFunc success");
+}
+
 void SceneSessionManager::RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession)
 {
     NotifySessionStateChangeNotifyManagerFunc func = [this](int64_t persistentId) {
@@ -1373,6 +1390,12 @@ void SceneSessionManager::InitPersistentStorage()
     }
 }
 
+void SceneSessionManager::OnSessionRectChange(uint64_t persistentId, const WSRect& rect)
+{
+    WLOGFI("OnSessionRectChange");
+    NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_BOUNDS);
+}
+
 WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
 {
     WLOGFI("GetAccessibilityWindowInfo Called.");
@@ -1411,11 +1434,11 @@ void SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     info->focused_ = sceneSession->GetPersistentId() == focusedSessionId_;
     info->type_ = sceneSession->GetWindowType();
     info->mode_ = sceneSession->GetWindowMode();
-    info->isDecorEnable_ = sceneSession->IsDecorEnable();
     auto property = sceneSession->GetSessionProperty();
     if (property != nullptr) {
         info->displayId_ = property->GetDisplayId();
         info->layer_ = property->GetZOrder();
+        info->isDecorEnable_ = property->IsDecorEnable();
     }
     infos.emplace_back(info);
 }
