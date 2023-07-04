@@ -31,29 +31,31 @@ WM_IMPLEMENT_SINGLE_INSTANCE(VsyncStation)
 
 void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
-    std::lock_guard<std::mutex> lock(mtx_);
-    if (destroyed_) {
-        return;
-    }
-    vsyncCallbacks_.insert(vsyncCallback);
-
-    if (!hasInitVsyncReceiver_ || !vsyncHandler_) {
-        if (!vsyncHandler_) {
-            vsyncHandler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>();
+    {  
+        std::lock_guard<std::mutex> lock(mtx_);
+        if (destroyed_) {
+            return;
         }
+        vsyncCallbacks_.insert(vsyncCallback);
 
-        auto& rsClient = OHOS::Rosen::RSInterfaces::GetInstance();
-        while (receiver_ == nullptr) {
-            receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(getpid()), vsyncHandler_);
+        if (!hasInitVsyncReceiver_ || !vsyncHandler_) {
+            if (!vsyncHandler_) {
+                vsyncHandler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>();
+            }
+
+            auto& rsClient = OHOS::Rosen::RSInterfaces::GetInstance();
+            while (receiver_ == nullptr) {
+                receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(getpid()), vsyncHandler_);
+            }
+            receiver_->Init();
+            hasInitVsyncReceiver_ = true;
         }
-        receiver_->Init();
-        hasInitVsyncReceiver_ = true;
+        if (hasRequestedVsync_) {
+            return;
+        }
+        hasRequestedVsync_ = true;
+        OHOS::AppExecFwk::EventHandler::Current().PostTask(vsyncTimeoutCallback_, VSYNC_TIME_OUT_MILLISECONDS);
     }
-    if (hasRequestedVsync_) {
-        return;
-    }
-    hasRequestedVsync_ = true;
-    OHOS::AppExecFwk::EventHandler::Current().PostTask(vsyncTimeoutCallback_, VSYNC_TIME_OUT_MILLISECONDS);
     receiver_->RequestNextVSync(frameCallback_);
 }
 
