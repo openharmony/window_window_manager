@@ -33,8 +33,8 @@ config("window_native_kit_config") {
   include_dirs = [
     "window_napi",
     "../../../innerkits/wm",
-    "../../../../wm/include",
     "../../../../utils/include",
+    "../../../../wm/include",
     "../../../../wmserver/include",
 
     # because of pixle_map.h

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,19 @@
  * limitations under the License.
  */
 
-#include <configuration.h>
+#include "window_scene.h"
 
+#include <configuration.h>
 #include "window_impl.h"
 #include "window_manager_hilog.h"
-#include "window_scene.h"
+#include "window_model.h"
 
 namespace OHOS {
 namespace Rosen {
 const std::string WindowScene::MAIN_WINDOW_ID = "main window";
-
+namespace {
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowScene"};
+}
 WindowScene::~WindowScene()
 {
 }
@@ -30,11 +33,12 @@ WindowScene::~WindowScene()
 WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRuntime::Context>& context,
     sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option)
 {
+    WLOGFD("WindowScene with window session!");
     displayId_ = displayId;
     if (option == nullptr) {
         option = new(std::nothrow) WindowOption();
         if (option == nullptr) {
-            WLOGFW("alloc WindowOption failed");
+            WLOGFE("alloc WindowOption failed");
             return WMError::WM_ERROR_NULLPTR;
         }
     }
@@ -43,10 +47,20 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
 
     mainWindow_ = Window::Create(GenerateMainWindowName(context), option, context);
     if (mainWindow_ == nullptr) {
+        WLOGFE("mainWindow_ is NULL");
         return WMError::WM_ERROR_NULLPTR;
     }
-    mainWindow_->RegisterLifeCycleListener(listener);
 
+    Previewer::PreviewerWindowModel& windowModel =  Previewer::PreviewerWindow::GetInstance().GetWindowParams();
+    Ace::ViewportConfig config;
+    config.SetSize(windowModel.originWidth, windowModel.originHeight);
+    config.SetPosition(0, 0);
+    config.SetOrientation(static_cast<int32_t>(Previewer::PreviewerWindow::TransOrientation(windowModel.orientation)));
+    config.SetDensity(windowModel.density);
+    mainWindow_->SetViewportConfig(config);
+
+    Previewer::PreviewerWindow::GetInstance().SetWindowObject(mainWindow_.GetRefPtr());
+    mainWindow_->RegisterLifeCycleListener(listener);
     return WMError::WM_OK;
 }
 
@@ -55,7 +69,8 @@ std::string WindowScene::GenerateMainWindowName(const std::shared_ptr<AbilityRun
     if (context == nullptr) {
         return MAIN_WINDOW_ID + std::to_string(count++);
     } else {
-        std::string windowName = "MainWinodw" + std::to_string(count++);
+        auto options = context->GetOptions();
+        std::string windowName = options.bundleName + std::to_string(count++);
         std::size_t pos = windowName.find_last_of('.');
         return (pos == std::string::npos) ? windowName : windowName.substr(pos + 1); // skip '.'
     }
@@ -63,13 +78,7 @@ std::string WindowScene::GenerateMainWindowName(const std::shared_ptr<AbilityRun
 
 sptr<Window> WindowScene::CreateWindow(const std::string& windowName, sptr<WindowOption>& option) const
 {
-    if (windowName.empty() || mainWindow_ == nullptr || option == nullptr) {
-        WLOGFE("WindowScene Name: %{public}s", windowName.c_str());
-        return nullptr;
-    }
-    option->SetParentId(mainWindow_->GetWindowId());
-    option->SetWindowTag(WindowTag::SUB_WINDOW);
-    return Window::Create(windowName, option, mainWindow_->GetContext());
+    return nullptr;
 }
 
 const sptr<Window>& WindowScene::GetMainWindow() const
@@ -79,12 +88,7 @@ const sptr<Window>& WindowScene::GetMainWindow() const
 
 std::vector<sptr<Window>> WindowScene::GetSubWindow()
 {
-    if (mainWindow_ == nullptr) {
-        WLOGFE("Get sub window failed, because main window is null");
-        return std::vector<sptr<Window>>();
-    }
-    uint32_t parentId = mainWindow_->GetWindowId();
-    return Window::GetSubWindow(parentId);
+    return std::vector<sptr<Window>>();
 }
 
 WMError WindowScene::GoDestroy()
