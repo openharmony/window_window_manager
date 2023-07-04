@@ -100,7 +100,7 @@ private:
     bool FixRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
-    std::vector<sptr<SessionChangeCallback>> sessionChangeCallbackList_ = nullptr;
+    std::vector<sptr<SessionChangeCallback>> sessionChangeCallbackList_;
     sptr<MoveDragController> moveDragController_ = nullptr;
     bool isFirstStart_ = true;
 };
