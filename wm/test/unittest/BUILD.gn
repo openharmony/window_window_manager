@@ -29,6 +29,7 @@ group("unittest") {
     ":wm_window_option_test",
     ":wm_window_proxy_test",
     ":wm_window_scene_effect_test",
+    ":wm_window_scene_session_impl_test",
     ":wm_window_scene_test",
     ":wm_window_session_impl_test",
     ":wm_window_stub_test",
@@ -148,6 +149,14 @@ ohos_unittest("wm_window_stub_test") {
   module_out_path = module_out_path
 
   sources = [ "window_stub_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+}
+
+ohos_unittest("wm_window_scene_session_impl_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_scene_session_impl_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 }
