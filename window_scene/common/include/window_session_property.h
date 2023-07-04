@@ -107,6 +107,8 @@ public:
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
     static void UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingSystemBarMap(Parcel& parcel) const;
+    static void UnMarshallingSystemBarMap(Parcel& parcel, WindowSessionProperty* property);
     bool Marshalling(Parcel& parcel) const override;
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
 private:

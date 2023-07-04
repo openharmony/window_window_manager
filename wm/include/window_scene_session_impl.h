@@ -83,6 +83,8 @@ public:
     virtual bool IsTurnScreenOn() const override;
     virtual bool IsKeepScreenOn() const override;
     virtual bool IsPrivacyMode() const override;
+    virtual bool IsLayoutFullScreen() const override;
+    virtual bool IsFullScreen() const override;
 protected:
     void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();
