@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,30 +26,39 @@
 
 class NativeValue;
 class NativeEngine;
+
 namespace OHOS::MMI {
 class PointerEvent;
 class KeyEvent;
 class AxisEvent;
 }
+
 namespace OHOS::AppExecFwk {
 class Configuration;
 class Ability;
 }
+
 namespace OHOS::AbilityRuntime {
 class AbilityContext;
 class Context;
 }
+
 namespace OHOS::Ace {
 class UIContent;
+class ViewportConfig;
 }
+
 namespace OHOS::AAFwk {
 class Want;
 }
+
 namespace OHOS {
 namespace Rosen {
 class RSSurfaceNode;
 class RSTransaction;
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
+using SendRenderDataCallback = bool (*)(const void*, const size_t, const int32_t, const int32_t);
+
 class IWindowLifeCycle : virtual public RefBase {
 };
 class IWindowChangeListener : virtual public RefBase {
@@ -87,7 +96,7 @@ class IDialogTargetTouchListener : virtual public RefBase {
 class IDialogDeathRecipientListener : virtual public RefBase {
 };
 static WMError DefaultCreateErrCode = WMError::WM_OK;
-class Window : public RefBase {
+class WINDOW_EXPORT Window : public RefBase {
 public:
     static sptr<Window> Create(const std::string& windowName,
     sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context = nullptr,
@@ -161,7 +170,7 @@ public:
     virtual bool IsFocused() const = 0;
     virtual WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) = 0;
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) = 0;
-    virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) = 0;
+    virtual void ConsumeKeyEvent(const std::shared_ptr<MMI::KeyEvent>& inputEvent) = 0;
     virtual void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent) = 0;
     virtual void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) = 0;
     virtual int64_t GetVSyncPeriod() = 0;
@@ -205,7 +214,6 @@ public:
     virtual WMError SetAPPWindowLabel(const std::string& label) = 0;
     virtual WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) = 0;
     virtual WMError DisableAppWindowDecor() = 0;
-    virtual bool IsDecorEnable() const = 0;
     virtual WMError Minimize() = 0;
     virtual WMError Maximize() = 0;
     virtual WMError Recover() = 0;
@@ -223,6 +231,14 @@ public:
     virtual WMError ResetAspectRatio() = 0;
     virtual KeyboardAnimationConfig GetKeyboardAnimationConfig() = 0;
     virtual void SetNeedDefaultAnimation(bool needDefaultAnimation) = 0;
+
+    virtual void SetViewportConfig(const Ace::ViewportConfig& config) = 0;
+    virtual void UpdateViewportConfig() = 0;
+    virtual void SetOrientation(Orientation orientation) = 0;
+    virtual void SetSize(int32_t width, int32_t height) = 0;
+    virtual void SetDensity(float density) = 0;
+
+    virtual void CreateSurfaceNode(const std::string name, const SendRenderDataCallback& callback) = 0;
 };
 }
 }

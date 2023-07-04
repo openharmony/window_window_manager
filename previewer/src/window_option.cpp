@@ -14,6 +14,7 @@
  */
 
 #include "window_option.h"
+
 #include "window_helper.h"
 #include "wm_common.h"
 
