@@ -23,7 +23,12 @@
 #include "window_scene.h"
 namespace OHOS {
 namespace Rosen {
-NativeValue* CreateJsWindowStage(NativeEngine& engine, std::shared_ptr<Rosen::WindowScene> windowScene);
+#ifdef _WIN32
+#define WINDOW_EXPORT __attribute__((dllexport))
+#else
+#define WINDOW_EXPORT __attribute__((visibility("default")))
+#endif
+WINDOW_EXPORT NativeValue* CreateJsWindowStage(NativeEngine& engine, std::shared_ptr<Rosen::WindowScene> windowScene);
 class JsWindowStage {
 public:
     explicit JsWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene);

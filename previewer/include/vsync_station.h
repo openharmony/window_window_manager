@@ -23,7 +23,7 @@
 #include <unordered_set>
 
 #include <refbase.h>
-#include <event_handler.h>
+#include <EventHandler.h>
 #include <vsync_receiver.h>
 
 #include "wm_common.h"
@@ -43,15 +43,6 @@ public:
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback);
     int64_t GetVSyncPeriod();
     void RemoveCallback();
-    void SetIsMainHandlerAvailable(bool available)
-    {
-        isMainHandlerAvailable_ = available;
-    }
-
-    void SetVsyncEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& eventHandler)
-    {
-        vsyncHandler_ = eventHandler;
-    }
 
 private:
     VsyncStation() = default;
@@ -63,7 +54,6 @@ private:
     std::mutex mtx_;
     bool hasRequestedVsync_ = false;
     bool hasInitVsyncReceiver_ = false;
-    bool isMainHandlerAvailable_ = true;
     bool destroyed_ = false;
     const std::string VSYNC_THREAD_ID = "VsyncThread";
     std::shared_ptr<OHOS::Rosen::VSyncReceiver> receiver_ = nullptr;
@@ -73,7 +63,7 @@ private:
         .callback_ = OnVsync,
     };
     std::shared_ptr<AppExecFwk::EventHandler> vsyncHandler_ = nullptr;
-    AppExecFwk::EventHandler::Callback vsyncTimeoutCallback_ = std::bind(&VsyncStation::OnVsyncTimeOut, this);
+    AppExecFwk::Callback vsyncTimeoutCallback_ = std::bind(&VsyncStation::OnVsyncTimeOut, this);
 };
 } // namespace Rosen
 } // namespace OHOS
