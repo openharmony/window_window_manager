@@ -19,6 +19,7 @@
 #include "window_interface.h"
 #include "iremote_proxy.h"
 #include "wm_common.h"
+#include <transaction/rs_transaction.h>
 
 namespace OHOS {
 namespace Rosen {
