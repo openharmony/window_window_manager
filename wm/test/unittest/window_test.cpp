@@ -1939,7 +1939,6 @@ HWTEST_F(WindowTest, WindowChangeListener, Function | SmallTest | Level3)
     window->RegisterWindowChangeListener(listener);
     Rect rect_ = {0, 0, 0, 0};
     WindowSizeChangeReason reason;
-    // listener->OnSizeChange(rect_,reason,nullptr);
     listener->OnModeChange(WindowMode::WINDOW_MODE_UNDEFINED, false);
     window->UnregisterWindowChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -1983,7 +1982,6 @@ HWTEST_F(WindowTest, WindowChangeListener, Function | SmallTest | Level3)
     Rect rect_ = {0, 0, 0, 0};
     std::shared_ptr<RSTransaction> rstransaction = std::make_shared<RSTransaction>();
     listener->OnSizeChange(rect_, WindowSizeChangeReason::UNDEFINED, rstransaction);
-    // listener->OnModeChange(nullptr,nullptr);
     window->UnregisterWindowChangeListener(listener);
     ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -2025,7 +2023,6 @@ HWTEST_F(WindowTest, IAnimationTransitionController, Function | SmallTest | Leve
     window->RegisterAnimationTransitionController(listener);
     listener->AnimationForShown();
     listener->AnimationForHidden();
-
     ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
@@ -2048,7 +2045,6 @@ HWTEST_F(WindowTest, IInputEventConsumer, Function | SmallTest | Level3)
     listener->OnInputEvent(keyEvent);
     listener->OnInputEvent(pointerEvent);
     listener->OnInputEvent(axisEvent);
-
     ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }

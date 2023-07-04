@@ -386,9 +386,7 @@ HWTEST_F(WindowOptionTest, GetWindowSessionType, Function | SmallTest | Level3)
     option->SetWindowSessionType(WindowSessionType::SCENE_SESSION);
     option->GetWindowSessionType();
     ASSERT_EQ(WindowSessionType::SCENE_SESSION, option->GetWindowSessionType());
-   
 }
-
 }
 } // namespace Rosen
 } // namespace OHOS
