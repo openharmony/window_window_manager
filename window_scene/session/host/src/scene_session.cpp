@@ -434,7 +434,7 @@ bool SceneSession::IsKeepScreenOn() const
 std::string SceneSession::GetSessionSnapshot()
 {
     WLOGFI("GetSessionSnapshot id %{public}" PRIu64 "", GetPersistentId());
-    if (Session::GetSessionState() >= SessionState::STATE_BACKGROUND) {
+    if (Session::GetSessionState() < SessionState::STATE_BACKGROUND) {
         Session::UpdateSnapshot();
     }
     if (scenePersistence_ != nullptr && GetSnapshot()) {
