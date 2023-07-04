@@ -63,8 +63,8 @@ private:
 
     void PendingSessionActivation(SessionInfo& info);
     void OnSessionStateChange(const SessionState& state);
-    void OnSessionEvent(uint32_t actionId);
-    void OnCreateSpecificSession(const sptr<SceneSession>& session);
+    void OnSessionEvent(uint32_t eventId);
+    void OnCreateSpecificSession(const sptr<SceneSession>& sceneSession);
     void OnSessionRectChange(const WSRect& rect);
     void OnRaiseToTop();
     void OnBackPressed();
