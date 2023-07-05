@@ -1932,54 +1932,12 @@ HWTEST_F(WindowTest, RegisterTransferComponentDataListener, Function | SmallTest
 HWTEST_F(WindowTest, WindowChangeListener01, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    auto window = Window::Create("WindowTest64", option);
+    auto window = Window::Create("WindowChangeListener01", option);
     ASSERT_NE(nullptr, window);
     auto ret = true;
     sptr<IWindowChangeListener> listener = new IWindowChangeListener();
     window->RegisterWindowChangeListener(listener);
     listener->OnModeChange(WindowMode::WINDOW_MODE_UNDEFINED, false);
-    window->UnregisterWindowChangeListener(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
-}
-
-/**
- * @tc.name: IOccupiedAreaChangeListener
- * @tc.desc: IOccupiedAreaChangeListener fun
- * @tc.type: FUNC
- */
-HWTEST_F(WindowTest, IOccupiedAreaChangeListener, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    auto window = Window::Create("WindowTest64", option);
-    ASSERT_NE(nullptr, window);
-    auto ret = true;
-    sptr<IOccupiedAreaChangeListener> listener = new IOccupiedAreaChangeListener();
-    Rect rect_ = {0, 0, 0, 0};
-    window->RegisterOccupiedAreaChangeListener(listener);
-    sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, rect_, 80);
-    listener->OnSizeChange(info, nullptr);
-    window->UnregisterOccupiedAreaChangeListener(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
-}
-
-/**
- * @tc.name: WindowChangeListener
- * @tc.desc: WindowChangeListener02 fun
- * @tc.type: FUNC
- */
-HWTEST_F(WindowTest, WindowChangeListener02, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    auto window = Window::Create("WindowTest6616", option);
-    ASSERT_NE(nullptr, window);
-    auto ret = true;
-    sptr<IWindowChangeListener> listener = new IWindowChangeListener();
-    window->RegisterWindowChangeListener(listener);
-    Rect rect_ = {0, 0, 0, 0};
-    std::shared_ptr<RSTransaction> rstransaction = std::make_shared<RSTransaction>();
-    listener->OnSizeChange(rect_, WindowSizeChangeReason::UNDEFINED, rstransaction);
     window->UnregisterWindowChangeListener(listener);
     ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -2002,6 +1960,27 @@ HWTEST_F(WindowTest, IOccupiedAreaChangeListener, Function | SmallTest | Level3)
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, rect_, 80);
     listener->OnSizeChange(info, nullptr);
     window->UnregisterOccupiedAreaChangeListener(listener);
+    ASSERT_EQ(true, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: WindowChangeListener
+ * @tc.desc: WindowChangeListener02 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, WindowChangeListener02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    auto window = Window::Create("WindowChangeListener02", option);
+    ASSERT_NE(nullptr, window);
+    auto ret = true;
+    sptr<IWindowChangeListener> listener = new IWindowChangeListener();
+    window->RegisterWindowChangeListener(listener);
+    Rect rect_ = {0, 0, 0, 0};
+    std::shared_ptr<RSTransaction> rstransaction = std::make_shared<RSTransaction>();
+    listener->OnSizeChange(rect_, WindowSizeChangeReason::UNDEFINED, rstransaction);
+    window->UnregisterWindowChangeListener(listener);
     ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
