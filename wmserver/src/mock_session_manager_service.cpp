@@ -34,7 +34,6 @@ MockSessionManagerService::MockSessionManagerService() : SystemAbility(WINDOW_MA
 
 bool MockSessionManagerService::RegisterMockSessionManagerService()
 {
-    WLOGFD("Register mock session manager service");
     bool res = SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<MockSessionManagerService>());
     if (!res) {
         WLOGFE("register failed");
@@ -42,6 +41,7 @@ bool MockSessionManagerService::RegisterMockSessionManagerService()
     if (!Publish(this)) {
         WLOGFE("Publish failed");
     }
+    WLOGFI("Publish mock session manager service success");
     return true;
 }
 
@@ -58,16 +58,17 @@ bool MockSessionManagerService::SetSessionManagerService(const sptr<IRemoteObjec
     }
     sessionManagerService_ = sessionManagerService;
     RegisterMockSessionManagerService();
-    WLOGFD("sessionManagerService set success!");
+    WLOGFI("sessionManagerService set success!");
     return true;
 }
 
 sptr<IRemoteObject> MockSessionManagerService::GetSessionManagerService()
 {
-    if (sessionManagerService_) {
+    if (!sessionManagerService_) {
         WLOGFE("sessionManagerService is nullptr");
         return nullptr;
     }
+    WLOGFD("Get session manager service success");
     return sessionManagerService_;
 }
 } // namespace Rosen
