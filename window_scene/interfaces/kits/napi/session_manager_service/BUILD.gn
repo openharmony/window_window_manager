@@ -43,7 +43,7 @@ ohos_shared_library("sessionmanagerservice_napi") {
     "ability_runtime:runtime",
     "c_utils:utils",
     "graphic_standard:surface",  # use for SurfaceUtils
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "ipc:ipc_napi_common",
     "napi:ace_napi",
   ]

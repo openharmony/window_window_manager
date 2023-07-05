@@ -36,7 +36,7 @@ ohos_static_library("libtestutil") {
     "access_token:libtoken_setproc",
     "c_utils:utils",
     "graphic_standard:surface",
-    "hilog_native:libhilog",
+    "hilog:libhilog",
     "multimedia_image_framework:image_native",
   ]
 
