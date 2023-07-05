@@ -78,6 +78,7 @@ enum class WindowType : uint32_t {
     SYSTEM_WINDOW_END = SYSTEM_SUB_WINDOW_END,
 
     WINDOW_TYPE_UI_EXTENSION = 3000,
+    WINDOW_TYPE_SCENE_BOARD
 };
 
 /**
