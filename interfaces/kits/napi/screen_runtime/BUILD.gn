@@ -42,8 +42,8 @@ ohos_shared_library("screen_napi") {
     "ability_runtime:runtime",
     "c_utils:utils",
     "graphic_standard:surface",  # use for SurfaceUtils
-    "hiview:libxpower_event_js",
     "hilog:libhilog",
+    "hiview:libxpower_event_js",
     "napi:ace_napi",
   ]
 
