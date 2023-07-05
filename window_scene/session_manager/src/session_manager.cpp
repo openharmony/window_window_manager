@@ -60,10 +60,14 @@ void SessionManager::InitSessionManagerServiceProxy()
             WLOGFE("Failed to get system ability mgr.");
             return;
         }
-    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(WINDOW_MANAGER_SERVICE_ID);
-    if (!remoteObject) {
-        WLOGFE("Remote object is nullptr");
-        return;
+    sptr<IRemoteObject> remoteObject = nullptr;
+    while (remoteObject == nullptr) {
+        WLOGFD("wait 100ms get systemability");
+        remoteObject = systemAbilityManager->GetSystemAbility(WINDOW_MANAGER_SERVICE_ID);
+        if (remoteObject != nullptr) {
+            break;
+        }
+        sleep(100); // wait 100ms
     }
     mockSessionManagerServiceProxy_ = iface_cast<IMockSessionManagerInterface>(remoteObject);
     sessionManagerServiceProxy_ = iface_cast<ISessionManagerService>(
