@@ -1926,19 +1926,17 @@ HWTEST_F(WindowTest, RegisterTransferComponentDataListener, Function | SmallTest
 
 /**
  * @tc.name: WindowChangeListener
- * @tc.desc: WindowChangeListener fun
+ * @tc.desc: WindowChangeListener01 fun
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, WindowChangeListener, Function | SmallTest | Level3)
+HWTEST_F(WindowTest, WindowChangeListener01, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     auto window = Window::Create("WindowTest64", option);
     ASSERT_NE(nullptr, window);
     auto ret = true;
     sptr<IWindowChangeListener> listener = new IWindowChangeListener();
     window->RegisterWindowChangeListener(listener);
-    Rect rect_ = {0, 0, 0, 0};
-    WindowSizeChangeReason reason;
     listener->OnModeChange(WindowMode::WINDOW_MODE_UNDEFINED, false);
     window->UnregisterWindowChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -1952,7 +1950,7 @@ HWTEST_F(WindowTest, WindowChangeListener, Function | SmallTest | Level3)
  */
 HWTEST_F(WindowTest, IOccupiedAreaChangeListener, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     auto window = Window::Create("WindowTest64", option);
     ASSERT_NE(nullptr, window);
     auto ret = true;
@@ -1968,12 +1966,12 @@ HWTEST_F(WindowTest, IOccupiedAreaChangeListener, Function | SmallTest | Level3)
 
 /**
  * @tc.name: WindowChangeListener
- * @tc.desc: WindowChangeListener fun
+ * @tc.desc: WindowChangeListener02 fun
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, WindowChangeListener, Function | SmallTest | Level3)
+HWTEST_F(WindowTest, WindowChangeListener02, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     auto window = Window::Create("WindowTest6616", option);
     ASSERT_NE(nullptr, window);
     auto ret = true;
@@ -1994,7 +1992,7 @@ HWTEST_F(WindowTest, WindowChangeListener, Function | SmallTest | Level3)
  */
 HWTEST_F(WindowTest, IOccupiedAreaChangeListener, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     auto window = Window::Create("IOccupiedAreaChangeListener", option);
     ASSERT_NE(nullptr, window);
     auto ret = true;
@@ -2015,7 +2013,7 @@ HWTEST_F(WindowTest, IOccupiedAreaChangeListener, Function | SmallTest | Level3)
  */
 HWTEST_F(WindowTest, IAnimationTransitionController, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     auto window = Window::Create("IAnimationTransitionController", option);
     ASSERT_NE(nullptr, window);
     auto ret = true;
@@ -2034,7 +2032,7 @@ HWTEST_F(WindowTest, IAnimationTransitionController, Function | SmallTest | Leve
  */
 HWTEST_F(WindowTest, IInputEventConsumer, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     auto window = Window::Create("IInputEventConsumer", option);
     ASSERT_NE(nullptr, window);
     auto ret = true;
@@ -2056,7 +2054,7 @@ HWTEST_F(WindowTest, IInputEventConsumer, Function | SmallTest | Level3)
  */
 HWTEST_F(WindowTest, IDialogDeathRecipientListener, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     auto window = Window::Create("IDialogDeathRecipientListener", option);
     ASSERT_NE(nullptr, window);
     auto ret = true;
@@ -2075,7 +2073,7 @@ HWTEST_F(WindowTest, IDialogDeathRecipientListener, Function | SmallTest | Level
  */
 HWTEST_F(WindowTest, IAceAbilityHandler, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     auto window = Window::Create("IAceAbilityHandler", option);
     ASSERT_NE(nullptr, window);
     auto ret = true;
@@ -2094,7 +2092,7 @@ HWTEST_F(WindowTest, IAceAbilityHandler, Function | SmallTest | Level3)
  */
 HWTEST_F(WindowTest, IDispatchInputEventListener, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     auto window = Window::Create("IDispatchInputEventListener", option);
     ASSERT_NE(nullptr, window);
     auto ret = true;
