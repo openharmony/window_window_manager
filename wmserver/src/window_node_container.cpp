@@ -449,6 +449,10 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node, bool fromA
 
 void WindowNodeContainer::HandleRemoveWindowDisplayOrientation(sptr<WindowNode>& node, bool fromAnimation)
 {
+    if (node->GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN) {
+        WLOGFD("[FixOrientation] not full screen window remove, do not update orientation");
+        return;
+    }
     if (!FIX_ORIENTATION_ENABLE) {
         auto nextRotatableWindow = GetNextRotatableWindow(node->GetWindowId());
         if (nextRotatableWindow != nullptr) {
