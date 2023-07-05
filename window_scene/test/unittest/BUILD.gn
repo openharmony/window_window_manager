@@ -19,9 +19,13 @@ group("unittest") {
   testonly = true
 
   deps = [
+    ":ws_scene_session_manager_proxy_test",
+    ":ws_scene_session_manager_stub_test",
     ":ws_scene_session_manager_test",
+    ":ws_scene_session_test",
     ":ws_screen_scene_config_test",
     ":ws_screen_session_manager_test",
+    ":ws_session_manager_agent_controller_test",
     ":ws_session_test",
     ":ws_window_scene_config_test",
   ]
@@ -72,15 +76,58 @@ ohos_unittest("ws_scene_session_manager_test") {
   deps = [ ":ws_unittest_common" ]
 }
 
+ohos_unittest("ws_scene_session_manager_proxy_test") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_manager_proxy_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+}
+
+ohos_unittest("ws_session_manager_agent_controller_test") {
+  module_out_path = module_out_path
+
+  sources = [ "session_manager_agent_controller_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+}
+
+ohos_unittest("ws_session_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "session_manager_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+}
+
+ohos_unittest("ws_scene_session_manager_stub_test") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_manager_stub_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+}
+
+ohos_unittest("ws_scene_session_test") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+}
+
 ## Build ws_unittest_common.a {{{
 config("ws_unittest_common_public_config") {
   include_dirs = [
+    "${window_base_path}/test/common/mock",
+
     # for WMError Code
     "${window_base_path}/dm/include",
     "${window_base_path}/dmserver/include",
     "${window_base_path}/interfaces/innerkits/dm",
     "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/window_scene/session_manager/include",
+    "${window_base_path}/window_scene/session_manager_service/include",
     "${window_base_path}/window_scene",
     "${window_base_path}/window_scene/test",
     "//third_party/googletest/googlemock/include",
@@ -92,6 +139,17 @@ config("ws_unittest_common_public_config") {
     "${multimodalinput_path}/input/interfaces/native/innerkits/event/include",
     "${multimodalinput_path}/input/util/common/include",
     "${ability_runtime_inner_api_path}/ability_manager/include",
+    "${window_base_path}/wm/include",
+    "${window_base_path}/wm/include/zidl",
+
+    # for session_manager
+    "${multimodalinput_path}/input/interfaces/native/innerkits/event/include",
+    "${ability_runtime_inner_api_path}/ability_manager/include",
+
+    # for screenlock_manager_interface
+    "${screenlock_mgr_path}/services/include",
+    "${screenlock_mgr_path}/utils/include",
+    "${screenlock_mgr_path}/frameworks/native/include",
     "${window_base_path}/wm/include",
     "${window_base_path}/wm/include/zidl",
 
@@ -117,6 +175,7 @@ ohos_static_library("ws_unittest_common") {
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session_manager:scene_session_manager",
     "${window_base_path}/window_scene/session_manager:screen_session_manager",
+    "${window_base_path}/window_scene/session_manager:session_manager",
     "${window_base_path}/wm:libwm",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
