@@ -244,12 +244,18 @@ sptr<IRemoteObject> Session::GetAbilityToken() const
 
 WSError Session::SetBrightness(float brightness)
 {
+    if (!property_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
     property_->SetBrightness(brightness);
     return WSError::WS_OK;
 }
 
 float Session::GetBrightness() const
 {
+    if (!property_) {
+        return UNDEFINED_BRIGHTNESS;
+    }
     return property_->GetBrightness();
 }
 
