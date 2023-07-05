@@ -1979,7 +1979,7 @@ HWTEST_F(WindowTest, WindowChangeListener02, Function | SmallTest | Level3)
     sptr<IWindowChangeListener> listener = new IWindowChangeListener();
     window->RegisterWindowChangeListener(listener);
     Rect rect_ = {0, 0, 0, 0};
-    std::shared_ptr<RSTransaction> rstransaction = std::make_shared<RSTransaction>();
+    std::shared_ptr<RSTransaction> rstransaction;
     listener->OnSizeChange(rect_, WindowSizeChangeReason::UNDEFINED, rstransaction);
     window->UnregisterWindowChangeListener(listener);
     ASSERT_EQ(true, ret);
