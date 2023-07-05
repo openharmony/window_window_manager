@@ -222,6 +222,11 @@ NativeValue* CreateJsSystemBarPropertyArrayObject(
     return objValue;
 }
 
+static void SetTypeProperty(NativeObject *object, NativeEngine* engine, std::string name, JsSessionType type)
+{
+    object->SetProperty(name.c_str(), CreateJsValue(*engine, static_cast<int32_t>(type)));
+}
+
 NativeValue* SessionTypeInit(NativeEngine* engine)
 {
     WLOGFD("SessionTypeInit");
@@ -237,43 +242,27 @@ NativeValue* SessionTypeInit(NativeEngine* engine)
         WLOGFE("Failed to get object");
         return nullptr;
     }
-
-    object->SetProperty("TYPE_UNDEFINED", CreateJsValue(*engine,
-        static_cast<int32_t>(JsSessionType::TYPE_UNDEFINED)));
-    object->SetProperty("TYPE_APP", CreateJsValue(*engine,
-        static_cast<int32_t>(JsSessionType::TYPE_APP)));
-    object->SetProperty("TYPE_SUB_APP", CreateJsValue(*engine,
-        static_cast<int32_t>(JsSessionType::TYPE_SUB_APP)));
-    object->SetProperty("TYPE_SYSTEM_ALERT", CreateJsValue(*engine,
-        static_cast<int32_t>(JsSessionType::TYPE_SYSTEM_ALERT)));
-    object->SetProperty("TYPE_INPUT_METHOD", CreateJsValue(*engine,
-        static_cast<int32_t>(JsSessionType::TYPE_INPUT_METHOD)));
-    object->SetProperty("TYPE_STATUS_BAR", CreateJsValue(*engine,
-        static_cast<int32_t>(JsSessionType::TYPE_STATUS_BAR)));
-    object->SetProperty("TYPE_PANEL", CreateJsValue(*engine,
-        static_cast<int32_t>(JsSessionType::TYPE_PANEL)));
-    object->SetProperty("TYPE_KEYGUARD", CreateJsValue(*engine,
-        static_cast<int32_t>(JsSessionType::TYPE_KEYGUARD)));
-    object->SetProperty("TYPE_VOLUME_OVERLAY", CreateJsValue(*engine,
-        static_cast<int32_t>(JsSessionType::TYPE_VOLUME_OVERLAY)));
-    object->SetProperty("TYPE_NAVIGATION_BAR", CreateJsValue(*engine,
-        static_cast<int32_t>(JsSessionType::TYPE_NAVIGATION_BAR)));
-    object->SetProperty("TYPE_FLOAT", CreateJsValue(*engine,
-        static_cast<int32_t>(JsSessionType::TYPE_FLOAT)));
-    object->SetProperty("TYPE_WALLPAPER", CreateJsValue(*engine,
-        static_cast<int32_t>(JsSessionType::TYPE_WALLPAPER)));
-    object->SetProperty("TYPE_DESKTOP", CreateJsValue(*engine,
-        static_cast<int32_t>(JsSessionType::TYPE_DESKTOP)));
-    object->SetProperty("TYPE_LAUNCHER_DOCK", CreateJsValue(*engine,
-        static_cast<int32_t>(JsSessionType::TYPE_LAUNCHER_DOCK)));
-    object->SetProperty("TYPE_FLOAT_CAMERA", CreateJsValue(*engine,
-        static_cast<int32_t>(JsSessionType::TYPE_FLOAT_CAMERA)));
-    object->SetProperty("TYPE_DIALOG", CreateJsValue(*engine,
-        static_cast<int32_t>(JsSessionType::TYPE_DIALOG)));
-    object->SetProperty("TYPE_SCREENSHOT", CreateJsValue(*engine,
-        static_cast<int32_t>(JsSessionType::TYPE_SCREENSHOT)));
-    object->SetProperty("TYPE_TOAST", CreateJsValue(*engine,
-        static_cast<int32_t>(JsSessionType::TYPE_TOAST)));
+    SetTypeProperty(object, engine, "TYPE_UNDEFINED", JsSessionType::TYPE_UNDEFINED);
+    SetTypeProperty(object, engine, "TYPE_APP", JsSessionType::TYPE_APP);
+    SetTypeProperty(object, engine, "TYPE_SUB_APP", JsSessionType::TYPE_SUB_APP);
+    SetTypeProperty(object, engine, "TYPE_SYSTEM_ALERT", JsSessionType::TYPE_SYSTEM_ALERT);
+    SetTypeProperty(object, engine, "TYPE_INPUT_METHOD", JsSessionType::TYPE_INPUT_METHOD);
+    SetTypeProperty(object, engine, "TYPE_STATUS_BAR", JsSessionType::TYPE_STATUS_BAR);
+    SetTypeProperty(object, engine, "TYPE_PANEL", JsSessionType::TYPE_PANEL);
+    SetTypeProperty(object, engine, "TYPE_KEYGUARD", JsSessionType::TYPE_KEYGUARD);
+    SetTypeProperty(object, engine, "TYPE_VOLUME_OVERLAY", JsSessionType::TYPE_VOLUME_OVERLAY);
+    SetTypeProperty(object, engine, "TYPE_NAVIGATION_BAR", JsSessionType::TYPE_NAVIGATION_BAR);
+    SetTypeProperty(object, engine, "TYPE_FLOAT", JsSessionType::TYPE_FLOAT);
+    SetTypeProperty(object, engine, "TYPE_WALLPAPER", JsSessionType::TYPE_WALLPAPER);
+    SetTypeProperty(object, engine, "TYPE_DESKTOP", JsSessionType::TYPE_DESKTOP);
+    SetTypeProperty(object, engine, "TYPE_LAUNCHER_DOCK", JsSessionType::TYPE_LAUNCHER_DOCK);
+    SetTypeProperty(object, engine, "TYPE_FLOAT_CAMERA", JsSessionType::TYPE_FLOAT_CAMERA);
+    SetTypeProperty(object, engine, "TYPE_DIALOG", JsSessionType::TYPE_DIALOG);
+    SetTypeProperty(object, engine, "TYPE_SCREENSHOT", JsSessionType::TYPE_SCREENSHOT);
+    SetTypeProperty(object, engine, "TYPE_TOAST", JsSessionType::TYPE_TOAST);
+    SetTypeProperty(object, engine, "TYPE_POINTER", JsSessionType::TYPE_POINTER);
+    SetTypeProperty(object, engine, "TYPE_LAUNCHER_RECENT", JsSessionType::TYPE_LAUNCHER_RECENT);
+    SetTypeProperty(object, engine, "TYPE_SCENE_BOARD", JsSessionType::TYPE_SCENE_BOARD);
     return objValue;
 }
 } // namespace OHOS::Rosen
