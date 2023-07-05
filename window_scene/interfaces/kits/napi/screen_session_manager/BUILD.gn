@@ -38,7 +38,7 @@ ohos_shared_library("screensessionmanager_napi") {
   external_deps = [
     "ability_runtime:runtime",
     "graphic_standard:librender_service_client",
-    "hilog_native:libhilog",
+    "hilog:libhilog",
     "napi:ace_napi",
   ]
 

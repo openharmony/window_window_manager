@@ -55,7 +55,7 @@ ohos_executable("demo_screenshot_listener") {
 
   external_deps = [
     "c_utils:utils",
-    "hilog_native:libhilog",
+    "hilog:libhilog",
     "multimedia_image_framework:image_native",
   ]
 

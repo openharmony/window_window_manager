@@ -43,7 +43,7 @@ ohos_shared_library("screen_napi") {
     "c_utils:utils",
     "graphic_standard:surface",  # use for SurfaceUtils
     "hiview:libxpower_event_js",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "napi:ace_napi",
   ]
 

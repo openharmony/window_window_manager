@@ -50,7 +50,7 @@ ohos_static_library("dm_napi_common") {
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
-    "hilog_native:libhilog",
+    "hilog:libhilog",
     "ipc:ipc_single",
     "napi:ace_napi",
   ]
