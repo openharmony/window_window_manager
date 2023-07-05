@@ -18,6 +18,7 @@
 #include "window.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
