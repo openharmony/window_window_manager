@@ -39,6 +39,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleNotifyTouchDialogTarget),
     std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA),
         &SessionStageStub::HandleNotifyTransferComponentData),
+    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_OCCUPIED_AREA_CHANGE_INFO),
+        &SessionStageStub::HandleNotifyOccupiedAreaChange),
 };
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -119,6 +121,18 @@ int SessionStageStub::HandleNotifyTransferComponentData(MessageParcel& data, Mes
     }
     WSError errCode = NotifyTransferComponentData(*wantParams);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyOccupiedAreaChange(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleNotifyOccupiedAreaChangeInfo!");
+    sptr<OccupiedAreaChangeInfo> info(data.ReadParcelable<OccupiedAreaChangeInfo>());
+    if (info == nullptr) {
+        WLOGFE("Occupied info is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    NotifyOccupiedAreaChangeInfo(info);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

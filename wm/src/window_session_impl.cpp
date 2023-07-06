@@ -42,6 +42,7 @@ std::map<uint64_t, std::vector<sptr<IWindowChangeListener>>> WindowSessionImpl::
 std::map<uint64_t, std::vector<sptr<IAvoidAreaChangedListener>>> WindowSessionImpl::avoidAreaChangeListeners_;
 std::map<uint64_t, std::vector<sptr<IDialogDeathRecipientListener>>> WindowSessionImpl::dialogDeathRecipientListeners_;
 std::map<uint64_t, std::vector<sptr<IDialogTargetTouchListener>>> WindowSessionImpl::dialogTargetTouchListener_;
+std::map<uint32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowSessionImpl::occupiedAreaChangeListeners_;
 std::recursive_mutex WindowSessionImpl::globalMutex_;
 std::map<std::string, std::pair<uint64_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::map<uint64_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
@@ -596,6 +597,20 @@ WMError WindowSessionImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle
     return RegisterListener(lifecycleListeners_[GetPersistentId()], listener);
 }
 
+WMError WindowSessionImpl::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
+{
+    WLOGFD("Start register");
+    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+    return RegisterListener(occupiedAreaChangeListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
+{
+    WLOGFD("Start unregister");
+    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+    return UnregisterListener(occupiedAreaChangeListeners_[GetPersistentId()], listener);
+}
+
 WMError WindowSessionImpl::UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
 {
     WLOGFD("Start unregister");
@@ -641,6 +656,19 @@ EnableIfSame<T, IWindowChangeListener, std::vector<sptr<IWindowChangeListener>>>
         }
     }
     return windowChangeListeners;
+}
+
+template<typename T>
+EnableIfSame<T, IOccupiedAreaChangeListener, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+        for (auto& listener : occupiedAreaChangeListeners_[GetPersistentId()]) {
+            occupiedAreaChangeListeners.push_back(listener);
+        }
+    }
+    return occupiedAreaChangeListeners;
 }
 
 template<typename T>
@@ -1030,6 +1058,22 @@ uint32_t WindowSessionImpl::GetBackgroundColor() const
     }
     WLOGFE("FA mode does not get bg color: %{public}u", GetWindowId());
     return 0xffffffff; // means no background color been set, default color is white
+}
+
+WMError WindowSessionImpl::SetWindowGravity(WindowGravity gravity, uint32_t percent)
+{
+    return SessionManager::GetInstance().SetSessionGravity(GetPersistentId(),
+        static_cast<SessionGravity>(gravity), percent);
+}
+
+void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
+{
+    auto occupiedAreaChangeListeners = GetListeners<IOccupiedAreaChangeListener>();
+    for (auto& listener : occupiedAreaChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnSizeChange(info);
+        }
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

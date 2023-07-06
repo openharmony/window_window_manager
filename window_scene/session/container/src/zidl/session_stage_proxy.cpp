@@ -186,4 +186,27 @@ WSError SessionStageProxy::NotifyTransferComponentData(const AAFwk::WantParams& 
     int32_t ret = reply.ReadUint32();
     return static_cast<WSError>(ret);
 }
+
+void SessionStageProxy::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteParcelable(info.GetRefPtr())) {
+        WLOGFE("occupied info write failed.");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_OCCUPIED_AREA_CHANGE_INFO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+    return;
+}
 } // namespace OHOS::Rosen

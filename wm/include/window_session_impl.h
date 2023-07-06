@@ -78,10 +78,12 @@ public:
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
     WSError UpdateFocus(bool focus) override;
     WSError HandleBackEvent() override { return WSError::WS_OK; }
+    WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;
 
     void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
     void NotifyFocusActiveEvent(bool isFocusActive) override;
+    void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info) override;
     void NotifyFocusWindowIdEvent(uint32_t windowId) override;
 
     WMError RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
@@ -94,6 +96,8 @@ public:
     void UnregisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) override;
     WMError RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
     WMError UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
+    WMError RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
+    WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
     void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
 
@@ -158,6 +162,8 @@ private:
     EnableIfSame<T, IDialogDeathRecipientListener, std::vector<sptr<IDialogDeathRecipientListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IDialogTargetTouchListener, std::vector<sptr<IDialogTargetTouchListener>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IOccupiedAreaChangeListener, std::vector<sptr<IOccupiedAreaChangeListener>>> GetListeners();
     template<typename T> void ClearUselessListeners(std::map<uint64_t, T>& listeners, uint64_t persistentId);
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
     void NotifyAfterFocused();
@@ -171,6 +177,7 @@ private:
     static std::map<uint64_t, std::vector<sptr<IAvoidAreaChangedListener>>> avoidAreaChangeListeners_;
     static std::map<uint64_t, std::vector<sptr<IDialogDeathRecipientListener>>> dialogDeathRecipientListeners_;
     static std::map<uint64_t, std::vector<sptr<IDialogTargetTouchListener>>> dialogTargetTouchListener_;
+    static std::map<uint32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> occupiedAreaChangeListeners_;
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;
