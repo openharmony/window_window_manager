@@ -335,7 +335,7 @@ void SceneSessionManager::ConfigKeyboardAnimation(const WindowSceneConfig::Confi
 std::string SceneSessionManager::CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig)
 {
     static std::unordered_set<std::string> curveSet = { "easeOut", "ease", "easeIn", "easeInOut", "default",
-        "linear", "spring", "interactiveSpring" };
+        "linear", "spring", "interactiveSpring", "interpolatingSpring" };
 
     std::string keyboardCurveName = "easeOut";
     const auto& nameItem = curveConfig.GetProp("name");
