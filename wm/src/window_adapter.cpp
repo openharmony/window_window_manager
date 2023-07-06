@@ -375,5 +375,11 @@ void WindowAdapter::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
     INIT_PROXY_CHECK_RETURN();
     return windowManagerServiceProxy_->GetFocusWindowInfo(focusInfo);
 }
+
+WMError WindowAdapter::UpdateSessionAvoidAreaListener(uint64_t& persistentId, bool haveListener)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(windowManagerServiceProxy_->UpdateSessionAvoidAreaListener(persistentId, haveListener));
+}
 } // namespace Rosen
 } // namespace OHOS
