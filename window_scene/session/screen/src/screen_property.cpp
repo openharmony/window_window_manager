@@ -22,6 +22,7 @@ constexpr int32_t PHONE_SCREEN_HEIGHT = 2772;
 constexpr float PHONE_SCREEN_DENSITY = 3.5f;
 constexpr float ELSE_SCREEN_DENSITY = 1.5f;
 constexpr float INCH_2_MM = 25.4f;
+constexpr int32_t HALF_VALUE = 2;
 }
 
 void ScreenProperty::SetRotation(float rotation)
@@ -90,6 +91,32 @@ void ScreenProperty::SetVirtualPixelRatio(float virtualPixelRatio)
 float ScreenProperty::GetVirtualPixelRatio() const
 {
     return virtualPixelRatio_;
+}
+
+void ScreenProperty::SetScreenRotation(Rotation rotation)
+{
+    if (IsVertical(rotation) != IsVertical(screenRotation_)) {
+        std::swap(bounds_.rect_.width_, bounds_.rect_.height_);
+        int32_t width = bounds_.rect_.width_;
+        int32_t height = bounds_.rect_.height_;
+        if (IsVertical(screenRotation_)) {
+            bounds_.rect_.left_ -= (width - height) / HALF_VALUE;
+            bounds_.rect_.top_ += (width - height) / HALF_VALUE;
+        } else {
+            bounds_.rect_.left_ += (height - width) / HALF_VALUE;
+            bounds_.rect_.top_ -= (height - width) / HALF_VALUE;
+        }
+    }
+    if (rotation == Rotation::ROTATION_0) {
+        rotation_ = 0.f;
+    } else if (rotation == Rotation::ROTATION_90) {
+        rotation_ = 90.f;
+    } else if (rotation == Rotation::ROTATION_180) {
+        rotation_ = 180.f;
+    } else {
+        rotation_ = 270.f;
+    }
+    screenRotation_ = rotation;
 }
 
 Rotation ScreenProperty::GetScreenRotation() const
@@ -212,6 +239,16 @@ void ScreenProperty::SetScreenType(ScreenType type)
 ScreenType ScreenProperty::GetScreenType() const
 {
     return type_;
+}
+
+void ScreenProperty::SetScreenRequestedOrientation(Orientation orientation)
+{
+    screenRequestedOrientation_ = orientation;
+}
+
+Orientation ScreenProperty::GetScreenRequestedOrientation() const
+{
+    return screenRequestedOrientation_;
 }
 
 } // namespace OHOS::Rosen

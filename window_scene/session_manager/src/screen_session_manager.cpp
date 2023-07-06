@@ -350,7 +350,7 @@ DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virt
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetVirtualPixelRatio(%" PRIu64", %f)", screenId,
         virtualPixelRatio);
-    screenSession->GetScreenProperty().SetVirtualPixelRatio(virtualPixelRatio);
+    screenSession->SetVirtualPixelRatio(virtualPixelRatio);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::VIRTUAL_PIXEL_RATIO_CHANGED);
 
     return DMError::DM_OK;
@@ -592,6 +592,83 @@ DMError ScreenSessionManager::SetScreenRotationLocked(bool isLocked)
     }
     WLOGFI("SCB: SetScreenRotationLocked: isLocked: %{public}u", isLocked);
     return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::SetOrientation(ScreenId screenId, Orientation orientation)
+{
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("SCB: ScreenSessionManager set orientation permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (orientation < Orientation::UNSPECIFIED || orientation > Orientation::REVERSE_HORIZONTAL) {
+        WLOGFE("SCB: ScreenSessionManager set orientation: %{public}u", static_cast<uint32_t>(orientation));
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return SetOrientationController(screenId, orientation, false);
+}
+
+DMError ScreenSessionManager::SetOrientationFromWindow(DisplayId displayId, Orientation orientation)
+{
+    sptr<DisplayInfo> displayInfo = GetDisplayInfoById(displayId);
+    if (displayInfo == nullptr) {
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return SetOrientationController(displayInfo->GetScreenId(), orientation, true);
+}
+
+DMError ScreenSessionManager::SetOrientationController(ScreenId screenId, Orientation newOrientation,
+    bool isFromWindow)
+{
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        WLOGFE("fail to set orientation, cannot find screen %{public}" PRIu64"", screenId);
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    if (isFromWindow) {
+        if (newOrientation == Orientation::UNSPECIFIED) {
+            newOrientation = screenSession->GetScreenRequestedOrientation();
+        }
+    } else {
+        screenSession->SetScreenRequestedOrientation(newOrientation);
+    }
+
+    if (screenSession->GetOrientation() == newOrientation) {
+        return DMError::DM_OK;
+    }
+    if (isFromWindow) {
+        // I will debug it in the future
+        // ScreenRotationProperty::ProcessOrientationSwitch(newOrientation);
+    } else {
+        Rotation rotationAfter = screenSession->CalcRotation(newOrientation);
+        SetRotation(screenId, rotationAfter, false);
+    }
+    screenSession->SetOrientation(newOrientation);
+    screenSession->PropertyChange(screenSession->GetScreenProperty());
+    // Notify rotation event to ScreenManager
+    NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ORIENTATION);
+    return DMError::DM_OK;
+}
+
+bool ScreenSessionManager::SetRotation(ScreenId screenId, Rotation rotationAfter,
+    bool isFromWindow)
+{
+    WLOGFI("Enter SetRotation, screenId: %{public}" PRIu64 ", rotation: %{public}u, isFromWindow: %{public}u,",
+        screenId, rotationAfter, isFromWindow);
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        WLOGFE("SetRotation error, cannot get screen with screenId: %{public}" PRIu64, screenId);
+        return false;
+    }
+    if (rotationAfter == screenSession->GetRotation()) {
+        WLOGFE("rotation not changed. screen %{public}" PRIu64" rotation %{public}u", screenId, rotationAfter);
+        return false;
+    }
+    WLOGFD("set orientation. rotation %{public}u", rotationAfter);
+    screenSession->SetRotation(rotationAfter);
+    screenSession->PropertyChange(screenSession->GetScreenProperty());
+    NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
+    return true;
 }
 
 void ScreenSessionManager::RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener)
@@ -892,8 +969,8 @@ sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId
     }
     screenSession->modes_.emplace_back(info);
     screenSession->activeIdx_ = 0;
-    screenSession->GetScreenProperty().SetScreenType(ScreenType::VIRTUAL);
-    screenSession->GetScreenProperty().SetVirtualPixelRatio(option.density_);
+    screenSession->SetScreenType(ScreenType::VIRTUAL);
+    screenSession->SetVirtualPixelRatio(option.density_);
     return screenSession;
 }
 

@@ -872,6 +872,11 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
             SetBrightness(sceneSession, property->GetBrightness());
             break;
         }
+        case WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION: {
+            ScreenSessionManager::GetInstance().
+                SetOrientationFromWindow(property->GetDisplayId(), property->GetRequestedOrientation());
+            break;
+        }
         case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
             bool prePrivacyMode = sceneSession->GetWindowSessionProperty()->GetPrivacyMode() || sceneSession->GetWindowSessionProperty()->GetSystemPrivacyMode();
             bool isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();

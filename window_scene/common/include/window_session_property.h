@@ -22,6 +22,7 @@
 #include <parcel.h>
 #include "interfaces/include/ws_common.h"
 #include "wm_common.h"
+#include "dm_common.h"
 #include <cfloat>
 
 namespace OHOS {
@@ -61,6 +62,7 @@ public:
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
     void SetBrightness(float brightness);
+    void SetRequestedOrientation(Orientation orientation);
     void SetPrivacyMode(bool isPrivate);
     void SetSystemPrivacyMode(bool isSystemPrivate);
     void SetDisplayId(uint64_t displayId);
@@ -89,6 +91,7 @@ public:
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
     float GetBrightness() const;
+    Orientation GetRequestedOrientation() const;
     bool GetPrivacyMode() const;
     bool GetSystemPrivacyMode() const;
     uint32_t GetParentId() const;
@@ -123,6 +126,7 @@ private:
     bool turnScreenOn_ = false;
     bool keepScreenOn_ = false;
     float brightness_ = UNDEFINED_BRIGHTNESS;
+    Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };
     uint64_t displayId_ = 0;
