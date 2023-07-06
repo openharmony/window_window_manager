@@ -13,13 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_MOCK_MANAGER_SERVICE_H
-#define OHOS_MOCK_MANAGER_SERVICE_H
+#ifndef OHOS_ROSEN_MOCK_SESSION_MANAGER_SERVICE_H
+#define OHOS_ROSEN_MOCK_SESSION_MANAGER_SERVICE_H
 
 #include <system_ability.h>
-#include <iremote_object.h>
 
-#include "singleton_delegator.h"
 #include "wm_single_instance.h"
 #include "zidl/mock_session_manager_service_stub.h"
 
@@ -32,14 +30,23 @@ public:
     bool SetSessionManagerService(const sptr<IRemoteObject>& sessionManagerService);
     sptr<IRemoteObject> GetSessionManagerService() override;
     void OnStart() override;
+
 protected:
     MockSessionManagerService();
     virtual ~MockSessionManagerService() = default;
+
 private:
     bool RegisterMockSessionManagerService();
 
+    class SMSDeathRecipient : public IRemoteObject::DeathRecipient {
+    public:
+        void OnRemoteDied(const wptr<IRemoteObject>& object) override;
+    };
+
     sptr<IRemoteObject> sessionManagerService_;
+    sptr<SMSDeathRecipient> smsDeathRecipient_;
 };
 } // namespace Rosen
 } // namespace OHOS
-#endif // OHOS_MOCK_MANAGER_SERVICE_H
+
+#endif // OHOS_ROSEN_MOCK_SESSION_MANAGER_SERVICE_H
