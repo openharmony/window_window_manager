@@ -75,6 +75,17 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SceneSessionManager)
 SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInstance())
 {
     taskScheduler_ = std::make_shared<TaskScheduler>(SCENE_SESSION_MANAGER_THREAD);
+    constexpr uint64_t interval = 5 * 1000; // 5 second
+    auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
+    auto mainEventHandler = std::make_shared<AppExecFwk::EventHandler>(mainEventRunner);
+    if (HiviewDFX::Watchdog::GetInstance().AddThread("MainThread", mainEventHandler, interval)) {
+        WLOGFW("Add thread MainThread to watchdog failed.");
+    }
+    if (HiviewDFX::Watchdog::GetInstance().AddThread(
+        SCENE_SESSION_MANAGER_THREAD, taskScheduler_->GetEventHandler(), interval)) {
+        WLOGFW("Add thread %{public}s to watchdog failed.", SCENE_SESSION_MANAGER_THREAD.c_str());
+    }
+
     bundleMgr_ = GetBundleManager();
     currentUserId_ = DEFAULT_USERID;
     LoadWindowSceneXml();
