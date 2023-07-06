@@ -1241,6 +1241,10 @@ WSError SceneSessionManager::NotifyWaterMarkFlagChangedResult(bool hasWaterMark)
 WSError SceneSessionManager::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label)
 {
     WLOGFI("run SetSessionLabel");
+    if (sessionListener_ == nullptr) {
+        WLOGFI("sessionListener not register, skip.");
+        return WSError::WS_OK;
+    }
     for (auto iter : sceneSessionMap_) {
         auto& sceneSession = iter.second;
         if (sceneSession->GetAbilityToken() == token) {
@@ -1256,6 +1260,10 @@ WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject> &token,
     const std::shared_ptr<Media::PixelMap> &icon)
 {
     WLOGFI("run SetSessionIcon");
+    if (sessionListener_ == nullptr) {
+        WLOGFI("sessionListener not register, skip.");
+        return WSError::WS_OK;
+    }
     for (auto iter : sceneSessionMap_) {
         auto& sceneSession = iter.second;
         if (sceneSession->GetAbilityToken() == token) {
