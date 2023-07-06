@@ -14,12 +14,11 @@
  */
 
 #include <gtest/gtest.h>
-#include "interfaces/include/ws_common.h"
 #include "session_manager/include/scene_session_manager.h"
+#include "session_manager/include/session_manager_agent_controller.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
 #include "window_manager_agent.h"
-#include "session_manager.h"
 #include "zidl/window_manager_agent_interface.h"
 
 using namespace testing;
@@ -27,7 +26,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-class SceneSessionManagerTest : public testing::Test {
+class SessionManagerAgentControllerTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -35,54 +34,38 @@ public:
     void TearDown() override;
 };
 
-void SceneSessionManagerTest::SetUpTestCase()
+void SessionManagerAgentControllerTest::SetUpTestCase()
 {
 }
 
-void SceneSessionManagerTest::TearDownTestCase()
+void SessionManagerAgentControllerTest::TearDownTestCase()
 {
 }
 
-void SceneSessionManagerTest::SetUp()
+void SessionManagerAgentControllerTest::SetUp()
 {
 }
 
-void SceneSessionManagerTest::TearDown()
+void SessionManagerAgentControllerTest::TearDown()
 {
-}
-
-namespace {
-/**
- * @tc.name: SetBrightness
- * @tc.desc: ScreenSesionManager set session brightness
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, SetBrightness, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetBrightness";
-    info.bundleName_ = "SetBrightness1";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    WSError result = SceneSessionManager::GetInstance().SetBrightness(sceneSession, 0.5);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
 }
 
 /**
  * @tc.name: RegisterWindowManagerAgent
- * @tc.desc: SceneSesionManager rigister window manager agent
+ * @tc.desc: SesionManagerAgentController rigister window manager agent
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest, RegisterWindowManagerAgent, Function | SmallTest | Level3)
+HWTEST_F(SessionManagerAgentControllerTest, RegisterWindowManagerAgent, Function | SmallTest | Level3)
 {
     sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
 
-    ASSERT_EQ(WMError::WM_OK, SceneSessionManager::GetInstance().RegisterWindowManagerAgent(type, windowManagerAgent));
-    ASSERT_EQ(WMError::WM_OK, SceneSessionManager::GetInstance().UnregisterWindowManagerAgent(
-        type, windowManagerAgent));
+    ASSERT_EQ(WMError::WM_OK, SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
+        windowManagerAgent, type));
+    ASSERT_EQ(WMError::WM_OK, SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(
+        windowManagerAgent, type));
 }
 
-}
 } // namespace Rosen
 } // namespace OHOS
 
