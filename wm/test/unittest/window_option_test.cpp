@@ -361,6 +361,32 @@ HWTEST_F(WindowOptionTest, CallingWindow, Function | SmallTest | Level3)
     option->SetCallingWindow(1);
     ASSERT_EQ(1, option->GetCallingWindow());
 }
+
+/**
+ * @tc.name: SetWindowSessionType
+ * @tc.desc: SetWindowSessionType fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetWindowSessionType, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    auto ret = true;
+    option->SetWindowSessionType(WindowSessionType::SCENE_SESSION);
+    ASSERT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: GetWindowSessionType
+ * @tc.desc: GetWindowSessionType fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, GetWindowSessionType, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowSessionType(WindowSessionType::SCENE_SESSION);
+    option->GetWindowSessionType();
+    ASSERT_EQ(WindowSessionType::SCENE_SESSION, option->GetWindowSessionType());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

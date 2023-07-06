@@ -362,6 +362,18 @@ HWTEST_F(DisplayManagerTest, ImplGetDefaultDisplaySync, Function | SmallTest | L
     sptr<Display> display = DisplayManager::GetInstance().GetDefaultDisplaySync();
     ASSERT_EQ(display, nullptr);
 }
+
+/**
+ * @tc.name: GetScreenBrightness
+ * @tc.desc: GetScreenBrightness fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenBrightness, Function | SmallTest | Level1)
+{
+    uint64_t screenId = 2;
+    auto ret = DisplayManager::GetInstance().GetScreenBrightness(screenId);
+    ASSERT_FALSE(ret == 1);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

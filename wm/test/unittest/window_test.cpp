@@ -18,6 +18,7 @@
 #include "window.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1924,6 +1925,176 @@ HWTEST_F(WindowTest, RegisterTransferComponentDataListener, Function | SmallTest
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
+/**
+ * @tc.name: WindowChangeListener
+ * @tc.desc: WindowChangeListener01 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, WindowChangeListener01, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    auto window = Window::Create("WindowChangeListener01", option);
+    ASSERT_NE(nullptr, window);
+    auto ret = true;
+    sptr<IWindowChangeListener> listener = new IWindowChangeListener();
+    window->RegisterWindowChangeListener(listener);
+    listener->OnModeChange(WindowMode::WINDOW_MODE_UNDEFINED, false);
+    window->UnregisterWindowChangeListener(listener);
+    ASSERT_EQ(true, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: IOccupiedAreaChangeListener
+ * @tc.desc: IOccupiedAreaChangeListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, IOccupiedAreaChangeListener, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    auto window = Window::Create("IOccupiedAreaChangeListener", option);
+    ASSERT_NE(nullptr, window);
+    auto ret = true;
+    sptr<IOccupiedAreaChangeListener> listener = new IOccupiedAreaChangeListener();
+    Rect rect_ = {0, 0, 0, 0};
+    window->RegisterOccupiedAreaChangeListener(listener);
+    sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, rect_, 80);
+    listener->OnSizeChange(info, nullptr);
+    window->UnregisterOccupiedAreaChangeListener(listener);
+    ASSERT_EQ(true, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: WindowChangeListener
+ * @tc.desc: WindowChangeListener02 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, WindowChangeListener02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    auto window = Window::Create("WindowChangeListener02", option);
+    ASSERT_NE(nullptr, window);
+    auto ret = true;
+    sptr<IWindowChangeListener> listener = new IWindowChangeListener();
+    window->RegisterWindowChangeListener(listener);
+    Rect rect_ = {0, 0, 0, 0};
+    std::shared_ptr<RSTransaction> rstransaction;
+    listener->OnSizeChange(rect_, WindowSizeChangeReason::UNDEFINED, rstransaction);
+    window->UnregisterWindowChangeListener(listener);
+    ASSERT_EQ(true, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: IAnimationTransitionController
+ * @tc.desc: IAnimationTransitionController fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, IAnimationTransitionController, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    auto window = Window::Create("IAnimationTransitionController", option);
+    ASSERT_NE(nullptr, window);
+    auto ret = true;
+    sptr<IAnimationTransitionController> listener = new IAnimationTransitionController();
+    window->RegisterAnimationTransitionController(listener);
+    listener->AnimationForShown();
+    listener->AnimationForHidden();
+    ASSERT_EQ(true, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: IInputEventConsumer
+ * @tc.desc: IInputEventConsumer fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, IInputEventConsumer, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    auto window = Window::Create("IInputEventConsumer", option);
+    ASSERT_NE(nullptr, window);
+    auto ret = true;
+    std::shared_ptr<IInputEventConsumer> listener = std::make_shared<IInputEventConsumer>();
+    std::shared_ptr<MMI::KeyEvent> keyEvent;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent;
+    std::shared_ptr<MMI::AxisEvent> axisEvent;
+    listener->OnInputEvent(keyEvent);
+    listener->OnInputEvent(pointerEvent);
+    listener->OnInputEvent(axisEvent);
+    ASSERT_EQ(true, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: IDialogDeathRecipientListener
+ * @tc.desc: IDialogDeathRecipientListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, IDialogDeathRecipientListener, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    auto window = Window::Create("IDialogDeathRecipientListener", option);
+    ASSERT_NE(nullptr, window);
+    auto ret = true;
+    sptr<IDialogDeathRecipientListener> listener = new IDialogDeathRecipientListener();
+    Rect rect_ = {0, 0, 0, 0};
+    sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, rect_, 80);
+    listener->OnDialogDeathRecipient();
+    ASSERT_EQ(true, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: IAceAbilityHandler
+ * @tc.desc: IAceAbilityHandler fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, IAceAbilityHandler, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    auto window = Window::Create("IAceAbilityHandler", option);
+    ASSERT_NE(nullptr, window);
+    auto ret = true;
+    sptr<IAceAbilityHandler> listener = new IAceAbilityHandler();
+    uint32_t color = 66;
+    listener->SetBackgroundColor(color);
+    listener->GetBackgroundColor();
+    ASSERT_EQ(true, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: IDispatchInputEventListener
+ * @tc.desc: IDispatchInputEventListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, IDispatchInputEventListener, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    auto window = Window::Create("IDispatchInputEventListener", option);
+    ASSERT_NE(nullptr, window);
+    auto ret = true;
+    sptr<IDispatchInputEventListener> listener = new IDispatchInputEventListener();
+    std::shared_ptr<MMI::KeyEvent> keyEvent;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent;
+    std::shared_ptr<MMI::AxisEvent> axisEvent;
+    listener->OnDispatchPointerEvent(pointerEvent);
+    listener->OnDispatchKeyEvent(keyEvent);
+    ASSERT_EQ(true, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: IsWindowSessionEnabled
+ * @tc.desc: IsWindowSessionEnabled fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, IsWindowSessionEnabled, Function | SmallTest | Level3)
+{
+    ASSERT_EQ(false, Rosen::SceneBoardJudgement::IsWindowSessionEnabled());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
