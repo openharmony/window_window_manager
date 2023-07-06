@@ -46,7 +46,7 @@ ohos_shared_library("scenesessionmanager_napi") {
     "ability_runtime:runtime",
     "c_utils:utils",
     "graphic_standard:window_animation",
-    "hilog_native:libhilog",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
     "napi:ace_napi",

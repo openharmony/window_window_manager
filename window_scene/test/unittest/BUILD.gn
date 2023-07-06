@@ -191,7 +191,7 @@ ohos_static_library("ws_unittest_common") {
     "ability_base:configuration",
     "ability_base:want",
     "c_utils:utils",
-    "hilog_native:libhilog",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
   ]

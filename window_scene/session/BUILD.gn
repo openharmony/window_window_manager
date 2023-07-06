@@ -73,7 +73,7 @@ ohos_shared_library("scene_session") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "graphic_standard:librender_service_client",
-    "hilog_native:libhilog",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
     "multimedia_image_framework:image_native",
