@@ -204,7 +204,7 @@ std::string WindowScene::GetContentInfo() const
     return mainWindow_->GetContentInfo();
 }
 
-WMError WindowScene::NotifyMemoryLevel(int32_t level) const
+WMError WindowScene::NotifyMemoryLevel(int32_t level)
 {
     WLOGI("Notify memory level: %{public}d", level);
     if (mainWindow_ == nullptr) {
