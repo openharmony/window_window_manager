@@ -1531,6 +1531,10 @@ void SceneSessionManager::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclu
         bool isVisible = elem.second;
         auto iter = sceneSessionMap_.begin();
         for (; iter != sceneSessionMap_.end(); iter++) {
+            if (iter->second == nullptr || iter->second->GetSurfaceNode() == nullptr) {
+                WLOGFD(" sceneSessionMap_->second is nullptr || sceneSessionMap_->second->GetSurfaceNode() is nullptr");
+                continue;
+            }
             if (surfaceId == iter->second->GetSurfaceNode()->GetId()) {
                 break;
             }
@@ -1539,9 +1543,6 @@ void SceneSessionManager::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclu
             continue;
         }
         sptr<SceneSession> session = iter->second;
-        if (session == nullptr) {
-            continue;
-        }
         windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(session->GetWindowId(), session->GetCallingPid(),
             session->GetCallingUid(), isVisible, session->GetWindowType()));
 #ifdef MEMMGR_WINDOW_ENABLE
