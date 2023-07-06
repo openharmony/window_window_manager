@@ -139,6 +139,7 @@ ohos_shared_library("screen_session_manager") {
     "config_policy:configpolicy_util",
     "eventhandler:libeventhandler",
     "graphic_standard:librender_service_client",
+    "hicollie:libhicollie",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
