@@ -33,6 +33,7 @@ public:
     MOCK_METHOD0(NotifyTouchDialogTarget, void(void));
     MOCK_METHOD1(NotifyTransferComponentData, WSError(const AAFwk::WantParams& wantParams));
     MOCK_METHOD1(MarkProcessed, WSError(int32_t eventId));
+    MOCK_METHOD1(NotifyOccupiedAreaChangeInfo, void(sptr<OccupiedAreaChangeInfo> info));
 };
 } // namespace Rosen
 } // namespace OHOS

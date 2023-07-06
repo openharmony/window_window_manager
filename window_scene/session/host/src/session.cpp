@@ -938,6 +938,14 @@ WSError Session::TransferExtensionData(const AAFwk::WantParams& wantParams)
     return WSError::WS_OK;
 }
 
+void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
+{
+    if (!sessionStage_) {
+        WLOGFE("session stage is nullptr");
+    }
+    sessionStage_->NotifyOccupiedAreaChangeInfo(info);
+}
+
 void Session::NotifyRemoteReady()
 {
     return;

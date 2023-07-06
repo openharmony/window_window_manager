@@ -42,6 +42,7 @@
 #include "interfaces/include/ws_common_inner.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/scene_session.h"
+#include "session_helper.h"
 #include "session/screen/include/screen_session.h"
 #include "session_manager/include/screen_session_manager.h"
 #include "singleton_container.h"
@@ -115,7 +116,6 @@ bool SceneSessionManager::Init()
     WLOGI("SceneSessionManager init success.");
     return true;
 }
-
 
 void SceneSessionManager::LoadWindowSceneXml()
 {
@@ -1455,6 +1455,114 @@ void SceneSessionManager::StartWindowInfoReportLoop()
         return;
     }
     isReportTaskStart_ = true;
+}
+
+void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(const sptr<SceneSession>& sceneSession)
+{
+    auto callingSession = GetSceneSession(focusedSessionId_);
+    if (callingSession == nullptr) {
+        WLOGFE("calling session is nullptr");
+    }
+    SessionGravity gravity;
+    uint32_t percent = 0;
+    sceneSession->GetSessionProperty()->GetSessionGravity(gravity, percent);
+    if (gravity != SessionGravity::SESSION_GRAVITY_BOTTOM) {
+        WLOGFI("input method window gravity is not bottom, no need to raise calling window");
+        return;
+    }
+
+    const WSRect& softInputSessionRect = sceneSession->GetSessionRect();
+    const WSRect& callingSessionRect = callingSession->GetSessionRect();
+    if (SessionHelper::IsEmptyRect(SessionHelper::GetOverlap(softInputSessionRect, callingSessionRect, 0, 0))) {
+        WLOGFD("There is no overlap area");
+        return;
+    }
+
+    // calculate new rect of calling window
+    WSRect newRect = callingSessionRect;
+    newRect.posY_ = softInputSessionRect.posY_ - static_cast<int32_t>(newRect.height_);
+    newRect.posY_ = std::max(newRect.posY_, STATUS_BAR_AVOID_AREA);
+
+    callingWindowRestoringRect_ = callingSessionRect;
+    NotifyOccupiedAreaChangeInfo(callingSession, newRect, softInputSessionRect);
+    callingSession->UpdateSessionRect(callingWindowRestoringRect_, SizeChangeReason::UNDEFINED);
+}
+
+void SceneSessionManager::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> callingSession,
+    const WSRect& rect, const WSRect& occupiedArea)
+{
+    // if keyboard will occupy calling, notify calling window the occupied area and safe height
+    const WSRect& safeRect = SessionHelper::GetOverlap(occupiedArea, rect, 0, 0);
+    sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
+        SessionHelper::TransferToRect(occupiedArea), safeRect.height_);
+    callingSession->NotifyOccupiedAreaChangeInfo(info);
+}
+
+void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
+{
+    auto callingSession = GetSceneSession(focusedSessionId_);
+    if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_) && callingSession != nullptr &&
+        callingSession->GetSessionProperty()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        WSRect overlapRect = { 0, 0, 0, 0 };
+        NotifyOccupiedAreaChangeInfo(callingSession, callingWindowRestoringRect_, overlapRect);
+        callingSession->UpdateSessionRect(callingWindowRestoringRect_, SizeChangeReason::UNDEFINED);
+    }
+    callingWindowRestoringRect_ = { 0, 0, 0, 0 };
+}
+
+WSError SceneSessionManager::SetSessionGravity(uint64_t persistentId, SessionGravity gravity, uint32_t percent)
+{
+    auto sceneSession = GetSceneSession(persistentId);
+    if (!sceneSession) {
+        WLOGFE("scene session is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        return WSError::WS_ERROR_INVALID_TYPE;
+    }
+    sceneSession->GetSessionProperty()->SetSessionGravity(gravity, percent);
+    RelayoutKeyBoard(sceneSession);
+    if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
+        RestoreCallingSessionSizeIfNeed();
+    } else {
+        ResizeSoftInputCallingSessionIfNeed(sceneSession);
+    }
+    return WSError::WS_OK;
+}
+
+void SceneSessionManager::RelayoutKeyBoard(sptr<SceneSession> sceneSession)
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("sceneSession is nullptr");
+        return;
+    }
+    SessionGravity gravity;
+    uint32_t percent = 0;
+    sceneSession->GetSessionProperty()->GetSessionGravity(gravity, percent);
+    if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
+        gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
+        return;
+    }
+
+    auto defaultDisplayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+    if (defaultDisplayInfo == nullptr) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+
+    auto requestRect = sceneSession->GetSessionProperty()->GetRequestRect();
+    if (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) {
+        if (percent != 0) {
+            requestRect.width_ = static_cast<uint32_t>(defaultDisplayInfo->GetWidth());
+            requestRect.height_ =
+                static_cast<uint32_t>(defaultDisplayInfo->GetHeight()) * percent / 100u; // 100: for calc percent.
+            requestRect.posX_ = 0;
+        }
+    }
+    requestRect.posY_ = defaultDisplayInfo->GetHeight() -
+        static_cast<int32_t>(requestRect.height_);
+    sceneSession->GetSessionProperty()->SetRequestRect(requestRect);
+    sceneSession->UpdateSessionRect(SessionHelper::TransferToWSRect(requestRect), SizeChangeReason::RESIZE);
 }
 
 void SceneSessionManager::InitPersistentStorage()
