@@ -96,6 +96,10 @@ public:
         std::vector<ScreenColorGamut>& colorGamuts) override;
     DMError IsScreenRotationLocked(bool& isLocked) override;
     DMError SetScreenRotationLocked(bool isLocked) override;
+    DMError SetOrientation(ScreenId screenId, Orientation orientation) override;
+    DMError SetOrientationFromWindow(DisplayId displayId, Orientation orientation);
+    DMError SetOrientationController(ScreenId screenId, Orientation newOrientation, bool isFromWindow);
+    bool SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow);
 
     std::vector<ScreenId> GetAllScreenIds() const;
     const std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByScreenId(ScreenId smsScreenId) const;
