@@ -145,7 +145,7 @@ sptr<OHOS::SurfaceBuffer> SurfaceDraw::GetSurfaceBuffer(sptr<OHOS::Surface> laye
         .width = bufferWidth,
         .height = bufferHeight,
         .strideAlignment = 0x8,
-        .format = PIXEL_FMT_RGBA_8888,
+        .format = GRAPHIC_PIXEL_FMT_RGBA_8888,
         .usage = BUFFER_USAGE_CPU_READ | BUFFER_USAGE_CPU_WRITE | BUFFER_USAGE_MEM_DMA,
     };
 
