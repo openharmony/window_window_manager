@@ -176,6 +176,7 @@ public:
     WindowMode GetWindowMode();
     void SetZOrder(uint32_t zOrder);
     WSError UpdateSnapshot();
+    WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
 protected:
     void GeneratePersistentId(const bool isExtension, const SessionInfo& sessionInfo);
     void UpdateSessionState(SessionState state);

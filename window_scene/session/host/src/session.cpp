@@ -966,4 +966,10 @@ WSError Session::UpdateSnapshot()
     snapshot_ = Snapshot();
     return WSError::WS_OK;
 }
+
+WSError Session::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
+{
+    WLOGFD("UpdateWindowAnimationFlag");
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

@@ -60,6 +60,7 @@ private:
     void ProcessNeedAvoidRegister();
     void ProcessPendingSessionToForegroundRegister();
     void ProcessPendingSessionToBackgroundForDelegatorRegister();
+    void ProcessSessionDefaultAnimationFlagChangeRegister();
 
     void PendingSessionActivation(SessionInfo& info);
     void OnSessionStateChange(const SessionState& state);
@@ -78,6 +79,7 @@ private:
     void OnNeedAvoid(bool status);
     void PendingSessionToForeground(const SessionInfo& info);
     void PendingSessionToBackgroundForDelegator(const SessionInfo& info);
+    void OnDefaultAnimationFlagChange(bool isNeedDefaultAnimationFlag);
 
     NativeEngine& engine_;
     wptr<SceneSession> weakSession_ = nullptr;

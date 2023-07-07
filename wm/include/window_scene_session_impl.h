@@ -85,6 +85,7 @@ public:
     virtual bool IsPrivacyMode() const override;
     virtual bool IsLayoutFullScreen() const override;
     virtual bool IsFullScreen() const override;
+    void SetNeedDefaultAnimation(bool needDefaultAnimation) override;
 protected:
     void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();

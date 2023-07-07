@@ -63,6 +63,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
         &SessionStub::HandleUpdateWindowSessionProperty),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_SET_ASPECT_RATIO),
         &SessionStub::HandleSetAspectRatio),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG),
+        &SessionStub::HandleSetWindowAnimationFlag),
 
     // for extension only
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_TRANSFER_ABILITY_RESULT),
@@ -88,6 +90,15 @@ int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParc
     }
 
     return (this->*(func->second))(data, reply);
+}
+
+int SessionStub::HandleSetWindowAnimationFlag(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleSetWindowAnimationFlag!");
+    bool isNeedWindowAnimationFlag = data.ReadBool();
+    const WSError& errCode = UpdateWindowAnimationFlag(isNeedWindowAnimationFlag);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
 }
 
 int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
