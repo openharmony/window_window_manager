@@ -95,6 +95,7 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
     LoadWindowSceneXml();
     Init();
     StartWindowInfoReportLoop();
+    ScreenSessionManager::GetInstance().SetSensorSubscriptionEnabled();
 }
 
 bool SceneSessionManager::Init()

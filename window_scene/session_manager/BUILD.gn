@@ -117,7 +117,9 @@ ohos_shared_library("screen_session_manager") {
   sources = [
     "../../dm/src/zidl/display_manager_agent_proxy.cpp",
     "src/screen_cutout_controller.cpp",
+    "src/screen_rotation_property.cpp",
     "src/screen_scene_config.cpp",
+    "src/screen_sensor_connector.cpp",
     "src/screen_session_manager.cpp",
     "src/session_display_power_controller.cpp",
     "src/zidl/screen_session_manager_stub.cpp",
@@ -143,7 +145,16 @@ ohos_shared_library("screen_session_manager") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
+    "sensor:sensor_interface_native",
   ]
+
+  defines = []
+  if (window_manager_feature_subscribe_motion) {
+    if (defined(global_parts_info) && defined(global_parts_info.msdp_motion)) {
+      external_deps += [ "motion:motion_interface_native" ]
+      defines += [ "WM_SUBSCRIBE_MOTION_ENABLE" ]
+    }
+  }
 
   if (is_standard_system) {
     external_deps += [ "init:libbegetutil" ]
