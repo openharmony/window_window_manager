@@ -106,7 +106,6 @@ private:
     int32_t minTranY_ = INT32_MIN;
     int32_t maxTranX_ = INT32_MAX;
     int32_t maxTranY_ = INT32_MAX;
-    int32_t maxFloatingWindowSize_ = 1920;  // 1920: default max size of floating window
     AreaType type_ = AreaType::UNDEFINED;
     AxisType mainMoveAxis_ = AxisType::UNDEFINED;
     WindowLimits limits_;
