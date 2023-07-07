@@ -15,14 +15,16 @@
 
 #include "session_manager/include/screen_session_manager.h"
 
-#include <transaction/rs_interfaces.h>
 #include <hitrace_meter.h>
-#include "window_manager_hilog.h"
-#include "screen_scene_config.h"
-#include "permission.h"
 #include <parameters.h>
-#include "sys_cap_util.h"
+#include <transaction/rs_interfaces.h>
+#include <xcollie/watchdog.h>
+
+#include "permission.h"
+#include "screen_scene_config.h"
 #include "surface_capture_future.h"
+#include "sys_cap_util.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -39,6 +41,12 @@ ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetIns
             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4)))
 {
     taskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_THREAD);
+    constexpr uint64_t interval = 5 * 1000; // 5 second
+    if (HiviewDFX::Watchdog::GetInstance().AddThread(
+        SCREEN_SESSION_MANAGER_THREAD, taskScheduler_->GetEventHandler(), interval)) {
+        WLOGFW("Add thread %{public}s to watchdog failed.", SCREEN_SESSION_MANAGER_THREAD.c_str());
+    }
+
     RegisterScreenChangeListener();
     LoadScreenSceneXml();
     screenCutoutController_ = new ScreenCutoutController();

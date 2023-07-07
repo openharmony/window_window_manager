@@ -14,19 +14,29 @@
  */
 
 #include "mock_session_manager_service.h"
-#include <iremote_broker.h>
-#include <iremote_object.h>
+
 #include <system_ability_definition.h>
-#include <sstream>
 
 #include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "MOCK_SMS"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "MockSessionManagerService" };
 }
+
 WM_IMPLEMENT_SINGLE_INSTANCE(MockSessionManagerService)
+
+void MockSessionManagerService::SMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& object)
+{
+    auto sessionManagerService = object.promote();
+    if (!sessionManagerService) {
+        WLOGFE("sessionManagerService is null");
+        return;
+    }
+    WLOGFI("SessionManagerService died, restart foundation now!");
+    exit(0);
+}
 
 MockSessionManagerService::MockSessionManagerService() : SystemAbility(WINDOW_MANAGER_SERVICE_ID, true)
 {
@@ -34,7 +44,7 @@ MockSessionManagerService::MockSessionManagerService() : SystemAbility(WINDOW_MA
 
 bool MockSessionManagerService::RegisterMockSessionManagerService()
 {
-    bool res = SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<MockSessionManagerService>());
+    bool res = SystemAbility::MakeAndRegisterAbility(this);
     if (!res) {
         WLOGFE("register failed");
     }
@@ -57,6 +67,13 @@ bool MockSessionManagerService::SetSessionManagerService(const sptr<IRemoteObjec
         return false;
     }
     sessionManagerService_ = sessionManagerService;
+
+    smsDeathRecipient_ = new SMSDeathRecipient();
+    if (sessionManagerService_->IsProxyObject() && !sessionManagerService_->AddDeathRecipient(smsDeathRecipient_)) {
+        WLOGFE("Failed to add death recipient");
+        return false;
+    }
+
     RegisterMockSessionManagerService();
     WLOGFI("sessionManagerService set success!");
     return true;

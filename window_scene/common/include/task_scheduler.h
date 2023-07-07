@@ -24,6 +24,7 @@ public:
     TaskScheduler(const std::string& threadName);
     ~TaskScheduler() = default;
 
+    std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler();
     using Task = std::function<void()>;
     void PostAsyncTask(Task task, int64_t delayTime = 0);
     void PostVoidSyncTask(Task task);
