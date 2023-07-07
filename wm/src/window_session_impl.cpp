@@ -203,7 +203,8 @@ WMError WindowSessionImpl::Connect()
     if (token) {
         property_->SetTokenState(true);
     }
-    auto ret = hostSession_->Connect(iSessionStage, iWindowEventChannel, surfaceNode_, windowSystemConfig_, property_, token);
+    auto ret = hostSession_->Connect(
+        iSessionStage, iWindowEventChannel, surfaceNode_, windowSystemConfig_, property_, token);
     WLOGFI("Window Connect [name:%{public}s, id:%{public}" PRIu64 ", type:%{public}u], ret:%{public}u",
         property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType(), ret);
     return static_cast<WMError>(ret);
@@ -211,7 +212,7 @@ WMError WindowSessionImpl::Connect()
 
 WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
-    WLOGFI("Window Show [name:%{public}s, id:%{public}" PRIu64 ", type: %{public}u], reason:%{public}u state:%{pubic}u",
+    WLOGFI("Window Show [name:%{public}s, id:%{public}" PRIu64 ", type:%{public}u], reason:%{public}u state:%{pubic}u",
         property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType(), reason, state_);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
@@ -823,7 +824,8 @@ EnableIfSame<T, IDialogDeathRecipientListener, std::vector<sptr<IDialogDeathReci
 }
 
 template<typename T>
-EnableIfSame<T, IDialogTargetTouchListener, std::vector<sptr<IDialogTargetTouchListener>>> WindowSessionImpl::GetListeners()
+EnableIfSame<T, IDialogTargetTouchListener,
+    std::vector<sptr<IDialogTargetTouchListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IDialogTargetTouchListener>> dialogTargetTouchListener;
     {
@@ -891,7 +893,8 @@ WMError WindowSessionImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChan
 }
 
 template<typename T>
-EnableIfSame<T, IAvoidAreaChangedListener, std::vector<sptr<IAvoidAreaChangedListener>>> WindowSessionImpl::GetListeners()
+EnableIfSame<T, IAvoidAreaChangedListener,
+    std::vector<sptr<IAvoidAreaChangedListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IAvoidAreaChangedListener>> windowChangeListeners;
     {

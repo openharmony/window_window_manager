@@ -43,6 +43,7 @@ class SceneSession;
 class AccessibilityWindowInfo;
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable)>;
+using ProcessOutsideDownEventFunc = std::function<void(int32_t x, int32_t y)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using EventHandler = OHOS::AppExecFwk::EventHandler;
 using EventRunner = OHOS::AppExecFwk::EventRunner;
@@ -64,6 +65,7 @@ public:
     WSError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
     void SetCreateSpecificSessionListener(const NotifyCreateSpecificSessionFunc& func);
     void SetGestureNavigationEnabledChangeListener(const ProcessGestureNavigationEnabledChangeFunc& func);
+    void SetOutsideDownEventListener(const ProcessOutsideDownEventFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     WSError ProcessBackEvent();
     void GetStartPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor);
@@ -94,6 +96,7 @@ public:
     void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
     void InitPersistentStorage();
     std::string GetSessionSnapshot(uint64_t persistentId);
+    void OnOutsideDownEvent(int32_t x, int32_t y);
 
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
     WSError SetWindowFlags(const sptr<SceneSession>& sceneSession, uint32_t flags);
@@ -148,6 +151,7 @@ private:
 
     NotifyCreateSpecificSessionFunc createSpecificSessionFunc_;
     ProcessGestureNavigationEnabledChangeFunc gestureNavigationEnabledChangeFunc_;
+    ProcessOutsideDownEventFunc outsideDownEventFunc_;
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
     uint64_t activeSessionId_ = INVALID_SESSION_ID;
