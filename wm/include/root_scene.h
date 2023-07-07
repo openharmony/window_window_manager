@@ -75,7 +75,7 @@ private:
 
     float density_ = 1.0f;
 
-    WindowType type_ = WindowType::WINDOW_TYPE_DESKTOP;
+    WindowType type_ = WindowType::WINDOW_TYPE_SCENE_BOARD;
 
     std::string name_ = "EntryView";
 };
