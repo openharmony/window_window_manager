@@ -19,6 +19,7 @@
 #include <iremote_broker.h>
 
 #include "interfaces/include/ws_common.h"
+#include "occupied_area_change_info.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -39,6 +40,7 @@ public:
         TRANS_ID_NOTIFY_DESTROY,
         TRANS_ID_NOTIFY_TOUCH_DIALOG_TARGET,
         TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA,
+        TRANS_ID_NOTIFY_OCCUPIED_AREA_CHANGE_INFO,
     };
 
     virtual void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
@@ -57,6 +59,7 @@ public:
     virtual WSError UpdateFocus(bool isFocused) = 0;
     virtual WSError NotifyDestroy() = 0;
     virtual void NotifyTouchDialogTarget() = 0;
+    virtual void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

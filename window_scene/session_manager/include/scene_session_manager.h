@@ -46,6 +46,7 @@ using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using EventHandler = OHOS::AppExecFwk::EventHandler;
 using EventRunner = OHOS::AppExecFwk::EventRunner;
+const int32_t STATUS_BAR_AVOID_AREA = 0;
 class SceneSessionManager : public SceneSessionManagerStub {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManager)
 public:
@@ -80,6 +81,7 @@ public:
     int32_t GetCurrentUserId() const;
     void StartWindowInfoReportLoop();
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
+    WSError SetSessionGravity(uint64_t persistentId, SessionGravity gravity, uint32_t percent);
     WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label);
     WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon);
     WSError RegisterSessionListener(const sptr<ISessionListener> sessionListener);
@@ -100,6 +102,8 @@ public:
 
     void SetWaterMarkSessionCount(int32_t count);
     int32_t GetWaterMarkSessionCount() const;
+    void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> callingSession,
+        const WSRect& rect, const WSRect& occupiedArea);
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
@@ -113,6 +117,9 @@ private:
     bool ConfigAppWindowCornerRadius(const WindowSceneConfig::ConfigItem& item, float& out);
     bool ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig, WindowShadowConfig& outShadow);
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig);
+    void RelayoutKeyBoard(sptr<SceneSession> sceneSession);
+    void RestoreCallingSessionSizeIfNeed();
+    void ResizeSoftInputCallingSessionIfNeed(const sptr<SceneSession>& sceneSession);
     void ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig);
 
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& scnSession);
@@ -154,6 +161,7 @@ private:
     uint64_t focusedSessionId_ = INVALID_SESSION_ID;
     uint64_t brightnessSessionId_ = INVALID_SESSION_ID;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
+    WSRect callingWindowRestoringRect_ = {0, 0, 0, 0};
     int32_t currentUserId_;
 
     std::shared_ptr<TaskScheduler> taskScheduler_;

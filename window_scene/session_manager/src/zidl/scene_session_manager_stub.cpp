@@ -251,4 +251,15 @@ int SceneSessionManagerStub::HandleGetAccessibilityWindowInfo(MessageParcel &dat
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
+
+int SceneSessionManagerStub::HandleSetSessionGravity(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleSetSessionGravity!");
+    uint64_t persistentId = data.ReadUint64();
+    SessionGravity gravity = static_cast<SessionGravity>(data.ReadUint32());
+    uint32_t percent = data.ReadUint32();
+    WSError ret = SetSessionGravity(persistentId, gravity, percent);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
 } // namespace OHOS::Rosen

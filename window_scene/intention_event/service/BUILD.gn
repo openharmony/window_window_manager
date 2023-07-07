@@ -21,6 +21,7 @@ config("intention_event_public_config") {
     "../../../utils/include",
     "../../session/container/include/zidl",
     "../../interfaces/include",
+    "../../../interfaces/innerkits/wm",
     "../../",
     "../dfx/include",
     "../framework/anr_handler/include",

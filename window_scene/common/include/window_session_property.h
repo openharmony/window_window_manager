@@ -76,6 +76,7 @@ public:
     void SetWindowMode(WindowMode mode);
     void SetWindowLimits(const WindowLimits& windowLimits);
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
+    void SetSessionGravity(SessionGravity gravity_, uint32_t percent);
     void SetDecorEnable(bool isDecorEnable);
     void SetZOrder(uint32_t zOrder);
     void SetWindowFlags(uint32_t flags);
@@ -107,6 +108,7 @@ public:
     WindowLimits GetWindowLimits() const;
     uint32_t GetModeSupportInfo() const;
     const std::unordered_map<WindowType, SystemBarProperty>& GetSystemBarProperty() const;
+    void GetSessionGravity(SessionGravity& gravity, uint32_t& percent);
     bool IsDecorEnable();
     uint32_t GetZOrder();
 
@@ -140,6 +142,8 @@ private:
     MaximizeMode maximizeMode_ = MaximizeMode::MODE_RECOVER;
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     WindowLimits limits_;
+    SessionGravity sessionGravity_ = SessionGravity::SESSION_GRAVITY_BOTTOM;
+    uint32_t sessionGravitySizePercent_ = 0;
     uint32_t modeSupportInfo_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },

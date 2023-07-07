@@ -156,29 +156,5 @@ void Window::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configu
         WindowImpl::UpdateConfigurationForAll(configuration);
     }
 }
-
-bool OccupiedAreaChangeInfo::Marshalling(Parcel& parcel) const
-{
-    return parcel.WriteInt32(rect_.posX_) && parcel.WriteInt32(rect_.posY_) &&
-        parcel.WriteUint32(rect_.width_) && parcel.WriteUint32(rect_.height_) &&
-        parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
-        parcel.WriteUint32(safeHeight_);
-}
-
-OccupiedAreaChangeInfo* OccupiedAreaChangeInfo::Unmarshalling(Parcel& parcel)
-{
-    OccupiedAreaChangeInfo* occupiedAreaChangeInfo = new OccupiedAreaChangeInfo();
-    bool res = parcel.ReadInt32(occupiedAreaChangeInfo->rect_.posX_) &&
-        parcel.ReadInt32(occupiedAreaChangeInfo->rect_.posY_) &&
-        parcel.ReadUint32(occupiedAreaChangeInfo->rect_.width_) &&
-        parcel.ReadUint32(occupiedAreaChangeInfo->rect_.height_);
-    if (!res) {
-        delete occupiedAreaChangeInfo;
-        return nullptr;
-    }
-    occupiedAreaChangeInfo->type_ = static_cast<OccupiedAreaType>(parcel.ReadUint32());
-    occupiedAreaChangeInfo->safeHeight_ = parcel.ReadUint32();
-    return occupiedAreaChangeInfo;
-}
 } // namespace Rosen
 } // namespace OHOS

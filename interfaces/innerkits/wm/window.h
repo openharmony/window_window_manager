@@ -22,6 +22,7 @@
 
 #include "wm_common.h"
 #include "window_option.h"
+#include "occupied_area_change_info.h"
 
 class NativeValue;
 class NativeEngine;
@@ -193,49 +194,6 @@ public:
      * @param inputEvent Means KeyEvent.
      */
     virtual void OnDispatchKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) {}
-};
-
-/**
- * @class OccupiedAreaChangeInfo
- *
- * @brief Occupied area info when it changed.
- */
-class OccupiedAreaChangeInfo : public Parcelable {
-public:
-    /**
-     * @brief Default construct func of OccupiedAreaChangeInfo.
-     */
-    OccupiedAreaChangeInfo() = default;
-    /**
-     * @brief Construct func of OccupiedAreaChangeInfo.
-     *
-     * @param OccupiedAreaType Type of occupied area.
-     * @param rect Rect of occupied area.
-     */
-    OccupiedAreaChangeInfo(OccupiedAreaType type, Rect rect) : type_(type), rect_(rect) {};
-    /**
-     * @brief Deconstruct func of OccupiedAreaChangeInfo.
-     */
-    OccupiedAreaChangeInfo(OccupiedAreaType type, Rect rect, uint32_t safeHeight)
-        : type_(type), rect_(rect), safeHeight_(safeHeight) {};
-    ~OccupiedAreaChangeInfo() = default;
-
-    /**
-     * @brief Marshalling the data of OccupiedAreaChangeInfo.
-     *
-     * @param parcel Data of OccupiedAreaChangeInfo.
-     */
-    virtual bool Marshalling(Parcel& parcel) const override;
-    /**
-     * @brief Unmarshalling the data of OccupiedAreaChangeInfo.
-     *
-     * @param parcel Data of OccupiedAreaChangeInfo.
-     */
-    static OccupiedAreaChangeInfo* Unmarshalling(Parcel& parcel);
-
-    OccupiedAreaType type_ = OccupiedAreaType::TYPE_INPUT;
-    Rect rect_ = { 0, 0, 0, 0 };
-    uint32_t safeHeight_ = 0;
 };
 
 /**
