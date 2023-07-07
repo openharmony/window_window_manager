@@ -485,6 +485,11 @@ private:
         auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
         CALL_LIFECYCLE_LISTENER_WITH_PARAM(ForegroundFailed, lifecycleListeners, static_cast<int32_t>(ret));
     }
+    inline void NotifyBackgroundFailed(WMError ret)
+    {
+        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+        CALL_LIFECYCLE_LISTENER_WITH_PARAM(BackgroundFailed, lifecycleListeners, static_cast<int32_t>(ret));
+    }
     inline bool IsStretchableReason(WindowSizeChangeReason reason)
     {
         return reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END ||

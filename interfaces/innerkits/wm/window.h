@@ -92,6 +92,12 @@ public:
      */
     virtual void ForegroundFailed(int32_t ret) {}
     /**
+     * @brief Notify caller the error code when window go background failed.
+     *
+     * @param ret Error code when window go background failed.
+     */
+    virtual void BackgroundFailed(int32_t ret) {}
+    /**
      * @brief Notify caller that window is active.
      */
     virtual void AfterActive() {}
