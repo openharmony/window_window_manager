@@ -33,6 +33,7 @@ public:
 private:
     static NativeValue* CreateShadowValue(NativeEngine& engine, const AppWindowSceneConfig& config, bool focused);
     static NativeValue* CreateKeyboardAnimationValue(NativeEngine& engine, const AppWindowSceneConfig& config);
+    static NativeValue* CreateWindowAnimationValue(NativeEngine& engine, const AppWindowSceneConfig& config);
 };
 } // namespace OHOS::Rosen
 

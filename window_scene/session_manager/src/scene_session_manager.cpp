@@ -68,6 +68,10 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneS
 const std::string SCENE_SESSION_MANAGER_THREAD = "SceneSessionManager";
 constexpr uint32_t MAX_BRIGHTNESS = 255;
 constexpr int32_t DEFAULT_USERID = -1;
+constexpr int32_t SCALE_DIMENSION = 2;
+constexpr int32_t TRANSLATE_DIMENSION = 2;
+constexpr int32_t ROTAION_DIMENSION = 4;
+constexpr int32_t CUBIC_CURVE_DIMENSION = 4;
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SceneSessionManager)
@@ -169,6 +173,11 @@ void SceneSessionManager::ConfigWindowSceneXml()
         if (numbers.size() == 1) {
             systemConfig_.maxFloatingWindowSize_ = numbers[0];
         }
+    }
+
+    item = config["windowAnimation"];
+    if (item.IsMap()) {
+        ConfigWindowAnimation(item);
     }
 }
 
@@ -343,32 +352,77 @@ void SceneSessionManager::ConfigKeyboardAnimation(const WindowSceneConfig::Confi
     }
 }
 
-std::string SceneSessionManager::CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig)
+void SceneSessionManager::ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig)
+{
+    WindowSceneConfig::ConfigItem item = windowAnimationConfig["timing"];
+    if (item.IsMap() && item.mapValue_->count("curve")) {
+        appWindowSceneConfig_.windowAnimation_.curveType_ = CreateCurve(item["curve"], "windowAnimation");
+    }
+    item = windowAnimationConfig["timing"]["duration"];
+    if (item.IsInts() && item.intsValue_->size() == 1) {
+        auto duration = *item.intsValue_;
+        appWindowSceneConfig_.windowAnimation_.duration_ = duration[0];
+    }
+    item = windowAnimationConfig["scale"];
+    if (item.IsFloats() && item.floatsValue_->size() == SCALE_DIMENSION) {
+        auto scales = *item.floatsValue_;
+        appWindowSceneConfig_.windowAnimation_.scaleX_ = scales[0];
+        appWindowSceneConfig_.windowAnimation_.scaleY_ = scales[1];
+    }
+    item = windowAnimationConfig["rotation"];
+    if (item.IsFloats() && item.floatsValue_->size() == ROTAION_DIMENSION) {
+        auto rotations = *item.floatsValue_;
+        appWindowSceneConfig_.windowAnimation_.rotationX_ = rotations[0]; // 0 ctrlX1
+        appWindowSceneConfig_.windowAnimation_.rotationY_ = rotations[1]; // 1 ctrlY1
+        appWindowSceneConfig_.windowAnimation_.rotationZ_ = rotations[2]; // 2 ctrlX2
+        appWindowSceneConfig_.windowAnimation_.angle_ = rotations[3]; // 3 ctrlY2
+    }
+    item = windowAnimationConfig["translate"];
+    if (item.IsFloats() && item.floatsValue_->size() == TRANSLATE_DIMENSION) {
+        auto translates = *item.floatsValue_;
+        appWindowSceneConfig_.windowAnimation_.translateX_ = translates[0];
+        appWindowSceneConfig_.windowAnimation_.translateY_ = translates[1];
+    }
+    item = windowAnimationConfig["opacity"];
+    if (item.IsFloats() && item.floatsValue_->size() == 1) {
+        auto opacity = *item.floatsValue_;
+        appWindowSceneConfig_.windowAnimation_.opacity_ = opacity[0];
+    }
+}
+
+std::string SceneSessionManager::CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig,
+    const std::string& nodeName)
 {
     static std::unordered_set<std::string> curveSet = { "easeOut", "ease", "easeIn", "easeInOut", "default",
         "linear", "spring", "interactiveSpring" };
 
-    std::string keyboardCurveName = "easeOut";
+    std::string curveName = "easeOut";
     const auto& nameItem = curveConfig.GetProp("name");
-    if (nameItem.IsString()) {
-        std::string name = nameItem.stringValue_;
-        if (name == "cubic" && curveConfig.IsFloats() &&
-            curveConfig.floatsValue_->size() == 4) { // 4 curve parameter
-            const auto& numbers = *curveConfig.floatsValue_;
-            keyboardCurveName = name;
+    if (!nameItem.IsString()) {
+        return curveName;
+    }
+    std::string name = nameItem.stringValue_;
+    if (name == "cubic" && curveConfig.IsFloats() && curveConfig.floatsValue_->size() == CUBIC_CURVE_DIMENSION) {
+        const auto& numbers = *curveConfig.floatsValue_;
+        curveName = name;
+        if (nodeName == "windowAnimation") {
+            appWindowSceneConfig_.windowAnimation_.ctrlX1_ = numbers[0]; // 0 ctrlX1
+            appWindowSceneConfig_.windowAnimation_.ctrlY1_ = numbers[1]; // 1 ctrlY1
+            appWindowSceneConfig_.windowAnimation_.ctrlX2_ = numbers[2]; // 2 ctrlX2
+            appWindowSceneConfig_.windowAnimation_.ctrlY2_ = numbers[3]; // 3 ctrlY2
+        } else {
             appWindowSceneConfig_.keyboardAnimation_.ctrlX1_ = numbers[0]; // 0 ctrlX1
             appWindowSceneConfig_.keyboardAnimation_.ctrlY1_ = numbers[1]; // 1 ctrlY1
             appWindowSceneConfig_.keyboardAnimation_.ctrlX2_ = numbers[2]; // 2 ctrlX2
             appWindowSceneConfig_.keyboardAnimation_.ctrlY2_ = numbers[3]; // 3 ctrlY2
-        } else {
-            auto iter = curveSet.find(name);
-            if (iter != curveSet.end()) {
-                keyboardCurveName = name;
-            }
+        }
+    } else {
+        auto iter = curveSet.find(name);
+        if (iter != curveSet.end()) {
+            curveName = name;
         }
     }
-
-    return keyboardCurveName;
+    return curveName;
 }
 
 sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()

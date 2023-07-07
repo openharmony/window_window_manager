@@ -187,12 +187,31 @@ struct KeyboardSceneAnimationConfig {
     uint32_t durationOut_ = 150; // default durationOut time
 };
 
+struct WindowAnimationConfig {
+    int32_t duration_ = 0;
+    std::string curveType_ = "easeOut";
+    float ctrlX1_ = 0.2f;
+    float ctrlY1_ = 0.0f;
+    float ctrlX2_ = 0.2f;
+    float ctrlY2_ = 1.0f;
+    float scaleX_ = 0.0f;
+    float scaleY_ = 0.0f;
+    float rotationX_ = 0.0f;
+    float rotationY_ = 0.0f;
+    float rotationZ_ = 0.0f;
+    int32_t angle_ = 0;
+    float translateX_ = 0.0f;
+    float translateY_ = 0.0f;
+    float opacity_ = 0;
+};
+
 struct AppWindowSceneConfig {
     float floatCornerRadius_ = 0.0f;
 
     WindowShadowConfig focusedShadow_;
     WindowShadowConfig unfocusedShadow_;
     KeyboardSceneAnimationConfig keyboardAnimation_;
+    WindowAnimationConfig windowAnimation_;
 };
 
 } // namespace OHOS::Rosen
