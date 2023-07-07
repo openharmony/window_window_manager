@@ -50,7 +50,7 @@ ohos_unittest("utils_screen_info_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [ "graphic_standard:surface" ]
+  external_deps = [ "graphic_2d:surface" ]
 }
 
 ohos_unittest("utils_screen_group_info_test") {
@@ -60,7 +60,7 @@ ohos_unittest("utils_screen_group_info_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [ "graphic_standard:surface" ]
+  external_deps = [ "graphic_2d:surface" ]
 }
 
 ohos_unittest("utils_string_test") {
