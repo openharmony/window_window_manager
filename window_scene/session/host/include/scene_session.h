@@ -36,6 +36,7 @@ using NotifyRaiseToTopFunc = std::function<void()>;
 using NotifySystemBarPropertyChangeFunc = std::function<void(
     const std::unordered_map<WindowType, SystemBarProperty>& propertyMap)>;
 using NotifyNeedAvoidFunc = std::function<void(bool status)>;
+using NotifyWindowAnimationFlagChangeFunc = std::function<void(const bool flag)>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -53,6 +54,7 @@ public:
         NotifySessionEventFunc OnSessionEvent_;
         NotifySystemBarPropertyChangeFunc OnSystemBarPropertyChange_;
         NotifyNeedAvoidFunc OnNeedAvoid_;
+        NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
     };
 
     SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
@@ -64,6 +66,7 @@ public:
 
     WSError Foreground() override;
     WSError Background() override;
+    WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
 
     WSError OnSessionEvent(SessionEvent event) override;
     WSError RaiseToAppTop() override;
