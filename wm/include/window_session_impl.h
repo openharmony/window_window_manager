@@ -111,6 +111,7 @@ public:
     void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
     void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
     void NotifyForegroundFailed(WMError ret);
+    void NotifyBackgroundFailed(WMError ret);
     WSError MarkProcessed(int32_t eventId) override;
     void UpdateWindowSizeLimits();
     void UpdateTitleButtonVisibility();
