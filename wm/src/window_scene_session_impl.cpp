@@ -29,6 +29,7 @@
 #include "wm_common.h"
 #include "wm_math.h"
 #include "session_manager_agent_controller.h"
+#include "window_impl.h"
 
 #include "window_session_impl.h"
 
@@ -55,6 +56,7 @@ union WSColorParam {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSceneSessionImpl"};
 }
+uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 
 WindowSceneSessionImpl::WindowSceneSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
 {
@@ -186,12 +188,130 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
             std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
         state_ = WindowState::STATE_CREATED;
         if (WindowHelper::IsMainWindow(GetType())) {
-            windowMode_ = windowSystemConfig_.defaultWindowMode_;
+            SetWindowMode(windowSystemConfig_.defaultWindowMode_);
+            GetConfigurationFromAbilityInfo();
         }
     }
     WLOGFD("Window Create [name:%{public}s, id:%{public}" PRIu64 "], state:%{pubic}u, windowmode:%{public}u",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, windowMode_);
     return ret;
+}
+
+void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
+{
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    if (abilityContext != nullptr) {
+        auto abilityInfo = abilityContext->GetAbilityInfo();
+        if (abilityInfo != nullptr) {
+            property_->SetWindowLimits({
+                abilityInfo->maxWindowWidth, abilityInfo->maxWindowHeight,
+                abilityInfo->minWindowWidth, abilityInfo->minWindowHeight,
+                static_cast<float>(abilityInfo->maxWindowRatio), static_cast<float>(abilityInfo->minWindowRatio)
+            });
+            UpdateWindowSizeLimits();
+            // get support modes configuration
+            uint32_t modeSupportInfo = WindowHelper::ConvertSupportModesToSupportInfo(abilityInfo->windowModes);
+            if (modeSupportInfo == 0) {
+                WLOGFI("mode config param is 0, all modes is supported");
+                modeSupportInfo = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+            }
+            WLOGFI("winId: %{public}u, modeSupportInfo: %{public}u", GetWindowId(), modeSupportInfo);
+            property_->SetModeSupportInfo(modeSupportInfo);
+
+            // get orientation configuration
+            OHOS::AppExecFwk::DisplayOrientation displayOrientation =
+                static_cast<OHOS::AppExecFwk::DisplayOrientation>(
+                    static_cast<uint32_t>(abilityInfo->orientation));
+            if (ABILITY_TO_WMS_ORIENTATION_MAP.count(displayOrientation) == 0) {
+                WLOGFE("id:%{public}u Do not support this Orientation type", GetWindowId());
+                return;
+            }
+            Orientation orientation = ABILITY_TO_WMS_ORIENTATION_MAP.at(displayOrientation);
+            if (orientation < Orientation::BEGIN || orientation > Orientation::END) {
+                WLOGFE("Set orientation from ability failed");
+                return;
+            }
+            property_->SetRequestedOrientation(orientation);
+            UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
+        }
+    }
+}
+
+WindowLimits WindowSceneSessionImpl::GetSystemSizeLimits(uint32_t displayWidth,
+    uint32_t displayHeight, float vpr)
+{
+    WindowLimits systemLimits;
+    systemLimits.maxWidth_ = static_cast<uint32_t>(maxFloatingWindowSize_ * vpr);
+    systemLimits.maxHeight_ = static_cast<uint32_t>(maxFloatingWindowSize_ * vpr);
+    systemLimits.minWidth_ = static_cast<uint32_t>(MIN_FLOATING_WIDTH * vpr);
+    systemLimits.minHeight_ = static_cast<uint32_t>(MIN_FLOATING_HEIGHT * vpr);
+    WLOGFI("[System SizeLimits] [maxWidth: %{public}u, minWidth: %{public}u, maxHeight: %{public}u, "
+        "minHeight: %{public}u]", systemLimits.maxWidth_, systemLimits.minWidth_,
+        systemLimits.maxHeight_, systemLimits.minHeight_);
+    return systemLimits;
+}
+
+void WindowSceneSessionImpl::UpdateWindowSizeLimits()
+{
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
+        return;
+    }
+    uint32_t displayWidth = static_cast<uint32_t>(display->GetWidth());
+    uint32_t displayHeight = static_cast<uint32_t>(display->GetHeight());
+    if (displayWidth == 0 || displayHeight == 0) {
+        return;
+    }
+    
+    float virtualPixelRatio = display->GetDisplayInfo()->GetVirtualPixelRatio();
+    const auto& systemLimits = GetSystemSizeLimits(displayWidth, displayHeight, virtualPixelRatio);
+    const auto& customizedLimits = property_->GetWindowLimits();
+
+    WindowLimits newLimits = systemLimits;
+
+    // configured limits of floating window
+    uint32_t configuredMaxWidth = static_cast<uint32_t>(customizedLimits.maxWidth_ * virtualPixelRatio);
+    uint32_t configuredMaxHeight = static_cast<uint32_t>(customizedLimits.maxHeight_ * virtualPixelRatio);
+    uint32_t configuredMinWidth = static_cast<uint32_t>(customizedLimits.minWidth_ * virtualPixelRatio);
+    uint32_t configuredMinHeight = static_cast<uint32_t>(customizedLimits.minHeight_ * virtualPixelRatio);
+
+    // calculate new limit size
+    if (systemLimits.minWidth_ <= configuredMaxWidth && configuredMaxWidth <= systemLimits.maxWidth_) {
+        newLimits.maxWidth_ = configuredMaxWidth;
+    }
+    if (systemLimits.minHeight_ <= configuredMaxHeight && configuredMaxHeight <= systemLimits.maxHeight_) {
+        newLimits.maxHeight_ = configuredMaxHeight;
+    }
+    if (systemLimits.minWidth_ <= configuredMinWidth && configuredMinWidth <= newLimits.maxWidth_) {
+        newLimits.minWidth_ = configuredMinWidth;
+    }
+    if (systemLimits.minHeight_ <= configuredMinHeight && configuredMinHeight <= newLimits.maxHeight_) {
+        newLimits.minHeight_ = configuredMinHeight;
+    }
+
+    // calculate new limit ratio
+    newLimits.maxRatio_ = static_cast<float>(newLimits.maxWidth_) / static_cast<float>(newLimits.minHeight_);
+    newLimits.minRatio_ = static_cast<float>(newLimits.minWidth_) / static_cast<float>(newLimits.maxHeight_);
+    if (!MathHelper::GreatNotEqual(newLimits.minRatio_, customizedLimits.maxRatio_) &&
+        !MathHelper::GreatNotEqual(customizedLimits.maxRatio_, newLimits.maxRatio_)) {
+        newLimits.maxRatio_ = customizedLimits.maxRatio_;
+    }
+    if (!MathHelper::GreatNotEqual(newLimits.minRatio_, customizedLimits.minRatio_) &&
+        !MathHelper::GreatNotEqual(customizedLimits.minRatio_, newLimits.maxRatio_)) {
+        newLimits.minRatio_ = customizedLimits.minRatio_;
+    }
+
+    // recalculate limit size by new ratio
+    uint32_t newMaxWidth = static_cast<uint32_t>(static_cast<float>(newLimits.maxHeight_) * newLimits.maxRatio_);
+    newLimits.maxWidth_ = std::min(newMaxWidth, newLimits.maxWidth_);
+    uint32_t newMinWidth = static_cast<uint32_t>(static_cast<float>(newLimits.minHeight_) * newLimits.minRatio_);
+    newLimits.minWidth_ = std::max(newMinWidth, newLimits.minWidth_);
+    uint32_t newMaxHeight = static_cast<uint32_t>(static_cast<float>(newLimits.maxWidth_) / newLimits.minRatio_);
+    newLimits.maxHeight_ = std::min(newMaxHeight, newLimits.maxHeight_);
+    uint32_t newMinHeight = static_cast<uint32_t>(static_cast<float>(newLimits.minWidth_) / newLimits.maxRatio_);
+    newLimits.minHeight_ = std::max(newMinHeight, newLimits.minHeight_);
+
+    property_->SetWindowLimits(newLimits);
 }
 
 void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(uint64_t parentPersistentId, const WindowState& newState)
@@ -456,16 +576,57 @@ void WindowSceneSessionImpl::LimitCameraFloatWindowMininumSize(uint32_t& width, 
     height = static_cast<uint32_t>(width * hwRatio);
 }
 
+void WindowSceneSessionImpl::UpdateFloatingWindowSizeBySizeLimits(uint32_t& width, uint32_t& height) const
+{
+    if (property_->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
+        return;
+    }
+    // get new limit config with the settings of system and app
+    const auto& sizeLimits = property_->GetWindowLimits();
+    // limit minimum size of floating (not system type) window
+    if (!WindowHelper::IsSystemWindow(property_->GetWindowType())) {
+        width = std::max(sizeLimits.minWidth_, width);
+        height = std::max(sizeLimits.minHeight_, height);
+    }
+    width = std::min(sizeLimits.maxWidth_, width);
+    height = std::min(sizeLimits.maxHeight_, height);
+    if (height == 0) {
+        return;
+    }
+    float curRatio = static_cast<float>(width) / static_cast<float>(height);
+    // there is no need to fix size by ratio if this is not main floating window
+    if (!WindowHelper::IsMainFloatingWindow(property_->GetWindowType(), windowMode_) ||
+        (!MathHelper::GreatNotEqual(sizeLimits.minRatio_, curRatio) &&
+         !MathHelper::GreatNotEqual(curRatio, sizeLimits.maxRatio_))) {
+        return;
+    }
+
+    float newRatio = curRatio < sizeLimits.minRatio_ ? sizeLimits.minRatio_ : sizeLimits.maxRatio_;
+    if (MathHelper::NearZero(newRatio)) {
+        return;
+    }
+    if (sizeLimits.maxWidth_ == sizeLimits.minWidth_) {
+        height = static_cast<uint32_t>(static_cast<float>(width) / newRatio);
+        return;
+    }
+    if (sizeLimits.maxHeight_ == sizeLimits.minHeight_) {
+        width = static_cast<uint32_t>(static_cast<float>(height) * newRatio);
+        return;
+    }
+    WLOGFD("After limit by customize config: %{public}u %{public}u", width, height);
+}
+
 WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 {
     WLOGFD("Id:%{public}" PRIu64 " Resize %{public}u %{public}u", property_->GetPersistentId(), width, height);
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-
     // Float camera window has special limits
     LimitCameraFloatWindowMininumSize(width, height);
 
+    UpdateFloatingWindowSizeBySizeLimits(width, height);
+    
     const auto& rect = property_->GetWindowRect();
     Rect newRect = { rect.posX_, rect.posY_, width, height }; // must keep w/h
     property_->SetRequestRect(newRect);
@@ -566,7 +727,7 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
         version = context_->GetApplicationInfo()->apiCompatibleVersion;
     }
     hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
-    windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     // 10 ArkUI new framework support after API10
     if (version >= 10) {
         if (uiContent_ != nullptr) {
@@ -740,7 +901,7 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         property_->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
     } else {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE_FLOATING);
-        windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
+        SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         property_->SetMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
         UpdateDecorEnable(true);
     }
@@ -758,7 +919,7 @@ WMError WindowSceneSessionImpl::Recover()
     }
     if (WindowHelper::IsMainWindow(GetType())) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_RECOVER);
-        windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
+        SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
         UpdateDecorEnable(true);
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
@@ -852,6 +1013,40 @@ MaximizeMode WindowSceneSessionImpl::GetGlobalMaximizeMode() const
     MaximizeMode mode = MaximizeMode::MODE_RECOVER;
     hostSession_->GetGlobalMaximizeMode(mode);
     return mode;
+}
+
+WMError WindowSceneSessionImpl::SetWindowMode(WindowMode mode)
+{
+    WLOGFI("SetWindowMode %{public}u mode %{public}u", GetWindowId(), static_cast<uint32_t>(mode));
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), mode)) {
+        WLOGFE("window %{public}u do not support mode: %{public}u",
+            GetWindowId(), static_cast<uint32_t>(mode));
+        return WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
+    }
+    if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
+        windowMode_ = mode;
+        UpdateTitleButtonVisibility();
+        UpdateDecorEnable(true);
+    } else if (state_ == WindowState::STATE_SHOWN) {
+        WindowMode lastMode = GetMode();
+        windowMode_ = mode;
+        WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE);
+        if (ret != WMError::WM_OK) {
+            windowMode_ = lastMode;
+            return ret;
+        }
+        // set client window mode if success.
+        UpdateTitleButtonVisibility();
+        UpdateDecorEnable(true);
+    }
+    if (GetMode() != mode) {
+        WLOGFE("set window mode filed! id: %{public}u.", GetWindowId());
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return WMError::WM_OK;
 }
 
 WindowMode WindowSceneSessionImpl::GetMode() const
