@@ -36,6 +36,7 @@ public:
     WSError NotifyDestroy() override;
     void NotifyTouchDialogTarget() override;
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
+    void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info) override;
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
 };

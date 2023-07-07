@@ -150,6 +150,17 @@ WMError SessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WS
     return static_cast<WMError>(sceneSessionManagerProxy_->UpdateProperty(property, action));
 }
 
+WMError SessionManager::SetSessionGravity(uint64_t persistentId, SessionGravity gravity, uint32_t percent)
+{
+    WLOGFD("SetWindowGravity");
+    InitSceneSessionManagerProxy();
+    if (!sceneSessionManagerProxy_) {
+        WLOGFE("sceneSessionManagerProxy_ is nullptr");
+        return WMError::WM_DO_NOTHING;
+    }
+    return static_cast<WMError>(sceneSessionManagerProxy_->SetSessionGravity(persistentId, gravity, percent));
+}
+
 void SessionManager::InitScreenLockManagerProxy()
 {
     if (screenLockManagerProxy_) {

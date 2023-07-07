@@ -271,6 +271,18 @@ WindowMode WindowSessionProperty::GetWindowMode() const
     return windowMode_;
 }
 
+void WindowSessionProperty::SetSessionGravity(SessionGravity gravity, uint32_t percent)
+{
+    sessionGravity_ = gravity;
+    sessionGravitySizePercent_ = percent;
+}
+
+void WindowSessionProperty::GetSessionGravity(SessionGravity& gravity, uint32_t& percent)
+{
+    gravity = sessionGravity_;
+    percent = sessionGravitySizePercent_;
+}
+
 void WindowSessionProperty::SetZOrder(uint32_t zOrder)
 {
     zOrder_ = zOrder;

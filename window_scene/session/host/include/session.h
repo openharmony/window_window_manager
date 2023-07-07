@@ -27,6 +27,7 @@
 #include "session/host/include/zidl/session_stub.h"
 #include "session/host/include/scene_persistence.h"
 #include "wm_common.h"
+#include "occupied_area_change_info.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -164,6 +165,7 @@ public:
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
     WSError SetBrightness(float brightness);
     float GetBrightness() const;
+    void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info);
     void SetRequestedOrientation(Orientation orientation);
     Orientation GetRequestedOrientation() const;
 

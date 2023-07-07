@@ -50,6 +50,7 @@ private:
     int HandlePendingSessionToBackgroundForDelegator(MessageParcel &data, MessageParcel &reply);
     int HandleGetFocusSessionToken(MessageParcel &data, MessageParcel &reply);
     int HandleSetGestureNavigationEnabled(MessageParcel &data, MessageParcel &reply);
+    int HandleSetSessionGravity(MessageParcel &data, MessageParcel &reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H

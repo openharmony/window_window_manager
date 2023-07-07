@@ -214,5 +214,12 @@ struct AppWindowSceneConfig {
     WindowAnimationConfig windowAnimation_;
 };
 
+/**
+ * @brief Enumerates session gravity.
+ */
+enum class SessionGravity : uint32_t {
+    SESSION_GRAVITY_FLOAT = 0,
+    SESSION_GRAVITY_BOTTOM,
+};
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
