@@ -55,6 +55,18 @@ bool Permission::IsSystemCalling()
     return isSystemApp;
 }
 
+bool Permission::IsStartByHdcd()
+{
+    OHOS::Security::AccessToken::NativeTokenInfo info;
+    if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(IPCSkeleton::GetCallingTokenID(), info) != 0) {
+        return false;
+    }
+    if (info.processName.compare("hdcd") == 0) {
+        return true;
+    }
+    return false;
+}
+
 bool Permission::IsStartedByInputMethod()
 {
     sptr<ISystemAbilityManager> systemAbilityManager =

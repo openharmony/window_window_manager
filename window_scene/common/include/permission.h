@@ -24,6 +24,7 @@ class Permission {
 public:
     static bool IsSystemServiceCalling(bool needPrintLog = true);
     static bool IsSystemCalling();
+    static bool IsStartByHdcd();
     static bool IsStartedByInputMethod();
 };
 } // Rosen
