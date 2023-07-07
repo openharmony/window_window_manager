@@ -113,6 +113,7 @@ private:
     bool ConfigAppWindowCornerRadius(const WindowSceneConfig::ConfigItem& item, float& out);
     bool ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig, WindowShadowConfig& outShadow);
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig);
+    void ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig);
 
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& scnSession);
     WSError DestroyDialogWithMainWindow(const sptr<SceneSession>& scnSession);
@@ -124,7 +125,8 @@ private:
     std::shared_ptr<Global::Resource::ResourceManager> CreateResourceManager(
         const AppExecFwk::AbilityInfo& abilityInfo);
     void GetStartPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, std::string& path, uint32_t& bgColor);
-    std::string CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
+    std::string CreateCurve(
+        const WindowSceneConfig::ConfigItem& curveConfig, const std::string& nodeName = "keyboardAnimation");
 
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
     WSError UpdateBrightness(uint64_t persistentId);
