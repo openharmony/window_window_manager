@@ -15,6 +15,7 @@
 
 #include "window_extension_session_impl.h"
 
+#include <transaction/rs_transaction.h>
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -109,6 +110,18 @@ WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::Wan
         notifyTransferComponentDataFunc_(wantParams);
     }
     return WSError::WS_OK;
+}
+
+WMError WindowExtensionSessionImpl::SetPrivacyMode(bool isPrivacyMode)
+{
+    WLOGFD("id : %{public}u, SetPrivacyMode, %{public}u", GetWindowId(), isPrivacyMode);
+    if (surfaceNode_ == nullptr) {
+        WLOGFE("surfaceNode_ is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    surfaceNode_->SetSecurityLayer(isPrivacyMode);
+    RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS
