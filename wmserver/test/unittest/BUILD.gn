@@ -61,7 +61,7 @@ test_external_deps = [
   "config_policy:configpolicy_util",
   "display_manager:displaymgr",
   "eventhandler:libeventhandler",
-  "graphic_standard:window_animation",
+  "graphic_2d:window_animation",
   "hicollie:libhicollie",
   "hilog:libhilog",
   "hisysevent:libhisysevent",
