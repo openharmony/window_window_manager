@@ -1013,6 +1013,12 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
             NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             break;
         }
+        case WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG: {
+            if (sceneSession->GetSessionProperty() != nullptr) {
+                sceneSession->GetSessionProperty()->SetAnimationFlag(property->GetAnimationFlag());
+            }
+            break;
+        }
         default:
             break;
     }

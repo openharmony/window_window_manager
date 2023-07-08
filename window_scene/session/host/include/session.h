@@ -89,7 +89,7 @@ public:
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr) override;
-    WSError Foreground() override;
+    WSError Foreground(sptr<WindowSessionProperty> property) override;
     WSError Background() override;
     WSError Disconnect() override;
 
@@ -179,6 +179,7 @@ public:
     void SetZOrder(uint32_t zOrder);
     WSError UpdateSnapshot();
     WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
+    WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
 protected:
     void GeneratePersistentId(const bool isExtension, const SessionInfo& sessionInfo);
     void UpdateSessionState(SessionState state);

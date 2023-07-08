@@ -21,6 +21,7 @@
 #include <unordered_map>
 #include <parcel.h>
 #include "interfaces/include/ws_common.h"
+#include "interfaces/include/ws_common_inner.h"
 #include "wm_common.h"
 #include "dm_common.h"
 #include <cfloat>
@@ -79,6 +80,8 @@ public:
     void SetSessionGravity(SessionGravity gravity_, uint32_t percent);
     void SetDecorEnable(bool isDecorEnable);
     void SetZOrder(uint32_t zOrder);
+    void SetAnimationFlag(uint32_t animationFlag);
+    void SetTransform(const Transform& trans);
     void SetWindowFlags(uint32_t flags);
     void AddWindowFlag(WindowFlag flag);
     void SetModeSupportInfo(uint32_t modeSupportInfo);
@@ -111,6 +114,8 @@ public:
     void GetSessionGravity(SessionGravity& gravity, uint32_t& percent);
     bool IsDecorEnable();
     uint32_t GetZOrder();
+    uint32_t GetAnimationFlag() const;
+    const Transform& GetTransform() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
     static void UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property);
@@ -118,6 +123,7 @@ public:
     static void UnMarshallingSystemBarMap(Parcel& parcel, WindowSessionProperty* property);
     bool Marshalling(Parcel& parcel) const override;
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
+
 private:
     std::string windowName_;
     SessionInfo sessionInfo_;
@@ -150,6 +156,9 @@ private:
     };
     uint32_t zOrder_ = 0;
     bool isDecorEnable_ = false;
+    uint32_t animationFlag_ { static_cast<uint32_t>(WindowAnimation::DEFAULT) };
+    // Transform info
+    Transform trans_;
 };
 
 struct SystemSessionConfig : public Parcelable {
