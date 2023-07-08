@@ -145,11 +145,11 @@ HWTEST_F(WindowSessionImplTest, Show01, Function | SmallTest | Level2)
     sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    EXPECT_CALL(*(session), Foreground()).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*(session), Foreground(_)).WillOnce(Return(WSError::WS_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_EQ(WMError::WM_OK, window->Show());
     window->state_ = WindowState::STATE_CREATED;
-    EXPECT_CALL(*(session), Foreground()).WillOnce(Return(WSError::WS_ERROR_INVALID_SESSION));
+    EXPECT_CALL(*(session), Foreground(_)).WillOnce(Return(WSError::WS_ERROR_INVALID_SESSION));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_SESSION, window->Show());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }

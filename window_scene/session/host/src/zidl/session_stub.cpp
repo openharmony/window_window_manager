@@ -66,6 +66,8 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG),
         &SessionStub::HandleSetWindowAnimationFlag),
 
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_UPDATE_CUSTOM_ANIMATION),
+        &SessionStub::HandleUpdateWindowSceneAfterCustomAnimation),
     // for extension only
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_TRANSFER_ABILITY_RESULT),
         &SessionStub::HandleTransferAbilityResult),
@@ -104,7 +106,14 @@ int SessionStub::HandleSetWindowAnimationFlag(MessageParcel& data, MessageParcel
 int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("Foreground!");
-    const WSError& errCode = Foreground();
+    sptr<WindowSessionProperty> property = nullptr;
+    if (data.ReadBool()) {
+        property = data.ReadStrongParcelable<WindowSessionProperty>();
+    } else {
+        WLOGFW("Property not exist!");
+        property = new WindowSessionProperty();
+    }
+    const WSError& errCode = Foreground(property);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -369,6 +378,15 @@ int SessionStub::HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply)
     WLOGFD("HandleSetAspectRatio!");
     float ratio = data.ReadFloat();
     const WSError& errCode = SetAspectRatio(ratio);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateWindowSceneAfterCustomAnimation(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGD("HandleUpdateWindowSceneAfterCustomAnimation!");
+    bool isAdd = data.ReadBool();
+    const WSError& errCode = UpdateWindowSceneAfterCustomAnimation(isAdd);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

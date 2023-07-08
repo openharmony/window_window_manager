@@ -333,7 +333,7 @@ WSError Session::UpdateWindowSessionProperty(sptr<WindowSessionProperty> propert
     return WSError::WS_OK;
 }
 
-WSError Session::Foreground()
+WSError Session::Foreground(sptr<WindowSessionProperty> property)
 {
     SessionState state = GetSessionState();
     WLOGFI("Foreground session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
@@ -398,8 +398,8 @@ WSError Session::SetActive(bool active)
         UpdateSessionState(SessionState::STATE_ACTIVE);
         isActive_ = active;
     }
-    if (!active && GetSessionState() == SessionState::STATE_ACTIVE) {
         sessionStage_->SetActive(false);
+    if (!active && GetSessionState() == SessionState::STATE_ACTIVE) {
         UpdateSessionState(SessionState::STATE_INACTIVE);
         isActive_ = active;
     }
@@ -978,6 +978,11 @@ WSError Session::UpdateSnapshot()
 WSError Session::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 {
     WLOGFD("UpdateWindowAnimationFlag");
+    return WSError::WS_OK;
+}
+
+WSError Session::UpdateWindowSceneAfterCustomAnimation(bool isAdd)
+{
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

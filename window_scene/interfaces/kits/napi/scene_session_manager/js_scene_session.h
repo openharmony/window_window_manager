@@ -61,6 +61,7 @@ private:
     void ProcessPendingSessionToForegroundRegister();
     void ProcessPendingSessionToBackgroundForDelegatorRegister();
     void ProcessSessionDefaultAnimationFlagChangeRegister();
+    void ProcessIsCustomAnimationPlaying();
 
     void PendingSessionActivation(SessionInfo& info);
     void OnSessionStateChange(const SessionState& state);
@@ -80,6 +81,7 @@ private:
     void PendingSessionToForeground(const SessionInfo& info);
     void PendingSessionToBackgroundForDelegator(const SessionInfo& info);
     void OnDefaultAnimationFlagChange(bool isNeedDefaultAnimationFlag);
+    void OnIsCustomAnimationPlaying(bool status);
 
     NativeEngine& engine_;
     wptr<SceneSession> weakSession_ = nullptr;
