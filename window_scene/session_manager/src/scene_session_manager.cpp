@@ -16,6 +16,7 @@
 #include "session_manager/include/scene_session_manager.h"
 
 #include <sstream>
+#include <unistd.h>
 
 #include <ability_info.h>
 #include <ability_manager_client.h>
@@ -34,6 +35,11 @@
 #include <hitrace_meter.h>
 #include <transaction/rs_transaction.h>
 #include <transaction/rs_interfaces.h>
+
+#ifdef RES_SCHED_ENABLE
+#include "res_type.h"
+#include "res_sched_client.h"
+#endif
 
 #include "ability_start_setting.h"
 #include "color_parser.h"
@@ -66,6 +72,9 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManager" };
+#ifdef RES_SCHED_ENABLE
+const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
+#endif
 const std::string SCENE_SESSION_MANAGER_THREAD = "SceneSessionManager";
 constexpr uint32_t MAX_BRIGHTNESS = 255;
 constexpr int32_t DEFAULT_USERID = -1;
@@ -90,6 +99,18 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
         SCENE_SESSION_MANAGER_THREAD, taskScheduler_->GetEventHandler(), interval)) {
         WLOGFW("Add thread %{public}s to watchdog failed.", SCENE_SESSION_MANAGER_THREAD.c_str());
     }
+
+#ifdef RES_SCHED_ENABLE
+    std::unordered_map<std::string, std::string> payload {
+        { "pid", std::to_string(getpid()) },
+        { "tid", std::to_string(gettid()) },
+        { "uid", std::to_string(getuid()) },
+        { "bundleName", SCENE_BOARD_BUNDLE_NAME },
+    };
+    uint32_t type = OHOS::ResourceSchedule::ResType::RES_TYPE_REPORT_SCENE_BOARD;
+    int64_t value = 0;
+    OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(type, value, payload);
+#endif
 
     bundleMgr_ = GetBundleManager();
     currentUserId_ = DEFAULT_USERID;
