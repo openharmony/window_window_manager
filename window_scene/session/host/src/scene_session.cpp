@@ -38,7 +38,7 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
 {
     GeneratePersistentId(false, info);
     if (!info.bundleName_.empty()) {
-        scenePersistence_ = new ScenePersistence(info, GetPersistentId());
+        scenePersistence_ = new (std::nothrow) ScenePersistence(info, GetPersistentId());
     }
     specificCallback_ = specificCallback;
     moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
