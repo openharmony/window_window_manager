@@ -724,6 +724,20 @@ void SceneSessionManager::SetGestureNavigationEnabledChangeListener(
     gestureNavigationEnabledChangeFunc_ = func;
 }
 
+void SceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
+{
+    WLOGFI("OnOutsideDownEvent x = %{public}d, y = %{public}d", x, y);
+    if (outsideDownEventFunc_) {
+        outsideDownEventFunc_(x, y);
+    }
+}
+
+void SceneSessionManager::SetOutsideDownEventListener(const ProcessOutsideDownEventFunc& func)
+{
+    WLOGFD("SetOutsideDownEventListener");
+    outsideDownEventFunc_ = func;
+}
+
 WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const uint64_t& persistentId)
 {
     auto task = [this, persistentId]() {
