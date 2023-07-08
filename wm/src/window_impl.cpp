@@ -108,7 +108,14 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     }
     name_ = option->GetWindowName();
 
-    surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
+    std::string surfaceNodeName;
+    if (auto bundleName = option->GetBundleName(); bundleName != "") {
+        surfaceNodeName = bundleName + "#" + property_->GetWindowName();
+    } else {
+        surfaceNodeName = property_->GetWindowName();
+    }
+    WLOGFD("surfaceNodeName: %{public}s", surfaceNodeName.c_str());
+    surfaceNode_ = CreateSurfaceNode(surfaceNodeName, option->GetWindowType());
 
     moveDragProperty_ = new (std::nothrow) MoveDragProperty();
     if (moveDragProperty_ == nullptr) {
