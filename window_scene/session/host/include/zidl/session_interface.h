@@ -57,6 +57,7 @@ public:
         TRANS_ID_GET_AVOID_AREA,
         TRANS_ID_UPDATE_WINDOW_SESSION_PROPERTY,
         TRANS_ID_SET_ASPECT_RATIO,
+        TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG,
 
         // Extension
         TRANS_ID_TRANSFER_ABILITY_RESULT = 500,
@@ -90,6 +91,7 @@ public:
     virtual WSError GetGlobalMaximizeMode(MaximizeMode& mode) = 0;
     virtual WSError UpdateWindowSessionProperty(sptr<WindowSessionProperty>) = 0;
     virtual WSError SetAspectRatio(float ratio) = 0;
+    virtual WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) = 0;
 
     // extension session
     virtual WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) = 0;

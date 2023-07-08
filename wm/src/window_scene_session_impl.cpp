@@ -1375,5 +1375,11 @@ bool WindowSceneSessionImpl::IsKeepScreenOn() const
 {
     return property_->IsKeepScreenOn();
 }
+
+void WindowSceneSessionImpl::SetNeedDefaultAnimation(bool needDefaultAnimation)
+{
+    hostSession_->UpdateWindowAnimationFlag(needDefaultAnimation);
+    return;
+}
 } // namespace Rosen
 } // namespace OHOS
