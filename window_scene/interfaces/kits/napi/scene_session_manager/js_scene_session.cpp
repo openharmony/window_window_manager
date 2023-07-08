@@ -40,6 +40,7 @@ const std::string SYSTEMBAR_PROPERTY_CHANGE_CB = "systemBarPropertyChange";
 const std::string NEED_AVOID_CB = "needAvoid";
 const std::string PENDING_SESSION_TO_FOREGROUND_CB = "pendingSessionToForeground";
 const std::string PENDING_SESSION_TO_BACKROUND_FOR_DELEGATOR_CB = "pendingSessionToBackgroundForDelegator";
+const std::string NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB = "needDefaultAnimationFlagChange";
 } // namespace
 
 NativeValue* JsSceneSession::Create(NativeEngine& engine, const sptr<SceneSession>& session)
@@ -94,6 +95,7 @@ JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& s
         { NEED_AVOID_CB,          &JsSceneSession::ProcessNeedAvoidRegister },
         { PENDING_SESSION_TO_FOREGROUND_CB,           &JsSceneSession::ProcessPendingSessionToForegroundRegister },
         { PENDING_SESSION_TO_BACKROUND_FOR_DELEGATOR_CB,           &JsSceneSession::ProcessPendingSessionToBackgroundForDelegatorRegister },
+        { NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB, &JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister },
     };
 
     sptr<SceneSession::SessionChangeCallback> sessionchangeCallback = new (std::nothrow)
@@ -110,6 +112,40 @@ JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& s
 JsSceneSession::~JsSceneSession()
 {
     WLOGD("~JsSceneSession");
+}
+
+void JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister()
+{
+    auto sessionchangeCallback = sessionchangeCallback_.promote();
+    if (sessionchangeCallback == nullptr) {
+        WLOGFE("sessionchangeCallback is nullptr");
+        return;
+    }
+    sessionchangeCallback->onWindowAnimationFlagChange_ = std::bind(
+        &JsSceneSession::OnDefaultAnimationFlagChange, this, std::placeholders::_1);
+    WLOGFD("ProcessSessionDefaultAnimationFlagChangeRegister success");
+}
+
+void JsSceneSession::OnDefaultAnimationFlagChange(bool isNeedDefaultAnimationFlag)
+{
+    WLOGFI("[NAPI]OnDefaultAnimationFlagChange, flag: %{public}u", isNeedDefaultAnimationFlag);
+    auto iter = jsCbMap_.find(NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [isNeedDefaultAnimationFlag, jsCallBack, eng = &engine_](
+            NativeEngine& engine, AsyncTask& task, int32_t status) {
+            NativeValue* jsSessionDefaultAnimationFlagObj = CreateJsValue(engine, isNeedDefaultAnimationFlag);
+            NativeValue* argv[] = { jsSessionDefaultAnimationFlagObj };
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSession::OnDefaultAnimationFlagChange", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsSceneSession::ProcessPendingSceneSessionActivationRegister()

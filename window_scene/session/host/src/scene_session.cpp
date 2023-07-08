@@ -444,4 +444,14 @@ std::string SceneSession::GetSessionSnapshot()
     }
     return "";
 }
+
+WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
+{
+    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
+        if (sessionChangeCallback != nullptr && sessionChangeCallback->onWindowAnimationFlagChange_) {
+            sessionChangeCallback -> onWindowAnimationFlagChange_(needDefaultAnimationFlag);
+        }
+    }
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen
