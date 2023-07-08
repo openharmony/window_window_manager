@@ -62,7 +62,7 @@ public:
 
     void SetOffsetX(int32_t offsetX);
     int32_t GetOffsetX() const;
-    
+
     void SetOffsetY(int32_t offsetY);
     int32_t GetOffsetY() const;
 
