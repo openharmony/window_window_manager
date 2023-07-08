@@ -1559,7 +1559,7 @@ WMError WindowImpl::Resize(uint32_t width, uint32_t height)
 WMError WindowImpl::SetWindowGravity(WindowGravity gravity, uint32_t percent)
 {
     WLOGFD("id:%{public}d SetWindowGravity %{public}u %{public}u",
-            property_->GetWindowId(), gravity, percent);
+        property_->GetWindowId(), gravity, percent);
 
     return SingletonContainer::Get<WindowAdapter>().SetWindowGravity(property_->GetWindowId(), gravity, percent);
 }
