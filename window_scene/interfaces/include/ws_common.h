@@ -178,7 +178,7 @@ struct WindowShadowConfig {
 };
 
 struct KeyboardSceneAnimationConfig {
-    std::string curveType_ = "easeOut";
+    std::string curveType_ = "default";
     float ctrlX1_ = 0.2f;
     float ctrlY1_ = 0.0f;
     float ctrlX2_ = 0.2f;
