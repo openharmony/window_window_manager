@@ -443,6 +443,10 @@ HWTEST_F(ScreenManagerTest, StopExpand_001, Function | SmallTest | Level1)
 {
     std::vector<ScreenId> screenIds;
     ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().StopExpand(screenIds));
+    std::vector<ScreenId> expandScreenIds {0, 1, 2, 3, 4, 5};
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().StopExpand(expandScreenIds);
+    ASSERT_EQ(DMError::DM_OK, err);
+
 }
 
 /**
@@ -456,6 +460,10 @@ HWTEST_F(ScreenManagerTest, StopMirror, Function | SmallTest | Level1)
     ASSERT_TRUE(utils.CreateSurface());
     std::vector<ScreenId> screenIds;
     ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().StopMirror(screenIds));
+    std::vector<ScreenId> mirrorScreenIds {0, 1, 2, 3, 4, 5};
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().StopMirror(mirrorScreenIds);
+    ASSERT_EQ(DMError::DM_OK, err);
+
 }
 }
 } // namespace Rosen

@@ -929,9 +929,9 @@ HWTEST_F(WindowTest, ConsumeKeyEvent, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest57", option);
     ASSERT_NE(nullptr, window);
-    auto ret = WMError::WM_OK;
-    std::shared_ptr<MMI::KeyEvent> inputEvent;
-    window->ConsumeKeyEvent(inputEvent);
+    auto ret = WMError::WM_OK;   
+    std::shared_ptr<MMI::KeyEvent> keyEvent=MMI::KeyEvent::Create();
+    window->ConsumeKeyEvent(keyEvent);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
@@ -947,8 +947,8 @@ HWTEST_F(WindowTest, ConsumePointerEvent, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest58", option);
     ASSERT_NE(nullptr, window);
     auto ret = WMError::WM_OK;
-    std::shared_ptr<MMI::PointerEvent> inputEvent;
-    window->ConsumePointerEvent(inputEvent);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    window->ConsumePointerEvent(pointerEvent);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }

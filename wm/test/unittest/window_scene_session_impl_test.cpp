@@ -104,16 +104,24 @@ HWTEST_F(WindowSceneSessionImplTest, CreateWindowAndDestroy01, Function | SmallT
 HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowName("Connect01");
+    option->SetWindowName("CreateAndConnectSpecificSession01");
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
     windowscenesession->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowscenesession->CreateAndConnectSpecificSession());
+    windowscenesession->property_->SetPersistentId(100);
+    windowscenesession->property_->SetParentPersistentId(11);
+    windowscenesession->property_->SetParentId(11);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
+
+    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
+    ASSERT_EQ(WMError::WM_OK, windowscenesession->Create(abilityContext_, session));
     windowscenesession->hostSession_ = session;
+    EXPECT_CALL(*(session), CreateAndConnectSpecificSession(_, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowscenesession->CreateAndConnectSpecificSession());
 }
 
 /**
@@ -296,10 +304,24 @@ HWTEST_F(WindowSceneSessionImplTest, RaiseToAppTop01, Function | SmallTest | Lev
 HWTEST_F(WindowSceneSessionImplTest, Resize01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowName("Connect01");
+    option->SetWindowName("Resize01");
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
-    windowscenesession->state_ = WindowState::STATE_UNFROZEN;
+    windowscenesession->property_->SetPersistentId(888);
+    
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    windowscenesession->hostSession_ = session;
+
+    Rect rect = { 2,2,2,2};
+    windowscenesession->property_->SetWindowRect(rect);
+    windowscenesession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
+    
+    windowscenesession->state_ = WindowState::STATE_FROZEN;
+    windowscenesession->hostSession_ = session;
+
+    ASSERT_EQ(WMError::WM_OK, windowscenesession->Resize(1,1));
 }
 
 /**
@@ -310,12 +332,17 @@ HWTEST_F(WindowSceneSessionImplTest, Resize01, Function | SmallTest | Level2)
 HWTEST_F(WindowSceneSessionImplTest, MoveTo01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowName("Connect01");
+    option->SetWindowName("MoveTo01");
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
 
     windowscenesession->property_->SetPersistentId(1);
     windowscenesession->state_ = WindowState::STATE_HIDDEN;
+        SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    windowscenesession->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, windowscenesession->MoveTo(2,2));
 }
 
 /**
@@ -437,10 +464,15 @@ HWTEST_F(WindowSceneSessionImplTest, Maximize01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("Connect01");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
     windowscenesession->property_->SetPersistentId(1);
-    windowscenesession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    windowscenesession->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, windowscenesession->Maximize());
 }
 
 /**
@@ -538,7 +570,15 @@ HWTEST_F(WindowSceneSessionImplTest, SetTransparent, Function | SmallTest | Leve
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetTransparent(true));
     window->property_->SetPersistentId(1);
-    ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
+    option->SetWindowName("SetTransparent");
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->SetBackgroundColor(333);
+    ASSERT_EQ(WMError::WM_OK, window->SetTransparent(true));
 }
 
 /*
