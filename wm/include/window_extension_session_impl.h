@@ -33,6 +33,7 @@ public:
     WMError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
     void RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func) override;
+    WMError SetPrivacyMode(bool isPrivacyMode) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
