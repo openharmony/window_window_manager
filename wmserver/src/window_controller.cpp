@@ -709,14 +709,14 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
         newRect = rect;
     }
     property->SetRequestRect(newRect);
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
+        (reason == WindowSizeChangeReason::RESIZE || reason == WindowSizeChangeReason::MOVE)) {
+        RelayoutKeyboard(node);
+        ResizeSoftInputCallingWindowIfNeed(node);
+    }
     WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_RECT);
     if (res != WMError::WM_OK) {
         return res;
-    }
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
-        reason == WindowSizeChangeReason::RESIZE) {
-        RelayoutKeyboard(node);
-        ResizeSoftInputCallingWindowIfNeed(node);
     }
     accessibilityConnection_->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
     return WMError::WM_OK;
