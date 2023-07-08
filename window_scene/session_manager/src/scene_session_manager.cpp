@@ -395,7 +395,7 @@ std::string SceneSessionManager::CreateCurve(const WindowSceneConfig::ConfigItem
     const std::string& nodeName)
 {
     static std::unordered_set<std::string> curveSet = { "easeOut", "ease", "easeIn", "easeInOut", "default",
-        "linear", "spring", "interactiveSpring" };
+        "linear", "spring", "interactiveSpring", "interpolatingSpring" };
 
     std::string curveName = "easeOut";
     const auto& nameItem = curveConfig.GetProp("name");
