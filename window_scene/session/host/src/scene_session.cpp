@@ -346,8 +346,8 @@ bool SceneSession::FixRectByAspectRatio(WSRect& rect)
         return false;
     }
 
-    if (MathHelper::NearZero(aspectRatio_ || aspectRatio_ == MathHelper::INF ||
-        aspectRatio_ == MathHelper::NAG_INF)) {
+    if (MathHelper::NearZero(aspectRatio_) || aspectRatio_ == MathHelper::INF ||
+        aspectRatio_ == MathHelper::NAG_INF) {
         return false;
     }
     float vpr = 1.5f; // 1.5f: default virtual pixel ratio
