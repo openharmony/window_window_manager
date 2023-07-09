@@ -762,14 +762,14 @@ void Session::NotifyClick()
 WSError Session::UpdateFocus(bool isFocused)
 {
     WLOGFI("Session update focus id: %{public}" PRIu64, GetPersistentId());
-    if (!IsSessionValid()) {
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
     if (isFocused_ == isFocused) {
         WLOGFD("Session focus do not change: [%{public}d]", isFocused);
         return WSError::WS_DO_NOTHING;
     }
     isFocused_ = isFocused;
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
     sessionStage_->UpdateFocus(isFocused);
 
     return WSError::WS_OK;
