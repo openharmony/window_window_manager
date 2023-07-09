@@ -1197,11 +1197,6 @@ WSError SceneSessionManager::UpdateFocus(uint64_t persistentId, bool isFocused)
             WLOGFE("could not find window");
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
-        WSError res = WSError::WS_OK;
-        res = sceneSession->UpdateFocus(isFocused);
-        if (res != WSError::WS_OK) {
-            return res;
-        }
         // focusId change
         if (isFocused) {
             SetFocusedSession(persistentId);
@@ -1218,6 +1213,11 @@ WSError SceneSessionManager::UpdateFocus(uint64_t persistentId, bool isFocused)
             sceneSession->GetAbilityToken()
         );
         SessionManagerAgentController::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, isFocused);
+        WSError res = WSError::WS_OK;
+        res = sceneSession->UpdateFocus(isFocused);
+        if (res != WSError::WS_OK) {
+            return res;
+        }
         return WSError::WS_OK;
     };
 
@@ -1313,7 +1313,7 @@ WSError SceneSessionManager::SetWindowFlags(const sptr<SceneSession>& sceneSessi
     if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) {
         CheckAndNotifyWaterMarkChangedResult(flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK));
     }
-    WLOGFI("SetWindowFlags end");
+    WLOGFI("SetWindowFlags end, flags: %{public}u", flags);
     return WSError::WS_OK;
 }
 
