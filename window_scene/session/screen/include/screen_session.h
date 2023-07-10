@@ -94,7 +94,7 @@ public:
     int32_t GetPrivateSessionCount() const;
     DMError SetPrivateSessionCount(int32_t count);
     bool HasPrivateSession() const;
-    void SetDisplayBoundary(const RectF& rect, const uint32_t offsetY);
+    void SetDisplayBoundary(const RectF& rect, const uint32_t& offsetY);
 
     std::string name_ { "UNKNOW" };
     ScreenId screenId_;
