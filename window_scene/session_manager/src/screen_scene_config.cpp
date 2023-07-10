@@ -31,10 +31,14 @@
 #include "include/utils/SkParsePath.h"
 #include "window_manager_hilog.h"
 
-
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSceneConfig"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSceneConfig"};
+constexpr char IS_WATERFALL_DISPLAY[] = "isWaterfallDisplay";
+constexpr char CURVED_SCREEN_BOUNDARY[] = "curvedScreenBoundary";
+constexpr char CURVED_AREA_IN_LANDSCAPE[] = "waterfallAreaCompressionSizeWhenHorzontal";
+constexpr char IS_CURVED_COMPRESS_ENABLED[] = "isWaterfallAreaCompressionEnableWhenHorizontal";
+constexpr uint32_t NO_WATERFALL_DISPLAY_COMPRESSION_SIZE = 0;
 }
 
 std::map<std::string, bool> ScreenSceneConfig::enableConfig_;
@@ -42,6 +46,8 @@ std::map<std::string, std::vector<int>> ScreenSceneConfig::intNumbersConfig_;
 std::map<std::string, std::string> ScreenSceneConfig::stringConfig_;
 std::vector<DMRect> ScreenSceneConfig::cutoutBoundaryRect_;
 bool ScreenSceneConfig::isWaterfallDisplay_ = false;
+bool ScreenSceneConfig::isScreenCompressionEnableInLandscape_ = false;
+uint32_t ScreenSceneConfig::curvedAreaInLandscape_ = 0;
 
 std::vector<std::string> ScreenSceneConfig::Split(std::string str, std::string pattern)
 {
@@ -113,16 +119,15 @@ bool ScreenSceneConfig::LoadConfigXml()
         }
 
         auto nodeName = curNodePtr->name;
-        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("isWaterfallDisplay")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("isWaterfallAreaCompressionEnableWhenHorizontal"))) {
+        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>(IS_WATERFALL_DISPLAY)) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>(IS_CURVED_COMPRESS_ENABLED))) {
             ReadEnableConfigInfo(curNodePtr);
             continue;
         }
         if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("dpi")) ||
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("defaultDeviceRotationOffset")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("cutoutArea")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("curvedScreenBoundary")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("waterfallAreaCompressionSizeWhenHorzontal")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>(CURVED_SCREEN_BOUNDARY)) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>(CURVED_AREA_IN_LANDSCAPE)) ||
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("buildInDefaultOrientation"))) {
             ReadIntNumbersConfigInfo(curNodePtr);
             continue;
@@ -184,8 +189,10 @@ void ScreenSceneConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)
     std::string nodeName = reinterpret_cast<const char *>(currNode->name);
     if (!xmlStrcmp(enable, reinterpret_cast<const xmlChar*>("true"))) {
         enableConfig_[nodeName] = true;
-        if ("isWaterfallDisplay" == nodeName) {
+        if (IS_WATERFALL_DISPLAY == nodeName) {
             isWaterfallDisplay_ = true;
+        } else if(IS_CURVED_COMPRESS_ENABLED == nodeName) {
+            isScreenCompressionEnableInLandscape_ = true;
         }
     } else {
         enableConfig_[nodeName] = false;
@@ -285,5 +292,28 @@ std::vector<DMRect> ScreenSceneConfig::GetCutoutBoundaryRect()
 bool ScreenSceneConfig::IsWaterfallDisplay()
 {
     return isWaterfallDisplay_;
+}
+
+void ScreenSceneConfig::SetCurvedCompressionAreaInLandscape()
+{
+    if (intNumbersConfig_[CURVED_AREA_IN_LANDSCAPE].size() > 0) {
+        curvedAreaInLandscape_ = static_cast<uint32_t>(intNumbersConfig_[CURVED_AREA_IN_LANDSCAPE][0]);
+    } else {
+         WLOGFW("waterfallAreaCompressionSizeWhenHorzontal value is not exist");
+    }
+}
+
+std::vector<int> ScreenSceneConfig::GetCurvedScreenBoundaryConfig()
+{
+    return intNumbersConfig_[CURVED_SCREEN_BOUNDARY];
+}
+
+uint32_t ScreenSceneConfig::GetCurvedCompressionAreaInLandscape()
+{
+    if (!isWaterfallDisplay_ || !isScreenCompressionEnableInLandscape_) {
+        WLOGFW("noy waterfall screen or waterfall compression is not enabled");
+        return NO_WATERFALL_DISPLAY_COMPRESSION_SIZE;
+    }
+    return curvedAreaInLandscape_;
 }
 } // namespace OHOS::Rosen
