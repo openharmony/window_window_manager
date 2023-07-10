@@ -398,8 +398,8 @@ WSError Session::SetActive(bool active)
         UpdateSessionState(SessionState::STATE_ACTIVE);
         isActive_ = active;
     }
-        sessionStage_->SetActive(false);
     if (!active && GetSessionState() == SessionState::STATE_ACTIVE) {
+        sessionStage_->SetActive(false);
         UpdateSessionState(SessionState::STATE_INACTIVE);
         isActive_ = active;
     }
