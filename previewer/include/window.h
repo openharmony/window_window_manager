@@ -58,6 +58,7 @@ class RSSurfaceNode;
 class RSTransaction;
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
 using SendRenderDataCallback = bool (*)(const void*, const size_t, const int32_t, const int32_t);
+using ContentInfoCallback = std::function<void(std::string contentInfo)>;
 
 class IWindowLifeCycle : virtual public RefBase {
 };
@@ -239,6 +240,7 @@ public:
     virtual void SetDensity(float density) = 0;
 
     virtual void CreateSurfaceNode(const std::string name, const SendRenderDataCallback& callback) = 0;
+    virtual void SetContentInfoCallback(const ContentInfoCallback& callback) = 0;
 };
 }
 }
