@@ -191,7 +191,7 @@ void ScreenSceneConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)
         enableConfig_[nodeName] = true;
         if (IS_WATERFALL_DISPLAY == nodeName) {
             isWaterfallDisplay_ = true;
-        } else if(IS_CURVED_COMPRESS_ENABLED == nodeName) {
+        } else if (IS_CURVED_COMPRESS_ENABLED == nodeName) {
             isScreenCompressionEnableInLandscape_ = true;
         }
     } else {
@@ -299,7 +299,7 @@ void ScreenSceneConfig::SetCurvedCompressionAreaInLandscape()
     if (intNumbersConfig_[CURVED_AREA_IN_LANDSCAPE].size() > 0) {
         curvedAreaInLandscape_ = static_cast<uint32_t>(intNumbersConfig_[CURVED_AREA_IN_LANDSCAPE][0]);
     } else {
-         WLOGFW("waterfallAreaCompressionSizeWhenHorzontal value is not exist");
+        WLOGFW("waterfallAreaCompressionSizeWhenHorzontal value is not exist");
     }
 }
 
