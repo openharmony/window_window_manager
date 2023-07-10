@@ -447,6 +447,57 @@ WSError SceneSessionManagerProxy::PendingSessionToBackgroundForDelegator(const s
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+WSError SceneSessionManagerProxy::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
+    bool needStartCaller)
+{
+    if (abilitySessionInfo == nullptr) {
+        WLOGFE("abilitySessionInfo is null");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    MessageParcel data, reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteParcelable(&(abilitySessionInfo->want))) {
+        WLOGFE("Write want info failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (abilitySessionInfo->callerToken) {
+        if (!data.WriteBool(true) || !data.WriteRemoteObject(abilitySessionInfo->callerToken)) {
+            WLOGFE("Write ability info failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    } else {
+        if (!data.WriteBool(false)) {
+            WLOGFE("Write ability info failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    }
+    if (abilitySessionInfo->sessionToken) {
+        if (!data.WriteBool(true) || !data.WriteRemoteObject(abilitySessionInfo->sessionToken)) {
+            WLOGFE("Write ability sessionToken failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    } else {
+        if (!data.WriteBool(false)) {
+            WLOGFE("Write ability sessionToken failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    }
+    if (!data.WriteBool(needStartCaller) || !data.WriteInt32(abilitySessionInfo->resultCode)) {
+        WLOGFE("Write needStartCaller or result code failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_TERMINATE_SESSION_NEW),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
 WSError SceneSessionManagerProxy::GetFocusSessionToken(sptr<IRemoteObject> &token)
 {
     WLOGFI("run SceneSessionManagerProxy::GetFocusSessionToken");
