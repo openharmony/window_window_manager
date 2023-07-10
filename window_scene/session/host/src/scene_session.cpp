@@ -59,9 +59,17 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     }
 }
 
-WSError SceneSession::Foreground()
+WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
 {
-    WSError ret = Session::Foreground();
+    // use property from client
+    if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
+        NotifyIsCustomAnimatiomPlaying(true);
+        if (setWindowScenePatternFunc_ && setWindowScenePatternFunc_->setOpacityFunc_) {
+            setWindowScenePatternFunc_->setOpacityFunc_(0.0f);
+        }
+    }
+    WSError ret = Session::Foreground(property);
     if (ret != WSError::WS_OK) {
         return ret;
     }
@@ -71,6 +79,12 @@ WSError SceneSession::Foreground()
 
 WSError SceneSession::Background()
 {
+    // background will remove surfaceNode, custom not execute
+    // not animation playing when already background; inactive may be animation playing
+    if (property_ && property_->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        NotifyIsCustomAnimatiomPlaying(true);
+        return WSError::WS_OK;
+    }
     WSError ret = Session::Background();
     if (ret != WSError::WS_OK) {
         return ret;
@@ -453,6 +467,34 @@ WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
         if (sessionChangeCallback != nullptr && sessionChangeCallback->onWindowAnimationFlagChange_) {
             sessionChangeCallback -> onWindowAnimationFlagChange_(needDefaultAnimationFlag);
         }
+    }
+    return WSError::WS_OK;
+}
+
+void SceneSession::NotifyIsCustomAnimatiomPlaying(bool isPlaying)
+{
+    WLOGFI("id %{public}" PRIu64 " %{public}u", GetPersistentId(), isPlaying);
+    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
+        if (sessionChangeCallback != nullptr && sessionChangeCallback->onIsCustomAnimationPlaying_) {
+            sessionChangeCallback->onIsCustomAnimationPlaying_(isPlaying);
+        }
+    }
+}
+
+WSError SceneSession::UpdateWindowSceneAfterCustomAnimation(bool isAdd)
+{
+    WLOGFI("id %{public}" PRIu64 "", GetPersistentId());
+    if (isAdd) {
+        if (!setWindowScenePatternFunc_ || !setWindowScenePatternFunc_->setOpacityFunc_) {
+            WLOGFE("SetOpacityFunc not register %{public}" PRIu64 "", GetPersistentId());
+            return WSError::WS_ERROR_INVALID_OPERATION;
+        }
+        setWindowScenePatternFunc_->setOpacityFunc_(1.0f);
+    } else {
+        WLOGFI("background after custom animation id %{public}" PRIu64 "", GetPersistentId());
+        // since background will remove surfaceNode
+        Background();
+        NotifyIsCustomAnimatiomPlaying(false);
     }
     return WSError::WS_OK;
 }

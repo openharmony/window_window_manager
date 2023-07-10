@@ -223,12 +223,14 @@ HWTEST_F(WindowSessionTest, Connect01, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest, Foreground01, Function | SmallTest | Level2)
 {
     session_->state_ = SessionState::STATE_DISCONNECT;
-    auto result = session_->Foreground();
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    auto result = session_->Foreground(property);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
 
     session_->state_ = SessionState::STATE_CONNECT;
     session_->isActive_ = true;
-    result = session_->Foreground();
+    result = session_->Foreground(property);
     ASSERT_EQ(result, WSError::WS_OK);
 
     session_->isActive_ = false;
