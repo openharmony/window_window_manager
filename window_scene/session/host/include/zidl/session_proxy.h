@@ -26,7 +26,7 @@ public:
     explicit SessionProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<ISession>(impl) {};
     ~SessionProxy() {};
 
-    WSError Foreground() override;
+    WSError Foreground(sptr<WindowSessionProperty> property) override;
     WSError Background() override;
     WSError Disconnect() override;
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
@@ -51,6 +51,8 @@ public:
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
     WSError UpdateWindowSessionProperty(sptr<WindowSessionProperty> property) override;
     WSError SetAspectRatio(float ratio) override;
+    WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
+
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     void NotifyRemoteReady() override;

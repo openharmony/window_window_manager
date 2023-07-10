@@ -14,6 +14,7 @@
  */
 
 #include "common/include/window_session_property.h"
+#include "window_manager_hilog.h"
 #include "wm_common.h"
 
 namespace OHOS {
@@ -313,6 +314,16 @@ uint32_t WindowSessionProperty::GetModeSupportInfo() const
     return modeSupportInfo_;
 }
 
+void WindowSessionProperty::SetAnimationFlag(uint32_t animationFlag)
+{
+    animationFlag_ = animationFlag;
+}
+
+uint32_t WindowSessionProperty::GetAnimationFlag() const
+{
+    return animationFlag_;
+}
+
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
 {
     if (parcel.WriteUint32(limits_.maxWidth_) &&
@@ -381,7 +392,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(zOrder_) && parcel.WriteUint32(flags_) &&
         parcel.WriteBool(isDecorEnable_) &&
         MarshallingWindowLimits(parcel) &&
-        MarshallingSystemBarMap(parcel);
+        MarshallingSystemBarMap(parcel) && parcel.WriteUint32(animationFlag_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -418,6 +429,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetDecorEnable(parcel.ReadBool());
     UnmarshallingWindowLimits(parcel, property);
     UnMarshallingSystemBarMap(parcel, property);
+    property->SetAnimationFlag(parcel.ReadUint32());
     return property;
 }
 
@@ -449,6 +461,17 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     sysBarPropMap_ = property->sysBarPropMap_;
     zOrder_ = property->zOrder_;
     isDecorEnable_ = property->isDecorEnable_;
+    animationFlag_ = property->animationFlag_;
+}
+
+void WindowSessionProperty::SetTransform(const Transform& trans)
+{
+    trans_ = trans;
+}
+
+const Transform& WindowSessionProperty::GetTransform() const
+{
+    return trans_;
 }
 } // namespace Rosen
 } // namespace OHOS
