@@ -100,11 +100,11 @@ void ScreenProperty::SetScreenRotation(Rotation rotation)
         int32_t width = bounds_.rect_.width_;
         int32_t height = bounds_.rect_.height_;
         if (IsVertical(screenRotation_)) {
-            bounds_.rect_.left_ -= (width - height) / HALF_VALUE - offsetY_;
-            bounds_.rect_.top_ += (width - height) / HALF_VALUE;
+            bounds_.rect_.left_ -= static_cast<float>((width - height) / HALF_VALUE - offsetY_);
+            bounds_.rect_.top_ += static_cast<float>((width - height) / HALF_VALUE);
         } else {
-            bounds_.rect_.left_ += (height - width) / HALF_VALUE;
-            bounds_.rect_.top_ -= (height - width) / HALF_VALUE + offsetY_;
+            bounds_.rect_.left_ += static_cast<float>((height - width) / HALF_VALUE);
+            bounds_.rect_.top_ -= static_cast<float>((height - width) / HALF_VALUE + offsetY_);
         }
     }
     if (rotation == Rotation::ROTATION_0) {
