@@ -397,8 +397,8 @@ WSError Session::SetActive(bool active)
         UpdateSessionState(SessionState::STATE_ACTIVE);
         isActive_ = active;
     }
-        sessionStage_->SetActive(false);
     if (!active && GetSessionState() == SessionState::STATE_ACTIVE) {
+        sessionStage_->SetActive(false);
         UpdateSessionState(SessionState::STATE_INACTIVE);
         isActive_ = active;
     }
@@ -465,6 +465,30 @@ WSError Session::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionI
 void Session::SetTerminateSessionListener(const NotifyTerminateSessionFunc& func)
 {
     terminateSessionFunc_ = func;
+}
+
+WSError Session::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needStartCaller)
+{
+    if (abilitySessionInfo == nullptr) {
+        WLOGFE("abilitySessionInfo is null");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    SessionInfo info;
+    info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
+    info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
+    info.callerToken_ = abilitySessionInfo->callerToken;
+    info.persistentId_ = abilitySessionInfo->persistentId;
+    sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
+    sessionInfo_.resultCode = abilitySessionInfo->resultCode;
+    if (terminateSessionFuncNew_) {
+        terminateSessionFuncNew_(info, needStartCaller);
+    }
+    return WSError::WS_OK;
+}
+
+void Session::SetTerminateSessionListenerNew(const NotifyTerminateSessionFuncNew& func)
+{
+    terminateSessionFuncNew_ = func;
 }
 
 WSError Session::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo)

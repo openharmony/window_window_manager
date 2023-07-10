@@ -1382,6 +1382,22 @@ WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject> &token,
     return WSError::WS_ERROR_SET_SESSION_ICON_FAILED;
 }
 
+WSError SceneSessionManager::TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller)
+{
+    WLOGFI("run SetSessionIcon");
+    if (info == nullptr) {
+        WLOGFI("sessionInfo is nullptr.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    sptr<SceneSession> sceneSession = FindSessionByToken(info->sessionToken);
+    if (sceneSession == nullptr) {
+        WLOGFI("fail to find session by token.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    const WSError& errCode = sceneSession->TerminateSessionNew(info, needStartCaller);
+    return errCode;
+}
+
 WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionListener> sessionListener)
 {
     WLOGFI("run RegisterSessionListener");
