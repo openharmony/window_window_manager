@@ -261,7 +261,7 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     }
     UpdateViewportConfig();
     if (contentInfoCallback_) {
-        contentInfoCallback_(uiContent_->GetContentInfo());
+        contentInfoCallback_(contentInfo);
     }
     return WMError::WM_OK;
 }
