@@ -323,7 +323,6 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     NotifyConnect();
     int32_t applicationPid = IPCSkeleton::GetCallingPid();
     DelayedSingleton<ANRManager>::GetInstance()->SetApplicationPid(persistentId_, applicationPid);
-    WLOGFI("SetApplicationPid pid:%{public}d", applicationPid);
     return WSError::WS_OK;
 }
 
