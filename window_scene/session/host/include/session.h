@@ -49,6 +49,7 @@ using NotifySessionFocusableChangeFunc = std::function<void(const bool isFocusab
 using NotifySessionTouchableChangeFunc = std::function<void(const bool touchable)>;
 using NotifyClickFunc = std::function<void()>;
 using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
+using NotifyTerminateSessionFuncNew = std::function<void(const SessionInfo& info, bool needStartCaller)>;
 using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
 using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info)>;
@@ -116,9 +117,11 @@ public:
 
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
 
-    void SetTerminateSessionListener(const NotifyTerminateSessionFunc& func);
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> info) override;
-    void SetSessionExceptionListener(const NotifyTerminateSessionFunc& func);
+    void SetTerminateSessionListener(const NotifyTerminateSessionFunc& func);
+    WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller);
+    void SetTerminateSessionListenerNew(const NotifyTerminateSessionFuncNew& func);
+    void SetSessionExceptionListener(const NotifySessionExceptionFunc& func);
     WSError NotifySessionException(const sptr<AAFwk::SessionInfo> info) override;
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
     void SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func);
@@ -200,6 +203,7 @@ protected:
     NotifySessionTouchableChangeFunc sessionTouchableChangeFunc_;
     NotifyClickFunc clickFunc_;
     NotifyTerminateSessionFunc terminateSessionFunc_;
+    NotifyTerminateSessionFuncNew terminateSessionFuncNew_;
     NotifySessionExceptionFunc sessionExceptionFunc_;
     NotifyPendingSessionToForegroundFunc pendingSessionToForegroundFunc_;
     NotifyPendingSessionToBackgroundForDelegatorFunc pendingSessionToBackgroundForDelegatorFunc_;
