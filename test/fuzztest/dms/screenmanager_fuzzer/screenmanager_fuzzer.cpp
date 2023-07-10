@@ -218,6 +218,20 @@ bool SetVirtualScreenSurfaceFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
+bool SetScreenRotationLockedFuzzTest(const uint8_t *data, size_t size)
+{
+    ScreenId screenId;
+    if (data == nullptr || size < sizeof(screenId)) {
+        return false;
+    }
+    size_t startPos = 0;
+    ScreenManager &screenManager = ScreenManager::GetInstance();
+    bool flag = true;
+    startPos += GetObject<bool>(flag, data + startPos, size - startPos);
+    screenManager.SetScreenRotationLocked(flag);
+    return true;
+}
+
 bool RemoveVirtualScreenFromGroupFuzzTest(const uint8_t *data, size_t size)
 {
     ScreenId screenId;
