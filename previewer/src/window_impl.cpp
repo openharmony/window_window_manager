@@ -58,6 +58,11 @@ void WindowImpl::CreateSurfaceNode(const std::string name, const SendRenderDataC
     surfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig);
 }
 
+void WindowImpl::SetContentInfoCallback(const ContentInfoCallback& callback)
+{
+    contentInfoCallback_ = callback;
+}
+
 sptr<Window> WindowImpl::Find(const std::string& name)
 {
     return nullptr;
@@ -255,6 +260,9 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
         return WMError::WM_ERROR_NULLPTR;
     }
     UpdateViewportConfig();
+    if (contentInfoCallback_) {
+        contentInfoCallback_(uiContent_->GetContentInfo());
+    }
     return WMError::WM_OK;
 }
 
