@@ -96,10 +96,6 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentSessionByParentId(uint
 
 sptr<WindowSessionImpl> WindowSceneSessionImpl::FindMainWindowWithContext()
 {
-    if (GetType() != WindowType::WINDOW_TYPE_DIALOG) {
-        return nullptr;
-    }
-
     for (const auto& winPair : windowSessionMap_) {
         auto win = winPair.second.second;
         if (win && win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
@@ -115,7 +111,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 {
     sptr<ISessionStage> iSessionStage(this);
     sptr<WindowEventChannel> channel = new (std::nothrow) WindowEventChannel(iSessionStage);
-    if (channel == nullptr) {
+    if (channel == nullptr || property_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
     sptr<IWindowEventChannel> eventChannel(channel);
@@ -140,7 +136,9 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         }
         if (GetType() == WindowType::WINDOW_TYPE_DIALOG) {
             auto mainWindow = FindMainWindowWithContext();
-            property_->SetParentPersistentId(mainWindow->GetPersistentId());
+            if (mainWindow != nullptr) {
+                property_->SetParentPersistentId(mainWindow->GetPersistentId());
+            }
             WLOGFD("Bind dialog to main window");
         }
         SessionManager::GetInstance().CreateAndConnectSpecificSession(iSessionStage, eventChannel, surfaceNode_,
