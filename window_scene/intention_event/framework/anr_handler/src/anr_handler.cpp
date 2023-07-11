@@ -49,7 +49,6 @@ ANRHandler::~ANRHandler() {}
 
 void ANRHandler::SetSessionStage(const wptr<ISessionStage> &sessionStage)
 {
-    CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(anrMtx_);
     sessionStage_ = sessionStage;
 }
@@ -62,13 +61,11 @@ void ANRHandler::SetLastProcessedEventStatus(bool status)
 
 void ANRHandler::UpdateLastProcessedEventId(int32_t eventId)
 {
-    CALL_DEBUG_ENTER;
     event_.lastEventId = eventId;
 }
 
 void ANRHandler::SetLastProcessedEventId(int32_t eventId, int64_t actionTime)
 {
-    CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(anrMtx_);
     if (event_.lastEventId > eventId) {
         WLOGFE("Event id %{public}d less then last processed lastEventId %{public}d", eventId, event_.lastEventId);
@@ -98,7 +95,6 @@ void ANRHandler::SetLastProcessedEventId(int32_t eventId, int64_t actionTime)
 
 int32_t ANRHandler::GetLastProcessedEventId()
 {
-    CALL_DEBUG_ENTER;
     if (event_.lastEventId == INVALID_OR_PROCESSED_ID
         || event_.lastEventId < event_.lastReportId) {
         WLOGFD("Invalid or processed, lastEventId:%{public}d, lastReportId:%{public}d",
@@ -120,6 +116,7 @@ void ANRHandler::MarkProcessed()
     WLOGFD("Processed eventId:%{public}d", eventId);
     if (sessionStage_ == nullptr) {
         WLOGFE("sessionStage is nullptr");
+        SetLastProcessedEventStatus(false);
         return;
     }
     if (WSError ret = sessionStage_->MarkProcessed(eventId); ret != WSError::WS_OK) {
@@ -130,8 +127,6 @@ void ANRHandler::MarkProcessed()
 
 void ANRHandler::SendEvent(int64_t delayTime)
 {
-    CALL_DEBUG_ENTER;
-    WLOGFD("Event delayTime:%{public}" PRId64, delayTime);
     SetLastProcessedEventStatus(true);
     if (eventHandler_ == nullptr) {
         WLOGFE("eventHandler is nullptr");
