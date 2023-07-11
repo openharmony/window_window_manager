@@ -106,7 +106,8 @@ void WindowManagerService::OnStart()
     AddSystemAbilityListener(RENDER_SERVICE);
     AddSystemAbilityListener(ABILITY_MGR_SERVICE_ID);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
-
+    sptr<WindowManagerService> wms = this;
+    wms->IncStrongRef(nullptr);
     if (!Publish(this)) {
         WLOGFE("Publish failed");
     }
