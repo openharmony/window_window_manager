@@ -46,7 +46,7 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
         WLOGFE("session stage is null!");
         return WSError::WS_ERROR_NULLPTR;
     }
-    DelayedSingleton<ANRHandler>::GetInstance()->SetSessionStage(sessionStage_);
+    DelayedSingleton<ANRHandler>::GetInstance()->SetSessionStage(pointerEvent->GetId(), sessionStage_);
     if (pointerEvent != nullptr) {
         WLOGFD("SetProcessedCallback enter");
         pointerEvent->SetProcessedCallback(dispatchCallback_);
@@ -64,7 +64,7 @@ WSError WindowEventChannel::TransferKeyEventForConsumed(
         WLOGFE("session stage is null!");
         return WSError::WS_ERROR_NULLPTR;
     }
-    DelayedSingleton<ANRHandler>::GetInstance()->SetSessionStage(sessionStage_);
+    DelayedSingleton<ANRHandler>::GetInstance()->SetSessionStage(keyEvent->GetId(), sessionStage_);
     if (keyEvent != nullptr) {
         WLOGFD("SetProcessedCallback enter");
         keyEvent->SetProcessedCallback(dispatchCallback_);

@@ -47,11 +47,11 @@ ANRHandler::ANRHandler()
 
 ANRHandler::~ANRHandler() {}
 
-void ANRHandler::SetSessionStage(const wptr<ISessionStage> &sessionStage)
+void ANRHandler::SetSessionStage(int32_t eventId, const wptr<ISessionStage> &sessionStage)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(anrMtx_);
-    sessionStage_ = sessionStage;
+    sessionStageMap[eventId] = sessionStage;
 }
 
 void ANRHandler::SetLastProcessedEventStatus(bool status)
@@ -118,15 +118,18 @@ void ANRHandler::MarkProcessed()
         return;
     }
     WLOGFD("Processed eventId:%{public}d", eventId);
-    if (sessionStage_ == nullptr) {
-        WLOGFE("sessionStage is nullptr");
-        SetLastProcessedEventStatus(false);
+    if (sessionStageMap_.find(eventId) == sessionStageMap_.end()) {
+        WLOGFE("sessionStage is not in sessionStageMap");
         return;
     }
-    if (WSError ret = sessionStage_->MarkProcessed(eventId); ret != WSError::WS_OK) {
+    if (sessionStageMap_[eventId] == nullptr) {
+        WLOGFE("sessionStage for eventId:%{public}d is nullptr", eventId);
+        return;
+    }
+    if (WSError ret = sessionStageMap_[eventId]->MarkProcessed(eventId); ret != WSError::WS_OK) {
         WLOGFE("Send to sceneBoard failed, ret:%{public}d", ret);
     }
-    SetLastProcessedEventStatus(false);
+    ClearExpiredEvents(eventId);
 }
 
 void ANRHandler::SendEvent(int64_t delayTime)
@@ -141,6 +144,19 @@ void ANRHandler::SendEvent(int64_t delayTime)
     std::function<void()> eventFunc = std::bind(&ANRHandler::MarkProcessed, this);
     if (!eventHandler_->PostHighPriorityTask(eventFunc, delayTime)) {
         WLOGFE("Send dispatch event failed");
+    }
+    SetLastProcessedEventStatus(false);
+}
+
+void ANRHandler::ClearExpiredEvents(int32_t eventId)
+{
+    CALL_DEBUG_ENTER;
+    for (auto iter = sessionStageMap_.begin(); iter != sessionStageMap_.end();) {
+        if (iter->first < eventId) {
+            sessionStageMap_.erase(iter++);
+        } else {
+            iter++;
+        }
     }
 }
 } // namespace Rosen
