@@ -1347,7 +1347,7 @@ WMError WindowSceneSessionImpl::SetSnapshotSkip(bool isSkip)
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::NotifyMemoryLevel(int32_t level) const
+WMError WindowSceneSessionImpl::NotifyMemoryLevel(int32_t level)
 {
     WLOGFD("id: %{public}u, notify memory level: %{public}d", GetWindowId(), level);
     if (uiContent_ == nullptr) {

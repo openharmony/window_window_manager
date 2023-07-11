@@ -55,7 +55,7 @@ public:
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
 
-    WMError NotifyMemoryLevel(int32_t level) const override;
+    WMError NotifyMemoryLevel(int32_t level) override;
 
     virtual WMError AddWindowFlag(WindowFlag flag) override;
     virtual WMError RemoveWindowFlag(WindowFlag flag) override;
