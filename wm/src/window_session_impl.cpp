@@ -293,6 +293,26 @@ WSError WindowSessionImpl::SetActive(bool active)
     return WSError::WS_OK;
 }
 
+WSError WindowSessionImpl::UpdateViewConfig(const ViewPortConfig& config, SizeChangeReason reason)
+{
+    auto wmReason = static_cast<WindowSizeChangeReason>(reason);
+    Rect wmRect = { config.posX_, config.posY_, config.width_, config.height_ };
+    property_->SetWindowRect(wmRect);
+    NotifySizeChange(wmRect, wmReason);
+
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (uiContent_ == nullptr) {
+        WLOGFE("uiContent_ is null!");
+        return WSError::WS_DO_NOTHING;
+    }
+    Ace::ViewportConfig aceConfig;
+    aceConfig.SetSize(config.width_, config.height_);
+    aceConfig.SetPosition(config.posX_, config.posY_);
+    aceConfig.SetDensity(config.density_);
+    uiContent_->UpdateViewportConfig(aceConfig, wmReason);
+    return WSError::WS_OK;
+}
+
 WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
     WLOGFI("update rect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u", rect.posX_, rect.posY_,
