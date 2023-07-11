@@ -792,13 +792,12 @@ void JsSceneSession::TerminateSessionNew(const SessionInfo& info, bool needStart
                 WLOGFE("[NAPI]jsCallBack is nullptr");
                 return;
             }
-            NativeValue* jsSessionInfo = CreateJsSessionInfo(engine, info);
             NativeValue* jsNeedStartCaller = CreateJsValue(engine, needStartCaller);
             if (jsSessionInfo == nullptr) {
                 WLOGFE("[NAPI]this target session info is nullptr");
                 return;
             }
-            NativeValue* argv[] = { jsSessionInfo, jsNeedStartCaller };
+            NativeValue* argv[] = { jsNeedStartCaller };
             engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
         });
 
