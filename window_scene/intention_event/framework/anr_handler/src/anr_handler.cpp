@@ -55,6 +55,7 @@ void ANRHandler::SetSessionStage(const wptr<ISessionStage> &sessionStage)
 
 void ANRHandler::SetLastProcessedEventStatus(bool status)
 {
+    CALL_DEBUG_ENTER;
     event_.sendStatus = status;
 }
 
@@ -115,6 +116,7 @@ void ANRHandler::MarkProcessed()
     WLOGFD("Processed eventId:%{public}d", eventId);
     if (sessionStage_ == nullptr) {
         WLOGFE("sessionStage is nullptr");
+        SetLastProcessedEventStatus(false);
         return;
     }
     if (WSError ret = sessionStage_->MarkProcessed(eventId); ret != WSError::WS_OK) {

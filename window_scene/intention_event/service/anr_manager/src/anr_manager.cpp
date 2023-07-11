@@ -143,6 +143,7 @@ void ANRManager::RemovePersistentId(int32_t persistentId)
 {
     if (applicationMap_.find(persistentId) == applicationMap_.end()) {
         WLOGFD("No persistentId:%{public}d in applicationMap", persistentId);
+        return;
     }
     WLOGFD("Remove persistentId:%{public}d -> applicationPid:%{public}d",
         persistentId, applicationMap_[persistentId]);
