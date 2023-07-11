@@ -92,6 +92,7 @@ public:
     WMError SetTransform(const Transform& trans) override;
     const Transform& GetTransform() const override;
     WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) override;
+    WMError SetAlpha(float alpha) override;
 protected:
     void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();
