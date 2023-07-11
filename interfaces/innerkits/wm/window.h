@@ -1349,6 +1349,11 @@ public:
      * @param func Function to notify transfer component data.
      */
     virtual void RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func) {}
+    /**
+     * @brief Perform back event.
+     *
+     */
+    virtual void PerformBack() {}
 };
 }
 }
