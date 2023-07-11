@@ -661,8 +661,8 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
             }
             dialog->NotifyDestroy();
             dialog->Disconnect();
-            sceneSessionMap_.erase(dialog->GetPersistentId());
             NotifyWindowInfoChange(dialog->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
+            sceneSessionMap_.erase(dialog->GetPersistentId());
         }
         return WSError::WS_OK;
     }
@@ -692,8 +692,8 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
             return WSError::WS_ERROR_NULLPTR;
         }
         AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
-        sceneSessionMap_.erase(persistentId);
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
+        sceneSessionMap_.erase(persistentId);
         return WSError::WS_OK;
     };
 
@@ -774,8 +774,8 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const uint64_t&
             sceneSession->NotifyDestroy();
         }
         ret = sceneSession->Disconnect();
-        sceneSessionMap_.erase(persistentId);
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
+        sceneSessionMap_.erase(persistentId);
         return ret;
     };
 
@@ -1380,6 +1380,22 @@ WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject> &token,
         }
     }
     return WSError::WS_ERROR_SET_SESSION_ICON_FAILED;
+}
+
+WSError SceneSessionManager::TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller)
+{
+    WLOGFI("run SetSessionIcon");
+    if (info == nullptr) {
+        WLOGFI("sessionInfo is nullptr.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    sptr<SceneSession> sceneSession = FindSessionByToken(info->sessionToken);
+    if (sceneSession == nullptr) {
+        WLOGFI("fail to find session by token.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    const WSError& errCode = sceneSession->TerminateSessionNew(info, needStartCaller);
+    return errCode;
 }
 
 WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionListener> sessionListener)

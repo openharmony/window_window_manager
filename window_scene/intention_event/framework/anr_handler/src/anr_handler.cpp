@@ -51,7 +51,7 @@ void ANRHandler::SetSessionStage(int32_t eventId, const wptr<ISessionStage> &ses
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(anrMtx_);
-    sessionStageMap[eventId] = sessionStage;
+    sessionStageMap_[eventId] = sessionStage;
 }
 
 void ANRHandler::SetLastProcessedEventStatus(bool status)

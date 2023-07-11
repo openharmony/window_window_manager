@@ -297,27 +297,29 @@ HWTEST_F(WindowSessionTest, PendingSessionActivation01, Function | SmallTest | L
 }
 
 /**
- * @tc.name: TerminateSession01
- * @tc.desc: check func TerminateSession
+ * @tc.name: TerminateSessionNew01
+ * @tc.desc: check func TerminateSessionNew
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, TerminateSession01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, TerminateSessionNew01, Function | SmallTest | Level2)
 {
     int resultValue = 0;
-    NotifyTerminateSessionFunc callback = [&resultValue](const SessionInfo& info) {
+    NotifyTerminateSessionFuncNew callback = [&resultValue](const SessionInfo& info, bool needStartCaller) {
         resultValue = 1;
     };
 
+    bool needStartCaller = false;
     sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
-    session_->terminateSessionFunc_ = nullptr;
-    session_->TerminateSession(info);
+    session_->terminateSessionFuncNew_ = nullptr;
+    session_->TerminateSessionNew(info, needStartCaller);
     ASSERT_EQ(resultValue, 0);
 
-    session_->SetTerminateSessionListener(callback);
-    session_->TerminateSession(info);
+    needStartCaller = true;
+    session_->SetTerminateSessionListenerNew(callback);
+    session_->TerminateSessionNew(info, needStartCaller);
     ASSERT_EQ(resultValue, 1);
 
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->TerminateSession(nullptr));
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->TerminateSessionNew(nullptr, needStartCaller));
 }
 
 /**
