@@ -41,6 +41,7 @@ public:
         TRANS_ID_NOTIFY_TOUCH_DIALOG_TARGET,
         TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA,
         TRANS_ID_NOTIFY_OCCUPIED_AREA_CHANGE_INFO,
+        TRANS_ID_NOTIFY_VIEW_PORT_CONFIG_CHANGE,
     };
 
     virtual void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
@@ -53,6 +54,7 @@ public:
     }
 
     virtual WSError SetActive(bool active) = 0;
+    virtual WSError UpdateViewConfig(const ViewPortConfig& cofig, SizeChangeReason reason) = 0;
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) = 0;
     virtual WSError HandleBackEvent() = 0;
     virtual WSError MarkProcessed(int32_t eventId) = 0;
