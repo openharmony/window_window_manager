@@ -1265,7 +1265,7 @@ public:
      * @param level memory level
      * @return the error code of window
      */
-    virtual WMError NotifyMemoryLevel(int32_t level) const { return WMError::WM_OK; }
+    virtual WMError NotifyMemoryLevel(int32_t level) { return WMError::WM_OK; }
 
     /**
      * @brief Update configuration for all windows

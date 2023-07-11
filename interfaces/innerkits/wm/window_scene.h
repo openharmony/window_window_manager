@@ -156,7 +156,7 @@ public:
      * @param level memory level
      * @return the error code of window
      */
-    WMError NotifyMemoryLevel(int32_t level) const;
+    WMError NotifyMemoryLevel(int32_t level);
 
 public:
     static const DisplayId DEFAULT_DISPLAY_ID = 0;
