@@ -119,7 +119,7 @@ void ANRHandler::MarkProcessed()
     }
     WLOGFD("Processed eventId:%{public}d", eventId);
     if (sessionStageMap_.find(eventId) == sessionStageMap_.end()) {
-        WLOGFE("sessionStage is not in sessionStageMap");
+        WLOGFE("sessionStage for eventId:%{public}d is not in sessionStageMap", eventId);
         return;
     }
     if (sessionStageMap_[eventId] == nullptr) {
