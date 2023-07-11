@@ -182,6 +182,10 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         } else if (!WindowHelper::IsSubWindow(GetType())) {
             return WMError::WM_ERROR_INVALID_TYPE;
         }
+        if (GetType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+            WLOGFI("Create input method and sleep 3s");
+            sleep(3); // sleep 3s
+        }
         ret = CreateAndConnectSpecificSession();
     }
     if (ret == WMError::WM_OK) {
