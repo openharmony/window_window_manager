@@ -985,11 +985,12 @@ WindowMode Session::GetWindowMode()
 
 void Session::SetZOrder(uint32_t zOrder)
 {
-    if (property_ == nullptr) {
-        WLOGFW("null property.");
-        return;
-    }
-    property_->SetZOrder(zOrder);
+    zOrder_ = zOrder;
+}
+
+uint32_t Session::GetZOrder()
+{
+    return zOrder_;
 }
 
 WSError Session::UpdateSnapshot()
