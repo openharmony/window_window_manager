@@ -1523,5 +1523,20 @@ WMError WindowSceneSessionImpl::UpdateAnimationFlagProperty(bool withAnimation)
     // when show(true) with default, hide() with None, to adjust animationFlag to disabled default animation
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
 }
+
+WMError WindowSceneSessionImpl::SetAlpha(float alpha)
+{
+    WLOGI("Window %{public}" PRIu64" alpha %{public}f", property_->GetPersistentId(), alpha);
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("set alpha permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    surfaceNode_->SetAlpha(alpha);
+    RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
