@@ -25,10 +25,13 @@ constexpr std::vector<int>::size_type LEFT = 0;
 constexpr std::vector<int>::size_type TOP = 1;
 constexpr std::vector<int>::size_type RIGHT = 2;
 constexpr std::vector<int>::size_type BOTTOM = 3;
-constexpr char CURVED_SCREEN_BOUNDARY[] = "curvedScreenBoundary";
-constexpr uint32_t HALF_SCREEN = 2;
+constexpr uint8_t HALF_SCREEN = 2;
+constexpr uint8_t QUARTER_SCREEN = 4;
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenCutoutController" };
 }
+
+uint32_t ScreenCutoutController::defaultDeviceRotation_ = 0;
+std::map<DeviceRotationValue, Rotation> ScreenCutoutController::deviceToDisplayRotationMap_;
 
 sptr<CutoutInfo> ScreenCutoutController::GetScreenCutoutInfo()
 {
@@ -76,15 +79,15 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
         }
         case Rotation::ROTATION_180: {
             for (DMRect rect : displayBoundaryRects) {
-                finalVector.emplace_back(DMRect {displayWidth - rect.posX_ - rect.width_,
-                    displayHeight - rect.posY_ - rect.height_, rect.width_, rect.height_});
+                finalVector.emplace_back(DMRect{ displayWidth - rect.posX_ - rect.width_,
+                    displayHeight - rect.posY_ - rect.height_, rect.width_, rect.height_ });
             }
             break;
         }
         case Rotation::ROTATION_270: {
             for (DMRect rect : displayBoundaryRects) {
                 finalVector.emplace_back(
-                    DMRect{ rect.posY_, displayWidth - rect.posX_ - rect.width_, rect.height_, rect.width_});
+                    DMRect{ rect.posY_, displayWidth - rect.posX_ - rect.width_, rect.height_, rect.width_ });
             }
             break;
         }
@@ -127,8 +130,7 @@ void ScreenCutoutController::CalcWaterfallRects()
         return;
     }
 
-    auto initConfig = ScreenSceneConfig::GetIntNumbersConfig();
-    std::vector<int> numberVec = initConfig[CURVED_SCREEN_BOUNDARY];
+    std::vector<int> numberVec = ScreenSceneConfig::GetCurvedScreenBoundaryConfig();
     if (numberVec.empty()) {
         WLOGFI("curved screen boundary is empty");
         waterfallDisplayAreaRects_ = emptyRects;
@@ -161,9 +163,8 @@ void ScreenCutoutController::CalcWaterfallRects()
         return;
     }
 
-    CalcWaterfallRectsByRotation(
-        ScreenSessionManager::GetInstance().GetDefaultDisplayInfo()->GetRotation(), displayHeight,
-        displayWidth, realNumVec);
+    CalcWaterfallRectsByRotation(ScreenSessionManager::GetInstance().GetDefaultDisplayInfo()->GetRotation(),
+        displayHeight, displayWidth, realNumVec);
 }
 
 void ScreenCutoutController::CalcWaterfallRectsByRotation(Rotation rotation, uint32_t displayHeight,
@@ -177,7 +178,7 @@ void ScreenCutoutController::CalcWaterfallRectsByRotation(Rotation rotation, uin
                 CreateWaterfallRect(displayWidth - realNumVec[RIGHT], 0, realNumVec[RIGHT], displayHeight);
             DMRect bottomRect =
                 CreateWaterfallRect(0, displayHeight - realNumVec[BOTTOM], displayWidth, realNumVec[BOTTOM]);
-            waterfallDisplayAreaRects_ = WaterfallDisplayAreaRects {leftRect, topRect, rightRect, bottomRect};
+            waterfallDisplayAreaRects_ = WaterfallDisplayAreaRects{ leftRect, topRect, rightRect, bottomRect };
             return;
         }
         case Rotation::ROTATION_90: {
@@ -186,7 +187,7 @@ void ScreenCutoutController::CalcWaterfallRectsByRotation(Rotation rotation, uin
             DMRect rightRect = CreateWaterfallRect(displayHeight - realNumVec[TOP], 0, realNumVec[TOP], displayWidth);
             DMRect bottomRect =
                 CreateWaterfallRect(0, displayWidth - realNumVec[RIGHT], displayHeight, realNumVec[RIGHT]);
-            waterfallDisplayAreaRects_ = WaterfallDisplayAreaRects {leftRect, topRect, rightRect, bottomRect};
+            waterfallDisplayAreaRects_ = WaterfallDisplayAreaRects{ leftRect, topRect, rightRect, bottomRect };
             return;
         }
         case Rotation::ROTATION_180: {
@@ -194,7 +195,7 @@ void ScreenCutoutController::CalcWaterfallRectsByRotation(Rotation rotation, uin
             DMRect topRect = CreateWaterfallRect(0, 0, realNumVec[BOTTOM], displayWidth);
             DMRect rightRect = CreateWaterfallRect(displayWidth - realNumVec[LEFT], 0, realNumVec[LEFT], displayHeight);
             DMRect bottomRect = CreateWaterfallRect(0, displayHeight - realNumVec[TOP], displayWidth, realNumVec[TOP]);
-            waterfallDisplayAreaRects_ = WaterfallDisplayAreaRects {leftRect, topRect, rightRect, bottomRect};
+            waterfallDisplayAreaRects_ = WaterfallDisplayAreaRects{ leftRect, topRect, rightRect, bottomRect };
             return;
         }
         case Rotation::ROTATION_270: {
@@ -204,7 +205,7 @@ void ScreenCutoutController::CalcWaterfallRectsByRotation(Rotation rotation, uin
                 CreateWaterfallRect(displayHeight - realNumVec[BOTTOM], 0, realNumVec[BOTTOM], displayWidth);
             DMRect bottomRect =
                 CreateWaterfallRect(0, displayWidth - realNumVec[LEFT], displayHeight, realNumVec[LEFT]);
-            waterfallDisplayAreaRects_ = WaterfallDisplayAreaRects {leftRect, topRect, rightRect, bottomRect};
+            waterfallDisplayAreaRects_ = WaterfallDisplayAreaRects{ leftRect, topRect, rightRect, bottomRect };
             return;
         }
         default: {
@@ -215,8 +216,105 @@ void ScreenCutoutController::CalcWaterfallRectsByRotation(Rotation rotation, uin
 DMRect ScreenCutoutController::CreateWaterfallRect(uint32_t left, uint32_t top, uint32_t width, uint32_t height)
 {
     if (width == 0 || height == 0) {
-        return DMRect {0, 0, 0, 0};
+        return DMRect{ 0, 0, 0, 0 };
     }
     return DMRect {left, top, width, height};
+}
+
+RectF ScreenCutoutController::CalculateCurvedCompression(const ScreenProperty& screenProperty)
+{
+    WLOGFI("calculate curved compression");
+    RectF finalRect = RectF(0, 0, 0, 0);
+    sptr<DisplayInfo> displayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+    uint32_t iCurvedSize = ScreenSceneConfig::GetCurvedCompressionAreaInLandscape();
+    if (!displayInfo || iCurvedSize == 0) {
+        WLOGFE("display Info. invalid or curved area config value is zero");
+        return finalRect;
+    }
+
+    uint32_t screenWidth = displayInfo->GetWidth();
+    uint32_t screenHeight = displayInfo->GetHeight();
+    uint32_t realWidth = static_cast<uint32_t>(iCurvedSize * screenProperty.GetVirtualPixelRatio());
+    if (realWidth >= screenHeight / QUARTER_SCREEN || realWidth >= screenWidth / QUARTER_SCREEN) {
+        WLOGFW("curved area is beyond the edge limit");
+        return finalRect;
+    }
+
+    Rotation rotation = displayInfo->GetRotation();
+    WLOGFI("realWidth : %{public}u rotation : %{public}u", realWidth, rotation);
+    bool isLandscape = screenHeight < screenWidth ? true : false;
+    uint32_t totalCompressedSize = realWidth * HALF_SCREEN; // *2 for both sides.
+    uint32_t displayHeightAfter =
+        isLandscape ? screenHeight - totalCompressedSize : screenWidth - totalCompressedSize;
+    finalRect.left_ = screenProperty.GetBounds().rect_.GetLeft();
+    finalRect.top_ = screenProperty.GetBounds().rect_.GetTop();
+    if (!IsDisplayRotationHorizontal(rotation)) {
+        finalRect.width_ = displayHeightAfter;
+        finalRect.height_ = screenProperty.GetBounds().rect_.GetHeight();
+        offsetY_ = realWidth;
+        SetWaterfallDisplayCompressionStatus(true);
+    } else {
+        if (GetWaterfallDisplayCompressionStatus()) {
+            displayHeightAfter =
+                isLandscape ? screenHeight + totalCompressedSize : screenWidth + totalCompressedSize;
+        }
+        finalRect.width_ = screenProperty.GetBounds().rect_.GetWidth();
+        finalRect.height_ = displayHeightAfter;
+        SetWaterfallDisplayCompressionStatus(false);
+    }
+    return finalRect;
+}
+
+bool ScreenCutoutController::IsDisplayRotationHorizontal(Rotation rotation)
+{
+    return (rotation == ConvertDeviceToDisplayRotation(DeviceRotationValue::ROTATION_LANDSCAPE)) ||
+        (rotation == ConvertDeviceToDisplayRotation(DeviceRotationValue::ROTATION_LANDSCAPE_INVERTED));
+}
+
+Rotation ScreenCutoutController::ConvertDeviceToDisplayRotation(DeviceRotationValue deviceRotation)
+{
+    if (deviceRotation == DeviceRotationValue::INVALID) {
+        return GetCurrentDisplayRotation();
+    }
+    if (deviceToDisplayRotationMap_.empty()) {
+        ProcessRotationMapping();
+    }
+    return deviceToDisplayRotationMap_.at(deviceRotation);
+}
+
+Rotation ScreenCutoutController::GetCurrentDisplayRotation()
+{
+    sptr<DisplayInfo> displayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+    if (!displayInfo) {
+        WLOGFE("Cannot get default display info");
+        return defaultDeviceRotation_ == 0 ? ConvertDeviceToDisplayRotation(DeviceRotationValue::ROTATION_PORTRAIT) :
+            ConvertDeviceToDisplayRotation(DeviceRotationValue::ROTATION_LANDSCAPE);
+    }
+    return displayInfo->GetRotation();
+}
+
+void ScreenCutoutController::ProcessRotationMapping()
+{
+    sptr<DisplayInfo> displayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+    // 0 means PORTRAIT, 1 means LANDSCAPE.
+    defaultDeviceRotation_ =
+        (!displayInfo || (displayInfo && (displayInfo->GetWidth() < displayInfo->GetHeight()))) ? 0 : 1;
+    if (deviceToDisplayRotationMap_.empty()) {
+        deviceToDisplayRotationMap_ = {
+            {DeviceRotationValue::ROTATION_PORTRAIT,
+                defaultDeviceRotation_ == 0 ? Rotation::ROTATION_0 : Rotation::ROTATION_90},
+            {DeviceRotationValue::ROTATION_LANDSCAPE,
+                defaultDeviceRotation_ == 1 ? Rotation::ROTATION_0 : Rotation::ROTATION_90},
+            {DeviceRotationValue::ROTATION_PORTRAIT_INVERTED,
+                defaultDeviceRotation_ == 0 ? Rotation::ROTATION_180 : Rotation::ROTATION_270},
+            {DeviceRotationValue::ROTATION_LANDSCAPE_INVERTED,
+                defaultDeviceRotation_ == 1 ? Rotation::ROTATION_180 : Rotation::ROTATION_270},
+        };
+    }
+}
+
+uint32_t ScreenCutoutController::GetOffsetY()
+{
+    return offsetY_;
 }
 } // namespace OHOS::Rosen

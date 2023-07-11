@@ -19,21 +19,39 @@
 #include <refbase.h>
 
 #include "cutout_info.h"
+#include "session/screen/include/screen_property.h"
 
 namespace OHOS::Rosen {
+enum class DeviceRotationValue: int32_t {
+    INVALID = -1,
+    ROTATION_PORTRAIT = 0,
+    ROTATION_LANDSCAPE,
+    ROTATION_PORTRAIT_INVERTED,
+    ROTATION_LANDSCAPE_INVERTED,
+};
 class ScreenCutoutController : public RefBase {
 public:
     ScreenCutoutController() {};
     sptr<CutoutInfo> GetScreenCutoutInfo();
+    RectF CalculateCurvedCompression(const ScreenProperty& screenProperty);
+    uint32_t GetOffsetY();
 
 private:
     void CalcWaterfallRects();
+    void ProcessRotationMapping();
     void CalcWaterfallRectsByRotation(Rotation rotation, uint32_t displayHeight, uint32_t displayWidth,
         std::vector<uint32_t> realNumVec);
     void CheckBoundaryRects(std::vector<DMRect>& boundaryRects, sptr<DisplayInfo> displayInfo);
     void ConvertBoundaryRectsByRotation(std::vector<DMRect>& boundaryRects);
+    bool IsDisplayRotationHorizontal(Rotation rotation);
     DMRect CreateWaterfallRect(uint32_t left, uint32_t top, uint32_t width, uint32_t height);
+    Rotation ConvertDeviceToDisplayRotation(DeviceRotationValue deviceRotation);
+    Rotation GetCurrentDisplayRotation();
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(bool, WaterfallDisplayCompressionStatus, waterfallDisplayCompressionStatus, false);
 
+    static uint32_t defaultDeviceRotation_;
+    static std::map<DeviceRotationValue, Rotation> deviceToDisplayRotationMap_;
+    uint32_t offsetY_;
     WaterfallDisplayAreaRects waterfallDisplayAreaRects_ = {};
 };
 } // namespace OHOS::Rosen

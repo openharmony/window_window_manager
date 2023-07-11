@@ -37,6 +37,9 @@ public:
     static std::vector<DMRect> GetCutoutBoundaryRect();
     static void SetCutoutSvgPath(const std::string& svgPath);
     static bool IsWaterfallDisplay();
+    static void SetCurvedCompressionAreaInLandscape();
+    static std::vector<int> GetCurvedScreenBoundaryConfig();
+    static uint32_t GetCurvedCompressionAreaInLandscape();
 
 private:
     static std::map<std::string, bool> enableConfig_;
@@ -44,6 +47,8 @@ private:
     static std::map<std::string, std::string> stringConfig_;
     static std::vector<DMRect> cutoutBoundaryRect_;
     static bool isWaterfallDisplay_;
+    static bool isScreenCompressionEnableInLandscape_;
+    static uint32_t curvedAreaInLandscape_;
 
     static bool IsValidNode(const xmlNode& currNode);
     static void ReadEnableConfigInfo(const xmlNodePtr& currNode);
