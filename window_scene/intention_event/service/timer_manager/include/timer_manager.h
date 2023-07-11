@@ -42,7 +42,6 @@ public:
     void Stop();
     int32_t AddTimer(int32_t intervalMs, std::function<void()> callback);
     int32_t RemoveTimer(int32_t timerId);
-    bool IsExist(int32_t timerId);
     int32_t CalcNextDelay();
     void ProcessTimers();
 
@@ -59,7 +58,6 @@ private:
     int32_t TakeNextTimerId();
     int32_t AddTimerInternal(int32_t intervalMs, std::function<void()> callback);
     int32_t RemoveTimerInternal(int32_t timerId);
-    bool IsExistInternal(int32_t timerId);
     void InsertTimerInternal(std::unique_ptr<TimerItem>& timer);
     int32_t CalcNextDelayInternal();
     void ProcessTimersInternal();

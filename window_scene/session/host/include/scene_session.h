@@ -34,7 +34,7 @@ using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
 using SetWindowPatternOpacityFunc = std::function<void(float opacity)>;
-using NotityIsCustomAnimationPlayingCallback = std::function<void(bool isFinish)>;
+using NotifyIsCustomAnimationPlayingCallback = std::function<void(bool isFinish)>;
 using NotifySystemBarPropertyChangeFunc = std::function<void(
     const std::unordered_map<WindowType, SystemBarProperty>& propertyMap)>;
 using NotifyNeedAvoidFunc = std::function<void(bool status)>;
@@ -57,7 +57,7 @@ public:
         NotifySystemBarPropertyChangeFunc OnSystemBarPropertyChange_;
         NotifyNeedAvoidFunc OnNeedAvoid_;
         NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
-        NotityIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
+        NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
     };
 
     // func for change window scene pattern property
