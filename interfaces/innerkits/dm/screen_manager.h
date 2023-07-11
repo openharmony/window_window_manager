@@ -66,7 +66,7 @@ public:
          *
          * @param info Change info of screen mirror.
          */
-        virtual void OnMirrorChange(const ChangeInfo& info) {}
+        virtual void OnMirrorChange([[maybe_unused]]const ChangeInfo& info) {}
     };
 
     /**

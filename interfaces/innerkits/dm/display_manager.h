@@ -55,7 +55,7 @@ public:
          *
          * @param info Screenshot info.
          */
-        virtual void OnScreenshot(const ScreenshotInfo info) {}
+        virtual void OnScreenshot([[maybe_unused]]const ScreenshotInfo info) {}
     };
 
     class IPrivateWindowListener : public virtual RefBase {
@@ -65,7 +65,7 @@ public:
          *
          * @param hasPrivate True means the display has private window, false means the opposite.
          */
-        virtual void OnPrivateWindow(bool hasPrivate) {};
+        virtual void OnPrivateWindow([[maybe_unused]]bool hasPrivate) {}
     };
 
     /**
