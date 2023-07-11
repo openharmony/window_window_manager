@@ -601,5 +601,9 @@ sptr<ScreenGroupInfo> ScreenSessionGroup::ConvertToScreenGroupInfo() const
     return screenGroupInfo;
 }
 
-
+void ScreenSession::SetDisplayBoundary(const RectF& rect, const uint32_t& offsetY)
+{
+    property_.SetOffsetY(offsetY);
+    property_.SetBounds(RRect(rect, 0.0f, 0.0f));
+}
 } // namespace OHOS::Rosen

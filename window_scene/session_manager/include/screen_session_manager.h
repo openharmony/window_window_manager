@@ -149,6 +149,7 @@ public:
         const std::vector<sptr<ScreenInfo>>& screenInfos, ScreenGroupChangeEvent groupEvent);
     void OnScreenshot(sptr<ScreenshotInfo> info);
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
+    void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
 
 protected:
     ScreenSessionManager();
