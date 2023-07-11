@@ -120,6 +120,7 @@ void ANRHandler::MarkProcessed()
     WLOGFD("Processed eventId:%{public}d", eventId);
     if (sessionStage_ == nullptr) {
         WLOGFE("sessionStage is nullptr");
+        SetLastProcessedEventStatus(false);
         return;
     }
     if (WSError ret = sessionStage_->MarkProcessed(eventId); ret != WSError::WS_OK) {
