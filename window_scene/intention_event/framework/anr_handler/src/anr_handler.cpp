@@ -143,7 +143,7 @@ void ANRHandler::SendEvent(int64_t delayTime)
 void ANRHandler::ClearExpiredEvents(int32_t eventId)
 {
     for (auto iter = sessionStageMap_.begin(); iter != sessionStageMap_.end();) {
-        if (iter->first < eventId) {
+        if (iter->first <= eventId) {
             sessionStageMap_.erase(iter++);
         } else {
             iter++;
