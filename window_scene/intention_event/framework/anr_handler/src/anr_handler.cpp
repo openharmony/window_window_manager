@@ -55,7 +55,6 @@ void ANRHandler::SetSessionStage(int32_t eventId, const wptr<ISessionStage> &ses
 
 void ANRHandler::SetLastProcessedEventStatus(bool status)
 {
-    CALL_DEBUG_ENTER;
     event_.sendStatus = status;
 }
 
@@ -108,7 +107,6 @@ int32_t ANRHandler::GetLastProcessedEventId()
 
 void ANRHandler::MarkProcessed()
 {
-    CALL_DEBUG_ENTER;
     int32_t eventId = GetLastProcessedEventId();
     if (eventId == INVALID_OR_PROCESSED_ID) {
         return;
@@ -126,6 +124,7 @@ void ANRHandler::MarkProcessed()
         WLOGFE("Send to sceneBoard failed, ret:%{public}d", ret);
     }
     ClearExpiredEvents(eventId);
+    SetLastProcessedEventStatus(false);
 }
 
 void ANRHandler::SendEvent(int64_t delayTime)
@@ -139,12 +138,10 @@ void ANRHandler::SendEvent(int64_t delayTime)
     if (!eventHandler_->PostHighPriorityTask(eventFunc, delayTime)) {
         WLOGFE("Send dispatch event failed");
     }
-    SetLastProcessedEventStatus(false);
 }
 
 void ANRHandler::ClearExpiredEvents(int32_t eventId)
 {
-    CALL_DEBUG_ENTER;
     for (auto iter = sessionStageMap_.begin(); iter != sessionStageMap_.end();) {
         if (iter->first < eventId) {
             sessionStageMap_.erase(iter++);
