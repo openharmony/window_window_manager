@@ -793,8 +793,8 @@ void JsSceneSession::TerminateSessionNew(const SessionInfo& info, bool needStart
                 return;
             }
             NativeValue* jsNeedStartCaller = CreateJsValue(engine, needStartCaller);
-            if (jsSessionInfo == nullptr) {
-                WLOGFE("[NAPI]this target session info is nullptr");
+            if (jsNeedStartCaller == nullptr) {
+                WLOGFE("[NAPI]this target jsNeedStartCaller is nullptr");
                 return;
             }
             NativeValue* argv[] = { jsNeedStartCaller };
