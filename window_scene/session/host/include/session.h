@@ -180,6 +180,7 @@ public:
     sptr<IRemoteObject> GetAbilityToken() const;
     WindowMode GetWindowMode();
     void SetZOrder(uint32_t zOrder);
+    uint32_t GetZOrder();
     WSError UpdateSnapshot();
     WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
@@ -242,6 +243,7 @@ private:
     static std::set<uint32_t> persistIdSet_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_ = nullptr;
     SessionState state_ = SessionState::STATE_DISCONNECT;
+    uint32_t zOrder_ = 0;
 
     std::recursive_mutex mutex_;
     std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;
