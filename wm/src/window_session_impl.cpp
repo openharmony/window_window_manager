@@ -15,6 +15,7 @@
 
 #include "window_session_impl.h"
 
+#include <cstdlib>
 #include <common/rs_common_def.h>
 #include <ipc_skeleton.h>
 #include <transaction/rs_interfaces.h>
@@ -321,6 +322,15 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     // delete after replace ws_common.h with wm_common.h
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
     Rect wmRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
+    if (!GetRect().IsUninitializedRect()) {
+        // 50 session动画阈值
+        int widthRange = 50;
+        int heightRange = 50;
+        if (std::abs((int)(GetRect().width_) - (int)(wmRect.width_)) > widthRange ||
+            std::abs((int)(GetRect().height_) - (int)(wmRect.height_)) > heightRange) {
+            wmReason = WindowSizeChangeReason::MAXIMIZE;
+        }
+    }
     property_->SetWindowRect(wmRect);
     NotifySizeChange(wmRect, wmReason);
     UpdateViewportConfig(wmRect, wmReason);
