@@ -67,6 +67,7 @@ ohos_shared_library("libwindow_extension") {
     "hitrace:hitrace_meter",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "napi:ace_napi",
   ]
 
   part_name = "window_manager"
@@ -97,6 +98,7 @@ ohos_shared_library("window_extension_module") {
     "ability_runtime:abilitykit_native",
     "common_event_service:cesfwk_innerkits",
     "hilog:libhilog",
+    "napi:ace_napi",
   ]
   relative_install_dir = "extensionability/"
   subsystem_name = "window"
