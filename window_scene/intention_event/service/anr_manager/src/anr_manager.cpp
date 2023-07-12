@@ -129,7 +129,6 @@ int32_t ANRManager::GetPidByPersistentId(int32_t persistentId)
 
 void ANRManager::RemoveTimers(int32_t persistentId)
 {
-    CALL_DEBUG_ENTER;
     std::vector<int32_t> timerIds = eventStage_.GetTimerIds(persistentId);
     for (int32_t item : timerIds) {
         if (item != -1) {
