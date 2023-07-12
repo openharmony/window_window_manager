@@ -52,7 +52,7 @@ ohos_shared_library("libwindow_extension_client") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:ability_manager",
-    "graphic_standard:librender_service_client",
+    "graphic_2d:librender_service_client",
     "hitrace:hitrace_meter",
     "input:libmmi-client",
     "ipc:ipc_single",

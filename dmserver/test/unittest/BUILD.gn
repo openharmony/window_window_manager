@@ -73,7 +73,7 @@ ohos_unittest("dmserver_display_manager_proxy_test") {
 
   deps = [ ":dmserver_unittest_common" ]
 
-  external_deps = [ "graphic_standard:surface" ]
+  external_deps = [ "graphic_2d:surface" ]
 }
 
 ohos_unittest("dmserver_screen_rotation_controller_test") {
