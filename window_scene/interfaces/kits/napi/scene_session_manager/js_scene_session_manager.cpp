@@ -36,6 +36,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSessionManager" };
 const std::string CREATE_SPECIFIC_SCENE_CB = "createSpecificSession";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
+const std::string OUTSIDE_DOWN_EVENT_CB = "outsideDownEvent";
 constexpr int32_t STATE_ABNORMALLY = static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY);
 } // namespace
 
@@ -89,6 +90,7 @@ JsSceneSessionManager::JsSceneSessionManager(NativeEngine& engine) : engine_(eng
         { CREATE_SPECIFIC_SCENE_CB, &JsSceneSessionManager::ProcessCreateSpecificSessionRegister },
         { GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
             &JsSceneSessionManager::ProcessGestureNavigationEnabledChangeListener },
+        { OUTSIDE_DOWN_EVENT_CB, &JsSceneSessionManager::ProcessOutsideDownEvent },
     };
 }
 
@@ -129,7 +131,6 @@ void JsSceneSessionManager::OnCreateSpecificSession(const sptr<SceneSession>& sc
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-
 void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable)
 {
     WLOGFI("[NAPI]OnGestureNavigationEnabledUpdate");
@@ -151,6 +152,36 @@ void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable)
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
+void JsSceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
+{
+    WLOGFI("[NAPI]OnOutsideDownEvent");
+    auto iter = jsCbMap_.find(OUTSIDE_DOWN_EVENT_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [this, x, y, jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            NativeValue* objValue = engine.CreateObject();
+            NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
+            if (object == nullptr) {
+                WLOGFE("[NAPI]Object is null!");
+                return;
+            }
+
+            object->SetProperty("x", CreateJsValue(engine_, x));
+            object->SetProperty("y", CreateJsValue(engine_, y));
+            NativeValue* argv[] = { objValue };
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSessionManager::OnOutsideDownEvent", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
 void JsSceneSessionManager::ProcessCreateSpecificSessionRegister()
 {
     NotifyCreateSpecificSessionFunc func = [this](const sptr<SceneSession>& session) {
@@ -167,6 +198,15 @@ void JsSceneSessionManager::ProcessGestureNavigationEnabledChangeListener()
         this->OnGestureNavigationEnabledUpdate(enable);
     };
     SceneSessionManager::GetInstance().SetGestureNavigationEnabledChangeListener(func);
+}
+
+void JsSceneSessionManager::ProcessOutsideDownEvent()
+{
+    ProcessOutsideDownEventFunc func = [this](int32_t x, int32_t y) {
+        WLOGFD("ProcessOutsideDownEvent called");
+        this->OnOutsideDownEvent(x, y);
+    };
+    SceneSessionManager::GetInstance().SetOutsideDownEventListener(func);
 }
 
 NativeValue* JsSceneSessionManager::RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info)

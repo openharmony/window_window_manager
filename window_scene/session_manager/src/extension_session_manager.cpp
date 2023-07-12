@@ -83,7 +83,8 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
 WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession)
 {
     wptr<ExtensionSession> weakExtSession(extensionSession);
-    auto task = [this, weakExtSession]() {
+    WSError ret = WSError::WS_OK;
+    auto task = [this, weakExtSession, &ret]() {
         auto extSession = weakExtSession.promote();
         if (extSession == nullptr) {
             WLOGFE("session is nullptr");
@@ -99,19 +100,20 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
         if (extSessionInfo == nullptr) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        AAFwk::AbilityManagerClient::GetInstance()->StartUIExtensionAbility(extSessionInfo,
+        auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIExtensionAbility(extSessionInfo,
             AAFwk::DEFAULT_INVAL_VALUE);
-        return WSError::WS_OK;
+        ret = (errorCode == ERR_OK) ? WSError::WS_OK : WSError::WS_ERROR_START_UI_EXTENSION_ABILITY_FAILED;
+        return ret;
     };
-
-    taskScheduler_->PostAsyncTask(task);
-    return WSError::WS_OK;
+    taskScheduler_->PostSyncTask(task);
+    return ret;
 }
 
 WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<ExtensionSession>& extensionSession)
 {
     wptr<ExtensionSession> weakExtSession(extensionSession);
-    auto task = [this, weakExtSession]() {
+    WSError ret = WSError::WS_OK;
+    auto task = [this, weakExtSession, &ret]() {
         auto extSession = weakExtSession.promote();
         if (extSession == nullptr) {
             WLOGFE("session is nullptr");
@@ -129,18 +131,19 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
         if (!extSessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIExtensionAbility(extSessionInfo);
-        return WSError::WS_OK;
+        auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIExtensionAbility(extSessionInfo);
+        ret = (errorCode == ERR_OK) ? WSError::WS_OK : WSError::WS_ERROR_MIN_UI_EXTENSION_ABILITY_FAILED;
+        return ret;
     };
-
-    taskScheduler_->PostAsyncTask(task);
-    return WSError::WS_OK;
+    taskScheduler_->PostSyncTask(task);
+    return ret;
 }
 
 WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<ExtensionSession>& extensionSession)
 {
     wptr<ExtensionSession> weakExtSession(extensionSession);
-    auto task = [this, weakExtSession]() {
+    WSError ret = WSError::WS_OK;
+    auto task = [this, weakExtSession, &ret]() {
         auto extSession = weakExtSession.promote();
         if (extSession == nullptr) {
             WLOGFE("session is nullptr");
@@ -157,12 +160,12 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
         if (!extSessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        AAFwk::AbilityManagerClient::GetInstance()->TerminateUIExtensionAbility(extSessionInfo);
+        auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->TerminateUIExtensionAbility(extSessionInfo);
         extensionSessionMap_.erase(persistentId);
-        return WSError::WS_OK;
+        ret = (errorCode == ERR_OK) ? WSError::WS_OK : WSError::WS_ERROR_TERMINATE_UI_EXTENSION_ABILITY_FAILED;
+        return ret;
     };
-
-    taskScheduler_->PostAsyncTask(task);
-    return WSError::WS_OK;
+    taskScheduler_->PostSyncTask(task);
+    return ret;
 }
 } // namespace OHOS::Rosen

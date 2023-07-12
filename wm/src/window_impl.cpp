@@ -108,7 +108,14 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     }
     name_ = option->GetWindowName();
 
-    surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
+    std::string surfaceNodeName;
+    if (auto bundleName = option->GetBundleName(); bundleName != "") {
+        surfaceNodeName = bundleName + "#" + property_->GetWindowName();
+    } else {
+        surfaceNodeName = property_->GetWindowName();
+    }
+    WLOGFD("surfaceNodeName: %{public}s", surfaceNodeName.c_str());
+    surfaceNode_ = CreateSurfaceNode(surfaceNodeName, option->GetWindowType());
 
     moveDragProperty_ = new (std::nothrow) MoveDragProperty();
     if (moveDragProperty_ == nullptr) {
@@ -1459,6 +1466,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerki
     }
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         WLOGI("already hidden, id: %{public}u", property_->GetWindowId());
+        NotifyBackgroundFailed(WMError::WM_DO_NOTHING);
         return WMError::WM_OK;
     }
     WMError ret = WMError::WM_OK;
@@ -1551,7 +1559,7 @@ WMError WindowImpl::Resize(uint32_t width, uint32_t height)
 WMError WindowImpl::SetWindowGravity(WindowGravity gravity, uint32_t percent)
 {
     WLOGFD("id:%{public}d SetWindowGravity %{public}u %{public}u",
-            property_->GetWindowId(), gravity, percent);
+        property_->GetWindowId(), gravity, percent);
 
     return SingletonContainer::Get<WindowAdapter>().SetWindowGravity(property_->GetWindowId(), gravity, percent);
 }
@@ -3599,9 +3607,10 @@ WMError WindowImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
     return WMError::WM_OK;
 }
 
-WMError WindowImpl::NotifyMemoryLevel(int32_t level) const
+WMError WindowImpl::NotifyMemoryLevel(int32_t level)
 {
     WLOGFD("id: %{public}u, notify memory level: %{public}d", property_->GetWindowId(), level);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ == nullptr) {
         WLOGFE("Window %{public}s notify memory level failed, ace is null.", name_.c_str());
         return WMError::WM_ERROR_NULLPTR;

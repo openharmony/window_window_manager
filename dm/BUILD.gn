@@ -29,6 +29,7 @@ config("libdm_public_config") {
   include_dirs = [
     "../interfaces/innerkits/dm",
     "../utils/include",
+    "${multimedia_path}/interfaces/innerkits/include",
   ]
 }
 

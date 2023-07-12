@@ -70,25 +70,30 @@ NativeValue* JsTransitionContext::OnCompleteTransition(NativeEngine& engine, Nat
         return engine.CreateUndefined();
     }
     WMError ret = WMError::WM_OK;
-    auto state = windowToken_->GetWindowState();
+    auto window = windowToken_.promote();
+    if (window == nullptr) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        return engine.CreateUndefined();
+    }
+    auto state = window->GetWindowState();
     if (!isShownTransContext_) {
         if (state != WindowState::STATE_HIDDEN) {
             WLOGI("[NAPI]Window [%{public}u, %{public}s] Hidden context called but window is not hidden: %{public}u",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), static_cast<uint32_t>(state));
+                window->GetWindowId(), window->GetWindowName().c_str(), static_cast<uint32_t>(state));
             return engine.CreateUndefined();
         }
-        windowToken_->UpdateSurfaceNodeAfterCustomAnimation(false); // remove from rs tree after animation
+        window->UpdateSurfaceNodeAfterCustomAnimation(false); // remove from rs tree after animation
         if (!transitionCompleted) {
-            ret = windowToken_->Show(); // hide aborted
+            ret = window->Show(); // hide aborted
         }
     } else {
         if (state != WindowState::STATE_SHOWN) {
             WLOGI("[NAPI]Window [%{public}u, %{public}s] shown context called but window is not shown: %{public}u",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), static_cast<uint32_t>(state));
+                window->GetWindowId(), window->GetWindowName().c_str(), static_cast<uint32_t>(state));
             return engine.CreateUndefined();
         }
         if (!transitionCompleted) {
-            ret = windowToken_->Hide(); // show aborted
+            ret = window->Hide(); // show aborted
         }
     }
     if (ret != WMError::WM_OK) {
@@ -96,7 +101,7 @@ NativeValue* JsTransitionContext::OnCompleteTransition(NativeEngine& engine, Nat
         return engine.CreateUndefined();
     }
     WLOGI("[NAPI]Window [%{public}u, %{public}s] CompleteTransition %{public}d end",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), transitionCompleted);
+        window->GetWindowId(), window->GetWindowName().c_str(), transitionCompleted);
     return engine.CreateUndefined();
 }
 

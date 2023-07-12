@@ -323,7 +323,6 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     NotifyConnect();
     int32_t applicationPid = IPCSkeleton::GetCallingPid();
     DelayedSingleton<ANRManager>::GetInstance()->SetApplicationPid(persistentId_, applicationPid);
-    WLOGFI("SetApplicationPid pid:%{public}d", applicationPid);
     return WSError::WS_OK;
 }
 
@@ -333,7 +332,7 @@ WSError Session::UpdateWindowSessionProperty(sptr<WindowSessionProperty> propert
     return WSError::WS_OK;
 }
 
-WSError Session::Foreground()
+WSError Session::Foreground(sptr<WindowSessionProperty> property)
 {
     SessionState state = GetSessionState();
     WLOGFI("Foreground session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
@@ -466,6 +465,30 @@ WSError Session::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionI
 void Session::SetTerminateSessionListener(const NotifyTerminateSessionFunc& func)
 {
     terminateSessionFunc_ = func;
+}
+
+WSError Session::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needStartCaller)
+{
+    if (abilitySessionInfo == nullptr) {
+        WLOGFE("abilitySessionInfo is null");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    SessionInfo info;
+    info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
+    info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
+    info.callerToken_ = abilitySessionInfo->callerToken;
+    info.persistentId_ = abilitySessionInfo->persistentId;
+    sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
+    sessionInfo_.resultCode = abilitySessionInfo->resultCode;
+    if (terminateSessionFuncNew_) {
+        terminateSessionFuncNew_(info, needStartCaller);
+    }
+    return WSError::WS_OK;
+}
+
+void Session::SetTerminateSessionListenerNew(const NotifyTerminateSessionFuncNew& func)
+{
+    terminateSessionFuncNew_ = func;
 }
 
 WSError Session::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
@@ -762,14 +785,14 @@ void Session::NotifyClick()
 WSError Session::UpdateFocus(bool isFocused)
 {
     WLOGFI("Session update focus id: %{public}" PRIu64, GetPersistentId());
-    if (!IsSessionValid()) {
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
     if (isFocused_ == isFocused) {
         WLOGFD("Session focus do not change: [%{public}d]", isFocused);
         return WSError::WS_DO_NOTHING;
     }
     isFocused_ = isFocused;
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
     sessionStage_->UpdateFocus(isFocused);
 
     return WSError::WS_OK;
@@ -938,6 +961,14 @@ WSError Session::TransferExtensionData(const AAFwk::WantParams& wantParams)
     return WSError::WS_OK;
 }
 
+void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
+{
+    if (!sessionStage_) {
+        WLOGFE("session stage is nullptr");
+    }
+    sessionStage_->NotifyOccupiedAreaChangeInfo(info);
+}
+
 void Session::NotifyRemoteReady()
 {
     return;
@@ -964,6 +995,17 @@ void Session::SetZOrder(uint32_t zOrder)
 WSError Session::UpdateSnapshot()
 {
     snapshot_ = Snapshot();
+    return WSError::WS_OK;
+}
+
+WSError Session::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
+{
+    WLOGFD("UpdateWindowAnimationFlag");
+    return WSError::WS_OK;
+}
+
+WSError Session::UpdateWindowSceneAfterCustomAnimation(bool isAdd)
+{
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

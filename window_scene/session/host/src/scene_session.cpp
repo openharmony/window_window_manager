@@ -37,7 +37,9 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     : Session(info)
 {
     GeneratePersistentId(false, info);
-    scenePersistence_ = new ScenePersistence(info, GetPersistentId());
+    if (!info.bundleName_.empty()) {
+        scenePersistence_ = new (std::nothrow) ScenePersistence(info, GetPersistentId());
+    }
     specificCallback_ = specificCallback;
     moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
     ProcessVsyncHandleRegister();
@@ -57,9 +59,17 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     }
 }
 
-WSError SceneSession::Foreground()
+WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
 {
-    WSError ret = Session::Foreground();
+    // use property from client
+    if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
+        NotifyIsCustomAnimatiomPlaying(true);
+        if (setWindowScenePatternFunc_ && setWindowScenePatternFunc_->setOpacityFunc_) {
+            setWindowScenePatternFunc_->setOpacityFunc_(0.0f);
+        }
+    }
+    WSError ret = Session::Foreground(property);
     if (ret != WSError::WS_OK) {
         return ret;
     }
@@ -69,6 +79,12 @@ WSError SceneSession::Foreground()
 
 WSError SceneSession::Background()
 {
+    // background will remove surfaceNode, custom not execute
+    // not animation playing when already background; inactive may be animation playing
+    if (property_ && property_->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        NotifyIsCustomAnimatiomPlaying(true);
+        return WSError::WS_OK;
+    }
     WSError ret = Session::Background();
     if (ret != WSError::WS_OK) {
         return ret;
@@ -346,8 +362,8 @@ bool SceneSession::FixRectByAspectRatio(WSRect& rect)
         return false;
     }
 
-    if (MathHelper::NearZero(aspectRatio_ || aspectRatio_ == MathHelper::INF ||
-        aspectRatio_ == MathHelper::NAG_INF)) {
+    if (MathHelper::NearZero(aspectRatio_) || aspectRatio_ == MathHelper::INF ||
+        aspectRatio_ == MathHelper::NAG_INF) {
         return false;
     }
     float vpr = 1.5f; // 1.5f: default virtual pixel ratio
@@ -443,5 +459,43 @@ std::string SceneSession::GetSessionSnapshot()
         return scenePersistence_->GetSnapshotFilePath();
     }
     return "";
+}
+
+WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
+{
+    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
+        if (sessionChangeCallback != nullptr && sessionChangeCallback->onWindowAnimationFlagChange_) {
+            sessionChangeCallback -> onWindowAnimationFlagChange_(needDefaultAnimationFlag);
+        }
+    }
+    return WSError::WS_OK;
+}
+
+void SceneSession::NotifyIsCustomAnimatiomPlaying(bool isPlaying)
+{
+    WLOGFI("id %{public}" PRIu64 " %{public}u", GetPersistentId(), isPlaying);
+    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
+        if (sessionChangeCallback != nullptr && sessionChangeCallback->onIsCustomAnimationPlaying_) {
+            sessionChangeCallback->onIsCustomAnimationPlaying_(isPlaying);
+        }
+    }
+}
+
+WSError SceneSession::UpdateWindowSceneAfterCustomAnimation(bool isAdd)
+{
+    WLOGFI("id %{public}" PRIu64 "", GetPersistentId());
+    if (isAdd) {
+        if (!setWindowScenePatternFunc_ || !setWindowScenePatternFunc_->setOpacityFunc_) {
+            WLOGFE("SetOpacityFunc not register %{public}" PRIu64 "", GetPersistentId());
+            return WSError::WS_ERROR_INVALID_OPERATION;
+        }
+        setWindowScenePatternFunc_->setOpacityFunc_(1.0f);
+    } else {
+        WLOGFI("background after custom animation id %{public}" PRIu64 "", GetPersistentId());
+        // since background will remove surfaceNode
+        Background();
+        NotifyIsCustomAnimatiomPlaying(false);
+    }
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
