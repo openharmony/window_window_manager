@@ -19,7 +19,9 @@ config("session_manager_public_config") {
 
   include_dirs = [
     "${window_base_path}/interfaces/innerkits/wm",
+    "${window_base_path}/interfaces/include",
     "${window_base_path}/window_scene",
+    "${window_base_path}/window_scene/interfaces/include",
     "${window_base_path}/window_scene/session_manager/include",
     "${window_base_path}/window_scene/session_manager/include/zidl",
     "${window_base_path}/window_scene/session_manager_service/include",
@@ -108,6 +110,12 @@ ohos_shared_library("scene_session_manager") {
     defines += [ "MEMMGR_WINDOW_ENABLE" ]
   }
 
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.resourceschedule_soc_perf)) {
+    external_deps += [ "resource_schedule_service:ressched_client" ]
+    defines += [ "RES_SCHED_ENABLE" ]
+  }
+
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
@@ -117,7 +125,9 @@ ohos_shared_library("screen_session_manager") {
   sources = [
     "../../dm/src/zidl/display_manager_agent_proxy.cpp",
     "src/screen_cutout_controller.cpp",
+    "src/screen_rotation_property.cpp",
     "src/screen_scene_config.cpp",
+    "src/screen_sensor_connector.cpp",
     "src/screen_session_manager.cpp",
     "src/session_display_power_controller.cpp",
     "src/zidl/screen_session_manager_stub.cpp",
@@ -139,10 +149,20 @@ ohos_shared_library("screen_session_manager") {
     "config_policy:configpolicy_util",
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
+    "hicollie:libhicollie",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
+    "sensor:sensor_interface_native",
   ]
+
+  defines = []
+  if (window_manager_feature_subscribe_motion) {
+    if (defined(global_parts_info) && defined(global_parts_info.msdp_motion)) {
+      external_deps += [ "motion:motion_interface_native" ]
+      defines += [ "WM_SUBSCRIBE_MOTION_ENABLE" ]
+    }
+  }
 
   if (is_standard_system) {
     external_deps += [ "init:libbegetutil" ]

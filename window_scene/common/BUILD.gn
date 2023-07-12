@@ -17,6 +17,7 @@ import("../../windowmanager_aafwk.gni")
 config("window_scene_common_public_config") {
   include_dirs = [
     "${window_base_path}/window_scene",
+    "${window_base_path}/interfaces/include",
 
     # for window_manager_hilog
     "${window_base_path}/utils/include",

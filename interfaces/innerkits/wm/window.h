@@ -22,6 +22,7 @@
 
 #include "wm_common.h"
 #include "window_option.h"
+#include "occupied_area_change_info.h"
 
 class NativeValue;
 class NativeEngine;
@@ -90,6 +91,12 @@ public:
      * @param ret Error code when window go forground failed.
      */
     virtual void ForegroundFailed(int32_t ret) {}
+    /**
+     * @brief Notify caller the error code when window go background failed.
+     *
+     * @param ret Error code when window go background failed.
+     */
+    virtual void BackgroundFailed(int32_t ret) {}
     /**
      * @brief Notify caller that window is active.
      */
@@ -193,49 +200,6 @@ public:
      * @param inputEvent Means KeyEvent.
      */
     virtual void OnDispatchKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) {}
-};
-
-/**
- * @class OccupiedAreaChangeInfo
- *
- * @brief Occupied area info when it changed.
- */
-class OccupiedAreaChangeInfo : public Parcelable {
-public:
-    /**
-     * @brief Default construct func of OccupiedAreaChangeInfo.
-     */
-    OccupiedAreaChangeInfo() = default;
-    /**
-     * @brief Construct func of OccupiedAreaChangeInfo.
-     *
-     * @param OccupiedAreaType Type of occupied area.
-     * @param rect Rect of occupied area.
-     */
-    OccupiedAreaChangeInfo(OccupiedAreaType type, Rect rect) : type_(type), rect_(rect) {};
-    /**
-     * @brief Deconstruct func of OccupiedAreaChangeInfo.
-     */
-    OccupiedAreaChangeInfo(OccupiedAreaType type, Rect rect, uint32_t safeHeight)
-        : type_(type), rect_(rect), safeHeight_(safeHeight) {};
-    ~OccupiedAreaChangeInfo() = default;
-
-    /**
-     * @brief Marshalling the data of OccupiedAreaChangeInfo.
-     *
-     * @param parcel Data of OccupiedAreaChangeInfo.
-     */
-    virtual bool Marshalling(Parcel& parcel) const override;
-    /**
-     * @brief Unmarshalling the data of OccupiedAreaChangeInfo.
-     *
-     * @param parcel Data of OccupiedAreaChangeInfo.
-     */
-    static OccupiedAreaChangeInfo* Unmarshalling(Parcel& parcel);
-
-    OccupiedAreaType type_ = OccupiedAreaType::TYPE_INPUT;
-    Rect rect_ = { 0, 0, 0, 0 };
-    uint32_t safeHeight_ = 0;
 };
 
 /**
@@ -1301,7 +1265,7 @@ public:
      * @param level memory level
      * @return the error code of window
      */
-    virtual WMError NotifyMemoryLevel(int32_t level) const { return WMError::WM_OK; }
+    virtual WMError NotifyMemoryLevel(int32_t level) { return WMError::WM_OK; }
 
     /**
      * @brief Update configuration for all windows

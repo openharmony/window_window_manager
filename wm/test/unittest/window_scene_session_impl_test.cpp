@@ -494,11 +494,11 @@ HWTEST_F(WindowSceneSessionImplTest, Show01, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, session);
 
     window->hostSession_ = session;
-    EXPECT_CALL(*(session), Foreground()).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*(session), Foreground(_)).WillOnce(Return(WSError::WS_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show(2, false));
 
     window->state_ = WindowState::STATE_CREATED;
-    EXPECT_CALL(*(session), Foreground()).WillOnce(Return(WSError::WS_ERROR_INVALID_SESSION));
+    EXPECT_CALL(*(session), Foreground(_)).WillOnce(Return(WSError::WS_ERROR_INVALID_SESSION));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_SESSION, window->Show(2, false));
     ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
 }
@@ -614,6 +614,26 @@ HWTEST_F(WindowSceneSessionImplTest, LimitCameraFloatWindowMininumSize, Function
     uint32_t width = 33;
     uint32_t height = 31;
     window->LimitCameraFloatWindowMininumSize(width, height);
+}
+
+/**
+ * @tc.name: SetTransform01
+ * @tc.desc: set transform
+ * @tc.type: FUNC
+ * @tc.require:issueI7IJVV
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetTransform01, Function | SmallTest | Level3)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetTransform01");
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetPersistentId(1);
+    Transform trans_;
+    window->SetTransform(trans_);
+    ASSERT_TRUE(trans_ == window->GetTransform());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
 }
 }
 } // namespace Rosen

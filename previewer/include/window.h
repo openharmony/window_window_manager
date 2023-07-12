@@ -58,6 +58,7 @@ class RSSurfaceNode;
 class RSTransaction;
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
 using SendRenderDataCallback = bool (*)(const void*, const size_t, const int32_t, const int32_t);
+using ContentInfoCallback = std::function<void(std::string contentInfo)>;
 
 class IWindowLifeCycle : virtual public RefBase {
 };
@@ -225,7 +226,7 @@ public:
     virtual ColorSpace GetColorSpace() = 0;
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() = 0;
-    virtual WMError NotifyMemoryLevel(int32_t level) const = 0;
+    virtual WMError NotifyMemoryLevel(int32_t level) = 0;
     virtual bool IsAllowHaveSystemSubWindow() = 0;
     virtual WMError SetAspectRatio(float ratio) = 0;
     virtual WMError ResetAspectRatio() = 0;
@@ -239,6 +240,7 @@ public:
     virtual void SetDensity(float density) = 0;
 
     virtual void CreateSurfaceNode(const std::string name, const SendRenderDataCallback& callback) = 0;
+    virtual void SetContentInfoCallback(const ContentInfoCallback& callback) = 0;
 };
 }
 }

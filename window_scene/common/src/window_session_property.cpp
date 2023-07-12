@@ -14,6 +14,7 @@
  */
 
 #include "common/include/window_session_property.h"
+#include "window_manager_hilog.h"
 #include "wm_common.h"
 
 namespace OHOS {
@@ -271,6 +272,18 @@ WindowMode WindowSessionProperty::GetWindowMode() const
     return windowMode_;
 }
 
+void WindowSessionProperty::SetSessionGravity(SessionGravity gravity, uint32_t percent)
+{
+    sessionGravity_ = gravity;
+    sessionGravitySizePercent_ = percent;
+}
+
+void WindowSessionProperty::GetSessionGravity(SessionGravity& gravity, uint32_t& percent)
+{
+    gravity = sessionGravity_;
+    percent = sessionGravitySizePercent_;
+}
+
 void WindowSessionProperty::SetZOrder(uint32_t zOrder)
 {
     zOrder_ = zOrder;
@@ -289,6 +302,26 @@ void WindowSessionProperty::SetDecorEnable(bool isDecorEnable)
 bool WindowSessionProperty::IsDecorEnable()
 {
     return isDecorEnable_;
+}
+
+void WindowSessionProperty::SetModeSupportInfo(uint32_t modeSupportInfo)
+{
+    modeSupportInfo_ = modeSupportInfo;
+}
+
+uint32_t WindowSessionProperty::GetModeSupportInfo() const
+{
+    return modeSupportInfo_;
+}
+
+void WindowSessionProperty::SetAnimationFlag(uint32_t animationFlag)
+{
+    animationFlag_ = animationFlag;
+}
+
+uint32_t WindowSessionProperty::GetAnimationFlag() const
+{
+    return animationFlag_;
 }
 
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
@@ -356,10 +389,10 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteFloat(brightness_) &&
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
-        parcel.WriteUint32(zOrder_) &&
+        parcel.WriteUint32(zOrder_) && parcel.WriteUint32(flags_) &&
         parcel.WriteBool(isDecorEnable_) &&
         MarshallingWindowLimits(parcel) &&
-        MarshallingSystemBarMap(parcel);
+        MarshallingSystemBarMap(parcel) && parcel.WriteUint32(animationFlag_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -392,9 +425,11 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));
     property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
     property->SetZOrder(parcel.ReadUint32());
+    property->SetWindowFlags(parcel.ReadUint32());
     property->SetDecorEnable(parcel.ReadBool());
     UnmarshallingWindowLimits(parcel, property);
     UnMarshallingSystemBarMap(parcel, property);
+    property->SetAnimationFlag(parcel.ReadUint32());
     return property;
 }
 
@@ -408,17 +443,35 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     focusable_= property->focusable_;
     touchable_ = property->touchable_;
     tokenState_ = property->tokenState_;
+    turnScreenOn_ = property->turnScreenOn_;
+    keepScreenOn_ = property->keepScreenOn_;
+    brightness_ = property->brightness_;
+    requestedOrientation_ = property->requestedOrientation_;
+    isPrivacyMode_ = property->isPrivacyMode_;
+    isSystemPrivacyMode_ = property->isSystemPrivacyMode_;
     displayId_ = property->displayId_;
     parentId_ = property->parentId_;
+    flags_ = property->flags_;
     persistentId_ = property->persistentId_;
     parentPersistentId_ = property->parentPersistentId_;
     accessTokenId_ = property->accessTokenId_;
     maximizeMode_ = property->maximizeMode_;
-    brightness_ = property->brightness_;
-    requestedOrientation_ = property->requestedOrientation_;
-    sysBarPropMap_ = property->sysBarPropMap_;
     windowMode_ = property->windowMode_;
     limits_ = property->limits_;
+    sysBarPropMap_ = property->sysBarPropMap_;
+    zOrder_ = property->zOrder_;
+    isDecorEnable_ = property->isDecorEnable_;
+    animationFlag_ = property->animationFlag_;
+}
+
+void WindowSessionProperty::SetTransform(const Transform& trans)
+{
+    trans_ = trans;
+}
+
+const Transform& WindowSessionProperty::GetTransform() const
+{
+    return trans_;
 }
 } // namespace Rosen
 } // namespace OHOS

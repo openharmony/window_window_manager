@@ -57,6 +57,8 @@ private:
     int HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateWindowSessionProperty(MessageParcel& data, MessageParcel& reply);
     int HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply);
+    int HandleSetWindowAnimationFlag(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateWindowSceneAfterCustomAnimation(MessageParcel& data, MessageParcel& reply);
 
     // for extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);

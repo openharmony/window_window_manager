@@ -27,6 +27,7 @@
 #include "session/host/include/zidl/session_stub.h"
 #include "session/host/include/scene_persistence.h"
 #include "wm_common.h"
+#include "occupied_area_change_info.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -48,6 +49,7 @@ using NotifySessionFocusableChangeFunc = std::function<void(const bool isFocusab
 using NotifySessionTouchableChangeFunc = std::function<void(const bool touchable)>;
 using NotifyClickFunc = std::function<void()>;
 using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
+using NotifyTerminateSessionFuncNew = std::function<void(const SessionInfo& info, bool needStartCaller)>;
 using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
 using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info)>;
@@ -88,7 +90,7 @@ public:
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr) override;
-    WSError Foreground() override;
+    WSError Foreground(sptr<WindowSessionProperty> property) override;
     WSError Background() override;
     WSError Disconnect() override;
 
@@ -115,9 +117,11 @@ public:
 
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
 
-    void SetTerminateSessionListener(const NotifyTerminateSessionFunc& func);
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> info) override;
-    void SetSessionExceptionListener(const NotifyTerminateSessionFunc& func);
+    void SetTerminateSessionListener(const NotifyTerminateSessionFunc& func);
+    WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller);
+    void SetTerminateSessionListenerNew(const NotifyTerminateSessionFuncNew& func);
+    void SetSessionExceptionListener(const NotifySessionExceptionFunc& func);
     WSError NotifySessionException(const sptr<AAFwk::SessionInfo> info) override;
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
     void SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func);
@@ -164,6 +168,7 @@ public:
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
     WSError SetBrightness(float brightness);
     float GetBrightness() const;
+    void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info);
     void SetRequestedOrientation(Orientation orientation);
     Orientation GetRequestedOrientation() const;
 
@@ -176,6 +181,8 @@ public:
     WindowMode GetWindowMode();
     void SetZOrder(uint32_t zOrder);
     WSError UpdateSnapshot();
+    WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
+    WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
 protected:
     void GeneratePersistentId(const bool isExtension, const SessionInfo& sessionInfo);
     void UpdateSessionState(SessionState state);
@@ -196,6 +203,7 @@ protected:
     NotifySessionTouchableChangeFunc sessionTouchableChangeFunc_;
     NotifyClickFunc clickFunc_;
     NotifyTerminateSessionFunc terminateSessionFunc_;
+    NotifyTerminateSessionFuncNew terminateSessionFuncNew_;
     NotifySessionExceptionFunc sessionExceptionFunc_;
     NotifyPendingSessionToForegroundFunc pendingSessionToForegroundFunc_;
     NotifyPendingSessionToBackgroundForDelegatorFunc pendingSessionToBackgroundForDelegatorFunc_;

@@ -66,8 +66,10 @@ private:
 
     void OnGestureNavigationEnabledUpdate(bool enable);
     void OnCreateSpecificSession(const sptr<SceneSession>& sceneSession);
+    void OnOutsideDownEvent(int32_t x, int32_t y);
     void ProcessCreateSpecificSessionRegister();
     void ProcessGestureNavigationEnabledChangeListener();
+    void ProcessOutsideDownEvent();
     bool IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject);
 
     NativeEngine& engine_;

@@ -58,7 +58,9 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_GESTURE_NAVIGATION_ENABLED),
         &SceneSessionManagerStub::HandleSetGestureNavigationEnabled),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_INFO),
-        &SceneSessionManagerStub::HandleGetAccessibilityWindowInfo)
+        &SceneSessionManagerStub::HandleGetAccessibilityWindowInfo),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_TERMINATE_SESSION_NEW),
+        &SceneSessionManagerStub::HandleTerminateSessionNew)
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -222,6 +224,25 @@ int SceneSessionManagerStub::HandlePendingSessionToBackgroundForDelegator(Messag
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleTerminateSessionNew(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("run HandleTerminateSessionNew");
+    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
+    std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    abilitySessionInfo->want = *want;
+    if (data.ReadBool()) {
+        abilitySessionInfo->callerToken = data.ReadRemoteObject();
+    }
+    if (data.ReadBool()) {
+        abilitySessionInfo->sessionToken = data.ReadRemoteObject();
+    }
+    bool needStartCaller = data.ReadBool();
+    abilitySessionInfo->resultCode = data.ReadInt32();
+    const WSError& errCode = TerminateSessionNew(abilitySessionInfo, needStartCaller);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleGetFocusSessionToken(MessageParcel &data, MessageParcel &reply)
 {
     WLOGFI("run HandleGetFocusSessionToken!");
@@ -249,6 +270,17 @@ int SceneSessionManagerStub::HandleGetAccessibilityWindowInfo(MessageParcel &dat
         return ERR_TRANSACTION_FAILED;
     }
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetSessionGravity(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleSetSessionGravity!");
+    uint64_t persistentId = data.ReadUint64();
+    SessionGravity gravity = static_cast<SessionGravity>(data.ReadUint32());
+    uint32_t percent = data.ReadUint32();
+    WSError ret = SetSessionGravity(persistentId, gravity, percent);
+    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

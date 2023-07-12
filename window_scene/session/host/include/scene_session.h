@@ -33,9 +33,12 @@ using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSessi
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
+using SetWindowPatternOpacityFunc = std::function<void(float opacity)>;
+using NotifyIsCustomAnimationPlayingCallback = std::function<void(bool isFinish)>;
 using NotifySystemBarPropertyChangeFunc = std::function<void(
     const std::unordered_map<WindowType, SystemBarProperty>& propertyMap)>;
 using NotifyNeedAvoidFunc = std::function<void(bool status)>;
+using NotifyWindowAnimationFlagChangeFunc = std::function<void(const bool flag)>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -53,6 +56,13 @@ public:
         NotifySessionEventFunc OnSessionEvent_;
         NotifySystemBarPropertyChangeFunc OnSystemBarPropertyChange_;
         NotifyNeedAvoidFunc OnNeedAvoid_;
+        NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
+        NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
+    };
+
+    // func for change window scene pattern property
+    struct SetWindowScenePatternFunc : public RefBase {
+        SetWindowPatternOpacityFunc setOpacityFunc_;
     };
 
     SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
@@ -62,8 +72,9 @@ public:
         sessionChangeCallbackList_.shrink_to_fit();
     }
 
-    WSError Foreground() override;
+    WSError Foreground(sptr<WindowSessionProperty> property) override;
     WSError Background() override;
+    WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
 
     WSError OnSessionEvent(SessionEvent event) override;
     WSError RaiseToAppTop() override;
@@ -82,6 +93,12 @@ public:
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
     std::string GetSessionSnapshot();
+    void RegisterSetWindowPatternFunc(sptr<SetWindowScenePatternFunc> func)
+    {
+        setWindowScenePatternFunc_ = func;
+    };
+    WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
+
     static MaximizeMode maximizeMode_;
 
     WSError SetTurnScreenOn(bool turnScreenOn);
@@ -99,9 +116,11 @@ private:
     void OnVsyncHandle();
     bool FixRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);
+    void NotifyIsCustomAnimatiomPlaying(bool isPlaying);
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     std::vector<sptr<SessionChangeCallback>> sessionChangeCallbackList_;
     sptr<MoveDragController> moveDragController_ = nullptr;
+    sptr<SetWindowScenePatternFunc> setWindowScenePatternFunc_ = nullptr;
     bool isFirstStart_ = true;
 };
 } // namespace OHOS::Rosen

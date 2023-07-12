@@ -220,6 +220,18 @@ HWTEST_F(WindowOptionTest, WindowName01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: BundleName01
+ * @tc.desc: SetBundleName/GetBundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, BundleName01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetBundleName("settings");
+    ASSERT_EQ("settings", option->GetBundleName());
+}
+
+/**
  * @tc.name: WindowFlag01
  * @tc.desc: SetWindowFlags/GetWindowFlags
  * @tc.type: FUNC

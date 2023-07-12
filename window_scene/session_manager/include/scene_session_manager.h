@@ -43,9 +43,11 @@ class SceneSession;
 class AccessibilityWindowInfo;
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable)>;
+using ProcessOutsideDownEventFunc = std::function<void(int32_t x, int32_t y)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using EventHandler = OHOS::AppExecFwk::EventHandler;
 using EventRunner = OHOS::AppExecFwk::EventRunner;
+const int32_t STATUS_BAR_AVOID_AREA = 0;
 class SceneSessionManager : public SceneSessionManagerStub {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManager)
 public:
@@ -64,6 +66,7 @@ public:
     WSError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
     void SetCreateSpecificSessionListener(const NotifyCreateSpecificSessionFunc& func);
     void SetGestureNavigationEnabledChangeListener(const ProcessGestureNavigationEnabledChangeFunc& func);
+    void SetOutsideDownEventListener(const ProcessOutsideDownEventFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     WSError ProcessBackEvent();
     void GetStartPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor);
@@ -80,6 +83,7 @@ public:
     int32_t GetCurrentUserId() const;
     void StartWindowInfoReportLoop();
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
+    WSError SetSessionGravity(uint64_t persistentId, SessionGravity gravity, uint32_t percent);
     WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label);
     WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon);
     WSError RegisterSessionListener(const sptr<ISessionListener> sessionListener);
@@ -90,16 +94,20 @@ public:
     WSError PendingSessionToForeground(const sptr<IRemoteObject> &token);
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token);
     WSError GetFocusSessionToken(sptr<IRemoteObject> &token);
+    WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller);
 
     void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
     void InitPersistentStorage();
     std::string GetSessionSnapshot(uint64_t persistentId);
+    void OnOutsideDownEvent(int32_t x, int32_t y);
 
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
     WSError SetWindowFlags(const sptr<SceneSession>& sceneSession, uint32_t flags);
 
     void SetWaterMarkSessionCount(int32_t count);
     int32_t GetWaterMarkSessionCount() const;
+    void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> callingSession,
+        const WSRect& rect, const WSRect& occupiedArea);
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
@@ -113,6 +121,10 @@ private:
     bool ConfigAppWindowCornerRadius(const WindowSceneConfig::ConfigItem& item, float& out);
     bool ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig, WindowShadowConfig& outShadow);
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig);
+    void RelayoutKeyBoard(sptr<SceneSession> sceneSession);
+    void RestoreCallingSessionSizeIfNeed();
+    void ResizeSoftInputCallingSessionIfNeed(const sptr<SceneSession>& sceneSession);
+    void ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig);
 
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& scnSession);
     WSError DestroyDialogWithMainWindow(const sptr<SceneSession>& scnSession);
@@ -124,7 +136,8 @@ private:
     std::shared_ptr<Global::Resource::ResourceManager> CreateResourceManager(
         const AppExecFwk::AbilityInfo& abilityInfo);
     void GetStartPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, std::string& path, uint32_t& bgColor);
-    std::string CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
+    std::string CreateCurve(
+        const WindowSceneConfig::ConfigItem& curveConfig, const std::string& nodeName = "keyboardAnimation");
 
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
     WSError UpdateBrightness(uint64_t persistentId);
@@ -146,12 +159,14 @@ private:
 
     NotifyCreateSpecificSessionFunc createSpecificSessionFunc_;
     ProcessGestureNavigationEnabledChangeFunc gestureNavigationEnabledChangeFunc_;
+    ProcessOutsideDownEventFunc outsideDownEventFunc_;
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
     uint64_t activeSessionId_ = INVALID_SESSION_ID;
     uint64_t focusedSessionId_ = INVALID_SESSION_ID;
     uint64_t brightnessSessionId_ = INVALID_SESSION_ID;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
+    WSRect callingWindowRestoringRect_ = {0, 0, 0, 0};
     int32_t currentUserId_;
 
     std::shared_ptr<TaskScheduler> taskScheduler_;

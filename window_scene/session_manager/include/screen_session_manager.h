@@ -100,6 +100,10 @@ public:
     DMError SetOrientationFromWindow(DisplayId displayId, Orientation orientation);
     DMError SetOrientationController(ScreenId screenId, Orientation newOrientation, bool isFromWindow);
     bool SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow);
+    void SetSensorSubscriptionEnabled();
+    bool SetRotationFromWindow(DisplayId displayId, Rotation targetRotation);
+    sptr<SupportedScreenModes> GetScreenModesByDisplayId(DisplayId displayId);
+    sptr<ScreenInfo> GetScreenInfoByDisplayId(DisplayId displayId);
 
     std::vector<ScreenId> GetAllScreenIds() const;
     const std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByScreenId(ScreenId smsScreenId) const;
@@ -145,6 +149,7 @@ public:
         const std::vector<sptr<ScreenInfo>>& screenInfos, ScreenGroupChangeEvent groupEvent);
     void OnScreenshot(sptr<ScreenshotInfo> info);
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
+    void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
 
 protected:
     ScreenSessionManager();
@@ -198,6 +203,7 @@ private:
     std::map<sptr<IRemoteObject>, std::vector<ScreenId>> screenAgentMap_;
     std::map<ScreenId, sptr<ScreenSessionGroup>> smsScreenGroupMap_;
 
+    bool isAutoRotationOpen_ = false;
     bool isExpandCombination_ = false;
     sptr<AgentDeathRecipient> deathRecipient_ { nullptr };
 
