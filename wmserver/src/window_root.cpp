@@ -832,7 +832,9 @@ WMError WindowRoot::DestroyWindowSelf(sptr<WindowNode>& node, const sptr<WindowN
             child->GetWindowToken()->NotifyDestroy();
         }
     }
-    WMError res = container->RemoveWindowNode(node);
+
+    std::vector<uint32_t> windowIds;
+    WMError res = container->DestroyWindowNode(node, windowIds);
     if (res != WMError::WM_OK) {
         WLOGFE("RemoveWindowNode failed");
     }
