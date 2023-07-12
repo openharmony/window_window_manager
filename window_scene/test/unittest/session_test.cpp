@@ -41,6 +41,7 @@ public:
     WSError TransferFocusActiveEvent(bool isFocusActive) override;
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
     WSError TransferFocusWindowId(uint32_t windowId) override;
+    WSError TransferFocusState(bool focusState) override;
 
     sptr<IRemoteObject> AsObject() override
     {
@@ -70,6 +71,11 @@ WSError TestWindowEventChannel::TransferFocusWindowId(uint32_t windowId)
 
 WSError TestWindowEventChannel::TransferKeyEventForConsumed(
     const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+{
+    return WSError::WS_OK;
+}
+
+WSError TestWindowEventChannel::TransferFocusState(bool foucsState)
 {
     return WSError::WS_OK;
 }

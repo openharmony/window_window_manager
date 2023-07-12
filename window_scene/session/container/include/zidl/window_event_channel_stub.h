@@ -40,6 +40,7 @@ private:
     int HandleGetApplicationPid(MessageParcel& data, MessageParcel& reply);
     int HandleTransferFocusActiveEvent(MessageParcel& data, MessageParcel& reply);
     int HandleTransferFocusWindowIdEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleTransferFocusStateEvent(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_WINDOW_EVENT_CHANNEL_STUB_H
