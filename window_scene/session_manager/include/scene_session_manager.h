@@ -153,6 +153,9 @@ private:
     void WindowVisibilityChangeCallback(std::shared_ptr<RSOcclusionData> occlusiontionData);
     void RegisterSessionRectChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void OnSessionRectChange(uint64_t persistentId, const WSRect& rect);
+    void RegisterInputMethodShownFunc(const sptr<SceneSession>& sceneSession);
+    void OnInputMethodShown(const uint64_t& persistentId);
+    void RegisterInputMethodHideFunc(const sptr<SceneSession>& sceneSession);
 
     sptr<RootSceneSession> rootSceneSession_;
     std::map<uint64_t, sptr<SceneSession>> sceneSessionMap_;
