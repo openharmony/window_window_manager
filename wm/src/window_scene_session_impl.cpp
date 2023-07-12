@@ -539,7 +539,7 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    const auto& rect = property_->GetWindowRect();
+    Rect rect = WindowHelper::IsMainFloatingWindow(GetType(), GetMode()) ? GetRect() : GetRequestRect();
     Rect newRect = { x, y, rect.width_, rect.height_ }; // must keep x/y
     property_->SetRequestRect(newRect);
     if (state_ == WindowState::STATE_HIDDEN || state_ < WindowState::STATE_CREATED) {
@@ -549,7 +549,7 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
     }
 
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
-    const WSError& ret = hostSession_->UpdateSessionRect(wsRect, SizeChangeReason::MOVE);
+    auto ret = hostSession_->UpdateSessionRect(wsRect, SizeChangeReason::MOVE);
     return static_cast<WMError>(ret);
 }
 
@@ -644,7 +644,7 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 
     UpdateFloatingWindowSizeBySizeLimits(width, height);
 
-    const auto& rect = property_->GetWindowRect();
+    Rect rect = WindowHelper::IsMainFloatingWindow(GetType(), GetMode()) ? GetRect() : GetRequestRect();
     Rect newRect = { rect.posX_, rect.posY_, width, height }; // must keep w/h
     property_->SetRequestRect(newRect);
     if (state_ == WindowState::STATE_HIDDEN || state_ < WindowState::STATE_CREATED) {
@@ -655,7 +655,7 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
     }
 
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
-    const WSError& ret = hostSession_->UpdateSessionRect(wsRect, SizeChangeReason::RESIZE);
+    auto ret = hostSession_->UpdateSessionRect(wsRect, SizeChangeReason::RESIZE);
     return static_cast<WMError>(ret);
 }
 
