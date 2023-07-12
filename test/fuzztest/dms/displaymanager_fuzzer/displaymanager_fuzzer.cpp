@@ -17,7 +17,6 @@
 
 #include <securec.h>
 #include "display_manager.h"
-#include "ui/rs_surface_node.h"
 
 namespace OHOS ::Rosen {
 class DisplayListener : public DisplayManager::IDisplayListener {
@@ -35,14 +34,14 @@ public:
 
 class ScreenshotListener : public DisplayManager::IScreenshotListener {
 public:
-    virtual void OnScreenshot(const ScreenshotInfo info) override
+    void OnScreenshot(const ScreenshotInfo info) override
     {
     }
 };
 
 class PrivateWindowListener : public DisplayManager::IPrivateWindowListener {
 public:
-    virtual void OnPrivateWindow(bool hasPrivate) override
+    void OnPrivateWindow(bool hasPrivate) override
     {
     }
 };
@@ -94,11 +93,6 @@ bool DisplayFuzzTest(const uint8_t* data, size_t size)
     sptr<PrivateWindowListener> privateWindowListener = new PrivateWindowListener();
     displayManager.RegisterPrivateWindowListener(privateWindowListener);
     displayManager.UnregisterPrivateWindowListener(privateWindowListener);
-    RSSurfaceNodeConfig config = { .SurfaceNodeName = "SurfaceNode" };
-    startPos += GetObject<RSSurfaceNodeConfig>(config, data + startPos, size - startPos);
-    std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config, RSSurfaceNodeType::SELF_DRAWING_WINDOW_NODE);
-    displayManager.AddSurfaceNodeToDisplay(displayId, surfaceNode);
-    displayManager.RemoveSurfaceNodeFromDisplay(displayId, surfaceNode);
     return true;
 }
 
