@@ -736,6 +736,15 @@ WSError Session::TransferFocusWindowIdEvent(uint32_t windowId)
     return windowEventChannel_->TransferFocusWindowId(windowId);
 }
 
+WSError Session::TransferFocusStateEvent(bool focusState)
+{
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferFocusState(focusState);
+}
+
 std::shared_ptr<Media::PixelMap> Session::GetSnapshot() const
 {
     return snapshot_;
