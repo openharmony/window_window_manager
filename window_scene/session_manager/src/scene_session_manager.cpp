@@ -582,7 +582,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
 WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive)
 {
     wptr<SceneSession> weakSceneSession(sceneSession);
-    auto task = [this, weakSceneSession]() {
+    auto task = [this, weakSceneSession, isNewActive]() {
         auto scnSession = weakSceneSession.promote();
         if (scnSession == nullptr) {
             WLOGFE("session is nullptr");
