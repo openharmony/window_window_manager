@@ -351,8 +351,20 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property)
     if (!isActive_) {
         SetActive(true);
     }
+
+    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        NotifyCallingSessionForeground();
+    }
     NotifyForeground();
     return WSError::WS_OK;
+}
+
+void Session::NotifyCallingSessionForeground()
+{
+    if (notifyCallingSessionForegroundFunc_) {
+        WLOGFI("Notify calling window that input method shown");
+        notifyCallingSessionForegroundFunc_(persistentId_);
+    }
 }
 
 WSError Session::Background()
@@ -365,9 +377,20 @@ WSError Session::Background()
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
+    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        NotifyCallingSessionBackground();
+    }
     snapshot_ = Snapshot();
     NotifyBackground();
     return WSError::WS_OK;
+}
+
+void Session::NotifyCallingSessionBackground()
+{
+    if (notifyCallingSessionBackgroundFunc_) {
+        WLOGFI("Notify calling window that input method hide");
+        notifyCallingSessionBackgroundFunc_();
+    }
 }
 
 WSError Session::Disconnect()
@@ -551,6 +574,16 @@ WSError Session::PendingSessionToBackgroundForDelegator()
         pendingSessionToBackgroundForDelegatorFunc_(info);
     }
     return WSError::WS_OK;
+}
+
+void Session::SetNotifyCallingSessionForegroundFunc(const NotifyCallingSessionForegroundFunc& func)
+{
+    notifyCallingSessionForegroundFunc_ = func;
+}
+
+void Session::SetNotifyCallingSessionBackgroundFunc(const NotifyCallingSessionBackgroundFunc& func)
+{
+    notifyCallingSessionBackgroundFunc_ = func;
 }
 
 void Session::NotifyTouchDialogTarget()
