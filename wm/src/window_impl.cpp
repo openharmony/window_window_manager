@@ -2355,8 +2355,17 @@ void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>&
     } else {
         WLOGFE("There is no back key event consumer");
     }
-    if (isConsumed || !WindowHelper::IsMainWindow(property_->GetWindowType())) {
-        WLOGD("Back key event is consumed or it is not a main window");
+    if (isConsumed) {
+        WLOGD("Back key event is consumed");
+        return;
+    }
+    PerformBack();
+}
+
+void WindowImpl::PerformBack()
+{
+    if(!WindowHelper::IsMainWindow(property_->GetWindowType())){
+        WLOGD("it is not a main window");
         return;
     }
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
