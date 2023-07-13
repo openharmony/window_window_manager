@@ -34,20 +34,22 @@ public:
 
     void SetSessionStage(int32_t eventId, const wptr<ISessionStage> &sessionStage);
     void SetLastProcessedEventId(int32_t eventId, int64_t actionTime);
+    void ClearDestroyedPersistentId(uint64_t persistentId);
 
 private:
     void MarkProcessed();
     void UpdateLastProcessedEventId(int32_t eventId);
-    void SetLastProcessedEventStatus(bool status);
+    void SetLastProcessedEventStatus(uint64_t persistentId, bool status);
     int32_t GetLastProcessedEventId();
-    void SendEvent(int64_t delayTime);
-    void ClearExpiredEvents(int32_t eventId);
+    void SendEvent(int32_t eventId, int64_t delayTime);
+    void ClearExpiredEvents(uint64_t persistentId, int32_t eventId);
+    uint64_t GetPersistentIdOfEvent(int32_t eventId);
 private:
     std::mutex anrMtx_;
     struct ANREvent {
-        bool sendStatus { false };
         int32_t lastEventId { -1 };
         int32_t lastReportId { -1 };
+        std::unordered_map<uint64_t, bool> sendStatus;
     };
     ANREvent event_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ { nullptr };

@@ -49,6 +49,10 @@ public:
     virtual void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) {}
     virtual void NotifyFocusActiveEvent(bool isFocusActive) {}
     virtual void NotifyFocusWindowIdEvent(uint32_t windowId) {}
+    virtual uint64_t GetPersistentId() const
+    {
+        return -1;
+    }
     virtual WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
     {
         return WSError::WS_OK;
