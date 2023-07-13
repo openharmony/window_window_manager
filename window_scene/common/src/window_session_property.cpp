@@ -284,16 +284,6 @@ void WindowSessionProperty::GetSessionGravity(SessionGravity& gravity, uint32_t&
     percent = sessionGravitySizePercent_;
 }
 
-void WindowSessionProperty::SetZOrder(uint32_t zOrder)
-{
-    zOrder_ = zOrder;
-}
-
-uint32_t WindowSessionProperty::GetZOrder()
-{
-    return zOrder_;
-}
-
 void WindowSessionProperty::SetDecorEnable(bool isDecorEnable)
 {
     isDecorEnable_ = isDecorEnable;
@@ -389,7 +379,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteFloat(brightness_) &&
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
-        parcel.WriteUint32(zOrder_) && parcel.WriteUint32(flags_) &&
+        parcel.WriteUint32(flags_) &&
         parcel.WriteBool(isDecorEnable_) &&
         MarshallingWindowLimits(parcel) &&
         MarshallingSystemBarMap(parcel) && parcel.WriteUint32(animationFlag_);
@@ -424,7 +414,6 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetBrightness(parcel.ReadFloat());
     property->SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));
     property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
-    property->SetZOrder(parcel.ReadUint32());
     property->SetWindowFlags(parcel.ReadUint32());
     property->SetDecorEnable(parcel.ReadBool());
     UnmarshallingWindowLimits(parcel, property);
@@ -459,7 +448,6 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     windowMode_ = property->windowMode_;
     limits_ = property->limits_;
     sysBarPropMap_ = property->sysBarPropMap_;
-    zOrder_ = property->zOrder_;
     isDecorEnable_ = property->isDecorEnable_;
     animationFlag_ = property->animationFlag_;
 }
