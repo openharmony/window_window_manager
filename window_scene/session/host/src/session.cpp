@@ -913,8 +913,8 @@ WSError Session::ProcessBackEvent()
 
 WSError Session::MarkProcessed(int32_t eventId)
 {
-    int32_t persistentId = GetPersistentId();
-    WLOGFI("persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
+    uint64_t persistentId = GetPersistentId();
+    WLOGFI("persistentId:%{public}" PRIu64 ", eventId:%{public}d", persistentId, eventId);
     DelayedSingleton<ANRManager>::GetInstance()->MarkProcessed(eventId, persistentId);
     return WSError::WS_OK;
 }
