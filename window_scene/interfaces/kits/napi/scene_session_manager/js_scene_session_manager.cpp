@@ -544,7 +544,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionActivation(NativeEngine
         return engine.CreateUndefined();
     }
 
-    if(SceneSession == nullptr){
+    if (SceneSession == nullptr) {
         WLOGFE("[NAPI]sceneSession is nullptr");
         return nullptr;
     }
@@ -588,8 +588,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackground(NativeEngine
     if (info.argc == 2 && info.argv[1]->TypeOf() != NATIVE_UNDEFINED) { // 2: params total num
         isDelegator = ConvertFromJsValue(engine, info.argv[1], isDelegator);
     }
-
-    if(SceneSession == nullptr){
+    if (SceneSession == nullptr) {
         WLOGFE("[NAPI]sceneSession is nullptr");
         return nullptr;
     }
@@ -628,7 +627,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
-    if(SceneSession == nullptr){
+    if (SceneSession == nullptr) {
         WLOGFE("[NAPI]sceneSession is nullptr");
         return nullptr;
     }
@@ -667,7 +666,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionByCall(NativeEngine& en
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
-    if(SceneSession == nullptr){
+    if (SceneSession == nullptr) {
         WLOGFE("[NAPI]sceneSession is nullptr");
         return nullptr;
     }
