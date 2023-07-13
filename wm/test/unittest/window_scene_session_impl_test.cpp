@@ -602,6 +602,39 @@ HWTEST_F(WindowSceneSessionImplTest, GetAvoidAreaByType, Function | SmallTest | 
 }
 
 /*
+ * @tc.name: Immersive
+ * @tc.desc: Immersive01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, Immersive, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetLayoutFullScreen(false));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFullScreen(false));
+    ASSERT_EQ(false, window->IsLayoutFullScreen());
+    ASSERT_EQ(false, window->IsFullScreen());
+}
+
+/*
+ * @tc.name: SystemBarProperty
+ * @tc.desc: SystemBarProperty01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+
+    SystemBarProperty property = SystemBarProperty();
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
+        window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+}
+
+/*
  * @tc.name: LimitCameraFloatWindowMininumSize
  * @tc.desc: LimitCameraFloatWindowMininumSize01 test
  * @tc.type: FUNC

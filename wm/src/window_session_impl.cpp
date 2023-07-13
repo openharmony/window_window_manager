@@ -29,6 +29,7 @@
 #include "session/container/include/window_event_channel.h"
 #include "session_manager/include/session_manager.h"
 #include "vsync_station.h"
+#include "window_adapter.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
 #include "color_parser.h"
@@ -942,19 +943,36 @@ WMError WindowSessionImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChange
         WLOGFE("listener is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
+
+    uint64_t persistentId = GetPersistentId();
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-    return RegisterListener(avoidAreaChangeListeners_[GetPersistentId()], listener);
+    WMError ret = RegisterListener(avoidAreaChangeListeners_[persistentId], listener);
+    if (ret != WMError::WM_OK) {
+        return ret;
+    }
+    if (avoidAreaChangeListeners_[persistentId].size() == 1) {
+        ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionAvoidAreaListener(persistentId, true);
+    }
+    return ret;
 }
 
 WMError WindowSessionImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
     WLOGFD("Start unregister");
+    uint64_t persistentId = GetPersistentId();
     if (listener == nullptr) {
         WLOGFE("listener is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-    return UnregisterListener(avoidAreaChangeListeners_[GetPersistentId()], listener);
+    WMError ret = UnregisterListener(avoidAreaChangeListeners_[persistentId], listener);
+    if (ret != WMError::WM_OK) {
+        return ret;
+    }
+    if (avoidAreaChangeListeners_[persistentId].empty()) {
+        ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionAvoidAreaListener(persistentId, false);
+    }
+    return ret;
 }
 
 template<typename T>
@@ -979,6 +997,13 @@ void WindowSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, 
             listener->OnAvoidAreaChanged(*avoidArea, type);
         }
     }
+}
+
+WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
+{
+    WLOGI("UpdateAvoidArea, id:%{public}" PRIu64, GetPersistentId());
+    NotifyAvoidAreaChange(avoidArea, type);
+    return WSError::WS_OK;
 }
 
 void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)

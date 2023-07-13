@@ -118,6 +118,7 @@ public:
     void UpdateTitleButtonVisibility();
     WSError NotifyDestroy() override;
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
+    WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void NotifyTouchDialogTarget() override;
 
     WindowState state_ { WindowState::STATE_INITIAL };

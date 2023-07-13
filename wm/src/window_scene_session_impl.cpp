@@ -807,6 +807,20 @@ SystemBarProperty WindowSceneSessionImpl::GetSystemBarPropertyByType(WindowType 
     return curProperties[type];
 }
 
+WMError WindowSceneSessionImpl::NotifyWindowSessionProperty()
+{
+    WLOGFD("NotifyWindowSessionProperty called windowId:%{public}u", GetWindowId());
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
+        return WMError::WM_OK;
+    }
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
 {
     WLOGFI("SetSystemBarProperty windowId:%{public}u type:%{public}u"
@@ -820,21 +834,12 @@ WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const Syst
     }
 
     property_->SetSystemBarProperty(type, property);
-    return WMError::WM_OK;
-}
-
-WMError WindowSceneSessionImpl::NotifyWindowSessionProperty()
-{
-    WLOGFD("NotifyWindowSessionProperty called windowId:%{public}u", GetWindowId());
-    if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
+    WMError ret = NotifyWindowSessionProperty();
+    if (ret != WMError::WM_OK) {
+        WLOGFE("NotifyWindowSessionProperty winId:%{public}u errCode:%{public}d",
+            GetWindowId(), static_cast<int32_t>(ret));
     }
-    if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
-        return WMError::WM_OK;
-    }
-    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
-    return WMError::WM_OK;
+    return ret;
 }
 
 WMError WindowSceneSessionImpl::SetFullScreen(bool status)
@@ -852,11 +857,6 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
     if (ret != WMError::WM_OK) {
         WLOGFE("SetSystemBarProperty errCode:%{public}d winId:%{public}u",
             static_cast<int32_t>(ret), GetWindowId());
-    }
-    ret = NotifyWindowSessionProperty();
-    if (ret != WMError::WM_OK) {
-        WLOGFE("NotifyWindowSessionProperty winId:%{public}u errCode:%{public}d",
-            GetWindowId(), static_cast<int32_t>(ret));
     }
     return ret;
 }

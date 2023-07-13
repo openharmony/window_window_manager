@@ -500,7 +500,7 @@ AvoidArea SessionProxy::GetAvoidAreaByType(AvoidAreaType type)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     AvoidArea avoidArea;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
