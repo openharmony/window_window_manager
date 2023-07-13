@@ -113,6 +113,7 @@ public:
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     WSError TransferFocusActiveEvent(bool isFocusActive);
     WSError TransferFocusWindowIdEvent(uint32_t windowId);
+    WSError TransferFocusStateEvent(bool focusState);
 
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);

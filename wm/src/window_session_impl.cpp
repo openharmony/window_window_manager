@@ -16,6 +16,8 @@
 #include "window_session_impl.h"
 
 #include <cstdlib>
+#include <optional>
+
 #include <common/rs_common_def.h>
 #include <ipc_skeleton.h>
 #include <transaction/rs_interfaces.h>
@@ -434,6 +436,11 @@ WMError WindowSessionImpl::SetUIContent(const std::string& contentInfo,
     if (focusWindowId_ != INVALID_WINDOW_ID) {
         uiContent_->SetFocusWindowId(focusWindowId_);
     }
+
+    if (focusState_ != std::nullopt) {
+        focusState_.value() ? uiContent_->Focus() : uiContent_->UnFocus();
+    }
+
     if (isIgnoreSafeAreaNeedNotify_) {
         uiContent_->SetIgnoreViewSafeArea(isIgnoreSafeArea_);
     }
@@ -1044,6 +1051,14 @@ void WindowSessionImpl::NotifyFocusWindowIdEvent(uint32_t windowId)
         uiContent_->SetFocusWindowId(windowId);
     }
     focusWindowId_ = windowId;
+}
+
+void WindowSessionImpl::NotifyFocusStateEvent(bool focusState)
+{
+    if (uiContent_) {
+        focusState ? uiContent_->Focus() : uiContent_->UnFocus();
+    }
+    focusState_ = focusState;
 }
 
 void WindowSessionImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
