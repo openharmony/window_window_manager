@@ -53,6 +53,7 @@ public:
     {
         return -1;
     }
+    virtual void NotifyFocusStateEvent(bool focusState) {}
     virtual WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
     {
         return WSError::WS_OK;
