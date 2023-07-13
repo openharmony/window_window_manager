@@ -534,7 +534,8 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionActivation(NativeEngine
         return engine.CreateUndefined();
     }
     sptr<SceneSession> sceneSession = jsSceneSession->GetNativeSession();
-    bool isNewActive = ConvertFromJsValue(engine, info.argv[1], isNewActive);
+    bool isNewActive = true;
+    ConvertFromJsValue(engine, info.argv[1], isNewActive);
     AsyncTask::CompleteCallback complete = [sceneSession, isNewActive](NativeEngine& engine, AsyncTask& task,
         int32_t status) {
         if (sceneSession == nullptr) {
