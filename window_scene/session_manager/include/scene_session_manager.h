@@ -95,6 +95,7 @@ public:
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token);
     WSError GetFocusSessionToken(sptr<IRemoteObject> &token);
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller);
+    WSError UpdateSessionAvoidAreaListener(uint64_t& persistentId, bool haveListener);
 
     void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
     void InitPersistentStorage();
@@ -131,6 +132,10 @@ private:
     WSError UpdateParentSession(const sptr<SceneSession>& sceneSession, sptr<WindowSessionProperty> property);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void UpdateFocusableProperty(uint64_t persistentId);
+    std::vector<sptr<SceneSession>> GetSceneSessionVectorByType(WindowType type);
+    bool UpdateSessionAvoidAreaIfNeed(const uint64_t& persistentId,
+        const AvoidArea& avoidArea, AvoidAreaType avoidAreaType);
+    bool UpdateAvoidArea(const uint64_t& persistentId);
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     std::shared_ptr<Global::Resource::ResourceManager> CreateResourceManager(
@@ -156,6 +161,8 @@ private:
 
     sptr<RootSceneSession> rootSceneSession_;
     std::map<uint64_t, sptr<SceneSession>> sceneSessionMap_;
+    std::set<sptr<SceneSession>> avoidAreaListenerSessionSet_;
+    std::map<uint64_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
 
     NotifyCreateSpecificSessionFunc createSpecificSessionFunc_;
     ProcessGestureNavigationEnabledChangeFunc gestureNavigationEnabledChangeFunc_;
