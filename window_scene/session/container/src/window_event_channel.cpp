@@ -88,7 +88,7 @@ WSError WindowEventChannel::TransferFocusActiveEvent(bool isFocusActive)
 
 void WindowEventChannel::OnDispatchEventProcessed(int32_t eventId, int64_t actionTime)
 {
-    DelayedSingleton<ANRHandler>::GetInstance()->SetLastProcessedEventId(eventId, actionTime);
+    DelayedSingleton<ANRHandler>::GetInstance()->HandleEventConsumed(eventId, actionTime);
 }
 
 void WindowEventChannel::PrintKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event)
