@@ -544,6 +544,10 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionActivation(NativeEngine
         return engine.CreateUndefined();
     }
 
+    if(SceneSession == nullptr){
+        WLOGFE("[NAPI]sceneSession is nullptr");
+        return nullptr;
+    }
     SceneSessionManager::GetInstance().RequestSceneSessionActivation(sceneSession);
     return nullptr;
 }
@@ -585,6 +589,10 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackground(NativeEngine
         isDelegator = ConvertFromJsValue(engine, info.argv[1], isDelegator);
     }
 
+    if(SceneSession == nullptr){
+        WLOGFE("[NAPI]sceneSession is nullptr");
+        return nullptr;
+    }
     SceneSessionManager::GetInstance().RequestSceneSessionBackground(sceneSession, isDelegator);
     return nullptr;
 }
@@ -620,7 +628,10 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
-
+    if(SceneSession == nullptr){
+        WLOGFE("[NAPI]sceneSession is nullptr");
+        return nullptr;
+    }
     SceneSessionManager::GetInstance().RequestSceneSessionDestruction(sceneSession);
     return nullptr;
 }
@@ -656,7 +667,10 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionByCall(NativeEngine& en
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
-
+    if(SceneSession == nullptr){
+        WLOGFE("[NAPI]sceneSession is nullptr");
+        return nullptr;
+    }
     SceneSessionManager::GetInstance().RequestSceneSessionByCall(sceneSession);
     return nullptr;
 }
