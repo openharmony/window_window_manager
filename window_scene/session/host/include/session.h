@@ -177,6 +177,7 @@ public:
 
     bool IsSessionValid() const;
 
+    sptr<IRemoteObject> dialogTargetToken_ = nullptr;
     uint32_t GetWindowId() const;
     int32_t GetCallingPid() const;
     int32_t GetCallingUid() const;
