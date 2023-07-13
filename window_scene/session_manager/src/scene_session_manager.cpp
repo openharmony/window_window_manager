@@ -1597,6 +1597,53 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
     taskScheduler_->PostAsyncTask(task);
 }
 
+sptr<SceneSession> SceneSessionManager::FindMainWindowWithToken(sptr<IRemoteObject> targetToken)
+{
+    if (!targetToken) {
+        WLOGFE("Token is null, cannot find main window");
+        return nullptr;
+    }
+
+    auto iter = std::find_if(sceneSessionMap_.begin(), sceneSessionMap_.end(),
+        [targetToken](const std::map<uint64_t, sptr<SceneSession>>::value_type& pair) {
+            if (pair.second->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+                return pair.second->GetAbilityToken() == targetToken;
+            }
+            return false;
+        });
+    if (iter == sceneSessionMap_.end()) {
+        WLOGFE("Cannot find session");
+        return nullptr;
+    }
+    return iter->second;
+}
+
+WSError SceneSessionManager::BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken)
+{
+    if (targetToken == nullptr) {
+        WLOGFE("Target token is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    auto scnSession = GetSceneSession(persistentId);
+    if (scnSession == nullptr) {
+        WLOGFE("Session is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (scnSession->GetWindowType() != WindowType::WINDOW_TYPE_DIALOG) {
+        WLOGFE("Session is not dialog window");
+        return WSError::WS_OK;
+    }
+    scnSession->dialogTargetToken_ = targetToken;
+    sptr<SceneSession> parentSession = FindMainWindowWithToken(targetToken);
+    if (parentSession == nullptr) {
+        scnSession->NotifyDestroy();
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    scnSession->SetParentSession(parentSession);
+    WLOGFD("Bind dialog success, dialog id %{public}" PRIu64 ", parent id %{public}" PRIu64 "",
+        persistentId, parentSession->GetPersistentId());
+    return WSError::WS_OK;
+}
 WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {

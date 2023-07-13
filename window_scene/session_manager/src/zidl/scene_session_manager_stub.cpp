@@ -63,6 +63,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleTerminateSessionNew),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_AVOIDAREA_LISTENER),
         &SceneSessionManagerStub::HandleUpdateSessionAvoidAreaListener),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_BIND_DIALOG_TARGET),
+        &SceneSessionManagerStub::HandleBindDialogTarget),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -303,6 +305,16 @@ int SceneSessionManagerStub::HandleUpdateSessionAvoidAreaListener(MessageParcel&
     bool haveAvoidAreaListener = data.ReadBool();
     WSError errCode = UpdateSessionAvoidAreaListener(persistentId, haveAvoidAreaListener);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleBindDialogTarget!");
+    uint64_t persistentId = data.ReadUint64();
+    sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
+    const WSError& ret = BindDialogTarget(persistentId, remoteObject);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
