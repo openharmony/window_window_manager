@@ -351,8 +351,20 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property)
     if (!isActive_) {
         SetActive(true);
     }
+
+    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        NotifyCallingSessionForeground();
+    }
     NotifyForeground();
     return WSError::WS_OK;
+}
+
+void Session::NotifyCallingSessionForeground()
+{
+    if (notifyCallingSessionForegroundFunc_) {
+        WLOGFI("Notify calling window that input method shown");
+        notifyCallingSessionForegroundFunc_(persistentId_);
+    }
 }
 
 WSError Session::Background()
@@ -365,9 +377,20 @@ WSError Session::Background()
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
+    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        NotifyCallingSessionBackground();
+    }
     snapshot_ = Snapshot();
     NotifyBackground();
     return WSError::WS_OK;
+}
+
+void Session::NotifyCallingSessionBackground()
+{
+    if (notifyCallingSessionBackgroundFunc_) {
+        WLOGFI("Notify calling window that input method hide");
+        notifyCallingSessionBackgroundFunc_();
+    }
 }
 
 WSError Session::Disconnect()
@@ -553,6 +576,16 @@ WSError Session::PendingSessionToBackgroundForDelegator()
     return WSError::WS_OK;
 }
 
+void Session::SetNotifyCallingSessionForegroundFunc(const NotifyCallingSessionForegroundFunc& func)
+{
+    notifyCallingSessionForegroundFunc_ = func;
+}
+
+void Session::SetNotifyCallingSessionBackgroundFunc(const NotifyCallingSessionBackgroundFunc& func)
+{
+    notifyCallingSessionBackgroundFunc_ = func;
+}
+
 void Session::NotifyTouchDialogTarget()
 {
     if (!sessionStage_) {
@@ -701,6 +734,15 @@ WSError Session::TransferFocusWindowIdEvent(uint32_t windowId)
         return WSError::WS_ERROR_NULLPTR;
     }
     return windowEventChannel_->TransferFocusWindowId(windowId);
+}
+
+WSError Session::TransferFocusStateEvent(bool focusState)
+{
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferFocusState(focusState);
 }
 
 std::shared_ptr<Media::PixelMap> Session::GetSnapshot() const
@@ -992,11 +1034,12 @@ WindowMode Session::GetWindowMode()
 
 void Session::SetZOrder(uint32_t zOrder)
 {
-    if (property_ == nullptr) {
-        WLOGFW("null property.");
-        return;
-    }
-    property_->SetZOrder(zOrder);
+    zOrder_ = zOrder;
+}
+
+uint32_t Session::GetZOrder()
+{
+    return zOrder_;
 }
 
 WSError Session::UpdateSnapshot()

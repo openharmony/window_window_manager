@@ -565,11 +565,50 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         sceneSessionMap_.insert({ persistentId, sceneSession });
         RegisterSessionStateChangeNotifyManagerFunc(sceneSession);
         RegisterSessionRectChangeNotifyManagerFunc(sceneSession);
+        RegisterInputMethodShownFunc(sceneSession);
+        RegisterInputMethodHideFunc(sceneSession);
         WLOGFI("create session persistentId: %{public}" PRIu64 "", persistentId);
         return sceneSession;
     };
 
     return taskScheduler_->PostSyncTask(task);
+}
+
+void SceneSessionManager::RegisterInputMethodShownFunc(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    NotifyCallingSessionForegroundFunc onInputMethodShown = [this](uint64_t persistentId) {
+        this->OnInputMethodShown(persistentId);
+    };
+    sceneSession->SetNotifyCallingSessionForegroundFunc(onInputMethodShown);
+    WLOGFD("RegisterInputMethodShownFunc success");
+}
+
+void SceneSessionManager::OnInputMethodShown(const uint64_t& persistentId)
+{
+    WLOGFD("Resize input method calling window");
+    auto scnSession = GetSceneSession(persistentId);
+    if (scnSession == nullptr) {
+        WLOGFE("Input method is null");
+        return;
+    }
+    ResizeSoftInputCallingSessionIfNeed(scnSession);
+}
+
+void SceneSessionManager::RegisterInputMethodHideFunc(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    NotifyCallingSessionBackgroundFunc onInputMethodHide = [this]() {
+        this->RestoreCallingSessionSizeIfNeed();
+    };
+    sceneSession->SetNotifyCallingSessionBackgroundFunc(onInputMethodHide);
+    WLOGFD("RegisterInputMethodHideFunc success");
 }
 
 sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<SceneSession>& scnSession)
@@ -1561,7 +1600,7 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(const sptr<SceneSe
 
     callingWindowRestoringRect_ = callingSessionRect;
     NotifyOccupiedAreaChangeInfo(callingSession, newRect, softInputSessionRect);
-    callingSession->UpdateSessionRect(callingWindowRestoringRect_, SizeChangeReason::UNDEFINED);
+    callingSession->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
 }
 
 void SceneSessionManager::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> callingSession,
@@ -1571,11 +1610,14 @@ void SceneSessionManager::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> 
     const WSRect& safeRect = SessionHelper::GetOverlap(occupiedArea, rect, 0, 0);
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
         SessionHelper::TransferToRect(occupiedArea), safeRect.height_);
+    WLOGFD("OccupiedAreaChangeInfo rect: %{public}u %{public}u %{public}u %{public}u",
+        occupiedArea.posX_, occupiedArea.posY_, occupiedArea.width_, occupiedArea.height_);
     callingSession->NotifyOccupiedAreaChangeInfo(info);
 }
 
 void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
 {
+    WLOGFD("RestoreCallingSessionSizeIfNeed");
     auto callingSession = GetSceneSession(focusedSessionId_);
     if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_) && callingSession != nullptr &&
         callingSession->GetSessionProperty()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
@@ -1698,10 +1740,10 @@ void SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     info->focused_ = sceneSession->GetPersistentId() == focusedSessionId_;
     info->type_ = sceneSession->GetWindowType();
     info->mode_ = sceneSession->GetWindowMode();
+    info->layer_ = sceneSession->GetZOrder();
     auto property = sceneSession->GetSessionProperty();
     if (property != nullptr) {
         info->displayId_ = property->GetDisplayId();
-        info->layer_ = property->GetZOrder();
         info->isDecorEnable_ = property->IsDecorEnable();
     }
     infos.emplace_back(info);
