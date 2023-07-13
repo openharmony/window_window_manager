@@ -21,7 +21,10 @@ declare_args() {
 }
 
 ohos_prebuilt_etc("window_manager_config") {
-  if (window_manager_dayu200_resource_config) {
+  if (is_emulator) {
+    source = "./other/window_manager_config.xml"
+    install_enable = false
+  } else if (window_manager_dayu200_resource_config) {
     source = "./rk3568/window_manager_config.xml"
     install_enable = true
   } else if (window_manager_dayu210_resource_config) {
@@ -37,7 +40,10 @@ ohos_prebuilt_etc("window_manager_config") {
 }
 
 ohos_prebuilt_etc("display_manager_config") {
-  if (window_manager_dayu200_resource_config) {
+  if (is_emulator) {
+    source = "./other/display_manager_config.xml"
+    install_enable = false
+  } else if (window_manager_dayu200_resource_config) {
     source = "./rk3568/display_manager_config.xml"
     install_enable = true
   } else if (window_manager_dayu210_resource_config) {
