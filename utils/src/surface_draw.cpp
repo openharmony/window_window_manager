@@ -303,8 +303,6 @@ bool SurfaceDraw::DoDrawImageRect(sptr<OHOS::SurfaceBuffer> buffer, const Rect& 
     // actual width of the surface buffer after alignment
     auto bufferStride = buffer->GetStride();
     int32_t alignWidth = bufferStride / static_cast<int32_t>(IMAGE_BYTES_STRIDE);
-    WLOGFD("drawing image rect win width: %{public}d win height: %{public}d align width:%{public}d.",
-        winWidth, winHeight, alignWidth);
     if (pixelMap == nullptr) {
         WLOGFE("drawing pixel map failed, because pixel map is nullptr.");
         return false;
@@ -313,21 +311,6 @@ bool SurfaceDraw::DoDrawImageRect(sptr<OHOS::SurfaceBuffer> buffer, const Rect& 
         WLOGFE("drawing pixel map failed, because width or height is invalid.");
         return false;
     }
-    float xAxis = static_cast<float>(winWidth) / pixelMap->GetWidth();
-    float yAxis = static_cast<float>(winHeight) / pixelMap->GetHeight();
-    float axis = std::min(xAxis, yAxis);
-    if (axis < 1.0) {
-        // scale when the size of the pixel map is larger than the window
-        // use axis to scale equally
-        pixelMap->scale(axis, axis);
-    } else if (fillWindow) {
-        // scale snapshot to whole window
-        pixelMap->scale(xAxis, yAxis);
-    }
-    int left = (winWidth - pixelMap->GetWidth()) / 2; // 2 is the left and right boundaries of the window
-    int top = (winHeight - pixelMap->GetHeight()) / 2; // 2 is the top and bottom boundaries of the window
-    WLOGFD("pixelMap width: %{public}d win height: %{public}d left:%{public}d top:%{public}d.",
-        pixelMap->GetWidth(), pixelMap->GetHeight(), left, top);
     Drawing::Bitmap bitmap;
     Drawing::BitmapFormat format { Drawing::ColorType::COLORTYPE_RGBA_8888,
         Drawing::AlphaType::ALPHATYPE_OPAQUE };
@@ -335,6 +318,25 @@ bool SurfaceDraw::DoDrawImageRect(sptr<OHOS::SurfaceBuffer> buffer, const Rect& 
     Drawing::Canvas canvas;
     canvas.Bind(bitmap);
     canvas.Clear(color);
+    float xAxis = static_cast<float>(winWidth) / pixelMap->GetWidth();
+    float yAxis = static_cast<float>(winHeight) / pixelMap->GetHeight();
+    float axis = std::min(xAxis, yAxis);
+    int scaledPixelMapW = pixelMap->GetWidth();
+    int scaledPixelMapH = pixelMap->GetHeight();
+    if (axis < 1.0) {
+        canvas.Scale(axis, axis);
+        scaledPixelMapW = scaledPixelMapW * axis;
+        scaledPixelMapH = scaledPixelMapH * axis;
+    } else if (fillWindow) {
+        // scale snapshot to whole window
+        canvas.Scale(xAxis, yAxis);
+        scaledPixelMapW = winWidth;
+        scaledPixelMapH = winHeight;
+    }
+    int left = (winWidth - scaledPixelMapW) / 2; // 2 is the left and right boundaries of the win
+    int top = (winHeight - scaledPixelMapH) / 2; // 2 is the top and bottom boundaries of the win
+    WLOGFD("pixelMap width: %{public}d win height: %{public}d left:%{public}d top:%{public}d.",
+        pixelMap->GetWidth(), pixelMap->GetHeight(), left, top);
     canvas.DrawBitmap(*pixelMap, left, top);
     // bufferSize is actual size of the surface buffer after alignment
     int32_t bufferSize = bufferStride * winHeight;
