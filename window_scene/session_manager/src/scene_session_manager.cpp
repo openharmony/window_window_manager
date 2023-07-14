@@ -219,6 +219,11 @@ void SceneSessionManager::ConfigWindowSceneXml()
     if (item.IsMap()) {
         ConfigWindowAnimation(item);
     }
+
+    item = config["startWindowTransitionAnimation"];
+    if (item.IsMap()) {
+        ConfigStartingWindowAnimation(item);
+    }
 }
 
 void SceneSessionManager::ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig)
@@ -427,6 +432,31 @@ void SceneSessionManager::ConfigWindowAnimation(const WindowSceneConfig::ConfigI
     if (item.IsFloats() && item.floatsValue_->size() == 1) {
         auto opacity = *item.floatsValue_;
         appWindowSceneConfig_.windowAnimation_.opacity_ = opacity[0];
+    }
+}
+
+void SceneSessionManager::ConfigStartingWindowAnimation(const WindowSceneConfig::ConfigItem& configItem)
+{
+    auto& config = appWindowSceneConfig_.startingWindowAnimationConfig_;
+    auto item = configItem.GetProp("enable");
+    if (item.IsBool()) {
+        config.enabled_ = item.boolValue_;
+    }
+    item = configItem["timing"];
+    if (item.IsMap() && item.mapValue_->count("curve")) {
+        config.curve_ = CreateCurve(item["curve"]);
+    }
+    item = configItem["timing"]["duration"];
+    if (item.IsInts() && item.intsValue_->size() == 1) {
+        config.duration_ = (*item.intsValue_)[0];
+    }
+    item = configItem["opacityStart"];
+    if (item.IsFloats() && item.floatsValue_->size() == 1) {
+        config.opacityStart_ = (*item.floatsValue_)[0];
+    }
+    item = configItem["opacityEnd"];
+    if (item.IsFloats() && item.floatsValue_->size() == 1) {
+        config.opacityEnd_ = (*item.floatsValue_)[0];
     }
 }
 
