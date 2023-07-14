@@ -1315,7 +1315,7 @@ WMError WindowSceneSessionImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
             return WMError::WM_ERROR_INVALID_PARAM;
         }
         surfaceNode_->SetBackgroundFilter(RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle), 
-                                          display->GetVirtualPixelRatio()));
+                                                                         display->GetVirtualPixelRatio()));
     }
 
     RSTransaction::FlushImplicitTransaction();
