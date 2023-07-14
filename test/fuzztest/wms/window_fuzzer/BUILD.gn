@@ -60,7 +60,7 @@ ohos_fuzztest("WindowFuzzTest") {
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "eventhandler:libeventhandler",
-    "graphic_standard:window_animation",
+    "graphic_2d:window_animation",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",

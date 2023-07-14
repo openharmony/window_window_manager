@@ -47,28 +47,24 @@ ANRHandler::ANRHandler()
 
 ANRHandler::~ANRHandler() {}
 
-void ANRHandler::SetSessionStage(const wptr<ISessionStage> &sessionStage)
+void ANRHandler::SetSessionStage(int32_t eventId, const wptr<ISessionStage> &sessionStage)
 {
-    CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(anrMtx_);
-    sessionStage_ = sessionStage;
+    sessionStageMap_[eventId] = sessionStage;
 }
 
 void ANRHandler::SetLastProcessedEventStatus(bool status)
 {
-    CALL_DEBUG_ENTER;
     event_.sendStatus = status;
 }
 
 void ANRHandler::UpdateLastProcessedEventId(int32_t eventId)
 {
-    CALL_DEBUG_ENTER;
     event_.lastEventId = eventId;
 }
 
 void ANRHandler::SetLastProcessedEventId(int32_t eventId, int64_t actionTime)
 {
-    CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(anrMtx_);
     if (event_.lastEventId > eventId) {
         WLOGFE("Event id %{public}d less then last processed lastEventId %{public}d", eventId, event_.lastEventId);
@@ -98,7 +94,6 @@ void ANRHandler::SetLastProcessedEventId(int32_t eventId, int64_t actionTime)
 
 int32_t ANRHandler::GetLastProcessedEventId()
 {
-    CALL_DEBUG_ENTER;
     if (event_.lastEventId == INVALID_OR_PROCESSED_ID
         || event_.lastEventId < event_.lastReportId) {
         WLOGFD("Invalid or processed, lastEventId:%{public}d, lastReportId:%{public}d",
@@ -112,26 +107,28 @@ int32_t ANRHandler::GetLastProcessedEventId()
 
 void ANRHandler::MarkProcessed()
 {
-    CALL_DEBUG_ENTER;
     int32_t eventId = GetLastProcessedEventId();
     if (eventId == INVALID_OR_PROCESSED_ID) {
         return;
     }
     WLOGFD("Processed eventId:%{public}d", eventId);
-    if (sessionStage_ == nullptr) {
-        WLOGFE("sessionStage is nullptr");
+    if (sessionStageMap_.find(eventId) == sessionStageMap_.end()) {
+        WLOGFE("sessionStage for eventId:%{public}d is not in sessionStageMap", eventId);
         return;
     }
-    if (WSError ret = sessionStage_->MarkProcessed(eventId); ret != WSError::WS_OK) {
+    if (sessionStageMap_[eventId] == nullptr) {
+        WLOGFE("sessionStage for eventId:%{public}d is nullptr", eventId);
+        return;
+    }
+    if (WSError ret = sessionStageMap_[eventId]->MarkProcessed(eventId); ret != WSError::WS_OK) {
         WLOGFE("Send to sceneBoard failed, ret:%{public}d", ret);
     }
+    ClearExpiredEvents(eventId);
     SetLastProcessedEventStatus(false);
 }
 
 void ANRHandler::SendEvent(int64_t delayTime)
 {
-    CALL_DEBUG_ENTER;
-    WLOGFD("Event delayTime:%{public}" PRId64, delayTime);
     SetLastProcessedEventStatus(true);
     if (eventHandler_ == nullptr) {
         WLOGFE("eventHandler is nullptr");
@@ -140,6 +137,17 @@ void ANRHandler::SendEvent(int64_t delayTime)
     std::function<void()> eventFunc = std::bind(&ANRHandler::MarkProcessed, this);
     if (!eventHandler_->PostHighPriorityTask(eventFunc, delayTime)) {
         WLOGFE("Send dispatch event failed");
+    }
+}
+
+void ANRHandler::ClearExpiredEvents(int32_t eventId)
+{
+    for (auto iter = sessionStageMap_.begin(); iter != sessionStageMap_.end();) {
+        if (iter->first < eventId) {
+            sessionStageMap_.erase(iter++);
+        } else {
+            iter++;
+        }
     }
 }
 } // namespace Rosen

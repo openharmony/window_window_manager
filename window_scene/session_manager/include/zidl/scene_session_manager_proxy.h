@@ -49,6 +49,7 @@ public:
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject> &token) override;
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) override;
+    WSError UpdateSessionAvoidAreaListener(uint64_t& persistentId, bool haveListener) override;
 
 private:
     static inline BrokerDelegator<SceneSessionManagerProxy> delegator_;

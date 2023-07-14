@@ -37,6 +37,8 @@ public:
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
     WSError TransferFocusActiveEvent(bool isFocusActive) override;
     WSError TransferFocusWindowId(uint32_t windowId) override;
+    WSError TransferFocusState(bool focusState) override;
+
 private:
     static void OnDispatchEventProcessed(int32_t eventId, int64_t actionTime);
 

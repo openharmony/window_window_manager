@@ -90,7 +90,7 @@ if (!ispreview) {
 
     external_deps = [
       "ace_engine:ace_uicontent",
-      "graphic_standard:librender_service_client",
+      "graphic_2d:librender_service_client",
       "hilog:libhilog",
       "previewer:ide_extension",
     ]

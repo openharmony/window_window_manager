@@ -739,7 +739,7 @@ WMError WindowImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
     return WMError::WM_OK;
 }
 
-WMError WindowImpl::NotifyMemoryLevel(int32_t level) const
+WMError WindowImpl::NotifyMemoryLevel(int32_t level)
 {
     return WMError::WM_OK;
 }
