@@ -32,6 +32,20 @@ public:
     }
 };
 
+class ScreenshotListener : public DisplayManager::IScreenshotListener {
+public:
+    void OnScreenshot(const ScreenshotInfo info) override
+    {
+    }
+};
+
+class PrivateWindowListener : public DisplayManager::IPrivateWindowListener {
+public:
+    void OnPrivateWindow(bool hasPrivate) override
+    {
+    }
+};
+
 class DisplayPowerEventListener : public IDisplayPowerEventListener {
 public:
     virtual void OnDisplayPowerEvent(DisplayPowerEvent event, EventStatus status) override
@@ -68,8 +82,17 @@ bool DisplayFuzzTest(const uint8_t* data, size_t size)
     displayManager.GetDisplayById(displayId);
     startPos += GetObject<ScreenId>(screenId, data + startPos, size - startPos);
     displayManager.GetDisplayByScreen(screenId);
+    bool flag = true;
+    startPos += GetObject<bool>(flag, data + startPos, size - startPos);
+    displayManager.HasPrivateWindow(displayId, flag);
     displayManager.RegisterDisplayListener(displayListener);
     displayManager.UnregisterDisplayListener(displayListener);
+    sptr<ScreenshotListener> screenshotListener = new ScreenshotListener();
+    displayManager.RegisterScreenshotListener(screenshotListener);
+    displayManager.UnregisterScreenshotListener(screenshotListener);
+    sptr<PrivateWindowListener> privateWindowListener = new PrivateWindowListener();
+    displayManager.RegisterPrivateWindowListener(privateWindowListener);
+    displayManager.UnregisterPrivateWindowListener(privateWindowListener);
     return true;
 }
 
