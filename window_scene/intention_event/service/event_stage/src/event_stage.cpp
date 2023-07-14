@@ -71,16 +71,24 @@ std::list<int32_t> EventStage::DelEvents(uint64_t persistentId, int32_t id)
         return {};
     }
     auto &events = events_[persistentId];
-    auto fistMatchIter = find_if(events.begin(), events.end(), [id](const auto &item) {
-        return item.id > id;
-    });
+    // auto fistMatchIter = find_if(events.begin(), events.end(), [id](const auto &item) {
+    //     return item.id > id;
+    // });
     std::list<int32_t> timerIds;
-    for (auto iter = events.begin(); iter != fistMatchIter; iter++) {
+    for (auto iter = events.begin(); iter != events.end(); iter++) {
         timerIds.push_back(iter->timerId);
     }
-    events.erase(events.begin(), fistMatchIter);
+    events.erase(events.begin(), events.end());
     SetAnrStatus(persistentId, false);
     return timerIds;
 }
+
+void EventStage::OnSessionLost(uint64_t persistentId)
+{
+    CALL_DEBUG_ENTER;
+    events_.erase(persistentId);
+    isAnrProcess_.erase(persistentId);
+}
+
 } // namespace MMI
 } // namespace OHOS
