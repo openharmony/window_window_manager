@@ -78,6 +78,8 @@ public:
 
     WSError SetFocusedSession(uint64_t persistentId);
     uint64_t GetFocusedSession() const;
+    WSError GetAllSessionDumpInfo(std::string& info);
+    WSError GetSessionDumpInfo(const sptr<DumpParam>& param, std::string& info);
     WSError UpdateFocus(uint64_t persistentId, bool isFocused);
     WSError SwitchUser(int32_t oldUserId, int32_t newUserId, std::string &fileDir);
     int32_t GetCurrentUserId() const;

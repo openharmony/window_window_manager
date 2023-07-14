@@ -26,7 +26,6 @@ public:
     explicit MockSessionManagerServiceProxy(const sptr<IRemoteObject>& impl) :
         IRemoteProxy<IMockSessionManagerInterface>(impl) {};
     ~MockSessionManagerServiceProxy() {};
-
     sptr<IRemoteObject> GetSessionManagerService() override;
 private:
     static inline BrokerDelegator<MockSessionManagerServiceProxy> delegator_;
