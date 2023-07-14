@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <mutex>
+#include <queue>
 #include <unordered_map>
 
 #include "event_handler.h"
@@ -48,6 +49,7 @@ private:
     struct ANRHandlerState {
         std::unordered_map<uint64_t, bool> sendStatus;
         int32_t currentEventIdToReceipt { -1 };
+        std::queue<int32_t> eventsToReceipt;
     };
     ANRHandlerState anrHandlerState_;
     std::unordered_map<int32_t, wptr<ISessionStage>> sessionStageMap_;
