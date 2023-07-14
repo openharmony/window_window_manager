@@ -35,6 +35,11 @@
 #include <hitrace_meter.h>
 #include <transaction/rs_transaction.h>
 #include <transaction/rs_interfaces.h>
+#include <cinttypes>
+#include <csignal>
+#include <iomanip>
+#include <map>
+#include <sstream>
 
 #ifdef RES_SCHED_ENABLE
 #include "res_type.h"
@@ -82,6 +87,12 @@ constexpr int32_t SCALE_DIMENSION = 2;
 constexpr int32_t TRANSLATE_DIMENSION = 2;
 constexpr int32_t ROTAION_DIMENSION = 4;
 constexpr int32_t CUBIC_CURVE_DIMENSION = 4;
+
+constexpr int WINDOW_NAME_MAX_LENGTH = 20;
+const std::string ARG_DUMP_HELP = "-h";
+const std::string ARG_DUMP_ALL = "-a";
+const std::string ARG_DUMP_SCREEN = "-s";
+const std::string ARG_DUMP_DISPLAY = "-d";
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SceneSessionManager)
@@ -1251,6 +1262,57 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
     return;
 }
 
+WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
+{
+    int32_t screenGroupId = 0;
+    std::ostringstream oss;
+    oss << "-------------------------------------ScreenGroup " << screenGroupId
+        << "-------------------------------------" << std::endl;
+    oss << "WindowName           DisplayId Pid     WinId Type Mode Flag ZOrd Orientation [ x    y    w    h    ]"
+        << std::endl;
+    for (auto& iter : sceneSessionMap_) {
+        auto pSession = iter.second;
+        if (pSession == nullptr) {
+            continue;
+        }
+        uint32_t zOrder = pSession->GetZOrder();
+        WSRect rect = pSession->GetSessionRect();
+        std::string sName = pSession->GetWindowName();
+        const std::string& windowName = sName.size() <= WINDOW_NAME_MAX_LENGTH ?
+            sName : sName.substr(0, WINDOW_NAME_MAX_LENGTH);
+        // std::setw is used to set the output width and different width values are set to keep the format aligned.
+        oss << std::left << std::setw(21) << windowName
+            << std::left << std::setw(10) << 0
+            << std::left << std::setw(8) << pSession->GetCallingPid()
+            << std::left << std::setw(6) << pSession->GetPersistentId()
+            << std::left << std::setw(5) << static_cast<uint32_t>(pSession->GetWindowType())
+            << std::left << std::setw(5) << static_cast<uint32_t>(pSession->GetWindowMode())
+            << std::left << std::setw(5) << 0
+            << std::left << std::setw(5) << zOrder
+            << std::left << std::setw(12) << 0
+            << "[ "
+            << std::left << std::setw(5) << rect.posX_
+            << std::left << std::setw(5) << rect.posY_
+            << std::left << std::setw(5) << rect.width_
+            << std::left << std::setw(5) << rect.height_
+            << "]"
+            << std::endl;
+    }
+    oss << "Focus window: " << GetFocusedSession() << std::endl;
+    oss << "total window num: " << sceneSessionMap_.size() << std::endl;
+    dumpInfo.append(oss.str());
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::GetSessionDumpInfo(const sptr<DumpParam>& param, std::string& info)
+{
+    if (param == nullptr) {
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    // if  1  params_[0] == ARG_DUMP_ALL) 
+    return GetAllSessionDumpInfo(info);
+}
+
 WSError SceneSessionManager::UpdateFocus(uint64_t persistentId, bool isFocused)
 {
     auto task = [this, persistentId, isFocused]() {
@@ -2009,4 +2071,3 @@ bool SceneSessionManager::UpdateAvoidArea(const uint64_t& persistentId)
     return needUpdate;
 }
 } // namespace OHOS::Rosen
-
