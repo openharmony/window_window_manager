@@ -54,20 +54,12 @@ void TimerManager::Stop()
 
 int32_t TimerManager::AddTimer(int32_t intervalMs, std::function<void()> callback)
 {
-    CALL_DEBUG_ENTER;
     return AddTimerInternal(intervalMs, callback);
 }
 
 int32_t TimerManager::RemoveTimer(int32_t timerId)
 {
-    CALL_DEBUG_ENTER;
     return RemoveTimerInternal(timerId);
-}
-
-bool TimerManager::IsExist(int32_t timerId)
-{
-    CALL_DEBUG_ENTER;
-    return IsExistInternal(timerId);
 }
 
 int32_t TimerManager::CalcNextDelay()
@@ -152,16 +144,6 @@ int32_t TimerManager::RemoveTimerInternal(int32_t timerId)
         }
     }
     return -1;
-}
-
-bool TimerManager::IsExistInternal(int32_t timerId)
-{
-    for (auto it = timers_.begin(); it != timers_.end(); ++it) {
-        if ((*it)->id == timerId) {
-            return true;
-        }
-    }
-    return false;
 }
 
 void TimerManager::InsertTimerInternal(std::unique_ptr<TimerItem>& timer)

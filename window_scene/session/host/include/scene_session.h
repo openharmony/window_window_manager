@@ -29,6 +29,9 @@ class SceneSession;
 using SpecificSessionCreateCallback = std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
 using SpecificSessionDestroyCallback = std::function<WSError(const uint64_t& persistentId)>;
 using CameraFloatSessionChangeCallback = std::function<void(uint32_t accessTokenId, bool isShowing)>;
+using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<SceneSession>>(WindowType type)>;
+using UpdateAvoidAreaCallback = std::function<bool(const uint64_t& persistentId)>;
+
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId)>;
@@ -46,6 +49,8 @@ public:
         SpecificSessionCreateCallback onCreate_;
         SpecificSessionDestroyCallback onDestroy_;
         CameraFloatSessionChangeCallback onCameraFloatSessionChange_;
+        GetSceneSessionVectorByTypeCallback onGetSceneSessionVectorByType_;
+        UpdateAvoidAreaCallback onUpdateAvoidArea_;
     };
 
     // callback for notify SceneBoard
@@ -86,7 +91,12 @@ public:
     WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) override;
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
     WSError OnNeedAvoid(bool status) override;
+    void CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, AvoidArea& avoidArea);
+    void GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea);
+    void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
+    void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
+    WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     WSError SetAspectRatio(float ratio) override;

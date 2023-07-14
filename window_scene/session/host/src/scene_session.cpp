@@ -22,6 +22,8 @@
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session_utils.h"
 #include "session_manager/include/screen_session_manager.h"
+#include "session_manager/include/scene_session_manager.h"
+#include "session_helper.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
@@ -74,6 +76,7 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
         return ret;
     }
     UpdateCameraFloatWindowStatus(true);
+    specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     return WSError::WS_OK;
 }
 
@@ -93,6 +96,7 @@ WSError SceneSession::Background()
         scenePersistence_->SaveSnapshot(GetSnapshot());
     }
     UpdateCameraFloatWindowStatus(false);
+    specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     return WSError::WS_OK;
 }
 
@@ -141,7 +145,7 @@ WSError SceneSession::SetAspectRatio(float ratio)
     }
     float vpr = 1.5f; // 1.5f: default virtual pixel ratio
     auto display = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
-    if (!display) {
+    if (display) {
         vpr = display->GetVirtualPixelRatio();
         WLOGD("vpr = %{public}f", vpr);
     }
@@ -197,6 +201,7 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason)
             return Session::UpdateRect(newRect, reason);
         }
     }
+    specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     return Session::UpdateRect(rect, reason);
 }
 
@@ -285,18 +290,106 @@ WSError SceneSession::OnNeedAvoid(bool status)
     return WSError::WS_OK;
 }
 
+void SceneSession::CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, AvoidArea& avoidArea)
+{
+    if (SessionHelper::IsEmptyRect(rect) || SessionHelper::IsEmptyRect(avoidRect)) {
+        return;
+    }
+    Rect avoidAreaRect = SessionHelper::TransferToRect(SessionHelper::GetOverlap(rect, avoidRect, 0, 0));
+    if (WindowHelper::IsEmptyRect(avoidAreaRect)) {
+        return;
+    }
+
+    uint32_t avoidAreaCenterX = avoidAreaRect.posX_ + (avoidAreaRect.width_ >> 1);
+    uint32_t avoidAreaCenterY = avoidAreaRect.posY_ + (avoidAreaRect.height_ >> 1);
+    float res1 = float(avoidAreaCenterY) - float(rect.height_) / float(rect.width_) *
+        float(avoidAreaCenterX);
+    float res2 = float(avoidAreaCenterY) + float(rect.height_) / float(rect.width_) *
+        float(avoidAreaCenterX) - float(rect.height_);
+    if (res1 < 0) {
+        if (res2 < 0) {
+            avoidArea.topRect_ = avoidAreaRect;
+        } else {
+            avoidArea.rightRect_ = avoidAreaRect;
+        }
+    } else {
+        if (res2 < 0) {
+            avoidArea.leftRect_ = avoidAreaRect;
+        } else {
+            avoidArea.bottomRect_ = avoidAreaRect;
+        }
+    }
+}
+
+void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
+{
+    if (property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)) {
+        return;
+    }
+    std::vector<sptr<SceneSession>> statusBarVector =
+        specificCallback_->onGetSceneSessionVectorByType_(WindowType::WINDOW_TYPE_STATUS_BAR);
+    for (auto& statusBar : statusBarVector) {
+        WSRect statusBarRect = statusBar->GetSessionRect();
+        CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
+    }
+
+    return;
+}
+
+void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
+{
+    std::vector<sptr<SceneSession>> inputMethodVector =
+        specificCallback_->onGetSceneSessionVectorByType_(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    for (auto& inputMethod : inputMethodVector) {
+        WSRect inputMethodRect = inputMethod->GetSessionRect();
+        CalculateAvoidAreaRect(rect, inputMethodRect, avoidArea);
+    }
+
+    return;
+}
+
+void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
+{
+    sptr<CutoutInfo> cutoutInfo = ScreenSessionManager::GetInstance().
+        GetCutoutInfo(property_->GetDisplayId());
+    if (cutoutInfo == nullptr) {
+        WLOGFI("GetCutoutAvoidArea There is no CutoutInfo");
+        return;
+    }
+    std::vector<DMRect> cutoutAreas = cutoutInfo->GetBoundingRects();
+    if (cutoutAreas.empty()) {
+        WLOGFI("GetCutoutAvoidArea There is no cutoutAreas");
+        return;
+    }
+    for (auto& cutoutArea : cutoutAreas) {
+        WSRect cutoutAreaRect = {
+            cutoutArea.posX_,
+            cutoutArea.posY_,
+            cutoutArea.width_,
+            cutoutArea.height_
+        };
+        CalculateAvoidAreaRect(rect, cutoutAreaRect, avoidArea);
+    }
+
+    return;
+}
+
 AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
 {
     AvoidArea avoidArea;
+    WSRect rect = GetSessionRect();
     WLOGFD("GetAvoidAreaByType avoidAreaType:%{public}u", type);
     switch (type) {
         case AvoidAreaType::TYPE_SYSTEM : {
+            GetSystemAvoidArea(rect, avoidArea);
             return avoidArea;
         }
         case AvoidAreaType::TYPE_KEYBOARD : {
+            GetKeyboardAvoidArea(rect, avoidArea);
             return avoidArea;
         }
         case AvoidAreaType::TYPE_CUTOUT : {
+            GetCutoutAvoidArea(rect, avoidArea);
             return avoidArea;
         }
         default : {
@@ -304,6 +397,14 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
             return avoidArea;
         }
     }
+}
+
+WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
+{
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->UpdateAvoidArea(avoidArea, type);
 }
 
 WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)

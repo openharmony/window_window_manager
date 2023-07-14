@@ -539,7 +539,7 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    const auto& rect = property_->GetWindowRect();
+    Rect rect = WindowHelper::IsMainFloatingWindow(GetType(), GetMode()) ? GetRect() : GetRequestRect();
     Rect newRect = { x, y, rect.width_, rect.height_ }; // must keep x/y
     property_->SetRequestRect(newRect);
     if (state_ == WindowState::STATE_HIDDEN || state_ < WindowState::STATE_CREATED) {
@@ -549,7 +549,7 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
     }
 
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
-    const WSError& ret = hostSession_->UpdateSessionRect(wsRect, SizeChangeReason::MOVE);
+    auto ret = hostSession_->UpdateSessionRect(wsRect, SizeChangeReason::MOVE);
     return static_cast<WMError>(ret);
 }
 
@@ -644,7 +644,7 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 
     UpdateFloatingWindowSizeBySizeLimits(width, height);
 
-    const auto& rect = property_->GetWindowRect();
+    Rect rect = WindowHelper::IsMainFloatingWindow(GetType(), GetMode()) ? GetRect() : GetRequestRect();
     Rect newRect = { rect.posX_, rect.posY_, width, height }; // must keep w/h
     property_->SetRequestRect(newRect);
     if (state_ == WindowState::STATE_HIDDEN || state_ < WindowState::STATE_CREATED) {
@@ -655,7 +655,7 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
     }
 
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
-    const WSError& ret = hostSession_->UpdateSessionRect(wsRect, SizeChangeReason::RESIZE);
+    auto ret = hostSession_->UpdateSessionRect(wsRect, SizeChangeReason::RESIZE);
     return static_cast<WMError>(ret);
 }
 
@@ -807,6 +807,20 @@ SystemBarProperty WindowSceneSessionImpl::GetSystemBarPropertyByType(WindowType 
     return curProperties[type];
 }
 
+WMError WindowSceneSessionImpl::NotifyWindowSessionProperty()
+{
+    WLOGFD("NotifyWindowSessionProperty called windowId:%{public}u", GetWindowId());
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
+        return WMError::WM_OK;
+    }
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
 {
     WLOGFI("SetSystemBarProperty windowId:%{public}u type:%{public}u"
@@ -820,21 +834,12 @@ WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const Syst
     }
 
     property_->SetSystemBarProperty(type, property);
-    return WMError::WM_OK;
-}
-
-WMError WindowSceneSessionImpl::NotifyWindowSessionProperty()
-{
-    WLOGFD("NotifyWindowSessionProperty called windowId:%{public}u", GetWindowId());
-    if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
+    WMError ret = NotifyWindowSessionProperty();
+    if (ret != WMError::WM_OK) {
+        WLOGFE("NotifyWindowSessionProperty winId:%{public}u errCode:%{public}d",
+            GetWindowId(), static_cast<int32_t>(ret));
     }
-    if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
-        return WMError::WM_OK;
-    }
-    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
-    return WMError::WM_OK;
+    return ret;
 }
 
 WMError WindowSceneSessionImpl::SetFullScreen(bool status)
@@ -852,11 +857,6 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
     if (ret != WMError::WM_OK) {
         WLOGFE("SetSystemBarProperty errCode:%{public}d winId:%{public}u",
             static_cast<int32_t>(ret), GetWindowId());
-    }
-    ret = NotifyWindowSessionProperty();
-    if (ret != WMError::WM_OK) {
-        WLOGFE("NotifyWindowSessionProperty winId:%{public}u errCode:%{public}d",
-            GetWindowId(), static_cast<int32_t>(ret));
     }
     return ret;
 }
@@ -1347,7 +1347,7 @@ WMError WindowSceneSessionImpl::SetSnapshotSkip(bool isSkip)
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::NotifyMemoryLevel(int32_t level) const
+WMError WindowSceneSessionImpl::NotifyMemoryLevel(int32_t level)
 {
     WLOGFD("id: %{public}u, notify memory level: %{public}d", GetWindowId(), level);
     if (uiContent_ == nullptr) {
@@ -1522,6 +1522,21 @@ WMError WindowSceneSessionImpl::UpdateAnimationFlagProperty(bool withAnimation)
     AdjustWindowAnimationFlag(withAnimation);
     // when show(true) with default, hide() with None, to adjust animationFlag to disabled default animation
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
+}
+
+WMError WindowSceneSessionImpl::SetAlpha(float alpha)
+{
+    WLOGI("Window %{public}" PRIu64" alpha %{public}f", property_->GetPersistentId(), alpha);
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("set alpha permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    surfaceNode_->SetAlpha(alpha);
+    RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -42,7 +42,7 @@ ohos_shared_library("sessionmanagerservice_napi") {
   external_deps = [
     "ability_runtime:runtime",
     "c_utils:utils",
-    "graphic_standard:surface",  # use for SurfaceUtils
+    "graphic_2d:surface",  # use for SurfaceUtils
     "hilog:libhilog",
     "ipc:ipc_napi_common",
     "napi:ace_napi",

@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <mutex>
+#include <unordered_map>
 
 #include "event_handler.h"
 #include "nocopyable.h"
@@ -31,7 +32,7 @@ class ANRHandler {
 public:
     DISALLOW_COPY_AND_MOVE(ANRHandler);
 
-    void SetSessionStage(const wptr<ISessionStage> &sessionStage);
+    void SetSessionStage(int32_t eventId, const wptr<ISessionStage> &sessionStage);
     void SetLastProcessedEventId(int32_t eventId, int64_t actionTime);
 
 private:
@@ -40,9 +41,7 @@ private:
     void SetLastProcessedEventStatus(bool status);
     int32_t GetLastProcessedEventId();
     void SendEvent(int64_t delayTime);
-    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ { nullptr };
-    wptr<ISessionStage> sessionStage_ = nullptr;
-
+    void ClearExpiredEvents(int32_t eventId);
 private:
     std::mutex anrMtx_;
     struct ANREvent {
@@ -51,6 +50,8 @@ private:
         int32_t lastReportId { -1 };
     };
     ANREvent event_;
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ { nullptr };
+    std::unordered_map<int32_t, wptr<ISessionStage>> sessionStageMap_;
 };
 } // namespace Rosen
 } // namespace OHOS

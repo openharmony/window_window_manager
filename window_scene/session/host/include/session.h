@@ -53,6 +53,8 @@ using NotifyTerminateSessionFuncNew = std::function<void(const SessionInfo& info
 using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
 using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info)>;
+using NotifyCallingSessionForegroundFunc = std::function<void(const uint64_t& persistentId)>;
+using NotifyCallingSessionBackgroundFunc = std::function<void()>;
 
 class ILifecycleListener {
 public:
@@ -110,6 +112,7 @@ public:
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     WSError TransferFocusActiveEvent(bool isFocusActive);
     WSError TransferFocusWindowIdEvent(uint32_t windowId);
+    WSError TransferFocusStateEvent(bool focusState);
 
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
@@ -180,9 +183,15 @@ public:
     sptr<IRemoteObject> GetAbilityToken() const;
     WindowMode GetWindowMode();
     void SetZOrder(uint32_t zOrder);
+    uint32_t GetZOrder();
     WSError UpdateSnapshot();
     WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
+
+    void SetNotifyCallingSessionForegroundFunc(const NotifyCallingSessionForegroundFunc& func);
+    void NotifyCallingSessionForeground();
+    void SetNotifyCallingSessionBackgroundFunc(const NotifyCallingSessionBackgroundFunc& func);
+    void NotifyCallingSessionBackground();
 protected:
     void GeneratePersistentId(const bool isExtension, const SessionInfo& sessionInfo);
     void UpdateSessionState(SessionState state);
@@ -207,6 +216,8 @@ protected:
     NotifySessionExceptionFunc sessionExceptionFunc_;
     NotifyPendingSessionToForegroundFunc pendingSessionToForegroundFunc_;
     NotifyPendingSessionToBackgroundForDelegatorFunc pendingSessionToBackgroundForDelegatorFunc_;
+    NotifyCallingSessionForegroundFunc notifyCallingSessionForegroundFunc_;
+    NotifyCallingSessionBackgroundFunc notifyCallingSessionBackgroundFunc_;
     sptr<WindowSessionProperty> property_ = nullptr;
     SystemSessionConfig systemConfig_;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
@@ -242,6 +253,7 @@ private:
     static std::set<uint32_t> persistIdSet_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_ = nullptr;
     SessionState state_ = SessionState::STATE_DISCONNECT;
+    uint32_t zOrder_ = 0;
 
     std::recursive_mutex mutex_;
     std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;
