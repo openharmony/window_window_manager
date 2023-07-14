@@ -81,6 +81,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneS
 const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 #endif
 const std::string SCENE_SESSION_MANAGER_THREAD = "SceneSessionManager";
+const std::string WINDOW_INFO_REPORT_THREAD = "WindowInfoReportThread";
 constexpr uint32_t MAX_BRIGHTNESS = 255;
 constexpr int32_t DEFAULT_USERID = -1;
 constexpr int32_t SCALE_DIMENSION = 2;
@@ -99,13 +100,26 @@ const std::string ARG_DUMP_HELP = "-h";
 const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_SCREEN = "-s";
 const std::string ARG_DUMP_DISPLAY = "-d";
-}
+} // namespace
 
-WM_IMPLEMENT_SINGLE_INSTANCE(SceneSessionManager)
+SceneSessionManager& SceneSessionManager::GetInstance()
+{
+    static SceneSessionManager* instance = nullptr;
+    if (instance == nullptr) {
+        instance = new SceneSessionManager();
+        instance->Init();
+    }
+    return *instance;
+}
 
 SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInstance())
 {
     taskScheduler_ = std::make_shared<TaskScheduler>(SCENE_SESSION_MANAGER_THREAD);
+    currentUserId_ = DEFAULT_USERID;
+}
+
+void SceneSessionManager::Init()
+{
     constexpr uint64_t interval = 5 * 1000; // 5 second
     auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
     auto mainEventHandler = std::make_shared<AppExecFwk::EventHandler>(mainEventRunner);
@@ -130,30 +144,17 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
 #endif
 
     bundleMgr_ = GetBundleManager();
-    currentUserId_ = DEFAULT_USERID;
     LoadWindowSceneXml();
-    Init();
-    StartWindowInfoReportLoop();
     ScreenSessionManager::GetInstance().SetSensorSubscriptionEnabled();
-}
 
-bool SceneSessionManager::Init()
-{
     // create handler for inner command at server
-    eventLoop_ = AppExecFwk::EventRunner::Create(SCENE_SESSION_MANAGER_THREAD);
-    if (eventLoop_ == nullptr) {
-        return false;
-    }
+    eventLoop_ = AppExecFwk::EventRunner::Create(WINDOW_INFO_REPORT_THREAD);
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
-    if (eventHandler_ == nullptr) {
-        return false;
+    if (HiviewDFX::Watchdog::GetInstance().AddThread(WINDOW_INFO_REPORT_THREAD, eventHandler_)) {
+        WLOGFW("Add thread %{public}s to watchdog failed.", WINDOW_INFO_REPORT_THREAD.c_str());
     }
-    int ret = HiviewDFX::Watchdog::GetInstance().AddThread(SCENE_SESSION_MANAGER_THREAD, eventHandler_);
-    if (ret != 0) {
-        WLOGFE("Add watchdog thread failed");
-    }
+    StartWindowInfoReportLoop();
     WLOGI("SceneSessionManager init success.");
-    return true;
 }
 
 void SceneSessionManager::LoadWindowSceneXml()
