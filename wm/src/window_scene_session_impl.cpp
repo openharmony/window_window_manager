@@ -572,7 +572,7 @@ void WindowSceneSessionImpl::LimitCameraFloatWindowMininumSize(uint32_t& width, 
     if (displayWidth == 0 || displayHeight == 0) {
         return;
     }
-    float vpr = (displayWidth > 2700) ? 3.5 : 1.5; // display width: 2770; vpr: 3.5 / 1.5
+    float vpr = display->GetVirtualPixelRatio();
     uint32_t smallWidth = displayHeight <= displayWidth ? displayHeight : displayWidth;
     float hwRatio = static_cast<float>(displayHeight) / static_cast<float>(displayWidth);
     uint32_t minWidth;
@@ -1308,8 +1308,14 @@ WMError WindowSceneSessionImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
     if (blurStyle == WindowBlurStyle::WINDOW_BLUR_OFF) {
         surfaceNode_->SetBackgroundFilter(nullptr);
     } else {
-        float density = 3.5f; // get density from screen property
-        surfaceNode_->SetBackgroundFilter(RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle), density));
+        auto display = SingletonContainer::IsDestroyed() ? nullptr :
+            SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+        if (display == nullptr) {
+            WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
+                property_->GetWindowId());
+            return WMError::WM_ERROR_INVALID_PARAM;
+        }
+        surfaceNode_->SetBackgroundFilter(RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle), display->GetVirtualPixelRatio()));
     }
 
     RSTransaction::FlushImplicitTransaction();
