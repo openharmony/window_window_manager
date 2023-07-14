@@ -491,12 +491,12 @@ void MoveDragController::InitDecorValue(const sptr<WindowSessionProperty> proper
 
 void MoveDragController::RequestVsync()
 {
-    VsyncStation::GetInstance().RequestVsync(vsyncCallback_);
+    SessionVsyncStation::GetInstance().RequestVsync(vsyncCallback_);
 }
 
 void MoveDragController::RemoveVsync()
 {
-    VsyncStation::GetInstance().RemoveCallback();
+    SessionVsyncStation::GetInstance().RemoveCallback(vsyncCallback_);
 }
 
 void MoveDragController::OnReceiveVsync(int64_t timeStamp)
