@@ -52,7 +52,7 @@ class SceneSessionManager : public SceneSessionManagerStub {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManager)
 public:
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property = nullptr);
-    WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession);
+    WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession, const bool isDelegator = false);
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession);
@@ -95,6 +95,7 @@ public:
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token);
     WSError GetFocusSessionToken(sptr<IRemoteObject> &token);
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller);
+    WSError UpdateSessionAvoidAreaListener(uint64_t& persistentId, bool haveListener);
 
     void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
     void InitPersistentStorage();
@@ -131,6 +132,10 @@ private:
     WSError UpdateParentSession(const sptr<SceneSession>& sceneSession, sptr<WindowSessionProperty> property);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void UpdateFocusableProperty(uint64_t persistentId);
+    std::vector<sptr<SceneSession>> GetSceneSessionVectorByType(WindowType type);
+    bool UpdateSessionAvoidAreaIfNeed(const uint64_t& persistentId,
+        const AvoidArea& avoidArea, AvoidAreaType avoidAreaType);
+    bool UpdateAvoidArea(const uint64_t& persistentId);
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     std::shared_ptr<Global::Resource::ResourceManager> CreateResourceManager(
@@ -153,9 +158,14 @@ private:
     void WindowVisibilityChangeCallback(std::shared_ptr<RSOcclusionData> occlusiontionData);
     void RegisterSessionRectChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void OnSessionRectChange(uint64_t persistentId, const WSRect& rect);
+    void RegisterInputMethodShownFunc(const sptr<SceneSession>& sceneSession);
+    void OnInputMethodShown(const uint64_t& persistentId);
+    void RegisterInputMethodHideFunc(const sptr<SceneSession>& sceneSession);
 
     sptr<RootSceneSession> rootSceneSession_;
     std::map<uint64_t, sptr<SceneSession>> sceneSessionMap_;
+    std::set<sptr<SceneSession>> avoidAreaListenerSessionSet_;
+    std::map<uint64_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
 
     NotifyCreateSpecificSessionFunc createSpecificSessionFunc_;
     ProcessGestureNavigationEnabledChangeFunc gestureNavigationEnabledChangeFunc_;

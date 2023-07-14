@@ -29,35 +29,30 @@ namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "EventStage" };
 } // namespace
 
-void EventStage::SetAnrStatus(int32_t persistentId, bool status)
+void EventStage::SetAnrStatus(uint64_t persistentId, bool status)
 {
-    CALL_DEBUG_ENTER;
     isAnrProcess_[persistentId] = status;
 }
 
-bool EventStage::CheckAnrStatus(int32_t persistentId)
+bool EventStage::CheckAnrStatus(uint64_t persistentId)
 {
-    CALL_DEBUG_ENTER;
     if (isAnrProcess_.find(persistentId) != isAnrProcess_.end()) {
         return isAnrProcess_[persistentId];
     }
-    WLOGFD("Current persistentId:%{public}d is not in event stage", persistentId);
+    WLOGFD("Current persistentId:%{public}" PRIu64 " is not in event stage", persistentId);
     return false;
 }
 
-void EventStage::SaveANREvent(int32_t persistentId, int32_t id, int64_t time, int32_t timerId)
+void EventStage::SaveANREvent(uint64_t persistentId, int32_t id, int64_t time, int32_t timerId)
 {
-    CALL_DEBUG_ENTER;
-    WLOGFD("Current persistentId:%{public}d, eventId:%{public}d, timerId:%{public}d", persistentId, id, timerId);
     EventTime eventTime { id, time, timerId };
     events_[persistentId].push_back(eventTime);
 }
 
-std::vector<int32_t> EventStage::GetTimerIds(int32_t persistentId)
+std::vector<int32_t> EventStage::GetTimerIds(uint64_t persistentId)
 {
-    CALL_DEBUG_ENTER;
     if (events_.find(persistentId) == events_.end()) {
-        WLOGFD("Current events have no event for persistentId:%{public}d", persistentId);
+        WLOGFD("Current events have no event for persistentId:%{public}" PRIu64 "", persistentId);
         return {};
     }
     std::vector<int32_t> timers;
@@ -68,12 +63,11 @@ std::vector<int32_t> EventStage::GetTimerIds(int32_t persistentId)
     return timers;
 }
 
-std::list<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t id)
+std::list<int32_t> EventStage::DelEvents(uint64_t persistentId, int32_t id)
 {
-    CALL_DEBUG_ENTER;
-    WLOGFD("Delete events, persistentId:%{public}d, id:%{public}d", persistentId, id);
+    WLOGFD("Delete events, persistentId:%{public}" PRIu64 ", id:%{public}d", persistentId, id);
     if (events_.find(persistentId) == events_.end()) {
-        WLOGFD("Current events have no event persistentId:%{public}d", persistentId);
+        WLOGFD("Current events have no event persistentId:%{public}" PRIu64 "", persistentId);
         return {};
     }
     auto &events = events_[persistentId];
@@ -82,7 +76,6 @@ std::list<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t id)
     });
     std::list<int32_t> timerIds;
     for (auto iter = events.begin(); iter != fistMatchIter; iter++) {
-        WLOGFD("Push timer:%{public}d, eventId:%{public}d in timerIds to remove", iter->timerId, iter->id);
         timerIds.push_back(iter->timerId);
     }
     events.erase(events.begin(), fistMatchIter);

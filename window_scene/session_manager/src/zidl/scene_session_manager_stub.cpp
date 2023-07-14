@@ -60,7 +60,9 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_INFO),
         &SceneSessionManagerStub::HandleGetAccessibilityWindowInfo),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_TERMINATE_SESSION_NEW),
-        &SceneSessionManagerStub::HandleTerminateSessionNew)
+        &SceneSessionManagerStub::HandleTerminateSessionNew),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_AVOIDAREA_LISTENER),
+        &SceneSessionManagerStub::HandleUpdateSessionAvoidAreaListener),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -281,6 +283,15 @@ int SceneSessionManagerStub::HandleSetSessionGravity(MessageParcel &data, Messag
     uint32_t percent = data.ReadUint32();
     WSError ret = SetSessionGravity(persistentId, gravity, percent);
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleUpdateSessionAvoidAreaListener(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t persistentId = data.ReadUint64();
+    bool haveAvoidAreaListener = data.ReadBool();
+    WSError errCode = UpdateSessionAvoidAreaListener(persistentId, haveAvoidAreaListener);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
