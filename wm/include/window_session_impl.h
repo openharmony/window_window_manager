@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WINDOW_SESSION_IMPL_H
 
 #include <atomic>
+#include <optional>
 
 #include <ability_context.h>
 #include <refbase.h>
@@ -76,6 +77,7 @@ public:
     // inherits from session stage
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
+    WSError UpdateViewConfig(const ViewPortConfig& config, SizeChangeReason reason) override;
     WSError UpdateFocus(bool focus) override;
     WSError HandleBackEvent() override { return WSError::WS_OK; }
     WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;
@@ -85,6 +87,7 @@ public:
     void NotifyFocusActiveEvent(bool isFocusActive) override;
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info) override;
     void NotifyFocusWindowIdEvent(uint32_t windowId) override;
+    void NotifyFocusStateEvent(bool focusState) override;
 
     WMError RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
@@ -117,6 +120,7 @@ public:
     void UpdateTitleButtonVisibility();
     WSError NotifyDestroy() override;
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
+    WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void NotifyTouchDialogTarget() override;
 
     WindowState state_ { WindowState::STATE_INITIAL };
@@ -180,9 +184,12 @@ private:
     static std::map<uint64_t, std::vector<sptr<IDialogTargetTouchListener>>> dialogTargetTouchListener_;
     static std::map<uint32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> occupiedAreaChangeListeners_;
 
+    std::optional<std::atomic<bool>> focusState_ = std::nullopt;
+
+    std::atomic<uint32_t> focusWindowId_ = INVALID_WINDOW_ID;
+
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;
-    std::atomic<uint32_t> focusWindowId_ = INVALID_WINDOW_ID;
 };
 } // namespace Rosen
 } // namespace OHOS

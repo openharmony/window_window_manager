@@ -24,7 +24,7 @@ namespace OHOS::MMI {
     class PointerEvent;
     class KeyEvent;
     class AxisEvent;
-}
+} // namespace OHOS::MMI
 
 namespace OHOS::Rosen {
 class IWindowEventChannel : public IRemoteBroker {
@@ -36,6 +36,7 @@ public:
         TRANS_ID_TRANSFER_POINTER_EVENT,
         TRANS_ID_TRANSFER_FOCUS_ACTIVE_EVENT,
         TRANS_ID_TRANSFER_FOCUS_WINDOW_ID_EVENT,
+        TRANS_ID_TRANSFER_FOCUS_STATE_EVENT,
     };
 
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
@@ -45,6 +46,7 @@ public:
     virtual WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) = 0;
     virtual WSError TransferFocusActiveEvent(bool isFocusActive) = 0;
     virtual WSError TransferFocusWindowId(uint32_t windowId) = 0;
+    virtual WSError TransferFocusState(bool focusState) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_WINDOW_EVENT_CHANNEL_INTERFACE_H

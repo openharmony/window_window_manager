@@ -2355,8 +2355,17 @@ void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>&
     } else {
         WLOGFE("There is no back key event consumer");
     }
-    if (isConsumed || !WindowHelper::IsMainWindow(property_->GetWindowType())) {
-        WLOGD("Back key event is consumed or it is not a main window");
+    if (isConsumed) {
+        WLOGD("Back key event is consumed");
+        return;
+    }
+    PerformBack();
+}
+
+void WindowImpl::PerformBack()
+{
+    if(!WindowHelper::IsMainWindow(property_->GetWindowType())){
+        WLOGD("it is not a main window");
         return;
     }
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
@@ -3607,9 +3616,10 @@ WMError WindowImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
     return WMError::WM_OK;
 }
 
-WMError WindowImpl::NotifyMemoryLevel(int32_t level) const
+WMError WindowImpl::NotifyMemoryLevel(int32_t level)
 {
     WLOGFD("id: %{public}u, notify memory level: %{public}d", property_->GetWindowId(), level);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ == nullptr) {
         WLOGFE("Window %{public}s notify memory level failed, ace is null.", name_.c_str());
         return WMError::WM_ERROR_NULLPTR;
