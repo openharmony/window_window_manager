@@ -145,7 +145,7 @@ WSError SceneSession::SetAspectRatio(float ratio)
     }
     float vpr = 1.5f; // 1.5f: default virtual pixel ratio
     auto display = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
-    if (!display) {
+    if (display) {
         vpr = display->GetVirtualPixelRatio();
         WLOGD("vpr = %{public}f", vpr);
     }
