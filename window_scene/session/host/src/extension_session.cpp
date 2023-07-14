@@ -80,15 +80,4 @@ sptr<ExtensionSession::ExtensionSessionEventCallback> ExtensionSession::GetExten
 
     return extSessionEventCallback_;
 }
-
-WSError ExtensionSession::UpdateViewConfig(const ViewPortConfig& config, SizeChangeReason reason)
-{
-    if (!IsSessionValid()) {
-        config_ = config;
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
-    config_ = config;
-    sessionStage_->UpdateViewConfig(config, reason);
-    return WSError::WS_OK;
-}
 } // namespace OHOS::Rosen
