@@ -210,36 +210,6 @@ void SessionStageProxy::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
     return;
 }
 
-WSError SessionStageProxy::UpdateViewConfig(const ViewPortConfig& config, SizeChangeReason reason)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (!(data.WriteInt32(config.posX_) && data.WriteInt32(config.posY_) &&
-        data.WriteUint32(config.width_) && data.WriteUint32(config.height_) && data.WriteFloat(config.density_))) {
-        WLOGFE("Write ViewPortConfig failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
-        WLOGFE("Write SessionSizeChangeReason failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_VIEW_PORT_CONFIG_CHANGE),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    int32_t ret = reply.ReadUint32();
-    return static_cast<WSError>(ret);
-}
-
 WSError SessionStageProxy::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     MessageParcel data;
