@@ -63,6 +63,7 @@ void ANRHandler::HandleEventConsumed(int32_t eventId, int64_t actionTime)
         "currentTime:%{public}" PRId64 ", timeoutTime:%{public}" PRId64,
         eventId, actionTime, currentTime, timeoutTime);
     if (IsOnEventHandler(GetPersistentIdOfEvent(eventId))) {
+        UpdateLatestEventId(eventId);
         return;
     }
     if (timeoutTime < MIN_MARK_PROCESS_DELAY_TIME) {
@@ -96,9 +97,9 @@ void ANRHandler::SetAnrHandleState(int32_t eventId, bool status)
     int64_t persistentId = GetPersistentIdOfEvent(eventId);
     anrHandlerState_.sendStatus[persistentId] = status;
     if (status) {
-        anrHandlerState_.eventsToReceipt.push(eventId);
+        anrHandlerState_.eventsToReceipt.push_back(eventId);
     } else {
-        anrHandlerState_.eventsToReceipt.pop();
+        anrHandlerState_.eventsToReceipt.pop_front();
         ClearExpiredEvents(eventId);
     }
 }
@@ -185,6 +186,20 @@ bool ANRHandler::IsOnEventHandler(uint64_t persistentId)
         return true;
     }
     return false;
+}
+
+void ANRHandler::UpdateLatestEventId(int32_t eventId)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    CALL_DEBUG_ENTER;
+    uint64_t currentPersistentId = GetPersistentIdOfEvent(eventId);
+    for (auto& event : anrHandlerState_.eventsToReceipt) {
+        if (GetPersistentIdOfEvent(event) == currentPersistentId && eventId > event) {
+            WLOGFD("Replace eventId:%{public}d by newer eventId:%{public}d", event, eventId);
+            event = eventId;
+            break;
+        }
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

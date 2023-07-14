@@ -18,7 +18,7 @@
 
 #include <memory>
 #include <mutex>
-#include <queue>
+#include <list>
 #include <unordered_map>
 
 #include "event_handler.h"
@@ -43,13 +43,14 @@ private:
     void ClearExpiredEvents(int32_t eventId);
     uint64_t GetPersistentIdOfEvent(int32_t eventId);
     bool IsOnEventHandler(uint64_t persistentId);
+    void UpdateLatestEventId(int32_t eventId);
 private:
     std::recursive_mutex mutex_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ { nullptr };
     struct ANRHandlerState {
         std::unordered_map<uint64_t, bool> sendStatus;
         int32_t currentEventIdToReceipt { -1 };
-        std::queue<int32_t> eventsToReceipt;
+        std::list<int32_t> eventsToReceipt;
     };
     ANRHandlerState anrHandlerState_;
     std::unordered_map<int32_t, wptr<ISessionStage>> sessionStageMap_;
