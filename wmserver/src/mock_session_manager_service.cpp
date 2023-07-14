@@ -15,6 +15,8 @@
 
 #include "mock_session_manager_service.h"
 
+#include <unistd.h>
+
 #include <system_ability_definition.h>
 #include <cinttypes>
 #include <csignal>
@@ -41,7 +43,7 @@ const char DEFAULT_STRING[] = "error";
 const std::string ARG_DUMP_HELP = "-h";
 const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_WINDOW = "-w";
-}
+} // namespace
 
 WM_IMPLEMENT_SINGLE_INSTANCE(MockSessionManagerService)
 
@@ -53,7 +55,7 @@ void MockSessionManagerService::SMSDeathRecipient::OnRemoteDied(const wptr<IRemo
         return;
     }
     WLOGFI("SessionManagerService died, restart foundation now!");
-    exit(0);
+    _exit(0);
 }
 
 MockSessionManagerService::MockSessionManagerService() : SystemAbility(WINDOW_MANAGER_SERVICE_ID, true)
