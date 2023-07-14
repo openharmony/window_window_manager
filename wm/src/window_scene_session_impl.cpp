@@ -1311,8 +1311,7 @@ WMError WindowSceneSessionImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
         auto display = SingletonContainer::IsDestroyed() ? nullptr :
             SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
         if (display == nullptr) {
-            WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
-                property_->GetWindowId());
+            WLOGFE("get display failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
             return WMError::WM_ERROR_INVALID_PARAM;
         }
         surfaceNode_->SetBackgroundFilter(RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle), display->GetVirtualPixelRatio()));
