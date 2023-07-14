@@ -539,7 +539,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionActivation(NativeEngine
         WLOGFE("[NAPI]sceneSession is nullptr");
         return nullptr;
     }
-    SceneSessionManager::GetInstance().RequestSceneSessionActivation(sceneSession);
+    SceneSessionManager::GetInstance().RequestSceneSessionActivation(sceneSession,isNewActive);
     return nullptr;
 }
 
