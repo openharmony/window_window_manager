@@ -140,7 +140,6 @@ void ANRManager::RemoveTimers(uint64_t persistentId)
 
 void ANRManager::RemovePersistentId(uint64_t persistentId)
 {
-    // EVstage 中也要进行清理
     if (applicationMap_.find(persistentId) == applicationMap_.end()) {
         WLOGFD("No persistentId:%{public}" PRIu64 " in applicationMap", persistentId);
         return;

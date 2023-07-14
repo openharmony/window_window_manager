@@ -71,14 +71,14 @@ std::list<int32_t> EventStage::DelEvents(uint64_t persistentId, int32_t id)
         return {};
     }
     auto &events = events_[persistentId];
-    // auto fistMatchIter = find_if(events.begin(), events.end(), [id](const auto &item) {
-    //     return item.id > id;
-    // });
+    auto fistMatchIter = find_if(events.begin(), events.end(), [id](const auto &item) {
+        return item.id > id;
+    });
     std::list<int32_t> timerIds;
-    for (auto iter = events.begin(); iter != events.end(); iter++) {
+    for (auto iter = events.begin(); iter != fistMatchIter; iter++) {
         timerIds.push_back(iter->timerId);
     }
-    events.erase(events.begin(), events.end());
+    events.erase(events.begin(), fistMatchIter);
     SetAnrStatus(persistentId, false);
     return timerIds;
 }
