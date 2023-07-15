@@ -94,7 +94,6 @@ constexpr int VALUE_MAX_WIDTH = 5;
 constexpr int ORIEN_MAX_WIDTH = 12;
 constexpr int PID_MAX_WIDTH = 8;
 constexpr int PARENT_ID_MAX_WIDTH = 6;
-
 constexpr int WINDOW_NAME_MAX_LENGTH = 20;
 const std::string ARG_DUMP_HELP = "-h";
 const std::string ARG_DUMP_ALL = "-a";
@@ -1294,7 +1293,7 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
         oss << std::left << std::setw(WINDOW_NAME_MAX_WIDTH) << windowName
             << std::left << std::setw(DISPLAY_NAME_MAX_WIDTH) << displayId
             << std::left << std::setw(PID_MAX_WIDTH) << pSession->GetCallingPid()
-            << std::left << std::setw(PARENT_VALUE_MAX_WIDTH) << pSession->GetPersistentId()
+            << std::left << std::setw(PARENT_ID_MAX_WIDTH) << pSession->GetPersistentId()
             << std::left << std::setw(VALUE_MAX_WIDTH) << static_cast<uint32_t>(pSession->GetWindowType())
             << std::left << std::setw(VALUE_MAX_WIDTH) << static_cast<uint32_t>(pSession->GetWindowMode())
             << std::left << std::setw(VALUE_MAX_WIDTH) << flag
