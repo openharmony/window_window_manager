@@ -22,6 +22,7 @@
 #include <map>
 #include <sstream>
 
+#include "mock_screen_manager_service.h"
 #include "window_manager_hilog.h"
 #include "unique_fd.h"
 #include "string_ex.h"
@@ -69,6 +70,7 @@ bool MockSessionManagerService::RegisterMockSessionManagerService()
         WLOGFE("Publish failed");
     }
     WLOGFI("Publish mock session manager service success");
+    MockScreenManagerService::GetInstance().RegisterMockScreenManagerService();
     return true;
 }
 
