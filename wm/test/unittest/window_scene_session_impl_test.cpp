@@ -1152,6 +1152,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetShadowRadius, Function | SmallTest | Lev
         ASSERT_EQ(WMError::WM_OK, window->SetShadowRadius(1.0));
     }
 }
+
 /**
  * @tc.name: SetTransform01
  * @tc.desc: set transform
