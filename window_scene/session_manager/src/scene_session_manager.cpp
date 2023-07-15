@@ -88,6 +88,13 @@ constexpr int32_t TRANSLATE_DIMENSION = 2;
 constexpr int32_t ROTAION_DIMENSION = 4;
 constexpr int32_t CUBIC_CURVE_DIMENSION = 4;
 
+constexpr int WINDOW_NAME_MAX_WIDTH = 21;
+constexpr int DISPLAY_NAME_MAX_WIDTH = 10;
+constexpr int VALUE_MAX_WIDTH = 5;
+constexpr int ORIEN_MAX_WIDTH = 12;
+constexpr int PID_MAX_WIDTH = 8;
+constexpr int PARENT_ID_MAX_WIDTH = 6;
+
 constexpr int WINDOW_NAME_MAX_LENGTH = 20;
 const std::string ARG_DUMP_HELP = "-h";
 const std::string ARG_DUMP_ALL = "-a";
@@ -1278,23 +1285,26 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
         uint32_t zOrder = pSession->GetZOrder();
         WSRect rect = pSession->GetSessionRect();
         std::string sName = pSession->GetWindowName();
+        uint32_t displayId = 0;
+        uint32_t flag = 0;
+        uint32_t orientation = 0;
         const std::string& windowName = sName.size() <= WINDOW_NAME_MAX_LENGTH ?
             sName : sName.substr(0, WINDOW_NAME_MAX_LENGTH);
         // std::setw is used to set the output width and different width values are set to keep the format aligned.
-        oss << std::left << std::setw(21) << windowName
-            << std::left << std::setw(10) << 0
-            << std::left << std::setw(8) << pSession->GetCallingPid()
-            << std::left << std::setw(6) << pSession->GetPersistentId()
-            << std::left << std::setw(5) << static_cast<uint32_t>(pSession->GetWindowType())
-            << std::left << std::setw(5) << static_cast<uint32_t>(pSession->GetWindowMode())
-            << std::left << std::setw(5) << 0
-            << std::left << std::setw(5) << zOrder
-            << std::left << std::setw(12) << 0
+        oss << std::left << std::setw(WINDOW_NAME_MAX_WIDTH) << windowName
+            << std::left << std::setw(DISPLAY_NAME_MAX_WIDTH) << displayId
+            << std::left << std::setw(PID_MAX_WIDTH) << pSession->GetCallingPid()
+            << std::left << std::setw(PARENT_VALUE_MAX_WIDTH) << pSession->GetPersistentId()
+            << std::left << std::setw(VALUE_MAX_WIDTH) << static_cast<uint32_t>(pSession->GetWindowType())
+            << std::left << std::setw(VALUE_MAX_WIDTH) << static_cast<uint32_t>(pSession->GetWindowMode())
+            << std::left << std::setw(VALUE_MAX_WIDTH) << flag
+            << std::left << std::setw(VALUE_MAX_WIDTH) << zOrder
+            << std::left << std::setw(ORIEN_MAX_WIDTH) << orientation
             << "[ "
-            << std::left << std::setw(5) << rect.posX_
-            << std::left << std::setw(5) << rect.posY_
-            << std::left << std::setw(5) << rect.width_
-            << std::left << std::setw(5) << rect.height_
+            << std::left << std::setw(VALUE_MAX_WIDTH) << rect.posX_
+            << std::left << std::setw(VALUE_MAX_WIDTH) << rect.posY_
+            << std::left << std::setw(VALUE_MAX_WIDTH) << rect.width_
+            << std::left << std::setw(VALUE_MAX_WIDTH) << rect.height_
             << "]"
             << std::endl;
     }
@@ -1309,7 +1319,7 @@ WSError SceneSessionManager::GetSessionDumpInfo(const sptr<DumpParam>& param, st
     if (param == nullptr) {
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    // if  1  params_[0] == ARG_DUMP_ALL) 
+    // if  1  params_[0] == ARG_DUMP_ALL)
     return GetAllSessionDumpInfo(info);
 }
 
