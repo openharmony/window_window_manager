@@ -71,7 +71,7 @@ JsSessionType JsSceneSession::GetApiType(WindowType type)
 {
     auto iter = WINDOW_TO_JS_SESSION_TYPE_MAP.find(type);
     if (iter == WINDOW_TO_JS_SESSION_TYPE_MAP.end()) {
-        WLOGFE("[NAPI]window type cannot map to api type!");
+        WLOGFE("[NAPI]window type: %{public}u cannot map to api type!", type);
         return JsSessionType::TYPE_UNDEFINED;
     } else {
         return iter->second;
