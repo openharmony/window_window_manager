@@ -542,7 +542,11 @@ WSError SceneSessionManagerProxy::GetFocusSessionToken(sptr<IRemoteObject> &toke
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
+
     token = reply.ReadRemoteObject();
+    if (token == nullptr) {
+        WLOGFE("get token nullptr.");
+    }
     return static_cast<WSError>(reply.ReadInt32());
 }
 

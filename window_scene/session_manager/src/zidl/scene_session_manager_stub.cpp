@@ -248,8 +248,9 @@ int SceneSessionManagerStub::HandleTerminateSessionNew(MessageParcel& data, Mess
 int SceneSessionManagerStub::HandleGetFocusSessionToken(MessageParcel &data, MessageParcel &reply)
 {
     WLOGFI("run HandleGetFocusSessionToken!");
-    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    sptr<IRemoteObject> token = nullptr;
     const WSError& errCode = GetFocusSessionToken(token);
+    reply.WriteRemoteObject(token);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
