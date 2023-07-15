@@ -55,7 +55,7 @@ public:
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
 
-    WMError NotifyMemoryLevel(int32_t level) const override;
+    WMError NotifyMemoryLevel(int32_t level) override;
 
     virtual WMError AddWindowFlag(WindowFlag flag) override;
     virtual WMError RemoveWindowFlag(WindowFlag flag) override;
@@ -86,6 +86,13 @@ public:
     virtual bool IsPrivacyMode() const override;
     virtual bool IsLayoutFullScreen() const override;
     virtual bool IsFullScreen() const override;
+
+    WMError RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener) override;
+    void SetNeedDefaultAnimation(bool needDefaultAnimation) override;
+    WMError SetTransform(const Transform& trans) override;
+    const Transform& GetTransform() const override;
+    WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) override;
+    WMError SetAlpha(float alpha) override;
 protected:
     void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();
@@ -105,6 +112,12 @@ private:
     bool IsValidSystemWindowType(const WindowType& type);
     WMError CheckParmAndPermission();
     static uint32_t maxFloatingWindowSize_;
+    void TransformSurfaceNode(const Transform& trans);
+    void AdjustWindowAnimationFlag(bool withAnimation = false);
+    WMError UpdateAnimationFlagProperty(bool withAnimation);
+
+    bool enableDefaultAnimation_ = true;
+    sptr<IAnimationTransitionController> animationTransitionController_;
 };
 } // namespace Rosen
 } // namespace OHOS

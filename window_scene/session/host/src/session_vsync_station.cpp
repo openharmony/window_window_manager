@@ -20,13 +20,13 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "VsyncStation"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionVsyncStation"};
     const std::string VSYNC_TIME_OUT_TASK = "vsync_time_out_task";
     constexpr int64_t VSYNC_TIME_OUT_MILLISECONDS = 600;
 }
-WM_IMPLEMENT_SINGLE_INSTANCE(VsyncStation)
+WM_IMPLEMENT_SINGLE_INSTANCE(SessionVsyncStation)
 
-void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
+void SessionVsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
     {
         std::lock_guard<std::mutex> lock(mtx_);
@@ -66,14 +66,21 @@ void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallb
     receiver_->RequestNextVSync(frameCallback_);
 }
 
-void VsyncStation::RemoveCallback()
+void SessionVsyncStation::RemoveCallback(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
     WLOGI("Remove Vsync callback");
+    std::lock_guard<std::mutex> lock(mtx_);
+    vsyncCallbacks_.erase(vsyncCallback);
+}
+
+void SessionVsyncStation::RemoveAllCallbacks()
+{
+    WLOGI("Remove all vsync callback");
     std::lock_guard<std::mutex> lock(mtx_);
     vsyncCallbacks_.clear();
 }
 
-void VsyncStation::VsyncCallbackInner(int64_t timestamp)
+void SessionVsyncStation::VsyncCallbackInner(int64_t timestamp)
 {
     std::unordered_set<std::shared_ptr<VsyncCallback>> vsyncCallbacks;
     {
@@ -88,9 +95,9 @@ void VsyncStation::VsyncCallbackInner(int64_t timestamp)
     }
 }
 
-void VsyncStation::OnVsync(int64_t timestamp, void* client)
+void SessionVsyncStation::OnVsync(int64_t timestamp, void* client)
 {
-    auto vsyncClient = static_cast<VsyncStation*>(client);
+    auto vsyncClient = static_cast<SessionVsyncStation*>(client);
     if (vsyncClient) {
         vsyncClient->VsyncCallbackInner(timestamp);
     } else {
@@ -98,7 +105,7 @@ void VsyncStation::OnVsync(int64_t timestamp, void* client)
     }
 }
 
-void VsyncStation::OnVsyncTimeOut()
+void SessionVsyncStation::OnVsyncTimeOut()
 {
     WLOGW("Vsync time out");
     std::lock_guard<std::mutex> lock(mtx_);

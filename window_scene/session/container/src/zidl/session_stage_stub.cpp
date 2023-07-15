@@ -41,6 +41,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleNotifyTransferComponentData),
     std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_OCCUPIED_AREA_CHANGE_INFO),
         &SessionStageStub::HandleNotifyOccupiedAreaChange),
+    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_UPDATE_AVOID_AREA),
+        &SessionStageStub::HandleUpdateAvoidArea)
 };
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -133,6 +135,18 @@ int SessionStageStub::HandleNotifyOccupiedAreaChange(MessageParcel& data, Messag
         return ERR_INVALID_VALUE;
     }
     NotifyOccupiedAreaChangeInfo(info);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleUpdateAvoidArea(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleUpdateAvoidArea!");
+    sptr<AvoidArea> avoidArea = data.ReadStrongParcelable<AvoidArea>();
+    uint32_t type;
+    if (!data.ReadUint32(type)) {
+        return ERR_INVALID_VALUE;
+    }
+    UpdateAvoidArea(avoidArea, static_cast<AvoidAreaType>(type));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

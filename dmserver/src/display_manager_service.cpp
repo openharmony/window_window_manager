@@ -77,7 +77,8 @@ void DisplayManagerService::OnStart()
         WLOGFE("Init failed");
         return;
     }
-
+    sptr<DisplayManagerService> dms = this;
+    dms->IncStrongRef(nullptr);
     if (!Publish(this)) {
         WLOGFE("Publish failed");
     }
@@ -93,6 +94,7 @@ bool DisplayManagerService::Init()
     }
     abstractScreenController_->Init();
     abstractDisplayController_->Init(abstractScreenController_);
+    SetGravitySensorSubscriptionEnabled();
     WLOGFI("DisplayManagerService::Init success");
     return true;
 }

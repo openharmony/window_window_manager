@@ -188,7 +188,7 @@ public:
 
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
-    virtual WMError NotifyMemoryLevel(int32_t level) const override;
+    virtual WMError NotifyMemoryLevel(int32_t level) override;
     virtual bool IsAllowHaveSystemSubWindow() override;
     WmErrorCode RaiseToAppTop() override;
     virtual WMError SetAspectRatio(float ratio) override;
@@ -204,7 +204,7 @@ public:
     virtual void SetDensity(float density) override;
 
     virtual void CreateSurfaceNode(const std::string name, const SendRenderDataCallback& callback) override;
-
+    virtual void SetContentInfoCallback(const ContentInfoCallback& callback) override;
 private:
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> subWindowMap_;
@@ -215,6 +215,7 @@ private:
     std::unique_ptr<Ace::UIContent> uiContent_;
     KeyboardAnimationConfig keyboardAnimationConfig_;
     bool needRemoveWindowInputChannel_ = false;
+    ContentInfoCallback contentInfoCallback_;
     Transform transform_;
     int32_t width_ = 0;
     int32_t height_ = 0;

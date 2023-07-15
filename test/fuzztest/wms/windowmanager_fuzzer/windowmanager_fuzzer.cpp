@@ -76,6 +76,19 @@ public:
     }
 };
 
+class WaterMarkFlagChangedListener : public IWaterMarkFlagChangedListener {
+public:
+    void OnWaterMarkFlagUpdate(bool showWaterMark) override
+    {
+    }
+};
+
+class GestureNavigationEnabledChangedListener : public IGestureNavigationEnabledChangedListener {
+public:
+    void OnGestureNavigationEnabledUpdate(bool enable) override
+    {
+    }
+};
 
 bool DoSomethingForWindowManagerImpl(WindowManager& windowManager, const uint8_t* data, size_t size)
 {
@@ -88,6 +101,9 @@ bool DoSomethingForWindowManagerImpl(WindowManager& windowManager, const uint8_t
     startPos += GetObject<uint32_t>(accessTokenId, data + startPos, size - startPos);
     startPos += GetObject<bool>(isShowing, data + startPos, size - startPos);
     windowManager.UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
+    bool enable;
+    startPos += GetObject<bool>(enable, data + startPos, size - startPos);
+    windowManager.SetGestureNavigaionEnabled(enable);
 
     Parcel windowVisibilityInfosParcel;
     if (windowVisibilityInfosParcel.WriteBuffer(data, size)) {
@@ -170,6 +186,12 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     windowManager.UnregisterVisibilityChangedListener(visibilityChangedListener);
     windowManager.UnregisterWindowUpdateListener(windowUpdateListener);
     windowManager.UnregisterCameraFloatWindowChangedListener(cameraFloatWindowChanagedListener);
+    sptr<IWaterMarkFlagChangedListener> waterMarkFlagChangedListener = new WaterMarkFlagChangedListener();
+    windowManager.RegisterWaterMarkFlagChangedListener(waterMarkFlagChangedListener);
+    windowManager.UnregisterWaterMarkFlagChangedListener(waterMarkFlagChangedListener);
+    sptr<IGestureNavigationEnabledChangedListener> gestureListener = new GestureNavigationEnabledChangedListener();
+    windowManager.RegisterGestureNavigationEnabledChangedListener(gestureListener);
+    windowManager.UnregisterGestureNavigationEnabledChangedListener(gestureListener);
     return true;
 }
 } // namespace.OHOS

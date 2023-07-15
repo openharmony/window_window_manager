@@ -51,7 +51,7 @@ ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetIns
 
     RegisterScreenChangeListener();
     LoadScreenSceneXml();
-    screenCutoutController_ = new ScreenCutoutController();
+    screenCutoutController_ = new (std::nothrow) ScreenCutoutController();
 }
 
 void ScreenSessionManager::RegisterScreenConnectionListener(sptr<IScreenConnectionListener>& screenConnectionListener)
@@ -175,10 +175,7 @@ void ScreenSessionManager::ConfigureWaterfallDisplayCompressionParams()
         bool enable = static_cast<bool>(enableConfig["isWaterfallAreaCompressionEnableWhenHorizontal"]);
         WLOGD("isWaterfallAreaCompressionEnableWhenHorizontal=%d.", enable);
     }
-    if (numbersConfig.count("waterfallAreaCompressionSizeWhenHorzontal") != 0) {
-        uint32_t uSize = static_cast<uint32_t>(numbersConfig["waterfallAreaCompressionSizeWhenHorzontal"][0]);
-        WLOGD("waterfallAreaCompressionSizeWhenHorzontal =%u.", uSize);
-    }
+    ScreenSceneConfig::SetCurvedCompressionAreaInLandscape();
 }
 
 void ScreenSessionManager::RegisterScreenChangeListener()
@@ -674,6 +671,7 @@ bool ScreenSessionManager::SetRotation(ScreenId screenId, Rotation rotationAfter
         return false;
     }
     WLOGFD("set orientation. rotation %{public}u", rotationAfter);
+    SetDisplayBoundary(screenSession);
     screenSession->SetRotation(rotationAfter);
     screenSession->PropertyChange(screenSession->GetScreenProperty());
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
@@ -1625,5 +1623,18 @@ void ScreenSessionManager::OnScreenshot(sptr<ScreenshotInfo> info)
 sptr<CutoutInfo> ScreenSessionManager::GetCutoutInfo(DisplayId displayId)
 {
     return screenCutoutController_ ? screenCutoutController_->GetScreenCutoutInfo() : nullptr;
+}
+
+void ScreenSessionManager::SetDisplayBoundary(const sptr<ScreenSession> screenSession)
+{
+    if (screenSession && screenCutoutController_) {
+        RectF rect =
+            screenCutoutController_->CalculateCurvedCompression(screenSession->GetScreenProperty());
+        if (!rect.IsEmpty()) {
+            screenSession->SetDisplayBoundary(rect, screenCutoutController_->GetOffsetY());
+        }
+    } else {
+        WLOGFW("screenSession or screenCutoutController_ is null");
+    }
 }
 } // namespace OHOS::Rosen

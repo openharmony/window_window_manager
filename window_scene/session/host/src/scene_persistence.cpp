@@ -39,7 +39,7 @@ ScenePersistence::ScenePersistence(const SessionInfo &info, const uint64_t persi
 
 void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap> &pixelMap)
 {
-    if (pixelMap == nullptr) {
+    if (pixelMap == nullptr || strSnapshotFile_.find('/') == std::string::npos) {
         return;
     }
 
