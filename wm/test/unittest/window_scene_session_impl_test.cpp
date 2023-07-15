@@ -398,7 +398,6 @@ HWTEST_F(WindowSceneSessionImplTest, MoveTo01, Function | SmallTest | Level2)
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     windowscenesession->hostSession_ = session;
-
     ASSERT_EQ(WMError::WM_OK, windowscenesession->MoveTo(2,2));
 }
 
