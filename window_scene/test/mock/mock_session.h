@@ -47,6 +47,8 @@ public:
     MOCK_METHOD1(GetAvoidAreaByType, AvoidArea(AvoidAreaType type));
     MOCK_METHOD1(SetAspectRatio, WSError(float ratio));
     MOCK_METHOD1(ResetAspectRatio, WSError(float ratio));
+    MOCK_METHOD1(OnNeedAvoid, WSError(bool status));
+    MOCK_METHOD1(SetGlobalMaximizeMode, WSError(MaximizeMode mode));
 };
 } // namespace Rosen
 } // namespace OHOS
