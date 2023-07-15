@@ -123,6 +123,7 @@ int MockSessionManagerService::Dump(int fd, const std::vector<std::u16string> &a
 
 bool MockSessionManagerService::SetSessionManagerService(const sptr<IRemoteObject>& sessionManagerService)
 {
+    if (!sessionManagerService) {
         WLOGFE("sessionManagerService is nullptr");
         return false;
     }
