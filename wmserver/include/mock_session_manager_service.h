@@ -29,6 +29,7 @@ WM_DECLARE_SINGLE_INSTANCE_BASE(MockSessionManagerService);
 public:
     bool SetSessionManagerService(const sptr<IRemoteObject>& sessionManagerService);
     sptr<IRemoteObject> GetSessionManagerService() override;
+    sptr<IRemoteObject> GetSceneSessionManager();
     void OnStart() override;
     int Dump(int fd, const std::vector<std::u16string> &args) override;
 
