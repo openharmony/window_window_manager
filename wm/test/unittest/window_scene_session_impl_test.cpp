@@ -121,7 +121,6 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession01, Function
     ASSERT_EQ(WMError::WM_OK, windowscenesession->Create(abilityContext_, session));
     windowscenesession->hostSession_ = session;
     EXPECT_CALL(*(session), CreateAndConnectSpecificSession(_, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
-
 }
 
 /**
@@ -367,21 +366,18 @@ HWTEST_F(WindowSceneSessionImplTest, Resize01, Function | SmallTest | Level2)
     option->SetWindowName("Resize01");
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
+
     windowscenesession->property_->SetPersistentId(888);
-    
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     windowscenesession->hostSession_ = session;
-
-    Rect rect = { 2,2,2,2};
+    Rect rect = {2, 2, 2, 2};
     windowscenesession->property_->SetWindowRect(rect);
     windowscenesession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
-    
     windowscenesession->state_ = WindowState::STATE_FROZEN;
     windowscenesession->hostSession_ = session;
-
-    ASSERT_EQ(WMError::WM_OK, windowscenesession->Resize(1,1));
+    ASSERT_EQ(WMError::WM_OK, windowscenesession->Resize(1, 1));
 }
 
 /**
@@ -402,6 +398,7 @@ HWTEST_F(WindowSceneSessionImplTest, MoveTo01, Function | SmallTest | Level2)
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     windowscenesession->hostSession_ = session;
+
     ASSERT_EQ(WMError::WM_OK, windowscenesession->MoveTo(2,2));
 }
 
@@ -782,12 +779,12 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreenByApiVersion, Function |
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetLayoutFullScreenByApiVersion(false));
     window->state_ = WindowState::STATE_SHOWN;
     window->property_->SetPersistentId(190);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     EXPECT_CALL(*(session), OnSessionEvent(SessionEvent::EVENT_MAXIMIZE)).WillOnce(Return(WSError::WS_OK));
-    ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreenByApiVersion(false));  
+    ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreenByApiVersion(false));
 }
 
 /*
