@@ -95,8 +95,8 @@ ohos_shared_library("sms") {
 
   deps = [
     "${window_base_path}/utils:libwmutil",
-    "${window_base_path}/window_scene/session_manager_service:session_manager_service",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    "${window_base_path}/window_scene/session_manager_service:session_manager_service",
     "../utils:libwmutil",
   ]
   external_deps = [
