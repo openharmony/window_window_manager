@@ -1327,9 +1327,9 @@ HWTEST_F(WindowTest, SetUIContent, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     NativeEngine* engine = nullptr;
     NativeValue* storage = nullptr;
-    auto ret = window_->SetUIContent("info", engine, storage);
+    auto ret = window->SetUIContent("info", engine, storage);
     ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_EQ(WMError::WM_OK, window_->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -1536,14 +1536,8 @@ HWTEST_F(WindowTest, MaximizeFloating, Function | SmallTest | Level2)
 {
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     auto ret = window->MaximizeFloating();
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
-
-    auto window_ = new (std::nothrow) Window();
-    ASSERT_NE(nullptr, window_);
-    ASSERT_EQ(WMError::WM_OK, window_->MaximizeFloating());
+    ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
