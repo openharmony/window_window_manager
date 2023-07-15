@@ -214,7 +214,6 @@ HWTEST_F(WindowTest, GetMode, Function | SmallTest | Level2)
     auto window_ = new (std::nothrow)Window();
     ASSERT_NE(nullptr, window_);
     ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window_->GetMode());
-
 }
 
 /**
