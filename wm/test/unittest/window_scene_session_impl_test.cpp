@@ -394,11 +394,11 @@ HWTEST_F(WindowSceneSessionImplTest, MoveTo01, Function | SmallTest | Level2)
 
     windowscenesession->property_->SetPersistentId(1);
     windowscenesession->state_ = WindowState::STATE_HIDDEN;
-        SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     windowscenesession->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, windowscenesession->MoveTo(2,2));
+    ASSERT_EQ(WMError::WM_OK, windowscenesession->MoveTo(2, 2));
 }
 
 /**
