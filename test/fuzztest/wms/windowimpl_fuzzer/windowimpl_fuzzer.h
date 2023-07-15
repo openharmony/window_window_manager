@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,17 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef DFX_HISYSEVENT_H
-#define DFX_HISYSEVENT_H
+#ifndef TEST_FUZZTEST_WINDOW_IMPL_FUZZER_H
+#define TEST_FUZZTEST_WINDOW_IMPL_FUZZER_H
 
-#include "hisysevent.h"
+#define FUZZ_PROJECT_NAME "windowimpl_fuzzer"
 
-namespace OHOS {
-namespace Rosen {
-class DfxHisysevent {
-public:
-    static void ApplicationBlockInput(int32_t eventId, int32_t pid, uint64_t persistentId);
-};
-} // namespace Rosen
-} // namespace OHOS
-#endif // DFX_HISYSEVENT_H
+#endif

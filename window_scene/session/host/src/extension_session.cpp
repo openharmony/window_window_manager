@@ -15,6 +15,7 @@
 
 #include "session/host/include/extension_session.h"
 
+#include "ws_common.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {

@@ -41,12 +41,14 @@ public:
         TRANS_ID_NOTIFY_TOUCH_DIALOG_TARGET,
         TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA,
         TRANS_ID_NOTIFY_OCCUPIED_AREA_CHANGE_INFO,
+        TRANS_ID_UPDATE_AVOID_AREA
     };
 
     virtual void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
     virtual void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) {}
     virtual void NotifyFocusActiveEvent(bool isFocusActive) {}
     virtual void NotifyFocusWindowIdEvent(uint32_t windowId) {}
+    virtual void NotifyFocusStateEvent(bool focusState) {}
     virtual WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
     {
         return WSError::WS_OK;
@@ -60,6 +62,7 @@ public:
     virtual WSError NotifyDestroy() = 0;
     virtual void NotifyTouchDialogTarget() = 0;
     virtual void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info) = 0;
+    virtual WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

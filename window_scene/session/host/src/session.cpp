@@ -323,7 +323,6 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     NotifyConnect();
     int32_t applicationPid = IPCSkeleton::GetCallingPid();
     DelayedSingleton<ANRManager>::GetInstance()->SetApplicationPid(persistentId_, applicationPid);
-    WLOGFI("SetApplicationPid pid:%{public}d", applicationPid);
     return WSError::WS_OK;
 }
 
@@ -333,7 +332,7 @@ WSError Session::UpdateWindowSessionProperty(sptr<WindowSessionProperty> propert
     return WSError::WS_OK;
 }
 
-WSError Session::Foreground()
+WSError Session::Foreground(sptr<WindowSessionProperty> property)
 {
     SessionState state = GetSessionState();
     WLOGFI("Foreground session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
@@ -347,8 +346,20 @@ WSError Session::Foreground()
     if (!isActive_) {
         SetActive(true);
     }
+
+    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        NotifyCallingSessionForeground();
+    }
     NotifyForeground();
     return WSError::WS_OK;
+}
+
+void Session::NotifyCallingSessionForeground()
+{
+    if (notifyCallingSessionForegroundFunc_) {
+        WLOGFI("Notify calling window that input method shown");
+        notifyCallingSessionForegroundFunc_(persistentId_);
+    }
 }
 
 WSError Session::Background()
@@ -361,9 +372,20 @@ WSError Session::Background()
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
+    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        NotifyCallingSessionBackground();
+    }
     snapshot_ = Snapshot();
     NotifyBackground();
     return WSError::WS_OK;
+}
+
+void Session::NotifyCallingSessionBackground()
+{
+    if (notifyCallingSessionBackgroundFunc_) {
+        WLOGFI("Notify calling window that input method hide");
+        notifyCallingSessionBackgroundFunc_();
+    }
 }
 
 WSError Session::Disconnect()
@@ -468,6 +490,30 @@ void Session::SetTerminateSessionListener(const NotifyTerminateSessionFunc& func
     terminateSessionFunc_ = func;
 }
 
+WSError Session::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needStartCaller)
+{
+    if (abilitySessionInfo == nullptr) {
+        WLOGFE("abilitySessionInfo is null");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    SessionInfo info;
+    info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
+    info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
+    info.callerToken_ = abilitySessionInfo->callerToken;
+    info.persistentId_ = abilitySessionInfo->persistentId;
+    sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
+    sessionInfo_.resultCode = abilitySessionInfo->resultCode;
+    if (terminateSessionFuncNew_) {
+        terminateSessionFuncNew_(info, needStartCaller);
+    }
+    return WSError::WS_OK;
+}
+
+void Session::SetTerminateSessionListenerNew(const NotifyTerminateSessionFuncNew& func)
+{
+    terminateSessionFuncNew_ = func;
+}
+
 WSError Session::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
     if (abilitySessionInfo == nullptr) {
@@ -523,6 +569,16 @@ WSError Session::PendingSessionToBackgroundForDelegator()
         pendingSessionToBackgroundForDelegatorFunc_(info);
     }
     return WSError::WS_OK;
+}
+
+void Session::SetNotifyCallingSessionForegroundFunc(const NotifyCallingSessionForegroundFunc& func)
+{
+    notifyCallingSessionForegroundFunc_ = func;
+}
+
+void Session::SetNotifyCallingSessionBackgroundFunc(const NotifyCallingSessionBackgroundFunc& func)
+{
+    notifyCallingSessionBackgroundFunc_ = func;
 }
 
 void Session::NotifyTouchDialogTarget()
@@ -675,6 +731,15 @@ WSError Session::TransferFocusWindowIdEvent(uint32_t windowId)
     return windowEventChannel_->TransferFocusWindowId(windowId);
 }
 
+WSError Session::TransferFocusStateEvent(bool focusState)
+{
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferFocusState(focusState);
+}
+
 std::shared_ptr<Media::PixelMap> Session::GetSnapshot() const
 {
     return snapshot_;
@@ -723,11 +788,13 @@ void Session::NotifySessionStateChange(const SessionState& state)
 void Session::SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func)
 {
     sessionFocusableChangeFunc_ = func;
+    sessionFocusableChangeFunc_(GetFocusable());
 }
 
 void Session::SetSessionTouchableChangeListener(const NotifySessionTouchableChangeFunc& func)
 {
     sessionTouchableChangeFunc_ = func;
+    sessionTouchableChangeFunc_(GetTouchable());
 }
 
 void Session::SetClickListener(const NotifyClickFunc& func)
@@ -762,14 +829,14 @@ void Session::NotifyClick()
 WSError Session::UpdateFocus(bool isFocused)
 {
     WLOGFI("Session update focus id: %{public}" PRIu64, GetPersistentId());
-    if (!IsSessionValid()) {
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
     if (isFocused_ == isFocused) {
         WLOGFD("Session focus do not change: [%{public}d]", isFocused);
         return WSError::WS_DO_NOTHING;
     }
     isFocused_ = isFocused;
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
     sessionStage_->UpdateFocus(isFocused);
 
     return WSError::WS_OK;
@@ -883,8 +950,8 @@ WSError Session::ProcessBackEvent()
 
 WSError Session::MarkProcessed(int32_t eventId)
 {
-    int32_t persistentId = GetPersistentId();
-    WLOGFI("persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
+    uint64_t persistentId = GetPersistentId();
+    WLOGFI("persistentId:%{public}" PRIu64 ", eventId:%{public}d", persistentId, eventId);
     DelayedSingleton<ANRManager>::GetInstance()->MarkProcessed(eventId, persistentId);
     return WSError::WS_OK;
 }
@@ -962,16 +1029,28 @@ WindowMode Session::GetWindowMode()
 
 void Session::SetZOrder(uint32_t zOrder)
 {
-    if (property_ == nullptr) {
-        WLOGFW("null property.");
-        return;
-    }
-    property_->SetZOrder(zOrder);
+    zOrder_ = zOrder;
+}
+
+uint32_t Session::GetZOrder()
+{
+    return zOrder_;
 }
 
 WSError Session::UpdateSnapshot()
 {
     snapshot_ = Snapshot();
+    return WSError::WS_OK;
+}
+
+WSError Session::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
+{
+    WLOGFD("UpdateWindowAnimationFlag");
+    return WSError::WS_OK;
+}
+
+WSError Session::UpdateWindowSceneAfterCustomAnimation(bool isAdd)
+{
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

@@ -24,6 +24,7 @@
 #include "window_transition_info.h"
 #include "zidl/window_interface.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "interfaces/include/ws_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -127,6 +128,7 @@ public:
     virtual void SetMaximizeMode(MaximizeMode maximizeMode) = 0;
     virtual MaximizeMode GetMaximizeMode() = 0;
     virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo) = 0;
+    virtual WSError UpdateSessionAvoidAreaListener(uint64_t& persistentId, bool haveListener) { return WSError::WS_OK; }
 };
 }
 }
