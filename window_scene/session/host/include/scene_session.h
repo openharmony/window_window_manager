@@ -42,6 +42,7 @@ using NotifySystemBarPropertyChangeFunc = std::function<void(
     const std::unordered_map<WindowType, SystemBarProperty>& propertyMap)>;
 using NotifyNeedAvoidFunc = std::function<void(bool status)>;
 using NotifyWindowAnimationFlagChangeFunc = std::function<void(const bool flag)>;
+using NotifyShowWhenLockedFunc = std::function<void(bool showWhenLocked)>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -63,6 +64,7 @@ public:
         NotifyNeedAvoidFunc OnNeedAvoid_;
         NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
         NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
+        NotifyShowWhenLockedFunc OnShowWhenLocked_;
     };
 
     // func for change window scene pattern property
@@ -97,6 +99,8 @@ public:
     void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
+    WSError OnShowWhenLocked(bool showWhenLocked);
+    bool IsShowWhenLocked() const;
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     WSError SetAspectRatio(float ratio) override;
