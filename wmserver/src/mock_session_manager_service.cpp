@@ -17,6 +17,7 @@
 
 #include <system_ability_definition.h>
 
+#include "mock_screen_manager_service.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -52,6 +53,7 @@ bool MockSessionManagerService::RegisterMockSessionManagerService()
         WLOGFE("Publish failed");
     }
     WLOGFI("Publish mock session manager service success");
+    MockScreenManagerService::GetInstance().RegisterMockScreenManagerService();
     return true;
 }
 

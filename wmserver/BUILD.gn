@@ -43,13 +43,18 @@ config("libmockwms_config") {
 
 ohos_shared_library("sms") {
   sources = [
+    "src/mock_screen_manager_service.cpp",
     "src/mock_session_manager_service.cpp",
+    "src/zidl/mock_screen_manager_service_stub.cpp",
     "src/zidl/mock_session_manager_service_stub.cpp",
   ]
 
   public_configs = [ ":libmockwms_config" ]
 
-  deps = [ "../utils:libwmutil" ]
+  deps = [
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    "../utils:libwmutil",
+  ]
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
