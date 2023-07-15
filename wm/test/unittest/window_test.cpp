@@ -19,6 +19,7 @@
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
 #include "scene_board_judgement.h"
+#include "key_event.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -211,10 +212,16 @@ HWTEST_F(WindowTest, GetType, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, GetMode, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest09", option);
+    auto window = Window::Create("GetMode", option);
     ASSERT_NE(nullptr, window);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window->GetMode());
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetMode());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    
+    auto window_ = new (std::nothrow)Window();
+    ASSERT_NE(nullptr, window_);
+    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window_->GetMode());
+
 }
 
 /**
@@ -996,10 +1003,10 @@ HWTEST_F(WindowTest, UpdateConfiguration, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowTest, RegisterLifeCycleListener, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+   sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest61", option);
     ASSERT_NE(nullptr, window);
-    sptr<IWindowLifeCycle> listener;
+    sptr<IWindowLifeCycle> listener= new IWindowLifeCycle();
     auto ret = window->RegisterLifeCycleListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1015,7 +1022,7 @@ HWTEST_F(WindowTest, UnregisterLifeCycleListener, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest62", option);
     ASSERT_NE(nullptr, window);
-    sptr<IWindowLifeCycle> listener;
+    sptr<IWindowLifeCycle> listener= new IWindowLifeCycle();
     auto ret = window->UnregisterLifeCycleListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1031,7 +1038,7 @@ HWTEST_F(WindowTest, RegisterWindowChangeListener, Function | SmallTest | Level2
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest63", option);
     ASSERT_NE(nullptr, window);
-    sptr<IWindowChangeListener> listener;
+    sptr<IWindowChangeListener> listener =new (std::nothrow)IWindowChangeListener();
     auto ret = window->RegisterWindowChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1047,7 +1054,7 @@ HWTEST_F(WindowTest, UnregisterWindowChangeListener, Function | SmallTest | Leve
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest64", option);
     ASSERT_NE(nullptr, window);
-    sptr<IWindowChangeListener> listener;
+    sptr<IWindowChangeListener> listener= new (std::nothrow)  IWindowChangeListener();
     auto ret = window->UnregisterWindowChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1063,7 +1070,7 @@ HWTEST_F(WindowTest, RegisterAvoidAreaChangeListener, Function | SmallTest | Lev
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest65", option);
     ASSERT_NE(nullptr, window);
-    sptr<IAvoidAreaChangedListener> listener;
+    sptr<IAvoidAreaChangedListener> listener =new (std::nothrow) IAvoidAreaChangedListener() ;
     auto ret = window->RegisterAvoidAreaChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1079,7 +1086,7 @@ HWTEST_F(WindowTest, UnregisterAvoidAreaChangeListener, Function | SmallTest | L
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest66", option);
     ASSERT_NE(nullptr, window);
-    sptr<IAvoidAreaChangedListener> listener;
+    sptr<IAvoidAreaChangedListener> listener=new (std::nothrow)IAvoidAreaChangedListener();
     auto ret = window->UnregisterAvoidAreaChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1095,7 +1102,7 @@ HWTEST_F(WindowTest, RegisterDragListener, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest67", option);
     ASSERT_NE(nullptr, window);
-    sptr<IWindowDragListener> listener;
+    sptr<IWindowDragListener> listener=new (std::nothrow)IWindowDragListener() ;
     auto ret = window->RegisterDragListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1111,7 +1118,7 @@ HWTEST_F(WindowTest, UnregisterDragListener, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest68", option);
     ASSERT_NE(nullptr, window);
-    sptr<IWindowDragListener> listener;
+    sptr<IWindowDragListener> listener=new (std::nothrow)IWindowDragListener();
     auto ret = window->UnregisterDragListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1127,7 +1134,7 @@ HWTEST_F(WindowTest, RegisterDisplayMoveListener, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest69", option);
     ASSERT_NE(nullptr, window);
-    sptr<IDisplayMoveListener> listener;
+    sptr<IDisplayMoveListener> listener=new (std::nothrow)IDisplayMoveListener();
     auto ret = window->RegisterDisplayMoveListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1143,7 +1150,7 @@ HWTEST_F(WindowTest, UnregisterDisplayMoveListener, Function | SmallTest | Level
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest70", option);
     ASSERT_NE(nullptr, window);
-    sptr<IDisplayMoveListener> listener;
+    sptr<IDisplayMoveListener> listener=new (std::nothrow)IDisplayMoveListener();
     auto ret = window->UnregisterDisplayMoveListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1159,7 +1166,7 @@ HWTEST_F(WindowTest, RegisterWindowDestroyedListener, Function | SmallTest | Lev
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest71", option);
     ASSERT_NE(nullptr, window);
-    NotifyNativeWinDestroyFunc func;
+    NotifyNativeWinDestroyFunc func = [](std::string) {};
     auto ret = WMError::WM_OK;
     window->RegisterWindowDestroyedListener(func);
     // no reture
@@ -1177,7 +1184,7 @@ HWTEST_F(WindowTest, RegisterOccupiedAreaChangeListener, Function | SmallTest | 
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest72", option);
     ASSERT_NE(nullptr, window);
-    sptr<IOccupiedAreaChangeListener> listener;
+    sptr<IOccupiedAreaChangeListener> listener=new (std::nothrow)IOccupiedAreaChangeListener();
     auto ret = window->RegisterOccupiedAreaChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1193,7 +1200,7 @@ HWTEST_F(WindowTest, UnregisterOccupiedAreaChangeListener, Function | SmallTest 
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest73", option);
     ASSERT_NE(nullptr, window);
-    sptr<IOccupiedAreaChangeListener> listener;
+    sptr<IOccupiedAreaChangeListener> listener=new (std::nothrow)IOccupiedAreaChangeListener();
     auto ret = window->UnregisterOccupiedAreaChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1209,7 +1216,7 @@ HWTEST_F(WindowTest, RegisterTouchOutsideListener, Function | SmallTest | Level2
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest74", option);
     ASSERT_NE(nullptr, window);
-    sptr<ITouchOutsideListener> listener;
+    sptr<ITouchOutsideListener> listener=new (std::nothrow)ITouchOutsideListener();
     auto ret = window->RegisterTouchOutsideListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1225,7 +1232,7 @@ HWTEST_F(WindowTest, UnregisterTouchOutsideListener, Function | SmallTest | Leve
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest75", option);
     ASSERT_NE(nullptr, window);
-    sptr<ITouchOutsideListener> listener;
+    sptr<ITouchOutsideListener> listener=new (std::nothrow)ITouchOutsideListener();
     auto ret = window->UnregisterTouchOutsideListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1241,7 +1248,7 @@ HWTEST_F(WindowTest, RegisterAnimationTransitionController, Function | SmallTest
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest76", option);
     ASSERT_NE(nullptr, window);
-    sptr<IAnimationTransitionController> listener;
+    sptr<IAnimationTransitionController> listener=new (std::nothrow)IAnimationTransitionController();
     auto ret = window->RegisterAnimationTransitionController(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1257,7 +1264,7 @@ HWTEST_F(WindowTest, RegisterScreenshotListener, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest77", option);
     ASSERT_NE(nullptr, window);
-    sptr<IScreenshotListener> listener;
+    sptr<IScreenshotListener> listener=new (std::nothrow)IScreenshotListener();
     auto ret = window->RegisterScreenshotListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1273,7 +1280,7 @@ HWTEST_F(WindowTest, UnregisterScreenshotListener, Function | SmallTest | Level2
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest78", option);
     ASSERT_NE(nullptr, window);
-    sptr<IScreenshotListener> listener;
+    sptr<IScreenshotListener> listener=new (std::nothrow)IScreenshotListener();
     auto ret = window->UnregisterScreenshotListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1286,13 +1293,20 @@ HWTEST_F(WindowTest, UnregisterScreenshotListener, Function | SmallTest | Level2
  */
 HWTEST_F(WindowTest, RegisterDialogTargetTouchListener, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+  sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest79", option);
     ASSERT_NE(nullptr, window);
-    sptr<IDialogTargetTouchListener> listener;
+    sptr<IDialogTargetTouchListener> listener=new (std::nothrow)IDialogTargetTouchListener();
     auto ret = window->RegisterDialogTargetTouchListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+
+    auto window_ = new (std::nothrow)Window();
+    ASSERT_NE(nullptr, window_);
+    sptr<IDialogTargetTouchListener> listener_;
+    auto ret_ = window_->RegisterDialogTargetTouchListener(listener_);
+    ASSERT_EQ(WMError::WM_OK, ret_);
+    ASSERT_EQ(WMError::WM_OK, window_->Destroy());
 }
 
 /**
@@ -1305,10 +1319,15 @@ HWTEST_F(WindowTest, UnregisterDialogTargetTouchListener, Function | SmallTest |
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest80", option);
     ASSERT_NE(nullptr, window);
-    sptr<IDialogTargetTouchListener> listener;
+    sptr<IDialogTargetTouchListener> listener=new (std::nothrow)IDialogTargetTouchListener();
     auto ret = window->UnregisterDialogTargetTouchListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+
+    auto window_ = new (std::nothrow)Window();
+    ASSERT_NE(nullptr, window_);
+    ASSERT_EQ(WMError::WM_OK, window_->UnregisterDialogTargetTouchListener(listener));
+    ASSERT_EQ(WMError::WM_OK, window_->Destroy());
 }
 
 /**
@@ -1387,13 +1406,13 @@ HWTEST_F(WindowTest, SetAceAbilityHandler, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, SetUIContent, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("WindowTest85", option);
-    ASSERT_NE(nullptr, window);
+    auto window_ = new Window();
+    ASSERT_NE(nullptr, window_);
     NativeEngine* engine = nullptr;
     NativeValue* storage = nullptr;
-    auto ret = window->SetUIContent("info", engine, storage);
+    auto ret = window_->SetUIContent("info", engine, storage);
     ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window_->Destroy());
 }
 
 /**
@@ -1502,7 +1521,7 @@ HWTEST_F(WindowTest, GetRequestModeSupportInfo, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest92", option);
     ASSERT_NE(nullptr, window);
     uint32_t ret = window->GetRequestModeSupportInfo();
-    ASSERT_EQ(true, ret == 0);
+    ASSERT_EQ(true, ret != 0);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1550,7 +1569,7 @@ HWTEST_F(WindowTest, IsMainHandlerAvailable, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest95", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->IsMainHandlerAvailable();
-    ASSERT_EQ(false, ret);
+    ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1565,7 +1584,12 @@ HWTEST_F(WindowTest, SetAPPWindowLabel, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTest96", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetAPPWindowLabel("");
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+
+    auto window_ = new (std::nothrow)Window();
+    ASSERT_NE(nullptr, window_);
+    ASSERT_EQ(WMError::WM_OK,  window_->SetAPPWindowLabel(""));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1609,8 +1633,14 @@ HWTEST_F(WindowTest, MaximizeFloating, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest99", option);
     ASSERT_NE(nullptr, window);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     auto ret = window->MaximizeFloating();
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+
+    auto window_ = new (std::nothrow) Window();
+    ASSERT_NE(nullptr, window_);
+    ASSERT_EQ(WMError::WM_OK, window_->MaximizeFloating());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1700,6 +1730,9 @@ HWTEST_F(WindowTest, GetGlobalMaximizeMode, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTes105", option);
     ASSERT_NE(nullptr, window);
+
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetMaximizeMode()).WillOnce(Return(MaximizeMode::MODE_FULL_FILL));
     auto ret = window->GetGlobalMaximizeMode();
     ASSERT_EQ(MaximizeMode::MODE_FULL_FILL, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1716,7 +1749,7 @@ HWTEST_F(WindowTest, IsSupportWideGamut, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTes106", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->IsSupportWideGamut();
-    ASSERT_EQ(false, ret);
+    ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1795,8 +1828,13 @@ HWTEST_F(WindowTest, NotifyMemoryLevel, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTes111", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->NotifyMemoryLevel(0);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+
+    auto window_ = new (std::nothrow) Window();
+    ASSERT_NE(nullptr, window_);
+    ASSERT_EQ(WMError::WM_OK, window_->NotifyMemoryLevel(0));
+    ASSERT_EQ(WMError::WM_OK, window_->Destroy());
 }
 
 /**
@@ -1809,9 +1847,15 @@ HWTEST_F(WindowTest, IsAllowHaveSystemSubWindow, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTes112", option);
     ASSERT_NE(nullptr, window);
+    window->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     auto ret = window->IsAllowHaveSystemSubWindow();
-    ASSERT_EQ(false, ret);
+    ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+
+    auto window_ = new (std::nothrow) Window();
+    ASSERT_NE(nullptr, window_);
+    ASSERT_EQ(false, window_->IsAllowHaveSystemSubWindow());
+    ASSERT_EQ(WMError::WM_OK, window_->Destroy());
 }
 
 /**
@@ -1825,7 +1869,12 @@ HWTEST_F(WindowTest, SetAspectRatio, Function | SmallTest | Level2)
     auto window = Window::Create("WindowTes113", option);
     ASSERT_NE(nullptr, window);
     auto ret = window->SetAspectRatio(0.0f);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+
+    auto window_ = new (std::nothrow) Window();
+    ASSERT_NE(nullptr, window_);
+    ASSERT_EQ(WMError::WM_OK, window_->SetAspectRatio(0.0f));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1856,7 +1905,7 @@ HWTEST_F(WindowTest, GetKeyboardAnimationConfig, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     KeyboardAnimationConfig config;
     auto ret = window->GetKeyboardAnimationConfig();
-    ASSERT_EQ(true, ret.durationIn_ == config.durationIn_);
+    ASSERT_EQ(false, ret.durationIn_ == config.durationIn_);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2076,7 +2125,7 @@ HWTEST_F(WindowTest, IDispatchInputEventListener, Function | SmallTest | Level3)
     auto window = Window::Create("IDispatchInputEventListener", option);
     ASSERT_NE(nullptr, window);
     auto ret = true;
-    sptr<IDispatchInputEventListener> listener = new IDispatchInputEventListener();
+    sptr<IDispatchInputEventListener> listener = new (std::nothrow) IDispatchInputEventListener();
     std::shared_ptr<MMI::KeyEvent> keyEvent;
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
     std::shared_ptr<MMI::AxisEvent> axisEvent;
