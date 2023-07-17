@@ -845,7 +845,11 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const uint64_t&
         auto ret = sceneSession->UpdateActiveStatus(false);
         if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
             auto parentSession = GetSceneSession(sceneSession->GetParentPersistentId());
-            parentSession->RemoveDialogToParentSession(sceneSession);
+            if (parentSession == nullptr) {
+                WLOGFE("Dialog not bind parent");
+            } else {
+                parentSession->RemoveDialogToParentSession(sceneSession);
+            }
             sceneSession->NotifyDestroy();
         }
         ret = sceneSession->Disconnect();
