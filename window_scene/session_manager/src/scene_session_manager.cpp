@@ -1984,10 +1984,14 @@ WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<I
 
 WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject> &token)
 {
-    WLOGFI("run GetFocusSessionToken");
+    WLOGFI("run GetFocusSessionToken with focusedSessionId: %{public}" PRIu64, focusedSessionId_);
     auto sceneSession = GetSceneSession(focusedSessionId_);
     if (sceneSession) {
         token = sceneSession->GetAbilityToken();
+        if (token == nullptr) {
+            WLOGFE("token is nullptr");
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
         return WSError::WS_OK;
     }
     return WSError::WS_ERROR_INVALID_PARAM;

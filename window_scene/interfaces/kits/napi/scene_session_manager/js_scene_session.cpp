@@ -260,12 +260,8 @@ void JsSceneSession::ProcessTerminateSessionRegisterNew()
 void JsSceneSession::ProcessPendingSessionToForegroundRegister()
 {
     WLOGFD("begin to run ProcessPendingSessionToForegroundRegister");
-    auto weak = weak_from_this();
-    NotifyPendingSessionToForegroundFunc func = [weak](const SessionInfo& info) {
-        auto self = weak.lock();
-        if (self) {
-            self->PendingSessionToForeground(info);
-        }
+    NotifyPendingSessionToForegroundFunc func = [this](const SessionInfo& info) {
+        this->PendingSessionToForeground(info);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -704,6 +700,7 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
             return;
         }
         info.persistentId_ = sceneSession->GetPersistentId();
+        sceneSession->GetSessionInfo().persistentId_ = sceneSession->GetPersistentId();
     } else {
         auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
         if (sceneSession == nullptr) {

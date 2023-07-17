@@ -192,6 +192,7 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
             return;
         }
         info.persistentId_ = sceneSession->GetPersistentId();
+        sceneSession->GetSessionInfo().persistentId_ = sceneSession->GetPersistentId();
     } else {
         auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
         if (sceneSession == nullptr) {
