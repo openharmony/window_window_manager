@@ -35,7 +35,6 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
     MessageOption option(MessageOption::TF_SYNC);
     MessageParcel data;
     MessageParcel reply;
-
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("Write InterfaceToken failed!");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -546,4 +545,25 @@ WSError SceneSessionManagerProxy::GetFocusSessionToken(sptr<IRemoteObject> &toke
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+WSError SceneSessionManagerProxy::GetSessionDumpInfo(const sptr<DumpParam> &param, std::string& info)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteParcelable(param)) {
+        WLOGFE("Write parcelable failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_DUMP_INFO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    info = reply.ReadString();
+    return static_cast<WSError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen
