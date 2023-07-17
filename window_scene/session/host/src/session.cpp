@@ -550,8 +550,8 @@ WSError Session::PendingSessionToForeground()
 {
     WLOGFI("run PendingSessionToForeground");
     SessionInfo info = GetSessionInfo();
-    if (pendingSessionToForegroundFunc_) {
-        pendingSessionToForegroundFunc_(info);
+    if (pendingSessionActivationFunc_) {
+        pendingSessionActivationFunc_(info);
     }
     return WSError::WS_OK;
 }
