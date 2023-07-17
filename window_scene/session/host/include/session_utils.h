@@ -48,10 +48,10 @@ inline void CalcFloatWindowRectLimits(const WindowLimits& limits, int32_t maxFlo
     maxWidth = (limits.maxWidth_ == 0 || limits.maxWidth_ >= INT32_MAX) ? INT32_MAX : limits.maxWidth_;
     minHeight = limits.minHeight_;
     maxHeight = (limits.maxHeight_ == 0 || limits.maxHeight_ >= INT32_MAX) ? INT32_MAX : limits.maxHeight_;
-    minWidth = std::max(minWidth, static_cast<int32_t>(MIN_FLOATING_WIDTH)) * vpr;
-    maxWidth = std::min(maxWidth, maxFloatingWindowSize) * vpr;
-    minHeight = std::max(minHeight, static_cast<int32_t>(MIN_FLOATING_HEIGHT)) * vpr;
-    maxHeight = std::min(maxHeight, maxFloatingWindowSize) * vpr;
+    minWidth = std::max(minWidth, static_cast<int32_t>(MIN_FLOATING_WIDTH * vpr));
+    maxWidth = std::min(maxWidth, static_cast<int32_t>(maxFloatingWindowSize * vpr));
+    minHeight = std::max(minHeight, static_cast<int32_t>(MIN_FLOATING_HEIGHT * vpr));
+    maxHeight = std::min(maxHeight, static_cast<int32_t>(maxFloatingWindowSize * vpr));
 }
 
 } // namespace SessionUtils

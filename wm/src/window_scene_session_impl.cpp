@@ -669,6 +669,10 @@ WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
         WLOGFE("SetAspectRatio failed because of nullptr");
         return  WMError::WM_ERROR_NULLPTR;
     }
+    if (ratio == MathHelper::INF || ratio == MathHelper::NAG_INF || std::isnan(ratio)) {
+        WLOGFE("SetAspectRatio failed, because of wrong value: %{public}f", ratio);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
     if (hostSession_->SetAspectRatio(ratio) != WSError::WS_OK) {
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -681,7 +685,7 @@ WMError WindowSceneSessionImpl::ResetAspectRatio()
         hostSession_->SetAspectRatio(0.0f);
         return WMError::WM_OK;
     } else {
-        WLOGE("no host session found");
+        WLOGFE("no host session found");
         return WMError::WM_ERROR_NULLPTR;
     }
 }
