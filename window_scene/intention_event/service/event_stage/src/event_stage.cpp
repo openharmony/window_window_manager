@@ -90,5 +90,5 @@ void EventStage::OnSessionLost(uint64_t persistentId)
     isAnrProcess_.erase(persistentId);
 }
 
-} // namespace MMI
+} // namespace Rosen
 } // namespace OHOS
