@@ -143,6 +143,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             }
             WLOGFD("Cannot find main window to bind");
         }
+        PreProcessCreate();
         SessionManager::GetInstance().CreateAndConnectSpecificSession(iSessionStage, eventChannel, surfaceNode_,
             property_, persistentId, session);
     }
@@ -434,6 +435,23 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         state_ = WindowState::STATE_HIDDEN;
     }
     return res;
+}
+
+void WindowSceneSessionImpl::PreProcessCreate()
+{
+    SetDefaultProperty();
+}
+
+void WindowSceneSessionImpl::SetDefaultProperty()
+{
+    switch (property_->GetWindowType()) {
+        case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT:{
+            property_->SetFocusable(false);
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 WSError WindowSceneSessionImpl::SetActive(bool active)

@@ -575,6 +575,10 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             WLOGFE("sceneSession is nullptr!");
             return sceneSession;
         }
+        if (sessionInfo.isSystem_) {
+            sceneSession->SetCallingPid(IPCSkeleton::GetCallingPid());
+            sceneSession->SetCallingUid(IPCSkeleton::GetCallingUid());
+        }
         auto persistentId = sceneSession->GetPersistentId();
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSession(%" PRIu64" )", persistentId);
         sceneSession->SetSystemConfig(systemConfig_);
@@ -783,15 +787,20 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     if (!Permission::IsSystemCalling() && !Permission::IsStartedByInputMethod()) {
         WLOGFE("check input method permission failed");
     }
-    auto task = [this, sessionStage, eventChannel, surfaceNode, property, &persistentId, &session]() {
+    // get pid/uid before post sync task
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    auto task = [this, sessionStage, eventChannel, surfaceNode, property, &persistentId, &session, pid, uid]() {
         // create specific session
         SessionInfo info;
         sptr<SceneSession> sceneSession = RequestSceneSession(info, property);
         if (sceneSession == nullptr) {
             return WSError::WS_ERROR_NULLPTR;
         }
+        sceneSession->SetCallingPid(pid);
+        sceneSession->SetCallingUid(uid);
         // connect specific session and sessionStage
-        WSError errCode = sceneSession->Connect(sessionStage, eventChannel, surfaceNode, systemConfig_, property);
+        WSError errCode = sceneSession->ConnectImpl(sessionStage, eventChannel, surfaceNode, systemConfig_, property);
         if (property) {
             persistentId = property->GetPersistentId();
         }
