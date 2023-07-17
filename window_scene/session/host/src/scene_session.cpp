@@ -316,8 +316,8 @@ void SceneSession::CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, Avoid
         return;
     }
 
-    uint32_t avoidAreaCenterX = avoidAreaRect.posX_ + (avoidAreaRect.width_ >> 1);
-    uint32_t avoidAreaCenterY = avoidAreaRect.posY_ + (avoidAreaRect.height_ >> 1);
+    uint32_t avoidAreaCenterX = static_cast<uint32_t>(avoidAreaRect.posX_) + (avoidAreaRect.width_ >> 1);
+    uint32_t avoidAreaCenterY = static_cast<uint32_t>(avoidAreaRect.posY_) + (avoidAreaRect.height_ >> 1);
     float res1 = float(avoidAreaCenterY) - float(rect.height_) / float(rect.width_) *
         float(avoidAreaCenterX);
     float res2 = float(avoidAreaCenterY) + float(rect.height_) / float(rect.width_) *

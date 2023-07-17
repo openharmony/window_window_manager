@@ -50,7 +50,7 @@ WSError WindowEventChannelProxy::TransferKeyEvent(const std::shared_ptr<MMI::Key
         return WSError::WS_ERROR_IPC_FAILED;
     }
     reply.ReadBool();
-    int32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
@@ -74,7 +74,7 @@ WSError WindowEventChannelProxy::TransferPointerEvent(const std::shared_ptr<MMI:
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
@@ -100,7 +100,7 @@ WSError WindowEventChannelProxy::TransferKeyEventForConsumed(
         return WSError::WS_ERROR_IPC_FAILED;
     }
     isConsumed = reply.ReadBool();
-    int32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
@@ -122,7 +122,7 @@ WSError WindowEventChannelProxy::TransferFocusActiveEvent(bool isFocusActive)
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
@@ -144,7 +144,7 @@ WSError WindowEventChannelProxy::TransferFocusWindowId(uint32_t windowId)
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
@@ -166,7 +166,7 @@ WSError WindowEventChannelProxy::TransferFocusState(bool focusState)
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 } // namespace OHOS::Rosen

@@ -74,7 +74,7 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
             WLOGFE("[NAPI]Failed to convert parameter to persistentId");
             return false;
         }
-        sessionInfo.persistentId_ = persistentId;
+        sessionInfo.persistentId_ = static_cast<uint64_t>(persistentId);
     }
     if (jsCallState->TypeOf() != NATIVE_UNDEFINED) {
         int32_t callState;
@@ -82,7 +82,7 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
             WLOGFE("[NAPI]Failed to convert parameter to callState");
             return false;
         }
-        sessionInfo.callState_ = callState;
+        sessionInfo.callState_ = static_cast<uint32_t>(callState);
     }
     if (jsSessionType->TypeOf() != NATIVE_UNDEFINED) {
         uint32_t windowType = 0;

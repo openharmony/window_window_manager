@@ -536,7 +536,7 @@ WSError SessionProxy::RequestSessionBack()
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
@@ -579,7 +579,7 @@ WSError OHOS::Rosen::SessionProxy::SetGlobalMaximizeMode(MaximizeMode mode)
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
@@ -598,7 +598,7 @@ WSError SessionProxy::GetGlobalMaximizeMode(MaximizeMode& mode)
         return WSError::WS_ERROR_IPC_FAILED;
     }
     mode = static_cast<MaximizeMode>(reply.ReadUint32());
-    int32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
@@ -690,7 +690,7 @@ WSError SessionProxy::TransferAbilityResult(uint32_t resultCode, const AAFwk::Wa
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
@@ -712,7 +712,7 @@ WSError SessionProxy::TransferExtensionData(const AAFwk::WantParams& wantParams)
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 

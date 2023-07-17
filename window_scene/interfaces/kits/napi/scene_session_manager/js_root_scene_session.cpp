@@ -110,7 +110,7 @@ NativeValue* JsRootSceneSession::OnRegisterCallback(NativeEngine& engine, Native
     std::shared_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
     jsCbMap_[cbType] = callbackRef;
-    WLOGFI("[NAPI]Register end, type = %{public}s, callback = %{public}p", cbType.c_str(), value);
+    WLOGFI("[NAPI]Register end, type = %{public}s", cbType.c_str());
     return engine.CreateUndefined();
 }
 

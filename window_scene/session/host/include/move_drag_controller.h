@@ -128,8 +128,8 @@ private:
         {DragType::DRAG_LEFT_TOP_CORNER,  MMI::MOUSE_ICON::NORTH_WEST_SOUTH_EAST},
         {DragType::DRAG_RIGHT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_EAST_SOUTH_WEST}
     };
-    Rect rectExceptFrame_;
-    Rect rectExceptCorner_;
+    Rect rectExceptFrame_ { 0, 0, 0, 0 };
+    Rect rectExceptCorner_ { 0, 0, 0, 0 };
     uint32_t mouseStyleID_ = 0;
     DragType dragType_ = DragType::DRAG_UNDEFINED;
 };
