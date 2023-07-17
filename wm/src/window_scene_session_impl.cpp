@@ -139,8 +139,9 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             auto mainWindow = FindMainWindowWithContext();
             if (mainWindow != nullptr) {
                 property_->SetParentPersistentId(mainWindow->GetPersistentId());
+                WLOGFD("Bind dialog to main window");
             }
-            WLOGFD("Bind dialog to main window");
+            WLOGFD("Cannot find main window to bind");
         }
         SessionManager::GetInstance().CreateAndConnectSpecificSession(iSessionStage, eventChannel, surfaceNode_,
             property_, persistentId, session);
@@ -1548,6 +1549,16 @@ WMError WindowSceneSessionImpl::SetAlpha(float alpha)
     surfaceNode_->SetAlpha(alpha);
     RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::BindDialogTarget(sptr<IRemoteObject> targetToken)
+{
+    uint32_t persistentId = property_->GetPersistentId();
+    WMError ret = SessionManager::GetInstance().BindDialogTarget(persistentId, targetToken);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("bind window failed with errCode:%{public}d", static_cast<int32_t>(ret));
+    }
+    return ret;
 }
 } // namespace Rosen
 } // namespace OHOS
