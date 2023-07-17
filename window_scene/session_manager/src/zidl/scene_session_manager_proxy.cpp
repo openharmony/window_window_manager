@@ -134,7 +134,7 @@ WSError SceneSessionManagerProxy::UpdateProperty(sptr<WindowSessionProperty>& pr
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 WSError SceneSessionManagerProxy::BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken)
@@ -163,7 +163,7 @@ WSError SceneSessionManagerProxy::BindDialogTarget(uint64_t persistentId, sptr<I
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
@@ -190,7 +190,7 @@ WSError SceneSessionManagerProxy::UpdateSessionAvoidAreaListener(uint64_t& persi
         data, reply, option) != ERR_NONE) {
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    uint32_t ret = reply.ReadUint32();
+    uint32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
@@ -325,7 +325,7 @@ WMError SceneSessionManagerProxy::SetGestureNavigaionEnabled(bool enable)
         WLOGFE("SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
     return static_cast<WMError>(ret);
 }
 
