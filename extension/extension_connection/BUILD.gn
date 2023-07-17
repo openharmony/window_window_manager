@@ -50,6 +50,7 @@ ohos_shared_library("libwindow_extension_client") {
   ]
 
   external_deps = [
+    "ability_base:session_info",
     "ability_base:want",
     "ability_runtime:ability_manager",
     "graphic_2d:librender_service_client",
