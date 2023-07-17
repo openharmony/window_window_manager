@@ -34,6 +34,7 @@ public:
     void DestroyAndDisconnectSpecificSession(const uint64_t& persistentId);
     WMError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
     WMError SetSessionGravity(uint64_t persistentId, SessionGravity gravity, uint32_t percent);
+    WMError BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken);
 
     sptr<ISceneSessionManager> GetSceneSessionManagerProxy();
     sptr<IScreenSessionManager> GetScreenSessionManagerProxy();
