@@ -37,12 +37,54 @@ config("libmockwms_config") {
 
   include_dirs = [
     "include",
-    "../utils/include",
+    "${window_base_path}/utils/include",
+    "${window_base_path}/interfaces/innerkits/wm",
+    "${window_base_path}/window_scene/session_manager_service/include",
+    "${window_base_path}/window_scene/session_manager/include/zidl",
+
+    # for session_manager
+    "${window_base_path}/interfaces/innerkits/wm",
+    "${window_base_path}/interfaces/include",
+    "${window_base_path}/window_scene",
+    "${window_base_path}/window_scene/interfaces/include",
+    "${window_base_path}/window_scene/session_manager/include",
+    "${window_base_path}/window_scene/session_manager/include/zidl",
+    "${window_base_path}/window_scene/session_manager_service/include",
+
+    # for session_manager
+    "${multimodalinput_path}/input/interfaces/native/innerkits/event/include",
+    "${multimodalinput_path}/input/util/common/include",
+    "${ability_runtime_inner_api_path}/ability_manager/include",
+    "${window_base_path}/wmserver/include",
+    "${window_base_path}/wmserver/include/zidl",
+
+    # for screen_session_manager
+    "${window_base_path}/utils/include",
+    "${window_base_path}/dm/include",
+    "${window_base_path}/interfaces/innerkits/dm",
+    "${window_base_path}/dmserver/include",
+
+    # for scene session manager
+    "${window_base_path}/interfaces/innerkits/wm",
+    "${window_base_path}/wmserver/include",
+    "${graphic_base_path}/graphic_2d/rosen/modules/animation/window_animation/include",
+    "${graphic_base_path}/graphic_2d/rosen/modules/platform/image_native",
+
+    # for window_manager_hilog
+    "${window_base_path}/utils/include",
+
+    # for screenlock_manager_interface
+    "${screenlock_mgr_path}/services/include",
+    "${screenlock_mgr_path}/utils/include",
+    "${screenlock_mgr_path}/frameworks/native/include",
+    "${window_base_path}/wm/include",
+    "${window_base_path}/wm/include/zidl",
   ]
 }
 
 ohos_shared_library("sms") {
   sources = [
+    "${window_base_path}/window_scene/session_manager/src/zidl/scene_session_manager_proxy.cpp",
     "src/mock_screen_manager_service.cpp",
     "src/mock_session_manager_service.cpp",
     "src/zidl/mock_screen_manager_service_stub.cpp",
@@ -52,13 +94,17 @@ ohos_shared_library("sms") {
   public_configs = [ ":libmockwms_config" ]
 
   deps = [
+    "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    "${window_base_path}/window_scene/session_manager_service:session_manager_service",
     "../utils:libwmutil",
   ]
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "ipc:ipc_single",
+    "multimedia_image_framework:image_native",
     "safwk:system_ability_fwk",
   ]
   innerapi_tags = [ "platformsdk" ]
