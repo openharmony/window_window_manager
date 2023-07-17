@@ -36,6 +36,8 @@ public:
     ScenePersistentStorage() = default;
     ~ScenePersistentStorage() = default;
 
+    static constexpr int32_t MAX_KEY_LEN = 80; // 80: max length of preference's key
+
     template <typename T>
     static void Insert(const std::string& key, const T& value, ScenePersistentStorageType storageType)
     {
