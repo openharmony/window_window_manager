@@ -533,14 +533,18 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionActivation(NativeEngine
         return engine.CreateUndefined();
     }
     sptr<SceneSession> sceneSession = jsSceneSession->GetNativeSession();
-    bool isNewActive = true;
-    ConvertFromJsValue(engine, info.argv[1], isNewActive);
     if (sceneSession == nullptr) {
         WLOGFE("[NAPI]sceneSession is nullptr");
-        return nullptr;
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY),
+            "sceneSession is nullptr"));
+        return engine.CreateUndefined();
     }
-    SceneSessionManager::GetInstance().RequestSceneSessionActivation(sceneSession,isNewActive);
-    return nullptr;
+
+    bool isNewActive = true;
+    ConvertFromJsValue(engine, info.argv[1], isNewActive);
+
+    SceneSessionManager::GetInstance().RequestSceneSessionActivation(sceneSession, isNewActive);
+    return engine.CreateUndefined();
 }
 
 NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackground(NativeEngine& engine, NativeCallbackInfo& info)
@@ -568,6 +572,12 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackground(NativeEngine
             }
         }
     }
+    if (sceneSession == nullptr) {
+        WLOGFE("[NAPI]sceneSession is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY),
+            "sceneSession is nullptr"));
+        return engine.CreateUndefined();
+    }
 
     if (errCode == WSErrorCode::WS_ERROR_INVALID_PARAM) {
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
@@ -579,12 +589,9 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackground(NativeEngine
     if (info.argc == 2 && info.argv[1]->TypeOf() != NATIVE_UNDEFINED) { // 2: params total num
         isDelegator = ConvertFromJsValue(engine, info.argv[1], isDelegator);
     }
-    if (sceneSession == nullptr) {
-        WLOGFE("[NAPI]sceneSession is nullptr");
-        return nullptr;
-    }
+
     SceneSessionManager::GetInstance().RequestSceneSessionBackground(sceneSession, isDelegator);
-    return nullptr;
+    return engine.CreateUndefined();
 }
 
 NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngine& engine, NativeCallbackInfo& info)
@@ -612,18 +619,21 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
             }
         }
     }
+    if (sceneSession == nullptr) {
+        WLOGFE("[NAPI]sceneSession is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY),
+            "sceneSession is nullptr"));
+        return engine.CreateUndefined();
+    }
 
     if (errCode == WSErrorCode::WS_ERROR_INVALID_PARAM) {
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
-    if (sceneSession == nullptr) {
-        WLOGFE("[NAPI]sceneSession is nullptr");
-        return nullptr;
-    }
+
     SceneSessionManager::GetInstance().RequestSceneSessionDestruction(sceneSession);
-    return nullptr;
+    return engine.CreateUndefined();
 }
 
 NativeValue* JsSceneSessionManager::OnRequestSceneSessionByCall(NativeEngine& engine, NativeCallbackInfo& info)
@@ -651,18 +661,21 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionByCall(NativeEngine& en
             }
         }
     }
+    if (sceneSession == nullptr) {
+        WLOGFE("[NAPI]sceneSession is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY),
+            "sceneSession is nullptr"));
+        return engine.CreateUndefined();
+    }
 
     if (errCode == WSErrorCode::WS_ERROR_INVALID_PARAM) {
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
-    if (sceneSession == nullptr) {
-        WLOGFE("[NAPI]sceneSession is nullptr");
-        return nullptr;
-    }
+
     SceneSessionManager::GetInstance().RequestSceneSessionByCall(sceneSession);
-    return nullptr;
+    return engine.CreateUndefined();
 }
 
 NativeValue* JsSceneSessionManager::OnStartAbilityBySpecified(NativeEngine& engine, NativeCallbackInfo& info)
