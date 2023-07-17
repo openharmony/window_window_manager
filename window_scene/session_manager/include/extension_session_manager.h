@@ -27,14 +27,8 @@ class SessionInfo;
 namespace OHOS::Rosen {
 class ExtensionSession;
 class ExtensionSessionManager {
-WM_DECLARE_SINGLE_INSTANCE_BASE(ExtensionSessionManager)
+WM_DECLARE_SINGLE_INSTANCE(ExtensionSessionManager)
 public:
-    /**
-     * @brief init extension session manager
-     *
-     * @return WSError
-     */
-    WSError Init();
     /**
      * @brief create extension session
      *
@@ -65,9 +59,7 @@ public:
     WSError RequestExtensionSessionDestruction(const sptr<ExtensionSession>& extensionSession);
 
 private:
-    ExtensionSessionManager();
-    virtual ~ExtensionSessionManager() = default;
-
+    void Init();
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<ExtensionSession>& extensionSession);
 
     std::shared_ptr<TaskScheduler> taskScheduler_;

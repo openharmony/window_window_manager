@@ -112,12 +112,13 @@ public:
     int32_t GetWaterMarkSessionCount() const;
     void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> callingSession,
         const WSRect& rect, const WSRect& occupiedArea);
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
 
 private:
-    bool Init();
+    void Init();
     void LoadWindowSceneXml();
     void ConfigWindowSceneXml();
     void ConfigWindowEffect(const WindowSceneConfig::ConfigItem& effectConfig);
@@ -125,10 +126,12 @@ private:
     bool ConfigAppWindowCornerRadius(const WindowSceneConfig::ConfigItem& item, float& out);
     bool ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig, WindowShadowConfig& outShadow);
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig);
+    void ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig);
+    void ConfigStartingWindowAnimation(const WindowSceneConfig::ConfigItem& startingWindowConfig);
+
     void RelayoutKeyBoard(sptr<SceneSession> sceneSession);
     void RestoreCallingSessionSizeIfNeed();
     void ResizeSoftInputCallingSessionIfNeed(const sptr<SceneSession>& sceneSession);
-    void ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig);
 
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& scnSession);
     WSError DestroyDialogWithMainWindow(const sptr<SceneSession>& scnSession);

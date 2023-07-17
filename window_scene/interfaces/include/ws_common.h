@@ -208,6 +208,14 @@ struct WindowAnimationConfig {
     float opacity_ = 0;
 };
 
+struct StartingWindowAnimationConfig {
+    bool enabled_ = false;
+    int duration_ = 200;
+    std::string curve_ = "linear";
+    float opacityStart_ = 1;
+    float opacityEnd_ = 0;
+};
+
 struct AppWindowSceneConfig {
     float floatCornerRadius_ = 0.0f;
 
@@ -215,6 +223,7 @@ struct AppWindowSceneConfig {
     WindowShadowConfig unfocusedShadow_;
     KeyboardSceneAnimationConfig keyboardAnimation_;
     WindowAnimationConfig windowAnimation_;
+    StartingWindowAnimationConfig startingWindowAnimationConfig_;
 };
 
 /**
