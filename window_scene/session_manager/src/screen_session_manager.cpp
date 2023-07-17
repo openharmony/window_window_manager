@@ -35,14 +35,27 @@ const std::string SCREEN_SESSION_MANAGER_THREAD = "ScreenSessionManager";
 const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
 } // namespace
 
-WM_IMPLEMENT_SINGLE_INSTANCE(ScreenSessionManager)
+ScreenSessionManager& ScreenSessionManager::GetInstance()
+{
+    static ScreenSessionManager* instance = nullptr;
+    if (instance == nullptr) {
+        instance = new ScreenSessionManager();
+        instance->Init();
+    }
+    return *instance;
+}
 
-ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetInstance()),
-    sessionDisplayPowerController_(new SessionDisplayPowerController(
-        std::bind(&ScreenSessionManager::NotifyDisplayStateChange, this,
-            std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4)))
+ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetInstance())
 {
     taskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_THREAD);
+    screenCutoutController_ = new (std::nothrow) ScreenCutoutController();
+    sessionDisplayPowerController_ = new SessionDisplayPowerController(
+        std::bind(&ScreenSessionManager::NotifyDisplayStateChange, this,
+            std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+}
+
+void ScreenSessionManager::Init()
+{
     constexpr uint64_t interval = 5 * 1000; // 5 second
     if (HiviewDFX::Watchdog::GetInstance().AddThread(
         SCREEN_SESSION_MANAGER_THREAD, taskScheduler_->GetEventHandler(), interval)) {
@@ -51,7 +64,6 @@ ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetIns
 
     RegisterScreenChangeListener();
     LoadScreenSceneXml();
-    screenCutoutController_ = new (std::nothrow) ScreenCutoutController();
 }
 
 void ScreenSessionManager::RegisterScreenConnectionListener(sptr<IScreenConnectionListener>& screenConnectionListener)
