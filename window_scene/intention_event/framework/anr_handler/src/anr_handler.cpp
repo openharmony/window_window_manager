@@ -31,7 +31,6 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "
 constexpr int64_t MAX_MARK_PROCESS_DELAY_TIME = 3500000;
 constexpr int64_t MIN_MARK_PROCESS_DELAY_TIME = 50000;
 constexpr uint64_t INVALID_PERSISTENT_ID = -1;
-constexpr int32_t INVALID_OR_PROCESSED_ID = -1;
 constexpr int32_t TIME_TRANSITION = 1000;
 const std::string ANR_HANDLER_RUNNER { "ANR_HANDLER" };
 } // namespace
@@ -115,7 +114,7 @@ void ANRHandler::MarkProcessed()
         WLOGFE("Events to receipt is empty");
     } else if (sessionStageMap_.find(eventId) == sessionStageMap_.end()) {
         WLOGFE("SessionStage for eventId:%{public}d is not in sessionStageMap", eventId);
-    } else if (SessionStageMap_[eventId] == nullptr) {
+    } else if (sessionStageMap_[eventId] == nullptr) {
         WLOGFE("SessionStage for eventId:%{public}d is nullptr", eventId);
     } else if (WSError ret = sessionStageMap_[eventId]->MarkProcessed(eventId); ret != WSError::WS_OK) {
         WLOGFE("Send to sceneBoard failed, ret:%{public}d", ret);

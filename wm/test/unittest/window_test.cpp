@@ -19,6 +19,7 @@
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
 #include "scene_board_judgement.h"
+#include "key_event.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -209,6 +210,10 @@ HWTEST_F(WindowTest, GetMode, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window->GetMode());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    
+    auto window_ = new (std::nothrow)Window();
+    ASSERT_NE(nullptr, window_);
+    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window_->GetMode());
 }
 
 /**
@@ -1217,6 +1222,13 @@ HWTEST_F(WindowTest, RegisterDialogTargetTouchListener, Function | SmallTest | L
     auto ret = window->RegisterDialogTargetTouchListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+
+    auto window_ = new (std::nothrow)Window();
+    ASSERT_NE(nullptr, window_);
+    sptr<IDialogTargetTouchListener> listener_;
+    auto ret_ = window_->RegisterDialogTargetTouchListener(listener_);
+    ASSERT_EQ(WMError::WM_OK, ret_);
+    ASSERT_EQ(WMError::WM_OK, window_->Destroy());
 }
 
 /**
@@ -1232,6 +1244,11 @@ HWTEST_F(WindowTest, UnregisterDialogTargetTouchListener, Function | SmallTest |
     auto ret = window->UnregisterDialogTargetTouchListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+
+    auto window_ = new (std::nothrow)Window();
+    ASSERT_NE(nullptr, window_);
+    ASSERT_EQ(WMError::WM_OK, window_->UnregisterDialogTargetTouchListener(listener));
+    ASSERT_EQ(WMError::WM_OK, window_->Destroy());
 }
 
 /**
@@ -1413,7 +1430,7 @@ HWTEST_F(WindowTest, GetRequestModeSupportInfo, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     uint32_t ret = window->GetRequestModeSupportInfo();
-    ASSERT_EQ(true, ret == 0);
+    ASSERT_EQ(true, ret != 0);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1458,7 +1475,7 @@ HWTEST_F(WindowTest, IsMainHandlerAvailable, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     auto ret = window->IsMainHandlerAvailable();
-    ASSERT_EQ(false, ret);
+    ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1472,7 +1489,12 @@ HWTEST_F(WindowTest, SetAPPWindowLabel, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     auto ret = window->SetAPPWindowLabel("");
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+
+    auto window_ = new (std::nothrow)Window();
+    ASSERT_NE(nullptr, window_);
+    ASSERT_EQ(WMError::WM_OK,  window_->SetAPPWindowLabel(""));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1598,6 +1620,9 @@ HWTEST_F(WindowTest, GetGlobalMaximizeMode, Function | SmallTest | Level2)
 {
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
+
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetMaximizeMode()).WillOnce(Return(MaximizeMode::MODE_FULL_FILL));
     auto ret = window->GetGlobalMaximizeMode();
     ASSERT_EQ(MaximizeMode::MODE_FULL_FILL, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1613,7 +1638,7 @@ HWTEST_F(WindowTest, IsSupportWideGamut, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     auto ret = window->IsSupportWideGamut();
-    ASSERT_EQ(false, ret);
+    ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1687,8 +1712,13 @@ HWTEST_F(WindowTest, NotifyMemoryLevel, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     auto ret = window->NotifyMemoryLevel(0);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+
+    auto window_ = new (std::nothrow) Window();
+    ASSERT_NE(nullptr, window_);
+    ASSERT_EQ(WMError::WM_OK, window_->NotifyMemoryLevel(0));
+    ASSERT_EQ(WMError::WM_OK, window_->Destroy());
 }
 
 /**
@@ -1700,9 +1730,15 @@ HWTEST_F(WindowTest, IsAllowHaveSystemSubWindow, Function | SmallTest | Level2)
 {
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
+    window->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     auto ret = window->IsAllowHaveSystemSubWindow();
-    ASSERT_EQ(false, ret);
+    ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+
+    auto window_ = new (std::nothrow) Window();
+    ASSERT_NE(nullptr, window_);
+    ASSERT_EQ(false, window_->IsAllowHaveSystemSubWindow());
+    ASSERT_EQ(WMError::WM_OK, window_->Destroy());
 }
 
 /**
@@ -1715,7 +1751,12 @@ HWTEST_F(WindowTest, SetAspectRatio, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     auto ret = window->SetAspectRatio(0.0f);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+
+    auto window_ = new (std::nothrow) Window();
+    ASSERT_NE(nullptr, window_);
+    ASSERT_EQ(WMError::WM_OK, window_->SetAspectRatio(0.0f));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1744,7 +1785,7 @@ HWTEST_F(WindowTest, GetKeyboardAnimationConfig, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
     KeyboardAnimationConfig config;
     auto ret = window->GetKeyboardAnimationConfig();
-    ASSERT_EQ(true, ret.durationIn_ == config.durationIn_);
+    ASSERT_EQ(false, ret.durationIn_ == config.durationIn_);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 

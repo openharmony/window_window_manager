@@ -13,23 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_MOCK_SESSION_MANAGER_PROXY_H
-#define OHOS_MOCK_SESSION_MANAGER_PROXY_H
-
-#include <iremote_proxy.h>
-#include "mock_session_manager_service_interface.h"
+#include "zidl/mock_screen_manager_service_proxy.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
-class MockSessionManagerServiceProxy : public IRemoteProxy<IMockSessionManagerInterface> {
-public:
-    explicit MockSessionManagerServiceProxy(const sptr<IRemoteObject>& impl) :
-        IRemoteProxy<IMockSessionManagerInterface>(impl) {};
-    ~MockSessionManagerServiceProxy() {};
-    sptr<IRemoteObject> GetSessionManagerService() override;
-private:
-    static inline BrokerDelegator<MockSessionManagerServiceProxy> delegator_;
-};
+namespace {
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "MockScreenManagerServiceProxy"};
 }
+
+void MockScreenManagerServiceProxy::GetScreenDumpInfo(const std::vector<std::string>& params, std::string& info)
+{
+    WLOGFD("GetScreenDumpInfo begin");
 }
-#endif // OHOS_MOCK_SESSION_MANAGER_PROXY_H
+} // namespace Rosen
+} // namespace OHOS

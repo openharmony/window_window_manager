@@ -52,6 +52,7 @@ public:
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     WMError SetLayoutFullScreen(bool status) override;
     WMError SetFullScreen(bool status) override;
+    WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
 
