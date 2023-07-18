@@ -129,13 +129,13 @@ private:
     void ProcessVsyncHandleRegister();
     void OnVsyncHandle();
     bool FixRectByAspectRatio(WSRect& rect);
+    std::string GetRatioPreferenceKey();
     bool SaveAspectRatio(float ratio);
     void NotifyIsCustomAnimatiomPlaying(bool isPlaying);
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     std::vector<sptr<SessionChangeCallback>> sessionChangeCallbackList_;
     sptr<MoveDragController> moveDragController_ = nullptr;
     sptr<SetWindowScenePatternFunc> setWindowScenePatternFunc_ = nullptr;
-    bool isFirstStart_ = true;
 };
 } // namespace OHOS::Rosen
 
