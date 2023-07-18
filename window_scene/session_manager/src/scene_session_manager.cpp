@@ -712,10 +712,16 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
         WLOGFD("Begin to destroy its dialog");
         auto dialogVec = scnSession->GetDialogVector();
         for (auto dialog : dialogVec) {
+            if (dialog == nullptr) {
+                WLOGFE("dialog is nullptr");
+                return WSError::WS_ERROR_NULLPTR;
+            }
             if (sceneSessionMap_.count(dialog->GetPersistentId()) == 0) {
                 WLOGFE("session is invalid with %{public}" PRIu64 "", dialog->GetPersistentId());
                 return WSError::WS_ERROR_INVALID_SESSION;
             }
+            auto sceneSession = GetSceneSession(dialog->GetPersistentId());
+            WindowDestroyNotifyVisibility(sceneSession);
             dialog->NotifyDestroy();
             dialog->Disconnect();
             NotifyWindowInfoChange(dialog->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
@@ -739,6 +745,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         DestroyDialogWithMainWindow(scnSession);
         WLOGFI("destroy session persistentId: %{public}" PRIu64 "", persistentId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionDestruction (%" PRIu64" )", persistentId);
+        WindowDestroyNotifyVisibility(scnSession);
         scnSession->Disconnect();
         if (sceneSessionMap_.count(persistentId) == 0) {
             WLOGFE("session is invalid with %{public}" PRIu64 "", persistentId);
@@ -825,6 +832,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const uint64_t&
             return WSError::WS_ERROR_NULLPTR;
         }
         auto ret = sceneSession->UpdateActiveStatus(false);
+        WindowDestroyNotifyVisibility(sceneSession);
         if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
             auto parentSession = GetSceneSession(sceneSession->GetParentPersistentId());
             parentSession->RemoveDialogToParentSession(sceneSession);
@@ -1823,7 +1831,6 @@ void SceneSessionManager::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclu
         auto iter = sceneSessionMap_.begin();
         for (; iter != sceneSessionMap_.end(); iter++) {
             if (iter->second == nullptr || iter->second->GetSurfaceNode() == nullptr) {
-                WLOGFD(" sceneSessionMap_->second is nullptr || sceneSessionMap_->second->GetSurfaceNode() is nullptr");
                 continue;
             }
             if (surfaceId == iter->second->GetSurfaceNode()->GetId()) {
@@ -1834,6 +1841,7 @@ void SceneSessionManager::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclu
             continue;
         }
         sptr<SceneSession> session = iter->second;
+        session->SetVisible(isVisible);
         windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(session->GetWindowId(), session->GetCallingPid(),
             session->GetCallingUid(), isVisible, session->GetWindowType()));
 #ifdef MEMMGR_WINDOW_ENABLE
@@ -1863,6 +1871,23 @@ void SceneSessionManager::InitWithRenderServiceAdded()
     WLOGI("RegisterWindowVisibilityChangeCallback");
     if (rsInterface_.RegisterOcclusionChangeCallback(windowVisibilityChangeCb) != WM_OK) {
         WLOGFE("RegisterWindowVisibilityChangeCallback failed");
+    }
+}
+
+void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("sceneSession is nullptr!");
+        return;
+    }
+    if (sceneSession->GetVisible()) {
+        std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+        sceneSession->SetVisible(false);
+        windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(sceneSession->GetWindowId(),
+            sceneSession->GetCallingPid(), sceneSession->GetCallingUid(), false, sceneSession->GetWindowType()));
+        WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
+            sceneSession->GetWindowId(), sceneSession->GetVisible());
+        SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
 }
 
