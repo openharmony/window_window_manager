@@ -107,10 +107,8 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
         moveDragController_->InitMoveDragProperty();
         moveDragController_->SetStartMoveFlag(true);
     }
-    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
-        if (sessionChangeCallback != nullptr && sessionChangeCallback->OnSessionEvent_) {
-            sessionChangeCallback->OnSessionEvent_(static_cast<uint32_t>(event));
-        }
+    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSessionEvent_) {
+        sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event));
     }
     return WSError::WS_OK;
 }
@@ -118,7 +116,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
 void SceneSession::RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>&
     sessionChangeCallback)
 {
-    sessionChangeCallbackList_.push_back(sessionChangeCallback);
+    sessionChangeCallback_ = sessionChangeCallback;
 }
 
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
@@ -207,10 +205,8 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
 
 WSError SceneSession::RaiseToAppTop()
 {
-    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
-        if (sessionChangeCallback != nullptr && sessionChangeCallback->onRaiseToTop_) {
-            sessionChangeCallback->onRaiseToTop_();
-        }
+    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onRaiseToTop_) {
+        sessionChangeCallback_->onRaiseToTop_();
     }
     return WSError::WS_OK;
 }
@@ -232,10 +228,8 @@ WSError SceneSession::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
     if (property) {
         persistentId = property->GetPersistentId();
     }
-    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
-        if (sessionChangeCallback != nullptr && sessionChangeCallback->onCreateSpecificSession_) {
-            sessionChangeCallback->onCreateSpecificSession_(sceneSession);
-        }
+    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onCreateSpecificSession_) {
+        sessionChangeCallback_->onCreateSpecificSession_(sceneSession);
     }
     session = sceneSession;
     return errCode;
@@ -261,10 +255,8 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
 {
     property_->SetSystemBarProperty(type, systemBarProperty);
     WLOGFD("SceneSession SetSystemBarProperty status:%{public}d", static_cast<int32_t>(type));
-    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
-        if (sessionChangeCallback != nullptr && sessionChangeCallback->OnSystemBarPropertyChange_) {
-            sessionChangeCallback->OnSystemBarPropertyChange_(property_->GetSystemBarProperty());
-        }
+    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSystemBarPropertyChange_) {
+        sessionChangeCallback_->OnSystemBarPropertyChange_(property_->GetSystemBarProperty());
     }
     return WSError::WS_OK;
 }
@@ -272,10 +264,8 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
 WSError SceneSession::OnNeedAvoid(bool status)
 {
     WLOGFD("SceneSession OnNeedAvoid status:%{public}d", static_cast<int32_t>(status));
-    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
-        if (sessionChangeCallback != nullptr && sessionChangeCallback->OnNeedAvoid_) {
-            sessionChangeCallback->OnNeedAvoid_(status);
-        }
+    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnNeedAvoid_) {
+        sessionChangeCallback_->OnNeedAvoid_(status);
     }
     return WSError::WS_OK;
 }
@@ -283,10 +273,8 @@ WSError SceneSession::OnNeedAvoid(bool status)
 WSError SceneSession::OnShowWhenLocked(bool showWhenLocked)
 {
     WLOGFD("SceneSession ShowWhenLocked status:%{public}d", static_cast<int32_t>(showWhenLocked));
-    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
-        if (sessionChangeCallback != nullptr && sessionChangeCallback->OnShowWhenLocked_) {
-            sessionChangeCallback->OnShowWhenLocked_(showWhenLocked);
-        }
+    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnShowWhenLocked_) {
+        sessionChangeCallback_->OnShowWhenLocked_(showWhenLocked);
     }
     return WSError::WS_OK;
 }
@@ -436,10 +424,8 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
 
 void SceneSession::NotifySessionRectChange(const WSRect& rect)
 {
-    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
-        if (sessionChangeCallback != nullptr && sessionChangeCallback->onRectChange_) {
-            sessionChangeCallback->onRectChange_(rect);
-        }
+    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onRectChange_) {
+        sessionChangeCallback_->onRectChange_(rect);
     }
 }
 
@@ -576,12 +562,20 @@ std::string SceneSession::GetSessionSnapshot()
     return "";
 }
 
+void SceneSession::UpdateNativeVisibility(bool visible)
+{
+    isVisible_ = visible;
+}
+
+bool SceneSession::IsVisible() const
+{
+    return isVisible_;
+}
+
 WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 {
-    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
-        if (sessionChangeCallback != nullptr && sessionChangeCallback->onWindowAnimationFlagChange_) {
-            sessionChangeCallback -> onWindowAnimationFlagChange_(needDefaultAnimationFlag);
-        }
+    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onWindowAnimationFlagChange_) {
+        sessionChangeCallback_ -> onWindowAnimationFlagChange_(needDefaultAnimationFlag);
     }
     return WSError::WS_OK;
 }
@@ -589,10 +583,8 @@ WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 void SceneSession::NotifyIsCustomAnimatiomPlaying(bool isPlaying)
 {
     WLOGFI("id %{public}" PRIu64 " %{public}u", GetPersistentId(), isPlaying);
-    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
-        if (sessionChangeCallback != nullptr && sessionChangeCallback->onIsCustomAnimationPlaying_) {
-            sessionChangeCallback->onIsCustomAnimationPlaying_(isPlaying);
-        }
+    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onIsCustomAnimationPlaying_) {
+        sessionChangeCallback_->onIsCustomAnimationPlaying_(isPlaying);
     }
 }
 
