@@ -88,6 +88,7 @@ void ANRHandler::ClearDestroyedPersistentId(uint64_t persistentId)
         return;
     }
     anrHandlerState_.sendStatus.erase(persistentId);
+    WLOGFD("PersistentId:%{public}" PRId64 " erased in ANRHandler", persistentId);
 }
 
 void ANRHandler::SetAnrHandleState(int32_t eventId, bool status)
@@ -170,7 +171,6 @@ uint64_t ANRHandler::GetPersistentIdOfEvent(int32_t eventId)
 
 bool ANRHandler::IsOnEventHandler(uint64_t persistentId)
 {
-    CALL_DEBUG_ENTER;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (anrHandlerState_.sendStatus.find(persistentId) != anrHandlerState_.sendStatus.end() &&
         anrHandlerState_.sendStatus[persistentId]) {
@@ -181,7 +181,6 @@ bool ANRHandler::IsOnEventHandler(uint64_t persistentId)
 
 void ANRHandler::UpdateLatestEventId(int32_t eventId)
 {
-    CALL_DEBUG_ENTER;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     uint64_t currentPersistentId = GetPersistentIdOfEvent(eventId);
     for (auto& event : anrHandlerState_.eventsToReceipt) {
