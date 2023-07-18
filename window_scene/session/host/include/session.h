@@ -167,6 +167,8 @@ public:
     bool GetFocusable() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
+    WSError SetVisible(bool isVisible);
+    bool GetVisible() const;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
@@ -268,6 +270,7 @@ private:
 
     int32_t callingPid_ = { 0 };
     int32_t callingUid_ = { 0 };
+    bool isVisible_ {false};
     sptr<IRemoteObject> abilityToken_ = nullptr;
 };
 } // namespace OHOS::Rosen
