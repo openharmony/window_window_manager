@@ -501,7 +501,7 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
         if (rootSceneSession_ != nullptr) {
             return rootSceneSession_;
         }
-        system::SetParameter("bootevent.boot.completed", "true");
+        system::SetParameter("bootevent.wms.fullscreen.ready", "true");
         SessionInfo info;
         rootSceneSession_ = new (std::nothrow) RootSceneSession(info);
         if (!rootSceneSession_) {
