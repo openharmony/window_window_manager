@@ -276,11 +276,8 @@ void JsSceneSession::ProcessPendingSessionToBackgroundForDelegatorRegister()
 {
     WLOGFD("begin to run ProcessPendingSessionToBackgroundForDelegatorRegister");
     auto weak = weak_from_this();
-    NotifyPendingSessionToBackgroundForDelegatorFunc func = [weak](const SessionInfo& info) {
-        auto self = weak.lock();
-        if (self) {
-            self->PendingSessionToBackgroundForDelegator(info);
-        }
+    NotifyPendingSessionToBackgroundForDelegatorFunc func = [this](const SessionInfo& info) {
+        this->PendingSessionToBackgroundForDelegator(info);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
