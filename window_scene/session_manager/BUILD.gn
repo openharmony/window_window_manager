@@ -71,7 +71,6 @@ ohos_shared_library("scene_session_manager") {
   public_configs = [ ":session_manager_public_config" ]
 
   deps = [
-    "${multimedia_path}/interfaces/innerkits:image_native",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/session:scene_session",
@@ -98,6 +97,7 @@ ohos_shared_library("scene_session_manager") {
     "hitrace:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_single",
+    "multimedia_image_framework:image_native",
     "power_manager:powermgr_client",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
