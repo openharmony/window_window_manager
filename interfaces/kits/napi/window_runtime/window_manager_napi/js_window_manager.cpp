@@ -334,6 +334,26 @@ static void CreateSubWindowTask(uint32_t parentWinId, std::string windowName, Wi
     }
 }
 
+static bool isConfigOptionWindowTypeValid(NativeEngine& engine, WindowOption& option)
+{
+    WindowType type = option.GetWindowType();
+    AppExecFwk::Ability* ability = nullptr;
+    bool isOldApi = GetAPI7Ability(engine, ability);
+    if (isOldApi) {
+        if (ability == nullptr || !WindowHelper::IsSubWindow(type)) {
+            WLOGE("FA mode GetAPI7Ability failed or convert parameter to invalid winType %{public}u", type);
+            return false;
+        }
+    } else {
+        if (!WindowHelper::IsSystemWindow(type)) {
+            WLOGFE("Stage mode convert parameter to invalid winType %{public}u", type);
+            return false;
+        }
+    }
+
+    return true;
+}
+
 NativeValue* JsWindowManager::OnCreate(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFD("OnCreate");
@@ -412,9 +432,8 @@ bool JsWindowManager::ParseConfigOption(NativeEngine& engine, NativeObject* jsOb
         WLOGFE("Failed to convert parameter to winType");
         return false;
     }
-    if (!(WindowHelper::IsSystemWindow(option.GetWindowType()) ||
-        WindowHelper::IsSubWindow(option.GetWindowType()))) {
-        WLOGFE("Convert parameter to invalid winType");
+
+    if (!isConfigOptionWindowTypeValid(engine, option)) {
         return false;
     }
 
