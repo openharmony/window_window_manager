@@ -93,7 +93,7 @@ JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& s
         { SESSION_TOUCHABLE_CHANGE_CB,    &JsSceneSession::ProcessSessionTouchableChangeRegister },
         { CLICK_CB,                       &JsSceneSession::ProcessClickRegister },
         { TERMINATE_SESSION_CB,           &JsSceneSession::ProcessTerminateSessionRegister },
-        { TERMINATE_SESSION_CB_NEW,           &JsSceneSession::ProcessTerminateSessionRegisterNew },
+        { TERMINATE_SESSION_CB_NEW,       &JsSceneSession::ProcessTerminateSessionRegisterNew },
         { SESSION_EXCEPTION_CB,           &JsSceneSession::ProcessSessionExceptionRegister },
         { SYSTEMBAR_PROPERTY_CHANGE_CB,   &JsSceneSession::ProcessSystemBarPropertyChangeRegister },
         { NEED_AVOID_CB,          &JsSceneSession::ProcessNeedAvoidRegister },
@@ -458,6 +458,14 @@ bool JsSceneSession::IsCallbackRegistered(const std::string& type, NativeValue* 
     return false;
 }
 
+bool JsSceneSession::IsCallbackTypeSupported(const std::string& type)
+{
+    if (listenerFunc_.find(type) != listenerFunc_.end()) {
+        return true;
+    }
+    return false;
+}
+
 NativeValue* JsSceneSession::OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info)
 {
     if (info.argc < 2) { // 2: params num
@@ -480,7 +488,12 @@ NativeValue* JsSceneSession::OnRegisterCallback(NativeEngine& engine, NativeCall
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
+    if (!IsCallbackTypeSupported(cbType)) {
+        WLOGFE("[NAPI]callback type is not supported, type = %{public}s", cbType.c_str());
+        return engine.CreateUndefined();
+    }
     if (IsCallbackRegistered(cbType, value)) {
+        WLOGFE("[NAPI]callback is registered, type = %{public}s", cbType.c_str());
         return engine.CreateUndefined();
     }
     auto session = weakSession_.promote();
