@@ -34,7 +34,6 @@ public:
     ExtensionSession(const SessionInfo& info);
     ~ExtensionSession() = default;
 
-    WSError UpdateViewConfig(const ViewPortConfig& config, SizeChangeReason reason) override;
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     WSError TransferComponentData(const AAFwk::WantParams& wantParams);

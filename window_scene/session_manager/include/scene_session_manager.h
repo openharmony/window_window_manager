@@ -52,7 +52,7 @@ class SceneSessionManager : public SceneSessionManagerStub {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManager)
 public:
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property = nullptr);
-    WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession);
+    WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession, const bool isDelegator = false);
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession);
@@ -69,6 +69,7 @@ public:
     void SetOutsideDownEventListener(const ProcessOutsideDownEventFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
     WSError ProcessBackEvent();
+    WSError BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken);
     void GetStartPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor);
     WMError SetGestureNavigaionEnabled(bool enable);
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
@@ -78,6 +79,8 @@ public:
 
     WSError SetFocusedSession(uint64_t persistentId);
     uint64_t GetFocusedSession() const;
+    WSError GetAllSessionDumpInfo(std::string& info);
+    WSError GetSessionDumpInfo(const sptr<DumpParam>& param, std::string& info);
     WSError UpdateFocus(uint64_t persistentId, bool isFocused);
     WSError SwitchUser(int32_t oldUserId, int32_t newUserId, std::string &fileDir);
     int32_t GetCurrentUserId() const;
@@ -109,12 +112,13 @@ public:
     int32_t GetWaterMarkSessionCount() const;
     void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> callingSession,
         const WSRect& rect, const WSRect& occupiedArea);
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
 
 private:
-    bool Init();
+    void Init();
     void LoadWindowSceneXml();
     void ConfigWindowSceneXml();
     void ConfigWindowEffect(const WindowSceneConfig::ConfigItem& effectConfig);
@@ -122,13 +126,16 @@ private:
     bool ConfigAppWindowCornerRadius(const WindowSceneConfig::ConfigItem& item, float& out);
     bool ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig, WindowShadowConfig& outShadow);
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig);
+    void ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig);
+    void ConfigStartingWindowAnimation(const WindowSceneConfig::ConfigItem& startingWindowConfig);
+
     void RelayoutKeyBoard(sptr<SceneSession> sceneSession);
     void RestoreCallingSessionSizeIfNeed();
     void ResizeSoftInputCallingSessionIfNeed(const sptr<SceneSession>& sceneSession);
-    void ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig);
 
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& scnSession);
     WSError DestroyDialogWithMainWindow(const sptr<SceneSession>& scnSession);
+    sptr<SceneSession> FindMainWindowWithToken(sptr<IRemoteObject> targetToken);
     WSError UpdateParentSession(const sptr<SceneSession>& sceneSession, sptr<WindowSessionProperty> property);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void UpdateFocusableProperty(uint64_t persistentId);

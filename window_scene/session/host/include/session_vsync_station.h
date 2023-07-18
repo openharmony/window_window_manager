@@ -29,16 +29,17 @@
 #include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
-class VsyncStation {
-WM_DECLARE_SINGLE_INSTANCE_BASE(VsyncStation);
+class SessionVsyncStation {
+WM_DECLARE_SINGLE_INSTANCE_BASE(SessionVsyncStation);
 public:
-    ~VsyncStation()
+    ~SessionVsyncStation()
     {
         std::lock_guard<std::mutex> lock(mtx_);
         destroyed_ = true;
     }
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback);
-    void RemoveCallback();
+    void RemoveCallback(const std::shared_ptr<VsyncCallback>& vsyncCallback);
+    void RemoveAllCallbacks();
     void SetIsMainHandlerAvailable(bool available)
     {
         isMainHandlerAvailable_ = available;
@@ -50,7 +51,7 @@ public:
     }
 
 private:
-    VsyncStation() = default;
+    SessionVsyncStation() = default;
     static void OnVsync(int64_t nanoTimestamp, void* client);
     void VsyncCallbackInner(int64_t nanoTimestamp);
     void OnVsyncTimeOut();
@@ -68,7 +69,7 @@ private:
         .callback_ = OnVsync,
     };
     std::shared_ptr<AppExecFwk::EventHandler> vsyncHandler_ = nullptr;
-    AppExecFwk::EventHandler::Callback vsyncTimeoutCallback_ = std::bind(&VsyncStation::OnVsyncTimeOut, this);
+    AppExecFwk::EventHandler::Callback vsyncTimeoutCallback_ = std::bind(&SessionVsyncStation::OnVsyncTimeOut, this);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_VSYNC_STATION_H

@@ -292,11 +292,6 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
     return WSError::WS_OK;
 }
 
-WSError Session::UpdateViewConfig(const ViewPortConfig& config, SizeChangeReason reason)
-{
-    return WSError::WS_OK;
-}
-
 WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
 {
@@ -555,8 +550,8 @@ WSError Session::PendingSessionToForeground()
 {
     WLOGFI("run PendingSessionToForeground");
     SessionInfo info = GetSessionInfo();
-    if (pendingSessionToForegroundFunc_) {
-        pendingSessionToForegroundFunc_(info);
+    if (pendingSessionActivationFunc_) {
+        pendingSessionActivationFunc_(info);
     }
     return WSError::WS_OK;
 }

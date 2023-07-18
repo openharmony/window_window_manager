@@ -37,7 +37,6 @@ public:
 private:
     static const std::map<uint32_t, SessionStageStubFunc> stubFuncMap_;
 
-    int HandleUpdateViewConfig(MessageParcel& data, MessageParcel& reply);
     int HandleSetActive(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateRect(MessageParcel& data, MessageParcel& reply);
     int HandleBackEventInner(MessageParcel& data, MessageParcel& reply);

@@ -145,7 +145,7 @@ WSError SceneSession::SetAspectRatio(float ratio)
     }
     float vpr = 1.5f; // 1.5f: default virtual pixel ratio
     auto display = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
-    if (!display) {
+    if (display) {
         vpr = display->GetVirtualPixelRatio();
         WLOGD("vpr = %{public}f", vpr);
     }
@@ -290,6 +290,22 @@ WSError SceneSession::OnNeedAvoid(bool status)
     return WSError::WS_OK;
 }
 
+WSError SceneSession::OnShowWhenLocked(bool showWhenLocked)
+{
+    WLOGFD("SceneSession ShowWhenLocked status:%{public}d", static_cast<int32_t>(showWhenLocked));
+    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
+        if (sessionChangeCallback != nullptr && sessionChangeCallback->OnShowWhenLocked_) {
+            sessionChangeCallback->OnShowWhenLocked_(showWhenLocked);
+        }
+    }
+    return WSError::WS_OK;
+}
+
+bool SceneSession::IsShowWhenLocked() const
+{
+    return property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
+}
+
 void SceneSession::CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, AvoidArea& avoidArea)
 {
     if (SessionHelper::IsEmptyRect(rect) || SessionHelper::IsEmptyRect(avoidRect)) {
@@ -300,8 +316,8 @@ void SceneSession::CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, Avoid
         return;
     }
 
-    uint32_t avoidAreaCenterX = avoidAreaRect.posX_ + (avoidAreaRect.width_ >> 1);
-    uint32_t avoidAreaCenterY = avoidAreaRect.posY_ + (avoidAreaRect.height_ >> 1);
+    uint32_t avoidAreaCenterX = static_cast<uint32_t>(avoidAreaRect.posX_) + (avoidAreaRect.width_ >> 1);
+    uint32_t avoidAreaCenterY = static_cast<uint32_t>(avoidAreaRect.posY_) + (avoidAreaRect.height_ >> 1);
     float res1 = float(avoidAreaCenterY) - float(rect.height_) / float(rect.width_) *
         float(avoidAreaCenterX);
     float res2 = float(avoidAreaCenterY) + float(rect.height_) / float(rect.width_) *

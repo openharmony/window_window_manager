@@ -177,6 +177,7 @@ ohos_shared_library("screen_session_manager") {
 
 ohos_shared_library("session_manager") {
   sources = [
+    "../../wmserver/src/zidl/mock_screen_manager_service_proxy.cpp",
     "../../wmserver/src/zidl/mock_session_manager_service_proxy.cpp",
     "../session_manager_service/src/session_manager_service_proxy.cpp",
     "src/session_manager.cpp",
@@ -188,10 +189,7 @@ ohos_shared_library("session_manager") {
 
   public_configs = [ ":session_manager_public_config" ]
 
-  deps = [
-    "${window_base_path}/utils:libwmutil",
-    "${window_base_path}/wmserver:sms",
-  ]
+  deps = [ "${window_base_path}/utils:libwmutil" ]
 
   external_deps = [
     "ability_base:session_info",

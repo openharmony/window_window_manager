@@ -51,7 +51,7 @@ private:
 
     static uint32_t defaultDeviceRotation_;
     static std::map<DeviceRotationValue, Rotation> deviceToDisplayRotationMap_;
-    uint32_t offsetY_;
+    uint32_t offsetY_ {};
     WaterfallDisplayAreaRects waterfallDisplayAreaRects_ = {};
 };
 } // namespace OHOS::Rosen

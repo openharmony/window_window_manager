@@ -156,6 +156,7 @@ protected:
     virtual ~ScreenSessionManager() = default;
 
 private:
+    void Init();
     void LoadScreenSceneXml();
     void ConfigureScreenScene();
     void ConfigureWaterfallDisplayCompressionParams();
