@@ -64,8 +64,8 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
         return;
     }
 
-    uint32_t displayWidth = displayInfo->GetWidth();
-    uint32_t displayHeight = displayInfo->GetHeight();
+    uint32_t displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
+    uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
     switch (currentRotation) {
         case Rotation::ROTATION_90: {
             for (DMRect rect : displayBoundaryRects) {
@@ -104,8 +104,8 @@ void ScreenCutoutController::CheckBoundaryRects(std::vector<DMRect>& boundaryRec
         return;
     }
 
-    uint32_t displayWidth = displayInfo->GetWidth();
-    uint32_t displayHeight = displayInfo->GetHeight();
+    uint32_t displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
+    uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
     for (auto iter = boundaryRects.begin(); iter != boundaryRects.end();) {
         DMRect boundaryRect = *iter;
         if (boundaryRect.posX_ < 0 || boundaryRect.posY_ < 0 ||
@@ -140,7 +140,7 @@ void ScreenCutoutController::CalcWaterfallRects()
     std::vector<uint32_t> realNumVec = { 0, 0, 0, 0 };
     for (auto i = LEFT; i <= BOTTOM; i++) {
         if (numberVec.size() > i) {
-            realNumVec[i] = numberVec[i];
+            realNumVec[i] = static_cast<uint32_t>(numberVec[i]);
         }
     }
     if (std::all_of(realNumVec.begin(), realNumVec.end(), [](uint32_t result) { return result == 0; })) {
@@ -154,8 +154,8 @@ void ScreenCutoutController::CalcWaterfallRects()
         return;
     }
 
-    uint32_t displayWidth = displayInfo->GetWidth();
-    uint32_t displayHeight = displayInfo->GetHeight();
+    uint32_t displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
+    uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
     if ((realNumVec[LEFT] > displayWidth / HALF_SCREEN) || (realNumVec[RIGHT] > displayWidth / HALF_SCREEN) ||
         (realNumVec[TOP] > displayHeight / HALF_SCREEN) || (realNumVec[BOTTOM] > displayHeight / HALF_SCREEN)) {
         WLOGFE("curved screen boundary data is not correct");
@@ -232,8 +232,8 @@ RectF ScreenCutoutController::CalculateCurvedCompression(const ScreenProperty& s
         return finalRect;
     }
 
-    uint32_t screenWidth = displayInfo->GetWidth();
-    uint32_t screenHeight = displayInfo->GetHeight();
+    uint32_t screenWidth = static_cast<uint32_t>(displayInfo->GetWidth());
+    uint32_t screenHeight = static_cast<uint32_t>(displayInfo->GetHeight());
     uint32_t realWidth = static_cast<uint32_t>(iCurvedSize * screenProperty.GetVirtualPixelRatio());
     if (realWidth >= screenHeight / QUARTER_SCREEN || realWidth >= screenWidth / QUARTER_SCREEN) {
         WLOGFW("curved area is beyond the edge limit");

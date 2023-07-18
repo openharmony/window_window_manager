@@ -1091,7 +1091,7 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
         case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
             bool prePrivacyMode = sceneSession->GetWindowSessionProperty()->GetPrivacyMode() || sceneSession->GetWindowSessionProperty()->GetSystemPrivacyMode();
             bool isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
-            if (prePrivacyMode ^ isPrivacyMode) {
+            if (prePrivacyMode != isPrivacyMode) {
                 sceneSession->GetWindowSessionProperty()->SetPrivacyMode(isPrivacyMode);
                 sceneSession->GetWindowSessionProperty()->SetSystemPrivacyMode(isPrivacyMode);
                 sceneSession->GetSurfaceNode()->SetSecurityLayer(isPrivacyMode);
@@ -1603,9 +1603,9 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
         if (!abilitySessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        if (sessionInfo.callState_ == static_cast<int32_t>(AAFwk::CallToState::BACKGROUND)) {
+        if (sessionInfo.callState_ == static_cast<uint32_t>(AAFwk::CallToState::BACKGROUND)) {
             scnSession->SetActive(false);
-        } else if (sessionInfo.callState_ == static_cast<int32_t>(AAFwk::CallToState::FOREGROUND)) {
+        } else if (sessionInfo.callState_ == static_cast<uint32_t>(AAFwk::CallToState::FOREGROUND)) {
             scnSession->SetActive(true);
         } else {
             WLOGFE("wrong callState_");
@@ -2151,7 +2151,7 @@ bool SceneSessionManager::UpdateAvoidArea(const uint64_t& persistentId)
             AvoidAreaType::TYPE_KEYBOARD : AvoidAreaType::TYPE_SYSTEM;
         for (auto& session : avoidAreaListenerSessionSet_) {
             AvoidArea avoidArea = session->GetAvoidAreaByType(avoidType);
-            needUpdate |= UpdateSessionAvoidAreaIfNeed(session->GetPersistentId(), avoidArea, avoidType);
+            needUpdate = needUpdate || UpdateSessionAvoidAreaIfNeed(session->GetPersistentId(), avoidArea, avoidType);
         }
     } else {
         if (avoidAreaListenerSessionSet_.find(sceneSession) == avoidAreaListenerSessionSet_.end()) {
@@ -2162,7 +2162,8 @@ bool SceneSessionManager::UpdateAvoidArea(const uint64_t& persistentId)
         uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_KEYBOARD);
         for (uint32_t avoidType = start; avoidType <= end; avoidType++) {
             AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
-            needUpdate |= UpdateSessionAvoidAreaIfNeed(persistentId, avoidArea, static_cast<AvoidAreaType>(avoidType));
+            needUpdate = needUpdate ||
+                UpdateSessionAvoidAreaIfNeed(persistentId, avoidArea, static_cast<AvoidAreaType>(avoidType));
         }
     }
 
