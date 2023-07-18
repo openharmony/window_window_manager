@@ -26,7 +26,7 @@
 #include "color_parser.h"
 #include "display_manager.h"
 #include "interfaces/include/ws_common.h"
-#include "permission.h"
+#include "session_permission.h"
 #include "key_event.h"
 #include "session/container/include/window_event_channel.h"
 #include "session_manager/include/session_manager.h"
