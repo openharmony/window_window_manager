@@ -85,7 +85,7 @@ public:
     void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
     void NotifyFocusActiveEvent(bool isFocusActive) override;
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info) override;
-    void NotifyFocusWindowIdEvent(uint32_t windowId) override;
+    void NotifyFocusWindowIdEvent(int32_t windowId) override;
     void NotifyFocusStateEvent(bool focusState) override;
 
     WMError RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;

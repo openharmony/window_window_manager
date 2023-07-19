@@ -236,9 +236,9 @@ bool Session::GetVisible() const
     return isVisible_;
 }
 
-uint32_t Session::GetWindowId() const
+int32_t Session::GetWindowId() const
 {
-    return static_cast<uint32_t>(GetPersistentId()) & 0xffffffff;
+    return static_cast<int32_t>(GetPersistentId()) & 0x7fffffff;
 }
 
 void Session::SetCallingPid(int32_t id)
@@ -753,7 +753,7 @@ WSError Session::TransferFocusActiveEvent(bool isFocusActive)
     return windowEventChannel_->TransferFocusActiveEvent(isFocusActive);
 }
 
-WSError Session::TransferFocusWindowIdEvent(uint32_t windowId)
+WSError Session::TransferFocusWindowIdEvent(int32_t windowId)
 {
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");

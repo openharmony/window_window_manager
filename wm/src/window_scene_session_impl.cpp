@@ -83,9 +83,10 @@ bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
 sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentSessionByParentId(uint32_t parentId)
 {
     for (const auto& item : windowSessionMap_) {
-        if (item.second.second && item.second.second->GetProperty() && item.second.second->GetWindowId() == parentId &&
+        if (item.second.second && item.second.second->GetProperty() &&
+            item.second.second->GetWindowId() == parentId &&
             WindowHelper::IsMainWindow(item.second.second->GetType())) {
-            WLOGFD("Find parent, [parentName: %{public}s, parentId:%{public}d, selfPersistentId: %{public}d]",
+            WLOGFD("Find parent, [parentName: %{public}s, parentId:%{public}u, selfPersistentId: %{public}d]",
                 item.second.second->GetProperty()->GetWindowName().c_str(), parentId, GetProperty()->GetPersistentId());
             return item.second.second;
         }

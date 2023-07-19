@@ -114,7 +114,7 @@ public:
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     WSError TransferFocusActiveEvent(bool isFocusActive);
-    WSError TransferFocusWindowIdEvent(uint32_t windowId);
+    WSError TransferFocusWindowIdEvent(int32_t windowId);
     WSError TransferFocusStateEvent(bool focusState);
 
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
@@ -183,7 +183,7 @@ public:
     bool IsSessionValid() const;
 
     sptr<IRemoteObject> dialogTargetToken_ = nullptr;
-    uint32_t GetWindowId() const;
+    int32_t GetWindowId() const;
     void SetCallingPid(int32_t id);
     void SetCallingUid(int32_t id);
     int32_t GetCallingPid() const;

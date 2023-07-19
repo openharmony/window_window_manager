@@ -1039,7 +1039,7 @@ void WindowSessionImpl::NotifyFocusActiveEvent(bool isFocusActive)
     }
 }
 
-void WindowSessionImpl::NotifyFocusWindowIdEvent(uint32_t windowId)
+void WindowSessionImpl::NotifyFocusWindowIdEvent(int32_t windowId)
 {
     if (uiContent_) {
         uiContent_->SetFocusWindowId(windowId);

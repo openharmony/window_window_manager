@@ -126,7 +126,7 @@ WSError WindowEventChannelProxy::TransferFocusActiveEvent(bool isFocusActive)
     return static_cast<WSError>(ret);
 }
 
-WSError WindowEventChannelProxy::TransferFocusWindowId(uint32_t windowId)
+WSError WindowEventChannelProxy::TransferFocusWindowId(int32_t windowId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -135,7 +135,7 @@ WSError WindowEventChannelProxy::TransferFocusWindowId(uint32_t windowId)
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(windowId)) {
+    if (!data.WriteInt32(windowId)) {
         WLOGFE("Write windowId failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
