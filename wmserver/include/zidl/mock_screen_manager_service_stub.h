@@ -13,23 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_MOCK_SESSION_MANAGER_PROXY_H
-#define OHOS_MOCK_SESSION_MANAGER_PROXY_H
+#ifndef OHOS_ROSEN_MOCK_SCREEN_MANAGER_STUB_H
+#define OHOS_ROSEN_MOCK_SCREEN_MANAGER_STUB_H
 
-#include <iremote_proxy.h>
-#include "mock_session_manager_service_interface.h"
+#include <iremote_stub.h>
+#include "mock_screen_manager_service_interface.h"
 
 namespace OHOS {
 namespace Rosen {
-class MockSessionManagerServiceProxy : public IRemoteProxy<IMockSessionManagerInterface> {
+class MockScreenManagerServiceStub : public IRemoteStub<IMockScreenManagerInterface> {
 public:
-    explicit MockSessionManagerServiceProxy(const sptr<IRemoteObject>& impl) :
-        IRemoteProxy<IMockSessionManagerInterface>(impl) {};
-    ~MockSessionManagerServiceProxy() {};
-    sptr<IRemoteObject> GetSessionManagerService() override;
-private:
-    static inline BrokerDelegator<MockSessionManagerServiceProxy> delegator_;
+    MockScreenManagerServiceStub() = default;
+    ~MockScreenManagerServiceStub() = default;
+    virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+        MessageOption &option) override;
 };
 }
 }
-#endif // OHOS_MOCK_SESSION_MANAGER_PROXY_H
+#endif // OHOS_ROSEN_MOCK_SCREEN_MANAGER_STUB_H

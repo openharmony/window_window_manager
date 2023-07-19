@@ -77,7 +77,6 @@ public:
     // inherits from session stage
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
-    WSError UpdateViewConfig(const ViewPortConfig& config, SizeChangeReason reason) override;
     WSError UpdateFocus(bool focus) override;
     WSError HandleBackEvent() override { return WSError::WS_OK; }
     WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;

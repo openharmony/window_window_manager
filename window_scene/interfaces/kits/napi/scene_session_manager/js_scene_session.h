@@ -43,6 +43,7 @@ private:
     static NativeValue* RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info);
     NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
     bool IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject);
+    bool IsCallbackTypeSupported(const std::string& type);
 
     void ProcessPendingSceneSessionActivationRegister();
     void ProcessSessionStateChangeRegister();
@@ -63,6 +64,7 @@ private:
     void ProcessPendingSessionToBackgroundForDelegatorRegister();
     void ProcessSessionDefaultAnimationFlagChangeRegister();
     void ProcessIsCustomAnimationPlaying();
+    void ProcessShowWhenLockedRegister();
 
     void PendingSessionActivation(SessionInfo& info);
     void OnSessionStateChange(const SessionState& state);
@@ -84,6 +86,7 @@ private:
     void PendingSessionToBackgroundForDelegator(const SessionInfo& info);
     void OnDefaultAnimationFlagChange(bool isNeedDefaultAnimationFlag);
     void OnIsCustomAnimationPlaying(bool status);
+    void OnShowWhenLocked(bool showWhenLocked);
 
     NativeEngine& engine_;
     wptr<SceneSession> weakSession_ = nullptr;

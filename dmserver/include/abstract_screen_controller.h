@@ -151,7 +151,7 @@ private:
     std::atomic<ScreenId> defaultRsScreenId_ {SCREEN_ID_INVALID };
     Orientation buildInDefaultOrientation_ { Orientation::UNSPECIFIED };
     bool isExpandCombination_ = false;
-    ScreenPowerState powerState_;
+    ScreenPowerState powerState_ { ScreenPowerState::INVALID_STATE };
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_SCREEN_CONTROLLER_H

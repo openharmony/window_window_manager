@@ -24,6 +24,11 @@
 namespace OHOS::Rosen {
 WM_IMPLEMENT_SINGLE_INSTANCE(SessionManagerService)
 
+void SessionManagerService::Init()
+{
+    AAFwk::AbilityManagerClient::GetInstance()->SetSessionManagerService(this->AsObject());
+}
+
 sptr<IRemoteObject> SessionManagerService::GetSceneSessionManager()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -44,16 +49,6 @@ sptr<IRemoteObject> SessionManagerService::GetScreenLockManagerService()
     return screenLockManagerObj_;
 }
 
-sptr<IRemoteObject> SessionManagerService::GetRemoteObject()
-{
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (sessionManagerServiceObj_) {
-        return sessionManagerServiceObj_;
-    }
-    sessionManagerServiceObj_ = this->AsObject();
-    return sessionManagerServiceObj_;
-}
-
 sptr<IRemoteObject> SessionManagerService::GetScreenSessionManagerService()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -62,10 +57,5 @@ sptr<IRemoteObject> SessionManagerService::GetScreenSessionManagerService()
     }
     screenSessionManagerObj_ = ScreenSessionManager::GetInstance().AsObject();
     return screenSessionManagerObj_;
-}
-
-void SessionManagerService::Init()
-{
-    AAFwk::AbilityManagerClient::GetInstance()->SetSessionManagerService(this->AsObject());
 }
 } // namesapce OHOS::Rosen

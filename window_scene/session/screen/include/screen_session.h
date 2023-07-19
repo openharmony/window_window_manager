@@ -97,8 +97,8 @@ public:
     void SetDisplayBoundary(const RectF& rect, const uint32_t& offsetY);
 
     std::string name_ { "UNKNOW" };
-    ScreenId screenId_;
-    ScreenId rsId_;
+    ScreenId screenId_ {};
+    ScreenId rsId_ {};
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
 
     int32_t activeIdx_ { 0 };

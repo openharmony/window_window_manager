@@ -13,34 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_WINDOW_SCENE_SESSION_MANAGER_SERVICE_H
-#define FOUNDATION_WINDOW_SCENE_SESSION_MANAGER_SERVICE_H
+#ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_SERVICE_H
+#define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_SERVICE_H
 
 #include "session_manager_service_stub.h"
 #include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
 class SessionManagerService : public SessionManagerServiceStub {
-WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManagerService);
+WM_DECLARE_SINGLE_INSTANCE(SessionManagerService)
 public:
     void Init();
-    sptr<IRemoteObject> GetRemoteObject();
     sptr<IRemoteObject> GetSceneSessionManager() override;
     sptr<IRemoteObject> GetScreenSessionManagerService() override;
     sptr<IRemoteObject> GetScreenLockManagerService() override;
 
-protected:
-    SessionManagerService() = default;
-    virtual ~SessionManagerService() = default;
-
 private:
     std::recursive_mutex mutex_;
 
-    sptr<IRemoteObject> sessionManagerServiceObj_;
     sptr<IRemoteObject> sceneSessionManagerObj_;
     sptr<IRemoteObject> screenSessionManagerObj_;
     sptr<IRemoteObject> screenLockManagerObj_;
 };
 } // namesapce OHOS::Rosen
 
-#endif // FOUNDATION_WINDOW_SCENE_SESSION_MANAGER_SERVICE_H
+#endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_SERVICE_H

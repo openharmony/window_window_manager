@@ -172,25 +172,6 @@ struct WSRect {
     }
 };
 
-struct ViewPortConfig {
-    int32_t posX_ = 0;
-    int32_t posY_ = 0;
-    uint32_t width_ = 0;
-    uint32_t height_ = 0;
-    float density_ = .0f;
-
-    bool operator==(const ViewPortConfig& a) const
-    {
-        return (posX_ == a.posX_ && posY_ == a.posY_ && width_ == a.width_
-                && height_ == a.height_ && density_ == a.density_);
-    }
-
-    bool operator!=(const ViewPortConfig& a) const
-    {
-        return !this->operator==(a);
-    }
-};
-
 struct WindowShadowConfig {
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
@@ -227,6 +208,14 @@ struct WindowAnimationConfig {
     float opacity_ = 0;
 };
 
+struct StartingWindowAnimationConfig {
+    bool enabled_ = false;
+    int duration_ = 200;
+    std::string curve_ = "linear";
+    float opacityStart_ = 1;
+    float opacityEnd_ = 0;
+};
+
 struct AppWindowSceneConfig {
     float floatCornerRadius_ = 0.0f;
 
@@ -234,6 +223,7 @@ struct AppWindowSceneConfig {
     WindowShadowConfig unfocusedShadow_;
     KeyboardSceneAnimationConfig keyboardAnimation_;
     WindowAnimationConfig windowAnimation_;
+    StartingWindowAnimationConfig startingWindowAnimationConfig_;
 };
 
 /**
