@@ -995,6 +995,10 @@ void Session::GeneratePersistentId(bool isExtension, const SessionInfo& sessionI
         return;
     }
 
+    if (sessionId_ == INVALID_SESSION_ID) {
+        sessionId_++; // init non system session id from 2
+    }
+
     sessionId_++;
     while (persistIdSet_.count(sessionId_) > 0) {
         sessionId_++;

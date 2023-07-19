@@ -41,7 +41,9 @@ public:
 
 private:
     static NativeValue* RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* UpdateNativeVisibility(NativeEngine* engine, NativeCallbackInfo* info);
     NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnUpdateNativeVisibility(NativeEngine& engine, NativeCallbackInfo& info);
     bool IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject);
     bool IsCallbackTypeSupported(const std::string& type);
 

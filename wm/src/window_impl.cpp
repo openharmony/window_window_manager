@@ -551,7 +551,10 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
         uiContent->Initialize(this, contentInfo, storage);
     }
     // make uiContent available after Initialize/Restore
-    uiContent_ = std::move(uiContent);
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        uiContent_ = std::move(uiContent);
+    }
     if (isIgnoreSafeAreaNeedNotify_) {
         uiContent_->SetIgnoreViewSafeArea(isIgnoreSafeArea_);
     }

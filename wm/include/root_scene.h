@@ -63,6 +63,11 @@ public:
         return name_;
     }
 
+    uint32_t GetWindowId() const override
+    {
+        return 1; // 1 for root
+    }
+
     static sptr<RootScene> staticRootScene_;
 
 private:
