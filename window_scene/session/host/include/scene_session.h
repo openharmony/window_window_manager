@@ -73,11 +73,7 @@ public:
     };
 
     SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
-    ~SceneSession()
-    {
-        sessionChangeCallbackList_.clear();
-        sessionChangeCallbackList_.shrink_to_fit();
-    }
+    ~SceneSession() = default;
 
     WSError Foreground(sptr<WindowSessionProperty> property) override;
     WSError Background() override;
@@ -121,6 +117,8 @@ public:
     bool IsKeepScreenOn() const;
     const std::string& GetWindowName() const;
     bool IsDecorEnable();
+    void UpdateNativeVisibility(bool visible);
+    bool IsVisible() const;
 
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 private:
@@ -133,9 +131,10 @@ private:
     bool SaveAspectRatio(float ratio);
     void NotifyIsCustomAnimatiomPlaying(bool isPlaying);
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
-    std::vector<sptr<SessionChangeCallback>> sessionChangeCallbackList_;
+    sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
     sptr<MoveDragController> moveDragController_ = nullptr;
     sptr<SetWindowScenePatternFunc> setWindowScenePatternFunc_ = nullptr;
+    bool isVisible_ = false;
 };
 } // namespace OHOS::Rosen
 
