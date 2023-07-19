@@ -1422,22 +1422,6 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(bool isAddingPrivateSessio
     ScreenSessionManager::GetInstance().UpdatePrivateStateAndNotify(screenSession, isAddingPrivateSession);
 }
 
-void SceneSessionManager::RegisterSessionRectChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession)
-{
-    if (sceneSession == nullptr) {
-        WLOGFE("session is nullptr");
-        return;
-    }
-    auto persistentId = sceneSession->GetPersistentId();
-    NotifySessionRectChangeFunc onRectChange = [this, persistentId](const WSRect& rect) {
-        this->OnSessionRectChange(persistentId, rect);
-    };
-    sptr<SceneSession::SessionChangeCallback> callback = new (std::nothrow)SceneSession::SessionChangeCallback();
-    callback->onRectChange_ = onRectChange;
-    sceneSession->RegisterSessionChangeCallback(callback);
-    WLOGFD("RegisterSessionRectChangeFunc success");
-}
-
 void SceneSessionManager::RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession)
 {
     NotifySessionStateChangeNotifyManagerFunc func = [this](int32_t persistentId) {
@@ -1868,12 +1852,6 @@ void SceneSessionManager::InitPersistentStorage()
             SceneSession::maximizeMode_ = static_cast<MaximizeMode>(storageMode);
         }
     }
-}
-
-void SceneSessionManager::OnSessionRectChange(int32_t persistentId, const WSRect& rect)
-{
-    WLOGFI("OnSessionRectChange");
-    NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_BOUNDS);
 }
 
 WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
