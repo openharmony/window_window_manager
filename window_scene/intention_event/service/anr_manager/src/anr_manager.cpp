@@ -27,7 +27,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ANRManager" };
-constexpr int32_t MAX_ANR_TIMER_COUNT = 64;
+constexpr int32_t MAX_ANR_TIMER_COUNT { 64 };
 } // namespace
 
 ANRManager::ANRManager() {}

@@ -28,10 +28,11 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ANRHandler" };
-constexpr int64_t MAX_MARK_PROCESS_DELAY_TIME = 3500000;
-constexpr int64_t MIN_MARK_PROCESS_DELAY_TIME = 50000;
-constexpr uint64_t INVALID_PERSISTENT_ID = -1;
-constexpr int32_t TIME_TRANSITION = 1000;
+constexpr int64_t MAX_MARK_PROCESS_DELAY_TIME { 3500000 };
+constexpr int64_t MIN_MARK_PROCESS_DELAY_TIME { 50000 };
+constexpr int32_t INVALID_EVENT_ID { -1 };
+constexpr uint64_t INVALID_PERSISTENT_ID { -1 };
+constexpr int32_t TIME_TRANSITION { 1000 };
 const std::string ANR_HANDLER_RUNNER { "ANR_HANDLER" };
 } // namespace
 
@@ -56,15 +57,15 @@ void ANRHandler::SetSessionStage(int32_t eventId, const wptr<ISessionStage> &ses
 void ANRHandler::HandleEventConsumed(int32_t eventId, int64_t actionTime)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (IsOnEventHandler(GetPersistentIdOfEvent(eventId))) {
+        UpdateLatestEventId(eventId);
+        return;
+    }
     int64_t currentTime = GetSysClockTime();
     int64_t timeoutTime = ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME * TIME_TRANSITION - (currentTime - actionTime);
     WLOGFD("Processed eventId:%{public}d, actionTime:%{public}" PRId64 ", "
         "currentTime:%{public}" PRId64 ", timeoutTime:%{public}" PRId64,
         eventId, actionTime, currentTime, timeoutTime);
-    if (IsOnEventHandler(GetPersistentIdOfEvent(eventId))) {
-        UpdateLatestEventId(eventId);
-        return;
-    }
     if (timeoutTime < MIN_MARK_PROCESS_DELAY_TIME) {
         SendEvent(eventId, 0);
     } else {
@@ -108,11 +109,14 @@ void ANRHandler::MarkProcessed()
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    int32_t eventId = anrHandlerState_.eventsToReceipt.front();
-    WLOGFD("EventId:%{public}d ", eventId);
     if (anrHandlerState_.eventsToReceipt.empty()) {
         WLOGFE("Events to receipt is empty");
-    } else if (sessionStageMap_.find(eventId) == sessionStageMap_.end()) {
+        SetAnrHandleState(INVALID_EVENT_ID, false);
+        return;
+    }
+    int32_t eventId = anrHandlerState_.eventsToReceipt.front();
+    WLOGFD("EventId:%{public}d ", eventId);
+    if (sessionStageMap_.find(eventId) == sessionStageMap_.end()) {
         WLOGFE("SessionStage for eventId:%{public}d is not in sessionStageMap", eventId);
     } else if (sessionStageMap_[eventId] == nullptr) {
         WLOGFE("SessionStage for eventId:%{public}d is nullptr", eventId);
