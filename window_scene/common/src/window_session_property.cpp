@@ -170,22 +170,22 @@ uint32_t WindowSessionProperty::GetWindowFlags() const
     return flags_;
 }
 
-void WindowSessionProperty::SetPersistentId(uint64_t persistentId)
+void WindowSessionProperty::SetPersistentId(uint32_t persistentId)
 {
     persistentId_ = persistentId;
 }
 
-uint64_t WindowSessionProperty::GetPersistentId() const
+uint32_t WindowSessionProperty::GetPersistentId() const
 {
     return persistentId_;
 }
 
-void WindowSessionProperty::SetParentPersistentId(uint64_t persistentId)
+void WindowSessionProperty::SetParentPersistentId(uint32_t persistentId)
 {
     parentPersistentId_ = persistentId;
 }
 
-uint64_t WindowSessionProperty::GetParentPersistentId() const
+uint32_t WindowSessionProperty::GetParentPersistentId() const
 {
     return parentPersistentId_;
 }
@@ -371,10 +371,10 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(focusable_) && parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
         parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
         parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_) &&
-        parcel.WriteUint64(displayId_) && parcel.WriteUint64(persistentId_) &&
+        parcel.WriteUint64(displayId_) && parcel.WriteUint32(persistentId_) &&
         parcel.WriteString(sessionInfo_.bundleName_) && parcel.WriteString(sessionInfo_.moduleName_) &&
         parcel.WriteString(sessionInfo_.abilityName_) &&
-        parcel.WriteUint64(parentPersistentId_) &&
+        parcel.WriteUint32(parentPersistentId_) &&
         parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
         parcel.WriteFloat(brightness_) &&
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
@@ -405,10 +405,10 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetPrivacyMode(parcel.ReadBool());
     property->SetSystemPrivacyMode(parcel.ReadBool());
     property->SetDisplayId(parcel.ReadUint64());
-    property->SetPersistentId(parcel.ReadUint64());
+    property->SetPersistentId(parcel.ReadUint32());
     SessionInfo info = { parcel.ReadString(), parcel.ReadString(), parcel.ReadString() };
     property->SetSessionInfo(info);
-    property->SetParentPersistentId(parcel.ReadUint64());
+    property->SetParentPersistentId(parcel.ReadUint32());
     property->SetAccessTokenId(parcel.ReadUint32());
     property->SetMaximizeMode(static_cast<MaximizeMode>(parcel.ReadUint32()));
     property->SetBrightness(parcel.ReadFloat());

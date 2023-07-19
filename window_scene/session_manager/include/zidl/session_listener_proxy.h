@@ -26,8 +26,8 @@ public:
         : IRemoteProxy<ISessionListener>(impl) {};
     ~SessionListenerProxy() {};
 
-    virtual void OnSessionLabelChange(int persistentId, const std::string &label) override;
-    virtual void OnSessionIconChange(int persistentId, const std::shared_ptr<Media::PixelMap> &icon) override;
+    virtual void OnSessionLabelChange(uint32_t persistentId, const std::string &label) override;
+    virtual void OnSessionIconChange(uint32_t persistentId, const std::shared_ptr<Media::PixelMap> &icon) override;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_LISTENER_PROXY_H

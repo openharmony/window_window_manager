@@ -28,7 +28,7 @@ class AbilityStartSetting;
 }
 
 namespace OHOS::Rosen {
-constexpr uint64_t INVALID_SESSION_ID = 0;
+constexpr uint32_t INVALID_SESSION_ID = 0;
 
 enum class WSError : int32_t {
     WS_OK = 0,
@@ -110,8 +110,8 @@ struct SessionInfo {
     int32_t requestCode;
     int32_t errorCode;
     std::string errorReason;
-    uint64_t persistentId_ = INVALID_SESSION_ID;
-    uint64_t callerPersistentId_ = INVALID_SESSION_ID;
+    uint32_t persistentId_ = INVALID_SESSION_ID;
+    uint32_t callerPersistentId_ = INVALID_SESSION_ID;
     uint32_t callState_ = 0;
     int64_t uiAbilityId_ = 0;
 };

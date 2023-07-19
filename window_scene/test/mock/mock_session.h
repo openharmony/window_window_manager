@@ -29,7 +29,7 @@ public:
         SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token));
     MOCK_METHOD6(CreateAndConnectSpecificSession, WSError(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session));
+        sptr<WindowSessionProperty> property, uint32_t& persistentId, sptr<ISession>& session));
 
     MOCK_METHOD1(Foreground, WSError(sptr<WindowSessionProperty> property));
     MOCK_METHOD0(Background, WSError(void));
