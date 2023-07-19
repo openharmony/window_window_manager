@@ -54,7 +54,6 @@ void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallb
             return;
         }
         hasRequestedVsync_ = true;
-        OHOS::AppExecFwk::EventHandler::PostTask(vsyncTimeoutCallback_, VSYNC_TIME_OUT_MILLISECONDS);
     }
     receiver_->RequestNextVSync(frameCallback_);
 }
