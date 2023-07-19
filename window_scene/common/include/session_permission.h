@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_PERMISSION_H
-#define OHOS_ROSEN_PERMISSION_H
+#ifndef OHOS_ROSEN_SESSION_PERMISSION_H
+#define OHOS_ROSEN_SESSION_PERMISSION_H
 
 #include <string>
 
 namespace OHOS {
 namespace Rosen {
-class Permission {
+class SessionPermission {
 public:
     static bool IsSystemServiceCalling(bool needPrintLog = true);
     static bool IsSystemCalling();
@@ -29,4 +29,4 @@ public:
 };
 } // Rosen
 } // OHOS
-#endif // OHOS_ROSEN_PERMISSION_H
+#endif // OHOS_ROSEN_SESSION_PERMISSION_H

@@ -48,7 +48,7 @@
 
 #include "ability_start_setting.h"
 #include "color_parser.h"
-#include "common/include/permission.h"
+#include "common/include/session_permission.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
 #include "session/host/include/scene_persistent_storage.h"
@@ -501,7 +501,7 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
         if (rootSceneSession_ != nullptr) {
             return rootSceneSession_;
         }
-        system::SetParameter("bootevent.boot.completed", "true");
+        system::SetParameter("bootevent.wms.fullscreen.ready", "true");
         SessionInfo info;
         rootSceneSession_ = new (std::nothrow) RootSceneSession(info);
         if (!rootSceneSession_) {
@@ -764,10 +764,16 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
         WLOGFD("Begin to destroy its dialog");
         auto dialogVec = scnSession->GetDialogVector();
         for (auto dialog : dialogVec) {
+            if (dialog == nullptr) {
+                WLOGFE("dialog is nullptr");
+                return WSError::WS_ERROR_NULLPTR;
+            }
             if (sceneSessionMap_.count(dialog->GetPersistentId()) == 0) {
                 WLOGFE("session is invalid with %{public}" PRIu64 "", dialog->GetPersistentId());
                 return WSError::WS_ERROR_INVALID_SESSION;
             }
+            auto sceneSession = GetSceneSession(dialog->GetPersistentId());
+            WindowDestroyNotifyVisibility(sceneSession);
             dialog->NotifyDestroy();
             dialog->Disconnect();
             NotifyWindowInfoChange(dialog->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
@@ -791,6 +797,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         DestroyDialogWithMainWindow(scnSession);
         WLOGFI("destroy session persistentId: %{public}" PRIu64 "", persistentId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionDestruction (%" PRIu64" )", persistentId);
+        WindowDestroyNotifyVisibility(scnSession);
         scnSession->Disconnect();
         if (sceneSessionMap_.count(persistentId) == 0) {
             WLOGFE("session is invalid with %{public}" PRIu64 "", persistentId);
@@ -814,7 +821,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartedByInputMethod()) {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartedByInputMethod()) {
         WLOGFE("check input method permission failed");
     }
     // get pid/uid before post sync task
@@ -882,6 +889,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const uint64_t&
             return WSError::WS_ERROR_NULLPTR;
         }
         auto ret = sceneSession->UpdateActiveStatus(false);
+        WindowDestroyNotifyVisibility(sceneSession);
         if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
             auto parentSession = GetSceneSession(sceneSession->GetParentPersistentId());
             if (parentSession == nullptr) {
@@ -1263,7 +1271,7 @@ float SceneSessionManager::GetDisplayBrightness() const
 
 WMError SceneSessionManager::SetGestureNavigaionEnabled(bool enable)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         WLOGFE("SetGestureNavigationEnabled permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -1983,7 +1991,6 @@ void SceneSessionManager::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclu
         auto iter = sceneSessionMap_.begin();
         for (; iter != sceneSessionMap_.end(); iter++) {
             if (iter->second == nullptr || iter->second->GetSurfaceNode() == nullptr) {
-                WLOGFD(" sceneSessionMap_->second is nullptr || sceneSessionMap_->second->GetSurfaceNode() is nullptr");
                 continue;
             }
             if (surfaceId == iter->second->GetSurfaceNode()->GetId()) {
@@ -1994,6 +2001,7 @@ void SceneSessionManager::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclu
             continue;
         }
         sptr<SceneSession> session = iter->second;
+        session->SetVisible(isVisible);
         windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(session->GetWindowId(), session->GetCallingPid(),
             session->GetCallingUid(), isVisible, session->GetWindowType()));
 #ifdef MEMMGR_WINDOW_ENABLE
@@ -2023,6 +2031,23 @@ void SceneSessionManager::InitWithRenderServiceAdded()
     WLOGI("RegisterWindowVisibilityChangeCallback");
     if (rsInterface_.RegisterOcclusionChangeCallback(windowVisibilityChangeCb) != WM_OK) {
         WLOGFE("RegisterWindowVisibilityChangeCallback failed");
+    }
+}
+
+void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("sceneSession is nullptr!");
+        return;
+    }
+    if (sceneSession->GetVisible()) {
+        std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+        sceneSession->SetVisible(false);
+        windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(sceneSession->GetWindowId(),
+            sceneSession->GetCallingPid(), sceneSession->GetCallingUid(), false, sceneSession->GetWindowType()));
+        WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
+            sceneSession->GetWindowId(), sceneSession->GetVisible());
+        SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
 }
 

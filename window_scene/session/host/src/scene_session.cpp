@@ -323,6 +323,9 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     std::vector<sptr<SceneSession>> statusBarVector =
         specificCallback_->onGetSceneSessionVectorByType_(WindowType::WINDOW_TYPE_STATUS_BAR);
     for (auto& statusBar : statusBarVector) {
+        if (!(statusBar->isActive_)) {
+            continue;
+        }
         WSRect statusBarRect = statusBar->GetSessionRect();
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
     }
@@ -335,6 +338,9 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     std::vector<sptr<SceneSession>> inputMethodVector =
         specificCallback_->onGetSceneSessionVectorByType_(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     for (auto& inputMethod : inputMethodVector) {
+        if (!(inputMethod->isActive_)) {
+            continue;
+        }
         WSRect inputMethodRect = inputMethod->GetSessionRect();
         CalculateAvoidAreaRect(rect, inputMethodRect, avoidArea);
     }

@@ -52,6 +52,12 @@ ohos_shared_library("scenesessionmanager_napi") {
     "napi:ace_napi",
     "power_manager:powermgr_client",
   ]
+  defines = []
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.resourceschedule_soc_perf)) {
+    external_deps += [ "soc_perf:socperf_client" ]
+    defines += [ "SOC_PERF_ENABLE" ]
+  }
 
   relative_install_dir = "module"
   part_name = "window_manager"
