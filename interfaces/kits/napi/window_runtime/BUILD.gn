@@ -71,10 +71,10 @@ ohos_shared_library("window_native_kit") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "hilog:libhilog",
+    "image_framework:image",
+    "image_framework:image_native",
     "ipc:ipc_napi_common",
     "ipc:ipc_single",
-    "multimedia_image_framework:image",
-    "multimedia_image_framework:image_native",
     "napi:ace_napi",
   ]
 

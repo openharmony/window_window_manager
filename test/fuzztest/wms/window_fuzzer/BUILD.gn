@@ -62,9 +62,9 @@ ohos_fuzztest("WindowFuzzTest") {
     "eventhandler:libeventhandler",
     "graphic_2d:window_animation",
     "hilog:libhilog",
+    "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "multimedia_image_framework:image_native",
   ]
 }
 

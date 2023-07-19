@@ -64,8 +64,8 @@ ohos_static_library("libdm_static") {
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_single",
-    "multimedia_image_framework:image_native",
     "samgr:samgr_proxy",
   ]
 
@@ -104,8 +104,8 @@ ohos_shared_library("libdm") {
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_single",
-    "multimedia_image_framework:image_native",
     "samgr:samgr_proxy",
   ]
 
