@@ -15,6 +15,8 @@
 
 #include "windowscene_fuzzer.h"
 
+#include "ability_context_impl.h"
+#include <configuration.h>
 #include <securec.h>
 #include <new>
 
@@ -188,6 +190,10 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     uint32_t level;
     startPos += GetObject<uint32_t>(level, data + startPos, size - startPos);
     windowScene->NotifyMemoryLevel(level);
+    AAFwk::Want want;
+    windowScene->OnNewWant(want);
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+    windowScene->UpdateConfiguration(configuration);
     return true;
 }
 } // namespace.OHOS
