@@ -46,7 +46,7 @@
           "display_manager",
           "config_policy",
           "ace_engine",
-          "multimedia_image_framework",
+          "image_framework",
           "preferences",
           "hiview",
           "hicollie",
