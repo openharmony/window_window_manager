@@ -29,30 +29,30 @@ namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "EventStage" };
 } // namespace
 
-void EventStage::SetAnrStatus(uint64_t persistentId, bool status)
+void EventStage::SetAnrStatus(uint32_t persistentId, bool status)
 {
     isAnrProcess_[persistentId] = status;
 }
 
-bool EventStage::CheckAnrStatus(uint64_t persistentId)
+bool EventStage::CheckAnrStatus(uint32_t persistentId)
 {
     if (isAnrProcess_.find(persistentId) != isAnrProcess_.end()) {
         return isAnrProcess_[persistentId];
     }
-    WLOGFD("Current persistentId:%{public}" PRIu64 " is not in event stage", persistentId);
+    WLOGFD("Current persistentId:%{public}" PRIu32 " is not in event stage", persistentId);
     return false;
 }
 
-void EventStage::SaveANREvent(uint64_t persistentId, int32_t id, int64_t time, int32_t timerId)
+void EventStage::SaveANREvent(uint32_t persistentId, int32_t id, int64_t time, int32_t timerId)
 {
     EventTime eventTime { id, time, timerId };
     events_[persistentId].push_back(eventTime);
 }
 
-std::vector<int32_t> EventStage::GetTimerIds(uint64_t persistentId)
+std::vector<int32_t> EventStage::GetTimerIds(uint32_t persistentId)
 {
     if (events_.find(persistentId) == events_.end()) {
-        WLOGFD("Current events have no event for persistentId:%{public}" PRIu64 "", persistentId);
+        WLOGFD("Current events have no event for persistentId:%{public}" PRIu32 "", persistentId);
         return {};
     }
     std::vector<int32_t> timers;
@@ -63,11 +63,11 @@ std::vector<int32_t> EventStage::GetTimerIds(uint64_t persistentId)
     return timers;
 }
 
-std::list<int32_t> EventStage::DelEvents(uint64_t persistentId, int32_t id)
+std::list<int32_t> EventStage::DelEvents(uint32_t persistentId, int32_t id)
 {
-    WLOGFD("Delete events, persistentId:%{public}" PRIu64 ", id:%{public}d", persistentId, id);
+    WLOGFD("Delete events, persistentId:%{public}" PRIu32 ", id:%{public}d", persistentId, id);
     if (events_.find(persistentId) == events_.end()) {
-        WLOGFD("Current events have no event persistentId:%{public}" PRIu64 "", persistentId);
+        WLOGFD("Current events have no event persistentId:%{public}" PRIu32 "", persistentId);
         return {};
     }
     auto &events = events_[persistentId];

@@ -39,7 +39,7 @@ void ANRManager::Init()
     TimerMgr->Init();
 }
 
-void ANRManager::AddTimer(int32_t id, int64_t currentTime, uint64_t persistentId)
+void ANRManager::AddTimer(int32_t id, int64_t currentTime, uint32_t persistentId)
 {
     std::lock_guard<std::mutex> guard(mtx_);
     if (anrTimerCount_ >= MAX_ANR_TIMER_COUNT) {
@@ -47,11 +47,11 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, uint64_t persistentId
         return;
     }
     int32_t timerId = TimerMgr->AddTimer(ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME, [this, id, persistentId]() {
-        WLOGFD("Anr callback enter. persistentId:%{public}" PRIu64 ", eventId:%{public}d", persistentId, id);
+        WLOGFD("Anr callback enter. persistentId:%{public}" PRIu32 ", eventId:%{public}d", persistentId, id);
         eventStage_.SetAnrStatus(persistentId, true);
         int32_t pid = GetPidByPersistentId(persistentId);
         DfxHisysevent::ApplicationBlockInput(id, pid, persistentId);
-        WLOGFE("Application not responding. persistentId:%{public}" PRIu64 ", eventId:%{public}d, pid:%{public}d",
+        WLOGFE("Application not responding. persistentId:%{public}" PRIu32", eventId:%{public}d, pid:%{public}d",
             persistentId, id, pid);
         if (anrObserver_ != nullptr) {
             anrObserver_(pid);
@@ -65,17 +65,17 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, uint64_t persistentId
                 anrTimerCount_--;
             }
         }
-        WLOGFD("Anr callback leave. persistentId:%{public}" PRIu64 ", eventId:%{public}d", persistentId, id);
+        WLOGFD("Anr callback leave. persistentId:%{public}" PRIu32 ", eventId:%{public}d", persistentId, id);
     });
     anrTimerCount_++;
     eventStage_.SaveANREvent(persistentId, id, currentTime, timerId);
 }
 
-void ANRManager::MarkProcessed(int32_t eventId, uint64_t persistentId)
+void ANRManager::MarkProcessed(int32_t eventId, uint32_t persistentId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
-    WLOGFD("eventId:%{public}d, persistentId:%{public}" PRIu64 "", eventId, persistentId);
+    WLOGFD("eventId:%{public}d, persistentId:%{public}" PRIu32"", eventId, persistentId);
     std::list<int32_t> timerIds = eventStage_.DelEvents(persistentId, eventId);
     for (int32_t item : timerIds) {
         if (item != -1) {
@@ -85,17 +85,17 @@ void ANRManager::MarkProcessed(int32_t eventId, uint64_t persistentId)
     }
 }
 
-bool ANRManager::IsANRTriggered(int64_t time, uint64_t persistentId)
+bool ANRManager::IsANRTriggered(int64_t time, uint32_t persistentId)
 {
     std::lock_guard<std::mutex> guard(mtx_);
     if (eventStage_.CheckAnrStatus(persistentId)) {
-        WLOGFD("Application not responding. persistentId:%{public}" PRIu64 "", persistentId);
+        WLOGFD("Application not responding. persistentId:%{public}" PRIu32 "", persistentId);
         return true;
     }
     return false;
 }
 
-void ANRManager::OnSessionLost(uint64_t persistentId)
+void ANRManager::OnSessionLost(uint32_t persistentId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
@@ -103,10 +103,10 @@ void ANRManager::OnSessionLost(uint64_t persistentId)
     RemovePersistentId(persistentId);
 }
 
-void ANRManager::SetApplicationPid(uint64_t persistentId, int32_t applicationPid)
+void ANRManager::SetApplicationPid(uint32_t persistentId, int32_t applicationPid)
 {
     std::lock_guard<std::mutex> guard(mtx_);
-    WLOGFD("persistentId:%{public}" PRIu64 " -> applicationPid:%{public}d", persistentId, applicationPid);
+    WLOGFD("persistentId:%{public}" PRIu32 " -> applicationPid:%{public}d", persistentId, applicationPid);
     applicationMap_[persistentId] = applicationPid;
 }
 
@@ -117,17 +117,17 @@ void ANRManager::SetAnrObserver(std::function<void(int32_t)> anrObserver)
     anrObserver_ = anrObserver;
 }
 
-int32_t ANRManager::GetPidByPersistentId(uint64_t persistentId)
+int32_t ANRManager::GetPidByPersistentId(uint32_t persistentId)
 {
     if (applicationMap_.find(persistentId) != applicationMap_.end()) {
-        WLOGFD("persistentId:%{public}" PRIu64 " -> pid:%{public}d", persistentId, applicationMap_[persistentId]);
+        WLOGFD("persistentId:%{public}" PRIu32 " -> pid:%{public}d", persistentId, applicationMap_[persistentId]);
         return applicationMap_[persistentId];
     }
-    WLOGFD("No application matches persistentId:%{public}" PRIu64 "", persistentId);
+    WLOGFD("No application matches persistentId:%{public}" PRIu32 "", persistentId);
     return -1;
 }
 
-void ANRManager::RemoveTimers(uint64_t persistentId)
+void ANRManager::RemoveTimers(uint32_t persistentId)
 {
     std::vector<int32_t> timerIds = eventStage_.GetTimerIds(persistentId);
     for (int32_t item : timerIds) {
@@ -138,13 +138,13 @@ void ANRManager::RemoveTimers(uint64_t persistentId)
     }
 }
 
-void ANRManager::RemovePersistentId(uint64_t persistentId)
+void ANRManager::RemovePersistentId(uint32_t persistentId)
 {
     if (applicationMap_.find(persistentId) == applicationMap_.end()) {
-        WLOGFD("No persistentId:%{public}" PRIu64 " in applicationMap", persistentId);
+        WLOGFD("No persistentId:%{public}" PRIu32 " in applicationMap", persistentId);
         return;
     }
-    WLOGFD("Remove persistentId:%{public}" PRIu64 " -> applicationPid:%{public}d",
+    WLOGFD("Remove persistentId:%{public}" PRIu32 " -> applicationPid:%{public}d",
         persistentId, applicationMap_[persistentId]);
     applicationMap_.erase(persistentId);
 }
