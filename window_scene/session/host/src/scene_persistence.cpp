@@ -31,13 +31,13 @@ constexpr uint8_t IMAGE_QUALITY = 85;
 
 std::string ScenePersistence::strPersistPath_;
 
-ScenePersistence::ScenePersistence(const SessionInfo &info, const uint64_t persistentId) : sessionInfo_(info)
+ScenePersistence::ScenePersistence(const SessionInfo& info, const uint32_t& persistentId) : sessionInfo_(info)
 {
     strSnapshotFile_ =
-        strPersistPath_ + sessionInfo_.bundleName_ + UNDERLINE_SEPARATOR + std::to_string(persistentId & 0xff);
+        strPersistPath_ + sessionInfo_.bundleName_ + UNDERLINE_SEPARATOR + std::to_string(persistentId & 0xffff);
 }
 
-void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap> &pixelMap)
+void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap)
 {
     if (pixelMap == nullptr || strSnapshotFile_.find('/') == std::string::npos) {
         return;

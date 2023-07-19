@@ -106,10 +106,10 @@ public:
     WMError SetBackgroundColor(const std::string& color) override;
 
     uint32_t GetParentId() const;
-    uint64_t GetPersistentId() const;
+    uint32_t GetPersistentId() const;
     sptr<WindowSessionProperty> GetProperty() const;
     sptr<ISession> GetHostSession() const;
-    uint64_t GetFloatingWindowParentId();
+    uint32_t GetFloatingWindowParentId();
     void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
     void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
     void NotifyForegroundFailed(WMError ret);
@@ -130,7 +130,7 @@ protected:
     void NotifyAfterActive();
     void NotifyAfterInactive();
     void NotifyBeforeDestroy(std::string windowName);
-    void ClearListenersById(uint64_t persistentId);
+    void ClearListenersById(uint32_t persistentId);
     WMError WindowSessionCreateCheck();
     void UpdateDecorEnable(bool needNotify = false);
     void NotifyModeChange(WindowMode mode, bool hasDeco = true);
@@ -150,8 +150,8 @@ protected:
     NotifyNativeWinDestroyFunc notifyNativeFunc_;
 
     std::recursive_mutex mutex_;
-    static std::map<std::string, std::pair<uint64_t, sptr<WindowSessionImpl>>> windowSessionMap_;
-    static std::map<uint64_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
+    static std::map<std::string, std::pair<uint32_t, sptr<WindowSessionImpl>>> windowSessionMap_;
+    static std::map<uint32_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
     bool isIgnoreSafeAreaNeedNotify_ = false;
     bool isIgnoreSafeArea_ = false;
 
@@ -169,7 +169,7 @@ private:
     EnableIfSame<T, IDialogTargetTouchListener, std::vector<sptr<IDialogTargetTouchListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IOccupiedAreaChangeListener, std::vector<sptr<IOccupiedAreaChangeListener>>> GetListeners();
-    template<typename T> void ClearUselessListeners(std::map<uint64_t, T>& listeners, uint64_t persistentId);
+    template<typename T> void ClearUselessListeners(std::map<uint32_t, T>& listeners, uint32_t persistentId);
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
     void NotifyAfterFocused();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
@@ -177,11 +177,11 @@ private:
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
 
     static std::recursive_mutex globalMutex_;
-    static std::map<uint64_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
-    static std::map<uint64_t, std::vector<sptr<IWindowChangeListener>>> windowChangeListeners_;
-    static std::map<uint64_t, std::vector<sptr<IAvoidAreaChangedListener>>> avoidAreaChangeListeners_;
-    static std::map<uint64_t, std::vector<sptr<IDialogDeathRecipientListener>>> dialogDeathRecipientListeners_;
-    static std::map<uint64_t, std::vector<sptr<IDialogTargetTouchListener>>> dialogTargetTouchListener_;
+    static std::map<uint32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
+    static std::map<uint32_t, std::vector<sptr<IWindowChangeListener>>> windowChangeListeners_;
+    static std::map<uint32_t, std::vector<sptr<IAvoidAreaChangedListener>>> avoidAreaChangeListeners_;
+    static std::map<uint32_t, std::vector<sptr<IDialogDeathRecipientListener>>> dialogDeathRecipientListeners_;
+    static std::map<uint32_t, std::vector<sptr<IDialogTargetTouchListener>>> dialogTargetTouchListener_;
     static std::map<uint32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> occupiedAreaChangeListeners_;
 
     std::optional<std::atomic<bool>> focusState_ = std::nullopt;

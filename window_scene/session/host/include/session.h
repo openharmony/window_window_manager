@@ -43,7 +43,7 @@ namespace OHOS::Rosen {
 class RSSurfaceNode;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
-using NotifySessionStateChangeNotifyManagerFunc = std::function<void(uint64_t persistentId)>;
+using NotifySessionStateChangeNotifyManagerFunc = std::function<void(uint32_t persistentId)>;
 using NotifyBackPressedFunc = std::function<void()>;
 using NotifySessionFocusableChangeFunc = std::function<void(const bool isFocusable)>;
 using NotifySessionTouchableChangeFunc = std::function<void(const bool touchable)>;
@@ -53,7 +53,7 @@ using NotifyTerminateSessionFuncNew = std::function<void(const SessionInfo& info
 using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
 using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info)>;
-using NotifyCallingSessionForegroundFunc = std::function<void(const uint64_t& persistentId)>;
+using NotifyCallingSessionForegroundFunc = std::function<void(const uint32_t& persistentId)>;
 using NotifyCallingSessionBackgroundFunc = std::function<void()>;
 
 class ILifecycleListener {
@@ -69,8 +69,8 @@ public:
     explicit Session(const SessionInfo& info) : sessionInfo_(info) {}
     virtual ~Session() = default;
 
-    uint64_t GetPersistentId() const;
-    uint64_t GetParentPersistentId() const;
+    uint32_t GetPersistentId() const;
+    uint32_t GetParentPersistentId() const;
     void SetSessionRect(const WSRect& rect);
 
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
@@ -137,8 +137,8 @@ public:
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) override;
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session) override;
-    WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) override;
+        sptr<WindowSessionProperty> property, uint32_t& persistentId, sptr<ISession>& session) override;
+    WSError DestroyAndDisconnectSpecificSession(const uint32_t& persistentId) override;
     void SetSystemConfig(const SystemSessionConfig& systemConfig);
     void SetBackPressedListenser(const NotifyBackPressedFunc& func);
     WSError ProcessBackEvent(); // send back event to session_stage
@@ -256,7 +256,7 @@ private:
     std::shared_ptr<RSSurfaceNode> CreateSurfaceNode(const std::string& name);
     std::shared_ptr<Media::PixelMap> Snapshot();
 
-    uint64_t persistentId_ = INVALID_SESSION_ID;
+    uint32_t persistentId_ = INVALID_SESSION_ID;
     static std::atomic<uint32_t> sessionId_;
     static std::set<uint32_t> persistIdSet_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_ = nullptr;
