@@ -144,7 +144,6 @@ ohos_shared_library("libwmutil") {
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
-
     "preferences:native_preferences",
     "samgr:samgr_proxy",
   ]
