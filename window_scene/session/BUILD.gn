@@ -56,7 +56,6 @@ ohos_shared_library("scene_session") {
   public_configs = [ ":session_public_config" ]
 
   deps = [
-    "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
     "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
