@@ -47,7 +47,7 @@ public:
     virtual void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
     virtual void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) {}
     virtual void NotifyFocusActiveEvent(bool isFocusActive) {}
-    virtual void NotifyFocusWindowIdEvent(uint32_t windowId) {}
+    virtual void NotifyFocusWindowIdEvent(int32_t windowId) {}
     virtual void NotifyFocusStateEvent(bool focusState) {}
     virtual WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
     {

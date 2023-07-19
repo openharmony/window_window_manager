@@ -105,7 +105,7 @@ int WindowEventChannelStub::HandleTransferFocusActiveEvent(MessageParcel& data, 
 
 int WindowEventChannelStub::HandleTransferFocusWindowIdEvent(MessageParcel& data, MessageParcel& reply)
 {
-    uint32_t focusWindowId = data.ReadUint32();
+    auto focusWindowId = data.ReadInt32();
     WSError errCode = TransferFocusWindowId(focusWindowId);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
