@@ -27,6 +27,15 @@ ohos_fuzztest("WindowSceneFuzzTest") {
     "../../../../interfaces/innerkits/wm",
     "//foundation/graphic/graphic_2d/interfaces/innerkits/surface",
     "//commonlibrary/c_utils/base/include",
+
+    # for abilityContext
+    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
+    "//third_party/node/deps/icu-small/source/common",
+    "${ability_runtime_inner_api_path}/ability_manager/include",
+    "//foundation/ability/ability_base/interfaces/kits/native/configuration/include/",
+
+    # abilityContext end
   ]
 
   configs = [
@@ -36,14 +45,20 @@ ohos_fuzztest("WindowSceneFuzzTest") {
 
   sources = [ "windowscene_fuzzer.cpp" ]
   deps = [
+    "${ability_runtime_inner_api_path}/ability_manager:ability_manager",
     "${window_base_path}/dm:libdm",
     "${window_base_path}/wm:libwm",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]
 
   external_deps = [
+    "ability_base:configuration",
+    "ability_base:want",
+    "ability_runtime:ability_context_native",
+    "ace_engine:ace_uicontent",
     "c_utils:utils",
+    "graphic_2d:librender_service_client",
     "ipc:ipc_single",
+    "napi:ace_napi",
   ]
 }
 
