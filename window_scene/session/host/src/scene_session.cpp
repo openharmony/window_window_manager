@@ -45,8 +45,8 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     specificCallback_ = specificCallback;
     moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
     ProcessVsyncHandleRegister();
-    if (!info.bundleName_.empty() && !info.abilityName_.empty()) {
-        std::string key = info.bundleName_ + "_" + info.abilityName_;
+    std::string key = GetRatioPreferenceKey();
+    if (!key.empty()) {
         if (ScenePersistentStorage::HasKey(key, ScenePersistentStorageType::ASPECT_RATIO)) {
             ScenePersistentStorage::Get(key, aspectRatio_, ScenePersistentStorageType::ASPECT_RATIO);
             WLOGD("SceneSession init aspectRatio , key %{public}s, value: %{public}f", key.c_str(), aspectRatio_);
@@ -145,7 +145,7 @@ WSError SceneSession::SetAspectRatio(float ratio)
     }
     float vpr = 1.5f; // 1.5f: default virtual pixel ratio
     auto display = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
-    if (!display) {
+    if (display) {
         vpr = display->GetVirtualPixelRatio();
         WLOGD("vpr = %{public}f", vpr);
     }
@@ -191,16 +191,6 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
     WLOGFD("UpdateRect [%{public}d, %{public}d, %{public}u, %{public}u]", rect.posX_, rect.posY_,
         rect.width_, rect.height_);
-    if (isFirstStart_) {
-        WSRect newRect = rect;
-        if (FixRectByAspectRatio(newRect)) {
-            isFirstStart_ = false;
-            WLOGFD("FixedRect [%{public}d, %{public}d, %{public}u, %{public}u]", newRect.posX_, newRect.posY_,
-                newRect.width_, newRect.height_);
-            NotifySessionRectChange(newRect);
-            return Session::UpdateRect(newRect, reason);
-        }
-    }
     specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     return Session::UpdateRect(rect, reason);
 }
@@ -290,6 +280,22 @@ WSError SceneSession::OnNeedAvoid(bool status)
     return WSError::WS_OK;
 }
 
+WSError SceneSession::OnShowWhenLocked(bool showWhenLocked)
+{
+    WLOGFD("SceneSession ShowWhenLocked status:%{public}d", static_cast<int32_t>(showWhenLocked));
+    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
+        if (sessionChangeCallback != nullptr && sessionChangeCallback->OnShowWhenLocked_) {
+            sessionChangeCallback->OnShowWhenLocked_(showWhenLocked);
+        }
+    }
+    return WSError::WS_OK;
+}
+
+bool SceneSession::IsShowWhenLocked() const
+{
+    return property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
+}
+
 void SceneSession::CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, AvoidArea& avoidArea)
 {
     if (SessionHelper::IsEmptyRect(rect) || SessionHelper::IsEmptyRect(avoidRect)) {
@@ -300,8 +306,8 @@ void SceneSession::CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, Avoid
         return;
     }
 
-    uint32_t avoidAreaCenterX = avoidAreaRect.posX_ + (avoidAreaRect.width_ >> 1);
-    uint32_t avoidAreaCenterY = avoidAreaRect.posY_ + (avoidAreaRect.height_ >> 1);
+    uint32_t avoidAreaCenterX = static_cast<uint32_t>(avoidAreaRect.posX_) + (avoidAreaRect.width_ >> 1);
+    uint32_t avoidAreaCenterY = static_cast<uint32_t>(avoidAreaRect.posY_) + (avoidAreaRect.height_ >> 1);
     float res1 = float(avoidAreaCenterY) - float(rect.height_) / float(rect.width_) *
         float(avoidAreaCenterX);
     float res2 = float(avoidAreaCenterY) + float(rect.height_) / float(rect.width_) *
@@ -443,10 +449,19 @@ bool SceneSession::IsDecorEnable()
         WindowHelper::IsWindowModeSupported(systemConfig_.decorModeSupportInfo_, property_->GetWindowMode());
 }
 
+std::string SceneSession::GetRatioPreferenceKey()
+{
+    std::string key = sessionInfo_.bundleName_ + sessionInfo_.moduleName_ + sessionInfo_.abilityName_;
+    if (key.length() > ScenePersistentStorage::MAX_KEY_LEN) {
+        return key.substr(key.length() - ScenePersistentStorage::MAX_KEY_LEN);
+    }
+    return key;
+}
+
 bool SceneSession::SaveAspectRatio(float ratio)
 {
-    if (!sessionInfo_.bundleName_.empty() && !sessionInfo_.abilityName_.empty()) {
-        std::string key = sessionInfo_.bundleName_ + "_" + sessionInfo_.abilityName_;
+    std::string key = GetRatioPreferenceKey();
+    if (!key.empty()) {
         ScenePersistentStorage::Insert(key, ratio, ScenePersistentStorageType::ASPECT_RATIO);
         WLOGD("SceneSession save aspectRatio , key %{public}s, value: %{public}f", key.c_str(), aspectRatio_);
         return true;
@@ -463,8 +478,7 @@ bool SceneSession::FixRectByAspectRatio(WSRect& rect)
         return false;
     }
 
-    if (MathHelper::NearZero(aspectRatio_) || aspectRatio_ == MathHelper::INF ||
-        aspectRatio_ == MathHelper::NAG_INF) {
+    if (MathHelper::NearZero(aspectRatio_)) {
         return false;
     }
     float vpr = 1.5f; // 1.5f: default virtual pixel ratio

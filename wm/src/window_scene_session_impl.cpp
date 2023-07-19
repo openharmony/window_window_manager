@@ -72,7 +72,8 @@ bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
         type == WindowType::WINDOW_TYPE_FLOAT_CAMERA || type == WindowType::WINDOW_TYPE_DIALOG ||
         type == WindowType::WINDOW_TYPE_FLOAT || type == WindowType::WINDOW_TYPE_SCREENSHOT ||
         type == WindowType::WINDOW_TYPE_VOICE_INTERACTION || type == WindowType::WINDOW_TYPE_POINTER ||
-        type == WindowType::WINDOW_TYPE_TOAST || type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT)) {
+        type == WindowType::WINDOW_TYPE_TOAST || type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT ||
+        type == WindowType::WINDOW_TYPE_SEARCHING_BAR)) {
         WLOGFW("Invalid type: %{public}u", GetType());
         return false;
     }
@@ -138,9 +139,11 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             auto mainWindow = FindMainWindowWithContext();
             if (mainWindow != nullptr) {
                 property_->SetParentPersistentId(mainWindow->GetPersistentId());
+                WLOGFD("Bind dialog to main window");
             }
-            WLOGFD("Bind dialog to main window");
+            WLOGFD("Cannot find main window to bind");
         }
+        PreProcessCreate();
         SessionManager::GetInstance().CreateAndConnectSpecificSession(iSessionStage, eventChannel, surfaceNode_,
             property_, persistentId, session);
     }
@@ -220,7 +223,9 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
             }
             WLOGFI("winId: %{public}u, modeSupportInfo: %{public}u", GetWindowId(), modeSupportInfo);
             property_->SetModeSupportInfo(modeSupportInfo);
-
+            if (modeSupportInfo == WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) {
+                SetFullScreen(true);
+            }
             // get orientation configuration
             OHOS::AppExecFwk::DisplayOrientation displayOrientation =
                 static_cast<OHOS::AppExecFwk::DisplayOrientation>(
@@ -432,6 +437,23 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     return res;
 }
 
+void WindowSceneSessionImpl::PreProcessCreate()
+{
+    SetDefaultProperty();
+}
+
+void WindowSceneSessionImpl::SetDefaultProperty()
+{
+    switch (property_->GetWindowType()) {
+        case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT:{
+            property_->SetFocusable(false);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 WSError WindowSceneSessionImpl::SetActive(bool active)
 {
     WLOGFD("active status: %{public}d", active);
@@ -572,7 +594,7 @@ void WindowSceneSessionImpl::LimitCameraFloatWindowMininumSize(uint32_t& width, 
     if (displayWidth == 0 || displayHeight == 0) {
         return;
     }
-    float vpr = (displayWidth > 2700) ? 3.5 : 1.5; // display width: 2770; vpr: 3.5 / 1.5
+    float vpr = display->GetVirtualPixelRatio();
     uint32_t smallWidth = displayHeight <= displayWidth ? displayHeight : displayWidth;
     float hwRatio = static_cast<float>(displayHeight) / static_cast<float>(displayWidth);
     uint32_t minWidth;
@@ -665,6 +687,10 @@ WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
         WLOGFE("SetAspectRatio failed because of nullptr");
         return  WMError::WM_ERROR_NULLPTR;
     }
+    if (ratio == MathHelper::INF || ratio == MathHelper::NAG_INF || std::isnan(ratio)) {
+        WLOGFE("SetAspectRatio failed, because of wrong value: %{public}f", ratio);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
     if (hostSession_->SetAspectRatio(ratio) != WSError::WS_OK) {
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -677,7 +703,7 @@ WMError WindowSceneSessionImpl::ResetAspectRatio()
         hostSession_->SetAspectRatio(0.0f);
         return WMError::WM_OK;
     } else {
-        WLOGE("no host session found");
+        WLOGFE("no host session found");
         return WMError::WM_ERROR_NULLPTR;
     }
 }
@@ -814,7 +840,9 @@ WMError WindowSceneSessionImpl::NotifyWindowSessionProperty()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
+    if ((state_ == WindowState::STATE_CREATED &&
+         property_->GetModeSupportInfo() != WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) ||
+         state_ == WindowState::STATE_HIDDEN) {
         return WMError::WM_OK;
     }
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
@@ -1308,8 +1336,14 @@ WMError WindowSceneSessionImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
     if (blurStyle == WindowBlurStyle::WINDOW_BLUR_OFF) {
         surfaceNode_->SetBackgroundFilter(nullptr);
     } else {
-        float density = 3.5f; // get density from screen property
-        surfaceNode_->SetBackgroundFilter(RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle), density));
+        auto display = SingletonContainer::IsDestroyed() ? nullptr :
+            SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+        if (display == nullptr) {
+            WLOGFE("get display failed displayId:%{public}" PRIu64"", property_->GetDisplayId());
+            return WMError::WM_ERROR_INVALID_PARAM;
+        }
+        surfaceNode_->SetBackgroundFilter(RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle),
+                                                                         display->GetVirtualPixelRatio()));
     }
 
     RSTransaction::FlushImplicitTransaction();
@@ -1537,6 +1571,16 @@ WMError WindowSceneSessionImpl::SetAlpha(float alpha)
     surfaceNode_->SetAlpha(alpha);
     RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::BindDialogTarget(sptr<IRemoteObject> targetToken)
+{
+    uint32_t persistentId = property_->GetPersistentId();
+    WMError ret = SessionManager::GetInstance().BindDialogTarget(persistentId, targetToken);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("bind window failed with errCode:%{public}d", static_cast<int32_t>(ret));
+    }
+    return ret;
 }
 } // namespace Rosen
 } // namespace OHOS

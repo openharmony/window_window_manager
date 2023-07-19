@@ -88,11 +88,13 @@ public:
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason);
-    virtual WSError UpdateViewConfig(const ViewPortConfig& config, SizeChangeReason reason);
 
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr) override;
+    WSError ConnectImpl(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
+        sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr);
     WSError Foreground(sptr<WindowSessionProperty> property) override;
     WSError Background() override;
     WSError Disconnect() override;
@@ -178,7 +180,10 @@ public:
 
     bool IsSessionValid() const;
 
+    sptr<IRemoteObject> dialogTargetToken_ = nullptr;
     uint32_t GetWindowId() const;
+    void SetCallingPid(int32_t id);
+    void SetCallingUid(int32_t id);
     int32_t GetCallingPid() const;
     int32_t GetCallingUid() const;
     sptr<IRemoteObject> GetAbilityToken() const;
@@ -203,7 +208,6 @@ protected:
     bool isFocused_ = false;
     float aspectRatio_ = 0.0f;
     WSRect winRect_;
-    ViewPortConfig config_;
     sptr<ISessionStage> sessionStage_;
     SessionInfo sessionInfo_;
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;

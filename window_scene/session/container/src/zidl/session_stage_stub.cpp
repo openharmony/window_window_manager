@@ -41,10 +41,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleNotifyTransferComponentData),
     std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_OCCUPIED_AREA_CHANGE_INFO),
         &SessionStageStub::HandleNotifyOccupiedAreaChange),
-    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_VIEW_PORT_CONFIG_CHANGE),
-        &SessionStageStub::HandleUpdateViewConfig),
     std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_UPDATE_AVOID_AREA),
-        &SessionStageStub::HandleUpdateAvoidArea),
+        &SessionStageStub::HandleUpdateAvoidArea)
 };
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -124,17 +122,6 @@ int SessionStageStub::HandleNotifyTransferComponentData(MessageParcel& data, Mes
         return ERR_INVALID_VALUE;
     }
     WSError errCode = NotifyTransferComponentData(*wantParams);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SessionStageStub::HandleUpdateViewConfig(MessageParcel& data, MessageParcel& reply)
-{
-    WLOGFD("HandleUpdateViewConfig!");
-    ViewPortConfig config = { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(),
-                              data.ReadUint32(), data.ReadFloat() };
-    SizeChangeReason reason = static_cast<SizeChangeReason>(data.ReadUint32());
-    WSError errCode = UpdateViewConfig(config, reason);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

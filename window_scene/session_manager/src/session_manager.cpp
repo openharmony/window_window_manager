@@ -161,6 +161,17 @@ WMError SessionManager::SetSessionGravity(uint64_t persistentId, SessionGravity 
     return static_cast<WMError>(sceneSessionManagerProxy_->SetSessionGravity(persistentId, gravity, percent));
 }
 
+WMError SessionManager::BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken)
+{
+    WLOGFD("BindDialogTarget");
+    InitSceneSessionManagerProxy();
+    if (!sceneSessionManagerProxy_) {
+        WLOGFE("sceneSessionManagerProxy_ is nullptr");
+        return WMError::WM_DO_NOTHING;
+    }
+    return static_cast<WMError>(sceneSessionManagerProxy_->BindDialogTarget(persistentId, targetToken));
+}
+
 void SessionManager::InitScreenLockManagerProxy()
 {
     if (screenLockManagerProxy_) {

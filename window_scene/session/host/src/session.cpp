@@ -227,6 +227,16 @@ uint32_t Session::GetWindowId() const
     return static_cast<uint32_t>(GetPersistentId()) & 0xffffffff;
 }
 
+void Session::SetCallingPid(int32_t id)
+{
+    callingPid_ = id;
+}
+
+void Session::SetCallingUid(int32_t id)
+{
+    callingUid_ = id;
+}
+
 int32_t Session::GetCallingPid() const
 {
     return callingPid_;
@@ -292,12 +302,15 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
     return WSError::WS_OK;
 }
 
-WSError Session::UpdateViewConfig(const ViewPortConfig& config, SizeChangeReason reason)
+WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
 {
-    return WSError::WS_OK;
+    callingPid_ = IPCSkeleton::GetCallingPid();
+    callingUid_ = IPCSkeleton::GetCallingUid();
+    return ConnectImpl(sessionStage, eventChannel, surfaceNode, systemConfig, property, token);
 }
 
-WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+WSError Session::ConnectImpl(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
 {
     WLOGFI("Connect session, id: %{public}" PRIu64 ", state: %{public}u", GetPersistentId(),
@@ -314,8 +327,6 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     windowEventChannel_ = eventChannel;
     surfaceNode_ = surfaceNode;
     abilityToken_ = token;
-    callingPid_ = IPCSkeleton::GetCallingPid();
-    callingUid_ = IPCSkeleton::GetCallingUid();
     systemConfig = systemConfig_;
     if (property) {
         property->SetPersistentId(GetPersistentId());
@@ -555,8 +566,8 @@ WSError Session::PendingSessionToForeground()
 {
     WLOGFI("run PendingSessionToForeground");
     SessionInfo info = GetSessionInfo();
-    if (pendingSessionToForegroundFunc_) {
-        pendingSessionToForegroundFunc_(info);
+    if (pendingSessionActivationFunc_) {
+        pendingSessionActivationFunc_(info);
     }
     return WSError::WS_OK;
 }

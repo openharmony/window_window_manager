@@ -207,7 +207,8 @@
             "name": "//foundation/window/window_manager/wmserver:sms",
             "header": {
               "header_files": [
-                "mock_session_manager_service.h"
+                "mock_session_manager_service.h",
+                "mock_screen_manager_service.h"
               ],
               "header_base": "//foundation/window/window_manager/wmserver/include"
             }

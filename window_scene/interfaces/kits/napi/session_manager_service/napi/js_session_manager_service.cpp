@@ -16,34 +16,25 @@
 #include "js_session_manager_service.h"
 
 #include "js_runtime_utils.h"
+
 #include "session_manager_service.h"
 #include "window_manager_hilog.h"
-
-#include "napi_remote_object.h"
 
 namespace OHOS::Rosen {
 using namespace OHOS::AbilityRuntime;
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsSessionManagerService"};
-}
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSessionManagerService" };
+} // namespace
 
 class JsSessionManagerService {
 public:
-    explicit JsSessionManagerService(NativeEngine* engine) {
-    }
-
+    JsSessionManagerService() = default;
     ~JsSessionManagerService() = default;
 
     static void Finalizer(NativeEngine* engine, void* data, void* hint)
     {
         WLOGI("Finalizer is called");
         std::unique_ptr<JsSessionManagerService>(static_cast<JsSessionManagerService*>(data));
-    }
-
-    static NativeValue* GetRemoteObject(NativeEngine* engine, NativeCallbackInfo* info)
-    {
-        JsSessionManagerService* me = CheckParamsAndGetThis<JsSessionManagerService>(engine, info);
-        return (me != nullptr) ? me->OnGetRemoteObject(*engine, *info) : nullptr;
     }
 
     static NativeValue* InitSessionManagerService(NativeEngine* engine, NativeCallbackInfo* info)
@@ -53,31 +44,17 @@ public:
     }
 
 private:
-    NativeValue* OnGetRemoteObject(NativeEngine& engine, NativeCallbackInfo& info)
-    {
-        WLOGI("JsSessionManagerService: OnGetRemoteObject is called");
-        sptr<IRemoteObject> remoteObject = SessionManagerService::GetInstance().GetRemoteObject();
-
-        napi_env env = reinterpret_cast<napi_env>(&engine);
-        napi_value value = NAPI_ohos_rpc_CreateJsRemoteObject(env, remoteObject);
-        return reinterpret_cast<NativeValue*>(value);
-    }
-
     NativeValue* OnInitSessionManagerService(NativeEngine& engine, NativeCallbackInfo& info)
     {
         WLOGI("JsSessionManagerService: OnInitSessionManagerService is called");
         SessionManagerService::GetInstance().Init();
-
-        napi_env env = reinterpret_cast<napi_env>(&engine);
-        napi_value value = NAPI_ohos_rpc_CreateJsRemoteObject(env, nullptr);
-        return reinterpret_cast<NativeValue*>(value);
+        return engine.CreateUndefined();
     }
 };
 
 NativeValue* JsSessionManagerServiceInit(NativeEngine* engine, NativeValue* exportObj)
 {
     WLOGI("JsSessionManagerServiceInit is called.");
-
     if (engine == nullptr || exportObj == nullptr) {
         WLOGFE("JsSessionManagerServiceInit engine or exportObj is nullptr");
         return nullptr;
@@ -89,12 +66,10 @@ NativeValue* JsSessionManagerServiceInit(NativeEngine* engine, NativeValue* expo
         return nullptr;
     }
 
-    std::unique_ptr<JsSessionManagerService> sessionManagerService = std::make_unique<JsSessionManagerService>(engine);
-    object->SetNativePointer(sessionManagerService.release(), JsSessionManagerService::Finalizer, nullptr);
+    auto jsSessionManagerService = std::make_unique<JsSessionManagerService>();
+    object->SetNativePointer(jsSessionManagerService.release(), JsSessionManagerService::Finalizer, nullptr);
 
-    // bind function
     const char* moduleName = "JsSessionManagerService";
-    BindNativeFunction(*engine, *object, "getRemoteObject", moduleName, JsSessionManagerService::GetRemoteObject);
     BindNativeFunction(*engine, *object, "initSessionManagerService", moduleName,
         JsSessionManagerService::InitSessionManagerService);
     return engine->CreateUndefined();
