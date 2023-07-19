@@ -594,12 +594,11 @@ WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 
 void SceneSession::NotifyIsCustomAnimatiomPlaying(bool isPlaying)
 {
-    WLOGFI("id: %{public}d isPlaying:%{public}u", GetPersistentId(), isPlaying);
-    for (auto& sessionChangeCallback : sessionChangeCallbackList_) {
-        if (sessionChangeCallback != nullptr && sessionChangeCallback->onIsCustomAnimationPlaying_) {
-            sessionChangeCallback->onIsCustomAnimationPlaying_(isPlaying);
-        }
+    WLOGFI("id %{public}d %{public}u", GetPersistentId(), isPlaying);
+    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onIsCustomAnimationPlaying_) {
+        sessionChangeCallback_->onIsCustomAnimationPlaying_(isPlaying);
     }
+
 }
 
 WSError SceneSession::UpdateWindowSceneAfterCustomAnimation(bool isAdd)
