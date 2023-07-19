@@ -1007,11 +1007,16 @@ WSError WindowSceneSessionImpl::HandleBackEvent()
         return WSError::WS_OK;
     }
     // notify back event to host session
+    PerformBack();
+    return WSError::WS_OK;
+}
+
+void WindowSceneSessionImpl::PerformBack()
+{
     if (hostSession_) {
         WLOGFD("Transfer back event to host session");
         hostSession_->RequestSessionBack();
     }
-    return WSError::WS_OK;
 }
 
 WMError WindowSceneSessionImpl::SetGlobalMaximizeMode(MaximizeMode mode)
