@@ -34,20 +34,20 @@ class ANRManager final {
 public:
     DISALLOW_COPY_AND_MOVE(ANRManager);
     void Init();
-    void AddTimer(int32_t id, int64_t currentTime, uint32_t persistentId);
-    void MarkProcessed(int32_t eventId, uint32_t persistentId);
-    bool IsANRTriggered(int64_t time, uint32_t persistentId);
-    void OnSessionLost(uint32_t persistentId);
-    void SetApplicationPid(uint32_t persistentId, int32_t applicationPid);
+    void AddTimer(int32_t id, int64_t currentTime, int32_t persistentId);
+    void MarkProcessed(int32_t eventId, int32_t persistentId);
+    bool IsANRTriggered(int64_t time, int32_t persistentId);
+    void OnSessionLost(int32_t persistentId);
+    void SetApplicationPid(int32_t persistentId, int32_t applicationPid);
     void SetAnrObserver(std::function<void(int32_t)> anrObserver);
 private:
-    int32_t GetPidByPersistentId(uint32_t persistentId);
-    void RemoveTimers(uint32_t persistentId);
-    void RemovePersistentId(uint32_t persistentId);
+    int32_t GetPidByPersistentId(int32_t persistentId);
+    void RemoveTimers(int32_t persistentId);
+    void RemovePersistentId(int32_t persistentId);
 private:
     std::mutex mtx_;
     int32_t anrTimerCount_ { 0 };
-    std::unordered_map<uint32_t, int32_t> applicationMap_;
+    std::unordered_map<int32_t, int32_t> applicationMap_;
     std::function<void(int32_t)> anrObserver_;
     EventStage eventStage_;
 };

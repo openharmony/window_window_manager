@@ -381,7 +381,7 @@ NativeValue* JsSceneSessionManager::OnUpdateFocus(NativeEngine& engine, NativeCa
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
-    uint32_t persistentId;
+    int32_t persistentId;
     if (!ConvertFromJsValue(engine, info.argv[0], persistentId)) {
         WLOGFE("[NAPI]Failed to convert parameter to persistentId");
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
@@ -745,7 +745,7 @@ NativeValue* JsSceneSessionManager::OnGetSessionSnapshot(NativeEngine& engine, N
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
-    uint32_t persistentId;
+    int32_t persistentId;
     if (!ConvertFromJsValue(engine, info.argv[0], persistentId)) {
         WLOGFE("[NAPI]Failed to convert parameter to persistentId");
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),

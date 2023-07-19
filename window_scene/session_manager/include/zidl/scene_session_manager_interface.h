@@ -64,11 +64,11 @@ public:
 
     virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        sptr<WindowSessionProperty> property, uint32_t& persistentId, sptr<ISession>& session) = 0;
-    virtual WSError DestroyAndDisconnectSpecificSession(const uint32_t& persistentId) = 0;
+        sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session) = 0;
+    virtual WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId) = 0;
     virtual WSError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) = 0;
     virtual WSError BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) = 0;
-    virtual WSError SetSessionGravity(uint32_t persistentId, SessionGravity gravity, uint32_t percent) = 0;
+    virtual WSError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent) = 0;
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
     virtual WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) = 0;
     virtual WSError RegisterSessionListener(const sptr<ISessionListener> sessionListener) = 0;

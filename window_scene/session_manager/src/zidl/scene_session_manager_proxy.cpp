@@ -30,7 +30,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSe
 }
 WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    sptr<WindowSessionProperty> property, uint32_t& persistentId, sptr<ISession>& session)
+    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session)
 {
     MessageOption option(MessageOption::TF_SYNC);
     MessageParcel data;
@@ -70,7 +70,7 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    persistentId = reply.ReadUint32();
+    persistentId = reply.ReadInt32();
     sptr<IRemoteObject> sessionObject = reply.ReadRemoteObject();
     if (sessionObject == nullptr) {
         WLOGFE("ReadRemoteObject failed");
@@ -81,7 +81,7 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
     return static_cast<WSError>(ret);
 }
 
-WSError SceneSessionManagerProxy::DestroyAndDisconnectSpecificSession(const uint32_t& persistentId)
+WSError SceneSessionManagerProxy::DestroyAndDisconnectSpecificSession(const int32_t& persistentId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -90,7 +90,7 @@ WSError SceneSessionManagerProxy::DestroyAndDisconnectSpecificSession(const uint
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(persistentId)) {
+    if (!data.WriteInt32(persistentId)) {
         WLOGFE("Write persistentId failed");
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(
@@ -167,7 +167,7 @@ WSError SceneSessionManagerProxy::BindDialogTarget(uint64_t persistentId, sptr<I
     return static_cast<WSError>(ret);
 }
 
-WSError SceneSessionManagerProxy::UpdateSessionAvoidAreaListener(uint32_t& persistentId, bool haveListener)
+WSError SceneSessionManagerProxy::UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -177,7 +177,7 @@ WSError SceneSessionManagerProxy::UpdateSessionAvoidAreaListener(uint32_t& persi
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(persistentId)) {
+    if (!data.WriteInt32(persistentId)) {
         WLOGFE("Write persistentId failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -275,7 +275,7 @@ void SceneSessionManagerProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
     focusInfo = *info;
 }
 
-WSError SceneSessionManagerProxy::SetSessionGravity(uint32_t persistentId, SessionGravity gravity, uint32_t percent)
+WSError SceneSessionManagerProxy::SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -290,7 +290,7 @@ WSError SceneSessionManagerProxy::SetSessionGravity(uint32_t persistentId, Sessi
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(persistentId)) {
+    if (!data.WriteInt32(persistentId)) {
         WLOGFE("Write PropertyChangeAction failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }

@@ -111,7 +111,7 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
     if (sceneSession== nullptr) {
         return ERR_INVALID_STATE;
     }
-    reply.WriteUint32(persistentId);
+    reply.WriteInt32(persistentId);
     reply.WriteRemoteObject(sceneSession->AsObject());
     reply.WriteUint32(static_cast<uint32_t>(WSError::WS_OK));
     return ERR_NONE;
@@ -120,7 +120,7 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
 int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSession(MessageParcel &data, MessageParcel &reply)
 {
     WLOGFI("run HandleDestroyAndDisconnectSpcificSession!");
-    auto persistentId = data.ReadUint32();
+    auto persistentId = data.ReadInt32();
     const WSError& ret = DestroyAndDisconnectSpecificSession(persistentId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
@@ -281,7 +281,7 @@ int SceneSessionManagerStub::HandleGetAccessibilityWindowInfo(MessageParcel &dat
 int SceneSessionManagerStub::HandleSetSessionGravity(MessageParcel &data, MessageParcel &reply)
 {
     WLOGFI("run HandleSetSessionGravity!");
-    auto persistentId = data.ReadUint32();
+    auto persistentId = data.ReadInt32();
     SessionGravity gravity = static_cast<SessionGravity>(data.ReadUint32());
     uint32_t percent = data.ReadUint32();
     WSError ret = SetSessionGravity(persistentId, gravity, percent);
@@ -302,7 +302,7 @@ int SceneSessionManagerStub::HandleGetSessionDump(MessageParcel &data, MessagePa
 
 int SceneSessionManagerStub::HandleUpdateSessionAvoidAreaListener(MessageParcel& data, MessageParcel& reply)
 {
-    auto persistentId = data.ReadUint32();
+    auto persistentId = data.ReadInt32();
     bool haveAvoidAreaListener = data.ReadBool();
     WSError errCode = UpdateSessionAvoidAreaListener(persistentId, haveAvoidAreaListener);
     reply.WriteUint32(static_cast<uint32_t>(errCode));

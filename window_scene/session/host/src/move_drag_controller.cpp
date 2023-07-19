@@ -31,7 +31,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "MoveDragController" };
 }
 
-MoveDragController::MoveDragController(uint32_t persistentId) : persistentId_(persistentId)
+MoveDragController::MoveDragController(int32_t persistentId) : persistentId_(persistentId)
 {
     vsyncCallback_->onCallback = std::bind(&MoveDragController::OnReceiveVsync, this, std::placeholders::_1);
 }
@@ -617,7 +617,7 @@ void MoveDragController::HandleMouseStyle(const std::shared_ptr<MMI::PointerEven
         newStyleID = MMI::MOUSE_ICON::DEFAULT;
     }
 
-    WLOGFI("Id: %{public}" PRIu32 ", Mouse posX : %{public}u, posY %{public}u, Pointer action : %{public}u, "
+    WLOGFI("Id: %{public}d, Mouse posX : %{public}u, posY %{public}u, Pointer action : %{public}u, "
         "winRect posX : %{public}u, posY : %{public}u, W : %{public}u, H : %{public}u, "
         "newStyle : %{public}u, oldStyle : %{public}u",
         persistentId_, mousePointX, mousePointY, action, winRect.posX_,

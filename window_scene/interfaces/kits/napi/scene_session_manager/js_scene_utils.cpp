@@ -69,7 +69,7 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
         sessionInfo.isSystem_ = isSystem;
     }
     if (jsPersistentId->TypeOf() != NATIVE_UNDEFINED) {
-        uint32_t persistentId;
+        int32_t persistentId;
         if (!ConvertFromJsValue(engine, jsPersistentId, persistentId)) {
             WLOGFE("[NAPI]Failed to convert parameter to persistentId");
             return false;
@@ -110,9 +110,9 @@ NativeValue* CreateJsSessionInfo(NativeEngine& engine, const SessionInfo& sessio
     object->SetProperty("moduleName", CreateJsValue(engine, sessionInfo.moduleName_));
     object->SetProperty("abilityName", CreateJsValue(engine, sessionInfo.abilityName_));
     object->SetProperty("isSystem", CreateJsValue(engine, sessionInfo.isSystem_));
-    object->SetProperty("persistentId", CreateJsValue(engine, static_cast<uint32_t>(sessionInfo.persistentId_)));
+    object->SetProperty("persistentId", CreateJsValue(engine, static_cast<int32_t>(sessionInfo.persistentId_)));
     object->SetProperty("callerPersistentId", CreateJsValue(engine,
-        static_cast<uint32_t>(sessionInfo.callerPersistentId_)));
+        static_cast<int32_t>(sessionInfo.callerPersistentId_)));
     object->SetProperty("callState", CreateJsValue(engine, static_cast<int32_t>(sessionInfo.callState_)));
     return objValue;
 }

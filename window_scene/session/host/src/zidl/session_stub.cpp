@@ -164,7 +164,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
     WSError errCode = Connect(sessionStage, eventChannel, surfaceNode, systemConfig, property, token);
     reply.WriteParcelable(&systemConfig);
     if (property) {
-        reply.WriteUint32(property->GetPersistentId());
+        reply.WriteInt32(property->GetPersistentId());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -221,7 +221,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
     abilitySessionInfo->requestCode = data.ReadInt32();
-    abilitySessionInfo->persistentId = data.ReadUint32();
+    abilitySessionInfo->persistentId = data.ReadInt32();
     abilitySessionInfo->state = static_cast<AAFwk::CallToState>(data.ReadInt32());
     abilitySessionInfo->uiAbilityId = data.ReadInt64();
     if (data.ReadBool()) {
@@ -283,7 +283,7 @@ int SessionStub::HandleCreateAndConnectSpecificSession(MessageParcel& data, Mess
     if (sceneSession== nullptr) {
         return ERR_INVALID_STATE;
     }
-    reply.WriteUint32(persistentId);
+    reply.WriteInt32(persistentId);
     reply.WriteRemoteObject(sceneSession->AsObject());
     reply.WriteUint32(static_cast<uint32_t>(WSError::WS_OK));
     return ERR_NONE;
