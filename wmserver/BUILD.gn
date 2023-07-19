@@ -103,8 +103,8 @@ ohos_shared_library("sms") {
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_single",
-    "multimedia_image_framework:image_native",
     "safwk:system_ability_fwk",
   ]
   innerapi_tags = [ "platformsdk" ]
@@ -188,9 +188,9 @@ ohos_shared_library("libwms") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "multimedia_image_framework:image_native",
     "power_manager:powermgr_client",
     "safwk:system_ability_fwk",
   ]

@@ -616,7 +616,6 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         UpdateParentSession(sceneSession, property);
         sceneSessionMap_.insert({ persistentId, sceneSession });
         RegisterSessionStateChangeNotifyManagerFunc(sceneSession);
-        RegisterSessionRectChangeNotifyManagerFunc(sceneSession);
         RegisterInputMethodShownFunc(sceneSession);
         RegisterInputMethodHideFunc(sceneSession);
         WLOGFI("create session persistentId: %{public}d", persistentId);
@@ -1859,13 +1858,26 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
     WLOGFI("GetAccessibilityWindowInfo Called.");
     std::map<int32_t, sptr<SceneSession>>::iterator iter;
     for (iter = sceneSessionMap_.begin(); iter != sceneSessionMap_.end(); iter++) {
-        FillWindowInfo(infos, iter->second);
+        sptr<SceneSession> sceneSession = iter->second;
+        if (sceneSession == nullptr) {
+            WLOGFW("null scene session");
+            continue;
+        }
+        WLOGFD("name = %{public}s, isSystem = %{public}d, persistendId = %{public}" PRIu64 ", winType = %{public}d, \
+             state = %{public}d, visible = %{public}d", sceneSession->GetWindowName().c_str(),
+             sceneSession->GetSessionInfo().isSystem_, iter->first, sceneSession->GetWindowType(),
+             sceneSession->GetSessionState(), sceneSession->IsVisible());
+        if (sceneSession->IsVisible() || sceneSession->GetSessionState() == SessionState::STATE_ACTIVE
+            || sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND) {
+            FillWindowInfo(infos, iter->second);
+        }
     }
     return WMError::WM_OK;
 }
 
 void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpdateType type)
 {
+    WLOGFI("NotifyWindowInfoChange, persistentId = %{public}" PRIu64 ", updateType = %{public}d", persistentId, type);
     std::vector<sptr<AccessibilityWindowInfo>> infos;
     auto iter = sceneSessionMap_.find(persistentId);
     if (iter == sceneSessionMap_.end()) {
@@ -1886,7 +1898,11 @@ void SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
         return;
     }
     sptr<AccessibilityWindowInfo> info = new (std::nothrow) AccessibilityWindowInfo();
-    info->wid_ = static_cast<int32_t>(sceneSession->GetPersistentId());
+    if (sceneSession->GetSessionInfo().isSystem_) {
+        info->wid_ = 1;
+    } else {
+        info->wid_ = static_cast<int32_t>(sceneSession->GetPersistentId());
+    }
     WSRect wsrect = sceneSession->GetSessionRect();
     info->windowRect_ = {wsrect.posX_, wsrect.posY_, wsrect.width_, wsrect.height_ };
     info->focused_ = sceneSession->GetPersistentId() == focusedSessionId_;
@@ -2150,6 +2166,7 @@ bool SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
         WLOGFE("sceneSession is nullptr.");
         return false;
     }
+    NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_BOUNDS);
 
     WindowType type = sceneSession->GetWindowType();
     SessionGravity gravity;
