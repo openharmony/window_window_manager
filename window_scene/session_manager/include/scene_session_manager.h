@@ -163,6 +163,7 @@ private:
     std::vector<std::pair<uint64_t, bool>> GetWindowVisibilityChangeInfo(
         std::shared_ptr<RSOcclusionData> occlusionData);
     void WindowVisibilityChangeCallback(std::shared_ptr<RSOcclusionData> occlusiontionData);
+    void WindowDestroyNotifyVisibility(const sptr<SceneSession>& sceneSession);
     void RegisterInputMethodShownFunc(const sptr<SceneSession>& sceneSession);
     void OnInputMethodShown(const uint64_t& persistentId);
     void RegisterInputMethodHideFunc(const sptr<SceneSession>& sceneSession);

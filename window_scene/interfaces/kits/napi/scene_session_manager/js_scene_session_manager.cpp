@@ -29,6 +29,9 @@
 #include "js_scene_session.h"
 #include "js_scene_utils.h"
 #include "js_window_scene_config.h"
+#ifdef SOC_PERF_ENABLE
+#include "socperf_client.h"
+#endif
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
@@ -80,6 +83,8 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
     BindNativeFunction(*engine, *object, "getSessionSnapshot", moduleName, JsSceneSessionManager::GetSessionSnapshot);
     BindNativeFunction(*engine, *object, "InitWithRenderServiceAdded", moduleName,
         JsSceneSessionManager::InitWithRenderServiceAdded);
+    BindNativeFunction(*engine, *object, "perfRequestEx", moduleName,
+        JsSceneSessionManager::PerfRequestEx);
     return engine->CreateUndefined();
 }
 
@@ -312,6 +317,13 @@ NativeValue* JsSceneSessionManager::InitWithRenderServiceAdded(NativeEngine* eng
     return (me != nullptr) ? me->OnInitWithRenderServiceAdded(*engine, *info) : nullptr;
 }
 
+NativeValue* JsSceneSessionManager::PerfRequestEx(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGD("[NAPI]PerfRequestEx");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
+    return (me != nullptr) ? me->OnPerfRequestEx(*engine, *info) : nullptr;
+}
+
 bool JsSceneSessionManager::IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
@@ -393,7 +405,7 @@ NativeValue* JsSceneSessionManager::OnProcessBackEvent(NativeEngine& engine, Nat
     return engine.CreateUndefined();
 }
 
-NativeValue* JsSceneSessionManager::OnSwitchUser(NativeEngine& engine, NativeCallbackInfo& info) 
+NativeValue* JsSceneSessionManager::OnSwitchUser(NativeEngine& engine, NativeCallbackInfo& info)
 {
     if (info.argc < 3) { // 3: params num
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
@@ -749,6 +761,38 @@ NativeValue* JsSceneSessionManager::OnInitWithRenderServiceAdded(NativeEngine& e
 {
     WLOGI("[NAPI]OnInitWithRenderServiceAdded");
     SceneSessionManager::GetInstance().InitWithRenderServiceAdded();
+    return engine.CreateUndefined();
+}
+
+NativeValue* JsSceneSessionManager::OnPerfRequestEx(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGI("[NAPI]OnPerfRequestEx");
+    if (info.argc < 2) { // 2: params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    int32_t cmdId;
+    bool onOffTag = false;
+    if (!ConvertFromJsValue(engine, info.argv[0], cmdId) || !ConvertFromJsValue(engine, info.argv[1], onOffTag)) {
+        WLOGFE("[NAPI]Failed to convert parameter to cmdId or onOffTag");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    std::string msg = "";
+    if (info.argc == 3) { // 3: params num
+        if (!ConvertFromJsValue(engine, info.argv[2], msg)) { // 2: the 3rd argv
+            WLOGFE("[NAPI]Failed to convert parameter to cmd msg");
+            engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                "Input parameter is missing or invalid"));
+            return engine.CreateUndefined();
+        }
+    }
+    OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequestEx(cmdId, onOffTag, msg);
+    WLOGFD("[NAPI]PerfRequestEx success cmdId: %{public}d onOffTag: %{public}u msg:%{public}s",
+        cmdId, static_cast<uint32_t>(onOffTag), msg.c_str());
     return engine.CreateUndefined();
 }
 } // namespace OHOS::Rosen

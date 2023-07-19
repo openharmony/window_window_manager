@@ -29,7 +29,7 @@ config("window_scene_common_public_config") {
 ## Build libwindow_scene_common.so
 ohos_shared_library("window_scene_common") {
   sources = [
-    "src/permission.cpp",
+    "src/session_permission.cpp",
     "src/task_scheduler.cpp",
     "src/window_session_property.cpp",
   ]
