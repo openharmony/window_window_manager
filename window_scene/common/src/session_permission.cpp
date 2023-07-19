@@ -22,16 +22,16 @@
 #include <system_ability_definition.h>
 #include <iservice_registry.h>
 #include <tokenid_kit.h>
-#include "common/include/permission.h"
+#include "common/include/session_permission.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Permission"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionPermission"};
 }
 
-bool Permission::IsSystemServiceCalling(bool needPrintLog)
+bool SessionPermission::IsSystemServiceCalling(bool needPrintLog)
 {
     Security::AccessToken::NativeTokenInfo tokenInfo;
     Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(IPCSkeleton::GetCallingTokenID(), tokenInfo);
@@ -45,17 +45,21 @@ bool Permission::IsSystemServiceCalling(bool needPrintLog)
     return false;
 }
 
-bool Permission::IsSystemCalling()
+bool SessionPermission::IsSystemCalling()
 {
-    if (IsSystemServiceCalling(false)) {
+    const auto& tokenId = IPCSkeleton::GetCallingTokenID();
+    const auto& flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
+    if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+        WLOGFD("Is native token, id: %{public}u", tokenId);
         return true;
     }
+    WLOGFD("tokenId: %{public}u, flag: %{public}u", tokenId, flag);
     uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
     bool isSystemApp = Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx);
     return isSystemApp;
 }
 
-bool Permission::IsStartByHdcd()
+bool SessionPermission::IsStartByHdcd()
 {
     OHOS::Security::AccessToken::NativeTokenInfo info;
     if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(IPCSkeleton::GetCallingTokenID(), info) != 0) {
@@ -67,7 +71,7 @@ bool Permission::IsStartByHdcd()
     return false;
 }
 
-bool Permission::IsStartedByInputMethod()
+bool SessionPermission::IsStartedByInputMethod()
 {
     sptr<ISystemAbilityManager> systemAbilityManager =
             SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
