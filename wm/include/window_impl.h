@@ -96,11 +96,12 @@ class WindowImpl : public Window, AAFwk::PrepareTerminateCallbackStub {
         }                                                                       \
     } while (0)
 
-#define CALL_UI_CONTENT(uiContentCb)                          \
-    do {                                                      \
-        if (uiContent_ != nullptr) {                          \
-            uiContent_->uiContentCb();                        \
-        }                                                     \
+#define CALL_UI_CONTENT(uiContentCb)                              \
+    do {                                                          \
+        std::lock_guard<std::recursive_mutex> lock(mutex_);       \
+        if (uiContent_ != nullptr) {                              \
+            uiContent_->uiContentCb();                            \
+        }                                                         \
     } while (0)
 
 public:
