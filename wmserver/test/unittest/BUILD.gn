@@ -190,7 +190,7 @@ ohos_unittest("wmserver_window_snapshot_test") {
   public_deps = test_public_deps
   external_deps = test_external_deps
 
-  external_deps += [ "multimedia_image_framework:image_native" ]
+  external_deps += [ "image_framework:image_native" ]
 }
 
 ohos_unittest("wmserver_window_zorder_policy_test") {

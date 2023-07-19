@@ -26,8 +26,8 @@ ohos_shared_library("screenshot") {
 
   external_deps = [
     "hilog:libhilog",
-    "multimedia_image_framework:image",
-    "multimedia_image_framework:image_native",
+    "image_framework:image",
+    "image_framework:image_native",
     "napi:ace_napi",
   ]
 
