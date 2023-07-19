@@ -222,6 +222,20 @@ bool Session::GetTouchable() const
     return property_->GetTouchable();
 }
 
+WSError Session::SetVisible(bool isVisible)
+{
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    isVisible_ = isVisible;
+    return WSError::WS_OK;
+}
+
+bool Session::GetVisible() const
+{
+    return isVisible_;
+}
+
 uint32_t Session::GetWindowId() const
 {
     return static_cast<uint32_t>(GetPersistentId()) & 0xffffffff;

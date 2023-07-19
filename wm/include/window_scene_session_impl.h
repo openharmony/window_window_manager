@@ -45,6 +45,7 @@ public:
     WMError Resize(uint32_t width, uint32_t height) override;
     WmErrorCode RaiseToAppTop() override;
     WSError HandleBackEvent() override;
+    void PerformBack() override;
     WMError SetAspectRatio(float ratio) override;
     WMError ResetAspectRatio() override;
     WMError SetGlobalMaximizeMode(MaximizeMode mode) override;
@@ -106,7 +107,7 @@ protected:
     void UpdateFloatingWindowSizeBySizeLimits(uint32_t& width, uint32_t& height) const;
     WMError NotifyWindowSessionProperty();
     WMError NotifyWindowNeedAvoid(bool status = false);
-    WMError SetLayoutFullScreenByApiVersion(bool status);
+    WMError SetLayoutFullScreenByApiVersion(bool status) override;
     void UpdateWindowSizeLimits();
     WindowLimits GetSystemSizeLimits(uint32_t displayWidth, uint32_t displayHeight, float vpr);
     void GetConfigurationFromAbilityInfo();
