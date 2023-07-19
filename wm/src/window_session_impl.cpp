@@ -428,9 +428,16 @@ WMError WindowSessionImpl::SetUIContent(const std::string& contentInfo,
         focusState_.value() ? uiContent_->Focus() : uiContent_->UnFocus();
     }
 
-    if (isIgnoreSafeAreaNeedNotify_) {
-        uiContent_->SetIgnoreViewSafeArea(isIgnoreSafeArea_);
+    uint32_t version = 0;
+    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
+        version = context_->GetApplicationInfo()->apiCompatibleVersion;
     }
+    // 10 ArkUI new framework support after API10
+    if (version < 10 || isIgnoreSafeAreaNeedNotify_) {
+        SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
+        isIgnoreSafeAreaNeedNotify_ = false;
+    }
+
     UpdateDecorEnable(true);
     if (state_ == WindowState::STATE_SHOWN) {
         // UIContent may be nullptr when show window, need to notify again when window is shown
@@ -1129,6 +1136,11 @@ uint32_t WindowSessionImpl::GetBackgroundColor() const
     }
     WLOGFE("FA mode does not get bg color: %{public}u", GetWindowId());
     return 0xffffffff; // means no background color been set, default color is white
+}
+
+WMError WindowSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
+{
+    return WMError::WM_OK;
 }
 
 WMError WindowSessionImpl::SetWindowGravity(WindowGravity gravity, uint32_t percent)
