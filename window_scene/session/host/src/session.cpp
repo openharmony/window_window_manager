@@ -36,15 +36,15 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Session" };
 } // namespace
 
-std::atomic<uint32_t> Session::sessionId_(INVALID_SESSION_ID);
-std::set<uint32_t> Session::persistIdSet_;
+std::atomic<int32_t> Session::sessionId_(INVALID_SESSION_ID);
+std::set<int32_t> Session::persistIdSet_;
 
-uint32_t Session::GetPersistentId() const
+int32_t Session::GetPersistentId() const
 {
     return persistentId_;
 }
 
-uint32_t Session::GetParentPersistentId() const
+int32_t Session::GetParentPersistentId() const
 {
     if (property_ != nullptr) {
         return property_->GetParentPersistentId();
@@ -297,7 +297,7 @@ bool Session::IsSessionValid() const
 {
     bool res = state_ > SessionState::STATE_DISCONNECT && state_ < SessionState::STATE_END;
     if (!res) {
-        WLOGFI("session is already destroyed or not created! id: %{public}" PRIu32 " state: %{public}u",
+        WLOGFI("session is already destroyed or not created! id: %{public}d state: %{public}u",
             GetPersistentId(), state_);
     }
     return res;
@@ -305,7 +305,7 @@ bool Session::IsSessionValid() const
 
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
-    WLOGFI("session update rect: id: %{public}" PRIu32 ", rect[%{public}d, %{public}d, %{public}u, %{public}u], "\
+    WLOGFI("session update rect: id: %{public}d, rect[%{public}d, %{public}d, %{public}u, %{public}u], "\
         "reason:%{public}u", GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
     if (!IsSessionValid()) {
         winRect_ = rect;
@@ -327,7 +327,7 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
 WSError Session::ConnectImpl(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
 {
-    WLOGFI("Connect session, id: %{public}" PRIu32 ", state: %{public}u", GetPersistentId(),
+    WLOGFI("Connect session, id: %{public}d, state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()));
     if (GetSessionState() != SessionState::STATE_DISCONNECT) {
         WLOGFE("state is not disconnect!");
@@ -365,7 +365,7 @@ WSError Session::UpdateWindowSessionProperty(sptr<WindowSessionProperty> propert
 WSError Session::Foreground(sptr<WindowSessionProperty> property)
 {
     SessionState state = GetSessionState();
-    WLOGFI("Foreground session, id: %{public}" PRIu32 ", state: %{public}" PRIu32"", GetPersistentId(),
+    WLOGFI("Foreground session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
     if (state != SessionState::STATE_CONNECT && state != SessionState::STATE_BACKGROUND) {
         WLOGFE("state invalid!");
@@ -395,7 +395,7 @@ void Session::NotifyCallingSessionForeground()
 WSError Session::Background()
 {
     SessionState state = GetSessionState();
-    WLOGFI("Background session, id: %{public}" PRIu32 ", state: %{public}" PRIu32"", GetPersistentId(),
+    WLOGFI("Background session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
     if (state < SessionState::STATE_INACTIVE) { // only STATE_INACTIVE can transfer to background
         WLOGFE("state invalid!");
@@ -421,7 +421,7 @@ void Session::NotifyCallingSessionBackground()
 WSError Session::Disconnect()
 {
     SessionState state = GetSessionState();
-    WLOGFI("Disconnect session, id: %{public}" PRIu32 ", state: %{public}" PRIu32"", GetPersistentId(),
+    WLOGFI("Disconnect session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
     state_ = SessionState::STATE_INACTIVE;
     NotifyDisconnect();
@@ -436,7 +436,7 @@ WSError Session::Disconnect()
 WSError Session::SetActive(bool active)
 {
     SessionState state = GetSessionState();
-    WLOGFI("Session update active: %{public}d, id: %{public}" PRIu32 ", state: %{public}" PRIu32"",
+    WLOGFI("Session update active: %{public}d, id: %{public}d, state: %{public}" PRIu32"",
         active, GetPersistentId(), static_cast<uint32_t>(state));
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -478,7 +478,7 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     info.startSetting = abilitySessionInfo->startSetting;
     WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
-    WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}" PRIu32 ", \
+    WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}d, \
         uiAbilityId: %{public}" PRIu64 "", info.callState_, info.persistentId_, info.uiAbilityId_);
     if (pendingSessionActivationFunc_) {
         pendingSessionActivationFunc_(info);
@@ -506,7 +506,7 @@ WSError Session::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionI
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.callerToken_ = abilitySessionInfo->callerToken;
-    info.persistentId_ = static_cast<uint32_t>(abilitySessionInfo->persistentId);
+    info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
     sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
     sessionInfo_.resultCode = abilitySessionInfo->resultCode;
     if (terminateSessionFunc_) {
@@ -530,7 +530,7 @@ WSError Session::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessi
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.callerToken_ = abilitySessionInfo->callerToken;
-    info.persistentId_ = static_cast<uint32_t>(abilitySessionInfo->persistentId);
+    info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
     sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
     sessionInfo_.resultCode = abilitySessionInfo->resultCode;
     if (terminateSessionFuncNew_) {
@@ -556,7 +556,7 @@ WSError Session::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySe
     info.callerToken_ = abilitySessionInfo->callerToken;
     info.errorCode = abilitySessionInfo->errorCode;
     info.errorReason = abilitySessionInfo->errorReason;
-    info.persistentId_ = static_cast<uint32_t>(abilitySessionInfo->persistentId);
+    info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
     sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
     sessionInfo_.errorCode = abilitySessionInfo->errorCode;
     sessionInfo_.errorReason = abilitySessionInfo->errorReason;
@@ -679,7 +679,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
-    WLOGFD("Session TransferPointEvent, Id: %{public}" PRIu32 ", eventId: %{public}d",
+    WLOGFD("Session TransferPointEvent, Id: %{public}d, eventId: %{public}d",
         persistentId_, pointerEvent->GetId());
     auto currentTime = GetSysClockTime();
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(currentTime, persistentId_)) {
@@ -715,7 +715,7 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
-    WLOGFD("Session TransferKeyEvent, Id: %{public}" PRIu32 ", eventId: %{public}d",
+    WLOGFD("Session TransferKeyEvent, Id: %{public}d, eventId: %{public}d",
         persistentId_, keyEvent->GetId());
     auto currentTime = GetSysClockTime();
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(currentTime, persistentId_)) {
@@ -726,7 +726,7 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    WLOGD("TransferKeyEvent, id: %{public}" PRIu32, persistentId_);
+    WLOGD("TransferKeyEvent, id: %{public}d", persistentId_);
     if (WSError ret = windowEventChannel_->TransferKeyEvent(keyEvent); ret != WSError::WS_OK) {
         WLOGFE("TransferKeyEvent failed");
         return ret;
@@ -859,7 +859,7 @@ void Session::NotifyClick()
 
 WSError Session::UpdateFocus(bool isFocused)
 {
-    WLOGFI("Session update focus id: %{public}" PRIu32, GetPersistentId());
+    WLOGFI("Session update focus id: %{public}d", GetPersistentId());
     if (isFocused_ == isFocused) {
         WLOGFD("Session focus do not change: [%{public}d]", isFocused);
         return WSError::WS_DO_NOTHING;
@@ -933,12 +933,12 @@ WSError Session::RaiseToAppTop()
 
 WSError Session::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    sptr<WindowSessionProperty> property, uint32_t& persistentId, sptr<ISession>& session)
+    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session)
 {
     return WSError::WS_OK;
 }
 
-WSError Session::DestroyAndDisconnectSpecificSession(const uint32_t& persistentId)
+WSError Session::DestroyAndDisconnectSpecificSession(const int32_t& persistentId)
 {
     return WSError::WS_OK;
 }
@@ -982,7 +982,7 @@ WSError Session::ProcessBackEvent()
 WSError Session::MarkProcessed(int32_t eventId)
 {
     uint32_t persistentId = GetPersistentId();
-    WLOGFI("persistentId:%{public}" PRIu32 ", eventId:%{public}d", persistentId, eventId);
+    WLOGFI("persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
     DelayedSingleton<ANRManager>::GetInstance()->MarkProcessed(eventId, persistentId);
     return WSError::WS_OK;
 }
@@ -991,7 +991,7 @@ void Session::GeneratePersistentId(bool isExtension, const SessionInfo& sessionI
 {
     if (sessionInfo.persistentId_ != INVALID_SESSION_ID) {
         persistIdSet_.insert(sessionInfo.persistentId_);
-        persistentId_ = static_cast<uint32_t>(sessionInfo.persistentId_);
+        persistentId_ = static_cast<int32_t>(sessionInfo.persistentId_);
         return;
     }
 
@@ -999,7 +999,7 @@ void Session::GeneratePersistentId(bool isExtension, const SessionInfo& sessionI
     while (persistIdSet_.count(sessionId_) > 0) {
         sessionId_++;
     }
-    persistentId_ = isExtension ? sessionId_.load() | 0x80000000 : sessionId_.load() & 0x7fffffff;
+    persistentId_ = isExtension ? sessionId_.load() | 0x40000000 : sessionId_.load() & 0x3fffffff;
     persistIdSet_.insert(sessionId_);
 }
 

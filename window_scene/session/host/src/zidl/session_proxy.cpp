@@ -146,7 +146,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
     sptr<SystemSessionConfig> config = reply.ReadParcelable<SystemSessionConfig>();
     systemConfig = *config;
     if (property) {
-        property->SetPersistentId(reply.ReadUint32());
+        property->SetPersistentId(reply.ReadInt32());
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
@@ -187,7 +187,7 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         WLOGFE("Write requestCode info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!(data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->persistentId)))) {
+    if (!(data.WriteInt32(static_cast<int32_t>(abilitySessionInfo->persistentId)))) {
         WLOGFE("Write persistentId failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -384,7 +384,7 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
 
 WSError SessionProxy::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    sptr<WindowSessionProperty> property, uint32_t& persistentId, sptr<ISession>& session)
+    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -423,7 +423,7 @@ WSError SessionProxy::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    persistentId = reply.ReadUint32();
+    persistentId = reply.ReadInt32();
     sptr<IRemoteObject> sessionObject = reply.ReadRemoteObject();
     if (sessionObject == nullptr) {
         WLOGFE("ReadRemoteObject failed");
@@ -434,7 +434,7 @@ WSError SessionProxy::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::DestroyAndDisconnectSpecificSession(const uint32_t& persistentId)
+WSError SessionProxy::DestroyAndDisconnectSpecificSession(const int32_t& persistentId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -443,7 +443,7 @@ WSError SessionProxy::DestroyAndDisconnectSpecificSession(const uint32_t& persis
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(persistentId)) {
+    if (!data.WriteInt32(persistentId)) {
         WLOGFE("Write persistentId failed");
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(

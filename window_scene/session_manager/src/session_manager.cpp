@@ -116,7 +116,7 @@ void SessionManager::InitSceneSessionManagerProxy()
 
 void SessionManager::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    sptr<WindowSessionProperty> property, uint32_t& persistentId, sptr<ISession>& session)
+    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session)
 {
     WLOGFD("CreateAndConnectSpecificSession");
     GetSceneSessionManagerProxy();
@@ -128,7 +128,7 @@ void SessionManager::CreateAndConnectSpecificSession(const sptr<ISessionStage>& 
         surfaceNode, property, persistentId, session);
 }
 
-void SessionManager::DestroyAndDisconnectSpecificSession(const uint32_t& persistentId)
+void SessionManager::DestroyAndDisconnectSpecificSession(const int32_t& persistentId)
 {
     WLOGFD("DestroyAndDisconnectSpecificSession");
     GetSceneSessionManagerProxy();
@@ -150,7 +150,7 @@ WMError SessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WS
     return static_cast<WMError>(sceneSessionManagerProxy_->UpdateProperty(property, action));
 }
 
-WMError SessionManager::SetSessionGravity(uint32_t persistentId, SessionGravity gravity, uint32_t percent)
+WMError SessionManager::SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent)
 {
     WLOGFD("SetWindowGravity");
     InitSceneSessionManagerProxy();

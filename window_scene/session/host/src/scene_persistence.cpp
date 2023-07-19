@@ -31,10 +31,10 @@ constexpr uint8_t IMAGE_QUALITY = 85;
 
 std::string ScenePersistence::strPersistPath_;
 
-ScenePersistence::ScenePersistence(const SessionInfo& info, const uint32_t& persistentId) : sessionInfo_(info)
+ScenePersistence::ScenePersistence(const SessionInfo& info, const int32_t& persistentId) : sessionInfo_(info)
 {
     strSnapshotFile_ =
-        strPersistPath_ + sessionInfo_.bundleName_ + UNDERLINE_SEPARATOR + std::to_string(persistentId & 0xffff);
+        strPersistPath_ + sessionInfo_.bundleName_ + UNDERLINE_SEPARATOR + std::to_string(persistentId & 0x3fffffff);
 }
 
 void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap)

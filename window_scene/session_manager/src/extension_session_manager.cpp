@@ -70,7 +70,7 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
             return extensionSession;
         }
         auto persistentId = extensionSession->GetPersistentId();
-        WLOGFI("create session persistentId: %{public}" PRIu32 ", bundleName: %{public}s, abilityName: %{public}s",
+        WLOGFI("create session persistentId: %{public}d, bundleName: %{public}s, abilityName: %{public}s",
             persistentId, sessionInfo.bundleName_.c_str(), sessionInfo.abilityName_.c_str());
         extensionSessionMap_.insert({ persistentId, extensionSession });
         return extensionSession;
@@ -90,7 +90,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
             return WSError::WS_ERROR_NULLPTR;
         }
         auto persistentId = extSession->GetPersistentId();
-        WLOGFI("Activate session with persistentId: %{public}" PRIu32, persistentId);
+        WLOGFI("Activate session with persistentId: %{public}d", persistentId);
         if (extensionSessionMap_.count(persistentId) == 0) {
             WLOGFE("Session is invalid!");
             return WSError::WS_ERROR_INVALID_SESSION;
@@ -119,7 +119,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
             return WSError::WS_ERROR_NULLPTR;
         }
         auto persistentId = extSession->GetPersistentId();
-        WLOGFI("Background session with persistentId: %{public}" PRIu32, persistentId);
+        WLOGFI("Background session with persistentId: %{public}d", persistentId);
         extSession->SetActive(false);
         extSession->Background();
         if (extensionSessionMap_.count(persistentId) == 0) {
@@ -149,7 +149,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
             return WSError::WS_ERROR_NULLPTR;
         }
         auto persistentId = extSession->GetPersistentId();
-        WLOGFI("Destroy session with persistentId: %{public}" PRIu32, persistentId);
+        WLOGFI("Destroy session with persistentId: %{public}d", persistentId);
         extSession->Disconnect();
         if (extensionSessionMap_.count(persistentId) == 0) {
             WLOGFE("Session is invalid!");

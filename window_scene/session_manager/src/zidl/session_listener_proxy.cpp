@@ -17,7 +17,7 @@
 
 namespace OHOS::Rosen {
 
-void SessionListenerProxy::OnSessionLabelChange(uint32_t persistentId, const std::string &label) {}
-void SessionListenerProxy::OnSessionIconChange(uint32_t persistentId, const std::shared_ptr<Media::PixelMap> &icon) {}
+void SessionListenerProxy::OnSessionLabelChange(int32_t persistentId, const std::string &label) {}
+void SessionListenerProxy::OnSessionIconChange(int32_t persistentId, const std::shared_ptr<Media::PixelMap> &icon) {}
 
 } // namespace OHOS::Rosen

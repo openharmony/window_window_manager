@@ -49,7 +49,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
 
 WMError WindowExtensionSessionImpl::MoveTo(int32_t x, int32_t y)
 {
-    WLOGFD("Id:%{public}" PRIu32 " MoveTo %{public}d %{public}d", property_->GetPersistentId(), x, y);
+    WLOGFD("Id:%{public}d MoveTo %{public}d %{public}d", property_->GetPersistentId(), x, y);
     if (IsWindowSessionInvalid()) {
         WLOGFE("Window session invalid.");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -62,7 +62,7 @@ WMError WindowExtensionSessionImpl::MoveTo(int32_t x, int32_t y)
 
 WMError WindowExtensionSessionImpl::Resize(uint32_t width, uint32_t height)
 {
-    WLOGFD("Id:%{public}" PRIu32 " Resize %{public}u %{public}u", property_->GetPersistentId(), width, height);
+    WLOGFD("Id:%{public}d Resize %{public}u %{public}u", property_->GetPersistentId(), width, height);
     if (IsWindowSessionInvalid()) {
         WLOGFE("Window session invalid.");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -76,7 +76,7 @@ WMError WindowExtensionSessionImpl::Resize(uint32_t width, uint32_t height)
 WMError WindowExtensionSessionImpl::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
 {
     if (state_ < WindowState::STATE_CREATED) {
-        WLOGFE("Extension invalid [name:%{public}s, id:%{public}" PRIu32 "], state:%{public}u",
+        WLOGFE("Extension invalid [name:%{public}s, id:%{public}d], state:%{public}u",
             property_->GetWindowName().c_str(), property_->GetPersistentId(), state_);
         return WMError::WM_ERROR_REPEAT_OPERATION;
     }
@@ -86,7 +86,7 @@ WMError WindowExtensionSessionImpl::TransferAbilityResult(uint32_t resultCode, c
 WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
     if (state_ < WindowState::STATE_CREATED) {
-        WLOGFE("Extension invalid [name:%{public}s, id:%{public}" PRIu32 "], state:%{public}u",
+        WLOGFE("Extension invalid [name:%{public}s, id:%{public}d], state:%{public}u",
             property_->GetWindowName().c_str(), property_->GetPersistentId(), state_);
         return WMError::WM_ERROR_REPEAT_OPERATION;
     }
@@ -96,7 +96,7 @@ WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParam
 void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func)
 {
     if (state_ < WindowState::STATE_CREATED) {
-        WLOGFE("Extension invalid [name:%{public}s, id:%{public}" PRIu32 "], state:%{public}u",
+        WLOGFE("Extension invalid [name:%{public}s, id:%{public}d], state:%{public}u",
             property_->GetWindowName().c_str(), property_->GetPersistentId(), state_);
         return;
     }

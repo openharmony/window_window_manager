@@ -83,7 +83,7 @@ public:
     virtual void SetMaximizeMode(MaximizeMode maximizeMode);
     virtual MaximizeMode GetMaximizeMode();
     virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
-    virtual WMError UpdateSessionAvoidAreaListener(uint32_t& persistentId, bool haveListener);
+    virtual WMError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener);
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxy();

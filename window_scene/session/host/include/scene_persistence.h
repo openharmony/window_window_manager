@@ -33,7 +33,7 @@ namespace OHOS::Rosen {
 class ScenePersistence : public RefBase {
 public:
     ScenePersistence() = default;
-    ScenePersistence(const SessionInfo& info, const uint32_t& persistentId);
+    ScenePersistence(const SessionInfo& info, const int32_t& persistentId);
     ~ScenePersistence() = default;
 
     static inline bool CreateSnapshotDir(const std::string& strFilesDir)
@@ -48,7 +48,7 @@ public:
 
     bool IsSnapshotExisted() const;
     std::string GetSnapshotFilePath() const;
-    void SetPersistentId(const uint32_t& persistId);
+    void SetPersistentId(const int32_t& persistId);
     void SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap);
 
 private:
