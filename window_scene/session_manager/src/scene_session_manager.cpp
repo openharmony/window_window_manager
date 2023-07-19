@@ -48,7 +48,7 @@
 
 #include "ability_start_setting.h"
 #include "color_parser.h"
-#include "common/include/permission.h"
+#include "common/include/session_permission.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
 #include "session/host/include/scene_persistent_storage.h"
@@ -815,7 +815,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartedByInputMethod()) {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartedByInputMethod()) {
         WLOGFE("check input method permission failed");
     }
     // get pid/uid before post sync task
@@ -1264,7 +1264,7 @@ float SceneSessionManager::GetDisplayBrightness() const
 
 WMError SceneSessionManager::SetGestureNavigaionEnabled(bool enable)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         WLOGFE("SetGestureNavigationEnabled permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
