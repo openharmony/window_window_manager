@@ -64,15 +64,16 @@ std::shared_ptr<PersistentPerference> ScenePersistentStorage::GetPreference(Scen
 
 void ScenePersistentStorage::InitDir(std::string dir)
 {
-    saveDir_ = dir + "/persistent_storage/";
+    saveDir_ = dir;
     std::filesystem::path fileDir {saveDir_};
     if (!std::filesystem::exists(fileDir)) {
         std::filesystem::create_directories(fileDir);
-        std::filesystem::permissions(fileDir, std::filesystem::perms::owner_all | std::filesystem::perms::group_read);
+        std::filesystem::permissions(fileDir, std::filesystem::perms::owner_read | std::filesystem::perms::owner_write |
+            std::filesystem::perms::group_read | std::filesystem::perms::group_write);
     }
     storagePath_ = {
-        { ScenePersistentStorageType::ASPECT_RATIO, saveDir_ + "session_window_aspect_ratio.xml" },
-        { ScenePersistentStorageType::MAXIMIZE_STATE, saveDir_ + "session_window_maximize_state.xml" },
+        { ScenePersistentStorageType::ASPECT_RATIO, saveDir_ + "/session_window_aspect_ratio" },
+        { ScenePersistentStorageType::MAXIMIZE_STATE, saveDir_ + "/session_window_maximize_state" },
     };
 }
 

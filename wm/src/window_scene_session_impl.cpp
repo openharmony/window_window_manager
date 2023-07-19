@@ -144,6 +144,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             }
             WLOGFD("Cannot find main window to bind");
         }
+        PreProcessCreate();
         SessionManager::GetInstance().CreateAndConnectSpecificSession(iSessionStage, eventChannel, surfaceNode_,
             property_, persistentId, session);
     }
@@ -437,6 +438,23 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     return res;
 }
 
+void WindowSceneSessionImpl::PreProcessCreate()
+{
+    SetDefaultProperty();
+}
+
+void WindowSceneSessionImpl::SetDefaultProperty()
+{
+    switch (property_->GetWindowType()) {
+        case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT:{
+            property_->SetFocusable(false);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 WSError WindowSceneSessionImpl::SetActive(bool active)
 {
     WLOGFD("active status: %{public}d", active);
@@ -671,6 +689,10 @@ WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
         WLOGFE("SetAspectRatio failed because of nullptr");
         return  WMError::WM_ERROR_NULLPTR;
     }
+    if (ratio == MathHelper::INF || ratio == MathHelper::NAG_INF || std::isnan(ratio)) {
+        WLOGFE("SetAspectRatio failed, because of wrong value: %{public}f", ratio);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
     if (hostSession_->SetAspectRatio(ratio) != WSError::WS_OK) {
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -683,7 +705,7 @@ WMError WindowSceneSessionImpl::ResetAspectRatio()
         hostSession_->SetAspectRatio(0.0f);
         return WMError::WM_OK;
     } else {
-        WLOGE("no host session found");
+        WLOGFE("no host session found");
         return WMError::WM_ERROR_NULLPTR;
     }
 }
