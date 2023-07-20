@@ -82,5 +82,13 @@ std::list<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t id)
     SetAnrStatus(persistentId, false);
     return timerIds;
 }
-} // namespace MMI
+
+void EventStage::OnSessionLost(uint64_t persistentId)
+{
+    CALL_DEBUG_ENTER;
+    events_.erase(persistentId);
+    isAnrProcess_.erase(persistentId);
+}
+
+} // namespace Rosen
 } // namespace OHOS

@@ -558,11 +558,11 @@ std::string SceneSession::GetSessionSnapshot()
 {
     WLOGFI("GetSessionSnapshot id %{public}d", GetPersistentId());
     if (Session::GetSessionState() < SessionState::STATE_BACKGROUND) {
+        WLOGFI("GetSessionSnapshot UpdateSnapshot");
         Session::UpdateSnapshot();
-    }
-    if (scenePersistence_ != nullptr && GetSnapshot()) {
-        WLOGFI("GetSessionSnapshot SaveSnapshot");
         scenePersistence_->SaveSnapshot(GetSnapshot());
+    }
+    if (scenePersistence_ != nullptr) {
         return scenePersistence_->GetSnapshotFilePath();
     }
     return "";

@@ -280,6 +280,7 @@ WMError WindowSessionImpl::Destroy(bool needClearListener)
     }
     hostSession_ = nullptr;
     windowSessionMap_.erase(property_->GetWindowName());
+    DelayedSingleton<ANRHandler>::GetInstance()->ClearDestroyedPersistentId(GetPersistentId());
     return WMError::WM_OK;
 }
 
