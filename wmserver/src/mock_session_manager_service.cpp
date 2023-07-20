@@ -136,7 +136,7 @@ bool MockSessionManagerService::SetSessionManagerService(const sptr<IRemoteObjec
     smsDeathRecipient_ = new SMSDeathRecipient();
     if (sessionManagerService_->IsProxyObject() && !sessionManagerService_->AddDeathRecipient(smsDeathRecipient_)) {
         WLOGFE("Failed to add death recipient");
-        return false;  
+        return false;
     }
 
     RegisterMockSessionManagerService();
@@ -210,7 +210,6 @@ int MockSessionManagerService::DumpSessionInfo(const std::vector<std::string>& a
     }
     return -1; // WMError::WM_ERROR_INVALID_PARAM;
 }
-
 
 void MockSessionManagerService::ShowHelpInfo(std::string& dumpInfo)
 {

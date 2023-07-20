@@ -38,7 +38,5 @@ sptr<IRemoteObject> MockSessionManagerServiceProxy::GetSessionManagerService()
     sptr<IRemoteObject> remoteObject = reply.ReadRemoteObject();
     return remoteObject;
 }
-
-
 } // namespace Rosen
 } // namespace OHOS
