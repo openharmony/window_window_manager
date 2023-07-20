@@ -599,4 +599,30 @@ WSError SceneSessionManagerProxy::GetSessionDumpInfo(const sptr<DumpParam> &para
     info = reply.ReadString();
     return static_cast<WSError>(reply.ReadInt32());
 }
+
+WSError SceneSessionManagerProxy::GetSessionSnapshot(uint32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    if (!data.WriteUint32(persistentId)) {
+        WLOGFE("Write persistentId failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    std::shared_ptr<Media::PixelMap> sessionSnapshot(reply.ReadParcelable<Media::PixelMap>());
+    snapshot = sessionSnapshot;
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
 } // namespace OHOS::Rosen

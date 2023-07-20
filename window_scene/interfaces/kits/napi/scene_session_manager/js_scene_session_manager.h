@@ -45,7 +45,7 @@ public:
     static NativeValue* ProcessBackEvent(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* UpdateFocus(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SwitchUser(NativeEngine* engin, NativeCallbackInfo* info);
-    static NativeValue* GetSessionSnapshot(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* GetSessionSnapshotFilePath(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* InitWithRenderServiceAdded(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* PerfRequestEx(NativeEngine* engine, NativeCallbackInfo* info);
 
@@ -62,7 +62,7 @@ private:
     NativeValue* OnProcessBackEvent(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnUpdateFocus(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSwitchUser(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnGetSessionSnapshot(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnGetSessionSnapshotFilePath(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnInitWithRenderServiceAdded(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnPerfRequestEx(NativeEngine& engine, NativeCallbackInfo& info);
 
