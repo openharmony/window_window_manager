@@ -135,7 +135,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     } else { // system window
         if (WindowHelper::IsAppFloatingWindow(type)) {
             property_->SetParentPersistentId(GetFloatingWindowParentId());
-            WLOGFI("property set parentPersistentId: %{public}"d, property_->GetParentPersistentId());
+            WLOGFI("property set parentPersistentId: %{public}d", property_->GetParentPersistentId());
             auto mainWindow = FindMainWindowWithContext();
             property_->SetFloatingWindowAppType(mainWindow != nullptr ? true : false);
         } else if (type == WindowType::WINDOW_TYPE_DIALOG) {
