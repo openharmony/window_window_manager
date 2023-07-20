@@ -52,6 +52,7 @@ public:
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) override;
     WSError GetSessionDumpInfo(const sptr<DumpParam> &param, std::string& info) override;
     WSError UpdateSessionAvoidAreaListener(uint64_t& persistentId, bool haveListener) override;
+    WSError GetSessionSnapshot(uint32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot) override;
 
 private:
     static inline BrokerDelegator<SceneSessionManagerProxy> delegator_;
