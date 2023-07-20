@@ -105,7 +105,7 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::FindMainWindowWithContext()
             return win;
         }
     }
-    WLOGFE("Can not find main window to bind dialog!");
+    WLOGFI("Can not find main window, not app type");
     return nullptr;
 }
 
@@ -119,7 +119,8 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     sptr<IWindowEventChannel> eventChannel(channel);
     uint64_t persistentId = INVALID_SESSION_ID;
     sptr<Rosen::ISession> session;
-    if (WindowHelper::IsSubWindow(GetType())) { // sub window
+    const WindowType type = GetType();
+    if (WindowHelper::IsSubWindow(type)) { // sub window
         auto parentSession = FindParentSessionByParentId(property_->GetParentId());
         if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
             return WMError::WM_ERROR_NULLPTR;
@@ -132,17 +133,17 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         // update subWindowSessionMap_
         subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
     } else { // system window
-        if (WindowHelper::IsAppFloatingWindow(GetType())) {
+        if (WindowHelper::IsAppFloatingWindow(type)) {
             property_->SetParentPersistentId(GetFloatingWindowParentId());
-            WLOGFI("property_ set parentPersistentId: %{public}" PRIu64 "", property_->GetParentPersistentId());
-        }
-        if (GetType() == WindowType::WINDOW_TYPE_DIALOG) {
+            WLOGFI("property set parentPersistentId: %{public}" PRIu64 "", property_->GetParentPersistentId());
+            auto mainWindow = FindMainWindowWithContext();
+            property_->SetFloatingWindowAppType(mainWindow != nullptr ? true : false);
+        } else if (type == WindowType::WINDOW_TYPE_DIALOG) {
             auto mainWindow = FindMainWindowWithContext();
             if (mainWindow != nullptr) {
                 property_->SetParentPersistentId(mainWindow->GetPersistentId());
                 WLOGFD("Bind dialog to main window");
             }
-            WLOGFD("Cannot find main window to bind");
         }
         PreProcessCreate();
         SessionManager::GetInstance().CreateAndConnectSpecificSession(iSessionStage, eventChannel, surfaceNode_,
