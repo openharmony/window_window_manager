@@ -98,6 +98,7 @@ constexpr int PARENT_ID_MAX_WIDTH = 6;
 constexpr int WINDOW_NAME_MAX_LENGTH = 20;
 const std::string ARG_DUMP_HELP = "-h";
 const std::string ARG_DUMP_ALL = "-a";
+const std::string ARG_DUMP_WINDOW = "-w";
 const std::string ARG_DUMP_SCREEN = "-s";
 const std::string ARG_DUMP_DISPLAY = "-d";
 } // namespace
@@ -1320,6 +1321,21 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
     return;
 }
 
+static bool IsValidDigitString(const std::string& windowIdStr)
+{
+    if (windowIdStr.empty()) {
+        return false;
+    }
+    for (char ch : windowIdStr) {
+        if ((ch >= '0' && ch <= '9')) {
+            continue;
+        }
+        WLOGFE("invalid window id");
+        return false;
+    }
+    return true;
+}
+
 WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
 {
     int32_t screenGroupId = 0;
@@ -1365,16 +1381,61 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::GetSessionDumpInfo(const sptr<DumpParam>& param, std::string& info)
+WSError SceneSessionManager::GetSessionDumpInfo(const sptr<DumpParam>& param, std::string& dumpInfo)
 {
     if (param == nullptr) {
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    if (param->params_.size() == 1 && param->params_[0] == ARG_DUMP_ALL) { // 1: param num
-        WSError errCode = GetAllSessionDumpInfo(info);
-        return errCode;
+    if (param->params_.size() == 1 && param->params_[0] == ARG_DUMP_ALL) { // 1: params= -a
+        return GetAllSessionDumpInfo(dumpInfo);
+    }
+    if (param->params_.size() >= 2 && param->params_[0] == ARG_DUMP_WINDOW &&
+        IsValidDigitString(param->params_[1])) {  // 2: -w 10
+        return GetSpecifiedSessionDumpInfo(dumpInfo, param->params_[1]);
     }
     return WSError::WS_ERROR_INVALID_OPERATION;
+}
+
+WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, const std::string& strId)
+{
+    uint64_t persistentId = std::stoull(strId);
+    auto session = GetSceneSession(persistentId);
+    if (session == nullptr) {
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    WSRect rect = session->GetSessionRect();
+    std::string isShown_ = "-";
+    std::string isVisible = "-";
+    std::string Focusable = session->GetFocusable() ? "true" : "false";
+    std::string DecoStatus = session->GetSessionProperty()->IsDecorEnable() ? "true" : "false";
+    bool PrivacyMode = session->GetSessionProperty()->GetSystemPrivacyMode() ||
+        session->GetSessionProperty()->GetPrivacyMode();
+    std::string isPrivacyMode = PrivacyMode ? "true" : "false";
+    bool isFirstFrameAvailable = true;
+    std::ostringstream oss;
+    oss << "WindowName: " << session->GetWindowName()  << std::endl;
+    oss << "DisplayId: " << 0 << std::endl;
+    oss << "WinId: " << session->GetPersistentId() << std::endl;
+    oss << "Pid: " << session->GetCallingPid() << std::endl;
+    oss << "Type: " << static_cast<uint32_t>(session->GetWindowType()) << std::endl;
+    oss << "Mode: " << static_cast<uint32_t>(session->GetWindowMode()) << std::endl;
+    oss << "Flag: " << session->GetSessionProperty()->GetWindowFlags() << std::endl;
+    oss << "Orientation: " << static_cast<uint32_t>(session->GetRequestedOrientation()) << std::endl;
+    oss << "IsStartingWindow: " << isShown_ << std::endl;
+    oss << "FirstFrameCallbackCalled: " << isFirstFrameAvailable << std::endl;
+    oss << "IsVisible: " << isVisible << std::endl;
+    oss << "Focusable: "  << Focusable << std::endl;
+    oss << "DecoStatus: "  << DecoStatus << std::endl;
+    oss << "isPrivacyMode: "  << isPrivacyMode << std::endl;
+    oss << "WindowRect: " << "[ "
+        << rect.posX_ << ", " << rect.posY_ << ", " << rect.width_ << ", " << rect.height_
+        << " ]" << std::endl;
+    oss << "TouchHotAreas: ";
+    std::vector<Rect> touchHotAreas;
+    oss << std::endl;
+    dumpInfo.append(oss.str());
+    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::UpdateFocus(uint64_t persistentId, bool isFocused)
