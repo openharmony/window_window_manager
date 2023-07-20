@@ -106,7 +106,7 @@ public:
     WMError SetBackgroundColor(const std::string& color) override;
 
     uint32_t GetParentId() const;
-    uint64_t GetPersistentId() const;
+    uint64_t GetPersistentId() const override;
     sptr<WindowSessionProperty> GetProperty() const;
     sptr<ISession> GetHostSession() const;
     uint64_t GetFloatingWindowParentId();
