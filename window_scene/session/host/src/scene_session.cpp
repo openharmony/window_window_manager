@@ -611,4 +611,14 @@ WSError SceneSession::UpdateWindowSceneAfterCustomAnimation(bool isAdd)
     }
     return WSError::WS_OK;
 }
+
+bool SceneSession::IsFloatingWindowAppType() const
+{
+    if (property_ == nullptr) {
+        return false;
+    }
+
+    return property_->IsFloatingWindowAppType();
+}
+
 } // namespace OHOS::Rosen

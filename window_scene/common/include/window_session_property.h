@@ -84,6 +84,7 @@ public:
     void SetWindowFlags(uint32_t flags);
     void AddWindowFlag(WindowFlag flag);
     void SetModeSupportInfo(uint32_t modeSupportInfo);
+    void SetFloatingWindowAppType(bool isAppType);
 
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
@@ -114,6 +115,7 @@ public:
     bool IsDecorEnable();
     uint32_t GetAnimationFlag() const;
     const Transform& GetTransform() const;
+    bool IsFloatingWindowAppType() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
     static void UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property);
@@ -156,6 +158,7 @@ private:
     uint32_t animationFlag_ { static_cast<uint32_t>(WindowAnimation::DEFAULT) };
     // Transform info
     Transform trans_;
+    bool isFloatingWindowAppType_ = false;
 };
 
 struct SystemSessionConfig : public Parcelable {
