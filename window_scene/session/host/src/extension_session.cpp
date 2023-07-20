@@ -41,7 +41,6 @@ WSError ExtensionSession::TransferAbilityResult(uint32_t resultCode, const AAFwk
 
 WSError ExtensionSession::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
-    TransferComponentData(wantParams);
     if (extSessionEventCallback_ != nullptr &&
         extSessionEventCallback_->transferExtensionDataFunc_ != nullptr) {
         extSessionEventCallback_->transferExtensionDataFunc_(wantParams);
