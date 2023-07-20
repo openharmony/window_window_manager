@@ -108,10 +108,8 @@ public:
     {
         DumpParam* param = new DumpParam;
         auto paramSize = parcel.ReadUint32();
-        if (paramSize == 4) { // 4: param size
-            for (uint32_t i = 0; i < paramSize; i++) {
-                param->params_.push_back(parcel.ReadString());
-            }
+        for (uint32_t i = 0; i < paramSize; i++) {
+            param->params_.push_back(parcel.ReadString());
         }
         return param;
     }
