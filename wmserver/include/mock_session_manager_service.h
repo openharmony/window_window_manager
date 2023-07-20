@@ -20,7 +20,6 @@
 
 #include "wm_single_instance.h"
 #include "zidl/mock_session_manager_service_stub.h"
-//#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {

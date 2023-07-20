@@ -1405,7 +1405,7 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
 
     WSRect rect = session->GetSessionRect();
     std::string isShown_ = "-";
-    std::string isVisible = "-";
+    std::string isVisible = session->GetVisible() ? "true" : "false";
     std::string Focusable = session->GetFocusable() ? "true" : "false";
     std::string DecoStatus = session->GetSessionProperty()->IsDecorEnable() ? "true" : "false";
     bool PrivacyMode = session->GetSessionProperty()->GetSystemPrivacyMode() ||
