@@ -24,8 +24,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "VsyncStation"};
-    const std::string VSYNC_TIME_OUT_TASK = "vsync_time_out_task";
-    constexpr int64_t VSYNC_TIME_OUT_MILLISECONDS = 600;
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(VsyncStation)
 
