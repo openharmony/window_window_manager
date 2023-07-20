@@ -592,7 +592,6 @@ void SceneSession::NotifyIsCustomAnimatiomPlaying(bool isPlaying)
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onIsCustomAnimationPlaying_) {
         sessionChangeCallback_->onIsCustomAnimationPlaying_(isPlaying);
     }
-
 }
 
 WSError SceneSession::UpdateWindowSceneAfterCustomAnimation(bool isAdd)
