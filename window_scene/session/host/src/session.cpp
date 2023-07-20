@@ -238,7 +238,7 @@ bool Session::GetVisible() const
 
 int32_t Session::GetWindowId() const
 {
-    return static_cast<int32_t>(GetPersistentId()) & 0x7fffffff;
+    return GetPersistentId();
 }
 
 void Session::SetCallingPid(int32_t id)
