@@ -1565,6 +1565,18 @@ WSError SceneSessionManager::TerminateSessionNew(const sptr<AAFwk::SessionInfo> 
     return errCode;
 }
 
+WSError SceneSessionManager::GetSessionSnapshot(uint32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot)
+{
+    WLOGFI("run GetSessionSnapshot");
+    sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
+    WSError errCode = sceneSession->UpdateSnapshot();
+    if (errCode != WSError::WS_OK) {
+        return errCode;
+    }
+    snapshot = sceneSession->GetSnapshot();
+    return WSError::WS_OK;
+}
+
 WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionListener> sessionListener)
 {
     WLOGFI("run RegisterSessionListener");
@@ -1917,7 +1929,7 @@ void SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     infos.emplace_back(info);
 }
 
-std::string SceneSessionManager::GetSessionSnapshot(uint64_t persistentId)
+std::string SceneSessionManager::GetSessionSnapshotFilePath(uint64_t persistentId)
 {
     WLOGFI("GetSessionSnapshot persistentId %{public}" PRIu64 "", persistentId);
     auto sceneSession = GetSceneSession(persistentId);
@@ -1932,7 +1944,7 @@ std::string SceneSessionManager::GetSessionSnapshot(uint64_t persistentId)
             WLOGFE("session is nullptr");
             return std::string("");
         }
-        return scnSession->GetSessionSnapshot();
+        return scnSession->GetSessionSnapshotFilePath();
     };
     return taskScheduler_->PostSyncTask(task);
 }

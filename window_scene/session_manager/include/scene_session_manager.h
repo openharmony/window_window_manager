@@ -99,10 +99,11 @@ public:
     WSError GetFocusSessionToken(sptr<IRemoteObject> &token);
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller);
     WSError UpdateSessionAvoidAreaListener(uint64_t& persistentId, bool haveListener);
+    WSError GetSessionSnapshot(uint32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot);
 
     void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
     void InitPersistentStorage();
-    std::string GetSessionSnapshot(uint64_t persistentId);
+    std::string GetSessionSnapshotFilePath(uint64_t persistentId);
     void OnOutsideDownEvent(int32_t x, int32_t y);
 
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);

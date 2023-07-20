@@ -67,6 +67,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleGetSessionDump),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_BIND_DIALOG_TARGET),
         &SceneSessionManagerStub::HandleBindDialogTarget),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT),
+        &SceneSessionManagerStub::HandleGetSessionSnapshot),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -317,6 +319,17 @@ int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel &data, Message
     uint64_t persistentId = data.ReadUint64();
     sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
     const WSError& ret = BindDialogTarget(persistentId, remoteObject);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetSessionSnapshot(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleGetSessionSnapshot!");
+    uint32_t persistentId = data.ReadUint32();
+    std::shared_ptr<Media::PixelMap> snapshot = std::make_shared<Media::PixelMap>();
+    const WSError& ret = GetSessionSnapshot(persistentId, snapshot);
+    reply.WriteParcelable(snapshot.get());
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
