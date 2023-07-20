@@ -207,6 +207,10 @@ public:
     void SetNotifyCallingSessionBackgroundFunc(const NotifyCallingSessionBackgroundFunc& func);
     void NotifyCallingSessionBackground();
     void NotifyScreenshot();
+    virtual std::vector<Rect> GetTouchHotAreas() const
+    {
+        return std::vector<Rect>();
+    }
 
 protected:
     void GeneratePersistentId(const bool isExtension, const SessionInfo& sessionInfo);

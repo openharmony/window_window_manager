@@ -59,6 +59,8 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
                 WLOGFE("uiContent_ is null");
             } else {
                 SceneSessionManager::GetInstance().OnOutsideDownEvent(
+                    pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+                SceneSessionManager::GetInstance().NotifySessionTouchOutside(
                     action, pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
             }
         }

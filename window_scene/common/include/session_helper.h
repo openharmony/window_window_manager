@@ -44,7 +44,7 @@ public:
         return (r.posX_ == 0 && r.posY_ == 0 && r.width_ == 0 && r.height_ == 0);
     }
 
-    static bool IsPointInRect(int32_t pointPosX, int32_t pointPosY, const WSRect& rect)
+    static bool IsPointInRect(int32_t pointPosX, int32_t pointPosY, const Rect& rect)
     {
         if ((pointPosX > rect.posX_) &&
             (pointPosX < (rect.posX_ + static_cast<int32_t>(rect.width_)) - 1) &&
