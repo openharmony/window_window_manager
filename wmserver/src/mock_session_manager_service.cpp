@@ -136,7 +136,7 @@ bool MockSessionManagerService::SetSessionManagerService(const sptr<IRemoteObjec
     smsDeathRecipient_ = new SMSDeathRecipient();
     if (sessionManagerService_->IsProxyObject() && !sessionManagerService_->AddDeathRecipient(smsDeathRecipient_)) {
         WLOGFE("Failed to add death recipient");
-        return false;
+        return false;  
     }
 
     RegisterMockSessionManagerService();

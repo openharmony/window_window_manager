@@ -86,6 +86,13 @@ enum class PropertyChangeAction : uint32_t {
     ACTION_UPDATE_MAXIMIZE_STATE = 1 << 17,
 };
 
+struct ModeChangeHotZonesConfig {
+    bool isModeChangeHotZoneConfigured_;
+    uint32_t fullscreenRange_;
+    uint32_t primaryRange_;
+    uint32_t secondaryRange_;
+};
+
 class DumpParam : public Parcelable {
 public:
     std::vector<std::string> params_;
@@ -115,13 +122,6 @@ public:
         }
         return param;
     }
-};
-
-struct ModeChangeHotZonesConfig {
-    bool isModeChangeHotZoneConfigured_;
-    uint32_t fullscreenRange_;
-    uint32_t primaryRange_;
-    uint32_t secondaryRange_;
 };
 
 struct SystemConfig : public Parcelable {

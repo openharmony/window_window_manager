@@ -1370,8 +1370,11 @@ WSError SceneSessionManager::GetSessionDumpInfo(const sptr<DumpParam>& param, st
     if (param == nullptr) {
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    // if  1  params_[0] == ARG_DUMP_ALL)
-    return GetAllSessionDumpInfo(info);
+    if (param->params_.size() == 1 && param->params_[0] == ARG_DUMP_ALL) { // 1: param num
+        WSError errCode = GetAllSessionDumpInfo(info);
+        return errCode;
+    }
+    return WSError::WS_ERROR_INVALID_OPERATION;
 }
 
 WSError SceneSessionManager::UpdateFocus(uint64_t persistentId, bool isFocused)
