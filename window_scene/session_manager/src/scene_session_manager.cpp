@@ -2074,6 +2074,10 @@ void SceneSessionManager::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclu
 #endif
         WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
             session->GetWindowId(), isVisible);
+        if (session->GetWindowSessionProperty()->GetWindowFlags() &
+        static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) {
+            CheckAndNotifyWaterMarkChangedResult(isVisible);
+        }
 }
         if (windowVisibilityInfos.size() != 0) {
             WLOGI("Notify windowvisibilityinfo changed start");
@@ -2111,6 +2115,10 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
             sceneSession->GetCallingPid(), sceneSession->GetCallingUid(), false, sceneSession->GetWindowType()));
         WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
             sceneSession->GetWindowId(), sceneSession->GetVisible());
+        if (sceneSession->GetWindowSessionProperty()->GetWindowFlags() &
+        static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) {
+            CheckAndNotifyWaterMarkChangedResult(false);
+        }
         SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
 }
