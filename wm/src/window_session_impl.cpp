@@ -1149,8 +1149,7 @@ WMError WindowSessionImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsi
 }
 
 template<typename T>
-EnableIfSame<T, ITouchOutsideListener,
-    std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::GetListeners()
+EnableIfSame<T, ITouchOutsideListener, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<ITouchOutsideListener>> windowChangeListeners;
     {

@@ -26,7 +26,6 @@
 #include "session_helper.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
-#include "wm_common.h"
 #include "wm_math.h"
 #include <running_lock.h>
 
@@ -259,6 +258,9 @@ void SceneSession::UpdateCameraFloatWindowStatus(bool isShowing)
 
 WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty)
 {
+    if (property_ == nullptr) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
     property_->SetSystemBarProperty(type, systemBarProperty);
     WLOGFD("SceneSession SetSystemBarProperty status:%{public}d", static_cast<int32_t>(type));
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSystemBarPropertyChange_) {
@@ -632,6 +634,14 @@ bool SceneSession::IsFloatingWindowAppType() const
     return property_->IsFloatingWindowAppType();
 }
 
+std::vector<Rect> SceneSession::GetTouchHotAreas() const
+{
+    std::vector<Rect> touchHotAreas;
+    if (property_) {
+        property_->GetTouchHotAreas(touchHotAreas);
+    }
+    return touchHotAreas;
+}
 void SceneSession::DumpSessionElementInfo(const std::vector<std::string>& params)
 {
     if (!sessionStage_) {
@@ -640,8 +650,9 @@ void SceneSession::DumpSessionElementInfo(const std::vector<std::string>& params
     return sessionStage_->DumpSessionElementInfo(params);
 }
 
-WSRect SceneSession::GetHotAreaRect(int32_t action)
+Rect SceneSession::GetHotAreaRect(int32_t action)
 {
+    Rect hotAreaRect;
     WSRect rect = GetSessionRect();
 
     float vpr = 1.5f; // 1.5f: default virtual pixel ratio
@@ -657,12 +668,12 @@ WSRect SceneSession::GetHotAreaRect(int32_t action)
     } else if (action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         hotZone = HOTZONE_POINTER;
     }
-    rect.posX_ = rect.posX_ - static_cast<int32_t>(vpr * hotZone);
-    rect.posY_ = rect.posY_ - static_cast<int32_t>(vpr * hotZone);
-    rect.width_ = rect.width_ + static_cast<uint32_t>(vpr * hotZone * 2); // double hotZone
-    rect.height_ = rect.height_ + static_cast<uint32_t>(vpr * hotZone * 2); // double hotZone
+    hotAreaRect.posX_ = rect.posX_ - static_cast<int32_t>(vpr * hotZone);
+    hotAreaRect.posY_ = rect.posY_ - static_cast<int32_t>(vpr * hotZone);
+    hotAreaRect.width_ = rect.width_ + static_cast<uint32_t>(vpr * hotZone * 2); // 2: double hotZone
+    hotAreaRect.height_ = rect.height_ + static_cast<uint32_t>(vpr * hotZone * 2); // 2: double hotZone
 
-    return rect;
+    return hotAreaRect;
 }
 
 WSError SceneSession::NotifyTouchOutside()

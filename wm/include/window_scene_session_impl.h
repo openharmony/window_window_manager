@@ -85,6 +85,7 @@ public:
     virtual WMError SetPrivacyMode(bool isPrivacyMode) override;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
     virtual WMError SetSnapshotSkip(bool isSkip) override;
+    WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
 
     virtual bool IsTransparent() const override;
     virtual bool IsTurnScreenOn() const override;
