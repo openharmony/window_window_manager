@@ -20,7 +20,7 @@
 
 #include "wm_single_instance.h"
 #include "zidl/mock_session_manager_service_stub.h"
-#include "wm_common.h"
+//#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -42,6 +42,7 @@ private:
     bool RegisterMockSessionManagerService();
     int DumpSessionInfo(const std::vector<std::string>& args, std::string& dumpInfo);
     int DumpAllSessionInfo(std::string& dumpInfo);
+    int DumpSpecifiedSessionInfo(std::string& dumpInfo, const std::string& persistentId);
     void ShowHelpInfo(std::string& dumpInfo);
     void ShowAceDumpHelp(std::string& dumpInfo);
     void ShowIllegalArgsInfo(std::string& dumpInfo);
