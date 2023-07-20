@@ -85,6 +85,11 @@ void WindowSessionProperty::SetDisplayId(DisplayId displayId)
     displayId_ = displayId;
 }
 
+void WindowSessionProperty::SetFloatingWindowAppType(bool isAppType)
+{
+    isFloatingWindowAppType_ = isAppType;
+}
+
 const std::string& WindowSessionProperty::GetWindowName() const
 {
     return windowName_;
@@ -314,6 +319,11 @@ uint32_t WindowSessionProperty::GetAnimationFlag() const
     return animationFlag_;
 }
 
+bool WindowSessionProperty::IsFloatingWindowAppType() const
+{
+    return isFloatingWindowAppType_;
+}
+
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
 {
     if (parcel.WriteUint32(limits_.maxWidth_) &&
@@ -382,7 +392,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(flags_) &&
         parcel.WriteBool(isDecorEnable_) &&
         MarshallingWindowLimits(parcel) &&
-        MarshallingSystemBarMap(parcel) && parcel.WriteUint32(animationFlag_);
+        MarshallingSystemBarMap(parcel) && parcel.WriteUint32(animationFlag_) &&
+        parcel.WriteBool(isFloatingWindowAppType_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -419,6 +430,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     UnmarshallingWindowLimits(parcel, property);
     UnMarshallingSystemBarMap(parcel, property);
     property->SetAnimationFlag(parcel.ReadUint32());
+    property->SetFloatingWindowAppType(parcel.ReadBool());
     return property;
 }
 
@@ -450,6 +462,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     sysBarPropMap_ = property->sysBarPropMap_;
     isDecorEnable_ = property->isDecorEnable_;
     animationFlag_ = property->animationFlag_;
+    isFloatingWindowAppType_ = property->isFloatingWindowAppType_;
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)
