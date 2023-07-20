@@ -45,7 +45,8 @@ enum class JsSessionType : uint32_t {
     TYPE_TOAST,
     TYPE_POINTER,
     TYPE_LAUNCHER_RECENT,
-    TYPE_SCENE_BOARD
+    TYPE_SCENE_BOARD,
+    TYPE_DRAGGING_EFFECT,
 };
 
 const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
@@ -68,7 +69,8 @@ const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
     { WindowType::WINDOW_TYPE_TOAST,               JsSessionType::TYPE_TOAST             },
     { WindowType::WINDOW_TYPE_POINTER,             JsSessionType::TYPE_POINTER           },
     { WindowType::WINDOW_TYPE_LAUNCHER_RECENT,     JsSessionType::TYPE_LAUNCHER_RECENT   },
-    { WindowType::WINDOW_TYPE_SCENE_BOARD,         JsSessionType::TYPE_SCENE_BOARD       }
+    { WindowType::WINDOW_TYPE_SCENE_BOARD,         JsSessionType::TYPE_SCENE_BOARD       },
+    { WindowType::WINDOW_TYPE_DRAGGING_EFFECT,     JsSessionType::TYPE_DRAGGING_EFFECT   },
 };
 
 const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
@@ -91,7 +93,8 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_TOAST,             WindowType::WINDOW_TYPE_TOAST               },
     { JsSessionType::TYPE_POINTER,           WindowType::WINDOW_TYPE_POINTER             },
     { JsSessionType::TYPE_LAUNCHER_RECENT,   WindowType::WINDOW_TYPE_LAUNCHER_RECENT     },
-    { JsSessionType::TYPE_SCENE_BOARD,       WindowType::WINDOW_TYPE_SCENE_BOARD         }
+    { JsSessionType::TYPE_SCENE_BOARD,       WindowType::WINDOW_TYPE_SCENE_BOARD         },
+    { JsSessionType::TYPE_DRAGGING_EFFECT,   WindowType::WINDOW_TYPE_DRAGGING_EFFECT     },
 };
 
 bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, SessionInfo& sessionInfo);
