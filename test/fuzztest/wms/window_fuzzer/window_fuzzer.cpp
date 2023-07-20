@@ -17,10 +17,14 @@
 
 #include <securec.h>
 
+#include "js_runtime.h"
 #include <want.h>
 #include "window.h"
+#include "window_accessibility_controller.h"
 #include "window_impl.h"
 #include "window_manager.h"
+#include "window_extension_connection.h"
+#include "window_adapter.h"
 
 using namespace OHOS::Rosen;
 
@@ -60,6 +64,35 @@ public:
     }
 };
 
+class ExtensionCallback : public IWindowExtensionCallback {
+public:
+    void OnWindowReady(const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode) override
+    {
+    }
+    void OnExtensionDisconnected() override
+    {
+    }
+    void OnKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event) override
+    {
+    }
+    void OnPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event) override
+    {
+    }
+    void OnBackPress() override
+    {
+    }
+};
+
+template<class T>
+size_t GetObject(T &object, const uint8_t *data, size_t size)
+{
+    size_t objectSize = sizeof(object);
+    if (objectSize > size) {
+        return 0;
+    }
+    return memcpy_s(&object, objectSize, data, objectSize) == EOK ? objectSize : 0;
+}
+
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
@@ -79,17 +112,34 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     }
     window->Hide(0);
     window->Destroy();
+    sptr<IFocusChangedListener> focusChangedListener = new FocusChangedListener();
+    sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo();
+    focusChangedListener->OnFocused(focusChangeInfo);
+    focusChangedListener->OnUnfocused(focusChangeInfo);
+    sptr<IDispatchInputEventListener> iDispatchInputEventListener = new IDispatchInputEventListener();
+    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    std::shared_ptr<MMI::AxisEvent> axisEvent = nullptr;
+    iDispatchInputEventListener->OnDispatchPointerEvent(pointerEvent);
+    iDispatchInputEventListener->OnDispatchKeyEvent(keyEvent);
+    std::shared_ptr<IInputEventConsumer> iInputEventConsumer = std::make_shared<IInputEventConsumer>();
+    iInputEventConsumer->OnInputEvent(keyEvent);
+    iInputEventConsumer->OnInputEvent(pointerEvent);
+    iInputEventConsumer->OnInputEvent(axisEvent);
+    sptr<IOccupiedAreaChangeListener> iOccupiedAreaChangeListener = new IOccupiedAreaChangeListener();
+    OHOS::Rosen::Rect rect_ = {0, 0, 0, 0};
+    window->RegisterOccupiedAreaChangeListener(iOccupiedAreaChangeListener);
+    int32_t safeHeight = 80;
+    size_t startPos = 0;
+    startPos += GetObject<int32_t>(safeHeight, data + startPos, size - startPos);
+    sptr<OHOS::Rosen::OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(
+        OccupiedAreaType::TYPE_INPUT, rect_, safeHeight);
+    iOccupiedAreaChangeListener->OnSizeChange(info, nullptr);
+    window->UnregisterOccupiedAreaChangeListener(iOccupiedAreaChangeListener);
+    sptr<IVisibilityChangedListener> visibilityChangedListener = new VisibilityChangedListener();
+    std::vector<sptr<WindowVisibilityInfo>> infos;
+    visibilityChangedListener->OnWindowVisibilityChanged(infos);
     return true;
-}
-
-template<class T>
-size_t GetObject(T &object, const uint8_t *data, size_t size)
-{
-    size_t objectSize = sizeof(object);
-    if (objectSize > size) {
-        return 0;
-    }
-    return memcpy_s(&object, objectSize, data, objectSize) == EOK ? objectSize : 0;
 }
 
 void CheckWindowImplFunctionsPart1(sptr<Window> window, const uint8_t* data, size_t size)
@@ -379,6 +429,21 @@ void CheckWindowImplFunctionsPart6(sptr<WindowImpl> window, const uint8_t* data,
 
     window->WindowCreateCheck(uint32Val[0]);
     window->CalculatePointerDirection(uint32Val[0], uint32Val[1]);
+    std::shared_ptr<AbilityRuntime::Context> context = nullptr;
+    window->GetTopWindowWithContext(context);
+    sptr<IWindowChangeListener> iWindowChangeListener = new IWindowChangeListener();
+    std::shared_ptr<RSTransaction> rstransaction;
+    OHOS::Rosen::Rect rect_ = {0, 0, 0, 0};
+    iWindowChangeListener->OnSizeChange(rect_, WindowSizeChangeReason::UNDEFINED, rstransaction);
+    sptr<IWindowExtensionCallback> iWindowExtensionCallback = new ExtensionCallback();
+    std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode = nullptr;
+    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
+    iWindowExtensionCallback->OnWindowReady(rsSurfaceNode);
+    iWindowExtensionCallback->OnExtensionDisconnected();
+    iWindowExtensionCallback->OnKeyEvent(keyEvent);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    iWindowExtensionCallback->OnPointerEvent(pointerEvent);
+    iWindowExtensionCallback->OnBackPress();
 }
 
 void WindowImplFuzzTest(const uint8_t* data, size_t size)
@@ -411,6 +476,57 @@ void WindowImplFuzzTest(const uint8_t* data, size_t size)
     window->Hide(reason, withAnimation);
     window->Destroy();
 }
+
+void WindowImplFuzzTest01(const uint8_t* data, size_t size)
+{
+    std::string name = "WindowFuzzTest01";
+    sptr<OHOS::Rosen::WindowOption> option = new OHOS::Rosen::WindowOption();
+    sptr<OHOS::Rosen::WindowImpl> window = new(std::nothrow) OHOS::Rosen::WindowImpl(option);
+    if (window == nullptr) {
+        return;
+    }
+    sptr<IWindowUpdateListener> windowUpdateListener = new WindowUpdateListener();
+    std::vector<sptr<AccessibilityWindowInfo>> accessibilityWindowInfo;
+    WindowUpdateType type = Rosen::WindowUpdateType::WINDOW_UPDATE_ADDED;
+    windowUpdateListener->OnWindowUpdate(accessibilityWindowInfo, type);
+    std::string windowName = "test1";
+    window->Find(windowName);
+    size_t startPos = 0;
+    uint32_t mainWinId = 1;
+    startPos += GetObject<uint32_t>(mainWinId, data + startPos, size - startPos);
+    window->GetTopWindowWithId(mainWinId);
+    uint32_t parentId = 1;
+    startPos += GetObject<uint32_t>(parentId, data + startPos, size - startPos);
+    window->GetSubWindow(parentId);
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    window->UpdateConfigurationForAll(configuration);
+    int32_t x;
+    int32_t y;
+    float scale;
+    startPos += GetObject<int32_t>(x, data + startPos, size - startPos);
+    startPos += GetObject<int32_t>(y, data + startPos, size - startPos);
+    startPos += GetObject<float>(scale, data + startPos, size - startPos);
+    WindowAccessibilityController::GetInstance().SetAnchorAndScale(x, y, scale);
+    int32_t deltaX;
+    int32_t deltaY;
+    startPos += GetObject<int32_t>(deltaX, data + startPos, size - startPos);
+    startPos += GetObject<int32_t>(deltaY, data + startPos, size - startPos);
+    WindowAccessibilityController::GetInstance().SetAnchorOffset(deltaX, deltaY);
+    sptr<WindowExtensionConnection> connection = new(std::nothrow)WindowExtensionConnection();
+    if (connection == nullptr) {
+        return;
+    }
+    AppExecFwk::ElementName element;
+    element.SetBundleName("com.test.windowextension");
+    element.SetAbilityName("WindowExtAbility");
+    Rosen::Rect rect {100, 100, 60, 60};
+    uint32_t uid = 100;
+    uint32_t windowId = INVALID_WINDOW_ID;
+    startPos += GetObject<uint32_t>(uid, data + startPos, size - startPos);
+    startPos += GetObject<uint32_t>(windowId, data + startPos, size - startPos);
+    connection->ConnectExtension(element, rect, uid, windowId, nullptr);
+    connection->SetBounds(rect);
+}
 } // namespace.OHOS
 
 /* Fuzzer entry point */
@@ -419,5 +535,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     /* Run your code on data */
     OHOS::DoSomethingInterestingWithMyAPI(data, size);
     OHOS::WindowImplFuzzTest(data, size);
+    OHOS::WindowImplFuzzTest01(data, size);
     return 0;
 }
