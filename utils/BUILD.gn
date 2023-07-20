@@ -81,9 +81,9 @@ ohos_static_library("libwmutil_static") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "multimedia_image_framework:image_native",
     "preferences:native_preferences",
     "samgr:samgr_proxy",
   ]
@@ -141,9 +141,9 @@ ohos_shared_library("libwmutil") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "multimedia_image_framework:image_native",
     "preferences:native_preferences",
     "samgr:samgr_proxy",
   ]
