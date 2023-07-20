@@ -83,7 +83,7 @@ std::list<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t id)
     return timerIds;
 }
 
-void EventStage::OnSessionLost(uint64_t persistentId)
+void EventStage::OnSessionLost(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
     events_.erase(persistentId);

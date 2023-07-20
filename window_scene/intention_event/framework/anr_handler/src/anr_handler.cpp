@@ -31,7 +31,7 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "
 constexpr int64_t MAX_MARK_PROCESS_DELAY_TIME { 3500000 };
 constexpr int64_t MIN_MARK_PROCESS_DELAY_TIME { 50000 };
 constexpr int32_t INVALID_EVENT_ID { -1 };
-constexpr uint64_t INVALID_PERSISTENT_ID { -1 };
+constexpr int32_t INVALID_PERSISTENT_ID { -1 };
 constexpr int32_t TIME_TRANSITION { 1000 };
 const std::string ANR_HANDLER_RUNNER { "ANR_HANDLER" };
 } // namespace
@@ -79,23 +79,23 @@ void ANRHandler::HandleEventConsumed(int32_t eventId, int64_t actionTime)
     }
 }
 
-void ANRHandler::ClearDestroyedPersistentId(uint64_t persistentId)
+void ANRHandler::ClearDestroyedPersistentId(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (anrHandlerState_.sendStatus.find(persistentId) == anrHandlerState_.sendStatus.end()) {
-        WLOGFE("PersistentId:%{public}" PRId64 " not in ANRHandler", persistentId);
+        WLOGFE("PersistentId:%{public}d not in ANRHandler", persistentId);
         return;
     }
     anrHandlerState_.sendStatus.erase(persistentId);
-    WLOGFD("PersistentId:%{public}" PRId64 " erased in ANRHandler", persistentId);
+    WLOGFD("PersistentId:%{public}d erased in ANRHandler", persistentId);
 }
 
 void ANRHandler::SetAnrHandleState(int32_t eventId, bool status)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    int64_t persistentId = GetPersistentIdOfEvent(eventId);
+    int32_t persistentId = GetPersistentIdOfEvent(eventId);
     anrHandlerState_.sendStatus[persistentId] = status;
     if (status) {
         anrHandlerState_.eventsToReceipt.push_back(eventId);
@@ -145,9 +145,9 @@ void ANRHandler::ClearExpiredEvents(int32_t eventId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    uint64_t persistentId = GetPersistentIdOfEvent(eventId);
+    int32_t persistentId = GetPersistentIdOfEvent(eventId);
     for (auto iter = sessionStageMap_.begin(); iter != sessionStageMap_.end();) {
-        uint64_t currentPersistentId = GetPersistentIdOfEvent(iter->first);
+        auto currentPersistentId = GetPersistentIdOfEvent(iter->first);
         if (iter->first < eventId &&
             (currentPersistentId == persistentId || currentPersistentId == INVALID_PERSISTENT_ID)) {
             sessionStageMap_.erase(iter++);
@@ -157,7 +157,7 @@ void ANRHandler::ClearExpiredEvents(int32_t eventId)
     }
 }
 
-uint64_t ANRHandler::GetPersistentIdOfEvent(int32_t eventId)
+int32_t ANRHandler::GetPersistentIdOfEvent(int32_t eventId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (sessionStageMap_.find(eventId) == sessionStageMap_.end()) {
@@ -172,7 +172,7 @@ uint64_t ANRHandler::GetPersistentIdOfEvent(int32_t eventId)
     return sessionStage->GetPersistentId();
 }
 
-bool ANRHandler::IsOnEventHandler(uint64_t persistentId)
+bool ANRHandler::IsOnEventHandler(int32_t persistentId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (anrHandlerState_.sendStatus.find(persistentId) != anrHandlerState_.sendStatus.end() &&
@@ -185,7 +185,7 @@ bool ANRHandler::IsOnEventHandler(uint64_t persistentId)
 void ANRHandler::UpdateLatestEventId(int32_t eventId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    uint64_t currentPersistentId = GetPersistentIdOfEvent(eventId);
+    auto currentPersistentId = GetPersistentIdOfEvent(eventId);
     for (auto& event : anrHandlerState_.eventsToReceipt) {
         if (GetPersistentIdOfEvent(event) == currentPersistentId && eventId > event) {
             WLOGFD("Replace eventId:%{public}d by newer eventId:%{public}d", event, eventId);
