@@ -1864,9 +1864,9 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
             continue;
         }
         WLOGFD("name = %{public}s, isSystem = %{public}d, persistendId = %{public}d, winType = %{public}d, \
-             state = %{public}d, visible = %{public}d", sceneSession->GetWindowName().c_str(),
-             sceneSession->GetSessionInfo().isSystem_, iter->first, sceneSession->GetWindowType(),
-             sceneSession->GetSessionState(), sceneSession->IsVisible());
+            state = %{public}d, visible = %{public}d", sceneSession->GetWindowName().c_str(),
+            sceneSession->GetSessionInfo().isSystem_, iter->first, sceneSession->GetWindowType(),
+            sceneSession->GetSessionState(), sceneSession->IsVisible());
         if (sceneSession->IsVisible() || sceneSession->GetSessionState() == SessionState::STATE_ACTIVE
             || sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND) {
             FillWindowInfo(infos, iter->second);
