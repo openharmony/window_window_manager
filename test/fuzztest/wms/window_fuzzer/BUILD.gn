@@ -25,9 +25,11 @@ ohos_fuzztest("WindowFuzzTest") {
     "../../../../wm/include",
     "../../../../dm/include",
     "../../../../wmserver/include",
-    "../../../../interfaces/innerkits/wm",
     "../../../../interfaces/innerkits/dm",
     "//commonlibrary/c_utils/base/include",
+    "../../../../extension/extension_connection/include",
+    "../../../../interfaces/innerkits/extension",
+    "../../../../utils/include",
 
     # for abilityContext
     "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
@@ -48,6 +50,7 @@ ohos_fuzztest("WindowFuzzTest") {
   sources = [ "window_fuzzer.cpp" ]
   deps = [
     "${window_base_path}/dm:libdm",
+    "${window_base_path}/utils:libwmutil",
     "${window_base_path}/wm:libwm",
   ]
 
@@ -65,6 +68,7 @@ ohos_fuzztest("WindowFuzzTest") {
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "window_manager:libwindow_extension_client",
   ]
 }
 

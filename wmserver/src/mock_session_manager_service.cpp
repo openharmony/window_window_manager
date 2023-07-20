@@ -208,9 +208,37 @@ int MockSessionManagerService::DumpSessionInfo(const std::vector<std::string>& a
     if (args.size() == 1 && args[0] == ARG_DUMP_ALL) { // 1: params num
         return DumpAllSessionInfo(dumpInfo);
     }
+    if (args.size() == 2 && args[0] == ARG_DUMP_WINDOW) { // -w
+        return DumpSpecifiedSessionInfo(dumpInfo, args[1]);
+    }
     return -1; // WMError::WM_ERROR_INVALID_PARAM;
 }
 
+int MockSessionManagerService::DumpSpecifiedSessionInfo(std::string& dumpInfo, const std::string& persistentId)
+{
+    if (!sessionManagerService_) {
+        WLOGFE("sessionManagerService is nullptr");
+        return -1;
+    }
+    if (!sceneSessionManager_) {
+        WLOGFW("Get scene session manager ...");
+        GetSceneSessionManager();
+    }
+    if (!sceneSessionManager_) {
+        WLOGFW("Get scene session manager proxy failed, nullptr");
+        return -1;
+    }
+    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager_);
+    sptr<DumpParam> param = new DumpParam();
+    param->params_.push_back(ARG_DUMP_WINDOW);
+    param->params_.push_back(persistentId);
+    WSError ret = sceneSessionManagerProxy->GetSessionDumpInfo(param, dumpInfo);
+    if (ret != WSError::WS_OK) {
+        WLOGFD("sessionManagerService set success!");
+        return -1;
+    }
+    return 0; // WMError::WM_OK;
+}
 
 void MockSessionManagerService::ShowHelpInfo(std::string& dumpInfo)
 {
@@ -228,6 +256,5 @@ void MockSessionManagerService::ShowHelpInfo(std::string& dumpInfo)
 void MockSessionManagerService::ShowAceDumpHelp(std::string& dumpInfo)
 {
 }
-
 } // namespace Rosen
 } // namespace OHOS

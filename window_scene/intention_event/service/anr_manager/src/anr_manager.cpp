@@ -27,7 +27,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ANRManager" };
-constexpr int32_t MAX_ANR_TIMER_COUNT = 64;
+constexpr int32_t MAX_ANR_TIMER_COUNT { 64 };
 } // namespace
 
 ANRManager::ANRManager() {}
@@ -56,7 +56,7 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
         if (anrObserver_ != nullptr) {
             anrObserver_(pid);
         } else {
-            WLOGFE("anrObserver is nullptr, do nothing");
+            WLOGFE("AnrObserver is nullptr, do nothing");
         }
         std::vector<int32_t> timerIds = eventStage_.GetTimerIds(persistentId);
         for (int32_t item : timerIds) {
@@ -75,7 +75,7 @@ void ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
-    WLOGFD("eventId:%{public}d, persistentId:%{public}d", eventId, persistentId);
+    WLOGFD("Event: eventId:%{public}d, persistentId:%{public}d", eventId, persistentId);
     std::list<int32_t> timerIds = eventStage_.DelEvents(persistentId, eventId);
     for (int32_t item : timerIds) {
         if (item != -1) {
@@ -106,7 +106,7 @@ void ANRManager::OnSessionLost(int32_t persistentId)
 void ANRManager::SetApplicationPid(int32_t persistentId, int32_t applicationPid)
 {
     std::lock_guard<std::mutex> guard(mtx_);
-    WLOGFD("persistentId:%{public}d -> applicationPid:%{public}d", persistentId, applicationPid);
+    WLOGFD("PersistentId:%{public}d -> applicationPid:%{public}d", persistentId, applicationPid);
     applicationMap_[persistentId] = applicationPid;
 }
 
@@ -120,7 +120,7 @@ void ANRManager::SetAnrObserver(std::function<void(int32_t)> anrObserver)
 int32_t ANRManager::GetPidByPersistentId(int32_t persistentId)
 {
     if (applicationMap_.find(persistentId) != applicationMap_.end()) {
-        WLOGFD("persistentId:%{public}d -> pid:%{public}d", persistentId, applicationMap_[persistentId]);
+        WLOGFD("PersistentId:%{public}d -> pid:%{public}d", persistentId, applicationMap_[persistentId]);
         return applicationMap_[persistentId];
     }
     WLOGFD("No application matches persistentId:%{public}d", persistentId);
@@ -140,13 +140,8 @@ void ANRManager::RemoveTimers(int32_t persistentId)
 
 void ANRManager::RemovePersistentId(int32_t persistentId)
 {
-    if (applicationMap_.find(persistentId) == applicationMap_.end()) {
-        WLOGFD("No persistentId:%{public}d in applicationMap", persistentId);
-        return;
-    }
-    WLOGFD("Remove persistentId:%{public}d -> applicationPid:%{public}d",
-        persistentId, applicationMap_[persistentId]);
     applicationMap_.erase(persistentId);
+    eventStage_.OnSessionLost(persistentId);
 }
 } // namespace Rosen
 } // namespace OHOS

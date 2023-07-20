@@ -28,6 +28,7 @@ public:
     void SaveANREvent(int32_t persistentId, int32_t id, int64_t time, int32_t timerId);
     std::vector<int32_t> GetTimerIds(int32_t persistentId);
     std::list<int32_t> DelEvents(int32_t persistentId, int32_t id);
+    void OnSessionLost(int32_t persistentId);
 private:
     struct EventTime {
         int32_t id { 0 };

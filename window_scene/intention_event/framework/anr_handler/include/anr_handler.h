@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <mutex>
+#include <list>
 #include <unordered_map>
 
 #include "event_handler.h"
@@ -33,24 +34,25 @@ public:
     DISALLOW_COPY_AND_MOVE(ANRHandler);
 
     void SetSessionStage(int32_t eventId, const wptr<ISessionStage> &sessionStage);
-    void SetLastProcessedEventId(int32_t eventId, int64_t actionTime);
-
+    void HandleEventConsumed(int32_t eventId, int64_t actionTime);
+    void ClearDestroyedPersistentId(uint64_t persistentId);
 private:
     void MarkProcessed();
-    void UpdateLastProcessedEventId(int32_t eventId);
-    void SetLastProcessedEventStatus(bool status);
-    int32_t GetLastProcessedEventId();
-    void SendEvent(int64_t delayTime);
+    void SendEvent(int32_t eventId, int64_t delayTime);
+    void SetAnrHandleState(int32_t eventId, bool status);
     void ClearExpiredEvents(int32_t eventId);
+    uint64_t GetPersistentIdOfEvent(int32_t eventId);
+    bool IsOnEventHandler(uint64_t persistentId);
+    void UpdateLatestEventId(int32_t eventId);
 private:
-    std::mutex anrMtx_;
-    struct ANREvent {
-        bool sendStatus { false };
-        int32_t lastEventId { -1 };
-        int32_t lastReportId { -1 };
-    };
-    ANREvent event_;
+    std::recursive_mutex mutex_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ { nullptr };
+    struct ANRHandlerState {
+        std::unordered_map<uint64_t, bool> sendStatus;
+        int32_t currentEventIdToReceipt { -1 };
+        std::list<int32_t> eventsToReceipt;
+    };
+    ANRHandlerState anrHandlerState_;
     std::unordered_map<int32_t, wptr<ISessionStage>> sessionStageMap_;
 };
 } // namespace Rosen

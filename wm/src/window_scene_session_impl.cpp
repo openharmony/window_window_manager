@@ -18,6 +18,7 @@
 #include <parameters.h>
 #include <transaction/rs_transaction.h>
 
+#include "anr_handler.h"
 #include "color_parser.h"
 #include "display_manager.h"
 #include "session_permission.h"
@@ -194,6 +195,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
             std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
         state_ = WindowState::STATE_CREATED;
         if (WindowHelper::IsMainWindow(GetType())) {
+            maxFloatingWindowSize_ = windowSystemConfig_.maxFloatingWindowSize_;
             SetWindowMode(windowSystemConfig_.defaultWindowMode_);
             GetConfigurationFromAbilityInfo();
         }
@@ -551,6 +553,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needClearListener)
 
     DestroySubWindow();
     windowSessionMap_.erase(property_->GetWindowName());
+    DelayedSingleton<ANRHandler>::GetInstance()->ClearDestroyedPersistentId(property_->GetPersistentId());
     hostSession_ = nullptr;
     return res;
 }

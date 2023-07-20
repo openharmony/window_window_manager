@@ -16,6 +16,7 @@
 #include "displaymanager_fuzzer.h"
 
 #include <securec.h>
+#include <ui/rs_surface_node.h>
 #include "display_manager.h"
 
 namespace OHOS ::Rosen {
@@ -93,6 +94,11 @@ bool DisplayFuzzTest(const uint8_t* data, size_t size)
     sptr<PrivateWindowListener> privateWindowListener = new PrivateWindowListener();
     displayManager.RegisterPrivateWindowListener(privateWindowListener);
     displayManager.UnregisterPrivateWindowListener(privateWindowListener);
+    RSSurfaceNodeConfig config;
+    config.SurfaceNodeName = "AddSurfaceNodeToDisplay";
+    auto surfaceNode = RSSurfaceNode::Create(config, false);
+    displayManager.AddSurfaceNodeToDisplay(displayId, surfaceNode);
+    displayManager.RemoveSurfaceNodeFromDisplay(displayId, surfaceNode);
     return true;
 }
 
