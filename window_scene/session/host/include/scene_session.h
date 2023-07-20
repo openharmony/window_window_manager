@@ -119,6 +119,7 @@ public:
     bool IsDecorEnable();
     void UpdateNativeVisibility(bool visible);
     bool IsVisible() const;
+    bool IsFloatingWindowAppType() const;
 
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 private:
