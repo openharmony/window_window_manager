@@ -63,7 +63,7 @@ private:
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<ExtensionSession>& extensionSession);
 
     std::shared_ptr<TaskScheduler> taskScheduler_;
-    std::map<uint64_t, sptr<ExtensionSession>> extensionSessionMap_;
+    std::map<int32_t, sptr<ExtensionSession>> extensionSessionMap_;
 };
 } // namespace OHOS::Rosen
 

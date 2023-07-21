@@ -29,8 +29,8 @@ public:
 
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session) override;
-    WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) override;
+        sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session) override;
+    WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId) override;
     WSError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) override;
     WSError BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;
 
@@ -39,7 +39,7 @@ public:
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
-    WSError SetSessionGravity(uint64_t persistentId, SessionGravity gravity, uint32_t percent) override;
+    WSError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent) override;
     WMError SetGestureNavigaionEnabled(bool enable) override;
     WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) override;
     WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) override;
@@ -51,8 +51,8 @@ public:
     WSError GetFocusSessionToken(sptr<IRemoteObject> &token) override;
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) override;
     WSError GetSessionDumpInfo(const sptr<DumpParam> &param, std::string& info) override;
-    WSError UpdateSessionAvoidAreaListener(uint64_t& persistentId, bool haveListener) override;
-    WSError GetSessionSnapshot(uint32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot) override;
+    WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) override;
+    WSError GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot) override;
 
 private:
     static inline BrokerDelegator<SceneSessionManagerProxy> delegator_;

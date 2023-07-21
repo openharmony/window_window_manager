@@ -82,8 +82,8 @@ public:
     virtual WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) = 0;
     virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session) = 0;
-    virtual WSError DestroyAndDisconnectSpecificSession(const uint64_t& persistentId) = 0;
+        sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session) = 0;
+    virtual WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId) = 0;
     virtual WSError OnNeedAvoid(bool status) = 0;
     virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type) = 0;
     virtual WSError RequestSessionBack() = 0;

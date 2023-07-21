@@ -23,20 +23,20 @@ namespace OHOS {
 namespace Rosen {
 class EventStage {
 public:
-    void SetAnrStatus(uint64_t persistentId, bool status);
-    bool CheckAnrStatus(uint64_t persistentId);
-    void SaveANREvent(uint64_t persistentId, int32_t id, int64_t time, int32_t timerId);
-    std::vector<int32_t> GetTimerIds(uint64_t persistentId);
-    std::list<int32_t> DelEvents(uint64_t persistentId, int32_t id);
-    void OnSessionLost(uint64_t persistentId);
+    void SetAnrStatus(int32_t persistentId, bool status);
+    bool CheckAnrStatus(int32_t persistentId);
+    void SaveANREvent(int32_t persistentId, int32_t id, int64_t time, int32_t timerId);
+    std::vector<int32_t> GetTimerIds(int32_t persistentId);
+    std::list<int32_t> DelEvents(int32_t persistentId, int32_t id);
+    void OnSessionLost(int32_t persistentId);
 private:
     struct EventTime {
         int32_t id { 0 };
         int64_t eventTime { 0 };
         int32_t timerId { -1 };
     };
-    std::map<uint64_t, std::vector<EventTime>> events_;
-    std::map<uint64_t, bool> isAnrProcess_;
+    std::map<int32_t, std::vector<EventTime>> events_;
+    std::map<int32_t, bool> isAnrProcess_;
 };
 } // namespace Rosen
 } // namespace OHOS
