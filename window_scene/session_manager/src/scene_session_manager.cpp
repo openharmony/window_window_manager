@@ -1343,14 +1343,39 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
         << "-------------------------------------" << std::endl;
     oss << "WindowName           DisplayId Pid     WinId Type Mode Flag ZOrd Orientation [ x    y    w    h    ]"
         << std::endl;
-    for (auto& iter : sceneSessionMap_) {
-        auto pSession = iter.second;
-        if (pSession == nullptr) {
+
+    std::vector<sptr<SceneSession>> allSession;
+    std::vector<sptr<SceneSession>> backgroundSession;
+    for (const auto& elem : sceneSessionMap_) {
+        auto curSession = elem.second;
+        if (curSession == nullptr) {
             continue;
         }
-        uint32_t zOrder = pSession->GetZOrder();
-        WSRect rect = pSession->GetSessionRect();
-        std::string sName = pSession->GetWindowName();
+        if (curSession->IsVisible() || curSession->GetSessionState() == SessionState::STATE_ACTIVE ||
+            curSession->GetSessionState() == SessionState::STATE_FOREGROUND) {
+            allSession.push_back(curSession);
+        } else {
+            backgroundSession.push_back(curSession);
+        }
+    }
+    allSession.insert(allSession.end(), backgroundSession.begin(), backgroundSession.end());
+    uint32_t count = 0;
+    for (const auto& session : allSession) {
+        if (session == nullptr) {
+            continue;
+        }
+        if (count == static_cast<uint32_t>(allSession.size() - backgroundSession.size())) {
+            oss << "---------------------------------------------------------------------------------------"
+                << std::endl;
+        }
+        uint32_t zOrder = session->GetZOrder();
+        WSRect rect = session->GetSessionRect();
+        std::string sName;
+        if (session->GetSessionInfo().isSystem_) {
+            sName = session->GetSessionInfo().abilityName_;
+        } else {
+            sName = session->GetWindowName();
+        }
         uint32_t displayId = 0;
         uint32_t flag = 0;
         uint32_t orientation = 0;
@@ -1359,10 +1384,10 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
         // std::setw is used to set the output width and different width values are set to keep the format aligned.
         oss << std::left << std::setw(WINDOW_NAME_MAX_WIDTH) << windowName
             << std::left << std::setw(DISPLAY_NAME_MAX_WIDTH) << displayId
-            << std::left << std::setw(PID_MAX_WIDTH) << pSession->GetCallingPid()
-            << std::left << std::setw(PARENT_ID_MAX_WIDTH) << pSession->GetPersistentId()
-            << std::left << std::setw(VALUE_MAX_WIDTH) << static_cast<uint32_t>(pSession->GetWindowType())
-            << std::left << std::setw(VALUE_MAX_WIDTH) << static_cast<uint32_t>(pSession->GetWindowMode())
+            << std::left << std::setw(PID_MAX_WIDTH) << session->GetCallingPid()
+            << std::left << std::setw(PARENT_ID_MAX_WIDTH) << session->GetPersistentId()
+            << std::left << std::setw(VALUE_MAX_WIDTH) << static_cast<uint32_t>(session->GetWindowType())
+            << std::left << std::setw(VALUE_MAX_WIDTH) << static_cast<uint32_t>(session->GetWindowMode())
             << std::left << std::setw(VALUE_MAX_WIDTH) << flag
             << std::left << std::setw(VALUE_MAX_WIDTH) << zOrder
             << std::left << std::setw(ORIEN_MAX_WIDTH) << orientation
@@ -1373,6 +1398,7 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
             << std::left << std::setw(VALUE_MAX_WIDTH) << rect.height_
             << "]"
             << std::endl;
+        count++;
     }
     oss << "Focus window: " << GetFocusedSession() << std::endl;
     oss << "total window num: " << sceneSessionMap_.size() << std::endl;
