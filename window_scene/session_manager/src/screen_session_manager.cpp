@@ -16,6 +16,7 @@
 #include "session_manager/include/screen_session_manager.h"
 
 #include <hitrace_meter.h>
+#include <iomanip>
 #include <parameters.h>
 #include <transaction/rs_interfaces.h>
 #include <xcollie/watchdog.h>
@@ -253,6 +254,9 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (auto sessionIt : screenSessionMap_) {
         auto screenSession = sessionIt.second;
+        if (screenSession == nullptr) {
+            continue;
+        }
         sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
         if (displayId == displayInfo->GetDisplayId()) {
             return displayInfo;
@@ -1648,5 +1652,91 @@ void ScreenSessionManager::SetDisplayBoundary(const sptr<ScreenSession> screenSe
     } else {
         WLOGFW("screenSession or screenCutoutController_ is null");
     }
+}
+
+std::string ScreenSessionManager::TransferTypeToString(ScreenType type) const
+{
+    std::string screenType;
+    switch (type) {
+        case ScreenType::REAL:
+            screenType = "REAL";
+            break;
+        case ScreenType::VIRTUAL:
+            screenType = "VIRTUAL";
+            break;
+        default:
+            screenType = "UNDEFINED";
+            break;
+    }
+    return screenType;
+}
+
+void ScreenSessionManager::DumpAllScreensInfo(std::string& dumpInfo)
+{
+    std::ostringstream oss;
+    oss << "--------------------------------------Free Screen"
+        << "--------------------------------------"
+        << std::endl;
+    oss << "ScreenName           Type     IsGroup DmsId RsId                 ActiveIdx VPR Rotation Orientation "
+        << "RequestOrientation NodeId               "
+        << std::endl;
+    for (auto sessionIt : screenSessionMap_) {
+        auto screenSession = sessionIt.second;
+        if (screenSession == nullptr) {
+            continue;
+        }
+        sptr<ScreenInfo> screenInfo = GetScreenInfoById(sessionIt.first);
+        if (screenInfo == nullptr) {
+            continue;
+        }
+        std::string screenType = TransferTypeToString(screenInfo->GetType());
+        NodeId nodeId = (screenSession->GetDisplayNode() == nullptr) ?
+            SCREEN_ID_INVALID : screenSession->GetDisplayNode()->GetId();
+        oss << std::left << std::setw(21) << screenInfo->GetName()
+            << std::left << std::setw(9) << screenType
+            << std::left << std::setw(8) << (screenSession->isScreenGroup_ ? "true" : "false")
+            << std::left << std::setw(6) << screenSession->screenId_
+            << std::left << std::setw(21) << screenSession->rsId_
+            << std::left << std::setw(10) << screenSession->activeIdx_
+            << std::left << std::setw(4) << screenInfo->GetVirtualPixelRatio()
+            << std::left << std::setw(9) << static_cast<uint32_t>(screenInfo->GetRotation())
+            << std::left << std::setw(12) << static_cast<uint32_t>(screenInfo->GetOrientation())
+            << std::left << std::setw(19) << static_cast<uint32_t>(screenSession->GetScreenRequestedOrientation())
+            << std::left << std::setw(21) << nodeId
+            << std::endl;
+    }
+    oss << "total screen num: " << screenSessionMap_.size() << std::endl;
+    dumpInfo.append(oss.str());
+}
+
+void ScreenSessionManager::DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo)
+{
+    std::ostringstream oss;
+    sptr<ScreenSession> session = GetScreenSession(id);
+    if (!session) {
+        WLOGFE("Get screen session failed.");
+        oss << "This screen id is invalid.";
+        dumpInfo.append(oss.str());
+        return;
+    }
+    sptr<ScreenInfo> screenInfo = GetScreenInfoById(id);
+    if (screenInfo == nullptr) {
+        return;
+    }
+    std::string screenType = TransferTypeToString(screenInfo->GetType());
+    NodeId nodeId = (session->GetDisplayNode() == nullptr) ?
+        SCREEN_ID_INVALID : session->GetDisplayNode()->GetId();
+    oss << "ScreenName: " << screenInfo->GetName() << std::endl;
+    oss << "Type: " << screenType << std::endl;
+    oss << "IsGroup: " << (session->isScreenGroup_ ? "true" : "false") << std::endl;
+    oss << "DmsId: " << id << std::endl;
+    oss << "RsId: " << session->rsId_ << std::endl;
+    oss << "ActiveIdx: " << session->activeIdx_ << std::endl;
+    oss << "VPR: " << screenInfo->GetVirtualPixelRatio() << std::endl;
+    oss << "Rotation: " << static_cast<uint32_t>(screenInfo->GetRotation()) << std::endl;
+    oss << "Orientation: " << static_cast<uint32_t>(screenInfo->GetOrientation()) << std::endl;
+    oss << "RequestOrientation: " << static_cast<uint32_t>(session->GetScreenRequestedOrientation()) << std::endl;
+    oss << "NodeId: " << nodeId << std::endl;
+    dumpInfo.append(oss.str());
 }
 } // namespace OHOS::Rosen

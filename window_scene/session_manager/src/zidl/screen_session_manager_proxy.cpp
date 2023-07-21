@@ -1098,4 +1098,51 @@ DMError OHOS::Rosen::ScreenSessionManagerProxy::HasPrivateWindow(DisplayId displ
     hasPrivateWindow = reply.ReadBool();
     return ret;
 }
+
+void ScreenSessionManagerProxy::DumpAllScreensInfo(std::string& dumpInfo)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is null");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_DUMP_ALL_SCREEN),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("failed");
+        return;
+    }
+    dumpInfo = reply.ReadString();
+}
+void ScreenSessionManagerProxy::DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is null");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("failed");
+        return;
+    }
+    if (!data.WriteUint64(id)) {
+        WLOGFE("write ScreenId failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_DUMP_SPECIAL_SCREEN),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("failed");
+        return;
+    }
+    dumpInfo = reply.ReadString();
+}
 } // namespace OHOS::Rosen
