@@ -60,6 +60,7 @@ public:
         TRANS_ID_TERMINATE_SESSION_NEW,
         TRANS_ID_GET_SESSION_DUMP_INFO,
         TRANS_ID_UPDATE_AVOIDAREA_LISTENER,
+        TRANS_ID_GET_SESSION_SNAPSHOT,
     };
 
     virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -78,6 +79,7 @@ public:
     virtual WSError GetFocusSessionToken(sptr<IRemoteObject> &token) = 0;
     virtual WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) = 0;
     virtual WSError GetSessionDumpInfo(const sptr<DumpParam> &param, std::string& info) = 0;
+    virtual WSError GetSessionSnapshot(uint32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot) = 0;
 
     // interfaces of IWindowManager
     WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
