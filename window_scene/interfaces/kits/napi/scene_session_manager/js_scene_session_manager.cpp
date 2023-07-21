@@ -381,7 +381,7 @@ NativeValue* JsSceneSessionManager::OnUpdateFocus(NativeEngine& engine, NativeCa
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
-    int64_t persistentId;
+    int32_t persistentId;
     if (!ConvertFromJsValue(engine, info.argv[0], persistentId)) {
         WLOGFE("[NAPI]Failed to convert parameter to persistentId");
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
@@ -395,7 +395,7 @@ NativeValue* JsSceneSessionManager::OnUpdateFocus(NativeEngine& engine, NativeCa
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
-    SceneSessionManager::GetInstance().UpdateFocus(static_cast<uint64_t>(persistentId), isFocused);
+    SceneSessionManager::GetInstance().UpdateFocus(persistentId, isFocused);
     return engine.CreateUndefined();
 }
 
@@ -745,14 +745,14 @@ NativeValue* JsSceneSessionManager::OnGetSessionSnapshotFilePath(NativeEngine& e
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
-    int64_t persistentId;
+    int32_t persistentId;
     if (!ConvertFromJsValue(engine, info.argv[0], persistentId)) {
         WLOGFE("[NAPI]Failed to convert parameter to persistentId");
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
-    std::string path = SceneSessionManager::GetInstance().GetSessionSnapshotFilePath(static_cast<uint64_t>(persistentId));
+    std::string path = SceneSessionManager::GetInstance().GetSessionSnapshotFilePath(persistentId);
     NativeValue* result = engine.CreateString(path.c_str(), path.length());
     return result;
 }

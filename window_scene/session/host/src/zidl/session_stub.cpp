@@ -164,7 +164,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
     WSError errCode = Connect(sessionStage, eventChannel, surfaceNode, systemConfig, property, token);
     reply.WriteParcelable(&systemConfig);
     if (property) {
-        reply.WriteUint64(property->GetPersistentId());
+        reply.WriteInt32(property->GetPersistentId());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -221,7 +221,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
     abilitySessionInfo->requestCode = data.ReadInt32();
-    abilitySessionInfo->persistentId = data.ReadUint64();
+    abilitySessionInfo->persistentId = data.ReadInt32();
     abilitySessionInfo->state = static_cast<AAFwk::CallToState>(data.ReadInt32());
     abilitySessionInfo->uiAbilityId = data.ReadInt64();
     if (data.ReadBool()) {
@@ -276,14 +276,14 @@ int SessionStub::HandleCreateAndConnectSpecificSession(MessageParcel& data, Mess
     } else {
         WLOGFW("Property not exist!");
     }
-    uint64_t persistentId = INVALID_SESSION_ID;
+    auto persistentId = INVALID_SESSION_ID;
     sptr<ISession> sceneSession;
     CreateAndConnectSpecificSession(sessionStage, eventChannel, surfaceNode,
         property, persistentId, sceneSession);
     if (sceneSession== nullptr) {
         return ERR_INVALID_STATE;
     }
-    reply.WriteUint64(persistentId);
+    reply.WriteInt32(persistentId);
     reply.WriteRemoteObject(sceneSession->AsObject());
     reply.WriteUint32(static_cast<uint32_t>(WSError::WS_OK));
     return ERR_NONE;
@@ -291,7 +291,7 @@ int SessionStub::HandleCreateAndConnectSpecificSession(MessageParcel& data, Mess
 
 int SessionStub::HandleDestroyAndDisconnectSpecificSession(MessageParcel& data, MessageParcel& reply)
 {
-    uint64_t persistentId = data.ReadUint64();
+    auto persistentId = data.ReadUint32();
     const WSError& ret = DestroyAndDisconnectSpecificSession(persistentId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;

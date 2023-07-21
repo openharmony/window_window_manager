@@ -69,7 +69,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
 void IntentionEventManager::InputEventListener::OnInputEvent(
     std::shared_ptr<MMI::KeyEvent> keyEvent) const
 {
-    uint64_t focusedSessionId = SceneSessionManager::GetInstance().GetFocusedSession();
+    auto focusedSessionId = SceneSessionManager::GetInstance().GetFocusedSession();
     if (focusedSessionId == INVALID_SESSION_ID) {
         WLOGFE("focusedSessionId is invalid");
         return;

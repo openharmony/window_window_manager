@@ -108,14 +108,14 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
     } else {
         WLOGFW("Property not exist!");
     }
-    uint64_t persistentId = INVALID_SESSION_ID;
+    auto persistentId = INVALID_SESSION_ID;
     sptr<ISession> sceneSession;
     CreateAndConnectSpecificSession(sessionStage, eventChannel, surfaceNode,
         property, persistentId, sceneSession);
     if (sceneSession== nullptr) {
         return ERR_INVALID_STATE;
     }
-    reply.WriteUint64(persistentId);
+    reply.WriteInt32(persistentId);
     reply.WriteRemoteObject(sceneSession->AsObject());
     reply.WriteUint32(static_cast<uint32_t>(WSError::WS_OK));
     return ERR_NONE;
@@ -124,7 +124,7 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
 int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSession(MessageParcel &data, MessageParcel &reply)
 {
     WLOGFI("run HandleDestroyAndDisconnectSpcificSession!");
-    uint64_t persistentId = data.ReadUint64();
+    auto persistentId = data.ReadInt32();
     const WSError& ret = DestroyAndDisconnectSpecificSession(persistentId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
@@ -285,7 +285,7 @@ int SceneSessionManagerStub::HandleGetAccessibilityWindowInfo(MessageParcel &dat
 int SceneSessionManagerStub::HandleSetSessionGravity(MessageParcel &data, MessageParcel &reply)
 {
     WLOGFI("run HandleSetSessionGravity!");
-    uint64_t persistentId = data.ReadUint64();
+    auto persistentId = data.ReadInt32();
     SessionGravity gravity = static_cast<SessionGravity>(data.ReadUint32());
     uint32_t percent = data.ReadUint32();
     WSError ret = SetSessionGravity(persistentId, gravity, percent);
@@ -306,7 +306,7 @@ int SceneSessionManagerStub::HandleGetSessionDump(MessageParcel &data, MessagePa
 
 int SceneSessionManagerStub::HandleUpdateSessionAvoidAreaListener(MessageParcel& data, MessageParcel& reply)
 {
-    uint64_t persistentId = data.ReadUint64();
+    auto persistentId = data.ReadInt32();
     bool haveAvoidAreaListener = data.ReadBool();
     WSError errCode = UpdateSessionAvoidAreaListener(persistentId, haveAvoidAreaListener);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
@@ -316,7 +316,7 @@ int SceneSessionManagerStub::HandleUpdateSessionAvoidAreaListener(MessageParcel&
 int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel &data, MessageParcel &reply)
 {
     WLOGFI("run HandleBindDialogTarget!");
-    uint64_t persistentId = data.ReadUint64();
+    auto persistentId = data.ReadUint64();
     sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
     const WSError& ret = BindDialogTarget(persistentId, remoteObject);
     reply.WriteUint32(static_cast<uint32_t>(ret));
@@ -326,7 +326,7 @@ int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel &data, Message
 int SceneSessionManagerStub::HandleGetSessionSnapshot(MessageParcel &data, MessageParcel &reply)
 {
     WLOGFI("run HandleGetSessionSnapshot!");
-    uint32_t persistentId = data.ReadUint32();
+    int32_t persistentId = data.ReadInt32();
     std::shared_ptr<Media::PixelMap> snapshot = std::make_shared<Media::PixelMap>();
     const WSError& ret = GetSessionSnapshot(persistentId, snapshot);
     reply.WriteParcelable(snapshot.get());

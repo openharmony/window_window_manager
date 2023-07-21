@@ -40,7 +40,7 @@ public:
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     WSError TransferFocusActiveEvent(bool isFocusActive) override;
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
-    WSError TransferFocusWindowId(uint32_t windowId) override;
+    WSError TransferFocusWindowId(int32_t windowId) override;
     WSError TransferFocusState(bool focusState) override;
 
     sptr<IRemoteObject> AsObject() override
@@ -64,7 +64,7 @@ WSError TestWindowEventChannel::TransferFocusActiveEvent(bool isFocusActive)
     return WSError::WS_OK;
 }
 
-WSError TestWindowEventChannel::TransferFocusWindowId(uint32_t windowId)
+WSError TestWindowEventChannel::TransferFocusWindowId(int32_t windowId)
 {
     return WSError::WS_OK;
 }
@@ -545,7 +545,7 @@ HWTEST_F(WindowSessionTest, DestroyAndDisconnectSpecificSession01, Function | Sm
     SessionInfo info;
     info.abilityName_ = "testSession1";
     info.bundleName_ = "testSession3";
-    uint64_t persistentId = 0;
+    int32_t persistentId = 0;
     sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     auto result = scensession->DestroyAndDisconnectSpecificSession(persistentId);
@@ -555,7 +555,7 @@ HWTEST_F(WindowSessionTest, DestroyAndDisconnectSpecificSession01, Function | Sm
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
     int resultValue = 0;
-    specificCallback_->onDestroy_ = [&resultValue](const uint64_t &persistentId) -> WSError
+    specificCallback_->onDestroy_ = [&resultValue](const int32_t &persistentId) -> WSError
     {
         resultValue = 1;
         return WSError::WS_OK;
@@ -579,7 +579,7 @@ HWTEST_F(WindowSessionTest, CreateAndConnectSpecificSession01, Function | SmallT
     sptr<Rosen::ISession> session_;
     auto surfaceNode_ = CreateRSSurfaceNode();
     sptr<WindowSessionProperty> property_ = nullptr;
-    uint64_t persistentId = 0;
+    int32_t persistentId = 0;
     sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
     EXPECT_NE(mockSessionStage, nullptr);
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
@@ -630,7 +630,7 @@ HWTEST_F(WindowSessionTest, CreateAndConnectSpecificSession2, Function | SmallTe
     sptr<Rosen::ISession> session_;
     auto surfaceNode_ = CreateRSSurfaceNode();
     sptr<WindowSessionProperty> property_ = nullptr;
-    uint64_t persistentId = 0;
+    int32_t persistentId = 0;
     sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
     EXPECT_NE(mockSessionStage, nullptr);
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =

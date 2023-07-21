@@ -213,9 +213,9 @@ WSError SceneSession::RaiseToAppTop()
 
 WSError SceneSession::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    sptr<WindowSessionProperty> property, uint64_t& persistentId, sptr<ISession>& session)
+    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session)
 {
-    WLOGFI("CreateAndConnectSpecificSession id: %{public}" PRIu64 "", GetPersistentId());
+    WLOGFI("CreateAndConnectSpecificSession id: %{public}d", GetPersistentId());
     sptr<SceneSession> sceneSession;
     if (specificCallback_ != nullptr) {
         sceneSession = specificCallback_->onCreate_(sessionInfo_, property);
@@ -235,7 +235,7 @@ WSError SceneSession::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
     return errCode;
 }
 
-WSError SceneSession::DestroyAndDisconnectSpecificSession(const uint64_t& persistentId)
+WSError SceneSession::DestroyAndDisconnectSpecificSession(const int32_t& persistentId)
 {
     WSError ret = WSError::WS_OK;
     if (specificCallback_ != nullptr) {
@@ -556,7 +556,7 @@ bool SceneSession::IsKeepScreenOn() const
 
 std::string SceneSession::GetSessionSnapshotFilePath()
 {
-    WLOGFI("GetSessionSnapshotFilePath id %{public}" PRIu64 "", GetPersistentId());
+    WLOGFI("GetSessionSnapshotFilePath id %{public}d", GetPersistentId());
     if (Session::GetSessionState() < SessionState::STATE_BACKGROUND) {
         WLOGFI("GetSessionSnapshotFilePath UpdateSnapshot");
         Session::UpdateSnapshot();
@@ -588,7 +588,7 @@ WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 
 void SceneSession::NotifyIsCustomAnimatiomPlaying(bool isPlaying)
 {
-    WLOGFI("id %{public}" PRIu64 " %{public}u", GetPersistentId(), isPlaying);
+    WLOGFI("id %{public}d %{public}u", GetPersistentId(), isPlaying);
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onIsCustomAnimationPlaying_) {
         sessionChangeCallback_->onIsCustomAnimationPlaying_(isPlaying);
     }
@@ -596,15 +596,15 @@ void SceneSession::NotifyIsCustomAnimatiomPlaying(bool isPlaying)
 
 WSError SceneSession::UpdateWindowSceneAfterCustomAnimation(bool isAdd)
 {
-    WLOGFI("id %{public}" PRIu64 "", GetPersistentId());
+    WLOGFI("id %{public}d", GetPersistentId());
     if (isAdd) {
         if (!setWindowScenePatternFunc_ || !setWindowScenePatternFunc_->setOpacityFunc_) {
-            WLOGFE("SetOpacityFunc not register %{public}" PRIu64 "", GetPersistentId());
+            WLOGFE("SetOpacityFunc not register %{public}d", GetPersistentId());
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         setWindowScenePatternFunc_->setOpacityFunc_(1.0f);
     } else {
-        WLOGFI("background after custom animation id %{public}" PRIu64 "", GetPersistentId());
+        WLOGFI("background after custom animation id %{public}d", GetPersistentId());
         // since background will remove surfaceNode
         Background();
         NotifyIsCustomAnimatiomPlaying(false);

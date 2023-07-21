@@ -22,7 +22,7 @@ namespace OHOS {
 namespace Rosen {
 class DfxHisysevent {
 public:
-    static void ApplicationBlockInput(int32_t eventId, int32_t pid, uint64_t persistentId);
+    static void ApplicationBlockInput(int32_t eventId, int32_t pid, int32_t persistentId);
 };
 } // namespace Rosen
 } // namespace OHOS

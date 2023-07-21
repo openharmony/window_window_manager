@@ -56,7 +56,7 @@ public:
         }
     };
 
-    MoveDragController(uint64_t persistentId);
+    MoveDragController(int32_t persistentId);
     ~MoveDragController();
 
     void SetVsyncHandleListenser(const NotifyVsyncHandleFunc& func);
@@ -112,7 +112,7 @@ private:
     MoveDragProperty moveDragProperty_ = { -1, -1, -1, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } };
     std::shared_ptr<VsyncCallback> vsyncCallback_ = std::make_shared<VsyncCallback>(VsyncCallback());
     NotifyVsyncHandleFunc vsyncHandleFunc_;
-    uint64_t persistentId_;
+    int32_t persistentId_;
 
     enum class DragType : uint32_t {
         DRAG_UNDEFINED,
