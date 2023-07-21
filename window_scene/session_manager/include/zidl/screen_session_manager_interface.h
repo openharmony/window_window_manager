@@ -91,6 +91,8 @@ public:
         std::shared_ptr<class RSSurfaceNode>& surfaceNode, bool onTop = true) override { return DMError::DM_OK; }
     virtual DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId,
         std::shared_ptr<class RSSurfaceNode>& surfaceNode) override { return DMError::DM_OK; }
+    virtual void DumpAllScreensInfo(std::string& dumpInfo) {}
+    virtual void DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo) {}
 };
 
 } // namespace Rosen

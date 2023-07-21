@@ -317,6 +317,19 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteBool(hasPrivateWindow);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_DUMP_ALL_SCREEN: {
+            std::string dumpInfo;
+            DumpAllScreensInfo(dumpInfo);
+            reply.WriteString(dumpInfo);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_DUMP_SPECIAL_SCREEN: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            std::string dumpInfo;
+            DumpSpecialScreenInfo(screenId, dumpInfo);
+            reply.WriteString(dumpInfo);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
