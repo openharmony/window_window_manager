@@ -80,7 +80,7 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
         JsSceneSessionManager::RequestSceneSessionByCall);
     BindNativeFunction(*engine, *object, "startAbilityBySpecified", moduleName,
         JsSceneSessionManager::StartAbilityBySpecified);
-    BindNativeFunction(*engine, *object, "getSessionSnapshot", moduleName, JsSceneSessionManager::GetSessionSnapshot);
+    BindNativeFunction(*engine, *object, "getSessionSnapshot", moduleName, JsSceneSessionManager::GetSessionSnapshotFilePath);
     BindNativeFunction(*engine, *object, "InitWithRenderServiceAdded", moduleName,
         JsSceneSessionManager::InitWithRenderServiceAdded);
     BindNativeFunction(*engine, *object, "perfRequestEx", moduleName,
@@ -303,11 +303,11 @@ NativeValue* JsSceneSessionManager::GetWindowSceneConfig(NativeEngine* engine, N
     return (me != nullptr) ? me->OnGetWindowSceneConfig(*engine, *info) : nullptr;
 }
 
-NativeValue* JsSceneSessionManager::GetSessionSnapshot(NativeEngine* engine, NativeCallbackInfo* info)
+NativeValue* JsSceneSessionManager::GetSessionSnapshotFilePath(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGI("[NAPI]GetSessionSnapshot");
+    WLOGI("[NAPI]GetSessionSnapshotFilePath");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
-    return (me != nullptr) ? me->OnGetSessionSnapshot(*engine, *info) : nullptr;
+    return (me != nullptr) ? me->OnGetSessionSnapshotFilePath(*engine, *info) : nullptr;
 }
 
 NativeValue* JsSceneSessionManager::InitWithRenderServiceAdded(NativeEngine* engine, NativeCallbackInfo* info)
@@ -737,7 +737,7 @@ NativeValue* JsSceneSessionManager::OnGetWindowSceneConfig(NativeEngine& engine,
     return jsWindowSceneConfigObj;
 }
 
-NativeValue* JsSceneSessionManager::OnGetSessionSnapshot(NativeEngine& engine, NativeCallbackInfo& info)
+NativeValue* JsSceneSessionManager::OnGetSessionSnapshotFilePath(NativeEngine& engine, NativeCallbackInfo& info)
 {
     if (info.argc < 1) { // 1: params num
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
@@ -752,7 +752,7 @@ NativeValue* JsSceneSessionManager::OnGetSessionSnapshot(NativeEngine& engine, N
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
-    std::string path = SceneSessionManager::GetInstance().GetSessionSnapshot(persistentId);
+    std::string path = SceneSessionManager::GetInstance().GetSessionSnapshotFilePath(persistentId);
     NativeValue* result = engine.CreateString(path.c_str(), path.length());
     return result;
 }

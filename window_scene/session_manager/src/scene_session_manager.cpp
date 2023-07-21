@@ -1629,6 +1629,18 @@ WSError SceneSessionManager::TerminateSessionNew(const sptr<AAFwk::SessionInfo> 
     return errCode;
 }
 
+WSError SceneSessionManager::GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot)
+{
+    WLOGFI("run GetSessionSnapshot");
+    sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
+    WSError errCode = sceneSession->UpdateSnapshot();
+    if (errCode != WSError::WS_OK) {
+        return errCode;
+    }
+    snapshot = sceneSession->GetSnapshot();
+    return WSError::WS_OK;
+}
+
 WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionListener> sessionListener)
 {
     WLOGFI("run RegisterSessionListener");
@@ -1981,7 +1993,7 @@ void SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     infos.emplace_back(info);
 }
 
-std::string SceneSessionManager::GetSessionSnapshot(int32_t persistentId)
+std::string SceneSessionManager::GetSessionSnapshotFilePath(int32_t persistentId)
 {
     WLOGFI("GetSessionSnapshot persistentId %{public}d", persistentId);
     auto sceneSession = GetSceneSession(persistentId);
@@ -1996,7 +2008,7 @@ std::string SceneSessionManager::GetSessionSnapshot(int32_t persistentId)
             WLOGFE("session is nullptr");
             return std::string("");
         }
-        return scnSession->GetSessionSnapshot();
+        return scnSession->GetSessionSnapshotFilePath();
     };
     return taskScheduler_->PostSyncTask(task);
 }
@@ -2074,6 +2086,10 @@ void SceneSessionManager::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclu
 #endif
         WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
             session->GetWindowId(), isVisible);
+        if (session->GetWindowSessionProperty()->GetWindowFlags() &
+        static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) {
+            CheckAndNotifyWaterMarkChangedResult(isVisible);
+        }
 }
         if (windowVisibilityInfos.size() != 0) {
             WLOGI("Notify windowvisibilityinfo changed start");
@@ -2111,6 +2127,10 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
             sceneSession->GetCallingPid(), sceneSession->GetCallingUid(), false, sceneSession->GetWindowType()));
         WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
             sceneSession->GetWindowId(), sceneSession->GetVisible());
+        if (sceneSession->GetWindowSessionProperty()->GetWindowFlags() &
+        static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) {
+            CheckAndNotifyWaterMarkChangedResult(false);
+        }
         SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
 }

@@ -554,11 +554,11 @@ bool SceneSession::IsKeepScreenOn() const
     return property_->IsKeepScreenOn();
 }
 
-std::string SceneSession::GetSessionSnapshot()
+std::string SceneSession::GetSessionSnapshotFilePath()
 {
-    WLOGFI("GetSessionSnapshot id %{public}d", GetPersistentId());
+    WLOGFI("GetSessionSnapshotFilePath id %{public}d", GetPersistentId());
     if (Session::GetSessionState() < SessionState::STATE_BACKGROUND) {
-        WLOGFI("GetSessionSnapshot UpdateSnapshot");
+        WLOGFI("GetSessionSnapshotFilePath UpdateSnapshot");
         Session::UpdateSnapshot();
         scenePersistence_->SaveSnapshot(GetSnapshot());
     }

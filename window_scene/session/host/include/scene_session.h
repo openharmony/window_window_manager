@@ -102,7 +102,7 @@ public:
     WSError SetAspectRatio(float ratio) override;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
-    std::string GetSessionSnapshot();
+    std::string GetSessionSnapshotFilePath();
     void RegisterSetWindowPatternFunc(sptr<SetWindowScenePatternFunc> func)
     {
         setWindowScenePatternFunc_ = func;
