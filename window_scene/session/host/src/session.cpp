@@ -380,7 +380,6 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property)
     if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         NotifyCallingSessionForeground();
     }
-    NotifyForeground();
     return WSError::WS_OK;
 }
 
@@ -1085,5 +1084,15 @@ WSError Session::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 WSError Session::UpdateWindowSceneAfterCustomAnimation(bool isAdd)
 {
     return WSError::WS_OK;
+}
+
+void Session::SetShowRecent(bool showRecent)
+{
+    showRecent_ = showRecent;
+}
+
+bool Session::GetShowRecent() const
+{
+    return showRecent_;
 }
 } // namespace OHOS::Rosen
