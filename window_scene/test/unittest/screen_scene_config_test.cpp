@@ -311,7 +311,7 @@ HWTEST_F(ScreenSceneConfigTest, GetCurvedScreenBoundaryConfig, Function | SmallT
 HWTEST_F(ScreenSceneConfigTest, GetCutoutBoundaryRect, Function | SmallTest | Level3)
 {
     auto result = ScreenSceneConfig::GetCutoutBoundaryRect();
-    ASSERT_FALSE( result.size()>0);
+    ASSERT_FALSE(result.size() > 0);
 }
 
 /**
