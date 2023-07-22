@@ -209,7 +209,7 @@ struct WindowAnimationConfig {
 };
 
 struct StartingWindowAnimationConfig {
-    bool enabled_ = false;
+    bool enabled_ = true;
     int duration_ = 200;
     std::string curve_ = "linear";
     float opacityStart_ = 1;
