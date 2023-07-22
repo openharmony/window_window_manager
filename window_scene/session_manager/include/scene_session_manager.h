@@ -169,6 +169,8 @@ private:
     void RegisterInputMethodShownFunc(const sptr<SceneSession>& sceneSession);
     void OnInputMethodShown(const int32_t& persistentId);
     void RegisterInputMethodHideFunc(const sptr<SceneSession>& sceneSession);
+    bool IsSessionVisible(const sptr<SceneSession>& session);
+    void DumpSessionInfo(const sptr<SceneSession>& session, std::ostringstream& oss);
 
     sptr<RootSceneSession> rootSceneSession_;
     std::map<int32_t, sptr<SceneSession>> sceneSessionMap_;
@@ -189,7 +191,7 @@ private:
 
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
-    
+
     std::shared_ptr<EventRunner> eventLoop_;
     std::shared_ptr<EventHandler> eventHandler_;
     bool isReportTaskStart_ = false;

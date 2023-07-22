@@ -1335,6 +1335,49 @@ static bool IsValidDigitString(const std::string& windowIdStr)
     return true;
 }
 
+bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
+{
+    if (session->IsVisible() || session->GetSessionState() == SessionState::STATE_ACTIVE ||
+        session->GetSessionState() == SessionState::STATE_FOREGROUND) {
+        return true;
+    }
+    return false;
+}
+
+void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std::ostringstream& oss)
+{
+    int zOrder = IsSessionVisible(session) ? session->GetZOrder() : -1;
+    WSRect rect = session->GetSessionRect();
+    std::string sName;
+    if (session->GetSessionInfo().isSystem_) {
+        sName = session->GetSessionInfo().abilityName_;
+    } else {
+        sName = session->GetWindowName();
+    }
+    uint32_t displayId = 0;
+    uint32_t flag = 0;
+    uint32_t orientation = 0;
+    const std::string& windowName = sName.size() <= WINDOW_NAME_MAX_LENGTH ?
+        sName : sName.substr(0, WINDOW_NAME_MAX_LENGTH);
+    // std::setw is used to set the output width and different width values are set to keep the format aligned.
+    oss << std::left << std::setw(WINDOW_NAME_MAX_WIDTH) << windowName
+        << std::left << std::setw(DISPLAY_NAME_MAX_WIDTH) << displayId
+        << std::left << std::setw(PID_MAX_WIDTH) << session->GetCallingPid()
+        << std::left << std::setw(PARENT_ID_MAX_WIDTH) << session->GetPersistentId()
+        << std::left << std::setw(VALUE_MAX_WIDTH) << static_cast<uint32_t>(session->GetWindowType())
+        << std::left << std::setw(VALUE_MAX_WIDTH) << static_cast<uint32_t>(session->GetWindowMode())
+        << std::left << std::setw(VALUE_MAX_WIDTH) << flag
+        << std::left << std::setw(VALUE_MAX_WIDTH) << zOrder
+        << std::left << std::setw(ORIEN_MAX_WIDTH) << orientation
+        << "[ "
+        << std::left << std::setw(VALUE_MAX_WIDTH) << rect.posX_
+        << std::left << std::setw(VALUE_MAX_WIDTH) << rect.posY_
+        << std::left << std::setw(VALUE_MAX_WIDTH) << rect.width_
+        << std::left << std::setw(VALUE_MAX_WIDTH) << rect.height_
+        << "]"
+        << std::endl;
+}
+
 WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
 {
     int32_t screenGroupId = 0;
@@ -1351,8 +1394,7 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
         if (curSession == nullptr) {
             continue;
         }
-        if (curSession->IsVisible() || curSession->GetSessionState() == SessionState::STATE_ACTIVE ||
-            curSession->GetSessionState() == SessionState::STATE_FOREGROUND) {
+        if (IsSessionVisible(curSession)) {
             allSession.push_back(curSession);
         } else {
             backgroundSession.push_back(curSession);
@@ -1368,36 +1410,7 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
             oss << "---------------------------------------------------------------------------------------"
                 << std::endl;
         }
-        uint32_t zOrder = session->GetZOrder();
-        WSRect rect = session->GetSessionRect();
-        std::string sName;
-        if (session->GetSessionInfo().isSystem_) {
-            sName = session->GetSessionInfo().abilityName_;
-        } else {
-            sName = session->GetWindowName();
-        }
-        uint32_t displayId = 0;
-        uint32_t flag = 0;
-        uint32_t orientation = 0;
-        const std::string& windowName = sName.size() <= WINDOW_NAME_MAX_LENGTH ?
-            sName : sName.substr(0, WINDOW_NAME_MAX_LENGTH);
-        // std::setw is used to set the output width and different width values are set to keep the format aligned.
-        oss << std::left << std::setw(WINDOW_NAME_MAX_WIDTH) << windowName
-            << std::left << std::setw(DISPLAY_NAME_MAX_WIDTH) << displayId
-            << std::left << std::setw(PID_MAX_WIDTH) << session->GetCallingPid()
-            << std::left << std::setw(PARENT_ID_MAX_WIDTH) << session->GetPersistentId()
-            << std::left << std::setw(VALUE_MAX_WIDTH) << static_cast<uint32_t>(session->GetWindowType())
-            << std::left << std::setw(VALUE_MAX_WIDTH) << static_cast<uint32_t>(session->GetWindowMode())
-            << std::left << std::setw(VALUE_MAX_WIDTH) << flag
-            << std::left << std::setw(VALUE_MAX_WIDTH) << zOrder
-            << std::left << std::setw(ORIEN_MAX_WIDTH) << orientation
-            << "[ "
-            << std::left << std::setw(VALUE_MAX_WIDTH) << rect.posX_
-            << std::left << std::setw(VALUE_MAX_WIDTH) << rect.posY_
-            << std::left << std::setw(VALUE_MAX_WIDTH) << rect.width_
-            << std::left << std::setw(VALUE_MAX_WIDTH) << rect.height_
-            << "]"
-            << std::endl;
+        DumpSessionInfo(session, oss);
         count++;
     }
     oss << "Focus window: " << GetFocusedSession() << std::endl;
@@ -1969,8 +1982,7 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
             state = %{public}d, visible = %{public}d", sceneSession->GetWindowName().c_str(),
             sceneSession->GetSessionInfo().isSystem_, iter->first, sceneSession->GetWindowType(),
             sceneSession->GetSessionState(), sceneSession->IsVisible());
-        if (sceneSession->IsVisible() || sceneSession->GetSessionState() == SessionState::STATE_ACTIVE
-            || sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND) {
+        if (IsSessionVisible(sceneSession)) {
             FillWindowInfo(infos, iter->second);
         }
     }
