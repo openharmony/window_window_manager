@@ -400,7 +400,7 @@ void MoveDragController::HandleDragEvent(DisplayId displayId, int32_t posX, int3
     WindowManagerService::GetInstance().UpdateProperty(windowProperty_, PropertyChangeAction::ACTION_UPDATE_RECT, true);
 }
 
-void MoveDragController::HandleMoveEvent(int32_t posX, int32_t posY,
+void MoveDragController::HandleMoveEvent(DisplayId displayId, int32_t posX, int32_t posY,
                                          int32_t pointId, int32_t sourceType)
 {
     if (moveDragProperty_ == nullptr) {
@@ -419,6 +419,9 @@ void MoveDragController::HandleMoveEvent(int32_t posX, int32_t posY,
 
     const Rect& oriRect = moveDragProperty_->startPointRect_;
     Rect newRect = { targetX, targetY, oriRect.width_, oriRect.height_ };
+    if (limitRectMap_.find(displayId) != limitRectMap_.end()) {
+        newRect.posY_ = std::max(newRect.posY_, limitRectMap_[displayId].posY_);
+    }
     WLOGFD("[WMS] HandleMoveEvent, id: %{public}u, newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
         windowProperty_->GetWindowId(), newRect.posX_, newRect.posY_, newRect.width_, newRect.height_);
     windowProperty_->SetRequestRect(newRect);
@@ -462,7 +465,7 @@ void MoveDragController::HandlePointerEvent(const std::shared_ptr<MMI::PointerEv
         }
         // ready to move or drag
         case MMI::PointerEvent::POINTER_ACTION_MOVE: {
-            HandleMoveEvent(pointPosX, pointPosY, pointId, sourceType);
+            HandleMoveEvent(targetDisplayId, pointPosX, pointPosY, pointId, sourceType);
             HandleDragEvent(targetDisplayId, pointPosX, pointPosY, pointId, sourceType);
             break;
         }
