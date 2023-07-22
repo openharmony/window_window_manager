@@ -134,12 +134,20 @@ sptr<Window> Window::Find(const std::string& windowName)
 
 sptr<Window> Window::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
 {
-    return WindowImpl::GetTopWindowWithContext(context);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return WindowSceneSessionImpl::GetTopWindowWithContext(context);
+    } else {
+        return WindowImpl::GetTopWindowWithContext(context);
+    }
 }
 
 sptr<Window> Window::GetTopWindowWithId(uint32_t mainWinId)
 {
-    return WindowImpl::GetTopWindowWithId(mainWinId);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return WindowSceneSessionImpl::GetTopWindowWithId(mainWinId);
+    } else {
+        return WindowImpl::GetTopWindowWithId(mainWinId);
+    }
 }
 
 std::vector<sptr<Window>> Window::GetSubWindow(uint32_t parentId)

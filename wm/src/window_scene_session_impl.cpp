@@ -1218,6 +1218,42 @@ void WindowSceneSessionImpl::UpdateConfigurationForAll(const std::shared_ptr<App
     }
 }
 
+sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
+{
+    if (windowSessionMap_.empty()) {
+        WLOGFE("Please create mainWindow First!");
+        return nullptr;
+    }
+    uint32_t mainWinId = INVALID_WINDOW_ID;
+    for (const auto& winPair : windowSessionMap_) {
+        auto win = winPair.second.second;
+        if (win && WindowHelper::IsMainWindow(win->GetType()) && context.get() == win->GetContext().get()) {
+            mainWinId = win->GetWindowId();
+            WLOGI("GetTopWindow Find MainWinId:%{public}u.", mainWinId);
+            return win;
+        }
+    }
+    WLOGFE("Cannot find topWindow!");
+    return nullptr;
+}
+
+sptr<Window> WindowSceneSessionImpl::GetTopWindowWithId(uint32_t mainWinId)
+{
+    if (windowSessionMap_.empty()) {
+        WLOGFE("Please create mainWindow First!");
+        return nullptr;
+    }
+    for (const auto& winPair : windowSessionMap_) {
+        auto win = winPair.second.second;
+        if (win && WindowHelper::IsMainWindow(win->GetType()) && mainWinId == win->GetWindowId()) {
+            WLOGI("GetTopWindow Find MainWinId:%{public}u.", mainWinId);
+            return win;
+        }
+    }
+    WLOGFE("Cannot find Window!");
+    return nullptr;
+}
+
 WMError WindowSceneSessionImpl::SetCornerRadius(float cornerRadius)
 {
     if (surfaceNode_ == nullptr) {
