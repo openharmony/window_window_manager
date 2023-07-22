@@ -1734,7 +1734,6 @@ HWTEST_F(WindowTest, IsAllowHaveSystemSubWindow, Function | SmallTest | Level2)
     auto ret = window->IsAllowHaveSystemSubWindow();
     ASSERT_EQ(false, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
-
 }
 
 /**

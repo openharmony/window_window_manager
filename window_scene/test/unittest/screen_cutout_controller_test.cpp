@@ -54,34 +54,33 @@ void ScreenCutoutControllerTest::TearDown()
 
 namespace {
 
-/**
- * @tc.name: CreateWaterfallRect
- * @tc.desc: CreateWaterfallRect func
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenCutoutControllerTest, CreateWaterfallRect, Function | SmallTest | Level3)
-{
-    DMRect emptyRect = { 0, 0, 0, 0 };
-    DMRect emptyRect_ = { 1,2,3,3 };
-    sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-    
-    DMRect result = controller->CreateWaterfallRect(0,0,0,0);;
-    ASSERT_EQ(result,emptyRect);
-    DMRect result_ = controller->CreateWaterfallRect(1,2,3,3);;
-    ASSERT_EQ(result_,emptyRect_);
-}
+    /**
+     * @tc.name: CreateWaterfallRect
+     * @tc.desc: CreateWaterfallRect func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, CreateWaterfallRect, Function | SmallTest | Level3)
+    {
+        DMRect emptyRect = {0, 0, 0, 0};
+        DMRect emptyRect_ = {1, 2, 3, 3};
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
 
-/**
- * @tc.name: GetScreenCutoutInfo
- * @tc.desc: GetScreenCutoutInfo func
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenCutoutControllerTest, GetScreenCutoutInfo, Function | SmallTest | Level3)
-{
-    sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-    ASSERT_NE(nullptr, controller->GetScreenCutoutInfo());   
-}
+        DMRect result = controller->CreateWaterfallRect(0, 0, 0, 0);
+        ASSERT_EQ(result, emptyRect);
+        DMRect result_ = controller->CreateWaterfallRect(1, 2, 3, 3);
+        ASSERT_EQ(result_, emptyRect_);
+    }
 
+    /**
+     * @tc.name: GetScreenCutoutInfo
+     * @tc.desc: GetScreenCutoutInfo func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, GetScreenCutoutInfo, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        ASSERT_NE(nullptr, controller->GetScreenCutoutInfo());
+    }
 }
 } // namespace Rosen
 } // namespace OHOS
