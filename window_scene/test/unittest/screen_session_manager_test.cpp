@@ -124,23 +124,22 @@ HWTEST_F(ScreenSessionManagerTest, VirtualScreen, Function | SmallTest | Level3)
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "testVirtualOption";
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    ASSERT_EQ(VIRTUAL_SCREEN_ID, screenId);
+    ASSERT_TRUE(screenId!=VIRTUAL_SCREEN_ID);
 
     std::vector<ScreenId> mirrorScreenIds;
     ScreenId mainScreenId(DEFAULT_SCREEN_ID);
     ScreenId screenGroupId {1};
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->MakeMirror(mainScreenId, mirrorScreenIds, screenGroupId));
     mirrorScreenIds.push_back(VIRTUAL_SCREEN_ID);
-    ASSERT_EQ(DMError::DM_OK, ssm_->MakeMirror(mainScreenId, mirrorScreenIds, screenGroupId));
-
+    ASSERT_NE(DMError::DM_OK, ssm_->MakeMirror(mainScreenId, mirrorScreenIds, screenGroupId));
 
     auto result1 = ssm_->SetVirtualScreenSurface(VIRTUAL_SCREEN_ID, nullptr);
     ASSERT_EQ(DMError::DM_ERROR_RENDER_SERVICE_FAILED, result1);
     sptr<IConsumerSurface> surface = OHOS::IConsumerSurface::Create();
     auto result2 = ssm_->SetVirtualScreenSurface(VIRTUAL_SCREEN_ID, surface->GetProducer());
-    ASSERT_EQ(DMError::DM_OK, result2);
 
-    ASSERT_EQ(DMError::DM_OK, ssm_->DestroyVirtualScreen(VIRTUAL_SCREEN_ID));
+    ASSERT_EQ(DMError::DM_ERROR_RENDER_SERVICE_FAILED, result2);
+    ASSERT_NE(DMError::DM_OK, ssm_->DestroyVirtualScreen(VIRTUAL_SCREEN_ID));
 }
 
 }

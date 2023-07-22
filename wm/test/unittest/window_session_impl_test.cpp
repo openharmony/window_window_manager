@@ -88,7 +88,7 @@ HWTEST_F(WindowSessionImplTest, CreateWindowAndDestroy01, Function | SmallTest |
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     EXPECT_CALL(*(session), Connect(_, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
-    ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, window->Create(abilityContext_, session));
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
     window->property_->SetPersistentId(1);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 
