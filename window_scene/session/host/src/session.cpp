@@ -405,8 +405,6 @@ WSError Session::Background()
     if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         NotifyCallingSessionBackground();
     }
-    snapshot_ = Snapshot();
-    NotifyBackground();
     return WSError::WS_OK;
 }
 
@@ -772,11 +770,6 @@ WSError Session::TransferFocusStateEvent(bool focusState)
     return windowEventChannel_->TransferFocusState(focusState);
 }
 
-std::shared_ptr<Media::PixelMap> Session::GetSnapshot() const
-{
-    return snapshot_;
-}
-
 std::shared_ptr<Media::PixelMap> Session::Snapshot()
 {
     auto callback = std::make_shared<SurfaceCaptureFuture>();
@@ -1072,12 +1065,6 @@ void Session::SetZOrder(uint32_t zOrder)
 uint32_t Session::GetZOrder()
 {
     return zOrder_;
-}
-
-WSError Session::UpdateSnapshot()
-{
-    snapshot_ = Snapshot();
-    return WSError::WS_OK;
 }
 
 WSError Session::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
