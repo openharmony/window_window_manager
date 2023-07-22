@@ -333,7 +333,7 @@ HWTEST_F(ScreenSceneConfigTest, IsWaterfallDisplay, Function | SmallTest | Level
 HWTEST_F(ScreenSceneConfigTest, GetCurvedCompressionAreaInLandscape, Function | SmallTest | Level3)
 {
     auto result = ScreenSceneConfig::GetCurvedCompressionAreaInLandscape();
-    ASSERT_TRUE(result==0);
+    ASSERT_TRUE(result == 0);
 }
 
 /**
@@ -343,7 +343,7 @@ HWTEST_F(ScreenSceneConfigTest, GetCurvedCompressionAreaInLandscape, Function | 
  */
 HWTEST_F(ScreenSceneConfigTest, Split, Function | SmallTest | Level3)
 {
-    auto result = ScreenSceneConfig::Split("oo","+9");
+    auto result = ScreenSceneConfig::Split("oo", "+9");
     ASSERT_NE(0, result.size());
 }
 
@@ -354,10 +354,10 @@ HWTEST_F(ScreenSceneConfigTest, Split, Function | SmallTest | Level3)
  */
 HWTEST_F(ScreenSceneConfigTest, CalcCutoutBoundaryRect, Function | SmallTest | Level3)
 {
-    DMRect emptyRect = { 0, 0, 0, 0 };
+    DMRect emptyRect = {0, 0, 0, 0};
     auto result = ScreenSceneConfig::CalcCutoutBoundaryRect("oo");
-    ASSERT_FALSE(result!=emptyRect);
-} 
+    ASSERT_FALSE(result != emptyRect);
+}
 
 /**
  * @tc.name: SetCutoutSvgPath
@@ -367,10 +367,9 @@ HWTEST_F(ScreenSceneConfigTest, CalcCutoutBoundaryRect, Function | SmallTest | L
 HWTEST_F(ScreenSceneConfigTest, SetCutoutSvgPath, Function | SmallTest | Level3)
 {
     ScreenSceneConfig::SetCutoutSvgPath("oo");
-    auto result_ =ScreenSceneConfig::GetCutoutBoundaryRect();
+    auto result_ = ScreenSceneConfig::GetCutoutBoundaryRect();
     ASSERT_NE(0, result_.size());
 }
-
 }
 } // namespace Rosen
 } // namespace OHOS
