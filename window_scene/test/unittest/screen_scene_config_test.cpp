@@ -357,7 +357,7 @@ HWTEST_F(ScreenSceneConfigTest, CalcCutoutBoundaryRect, Function | SmallTest | L
     DMRect emptyRect = { 0, 0, 0, 0 };
     auto result = ScreenSceneConfig::CalcCutoutBoundaryRect("oo");
     ASSERT_FALSE(result!=emptyRect);
-}
+} 
 
 /**
  * @tc.name: SetCutoutSvgPath
