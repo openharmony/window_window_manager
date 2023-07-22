@@ -80,6 +80,9 @@ public:
         TRANS_ID_REMOVE_SURFACE_NODE,
         TRANS_ID_SCREEN_STOP_MIRROR,
         TRANS_ID_SCREEN_STOP_EXPAND,
+        TRANS_ID_SCENE_BOARD_SCREEN_BASE = 2000,
+        TRANS_ID_SCENE_BOARD_DUMP_ALL_SCREEN,
+        TRANS_ID_SCENE_BOARD_DUMP_SPECIAL_SCREEN,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;

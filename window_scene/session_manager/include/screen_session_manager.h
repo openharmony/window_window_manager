@@ -57,6 +57,9 @@ public:
     DMError SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap) override;
     DMError SetScreenColorTransform(ScreenId screenId) override;
 
+    void DumpAllScreensInfo(std::string& dumpInfo) override;
+    void DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo) override;
+
     void RegisterScreenConnectionListener(sptr<IScreenConnectionListener>& screenConnectionListener);
     void UnregisterScreenConnectionListener(sptr<IScreenConnectionListener>& screenConnectionListener);
 
@@ -170,6 +173,8 @@ private:
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
 
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
+
+    std::string TransferTypeToString(ScreenType type) const;
 
     class ScreenIdManager {
     friend class ScreenSessionGroup;

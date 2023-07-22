@@ -19,6 +19,7 @@
 #include <system_ability.h>
 #include <iremote_object.h>
 
+#include "dm_common.h"
 #include "singleton_delegator.h"
 #include "zidl/mock_screen_manager_service_stub.h"
 
@@ -32,11 +33,23 @@ public:
     void GetScreenDumpInfo(const std::vector<std::string>& params, std::string& info) override;
     int Dump(int fd, const std::vector<std::u16string>& args) override;
     bool RegisterMockScreenManagerService();
+    void SetSessionManagerService(const sptr<IRemoteObject>& sessionManagerService);
 protected:
     MockScreenManagerService();
     virtual ~MockScreenManagerService() = default;
 private:
+    void ShowHelpInfo(std::string& dumpInfo);
+    void ShowIllegalArgsInfo(std::string& dumpInfo);
+    int DumpScreenInfo(const std::vector<std::string>& args, std::string& dumpInfo);
+    int DumpAllScreenInfo(std::string& dumpInfo);
+    int DumpSpecifiedScreenInfo(ScreenId screenId, std::string& dumpInfo);
+    bool IsValidDigitString(const std::string& idStr) const;
+
+    void InitScreenSessionManager();
+
     static inline SingletonDelegator<MockScreenManagerService> delegator;
+    sptr<IRemoteObject> sessionManagerService_ = nullptr;
+    sptr<IRemoteObject> screenSessionManager_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS

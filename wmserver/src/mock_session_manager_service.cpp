@@ -140,6 +140,7 @@ bool MockSessionManagerService::SetSessionManagerService(const sptr<IRemoteObjec
     }
 
     RegisterMockSessionManagerService();
+    MockScreenManagerService::GetInstance().SetSessionManagerService(sessionManagerService);
     WLOGFI("sessionManagerService set success!");
     return true;
 }

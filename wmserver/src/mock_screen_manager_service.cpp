@@ -16,13 +16,22 @@
 #include "mock_screen_manager_service.h"
 
 #include <system_ability_definition.h>
+#include <csignal>
+#include <string_ex.h>
+#include <unique_fd.h>
+
 #include "scene_board_judgement.h"
+#include "session_manager_service_interface.h"
+#include "screen_session_manager_interface.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "MockScreenManagerService" };
+const std::string ARG_DUMP_HELP = "-h";
+const std::string ARG_DUMP_ALL = "-a";
+const std::string ARG_DUMP_SCREEN = "-s";
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(MockScreenManagerService)
@@ -44,10 +53,121 @@ void MockScreenManagerService::GetScreenDumpInfo(const std::vector<std::string>&
     WLOGFD("GetScreenDumpInfo begin");
 }
 
+void MockScreenManagerService::ShowHelpInfo(std::string& dumpInfo)
+{
+    dumpInfo.append("Usage:\n")
+        .append(" -h                             ")
+        .append("|help text for the tool\n")
+        .append(" -a                             ")
+        .append("|dump all screen information in the system\n")
+        .append(" -s {screen id}")
+        .append("|dump specified screen information\n");
+}
+
+void MockScreenManagerService::ShowIllegalArgsInfo(std::string& dumpInfo)
+{
+    dumpInfo.append("The arguments are illegal and you can enter '-h' for help.");
+}
+
+bool MockScreenManagerService::IsValidDigitString(const std::string& idStr) const
+{
+    if (idStr.empty()) {
+        return false;
+    }
+    for (char ch : idStr) {
+        if ((ch >= '0' && ch <= '9')) {
+            continue;
+        }
+        WLOGFE("invalid id");
+        return false;
+    }
+    return true;
+}
+
+int MockScreenManagerService::DumpScreenInfo(const std::vector<std::string>& args, std::string& dumpInfo)
+{
+    if (args.empty()) {
+        return -1;
+    }
+    if (args.size() == 1 && args[0] == ARG_DUMP_ALL) { // 1: params num
+        return DumpAllScreenInfo(dumpInfo);
+    } else if (args[0] == ARG_DUMP_SCREEN && IsValidDigitString(args[1])) {
+        ScreenId screenId = std::stoull(args[1]);
+        return DumpSpecifiedScreenInfo(screenId, dumpInfo);
+    } else {
+        return -1;
+    }
+}
+
+int MockScreenManagerService::DumpAllScreenInfo(std::string& dumpInfo)
+{
+    sptr<IScreenSessionManager> screenSessionManagerProxy = iface_cast<IScreenSessionManager>(screenSessionManager_);
+    screenSessionManagerProxy->DumpAllScreensInfo(dumpInfo);
+    return 0;
+}
+
+int MockScreenManagerService::DumpSpecifiedScreenInfo(ScreenId screenId, std::string& dumpInfo)
+{
+    sptr<IScreenSessionManager> screenSessionManagerProxy = iface_cast<IScreenSessionManager>(screenSessionManager_);
+    screenSessionManagerProxy->DumpSpecialScreenInfo(screenId, dumpInfo);
+    return 0;
+}
+
 int MockScreenManagerService::Dump(int fd, const std::vector<std::u16string>& args)
 {
     WLOGFI("Dump begin");
+    if (fd < 0) {
+        return -1;
+    }
+    InitScreenSessionManager();
+    if (!screenSessionManager_) {
+        WLOGFE("dump ipc not ready");
+        return -1;
+    }
+    (void) signal(SIGPIPE, SIG_IGN); // ignore SIGPIPE crash
+    UniqueFd ufd = UniqueFd(fd); // auto close
+    fd = ufd.Get();
+    std::vector<std::string> params;
+    for (auto& arg : args) {
+        params.emplace_back(Str16ToStr8(arg));
+    }
+    std::string dumpInfo;
+    if (params.empty()) {
+        ShowHelpInfo(dumpInfo);
+    } else if (params.size() == 1 && params[0] == ARG_DUMP_HELP) { // 1: params num
+        ShowHelpInfo(dumpInfo);
+    } else {
+        int errCode = DumpScreenInfo(params, dumpInfo);
+        if (errCode != 0) {
+            ShowIllegalArgsInfo(dumpInfo);
+        }
+    }
+    int ret = dprintf(fd, "%s\n", dumpInfo.c_str());
+    if (ret < 0) {
+        WLOGFE("dprintf error");
+        return -1; // WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    WLOGI("dump end");
     return 0;
+}
+
+void MockScreenManagerService::InitScreenSessionManager()
+{
+    if (!sessionManagerService_) {
+        WLOGFE("sessionManagerService is nullptr");
+        return;
+    }
+    if (screenSessionManager_) {
+        return;
+    }
+    sptr<ISessionManagerService> sessionManagerServiceProxy =
+        iface_cast<ISessionManagerService>(sessionManagerService_);
+    sptr<IRemoteObject> remoteObject = sessionManagerServiceProxy->GetScreenSessionManagerService();
+    if (!remoteObject) {
+        WLOGFW("Get scene session manager proxy failed, scene session manager service is null");
+        return;
+    }
+    screenSessionManager_ = remoteObject;
 }
 
 bool MockScreenManagerService::RegisterMockScreenManagerService()
@@ -63,6 +183,11 @@ bool MockScreenManagerService::RegisterMockScreenManagerService()
     }
     WLOGFI("Publish mock screen manager service success");
     return true;
+}
+
+void MockScreenManagerService::SetSessionManagerService(const sptr<IRemoteObject>& sessionManagerService)
+{
+    sessionManagerService_ = sessionManagerService;
 }
 
 } // namespace Rosen
