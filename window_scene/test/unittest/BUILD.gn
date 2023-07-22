@@ -45,18 +45,18 @@ ohos_unittest("ws_session_test") {
   ]
 }
 
-ohos_unittest("ws_screen_scene_config_test") {
-  module_out_path = module_out_path
-
-  sources = [ "screen_scene_config_test.cpp" ]
-
-  deps = [ ":ws_unittest_common" ]
-}
-
 ohos_unittest("ws_screen_cutout_controller_test") {
   module_out_path = module_out_path
 
   sources = [ "screen_cutout_controller_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+}
+
+ohos_unittest("ws_screen_scene_config_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screen_scene_config_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 }
