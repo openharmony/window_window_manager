@@ -87,6 +87,9 @@ public:
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
 
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override;
+
+    virtual void DumpAllScreensInfo(std::string& dumpInfo) override;
+    virtual void DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo) override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
 };
