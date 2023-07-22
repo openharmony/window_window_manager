@@ -169,8 +169,6 @@ ohos_unittest("wm_window_manager_stub_proxy_test") {
   deps = [ ":wm_unittest_common" ]
 }
 
-
-
 ## Build wm_unittest_common.a {{{
 config("wm_unittest_common_public_config") {
   include_dirs = [
