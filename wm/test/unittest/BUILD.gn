@@ -34,6 +34,7 @@ group("unittest") {
     ":wm_window_session_impl_test",
     ":wm_window_stub_test",
     ":wm_window_test",
+    ":ws_screen_cutout_controller_test",
   ]
 }
 
@@ -167,6 +168,14 @@ ohos_unittest("wm_window_manager_stub_proxy_test") {
   sources = [ "window_manager_agent_stub_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
+}
+
+ohos_unittest("ws_screen_cutout_controller_test") {
+  module_out_path = module_out_path
+  
+  sources = [ "screen_cutout_controller_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
 }
 
 ## Build wm_unittest_common.a {{{
