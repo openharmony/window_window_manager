@@ -189,8 +189,11 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
     WLOGFD("UpdateRect [%{public}d, %{public}d, %{public}u, %{public}u]", rect.posX_, rect.posY_,
         rect.width_, rect.height_);
-    specificCallback_->onUpdateAvoidArea_(GetPersistentId());
-    return Session::UpdateRect(rect, reason);
+    WSError ret = Session::UpdateRect(rect, reason);
+    if (ret == WSError::WS_OK) {
+        specificCallback_->onUpdateAvoidArea_(GetPersistentId());
+    }
+    return ret;
 }
 
 WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
@@ -323,7 +326,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     std::vector<sptr<SceneSession>> statusBarVector =
         specificCallback_->onGetSceneSessionVectorByType_(WindowType::WINDOW_TYPE_STATUS_BAR);
     for (auto& statusBar : statusBarVector) {
-        if (!(statusBar->isActive_)) {
+        if (!(statusBar->isVisible_)) {
             continue;
         }
         WSRect statusBarRect = statusBar->GetSessionRect();
@@ -338,7 +341,7 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     std::vector<sptr<SceneSession>> inputMethodVector =
         specificCallback_->onGetSceneSessionVectorByType_(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     for (auto& inputMethod : inputMethodVector) {
-        if (!(inputMethod->isActive_)) {
+        if (!(inputMethod->isVisible_)) {
             continue;
         }
         WSRect inputMethodRect = inputMethod->GetSessionRect();
@@ -571,6 +574,7 @@ std::string SceneSession::GetSessionSnapshot()
 void SceneSession::UpdateNativeVisibility(bool visible)
 {
     isVisible_ = visible;
+    specificCallback_->onUpdateAvoidArea_(GetPersistentId());
 }
 
 bool SceneSession::IsVisible() const
