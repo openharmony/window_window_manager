@@ -92,9 +92,11 @@ WSError SceneSession::Background()
     if (ret != WSError::WS_OK) {
         return ret;
     }
-    if (scenePersistence_ != nullptr && GetSnapshot() != nullptr) {
-        scenePersistence_->SaveSnapshot(GetSnapshot());
+    auto snapshot = Snapshot();
+    if (scenePersistence_ && snapshot) {
+        scenePersistence_->SaveSnapshot(snapshot);
     }
+    NotifyBackground();
     UpdateCameraFloatWindowStatus(false);
     specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     return WSError::WS_OK;
@@ -559,8 +561,8 @@ std::string SceneSession::GetSessionSnapshotFilePath()
     WLOGFI("GetSessionSnapshotFilePath id %{public}d", GetPersistentId());
     if (Session::GetSessionState() < SessionState::STATE_BACKGROUND) {
         WLOGFI("GetSessionSnapshotFilePath UpdateSnapshot");
-        Session::UpdateSnapshot();
-        scenePersistence_->SaveSnapshot(GetSnapshot());
+        auto snapshot = Snapshot();
+        scenePersistence_->SaveSnapshot(snapshot);
     }
     if (scenePersistence_ != nullptr) {
         return scenePersistence_->GetSnapshotFilePath();
