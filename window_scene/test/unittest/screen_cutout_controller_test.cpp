@@ -61,7 +61,6 @@ namespace {
  */
 HWTEST_F(ScreenCutoutControllerTest, CreateWaterfallRect, Function | SmallTest | Level3)
 {
-
     DMRect emptyRect = { 0, 0, 0, 0 };
     DMRect emptyRect_ = { 1,2,3,3 };
     sptr<ScreenCutoutController> controller = new ScreenCutoutController();
@@ -82,8 +81,6 @@ HWTEST_F(ScreenCutoutControllerTest, GetScreenCutoutInfo, Function | SmallTest |
     sptr<ScreenCutoutController> controller = new ScreenCutoutController();
     ASSERT_NE(nullptr, controller->GetScreenCutoutInfo());   
 }
-
-
 
 }
 } // namespace Rosen
