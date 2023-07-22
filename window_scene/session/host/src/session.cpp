@@ -1045,6 +1045,7 @@ void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
 {
     if (!sessionStage_) {
         WLOGFE("session stage is nullptr");
+        return;
     }
     sessionStage_->NotifyOccupiedAreaChangeInfo(info);
 }
