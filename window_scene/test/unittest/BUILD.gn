@@ -23,12 +23,12 @@ group("unittest") {
     ":ws_scene_session_manager_stub_test",
     ":ws_scene_session_manager_test",
     ":ws_scene_session_test",
+    ":ws_screen_cutout_controller_test",
     ":ws_screen_scene_config_test",
     ":ws_screen_session_manager_test",
     ":ws_session_manager_agent_controller_test",
     ":ws_session_test",
     ":ws_window_scene_config_test",
-    ":ws_screen_cutout_controller_test",
   ]
 }
 
@@ -119,7 +119,7 @@ ohos_unittest("ws_scene_session_test") {
 
 ohos_unittest("ws_screen_cutout_controller_test") {
   module_out_path = module_out_path
-  
+
   sources = [ "screen_cutout_controller_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
