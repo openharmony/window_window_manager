@@ -56,7 +56,6 @@ public:
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
-
 };
 
 void WindowSceneSessionImplTest::SetUpTestCase() {}
@@ -77,7 +76,7 @@ RSSurfaceNode::SharedPtr WindowSceneSessionImplTest::CreateRSSurfaceNode()
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = "startingWindowTestSurfaceNode";
-    auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,RSSurfaceNodeType::DEFAULT);
+    auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
     return surfaceNode;
 }
 
