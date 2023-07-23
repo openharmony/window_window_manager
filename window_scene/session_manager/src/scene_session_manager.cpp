@@ -1672,11 +1672,10 @@ WSError SceneSessionManager::GetSessionSnapshot(int32_t persistentId, std::share
 {
     WLOGFI("run GetSessionSnapshot");
     sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
-    WSError errCode = sceneSession->UpdateSnapshot();
-    if (errCode != WSError::WS_OK) {
-        return errCode;
+    if (!sceneSession) {
+        return WSError::WS_ERROR_NULLPTR;
     }
-    snapshot = sceneSession->GetSnapshot();
+    snapshot = sceneSession->Snapshot();
     return WSError::WS_OK;
 }
 
