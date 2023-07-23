@@ -74,7 +74,7 @@ public:
     void SetSessionRect(const WSRect& rect);
 
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
-    std::shared_ptr<Media::PixelMap> GetSnapshot() const;
+    std::shared_ptr<Media::PixelMap> Snapshot();
     SessionState GetSessionState() const;
     SessionInfo& GetSessionInfo();
     sptr<WindowSessionProperty> GetSessionProperty() const;
@@ -192,7 +192,6 @@ public:
     WindowMode GetWindowMode();
     void SetZOrder(uint32_t zOrder);
     uint32_t GetZOrder();
-    WSError UpdateSnapshot();
     WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
 
@@ -200,6 +199,7 @@ public:
     void NotifyCallingSessionForeground();
     void SetNotifyCallingSessionBackgroundFunc(const NotifyCallingSessionBackgroundFunc& func);
     void NotifyCallingSessionBackground();
+
 protected:
     void GeneratePersistentId(const bool isExtension, const SessionInfo& sessionInfo);
     void UpdateSessionState(SessionState state);
@@ -254,7 +254,6 @@ private:
     }
 
     std::shared_ptr<RSSurfaceNode> CreateSurfaceNode(const std::string& name);
-    std::shared_ptr<Media::PixelMap> Snapshot();
 
     int32_t persistentId_ = INVALID_SESSION_ID;
     static std::atomic<int32_t> sessionId_;
@@ -266,8 +265,6 @@ private:
     std::recursive_mutex mutex_;
     std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;
     sptr<IWindowEventChannel> windowEventChannel_ = nullptr;
-
-    std::shared_ptr<Media::PixelMap> snapshot_;
 
     std::vector<sptr<Session>> dialogVec_;
     sptr<Session> parentSession_;
