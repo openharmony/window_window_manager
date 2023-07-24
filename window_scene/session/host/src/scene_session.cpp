@@ -341,7 +341,7 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     std::vector<sptr<SceneSession>> inputMethodVector =
         specificCallback_->onGetSceneSessionVectorByType_(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     for (auto& inputMethod : inputMethodVector) {
-        if (!(inputMethod->isVisible_)) {
+        if (!(inputMethod->GetSessionState() == SessionState::STATE_FOREGROUND)) {
             continue;
         }
         WSRect inputMethodRect = inputMethod->GetSessionRect();
