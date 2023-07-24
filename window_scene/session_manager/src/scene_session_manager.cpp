@@ -1848,6 +1848,7 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(const sptr<SceneSe
     auto callingSession = GetSceneSession(focusedSessionId_);
     if (callingSession == nullptr) {
         WLOGFE("calling session is nullptr");
+        return;
     }
     SessionGravity gravity;
     uint32_t percent = 0;
