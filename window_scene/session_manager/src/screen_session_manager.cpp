@@ -34,10 +34,12 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSessionManager" };
 const std::string SCREEN_SESSION_MANAGER_THREAD = "ScreenSessionManager";
 const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
+std::recursive_mutex screenSessionManagerInstanceMutex_;
 } // namespace
 
 ScreenSessionManager& ScreenSessionManager::GetInstance()
 {
+    std::lock_guard<std::recursive_mutex> lock(screenSessionManagerInstanceMutex_);
     static ScreenSessionManager* instance = nullptr;
     if (instance == nullptr) {
         instance = new ScreenSessionManager();
@@ -48,6 +50,7 @@ ScreenSessionManager& ScreenSessionManager::GetInstance()
 
 ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetInstance())
 {
+    LoadScreenSceneXml();
     taskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_THREAD);
     screenCutoutController_ = new (std::nothrow) ScreenCutoutController();
     sessionDisplayPowerController_ = new SessionDisplayPowerController(
@@ -64,7 +67,6 @@ void ScreenSessionManager::Init()
     }
 
     RegisterScreenChangeListener();
-    LoadScreenSceneXml();
 }
 
 void ScreenSessionManager::RegisterScreenConnectionListener(sptr<IScreenConnectionListener>& screenConnectionListener)
