@@ -530,6 +530,9 @@ void SceneSession::OnVsyncHandle()
     WSRect rect = moveDragController_->GetTargetRect();
     WLOGFD("rect: [%{public}d, %{public}d, %{public}u, %{public}u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
     NotifySessionRectChange(rect);
+    if (!(moveDragController_->GetStartMoveFlag() || moveDragController_->GetStartDragFlag())) {
+        OnSessionEvent(SessionEvent::EVENT_END_MOVE);
+    }
 }
 
 const std::string& SceneSession::GetWindowName() const

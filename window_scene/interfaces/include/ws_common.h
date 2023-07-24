@@ -153,6 +153,8 @@ enum class SessionEvent : uint32_t {
     EVENT_MAXIMIZE_FLOATING,
     EVENT_TERMINATE,
     EVENT_EXCEPTION,
+    EVENT_SPLIT_PRIMARY,
+    EVENT_SPLIT_SECONDARY,
 };
 
 struct WSRect {
