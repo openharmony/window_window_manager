@@ -247,6 +247,7 @@ void WMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
     WLOGI("wms OnRemoteDied");
     SingletonContainer::Get<WindowAdapter>().ClearWindowAdapter();
     SingletonContainer::Get<WindowManager>().OnRemoteDied();
+    SingletonContainer::Get<SessionManager>().ClearSessionManagerProxy();
 }
 
 WMError WindowAdapter::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
