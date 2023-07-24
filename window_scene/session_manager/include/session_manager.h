@@ -35,6 +35,7 @@ public:
     WMError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
     WMError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent);
     WMError BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken);
+    void ClearSessionManagerProxy();
 
     sptr<ISceneSessionManager> GetSceneSessionManagerProxy();
     sptr<IScreenSessionManager> GetScreenSessionManagerProxy();
