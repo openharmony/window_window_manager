@@ -28,6 +28,15 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "Sessi
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SessionManager)
 
+void SessionManager::ClearSessionManagerProxy()
+{
+    mockSessionManagerServiceProxy_ = nullptr;
+    sessionManagerServiceProxy_ = nullptr;
+    sceneSessionManagerProxy_ = nullptr;
+    screenSessionManagerProxy_ = nullptr;
+    screenLockManagerProxy_ = nullptr;
+}
+
 sptr<ScreenLock::ScreenLockManagerInterface> SessionManager::GetScreenLockManagerProxy()
 {
     InitSessionManagerServiceProxy();
