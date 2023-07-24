@@ -83,10 +83,7 @@ public:
 
     void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
-    void NotifyFocusActiveEvent(bool isFocusActive) override;
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info) override;
-    void NotifyFocusWindowIdEvent(int32_t windowId) override;
-    void NotifyFocusStateEvent(bool focusState) override;
 
     WMError RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
@@ -138,6 +135,7 @@ protected:
     WMError SetBackgroundColor(uint32_t color);
     uint32_t GetBackgroundColor() const;
     virtual WMError SetLayoutFullScreenByApiVersion(bool status);
+    void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason);
 
     sptr<ISession> hostSession_;
     std::unique_ptr<Ace::UIContent> uiContent_;
@@ -173,7 +171,7 @@ private:
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
     void NotifyAfterFocused();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
-    void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason);
+
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
 
     static std::recursive_mutex globalMutex_;
@@ -183,10 +181,6 @@ private:
     static std::map<int32_t, std::vector<sptr<IDialogDeathRecipientListener>>> dialogDeathRecipientListeners_;
     static std::map<int32_t, std::vector<sptr<IDialogTargetTouchListener>>> dialogTargetTouchListener_;
     static std::map<int32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> occupiedAreaChangeListeners_;
-
-    std::optional<std::atomic<bool>> focusState_ = std::nullopt;
-
-    std::atomic<int32_t> focusWindowId_ = INVALID_WINDOW_ID;
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;
