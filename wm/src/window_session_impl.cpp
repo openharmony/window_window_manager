@@ -421,14 +421,6 @@ WMError WindowSessionImpl::SetUIContent(const std::string& contentInfo,
     // make uiContent available after Initialize/Restore
     uiContent_ = std::move(uiContent);
 
-    if (focusWindowId_ != INVALID_WINDOW_ID) {
-        uiContent_->SetFocusWindowId(focusWindowId_);
-    }
-
-    if (focusState_ != std::nullopt) {
-        focusState_.value() ? uiContent_->Focus() : uiContent_->UnFocus();
-    }
-
     uint32_t version = 0;
     if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
         version = context_->GetApplicationInfo()->apiCompatibleVersion;
@@ -1031,29 +1023,6 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
             Recover();
         }
     }
-}
-
-void WindowSessionImpl::NotifyFocusActiveEvent(bool isFocusActive)
-{
-    if (uiContent_) {
-        uiContent_->SetIsFocusActive(isFocusActive);
-    }
-}
-
-void WindowSessionImpl::NotifyFocusWindowIdEvent(int32_t windowId)
-{
-    if (uiContent_) {
-        uiContent_->SetFocusWindowId(windowId);
-    }
-    focusWindowId_ = windowId;
-}
-
-void WindowSessionImpl::NotifyFocusStateEvent(bool focusState)
-{
-    if (uiContent_) {
-        focusState ? uiContent_->Focus() : uiContent_->UnFocus();
-    }
-    focusState_ = focusState;
 }
 
 void WindowSessionImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)

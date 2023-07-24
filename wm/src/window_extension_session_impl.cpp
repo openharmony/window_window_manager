@@ -123,5 +123,74 @@ WMError WindowExtensionSessionImpl::SetPrivacyMode(bool isPrivacyMode)
     RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
 }
+
+void WindowExtensionSessionImpl::NotifyFocusWindowIdEvent(int32_t windowId)
+{
+    if (uiContent_) {
+        uiContent_->SetFocusWindowId(windowId);
+    }
+    focusWindowId_ = windowId;
+}
+
+void WindowExtensionSessionImpl::NotifyFocusStateEvent(bool focusState)
+{
+    if (uiContent_) {
+        focusState ? uiContent_->Focus() : uiContent_->UnFocus();
+    }
+    focusState_ = focusState;
+}
+
+void WindowExtensionSessionImpl::NotifyFocusActiveEvent(bool isFocusActive)
+{
+    if (uiContent_) {
+        uiContent_->SetIsFocusActive(isFocusActive);
+    }
+}
+
+WMError WindowExtensionSessionImpl::SetUIContent(const std::string& contentInfo,
+    NativeEngine* engine, NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability)
+{
+    WLOGFD("WindowExtensionSessionImpl SetUIContent: %{public}s state:%{public}u", contentInfo.c_str(), state_);
+    if (uiContent_) {
+        uiContent_->Destroy();
+    }
+    std::unique_ptr<Ace::UIContent> uiContent;
+    if (ability != nullptr) {
+        uiContent = Ace::UIContent::Create(ability);
+    } else {
+        uiContent = Ace::UIContent::Create(context_.get(), engine);
+    }
+    if (uiContent == nullptr) {
+        WLOGFE("fail to SetUIContent id: %{public}d", GetPersistentId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    uiContent->Initialize(this, contentInfo, storage, focusWindowId_);
+    // make uiContent available after Initialize/Restore
+    uiContent_ = std::move(uiContent);
+
+    if (focusState_ != std::nullopt) {
+        focusState_.value() ? uiContent_->Focus() : uiContent_->UnFocus();
+    }
+
+    uint32_t version = 0;
+    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
+        version = context_->GetApplicationInfo()->apiCompatibleVersion;
+    }
+    // 10 ArkUI new framework support after API10
+    if (version < 10 || isIgnoreSafeAreaNeedNotify_) {
+        SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
+        isIgnoreSafeAreaNeedNotify_ = false;
+    }
+
+    UpdateDecorEnable(true);
+    if (state_ == WindowState::STATE_SHOWN) {
+        // UIContent may be nullptr when show window, need to notify again when window is shown
+        uiContent_->Foreground();
+        UpdateTitleButtonVisibility();
+    }
+    UpdateViewportConfig(GetRect(), WindowSizeChangeReason::UNDEFINED);
+    WLOGFD("notify uiContent window size change end");
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
