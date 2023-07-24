@@ -677,7 +677,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
-    WLOGFD("Session TransferPointEvent, Id: %{public}d, eventId: %{public}d",
+    WLOGFD("Session TransferPointEvent, persistentId:%{public}d, eventId:%{public}d",
         persistentId_, pointerEvent->GetId());
     auto currentTime = GetSysClockTime();
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(currentTime, persistentId_)) {
@@ -723,7 +723,7 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
-    WLOGFD("Session TransferKeyEvent, Id: %{public}d, eventId: %{public}d",
+    WLOGFD("Session TransferKeyEvent, persistentId:%{public}d, eventId:%{public}d",
         persistentId_, keyEvent->GetId());
     auto currentTime = GetSysClockTime();
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(currentTime, persistentId_)) {

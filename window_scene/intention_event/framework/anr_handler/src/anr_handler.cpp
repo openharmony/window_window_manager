@@ -57,15 +57,17 @@ void ANRHandler::SetSessionStage(int32_t eventId, const wptr<ISessionStage> &ses
 void ANRHandler::HandleEventConsumed(int32_t eventId, int64_t actionTime)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (IsOnEventHandler(GetPersistentIdOfEvent(eventId))) {
+    int32_t currentPersistentId = GetPersistentIdOfEvent(eventId);
+    WLOGFD("Processed eventId:%{public}d, persistentId:%{public}d", eventId, currentPersistentId);
+    if (IsOnEventHandler(currentPersistentId)) {
         UpdateLatestEventId(eventId);
         return;
     }
     int64_t currentTime = GetSysClockTime();
     int64_t timeoutTime = ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME * TIME_TRANSITION - (currentTime - actionTime);
-    WLOGFD("Processed eventId:%{public}d, actionTime:%{public}" PRId64 ", "
+    WLOGFD("Processed eventId:%{public}d, persistentId:%{public}d, actionTime:%{public}" PRId64 ", "
         "currentTime:%{public}" PRId64 ", timeoutTime:%{public}" PRId64,
-        eventId, actionTime, currentTime, timeoutTime);
+        eventId, currentPersistentId, actionTime, currentTime, timeoutTime);
     if (timeoutTime < MIN_MARK_PROCESS_DELAY_TIME) {
         SendEvent(eventId, 0);
     } else {
