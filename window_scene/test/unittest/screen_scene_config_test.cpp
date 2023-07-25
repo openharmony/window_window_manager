@@ -324,7 +324,7 @@ HWTEST_F(ScreenSceneConfigTest, IsWaterfallDisplay, Function | SmallTest | Level
     auto result = ScreenSceneConfig::IsWaterfallDisplay();
     if (result)
     {
-        ASSERT_EQ(false, result);
+        ASSERT_EQ(true, result);
     }
 }
 

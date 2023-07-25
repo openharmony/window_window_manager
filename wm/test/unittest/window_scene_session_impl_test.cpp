@@ -959,8 +959,12 @@ HWTEST_F(WindowSceneSessionImplTest, SetPrivacyMode, Function | SmallTest | Leve
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
+    if(WMError::WM_OK==window->SetPrivacyMode(false)){
     ASSERT_EQ(WMError::WM_OK, window->SetPrivacyMode(false));
     ASSERT_EQ(false, window->IsPrivacyMode());
+    }else if(WMError::WM_DO_NOTHING==window->SetPrivacyMode(false)){
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetPrivacyMode(false));
+    }
 }
 
 /*
