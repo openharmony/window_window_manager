@@ -373,14 +373,14 @@ HWTEST_F(AbstractScreenControllerTest, CreateVirtualScreen01, Function | SmallTe
  */
 HWTEST_F(AbstractScreenControllerTest, InitVirtualScreen01, Function | SmallTest | Level3)
 {
-   VirtualScreenOption option;
-   absController_->dmsScreenMap_.erase(absController_->GetDefaultAbstractScreenId());
-   sptr<AbstractScreen> screen = absController_->InitVirtualScreen(0, 0, option);
-   auto ret = screen->activeIdx_;
-   if (ret != 0)
-   {
-    ASSERT_NE(0, ret);
-   }
+    VirtualScreenOption option;
+    absController_->dmsScreenMap_.erase(absController_->GetDefaultAbstractScreenId());
+    sptr<AbstractScreen> screen = absController_->InitVirtualScreen(0, 0, option);
+    auto ret = screen->activeIdx_;
+    if (ret != 0)
+    {
+        ASSERT_NE(0, ret);
+    }
 }
 
 /**
@@ -390,17 +390,17 @@ HWTEST_F(AbstractScreenControllerTest, InitVirtualScreen01, Function | SmallTest
  */
 HWTEST_F(AbstractScreenControllerTest, InitVirtualScreen02, Function | SmallTest | Level3)
 {
-   VirtualScreenOption option;
-   sptr<AbstractScreen> defaultScreen = absController_->dmsScreenMap_[absController_->GetDefaultAbstractScreenId()];
-   sptr<SupportedScreenModes> modes;
-   if (defaultScreen != nullptr)
-   {
-    defaultScreen->modes_.emplace_back(modes);
-    defaultScreen->activeIdx_ = 0;
-    ASSERT_EQ(nullptr, defaultScreen->GetActiveScreenMode());
-    sptr<AbstractScreen> screen = absController_->InitVirtualScreen(0, 0, option);
-    ASSERT_EQ(ScreenType::VIRTUAL, screen->type_);
-   }
+    VirtualScreenOption option;
+    sptr<AbstractScreen> defaultScreen = absController_->dmsScreenMap_[absController_->GetDefaultAbstractScreenId()];
+    sptr<SupportedScreenModes> modes;
+    if (defaultScreen != nullptr)
+    {
+        defaultScreen->modes_.emplace_back(modes);
+        defaultScreen->activeIdx_ = 0;
+        ASSERT_EQ(nullptr, defaultScreen->GetActiveScreenMode());
+        sptr<AbstractScreen> screen = absController_->InitVirtualScreen(0, 0, option);
+        ASSERT_EQ(ScreenType::VIRTUAL, screen->type_);
+    }
 }
 
 /**
