@@ -322,7 +322,10 @@ HWTEST_F(ScreenSceneConfigTest, GetCutoutBoundaryRect, Function | SmallTest | Le
 HWTEST_F(ScreenSceneConfigTest, IsWaterfallDisplay, Function | SmallTest | Level3)
 {
     auto result = ScreenSceneConfig::IsWaterfallDisplay();
-    ASSERT_EQ(false, result);
+    if (result)
+    {
+        ASSERT_EQ(false, result);
+    }
 }
 
 /**

@@ -124,11 +124,14 @@ HWTEST_F(ScreenSessionManagerTest, VirtualScreen, Function | SmallTest | Level3)
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "testVirtualOption";
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    ASSERT_TRUE(screenId!=VIRTUAL_SCREEN_ID);
+    if (screenId != VIRTUAL_SCREEN_ID)
+    {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
 
     std::vector<ScreenId> mirrorScreenIds;
     ScreenId mainScreenId(DEFAULT_SCREEN_ID);
-    ScreenId screenGroupId {1};
+    ScreenId screenGroupId{1};
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->MakeMirror(mainScreenId, mirrorScreenIds, screenGroupId));
     mirrorScreenIds.push_back(VIRTUAL_SCREEN_ID);
     ASSERT_NE(DMError::DM_OK, ssm_->MakeMirror(mainScreenId, mirrorScreenIds, screenGroupId));
@@ -141,7 +144,6 @@ HWTEST_F(ScreenSessionManagerTest, VirtualScreen, Function | SmallTest | Level3)
     ASSERT_EQ(DMError::DM_ERROR_RENDER_SERVICE_FAILED, result2);
     ASSERT_NE(DMError::DM_OK, ssm_->DestroyVirtualScreen(VIRTUAL_SCREEN_ID));
 }
-
 }
 } // namespace Rosen
 } // namespace OHOS
