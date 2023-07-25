@@ -18,7 +18,8 @@
 
 #include <fstream>
 
-namespace OHOS::Rosen {
+namespace OHOS {
+namespace Rosen {
 class SceneBoardJudgement final {
 public:
     // Judge whether SceneBoard is enabled.
@@ -32,6 +33,7 @@ private:
     static std::ifstream& SafeGetLine(std::ifstream& configFile, std::string& line);
     static void InitWithConfigFile(const char* filePath, bool& enabled);
 };
-} // namespace OHOS::Rosen
+} // namespace Rosen
+} // namespace OHOS
 
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_BOARD_JUDGEMENT_H

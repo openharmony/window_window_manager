@@ -15,7 +15,8 @@
 
 #include "scene_board_judgement.h"
 
-namespace OHOS::Rosen {
+namespace OHOS {
+namespace Rosen {
 bool SceneBoardJudgement::IsSceneBoardEnabled()
 {
     static bool isSceneBoardEnabled = false;
@@ -56,4 +57,5 @@ void SceneBoardJudgement::InitWithConfigFile(const char* filePath, bool& enabled
     }
     configFile.close();
 }
-} // namespace OHOS::Rosen
+} // namespace Rosen
+} // namespace OHOS
