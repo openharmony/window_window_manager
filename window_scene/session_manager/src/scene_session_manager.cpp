@@ -1891,8 +1891,7 @@ void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
 {
     WLOGFD("RestoreCallingSessionSizeIfNeed");
     auto callingSession = GetSceneSession(focusedSessionId_);
-    if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_) && callingSession != nullptr &&
-        callingSession->GetSessionProperty()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+    if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_) && callingSession != nullptr) {
         WSRect overlapRect = { 0, 0, 0, 0 };
         NotifyOccupiedAreaChangeInfo(callingSession, callingWindowRestoringRect_, overlapRect);
         callingSession->UpdateSessionRect(callingWindowRestoringRect_, SizeChangeReason::UNDEFINED);

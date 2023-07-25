@@ -1121,6 +1121,9 @@ WMError WindowSessionImpl::SetWindowGravity(WindowGravity gravity, uint32_t perc
 
 void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
 {
+    WLOGFD("NotifyOccupiedAreaChangeInfo, safeHeight: %{public}u "
+           "occupied rect: x %{public}u, y %{public}u, w %{public}u, h %{public}u",
+           info->safeHeight_, info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_);
     auto occupiedAreaChangeListeners = GetListeners<IOccupiedAreaChangeListener>();
     for (auto& listener : occupiedAreaChangeListeners) {
         if (listener != nullptr) {
