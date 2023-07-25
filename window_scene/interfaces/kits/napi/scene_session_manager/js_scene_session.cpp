@@ -209,11 +209,9 @@ void JsSceneSession::ProcessSessionRectChangeRegister()
     sessionchangeCallback->onRectChange_ = std::bind(&JsSceneSession::OnSessionRectChange, this, std::placeholders::_1);
 
     auto session = weakSession_.promote();
-    if (session == nullptr) {
-        WLOGFE("session is nullptr");
-        return;
+    if (session && session->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        OnSessionRectChange(session->GetSessionRect());
     }
-    OnSessionRectChange(session->GetSessionRect());
     WLOGFD("ProcessSessionRectChangeRegister success");
 }
 
