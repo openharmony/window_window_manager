@@ -96,6 +96,13 @@ enum class SessionState : uint32_t {
     STATE_END,
 };
 
+enum ContinueState {
+    CONTINUESTATE_UNKNOWN = -1,
+    CONTINUESTATE_ACTIVE = 0,
+    CONTINUESTATE_INACTIVE = 1,
+    CONTINUESTATE_MAX
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
@@ -113,6 +120,16 @@ struct SessionInfo {
     int32_t persistentId_ = INVALID_SESSION_ID;
     int32_t callerPersistentId_ = INVALID_SESSION_ID;
     uint32_t callState_ = 0;
+    int32_t startMethod;
+    // whether to display in the missions list
+    bool excludeFromMissions = false;
+    bool unclearable = false;
+    bool lockedState = false;
+    bool continuable = false;
+    std::string time;
+    std::string label;
+    std::string iconPath;
+    ContinueState continueState = ContinueState::CONTINUESTATE_ACTIVE;
     int64_t uiAbilityId_ = 0;
 };
 
