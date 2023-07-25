@@ -1131,5 +1131,10 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
         }
     }
 }
+
+void WindowSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& params)
+{
+    WLOGFD("DumpSessionElementInfo");
+}
 } // namespace Rosen
 } // namespace OHOS

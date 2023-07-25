@@ -18,6 +18,7 @@
 
 #include <transaction/rs_interfaces.h>
 #include "common/include/task_scheduler.h"
+#include "future.h"
 #include "interfaces/include/ws_common.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "session/host/include/root_scene_session.h"
@@ -45,6 +46,8 @@ using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSessi
 using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable)>;
 using ProcessOutsideDownEventFunc = std::function<void(int32_t x, int32_t y)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
+using DumpRootSceneElementInfoFunc = std::function<void(const std::vector<std::string>& params,
+    std::vector<std::string>& infos)>;
 using EventHandler = OHOS::AppExecFwk::EventHandler;
 using EventRunner = OHOS::AppExecFwk::EventRunner;
 const int32_t STATUS_BAR_AVOID_AREA = 0;
@@ -80,8 +83,9 @@ public:
     WSError SetFocusedSession(int32_t persistentId);
     int32_t GetFocusedSession() const;
     WSError GetAllSessionDumpInfo(std::string& info);
-    WSError GetSpecifiedSessionDumpInfo(std::string& dumpInfo, const std::string& strId);
-    WSError GetSessionDumpInfo(const sptr<DumpParam>& param, std::string& info);
+    WSError GetSpecifiedSessionDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params,
+        const std::string& strId);
+    WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info);
     WSError UpdateFocus(int32_t persistentId, bool isFocused);
     WSError SwitchUser(int32_t oldUserId, int32_t newUserId, std::string &fileDir);
     int32_t GetCurrentUserId() const;
@@ -114,6 +118,10 @@ public:
     int32_t GetWaterMarkSessionCount() const;
     void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> callingSession,
         const WSRect& rect, const WSRect& occupiedArea);
+    void NotifyDumpInfoResult(const std::vector<std::string>& info);
+    void SetDumpRootSceneElementInfoListener(const DumpRootSceneElementInfoFunc& func);
+
+    RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
 
 protected:
     SceneSessionManager();
@@ -171,6 +179,9 @@ private:
     void RegisterInputMethodHideFunc(const sptr<SceneSession>& sceneSession);
     bool IsSessionVisible(const sptr<SceneSession>& session);
     void DumpSessionInfo(const sptr<SceneSession>& session, std::ostringstream& oss);
+    void DumpAllAppSessionInfo(std::ostringstream& oss);
+    void DumpSessionElementInfo(const sptr<SceneSession>& session,
+        const std::vector<std::string>& params, std::string& dumpInfo);
 
     sptr<RootSceneSession> rootSceneSession_;
     std::map<int32_t, sptr<SceneSession>> sceneSessionMap_;
@@ -180,6 +191,7 @@ private:
     NotifyCreateSpecificSessionFunc createSpecificSessionFunc_;
     ProcessGestureNavigationEnabledChangeFunc gestureNavigationEnabledChangeFunc_;
     ProcessOutsideDownEventFunc outsideDownEventFunc_;
+    DumpRootSceneElementInfoFunc dumpRootSceneFunc_;
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
     int32_t activeSessionId_ = INVALID_SESSION_ID;

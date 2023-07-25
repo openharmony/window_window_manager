@@ -234,4 +234,24 @@ WSError SessionStageProxy::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, Avo
     }
     return WSError::WS_OK;
 }
+
+void SessionStageProxy::DumpSessionElementInfo(const std::vector<std::string>& params)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteStringVector(params)) {
+        WLOGFE("Write params failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_DUMP_SESSSION_ELEMENT_INFO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
 } // namespace OHOS::Rosen

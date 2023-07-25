@@ -50,7 +50,8 @@ public:
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject> &token) override;
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) override;
-    WSError GetSessionDumpInfo(const sptr<DumpParam> &param, std::string& info) override;
+    WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;
+    void NotifyDumpInfoResult(const std::vector<std::string>& info) override;
     WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) override;
     WSError GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot) override;
 
