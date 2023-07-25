@@ -56,6 +56,11 @@ bool MoveDragController::GetStartMoveFlag() const
     return isStartMove_;
 }
 
+bool MoveDragController::GetStartDragFlag() const
+{
+    return isStartDrag_;
+}
+
 WSRect MoveDragController::GetTargetRect() const
 {
     return moveDragProperty_.targetRect_;
