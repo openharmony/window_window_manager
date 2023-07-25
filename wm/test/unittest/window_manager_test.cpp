@@ -560,6 +560,21 @@ HWTEST_F(WindowManagerTest, UnregisterGestureNavigationEnabledChangedListener, F
     ASSERT_EQ(0, windowManager.pImpl_->gestureNavigationEnabledListeners_.size());
 }
 
+/**
+ * @tc.name: GetFocusWindowInfo
+ * @tc.desc: window GetFocusWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetFocusWindowInfo, Function | SmallTest | Level2)
+{
+    FocusChangeInfo focusInfo;
+    auto ret = 0;
+    WindowManager::GetInstance().GetFocusWindowInfo(focusInfo);
+    ASSERT_EQ(0, ret);
+}
+
+
+
 }
 } // namespace Rosen
 } // namespace OHOS
