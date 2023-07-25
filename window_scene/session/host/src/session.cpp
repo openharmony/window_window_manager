@@ -781,7 +781,8 @@ WSError Session::TransferFocusStateEvent(bool focusState)
 std::shared_ptr<Media::PixelMap> Session::Snapshot()
 {
     auto callback = std::make_shared<SurfaceCaptureFuture>();
-    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
+    constexpr float scale = 0.5;
+    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, scale, scale);
     if (!ret) {
         WLOGFE("TakeSurfaceCapture failed");
         return nullptr;
