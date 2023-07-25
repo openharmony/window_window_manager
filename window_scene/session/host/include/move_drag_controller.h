@@ -62,6 +62,7 @@ public:
     void SetVsyncHandleListenser(const NotifyVsyncHandleFunc& func);
     void SetStartMoveFlag(bool flag);
     bool GetStartMoveFlag() const;
+    bool GetStartDragFlag() const;
     WSRect GetTargetRect() const;
     void InitMoveDragProperty();
     void SetAspectRatio(float ratio);

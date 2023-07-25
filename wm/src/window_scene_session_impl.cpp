@@ -1101,6 +1101,12 @@ WMError WindowSceneSessionImpl::SetWindowMode(WindowMode mode)
         WLOGFE("set window mode filed! id: %{public}u.", GetWindowId());
         return WMError::WM_ERROR_INVALID_PARAM;
     }
+
+    if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY && hostSession_) {
+        hostSession_->OnSessionEvent(SessionEvent::EVENT_SPLIT_PRIMARY);
+    } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY && hostSession_) {
+        hostSession_->OnSessionEvent(SessionEvent::EVENT_SPLIT_SECONDARY);
+    }
     return WMError::WM_OK;
 }
 
