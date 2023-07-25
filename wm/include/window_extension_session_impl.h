@@ -34,9 +34,19 @@ public:
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
     void RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func) override;
     WMError SetPrivacyMode(bool isPrivacyMode) override;
+    WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
+        NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability) override;
+
+    void NotifyFocusActiveEvent(bool isFocusActive) override;
+    void NotifyFocusStateEvent(bool focusState) override;
+    void NotifyFocusWindowIdEvent(int32_t windowId) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
+
+private:
+    std::atomic<int32_t> focusWindowId_ = INVALID_WINDOW_ID;
+    std::optional<std::atomic<bool>> focusState_ = std::nullopt;
 };
 } // namespace Rosen
 } // namespace OHOS
