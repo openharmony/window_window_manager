@@ -119,13 +119,14 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession01, Function
     ASSERT_NE(nullptr, windowscenesession);
 
     windowscenesession->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    if(windowscenesession->CreateAndConnectSpecificSession()==WMError::WM_ERROR_NULLPTR){
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowscenesession->CreateAndConnectSpecificSession());
+    if (windowscenesession->CreateAndConnectSpecificSession() == WMError::WM_ERROR_NULLPTR)
+    {
+        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowscenesession->CreateAndConnectSpecificSession());
     }
     windowscenesession->property_->SetPersistentId(102);
     windowscenesession->property_->SetParentPersistentId(100);
     windowscenesession->property_->SetParentId(100);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
 
@@ -959,10 +960,13 @@ HWTEST_F(WindowSceneSessionImplTest, SetPrivacyMode, Function | SmallTest | Leve
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    if(WMError::WM_OK==window->SetPrivacyMode(false)){
+    if (WMError::WM_OK == window->SetPrivacyMode(false))
+    {
     ASSERT_EQ(WMError::WM_OK, window->SetPrivacyMode(false));
     ASSERT_EQ(false, window->IsPrivacyMode());
-    }else if(WMError::WM_DO_NOTHING==window->SetPrivacyMode(false)){
+    }
+    else if (WMError::WM_DO_NOTHING == window->SetPrivacyMode(false))
+    {
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetPrivacyMode(false));
     }
 }
