@@ -408,3 +408,23 @@ ohos_unittest("wmserver_window_group_mgr_test") {
   public_deps = test_public_deps
   external_deps = test_external_deps
 }
+
+ohos_unittest("mock_screen_manager_service_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "mock_screen_manager_service_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
+ohos_unittest("mock_session_manager_service_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "mock_session_manager_service_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
