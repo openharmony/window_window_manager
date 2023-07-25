@@ -69,6 +69,10 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleBindDialogTarget),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT),
         &SceneSessionManagerStub::HandleGetSessionSnapshot),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_DUMP_INFO),
+        &SceneSessionManagerStub::HandleGetSessionDump),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT),
+        &SceneSessionManagerStub::HandleNotifyDumpInfoResult),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -295,10 +299,14 @@ int SceneSessionManagerStub::HandleSetSessionGravity(MessageParcel &data, Messag
 
 int SceneSessionManagerStub::HandleGetSessionDump(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFI("run HandleGet all session Dump!");
-    sptr<DumpParam> dumpParam = data.ReadParcelable<DumpParam>();
+    WLOGFI("run HandleGetSessionDump");
+    std::vector<std::string> params;
+    if (!data.ReadStringVector(&params)) {
+        WLOGFE("Fail to read params");
+        return -1;
+    }
     std::string dumpInfo;
-    WSError errCode = GetSessionDumpInfo(dumpParam, dumpInfo);
+    WSError errCode = GetSessionDumpInfo(params, dumpInfo);
     reply.WriteString(dumpInfo);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
@@ -331,6 +339,15 @@ int SceneSessionManagerStub::HandleGetSessionSnapshot(MessageParcel &data, Messa
     const WSError& ret = GetSessionSnapshot(persistentId, snapshot);
     reply.WriteParcelable(snapshot.get());
     reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("HandleNotifyDumpInfoResult");
+    std::vector<std::string> info;
+    data.ReadStringVector(&info);
+    NotifyDumpInfoResult(info);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

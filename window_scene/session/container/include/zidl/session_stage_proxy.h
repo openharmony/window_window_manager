@@ -38,6 +38,8 @@ public:
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info) override;
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
+    void DumpSessionElementInfo(const std::vector<std::string>& params)  override;
+
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
 };

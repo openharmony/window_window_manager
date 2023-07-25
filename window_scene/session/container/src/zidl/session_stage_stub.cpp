@@ -42,7 +42,9 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
     std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_OCCUPIED_AREA_CHANGE_INFO),
         &SessionStageStub::HandleNotifyOccupiedAreaChange),
     std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_UPDATE_AVOID_AREA),
-        &SessionStageStub::HandleUpdateAvoidArea)
+        &SessionStageStub::HandleUpdateAvoidArea),
+    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_DUMP_SESSSION_ELEMENT_INFO),
+        &SessionStageStub::HandleDumpSessionElementInfo)
 };
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -147,6 +149,18 @@ int SessionStageStub::HandleUpdateAvoidArea(MessageParcel& data, MessageParcel& 
         return ERR_INVALID_VALUE;
     }
     UpdateAvoidArea(avoidArea, static_cast<AvoidAreaType>(type));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleDumpSessionElementInfo(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleDumpSessionElementInfo!");
+    std::vector<std::string> params;
+    if (!data.ReadStringVector(&params)) {
+        WLOGFE("Fail to read params");
+        return -1;
+    }
+    DumpSessionElementInfo(params);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

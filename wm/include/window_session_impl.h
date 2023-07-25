@@ -118,6 +118,7 @@ public:
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void NotifyTouchDialogTarget() override;
+    void DumpSessionElementInfo(const std::vector<std::string>& params) override;
 
     WindowState state_ { WindowState::STATE_INITIAL };
 
