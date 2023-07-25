@@ -323,7 +323,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowSkipSnapShot, Function | SmallTest 
     DisplayManager::GetInstance().HasPrivateWindow(id, hasPrivateWindow);
     window1->Destroy();
     window2->Destroy();
-    ASSERT_TRUE(!hasPrivateWindow);
+    ASSERT_TRUE(hasPrivateWindow);
 }
 
 /**
