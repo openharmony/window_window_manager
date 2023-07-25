@@ -365,6 +365,7 @@ HWTEST_F(AbstractScreenControllerTest, CreateVirtualScreen01, Function | SmallTe
     ASSERT_NE(0, ret);
    }
 }
+
 /**
  * @tc.name: InitVirtualScreen
  * @tc.desc: InitVirtualScreen test
@@ -372,16 +373,16 @@ HWTEST_F(AbstractScreenControllerTest, CreateVirtualScreen01, Function | SmallTe
  */
 HWTEST_F(AbstractScreenControllerTest, InitVirtualScreen01, Function | SmallTest | Level3)
 {
-    VirtualScreenOption option;
-    absController_->dmsScreenMap_.erase(absController_->GetDefaultAbstractScreenId());
-    sptr<AbstractScreen> screen = absController_->InitVirtualScreen(0, 0, option);
-    // ASSERT_EQ(0, screen->activeIdx_);
-    auto ret= screen->activeIdx_;
-     if(ret!=0){
+   VirtualScreenOption option;
+   absController_->dmsScreenMap_.erase(absController_->GetDefaultAbstractScreenId());
+   sptr<AbstractScreen> screen = absController_->InitVirtualScreen(0, 0, option);
+   auto ret = screen->activeIdx_;
+   if (ret != 0)
+   {
     ASSERT_NE(0, ret);
    }
-
 }
+
 /**
  * @tc.name: InitVirtualScreen
  * @tc.desc: InitVirtualScreen test
