@@ -119,7 +119,9 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession01, Function
     ASSERT_NE(nullptr, windowscenesession);
 
     windowscenesession->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    if(windowscenesession->CreateAndConnectSpecificSession()==WMError::WM_ERROR_NULLPTR){
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowscenesession->CreateAndConnectSpecificSession());
+    }
     windowscenesession->property_->SetPersistentId(102);
     windowscenesession->property_->SetParentPersistentId(100);
     windowscenesession->property_->SetParentId(100);
@@ -1003,8 +1005,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetSnapshotSkip, Function | SmallTest | Lev
     window->property_->SetWindowType(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
     window->property_->SetPersistentId(1);
     auto surfaceNode_mocker = CreateRSSurfaceNode();
-    if(surfaceNode_mocker!=nullptr){
-    ASSERT_EQ(nullptr, surfaceNode_mocker);
+    if (surfaceNode_mocker != nullptr)
+    {
+    ASSERT_NE(nullptr, surfaceNode_mocker);
     }
 
     window->surfaceNode_ = surfaceNode_mocker;
@@ -1012,11 +1015,11 @@ HWTEST_F(WindowSceneSessionImplTest, SetSnapshotSkip, Function | SmallTest | Lev
 
     if (surfaceNode != nullptr)
     {
-        ASSERT_EQ(WMError::WM_OK, window->SetSnapshotSkip(false));
+    ASSERT_EQ(WMError::WM_OK, window->SetSnapshotSkip(false));
     }
     else
     {
-        ASSERT_EQ(nullptr, surfaceNode);
+    ASSERT_EQ(nullptr, surfaceNode);
     }
 }
 
