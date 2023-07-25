@@ -226,7 +226,8 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
             }
             WLOGFI("winId: %{public}u, modeSupportInfo: %{public}u", GetWindowId(), modeSupportInfo);
             property_->SetModeSupportInfo(modeSupportInfo);
-            if (modeSupportInfo == WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) {
+            auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
+            if (modeSupportInfo == WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN && !isPhone) {
                 SetFullScreen(true);
             }
             // get orientation configuration
