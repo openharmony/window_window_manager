@@ -393,11 +393,13 @@ HWTEST_F(AbstractScreenControllerTest, InitVirtualScreen02, Function | SmallTest
     VirtualScreenOption option;
     sptr<AbstractScreen> defaultScreen = absController_->dmsScreenMap_[absController_->GetDefaultAbstractScreenId()];
     sptr<SupportedScreenModes> modes;
+    if(defaultScreen!=nullptr){
     defaultScreen->modes_.emplace_back(modes);
     defaultScreen->activeIdx_ = 0;
     ASSERT_EQ(nullptr, defaultScreen->GetActiveScreenMode());
     sptr<AbstractScreen> screen = absController_->InitVirtualScreen(0, 0, option);
     ASSERT_EQ(ScreenType::VIRTUAL, screen->type_);
+    }
 }
 /**
  * @tc.name: DestroyVirtualScreen
@@ -602,10 +604,12 @@ HWTEST_F(AbstractScreenControllerTest, MakeExpand02, Function | SmallTest | Leve
     std::vector<Point> startPoints;
     ScreenId defaultId = absController_->GetDefaultAbstractScreenId();
     auto defaultScreen = absController_->GetAbstractScreen(defaultId);
+    if(defaultScreen!=nullptr){
     ScreenId groupDmsId = defaultScreen->groupDmsId_;
     absController_->dmsScreenGroupMap_[groupDmsId] = nullptr;
     ASSERT_EQ(false, absController_->MakeExpand(screenIds, startPoints));
     ASSERT_EQ(DMError::DM_OK, absController_->StopScreens(screenIds, ScreenCombination::SCREEN_EXPAND));
+    }
 }
 /**
  * @tc.name: RemoveVirtualScreenFromGroup
