@@ -236,6 +236,11 @@ bool Session::GetVisible() const
     return isVisible_;
 }
 
+bool Session::IsActive() const
+{
+    return isActive_;
+}
+
 int32_t Session::GetWindowId() const
 {
     return GetPersistentId();
