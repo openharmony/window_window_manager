@@ -46,6 +46,7 @@ private:
     int HandleNotifyTransferComponentData(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyOccupiedAreaChange(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateAvoidArea(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyScreenshot(MessageParcel& data, MessageParcel& reply);
     int HandleDumpSessionElementInfo(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
