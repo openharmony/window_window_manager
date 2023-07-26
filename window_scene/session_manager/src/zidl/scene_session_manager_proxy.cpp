@@ -551,7 +551,9 @@ WSError SceneSessionManagerProxy::TerminateSessionNew(const sptr<AAFwk::SessionI
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    return static_cast<WSError>(reply.ReadInt32());
+    int32_t ret = reply.ReadInt32();
+    abilitySessionInfo->resultCode = ret;
+    return static_cast<WSError>(ret);
 }
 
 WSError SceneSessionManagerProxy::GetFocusSessionToken(sptr<IRemoteObject> &token)
