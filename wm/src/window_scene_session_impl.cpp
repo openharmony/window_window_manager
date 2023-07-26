@@ -36,7 +36,7 @@
 namespace OHOS {
 namespace Rosen {
 union WSColorParam {
-#if BIG_ENDIANNESS
+#if defined(BIG_ENDIANNESS) && BIG_ENDIANNESS
     struct {
         uint8_t alpha;
         uint8_t red;
