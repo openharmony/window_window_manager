@@ -16,7 +16,11 @@
 #include "marshalling_helper.h"
 
 #include <securec.h>
+#include <iremote_broker.h>
+#include <iservice_registry.h>
 
+#include "ability_context.h"
+#include "ability_context_impl.h"
 #include "js_runtime.h"
 #include <want.h>
 #include "window.h"
@@ -25,6 +29,8 @@
 #include "window_manager.h"
 #include "window_extension_connection.h"
 #include "window_adapter.h"
+#include "wm_common.h"
+#include "window_option.h"
 
 using namespace OHOS::Rosen;
 
@@ -79,6 +85,114 @@ public:
     {
     }
     void OnBackPress() override
+    {
+    }
+};
+
+class OccupiedAreaChangeListener : public IOccupiedAreaChangeListener {
+public:
+    void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override
+    {
+    }
+};
+
+class TouchOutsideListener : public ITouchOutsideListener {
+public:
+    void OnTouchOutside() const override
+    {
+    }
+};
+
+class AnimationTransitionController : public IAnimationTransitionController {
+public:
+    void AnimationForShown() override
+    {
+    }
+
+    void AnimationForHidden() override
+    {
+    }
+};
+
+class ScreenshotListener : public IScreenshotListener {
+public:
+    void OnScreenshot() override
+    {
+    }
+};
+
+class DialogTargetTouchListener : public IDialogTargetTouchListener {
+public:
+    void OnDialogTargetTouch() const override
+    {
+    }
+};
+
+class DialogDeathRecipientListener : public IDialogDeathRecipientListener {
+public:
+    void OnDialogDeathRecipient() const override
+    {
+    }
+};
+
+class WindowDragListener : public IWindowDragListener {
+public:
+    void OnDrag(int32_t x, int32_t y, DragEvent event) override
+    {
+    }
+};
+
+class DisplayMoveListener : public IDisplayMoveListener {
+public:
+    void OnDisplayMove(DisplayId from, DisplayId to) override
+    {
+    }
+};
+
+class AceAbilityHandler : public IAceAbilityHandler {
+public:
+    void SetBackgroundColor(uint32_t color) override
+    {
+    }
+
+    virtual uint32_t GetBackgroundColor() override
+    {
+        return 0xffffffff;
+    }
+};
+
+class WindowLifeCycle : public IWindowLifeCycle {
+public:
+    void AfterForeground() override
+    {
+    }
+
+    void AfterBackground() override
+    {
+    }
+
+    void AfterFocused() override
+    {
+    }
+
+    void AfterUnfocused() override
+    {
+    }
+
+    void ForegroundFailed(int32_t ret) override
+    {
+    }
+
+    void BackgroundFailed(int32_t ret) override
+    {
+    }
+
+    void AfterActive() override
+    {
+    }
+
+    void AfterInactive()  override
     {
     }
 };
@@ -398,7 +512,6 @@ void CheckWindowImplFunctionsPart5(sptr<WindowImpl> window, const uint8_t* data,
     window->HandleModeChangeHotZones(posX, posY);
 }
 
-
 void CheckWindowImplFunctionsPart6(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 {
     if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
@@ -429,8 +542,6 @@ void CheckWindowImplFunctionsPart6(sptr<WindowImpl> window, const uint8_t* data,
 
     window->WindowCreateCheck(uint32Val[0]);
     window->CalculatePointerDirection(uint32Val[0], uint32Val[1]);
-    std::shared_ptr<AbilityRuntime::Context> context = nullptr;
-    window->GetTopWindowWithContext(context);
     sptr<IWindowChangeListener> iWindowChangeListener = new IWindowChangeListener();
     std::shared_ptr<RSTransaction> rstransaction;
     OHOS::Rosen::Rect rect_ = {0, 0, 0, 0};
@@ -446,15 +557,139 @@ void CheckWindowImplFunctionsPart6(sptr<WindowImpl> window, const uint8_t* data,
     iWindowExtensionCallback->OnBackPress();
 }
 
+void CheckWindowImplFunctionsPart7(sptr<WindowImpl> window, const uint8_t* data, size_t size)
+{
+    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
+        return;
+    }
+    size_t startPos = 0;
+    NotifyNativeWinDestroyFunc func = [](std::string) {};
+    window->RegisterWindowDestroyedListener(func);
+
+    sptr<IOccupiedAreaChangeListener> occupiedAreaChangeListener = new OccupiedAreaChangeListener();
+    window->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener);
+    window->UnregisterOccupiedAreaChangeListener(occupiedAreaChangeListener);
+    sptr<ITouchOutsideListener> touchOutsideListener = new TouchOutsideListener();
+    window->RegisterTouchOutsideListener(touchOutsideListener);
+    window->UnregisterTouchOutsideListener(touchOutsideListener);
+    sptr<IAnimationTransitionController> animationTransitionController = new AnimationTransitionController();
+    window->RegisterAnimationTransitionController(animationTransitionController);
+    sptr<IScreenshotListener> screenshotListener = new IScreenshotListener();
+    window->RegisterScreenshotListener(screenshotListener);
+    window->UnregisterScreenshotListener(screenshotListener);
+    sptr<IDialogTargetTouchListener> dialogTargetTouchListener = new DialogTargetTouchListener();
+    window->RegisterDialogTargetTouchListener(dialogTargetTouchListener);
+    window->UnregisterDialogTargetTouchListener(dialogTargetTouchListener);
+    sptr<IDialogDeathRecipientListener> dialogDeathRecipientListener = new DialogDeathRecipientListener();
+    window->RegisterDialogDeathRecipientListener(dialogDeathRecipientListener);
+    window->UnregisterDialogDeathRecipientListener(dialogDeathRecipientListener);
+    sptr<IAceAbilityHandler> aceAbilityHandler = new AceAbilityHandler();
+    window->SetAceAbilityHandler(aceAbilityHandler);
+    uint32_t modeSupportInfo;
+    startPos += GetObject<uint32_t>(modeSupportInfo, data + startPos, size - startPos);
+    window->SetRequestModeSupportInfo(modeSupportInfo);
+    float ratio;
+    startPos += GetObject<float>(ratio, data + startPos, size - startPos);
+    window->SetAspectRatio(ratio);
+    AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
+    AvoidArea avoidArea;
+    startPos += GetObject<AvoidAreaType>(avoidAreaType, data + startPos, size - startPos);
+    startPos += GetObject<AvoidArea>(avoidArea, data + startPos, size - startPos);
+    window->GetAvoidAreaByType(avoidAreaType, avoidArea);
+    WindowGravity gravity = WindowGravity::WINDOW_GRAVITY_FLOAT;
+    uint32_t invalidGravityPercent = 0;
+    startPos += GetObject<WindowGravity>(gravity, data + startPos, size - startPos);
+    startPos += GetObject<uint32_t>(invalidGravityPercent, data + startPos, size - startPos);
+    window->SetWindowGravity(gravity, invalidGravityPercent);
+    sptr<IRemoteObject> targetToken;
+    window->BindDialogTarget(targetToken);
+    std::string color = "ff22ee44";
+    startPos += GetObject<std::string>(color, data + startPos, size - startPos);
+    window->SetShadowColor(color);
+}
+
+void CheckWindowImplFunctionsPart8(sptr<WindowImpl> window, const uint8_t* data, size_t size)
+{
+    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
+        return;
+    }
+    size_t startPos = 0;
+    std::vector<std::string> params{"-h"};
+    std::vector<std::string> info{""};
+    window->DumpInfo(params, info);
+    params.push_back("");
+    window->DumpInfo(params, info);
+
+    auto keyEvent = MMI::KeyEvent::Create();
+    window->ConsumeKeyEvent(keyEvent);
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_BACK);
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
+    window->ConsumeKeyEvent(keyEvent);
+
+    auto pointerEvent = MMI::PointerEvent::Create();
+    MMI::PointerEvent::PointerItem item;
+    int32_t pointerId = 0;
+    startPos += GetObject<int32_t>(pointerId, data + startPos, size - startPos);
+    pointerEvent->SetPointerId(pointerId);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
+    window->ConsumePointerEvent(pointerEvent);
+    item.SetPointerId(pointerId);
+    item.SetDisplayX(15); // 15 : position x
+    item.SetDisplayY(15); // 15 : position y
+    pointerEvent->AddPointerItem(item);
+    window->ConsumePointerEvent(pointerEvent);
+    int32_t x = 5;
+    int32_t y = 5;
+    startPos += GetObject<int32_t>(x, data + startPos, size - startPos);
+    startPos += GetObject<int32_t>(y, data + startPos, size - startPos);
+    item.SetDisplayX(x); // 5 : position x
+    item.SetDisplayY(y); // 5 : position y
+    pointerEvent->UpdatePointerItem(pointerId, item);
+    window->ConsumePointerEvent(pointerEvent);
+}
+
+void CheckWindowImplFunctionsPart9(sptr<WindowImpl> window, const uint8_t* data, size_t size)
+{
+    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
+        return;
+    }
+    std::shared_ptr<IInputEventConsumer> iInputEventConsumer = std::make_shared<IInputEventConsumer>();
+    window->SetInputEventConsumer(iInputEventConsumer);
+    std::shared_ptr<VsyncCallback> callback;
+    window->RequestVsync(callback);
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    window->UpdateConfiguration(configuration);
+    sptr<IWindowLifeCycle> windowLifeCycleListener = new IWindowLifeCycle();
+    window->RegisterLifeCycleListener(windowLifeCycleListener);
+    window->UnregisterLifeCycleListener(windowLifeCycleListener);
+    sptr<IWindowChangeListener> windowChangeListener = new IWindowChangeListener();
+    window->RegisterWindowChangeListener(sptr<IWindowChangeListener>(windowChangeListener));
+    window->UnregisterWindowChangeListener(sptr<IWindowChangeListener>(windowChangeListener));
+    sptr<IAvoidAreaChangedListener> avoidAreaChangedListener = new IAvoidAreaChangedListener();
+    window->RegisterAvoidAreaChangeListener(avoidAreaChangedListener);
+    window->UnregisterAvoidAreaChangeListener(avoidAreaChangedListener);
+    sptr<IWindowDragListener> windowDragListener = new WindowDragListener();
+    window->RegisterDragListener(windowDragListener);
+    window->UnregisterDragListener(windowDragListener);
+    sptr<IDisplayMoveListener> displayMoveListener = new DisplayMoveListener();
+    window->RegisterDisplayMoveListener(displayMoveListener);
+    window->UnregisterDisplayMoveListener(displayMoveListener);
+    AAFwk::Want want;
+    window->OnNewWant(want);
+}
+
 void WindowImplFuzzTest(const uint8_t* data, size_t size)
 {
     std::string name = "WindowFuzzTest";
     sptr<OHOS::Rosen::WindowOption> option = new OHOS::Rosen::WindowOption();
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<OHOS::Rosen::WindowImpl> window = new(std::nothrow) OHOS::Rosen::WindowImpl(option);
     if (window == nullptr) {
         return;
     }
-    OHOS::Rosen::WMError error = window->Create(option->GetParentId(), nullptr);
+    std::shared_ptr<AbilityRuntime::AbilityContext> context =
+        std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    OHOS::Rosen::WMError error = window->Create(option->GetParentId(), context);
     if (error != OHOS::Rosen::WMError::WM_OK) {
         return;
     }
@@ -472,6 +707,9 @@ void WindowImplFuzzTest(const uint8_t* data, size_t size)
     OHOS::CheckWindowImplFunctionsPart4(window, data, size);
     OHOS::CheckWindowImplFunctionsPart5(window, data, size);
     OHOS::CheckWindowImplFunctionsPart6(window, data, size);
+    OHOS::CheckWindowImplFunctionsPart7(window, data, size);
+    OHOS::CheckWindowImplFunctionsPart8(window, data, size);
+    OHOS::CheckWindowImplFunctionsPart9(window, data, size);
 
     window->Hide(reason, withAnimation);
     window->Destroy();
