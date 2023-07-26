@@ -902,9 +902,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetBlur, Function | SmallTest | Level3)
     window->property_->SetWindowName("SetBlur");
 
     auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr){
+    if (surfaceNode == nullptr) {
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    }else{
+    } else {
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBlur(-1.0));
     ASSERT_EQ(WMError::WM_OK, window->SetBlur(1.0));
@@ -1132,9 +1132,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetShadowColor, Function | SmallTest | Leve
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
 
     auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr){
+    if (surfaceNode == nullptr) {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    }else{
+    }else {
         ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowColor("111ff22ee44"));
         ASSERT_EQ(WMError::WM_OK, window->SetShadowColor("#ff22ee44"));
         ASSERT_EQ(WMError::WM_OK, window->SetShadowColor("#000999"));
