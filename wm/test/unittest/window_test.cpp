@@ -94,8 +94,7 @@ HWTEST_F(WindowTest, Create03, Function | SmallTest | Level2)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("WindowTest03", option);
-    if (window != nullptr)
-    {
+    if (window != nullptr) {
         ASSERT_EQ(nullptr, Window::Create("WindowTest03", option));
     }
 }
@@ -132,17 +131,14 @@ HWTEST_F(WindowTest, Find02, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
 
     auto window = Window::Create("WindowTest03", option);
-    if (window != nullptr)
-    {
+    if (window != nullptr) {
         ASSERT_NE(nullptr, window);
     }
-    if (Window::Find("WindowTest03") != nullptr)
-    {
+    if (Window::Find("WindowTest03") != nullptr) {
         ASSERT_NE(nullptr, Window::Find("WindowTest03"));
     }
 
-    if (window != nullptr)
-    {
+    if (window != nullptr) {
         ASSERT_EQ(WMError::WM_OK, window->Destroy());
     }
 }
