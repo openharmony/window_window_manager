@@ -96,7 +96,6 @@ constexpr int ORIEN_MAX_WIDTH = 12;
 constexpr int PID_MAX_WIDTH = 8;
 constexpr int PARENT_ID_MAX_WIDTH = 6;
 constexpr int WINDOW_NAME_MAX_LENGTH = 20;
-const std::string ARG_DUMP_HELP = "-h";
 const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_WINDOW = "-w";
 const std::string ARG_DUMP_SCREEN = "-s";
@@ -1347,6 +1346,9 @@ bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
 
 void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std::ostringstream& oss)
 {
+    if (session == nullptr) {
+        return;
+    }
     int zOrder = IsSessionVisible(session) ? session->GetZOrder() : -1;
     WSRect rect = session->GetSessionRect();
     std::string sName;
@@ -1377,6 +1379,39 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
         << std::left << std::setw(VALUE_MAX_WIDTH) << rect.height_
         << "]"
         << std::endl;
+}
+
+void SceneSessionManager::DumpAllAppSessionInfo(std::ostringstream& oss)
+{
+    oss << std::endl << "Current mission lists:" << std::endl;
+    oss << " MissionList Type #NORMAL" << std::endl;
+    for (const auto& elem: sceneSessionMap_) {
+        auto curSession = elem.second;
+        if (curSession == nullptr) {
+            WLOGFW("curSession is nullptr");
+            continue;
+        }
+        if (curSession->GetSessionInfo().isSystem_ ||
+            curSession->GetWindowType() < WindowType::APP_MAIN_WINDOW_BASE ||
+            curSession->GetWindowType() >= WindowType::APP_MAIN_WINDOW_END) {
+            WLOGFW("No need to dump, id: %{public}d, isSystem: %{public}d, windowType: %{public}d",
+                curSession->GetPersistentId(), curSession->GetSessionInfo().isSystem_, curSession->GetWindowType());
+            continue;
+        }
+
+        const auto& sessionInfo = curSession->GetSessionInfo();
+        std::string isActive = curSession->IsActive() ? "FOREGROUND" : "BACKGROUND";
+        oss << "    Mission ID #" << curSession->GetPersistentId() << "  mission name #" << "[#"
+            << sessionInfo.bundleName_ << ":" << sessionInfo.moduleName_ << ":" << sessionInfo.abilityName_
+            << "]" << "    lockedState #0" << std::endl;
+        oss << "    app name [" << sessionInfo.bundleName_ << "]" << std::endl;
+        oss << "    main name [" << sessionInfo.abilityName_ << "]" << std::endl;
+        oss << "    bundle name [" << sessionInfo.bundleName_ << "]" << std::endl;
+        oss << "    ability type [PAGE]" << std::endl;
+        oss << "    state #" << isActive.c_str() << std::endl;
+        oss << "    app state #" << isActive.c_str() << std::endl;
+        oss << "    callee connections:" << std::endl;
+    }
 }
 
 WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
@@ -1415,27 +1450,47 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
         count++;
     }
     oss << "Focus window: " << GetFocusedSession() << std::endl;
-    oss << "total window num: " << sceneSessionMap_.size() << std::endl;
+    oss << "Total window num: " << sceneSessionMap_.size() << std::endl;
+    DumpAllAppSessionInfo(oss);
     dumpInfo.append(oss.str());
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::GetSessionDumpInfo(const sptr<DumpParam>& param, std::string& dumpInfo)
+void SceneSessionManager::SetDumpRootSceneElementInfoListener(const DumpRootSceneElementInfoFunc& func)
 {
-    if (param == nullptr) {
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
-    if (param->params_.size() == 1 && param->params_[0] == ARG_DUMP_ALL) { // 1: params= -a
-        return GetAllSessionDumpInfo(dumpInfo);
-    }
-    if (param->params_.size() >= 2 && param->params_[0] == ARG_DUMP_WINDOW &&
-        IsValidDigitString(param->params_[1])) {  // 2: -w 10
-        return GetSpecifiedSessionDumpInfo(dumpInfo, param->params_[1]);
-    }
-    return WSError::WS_ERROR_INVALID_OPERATION;
+    dumpRootSceneFunc_ = func;
 }
 
-WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, const std::string& strId)
+void SceneSessionManager::DumpSessionElementInfo(const sptr<SceneSession>& session,
+    const std::vector<std::string>& params, std::string& dumpInfo)
+{
+    std::vector<std::string> resetParams;
+    resetParams.assign(params.begin() + 2, params.end()); // 2: params num
+    if (resetParams.empty()) {
+        WLOGI("do not dump ui info");
+        return;
+    }
+
+    if (!session->GetSessionInfo().isSystem_) {
+        WLOGFI("Dump normal session, not system");
+        dumpInfoFuture_.ResetLock({});
+        session->DumpSessionElementInfo(resetParams);
+        std::vector<std::string> infos = dumpInfoFuture_.GetResult(2000); // 2000: wait for 2000ms
+        for (auto& info: infos) {
+            dumpInfo.append(info).append("\n");
+        }
+    } else {
+        WLOGFI("Dump system session");
+        std::vector<std::string> infos;
+        dumpRootSceneFunc_(resetParams, infos);
+        for (auto& info: infos) {
+            dumpInfo.append(info).append("\n");
+        }
+    }
+}
+
+WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, const std::vector<std::string>& params,
+    const std::string& strId)
 {
     uint64_t persistentId = std::stoull(strId);
     auto session = GetSceneSession(persistentId);
@@ -1474,7 +1529,26 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
     std::vector<Rect> touchHotAreas;
     oss << std::endl;
     dumpInfo.append(oss.str());
+
+    DumpSessionElementInfo(session, params, dumpInfo);
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::NotifyDumpInfoResult(const std::vector<std::string>& info)
+{
+    dumpInfoFuture_.SetValue(info);
+    WLOGFD("NotifyDumpInfoResult");
+}
+
+WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& params, std::string& dumpInfo)
+{
+    if (params.size() == 1 && params[0] == ARG_DUMP_ALL) { // 1: params num
+        return GetAllSessionDumpInfo(dumpInfo);
+    }
+    if (params.size() >= 2 && params[0] == ARG_DUMP_WINDOW && IsValidDigitString(params[1])) { // 2: params num
+        return GetSpecifiedSessionDumpInfo(dumpInfo, params, params[1]);
+    }
+    return WSError::WS_ERROR_INVALID_OPERATION;
 }
 
 WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)

@@ -22,6 +22,7 @@
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session.h"
 #include "session_manager/include/scene_session_manager.h"
+#include <ui_content.h>
 #include "want.h"
 #include "window_manager_hilog.h"
 
@@ -40,6 +41,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScen
 const std::string CREATE_SPECIFIC_SCENE_CB = "createSpecificSession";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 const std::string OUTSIDE_DOWN_EVENT_CB = "outsideDownEvent";
+const std::string ARG_DUMP_HELP = "-h";
 } // namespace
 
 NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* exportObj)
@@ -443,6 +445,21 @@ NativeValue* JsSceneSessionManager::OnSwitchUser(NativeEngine& engine, NativeCal
     return engine.CreateUndefined();
 }
 
+void JsSceneSessionManager::RegisterDumpRootSceneElementInfoListener()
+{
+    DumpRootSceneElementInfoFunc func = [this](const std::vector<std::string>& params,
+        std::vector<std::string>& infos) {
+        if (params.size() == 1 && params[0] == ARG_DUMP_HELP) {
+            Ace::UIContent::ShowDumpHelp(infos);
+            WLOGFD("Dump arkUI help info");
+        } else if (RootScene::staticRootScene_->GetUIContent()) {
+            RootScene::staticRootScene_->GetUIContent()->DumpInfo(params, infos);
+            WLOGFD("Dump arkUI element info");
+        }
+    };
+    SceneSessionManager::GetInstance().SetDumpRootSceneElementInfoListener(func);
+}
+
 NativeValue* JsSceneSessionManager::OnGetRootSceneSession(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGI("[NAPI]OnGetRootSceneSession");
@@ -457,6 +474,7 @@ NativeValue* JsSceneSessionManager::OnGetRootSceneSession(NativeEngine& engine, 
         rootScene_ = new RootScene();
     }
     RootScene::staticRootScene_ = rootScene_;
+    RegisterDumpRootSceneElementInfoListener();
     rootSceneSession->SetLoadContentFunc([rootScene = rootScene_]
         (const std::string& contentUrl, NativeEngine* engine, NativeValue* storage, AbilityRuntime::Context* context) {
             rootScene->LoadContent(contentUrl, engine, storage, context);

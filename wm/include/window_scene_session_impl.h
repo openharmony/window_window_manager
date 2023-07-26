@@ -99,6 +99,8 @@ public:
     const Transform& GetTransform() const override;
     WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) override;
     WMError SetAlpha(float alpha) override;
+    void DumpSessionElementInfo(const std::vector<std::string>& params) override;
+    
 protected:
     void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();

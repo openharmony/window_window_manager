@@ -174,7 +174,6 @@ public:
     bool GetTouchable() const;
     WSError SetVisible(bool isVisible);
     bool GetVisible() const;
-    bool IsActive() const;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
@@ -185,6 +184,7 @@ public:
     Orientation GetRequestedOrientation() const;
 
     bool IsSessionValid() const;
+    bool IsActive() const;
 
     sptr<IRemoteObject> dialogTargetToken_ = nullptr;
     int32_t GetWindowId() const;
