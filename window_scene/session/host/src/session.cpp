@@ -385,7 +385,6 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property)
     if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         NotifyCallingSessionForeground();
     }
-    NotifyForeground();
     return WSError::WS_OK;
 }
 
@@ -787,7 +786,8 @@ WSError Session::TransferFocusStateEvent(bool focusState)
 std::shared_ptr<Media::PixelMap> Session::Snapshot()
 {
     auto callback = std::make_shared<SurfaceCaptureFuture>();
-    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
+    constexpr float scale = 0.5;
+    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, scale, scale);
     if (!ret) {
         WLOGFE("TakeSurfaceCapture failed");
         return nullptr;
@@ -1090,5 +1090,15 @@ WSError Session::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 WSError Session::UpdateWindowSceneAfterCustomAnimation(bool isAdd)
 {
     return WSError::WS_OK;
+}
+
+void Session::SetShowRecent(bool showRecent)
+{
+    showRecent_ = showRecent;
+}
+
+bool Session::GetShowRecent() const
+{
+    return showRecent_;
 }
 } // namespace OHOS::Rosen

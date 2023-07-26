@@ -80,11 +80,11 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
         JsSceneSessionManager::RequestSceneSessionByCall);
     BindNativeFunction(*engine, *object, "startAbilityBySpecified", moduleName,
         JsSceneSessionManager::StartAbilityBySpecified);
-    BindNativeFunction(*engine, *object, "getSessionSnapshot", moduleName, JsSceneSessionManager::GetSessionSnapshotFilePath);
+    BindNativeFunction(*engine, *object, "getSessionSnapshot", moduleName,
+        JsSceneSessionManager::GetSessionSnapshotFilePath);
     BindNativeFunction(*engine, *object, "InitWithRenderServiceAdded", moduleName,
         JsSceneSessionManager::InitWithRenderServiceAdded);
-    BindNativeFunction(*engine, *object, "perfRequestEx", moduleName,
-        JsSceneSessionManager::PerfRequestEx);
+    BindNativeFunction(*engine, *object, "perfRequestEx", moduleName, JsSceneSessionManager::PerfRequestEx);
     return engine->CreateUndefined();
 }
 
