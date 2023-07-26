@@ -678,6 +678,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     abilitySessionInfo->resultCode = sessionInfo.resultCode;
     abilitySessionInfo->uiAbilityId = sessionInfo.uiAbilityId_;
     abilitySessionInfo->startSetting = sessionInfo.startSetting;
+    abilitySessionInfo->userId = currentUserId_;
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = *sessionInfo.want;
     } else {
