@@ -14,6 +14,7 @@
  */
 
 #include "session/screen/include/screen_property.h"
+#include "parameters.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -22,6 +23,7 @@ constexpr int32_t PHONE_SCREEN_HEIGHT = 2772;
 constexpr float PHONE_SCREEN_DENSITY = 3.5f;
 constexpr float ELSE_SCREEN_DENSITY = 1.5f;
 constexpr float INCH_2_MM = 25.4f;
+constexpr int32_t HALF_VALUE = 2;
 }
 
 void ScreenProperty::SetRotation(float rotation)
@@ -94,6 +96,32 @@ float ScreenProperty::GetVirtualPixelRatio() const
 
 void ScreenProperty::SetScreenRotation(Rotation rotation)
 {
+    bool enableRotation = system::GetParameter("debug.window.rotation.enabled", "0") == "1";
+    if (enableRotation) {
+        if (IsVertical(rotation) != IsVertical(screenRotation_)) {
+            std::swap(bounds_.rect_.width_, bounds_.rect_.height_);
+            int32_t width = bounds_.rect_.width_;
+            int32_t height = bounds_.rect_.height_;
+            if (IsVertical(screenRotation_)) {
+                bounds_.rect_.left_ -= static_cast<float>(width - height) / static_cast<float>(HALF_VALUE) -
+                    static_cast<float>(offsetY_);
+                bounds_.rect_.top_ += static_cast<float>(width - height) / static_cast<float>(HALF_VALUE);
+            } else {
+                bounds_.rect_.left_ += static_cast<float>(height - width) / static_cast<float>(HALF_VALUE);
+                bounds_.rect_.top_ -= static_cast<float>(height - width) / static_cast<float>(HALF_VALUE) +
+                    static_cast<float>(offsetY_);
+            }
+        }
+        if (rotation == Rotation::ROTATION_0) {
+            rotation_ = 0.f;
+        } else if (rotation == Rotation::ROTATION_90) {
+            rotation_ = 90.f;
+        } else if (rotation == Rotation::ROTATION_180) {
+            rotation_ = 180.f;
+        } else {
+            rotation_ = 270.f;
+        }
+    }
     screenRotation_ = rotation;
 }
 
