@@ -1154,7 +1154,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetCornerRadius, Function | SmallTest | Lev
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
 
     auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr){
+    if (surfaceNode == nullptr) {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetCornerRadius(1.0));
     } else {
         ASSERT_EQ(WMError::WM_OK, window->SetCornerRadius(1.0));
