@@ -837,12 +837,9 @@ HWTEST_F(WindowSceneSessionImplTest, CheckParmAndPermission, Function | SmallTes
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
 
     auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr)
-    {
+    if (surfaceNode == nullptr) {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    }
-    else
-    {
+    } else {
         ASSERT_EQ(WMError::WM_OK, window->CheckParmAndPermission());
         window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
         ASSERT_EQ(WMError::WM_OK, window->CheckParmAndPermission());
@@ -863,13 +860,10 @@ HWTEST_F(WindowSceneSessionImplTest, SetBackdropBlurStyle, Function | SmallTest 
     window->property_->SetDisplayId(3);
 
     auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr)
-    {
+    if (surfaceNode == nullptr) {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF));
-    }
-    else
-    {
+    } else {
     ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_THICK));
     }
@@ -908,12 +902,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetBlur, Function | SmallTest | Level3)
     window->property_->SetWindowName("SetBlur");
 
     auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr)
-    {
+    if (surfaceNode == nullptr){
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    }
-    else
-    {
+    }else{
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBlur(-1.0));
     ASSERT_EQ(WMError::WM_OK, window->SetBlur(1.0));
@@ -960,13 +951,10 @@ HWTEST_F(WindowSceneSessionImplTest, SetPrivacyMode, Function | SmallTest | Leve
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    if (WMError::WM_OK == window->SetPrivacyMode(false))
-    {
+    if (WMError::WM_OK == window->SetPrivacyMode(false)) {
     ASSERT_EQ(WMError::WM_OK, window->SetPrivacyMode(false));
     ASSERT_EQ(false, window->IsPrivacyMode());
-    }
-    else if (WMError::WM_DO_NOTHING == window->SetPrivacyMode(false))
-    {
+    }else if (WMError::WM_DO_NOTHING == window->SetPrivacyMode(false)) {
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetPrivacyMode(false));
     }
 }
@@ -1013,20 +1001,16 @@ HWTEST_F(WindowSceneSessionImplTest, SetSnapshotSkip, Function | SmallTest | Lev
     window->property_->SetWindowType(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
     window->property_->SetPersistentId(1);
     auto surfaceNode_mocker = CreateRSSurfaceNode();
-    if (surfaceNode_mocker != nullptr)
-    {
+    if (surfaceNode_mocker != nullptr) {
     ASSERT_NE(nullptr, surfaceNode_mocker);
     }
 
     window->surfaceNode_ = surfaceNode_mocker;
     auto surfaceNode = window->GetSurfaceNode();
 
-    if (surfaceNode != nullptr)
-    {
+    if (surfaceNode != nullptr) {
     ASSERT_EQ(WMError::WM_OK, window->SetSnapshotSkip(false));
-    }
-    else
-    {
+    } else {
     ASSERT_EQ(nullptr, surfaceNode);
     }
 }
@@ -1087,12 +1071,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetShadowOffsetX, Function | SmallTest | Le
     window->property_->SetWindowName("SetKeepScreenOn");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
     auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr)
-    {
+    if (surfaceNode == nullptr) {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    }
-    else
-    {
+    } else {
         ASSERT_EQ(WMError::WM_OK, window->SetShadowOffsetX(1.0));
     }
 }
@@ -1110,12 +1091,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetShadowOffsetY, Function | SmallTest | Le
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
 
     auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr)
-    {
+    if (surfaceNode == nullptr) {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    }
-    else
-    {
+    } else {
         ASSERT_EQ(WMError::WM_OK, window->SetShadowOffsetY(1.0));
     }
 }
@@ -1133,12 +1111,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetBackdropBlur, Function | SmallTest | Lev
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
 
     auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr)
-    {
+    if (surfaceNode == nullptr) {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    }
-    else
-    {
+    } else {
         ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlur(-1.0));
         ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlur(1.0));
     }
@@ -1157,12 +1132,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetShadowColor, Function | SmallTest | Leve
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
 
     auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr)
-    {
+    if (surfaceNode == nullptr){
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    }
-    else
-    {
+    }else{
         ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowColor("111ff22ee44"));
         ASSERT_EQ(WMError::WM_OK, window->SetShadowColor("#ff22ee44"));
         ASSERT_EQ(WMError::WM_OK, window->SetShadowColor("#000999"));
@@ -1182,12 +1154,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetCornerRadius, Function | SmallTest | Lev
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
 
     auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr)
-    {
+    if (surfaceNode == nullptr){
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetCornerRadius(1.0));
-    }
-    else
-    {
+    } else {
         ASSERT_EQ(WMError::WM_OK, window->SetCornerRadius(1.0));
     }
 }
@@ -1205,12 +1174,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetShadowRadius, Function | SmallTest | Lev
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
 
     auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr)
-    {
+    if (surfaceNode == nullptr) {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    }
-    else
-    {
+    } else {
         ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowRadius(-1.0));
         ASSERT_EQ(WMError::WM_OK, window->SetShadowRadius(1.0));
     }
@@ -1332,12 +1298,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetAlpha01, Function | SmallTest | Level2)
     windowscenesession->hostSession_ = session;
 
     auto surfaceNode = windowscenesession->GetSurfaceNode();
-    if (surfaceNode == nullptr)
-    {
+    if (surfaceNode == nullptr) {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowscenesession->CheckParmAndPermission());
-    }
-    else
-    {
+    } else {
         ASSERT_EQ(WMError::WM_OK, windowscenesession->SetAlpha(1.0));
     }
 }

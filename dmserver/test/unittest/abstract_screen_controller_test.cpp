@@ -377,8 +377,7 @@ HWTEST_F(AbstractScreenControllerTest, InitVirtualScreen01, Function | SmallTest
     absController_->dmsScreenMap_.erase(absController_->GetDefaultAbstractScreenId());
     sptr<AbstractScreen> screen = absController_->InitVirtualScreen(0, 0, option);
     auto ret = screen->activeIdx_;
-    if (ret != 0)
-    {
+    if (ret != 0){
         ASSERT_NE(0, ret);
     }
 }
@@ -393,8 +392,7 @@ HWTEST_F(AbstractScreenControllerTest, InitVirtualScreen02, Function | SmallTest
     VirtualScreenOption option;
     sptr<AbstractScreen> defaultScreen = absController_->dmsScreenMap_[absController_->GetDefaultAbstractScreenId()];
     sptr<SupportedScreenModes> modes;
-    if (defaultScreen != nullptr)
-    {
+    if (defaultScreen != nullptr){
         defaultScreen->modes_.emplace_back(modes);
         defaultScreen->activeIdx_ = 0;
         ASSERT_EQ(nullptr, defaultScreen->GetActiveScreenMode());
