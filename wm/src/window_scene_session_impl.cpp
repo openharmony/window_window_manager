@@ -25,6 +25,7 @@
 #include "session/container/include/window_event_channel.h"
 #include "session_manager/include/session_manager.h"
 #include "singleton_container.h"
+#include "window_adapter.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
@@ -56,6 +57,7 @@ union WSColorParam {
 };
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSceneSessionImpl"};
+const std::string PARAM_DUMP_HELP = "-h";
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 
@@ -1633,6 +1635,23 @@ WMError WindowSceneSessionImpl::BindDialogTarget(sptr<IRemoteObject> targetToken
         WLOGFE("bind window failed with errCode:%{public}d", static_cast<int32_t>(ret));
     }
     return ret;
+}
+
+void WindowSceneSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& params)
+{
+    WLOGFD("DumpSessionElementInfo");
+    std::vector<std::string> info;
+    if (params.size() == 1 && params[0] == PARAM_DUMP_HELP) { // 1: params num
+        WLOGFD("Dump ArkUI help Info");
+        Ace::UIContent::ShowDumpHelp(info);
+        SingletonContainer::Get<WindowAdapter>().NotifyDumpInfoResult(info);
+        return;
+    }
+    WLOGFD("ArkUI:DumpInfo");
+    if (uiContent_ != nullptr) {
+        uiContent_->DumpInfo(params, info);
+    }
+    SingletonContainer::Get<WindowAdapter>().NotifyDumpInfoResult(info);
 }
 } // namespace Rosen
 } // namespace OHOS

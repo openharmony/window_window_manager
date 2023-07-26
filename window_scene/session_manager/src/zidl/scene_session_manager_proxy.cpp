@@ -578,7 +578,7 @@ WSError SceneSessionManagerProxy::GetFocusSessionToken(sptr<IRemoteObject> &toke
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::GetSessionDumpInfo(const sptr<DumpParam> &param, std::string& info)
+WSError SceneSessionManagerProxy::GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -587,9 +587,9 @@ WSError SceneSessionManagerProxy::GetSessionDumpInfo(const sptr<DumpParam> &para
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    if (!data.WriteParcelable(param)) {
-        WLOGFE("Write parcelable failed");
-        return WSError::WS_ERROR_INVALID_PARAM;
+    if (!data.WriteStringVector(params)) {
+        WLOGFE("Write params failed");
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_DUMP_INFO),
         data, reply, option) != ERR_NONE) {
@@ -625,4 +625,23 @@ WSError SceneSessionManagerProxy::GetSessionSnapshot(int32_t persistentId, std::
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+void SceneSessionManagerProxy::NotifyDumpInfoResult(const std::vector<std::string>& info)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken pfailed");
+        return;
+    }
+    if (!data.WriteStringVector(info)) {
+        WLOGFE("Write info failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
 } // namespace OHOS::Rosen

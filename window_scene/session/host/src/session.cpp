@@ -236,11 +236,6 @@ bool Session::GetVisible() const
     return isVisible_;
 }
 
-bool Session::IsActive() const
-{
-    return isActive_;
-}
-
 int32_t Session::GetWindowId() const
 {
     return GetPersistentId();
@@ -306,6 +301,11 @@ bool Session::IsSessionValid() const
             GetPersistentId(), state_);
     }
     return res;
+}
+
+bool Session::IsActive() const
+{
+    return isActive_;
 }
 
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)

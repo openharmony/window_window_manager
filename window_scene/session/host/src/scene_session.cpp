@@ -630,4 +630,11 @@ bool SceneSession::IsFloatingWindowAppType() const
     return property_->IsFloatingWindowAppType();
 }
 
+void SceneSession::DumpSessionElementInfo(const std::vector<std::string>& params)
+{
+    if (!sessionStage_) {
+        return;
+    }
+    return sessionStage_->DumpSessionElementInfo(params);
+}
 } // namespace OHOS::Rosen

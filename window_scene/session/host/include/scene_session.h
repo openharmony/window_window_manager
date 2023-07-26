@@ -120,6 +120,7 @@ public:
     void UpdateNativeVisibility(bool visible);
     bool IsVisible() const;
     bool IsFloatingWindowAppType() const;
+    void DumpSessionElementInfo(const std::vector<std::string>& params);
 
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 private:

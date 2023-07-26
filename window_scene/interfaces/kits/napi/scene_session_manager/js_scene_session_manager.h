@@ -73,6 +73,7 @@ private:
     void ProcessGestureNavigationEnabledChangeListener();
     void ProcessOutsideDownEvent();
     bool IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject);
+    void RegisterDumpRootSceneElementInfoListener();
 
     NativeEngine& engine_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;

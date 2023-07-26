@@ -41,7 +41,8 @@ public:
         TRANS_ID_NOTIFY_TOUCH_DIALOG_TARGET,
         TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA,
         TRANS_ID_NOTIFY_OCCUPIED_AREA_CHANGE_INFO,
-        TRANS_ID_UPDATE_AVOID_AREA
+        TRANS_ID_UPDATE_AVOID_AREA,
+        TRANS_ID_DUMP_SESSSION_ELEMENT_INFO
     };
 
     virtual void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
@@ -67,6 +68,7 @@ public:
     virtual void NotifyTouchDialogTarget() = 0;
     virtual void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info) = 0;
     virtual WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) = 0;
+    virtual void DumpSessionElementInfo(const std::vector<std::string>& params) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H
