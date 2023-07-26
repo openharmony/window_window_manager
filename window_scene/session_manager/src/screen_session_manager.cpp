@@ -1029,7 +1029,8 @@ sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId
     VirtualScreenOption option)
 {
     WLOGFI("SCB: ScreenSessionManager::InitVirtualScreen: Enter");
-    sptr<ScreenSession> screenSession = new(std::nothrow) ScreenSession(option.name_, smsScreenId, rsId, GetDefaultAbstractScreenId());
+    sptr<ScreenSession> screenSession =
+        new(std::nothrow) ScreenSession(option.name_, smsScreenId, rsId, GetDefaultAbstractScreenId());
     sptr<SupportedScreenModes> info = new(std::nothrow) SupportedScreenModes();
     if (screenSession == nullptr || info == nullptr) {
         WLOGFI("SCB: ScreenSessionManager::InitVirtualScreen: new screenSession or info failed");
