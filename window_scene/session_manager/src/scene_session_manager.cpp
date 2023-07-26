@@ -712,6 +712,7 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
         activeSessionId_ = persistentId;
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
+        scnSession->NotifyForeground();
         return WSError::WS_OK;
     };
 

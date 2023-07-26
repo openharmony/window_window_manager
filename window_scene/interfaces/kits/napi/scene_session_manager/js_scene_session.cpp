@@ -62,9 +62,11 @@ NativeValue* JsSceneSession::Create(NativeEngine& engine, const sptr<SceneSessio
     object->SetProperty("parentId", CreateJsValue(engine, static_cast<int32_t>(session->GetParentPersistentId())));
     object->SetProperty("type", CreateJsValue(engine, static_cast<uint32_t>(GetApiType(session->GetWindowType()))));
     object->SetProperty("isAppType", CreateJsValue(engine, session->IsFloatingWindowAppType()));
+
     const char* moduleName = "JsSceneSession";
     BindNativeFunction(engine, *object, "on", moduleName, JsSceneSession::RegisterCallback);
     BindNativeFunction(engine, *object, "updateNativeVisibility", moduleName, JsSceneSession::UpdateNativeVisibility);
+    BindNativeFunction(engine, *object, "setShowRecent", moduleName, JsSceneSession::SetShowRecent);
 
     return objValue;
 }
@@ -207,11 +209,9 @@ void JsSceneSession::ProcessSessionRectChangeRegister()
     sessionchangeCallback->onRectChange_ = std::bind(&JsSceneSession::OnSessionRectChange, this, std::placeholders::_1);
 
     auto session = weakSession_.promote();
-    if (session == nullptr) {
-        WLOGFE("session is nullptr");
-        return;
+    if (session && session->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        OnSessionRectChange(session->GetSessionRect());
     }
-    OnSessionRectChange(session->GetSessionRect());
     WLOGFD("ProcessSessionRectChangeRegister success");
 }
 
@@ -458,6 +458,13 @@ NativeValue* JsSceneSession::UpdateNativeVisibility(NativeEngine* engine, Native
     WLOGI("[NAPI]UpdateNativeVisibility");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(engine, info);
     return (me != nullptr) ? me->OnUpdateNativeVisibility(*engine, *info) : nullptr;
+}
+
+NativeValue* JsSceneSession::SetShowRecent(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGI("[NAPI]SetShowRecent");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(engine, info);
+    return (me != nullptr) ? me->OnSetShowRecent(*engine, *info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject)
@@ -1053,6 +1060,19 @@ void JsSceneSession::OnShowWhenLocked(bool showWhenLocked)
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
     AsyncTask::Schedule("JsSceneSession::OnShowWhenLocked", engine_,
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+NativeValue* JsSceneSession::OnSetShowRecent(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("[NAPI]session is null");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+            "session is null"));
+        return engine.CreateUndefined();
+    }
+    session->SetShowRecent(true);
+    return engine.CreateUndefined();
 }
 
 sptr<SceneSession> JsSceneSession::GetNativeSession() const
