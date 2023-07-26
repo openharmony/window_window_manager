@@ -122,7 +122,7 @@ ScreenProperty ScreenSession::GetScreenProperty() const
 
 void ScreenSession::UpdatePropertyByActiveMode(){
     sptr<SupportedScreenModes> mode = GetActiveScreenMode();
-    if (info != nullptr) {
+    if (mode != nullptr) {
         auto screeBounds = property_.GetBounds();
         screeBounds.rect_.width_ = mode->width_;
         screeBounds.rect_.height_ = mode->height_;
