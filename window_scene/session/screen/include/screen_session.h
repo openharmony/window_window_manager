@@ -77,6 +77,7 @@ public:
 
     ScreenId GetScreenId();
     ScreenProperty GetScreenProperty() const;
+    void UpdatePropertyByActiveMode();
     std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
     void ReleaseDisplayNode();
 
