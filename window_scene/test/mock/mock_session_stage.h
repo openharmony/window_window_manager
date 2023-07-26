@@ -36,7 +36,7 @@ public:
     MOCK_METHOD1(NotifyOccupiedAreaChangeInfo, void(sptr<OccupiedAreaChangeInfo> info));
     MOCK_METHOD2(UpdateAvoidArea, WSError(const sptr<AvoidArea>& avoidArea, AvoidAreaType type));
     MOCK_METHOD1(DumpSessionElementInfo, void(const std::vector<std::string>& params));
-    // MOCK_METHOD0(NotifyScreenshot, void(void));
+    MOCK_METHOD0(NotifyScreenshot, void(void));
 };
 } // namespace Rosen
 } // namespace OHOS
