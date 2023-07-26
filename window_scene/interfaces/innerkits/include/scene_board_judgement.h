@@ -25,9 +25,6 @@ public:
     // Judge whether SceneBoard is enabled.
     static bool IsSceneBoardEnabled();
 
-    // Judge whether WindowSession is enabled.
-    static bool IsWindowSessionEnabled();
-
 private:
     // Dealing with Windows type end of line "\r\n".
     static std::ifstream& SafeGetLine(std::ifstream& configFile, std::string& line);
