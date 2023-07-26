@@ -157,6 +157,10 @@ void SceneSessionManager::Init()
     if (HiviewDFX::Watchdog::GetInstance().AddThread(WINDOW_INFO_REPORT_THREAD, eventHandler_)) {
         WLOGFW("Add thread %{public}s to watchdog failed.", WINDOW_INFO_REPORT_THREAD.c_str());
     }
+
+    listenerController_ = std::make_shared<MissionListenerController>();
+    listenerController_->Init();
+
     StartWindowInfoReportLoop();
     WLOGI("SceneSessionManager init success.");
 }
@@ -1753,6 +1757,46 @@ WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject> &token,
         }
     }
     return WSError::WS_ERROR_SET_SESSION_ICON_FAILED;
+}
+
+WSError SceneSessionManager::RegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener)
+{
+    WLOGFI("run RegisterMissionListener");
+    return listenerController_->AddMissionListener(listener);
+}
+
+WSError SceneSessionManager::UnRegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener)
+{
+    WLOGFI("run UnRegisterMissionListener");
+    listenerController_->DelMissionListener(listener);
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::GetMissionInfos(int32_t numMax, std::vector<AAFwk::MissionInfo>& missionInfos)
+{
+    WLOGFI("run GetMissionInfos");
+    std::map<int32_t, sptr<SceneSession>>::iterator iter;
+    std::vector<sptr<SceneSession>> sceneSessionInfos;
+    for (iter = sceneSessionMap_.begin(); iter != sceneSessionMap_.end(); iter++) {
+        if (static_cast<int>(sceneSessionInfos.size()) >= numMax) {
+            break;
+        }
+        sceneSessionInfos.emplace_back(iter->second);
+    }
+    return SceneSessionConverter::ConvertToMissionInfos(sceneSessionInfos, missionInfos);
+}
+
+WSError SceneSessionManager::GetMissionInfo(int32_t missionId, AAFwk::MissionInfo& missionInfo)
+{
+    WLOGFI("run GetMissionInfo");
+    std::map<int32_t, sptr<SceneSession>>::iterator iter;
+    sptr<SceneSession> sceneSession;
+    for (iter = sceneSessionMap_.begin(); iter != sceneSessionMap_.end(); iter++) {
+        if (missionId == iter->first) {
+            return SceneSessionConverter::ConvertToMissionInfo(iter->second, missionInfo);
+        }
+    }
+    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller)

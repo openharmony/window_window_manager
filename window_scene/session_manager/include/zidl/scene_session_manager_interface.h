@@ -28,6 +28,8 @@
 #include "window_manager.h"
 #include "zidl/window_manager_interface.h"
 #include "session_info.h"
+#include "mission_listener_interface.h"
+#include "mission_info.h"
 
 namespace OHOS::Media {
 class PixelMap;
@@ -57,6 +59,10 @@ public:
         TRANS_ID_PENDING_SESSION_TO_FOREGROUND,
         TRANS_ID_PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR,
         TRANS_ID_GET_FOCUS_SESSION_TOKEN,
+        TRANS_ID_REGISTER_MISSION_LISTENER,
+        TRANS_ID_UNREGISTER_MISSION_LISTENER,
+        TRANS_ID_GET_MISSION_INFOS,
+        TRANS_ID_GET_MISSION_INFO_BY_ID,
         TRANS_ID_TERMINATE_SESSION_NEW,
         TRANS_ID_GET_SESSION_DUMP_INFO,
         TRANS_ID_UPDATE_AVOIDAREA_LISTENER,
@@ -78,6 +84,12 @@ public:
     virtual WSError PendingSessionToForeground(const sptr<IRemoteObject> &token) = 0;
     virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token) = 0;
     virtual WSError GetFocusSessionToken(sptr<IRemoteObject> &token) = 0;
+
+    virtual WSError RegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener) = 0;
+    virtual WSError UnRegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener) = 0;
+    virtual WSError GetMissionInfos(int32_t numMax, std::vector<AAFwk::MissionInfo>& missionInfos) = 0;
+    virtual WSError GetMissionInfo(int32_t missionId, AAFwk::MissionInfo& missionInfo) = 0;
+
     virtual WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) = 0;
     virtual WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) = 0;
     virtual WSError GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot) = 0;
