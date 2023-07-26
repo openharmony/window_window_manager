@@ -330,6 +330,9 @@ DMError ScreenSessionManager::SetScreenActiveMode(ScreenId screenId, uint32_t mo
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetScreenActiveMode(%" PRIu64", %u)", screenId, modeId);
         rsInterface_.SetScreenActiveMode(rsScreenId, modeId);
         screenSession->activeIdx_ = static_cast<int32_t>(modeId);
+        screenSession->UpdatePropertyByActiveMode();
+        screenSession->PropertyChange(screenSession->GetScreenProperty());
+        NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
     }
     return DMError::DM_OK;
 }
