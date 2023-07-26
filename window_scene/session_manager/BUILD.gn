@@ -40,6 +40,7 @@ config("session_manager_public_config") {
     "${window_base_path}/dmserver/include",
 
     # for scene session manager
+    "${resourceschedule_path}/ffrt/interfaces/kits",
     "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/wmserver/include",
     "${graphic_base_path}/graphic_2d/rosen/modules/animation/window_animation/include",
@@ -60,6 +61,8 @@ ohos_shared_library("scene_session_manager") {
   sources = [
     "../../wm/src/zidl/window_manager_agent_proxy.cpp",
     "src/extension_session_manager.cpp",
+    "src/mission_listener_controller.cpp",
+    "src/scene_session_converter.cpp",
     "src/scene_session_manager.cpp",
     "src/session_manager_agent_controller.cpp",
     "src/window_scene_config.cpp",
@@ -91,6 +94,7 @@ ohos_shared_library("scene_session_manager") {
     "display_manager:displaymgr",
     "eventhandler:libeventhandler",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "graphic_2d:librender_service_client",
     "graphic_2d:window_animation",
     "hicollie:libhicollie",
@@ -195,6 +199,8 @@ ohos_shared_library("session_manager") {
 
   external_deps = [
     "ability_base:session_info",
+    "ability_base:want",
+    "ability_runtime:mission_info",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image_native",

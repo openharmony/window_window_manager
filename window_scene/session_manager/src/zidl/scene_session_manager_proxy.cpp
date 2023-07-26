@@ -26,6 +26,7 @@
 
 namespace OHOS::Rosen {
 namespace {
+constexpr int32_t CYCLE_LIMIT = 1000;
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManagerProxy"};
 }
 WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -505,6 +506,134 @@ WSError SceneSessionManagerProxy::PendingSessionToBackgroundForDelegator(const s
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return static_cast<WSError>(reply.ReadInt32());
+}
+
+WSError SceneSessionManagerProxy::RegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener)
+{
+    WLOGFI("run SceneSessionManagerProxy::RegisterMissionListener");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (listener == nullptr) {
+        WLOGFE("register mission listener, listener is nullptr");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteRemoteObject(listener->AsObject())) {
+        WLOGFE("write mission listener failed when register mission listener.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_MISSION_LISTENER),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
+WSError SceneSessionManagerProxy::UnRegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener)
+{
+    WLOGFI("run SceneSessionManagerProxy::UnRegisterMissionListener");
+    if (listener == nullptr) {
+        WLOGFE("unregister mission listener, listener is nullptr");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteRemoteObject(listener->AsObject())) {
+        WLOGFE("write mission listener failed when unregister mission listener.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNREGISTER_MISSION_LISTENER),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
+WSError SceneSessionManagerProxy::GetMissionInfos(int32_t numMax, std::vector<AAFwk::MissionInfo>& missionInfos)
+{
+    WLOGFI("run SceneSessionManagerProxy::GetMissionInfos");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(numMax)) {
+        WLOGFE("GetMissionInfos numMax write failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_MISSION_INFOS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    WSError error = GetParcelableInfos(reply, missionInfos);
+    if (error != WSError::WS_OK) {
+        WLOGFE("GetMissionInfos error");
+        return error;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
+WSError SceneSessionManagerProxy::GetMissionInfo(int32_t missionId, AAFwk::MissionInfo& missionInfo)
+{
+    WLOGFI("run SceneSessionManagerProxy::GetMissionInfo");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(missionId)) {
+        WLOGFE("GetMissionInfo write missionId failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_MISSION_INFO_BY_ID),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    std::unique_ptr<AAFwk::MissionInfo> info(reply.ReadParcelable<AAFwk::MissionInfo>());
+    if (info == nullptr) {
+        WLOGFE("read missioninfo failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    missionInfo = *info;
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
+template<typename T>
+WSError SceneSessionManagerProxy::GetParcelableInfos(MessageParcel& reply, std::vector<T>& parcelableInfos)
+{
+    int32_t infoSize = reply.ReadInt32();
+    if (infoSize > CYCLE_LIMIT) {
+        WLOGFE("infoSize is too large");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    for (int32_t i = 0; i < infoSize; i++) {
+        std::unique_ptr<T> info(reply.ReadParcelable<T>());
+        if (!info) {
+            WLOGFE("Read Parcelable infos failed.");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        parcelableInfos.emplace_back(*info);
+    }
+    return WSError::WS_OK;
 }
 
 WSError SceneSessionManagerProxy::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
