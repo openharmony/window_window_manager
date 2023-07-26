@@ -25,6 +25,8 @@
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "wm_single_instance.h"
 #include "window_scene_config.h"
+#include "display_info.h"
+#include "display_change_listener.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
@@ -51,6 +53,14 @@ using DumpRootSceneElementInfoFunc = std::function<void(const std::vector<std::s
 using EventHandler = OHOS::AppExecFwk::EventHandler;
 using EventRunner = OHOS::AppExecFwk::EventRunner;
 const int32_t STATUS_BAR_AVOID_AREA = 0;
+
+class DisplayChangeListener : public IDisplayChangeListener {
+public:
+    virtual void OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
+        const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) override;
+    virtual void OnScreenshot(DisplayId displayId) override;
+};
+
 class SceneSessionManager : public SceneSessionManagerStub {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManager)
 public:
@@ -118,6 +128,7 @@ public:
     int32_t GetWaterMarkSessionCount() const;
     void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> callingSession,
         const WSRect& rect, const WSRect& occupiedArea);
+    void OnScreenshot(DisplayId displayId);
     void NotifyDumpInfoResult(const std::vector<std::string>& info);
     void SetDumpRootSceneElementInfoListener(const DumpRootSceneElementInfoFunc& func);
 

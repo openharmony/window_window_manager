@@ -98,6 +98,8 @@ public:
     WMError RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
+    WMError RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
+    WMError UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
     void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
 
     WMError SetBackgroundColor(const std::string& color) override;
@@ -118,6 +120,7 @@ public:
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void NotifyTouchDialogTarget() override;
+    void NotifyScreenshot() override;
     void DumpSessionElementInfo(const std::vector<std::string>& params) override;
 
     WindowState state_ { WindowState::STATE_INITIAL };
@@ -168,6 +171,8 @@ private:
     EnableIfSame<T, IDialogTargetTouchListener, std::vector<sptr<IDialogTargetTouchListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IOccupiedAreaChangeListener, std::vector<sptr<IOccupiedAreaChangeListener>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> GetListeners();
     template<typename T> void ClearUselessListeners(std::map<int32_t, T>& listeners, int32_t persistentId);
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
     void NotifyAfterFocused();
@@ -182,6 +187,7 @@ private:
     static std::map<int32_t, std::vector<sptr<IDialogDeathRecipientListener>>> dialogDeathRecipientListeners_;
     static std::map<int32_t, std::vector<sptr<IDialogTargetTouchListener>>> dialogTargetTouchListener_;
     static std::map<int32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> occupiedAreaChangeListeners_;
+    static std::map<int32_t, std::vector<sptr<IScreenshotListener>>> screenshotListeners_;
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;
