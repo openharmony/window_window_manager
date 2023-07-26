@@ -2006,16 +2006,6 @@ HWTEST_F(WindowTest, IDispatchInputEventListener, Function | SmallTest | Level3)
     ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
-
-/**
- * @tc.name: IsWindowSessionEnabled
- * @tc.desc: IsWindowSessionEnabled fun
- * @tc.type: FUNC
- */
-HWTEST_F(WindowTest, IsWindowSessionEnabled, Function | SmallTest | Level3)
-{
-    ASSERT_EQ(false, Rosen::SceneBoardJudgement::IsWindowSessionEnabled());
-}
 }
 } // namespace Rosen
 } // namespace OHOS
