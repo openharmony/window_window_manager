@@ -108,6 +108,8 @@ public:
         setWindowScenePatternFunc_ = func;
     };
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
+    WSRect GetHotAreaRect(int32_t action);
+    WSError NotifyTouchOutside();
 
     static MaximizeMode maximizeMode_;
 

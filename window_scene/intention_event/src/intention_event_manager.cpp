@@ -59,7 +59,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
                 WLOGFE("uiContent_ is null");
             } else {
                 SceneSessionManager::GetInstance().OnOutsideDownEvent(
-                    pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+                    action, pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
             }
         }
     }
