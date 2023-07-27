@@ -99,6 +99,7 @@ void ANRManager::OnSessionLost(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
+    WLOGFD("Disconnect session, persistentId:%{public}d", persistentId);
     RemoveTimers(persistentId);
     RemovePersistentId(persistentId);
 }
