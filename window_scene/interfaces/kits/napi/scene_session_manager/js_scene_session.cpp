@@ -435,8 +435,7 @@ void JsSceneSession::ProcessShowWhenLockedRegister()
     sessionchangeCallback->OnShowWhenLocked_ = std::bind(
         &JsSceneSession::OnShowWhenLocked, this, std::placeholders::_1);
     auto session = weakSession_.promote();
-    sessionchangeCallback->OnShowWhenLocked_(
-        session->IsShowWhenLocked() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
+    sessionchangeCallback->OnShowWhenLocked_(session->IsShowWhenLocked());
     WLOGFD("ProcessShowWhenLockedRegister success");
 }
 
