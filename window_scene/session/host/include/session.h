@@ -91,6 +91,8 @@ public:
 
     void SetShowRecent(bool showRecent);
     bool GetShowRecent() const;
+    void SetBufferAvailable(bool bufferAvailable);
+    bool GetBufferAvailable() const;
 
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
@@ -263,8 +265,9 @@ private:
     static std::set<int32_t> persistIdSet_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_ = nullptr;
     SessionState state_ = SessionState::STATE_DISCONNECT;
-    uint32_t zOrder_ = 0;
     bool showRecent_ = false;
+    bool bufferAvailable_ = false;
+    uint32_t zOrder_ = 0;
 
     std::recursive_mutex mutex_;
     std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;
