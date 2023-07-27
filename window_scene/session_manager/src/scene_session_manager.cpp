@@ -2088,6 +2088,10 @@ void SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
         return;
     }
     sptr<AccessibilityWindowInfo> info = new (std::nothrow) AccessibilityWindowInfo();
+    if (info == nullptr) {
+        WLOGFE("null info.");
+        return;
+    }
     if (sceneSession->GetSessionInfo().isSystem_) {
         info->wid_ = 1;
     } else {
