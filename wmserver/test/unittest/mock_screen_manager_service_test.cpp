@@ -44,21 +44,12 @@ public:
     // static int missionCount_;
 };
 
-
-// sptr<WindowGroupMgr> MockScreenManagerServiceTest::windowGroupMgr_ = nullptr;
-// sptr<WindowRoot> MockScreenManagerServiceTest::windowRoot_;
-// DisplayId MockScreenManagerServiceTest::defalutDisplayId_ = -1;
-// int MockScreenManagerServiceTest::missionCount_ = 3;
-
 void MockScreenManagerServiceTest::SetUpTestCase()
 {
 }
 
 void MockScreenManagerServiceTest::TearDownTestCase()
 {
-    // windowGroupMgr_ = nullptr;
-    // windowRoot_ = nullptr;
-    // defalutDisplayId_ = -1;
 }
 
 void MockScreenManagerServiceTest::SetUp()
