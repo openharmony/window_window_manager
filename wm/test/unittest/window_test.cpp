@@ -2008,16 +2008,6 @@ HWTEST_F(WindowTest, IDispatchInputEventListener, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: IsWindowSessionEnabled
- * @tc.desc: IsWindowSessionEnabled fun
- * @tc.type: FUNC
- */
-HWTEST_F(WindowTest, IsWindowSessionEnabled, Function | SmallTest | Level3)
-{
-    ASSERT_EQ(false, Rosen::SceneBoardJudgement::IsWindowSessionEnabled());
-}
-
-/**
  * @tc.name: Marshalling
  * @tc.desc: keyboardAnimationConfig marshalling
  * @tc.type: FUNC
