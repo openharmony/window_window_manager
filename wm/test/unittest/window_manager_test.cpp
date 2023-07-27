@@ -572,9 +572,6 @@ HWTEST_F(WindowManagerTest, GetFocusWindowInfo, Function | SmallTest | Level2)
     WindowManager::GetInstance().GetFocusWindowInfo(focusInfo);
     ASSERT_EQ(0, ret);
 }
-
-
-
 }
 } // namespace Rosen
 } // namespace OHOS

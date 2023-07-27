@@ -109,7 +109,6 @@ HWTEST_F(MockScreenManagerServiceTest, Dump, Function | SmallTest | Level2)
     ret = MockScreenManagerService::GetInstance()->Dump(0, args);
     ASSERT_EQ(0, ret);
 }
-
 }
 }
 }

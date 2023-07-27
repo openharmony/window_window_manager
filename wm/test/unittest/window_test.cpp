@@ -2083,8 +2083,6 @@ HWTEST_F(WindowTest, performBack, Function | SmallTest | Level3)
     window->PerformBack();
     ASSERT_EQ(0, ret);
 }
-
-
 }
 } // namespace Rosen
 } // namespace OHOS
