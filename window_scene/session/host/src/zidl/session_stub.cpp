@@ -217,13 +217,14 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
     std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     abilitySessionInfo->want = *want;
+    abilitySessionInfo->requestCode = data.ReadInt32();
+    abilitySessionInfo->persistentId = data.ReadInt64();
+    abilitySessionInfo->state = static_cast<AAFwk::CallToState>(data.ReadInt32());
+    abilitySessionInfo->uiAbilityId = data.ReadInt64();
+    abilitySessionInfo->callingTokenId = data.ReadInt32();
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
-    abilitySessionInfo->requestCode = data.ReadInt32();
-    abilitySessionInfo->persistentId = data.ReadInt32();
-    abilitySessionInfo->state = static_cast<AAFwk::CallToState>(data.ReadInt32());
-    abilitySessionInfo->uiAbilityId = data.ReadInt64();
     if (data.ReadBool()) {
         abilitySessionInfo->startSetting.reset(data.ReadParcelable<AAFwk::AbilityStartSetting>());
     }

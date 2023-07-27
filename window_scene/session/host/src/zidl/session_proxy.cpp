@@ -162,16 +162,16 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+    if (!data.WriteInterfaceToken(GetDescriptor()) ||
+        !(data.WriteParcelable(&(abilitySessionInfo->want))) ||
+        !data.WriteInt32(abilitySessionInfo->requestCode) ||
+        !(data.WriteInt64(abilitySessionInfo->persistentId)) ||
+        !(data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state))) ||
+        !(data.WriteInt64(abilitySessionInfo->uiAbilityId)) ||
+        !data.WriteInt32(abilitySessionInfo->callingTokenId)) {
+        WLOGFE("WriteInterfaceToken or other param failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
-    if (!(data.WriteParcelable(&(abilitySessionInfo->want)))) {
-        WLOGFE("Write want info failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
     if (abilitySessionInfo->callerToken) {
         if (!data.WriteBool(true) || !data.WriteRemoteObject(abilitySessionInfo->callerToken)) {
             WLOGFE("Write callerToken info failed");
@@ -179,25 +179,9 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         }
     } else {
         if (!data.WriteBool(false)) {
-            WLOGFE("Write session info failed");
+            WLOGFE("Write callerToken info failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
-    }
-    if (!data.WriteInt32(abilitySessionInfo->requestCode)) {
-        WLOGFE("Write requestCode info failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!(data.WriteInt32(static_cast<int32_t>(abilitySessionInfo->persistentId)))) {
-        WLOGFE("Write persistentId failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!(data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state)))) {
-        WLOGFE("Write callState failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!(data.WriteInt64(abilitySessionInfo->uiAbilityId))) {
-        WLOGFE("Write uiAbilityId failed");
-        return WSError::WS_ERROR_IPC_FAILED;
     }
     if (abilitySessionInfo->startSetting) {
         if (!data.WriteBool(true) || !data.WriteParcelable(abilitySessionInfo->startSetting.get())) {
@@ -206,7 +190,7 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         }
     } else {
         if (!data.WriteBool(false)) {
-            WLOGFE("Write startSetting failed");
+            WLOGFE("Write has not startSetting failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
