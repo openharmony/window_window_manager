@@ -107,9 +107,9 @@ struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
     std::string abilityName_ = "";
-    sptr<IRemoteObject> callerToken_ = nullptr;
     bool isSystem_ = false;
-    uint32_t windowType_ = 0;
+    uint32_t windowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
+    sptr<IRemoteObject> callerToken_ = nullptr;
 
     sptr<AAFwk::Want> want;
     std::shared_ptr<AAFwk::AbilityStartSetting> startSetting = nullptr;
