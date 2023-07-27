@@ -120,6 +120,16 @@ ScreenProperty ScreenSession::GetScreenProperty() const
     return property_;
 }
 
+void ScreenSession::UpdatePropertyByActiveMode() {
+    sptr<SupportedScreenModes> mode = GetActiveScreenMode();
+    if (mode != nullptr) {
+        auto screeBounds = property_.GetBounds();
+        screeBounds.rect_.width_ = mode->width_;
+        screeBounds.rect_.height_ = mode->height_;
+        property_.SetBounds(screeBounds);
+    }
+}
+
 std::shared_ptr<RSDisplayNode> ScreenSession::GetDisplayNode() const
 {
     return displayNode_;
