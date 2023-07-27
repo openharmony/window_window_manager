@@ -81,6 +81,7 @@ ohos_shared_library("scene_session_manager") {
   external_deps = [
     "ability_base:session_info",
     "ability_base:want",
+    "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:ability_start_setting",
     "bundle_framework:appexecfwk_base",
@@ -98,6 +99,7 @@ ohos_shared_library("scene_session_manager") {
     "image_framework:image_native",
     "init:libbegetutil",
     "ipc:ipc_single",
+    "napi:ace_napi",
     "power_manager:powermgr_client",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",

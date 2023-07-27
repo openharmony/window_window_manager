@@ -192,6 +192,7 @@ public:
     void SetCallingUid(int32_t id);
     int32_t GetCallingPid() const;
     int32_t GetCallingUid() const;
+    void SetAbilityToken(sptr<IRemoteObject> token);
     sptr<IRemoteObject> GetAbilityToken() const;
     WindowMode GetWindowMode();
     void SetZOrder(uint32_t zOrder);
