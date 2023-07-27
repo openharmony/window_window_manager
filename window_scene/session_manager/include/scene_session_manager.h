@@ -217,6 +217,7 @@ private:
     void CheckAndNotifyWaterMarkChangedResult(bool isAddingWaterMark);
     WSError NotifyWaterMarkFlagChangedResult(bool hasWaterMark);
     int32_t waterMarkSessionCount_ { 0 };
+    sptr<SceneSession> callingSession_ = nullptr;
 };
 } // namespace OHOS::Rosen
 

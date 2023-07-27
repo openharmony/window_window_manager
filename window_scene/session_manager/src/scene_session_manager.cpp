@@ -646,6 +646,7 @@ void SceneSessionManager::OnInputMethodShown(const int32_t& persistentId)
         WLOGFE("Input method is null");
         return;
     }
+    callingSession_ = GetSceneSession(focusedSessionId_);
     ResizeSoftInputCallingSessionIfNeed(scnSession);
 }
 
@@ -1922,8 +1923,7 @@ void SceneSessionManager::StartWindowInfoReportLoop()
 
 void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(const sptr<SceneSession>& sceneSession)
 {
-    auto callingSession = GetSceneSession(focusedSessionId_);
-    if (callingSession == nullptr) {
+    if (callingSession_ == nullptr) {
         WLOGFE("calling session is nullptr");
         return;
     }
@@ -1936,7 +1936,7 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(const sptr<SceneSe
     }
 
     const WSRect& softInputSessionRect = sceneSession->GetSessionRect();
-    const WSRect& callingSessionRect = callingSession->GetSessionRect();
+    const WSRect& callingSessionRect = callingSession_->GetSessionRect();
     if (SessionHelper::IsEmptyRect(SessionHelper::GetOverlap(softInputSessionRect, callingSessionRect, 0, 0))) {
         WLOGFD("There is no overlap area");
         return;
@@ -1948,8 +1948,8 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(const sptr<SceneSe
     newRect.posY_ = std::max(newRect.posY_, STATUS_BAR_AVOID_AREA);
 
     callingWindowRestoringRect_ = callingSessionRect;
-    NotifyOccupiedAreaChangeInfo(callingSession, newRect, softInputSessionRect);
-    callingSession->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
+    NotifyOccupiedAreaChangeInfo(callingSession_, newRect, softInputSessionRect);
+    callingSession_->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
 }
 
 void SceneSessionManager::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> callingSession,
@@ -1967,13 +1967,17 @@ void SceneSessionManager::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> 
 void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
 {
     WLOGFD("RestoreCallingSessionSizeIfNeed");
-    auto callingSession = GetSceneSession(focusedSessionId_);
-    if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_) && callingSession != nullptr) {
+    if (callingSession_ == nullptr) {
+        WLOGFE("Calling session is nullptr");
+        return;
+    }
+    if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_)) {
         WSRect overlapRect = { 0, 0, 0, 0 };
-        NotifyOccupiedAreaChangeInfo(callingSession, callingWindowRestoringRect_, overlapRect);
-        callingSession->UpdateSessionRect(callingWindowRestoringRect_, SizeChangeReason::UNDEFINED);
+        NotifyOccupiedAreaChangeInfo(callingSession_, callingWindowRestoringRect_, overlapRect);
+        callingSession_->UpdateSessionRect(callingWindowRestoringRect_, SizeChangeReason::UNDEFINED);
     }
     callingWindowRestoringRect_ = { 0, 0, 0, 0 };
+    callingSession_ = nullptr;
 }
 
 WSError SceneSessionManager::SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent)
