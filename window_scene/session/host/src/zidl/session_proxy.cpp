@@ -165,7 +165,7 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
     if (!data.WriteInterfaceToken(GetDescriptor()) ||
         !(data.WriteParcelable(&(abilitySessionInfo->want))) ||
         !data.WriteInt32(abilitySessionInfo->requestCode) ||
-        !(data.WriteInt64(abilitySessionInfo->persistentId)) ||
+        !(data.WriteInt32(abilitySessionInfo->persistentId)) ||
         !(data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state))) ||
         !(data.WriteInt64(abilitySessionInfo->uiAbilityId)) ||
         !data.WriteInt32(abilitySessionInfo->callingTokenId)) {
@@ -179,7 +179,7 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         }
     } else {
         if (!data.WriteBool(false)) {
-            WLOGFE("Write callerToken info failed");
+            WLOGFE("Write has not callerToken info failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
