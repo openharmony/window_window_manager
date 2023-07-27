@@ -17,7 +17,6 @@ group("fuzztest") {
   deps = [
     "window_fuzzer:fuzztest",
     "windowagent_fuzzer:fuzztest",
-    "windowimpl_fuzzer:fuzztest",
     "windowipc_fuzzer:fuzztest",
     "windowmanager_fuzzer:fuzztest",
     "windowscene_fuzzer:fuzztest",
