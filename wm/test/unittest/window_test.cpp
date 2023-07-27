@@ -2036,7 +2036,6 @@ HWTEST_F(WindowTest, WindowLifeCycleBackgroundFailed, Function | SmallTest | Lev
 /**
  * @tc.name: GetVSyncPeriod
  * @tc.desc: window GetVSyncPeriod
- * 
  * @tc.type: FUNC
  */
 HWTEST_F(WindowTest, GetVSyncPeriod, Function | SmallTest | Level3)
@@ -2056,7 +2055,6 @@ HWTEST_F(WindowTest, GetVSyncPeriod, Function | SmallTest | Level3)
 /**
  * @tc.name: performBack
  * @tc.desc: window performBack
- * 
  * @tc.type: FUNC
  */
 HWTEST_F(WindowTest, performBack, Function | SmallTest | Level3)
