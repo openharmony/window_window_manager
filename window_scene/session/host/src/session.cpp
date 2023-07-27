@@ -477,10 +477,12 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     info.requestCode = abilitySessionInfo->requestCode;
     info.callerToken_ = abilitySessionInfo->callerToken;
     info.startSetting = abilitySessionInfo->startSetting;
+    info.callingTokenId_ = abilitySessionInfo->callingTokenId;
     WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
-    WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}d, \
-        uiAbilityId: %{public}" PRIu64 "", info.callState_, info.persistentId_, info.uiAbilityId_);
+    WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}d, callingTokenId:%{public}d, \
+        uiAbilityId: %{public}" PRIu64 "", info.callState_, info.persistentId_, info.callingTokenId_,
+        info.uiAbilityId_);
     if (pendingSessionActivationFunc_) {
         pendingSessionActivationFunc_(info);
     }
