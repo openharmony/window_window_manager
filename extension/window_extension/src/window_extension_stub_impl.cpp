@@ -50,8 +50,7 @@ sptr<Window> WindowExtensionStubImpl::CreateWindow(
     option->SetParentId(parentWindowId);
     option->SetWindowName(windowName_);
     option->SetWindowSessionType(WindowSessionType::EXTENSION_SESSION);
-    if (Rosen::SceneBoardJudgement::IsWindowSessionEnabled()
-        || Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         WLOGI("Window::Create with session.");
         window_ = Window::Create(option, context, iSession);
     } else {

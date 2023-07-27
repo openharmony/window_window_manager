@@ -28,17 +28,6 @@ bool SceneBoardJudgement::IsSceneBoardEnabled()
     return isSceneBoardEnabled;
 }
 
-bool SceneBoardJudgement::IsWindowSessionEnabled()
-{
-    static bool isWindowSessionEnabled = false;
-    static bool windowSessionInitialized = false;
-    if (!windowSessionInitialized) {
-        InitWithConfigFile("/etc/windowsession.config", isWindowSessionEnabled);
-        windowSessionInitialized = true;
-    }
-    return isWindowSessionEnabled;
-}
-
 std::ifstream& SceneBoardJudgement::SafeGetLine(std::ifstream& configFile, std::string& line)
 {
     std::getline(configFile, line);
