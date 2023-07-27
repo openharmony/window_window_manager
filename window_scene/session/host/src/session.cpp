@@ -261,6 +261,11 @@ int32_t Session::GetCallingUid() const
     return callingUid_;
 }
 
+void Session::SetAbilityToken(sptr<IRemoteObject> token)
+{
+    abilityToken_ = token;
+}
+
 sptr<IRemoteObject> Session::GetAbilityToken() const
 {
     return abilityToken_;
