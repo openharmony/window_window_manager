@@ -748,6 +748,12 @@ void WindowSessionImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDes
     notifyNativeFunc_ = std::move(func);
 }
 
+void WindowSessionImpl::SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    inputEventConsumer_ = inputEventConsumer;
+}
+
 void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool needNotifyUiContent)
 {
     if (needNotifyListeners) {
@@ -1002,8 +1008,20 @@ WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, Avo
 
 void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    if (uiContent_) {
-        uiContent_->ProcessPointerEvent(pointerEvent);
+    std::shared_ptr<IInputEventConsumer> inputEventConsumer;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        inputEventConsumer = inputEventConsumer_;
+    }
+    if (inputEventConsumer != nullptr) {
+        WLOGFD("Transfer pointer event to inputEventConsumer");
+        (void)inputEventConsumer->OnInputEvent(pointerEvent);
+    } else if (uiContent_ != nullptr) {
+        WLOGFD("Transfer pointer event to uiContent");
+        (void)uiContent_->ProcessPointerEvent(pointerEvent);
+    } else {
+        WLOGFW("pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
+        pointerEvent->MarkProcessed();
     }
 }
 
@@ -1013,10 +1031,18 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
         WLOGFE("keyEvent is nullptr");
         return;
     }
-    int32_t keyCode = keyEvent->GetKeyCode();
-    if (uiContent_) {
+
+    std::shared_ptr<IInputEventConsumer> inputEventConsumer;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        inputEventConsumer = inputEventConsumer_;
+    }
+    if (inputEventConsumer != nullptr) {
+        WLOGD("Transfer key event to inputEventConsumer");
+        (void)inputEventConsumer->OnInputEvent(keyEvent);
+    } else if (uiContent_) {
         isConsumed = uiContent_->ProcessKeyEvent(keyEvent);
-        if (!isConsumed && keyCode == MMI::KeyEvent::KEYCODE_ESCAPE &&
+        if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
             windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN &&
             property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL) {
             WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
