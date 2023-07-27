@@ -38,10 +38,6 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    // static sptr<WindowGroupMgr> windowGroupMgr_;
-    // static sptr<WindowRoot> windowRoot_;
-    // static DisplayId defalutDisplayId_;
-    // static int missionCount_;
 };
 
 void MockScreenManagerServiceTest::SetUpTestCase()
