@@ -844,6 +844,42 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
     return WSError::WS_OK;
 }
 
+void SceneSessionManager::AddClientDeathRecipient(const sptr<ISessionStage>& sessionStage,
+    const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr || sessionStage == nullptr) {
+        WLOGFE("sessionStage or sceneSession is nullptr");
+        return;
+    }
+
+    auto remoteObject = sessionStage->AsObject();
+    remoteObjectMap_.insert(std::make_pair(remoteObject, sceneSession->GetPersistentId()));
+    if (windowDeath_ == nullptr) {
+        WLOGFE("failed to create death recipient");
+        return;
+    }
+    if (!remoteObject->AddDeathRecipient(windowDeath_)) {
+        WLOGFE("failed to add death recipient");
+        return;
+    }
+    WLOGFD("Id: %{public}d", sceneSession->GetPersistentId());
+}
+
+void SceneSessionManager::DestroySpecificSession(const sptr<IRemoteObject>& remoteObject)
+{
+    auto task = [this, remoteObject] {
+        auto iter = remoteObjectMap_.find(remoteObject);
+        if (iter == remoteObjectMap_.end()) {
+            WLOGFE("Invalid remoteObject");
+            return;
+        }
+        WLOGFD("Remote died, id: %{public}d", iter->second);
+        DestroyAndDisconnectSpecificSession(iter->second);
+        remoteObjectMap_.erase(iter);
+    };
+    taskScheduler_->PostAsyncTask(task);
+}
+
 WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session)
@@ -872,6 +908,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             createSpecificSessionFunc_(sceneSession);
         }
         session = sceneSession;
+        AddClientDeathRecipient(sessionStage, sceneSession);
         return errCode;
     };
 
