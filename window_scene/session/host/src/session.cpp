@@ -356,8 +356,7 @@ WSError Session::ConnectImpl(const sptr<ISessionStage>& sessionStage, const sptr
     // once update rect before connect, update again when connect
     UpdateRect(winRect_, SizeChangeReason::UNDEFINED);
     NotifyConnect();
-    int32_t applicationPid = IPCSkeleton::GetCallingPid();
-    DelayedSingleton<ANRManager>::GetInstance()->SetApplicationPid(persistentId_, applicationPid);
+    DelayedSingleton<ANRManager>::GetInstance()->SetApplicationPid(persistentId_, callingPid_);
     return WSError::WS_OK;
 }
 
