@@ -360,8 +360,7 @@ HWTEST_F(AbstractScreenControllerTest, CreateVirtualScreen01, Function | SmallTe
     VirtualScreenOption option;
     sptr<IRemoteObject> displayManagerAgent = new IRemoteObjectMocker();
     auto ret = absController_->CreateVirtualScreen(option, displayManagerAgent);
-    if (ret != 0)
-    {
+    if (ret != 0) {
         ASSERT_NE(0, ret);
     }
 }
