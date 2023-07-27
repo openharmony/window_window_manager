@@ -111,7 +111,6 @@ HWTEST_F(MockSessionManagerServiceTest, OnStart, Function | SmallTest | Level2)
     MockSessionManagerService::GetInstance()->OnStart();
     ASSERT_EQ(ret, WMError::WM_OK);
 }
-
 }
 }
 }
