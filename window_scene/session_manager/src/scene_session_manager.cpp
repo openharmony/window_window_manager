@@ -680,6 +680,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     abilitySessionInfo->resultCode = sessionInfo.resultCode;
     abilitySessionInfo->uiAbilityId = sessionInfo.uiAbilityId_;
     abilitySessionInfo->startSetting = sessionInfo.startSetting;
+    abilitySessionInfo->userId = currentUserId_;
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = *sessionInfo.want;
     } else {
@@ -1160,7 +1161,8 @@ void SceneSessionManager::HandleTurnScreenOn(const sptr<SceneSession>& sceneSess
             WLOGFE("session is invalid");
             return;
         }
-        WLOGFD("Win: %{public}s, is turn on%{public}d", sceneSession->GetWindowName().c_str(), sceneSession->IsTurnScreenOn());
+        WLOGFD("Win: %{public}s, is turn on%{public}d",
+            sceneSession->GetWindowName().c_str(), sceneSession->IsTurnScreenOn());
         std::string identity = IPCSkeleton::ResetCallingIdentity();
         if (sceneSession->IsTurnScreenOn() && !PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
             WLOGI("turn screen on");
@@ -1624,20 +1626,20 @@ void SceneSessionManager::OnSessionStateChange(int32_t persistentId)
     }
     SessionState state = sceneSession->GetSessionState();
     switch (state) {
-    case SessionState::STATE_FOREGROUND:
-        HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
-        if (sceneSession->GetWindowSessionProperty()->GetPrivacyMode()) {
-            UpdatePrivateStateAndNotify(true);
-        }
-        break;
-    case SessionState::STATE_BACKGROUND:
-        HandleKeepScreenOn(sceneSession, false);
-        if (sceneSession->GetWindowSessionProperty()->GetPrivacyMode()) {
-            UpdatePrivateStateAndNotify(false);
-        }
-        break;
-    default:
-        break;
+        case SessionState::STATE_FOREGROUND:
+            HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
+            if (sceneSession->GetWindowSessionProperty()->GetPrivacyMode()) {
+                UpdatePrivateStateAndNotify(true);
+            }
+            break;
+        case SessionState::STATE_BACKGROUND:
+            HandleKeepScreenOn(sceneSession, false);
+            if (sceneSession->GetWindowSessionProperty()->GetPrivacyMode()) {
+                UpdatePrivateStateAndNotify(false);
+            }
+            break;
+        default:
+            break;
     }
 }
 

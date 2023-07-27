@@ -20,6 +20,7 @@
 #include <optional>
 
 #include <ability_context.h>
+#include <i_input_event_consumer.h>
 #include <refbase.h>
 #include <ui_content.h>
 #include <ui/rs_surface_node.h>
@@ -101,6 +102,7 @@ public:
     WMError RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
     WMError UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
     void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
+    void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
 
     WMError SetBackgroundColor(const std::string& color) override;
 
@@ -188,6 +190,7 @@ private:
     static std::map<int32_t, std::vector<sptr<IDialogTargetTouchListener>>> dialogTargetTouchListener_;
     static std::map<int32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> occupiedAreaChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IScreenshotListener>>> screenshotListeners_;
+    std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;

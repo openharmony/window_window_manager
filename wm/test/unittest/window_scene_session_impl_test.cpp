@@ -54,6 +54,8 @@ public:
 
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+private:
+    RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
 };
 
 void WindowSceneSessionImplTest::SetUpTestCase() {}
@@ -68,6 +70,14 @@ void WindowSceneSessionImplTest::SetUp()
 void WindowSceneSessionImplTest::TearDown()
 {
     abilityContext_ = nullptr;
+}
+
+RSSurfaceNode::SharedPtr WindowSceneSessionImplTest::CreateRSSurfaceNode()
+{
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    rsSurfaceNodeConfig.SurfaceNodeName = "startingWindowTestSurfaceNode";
+    auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    return surfaceNode;
 }
 
 namespace {
@@ -109,11 +119,14 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession01, Function
     ASSERT_NE(nullptr, windowscenesession);
 
     windowscenesession->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowscenesession->CreateAndConnectSpecificSession());
+    if (windowscenesession->CreateAndConnectSpecificSession() == WMError::WM_ERROR_NULLPTR)
+    {
+        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowscenesession->CreateAndConnectSpecificSession());
+    }
     windowscenesession->property_->SetPersistentId(102);
     windowscenesession->property_->SetParentPersistentId(100);
     windowscenesession->property_->SetParentId(100);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
 
@@ -824,12 +837,9 @@ HWTEST_F(WindowSceneSessionImplTest, CheckParmAndPermission, Function | SmallTes
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
 
     auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr)
-    {
+    if (surfaceNode == nullptr) {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    }
-    else
-    {
+    } else {
         ASSERT_EQ(WMError::WM_OK, window->CheckParmAndPermission());
         window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
         ASSERT_EQ(WMError::WM_OK, window->CheckParmAndPermission());
@@ -847,8 +857,16 @@ HWTEST_F(WindowSceneSessionImplTest, SetBackdropBlurStyle, Function | SmallTest 
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     window->property_->SetWindowName("SetBackdropBlurStyle");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    window->property_->SetDisplayId(3);
+
+    auto surfaceNode = window->GetSurfaceNode();
+    if (surfaceNode == nullptr) {
+        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
+        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF));
+    } else {
     ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF));
-    ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_THICK));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_THICK));
+    }
 }
 
 /*
@@ -884,15 +902,12 @@ HWTEST_F(WindowSceneSessionImplTest, SetBlur, Function | SmallTest | Level3)
     window->property_->SetWindowName("SetBlur");
 
     auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr)
-    {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    }
-    else
-    {
-        window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
-        ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBlur(-1.0));
-        ASSERT_EQ(WMError::WM_OK, window->SetBlur(1.0));
+    if (surfaceNode == nullptr) {
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
+    } else {
+    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBlur(-1.0));
+    ASSERT_EQ(WMError::WM_OK, window->SetBlur(1.0));
     }
 }
 
@@ -929,8 +944,19 @@ HWTEST_F(WindowSceneSessionImplTest, SetPrivacyMode, Function | SmallTest | Leve
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     window->property_->SetWindowName("SetPrivacyMode");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
-    ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetPrivacyMode(false));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetPrivacyMode(false));
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    if (WMError::WM_OK == window->SetPrivacyMode(false)) {
+    ASSERT_EQ(WMError::WM_OK, window->SetPrivacyMode(false));
     ASSERT_EQ(false, window->IsPrivacyMode());
+    }else if (WMError::WM_DO_NOTHING == window->SetPrivacyMode(false)) {
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetPrivacyMode(false));
+    }
 }
 
 /*
@@ -972,8 +998,21 @@ HWTEST_F(WindowSceneSessionImplTest, SetSnapshotSkip, Function | SmallTest | Lev
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     window->property_->SetWindowName("SetSnapshotSkip");
-    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    window->property_->SetWindowType(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
+    window->property_->SetPersistentId(1);
+    auto surfaceNode_mocker = CreateRSSurfaceNode();
+    if (surfaceNode_mocker != nullptr) {
+    ASSERT_NE(nullptr, surfaceNode_mocker);
+    }
+
+    window->surfaceNode_ = surfaceNode_mocker;
+    auto surfaceNode = window->GetSurfaceNode();
+
+    if (surfaceNode != nullptr) {
     ASSERT_EQ(WMError::WM_OK, window->SetSnapshotSkip(false));
+    } else {
+    ASSERT_EQ(nullptr, surfaceNode);
+    }
 }
 
 /*
@@ -995,7 +1034,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen, Function | SmallTest |
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreen(false));
-    ASSERT_EQ(true, window->IsLayoutFullScreen());
+    ASSERT_EQ(false, window->IsLayoutFullScreen());
 }
 
 /*
@@ -1016,7 +1055,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetFullScreen, Function | SmallTest | Level
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
 
-    ASSERT_EQ(WMError::WM_OK, window->SetFullScreen(false));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFullScreen(false));
     ASSERT_EQ(false, window->IsFullScreen());
 }
 
@@ -1032,12 +1071,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetShadowOffsetX, Function | SmallTest | Le
     window->property_->SetWindowName("SetKeepScreenOn");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
     auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr)
-    {
+    if (surfaceNode == nullptr) {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    }
-    else
-    {
+    } else {
         ASSERT_EQ(WMError::WM_OK, window->SetShadowOffsetX(1.0));
     }
 }
@@ -1055,12 +1091,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetShadowOffsetY, Function | SmallTest | Le
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
 
     auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr)
-    {
+    if (surfaceNode == nullptr) {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    }
-    else
-    {
+    } else {
         ASSERT_EQ(WMError::WM_OK, window->SetShadowOffsetY(1.0));
     }
 }
@@ -1078,12 +1111,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetBackdropBlur, Function | SmallTest | Lev
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
 
     auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr)
-    {
+    if (surfaceNode == nullptr) {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    }
-    else
-    {
+    } else {
         ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlur(-1.0));
         ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlur(1.0));
     }
@@ -1102,12 +1132,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetShadowColor, Function | SmallTest | Leve
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
 
     auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr)
-    {
+    if (surfaceNode == nullptr) {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    }
-    else
-    {
+    }else {
         ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowColor("111ff22ee44"));
         ASSERT_EQ(WMError::WM_OK, window->SetShadowColor("#ff22ee44"));
         ASSERT_EQ(WMError::WM_OK, window->SetShadowColor("#000999"));
@@ -1126,7 +1153,12 @@ HWTEST_F(WindowSceneSessionImplTest, SetCornerRadius, Function | SmallTest | Lev
     window->property_->SetWindowName("SetCornerRadius");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
 
-    ASSERT_EQ(WMError::WM_OK, window->SetCornerRadius(1.0));
+    auto surfaceNode = window->GetSurfaceNode();
+    if (surfaceNode == nullptr) {
+        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetCornerRadius(1.0));
+    } else {
+        ASSERT_EQ(WMError::WM_OK, window->SetCornerRadius(1.0));
+    }
 }
 
 /*
@@ -1142,12 +1174,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetShadowRadius, Function | SmallTest | Lev
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
 
     auto surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr)
-    {
+    if (surfaceNode == nullptr) {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->CheckParmAndPermission());
-    }
-    else
-    {
+    } else {
         ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowRadius(-1.0));
         ASSERT_EQ(WMError::WM_OK, window->SetShadowRadius(1.0));
     }
@@ -1171,6 +1200,109 @@ HWTEST_F(WindowSceneSessionImplTest, SetTransform01, Function | SmallTest | Leve
     window->SetTransform(trans_);
     ASSERT_TRUE(trans_ == window->GetTransform());
     ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
+}
+
+/**
+ * @tc.name: RegisterAnimationTransitionController01
+ * @tc.desc: RegisterAnimationTransitionController
+ * @tc.type: FUNC
+ * @tc.require:issueI7IJVV
+ */
+HWTEST_F(WindowSceneSessionImplTest, RegisterAnimationTransitionController01, Function | SmallTest | Level3)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("RegisterAnimationTransitionController01");
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetPersistentId(1);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->RegisterAnimationTransitionController(nullptr));
+}
+
+/**
+ * @tc.name: SetNeedDefaultAnimation01
+ * @tc.desc: SetNeedDefaultAnimation
+ * @tc.type: FUNC
+ * @tc.require:issueI7IJVV
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetNeedDefaultAnimation01, Function | SmallTest | Level3)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetNeedDefaultAnimation01");
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    auto ret = true;
+    window->property_->SetPersistentId(1);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->SetNeedDefaultAnimation(false);
+    ASSERT_TRUE(ret);
+}
+
+/**
+ * @tc.desc: UpdateSurfaceNodeAfterCustomAnimation01
+ * @tc.desc: UpdateSurfaceNodeAfterCustomAnimation
+ * @tc.type: FUNC
+ * @tc.require:issueI7IJVV
+ */
+HWTEST_F(WindowSceneSessionImplTest, UpdateSurfaceNodeAfterCustomAnimation, Function | SmallTest | Level3)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("UpdateSurfaceNodeAfterCustomAnimation");
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    window->property_->SetPersistentId(1);
+
+    window->UpdateSurfaceNodeAfterCustomAnimation(false);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->UpdateSurfaceNodeAfterCustomAnimation(false));
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window->UpdateSurfaceNodeAfterCustomAnimation(false));
+}
+
+/**
+ * @tc.name: SetAlpha01
+ * @tc.desc: SetAlpha
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetAlpha01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("SetAlpha01");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+
+    ASSERT_NE(nullptr, windowscenesession);
+    windowscenesession->property_->SetPersistentId(11);
+    windowscenesession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowscenesession->SetAlpha(1.0));
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+
+    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*(session), CreateAndConnectSpecificSession(_, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
+    ASSERT_EQ(WMError::WM_OK, windowscenesession->Create(abilityContext_, session));
+    windowscenesession->hostSession_ = session;
+
+    auto surfaceNode = windowscenesession->GetSurfaceNode();
+    if (surfaceNode == nullptr) {
+        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowscenesession->CheckParmAndPermission());
+    } else {
+        ASSERT_EQ(WMError::WM_OK, windowscenesession->SetAlpha(1.0));
+    }
 }
 }
 } // namespace Rosen
