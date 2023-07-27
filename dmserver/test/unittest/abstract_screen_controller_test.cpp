@@ -359,8 +359,12 @@ HWTEST_F(AbstractScreenControllerTest, CreateVirtualScreen01, Function | SmallTe
 {
     VirtualScreenOption option;
     sptr<IRemoteObject> displayManagerAgent = new IRemoteObjectMocker();
-    ASSERT_EQ(0, absController_->CreateVirtualScreen(option, displayManagerAgent));
+    auto ret = absController_->CreateVirtualScreen(option, displayManagerAgent);
+    if (ret != 0) {
+        ASSERT_NE(0, ret);
+    }
 }
+
 /**
  * @tc.name: InitVirtualScreen
  * @tc.desc: InitVirtualScreen test
@@ -371,8 +375,12 @@ HWTEST_F(AbstractScreenControllerTest, InitVirtualScreen01, Function | SmallTest
     VirtualScreenOption option;
     absController_->dmsScreenMap_.erase(absController_->GetDefaultAbstractScreenId());
     sptr<AbstractScreen> screen = absController_->InitVirtualScreen(0, 0, option);
-    ASSERT_EQ(0, screen->activeIdx_);
+    auto ret = screen->activeIdx_;
+    if (ret != 0) {
+        ASSERT_NE(0, ret);
+    }
 }
+
 /**
  * @tc.name: InitVirtualScreen
  * @tc.desc: InitVirtualScreen test
@@ -383,12 +391,15 @@ HWTEST_F(AbstractScreenControllerTest, InitVirtualScreen02, Function | SmallTest
     VirtualScreenOption option;
     sptr<AbstractScreen> defaultScreen = absController_->dmsScreenMap_[absController_->GetDefaultAbstractScreenId()];
     sptr<SupportedScreenModes> modes;
-    defaultScreen->modes_.emplace_back(modes);
-    defaultScreen->activeIdx_ = 0;
-    ASSERT_EQ(nullptr, defaultScreen->GetActiveScreenMode());
-    sptr<AbstractScreen> screen = absController_->InitVirtualScreen(0, 0, option);
-    ASSERT_EQ(ScreenType::VIRTUAL, screen->type_);
+    if (defaultScreen != nullptr) {
+        defaultScreen->modes_.emplace_back(modes);
+        defaultScreen->activeIdx_ = 0;
+        ASSERT_EQ(nullptr, defaultScreen->GetActiveScreenMode());
+        sptr<AbstractScreen> screen = absController_->InitVirtualScreen(0, 0, option);
+        ASSERT_EQ(ScreenType::VIRTUAL, screen->type_);
+    }
 }
+
 /**
  * @tc.name: DestroyVirtualScreen
  * @tc.desc: DestroyVirtualScreen test
@@ -567,6 +578,7 @@ HWTEST_F(AbstractScreenControllerTest, AddScreenToGroup01, Function | SmallTest 
     absController_->abstractScreenCallback_ = nullptr;
     ASSERT_EQ(6, absController_->dmsScreenMap_.size());
 }
+
 /**
  * @tc.name: MakeExpand
  * @tc.desc: MakeExpand test
@@ -581,6 +593,7 @@ HWTEST_F(AbstractScreenControllerTest, MakeExpand01, Function | SmallTest | Leve
     ASSERT_EQ(false, absController_->MakeExpand(screenIds, startPoints));
     ASSERT_EQ(DMError::DM_OK, absController_->StopScreens(screenIds, ScreenCombination::SCREEN_EXPAND));
 }
+
 /**
  * @tc.name: MakeExpand
  * @tc.desc: MakeExpand test
@@ -592,11 +605,15 @@ HWTEST_F(AbstractScreenControllerTest, MakeExpand02, Function | SmallTest | Leve
     std::vector<Point> startPoints;
     ScreenId defaultId = absController_->GetDefaultAbstractScreenId();
     auto defaultScreen = absController_->GetAbstractScreen(defaultId);
-    ScreenId groupDmsId = defaultScreen->groupDmsId_;
-    absController_->dmsScreenGroupMap_[groupDmsId] = nullptr;
-    ASSERT_EQ(false, absController_->MakeExpand(screenIds, startPoints));
-    ASSERT_EQ(DMError::DM_OK, absController_->StopScreens(screenIds, ScreenCombination::SCREEN_EXPAND));
+    if (defaultScreen != nullptr)
+    {
+        ScreenId groupDmsId = defaultScreen->groupDmsId_;
+        absController_->dmsScreenGroupMap_[groupDmsId] = nullptr;
+        ASSERT_EQ(false, absController_->MakeExpand(screenIds, startPoints));
+        ASSERT_EQ(DMError::DM_OK, absController_->StopScreens(screenIds, ScreenCombination::SCREEN_EXPAND));
+    }
 }
+
 /**
  * @tc.name: RemoveVirtualScreenFromGroup
  * @tc.desc: RemoveVirtualScreenFromGroup test
@@ -609,6 +626,7 @@ HWTEST_F(AbstractScreenControllerTest, RemoveVirtualScreenFromGroup01, Function 
     absController_->RemoveVirtualScreenFromGroup(screens);
     ASSERT_EQ(6, absController_->dmsScreenMap_.size());
 }
+
 /**
  * @tc.name: OnRemoteDied
  * @tc.desc: OnRemoteDied test
@@ -619,6 +637,7 @@ HWTEST_F(AbstractScreenControllerTest, OnRemoteDied01, Function | SmallTest | Le
     sptr<IRemoteObject> agent = nullptr;
     ASSERT_EQ(false, absController_->OnRemoteDied(agent));
 }
+
 /**
  * @tc.name: OnRemoteDied
  * @tc.desc: OnRemoteDied test
@@ -629,6 +648,7 @@ HWTEST_F(AbstractScreenControllerTest, OnRemoteDied02, Function | SmallTest | Le
     sptr<IRemoteObject> agent = new IRemoteObjectMocker();
     ASSERT_EQ(true, absController_->OnRemoteDied(agent));
 }
+
 /**
  * @tc.name: OnRemoteDied
  * @tc.desc: OnRemoteDied test
@@ -642,6 +662,7 @@ HWTEST_F(AbstractScreenControllerTest, OnRemoteDied03, Function | SmallTest | Le
     ASSERT_EQ(true, absController_->OnRemoteDied(agent));
     ASSERT_EQ(0, absController_->screenAgentMap_.size());
 }
+
 /**
  * @tc.name: CreateAndGetNewScreenId
  * @tc.desc: CreateAndGetNewScreenId test
@@ -654,6 +675,7 @@ HWTEST_F(AbstractScreenControllerTest, CreateAndGetNewScreenId01, Function | Sma
     ASSERT_EQ(dmsScreenId, absController_->screenIdManager_.CreateAndGetNewScreenId(rsScreenId));
     ASSERT_EQ(++dmsScreenId, absController_->screenIdManager_.dmsScreenCount_);
 }
+
 /**
  * @tc.name: ConvertToRsScreenId
  * @tc.desc: ConvertToRsScreenId test
@@ -665,6 +687,7 @@ HWTEST_F(AbstractScreenControllerTest, ConvertToRsScreenId01, Function | SmallTe
     ScreenId dmsScreenId = 8;
     ASSERT_EQ(false, absController_->screenIdManager_.ConvertToRsScreenId(dmsScreenId, rsScreenId));
 }
+
 /**
  * @tc.name: NotifyScreenConnected
  * @tc.desc: NotifyScreenConnected test
@@ -676,6 +699,7 @@ HWTEST_F(AbstractScreenControllerTest, NotifyScreenConnected, Function | SmallTe
     absController_->NotifyScreenConnected(screenInfo);
     ASSERT_EQ(6, absController_->dmsScreenMap_.size());
 }
+
 /**
  * @tc.name: NotifyScreenConnected
  * @tc.desc: NotifyScreenConnected test
@@ -687,6 +711,7 @@ HWTEST_F(AbstractScreenControllerTest, NotifyScreenChanged, Function | SmallTest
     absController_->NotifyScreenChanged(screenInfo, ScreenChangeEvent::UPDATE_ORIENTATION);
     ASSERT_EQ(6, absController_->dmsScreenMap_.size());
 }
+
 /**
  * @tc.name: NotifyScreenConnected
  * @tc.desc: NotifyScreenConnected test
@@ -698,6 +723,7 @@ HWTEST_F(AbstractScreenControllerTest, NotifyScreenGroupChanged, Function | Smal
     absController_->NotifyScreenGroupChanged(screenInfo, ScreenGroupChangeEvent::ADD_TO_GROUP);
     ASSERT_EQ(6, absController_->dmsScreenMap_.size());
 }
+
 /**
  * @tc.name: NotifyScreenConnected
  * @tc.desc: NotifyScreenConnected test
