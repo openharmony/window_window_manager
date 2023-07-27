@@ -94,7 +94,7 @@ HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService, Function | Sma
 HWTEST_F(MockSessionManagerServiceTest, GetSessionManagerService, Function | SmallTest | Level2)
 {
     WLOGI("GetSessionManagerService");
-    sptr<IRemoteObject> sessionManagerService = 
+    sptr<IRemoteObject> sessionManagerService =
     MockSessionManagerService::GetInstance()->GetSessionManagerService();
     ASSERT_EQ(nullptr, sessionManagerService);
 }
