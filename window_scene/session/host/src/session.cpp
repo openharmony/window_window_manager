@@ -1100,4 +1100,14 @@ bool Session::GetShowRecent() const
 {
     return showRecent_;
 }
+
+void Session::SetBufferAvailable(bool bufferAvailable)
+{
+    bufferAvailable_ = bufferAvailable;
+}
+
+bool Session::GetBufferAvailable() const
+{
+    return bufferAvailable_;
+}
 } // namespace OHOS::Rosen
