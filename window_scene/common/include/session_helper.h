@@ -44,6 +44,17 @@ public:
         return (r.posX_ == 0 && r.posY_ == 0 && r.width_ == 0 && r.height_ == 0);
     }
 
+    static bool IsPointInRect(int32_t pointPosX, int32_t pointPosY, const WSRect& rect)
+    {
+        if ((pointPosX > rect.posX_) &&
+            (pointPosX < (rect.posX_ + static_cast<int32_t>(rect.width_)) - 1) &&
+            (pointPosY > rect.posY_) &&
+            (pointPosY < (rect.posY_ + static_cast<int32_t>(rect.height_)) - 1)) {
+            return true;
+        }
+        return false;
+    }
+
     static inline WSRect TransferToWSRect(const Rect& rect)
     {
         WSRect r;

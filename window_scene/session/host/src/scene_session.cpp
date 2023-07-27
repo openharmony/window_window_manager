@@ -639,4 +639,37 @@ void SceneSession::DumpSessionElementInfo(const std::vector<std::string>& params
     }
     return sessionStage_->DumpSessionElementInfo(params);
 }
+
+WSRect SceneSession::GetHotAreaRect(int32_t action)
+{
+    WSRect rect = GetSessionRect();
+
+    float vpr = 1.5f; // 1.5f: default virtual pixel ratio
+    auto display = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+    if (display) {
+        vpr = display->GetVirtualPixelRatio();
+        WLOGD("vpr = %{public}f", vpr);
+    }
+
+    float hotZone = 0.0;
+    if (action == MMI::PointerEvent::POINTER_ACTION_DOWN) {
+        hotZone = HOTZONE_TOUCH;
+    } else if (action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        hotZone = HOTZONE_POINTER;
+    }
+    rect.posX_ = rect.posX_ - static_cast<int32_t>(vpr * hotZone);
+    rect.posY_ = rect.posY_ - static_cast<int32_t>(vpr * hotZone);
+    rect.width_ = rect.width_ + static_cast<uint32_t>(vpr * hotZone * 2); // double hotZone
+    rect.height_ = rect.height_ + static_cast<uint32_t>(vpr * hotZone * 2); // double hotZone
+
+    return rect;
+}
+
+WSError SceneSession::NotifyTouchOutside()
+{
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyTouchOutside();
+}
 } // namespace OHOS::Rosen

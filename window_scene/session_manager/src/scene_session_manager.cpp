@@ -893,11 +893,26 @@ void SceneSessionManager::SetGestureNavigationEnabledChangeListener(
     gestureNavigationEnabledChangeFunc_ = func;
 }
 
-void SceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
+void SceneSessionManager::OnOutsideDownEvent(int32_t action, int32_t x, int32_t y)
 {
     WLOGFI("OnOutsideDownEvent x = %{public}d, y = %{public}d", x, y);
     if (outsideDownEventFunc_) {
         outsideDownEventFunc_(x, y);
+    }
+    NotifySessionTouchOutside(action, x, y);
+}
+
+void SceneSessionManager::NotifySessionTouchOutside(int32_t action, int32_t x, int32_t y)
+{
+    for (const auto &item : sceneSessionMap_) {
+        auto sceneSession = item.second;
+        auto persistentId = sceneSession->GetPersistentId();
+        auto hotAreaRect = sceneSession->GetHotAreaRect(action);
+        if (!SessionHelper::IsPointInRect(x, y, hotAreaRect)) {
+            sceneSession->NotifyTouchOutside();
+        } else {
+            WLOGFD("TouchInside %{public}d", persistentId);
+        }
     }
 }
 
