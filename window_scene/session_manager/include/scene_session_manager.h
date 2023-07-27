@@ -60,6 +60,7 @@ public:
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession);
     void StartAbilityBySpecified(const SessionInfo& sessionInfo);
+    void SetRootSceneContext(AbilityRuntime::Context* context);
     sptr<RootSceneSession> GetRootSceneSession();
     sptr<SceneSession> GetSceneSession(int32_t persistentId);
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -184,6 +185,7 @@ private:
         const std::vector<std::string>& params, std::string& dumpInfo);
 
     sptr<RootSceneSession> rootSceneSession_;
+    std::shared_ptr<AbilityRuntime::Context> rootSceneContext_;
     std::map<int32_t, sptr<SceneSession>> sceneSessionMap_;
     std::set<sptr<SceneSession>> avoidAreaListenerSessionSet_;
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;

@@ -49,7 +49,8 @@ public:
     {
         return parcel.WriteInt32(windowId_) && parcel.WriteUint64(displayId_) &&
         parcel.WriteInt32(pid_) && parcel.WriteInt32(uid_) &&
-        parcel.WriteUint32(static_cast<uint32_t>(windowType_));
+        parcel.WriteUint32(static_cast<uint32_t>(windowType_)) &&
+        (static_cast<MessageParcel*>(&parcel))->WriteRemoteObject(abilityToken_);
     }
 
     static FocusChangeInfo* Unmarshalling(Parcel &parcel)
@@ -62,6 +63,7 @@ public:
             return nullptr;
         }
         focusChangeInfo->windowType_ = static_cast<WindowType>(parcel.ReadUint32());
+        focusChangeInfo->abilityToken_ = (static_cast<MessageParcel*>(&parcel))->ReadRemoteObject();
         return focusChangeInfo;
     }
 

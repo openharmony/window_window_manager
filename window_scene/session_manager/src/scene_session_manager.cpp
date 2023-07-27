@@ -18,6 +18,7 @@
 #include <sstream>
 #include <unistd.h>
 
+#include <ability_context.h>
 #include <ability_info.h>
 #include <ability_manager_client.h>
 #include <bundle_mgr_interface.h>
@@ -495,6 +496,11 @@ std::string SceneSessionManager::CreateCurve(const WindowSceneConfig::ConfigItem
     return curveName;
 }
 
+void SceneSessionManager::SetRootSceneContext(AbilityRuntime::Context* context)
+{
+    rootSceneContext_ = std::shared_ptr<AbilityRuntime::Context>(context);
+}
+
 sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
 {
     auto task = [this]() -> sptr<RootSceneSession> {
@@ -581,27 +587,25 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             return session;
         }
     }
-    sptr<SceneSession::SpecificSessionCallback> specificCallback = new (std::nothrow)
-        SceneSession::SpecificSessionCallback();
-    if (specificCallback == nullptr) {
+    sptr<SceneSession::SpecificSessionCallback> specificCb = new (std::nothrow)SceneSession::SpecificSessionCallback();
+    if (specificCb == nullptr) {
         WLOGFE("SpecificSessionCallback is nullptr");
         return nullptr;
     }
-    specificCallback->onCreate_ = std::bind(&SceneSessionManager::RequestSceneSession,
+    specificCb->onCreate_ = std::bind(&SceneSessionManager::RequestSceneSession,
         this, std::placeholders::_1, std::placeholders::_2);
-    specificCallback->onDestroy_ = std::bind(&SceneSessionManager::DestroyAndDisconnectSpecificSession,
+    specificCb->onDestroy_ = std::bind(&SceneSessionManager::DestroyAndDisconnectSpecificSession,
         this, std::placeholders::_1);
-    specificCallback->onCameraFloatSessionChange_ = std::bind(&SceneSessionManager::UpdateCameraFloatWindowStatus,
+    specificCb->onCameraFloatSessionChange_ = std::bind(&SceneSessionManager::UpdateCameraFloatWindowStatus,
         this, std::placeholders::_1, std::placeholders::_2);
-    specificCallback->onGetSceneSessionVectorByType_ = std::bind(&SceneSessionManager::GetSceneSessionVectorByType,
+    specificCb->onGetSceneSessionVectorByType_ = std::bind(&SceneSessionManager::GetSceneSessionVectorByType,
         this, std::placeholders::_1);
-    specificCallback->onUpdateAvoidArea_ = std::bind(&SceneSessionManager::UpdateAvoidArea,
-        this, std::placeholders::_1);
-    auto task = [this, sessionInfo, specificCallback, property]() {
+    specificCb->onUpdateAvoidArea_ = std::bind(&SceneSessionManager::UpdateAvoidArea, this, std::placeholders::_1);
+    auto task = [this, sessionInfo, specificCb, property]() {
         WLOGFI("sessionInfo: bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, type %{public}u",
             sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
             sessionInfo.abilityName_.c_str(), sessionInfo.windowType_);
-        sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, specificCallback);
+        sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, specificCb);
         if (sceneSession == nullptr) {
             WLOGFE("sceneSession is nullptr!");
             return sceneSession;
@@ -609,6 +613,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         if (sessionInfo.isSystem_) {
             sceneSession->SetCallingPid(IPCSkeleton::GetCallingPid());
             sceneSession->SetCallingUid(IPCSkeleton::GetCallingUid());
+            sceneSession->SetAbilityToken(rootSceneContext_ != nullptr ? rootSceneContext_->GetToken() : nullptr);
         }
         auto persistentId = sceneSession->GetPersistentId();
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSession(%d )", persistentId);
