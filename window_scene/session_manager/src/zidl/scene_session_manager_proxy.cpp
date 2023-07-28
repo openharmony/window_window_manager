@@ -272,7 +272,11 @@ void SceneSessionManagerProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
         return;
     }
     sptr<FocusChangeInfo> info = reply.ReadParcelable<FocusChangeInfo>();
-    focusInfo = *info;
+    if (info) {
+        focusInfo = *info;
+    } else {
+        WLOGFE("info is null.");
+    }
 }
 
 WSError SceneSessionManagerProxy::SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent)
