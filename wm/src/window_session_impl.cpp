@@ -1121,6 +1121,15 @@ WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
     return WMError::WM_ERROR_INVALID_OPERATION;
 }
 
+std::vector<sptr<Window>> WindowSessionImpl::GetSubWindow(int parentId)
+{
+    auto iter = subWindowSessionMap_.find(parentId);
+    if (iter == subWindowSessionMap_.end()) {
+        return std::vector<sptr<Window>>();
+    }
+    return std::vector<sptr<Window>>(subWindowSessionMap_[parentId].begin(), subWindowSessionMap_[parentId].end());
+}
+
 uint32_t WindowSessionImpl::GetBackgroundColor() const
 {
     if (uiContent_ != nullptr) {
