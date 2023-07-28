@@ -28,6 +28,7 @@
 #include "session/host/include/scene_persistence.h"
 #include "wm_common.h"
 #include "occupied_area_change_info.h"
+#include <ability_info.h>
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -152,6 +153,7 @@ public:
     WSError MarkProcessed(int32_t eventId) override;
 
     sptr<ScenePersistence> GetScenePersistence() const;
+    void SetSessionContinueState(const ContinueState& continueState);
     void SetParentSession(const sptr<Session>& session);
     void BindDialogToParentSession(const sptr<Session>& session);
     void RemoveDialogToParentSession(const sptr<Session>& session);
@@ -172,6 +174,8 @@ public:
     void NotifyClick();
     WSError UpdateFocus(bool isFocused);
     WSError SetFocusable(bool isFocusable);
+    bool NeedNotify() const;
+    void SetNeedNotify(bool needNotify);
     bool GetFocusable() const;
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
@@ -244,6 +248,9 @@ protected:
     sptr<ScenePersistence> scenePersistence_ = nullptr;
 
 private:
+    void FillSessionInfo(SessionInfo& sessionInfo);
+    sptr<AppExecFwk::AbilityInfo> QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
+        const std::string& abilityName, const std::string& moduleName);
     bool CheckDialogOnForeground();
 
     template<typename T>
@@ -287,6 +294,7 @@ private:
     int32_t callingPid_ = { 0 };
     int32_t callingUid_ = { 0 };
     bool isVisible_ {false};
+    bool needNotify_ {true};
     sptr<IRemoteObject> abilityToken_ = nullptr;
 };
 } // namespace OHOS::Rosen

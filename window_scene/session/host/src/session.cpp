@@ -30,10 +30,24 @@
 
 #include "ability_start_setting.h"
 #include "window_manager_hilog.h"
+#include "iservice_registry.h"
+#include "if_system_ability_manager.h"
+#include "system_ability_definition.h"
+#include "bundle_mgr_interface.h"
 
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Session" };
+constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
+constexpr int32_t UID_TRANSFORM_DIVISOR = 200000;  // local account id = uid / UID_TRANSFORM_DIVISOR
+std::string GetCurrentTime()
+{
+    struct timespec tn;
+    clock_gettime(CLOCK_REALTIME, &tn);
+    uint64_t uTime = static_cast<uint64_t>(tn.tv_sec) * NANO_SECOND_PER_SEC +
+        static_cast<uint64_t>(tn.tv_nsec);
+    return std::to_string(uTime);
+}
 } // namespace
 
 std::atomic<int32_t> Session::sessionId_(INVALID_SESSION_ID);
@@ -218,6 +232,16 @@ bool Session::GetFocusable() const
     return true;
 }
 
+void Session::SetNeedNotify(bool needNotify)
+{
+    needNotify_ = needNotify;
+}
+
+bool Session::NeedNotify() const
+{
+    return needNotify_;
+}
+
 WSError Session::SetTouchable(bool touchable)
 {
     if (!IsSessionValid()) {
@@ -367,12 +391,71 @@ WSError Session::ConnectImpl(const sptr<ISessionStage>& sessionStage, const sptr
     }
     property_ = property;
 
+    FillSessionInfo(GetSessionInfo());
     UpdateSessionState(SessionState::STATE_CONNECT);
     // once update rect before connect, update again when connect
     UpdateRect(winRect_, SizeChangeReason::UNDEFINED);
     NotifyConnect();
     DelayedSingleton<ANRManager>::GetInstance()->SetApplicationPid(persistentId_, callingPid_);
     return WSError::WS_OK;
+}
+
+void Session::FillSessionInfo(SessionInfo &sessionInfo)
+{
+    auto uid = GetCallingUid() / UID_TRANSFORM_DIVISOR;
+    auto abilityInfo = QueryAbilityInfoFromBMS(uid, sessionInfo.bundleName_, sessionInfo.abilityName_,
+        sessionInfo.moduleName_);
+    if (abilityInfo == nullptr) {
+        return;
+    }
+    if (sessionInfo.startMethod != OHOS::Rosen::StartMethod::START_CALL) {
+        sessionInfo.startMethod = OHOS::Rosen::StartMethod::START_NORMAL;
+    }
+    sessionInfo.removeSessionAfterTerminate = abilityInfo->removeMissionAfterTerminate;
+    sessionInfo.excludeFromSessions = abilityInfo->excludeFromMissions;
+    sessionInfo.continuable = abilityInfo->continuable;
+    sessionInfo.unClearable = abilityInfo->unclearableMission;
+    sessionInfo.time = GetCurrentTime();
+    sessionInfo.label = abilityInfo->label;
+    sessionInfo.iconPath = abilityInfo->iconPath;
+    WLOGFI("FillSessionInfo end, removeMissionAfterTerminate: %{public}d excludeFromMissions: %{public}d "
+        "unclearable:%{public}d,continuable:%{public}d  label:%{public}s iconPath:%{public}s",
+        sessionInfo.removeSessionAfterTerminate, sessionInfo.excludeFromSessions, sessionInfo.unClearable,
+        sessionInfo.continuable, sessionInfo.label.c_str(), sessionInfo.iconPath.c_str());
+}
+
+sptr<AppExecFwk::AbilityInfo> Session::QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
+    const std::string& abilityName, const std::string& moduleName)
+{
+    AAFwk::Want want;
+    want.SetElementName("", bundleName, abilityName, moduleName);
+    sptr<AppExecFwk::AbilityInfo> abilityInfo = new (std::nothrow) AppExecFwk::AbilityInfo();
+    if (abilityInfo == nullptr) {
+        return nullptr;
+    }
+    auto abilityInfoFlag = (AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION |
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_METADATA);
+    auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityMgr == nullptr) {
+        WLOGFE("Failed to get SystemAbilityManager.");
+        return nullptr;
+    }
+    auto bmsObj = systemAbilityMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (bmsObj == nullptr) {
+        WLOGFE("Failed to get BundleManagerService.");
+        return nullptr;
+    }
+    auto bundleMgr = iface_cast<AppExecFwk::IBundleMgr>(bmsObj);
+    if (bundleMgr == nullptr) {
+        return nullptr;
+    }
+    bool ret = bundleMgr->QueryAbilityInfo(want, abilityInfoFlag, uId, *abilityInfo);
+    if (!ret) {
+        WLOGFE("Get ability info from BMS failed!");
+        return nullptr;
+    }
+    return abilityInfo;
 }
 
 WSError Session::UpdateWindowSessionProperty(sptr<WindowSessionProperty> property)
@@ -480,6 +563,8 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    sessionInfo_.startMethod = OHOS::Rosen::StartMethod::START_CALL;
+
     SessionInfo info;
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -652,6 +737,12 @@ WSError Session::NotifyDestroy()
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->NotifyDestroy();
+}
+
+void Session::SetSessionContinueState(const ContinueState& continueState)
+{
+    auto sessionInfo =  GetSessionInfo();
+    sessionInfo.continueState = continueState;
 }
 
 void Session::SetParentSession(const sptr<Session>& session)
