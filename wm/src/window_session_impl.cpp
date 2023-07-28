@@ -21,6 +21,7 @@
 #include <common/rs_common_def.h>
 #include <ipc_skeleton.h>
 #include <transaction/rs_interfaces.h>
+#include <transaction/rs_transaction.h>
 
 #include "anr_handler.h"
 #include "color_parser.h"
@@ -98,6 +99,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetKeepScreenOn(option->IsKeepScreenOn());
     property_->SetWindowMode(option->GetWindowMode());
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
+    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 }
 
 RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(std::string name, WindowType type)
@@ -303,9 +305,6 @@ WSError WindowSessionImpl::SetActive(bool active)
 
 WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
-    WLOGFI("update rect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u", rect.posX_, rect.posY_,
-        rect.width_, rect.height_, reason);
-
     // delete after replace ws_common.h with wm_common.h
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
     Rect wmRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
@@ -318,9 +317,39 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
             wmReason = WindowSizeChangeReason::MAXIMIZE;
         }
     }
+    auto preRect = GetRect();
+    if (preRect.width_ == wmRect.height_ && preRect.height_ == wmRect.width_) {
+        wmReason = WindowSizeChangeReason::ROTATION;
+    }
     property_->SetWindowRect(wmRect);
-    NotifySizeChange(wmRect, wmReason);
-    UpdateViewportConfig(wmRect, wmReason);
+    auto task = [this, wmReason, wmRect, preRect]() mutable {
+        RSTransaction::FlushImplicitTransaction();
+        RSAnimationTimingProtocol protocol;
+        protocol.SetDuration(600);
+        auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
+        RSNode::OpenImplicitAnimation(protocol, curve);
+        if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_)) {
+            NotifySizeChange(wmRect, wmReason);
+            lastSizeChangeReason_ = wmReason;
+        }
+        UpdateViewportConfig(wmRect, wmReason);
+        RSNode::CloseImplicitAnimation();
+        RSTransaction::FlushImplicitTransaction();
+        postTaskDone_ = true;
+    };
+    if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
+        postTaskDone_ = false;
+        handler_->PostTask(task);
+    } else {
+        if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_) {
+            NotifySizeChange(wmRect, wmReason);
+            lastSizeChangeReason_ = wmReason;
+            postTaskDone_ = true;
+        }
+        UpdateViewportConfig(wmRect, wmReason);
+    }
+    WLOGFI("update rect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u", rect.posX_, rect.posY_,
+        rect.width_, rect.height_, wmReason);
     return WSError::WS_OK;
 }
 
@@ -798,11 +827,19 @@ void WindowSessionImpl::NotifyAfterUnfocused(bool needNotifyUiContent)
 void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (uiContent_ != nullptr) {
-        auto uiContent = std::move(uiContent_);
-        uiContent_ = nullptr;
-        uiContent->Destroy();
+    auto uiContent = GetUIContent();
+    auto task = [uiContent]() {
+        if (uiContent != nullptr) {
+            uiContent->Destroy();
+        }
+    };
+    if (handler_) {
+        handler_->PostTask(task);
+    } else {
+        task();
     }
+    uiContent_ = nullptr;
+
     if (notifyNativeFunc_) {
         notifyNativeFunc_(windowName);
     }

@@ -20,6 +20,7 @@
 #include <optional>
 
 #include <ability_context.h>
+#include <event_handler.h>
 #include <i_input_event_consumer.h>
 #include <refbase.h>
 #include <ui_content.h>
@@ -158,6 +159,7 @@ protected:
     static std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
     bool isIgnoreSafeAreaNeedNotify_ = false;
     bool isIgnoreSafeArea_ = false;
+    std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
 
 private:
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
@@ -194,6 +196,9 @@ private:
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;
+
+    WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
+    bool postTaskDone_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS
