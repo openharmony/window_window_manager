@@ -2387,7 +2387,8 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistent
 
 bool SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
 {
-    bool needUpdate = true;
+    bool ret = true;
+    bool needUpdate = false;
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         WLOGFE("sceneSession is nullptr.");
@@ -2406,8 +2407,10 @@ bool SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
         AvoidAreaType avoidType = (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) ?
             AvoidAreaType::TYPE_KEYBOARD : AvoidAreaType::TYPE_SYSTEM;
         for (auto& session : avoidAreaListenerSessionSet_) {
-            AvoidArea avoidArea = session->GetAvoidAreaByType(avoidType);
-            needUpdate = needUpdate || UpdateSessionAvoidAreaIfNeed(session->GetPersistentId(), avoidArea, avoidType);
+            AvoidArea avoidArea = session->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
+            ret = UpdateSessionAvoidAreaIfNeed(
+                session->GetPersistentId(), avoidArea, static_cast<AvoidAreaType>(avoidType));
+            needUpdate = needUpdate || ret;
         }
     } else {
         if (avoidAreaListenerSessionSet_.find(sceneSession) == avoidAreaListenerSessionSet_.end()) {
@@ -2418,8 +2421,8 @@ bool SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
         uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_KEYBOARD);
         for (uint32_t avoidType = start; avoidType <= end; avoidType++) {
             AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
-            needUpdate = needUpdate ||
-                UpdateSessionAvoidAreaIfNeed(persistentId, avoidArea, static_cast<AvoidAreaType>(avoidType));
+            ret = UpdateSessionAvoidAreaIfNeed(persistentId, avoidArea, static_cast<AvoidAreaType>(avoidType));
+            needUpdate = needUpdate || ret;
         }
     }
 

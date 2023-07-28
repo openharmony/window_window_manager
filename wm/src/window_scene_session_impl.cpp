@@ -777,8 +777,6 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
     if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
         version = context_->GetApplicationInfo()->apiCompatibleVersion;
     }
-    hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
-    SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     // 10 ArkUI new framework support after API10
     if (version >= 10) {
         if (uiContent_ != nullptr) {
@@ -817,6 +815,8 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
 WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
 {
     WLOGFI("winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
+    hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
+    SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     WMError ret = SetLayoutFullScreenByApiVersion(status);
     if (ret != WMError::WM_OK) {
         WLOGFE("SetLayoutFullScreenByApiVersion errCode:%{public}d winId:%{public}u",
@@ -881,6 +881,8 @@ WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const Syst
 WMError WindowSceneSessionImpl::SetFullScreen(bool status)
 {
     WLOGFI("winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
+    hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
+    SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     WMError ret = SetLayoutFullScreenByApiVersion(status);
     if (ret != WMError::WM_OK) {
         WLOGFE("SetLayoutFullScreenByApiVersion errCode:%{public}d winId:%{public}u",
