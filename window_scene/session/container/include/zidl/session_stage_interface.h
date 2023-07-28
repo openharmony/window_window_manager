@@ -42,6 +42,7 @@ public:
         TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA,
         TRANS_ID_NOTIFY_OCCUPIED_AREA_CHANGE_INFO,
         TRANS_ID_UPDATE_AVOID_AREA,
+        TRANS_ID_NOTIFY_SCREEN_SHOT,
         TRANS_ID_DUMP_SESSSION_ELEMENT_INFO
     };
 
@@ -68,6 +69,7 @@ public:
     virtual void NotifyTouchDialogTarget() = 0;
     virtual void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info) = 0;
     virtual WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) = 0;
+    virtual void NotifyScreenshot() = 0;
     virtual void DumpSessionElementInfo(const std::vector<std::string>& params) = 0;
 };
 } // namespace OHOS::Rosen

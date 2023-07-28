@@ -206,6 +206,7 @@ public:
     void NotifyCallingSessionForeground();
     void SetNotifyCallingSessionBackgroundFunc(const NotifyCallingSessionBackgroundFunc& func);
     void NotifyCallingSessionBackground();
+    void NotifyScreenshot();
 
 protected:
     void GeneratePersistentId(const bool isExtension, const SessionInfo& sessionInfo);

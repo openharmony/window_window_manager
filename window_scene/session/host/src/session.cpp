@@ -626,6 +626,14 @@ void Session::NotifyTouchDialogTarget()
     sessionStage_->NotifyTouchDialogTarget();
 }
 
+void Session::NotifyScreenshot()
+{
+    if (!sessionStage_) {
+        return;
+    }
+    sessionStage_->NotifyScreenshot();
+}
+
 WSError Session::NotifyDestroy()
 {
     if (!sessionStage_) {
