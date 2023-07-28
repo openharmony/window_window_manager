@@ -56,6 +56,7 @@ public:
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     void NotifyRemoteReady() override;
+    void NotifyExtensionDied() override;
     WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
