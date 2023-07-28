@@ -958,6 +958,7 @@ void WindowController::StopBootAnimationIfNeed(const sptr<WindowNode>& node)
             system::SetParameter("bootevent.wms.fullscreen.ready", "true");
             isBootAnimationStopped_ = true;
             RecordBootAnimationEvent();
+            DisplayManagerServiceInner::GetInstance().SetGravitySensorSubscriptionEnabled();
         }
     }
 }
