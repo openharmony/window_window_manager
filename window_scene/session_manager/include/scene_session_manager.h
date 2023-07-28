@@ -16,11 +16,14 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_MANAGER_H
 
+#include <shared_mutex>
+#include <mutex>
+
 #include <transaction/rs_interfaces.h>
+
 #include "common/include/task_scheduler.h"
 #include "future.h"
 #include "interfaces/include/ws_common.h"
-#include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "session/host/include/root_scene_session.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "wm_single_instance.h"
@@ -50,9 +53,6 @@ using ProcessOutsideDownEventFunc = std::function<void(int32_t x, int32_t y)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using DumpRootSceneElementInfoFunc = std::function<void(const std::vector<std::string>& params,
     std::vector<std::string>& infos)>;
-using EventHandler = OHOS::AppExecFwk::EventHandler;
-using EventRunner = OHOS::AppExecFwk::EventRunner;
-const int32_t STATUS_BAR_AVOID_AREA = 0;
 
 class DisplayChangeListener : public IDisplayChangeListener {
 public:
@@ -197,6 +197,7 @@ private:
 
     sptr<RootSceneSession> rootSceneSession_;
     std::shared_ptr<AbilityRuntime::Context> rootSceneContext_;
+    std::shared_mutex sceneSessionMapMutex_;
     std::map<int32_t, sptr<SceneSession>> sceneSessionMap_;
     std::set<sptr<SceneSession>> avoidAreaListenerSessionSet_;
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
@@ -217,8 +218,8 @@ private:
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
 
-    std::shared_ptr<EventRunner> eventLoop_;
-    std::shared_ptr<EventHandler> eventHandler_;
+    std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     bool isReportTaskStart_ = false;
     std::shared_ptr<RSOcclusionData> lastOcclusionData_ = std::make_shared<RSOcclusionData>();
     RSInterfaces& rsInterface_;

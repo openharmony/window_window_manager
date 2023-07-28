@@ -97,6 +97,7 @@ constexpr int ORIEN_MAX_WIDTH = 12;
 constexpr int PID_MAX_WIDTH = 8;
 constexpr int PARENT_ID_MAX_WIDTH = 6;
 constexpr int WINDOW_NAME_MAX_LENGTH = 20;
+constexpr int32_t STATUS_BAR_AVOID_AREA = 0;
 const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_WINDOW = "-w";
 const std::string ARG_DUMP_SCREEN = "-s";
@@ -526,20 +527,19 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
 
 sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
 {
-    return taskScheduler_->PostSyncTask([this, persistentId]() -> sptr<SceneSession> {
-        auto iter = sceneSessionMap_.find(persistentId);
-        if (iter == sceneSessionMap_.end()) {
-            WLOGFE("Error found scene session with id: %{public}d", persistentId);
-            return nullptr;
-        }
-        return iter->second;
-    });
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    auto iter = sceneSessionMap_.find(persistentId);
+    if (iter == sceneSessionMap_.end()) {
+        WLOGFE("Error found scene session with id: %{public}d", persistentId);
+        return nullptr;
+    }
+    return iter->second;
 }
 
 std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByType(WindowType type)
 {
     std::vector<sptr<SceneSession>> sceneSessionVector;
-
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto &item : sceneSessionMap_) {
         auto sceneSession = item.second;
         if (sceneSession->GetWindowType() == type) {
@@ -562,11 +562,12 @@ WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& scene
     }
     auto parentPersistentId = property->GetParentPersistentId();
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
-        if (!sceneSessionMap_.count(parentPersistentId)) {
+        auto parentSceneSession = GetSceneSession(parentPersistentId);
+        if (!parentSceneSession) {
             WLOGFD("Session is invalid");
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        sceneSession->SetParentSession(sceneSessionMap_.at(parentPersistentId));
+        sceneSession->SetParentSession(parentSceneSession);
     } else if (property->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && parentPersistentId != INVALID_SESSION_ID) {
         auto parentSession = GetSceneSession(parentPersistentId);
         if (parentSession == nullptr) {
@@ -621,7 +622,10 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSession(%d )", persistentId);
         sceneSession->SetSystemConfig(systemConfig_);
         UpdateParentSession(sceneSession, property);
-        sceneSessionMap_.insert({ persistentId, sceneSession });
+        {
+            std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            sceneSessionMap_.insert({ persistentId, sceneSession });
+        }
         RegisterSessionStateChangeNotifyManagerFunc(sceneSession);
         RegisterInputMethodShownFunc(sceneSession);
         RegisterInputMethodHideFunc(sceneSession);
@@ -707,7 +711,7 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         auto persistentId = scnSession->GetPersistentId();
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionActivation(%d )", persistentId);
         WLOGFI("active persistentId: %{public}d", persistentId);
-        if (sceneSessionMap_.count(persistentId) == 0) {
+        if (!GetSceneSession(persistentId)) {
             WLOGFE("session is invalid with %{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
@@ -741,7 +745,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionBackground (%d )", persistentId);
         scnSession->SetActive(false);
         scnSession->Background();
-        if (sceneSessionMap_.count(persistentId) == 0) {
+        if (!GetSceneSession(persistentId)) {
             WLOGFE("session is invalid with %{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
@@ -777,7 +781,7 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
                 WLOGFE("dialog is nullptr");
                 return WSError::WS_ERROR_NULLPTR;
             }
-            if (sceneSessionMap_.count(dialog->GetPersistentId()) == 0) {
+            if (!GetSceneSession(dialog->GetPersistentId())) {
                 WLOGFE("session is invalid with %{public}d", dialog->GetPersistentId());
                 return WSError::WS_ERROR_INVALID_SESSION;
             }
@@ -786,7 +790,10 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
             dialog->NotifyDestroy();
             dialog->Disconnect();
             NotifyWindowInfoChange(dialog->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
-            sceneSessionMap_.erase(dialog->GetPersistentId());
+            {
+                std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+                sceneSessionMap_.erase(dialog->GetPersistentId());
+            }
         }
         return WSError::WS_OK;
     }
@@ -808,7 +815,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionDestruction (%" PRIu32" )", persistentId);
         WindowDestroyNotifyVisibility(scnSession);
         scnSession->Disconnect();
-        if (sceneSessionMap_.count(persistentId) == 0) {
+        if (!GetSceneSession(persistentId)) {
             WLOGFE("session is invalid with %{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
@@ -818,7 +825,10 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         }
         AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
-        sceneSessionMap_.erase(persistentId);
+        {
+            std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            sceneSessionMap_.erase(persistentId);
+        }
         return WSError::WS_OK;
     };
 
@@ -910,7 +920,10 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t& 
         }
         ret = sceneSession->Disconnect();
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
-        sceneSessionMap_.erase(persistentId);
+        {
+            std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            sceneSessionMap_.erase(persistentId);
+        }
         return ret;
     };
 
@@ -951,6 +964,7 @@ WSError SceneSessionManager::SwitchUser(int32_t oldUserId, int32_t newUserId, st
             WLOGFD("snapshot dir existed");
         }
         currentUserId_ = newUserId;
+        std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto &item : sceneSessionMap_) {
             auto scnSession = item.second;
             auto persistentId = scnSession->GetPersistentId();
@@ -1394,6 +1408,7 @@ void SceneSessionManager::DumpAllAppSessionInfo(std::ostringstream& oss)
 {
     oss << std::endl << "Current mission lists:" << std::endl;
     oss << " MissionList Type #NORMAL" << std::endl;
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& elem: sceneSessionMap_) {
         auto curSession = elem.second;
         if (curSession == nullptr) {
@@ -1434,6 +1449,7 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
 
     std::vector<sptr<SceneSession>> allSession;
     std::vector<sptr<SceneSession>> backgroundSession;
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& elem : sceneSessionMap_) {
         auto curSession = elem.second;
         if (curSession == nullptr) {
@@ -1445,6 +1461,7 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
             backgroundSession.push_back(curSession);
         }
     }
+    lock.unlock();
     allSession.insert(allSession.end(), backgroundSession.begin(), backgroundSession.end());
     uint32_t count = 0;
     for (const auto& session : allSession) {
@@ -1706,6 +1723,7 @@ WSError SceneSessionManager::SetSessionLabel(const sptr<IRemoteObject> &token, c
         WLOGFI("sessionListener not register, skip.");
         return WSError::WS_OK;
     }
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (auto iter : sceneSessionMap_) {
         auto& sceneSession = iter.second;
         if (sceneSession->GetAbilityToken() == token) {
@@ -1725,6 +1743,7 @@ WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject> &token,
         WLOGFI("sessionListener not register, skip.");
         return WSError::WS_OK;
     }
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (auto iter : sceneSessionMap_) {
         auto& sceneSession = iter.second;
         if (sceneSession->GetAbilityToken() == token) {
@@ -1790,7 +1809,7 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
         }
         auto persistentId = scnSession->GetPersistentId();
         WLOGFI("RequestSceneSessionByCall persistentId: %{public}d", persistentId);
-        if (sceneSessionMap_.count(persistentId) == 0) {
+        if (!GetSceneSession(persistentId)) {
             WLOGFE("session is invalid with %{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
@@ -1837,6 +1856,7 @@ sptr<SceneSession> SceneSessionManager::FindMainWindowWithToken(sptr<IRemoteObje
         return nullptr;
     }
 
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     auto iter = std::find_if(sceneSessionMap_.begin(), sceneSessionMap_.end(),
         [targetToken](const std::map<uint64_t, sptr<SceneSession>>::value_type& pair) {
             if (pair.second->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
@@ -2055,6 +2075,7 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
 {
     WLOGFI("GetAccessibilityWindowInfo Called.");
     std::map<int32_t, sptr<SceneSession>>::iterator iter;
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (iter = sceneSessionMap_.begin(); iter != sceneSessionMap_.end(); iter++) {
         sptr<SceneSession> sceneSession = iter->second;
         if (sceneSession == nullptr) {
@@ -2076,13 +2097,8 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
 {
     WLOGFI("NotifyWindowInfoChange, persistentId = %{public}d, updateType = %{public}d", persistentId, type);
     std::vector<sptr<AccessibilityWindowInfo>> infos;
-    auto iter = sceneSessionMap_.find(persistentId);
-    if (iter == sceneSessionMap_.end()) {
-        WLOGFW("Error find session for id = %{public}d", persistentId);
-        return;
-    }
 
-    const auto& sceneSession = iter->second;
+    auto sceneSession = GetSceneSession(persistentId);
     FillWindowInfo(infos, sceneSession);
     SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(infos, type);
 }
@@ -2189,6 +2205,7 @@ void SceneSessionManager::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclu
     for (const auto& elem : visibilityChangeInfo) {
         uint64_t surfaceId = elem.first;
         bool isVisible = elem.second;
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         auto iter = sceneSessionMap_.begin();
         for (; iter != sceneSessionMap_.end(); iter++) {
             if (iter->second == nullptr || iter->second->GetSurfaceNode() == nullptr) {
@@ -2272,6 +2289,7 @@ sptr<SceneSession> SceneSessionManager::FindSessionByToken(const sptr<IRemoteObj
         }
         return false;
     };
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     auto iter = std::find_if(sceneSessionMap_.begin(), sceneSessionMap_.end(), cmpFunc);
     if (iter != sceneSessionMap_.end()) {
         session = iter->second;
