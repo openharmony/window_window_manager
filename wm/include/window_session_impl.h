@@ -33,6 +33,7 @@
 #include "session/host/include/zidl/session_interface.h"
 #include "window.h"
 #include "window_option.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -122,6 +123,10 @@ public:
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void NotifyTouchDialogTarget() override;
     void DumpSessionElementInfo(const std::vector<std::string>& params) override;
+    // colorspace, gamut
+    virtual bool IsSupportWideGamut() override;
+    virtual void SetColorSpace(ColorSpace colorSpace) override;
+    virtual ColorSpace GetColorSpace() override;
 
     WindowState state_ { WindowState::STATE_INITIAL };
 
@@ -158,6 +163,11 @@ protected:
     bool isIgnoreSafeArea_ = false;
 
 private:
+    //Trans between colorGamut and colorSpace
+    static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
+    static GraphicColorGamut GetSurfaceGamutFromColorSpace(ColorSpace colorSpace);
+    static std::unordered_map<ColorSpace, GraphicColorGamut> colorSpaceConvertMap;
+
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> GetListeners();
