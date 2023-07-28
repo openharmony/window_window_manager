@@ -412,7 +412,6 @@ ohos_unittest("wmserver_window_group_mgr_test") {
   external_deps = test_external_deps
 }
 
-# add
 ohos_unittest("wmserver_mock_screen_manager_service_test") {
   module_out_path = module_out_path
   configs = test_public_config
@@ -432,5 +431,3 @@ ohos_unittest("wmserver_mock_session_manager_service_test") {
   public_deps = test_public_deps
   external_deps = test_external_deps
 }
-
-
