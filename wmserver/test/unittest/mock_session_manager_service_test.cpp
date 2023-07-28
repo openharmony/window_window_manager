@@ -66,9 +66,9 @@ HWTEST_F(MockSessionManagerServiceTest, OnRemoteDied, Function | SmallTest | Lev
 {
     WLOGI("OnRemoteDied");
     MockSessionManagerService::SMSDeathRecipient smsDeathRecipient;
+    auto res = WMError::WM_OK;
     wptr<IRemoteObject> object = nullptr;
     smsDeathRecipient.OnRemoteDied(object);
-
     ASSERT_EQ(WMError::WM_OK, res);
 }
 
@@ -80,9 +80,9 @@ HWTEST_F(MockSessionManagerServiceTest, OnRemoteDied, Function | SmallTest | Lev
 HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService, Function | SmallTest | Level2)
 {
     WLOGI("SetSessionManagerService");
-    auto ret = WMError::WM_OK;
+    auto res = WMError::WM_OK;
     sptr<IRemoteObject> sessionManagerService = nullptr;
-    MockSessionManagerService::GetInstance()->SetSessionManagerService(sessionManagerService);
+    MockSessionManagerService::GetInstance().SetSessionManagerService(sessionManagerService);
     ASSERT_EQ(WMError::WM_OK, res);
 }
 
@@ -95,7 +95,7 @@ HWTEST_F(MockSessionManagerServiceTest, GetSessionManagerService, Function | Sma
 {
     WLOGI("GetSessionManagerService");
     sptr<IRemoteObject> sessionManagerService =
-    MockSessionManagerService::GetInstance()->GetSessionManagerService();
+    MockSessionManagerService::GetInstance().GetSessionManagerService();
     ASSERT_EQ(nullptr, sessionManagerService);
 }
 
@@ -108,7 +108,7 @@ HWTEST_F(MockSessionManagerServiceTest, OnStart, Function | SmallTest | Level2)
 {
     WLOGI("onStart");
     auto ret = WMError::WM_OK;
-    MockSessionManagerService::GetInstance()->OnStart();
+    MockSessionManagerService::GetInstance().OnStart();
     ASSERT_EQ(ret, WMError::WM_OK);
 }
 }
