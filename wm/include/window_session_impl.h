@@ -45,6 +45,7 @@ public:
     explicit WindowSessionImpl(const sptr<WindowOption>& option);
     ~WindowSessionImpl();
     static sptr<Window> Find(const std::string& name);
+    static std::vector<sptr<Window>> GetSubWindow(int parentId);
     // inherits from window
     virtual WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession);
