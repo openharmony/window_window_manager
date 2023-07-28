@@ -543,6 +543,13 @@ void ScreenSessionManager::NotifyDisplayStateChange(DisplayId defaultDisplayId, 
     }
 }
 
+void ScreenSessionManager::NotifyScreenshot(DisplayId displayId)
+{
+    if (displayChangeListener_ != nullptr) {
+        displayChangeListener_->OnScreenshot(displayId);
+    }
+}
+
 bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
     auto screenIds = GetAllScreenIds();
@@ -1424,6 +1431,9 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
     WLOGFI("SCB: ScreenSessionManager::GetDisplaySnapshot ENTER!");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetDisplaySnapshot(%" PRIu64")", displayId);
     auto res = GetScreenSnapshot(displayId);
+    if (res != nullptr) {
+        NotifyScreenshot(displayId);
+    }
     return res;
 }
 
