@@ -15,11 +15,11 @@
 
 #include "session/host/include/session.h"
 
-#include "accesstoken_kit"
+#include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
 #include "key_event.h"
-#include "pointer_event.h"
 #include "native_token_info.h"
+#include "pointer_event.h"
 
 #include "anr_manager.h"
 #include "foundation/ability/ability_base/interfaces/kits/native/want/include/want.h"
@@ -337,10 +337,10 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     Security::AccessToken::NativeTokenInfo tokenInfo;
     if (auto ret = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(callingTokenId, tokenInfo);
         ret == Security::AccessToken::AccessTokenKitRet::RET_SUCCESS) {
-            WLOGFD("GetNativeTokenInfo successfully");
-            callingProcessName_ = tokenInfo.processName;
+        WLOGFD("GetNativeTokenInfo successfully");
+        callingProcessName_ = tokenInfo.processName;
     } else {
-        WLOGFD("GetNativeTokenInfo failed, ret:%{public}d", static_cast<int32_t>(ret));
+        WLOGFE("GetNativeTokenInfo failed, ret:%{public}d", static_cast<int32_t>(ret));
     }
     return ConnectImpl(sessionStage, eventChannel, surfaceNode, systemConfig, property, token);
 }
@@ -709,7 +709,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         return WSError::WS_ERROR_NULLPTR;
     }
     WLOGFD("Session TransferPointEvent, eventId:%{public}d, persistentId:%{public}d, "
-        "application:%{public}s, pid:%{public}d"
+        "application:%{public}s, pid:%{public}d",
         pointerEvent->GetId(), persistentId_, callingProcessName_.c_str(), callingPid_);
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
         WLOGFD("The pointerEvent does not report normally, application:%{public}s not response, pid:%{public}d",
@@ -760,7 +760,7 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
         return WSError::WS_ERROR_NULLPTR;
     }
     WLOGFD("Session TransferKeyEvent, eventId:%{public}d, persistentId:%{public}d, "
-        "application:%{public}s, pid:%{public}d"
+        "application:%{public}s, pid:%{public}d",
         keyEvent->GetId(), persistentId_, callingProcessName_.c_str(), callingPid_);
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
         WLOGFD("The keyEvent does not report normally, application:%{public}s not response, pid:%{public}d",

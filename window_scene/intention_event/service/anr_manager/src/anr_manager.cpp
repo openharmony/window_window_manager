@@ -90,7 +90,7 @@ bool ANRManager::IsANRTriggered(int32_t persistentId)
 {
     std::lock_guard<std::mutex> guard(mtx_);
     if (eventStage_.CheckAnrStatus(persistentId)) {
-        WLOGFD("Application not respond, persistentId:%{public}d -> applicationPid:%{public}s, processName:%{public}s",
+        WLOGFD("Application not respond, persistentId:%{public}d -> applicationPid:%{public}d, processName:%{public}s",
             persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].processName.c_str());
         return true;
     }
@@ -101,8 +101,8 @@ void ANRManager::OnSessionLost(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
-    WLOGFD("Disconnect session, persistentId:%{public}d -> applicationPid:%{public}s, processName:%{public}s",
-            persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].processName.c_str());
+    WLOGFD("Disconnect session, persistentId:%{public}d -> applicationPid:%{public}d, processName:%{public}s",
+        persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].processName.c_str());
     RemoveTimers(persistentId);
     RemovePersistentId(persistentId);
 }
@@ -126,7 +126,7 @@ ANRManager::AppInfo ANRManager::GetAppInfoByPersistentId(int32_t persistentId)
 {
     if (applicationMap_.find(persistentId) != applicationMap_.end()) {
         WLOGFD("PersistentId:%{public}d -> pid:%{public}d, processName:%{public}s",
-            persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].processName);
+            persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].processName.c_str());
         return applicationMap_[persistentId];
     }
     WLOGFD("No application matches persistentId:%{public}d", persistentId);
