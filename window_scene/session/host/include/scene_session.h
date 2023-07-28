@@ -126,8 +126,8 @@ public:
 private:
     void UpdateCameraFloatWindowStatus(bool isShowing);
     void NotifySessionRectChange(const WSRect& rect);
-    void ProcessVsyncHandleRegister();
-    void OnVsyncHandle();
+    void SetSessionRectChangeCallback();
+    void OnSessionRectChange();
     bool FixRectByAspectRatio(WSRect& rect);
     std::string GetRatioPreferenceKey();
     bool SaveAspectRatio(float ratio);

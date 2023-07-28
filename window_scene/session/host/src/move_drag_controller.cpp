@@ -20,7 +20,6 @@
 
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session_utils.h"
-#include "session/host/include/session_vsync_station.h"
 #include "session_manager/include/screen_session_manager.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
@@ -31,19 +30,14 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "MoveDragController" };
 }
 
-MoveDragController::MoveDragController(int32_t persistentId) : persistentId_(persistentId)
+MoveDragController::MoveDragController(int32_t persistentId)
 {
-    vsyncCallback_->onCallback = std::bind(&MoveDragController::OnReceiveVsync, this, std::placeholders::_1);
+    persistentId_ = persistentId;
 }
 
-MoveDragController::~MoveDragController()
+void MoveDragController::RegisterSessionRectChangeCallback(const SessionRectChangeCallBack& callBack)
 {
-    RemoveVsync();
-}
-
-void MoveDragController::SetVsyncHandleListenser(const NotifyVsyncHandleFunc& func)
-{
-    vsyncHandleFunc_ = func;
+    sessionRectChangeCallBack_ = callBack;
 }
 
 void MoveDragController::SetStartMoveFlag(bool flag)
@@ -168,7 +162,7 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
     } else {
         moveDragProperty_.targetRect_ = CalcFreeformTargetRect(type_, tranX, tranY, moveDragProperty_.originalRect_);
     }
-    RequestVsync();
+    ProcessSessionRectChange();
     return true;
 }
 
@@ -200,7 +194,7 @@ void MoveDragController::CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEv
         WLOGFD("move rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
             moveDragProperty_.targetRect_.posX_, moveDragProperty_.targetRect_.posY_,
             moveDragProperty_.targetRect_.width_, moveDragProperty_.targetRect_.height_);
-        RequestVsync();
+        ProcessSessionRectChange();
     }
 }
 
@@ -494,21 +488,10 @@ void MoveDragController::InitDecorValue(const sptr<WindowSessionProperty> proper
         WindowHelper::IsWindowModeSupported(sysConfig.decorModeSupportInfo_, property->GetWindowMode());
 }
 
-void MoveDragController::RequestVsync()
+void MoveDragController::ProcessSessionRectChange()
 {
-    SessionVsyncStation::GetInstance().RequestVsync(vsyncCallback_);
-}
-
-void MoveDragController::RemoveVsync()
-{
-    SessionVsyncStation::GetInstance().RemoveCallback(vsyncCallback_);
-}
-
-void MoveDragController::OnReceiveVsync(int64_t timeStamp)
-{
-    WLOGFD("[OnReceiveVsync] receive event, time: %{public}" PRId64"", timeStamp);
-    if (vsyncHandleFunc_) {
-        vsyncHandleFunc_();
+    if (sessionRectChangeCallBack_) {
+        sessionRectChangeCallBack_();
     }
 }
 
