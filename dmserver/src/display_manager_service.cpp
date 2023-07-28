@@ -94,7 +94,6 @@ bool DisplayManagerService::Init()
     }
     abstractScreenController_->Init();
     abstractDisplayController_->Init(abstractScreenController_);
-    SetGravitySensorSubscriptionEnabled();
     WLOGFI("DisplayManagerService::Init success");
     return true;
 }
