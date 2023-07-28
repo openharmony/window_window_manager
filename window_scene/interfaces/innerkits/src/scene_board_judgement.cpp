@@ -22,7 +22,7 @@ bool SceneBoardJudgement::IsSceneBoardEnabled()
     static bool isSceneBoardEnabled = false;
     static bool initialized = false;
     if (!initialized) {
-        InitWithConfigFile("/etc/sceneboard.config", isSceneBoardEnabled);
+        InitWithConfigFile("/sys_prod/etc/sceneboard/sceneboard.config", isSceneBoardEnabled);
         initialized = true;
     }
     return isSceneBoardEnabled;
