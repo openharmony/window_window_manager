@@ -130,9 +130,9 @@ sptr<Window> Window::Create(sptr<WindowOption>& option, const std::shared_ptr<OH
 sptr<Window> Window::Find(const std::string& windowName)
 {
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        return WindowImpl::Find(windowName);
-    } else {
         return WindowSessionImpl::Find(windowName);
+    } else {
+        return WindowImpl::Find(windowName);
     }
 }
 
