@@ -17,6 +17,7 @@
 
 #include "window_manager_hilog.h"
 #include <transaction/rs_interfaces.h>
+#include <transaction/rs_transaction.h>
 
 namespace OHOS::Rosen {
 namespace {
@@ -31,6 +32,7 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, 
 {
     Rosen::RSDisplayNodeConfig config = { .screenId = screenId_ };
     displayNode_ = Rosen::RSDisplayNode::Create(config);
+    RSTransaction::FlushImplicitTransaction();
 }
 
 ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId rsId, ScreenId defaultScreenId)
@@ -39,6 +41,7 @@ ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId r
     (void)rsId_;
     Rosen::RSDisplayNodeConfig config = { .screenId = screenId_ };
     displayNode_ = Rosen::RSDisplayNode::Create(config);
+    RSTransaction::FlushImplicitTransaction();
 }
 
 void ScreenSession::RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener)
