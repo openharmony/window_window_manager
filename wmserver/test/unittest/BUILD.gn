@@ -47,6 +47,8 @@ group("unittest") {
     ":wmserver_window_snapshot_test",
     ":wmserver_window_system_effect_test",
     ":wmserver_window_zorder_policy_test",
+    ":wmserver_mock_screen_manager_service_test",
+    ":wmserver_mock_session_manager_service_test",
   ]
 }
 
@@ -82,6 +84,7 @@ test_inner_deps = [
   "${window_base_path}/dm:libdm",
   "${window_base_path}/utils:libwmutil",
   "${window_base_path}/wm:libwm",
+  "${window_base_path}/wmserver:sms",
   "../..:libwms",
   "../../../dmserver:libdms",
   "../../../test/common/utils:libtestutil",
@@ -409,7 +412,8 @@ ohos_unittest("wmserver_window_group_mgr_test") {
   external_deps = test_external_deps
 }
 
-ohos_unittest("mock_screen_manager_service_test") {
+# add
+ohos_unittest("wmserver_mock_screen_manager_service_test") {
   module_out_path = module_out_path
   configs = test_public_config
   sources = [ "mock_screen_manager_service_test.cpp" ]
@@ -419,7 +423,7 @@ ohos_unittest("mock_screen_manager_service_test") {
   external_deps = test_external_deps
 }
 
-ohos_unittest("mock_session_manager_service_test") {
+ohos_unittest("wmserver_mock_session_manager_service_test") {
   module_out_path = module_out_path
   configs = test_public_config
   sources = [ "mock_session_manager_service_test.cpp" ]
@@ -428,3 +432,5 @@ ohos_unittest("mock_session_manager_service_test") {
   public_deps = test_public_deps
   external_deps = test_external_deps
 }
+
+
