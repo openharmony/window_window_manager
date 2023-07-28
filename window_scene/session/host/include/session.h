@@ -281,6 +281,7 @@ private:
 
     int32_t callingPid_ = { 0 };
     int32_t callingUid_ = { 0 };
+    std::string callingProcessName_ { "unknow" };
     bool isVisible_ {false};
     sptr<IRemoteObject> abilityToken_ = nullptr;
 };
