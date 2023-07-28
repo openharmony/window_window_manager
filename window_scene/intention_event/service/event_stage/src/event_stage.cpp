@@ -43,9 +43,9 @@ bool EventStage::CheckAnrStatus(int32_t persistentId)
     return false;
 }
 
-void EventStage::SaveANREvent(int32_t persistentId, int32_t id, int64_t time, int32_t timerId)
+void EventStage::SaveANREvent(int32_t persistentId, int32_t eventId, int32_t timerId)
 {
-    EventTime eventTime { id, time, timerId };
+    EventTime eventTime { eventId, timerId };
     events_[persistentId].push_back(eventTime);
 }
 
@@ -63,16 +63,16 @@ std::vector<int32_t> EventStage::GetTimerIds(int32_t persistentId)
     return timers;
 }
 
-std::list<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t id)
+std::list<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t eventId)
 {
-    WLOGFD("Delete events, persistentId:%{public}d, id:%{public}d", persistentId, id);
+    WLOGFD("Delete events, persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
     if (events_.find(persistentId) == events_.end()) {
         WLOGFD("Current events have no event persistentId:%{public}d", persistentId);
         return {};
     }
     auto &events = events_[persistentId];
-    auto fistMatchIter = find_if(events.begin(), events.end(), [id](const auto &item) {
-        return item.id > id;
+    auto fistMatchIter = find_if(events.begin(), events.end(), [eventId](const auto &item) {
+        return item.eventId > eventId;
     });
     std::list<int32_t> timerIds;
     for (auto iter = events.begin(); iter != fistMatchIter; iter++) {

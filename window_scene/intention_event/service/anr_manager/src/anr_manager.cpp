@@ -39,22 +39,23 @@ void ANRManager::Init()
     TimerMgr->Init();
 }
 
-void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
+void ANRManager::AddTimer(int32_t eventId, int32_t persistentId)
 {
     std::lock_guard<std::mutex> guard(mtx_);
     if (anrTimerCount_ >= MAX_ANR_TIMER_COUNT) {
         WLOGFD("AddAnrTimer failed, anrTimerCount exceeded %{public}d", MAX_ANR_TIMER_COUNT);
         return;
     }
-    int32_t timerId = TimerMgr->AddTimer(ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME, [this, id, persistentId]() {
-        WLOGFD("Anr callback enter. persistentId:%{public}d, eventId:%{public}d", persistentId, id);
+    int32_t timerId = TimerMgr->AddTimer(ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME, [this, eventId, persistentId]() {
+        WLOGFD("Anr callback enter. persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
         eventStage_.SetAnrStatus(persistentId, true);
-        int32_t pid = GetPidByPersistentId(persistentId);
-        DfxHisysevent::ApplicationBlockInput(id, pid, persistentId);
-        WLOGFE("Application not responding. persistentId:%{public}d, eventId:%{public}d, pid:%{public}d",
-            persistentId, id, pid);
+        AppInfo appInfo = GetAppInfoByPersistentId(persistentId);
+        DfxHisysevent::ApplicationBlockInput(eventId, appInfo.pid, appInfo.processName, persistentId);
+        WLOGFE("Application not responding. persistentId:%{public}d, eventId:%{public}d,"
+            "pid:%{public}d, processName:%{public}s",
+            persistentId, eventId, appInfo.pid, appInfo.processName.c_str());
         if (anrObserver_ != nullptr) {
-            anrObserver_(pid);
+            anrObserver_(appInfo.pid);
         } else {
             WLOGFE("AnrObserver is nullptr, do nothing");
         }
@@ -65,10 +66,10 @@ void ANRManager::AddTimer(int32_t id, int64_t currentTime, int32_t persistentId)
                 anrTimerCount_--;
             }
         }
-        WLOGFD("Anr callback leave. persistentId:%{public}d, eventId:%{public}d", persistentId, id);
+        WLOGFD("Anr callback leave. persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
     });
     anrTimerCount_++;
-    eventStage_.SaveANREvent(persistentId, id, currentTime, timerId);
+    eventStage_.SaveANREvent(persistentId, eventId, timerId);
 }
 
 void ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
@@ -85,11 +86,12 @@ void ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
     }
 }
 
-bool ANRManager::IsANRTriggered(int64_t time, int32_t persistentId)
+bool ANRManager::IsANRTriggered(int32_t persistentId)
 {
     std::lock_guard<std::mutex> guard(mtx_);
     if (eventStage_.CheckAnrStatus(persistentId)) {
-        WLOGFD("Application not responding. persistentId:%{public}d", persistentId);
+        WLOGFD("Application not respond, persistentId:%{public}d -> applicationPid:%{public}s, processName:%{public}s",
+            persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].processName.c_str());
         return true;
     }
     return false;
@@ -99,16 +101,18 @@ void ANRManager::OnSessionLost(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
-    WLOGFD("Disconnect session, persistentId:%{public}d", persistentId);
+    WLOGFD("Disconnect session, persistentId:%{public}d -> applicationPid:%{public}s, processName:%{public}s",
+            persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].processName.c_str());
     RemoveTimers(persistentId);
     RemovePersistentId(persistentId);
 }
 
-void ANRManager::SetApplicationPid(int32_t persistentId, int32_t applicationPid)
+void ANRManager::SetApplicationInfo(int32_t persistentId, int32_t applicationPid, std::string processName)
 {
     std::lock_guard<std::mutex> guard(mtx_);
-    WLOGFD("PersistentId:%{public}d -> applicationPid:%{public}d", persistentId, applicationPid);
-    applicationMap_[persistentId] = applicationPid;
+    WLOGFD("PersistentId:%{public}d -> applicationPid:%{public}d, processName:%{public}s",
+        persistentId, applicationPid, processName.c_str());
+    applicationMap_[persistentId] = { applicationPid, processName };
 }
 
 void ANRManager::SetAnrObserver(std::function<void(int32_t)> anrObserver)
@@ -118,14 +122,15 @@ void ANRManager::SetAnrObserver(std::function<void(int32_t)> anrObserver)
     anrObserver_ = anrObserver;
 }
 
-int32_t ANRManager::GetPidByPersistentId(int32_t persistentId)
+ANRManager::AppInfo ANRManager::GetAppInfoByPersistentId(int32_t persistentId)
 {
     if (applicationMap_.find(persistentId) != applicationMap_.end()) {
-        WLOGFD("PersistentId:%{public}d -> pid:%{public}d", persistentId, applicationMap_[persistentId]);
+        WLOGFD("PersistentId:%{public}d -> pid:%{public}d, processName:%{public}s",
+            persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].processName);
         return applicationMap_[persistentId];
     }
     WLOGFD("No application matches persistentId:%{public}d", persistentId);
-    return -1;
+    return ANRManager::AppInfo();
 }
 
 void ANRManager::RemoveTimers(int32_t persistentId)

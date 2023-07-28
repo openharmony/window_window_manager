@@ -23,7 +23,7 @@ namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "DfxHisysevent" };
 } // namespace
 
-void DfxHisysevent::ApplicationBlockInput(int32_t eventId, int32_t pid, int32_t persistentId)
+void DfxHisysevent::ApplicationBlockInput(int32_t eventId, int32_t pid, std::string processName, int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
     int32_t ret = HiSysEventWrite(
@@ -32,6 +32,7 @@ void DfxHisysevent::ApplicationBlockInput(int32_t eventId, int32_t pid, int32_t 
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
         "EVENT_ID", eventId,
         "PID", pid,
+        "PROCESS_NAME", processName,
         "PERSISTENT_ID", persistentId,
         "MSG", "User input does not respond");
     if (ret != 0) {
