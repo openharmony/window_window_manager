@@ -103,6 +103,11 @@ enum ContinueState {
     CONTINUESTATE_MAX
 };
 
+enum class StartMethod : int32_t {
+    START_NORMAL,
+    START_CALL
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
@@ -121,10 +126,11 @@ struct SessionInfo {
     int32_t callerPersistentId_ = INVALID_SESSION_ID;
     uint32_t callState_ = 0;
     uint32_t callingTokenId_ = 0;
-    int32_t startMethod;
-    // whether to display in the missions list
-    bool excludeFromMissions = false;
-    bool unclearable = false;
+    StartMethod startMethod;
+    // whether to display in the sessions list
+    bool excludeFromSessions = false;
+    bool removeSessionAfterTerminate = false;
+    bool unClearable = false;
     bool lockedState = false;
     bool continuable = false;
     std::string time;

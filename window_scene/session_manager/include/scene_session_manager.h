@@ -126,6 +126,7 @@ public:
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller);
     WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener);
     WSError GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot);
+    WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState);
 
     void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
     void InitPersistentStorage();
