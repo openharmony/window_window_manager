@@ -750,13 +750,13 @@ WMError WindowImpl::SetLayoutFullScreen(bool status)
             static_cast<int32_t>(ret), property_->GetWindowId());
         return ret;
     }
+    isIgnoreSafeArea_ = status;
     // 10 ArkUI new framework support after API10
     if (version >= 10) {
         if (uiContent_ != nullptr) {
             uiContent_->SetIgnoreViewSafeArea(status);
         } else {
             isIgnoreSafeAreaNeedNotify_ = true;
-            isIgnoreSafeArea_ = status;
         }
     } else {
         if (status) {
@@ -3407,10 +3407,8 @@ bool WindowImpl::IsWindowValid() const
 
 bool WindowImpl::IsLayoutFullScreen() const
 {
-    uint32_t flags = GetWindowFlags();
     auto mode = GetMode();
-    bool needAvoid = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
-    return (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !needAvoid);
+    return (mode == WindowMode::WINDOW_MODE_FULLSCREEN && isIgnoreSafeArea_);
 }
 
 bool WindowImpl::IsFullScreen() const
