@@ -153,6 +153,8 @@ config("ws_unittest_common_public_config") {
 
     # for session_manager
     "${multimodalinput_path}/input/interfaces/native/innerkits/event/include",
+    "${window_base_path}/window_scene/interfaces/include",
+    "${resourceschedule_path}/ffrt/interfaces/kits",
     "${ability_runtime_inner_api_path}/ability_manager/include",
 
     # for screenlock_manager_interface

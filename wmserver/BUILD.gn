@@ -100,6 +100,8 @@ ohos_shared_library("sms") {
     "../utils:libwmutil",
   ]
   external_deps = [
+    "ability_base:want",
+    "ability_runtime:mission_info",
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",

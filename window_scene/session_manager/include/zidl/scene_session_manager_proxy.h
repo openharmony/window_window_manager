@@ -49,6 +49,12 @@ public:
     WSError PendingSessionToForeground(const sptr<IRemoteObject> &token) override;
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject> &token) override;
+
+    WSError RegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener) override;
+    WSError UnRegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener) override;
+    WSError GetMissionInfos(int32_t numMax, std::vector<AAFwk::MissionInfo>& missionInfos) override;
+    WSError GetMissionInfo(int32_t missionId, AAFwk::MissionInfo& missionInfo) override;
+
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) override;
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;
     void NotifyDumpInfoResult(const std::vector<std::string>& info) override;
@@ -56,6 +62,8 @@ public:
     WSError GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot) override;
 
 private:
+    template<typename T>
+    WSError GetParcelableInfos(MessageParcel& reply, std::vector<T>& parcelableInfos);
     static inline BrokerDelegator<SceneSessionManagerProxy> delegator_;
 };
 } // namespace OHOS::Rosen

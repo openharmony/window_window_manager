@@ -51,6 +51,12 @@ private:
     int HandleGetFocusSessionToken(MessageParcel &data, MessageParcel &reply);
     int HandleSetGestureNavigationEnabled(MessageParcel &data, MessageParcel &reply);
     int HandleSetSessionGravity(MessageParcel &data, MessageParcel &reply);
+
+    int HandleRegisterMissionListener(MessageParcel& data, MessageParcel& reply);
+    int HandleUnRegisterMissionListener(MessageParcel& data, MessageParcel& reply);
+    int HandleGetMissionInfos(MessageParcel& data, MessageParcel& reply);
+    int HandleGetMissionInfo(MessageParcel& data, MessageParcel& reply);
+
     int HandleTerminateSessionNew(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionDump(MessageParcel &data, MessageParcel &reply);
     int HandleUpdateSessionAvoidAreaListener(MessageParcel& data, MessageParcel& reply);
