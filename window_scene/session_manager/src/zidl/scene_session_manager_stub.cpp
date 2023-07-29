@@ -59,6 +59,16 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleSetGestureNavigationEnabled),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_INFO),
         &SceneSessionManagerStub::HandleGetAccessibilityWindowInfo),
+
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_MISSION_LISTENER),
+        &SceneSessionManagerStub::HandleRegisterMissionListener),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNREGISTER_MISSION_LISTENER),
+        &SceneSessionManagerStub::HandleUnRegisterMissionListener),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_MISSION_INFOS),
+        &SceneSessionManagerStub::HandleGetMissionInfos),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_MISSION_INFO_BY_ID),
+        &SceneSessionManagerStub::HandleGetMissionInfo),
+
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_TERMINATE_SESSION_NEW),
         &SceneSessionManagerStub::HandleTerminateSessionNew),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_AVOIDAREA_LISTENER),
@@ -233,6 +243,61 @@ int SceneSessionManagerStub::HandlePendingSessionToBackgroundForDelegator(Messag
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     const WSError& errCode = PendingSessionToBackgroundForDelegator(token);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRegisterMissionListener(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFI("run HandleRegisterMissionListener!");
+    sptr<AAFwk::IMissionListener> listener = iface_cast<AAFwk::IMissionListener>(data.ReadRemoteObject());
+    WSError errCode = RegisterMissionListener(listener);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleUnRegisterMissionListener(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFI("run HandleUnRegisterMissionListener!");
+    sptr<AAFwk::IMissionListener> listener = iface_cast<AAFwk::IMissionListener>(data.ReadRemoteObject());
+    WSError errCode = UnRegisterMissionListener(listener);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetMissionInfos(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFI("run HandleGetMissionInfos!");
+    int numMax = data.ReadInt32();
+    std::vector<AAFwk::MissionInfo> missionInfos;
+    WSError errCode = GetMissionInfos(numMax, missionInfos);
+    reply.WriteInt32(missionInfos.size());
+    for (auto& it : missionInfos) {
+        if (!reply.WriteParcelable(&it)) {
+            WLOGFE("GetMissionInfos error");
+            return ERR_INVALID_DATA;
+        }
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetMissionInfo(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFI("run HandleGetMissionInfo!");
+    AAFwk::MissionInfo info;
+    int32_t missionId = data.ReadInt32();
+    WSError errCode = GetMissionInfo(missionId, info);
+    if (!reply.WriteParcelable(&info)) {
+        WLOGFE("GetMissionInfo error");
+        return ERR_INVALID_DATA;
+    }
+
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        WLOGFE("GetMissionInfo result error");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

@@ -24,6 +24,8 @@
 #include "common/include/task_scheduler.h"
 #include "future.h"
 #include "interfaces/include/ws_common.h"
+#include "mission_listener_controller.h"
+#include "scene_session_converter.h"
 #include "session/host/include/root_scene_session.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "wm_single_instance.h"
@@ -113,6 +115,12 @@ public:
     WSError PendingSessionToForeground(const sptr<IRemoteObject> &token);
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token);
     WSError GetFocusSessionToken(sptr<IRemoteObject> &token);
+
+    WSError RegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener);
+    WSError UnRegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener);
+    WSError GetMissionInfos(int32_t numMax, std::vector<AAFwk::MissionInfo>& missionInfos);
+    WSError GetMissionInfo(int32_t missionId, AAFwk::MissionInfo& missionInfo);
+
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller);
     WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener);
     WSError GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot);
@@ -199,6 +207,7 @@ private:
     std::shared_ptr<AbilityRuntime::Context> rootSceneContext_;
     std::shared_mutex sceneSessionMapMutex_;
     std::map<int32_t, sptr<SceneSession>> sceneSessionMap_;
+    std::shared_ptr<MissionListenerController> listenerController_;
     std::set<sptr<SceneSession>> avoidAreaListenerSessionSet_;
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
 
