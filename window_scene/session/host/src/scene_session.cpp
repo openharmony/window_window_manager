@@ -44,7 +44,7 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     }
     specificCallback_ = specificCallback;
     moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
-    ProcessVsyncHandleRegister();
+    SetSessionRectChangeCallback();
     std::string key = GetRatioPreferenceKey();
     if (!key.empty()) {
         if (ScenePersistentStorage::HasKey(key, ScenePersistentStorageType::ASPECT_RATIO)) {
@@ -516,17 +516,17 @@ bool SceneSession::FixRectByAspectRatio(WSRect& rect)
     return true;
 }
 
-void SceneSession::ProcessVsyncHandleRegister()
+void SceneSession::SetSessionRectChangeCallback()
 {
     if (moveDragController_) {
-        NotifyVsyncHandleFunc func = [this](void) {
-            this->OnVsyncHandle();
+        SessionRectChangeCallBack callBack = [this](void) {
+            this->OnSessionRectChange();
         };
-        moveDragController_->SetVsyncHandleListenser(func);
+        moveDragController_->RegisterSessionRectChangeCallback(callBack);
     }
 }
 
-void SceneSession::OnVsyncHandle()
+void SceneSession::OnSessionRectChange()
 {
     WSRect rect = moveDragController_->GetTargetRect();
     WLOGFD("rect: [%{public}d, %{public}d, %{public}u, %{public}u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
