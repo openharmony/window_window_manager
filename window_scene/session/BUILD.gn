@@ -48,7 +48,6 @@ ohos_shared_library("scene_session") {
     "host/src/scene_persistent_storage.cpp",
     "host/src/scene_session.cpp",
     "host/src/session.cpp",
-    "host/src/session_vsync_station.cpp",
     "host/src/zidl/session_proxy.cpp",
     "host/src/zidl/session_stub.cpp",
   ]
@@ -70,7 +69,6 @@ ohos_shared_library("scene_session") {
     "ability_base:want",
     "ability_runtime:ability_start_setting",
     "c_utils:utils",
-    "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image_native",

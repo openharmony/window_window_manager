@@ -27,7 +27,7 @@ class PointerEvent;
 
 namespace OHOS::Rosen {
 
-using NotifyVsyncHandleFunc = std::function<void(void)>;
+using SessionRectChangeCallBack = std::function<void(void)>;
 
 enum class AreaType : uint32_t {
     UNDEFINED = 0,
@@ -57,9 +57,9 @@ public:
     };
 
     MoveDragController(int32_t persistentId);
-    ~MoveDragController();
+    ~MoveDragController() = default;
 
-    void SetVsyncHandleListenser(const NotifyVsyncHandleFunc& func);
+    void RegisterSessionRectChangeCallback(const SessionRectChangeCallBack& callBack);
     void SetStartMoveFlag(bool flag);
     bool GetStartMoveFlag() const;
     bool GetStartDragFlag() const;
@@ -87,9 +87,7 @@ private:
     void FixTranslateByLimits(int32_t& tranX, int32_t& tranY);
     bool InitMainAxis(AreaType type, int32_t tranX, int32_t tranY);
     void ConvertXYByAspectRatio(int32_t& tx, int32_t& ty, float aspectRatio);
-    void RequestVsync(void);
-    void RemoveVsync();
-    void OnReceiveVsync(int64_t timeStamp);
+    void ProcessSessionRectChange(void);
     void InitDecorValue(const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
 
     float GetVirtualPixelRatio() const;
@@ -111,8 +109,7 @@ private:
     AxisType mainMoveAxis_ = AxisType::UNDEFINED;
     WindowLimits limits_;
     MoveDragProperty moveDragProperty_ = { -1, -1, -1, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } };
-    std::shared_ptr<VsyncCallback> vsyncCallback_ = std::make_shared<VsyncCallback>(VsyncCallback());
-    NotifyVsyncHandleFunc vsyncHandleFunc_;
+    SessionRectChangeCallBack sessionRectChangeCallBack_;
     int32_t persistentId_;
 
     enum class DragType : uint32_t {
