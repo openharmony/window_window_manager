@@ -124,12 +124,7 @@ Rotation ScreenRotationProperty::GetCurrentDisplayRotation()
 
 Orientation ScreenRotationProperty::GetPreferredOrientation()
 {
-    sptr<ScreenInfo> screenInfo = ScreenSessionManager::GetInstance().GetScreenInfoByDisplayId(defaultDisplayId_);
-    if (screenInfo == nullptr) {
-        WLOGFE("Cannot get default screen info");
-        return Orientation::UNSPECIFIED;
-    }
-    return screenInfo->GetOrientation();
+    return Orientation::SENSOR;
 }
 
 Rotation ScreenRotationProperty::CalcTargetDisplayRotation(
