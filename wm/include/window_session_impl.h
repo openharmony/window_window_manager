@@ -61,6 +61,7 @@ public:
     WindowType GetType() const override;
     const std::string& GetWindowName() const override;
     WindowState GetWindowState() const override;
+    WindowState GetRequestWindowState() const;
     WMError SetFocusable(bool isFocusable) override;
     WMError SetTouchable(bool isTouchable) override;
     WMError SetWindowType(WindowType type) override;
@@ -127,6 +128,7 @@ public:
     void DumpSessionElementInfo(const std::vector<std::string>& params) override;
 
     WindowState state_ { WindowState::STATE_INITIAL };
+    WindowState requestState_ { WindowState::STATE_INITIAL };
 
 protected:
     WMError Connect();

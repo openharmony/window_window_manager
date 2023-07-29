@@ -223,7 +223,8 @@ WSError SceneSession::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
     WLOGFI("CreateAndConnectSpecificSession id: %{public}d", GetPersistentId());
     sptr<SceneSession> sceneSession;
     if (specificCallback_ != nullptr) {
-        sceneSession = specificCallback_->onCreate_(sessionInfo_, property);
+        SessionInfo sessionInfo;
+        sceneSession = specificCallback_->onCreate_(sessionInfo, property);
     }
     if (sceneSession == nullptr) {
         return WSError::WS_ERROR_NULLPTR;

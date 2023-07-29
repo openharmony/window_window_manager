@@ -240,6 +240,7 @@ WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
     if (res == WMError::WM_OK) {
         NotifyAfterForeground();
         state_ = WindowState::STATE_SHOWN;
+        requestState_ = WindowState::STATE_SHOWN;
     } else {
         NotifyForegroundFailed(res);
     }
@@ -262,6 +263,7 @@ WMError WindowSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFrom
     }
     NotifyAfterBackground();
     state_ = WindowState::STATE_HIDDEN;
+    requestState_ = WindowState::STATE_HIDDEN;
     return WMError::WM_OK;
 }
 
@@ -280,6 +282,7 @@ WMError WindowSessionImpl::Destroy(bool needClearListener)
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         state_ = WindowState::STATE_DESTROYED;
+        requestState_ = WindowState::STATE_DESTROYED;
     }
     hostSession_ = nullptr;
     windowSessionMap_.erase(property_->GetWindowName());
@@ -527,6 +530,11 @@ const std::string& WindowSessionImpl::GetWindowName() const
 WindowState WindowSessionImpl::GetWindowState() const
 {
     return state_;
+}
+
+WindowState WindowSessionImpl::GetRequestWindowState() const
+{
+    return requestState_;
 }
 
 WMError WindowSessionImpl::SetFocusable(bool isFocusable)
