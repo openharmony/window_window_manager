@@ -55,20 +55,3 @@ ohos_shared_library("intention_event_anr_manager") {
   part_name = "window_manager"
   subsystem_name = "window"
 }
-
-ohos_executable("switch_anr") {
-  include_dirs = [ "anr_manager/include" ]
-
-  sources = [ "tools/anr_switcher.cpp" ]
-
-  deps = [ ":intention_event_anr_manager" ]
-
-  external_deps = [
-    "c_utils:utils",
-    "ipc:ipc_single",
-  ]
-
-  install_enable = false
-  part_name = "window_manager"
-  subsystem_name = "window"
-}
