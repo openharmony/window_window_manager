@@ -36,12 +36,17 @@ ANRManager::~ANRManager() {}
 void ANRManager::Init()
 {
     CALL_DEBUG_ENTER;
+    SwitchAnr(true);
     TimerMgr->Init();
 }
 
 void ANRManager::AddTimer(int32_t eventId, int32_t persistentId)
 {
     std::lock_guard<std::mutex> guard(mtx_);
+    if (!switcher_) {
+        WLOGFD("Anr is off, dispatch event without timer");
+        return;
+    }
     if (anrTimerCount_ >= MAX_ANR_TIMER_COUNT) {
         WLOGFD("AddAnrTimer failed, anrTimerCount exceeded %{public}d", MAX_ANR_TIMER_COUNT);
         return;
@@ -148,6 +153,16 @@ void ANRManager::RemovePersistentId(int32_t persistentId)
 {
     applicationMap_.erase(persistentId);
     eventStage_.OnSessionLost(persistentId);
+}
+
+void ANRManager::SwitchAnr(bool status)
+{
+    switcher_ = status;
+    if (switcher_) {
+        WLOGFI("Anr is on");
+    } else {
+        WLOGFI("Anr is off");
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

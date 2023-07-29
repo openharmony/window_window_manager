@@ -35,6 +35,7 @@ class ANRManager final {
 public:
     DISALLOW_COPY_AND_MOVE(ANRManager);
     void Init();
+    void SwitchAnr(bool status);
     void AddTimer(int32_t eventId, int32_t persistentId);
     void MarkProcessed(int32_t eventId, int32_t persistentId);
     bool IsANRTriggered(int32_t persistentId);
@@ -50,6 +51,7 @@ private:
     void RemoveTimers(int32_t persistentId);
     void RemovePersistentId(int32_t persistentId);
 private:
+    std::atomic_bool switcher_ {true};
     std::mutex mtx_;
     int32_t anrTimerCount_ { 0 };
     std::unordered_map<int32_t, AppInfo> applicationMap_;
