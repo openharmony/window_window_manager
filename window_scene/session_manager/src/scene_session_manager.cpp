@@ -2067,14 +2067,17 @@ WSError SceneSessionManager::SetSessionGravity(int32_t persistentId, SessionGrav
         WLOGFE("scene session is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+    if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        WLOGFE("scene session is not input method");
         return WSError::WS_ERROR_INVALID_TYPE;
     }
     sceneSession->GetSessionProperty()->SetSessionGravity(gravity, percent);
     RelayoutKeyBoard(sceneSession);
     if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
+        WLOGFD("input method is float mode");
         RestoreCallingSessionSizeIfNeed();
     } else {
+        WLOGFD("input method is bottom mode");
         ResizeSoftInputCallingSessionIfNeed(sceneSession);
     }
     return WSError::WS_OK;

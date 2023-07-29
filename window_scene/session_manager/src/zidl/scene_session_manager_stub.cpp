@@ -83,6 +83,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleGetSessionDump),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT),
         &SceneSessionManagerStub::HandleNotifyDumpInfoResult),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_GRAVITY),
+        &SceneSessionManagerStub::HandleSetSessionGravity),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
