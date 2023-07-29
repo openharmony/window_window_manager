@@ -198,6 +198,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         windowSessionMap_.insert(std::make_pair(property_->GetWindowName(),
             std::pair<uint64_t, sptr<WindowSessionImpl>>(property_->GetPersistentId(), this)));
         state_ = WindowState::STATE_CREATED;
+        requestState_ = WindowState::STATE_CREATED;
         if (WindowHelper::IsMainWindow(GetType())) {
             maxFloatingWindowSize_ = windowSystemConfig_.maxFloatingWindowSize_;
             SetWindowMode(windowSystemConfig_.defaultWindowMode_);
@@ -353,7 +354,8 @@ void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersist
     // when main window show and subwindow whose state is shown should show and notify user
     } else if (newState == WindowState::STATE_SHOWN) {
         for (auto subwindow : subWindows) {
-            if (subwindow != nullptr && subwindow->GetWindowState() == WindowState::STATE_HIDDEN) {
+            if (subwindow != nullptr && subwindow->GetWindowState() == WindowState::STATE_HIDDEN &&
+                subwindow->GetRequestWindowState() == WindowState::STATE_SHOWN) {
                 subwindow->NotifyAfterForeground();
                 subwindow->state_ = WindowState::STATE_SHOWN;
             }
@@ -391,6 +393,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         }
         NotifyAfterForeground();
         state_ = WindowState::STATE_SHOWN;
+        requestState_ = WindowState::STATE_SHOWN;
     } else {
         NotifyForegroundFailed(ret);
     }
@@ -441,6 +444,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         }
         NotifyAfterBackground();
         state_ = WindowState::STATE_HIDDEN;
+        requestState_ = WindowState::STATE_HIDDEN;
     }
     return res;
 }
@@ -555,6 +559,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needClearListener)
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         state_ = WindowState::STATE_DESTROYED;
+        requestState_ = WindowState::STATE_DESTROYED;
     }
 
     DestroySubWindow();
