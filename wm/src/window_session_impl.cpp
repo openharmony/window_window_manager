@@ -1137,6 +1137,12 @@ void WindowSessionImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsync
     VsyncStation::GetInstance().RequestVsync(vsyncCallback);
 }
 
+int64_t WindowSessionImpl::GetVSyncPeriod()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return VsyncStation::GetInstance().GetVSyncPeriod();
+}
+
 WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
 {
     WLOGFD("UpdateProperty, action:%{public}u", action);
