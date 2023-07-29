@@ -15,6 +15,10 @@
 
 #include "session_manager/include/scene_session_manager.h"
 
+#include <cinttypes>
+#include <csignal>
+#include <iomanip>
+#include <map>
 #include <sstream>
 #include <unistd.h>
 
@@ -36,11 +40,6 @@
 #include <hitrace_meter.h>
 #include <transaction/rs_transaction.h>
 #include <transaction/rs_interfaces.h>
-#include <cinttypes>
-#include <csignal>
-#include <iomanip>
-#include <map>
-#include <sstream>
 
 #ifdef RES_SCHED_ENABLE
 #include "res_type.h"
@@ -554,7 +553,8 @@ std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByType
     return sceneSessionVector;
 }
 
-WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& sceneSession, sptr<WindowSessionProperty> property)
+WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& sceneSession,
+    sptr<WindowSessionProperty> property)
 {
     if (property == nullptr) {
         WLOGFW("Property is null, no need to update parent info");
@@ -572,7 +572,8 @@ WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& scene
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         sceneSession->SetParentSession(parentSceneSession);
-    } else if (property->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && parentPersistentId != INVALID_SESSION_ID) {
+    } else if (property->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG &&
+        parentPersistentId != INVALID_SESSION_ID) {
         auto parentSession = GetSceneSession(parentPersistentId);
         if (parentSession == nullptr) {
             WLOGFE("Parent session is nullptr");
@@ -585,7 +586,8 @@ WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& scene
     return WSError::WS_OK;
 }
 
-sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property)
+sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo,
+    sptr<WindowSessionProperty> property)
 {
     if (sessionInfo.persistentId_ != 0) {
         auto session = GetSceneSession(sessionInfo.persistentId_);
@@ -735,7 +737,8 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession, const bool isDelegator)
+WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession,
+    const bool isDelegator)
 {
     wptr<SceneSession> weakSceneSession(sceneSession);
     auto task = [this, weakSceneSession, isDelegator]() {
@@ -1132,7 +1135,8 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
-            bool prePrivacyMode = sceneSession->GetWindowSessionProperty()->GetPrivacyMode() || sceneSession->GetWindowSessionProperty()->GetSystemPrivacyMode();
+            bool prePrivacyMode = sceneSession->GetWindowSessionProperty()->GetPrivacyMode() ||
+                sceneSession->GetWindowSessionProperty()->GetSystemPrivacyMode();
             bool isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
             if (prePrivacyMode != isPrivacyMode) {
                 sceneSession->GetWindowSessionProperty()->SetPrivacyMode(isPrivacyMode);
@@ -1207,7 +1211,8 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
         if (requireLock && sceneSession->keepScreenLock_ == nullptr) {
             // reset ipc identity
             std::string identity = IPCSkeleton::ResetCallingIdentity();
-            sceneSession->keepScreenLock_ = PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock(sceneSession->GetWindowName(),
+            sceneSession->keepScreenLock_ =
+                PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock(sceneSession->GetWindowName(),
                 PowerMgr::RunningLockType::RUNNINGLOCK_SCREEN);
             // set ipc identity to raw
             IPCSkeleton::SetCallingIdentity(identity);
@@ -1226,7 +1231,8 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
         // set ipc identity to raw
         IPCSkeleton::SetCallingIdentity(identity);
         if (res != ERR_OK) {
-            WLOGFE("handle keep screen running lock failed: [operation: %{public}d, err: %{public}d]", requireLock, res);
+            WLOGFE("handle keep screen running lock failed: [operation: %{public}d, err: %{public}d]",
+                requireLock, res);
         }
     };
     taskScheduler_->PostAsyncTask(task);
@@ -1283,7 +1289,8 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
     return WSError::WS_OK;
 }
 
-int32_t SceneSessionManager::GetCurrentUserId() const {
+int32_t SceneSessionManager::GetCurrentUserId() const
+{
     return currentUserId_;
 }
 
@@ -1413,7 +1420,7 @@ void SceneSessionManager::DumpAllAppSessionInfo(std::ostringstream& oss)
     oss << std::endl << "Current mission lists:" << std::endl;
     oss << " MissionList Type #NORMAL" << std::endl;
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto& elem: sceneSessionMap_) {
+    for (const auto& elem : sceneSessionMap_) {
         auto curSession = elem.second;
         if (curSession == nullptr) {
             WLOGFW("curSession is nullptr");
@@ -1673,6 +1680,7 @@ void SceneSessionManager::SetWaterMarkSessionCount(int32_t count)
 {
     waterMarkSessionCount_ = count;
 }
+
 int32_t SceneSessionManager::GetWaterMarkSessionCount() const
 {
     return waterMarkSessionCount_;
@@ -1941,6 +1949,7 @@ WSError SceneSessionManager::BindDialogTarget(uint64_t persistentId, sptr<IRemot
         persistentId, parentSession->GetPersistentId());
     return WSError::WS_OK;
 }
+
 WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
@@ -2126,8 +2135,8 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
             WLOGFW("null scene session");
             continue;
         }
-        WLOGFD("name = %{public}s, isSystem = %{public}d, persistendId = %{public}d, winType = %{public}d, \
-            state = %{public}d, visible = %{public}d", sceneSession->GetWindowName().c_str(),
+        WLOGFD("name = %{public}s, isSystem = %{public}d, persistendId = %{public}d, winType = %{public}d, "
+            "state = %{public}d, visible = %{public}d", sceneSession->GetWindowName().c_str(),
             sceneSession->GetSessionInfo().isSystem_, iter->first, sceneSession->GetWindowType(),
             sceneSession->GetSessionState(), sceneSession->IsVisible());
         if (IsSessionVisible(sceneSession)) {
@@ -2483,6 +2492,7 @@ void DisplayChangeListener::OnScreenshot(DisplayId displayId)
 {
     SceneSessionManager::GetInstance().OnScreenshot(displayId);
 }
+
 void SceneSessionManager::OnScreenshot(DisplayId displayId)
 {
     auto task = [this, displayId]() {
