@@ -42,6 +42,7 @@ public:
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
 
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
+    int64_t GetVSyncPeriod() override;
 
     void SetDisplayDensity(float density)
     {

@@ -22,6 +22,7 @@
 
 #include "app_mgr_client.h"
 #include "singleton.h"
+#include "singleton_container.h"
 
 #include "anr_manager.h"
 #include "intention_event_manager.h"
@@ -158,6 +159,12 @@ void RootScene::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     VsyncStation::GetInstance().RequestVsync(vsyncCallback);
+}
+
+int64_t RootScene::GetVSyncPeriod()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return VsyncStation::GetInstance().GetVSyncPeriod();
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -75,6 +75,7 @@ public:
     WMError SetAPPWindowLabel(const std::string& label) override;
     WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
+    int64_t GetVSyncPeriod() override;
     // inherits from session stage
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
