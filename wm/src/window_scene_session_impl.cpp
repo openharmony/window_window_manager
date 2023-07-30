@@ -15,6 +15,7 @@
 
 #include "window_scene_session_impl.h"
 
+#include <ability_manager_client.h>
 #include <parameters.h>
 #include <transaction/rs_transaction.h>
 
@@ -1047,7 +1048,7 @@ WMError WindowSceneSessionImpl::Close()
     if (WindowHelper::IsMainWindow(GetType())) {
         auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
         if (!abilityContext) {
-            return Destroy();
+            return Destroy(true);
         }
         WindowPrepareTerminateHandler* handler = new(std::nothrow) WindowPrepareTerminateHandler();
         if (handler == nullptr) {
@@ -1056,7 +1057,7 @@ WMError WindowSceneSessionImpl::Close()
             return WMError::WM_OK;
         }
         wptr<ISession> hostSessionWptr = hostSession_;
-        SetPrepareTerminateFun func = [hostSessionWptr]() {
+        PrepareTerminateFunc func = [hostSessionWptr]() {
             auto weakSession = hostSessionWptr.promote();
             if (weakSession == nullptr) {
                 WLOGFW("this session wptr is nullptr");

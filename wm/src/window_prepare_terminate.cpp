@@ -34,7 +34,7 @@ void WindowPrepareTerminateHandler::DoPrepareTerminate()
         func_();
     }
 }
-void SetPrepareTerminateFun(const PrepareTerminateFunc& func)
+void WindowPrepareTerminateHandler::SetPrepareTerminateFun(const PrepareTerminateFunc& func)
 {
     func_ = func;
 }
