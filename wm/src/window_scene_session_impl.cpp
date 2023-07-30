@@ -575,8 +575,24 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    Rect rect = WindowHelper::IsMainFloatingWindow(GetType(), GetMode()) ? GetRect() : GetRequestRect();
+
+    const auto& windowRect = GetRect();
+    const auto& requestRect = GetRequestRect();
+    Rect rect;
+    if (state_ <= WindowState::STATE_CREATED) {
+        rect = requestRect;
+    } else {
+        rect = WindowHelper::IsMainFloatingWindow(GetType(), GetMode()) ? windowRect : requestRect;
+    }
     Rect newRect = { x, y, rect.width_, rect.height_ }; // must keep x/y
+    WLOGFD("Id:%{public}d, type: %{public}d, mode: %{public}d, requestRect: [%{public}d, %{public}d, %{public}d, "
+        "%{public}d], windowRect: [%{public}d, %{public}d, %{public}d, %{public}d], "
+        "newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+        property_->GetPersistentId(), GetType(), GetMode(), requestRect.posX_, requestRect.posY_,
+        requestRect.width_, requestRect.height_, windowRect.posX_, windowRect.posY_,
+        windowRect.width_, windowRect.height_, newRect.posX_, newRect.posY_,
+        newRect.width_, newRect.height_);
+
     property_->SetRequestRect(newRect);
     if (state_ == WindowState::STATE_HIDDEN || state_ < WindowState::STATE_CREATED) {
         WLOGFD("Window is hidden or not created! id: %{public}d, oriPos: [%{public}d, %{public}d, "
@@ -680,8 +696,24 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 
     UpdateFloatingWindowSizeBySizeLimits(width, height);
 
-    Rect rect = WindowHelper::IsMainFloatingWindow(GetType(), GetMode()) ? GetRect() : GetRequestRect();
+    const auto& windowRect = GetRect();
+    const auto& requestRect = GetRequestRect();
+    Rect rect;
+    if (state_ <= WindowState::STATE_CREATED) {
+        rect = requestRect;
+    } else {
+        rect = WindowHelper::IsMainFloatingWindow(GetType(), GetMode()) ? windowRect : requestRect;
+    }
+
     Rect newRect = { rect.posX_, rect.posY_, width, height }; // must keep w/h
+    WLOGFD("Id:%{public}d, type: %{public}d, mode: %{public}d, requestRect: [%{public}d, %{public}d, %{public}d, "
+        "%{public}d], windowRect: [%{public}d, %{public}d, %{public}d, %{public}d], "
+        "newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+        property_->GetPersistentId(), GetType(), GetMode(), requestRect.posX_, requestRect.posY_,
+        requestRect.width_, requestRect.height_, windowRect.posX_, windowRect.posY_,
+        windowRect.width_, windowRect.height_, newRect.posX_, newRect.posY_,
+        newRect.width_, newRect.height_);
+
     property_->SetRequestRect(newRect);
     if (state_ == WindowState::STATE_HIDDEN || state_ < WindowState::STATE_CREATED) {
         WLOGFD("Window is hidden or not created! id: %{public}d, oriSize: [%{public}u, %{public}u, "
