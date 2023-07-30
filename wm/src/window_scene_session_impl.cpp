@@ -30,6 +30,7 @@
 #include "window_adapter.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
+#include "window_prepare_terminate.h"
 #include "wm_common.h"
 #include "wm_math.h"
 #include "session_manager_agent_controller.h"
@@ -1043,8 +1044,34 @@ WMError WindowSceneSessionImpl::Close()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (WindowHelper::IsMainWindow(GetType()) && hostSession_) {
-        hostSession_->OnSessionEvent(SessionEvent::EVENT_CLOSE);
+    if (WindowHelper::IsMainWindow(GetType())) {
+        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+        if (!abilityContext) {
+            return Destroy();
+        }
+        WindowPrepareTerminateHandler* handler = new(std::nothrow) WindowPrepareTerminateHandler();
+        if (handler == nullptr) {
+            WLOGFW("new WindowPrepareTerminateHandler failed, do close window");
+            hostSession_->OnSessionEvent(SessionEvent::EVENT_CLOSE);
+            return WMError::WM_OK;
+        }
+        wptr<ISession> hostSessionWptr = hostSession_;
+        SetPrepareTerminateFun func = [hostSessionWptr]() {
+            auto weakSession = hostSessionWptr.promote();
+            if (weakSession == nullptr) {
+                WLOGFW("this session wptr is nullptr");
+                return;
+            }
+            weakSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
+        };
+        handler->SetPrepareTerminateFun(func);
+        sptr<AAFwk::IPrepareTerminateCallback> callback = handler;
+        if (AAFwk::AbilityManagerClient::GetInstance()->PrepareTerminateAbility(abilityContext->GetToken(),
+            callback) != ERR_OK) {
+            WLOGFW("RegisterWindowManagerServiceHandler failed, do close window");
+            hostSession_->OnSessionEvent(SessionEvent::EVENT_CLOSE);
+            return WMError::WM_OK;
+        }
     }
 
     return WMError::WM_OK;
