@@ -159,7 +159,7 @@ void SceneSessionManager::Init()
         WLOGFW("Add thread %{public}s to watchdog failed.", WINDOW_INFO_REPORT_THREAD.c_str());
     }
 
-    listenerController_ = std::make_shared<MissionListenerController>();
+    listenerController_ = std::make_shared<SessionListenerController>();
     listenerController_->Init();
 
     StartWindowInfoReportLoop();
@@ -1850,22 +1850,22 @@ WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject> &token,
     return WSError::WS_ERROR_SET_SESSION_ICON_FAILED;
 }
 
-WSError SceneSessionManager::RegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener)
+WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionListener>& listener)
 {
-    WLOGFI("run RegisterMissionListener");
-    return listenerController_->AddMissionListener(listener);
+    WLOGFI("run RegisterSessionListener");
+    return listenerController_->AddSessionListener(listener);
 }
 
-WSError SceneSessionManager::UnRegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener)
+WSError SceneSessionManager::UnRegisterSessionListener(const sptr<ISessionListener>& listener)
 {
-    WLOGFI("run UnRegisterMissionListener");
-    listenerController_->DelMissionListener(listener);
+    WLOGFI("run UnRegisterSessionListener");
+    listenerController_->DelSessionListener(listener);
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::GetMissionInfos(int32_t numMax, std::vector<AAFwk::MissionInfo>& missionInfos)
+WSError SceneSessionManager::GetSessionInfos(int32_t numMax, std::vector<SessionInfoBean>& sessionInfos)
 {
-    WLOGFI("run GetMissionInfos");
+    WLOGFI("run GetSessionInfos");
     std::map<int32_t, sptr<SceneSession>>::iterator iter;
     std::vector<sptr<SceneSession>> sceneSessionInfos;
     for (iter = sceneSessionMap_.begin(); iter != sceneSessionMap_.end(); iter++) {
@@ -1874,17 +1874,17 @@ WSError SceneSessionManager::GetMissionInfos(int32_t numMax, std::vector<AAFwk::
         }
         sceneSessionInfos.emplace_back(iter->second);
     }
-    return SceneSessionConverter::ConvertToMissionInfos(sceneSessionInfos, missionInfos);
+    return SceneSessionConverter::ConvertToMissionInfos(sceneSessionInfos, sessionInfos);
 }
 
-WSError SceneSessionManager::GetMissionInfo(int32_t missionId, AAFwk::MissionInfo& missionInfo)
+WSError SceneSessionManager::GetSessionInfo(int32_t persistentId, SessionInfoBean& sessionInfo)
 {
-    WLOGFI("run GetMissionInfo");
+    WLOGFI("run GetSessionInfo");
     std::map<int32_t, sptr<SceneSession>>::iterator iter;
     sptr<SceneSession> sceneSession;
     for (iter = sceneSessionMap_.begin(); iter != sceneSessionMap_.end(); iter++) {
-        if (missionId == iter->first) {
-            return SceneSessionConverter::ConvertToMissionInfo(iter->second, missionInfo);
+        if (persistentId == iter->first) {
+            return SceneSessionConverter::ConvertToMissionInfo(iter->second, sessionInfo);
         }
     }
     return WSError::WS_OK;
@@ -1917,7 +1917,7 @@ WSError SceneSessionManager::GetSessionSnapshot(int32_t persistentId, std::share
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionListener> sessionListener)
+WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionChangeListener> sessionListener)
 {
     WLOGFI("run RegisterSessionListener");
     if (sessionListener == nullptr) {
