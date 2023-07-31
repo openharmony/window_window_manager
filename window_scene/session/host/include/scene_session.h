@@ -18,6 +18,7 @@
 
 #include "session/host/include/session.h"
 #include "session/host/include/move_drag_controller.h"
+#include "wm_common.h"
 
 namespace OHOS::PowerMgr {
     class RunningLock;
@@ -111,6 +112,9 @@ public:
     };
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
     void SetZOrder(uint32_t zOrder) override;
+    std::vector<Rect> GetTouchHotAreas() const override;
+    Rect GetHotAreaRect(int32_t action);
+    WSError NotifyTouchOutside();
 
     static MaximizeMode maximizeMode_;
 

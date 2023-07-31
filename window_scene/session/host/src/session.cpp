@@ -405,7 +405,7 @@ WSError Session::Background()
     SessionState state = GetSessionState();
     WLOGFI("Background session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
-    if (state < SessionState::STATE_INACTIVE) { // only STATE_INACTIVE can transfer to background
+    if (state != SessionState::STATE_INACTIVE) {
         WLOGFE("state invalid!");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -777,15 +777,6 @@ WSError Session::TransferFocusActiveEvent(bool isFocusActive)
     return windowEventChannel_->TransferFocusActiveEvent(isFocusActive);
 }
 
-WSError Session::TransferFocusWindowIdEvent(int32_t windowId)
-{
-    if (!windowEventChannel_) {
-        WLOGFE("windowEventChannel_ is null");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return windowEventChannel_->TransferFocusWindowId(windowId);
-}
-
 WSError Session::TransferFocusStateEvent(bool focusState)
 {
     if (!windowEventChannel_) {
@@ -832,7 +823,7 @@ void Session::NotifySessionStateChange(const SessionState& state)
         sessionStateChangeFunc_(state);
     }
     if (sessionStateChangeNotifyManagerFunc_) {
-        sessionStateChangeNotifyManagerFunc_(GetPersistentId());
+        sessionStateChangeNotifyManagerFunc_(GetPersistentId(), state);
     }
 }
 

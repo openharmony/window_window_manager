@@ -32,7 +32,6 @@ public:
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
     WSError TransferFocusActiveEvent(bool isFocusActive) override;
-    WSError TransferFocusWindowId(int32_t windowId) override;
     WSError TransferFocusState(bool focusState) override;
 private:
     static inline BrokerDelegator<WindowEventChannelProxy> delegator_;

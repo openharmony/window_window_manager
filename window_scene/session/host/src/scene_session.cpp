@@ -26,7 +26,6 @@
 #include "session_helper.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
-#include "wm_common.h"
 #include "wm_math.h"
 #include <running_lock.h>
 
@@ -75,6 +74,7 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
     if (ret != WSError::WS_OK) {
         return ret;
     }
+    NotifyForeground();
     UpdateCameraFloatWindowStatus(true);
     if (specificCallback_ != nullptr) {
         specificCallback_->onUpdateAvoidArea_(GetPersistentId());
@@ -265,6 +265,9 @@ void SceneSession::UpdateCameraFloatWindowStatus(bool isShowing)
 
 WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty)
 {
+    if (property_ == nullptr) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
     property_->SetSystemBarProperty(type, systemBarProperty);
     WLOGFD("SceneSession SetSystemBarProperty status:%{public}d", static_cast<int32_t>(type));
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSystemBarPropertyChange_) {
@@ -648,11 +651,53 @@ bool SceneSession::IsFloatingWindowAppType() const
     return property_->IsFloatingWindowAppType();
 }
 
+std::vector<Rect> SceneSession::GetTouchHotAreas() const
+{
+    std::vector<Rect> touchHotAreas;
+    if (property_) {
+        property_->GetTouchHotAreas(touchHotAreas);
+    }
+    return touchHotAreas;
+}
 void SceneSession::DumpSessionElementInfo(const std::vector<std::string>& params)
 {
     if (!sessionStage_) {
         return;
     }
     return sessionStage_->DumpSessionElementInfo(params);
+}
+
+Rect SceneSession::GetHotAreaRect(int32_t action)
+{
+    Rect hotAreaRect;
+    WSRect rect = GetSessionRect();
+
+    float vpr = 1.5f; // 1.5f: default virtual pixel ratio
+    auto display = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+    if (display) {
+        vpr = display->GetVirtualPixelRatio();
+        WLOGD("vpr = %{public}f", vpr);
+    }
+
+    float hotZone = 0.0;
+    if (action == MMI::PointerEvent::POINTER_ACTION_DOWN) {
+        hotZone = HOTZONE_TOUCH;
+    } else if (action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        hotZone = HOTZONE_POINTER;
+    }
+    hotAreaRect.posX_ = rect.posX_ - static_cast<int32_t>(vpr * hotZone);
+    hotAreaRect.posY_ = rect.posY_ - static_cast<int32_t>(vpr * hotZone);
+    hotAreaRect.width_ = rect.width_ + static_cast<uint32_t>(vpr * hotZone * 2); // 2: double hotZone
+    hotAreaRect.height_ = rect.height_ + static_cast<uint32_t>(vpr * hotZone * 2); // 2: double hotZone
+
+    return hotAreaRect;
+}
+
+WSError SceneSession::NotifyTouchOutside()
+{
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyTouchOutside();
 }
 } // namespace OHOS::Rosen

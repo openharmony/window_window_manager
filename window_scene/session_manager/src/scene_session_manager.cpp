@@ -82,6 +82,7 @@ const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 #endif
 const std::string SCENE_SESSION_MANAGER_THREAD = "SceneSessionManager";
 const std::string WINDOW_INFO_REPORT_THREAD = "WindowInfoReportThread";
+std::recursive_mutex g_instanceMutex;
 constexpr uint32_t MAX_BRIGHTNESS = 255;
 constexpr int32_t DEFAULT_USERID = -1;
 constexpr int32_t SCALE_DIMENSION = 2;
@@ -105,6 +106,7 @@ const std::string ARG_DUMP_DISPLAY = "-d";
 
 SceneSessionManager& SceneSessionManager::GetInstance()
 {
+    std::lock_guard<std::recursive_mutex> lock(g_instanceMutex);
     static SceneSessionManager* instance = nullptr;
     if (instance == nullptr) {
         instance = new SceneSessionManager();
@@ -738,7 +740,6 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
         activeSessionId_ = persistentId;
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
-        scnSession->NotifyForeground();
         return WSError::WS_OK;
     };
 
@@ -851,6 +852,42 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
     return WSError::WS_OK;
 }
 
+void SceneSessionManager::AddClientDeathRecipient(const sptr<ISessionStage>& sessionStage,
+    const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr || sessionStage == nullptr) {
+        WLOGFE("sessionStage or sceneSession is nullptr");
+        return;
+    }
+
+    auto remoteObject = sessionStage->AsObject();
+    remoteObjectMap_.insert(std::make_pair(remoteObject, sceneSession->GetPersistentId()));
+    if (windowDeath_ == nullptr) {
+        WLOGFE("failed to create death recipient");
+        return;
+    }
+    if (!remoteObject->AddDeathRecipient(windowDeath_)) {
+        WLOGFE("failed to add death recipient");
+        return;
+    }
+    WLOGFD("Id: %{public}d", sceneSession->GetPersistentId());
+}
+
+void SceneSessionManager::DestroySpecificSession(const sptr<IRemoteObject>& remoteObject)
+{
+    auto task = [this, remoteObject] {
+        auto iter = remoteObjectMap_.find(remoteObject);
+        if (iter == remoteObjectMap_.end()) {
+            WLOGFE("Invalid remoteObject");
+            return;
+        }
+        WLOGFD("Remote died, id: %{public}d", iter->second);
+        DestroyAndDisconnectSpecificSession(iter->second);
+        remoteObjectMap_.erase(iter);
+    };
+    taskScheduler_->PostAsyncTask(task);
+}
+
 WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session)
@@ -879,6 +916,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             createSpecificSessionFunc_(sceneSession);
         }
         session = sceneSession;
+        AddClientDeathRecipient(sessionStage, sceneSession);
         return errCode;
     };
 
@@ -905,6 +943,40 @@ void SceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
     WLOGFI("OnOutsideDownEvent x = %{public}d, y = %{public}d", x, y);
     if (outsideDownEventFunc_) {
         outsideDownEventFunc_(x, y);
+    }
+}
+
+void SceneSessionManager::NotifySessionTouchOutside(int32_t action, int32_t x, int32_t y)
+{
+    for (const auto &item : sceneSessionMap_) {
+        auto sceneSession = item.second;
+        if (sceneSession == nullptr) {
+            continue;
+        }
+        auto persistentId = sceneSession->GetPersistentId();
+        auto touchHotAreaRects = sceneSession->GetTouchHotAreas();
+        if (!touchHotAreaRects.empty()) {
+            bool touchInsideFlag = false;
+            for (auto touchHotAreaRect : touchHotAreaRects) {
+                if (!SessionHelper::IsPointInRect(x, y, touchHotAreaRect)) {
+                    continue;
+                } else {
+                    WLOGFD("TouchInside %{public}d", persistentId);
+                    touchInsideFlag = true;
+                    break;
+                }
+            }
+            if (!touchInsideFlag) {
+                sceneSession->NotifyTouchOutside();
+            }
+        } else {
+            auto hotAreaRect = sceneSession->GetHotAreaRect(action);
+            if (!SessionHelper::IsPointInRect(x, y, hotAreaRect)) {
+                sceneSession->NotifyTouchOutside();
+            } else {
+                WLOGFD("TouchInside %{public}d", persistentId);
+            }
+        }
     }
 }
 
@@ -1162,8 +1234,8 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS: {
-            auto& systemBarProperties = property->GetSystemBarProperty();
-            for (auto& iter : systemBarProperties) {
+            auto systemBarProperties = property->GetSystemBarProperty();
+            for (auto iter : systemBarProperties) {
                 sceneSession->SetSystemBarProperty(iter.first, iter.second);
             }
             NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
@@ -1181,6 +1253,14 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
         case WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG: {
             if (sceneSession->GetSessionProperty() != nullptr) {
                 sceneSession->GetSessionProperty()->SetAnimationFlag(property->GetAnimationFlag());
+            }
+            break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA: {
+            if (sceneSession->GetSessionProperty() != nullptr) {
+                std::vector<Rect> touchHotAreas;
+                property->GetTouchHotAreas(touchHotAreas);
+                sceneSession->GetSessionProperty()->SetTouchHotAreas(touchHotAreas);
             }
             break;
         }
@@ -1646,8 +1726,8 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(bool isAddingPrivateSessio
 
 void SceneSessionManager::RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession)
 {
-    NotifySessionStateChangeNotifyManagerFunc func = [this](int32_t persistentId) {
-        this->OnSessionStateChange(persistentId);
+    NotifySessionStateChangeNotifyManagerFunc func = [this](int32_t persistentId, const SessionState& state) {
+        this->OnSessionStateChange(persistentId, state);
     };
     if (sceneSession == nullptr) {
         WLOGFE("session is nullptr");
@@ -1657,7 +1737,7 @@ void SceneSessionManager::RegisterSessionStateChangeNotifyManagerFunc(sptr<Scene
     WLOGFD("RegisterSessionStateChangeFunc success");
 }
 
-void SceneSessionManager::OnSessionStateChange(int32_t persistentId)
+void SceneSessionManager::OnSessionStateChange(int32_t persistentId, const SessionState& state)
 {
     WLOGFD("Session state change, id: %{public}d", persistentId);
     auto sceneSession = GetSceneSession(persistentId);
@@ -1665,7 +1745,6 @@ void SceneSessionManager::OnSessionStateChange(int32_t persistentId)
         WLOGFD("session is nullptr");
         return;
     }
-    SessionState state = sceneSession->GetSessionState();
     switch (state) {
         case SessionState::STATE_FOREGROUND:
             HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
@@ -2467,9 +2546,11 @@ bool SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
     NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_BOUNDS);
 
     WindowType type = sceneSession->GetWindowType();
-    SessionGravity gravity;
+    SessionGravity gravity = SessionGravity::SESSION_GRAVITY_BOTTOM;
     uint32_t percent = 0;
-    sceneSession->GetSessionProperty()->GetSessionGravity(gravity, percent);
+    if (sceneSession->GetSessionProperty() != nullptr) {
+        sceneSession->GetSessionProperty()->GetSessionGravity(gravity, percent);
+    }
     if (type == WindowType::WINDOW_TYPE_STATUS_BAR ||
         type == WindowType::WINDOW_TYPE_NAVIGATION_BAR ||
         (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&

@@ -209,6 +209,10 @@ static NativeValue* CreateJsSystemBarPropertyObject(
 NativeValue* CreateJsSystemBarPropertyArrayObject(
     NativeEngine& engine, const std::unordered_map<WindowType, SystemBarProperty>& propertyMap)
 {
+    if (propertyMap.empty()) {
+        WLOGFE("Empty propertyMap");
+        return nullptr;
+    }
     NativeValue* objValue = engine.CreateArray(propertyMap.size());
     NativeArray* array = ConvertNativeValueTo<NativeArray>(objValue);
     if (array == nullptr) {

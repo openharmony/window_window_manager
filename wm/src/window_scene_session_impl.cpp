@@ -788,6 +788,9 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
             static_cast<uint32_t>(type), static_cast<uint32_t>(windowMode_));
         return WMError::WM_OK;
     }
+    if (hostSession_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
     avoidArea = hostSession_->GetAvoidAreaByType(type);
     return WMError::WM_OK;
 }
@@ -815,13 +818,13 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
     if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
         version = context_->GetApplicationInfo()->apiCompatibleVersion;
     }
+    isIgnoreSafeArea_ = status;
     // 10 ArkUI new framework support after API10
     if (version >= 10) {
         if (uiContent_ != nullptr) {
             uiContent_->SetIgnoreViewSafeArea(status);
         } else {
             isIgnoreSafeAreaNeedNotify_ = true;
-            isIgnoreSafeArea_ = status;
         }
     } else {
         WMError ret = WMError::WM_OK;
@@ -853,6 +856,9 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
 WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
 {
     WLOGFI("winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
+    if (hostSession_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
     hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
     SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     WMError ret = SetLayoutFullScreenByApiVersion(status);
@@ -865,16 +871,17 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
 
 bool WindowSceneSessionImpl::IsLayoutFullScreen() const
 {
-    uint32_t flags = GetWindowFlags();
     WindowMode mode = GetMode();
-    bool needAvoid = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
-    return (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !needAvoid);
+    return (mode == WindowMode::WINDOW_MODE_FULLSCREEN && isIgnoreSafeArea_);
 }
 
 SystemBarProperty WindowSceneSessionImpl::GetSystemBarPropertyByType(WindowType type) const
 {
     WLOGFI("GetSystemBarPropertyByType windowId:%{public}u type:%{public}u",
         GetWindowId(), static_cast<uint32_t>(type));
+    if (property_ == nullptr) {
+        return SystemBarProperty();
+    }
     auto curProperties = property_->GetSystemBarProperty();
     return curProperties[type];
 }
@@ -907,6 +914,9 @@ WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const Syst
         return WMError::WM_OK;
     }
 
+    if (property_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
     property_->SetSystemBarProperty(type, property);
     WMError ret = NotifyWindowSessionProperty();
     if (ret != WMError::WM_OK) {
@@ -919,6 +929,9 @@ WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const Syst
 WMError WindowSceneSessionImpl::SetFullScreen(bool status)
 {
     WLOGFI("winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
+    if (hostSession_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
     hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
     SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     WMError ret = SetLayoutFullScreenByApiVersion(status);
@@ -1676,6 +1689,27 @@ WMError WindowSceneSessionImpl::BindDialogTarget(sptr<IRemoteObject> targetToken
         WLOGFE("bind window failed with errCode:%{public}d", static_cast<int32_t>(ret));
     }
     return ret;
+}
+
+WMError WindowSceneSessionImpl::SetTouchHotAreas(const std::vector<Rect>& rects)
+{
+    if (property_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::vector<Rect> lastTouchHotAreas;
+    property_->GetTouchHotAreas(lastTouchHotAreas);
+    property_->SetTouchHotAreas(rects);
+    WMError result = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA);
+    if (result != WMError::WM_OK) {
+        property_->SetTouchHotAreas(lastTouchHotAreas);
+        WLOGFE("SetTouchHotAreas with errCode:%{public}d", static_cast<int32_t>(result));
+        return result;
+    }
+    for (uint32_t i = 0; i < rects.size(); i++) {
+        WLOGFI("Set areas: %{public}u [x: %{public}d y:%{public}d w:%{public}u h:%{public}u]",
+            i, rects[i].posX_, rects[i].posY_, rects[i].width_, rects[i].height_);
+    }
+    return result;
 }
 
 void WindowSceneSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& params)
