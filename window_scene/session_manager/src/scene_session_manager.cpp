@@ -1119,16 +1119,21 @@ void SceneSessionManager::GetStartPage(const SessionInfo& sessionInfo, std::stri
 
 WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
 {
-    auto task = [this, property, action]() {
+    wptr<SceneSessionManager> weak = this;
+    auto task = [weak, property, action]() {
+        auto weakSession = weak.promote();
+        if (weakSession == nullptr) {
+            return;
+        }
         if (property == nullptr) {
             return;
         }
-        auto sceneSession = GetSceneSession(property->GetPersistentId());
+        auto sceneSession = weakSession->GetSceneSession(property->GetPersistentId());
         if (sceneSession == nullptr) {
             return;
         }
         WLOGI("Id: %{public}d, action: %{public}u", sceneSession->GetPersistentId(), action);
-        HandleUpdateProperty(property, action, sceneSession);
+        weakSession->HandleUpdateProperty(property, action, sceneSession);
     };
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
