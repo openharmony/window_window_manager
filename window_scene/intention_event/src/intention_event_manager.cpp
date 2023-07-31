@@ -100,12 +100,12 @@ void IntentionEventManager::InputEventListener::UpdateLastMouseEvent(
         WLOGFE("pointerEvent is null");
         return;
     }
-    if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+    if ((pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
+        (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW)) {
         std::lock_guard<std::mutex> guard(mouseEventMutex_);
         g_lastMouseEvent = std::make_shared<MMI::PointerEvent>(*pointerEvent);
-    }
-    if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN ||
-        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
+    } else if (g_lastMouseEvent != nullptr) {
+        WLOGFD("Clear last mouse event");
         std::lock_guard<std::mutex> guard(mouseEventMutex_);
         g_lastMouseEvent = nullptr;
         SceneSession::ClearEnterWindow();
