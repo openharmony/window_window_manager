@@ -105,7 +105,7 @@ public:
     DMError SetOrientationController(ScreenId screenId, Orientation newOrientation, bool isFromWindow);
     bool SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow);
     void SetSensorSubscriptionEnabled();
-    bool SetRotationFromWindow(DisplayId displayId, Rotation targetRotation);
+    bool SetRotationFromWindow(Rotation targetRotation);
     sptr<SupportedScreenModes> GetScreenModesByDisplayId(DisplayId displayId);
     sptr<ScreenInfo> GetScreenInfoByDisplayId(DisplayId displayId);
 
