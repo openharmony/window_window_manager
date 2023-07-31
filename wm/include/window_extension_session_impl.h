@@ -39,13 +39,11 @@ public:
 
     void NotifyFocusActiveEvent(bool isFocusActive) override;
     void NotifyFocusStateEvent(bool focusState) override;
-    void NotifyFocusWindowIdEvent(int32_t windowId) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
 
 private:
-    std::atomic<int32_t> focusWindowId_ = INVALID_WINDOW_ID;
     std::optional<std::atomic<bool>> focusState_ = std::nullopt;
 };
 } // namespace Rosen
