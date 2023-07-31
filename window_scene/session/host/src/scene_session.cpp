@@ -75,6 +75,7 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
     if (ret != WSError::WS_OK) {
         return ret;
     }
+    NotifyForeground();
     UpdateCameraFloatWindowStatus(true);
     specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     return WSError::WS_OK;

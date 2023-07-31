@@ -82,6 +82,7 @@ const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 #endif
 const std::string SCENE_SESSION_MANAGER_THREAD = "SceneSessionManager";
 const std::string WINDOW_INFO_REPORT_THREAD = "WindowInfoReportThread";
+std::recursive_mutex g_instanceMutex;
 constexpr uint32_t MAX_BRIGHTNESS = 255;
 constexpr int32_t DEFAULT_USERID = -1;
 constexpr int32_t SCALE_DIMENSION = 2;
@@ -105,6 +106,7 @@ const std::string ARG_DUMP_DISPLAY = "-d";
 
 SceneSessionManager& SceneSessionManager::GetInstance()
 {
+    std::lock_guard<std::recursive_mutex> lock(g_instanceMutex);
     static SceneSessionManager* instance = nullptr;
     if (instance == nullptr) {
         instance = new SceneSessionManager();
@@ -730,7 +732,6 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
         activeSessionId_ = persistentId;
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
-        scnSession->NotifyForeground();
         return WSError::WS_OK;
     };
 
