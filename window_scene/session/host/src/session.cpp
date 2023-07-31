@@ -15,10 +15,8 @@
 
 #include "session/host/include/session.h"
 
-#include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
 #include "key_event.h"
-#include "native_token_info.h"
 #include "pointer_event.h"
 
 #include "anr_manager.h"
@@ -333,15 +331,6 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
 {
     callingPid_ = IPCSkeleton::GetCallingPid();
     callingUid_ = IPCSkeleton::GetCallingUid();
-    Security::AccessToken::AccessTokenID callingTokenId = IPCSkeleton::GetCallingTokenID();
-    Security::AccessToken::NativeTokenInfo tokenInfo;
-    if (auto ret = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(callingTokenId, tokenInfo);
-        ret == Security::AccessToken::AccessTokenKitRet::RET_SUCCESS) {
-        WLOGFD("GetNativeTokenInfo successfully");
-        callingProcessName_ = tokenInfo.processName;
-    } else {
-        WLOGFE("GetNativeTokenInfo failed, ret:%{public}d", static_cast<int32_t>(ret));
-    }
     return ConnectImpl(sessionStage, eventChannel, surfaceNode, systemConfig, property, token);
 }
 
@@ -372,7 +361,8 @@ WSError Session::ConnectImpl(const sptr<ISessionStage>& sessionStage, const sptr
     // once update rect before connect, update again when connect
     UpdateRect(winRect_, SizeChangeReason::UNDEFINED);
     NotifyConnect();
-    DelayedSingleton<ANRManager>::GetInstance()->SetApplicationInfo(persistentId_, callingPid_, callingProcessName_);
+    callingBundleName_ = DelayedSingleton<ANRManager>::GetInstance()->GetBundleName(callingPid_, callingUid_);
+    DelayedSingleton<ANRManager>::GetInstance()->SetApplicationInfo(persistentId_, callingPid_, callingBundleName_);
     return WSError::WS_OK;
 }
 
@@ -709,11 +699,11 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         return WSError::WS_ERROR_NULLPTR;
     }
     WLOGFD("Session TransferPointEvent, eventId:%{public}d, persistentId:%{public}d, "
-        "application:%{public}s, pid:%{public}d",
-        pointerEvent->GetId(), persistentId_, callingProcessName_.c_str(), callingPid_);
+        "bundleName:%{public}s, pid:%{public}d",
+        pointerEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
-        WLOGFD("The pointerEvent does not report normally, application:%{public}s not response, pid:%{public}d",
-            callingProcessName_.c_str(), callingPid_);
+        WLOGFD("The pointerEvent does not report normally, bundleName:%{public}s not response, pid:%{public}d",
+            callingBundleName_.c_str(), callingPid_);
         return WSError::WS_DO_NOTHING;
     }
     auto action = pointerEvent->GetPointerAction();
@@ -760,11 +750,11 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
         return WSError::WS_ERROR_NULLPTR;
     }
     WLOGFD("Session TransferKeyEvent, eventId:%{public}d, persistentId:%{public}d, "
-        "application:%{public}s, pid:%{public}d",
-        keyEvent->GetId(), persistentId_, callingProcessName_.c_str(), callingPid_);
+        "bundleName:%{public}s, pid:%{public}d",
+        keyEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
-        WLOGFD("The keyEvent does not report normally, application:%{public}s not response, pid:%{public}d",
-            callingProcessName_.c_str(), callingPid_);
+        WLOGFD("The keyEvent does not report normally, bundleName:%{public}s not response, pid:%{public}d",
+            callingBundleName_.c_str(), callingPid_);
         return WSError::WS_DO_NOTHING;
     }
     if (!windowEventChannel_) {
