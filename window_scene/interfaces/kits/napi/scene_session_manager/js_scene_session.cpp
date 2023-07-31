@@ -67,6 +67,7 @@ NativeValue* JsSceneSession::Create(NativeEngine& engine, const sptr<SceneSessio
     BindNativeFunction(engine, *object, "on", moduleName, JsSceneSession::RegisterCallback);
     BindNativeFunction(engine, *object, "updateNativeVisibility", moduleName, JsSceneSession::UpdateNativeVisibility);
     BindNativeFunction(engine, *object, "setShowRecent", moduleName, JsSceneSession::SetShowRecent);
+    BindNativeFunction(engine, *object, "setZOrder", moduleName, JsSceneSession::SetZOrder);
 
     return objValue;
 }
@@ -468,6 +469,13 @@ NativeValue* JsSceneSession::SetShowRecent(NativeEngine* engine, NativeCallbackI
     WLOGI("[NAPI]SetShowRecent");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(engine, info);
     return (me != nullptr) ? me->OnSetShowRecent(*engine, *info) : nullptr;
+}
+
+NativeValue* JsSceneSession::SetZOrder(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGI("[NAPI]SetZOrder");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(engine, info);
+    return (me != nullptr) ? me->OnSetZOrder(*engine, *info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject)
@@ -1075,6 +1083,32 @@ NativeValue* JsSceneSession::OnSetShowRecent(NativeEngine& engine, NativeCallbac
         return engine.CreateUndefined();
     }
     session->SetShowRecent(true);
+    return engine.CreateUndefined();
+}
+
+NativeValue* JsSceneSession::OnSetZOrder(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    if (info.argc != 1) { // 1: params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    uint32_t zOrder;
+    if (!ConvertFromJsValue(engine, info.argv[0], zOrder)) {
+        WLOGFE("[NAPI]Failed to convert parameter to uint32_t");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("[NAPI]session is null");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+            "session is null"));
+        return engine.CreateUndefined();
+    }
+    session->SetZOrder(zOrder);
     return engine.CreateUndefined();
 }
 
