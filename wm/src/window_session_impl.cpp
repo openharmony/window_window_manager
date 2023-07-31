@@ -20,6 +20,9 @@
 
 #include <common/rs_common_def.h>
 #include <ipc_skeleton.h>
+#ifdef IMF_ENABLE
+#include <input_method_controller.h>
+#endif // IMF_ENABLE
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
 
@@ -1198,23 +1201,43 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
         return;
     }
 
-    std::shared_ptr<IInputEventConsumer> inputEventConsumer;
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        inputEventConsumer = inputEventConsumer_;
+    bool inputMethodHasProcessed = false;
+#ifdef IMF_ENABLE
+    bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
+    if (isKeyboardEvent) {
+        WLOGD("dispatch keyEvent to input method");
+        inputMethodHasProcessed = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent);
     }
-    if (inputEventConsumer != nullptr) {
-        WLOGD("Transfer key event to inputEventConsumer");
-        (void)inputEventConsumer->OnInputEvent(keyEvent);
-    } else if (uiContent_) {
-        isConsumed = uiContent_->ProcessKeyEvent(keyEvent);
-        if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
-            windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN &&
-            property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL) {
-            WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
-            Recover();
+#endif // IMF_ENABLE
+    if (!inputMethodHasProcessed) {
+        std::shared_ptr<IInputEventConsumer> inputEventConsumer;
+        {
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            inputEventConsumer = inputEventConsumer_;
+        }
+        if (inputEventConsumer != nullptr) {
+            WLOGD("Transfer key event to inputEventConsumer");
+            (void)inputEventConsumer->OnInputEvent(keyEvent);
+        } else if (uiContent_) {
+            isConsumed = uiContent_->ProcessKeyEvent(keyEvent);
+            if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
+                windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN &&
+                property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL) {
+                WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
+                Recover();
+            }
         }
     }
+}
+
+bool WindowSessionImpl::IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
+{
+    int32_t keyCode = keyEvent->GetKeyCode();
+    bool isKeyFN = (keyCode == MMI::KeyEvent::KEYCODE_FN);
+    bool isKeyBack = (keyCode == MMI::KeyEvent::KEYCODE_BACK);
+    bool isKeyboard = (keyCode >= MMI::KeyEvent::KEYCODE_0 && keyCode <= MMI::KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN);
+    WLOGI("isKeyFN: %{public}d, isKeyboard: %{public}d", isKeyFN, isKeyboard);
+    return (isKeyFN || isKeyboard || isKeyBack);
 }
 
 void WindowSessionImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
