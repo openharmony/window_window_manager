@@ -777,15 +777,6 @@ WSError Session::TransferFocusActiveEvent(bool isFocusActive)
     return windowEventChannel_->TransferFocusActiveEvent(isFocusActive);
 }
 
-WSError Session::TransferFocusWindowIdEvent(int32_t windowId)
-{
-    if (!windowEventChannel_) {
-        WLOGFE("windowEventChannel_ is null");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return windowEventChannel_->TransferFocusWindowId(windowId);
-}
-
 WSError Session::TransferFocusStateEvent(bool focusState)
 {
     if (!windowEventChannel_) {
