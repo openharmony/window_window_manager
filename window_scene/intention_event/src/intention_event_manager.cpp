@@ -57,35 +57,40 @@ void IntentionEventManager::InputEventListener::RegisterWindowFocusChanged()
 {
     SceneSessionManager::GetInstance().RegisterWindowFocusChanged(
         [this](int32_t persistentId, bool isFocused) {
-            auto task = [this, persistendId, isFocused]() {
-                WLOGFD("Window focus changed, persistentId:%{public}d, isFocused:%{public}d",
-                    persistentId, isFocused);
-                std::lock_guard<std::mutex> guard(mouseEventMutex_);
-                auto enterSession = SceneSession::GetEnterWindow().promote();
-                if ((enterSession != nullptr) && ((g_lastMouseEvent != nullptr) &&
-                    (g_lastMouseEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE))) {
-                    WLOGFD("Window changed, reissuing enter leave events");
-                    auto leaveEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
-                    leaveEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
-                    enterSession->TransferPointerEvent(leaveEvent);
-
-                    auto enterEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
-                    enterEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
-                    if (uiContent_ == nullptr) {
-                        WLOGFE("uiContent_ is null");
-                        return;
-                    }
-                    uiContent_->ProcessPointerEvent(enterEvent);
-                }
-            };
-            auto eventHandler = weakEventConsumer_.lock();
-            if (eventHandler == nullptr) {
-                WLOGFE("eventHandler is null");
-                return;
-            }
-            eventHandler->PostTask(std::move(task), DELAY_TIME, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+            WLOGFD("Window focus changed, persistentId:%{public}d, isFocused:%{public}d",
+                persistentId, isFocused);
+            this->ProcessEnterLeaveEvent();
         }
     );
+}
+
+void IntentionEventManager::InputEventListener::ProcessEnterLeaveEvent()
+{
+    auto task = [this]() {
+        std::lock_guard<std::mutex> guard(mouseEventMutex_);
+        auto enterSession = SceneSession::GetEnterWindow().promote();
+        if ((enterSession != nullptr) && ((g_lastMouseEvent != nullptr) &&
+            (g_lastMouseEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE))) {
+            WLOGFD("Window changed, reissuing enter leave events");
+            auto leaveEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
+            leaveEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
+            enterSession->TransferPointerEvent(leaveEvent);
+
+            auto enterEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
+            enterEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
+            if (uiContent_ == nullptr) {
+                WLOGFE("uiContent_ is null");
+                return;
+            }
+            uiContent_->ProcessPointerEvent(enterEvent);
+        }
+    };
+    auto eventHandler = weakEventConsumer_.lock();
+    if (eventHandler == nullptr) {
+        WLOGFE("eventHandler is null");
+        return;
+    }
+    eventHandler->PostTask(std::move(task), DELAY_TIME, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void IntentionEventManager::InputEventListener::UpdateLastMouseEvent(

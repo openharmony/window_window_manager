@@ -47,8 +47,9 @@ public:
 
 private:
     void UpdateLastMouseEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const;
+    void ProcessEnterLeaveEvent();
     Ace::UIContent* uiContent_ = nullptr;
-    std::weak_ptr<AppExecFwk::EventHandler> weakEventConsumer_ = nullptr;
+    std::weak_ptr<AppExecFwk::EventHandler> weakEventConsumer_;
     mutable std::mutex mouseEventMutex_;
 };
 };
