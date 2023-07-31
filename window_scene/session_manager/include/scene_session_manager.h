@@ -237,7 +237,7 @@ private:
     std::shared_ptr<RSOcclusionData> lastOcclusionData_ = std::make_shared<RSOcclusionData>();
     RSInterfaces& rsInterface_;
     void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
-    void OnSessionStateChange(int32_t persistentId);
+    void OnSessionStateChange(int32_t persistentId, const SessionState& state);
     sptr<ISessionListener> sessionListener_;
     sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject> &token);
 

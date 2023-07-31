@@ -43,7 +43,7 @@ namespace OHOS::Rosen {
 class RSSurfaceNode;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
-using NotifySessionStateChangeNotifyManagerFunc = std::function<void(int32_t persistentId)>;
+using NotifySessionStateChangeNotifyManagerFunc = std::function<void(int32_t persistentId, const SessionState& state)>;
 using NotifyBackPressedFunc = std::function<void()>;
 using NotifySessionFocusableChangeFunc = std::function<void(const bool isFocusable)>;
 using NotifySessionTouchableChangeFunc = std::function<void(const bool touchable)>;

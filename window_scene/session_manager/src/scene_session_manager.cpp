@@ -1676,8 +1676,8 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(bool isAddingPrivateSessio
 
 void SceneSessionManager::RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession)
 {
-    NotifySessionStateChangeNotifyManagerFunc func = [this](int32_t persistentId) {
-        this->OnSessionStateChange(persistentId);
+    NotifySessionStateChangeNotifyManagerFunc func = [this](int32_t persistentId, const SessionState& state) {
+        this->OnSessionStateChange(persistentId, state);
     };
     if (sceneSession == nullptr) {
         WLOGFE("session is nullptr");
@@ -1687,7 +1687,7 @@ void SceneSessionManager::RegisterSessionStateChangeNotifyManagerFunc(sptr<Scene
     WLOGFD("RegisterSessionStateChangeFunc success");
 }
 
-void SceneSessionManager::OnSessionStateChange(int32_t persistentId)
+void SceneSessionManager::OnSessionStateChange(int32_t persistentId, const SessionState& state)
 {
     WLOGFD("Session state change, id: %{public}d", persistentId);
     auto sceneSession = GetSceneSession(persistentId);
@@ -1695,7 +1695,6 @@ void SceneSessionManager::OnSessionStateChange(int32_t persistentId)
         WLOGFD("session is nullptr");
         return;
     }
-    SessionState state = sceneSession->GetSessionState();
     switch (state) {
         case SessionState::STATE_FOREGROUND:
             HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
