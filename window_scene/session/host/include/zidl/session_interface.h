@@ -63,7 +63,8 @@ public:
         // Extension
         TRANS_ID_TRANSFER_ABILITY_RESULT = 500,
         TRANS_ID_TRANSFER_EXTENSION_DATA = 501,
-        TRANS_ID_NOTIFY_REMOTE_READY = 502
+        TRANS_ID_NOTIFY_REMOTE_READY = 502,
+        TRANS_ID_NOTIFY_EXTENSION_DIED = 503
     };
     virtual WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
@@ -99,6 +100,7 @@ public:
     virtual WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) = 0;
     virtual WSError TransferExtensionData(const AAFwk::WantParams& wantParams) = 0;
     virtual void NotifyRemoteReady() = 0;
+    virtual void NotifyExtensionDied() = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_INTERFACE_H

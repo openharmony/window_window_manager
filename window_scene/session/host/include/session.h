@@ -62,6 +62,7 @@ public:
     virtual void OnForeground() = 0;
     virtual void OnBackground() = 0;
     virtual void OnDisconnect() = 0;
+    virtual void OnExtensionDied() = 0;
 };
 
 class Session : public SessionStub, public virtual RefBase {
@@ -110,6 +111,7 @@ public:
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     void NotifyRemoteReady() override;
+    void NotifyExtensionDied() override;
     void NotifyConnect();
     void NotifyForeground();
     void NotifyBackground();

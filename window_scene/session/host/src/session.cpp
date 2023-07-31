@@ -152,6 +152,16 @@ void Session::NotifyDisconnect()
     }
 }
 
+void Session::NotifyExtensionDied()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (!listener.expired()) {
+            listener.lock()->OnExtensionDied();
+        }
+    }
+}
+
 float Session::GetAspectRatio() const
 {
     return aspectRatio_;
