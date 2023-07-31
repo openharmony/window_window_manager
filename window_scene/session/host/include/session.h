@@ -43,7 +43,7 @@ namespace OHOS::Rosen {
 class RSSurfaceNode;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
-using NotifySessionStateChangeNotifyManagerFunc = std::function<void(int32_t persistentId)>;
+using NotifySessionStateChangeNotifyManagerFunc = std::function<void(int32_t persistentId, const SessionState& state)>;
 using NotifyBackPressedFunc = std::function<void()>;
 using NotifySessionFocusableChangeFunc = std::function<void(const bool isFocusable)>;
 using NotifySessionTouchableChangeFunc = std::function<void(const bool touchable)>;
@@ -119,7 +119,6 @@ public:
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     WSError TransferFocusActiveEvent(bool isFocusActive);
-    WSError TransferFocusWindowIdEvent(int32_t windowId);
     WSError TransferFocusStateEvent(bool focusState);
 
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
@@ -207,6 +206,10 @@ public:
     void SetNotifyCallingSessionBackgroundFunc(const NotifyCallingSessionBackgroundFunc& func);
     void NotifyCallingSessionBackground();
     void NotifyScreenshot();
+    virtual std::vector<Rect> GetTouchHotAreas() const
+    {
+        return std::vector<Rect>();
+    }
 
 protected:
     void GeneratePersistentId(const bool isExtension, const SessionInfo& sessionInfo);

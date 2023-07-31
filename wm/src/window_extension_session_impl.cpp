@@ -124,14 +124,6 @@ WMError WindowExtensionSessionImpl::SetPrivacyMode(bool isPrivacyMode)
     return WMError::WM_OK;
 }
 
-void WindowExtensionSessionImpl::NotifyFocusWindowIdEvent(int32_t windowId)
-{
-    if (uiContent_) {
-        uiContent_->SetFocusWindowId(windowId);
-    }
-    focusWindowId_ = windowId;
-}
-
 void WindowExtensionSessionImpl::NotifyFocusStateEvent(bool focusState)
 {
     if (uiContent_) {
@@ -164,7 +156,7 @@ WMError WindowExtensionSessionImpl::SetUIContent(const std::string& contentInfo,
         WLOGFE("fail to SetUIContent id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    uiContent->Initialize(this, contentInfo, storage, focusWindowId_);
+    uiContent->Initialize(this, contentInfo, storage, property_->GetParentId());
     // make uiContent available after Initialize/Restore
     uiContent_ = std::move(uiContent);
 

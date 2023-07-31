@@ -55,6 +55,7 @@ std::map<int32_t, std::vector<sptr<IDialogDeathRecipientListener>>> WindowSessio
 std::map<int32_t, std::vector<sptr<IDialogTargetTouchListener>>> WindowSessionImpl::dialogTargetTouchListener_;
 std::map<int32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowSessionImpl::occupiedAreaChangeListeners_;
 std::map<int32_t, std::vector<sptr<IScreenshotListener>>> WindowSessionImpl::screenshotListeners_;
+std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::touchOutsideListeners_;
 std::recursive_mutex WindowSessionImpl::globalMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
@@ -1130,6 +1131,44 @@ WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, Avo
 {
     WLOGI("UpdateAvoidArea, id:%{public}d", GetPersistentId());
     NotifyAvoidAreaChange(avoidArea, type);
+    return WSError::WS_OK;
+}
+
+WMError WindowSessionImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
+{
+    WLOGFD("Start register");
+    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+    return RegisterListener(touchOutsideListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
+{
+    WLOGFD("Start unregister");
+    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+    return UnregisterListener(touchOutsideListeners_[GetPersistentId()], listener);
+}
+
+template<typename T>
+EnableIfSame<T, ITouchOutsideListener, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<ITouchOutsideListener>> windowChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+        for (auto& listener : touchOutsideListeners_[GetPersistentId()]) {
+            windowChangeListeners.push_back(listener);
+        }
+    }
+    return windowChangeListeners;
+}
+
+WSError WindowSessionImpl::NotifyTouchOutside()
+{
+    auto touchOutsideListeners = GetListeners<ITouchOutsideListener>();
+    for (auto& listener : touchOutsideListeners) {
+        if (listener != nullptr) {
+            listener->OnTouchOutside();
+        }
+    }
     return WSError::WS_OK;
 }
 

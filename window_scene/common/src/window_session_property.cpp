@@ -19,6 +19,9 @@
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 10;
+}
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
 {
@@ -252,7 +255,7 @@ void WindowSessionProperty::SetSystemBarProperty(WindowType type, const SystemBa
     }
 }
 
-const std::unordered_map<WindowType, SystemBarProperty>& WindowSessionProperty::GetSystemBarProperty() const
+std::unordered_map<WindowType, SystemBarProperty> WindowSessionProperty::GetSystemBarProperty() const
 {
     return sysBarPropMap_;
 }
@@ -324,6 +327,16 @@ bool WindowSessionProperty::IsFloatingWindowAppType() const
     return isFloatingWindowAppType_;
 }
 
+void WindowSessionProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
+{
+    touchHotAreas_ = rects;
+}
+
+void WindowSessionProperty::GetTouchHotAreas(std::vector<Rect>& rects) const
+{
+    rects = touchHotAreas_;
+}
+
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
 {
     if (parcel.WriteUint32(limits_.maxWidth_) &&
@@ -370,6 +383,36 @@ void WindowSessionProperty::UnMarshallingSystemBarMap(Parcel& parcel, WindowSess
     }
 }
 
+bool WindowSessionProperty::MarshallingTouchHotAreas(Parcel& parcel) const
+{
+    auto size = touchHotAreas_.size();
+    if (size > TOUCH_HOT_AREA_MAX_NUM) {
+        return false;
+    }
+    if (!parcel.WriteUint32(static_cast<uint32_t>(size))) {
+        return false;
+    }
+    for (const auto& rect : touchHotAreas_) {
+        if (!(parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
+            parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_))) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void WindowSessionProperty::UnmarshallingTouchHotAreas(Parcel& parcel, WindowSessionProperty* property)
+{
+    uint32_t size = parcel.ReadUint32();
+    if (size > TOUCH_HOT_AREA_MAX_NUM) {
+        return;
+    }
+    for (uint32_t i = 0; i < size; i++) {
+        property->touchHotAreas_.emplace_back(
+            Rect{ parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() });
+    }
+}
+
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
@@ -393,7 +436,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isDecorEnable_) &&
         MarshallingWindowLimits(parcel) &&
         MarshallingSystemBarMap(parcel) && parcel.WriteUint32(animationFlag_) &&
-        parcel.WriteBool(isFloatingWindowAppType_);
+        parcel.WriteBool(isFloatingWindowAppType_) && MarshallingTouchHotAreas(parcel);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -431,6 +474,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     UnMarshallingSystemBarMap(parcel, property);
     property->SetAnimationFlag(parcel.ReadUint32());
     property->SetFloatingWindowAppType(parcel.ReadBool());
+    UnmarshallingTouchHotAreas(parcel, property);
     return property;
 }
 
@@ -463,6 +507,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isDecorEnable_ = property->isDecorEnable_;
     animationFlag_ = property->animationFlag_;
     isFloatingWindowAppType_ = property->isFloatingWindowAppType_;
+    touchHotAreas_ = property->touchHotAreas_;
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)
