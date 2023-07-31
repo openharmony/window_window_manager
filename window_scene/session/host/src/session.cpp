@@ -405,7 +405,7 @@ WSError Session::Background()
     SessionState state = GetSessionState();
     WLOGFI("Background session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
-    if (state < SessionState::STATE_INACTIVE) { // only STATE_INACTIVE can transfer to background
+    if (state != SessionState::STATE_INACTIVE) {
         WLOGFE("state invalid!");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
