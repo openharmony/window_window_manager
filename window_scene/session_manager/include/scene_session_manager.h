@@ -55,9 +55,6 @@ using ProcessOutsideDownEventFunc = std::function<void(int32_t x, int32_t y)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using DumpRootSceneElementInfoFunc = std::function<void(const std::vector<std::string>& params,
     std::vector<std::string>& infos)>;
-using EventHandler = OHOS::AppExecFwk::EventHandler;
-using EventRunner = OHOS::AppExecFwk::EventRunner;
-const int32_t STATUS_BAR_AVOID_AREA = 0;
 using WindowFocusChangedFunc = std::function<void(int32_t persistentId, bool isFocused)>;
 
 class DisplayChangeListener : public IDisplayChangeListener {
