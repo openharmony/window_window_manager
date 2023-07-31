@@ -23,9 +23,9 @@ class PixelMap;
 } // namespace OHOS::Media
 
 namespace OHOS::Rosen {
-class ISessionListener : public IRemoteBroker {
+class ISessionChangeListener : public IRemoteBroker {
 public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISessionListener");
+    DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISessionChangeListener");
 
     virtual void OnSessionLabelChange(int32_t persistentId, const std::string &label) = 0;
     virtual void OnSessionIconChange(int32_t persistentId, const std::shared_ptr<Media::PixelMap> &icon) = 0;

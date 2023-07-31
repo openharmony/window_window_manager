@@ -20,7 +20,7 @@
 #include "session_listener_interface.h"
 
 namespace OHOS::Rosen {
-class SessionListenerStub : public IRemoteStub<ISessionListener> {
+class SessionListenerStub : public IRemoteStub<ISessionChangeListener> {
 public:
     SessionListenerStub() = default;
     virtual ~SessionListenerStub() = default;
