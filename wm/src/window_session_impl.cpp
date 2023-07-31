@@ -43,6 +43,11 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
 }
+
+std::unordered_map<ColorSpace, GraphicColorGamut> WindowSessionImpl::colorSpaceConvertMap = {
+    {ColorSpace::COLOR_SPACE_DEFAULT, GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB},
+    {ColorSpace::COLOR_SPACE_WIDE_GAMUT, GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DCI_P3},
+};
 std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
 std::map<int32_t, std::vector<sptr<IWindowChangeListener>>> WindowSessionImpl::windowChangeListeners_;
 std::map<int32_t, std::vector<sptr<IAvoidAreaChangedListener>>> WindowSessionImpl::avoidAreaChangeListeners_;
@@ -164,6 +169,44 @@ sptr<WindowSessionProperty> WindowSessionImpl::GetProperty() const
 sptr<ISession> WindowSessionImpl::GetHostSession() const
 {
     return hostSession_;
+}
+
+ColorSpace WindowSessionImpl::GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut)
+{
+    for (std::pair<ColorSpace, GraphicColorGamut> p: colorSpaceConvertMap) {
+        if (p.second == colorGamut) {
+            return p.first;
+        }
+    }
+    WLOGFE("try to get not exist ColorSpace");
+    
+    return ColorSpace::COLOR_SPACE_DEFAULT;
+}
+
+GraphicColorGamut WindowSessionImpl::GetSurfaceGamutFromColorSpace(ColorSpace colorSpace)
+{
+    if (colorSpaceConvertMap.count(colorSpace)) {
+        return colorSpaceConvertMap[colorSpace];
+    }
+    WLOGFE("try to get not exist colorGamut");
+    return GRAPHIC_COLOR_GAMUT_SRGB;
+}
+
+bool WindowSessionImpl::IsSupportWideGamut()
+{
+    return true;
+}
+
+void WindowSessionImpl::SetColorSpace(ColorSpace colorSpace)
+{
+    auto colorGamut = GetSurfaceGamutFromColorSpace(colorSpace);
+    surfaceNode_->SetColorSpace(colorGamut);
+}
+
+ColorSpace WindowSessionImpl::GetColorSpace()
+{
+    GraphicColorGamut colorGamut = surfaceNode_->GetColorSpace();
+    return GetColorSpaceFromSurfaceGamut(colorGamut);
 }
 
 WMError WindowSessionImpl::WindowSessionCreateCheck()
@@ -1209,6 +1252,15 @@ WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
     }
     WLOGFE("FA mode could not set bg color: %{public}u", GetWindowId());
     return WMError::WM_ERROR_INVALID_OPERATION;
+}
+
+std::vector<sptr<Window>> WindowSessionImpl::GetSubWindow(int parentId)
+{
+    auto iter = subWindowSessionMap_.find(parentId);
+    if (iter == subWindowSessionMap_.end()) {
+        return std::vector<sptr<Window>>();
+    }
+    return std::vector<sptr<Window>>(subWindowSessionMap_[parentId].begin(), subWindowSessionMap_[parentId].end());
 }
 
 uint32_t WindowSessionImpl::GetBackgroundColor() const
