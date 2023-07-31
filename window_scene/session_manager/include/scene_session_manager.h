@@ -20,7 +20,7 @@
 #include <mutex>
 
 #include <transaction/rs_interfaces.h>
-
+#include "agent_death_recipient.h"
 #include "common/include/task_scheduler.h"
 #include "future.h"
 #include "interfaces/include/ws_common.h"
@@ -203,12 +203,15 @@ private:
     void DumpAllAppSessionInfo(std::ostringstream& oss);
     void DumpSessionElementInfo(const sptr<SceneSession>& session,
         const std::vector<std::string>& params, std::string& dumpInfo);
+    void AddClientDeathRecipient(const sptr<ISessionStage>& sessionStage, const sptr<SceneSession>& sceneSession);
+    void DestroySpecificSession(const sptr<IRemoteObject>& remoteObject);
 
     sptr<RootSceneSession> rootSceneSession_;
     std::shared_ptr<AbilityRuntime::Context> rootSceneContext_;
     std::shared_mutex sceneSessionMapMutex_;
     std::map<int32_t, sptr<SceneSession>> sceneSessionMap_;
     std::shared_ptr<MissionListenerController> listenerController_;
+    std::map<sptr<IRemoteObject>, int32_t> remoteObjectMap_;
     std::set<sptr<SceneSession>> avoidAreaListenerSessionSet_;
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
 
@@ -242,6 +245,8 @@ private:
     WSError NotifyWaterMarkFlagChangedResult(bool hasWaterMark);
     int32_t waterMarkSessionCount_ { 0 };
     sptr<SceneSession> callingSession_ = nullptr;
+    sptr<AgentDeathRecipient> windowDeath_ = new AgentDeathRecipient(
+        std::bind(&SceneSessionManager::DestroySpecificSession, this, std::placeholders::_1));
 };
 } // namespace OHOS::Rosen
 
