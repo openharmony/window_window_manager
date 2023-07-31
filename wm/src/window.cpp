@@ -129,7 +129,11 @@ sptr<Window> Window::Create(sptr<WindowOption>& option, const std::shared_ptr<OH
 
 sptr<Window> Window::Find(const std::string& windowName)
 {
-    return WindowImpl::Find(windowName);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return WindowSessionImpl::Find(windowName);
+    } else {
+        return WindowImpl::Find(windowName);
+    }
 }
 
 sptr<Window> Window::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
@@ -152,7 +156,11 @@ sptr<Window> Window::GetTopWindowWithId(uint32_t mainWinId)
 
 std::vector<sptr<Window>> Window::GetSubWindow(uint32_t parentId)
 {
-    return WindowImpl::GetSubWindow(parentId);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return WindowSessionImpl::GetSubWindow(parentId);
+    } else {
+        return WindowImpl::GetSubWindow(parentId);
+    }
 }
 
 void Window::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)

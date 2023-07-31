@@ -34,6 +34,7 @@
 #include "session/host/include/zidl/session_interface.h"
 #include "window.h"
 #include "window_option.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -46,6 +47,7 @@ public:
     explicit WindowSessionImpl(const sptr<WindowOption>& option);
     ~WindowSessionImpl();
     static sptr<Window> Find(const std::string& name);
+    static std::vector<sptr<Window>> GetSubWindow(int parentId);
     // inherits from window
     virtual WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession);
@@ -127,6 +129,10 @@ public:
     void NotifyTouchDialogTarget() override;
     void NotifyScreenshot() override;
     void DumpSessionElementInfo(const std::vector<std::string>& params) override;
+    // colorspace, gamut
+    virtual bool IsSupportWideGamut() override;
+    virtual void SetColorSpace(ColorSpace colorSpace) override;
+    virtual ColorSpace GetColorSpace() override;
 
     WindowState state_ { WindowState::STATE_INITIAL };
     WindowState requestState_ { WindowState::STATE_INITIAL };
@@ -165,6 +171,11 @@ protected:
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
 
 private:
+    //Trans between colorGamut and colorSpace
+    static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
+    static GraphicColorGamut GetSurfaceGamutFromColorSpace(ColorSpace colorSpace);
+    static std::unordered_map<ColorSpace, GraphicColorGamut> colorSpaceConvertMap;
+
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> GetListeners();
