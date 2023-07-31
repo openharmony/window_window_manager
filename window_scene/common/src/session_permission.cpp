@@ -49,8 +49,9 @@ bool SessionPermission::IsSystemCalling()
 {
     const auto& tokenId = IPCSkeleton::GetCallingTokenID();
     const auto& flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
-    if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        WLOGFD("Is native token, id: %{public}u", tokenId);
+    if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
+        flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
+        WLOGFD("tokenId: %{public}u, flag: %{public}u", tokenId, flag);
         return true;
     }
     WLOGFD("tokenId: %{public}u, flag: %{public}u", tokenId, flag);

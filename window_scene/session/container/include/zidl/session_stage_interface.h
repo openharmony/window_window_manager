@@ -43,13 +43,13 @@ public:
         TRANS_ID_NOTIFY_OCCUPIED_AREA_CHANGE_INFO,
         TRANS_ID_UPDATE_AVOID_AREA,
         TRANS_ID_NOTIFY_SCREEN_SHOT,
-        TRANS_ID_DUMP_SESSSION_ELEMENT_INFO
+        TRANS_ID_DUMP_SESSSION_ELEMENT_INFO,
+        TRANS_ID_NOTIFY_TOUCH_OUTSIDE,
     };
 
     virtual void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
     virtual void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) {}
     virtual void NotifyFocusActiveEvent(bool isFocusActive) {}
-    virtual void NotifyFocusWindowIdEvent(int32_t windowId) {}
     virtual int32_t GetPersistentId() const
     {
         return -1;
@@ -71,6 +71,7 @@ public:
     virtual WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) = 0;
     virtual void NotifyScreenshot() = 0;
     virtual void DumpSessionElementInfo(const std::vector<std::string>& params) = 0;
+    virtual WSError NotifyTouchOutside() = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

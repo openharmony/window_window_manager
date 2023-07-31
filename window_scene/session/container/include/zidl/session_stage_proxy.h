@@ -40,6 +40,7 @@ public:
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void NotifyScreenshot() override;
     void DumpSessionElementInfo(const std::vector<std::string>& params)  override;
+    WSError NotifyTouchOutside() override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

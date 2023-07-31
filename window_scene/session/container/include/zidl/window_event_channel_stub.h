@@ -39,7 +39,6 @@ private:
     int HandleTransferPointerEvent(MessageParcel& data, MessageParcel& reply);
     int HandleGetApplicationPid(MessageParcel& data, MessageParcel& reply);
     int HandleTransferFocusActiveEvent(MessageParcel& data, MessageParcel& reply);
-    int HandleTransferFocusWindowIdEvent(MessageParcel& data, MessageParcel& reply);
     int HandleTransferFocusStateEvent(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
