@@ -52,13 +52,13 @@ void ANRManager::AddTimer(int32_t eventId, int32_t persistentId)
         return;
     }
     int32_t timerId = TimerMgr->AddTimer(ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME, [this, eventId, persistentId]() {
-        WLOGFD("Anr callback enter. persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
+        WLOGFE("Anr callback enter. persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
         eventStage_.SetAnrStatus(persistentId, true);
         AppInfo appInfo = GetAppInfoByPersistentId(persistentId);
-        DfxHisysevent::ApplicationBlockInput(eventId, appInfo.pid, appInfo.processName, persistentId);
+        DfxHisysevent::ApplicationBlockInput(eventId, appInfo.pid, appInfo.bundleName, persistentId);
         WLOGFE("Application not responding. persistentId:%{public}d, eventId:%{public}d,"
-            "pid:%{public}d, processName:%{public}s",
-            persistentId, eventId, appInfo.pid, appInfo.processName.c_str());
+            "pid:%{public}d, bundleName:%{public}s",
+            persistentId, eventId, appInfo.pid, appInfo.bundleName.c_str());
         if (anrObserver_ != nullptr) {
             anrObserver_(appInfo.pid);
         } else {
@@ -71,7 +71,7 @@ void ANRManager::AddTimer(int32_t eventId, int32_t persistentId)
                 anrTimerCount_--;
             }
         }
-        WLOGFD("Anr callback leave. persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
+        WLOGFE("Anr callback leave. persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
     });
     anrTimerCount_++;
     eventStage_.SaveANREvent(persistentId, eventId, timerId);
@@ -95,8 +95,8 @@ bool ANRManager::IsANRTriggered(int32_t persistentId)
 {
     std::lock_guard<std::mutex> guard(mtx_);
     if (eventStage_.CheckAnrStatus(persistentId)) {
-        WLOGFD("Application not respond, persistentId:%{public}d -> applicationPid:%{public}d, processName:%{public}s",
-            persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].processName.c_str());
+        WLOGFE("Application not respond, persistentId:%{public}d -> pid:%{public}d, bundleName:%{public}s",
+            persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].bundleName.c_str());
         return true;
     }
     return false;
@@ -106,18 +106,18 @@ void ANRManager::OnSessionLost(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
-    WLOGFD("Disconnect session, persistentId:%{public}d -> applicationPid:%{public}d, processName:%{public}s",
-        persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].processName.c_str());
+    WLOGFD("Disconnect session, persistentId:%{public}d -> pid:%{public}d, bundleName:%{public}s",
+        persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].bundleName.c_str());
     RemoveTimers(persistentId);
     RemovePersistentId(persistentId);
 }
 
-void ANRManager::SetApplicationInfo(int32_t persistentId, int32_t applicationPid, std::string processName)
+void ANRManager::SetApplicationInfo(int32_t persistentId, int32_t pid, const std::string& bundleName)
 {
     std::lock_guard<std::mutex> guard(mtx_);
-    WLOGFD("PersistentId:%{public}d -> applicationPid:%{public}d, processName:%{public}s",
-        persistentId, applicationPid, processName.c_str());
-    applicationMap_[persistentId] = { applicationPid, processName };
+    WLOGFD("PersistentId:%{public}d -> pid:%{public}d, bundleName:%{public}s",
+        persistentId, pid, bundleName.c_str());
+    applicationMap_[persistentId] = { pid, bundleName };
 }
 
 void ANRManager::SetAnrObserver(std::function<void(int32_t)> anrObserver)
@@ -130,8 +130,8 @@ void ANRManager::SetAnrObserver(std::function<void(int32_t)> anrObserver)
 ANRManager::AppInfo ANRManager::GetAppInfoByPersistentId(int32_t persistentId)
 {
     if (applicationMap_.find(persistentId) != applicationMap_.end()) {
-        WLOGFD("PersistentId:%{public}d -> pid:%{public}d, processName:%{public}s",
-            persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].processName.c_str());
+        WLOGFD("PersistentId:%{public}d -> pid:%{public}d, bundleName:%{public}s",
+            persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].bundleName.c_str());
         return applicationMap_[persistentId];
     }
     WLOGFD("No application matches persistentId:%{public}d", persistentId);
@@ -164,5 +164,26 @@ void ANRManager::SwitchAnr(bool status)
         WLOGFI("Anr is off");
     }
 }
+
+void ANRManager::SetAppInfoGetter(std::function<void(int32_t, std::string&, int32_t)> callback)
+{
+    CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mtx_);
+    appInfoGetter_ = callback;
+}
+
+std::string ANRManager::GetBundleName(int32_t pid, int32_t uid)
+{
+    CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mtx_);
+    std::string bundleName { "unknow" };
+    if (appInfoGetter_ == nullptr) {
+        WLOGFE("AppInfoGetter is nullptr");
+        return bundleName;
+    }
+    appInfoGetter_(pid, bundleName, uid);
+    return bundleName;
+}
+
 } // namespace Rosen
 } // namespace OHOS

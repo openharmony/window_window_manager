@@ -40,22 +40,25 @@ public:
     void MarkProcessed(int32_t eventId, int32_t persistentId);
     bool IsANRTriggered(int32_t persistentId);
     void OnSessionLost(int32_t persistentId);
-    void SetApplicationInfo(int32_t persistentId, int32_t applicationPid, std::string processName);
+    void SetApplicationInfo(int32_t persistentId, int32_t pid, const std::string& uid);
     void SetAnrObserver(std::function<void(int32_t)> anrObserver);
+    void SetAppInfoGetter(std::function<void(int32_t, std::string&, int32_t)> callback);
+    std::string GetBundleName(int32_t pid, int32_t uid);
 private:
     struct AppInfo {
         int32_t pid { -1 };
-        std::string processName { "unknow" };
+        std::string bundleName { "unknow" };
     };
     ANRManager::AppInfo GetAppInfoByPersistentId(int32_t persistentId);
     void RemoveTimers(int32_t persistentId);
     void RemovePersistentId(int32_t persistentId);
 private:
-    std::atomic_bool switcher_ {true};
+    std::atomic_bool switcher_ { true };
     std::mutex mtx_;
     int32_t anrTimerCount_ { 0 };
     std::unordered_map<int32_t, AppInfo> applicationMap_;
     std::function<void(int32_t)> anrObserver_;
+    std::function<void(int32_t, std::string&, int32_t)> appInfoGetter_;
     EventStage eventStage_;
 };
 } // namespace Rosen
