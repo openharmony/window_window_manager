@@ -60,6 +60,8 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
             } else {
                 SceneSessionManager::GetInstance().OnOutsideDownEvent(
                     pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+                SceneSessionManager::GetInstance().NotifySessionTouchOutside(
+                    action, pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
             }
         }
     }

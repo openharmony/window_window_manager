@@ -130,6 +130,7 @@ public:
     void InitPersistentStorage();
     std::string GetSessionSnapshotFilePath(int32_t persistentId);
     void OnOutsideDownEvent(int32_t x, int32_t y);
+    void NotifySessionTouchOutside(int32_t action, int32_t x, int32_t y);
 
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
     WSError SetWindowFlags(const sptr<SceneSession>& sceneSession, uint32_t flags);
