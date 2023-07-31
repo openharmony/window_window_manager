@@ -34,12 +34,12 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSessionManager" };
 const std::string SCREEN_SESSION_MANAGER_THREAD = "ScreenSessionManager";
 const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
-std::recursive_mutex screenSessionManagerInstanceMutex_;
+std::recursive_mutex g_instanceMutex;
 } // namespace
 
 ScreenSessionManager& ScreenSessionManager::GetInstance()
 {
-    std::lock_guard<std::recursive_mutex> lock(screenSessionManagerInstanceMutex_);
+    std::lock_guard<std::recursive_mutex> lock(g_instanceMutex);
     static ScreenSessionManager* instance = nullptr;
     if (instance == nullptr) {
         instance = new ScreenSessionManager();
@@ -913,7 +913,10 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
     if (rsScreenId != SCREEN_ID_INVALID && GetScreenSession(screenId) != nullptr) {
         std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
         auto smsScreenMapIter = screenSessionMap_.find(screenId);
-        screenSessionMap_.erase(smsScreenMapIter);
+        if (smsScreenMapIter != screenSessionMap_.end()) {
+            RemoveFromGroupLocked(smsScreenMapIter->second);
+            screenSessionMap_.erase(smsScreenMapIter);
+        }
     }
     screenIdManager_.DeleteScreenId(screenId);
 

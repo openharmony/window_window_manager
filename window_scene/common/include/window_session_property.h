@@ -85,6 +85,7 @@ public:
     void AddWindowFlag(WindowFlag flag);
     void SetModeSupportInfo(uint32_t modeSupportInfo);
     void SetFloatingWindowAppType(bool isAppType);
+    void SetTouchHotAreas(const std::vector<Rect>& rects);
 
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
@@ -110,12 +111,13 @@ public:
     WindowMode GetWindowMode() const;
     WindowLimits GetWindowLimits() const;
     uint32_t GetModeSupportInfo() const;
-    const std::unordered_map<WindowType, SystemBarProperty>& GetSystemBarProperty() const;
+    std::unordered_map<WindowType, SystemBarProperty> GetSystemBarProperty() const;
     void GetSessionGravity(SessionGravity& gravity, uint32_t& percent);
     bool IsDecorEnable();
     uint32_t GetAnimationFlag() const;
     const Transform& GetTransform() const;
     bool IsFloatingWindowAppType() const;
+    void GetTouchHotAreas(std::vector<Rect>& rects) const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
     static void UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property);
@@ -125,6 +127,8 @@ public:
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
 
 private:
+    bool MarshallingTouchHotAreas(Parcel& parcel) const;
+    static void UnmarshallingTouchHotAreas(Parcel& parcel, WindowSessionProperty* property);
     std::string windowName_;
     SessionInfo sessionInfo_;
     Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
@@ -159,6 +163,7 @@ private:
     // Transform info
     Transform trans_;
     bool isFloatingWindowAppType_ = false;
+    std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
 };
 
 struct SystemSessionConfig : public Parcelable {

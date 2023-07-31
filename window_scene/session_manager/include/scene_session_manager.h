@@ -20,7 +20,7 @@
 #include <mutex>
 
 #include <transaction/rs_interfaces.h>
-
+#include "agent_death_recipient.h"
 #include "common/include/task_scheduler.h"
 #include "future.h"
 #include "interfaces/include/ws_common.h"
@@ -131,6 +131,7 @@ public:
     void InitPersistentStorage();
     std::string GetSessionSnapshotFilePath(int32_t persistentId);
     void OnOutsideDownEvent(int32_t x, int32_t y);
+    void NotifySessionTouchOutside(int32_t action, int32_t x, int32_t y);
 
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
     WSError SetWindowFlags(const sptr<SceneSession>& sceneSession, uint32_t flags);
@@ -205,12 +206,15 @@ private:
     void DumpAllAppSessionInfo(std::ostringstream& oss);
     void DumpSessionElementInfo(const sptr<SceneSession>& session,
         const std::vector<std::string>& params, std::string& dumpInfo);
+    void AddClientDeathRecipient(const sptr<ISessionStage>& sessionStage, const sptr<SceneSession>& sceneSession);
+    void DestroySpecificSession(const sptr<IRemoteObject>& remoteObject);
 
     sptr<RootSceneSession> rootSceneSession_;
     std::shared_ptr<AbilityRuntime::Context> rootSceneContext_;
     std::shared_mutex sceneSessionMapMutex_;
     std::map<int32_t, sptr<SceneSession>> sceneSessionMap_;
     std::shared_ptr<MissionListenerController> listenerController_;
+    std::map<sptr<IRemoteObject>, int32_t> remoteObjectMap_;
     std::set<sptr<SceneSession>> avoidAreaListenerSessionSet_;
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
 
@@ -236,7 +240,7 @@ private:
     std::shared_ptr<RSOcclusionData> lastOcclusionData_ = std::make_shared<RSOcclusionData>();
     RSInterfaces& rsInterface_;
     void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
-    void OnSessionStateChange(int32_t persistentId);
+    void OnSessionStateChange(int32_t persistentId, const SessionState& state);
     sptr<ISessionListener> sessionListener_;
     sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject> &token);
 
@@ -245,6 +249,8 @@ private:
     int32_t waterMarkSessionCount_ { 0 };
     WindowFocusChangedFunc windowFocusChangedFunc_;
     sptr<SceneSession> callingSession_ = nullptr;
+    sptr<AgentDeathRecipient> windowDeath_ = new AgentDeathRecipient(
+        std::bind(&SceneSessionManager::DestroySpecificSession, this, std::placeholders::_1));
 };
 } // namespace OHOS::Rosen
 
