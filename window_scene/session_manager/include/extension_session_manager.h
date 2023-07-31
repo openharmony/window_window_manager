@@ -42,7 +42,7 @@ public:
      * @param extensionSession the extension session need to be activated
      * @return WSError
      */
-    WSError RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession);
+    WSError RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession, uint32_t hostWindowId);
     /**
      * @brief background extension session
      *

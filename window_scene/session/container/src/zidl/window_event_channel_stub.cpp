@@ -34,8 +34,6 @@ const std::map<uint32_t, WindowEventChannelStubFunc> WindowEventChannelStub::stu
         &WindowEventChannelStub::HandleTransferPointerEvent),
     std::make_pair(static_cast<uint32_t>(WindowEventChannelMessage::TRANS_ID_TRANSFER_FOCUS_ACTIVE_EVENT),
         &WindowEventChannelStub::HandleTransferFocusActiveEvent),
-    std::make_pair(static_cast<uint32_t>(WindowEventChannelMessage::TRANS_ID_TRANSFER_FOCUS_WINDOW_ID_EVENT),
-        &WindowEventChannelStub::HandleTransferFocusWindowIdEvent),
     std::make_pair(static_cast<uint32_t>(WindowEventChannelMessage::TRANS_ID_TRANSFER_FOCUS_STATE_EVENT),
         &WindowEventChannelStub::HandleTransferFocusStateEvent)
 };
@@ -99,14 +97,6 @@ int WindowEventChannelStub::HandleTransferFocusActiveEvent(MessageParcel& data, 
 {
     bool isFocusActive = data.ReadBool();
     WSError errCode = TransferFocusActiveEvent(isFocusActive);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
-    return ERR_NONE;
-}
-
-int WindowEventChannelStub::HandleTransferFocusWindowIdEvent(MessageParcel& data, MessageParcel& reply)
-{
-    auto focusWindowId = data.ReadInt32();
-    WSError errCode = TransferFocusWindowId(focusWindowId);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

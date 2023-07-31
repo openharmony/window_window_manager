@@ -79,11 +79,12 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
     return taskScheduler_->PostSyncTask(task);
 }
 
-WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession)
+WSError ExtensionSessionManager::RequestExtensionSessionActivation(
+    const sptr<ExtensionSession>& extensionSession, uint32_t hostWindowId)
 {
     wptr<ExtensionSession> weakExtSession(extensionSession);
     WSError ret = WSError::WS_OK;
-    auto task = [this, weakExtSession, &ret]() {
+    auto task = [this, weakExtSession, &ret, hostWindowId]() {
         auto extSession = weakExtSession.promote();
         if (extSession == nullptr) {
             WLOGFE("session is nullptr");
@@ -99,6 +100,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
         if (extSessionInfo == nullptr) {
             return WSError::WS_ERROR_NULLPTR;
         }
+        extSessionInfo->hostWindowId = hostWindowId;
         auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIExtensionAbility(extSessionInfo,
             AAFwk::DEFAULT_INVAL_VALUE);
         ret = (errorCode == ERR_OK) ? WSError::WS_OK : WSError::WS_ERROR_START_UI_EXTENSION_ABILITY_FAILED;
