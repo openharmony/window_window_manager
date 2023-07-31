@@ -260,6 +260,10 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
             continue;
         }
         sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
+        if (displayInfo == nullptr) {
+            WLOGFE("ConvertToDisplayInfo error, displayInfo is nullptr.");
+            continue;
+        }
         if (displayId == displayInfo->GetDisplayId()) {
             return displayInfo;
         }
