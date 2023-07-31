@@ -202,6 +202,7 @@ private:
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
 
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
+    bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
 
     static std::recursive_mutex globalMutex_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
