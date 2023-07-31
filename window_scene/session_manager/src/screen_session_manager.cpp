@@ -717,9 +717,9 @@ void ScreenSessionManager::SetSensorSubscriptionEnabled()
     ScreenSensorConnector::SubscribeRotationSensor();
 }
 
-bool ScreenSessionManager::SetRotationFromWindow(DisplayId displayId, Rotation targetRotation)
+bool ScreenSessionManager::SetRotationFromWindow(Rotation targetRotation)
 {
-    sptr<DisplayInfo> displayInfo = GetDisplayInfoById(displayId);
+    sptr<DisplayInfo> displayInfo = GetDefaultDisplayInfo();
     if (displayInfo == nullptr) {
         return false;
     }

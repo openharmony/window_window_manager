@@ -189,8 +189,7 @@ void ScreenRotationProperty::SetScreenRotation(Rotation targetRotation)
     if (targetRotation == GetCurrentDisplayRotation()) {
         return;
     }
-    ScreenSessionManager::GetInstance().GetDefaultDisplayInfo()->SetRotation(targetRotation);
-    ScreenSessionManager::GetInstance().SetRotationFromWindow(defaultDisplayId_, targetRotation);
+    ScreenSessionManager::GetInstance().SetRotationFromWindow(targetRotation);
     WLOGFI("dms: Set screen rotation: %{public}u", targetRotation);
 }
 
