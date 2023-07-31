@@ -16,6 +16,8 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_INTENTION_EVENT_MANAGER_H
 #define OHOS_ROSEN_WINDOW_SCENE_INTENTION_EVENT_MANAGER_H
 
+#include <mutex>
+
 #include "input_manager.h"
 #include "singleton.h"
 #include "ui_content.h"
@@ -35,14 +37,19 @@ public:
 private:
 class InputEventListener : public MMI::IInputEventConsumer {
 public:
-    explicit InputEventListener(Ace::UIContent* uiContent): uiContent_(uiContent) {}
-    virtual ~InputEventListener() = default;
+    InputEventListener(Ace::UIContent* uiContent, std::shared_ptr<AppExecFwk::EventHandler>
+        eventHandler): uiContent_(uiContent), weakEventConsumer_(eventHandler) {}
+    virtual ~InputEventListener();
     void OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const override;
     void OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const override;
     void OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const override;
+    void RegisterWindowFocusChanged();
 
 private:
+    void UpdateLastMouseEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const;
     Ace::UIContent* uiContent_ = nullptr;
+    std::weak_ptr<AppExecFwk::EventHandler> weakEventConsumer_ = nullptr;
+    mutable std::mutex mouseEventMutex_;
 };
 };
 } // namespace OHOS::Rosen
