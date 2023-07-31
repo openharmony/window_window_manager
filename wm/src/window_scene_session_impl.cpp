@@ -731,7 +731,7 @@ WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
 {
     if (property_ == nullptr || hostSession_ == nullptr) {
         WLOGFE("SetAspectRatio failed because of nullptr");
-        return  WMError::WM_ERROR_NULLPTR;
+        return WMError::WM_ERROR_NULLPTR;
     }
     if (ratio == MathHelper::INF || ratio == MathHelper::NAG_INF || std::isnan(ratio)) {
         WLOGFE("SetAspectRatio failed, because of wrong value: %{public}f", ratio);
@@ -745,13 +745,12 @@ WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
 
 WMError WindowSceneSessionImpl::ResetAspectRatio()
 {
-    if (hostSession_) {
-        hostSession_->SetAspectRatio(0.0f);
-        return WMError::WM_OK;
-    } else {
+    if (!hostSession_) {
         WLOGFE("no host session found");
         return WMError::WM_ERROR_NULLPTR;
     }
+    hostSession_->SetAspectRatio(0.0f);
+    return WMError::WM_OK;
 }
 
 WmErrorCode WindowSceneSessionImpl::RaiseToAppTop()
@@ -771,7 +770,9 @@ WmErrorCode WindowSceneSessionImpl::RaiseToAppTop()
         WLOGFE("The sub window must be shown!");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-
+    if (!hostSession_) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
     const WSError& ret = hostSession_->RaiseToAppTop();
     return static_cast<WmErrorCode>(ret);
 }
@@ -799,6 +800,9 @@ WMError WindowSceneSessionImpl::NotifyWindowNeedAvoid(bool status)
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (hostSession_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
     }
     hostSession_->OnNeedAvoid(status);
     return WMError::WM_OK;
@@ -852,6 +856,9 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
 
 WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
 {
+    if (hostSession_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
     WLOGFI("winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
     hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
     SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -917,6 +924,9 @@ WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const Syst
 WMError WindowSceneSessionImpl::SetFullScreen(bool status)
 {
     WLOGFI("winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
+    if (hostSession_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
     hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
     SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     WMError ret = SetLayoutFullScreenByApiVersion(status);
@@ -957,7 +967,7 @@ WMError WindowSceneSessionImpl::Minimize()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (WindowHelper::IsMainWindow(GetType())) {
+    if (WindowHelper::IsMainWindow(GetType()) && hostSession_) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
     }
     return WMError::WM_OK;
@@ -1008,7 +1018,7 @@ WMError WindowSceneSessionImpl::Recover()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (WindowHelper::IsMainWindow(GetType())) {
+    if (WindowHelper::IsMainWindow(GetType()) && hostSession_) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_RECOVER);
         SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
@@ -1025,7 +1035,7 @@ void WindowSceneSessionImpl::StartMove()
         WLOGFE("session is invalid");
         return;
     }
-    if (WindowHelper::IsMainWindow(GetType())) {
+    if (WindowHelper::IsMainWindow(GetType()) && hostSession_) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     }
     return;
@@ -1038,7 +1048,7 @@ WMError WindowSceneSessionImpl::Close()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (WindowHelper::IsMainWindow(GetType())) {
+    if (WindowHelper::IsMainWindow(GetType()) && hostSession_) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_CLOSE);
     }
 
@@ -1094,7 +1104,7 @@ WMError WindowSceneSessionImpl::SetGlobalMaximizeMode(MaximizeMode mode)
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+    if (WindowHelper::IsMainWindow(GetType()) && hostSession_) {
         hostSession_->SetGlobalMaximizeMode(mode);
         return WMError::WM_OK;
     } else {
