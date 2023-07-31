@@ -832,7 +832,7 @@ void Session::NotifySessionStateChange(const SessionState& state)
         sessionStateChangeFunc_(state);
     }
     if (sessionStateChangeNotifyManagerFunc_) {
-        sessionStateChangeNotifyManagerFunc_(GetPersistentId());
+        sessionStateChangeNotifyManagerFunc_(GetPersistentId(), state);
     }
 }
 
