@@ -74,7 +74,9 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_TRANSFER_EXTENSION_DATA),
         &SessionStub::HandleTransferExtensionData),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_NOTIFY_REMOTE_READY),
-        &SessionStub::HandleNotifyRemoteReady)
+        &SessionStub::HandleNotifyRemoteReady),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_NOTIFY_EXTENSION_DIED),
+        &SessionStub::HandleNotifyExtensionDied)
 };
 
 int SessionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -422,6 +424,13 @@ int SessionStub::HandleNotifyRemoteReady(MessageParcel& data, MessageParcel& rep
 {
     WLOGFD("HandleNotifyRemoteReady!");
     NotifyRemoteReady();
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyExtensionDied(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("called");
+    NotifyExtensionDied();
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
