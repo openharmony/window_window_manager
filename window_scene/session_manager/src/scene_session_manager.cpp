@@ -939,6 +939,40 @@ void SceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
     }
 }
 
+void SceneSessionManager::NotifySessionTouchOutside(int32_t action, int32_t x, int32_t y)
+{
+    for (const auto &item : sceneSessionMap_) {
+        auto sceneSession = item.second;
+        if (sceneSession == nullptr) {
+            continue;
+        }
+        auto persistentId = sceneSession->GetPersistentId();
+        auto touchHotAreaRects = sceneSession->GetTouchHotAreas();
+        if (!touchHotAreaRects.empty()) {
+            bool touchInsideFlag = false;
+            for (auto touchHotAreaRect : touchHotAreaRects) {
+                if (!SessionHelper::IsPointInRect(x, y, touchHotAreaRect)) {
+                    continue;
+                } else {
+                    WLOGFD("TouchInside %{public}d", persistentId);
+                    touchInsideFlag = true;
+                    break;
+                }
+            }
+            if (!touchInsideFlag) {
+                sceneSession->NotifyTouchOutside();
+            }
+        } else {
+            auto hotAreaRect = sceneSession->GetHotAreaRect(action);
+            if (!SessionHelper::IsPointInRect(x, y, hotAreaRect)) {
+                sceneSession->NotifyTouchOutside();
+            } else {
+                WLOGFD("TouchInside %{public}d", persistentId);
+            }
+        }
+    }
+}
+
 void SceneSessionManager::SetOutsideDownEventListener(const ProcessOutsideDownEventFunc& func)
 {
     WLOGFD("SetOutsideDownEventListener");
@@ -1193,8 +1227,8 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS: {
-            auto& systemBarProperties = property->GetSystemBarProperty();
-            for (auto& iter : systemBarProperties) {
+            auto systemBarProperties = property->GetSystemBarProperty();
+            for (auto iter : systemBarProperties) {
                 sceneSession->SetSystemBarProperty(iter.first, iter.second);
             }
             NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
@@ -1212,6 +1246,14 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
         case WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG: {
             if (sceneSession->GetSessionProperty() != nullptr) {
                 sceneSession->GetSessionProperty()->SetAnimationFlag(property->GetAnimationFlag());
+            }
+            break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA: {
+            if (sceneSession->GetSessionProperty() != nullptr) {
+                std::vector<Rect> touchHotAreas;
+                property->GetTouchHotAreas(touchHotAreas);
+                sceneSession->GetSessionProperty()->SetTouchHotAreas(touchHotAreas);
             }
             break;
         }
@@ -2497,9 +2539,11 @@ bool SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
     NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_BOUNDS);
 
     WindowType type = sceneSession->GetWindowType();
-    SessionGravity gravity;
+    SessionGravity gravity = SessionGravity::SESSION_GRAVITY_BOTTOM;
     uint32_t percent = 0;
-    sceneSession->GetSessionProperty()->GetSessionGravity(gravity, percent);
+    if (sceneSession->GetSessionProperty() != nullptr) {
+        sceneSession->GetSessionProperty()->GetSessionGravity(gravity, percent);
+    }
     if (type == WindowType::WINDOW_TYPE_STATUS_BAR ||
         type == WindowType::WINDOW_TYPE_NAVIGATION_BAR ||
         (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
