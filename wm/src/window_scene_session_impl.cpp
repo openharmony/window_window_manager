@@ -815,13 +815,13 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
     if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
         version = context_->GetApplicationInfo()->apiCompatibleVersion;
     }
+    isIgnoreSafeArea_ = status;
     // 10 ArkUI new framework support after API10
     if (version >= 10) {
         if (uiContent_ != nullptr) {
             uiContent_->SetIgnoreViewSafeArea(status);
         } else {
             isIgnoreSafeAreaNeedNotify_ = true;
-            isIgnoreSafeArea_ = status;
         }
     } else {
         WMError ret = WMError::WM_OK;
@@ -865,10 +865,8 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
 
 bool WindowSceneSessionImpl::IsLayoutFullScreen() const
 {
-    uint32_t flags = GetWindowFlags();
     WindowMode mode = GetMode();
-    bool needAvoid = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
-    return (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !needAvoid);
+    return (mode == WindowMode::WINDOW_MODE_FULLSCREEN && isIgnoreSafeArea_);
 }
 
 SystemBarProperty WindowSceneSessionImpl::GetSystemBarPropertyByType(WindowType type) const
