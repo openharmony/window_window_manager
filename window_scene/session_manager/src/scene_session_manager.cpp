@@ -1694,6 +1694,9 @@ WSError SceneSessionManager::SetWindowFlags(const sptr<SceneSession>& sceneSessi
         return WSError::WS_ERROR_NULLPTR;
     }
     auto property = sceneSession->GetWindowSessionProperty();
+    if (property == nullptr) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
     uint32_t oldFlags = property->GetWindowFlags();
     property->SetWindowFlags(flags);
     // notify when visibility change
