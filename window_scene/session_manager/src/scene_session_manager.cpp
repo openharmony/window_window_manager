@@ -1701,11 +1701,20 @@ WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
         if (res != WSError::WS_OK) {
             return res;
         }
+        if (windowFocusChangedFunc_ != nullptr) {
+            windowFocusChangedFunc_(persistentId, isFocused);
+        }
         return WSError::WS_OK;
     };
 
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::RegisterWindowFocusChanged(const WindowFocusChangedFunc& func)
+{
+    WLOGFE("RegisterWindowFocusChanged in");
+    windowFocusChangedFunc_ = func;
 }
 
 void SceneSessionManager::UpdatePrivateStateAndNotify(bool isAddingPrivateSession)

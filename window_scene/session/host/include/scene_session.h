@@ -16,6 +16,8 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 
+#include <mutex>
+
 #include "session/host/include/session.h"
 #include "session/host/include/move_drag_controller.h"
 #include "wm_common.h"
@@ -125,6 +127,8 @@ public:
     bool IsVisible() const;
     bool IsFloatingWindowAppType() const;
     void DumpSessionElementInfo(const std::vector<std::string>& params);
+    static const wptr<SceneSession> GetEnterWindow();
+    static void ClearEnterWindow();
 
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 private:
@@ -141,6 +145,8 @@ private:
     sptr<MoveDragController> moveDragController_ = nullptr;
     sptr<SetWindowScenePatternFunc> setWindowScenePatternFunc_ = nullptr;
     bool isVisible_ = false;
+    static wptr<SceneSession> enterSession_;
+    static std::mutex enterSessionMutex_;
 };
 } // namespace OHOS::Rosen
 
