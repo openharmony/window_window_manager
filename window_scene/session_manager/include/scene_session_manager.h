@@ -163,6 +163,7 @@ private:
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig);
     void ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig);
     void ConfigStartingWindowAnimation(const WindowSceneConfig::ConfigItem& startingWindowConfig);
+    sptr<SceneSession::SpecificSessionCallback> CreateSpecificSessionCallback();
 
     void RelayoutKeyBoard(sptr<SceneSession> sceneSession);
     void RestoreCallingSessionSizeIfNeed();
