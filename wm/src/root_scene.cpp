@@ -101,6 +101,14 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
         }
         WLOGFD("Receive anr notice leave");
     }));
+    DelayedSingleton<ANRManager>::GetInstance()->SetAppInfoGetter(
+        [](int32_t pid, std::string& bundleName, int32_t uid) {
+            int32_t ret = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetBundleNameByPid(
+                pid, bundleName, uid);
+            if (ret != 0) {
+                WLOGFE("GetBundleNameByPid failed, pid:%{public}d, errcode:%{public}d", pid, ret);
+            }
+        });
 }
 
 void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)

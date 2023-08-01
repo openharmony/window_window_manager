@@ -47,7 +47,6 @@ ohos_shared_library("intention_event_anr_manager") {
     "eventhandler:libeventhandler",
     "hicollie:libhicollie",
     "hilog:libhilog",
-    "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_single",
