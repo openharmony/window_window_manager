@@ -26,6 +26,9 @@
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
 }
+namespace OHOS::AppExecFwk {
+struct AbilityInfo;
+}
 
 namespace OHOS::Rosen {
 constexpr int32_t INVALID_SESSION_ID = 0;
@@ -118,6 +121,7 @@ struct SessionInfo {
 
     sptr<AAFwk::Want> want;
     std::shared_ptr<AAFwk::AbilityStartSetting> startSetting = nullptr;
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
     int32_t resultCode;
     int32_t requestCode;
     int32_t errorCode;
@@ -127,15 +131,8 @@ struct SessionInfo {
     uint32_t callState_ = 0;
     uint32_t callingTokenId_ = 0;
     StartMethod startMethod;
-    // whether to display in the sessions list
-    bool excludeFromSessions = false;
-    bool removeSessionAfterTerminate = false;
-    bool unClearable = false;
     bool lockedState = false;
-    bool continuable = false;
     std::string time;
-    std::string label;
-    std::string iconPath;
     ContinueState continueState = ContinueState::CONTINUESTATE_ACTIVE;
     int64_t uiAbilityId_ = 0;
 };
