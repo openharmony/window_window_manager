@@ -198,6 +198,8 @@ public:
 
     sptr<IRemoteObject> dialogTargetToken_ = nullptr;
     int32_t GetWindowId() const;
+    void SetAppIndex(const int32_t appIndex);
+    int32_t GetAppIndex() const;
     void SetCallingPid(int32_t id);
     void SetCallingUid(int32_t id);
     int32_t GetCallingPid() const;
@@ -257,7 +259,7 @@ protected:
 
 private:
     void FillSessionInfo(SessionInfo& sessionInfo);
-    sptr<AppExecFwk::AbilityInfo> QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
+    std::shared_ptr<AppExecFwk::AbilityInfo> QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
         const std::string& abilityName, const std::string& moduleName);
     bool CheckDialogOnForeground();
 
@@ -293,6 +295,7 @@ private:
 
     int32_t callingPid_ = { 0 };
     int32_t callingUid_ = { 0 };
+    int32_t appIndex_ = { 0 };
     std::string callingBundleName_ { "unknow" };
     bool isVisible_ {false};
     bool needNotify_ {true};

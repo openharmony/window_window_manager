@@ -124,6 +124,8 @@ public:
     WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener);
     WSError GetSessionInfos(int32_t numMax, std::vector<SessionInfoBean>& sessionInfos);
     WSError GetSessionInfo(int32_t persistentId, SessionInfoBean& sessionInfo);
+    WSError GetAllAbilityInfos(const AAFwk::Want &want, int32_t userId,
+        std::vector<AppExecFwk::AbilityInfo> &abilityInfos);
 
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller);
     WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener);
