@@ -836,8 +836,8 @@ void JsSceneSession::OnBackPressed()
 
 void JsSceneSession::TerminateSession(const SessionInfo& info)
 {
-    WLOGFI("[NAPI]run TerminateSession, bundleName = %{public}s, id = %{public}s",
-        info.bundleName_.c_str(), info.abilityName_.c_str());
+    WLOGFI("[NAPI]run TerminateSession, bundleName = %{public}s, abilityName = %{public}s, persistentId = %{public}d",
+        info.bundleName_.c_str(), info.abilityName_.c_str(), info.persistentId_);
     auto iter = jsCbMap_.find(TERMINATE_SESSION_CB);
     if (iter == jsCbMap_.end()) {
         return;
