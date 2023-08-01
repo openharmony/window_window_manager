@@ -44,18 +44,18 @@ private:
     int HandleGetFocusSessionInfo(MessageParcel &data, MessageParcel &reply);
     int HandleSetSessionLabel(MessageParcel &data, MessageParcel &reply);
     int HandleSetSessionIcon(MessageParcel &data, MessageParcel &reply);
-    int HandleRegisterSessionListener(MessageParcel &data, MessageParcel &reply);
-    int HandleUnregisterSessionListener(MessageParcel &data, MessageParcel &reply);
+    int HandleRegisterSessionChangeListener(MessageParcel &data, MessageParcel &reply);
+    int HandleUnRegisterSessionChangeListener(MessageParcel &data, MessageParcel &reply);
     int HandlePendingSessionToForeground(MessageParcel &data, MessageParcel &reply);
     int HandlePendingSessionToBackgroundForDelegator(MessageParcel &data, MessageParcel &reply);
     int HandleGetFocusSessionToken(MessageParcel &data, MessageParcel &reply);
     int HandleSetGestureNavigationEnabled(MessageParcel &data, MessageParcel &reply);
     int HandleSetSessionGravity(MessageParcel &data, MessageParcel &reply);
 
-    int HandleRegisterMissionListener(MessageParcel& data, MessageParcel& reply);
-    int HandleUnRegisterMissionListener(MessageParcel& data, MessageParcel& reply);
-    int HandleGetMissionInfos(MessageParcel& data, MessageParcel& reply);
-    int HandleGetMissionInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
+    int HandleUnRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
+    int HandleGetSessionInfos(MessageParcel& data, MessageParcel& reply);
+    int HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply);
 
     int HandleTerminateSessionNew(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionDump(MessageParcel &data, MessageParcel &reply);

@@ -20,10 +20,10 @@
 #include "session_listener_interface.h"
 
 namespace OHOS::Rosen {
-class SessionListenerProxy : public IRemoteProxy<ISessionListener> {
+class SessionListenerProxy : public IRemoteProxy<ISessionChangeListener> {
 public:
     explicit SessionListenerProxy(const sptr<IRemoteObject>& impl)
-        : IRemoteProxy<ISessionListener>(impl) {};
+        : IRemoteProxy<ISessionChangeListener>(impl) {};
     ~SessionListenerProxy() {};
 
     virtual void OnSessionLabelChange(int32_t persistentId, const std::string &label) override;

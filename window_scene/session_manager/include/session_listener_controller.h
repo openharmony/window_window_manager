@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_SESSION_MANAGER_MISSION_LISTENER_CONTROLLER_H
-#define OHOS_SESSION_MANAGER_MISSION_LISTENER_CONTROLLER_H
+#ifndef OHOS_SESSION_MANAGER_SESSION_LISTENER_CONTROLLER_H
+#define OHOS_SESSION_MANAGER_SESSION_LISTENER_CONTROLLER_H
 
 #include <mutex>
 #include <vector>
@@ -27,38 +27,38 @@
 
 namespace OHOS {
 namespace Rosen {
-
-class MissionListenerController : public std::enable_shared_from_this<MissionListenerController> {
+using ISessionListener = AAFwk::IMissionListener;
+class SessionListenerController : public std::enable_shared_from_this<SessionListenerController> {
     public:
-    MissionListenerController();
+    SessionListenerController();
 
-    ~MissionListenerController();
+    ~SessionListenerController();
 
     void Init();
 
-    WSError AddMissionListener(const sptr<AAFwk::IMissionListener>& listener);
+    WSError AddSessionListener(const sptr<ISessionListener>& listener);
 
-    void DelMissionListener(const sptr<AAFwk::IMissionListener>& listener);
+    void DelSessionListener(const sptr<ISessionListener>& listener);
 
-    void NotifyMissionCreated(int32_t missionId);
+    void NotifySessionCreated(int32_t persistentId);
 
-    void NotifyMissionDestroyed(int32_t missionId);
+    void NotifySessionDestroyed(int32_t persistentId);
 
-    void NotifyMissionSnapshotChanged(int32_t missionId);
+    void NotifySessionSnapshotChanged(int32_t persistentId);
 
-    void NotifyMissionMovedToFront(int32_t missionId);
+    void NotifySessionMovedToFront(int32_t persistentId);
 
-    void NotifyMissionFocused(int32_t missionId);
+    void NotifySessionFocused(int32_t persistentId);
 
-    void NotifyMissionUnfocused(int32_t missionId);
+    void NotifySessionUnfocused(int32_t persistentId);
 
-    void NotifyMissionIconChanged(int32_t missionId, const std::shared_ptr<OHOS::Media::PixelMap>& icon);
+    void NotifySessionIconChanged(int32_t persistentId, const std::shared_ptr<OHOS::Media::PixelMap>& icon);
 
-    void NotifyMissionClosed(int32_t missionId);
+    void NotifySessionClosed(int32_t persistentId);
 
-    void NotifyMissionLabelUpdated(int32_t missionId);
+    void NotifySessionLabelUpdated(int32_t persistentId);
 
-    void HandleUnInstallApp(const std::list<int32_t>& missions);
+    void HandleUnInstallApp(const std::list<int32_t>& sessions);
 
 private:
     void OnListenerDied(const wptr<IRemoteObject>& remote);
@@ -67,7 +67,7 @@ private:
     void CallListeners(F func, Args&& ... args)
     {
         std::lock_guard<ffrt::mutex> guard(listenerLock_);
-        for (auto listener : missionListeners_) {
+        for (auto listener : sessionListeners_) {
             if (listener) {
                 (listener->*func)(std::forward<Args>(args)...);
             }
@@ -88,9 +88,9 @@ private:
 private:
     ffrt::mutex listenerLock_;
     std::shared_ptr<TaskScheduler> taskScheduler_;
-    std::vector<sptr<AAFwk::IMissionListener>> missionListeners_;
+    std::vector<sptr<ISessionListener>> sessionListeners_;
     sptr<IRemoteObject::DeathRecipient> listenerDeathRecipient_;
 };
 }  // namespace Rosen
 }  // namespace OHOS
-#endif  // OHOS_SESSION_MANAGER_MISSION_LISTENER_CONTROLLER_H
+#endif  // OHOS_SESSION_MANAGER_SESSION_LISTENER_CONTROLLER_H

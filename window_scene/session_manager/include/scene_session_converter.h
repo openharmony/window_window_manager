@@ -29,7 +29,7 @@ class SceneSessionConverter {
 public:
     static WSError ConvertToMissionInfos(std::vector<sptr<SceneSession>>& sceneSessionInfos,
         std::vector<AAFwk::MissionInfo>& missionInfos);
-    static WSError ConvertToMissionInfo(sptr<SceneSession>& sceneSession, OHOS::AAFwk::MissionInfo& missionInfo);
+    static WSError ConvertToMissionInfo(sptr<SceneSession>& sceneSession, AAFwk::MissionInfo& missionInfo);
 };
 }
 }
