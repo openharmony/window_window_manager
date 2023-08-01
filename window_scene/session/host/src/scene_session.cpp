@@ -208,8 +208,8 @@ WSError SceneSession::SetAspectRatio(float ratio)
 
 WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
-    WLOGFD("UpdateRect [%{public}d, %{public}d, %{public}u, %{public}u]", rect.posX_, rect.posY_,
-        rect.width_, rect.height_);
+    WLOGFD("Id: %{public}d, reason: %{public}d, rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
+        GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_, rect.height_);
     WSError ret = Session::UpdateRect(rect, reason);
     if (ret == WSError::WS_OK) {
         specificCallback_->onUpdateAvoidArea_(GetPersistentId());
@@ -219,11 +219,34 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 
 WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
 {
-    WLOGFI("UpdateSessionRect [%{public}d, %{public}d, %{public}u, %{public}u]", rect.posX_, rect.posY_,
-        rect.width_, rect.height_);
-    SetSessionRect(rect);
-    NotifySessionRectChange(rect);
-    UpdateRect(rect, reason);
+    auto newWinRect = winRect_;
+    auto newRequestRect = GetSessionRequestRect();
+    if (reason == SizeChangeReason::MOVE) {
+        newWinRect.posX_ = rect.posX_;
+        newWinRect.posY_ = rect.posY_;
+        newRequestRect.posX_ = rect.posX_;
+        newRequestRect.posY_ = rect.posY_;
+        SetSessionRect(newWinRect);
+        SetSessionRequestRect(newRequestRect);
+        NotifySessionRectChange(newRequestRect, reason);
+    } else if (reason == SizeChangeReason::RESIZE) {
+        newWinRect.width_ = rect.width_;
+        newWinRect.height_ = rect.height_;
+        newRequestRect.width_ = rect.width_;
+        newRequestRect.height_ = rect.height_;
+        SetSessionRect(newWinRect);
+        SetSessionRequestRect(newRequestRect);
+        NotifySessionRectChange(newRequestRect, reason);
+    } else {
+        SetSessionRect(rect);
+        NotifySessionRectChange(rect, reason);
+    }
+
+    WLOGFI("Id: %{public}d, reason: %{public}d, rect: [%{public}d, %{public}d, %{public}u, %{public}u], "
+        "newRequestRect: [%{public}d, %{public}d, %{public}u, %{public}u], newWinRect: [%{public}d, "
+        "%{public}d, %{public}u, %{public}u]", GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_,
+        rect.height_, newRequestRect.posX_, newRequestRect.posY_, newRequestRect.width_, newRequestRect.height_,
+        newWinRect.posX_, newWinRect.posY_, newWinRect.width_, newWinRect.height_);
     return WSError::WS_OK;
 }
 
@@ -479,10 +502,10 @@ void SceneSession::ClearEnterWindow()
     enterSession_ = nullptr;
 }
 
-void SceneSession::NotifySessionRectChange(const WSRect& rect)
+void SceneSession::NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason)
 {
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onRectChange_) {
-        sessionChangeCallback_->onRectChange_(rect);
+        sessionChangeCallback_->onRectChange_(rect, reason);
     }
 }
 

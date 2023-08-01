@@ -88,6 +88,8 @@ public:
 
     void SetWindowSessionProperty(const sptr<WindowSessionProperty>& property);
     sptr<WindowSessionProperty> GetWindowSessionProperty() const;
+    void SetSessionRequestRect(const WSRect& rect);
+    WSRect GetSessionRequestRect() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason);

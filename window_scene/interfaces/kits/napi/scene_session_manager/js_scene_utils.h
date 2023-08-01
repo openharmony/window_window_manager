@@ -100,6 +100,7 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
 bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, SessionInfo& sessionInfo);
 NativeValue* CreateJsSessionInfo(NativeEngine& engine, const SessionInfo& sessionInfo);
 NativeValue* CreateJsSessionState(NativeEngine& engine);
+NativeValue* CreateJsSessionSizeChangeReason(NativeEngine& engine);
 NativeValue* CreateJsSessionRect(NativeEngine& engine, const WSRect& rect);
 NativeValue* CreateJsSystemBarPropertyArrayObject(
     NativeEngine& engine, const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);

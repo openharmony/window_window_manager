@@ -37,7 +37,7 @@ using UpdateAvoidAreaCallback = std::function<bool(const int32_t& persistentId)>
 using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
-using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect)>;
+using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect, const SizeChangeReason& reason)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
 using SetWindowPatternOpacityFunc = std::function<void(float opacity)>;
@@ -137,7 +137,7 @@ public:
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 private:
     void UpdateCameraFloatWindowStatus(bool isShowing);
-    void NotifySessionRectChange(const WSRect& rect);
+    void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void SetSessionRectChangeCallback();
     void OnSessionRectChange();
     bool FixRectByAspectRatio(WSRect& rect);
