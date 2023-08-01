@@ -2161,13 +2161,13 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
     WLOGFI("NotifyWindowInfoChange, persistentId = %{public}d, updateType = %{public}d", persistentId, type);
     std::vector<sptr<AccessibilityWindowInfo>> infos;
 
-    auto sceneSession = GetSceneSession(persistentId);
+    sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
     FillWindowInfo(infos, sceneSession);
     SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(infos, type);
 }
 
 void SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,
-    const sptr<SceneSession> sceneSession)
+    const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
         WLOGFW("null scene session.");
