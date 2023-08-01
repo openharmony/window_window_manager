@@ -34,6 +34,9 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSession" };
 }
 MaximizeMode SceneSession::maximizeMode_ = MaximizeMode::MODE_RECOVER;
+wptr<SceneSession> SceneSession::enterSession_ = nullptr;
+std::mutex SceneSession::enterSessionMutex_;
+
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : Session(info)
 {
@@ -420,6 +423,16 @@ WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAre
 WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     WLOGFD("SceneSession TransferPointEvent");
+    if (pointerEvent == nullptr) {
+        WLOGFE("pointerEvent is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    {
+        if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW) {
+            std::lock_guard<std::mutex> guard(enterSessionMutex_);
+            enterSession_ = wptr<SceneSession>(this);
+        }
+    }
     if (property_ && property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
         WindowHelper::IsMainWindow(property_->GetWindowType()) &&
         property_->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
@@ -436,6 +449,18 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
     }
     return Session::TransferPointerEvent(pointerEvent);
+}
+
+const wptr<SceneSession> SceneSession::GetEnterWindow()
+{
+    std::lock_guard<std::mutex> guard(enterSessionMutex_);
+    return enterSession_;
+}
+
+void SceneSession::ClearEnterWindow()
+{
+    std::lock_guard<std::mutex> guard(enterSessionMutex_);
+    enterSession_ = nullptr;
 }
 
 void SceneSession::NotifySessionRectChange(const WSRect& rect)

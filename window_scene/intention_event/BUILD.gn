@@ -18,6 +18,7 @@ ohos_shared_library("libintention_event") {
   include_dirs = [
     "./include",
     "${window_base_path}/wm/include",
+    "${window_base_path}/window_scene/session/host/include",
   ]
 
   sources = [ "src/intention_event_manager.cpp" ]
