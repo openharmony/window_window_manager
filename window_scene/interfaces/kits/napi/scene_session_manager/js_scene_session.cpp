@@ -207,11 +207,12 @@ void JsSceneSession::ProcessSessionRectChangeRegister()
         WLOGFE("sessionchangeCallback is nullptr");
         return;
     }
-    sessionchangeCallback->onRectChange_ = std::bind(&JsSceneSession::OnSessionRectChange, this, std::placeholders::_1);
+    sessionchangeCallback->onRectChange_ = std::bind(&JsSceneSession::OnSessionRectChange,
+        this, std::placeholders::_1, std::placeholders::_2);
 
     auto session = weakSession_.promote();
     if (session && session->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-        OnSessionRectChange(session->GetSessionRect());
+        OnSessionRectChange(session->GetSessionRequestRect());
     }
     WLOGFD("ProcessSessionRectChangeRegister success");
 }
@@ -638,8 +639,12 @@ void JsSceneSession::OnSessionStateChange(const SessionState& state)
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsSceneSession::OnSessionRectChange(const WSRect& rect)
+void JsSceneSession::OnSessionRectChange(const WSRect& rect, const SizeChangeReason& reason)
 {
+    if (rect.IsEmpty()) {
+        WLOGFD("Rect is empty, there is no need to notify");
+        return;
+    }
     WLOGFI("[NAPI]OnSessionRectChange");
     auto iter = jsCbMap_.find(SESSION_RECT_CHANGE_CB);
     if (iter == jsCbMap_.end()) {
@@ -647,13 +652,14 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect)
     }
     auto jsCallBack = iter->second;
     auto complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [rect, jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [rect, reason, jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (!jsCallBack) {
                 WLOGFE("[NAPI]jsCallBack is nullptr");
                 return;
             }
             NativeValue* jsSessionStateObj = CreateJsSessionRect(engine, rect);
-            NativeValue* argv[] = { jsSessionStateObj };
+            NativeValue* sizeChangeReason = CreateJsValue(engine, static_cast<int32_t>(reason));
+            NativeValue* argv[] = { jsSessionStateObj, sizeChangeReason };
             engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
         });
 
