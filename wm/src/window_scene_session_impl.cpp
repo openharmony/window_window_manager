@@ -385,6 +385,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         WLOGFE("UpdateProperty failed with errCode:%{public}d", static_cast<int32_t>(ret));
         return ret;
     }
+    UpdateTitleButtonVisibility();
     ret = static_cast<WMError>(hostSession_->Foreground(property_));
     if (ret == WMError::WM_OK) {
         // update sub window state if this is main window
