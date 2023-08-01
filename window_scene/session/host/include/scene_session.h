@@ -130,6 +130,7 @@ public:
     const std::string& GetWindowName() const;
     bool IsDecorEnable();
     void UpdateNativeVisibility(bool visible);
+    void SetPrivacyMode(bool isPrivacy);
     bool IsVisible() const;
     bool IsFloatingWindowAppType() const;
     void DumpSessionElementInfo(const std::vector<std::string>& params);
