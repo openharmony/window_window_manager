@@ -186,8 +186,9 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
 {
     WLOGI("[NAPI]pending session activation: bundleName %{public}s, moduleName %{public}s, abilityName %{public}s",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
+    sptr<SceneSession> sceneSession;
     if (info.persistentId_ == 0) {
-        auto sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
+        sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
         if (sceneSession == nullptr) {
             WLOGFE("RequestSceneSession return nullptr");
             return;
@@ -195,7 +196,7 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
         info.persistentId_ = sceneSession->GetPersistentId();
         sceneSession->GetSessionInfo().persistentId_ = sceneSession->GetPersistentId();
     } else {
-        auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
+        sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
         if (sceneSession == nullptr) {
             WLOGFE("GetSceneSession return nullptr");
             return;
@@ -204,6 +205,18 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
         sceneSession->GetSessionInfo().callerToken_ = info.callerToken_;
         sceneSession->GetSessionInfo().requestCode = info.requestCode;
         sceneSession->GetSessionInfo().callerPersistentId_ = info.callerPersistentId_;
+    }
+    if (info.want != nullptr) {
+        bool isNeedBackToOther = info.want->GetBoolParam(AAFwk::Want::PARAM_BACK_TO_OTHER_MISSION_STACK, false);
+        WLOGFI("[NAPI]isNeedBackToOther: %{public}d", isNeedBackToOther);
+        if (isNeedBackToOther) {
+            int32_t realCallerSessionId = SceneSessionManager::GetInstance().GetFocusedSession();
+            WLOGFI("[NAPI]need to back to other session: %{public}d", realCallerSessionId);
+            if (sceneSession != nullptr) {
+                sceneSession->GetSessionInfo().persistentId_ = realCallerSessionId;
+            }
+            info.callerPersistentId_ = realCallerSessionId;
+        }
     }
     auto iter = jsCbMap_.find(PENDING_SCENE_CB);
     if (iter == jsCbMap_.end()) {
