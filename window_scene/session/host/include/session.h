@@ -293,6 +293,7 @@ private:
 
     int32_t callingPid_ = { 0 };
     int32_t callingUid_ = { 0 };
+    std::string callingBundleName_ { "unknow" };
     bool isVisible_ {false};
     bool needNotify_ {true};
     sptr<IRemoteObject> abilityToken_ = nullptr;

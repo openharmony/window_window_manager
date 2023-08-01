@@ -47,7 +47,7 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
         return WSError::WS_ERROR_NULLPTR;
     }
     if (pointerEvent == nullptr) {
-        WLOGFE("PointerEvent null!");
+        WLOGFE("PointerEvent is null!");
         return WSError::WS_ERROR_NULLPTR;
     }
     auto pointerAction = pointerEvent->GetPointerAction();
