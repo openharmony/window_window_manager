@@ -234,6 +234,17 @@ void SceneSessionManager::ConfigWindowSceneXml()
         ConfigStartingWindowAnimation(item);
     }
 }
+WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &token,
+    const ContinueState& continueState)
+{
+    sptr<SceneSession> sceneSession = FindSessionByToken(token);
+    if (sceneSession == nullptr) {
+        WLOGFI("fail to find session by token.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    sceneSession->SetSessionContinueState(continueState);
+    return WSError::WS_OK;
+}
 
 void SceneSessionManager::ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig)
 {
