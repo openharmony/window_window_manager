@@ -118,6 +118,6 @@ APPLICATION_BLOCK_INPUT:
   __BASE: {type: FAULT, level: CRITICAL, desc: The event is not consumed}
   EVENT_ID: {type: INT32, desc: eventId}
   PID: {type: INT32, desc: pid}
-  PROCESS_NAME: {type: STRING, desc: processName}
+  BUNDLE_NAME: {type: STRING, desc: bundleName}
   PERSISTENT_ID: { type: INT32, desc: persistentId}
   MSG: {type: STRING, desc: event not consumed}
