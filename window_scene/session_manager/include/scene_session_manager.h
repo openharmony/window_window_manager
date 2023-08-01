@@ -24,7 +24,7 @@
 #include "common/include/task_scheduler.h"
 #include "future.h"
 #include "interfaces/include/ws_common.h"
-#include "mission_listener_controller.h"
+#include "session_listener_controller.h"
 #include "scene_session_converter.h"
 #include "session/host/include/root_scene_session.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
@@ -109,7 +109,7 @@ public:
     WSError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent);
     WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label);
     WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon);
-    WSError RegisterSessionListener(const sptr<ISessionListener> sessionListener);
+    WSError RegisterSessionListener(const sptr<ISessionChangeListener> sessionListener);
     void UnregisterSessionListener();
     void HandleTurnScreenOn(const sptr<SceneSession>& sceneSession);
     void HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock);
@@ -118,10 +118,10 @@ public:
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token);
     WSError GetFocusSessionToken(sptr<IRemoteObject> &token);
 
-    WSError RegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener);
-    WSError UnRegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener);
-    WSError GetMissionInfos(int32_t numMax, std::vector<AAFwk::MissionInfo>& missionInfos);
-    WSError GetMissionInfo(int32_t missionId, AAFwk::MissionInfo& missionInfo);
+    WSError RegisterSessionListener(const sptr<ISessionListener>& listener);
+    WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener);
+    WSError GetSessionInfos(int32_t numMax, std::vector<SessionInfoBean>& sessionInfos);
+    WSError GetSessionInfo(int32_t persistentId, SessionInfoBean& sessionInfo);
 
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller);
     WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener);
@@ -214,7 +214,7 @@ private:
     std::shared_ptr<AbilityRuntime::Context> rootSceneContext_;
     std::shared_mutex sceneSessionMapMutex_;
     std::map<int32_t, sptr<SceneSession>> sceneSessionMap_;
-    std::shared_ptr<MissionListenerController> listenerController_;
+    std::shared_ptr<SessionListenerController> listenerController_;
     std::map<sptr<IRemoteObject>, int32_t> remoteObjectMap_;
     std::set<sptr<SceneSession>> avoidAreaListenerSessionSet_;
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
@@ -242,7 +242,7 @@ private:
     RSInterfaces& rsInterface_;
     void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void OnSessionStateChange(int32_t persistentId, const SessionState& state);
-    sptr<ISessionListener> sessionListener_;
+    sptr<ISessionChangeListener> sessionListener_;
     sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject> &token);
 
     void CheckAndNotifyWaterMarkChangedResult(bool isAddingWaterMark);

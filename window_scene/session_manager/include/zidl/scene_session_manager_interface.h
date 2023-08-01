@@ -37,6 +37,8 @@ class PixelMap;
 
 namespace OHOS::Rosen {
 class RSSurfaceNode;
+using ISessionListener = AAFwk::IMissionListener;
+using SessionInfoBean = AAFwk::MissionInfo;
 class ISceneSessionManager : public IWindowManager {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISceneSessionManager");
@@ -53,14 +55,14 @@ public:
         TRANS_ID_SET_GESTURE_NAVIGATION_ENABLED,
         TRANS_ID_SET_SESSION_LABEL,
         TRANS_ID_SET_SESSION_ICON,
-        TRANS_ID_REGISTER_SESSION_LISTENER,
-        TRANS_ID_UNREGISTER_SESSION_LISTENER,
+        TRANS_ID_REGISTER_SESSION_CHANGE_LISTENER,
+        TRANS_ID_UNREGISTER_SESSION_CHANGE_LISTENER,
         TRANS_ID_GET_WINDOW_INFO,
         TRANS_ID_PENDING_SESSION_TO_FOREGROUND,
         TRANS_ID_PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR,
         TRANS_ID_GET_FOCUS_SESSION_TOKEN,
-        TRANS_ID_REGISTER_MISSION_LISTENER,
-        TRANS_ID_UNREGISTER_MISSION_LISTENER,
+        TRANS_ID_REGISTER_SESSION_LISTENER,
+        TRANS_ID_UNREGISTER_SESSION_LISTENER,
         TRANS_ID_GET_MISSION_INFOS,
         TRANS_ID_GET_MISSION_INFO_BY_ID,
         TRANS_ID_TERMINATE_SESSION_NEW,
@@ -79,16 +81,16 @@ public:
     virtual WSError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent) = 0;
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
     virtual WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) = 0;
-    virtual WSError RegisterSessionListener(const sptr<ISessionListener> sessionListener) = 0;
+    virtual WSError RegisterSessionListener(const sptr<ISessionChangeListener> sessionListener) = 0;
     virtual void UnregisterSessionListener() = 0;
     virtual WSError PendingSessionToForeground(const sptr<IRemoteObject> &token) = 0;
     virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token) = 0;
     virtual WSError GetFocusSessionToken(sptr<IRemoteObject> &token) = 0;
 
-    virtual WSError RegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener) = 0;
-    virtual WSError UnRegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener) = 0;
-    virtual WSError GetMissionInfos(int32_t numMax, std::vector<AAFwk::MissionInfo>& missionInfos) = 0;
-    virtual WSError GetMissionInfo(int32_t missionId, AAFwk::MissionInfo& missionInfo) = 0;
+    virtual WSError RegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
+    virtual WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
+    virtual WSError GetSessionInfos(int32_t numMax, std::vector<SessionInfoBean>& sessionInfos) = 0;
+    virtual WSError GetSessionInfo(int32_t persistentId, SessionInfoBean& sessionInfo) = 0;
 
     virtual WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) = 0;
     virtual WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) = 0;

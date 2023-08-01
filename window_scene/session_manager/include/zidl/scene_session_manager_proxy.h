@@ -43,17 +43,17 @@ public:
     WMError SetGestureNavigaionEnabled(bool enable) override;
     WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) override;
     WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) override;
-    WSError RegisterSessionListener(const sptr<ISessionListener> sessionListener) override;
+    WSError RegisterSessionListener(const sptr<ISessionChangeListener> sessionListener) override;
     void UnregisterSessionListener() override;
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
     WSError PendingSessionToForeground(const sptr<IRemoteObject> &token) override;
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject> &token) override;
 
-    WSError RegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener) override;
-    WSError UnRegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener) override;
-    WSError GetMissionInfos(int32_t numMax, std::vector<AAFwk::MissionInfo>& missionInfos) override;
-    WSError GetMissionInfo(int32_t missionId, AAFwk::MissionInfo& missionInfo) override;
+    WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;
+    WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override;
+    WSError GetSessionInfos(int32_t numMax, std::vector<SessionInfoBean>& sessionInfos) override;
+    WSError GetSessionInfo(int32_t persistentId, SessionInfoBean& sessionInfo) override;
 
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) override;
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;

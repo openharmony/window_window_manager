@@ -61,9 +61,9 @@ ohos_shared_library("scene_session_manager") {
   sources = [
     "../../wm/src/zidl/window_manager_agent_proxy.cpp",
     "src/extension_session_manager.cpp",
-    "src/mission_listener_controller.cpp",
     "src/scene_session_converter.cpp",
     "src/scene_session_manager.cpp",
+    "src/session_listener_controller.cpp",
     "src/session_manager_agent_controller.cpp",
     "src/window_scene_config.cpp",
     "src/zidl/scene_session_manager_stub.cpp",
