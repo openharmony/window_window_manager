@@ -120,6 +120,7 @@ struct SessionInfo {
     int32_t persistentId_ = INVALID_SESSION_ID;
     int32_t callerPersistentId_ = INVALID_SESSION_ID;
     uint32_t callState_ = 0;
+    uint32_t callingTokenId_ = 0;
     int32_t startMethod;
     // whether to display in the missions list
     bool excludeFromMissions = false;

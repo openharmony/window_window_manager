@@ -775,6 +775,7 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
         sceneSession->GetSessionInfo().callerToken_ = info.callerToken_;
         sceneSession->GetSessionInfo().requestCode = info.requestCode;
         sceneSession->GetSessionInfo().callerPersistentId_ = info.callerPersistentId_;
+        sceneSession->GetSessionInfo().callingTokenId_ = info.callingTokenId_;
     }
     auto iter = jsCbMap_.find(PENDING_SCENE_CB);
     if (iter == jsCbMap_.end()) {
