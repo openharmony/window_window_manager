@@ -17,6 +17,7 @@
 
 #include <iterator>
 #include <pointer_event.h>
+#include <transaction/rs_transaction.h>
 
 #include "interfaces/include/ws_common.h"
 #include "session/host/include/scene_persistent_storage.h"
@@ -641,6 +642,33 @@ void SceneSession::UpdateNativeVisibility(bool visible)
 bool SceneSession::IsVisible() const
 {
     return isVisible_;
+}
+
+void SceneSession::SetPrivacyMode(bool isPrivacy)
+{
+    if (!property_) {
+        WLOGFE("property_ is null");
+        return;
+    }
+    if (!surfaceNode_) {
+        WLOGFE("surfaceNode_ is null");
+        return;
+    }
+    bool lastPrivacyMode = property_->GetPrivacyMode() || property_->GetSystemPrivacyMode();
+    if (lastPrivacyMode == isPrivacy) {
+        WLOGFW("privacy mode is not change, do nothing");
+        return;
+    }
+    property_->SetPrivacyMode(isPrivacy);
+    property_->SetSystemPrivacyMode(isPrivacy);
+    surfaceNode_->SetSecurityLayer(isPrivacy);
+    RSTransaction::FlushImplicitTransaction();
+    auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);
+    if (screenSession == nullptr) {
+        WLOGFE("screen session is null");
+        return;
+    }
+    ScreenSessionManager::GetInstance().UpdatePrivateStateAndNotify(screenSession, isPrivacy);
 }
 
 WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
