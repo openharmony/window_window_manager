@@ -599,16 +599,8 @@ WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& scene
     return WSError::WS_OK;
 }
 
-sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo,
-    sptr<WindowSessionProperty> property)
+sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificSessionCallback()
 {
-    if (sessionInfo.persistentId_ != 0) {
-        auto session = GetSceneSession(sessionInfo.persistentId_);
-        if (session != nullptr) {
-            WLOGFI("get exist session persistentId: %{public}d", sessionInfo.persistentId_);
-            return session;
-        }
-    }
     sptr<SceneSession::SpecificSessionCallback> specificCb = new (std::nothrow)SceneSession::SpecificSessionCallback();
     if (specificCb == nullptr) {
         WLOGFE("SpecificSessionCallback is nullptr");
@@ -623,6 +615,22 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
     specificCb->onGetSceneSessionVectorByType_ = std::bind(&SceneSessionManager::GetSceneSessionVectorByType,
         this, std::placeholders::_1);
     specificCb->onUpdateAvoidArea_ = std::bind(&SceneSessionManager::UpdateAvoidArea, this, std::placeholders::_1);
+    specificCb->onWindowInfoUpdate_ = std::bind(&SceneSessionManager::NotifyWindowInfoChange,
+        this, std::placeholders::_1, std::placeholders::_2);
+    return specificCb;
+}
+
+sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo,
+    sptr<WindowSessionProperty> property)
+{
+    if (sessionInfo.persistentId_ != 0) {
+        auto session = GetSceneSession(sessionInfo.persistentId_);
+        if (session != nullptr) {
+            WLOGFI("get exist session persistentId: %{public}d", sessionInfo.persistentId_);
+            return session;
+        }
+    }
+    sptr<SceneSession::SpecificSessionCallback> specificCb = CreateSpecificSessionCallback();
     auto task = [this, sessionInfo, specificCb, property]() {
         WLOGFI("sessionInfo: bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, type %{public}u",
             sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
@@ -783,7 +791,6 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         } else {
             AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo, true);
         }
-        NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
         return WSError::WS_OK;
     };
 

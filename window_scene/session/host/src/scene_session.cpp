@@ -79,7 +79,10 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
     }
     NotifyForeground();
     UpdateCameraFloatWindowStatus(true);
-    specificCallback_->onUpdateAvoidArea_(GetPersistentId());
+    if (specificCallback_ != nullptr) {
+        specificCallback_->onUpdateAvoidArea_(GetPersistentId());
+        specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
+    }
     return WSError::WS_OK;
 }
 
@@ -101,7 +104,10 @@ WSError SceneSession::Background()
     }
     NotifyBackground();
     UpdateCameraFloatWindowStatus(false);
-    specificCallback_->onUpdateAvoidArea_(GetPersistentId());
+    if (specificCallback_ != nullptr) {
+        specificCallback_->onUpdateAvoidArea_(GetPersistentId());
+        specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
+    }
     return WSError::WS_OK;
 }
 
@@ -562,6 +568,16 @@ void SceneSession::OnSessionRectChange()
     NotifySessionRectChange(rect);
     if (!(moveDragController_->GetStartMoveFlag() || moveDragController_->GetStartDragFlag())) {
         OnSessionEvent(SessionEvent::EVENT_END_MOVE);
+    }
+}
+
+void SceneSession::SetZOrder(uint32_t zOrder)
+{
+    if (zOrder_ != zOrder) {
+        Session::SetZOrder(zOrder);
+        if (specificCallback_ != nullptr) {
+            specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+        }
     }
 }
 

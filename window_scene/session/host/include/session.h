@@ -202,7 +202,7 @@ public:
     void SetAbilityToken(sptr<IRemoteObject> token);
     sptr<IRemoteObject> GetAbilityToken() const;
     WindowMode GetWindowMode();
-    void SetZOrder(uint32_t zOrder);
+    virtual void SetZOrder(uint32_t zOrder);
     uint32_t GetZOrder();
     WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
@@ -246,6 +246,7 @@ protected:
     sptr<WindowSessionProperty> property_ = nullptr;
     SystemSessionConfig systemConfig_;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
+    uint32_t zOrder_ = 0;
 
 private:
     void FillSessionInfo(SessionInfo& sessionInfo);
@@ -282,7 +283,6 @@ private:
     SessionState state_ = SessionState::STATE_DISCONNECT;
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
-    uint32_t zOrder_ = 0;
 
     std::recursive_mutex mutex_;
     std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;

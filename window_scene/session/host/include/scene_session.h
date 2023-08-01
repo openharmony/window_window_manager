@@ -34,6 +34,7 @@ using SpecificSessionDestroyCallback = std::function<WSError(const int32_t& pers
 using CameraFloatSessionChangeCallback = std::function<void(uint32_t accessTokenId, bool isShowing)>;
 using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<SceneSession>>(WindowType type)>;
 using UpdateAvoidAreaCallback = std::function<bool(const int32_t& persistentId)>;
+using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect)>;
@@ -55,6 +56,7 @@ public:
         CameraFloatSessionChangeCallback onCameraFloatSessionChange_;
         GetSceneSessionVectorByTypeCallback onGetSceneSessionVectorByType_;
         UpdateAvoidAreaCallback onUpdateAvoidArea_;
+        NotifyWindowInfoUpdateCallback onWindowInfoUpdate_;
     };
 
     // callback for notify SceneBoard
@@ -111,6 +113,7 @@ public:
         setWindowScenePatternFunc_ = func;
     };
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
+    void SetZOrder(uint32_t zOrder) override;
     std::vector<Rect> GetTouchHotAreas() const override;
     Rect GetHotAreaRect(int32_t action);
     WSError NotifyTouchOutside();
