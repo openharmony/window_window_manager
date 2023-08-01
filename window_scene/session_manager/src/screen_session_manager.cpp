@@ -918,7 +918,11 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
         std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
         auto smsScreenMapIter = screenSessionMap_.find(screenId);
         if (smsScreenMapIter != screenSessionMap_.end()) {
-            RemoveFromGroupLocked(smsScreenMapIter->second);
+            auto screenGroup = RemoveFromGroupLocked(smsScreenMapIter->second);
+            if (screenGroup != nullptr) {
+                NotifyScreenGroupChanged(
+                    smsScreenMapIter->second->ConvertToScreenInfo(), ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
+            }
             screenSessionMap_.erase(smsScreenMapIter);
         }
     }
