@@ -81,7 +81,7 @@ void ANRHandler::HandleEventConsumed(int32_t eventId, int64_t actionTime)
     }
 }
 
-void ANRHandler::ClearDestroyedPersistentId(int32_t persistentId)
+void ANRHandler::OnWindowDestroyed(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -90,6 +90,11 @@ void ANRHandler::ClearDestroyedPersistentId(int32_t persistentId)
         return;
     }
     anrHandlerState_.sendStatus.erase(persistentId);
+    if (anrHandlerState_.eventsMap.find(persistentId) == anrHandlerState_.eventsMap.end()) {
+        WLOGFE("PersistentId:%{public}d not in ANRHandler", persistentId);
+        return;
+    }
+    anrHandlerState_.eventsMap.erase(persistentId);
     WLOGFD("PersistentId:%{public}d erased in ANRHandler", persistentId);
 }
 
@@ -100,9 +105,11 @@ void ANRHandler::SetAnrHandleState(int32_t eventId, bool status)
     int32_t persistentId = GetPersistentIdOfEvent(eventId);
     anrHandlerState_.sendStatus[persistentId] = status;
     if (status) {
-        anrHandlerState_.eventsToReceipt.push_back(eventId);
+        auto iter = anrHandlerState_.eventsToReceipt.insert(anrHandlerState_.eventsToReceipt.end(), eventId);
+        anrHandlerState_.eventsMap[persistentId] = iter;
     } else {
         anrHandlerState_.eventsToReceipt.pop_front();
+        anrHandlerState_.eventsMap[persistentId] = anrHandlerState_.eventsToReceipt.begin();
         ClearExpiredEvents(eventId);
     }
 }
@@ -188,12 +195,14 @@ void ANRHandler::UpdateLatestEventId(int32_t eventId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto currentPersistentId = GetPersistentIdOfEvent(eventId);
-    for (auto& event : anrHandlerState_.eventsToReceipt) {
-        if (GetPersistentIdOfEvent(event) == currentPersistentId && eventId > event) {
-            WLOGFD("Replace eventId:%{public}d by newer eventId:%{public}d", event, eventId);
-            event = eventId;
-            break;
-        }
+    auto pendingEventIter = anrHandlerState_.eventsMap[currentPersistentId];
+    if (pendingEventIter == anrHandlerState_.eventsToReceipt.end()) {
+        WLOGFE("No pending event on eventsToReceipt");
+        return;
+    }
+    if (eventId > *pendingEventIter) {
+        WLOGFD("Replace eventId:%{public}d by newer eventId:%{public}d", event, eventId);
+        *pendingEventIter = eventId;
     }
 }
 } // namespace Rosen
