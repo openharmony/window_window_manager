@@ -577,6 +577,7 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
         }
         float virtualPixelRatio = display->GetVirtualPixelRatio();
         config.SetDensity(virtualPixelRatio);
+        config.SetOrientation(static_cast<int32_t>(display->GetOrientation()));
         uiContent_->UpdateViewportConfig(config, WindowSizeChangeReason::UNDEFINED, nullptr);
         WLOGFD("notify uiContent window size change end");
     }
@@ -2933,6 +2934,7 @@ void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& dis
     config.SetPosition(rect.posX_, rect.posY_);
     if (display) {
         config.SetDensity(display->GetVirtualPixelRatio());
+        config.SetOrientation(static_cast<int32_t>(display->GetOrientation()));
     }
     uiContent_->UpdateViewportConfig(config, reason, rsTransaction);
     WLOGFD("Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
