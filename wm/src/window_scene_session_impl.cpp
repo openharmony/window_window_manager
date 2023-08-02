@@ -32,6 +32,8 @@
 #include "wm_math.h"
 #include "session_manager_agent_controller.h"
 #include "window_impl.h"
+#include <transaction/rs_interfaces.h>
+#include "surface_capture_future.h"
 
 #include "window_session_impl.h"
 
@@ -1494,6 +1496,24 @@ WMError WindowSceneSessionImpl::SetSnapshotSkip(bool isSkip)
     surfaceNode_->SetSecurityLayer(isSkip || property_->GetSystemPrivacyMode());
     RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
+}
+
+std::shared_ptr<Media::PixelMap> WindowSceneSessionImpl::Snapshot()
+{
+    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
+    auto isSucceeded = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    if (!isSucceeded) {
+        WLOGFE("Failed to TakeSurfaceCapture!");
+        return nullptr;
+    }
+    pixelMap = callback->GetResult(2000); // wait for <= 2000ms
+    if (pixelMap != nullptr) {
+        WLOGFD("Snapshot succeed, save WxH = %{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
+    } else {
+        WLOGFE("Failed to get pixelmap, return nullptr!");
+    }
+    return pixelMap;
 }
 
 WMError WindowSceneSessionImpl::NotifyMemoryLevel(int32_t level)
