@@ -882,10 +882,11 @@ void WindowSessionImpl::NotifyAfterUnfocused(bool needNotifyUiContent)
 void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    auto uiContent = GetUIContent();
+    std::shared_ptr<Ace::UIContent> uiContent = std::move(uiContent_);
     auto task = [uiContent]() {
         if (uiContent != nullptr) {
             uiContent->Destroy();
+            WLOGFD("NotifyBeforeDestroy: uiContent destroy success");
         }
     };
     if (handler_) {
@@ -893,7 +894,6 @@ void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
     } else {
         task();
     }
-    uiContent_ = nullptr;
 
     if (notifyNativeFunc_) {
         notifyNativeFunc_(windowName);
