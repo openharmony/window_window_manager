@@ -331,7 +331,9 @@ WMError WindowSessionImpl::Destroy(bool needClearListener)
         state_ = WindowState::STATE_DESTROYED;
         requestState_ = WindowState::STATE_DESTROYED;
     }
-    hostSession_ = nullptr;
+    if (hostSession_ != nullptr) {
+        hostSession_ = nullptr;
+    }
     windowSessionMap_.erase(property_->GetWindowName());
     DelayedSingleton<ANRHandler>::GetInstance()->ClearDestroyedPersistentId(GetPersistentId());
     return WMError::WM_OK;
@@ -1032,8 +1034,6 @@ WSError WindowSessionImpl::NotifyDestroy()
             listener->OnDialogDeathRecipient();
         }
     }
-    // destroy dialog in client
-    Destroy();
     return WSError::WS_OK;
 }
 
@@ -1209,23 +1209,25 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
         inputMethodHasProcessed = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent);
     }
 #endif // IMF_ENABLE
-    if (!inputMethodHasProcessed) {
-        std::shared_ptr<IInputEventConsumer> inputEventConsumer;
-        {
-            std::lock_guard<std::recursive_mutex> lock(mutex_);
-            inputEventConsumer = inputEventConsumer_;
-        }
-        if (inputEventConsumer != nullptr) {
-            WLOGD("Transfer key event to inputEventConsumer");
-            (void)inputEventConsumer->OnInputEvent(keyEvent);
-        } else if (uiContent_) {
-            isConsumed = uiContent_->ProcessKeyEvent(keyEvent);
-            if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
-                windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN &&
-                property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL) {
-                WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
-                Recover();
-            }
+    if (inputMethodHasProcessed) {
+        WLOGFD("input method has processed key event");
+        return;
+    }
+    std::shared_ptr<IInputEventConsumer> inputEventConsumer;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        inputEventConsumer = inputEventConsumer_;
+    }
+    if (inputEventConsumer != nullptr) {
+        WLOGD("Transfer key event to inputEventConsumer");
+        (void)inputEventConsumer->OnInputEvent(keyEvent);
+    } else if (uiContent_) {
+        isConsumed = uiContent_->ProcessKeyEvent(keyEvent);
+        if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
+            windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN &&
+            property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL) {
+            WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
+            Recover();
         }
     }
 }
