@@ -1520,6 +1520,7 @@ std::shared_ptr<Media::PixelMap> WindowSceneSessionImpl::Snapshot()
 WMError WindowSceneSessionImpl::NotifyMemoryLevel(int32_t level)
 {
     WLOGFD("id: %{public}u, notify memory level: %{public}d", GetWindowId(), level);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (uiContent_ == nullptr) {
         WLOGFE("Window %{public}s notify memory level failed, ace is null.", GetWindowName().c_str());
         return WMError::WM_ERROR_NULLPTR;
