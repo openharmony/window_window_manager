@@ -567,7 +567,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needClearListener)
 
     DestroySubWindow();
     windowSessionMap_.erase(property_->GetWindowName());
-    DelayedSingleton<ANRHandler>::GetInstance()->ClearDestroyedPersistentId(property_->GetPersistentId());
+    DelayedSingleton<ANRHandler>::GetInstance()->OnWindowDestroyed(property_->GetPersistentId());
     hostSession_ = nullptr;
     return res;
 }
