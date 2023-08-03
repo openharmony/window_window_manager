@@ -842,12 +842,12 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
 
 WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
 {
-    if (hostSession_ == nullptr) {
-        return WMError::WM_ERROR_NULLPTR;
-    }
     WLOGFI("winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
     if (hostSession_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
+    }
+    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
     SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -907,6 +907,7 @@ WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const Syst
     if (property_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
+    isSystembarPropertiesSet_ = true;
     property_->SetSystemBarProperty(type, property);
     WMError ret = NotifyWindowSessionProperty();
     if (ret != WMError::WM_OK) {
@@ -921,6 +922,9 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
     WLOGFI("winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
     if (hostSession_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
+    }
+    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
     SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);

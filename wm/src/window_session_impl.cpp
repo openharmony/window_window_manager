@@ -524,7 +524,12 @@ WMError WindowSessionImpl::SetUIContent(const std::string& contentInfo,
         version = context_->GetApplicationInfo()->apiCompatibleVersion;
     }
     // 10 ArkUI new framework support after API10
-    if (version < 10 || isIgnoreSafeAreaNeedNotify_) {
+    if (version < 10) {
+        SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
+        if (!isSystembarPropertiesSet_) {
+            SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, SystemBarProperty());
+        }
+    } else if (isIgnoreSafeAreaNeedNotify_) {
         SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
         isIgnoreSafeAreaNeedNotify_ = false;
     }
@@ -1384,6 +1389,11 @@ WMError WindowSessionImpl::SetWindowGravity(WindowGravity gravity, uint32_t perc
 {
     return SessionManager::GetInstance().SetSessionGravity(GetPersistentId(),
         static_cast<SessionGravity>(gravity), percent);
+}
+
+WMError WindowSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
+{
+    return WMError::WM_OK;
 }
 
 void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
