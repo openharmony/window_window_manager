@@ -15,6 +15,7 @@
 
 #include "session/container/include/zidl/session_stage_proxy.h"
 
+#include <cstdint>
 #include <ipc_types.h>
 #include <message_option.h>
 #include <message_parcel.h>
@@ -287,5 +288,29 @@ WSError SessionStageProxy::NotifyTouchOutside()
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;
+}
+
+WSError SessionStageProxy::UpdateWindowMode(WindowMode mode)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteInt32(static_cast<int32_t>(mode))) {
+        WLOGFE("Write mode failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_WINDOW_MODE_CHANGE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
 }
 } // namespace OHOS::Rosen

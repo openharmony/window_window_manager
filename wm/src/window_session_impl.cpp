@@ -183,7 +183,7 @@ ColorSpace WindowSessionImpl::GetColorSpaceFromSurfaceGamut(GraphicColorGamut co
         }
     }
     WLOGFE("try to get not exist ColorSpace");
-    
+
     return ColorSpace::COLOR_SPACE_DEFAULT;
 }
 
@@ -413,6 +413,11 @@ WSError WindowSessionImpl::UpdateFocus(bool isFocused)
     } else {
         NotifyAfterUnfocused();
     }
+    return WSError::WS_OK;
+}
+
+WSError WindowSessionImpl::UpdateWindowMode(WindowMode mode)
+{
     return WSError::WS_OK;
 }
 
