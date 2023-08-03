@@ -805,8 +805,9 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         "bundleName:%{public}s, pid:%{public}d",
         pointerEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
-        WLOGFD("The pointerEvent does not report normally, bundleName:%{public}s not response, pid:%{public}d",
-            callingBundleName_.c_str(), callingPid_);
+        WLOGFD("The pointerEvent does not report normally, "
+            "bundleName:%{public}s not response, pid:%{public}d, persistentId:%{public}d",
+            callingBundleName_.c_str(), callingPid_, persistentId_);
         return WSError::WS_DO_NOTHING;
     }
     auto action = pointerEvent->GetPointerAction();
@@ -856,8 +857,9 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
         "bundleName:%{public}s, pid:%{public}d",
         keyEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
-        WLOGFD("The keyEvent does not report normally, bundleName:%{public}s not response, pid:%{public}d",
-            callingBundleName_.c_str(), callingPid_);
+        WLOGFD("The keyEvent does not report normally, "
+            "bundleName:%{public}s not response, pid:%{public}d, persistentId:%{public}d",
+            callingBundleName_.c_str(), callingPid_, persistentId_);
         return WSError::WS_DO_NOTHING;
     }
     if (!windowEventChannel_) {
