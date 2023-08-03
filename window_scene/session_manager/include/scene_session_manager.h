@@ -226,7 +226,6 @@ private:
     DumpRootSceneElementInfoFunc dumpRootSceneFunc_;
     AppWindowSceneConfig appWindowSceneConfig_;
     SystemSessionConfig systemConfig_;
-    int32_t activeSessionId_ = INVALID_SESSION_ID;
     int32_t focusedSessionId_ = INVALID_SESSION_ID;
     int32_t brightnessSessionId_ = INVALID_SESSION_ID;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
