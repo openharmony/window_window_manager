@@ -1280,6 +1280,12 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
             }
             break;
         }
+        case WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE: {
+            if (sceneSession->GetSessionProperty() != nullptr) {
+                sceneSession->GetSessionProperty()->SetDecorEnable(property->IsDecorEnable());
+            }
+            break;
+        }
         default:
             break;
     }
@@ -1496,7 +1502,7 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
         sName = session->GetWindowName();
     }
     uint32_t displayId = 0;
-    uint32_t flag = 0;
+    uint32_t flag = session->GetWindowSessionProperty()->GetWindowFlags();
     uint32_t orientation = 0;
     const std::string& windowName = sName.size() <= WINDOW_NAME_MAX_LENGTH ?
         sName : sName.substr(0, WINDOW_NAME_MAX_LENGTH);
