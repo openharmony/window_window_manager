@@ -23,7 +23,7 @@ namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "DfxHisysevent" };
 } // namespace
 
-void DfxHisysevent::ApplicationBlockInput(int32_t eventId, int32_t pid, std::string bundleName, int32_t persistentId)
+void DfxHisysevent::ApplicationBlockInput(int32_t eventId, int32_t pid, const std::string& bundleName, int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
     int32_t ret = HiSysEventWrite(

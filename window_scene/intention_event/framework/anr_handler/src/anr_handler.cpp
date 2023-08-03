@@ -201,7 +201,7 @@ void ANRHandler::UpdateLatestEventId(int32_t eventId)
         return;
     }
     if (eventId > *pendingEventIter) {
-        WLOGFD("Replace eventId:%{public}d by newer eventId:%{public}d", event, eventId);
+        WLOGFD("Replace eventId:%{public}d by newer eventId:%{public}d", *pendingEventIter, eventId);
         *pendingEventIter = eventId;
     }
 }
