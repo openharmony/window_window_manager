@@ -728,34 +728,44 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     return abilitySessionInfo;
 }
 
-WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive)
+std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
+    const sptr<SceneSession>& sceneSession, bool isNewActive)
 {
     wptr<SceneSession> weakSceneSession(sceneSession);
-    auto task = [this, weakSceneSession, isNewActive]() {
+    auto promise = std::make_shared<std::promise<int32_t>>();
+    auto future = promise->get_future();
+    auto task = [this, weakSceneSession, isNewActive, promise]() {
         auto scnSession = weakSceneSession.promote();
         if (scnSession == nullptr) {
             WLOGFE("session is nullptr");
-            return WSError::WS_ERROR_NULLPTR;
+            promise->set_value(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
+            return;
         }
+
         auto persistentId = scnSession->GetPersistentId();
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionActivation(%d )", persistentId);
         WLOGFI("active persistentId: %{public}d", persistentId);
         if (!GetSceneSession(persistentId)) {
             WLOGFE("session is invalid with %{public}d", persistentId);
-            return WSError::WS_ERROR_INVALID_SESSION;
+            promise->set_value(static_cast<int32_t>(WSError::WS_ERROR_INVALID_SESSION));
+            return;
         }
+
         auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
         if (!scnSessionInfo) {
-            return WSError::WS_ERROR_NULLPTR;
+            promise->set_value(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
+            return;
         }
+
         scnSessionInfo->isNewWant = isNewActive;
-        AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
+        auto errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
-        return WSError::WS_OK;
+        promise->set_value(static_cast<int32_t>(errCode));
+        return;
     };
 
     taskScheduler_->PostAsyncTask(task);
-    return WSError::WS_OK;
+    return future;
 }
 
 WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession,
