@@ -1705,6 +1705,25 @@ WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
         // focusId change
         if (isFocused) {
             SetFocusedSession(persistentId);
+            // notify RS
+            WLOGFD("current focus session: windowId: %{public}d, windowName: %{public}s, bundleName: %{public}s,"
+            " abilityName: %{public}s, pid: %{public}d, uid: %{public}d", persistentId,
+            sceneSession->GetWindowSessionProperty()->GetWindowName().c_str(),
+            sceneSession->GetSessionInfo().bundleName_.c_str(),
+            sceneSession->GetSessionInfo().abilityName_.c_str(),
+            sceneSession->GetCallingPid(), sceneSession->GetCallingUid());
+            uint64_t focusNodeId = 0; // 0 means invalid
+            if (sceneSession->GetSurfaceNode() == nullptr) {
+                WLOGFW("focused window surfaceNode is null");
+            } else {
+                focusNodeId = sceneSession->GetSurfaceNode()->GetId();
+            }
+            FocusAppInfo appInfo = {
+                sceneSession->GetCallingPid(), sceneSession->GetCallingUid(),
+                sceneSession->GetSessionInfo().bundleName_, sceneSession->GetSessionInfo().abilityName_,
+                focusNodeId
+            };
+            RSInterfaces::GetInstance().SetFocusAppInfo(appInfo);
         } else if (persistentId == GetFocusedSession()) {
             SetFocusedSession(INVALID_SESSION_ID);
         }
