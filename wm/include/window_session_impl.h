@@ -88,6 +88,7 @@ public:
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError HandleBackEvent() override { return WSError::WS_OK; }
     WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;
+    WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
 
     void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
@@ -170,6 +171,7 @@ protected:
     std::recursive_mutex mutex_;
     static std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> windowSessionMap_;
     static std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
+    bool isSystembarPropertiesSet_ = false;
     bool isIgnoreSafeAreaNeedNotify_ = false;
     bool isIgnoreSafeArea_ = false;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;

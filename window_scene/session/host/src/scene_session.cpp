@@ -710,6 +710,7 @@ void SceneSession::UpdateNativeVisibility(bool visible)
     } else {
         specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
     }
+    specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     // update private state
     if (!property_) {
         WLOGFE("property_ is null");

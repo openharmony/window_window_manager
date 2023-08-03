@@ -586,16 +586,19 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionByName(const std::string&
 
 std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByType(WindowType type)
 {
-    std::vector<sptr<SceneSession>> sceneSessionVector;
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto &item : sceneSessionMap_) {
-        auto sceneSession = item.second;
-        if (sceneSession->GetWindowType() == type) {
-            sceneSessionVector.emplace_back(sceneSession);
+    auto task = [this, type]() {
+        std::vector<sptr<SceneSession>> sceneSessionVector;
+        for (const auto &item : sceneSessionMap_) {
+            auto sceneSession = item.second;
+            if (sceneSession->GetWindowType() == type) {
+                sceneSessionVector.emplace_back(sceneSession);
+            }
         }
-    }
 
-    return sceneSessionVector;
+        return sceneSessionVector;
+    };
+
+    return taskScheduler_->PostSyncTask(task);
 }
 
 WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& sceneSession,
@@ -2985,48 +2988,52 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistent
 
 bool SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
 {
-    bool ret = true;
-    bool needUpdate = false;
-    auto sceneSession = GetSceneSession(persistentId);
-    if (sceneSession == nullptr) {
-        WLOGFE("sceneSession is nullptr.");
-        return false;
-    }
-    NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_BOUNDS);
-
-    WindowType type = sceneSession->GetWindowType();
-    SessionGravity gravity = SessionGravity::SESSION_GRAVITY_BOTTOM;
-    uint32_t percent = 0;
-    if (sceneSession->GetSessionProperty() != nullptr) {
-        sceneSession->GetSessionProperty()->GetSessionGravity(gravity, percent);
-    }
-    if (type == WindowType::WINDOW_TYPE_STATUS_BAR ||
-        type == WindowType::WINDOW_TYPE_NAVIGATION_BAR ||
-        (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
-        gravity == SessionGravity::SESSION_GRAVITY_BOTTOM)) {
-        AvoidAreaType avoidType = (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) ?
-            AvoidAreaType::TYPE_KEYBOARD : AvoidAreaType::TYPE_SYSTEM;
-        for (auto& session : avoidAreaListenerSessionSet_) {
-            AvoidArea avoidArea = session->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
-            ret = UpdateSessionAvoidAreaIfNeed(
-                session->GetPersistentId(), avoidArea, static_cast<AvoidAreaType>(avoidType));
-            needUpdate = needUpdate || ret;
-        }
-    } else {
-        if (avoidAreaListenerSessionSet_.find(sceneSession) == avoidAreaListenerSessionSet_.end()) {
-            WLOGD("id:%{public}d is not in avoidAreaListenerNodes, don't update avoid area.", persistentId);
+    auto task = [this, persistentId]() {
+        bool ret = true;
+        bool needUpdate = false;
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            WLOGFE("sceneSession is nullptr.");
             return false;
         }
-        uint32_t start = static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM);
-        uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_KEYBOARD);
-        for (uint32_t avoidType = start; avoidType <= end; avoidType++) {
-            AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
-            ret = UpdateSessionAvoidAreaIfNeed(persistentId, avoidArea, static_cast<AvoidAreaType>(avoidType));
-            needUpdate = needUpdate || ret;
-        }
-    }
+        NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_BOUNDS);
 
-    return needUpdate;
+        WindowType type = sceneSession->GetWindowType();
+        SessionGravity gravity = SessionGravity::SESSION_GRAVITY_BOTTOM;
+        uint32_t percent = 0;
+        if (sceneSession->GetSessionProperty() != nullptr) {
+            sceneSession->GetSessionProperty()->GetSessionGravity(gravity, percent);
+        }
+        if (type == WindowType::WINDOW_TYPE_STATUS_BAR ||
+            type == WindowType::WINDOW_TYPE_NAVIGATION_BAR ||
+            (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
+            gravity == SessionGravity::SESSION_GRAVITY_BOTTOM)) {
+            AvoidAreaType avoidType = (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) ?
+                AvoidAreaType::TYPE_KEYBOARD : AvoidAreaType::TYPE_SYSTEM;
+            for (auto& session : avoidAreaListenerSessionSet_) {
+                AvoidArea avoidArea = session->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
+                ret = UpdateSessionAvoidAreaIfNeed(
+                    session->GetPersistentId(), avoidArea, static_cast<AvoidAreaType>(avoidType));
+                needUpdate = needUpdate || ret;
+            }
+        } else {
+            if (avoidAreaListenerSessionSet_.find(sceneSession) == avoidAreaListenerSessionSet_.end()) {
+                WLOGD("id:%{public}d is not in avoidAreaListenerNodes, don't update avoid area.", persistentId);
+                return false;
+            }
+            uint32_t start = static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM);
+            uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_KEYBOARD);
+            for (uint32_t avoidType = start; avoidType <= end; avoidType++) {
+                AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
+                ret = UpdateSessionAvoidAreaIfNeed(persistentId, avoidArea, static_cast<AvoidAreaType>(avoidType));
+                needUpdate = needUpdate || ret;
+            }
+        }
+
+        return needUpdate;
+    };
+
+    return taskScheduler_->PostSyncTask(task);
 }
 
 void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,

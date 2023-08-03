@@ -169,7 +169,12 @@ WMError WindowExtensionSessionImpl::SetUIContent(const std::string& contentInfo,
         version = context_->GetApplicationInfo()->apiCompatibleVersion;
     }
     // 10 ArkUI new framework support after API10
-    if (version < 10 || isIgnoreSafeAreaNeedNotify_) {
+    if (version < 10) {
+        SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
+        if (!isSystembarPropertiesSet_) {
+            SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, SystemBarProperty());
+        }
+    } else if (isIgnoreSafeAreaNeedNotify_) {
         SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
         isIgnoreSafeAreaNeedNotify_ = false;
     }
