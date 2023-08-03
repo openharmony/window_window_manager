@@ -38,6 +38,8 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Session" };
+std::atomic<int32_t> g_persistentId = INVALID_SESSION_ID;
+std::set<int32_t> g_persistentIdSet;
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 constexpr int32_t UID_TRANSFORM_DIVISOR = 200000;  // local account id = uid / UID_TRANSFORM_DIVISOR
 std::string GetCurrentTime()
@@ -49,9 +51,6 @@ std::string GetCurrentTime()
     return std::to_string(uTime);
 }
 } // namespace
-
-std::atomic<int32_t> Session::sessionId_(INVALID_SESSION_ID);
-std::set<int32_t> Session::persistIdSet_;
 
 int32_t Session::GetPersistentId() const
 {
@@ -1119,21 +1118,21 @@ WSError Session::MarkProcessed(int32_t eventId)
 void Session::GeneratePersistentId(bool isExtension, const SessionInfo& sessionInfo)
 {
     if (sessionInfo.persistentId_ != INVALID_SESSION_ID) {
-        persistIdSet_.insert(sessionInfo.persistentId_);
-        persistentId_ = static_cast<int32_t>(sessionInfo.persistentId_);
+        g_persistentIdSet.insert(sessionInfo.persistentId_);
+        persistentId_ = sessionInfo.persistentId_;
         return;
     }
 
-    if (sessionId_ == INVALID_SESSION_ID) {
-        sessionId_++; // init non system session id from 2
+    if (g_persistentId == INVALID_SESSION_ID) {
+        g_persistentId++; // init non system session id from 2
     }
 
-    sessionId_++;
-    while (persistIdSet_.count(sessionId_) > 0) {
-        sessionId_++;
+    g_persistentId++;
+    while (g_persistentIdSet.count(g_persistentId)) {
+        g_persistentId++;
     }
-    persistentId_ = isExtension ? sessionId_.load() | 0x40000000 : sessionId_.load() & 0x3fffffff;
-    persistIdSet_.insert(sessionId_);
+    persistentId_ = isExtension ? g_persistentId.load() | 0x40000000 : g_persistentId.load() & 0x3fffffff;
+    g_persistentIdSet.insert(g_persistentId);
 }
 
 sptr<ScenePersistence> Session::GetScenePersistence() const
