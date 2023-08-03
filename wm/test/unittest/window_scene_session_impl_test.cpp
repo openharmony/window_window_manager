@@ -133,7 +133,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession01, Function
     EXPECT_CALL(*(session), Connect(_, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
     ASSERT_EQ(WMError::WM_OK, windowscenesession->Create(abilityContext_, session));
     windowscenesession->hostSession_ = session;
-    EXPECT_CALL(*(session), CreateAndConnectSpecificSession(_, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*(session), CreateAndConnectSpecificSession(_, _, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
 }
 
 /**
@@ -160,7 +160,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession02, Function
     parentscenesession_->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
     parentscenesession_->hostSession_ = session_;
 
-    EXPECT_CALL(*(session_), CreateAndConnectSpecificSession(_, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*(session_), CreateAndConnectSpecificSession(_, _, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
     parentscenesession_->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, parentscenesession_->CreateAndConnectSpecificSession());
 }
@@ -1293,7 +1293,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetAlpha01, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, session);
 
     EXPECT_CALL(*(session), Connect(_, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
-    EXPECT_CALL(*(session), CreateAndConnectSpecificSession(_, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*(session), CreateAndConnectSpecificSession(_, _, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
     ASSERT_EQ(WMError::WM_OK, windowscenesession->Create(abilityContext_, session));
     windowscenesession->hostSession_ = session;
 
