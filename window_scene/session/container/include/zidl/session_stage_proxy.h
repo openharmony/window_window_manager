@@ -42,6 +42,7 @@ public:
     void DumpSessionElementInfo(const std::vector<std::string>& params)  override;
     WSError NotifyTouchOutside() override;
     WSError UpdateWindowMode(WindowMode mode) override;
+
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
 };
