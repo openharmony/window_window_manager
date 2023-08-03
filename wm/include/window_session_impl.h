@@ -163,7 +163,6 @@ protected:
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
 
     sptr<WindowSessionProperty> property_;
-    WindowMode windowMode_ = WindowMode::WINDOW_MODE_UNDEFINED;
     SystemSessionConfig windowSystemConfig_;
     NotifyNativeWinDestroyFunc notifyNativeFunc_;
 

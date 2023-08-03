@@ -187,7 +187,7 @@ int SessionStageStub::HandleNotifyTouchOutside(MessageParcel& data, MessageParce
 int SessionStageStub::HandleUpdateWindowMode(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleUpdateWindowMode!");
-    WindowMode mode = static_cast<WindowMode>(data.ReadInt32());
+    WindowMode mode = static_cast<WindowMode>(data.ReadUint32());
     WSError errCode = UpdateWindowMode(mode);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
