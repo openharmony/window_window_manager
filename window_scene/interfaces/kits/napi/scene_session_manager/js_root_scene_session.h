@@ -37,6 +37,7 @@ private:
     NativeValue* OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info);
     bool IsCallbackRegistered(std::string type, NativeValue* jsListenerObject);
     void PendingSessionActivation(SessionInfo& info);
+    sptr<SceneSession> GenSceneSession(SessionInfo& info);
 
     NativeEngine& engine_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
