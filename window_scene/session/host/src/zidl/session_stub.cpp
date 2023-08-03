@@ -223,7 +223,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     abilitySessionInfo->persistentId = data.ReadInt32();
     abilitySessionInfo->state = static_cast<AAFwk::CallToState>(data.ReadInt32());
     abilitySessionInfo->uiAbilityId = data.ReadInt64();
-    abilitySessionInfo->callingTokenId = data.ReadInt32();
+    abilitySessionInfo->callingTokenId = data.ReadUint32();
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
