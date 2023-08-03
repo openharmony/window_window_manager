@@ -901,7 +901,7 @@ void SceneSessionManager::DestroySpecificSession(const sptr<IRemoteObject>& remo
 
 WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session)
+    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session, sptr<IRemoteObject> token)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartedByInputMethod()) {
         WLOGFE("check input method permission failed");
@@ -909,7 +909,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     // get pid/uid before post sync task
     int32_t pid = IPCSkeleton::GetCallingPid();
     int32_t uid = IPCSkeleton::GetCallingUid();
-    auto task = [this, sessionStage, eventChannel, surfaceNode, property, &persistentId, &session, pid, uid]() {
+    auto task = [this, sessionStage, eventChannel, surfaceNode, property, &persistentId, &session, token, pid, uid]() {
         // create specific session
         SessionInfo info;
         sptr<SceneSession> sceneSession = RequestSceneSession(info, property);
@@ -919,7 +919,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         sceneSession->SetCallingPid(pid);
         sceneSession->SetCallingUid(uid);
         // connect specific session and sessionStage
-        WSError errCode = sceneSession->ConnectImpl(sessionStage, eventChannel, surfaceNode, systemConfig_, property);
+        WSError errCode = sceneSession->ConnectImpl(
+            sessionStage, eventChannel, surfaceNode, systemConfig_, property, token);
         if (property) {
             persistentId = property->GetPersistentId();
         }

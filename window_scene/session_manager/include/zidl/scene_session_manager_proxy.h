@@ -29,7 +29,8 @@ public:
 
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session) override;
+        sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
+        sptr<IRemoteObject> token = nullptr) override;
     WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId) override;
     WSError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) override;
     WSError BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;

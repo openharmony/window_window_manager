@@ -74,7 +74,8 @@ public:
 
     virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session) = 0;
+        sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
+        sptr<IRemoteObject> token = nullptr) = 0;
     virtual WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId) = 0;
     virtual WSError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) = 0;
     virtual WSError BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) = 0;
