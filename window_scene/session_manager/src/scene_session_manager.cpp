@@ -750,7 +750,6 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         }
         scnSessionInfo->isNewWant = isNewActive;
         AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
-        activeSessionId_ = persistentId;
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
         return WSError::WS_OK;
     };
@@ -1037,11 +1036,11 @@ const AppWindowSceneConfig& SceneSessionManager::GetWindowSceneConfig() const
 WSError SceneSessionManager::ProcessBackEvent()
 {
     auto task = [this]() {
-        auto session = GetSceneSession(activeSessionId_);
+        auto session = GetSceneSession(focusedSessionId_);
         if (!session) {
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        WLOGFD("ProcessBackEvent session persistentId: %{public}d", activeSessionId_);
+        WLOGFD("ProcessBackEvent session persistentId: %{public}d", focusedSessionId_);
         session->ProcessBackEvent();
         return WSError::WS_OK;
     };
