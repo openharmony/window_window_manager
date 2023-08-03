@@ -124,6 +124,10 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     sptr<IWindowEventChannel> eventChannel(channel);
     auto persistentId = INVALID_SESSION_ID;
     sptr<Rosen::ISession> session;
+    sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
+    if (token) {
+        property_->SetTokenState(true);
+    }
     const WindowType type = GetType();
     if (WindowHelper::IsSubWindow(type)) { // sub window
         auto parentSession = FindParentSessionByParentId(property_->GetParentId());
@@ -134,7 +138,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         property_->SetParentPersistentId(parentSession->GetPersistentId());
         // creat sub session by parent session
         parentSession->GetHostSession()->CreateAndConnectSpecificSession(iSessionStage, eventChannel, surfaceNode_,
-            property_, persistentId, session);
+            property_, persistentId, session, token);
         // update subWindowSessionMap_
         subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
     } else { // system window
@@ -152,14 +156,13 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         }
         PreProcessCreate();
         SessionManager::GetInstance().CreateAndConnectSpecificSession(iSessionStage, eventChannel, surfaceNode_,
-            property_, persistentId, session);
+            property_, persistentId, session, token);
     }
     property_->SetPersistentId(persistentId);
-    if (session != nullptr) {
-        hostSession_ = session;
-    } else {
+    if (session == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
+    hostSession_ = session;
     WLOGFI("CreateAndConnectSpecificSession [name:%{public}s, id:%{public}d, type: %{public}u]",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), GetType());
     return WMError::WM_OK;

@@ -279,10 +279,18 @@ int SessionStub::HandleCreateAndConnectSpecificSession(MessageParcel& data, Mess
     } else {
         WLOGFW("Property not exist!");
     }
+
+    sptr<IRemoteObject> token = nullptr;
+    if (property && property->GetTokenState()) {
+        token = data.ReadRemoteObject();
+    } else {
+        WLOGI("accept token is nullptr");
+    }
+
     auto persistentId = INVALID_SESSION_ID;
     sptr<ISession> sceneSession;
     CreateAndConnectSpecificSession(sessionStage, eventChannel, surfaceNode,
-        property, persistentId, sceneSession);
+        property, persistentId, sceneSession, token);
     if (sceneSession== nullptr) {
         return ERR_INVALID_STATE;
     }
