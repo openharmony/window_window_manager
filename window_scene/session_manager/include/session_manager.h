@@ -30,7 +30,8 @@ WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManager);
 public:
     void CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session);
+        sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
+        sptr<IRemoteObject> token = nullptr);
     void DestroyAndDisconnectSpecificSession(const int32_t& persistentId);
     WMError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
     WMError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent);

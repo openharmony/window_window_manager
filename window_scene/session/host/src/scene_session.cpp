@@ -227,7 +227,7 @@ WSError SceneSession::RaiseToAppTop()
 
 WSError SceneSession::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session)
+    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session, sptr<IRemoteObject> token)
 {
     WLOGFI("CreateAndConnectSpecificSession id: %{public}d", GetPersistentId());
     sptr<SceneSession> sceneSession;
@@ -239,7 +239,7 @@ WSError SceneSession::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
         return WSError::WS_ERROR_NULLPTR;
     }
     // connect specific session and sessionStage
-    WSError errCode = sceneSession->Connect(sessionStage, eventChannel, surfaceNode, systemConfig_, property);
+    WSError errCode = sceneSession->Connect(sessionStage, eventChannel, surfaceNode, systemConfig_, property, token);
     if (property) {
         persistentId = property->GetPersistentId();
     }
