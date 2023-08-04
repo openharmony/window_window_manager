@@ -1001,6 +1001,16 @@ WSError Session::UpdateFocus(bool isFocused)
     return WSError::WS_OK;
 }
 
+WSError Session::UpdateWindowMode(WindowMode mode)
+{
+    WLOGFI("Session update window mode, id: %{public}d, mode: %{public}d", GetPersistentId(),
+        static_cast<int32_t>(mode));
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    return sessionStage_->UpdateWindowMode(mode);
+}
+
 void Session::SetSessionRect(const WSRect& rect)
 {
     winRect_ = rect;

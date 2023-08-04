@@ -103,6 +103,7 @@ public:
         const std::string& strId);
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info);
     WSError UpdateFocus(int32_t persistentId, bool isFocused);
+    WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
     WSError SwitchUser(int32_t oldUserId, int32_t newUserId, std::string &fileDir);
     int32_t GetCurrentUserId() const;
     void StartWindowInfoReportLoop();
