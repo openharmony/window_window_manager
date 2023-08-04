@@ -183,7 +183,7 @@ ColorSpace WindowSessionImpl::GetColorSpaceFromSurfaceGamut(GraphicColorGamut co
         }
     }
     WLOGFE("try to get not exist ColorSpace");
-    
+
     return ColorSpace::COLOR_SPACE_DEFAULT;
 }
 
@@ -413,6 +413,11 @@ WSError WindowSessionImpl::UpdateFocus(bool isFocused)
     } else {
         NotifyAfterUnfocused();
     }
+    return WSError::WS_OK;
+}
+
+WSError WindowSessionImpl::UpdateWindowMode(WindowMode mode)
+{
     return WSError::WS_OK;
 }
 
@@ -1224,7 +1229,7 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
     } else if (uiContent_) {
         isConsumed = uiContent_->ProcessKeyEvent(keyEvent);
         if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
-            windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN &&
+            property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
             property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL) {
             WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
             Recover();

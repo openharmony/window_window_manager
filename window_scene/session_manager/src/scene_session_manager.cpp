@@ -1759,6 +1759,18 @@ WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
     return WSError::WS_OK;
 }
 
+WSError SceneSessionManager::UpdateWindowMode(int32_t persistentId, int32_t windowMode)
+{
+    WLOGFD("update window mode, id: %{public}d, mode: %{public}d", persistentId, windowMode);
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        WLOGFE("could not find window");
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    WindowMode mode = static_cast<WindowMode>(windowMode);
+    return sceneSession->UpdateWindowMode(mode);
+}
+
 void SceneSessionManager::RegisterWindowFocusChanged(const WindowFocusChangedFunc& func)
 {
     WLOGFE("RegisterWindowFocusChanged in");

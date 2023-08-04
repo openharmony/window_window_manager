@@ -174,6 +174,7 @@ public:
     void NotifySessionTouchableChange(bool touchable);
     void NotifyClick();
     WSError UpdateFocus(bool isFocused);
+    WSError UpdateWindowMode(WindowMode mode);
     WSError SetFocusable(bool isFocusable);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);

@@ -211,7 +211,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         }
     }
     WLOGFD("Window Create [name:%{public}s, id:%{public}d], state:%{pubic}u, windowmode:%{public}u",
-        property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, windowMode_);
+        property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetMode());
     return ret;
 }
 
@@ -670,7 +670,7 @@ void WindowSceneSessionImpl::UpdateFloatingWindowSizeBySizeLimits(uint32_t& widt
     }
     float curRatio = static_cast<float>(width) / static_cast<float>(height);
     // there is no need to fix size by ratio if this is not main floating window
-    if (!WindowHelper::IsMainFloatingWindow(property_->GetWindowType(), windowMode_) ||
+    if (!WindowHelper::IsMainFloatingWindow(property_->GetWindowType(), GetMode()) ||
         (!MathHelper::GreatNotEqual(sizeLimits.minRatio_, curRatio) &&
          !MathHelper::GreatNotEqual(curRatio, sizeLimits.maxRatio_))) {
         return;
@@ -787,12 +787,13 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
 {
     uint32_t windowId = GetWindowId();
     WLOGFI("GetAvoidAreaByType windowId:%{public}u type:%{public}u", windowId, static_cast<uint32_t>(type));
+    WindowMode mode = GetMode();
     if (type != AvoidAreaType::TYPE_KEYBOARD &&
-        windowMode_ != WindowMode::WINDOW_MODE_FULLSCREEN &&
-        windowMode_ != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
-        windowMode_ != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        mode != WindowMode::WINDOW_MODE_FULLSCREEN &&
+        mode != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
+        mode != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         WLOGI("avoidAreaType:%{public}u, windowMode:%{public}u, return default avoid area.",
-            static_cast<uint32_t>(type), static_cast<uint32_t>(windowMode_));
+            static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
         return WMError::WM_OK;
     }
     if (hostSession_ == nullptr) {
@@ -1150,25 +1151,9 @@ WMError WindowSceneSessionImpl::SetWindowMode(WindowMode mode)
             GetWindowId(), static_cast<uint32_t>(mode));
         return WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
     }
-    if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
-        windowMode_ = mode;
-        UpdateTitleButtonVisibility();
-        UpdateDecorEnable(true);
-    } else if (state_ == WindowState::STATE_SHOWN) {
-        WindowMode lastMode = GetMode();
-        windowMode_ = mode;
-        WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE);
-        if (ret != WMError::WM_OK) {
-            windowMode_ = lastMode;
-            return ret;
-        }
-        // set client window mode if success.
-        UpdateTitleButtonVisibility();
-        UpdateDecorEnable(true);
-    }
-    if (GetMode() != mode) {
-        WLOGFE("set window mode filed! id: %{public}u.", GetWindowId());
-        return WMError::WM_ERROR_INVALID_PARAM;
+    WMError ret = UpdateWindowModeImmediately(mode);
+    if (ret != WMError::WM_OK) {
+        return ret;
     }
 
     if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY && hostSession_) {
@@ -1181,7 +1166,7 @@ WMError WindowSceneSessionImpl::SetWindowMode(WindowMode mode)
 
 WindowMode WindowSceneSessionImpl::GetMode() const
 {
-    return windowMode_;
+    return property_->GetWindowMode();
 }
 
 bool WindowSceneSessionImpl::IsTransparent() const
@@ -1759,6 +1744,42 @@ void WindowSceneSessionImpl::DumpSessionElementInfo(const std::vector<std::strin
         uiContent_->DumpInfo(params, info);
     }
     SingletonContainer::Get<WindowAdapter>().NotifyDumpInfoResult(info);
+}
+
+WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
+{
+    WLOGFI("UpdateWindowMode %{public}u mode %{public}u", GetWindowId(), static_cast<uint32_t>(mode));
+    if (IsWindowSessionInvalid()) {
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), mode)) {
+        WLOGFE("window %{public}u do not support mode: %{public}u",
+            GetWindowId(), static_cast<uint32_t>(mode));
+        return WSError::WS_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
+    }
+    WMError ret = UpdateWindowModeImmediately(mode);
+    return static_cast<WSError>(ret);
+}
+
+WMError WindowSceneSessionImpl::UpdateWindowModeImmediately(WindowMode mode)
+{
+    if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
+        property_->SetWindowMode(mode);
+        UpdateTitleButtonVisibility();
+        UpdateDecorEnable(true);
+    } else if (state_ == WindowState::STATE_SHOWN) {
+        WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE);
+        if (ret != WMError::WM_OK) {
+            WLOGFE("update window mode filed! id: %{public}u, mode: %{public}u.", GetWindowId(),
+                static_cast<uint32_t>(mode));
+            return ret;
+        }
+        // set client window mode if success.
+        property_->SetWindowMode(mode);
+        UpdateTitleButtonVisibility();
+        UpdateDecorEnable(true);
+    }
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

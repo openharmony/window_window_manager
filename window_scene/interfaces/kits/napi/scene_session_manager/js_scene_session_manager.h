@@ -48,6 +48,7 @@ public:
     static NativeValue* GetSessionSnapshotFilePath(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* InitWithRenderServiceAdded(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* PerfRequestEx(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* UpdateWindowMode(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
     NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
@@ -65,6 +66,7 @@ private:
     NativeValue* OnGetSessionSnapshotFilePath(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnInitWithRenderServiceAdded(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnPerfRequestEx(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnUpdateWindowMode(NativeEngine& engine, NativeCallbackInfo& info);
 
     void OnGestureNavigationEnabledUpdate(bool enable);
     void OnCreateSpecificSession(const sptr<SceneSession>& sceneSession);

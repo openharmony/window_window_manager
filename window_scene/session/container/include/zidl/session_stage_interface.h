@@ -45,6 +45,7 @@ public:
         TRANS_ID_NOTIFY_SCREEN_SHOT,
         TRANS_ID_DUMP_SESSSION_ELEMENT_INFO,
         TRANS_ID_NOTIFY_TOUCH_OUTSIDE,
+        TRANS_ID_NOTIFY_WINDOW_MODE_CHANGE
     };
 
     virtual void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
@@ -72,6 +73,7 @@ public:
     virtual void NotifyScreenshot() = 0;
     virtual void DumpSessionElementInfo(const std::vector<std::string>& params) = 0;
     virtual WSError NotifyTouchOutside() = 0;
+    virtual WSError UpdateWindowMode(WindowMode mode) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H
