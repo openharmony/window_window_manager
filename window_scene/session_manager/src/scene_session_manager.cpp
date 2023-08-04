@@ -1063,6 +1063,20 @@ WSError SceneSessionManager::ProcessBackEvent()
     return WSError::WS_OK;
 }
 
+void SceneSessionManager::CleanUserMap()
+{
+    WLOGFI("CleanUserMap in size = %{public}zu", sceneSessionMap_.size());
+    auto iter = sceneSessionMap_.begin();
+    while (iter != sceneSessionMap_.end()) {
+        if (iter->second != nullptr && !iter->second->GetSessionInfo().isSystem_) {
+            iter = sceneSessionMap_.erase(iter);
+        } else {
+            iter++;
+        }
+    }
+    WLOGFI("CleanUserMap out size = %{public}zu", sceneSessionMap_.size());
+}
+
 WSError SceneSessionManager::SwitchUser(int32_t oldUserId, int32_t newUserId, std::string &fileDir)
 {
     if (oldUserId != currentUserId_ || oldUserId == newUserId || fileDir.empty()) {
@@ -1091,7 +1105,7 @@ WSError SceneSessionManager::SwitchUser(int32_t oldUserId, int32_t newUserId, st
             }
             AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo);
         }
-        sceneSessionMap_.clear();
+        CleanUserMap();
         return WSError::WS_OK;
     };
     taskScheduler_->PostSyncTask(task);
