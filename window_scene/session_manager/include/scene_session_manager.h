@@ -69,7 +69,7 @@ WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManager)
 public:
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo,
         sptr<WindowSessionProperty> property = nullptr);
-    WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive);
+    std::future<int32_t> RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession, const bool isDelegator = false);
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession);

@@ -38,6 +38,7 @@ namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSessionManager" };
+constexpr int WAIT_FOR_SECONDS = 2;
 const std::string CREATE_SPECIFIC_SCENE_CB = "createSpecificSession";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 const std::string OUTSIDE_DOWN_EVENT_CB = "outsideDownEvent";
@@ -581,8 +582,12 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionActivation(NativeEngine
     bool isNewActive = true;
     ConvertFromJsValue(engine, info.argv[1], isNewActive);
 
-    SceneSessionManager::GetInstance().RequestSceneSessionActivation(sceneSession, isNewActive);
-    return engine.CreateUndefined();
+    int32_t errCode = static_cast<int32_t>(WSErrorCode::WS_ERROR_TIMEOUT);
+    auto future = SceneSessionManager::GetInstance().RequestSceneSessionActivation(sceneSession, isNewActive);
+    if (future.wait_for(std::chrono::seconds(WAIT_FOR_SECONDS)) == std::future_status::ready) {
+        errCode = future.get();
+    }
+    return engine.CreateNumber(errCode);
 }
 
 NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackground(NativeEngine& engine, NativeCallbackInfo& info)
