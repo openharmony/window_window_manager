@@ -61,6 +61,16 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     if (property_) {
         property_->SetWindowType(static_cast<WindowType>(info.windowType_));
     }
+
+    if (sessionInfo_.isSystem_) {
+        auto name = sessionInfo_.bundleName_;
+        auto pos = name.find_last_of('.');
+        name = (pos == std::string::npos) ? name : name.substr(pos + 1); // skip '.'
+
+        Rosen::RSSurfaceNodeConfig config;
+        config.SurfaceNodeName = name;
+        surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
+    }
 }
 
 WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)

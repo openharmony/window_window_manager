@@ -224,12 +224,15 @@ protected:
     void UpdateSessionFocusable(bool isFocusable);
     void UpdateSessionTouchable(bool touchable);
 
-    bool isActive_ = false;
-    bool isFocused_ = false;
-    float aspectRatio_ = 0.0f;
-    WSRect winRect_;
-    sptr<ISessionStage> sessionStage_;
+    int32_t persistentId_ = INVALID_SESSION_ID;
+    SessionState state_ = SessionState::STATE_DISCONNECT;
     SessionInfo sessionInfo_;
+    sptr<WindowSessionProperty> property_;
+    std::shared_ptr<RSSurfaceNode> surfaceNode_;
+    sptr<ISessionStage> sessionStage_;
+    bool isActive_ = false;
+    WSRect winRect_;
+
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
     NotifySessionStateChangeNotifyManagerFunc sessionStateChangeNotifyManagerFunc_;
@@ -244,10 +247,11 @@ protected:
     NotifyPendingSessionToBackgroundForDelegatorFunc pendingSessionToBackgroundForDelegatorFunc_;
     NotifyCallingSessionForegroundFunc notifyCallingSessionForegroundFunc_;
     NotifyCallingSessionBackgroundFunc notifyCallingSessionBackgroundFunc_;
-    sptr<WindowSessionProperty> property_ = nullptr;
     SystemSessionConfig systemConfig_;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
     uint32_t zOrder_ = 0;
+    bool isFocused_ = false;
+    float aspectRatio_ = 0.0f;
 
 private:
     void FillSessionInfo(SessionInfo& sessionInfo);
@@ -275,19 +279,12 @@ private:
         return lifecycleListeners;
     }
 
-    std::shared_ptr<RSSurfaceNode> CreateSurfaceNode(const std::string& name);
-
-    int32_t persistentId_ = INVALID_SESSION_ID;
-    static std::atomic<int32_t> sessionId_;
-    static std::set<int32_t> persistIdSet_;
-    std::shared_ptr<RSSurfaceNode> surfaceNode_ = nullptr;
-    SessionState state_ = SessionState::STATE_DISCONNECT;
-    bool showRecent_ = false;
-    bool bufferAvailable_ = false;
-
     std::recursive_mutex mutex_;
     std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;
     sptr<IWindowEventChannel> windowEventChannel_ = nullptr;
+
+    bool showRecent_ = false;
+    bool bufferAvailable_ = false;
 
     std::vector<sptr<Session>> dialogVec_;
     sptr<Session> parentSession_;
