@@ -183,7 +183,7 @@ ColorSpace WindowSessionImpl::GetColorSpaceFromSurfaceGamut(GraphicColorGamut co
         }
     }
     WLOGFE("try to get not exist ColorSpace");
-    
+
     return ColorSpace::COLOR_SPACE_DEFAULT;
 }
 

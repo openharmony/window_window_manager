@@ -73,6 +73,7 @@ public:
 
     int32_t GetPersistentId() const;
     int32_t GetParentPersistentId() const;
+    void SetParentPersistentId(int32_t parentId);
     void SetSessionRect(const WSRect& rect);
 
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;

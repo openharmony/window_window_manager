@@ -511,8 +511,11 @@ void WindowSceneSessionImpl::DestroySubWindow()
             }
             if ((*iter)->GetPersistentId() == persistentId) {
                 WLOGFD("Destroy sub window, persistentId: %{public}d", persistentId);
-                iter = subWindows.erase(iter);
+                subWindows.erase(iter);
                 break;
+            } else {
+                WLOGFD("Exists other sub window, persistentId: %{public}d", persistentId);
+                iter++;
             }
         }
     }
@@ -521,15 +524,14 @@ void WindowSceneSessionImpl::DestroySubWindow()
     auto mainIter = subWindowSessionMap_.find(persistentId);
     if (mainIter != subWindowSessionMap_.end()) {
         auto& subWindows = mainIter->second;
-        for (auto iter = subWindows.begin(); iter != subWindows.end();) {
+        for (auto iter = subWindows.begin(); iter != subWindows.end(); iter = subWindows.begin()) {
             if ((*iter) == nullptr) {
                 WLOGFD("Destroy sub window which is nullptr");
-                iter = subWindows.erase(iter);
+                subWindows.erase(iter);
                 continue;
             }
             WLOGFD("Destroy sub window, persistentId: %{public}d", (*iter)->GetPersistentId());
             (*iter)->Destroy(false);
-            iter++;
         }
         mainIter->second.clear();
         subWindowSessionMap_.erase(mainIter);

@@ -66,6 +66,14 @@ int32_t Session::GetParentPersistentId() const
     return INVALID_SESSION_ID;
 }
 
+void Session::SetParentPersistentId(int32_t parentId)
+{
+    if (property_ == nullptr) {
+        return;
+    }
+    property_->SetParentPersistentId(parentId);
+}
+
 void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& property)
 {
     property_ = property;
@@ -753,15 +761,27 @@ void Session::SetParentSession(const sptr<Session>& session)
 
 void Session::BindDialogToParentSession(const sptr<Session>& session)
 {
+    auto iter = std::find(dialogVec_.begin(), dialogVec_.end(), session);
+    if (iter != dialogVec_.end()) {
+        WLOGFW("Dialog is existed in parentVec, id: %{public}d, parentId: %{public}d",
+            session->GetPersistentId(), GetPersistentId());
+        return;
+    }
     dialogVec_.push_back(session);
+    WLOGFD("Bind dialog success, id: %{public}d, parentId: %{public}d",
+        session->GetPersistentId(), GetPersistentId());
 }
 
 void Session::RemoveDialogToParentSession(const sptr<Session>& session)
 {
     auto iter = std::find(dialogVec_.begin(), dialogVec_.end(), session);
     if (iter != dialogVec_.end()) {
+        WLOGFD("Remove dialog success, id: %{public}d, parentId: %{public}d",
+            session->GetPersistentId(), GetPersistentId());
         dialogVec_.erase(iter);
     }
+    WLOGFW("Remove dialog failed, id: %{public}d, parentId: %{public}d",
+        session->GetPersistentId(), GetPersistentId());
 }
 
 std::vector<sptr<Session>> Session::GetDialogVector() const
