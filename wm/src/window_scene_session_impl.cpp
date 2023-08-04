@@ -1101,7 +1101,7 @@ WSError WindowSceneSessionImpl::HandleBackEvent()
         WLOGD("Back key event is consumed");
         return WSError::WS_OK;
     }
-    WLOGFI("wml.report Back");
+    WLOGFD("report Back");
     SingletonContainer::Get<WindowInfoReporter>().ReportBackButtonInfoImmediately();
     // notify back event to host session
     PerformBack();
