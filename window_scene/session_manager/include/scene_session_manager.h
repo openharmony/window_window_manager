@@ -79,7 +79,8 @@ public:
     sptr<SceneSession> GetSceneSession(int32_t persistentId);
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session);
+        sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
+        sptr<IRemoteObject> token = nullptr);
     WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId);
     WSError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
     void SetCreateSpecificSessionListener(const NotifyCreateSpecificSessionFunc& func);
@@ -102,6 +103,7 @@ public:
         const std::string& strId);
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info);
     WSError UpdateFocus(int32_t persistentId, bool isFocused);
+    WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
     WSError SwitchUser(int32_t oldUserId, int32_t newUserId, std::string &fileDir);
     int32_t GetCurrentUserId() const;
     void StartWindowInfoReportLoop();

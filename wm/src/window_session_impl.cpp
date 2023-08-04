@@ -183,7 +183,7 @@ ColorSpace WindowSessionImpl::GetColorSpaceFromSurfaceGamut(GraphicColorGamut co
         }
     }
     WLOGFE("try to get not exist ColorSpace");
-    
+
     return ColorSpace::COLOR_SPACE_DEFAULT;
 }
 
@@ -416,6 +416,11 @@ WSError WindowSessionImpl::UpdateFocus(bool isFocused)
     return WSError::WS_OK;
 }
 
+WSError WindowSessionImpl::UpdateWindowMode(WindowMode mode)
+{
+    return WSError::WS_OK;
+}
+
 void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -546,9 +551,9 @@ void WindowSessionImpl::NotifyModeChange(WindowMode mode, bool hasDeco)
     if (hostSession_) {
         property_->SetWindowMode(mode);
         property_->SetDecorEnable(hasDeco);
-        hostSession_->UpdateWindowSessionProperty(property_);
     }
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE);
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE);
 }
 
 std::shared_ptr<RSSurfaceNode> WindowSessionImpl::GetSurfaceNode() const
@@ -1224,7 +1229,7 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
     } else if (uiContent_) {
         isConsumed = uiContent_->ProcessKeyEvent(keyEvent);
         if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
-            windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN &&
+            property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
             property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL) {
             WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
             Recover();

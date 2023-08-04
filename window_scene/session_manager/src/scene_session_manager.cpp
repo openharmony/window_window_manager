@@ -585,6 +585,8 @@ WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& scene
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         sceneSession->SetParentSession(parentSceneSession);
+        WLOGFD("Update parent of subWindow success, id %{public}d, parentId %{public}d",
+            sceneSession->GetPersistentId(), parentPersistentId);
     } else if (property->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG &&
         parentPersistentId != INVALID_SESSION_ID) {
         auto parentSession = GetSceneSession(parentPersistentId);
@@ -592,9 +594,10 @@ WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& scene
             WLOGFE("Parent session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
-        WLOGFD("Add dialog id to its parent vector");
         parentSession->BindDialogToParentSession(sceneSession);
         sceneSession->SetParentSession(parentSession);
+        WLOGFD("Update parent of dialog success, id %{public}d, parentId %{public}d",
+            sceneSession->GetPersistentId(), parentPersistentId);
     }
     return WSError::WS_OK;
 }
@@ -901,7 +904,7 @@ void SceneSessionManager::DestroySpecificSession(const sptr<IRemoteObject>& remo
 
 WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session)
+    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session, sptr<IRemoteObject> token)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartedByInputMethod()) {
         WLOGFE("check input method permission failed");
@@ -909,7 +912,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     // get pid/uid before post sync task
     int32_t pid = IPCSkeleton::GetCallingPid();
     int32_t uid = IPCSkeleton::GetCallingUid();
-    auto task = [this, sessionStage, eventChannel, surfaceNode, property, &persistentId, &session, pid, uid]() {
+    auto task = [this, sessionStage, eventChannel, surfaceNode, property, &persistentId, &session, token, pid, uid]() {
         // create specific session
         SessionInfo info;
         sptr<SceneSession> sceneSession = RequestSceneSession(info, property);
@@ -919,7 +922,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         sceneSession->SetCallingPid(pid);
         sceneSession->SetCallingUid(uid);
         // connect specific session and sessionStage
-        WSError errCode = sceneSession->ConnectImpl(sessionStage, eventChannel, surfaceNode, systemConfig_, property);
+        WSError errCode = sceneSession->ConnectImpl(
+            sessionStage, eventChannel, surfaceNode, systemConfig_, property, token);
         if (property) {
             persistentId = property->GetPersistentId();
         }
@@ -1280,6 +1284,12 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
             }
             break;
         }
+        case WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE: {
+            if (sceneSession->GetSessionProperty() != nullptr) {
+                sceneSession->GetSessionProperty()->SetDecorEnable(property->IsDecorEnable());
+            }
+            break;
+        }
         default:
             break;
     }
@@ -1496,7 +1506,7 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
         sName = session->GetWindowName();
     }
     uint32_t displayId = 0;
-    uint32_t flag = 0;
+    uint32_t flag = session->GetWindowSessionProperty()->GetWindowFlags();
     uint32_t orientation = 0;
     const std::string& windowName = sName.size() <= WINDOW_NAME_MAX_LENGTH ?
         sName : sName.substr(0, WINDOW_NAME_MAX_LENGTH);
@@ -1705,6 +1715,25 @@ WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
         // focusId change
         if (isFocused) {
             SetFocusedSession(persistentId);
+            // notify RS
+            WLOGFD("current focus session: windowId: %{public}d, windowName: %{public}s, bundleName: %{public}s,"
+            " abilityName: %{public}s, pid: %{public}d, uid: %{public}d", persistentId,
+            sceneSession->GetWindowSessionProperty()->GetWindowName().c_str(),
+            sceneSession->GetSessionInfo().bundleName_.c_str(),
+            sceneSession->GetSessionInfo().abilityName_.c_str(),
+            sceneSession->GetCallingPid(), sceneSession->GetCallingUid());
+            uint64_t focusNodeId = 0; // 0 means invalid
+            if (sceneSession->GetSurfaceNode() == nullptr) {
+                WLOGFW("focused window surfaceNode is null");
+            } else {
+                focusNodeId = sceneSession->GetSurfaceNode()->GetId();
+            }
+            FocusAppInfo appInfo = {
+                sceneSession->GetCallingPid(), sceneSession->GetCallingUid(),
+                sceneSession->GetSessionInfo().bundleName_, sceneSession->GetSessionInfo().abilityName_,
+                focusNodeId
+            };
+            RSInterfaces::GetInstance().SetFocusAppInfo(appInfo);
         } else if (persistentId == GetFocusedSession()) {
             SetFocusedSession(INVALID_SESSION_ID);
         }
@@ -1731,6 +1760,18 @@ WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
 
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::UpdateWindowMode(int32_t persistentId, int32_t windowMode)
+{
+    WLOGFD("update window mode, id: %{public}d, mode: %{public}d", persistentId, windowMode);
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        WLOGFE("could not find window");
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    WindowMode mode = static_cast<WindowMode>(windowMode);
+    return sceneSession->UpdateWindowMode(mode);
 }
 
 void SceneSessionManager::RegisterWindowFocusChanged(const WindowFocusChangedFunc& func)
@@ -2060,6 +2101,8 @@ WSError SceneSessionManager::BindDialogTarget(uint64_t persistentId, sptr<IRemot
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     scnSession->SetParentSession(parentSession);
+    scnSession->SetParentPersistentId(parentSession->GetPersistentId());
+    UpdateParentSession(scnSession, scnSession->GetSessionProperty());
     WLOGFD("Bind dialog success, dialog id %{public}" PRIu64 ", parent id %{public}d",
         persistentId, parentSession->GetPersistentId());
     return WSError::WS_OK;

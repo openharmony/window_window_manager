@@ -368,7 +368,7 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
 
 WSError SessionProxy::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session)
+    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session, sptr<IRemoteObject> token)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -392,12 +392,15 @@ WSError SessionProxy::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
 
     if (property) {
         if (!data.WriteBool(true) || !data.WriteParcelable(property.GetRefPtr())) {
-            WLOGFE("Write property failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
     } else {
         if (!data.WriteBool(false)) {
-            WLOGFE("Write property failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    }
+    if (token != nullptr) {
+        if (!data.WriteRemoteObject(token)) {
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
