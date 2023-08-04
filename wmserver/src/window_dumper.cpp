@@ -182,6 +182,7 @@ WMError WindowDumper::DumpSpecifiedWindowInfo(uint32_t windowId, const std::vect
     std::string DecoStatus = node->GetWindowProperty()->GetDecoStatus() ? "true" : "false";
     bool PrivacyMode = node->GetWindowProperty()->GetSystemPrivacyMode() ||
         node->GetWindowProperty()->GetPrivacyMode();
+    bool OnlySkipSnapshot = node->GetWindowProperty()->GetOnlySkipSnapshot();
     std::string isPrivacyMode = PrivacyMode ? "true" : "false";
     std::ostringstream oss;
     oss << "WindowName: " << node->GetWindowName()  << std::endl;
@@ -197,7 +198,8 @@ WMError WindowDumper::DumpSpecifiedWindowInfo(uint32_t windowId, const std::vect
     oss << "IsVisible: " << isVisible << std::endl;
     oss << "Focusable: "  << Focusable << std::endl;
     oss << "DecoStatus: "  << DecoStatus << std::endl;
-    oss << "isPrivacyMode: "  << isPrivacyMode << std::endl;
+    oss << "IsPrivacyMode: "  << isPrivacyMode << std::endl;
+    oss << "OnlySkipSnapshot: "  << OnlySkipSnapshot << std::endl;
     oss << "WindowRect: " << "[ "
         << rect.posX_ << ", " << rect.posY_ << ", " << rect.width_ << ", " << rect.height_
         << " ]" << std::endl;

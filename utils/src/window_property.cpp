@@ -571,6 +571,11 @@ void WindowProperty::SetMaximizeMode(MaximizeMode maximizeMode)
     maximizeMode_ = maximizeMode;
 }
 
+void WindowProperty::SetOnlySkipSnapshot(bool onlySkip)
+{
+    onlySkipSnapshot_ = onlySkip;
+}
+
 float WindowProperty::GetAspectRatio() const
 {
     return aspectRatio_;
@@ -579,6 +584,10 @@ float WindowProperty::GetAspectRatio() const
 MaximizeMode WindowProperty::GetMaximizeMode() const
 {
     return maximizeMode_;
+}
+bool WindowProperty::GetOnlySkipSnapshot()
+{
+    return onlySkipSnapshot_;
 }
 
 uint32_t WindowProperty::GetAccessTokenId() const
@@ -725,7 +734,8 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isStretchable_) && MarshallingTouchHotAreas(parcel) && parcel.WriteUint32(accessTokenId_) &&
         MarshallingTransform(parcel) && MarshallingWindowSizeLimits(parcel) && zoomTrans_.Marshalling(parcel) &&
         parcel.WriteBool(isDisplayZoomOn_) && parcel.WriteString(abilityInfo_.bundleName_) &&
-        parcel.WriteString(abilityInfo_.abilityName_) && parcel.WriteInt32(abilityInfo_.missionId_);
+        parcel.WriteString(abilityInfo_.abilityName_) && parcel.WriteInt32(abilityInfo_.missionId_) &&
+        parcel.WriteBool(onlySkipSnapshot_);
 }
 
 WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
@@ -782,6 +792,7 @@ WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetDisplayZoomState(parcel.ReadBool());
     AbilityInfo info = { parcel.ReadString(), parcel.ReadString(), parcel.ReadInt32() };
     property->SetAbilityInfo(info);
+    property->SetOnlySkipSnapshot(parcel.ReadBool());
     return property;
 }
 
@@ -840,7 +851,8 @@ bool WindowProperty::Write(Parcel& parcel, PropertyChangeAction action)
             ret = ret && parcel.WriteUint32(animationFlag_);
             break;
         case PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE:
-            ret = ret && parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_);
+            ret = ret && parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_)
+                && parcel.WriteBool(onlySkipSnapshot_);
             break;
         case PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO:
             ret = ret && parcel.WriteFloat(aspectRatio_);
@@ -912,6 +924,7 @@ void WindowProperty::Read(Parcel& parcel, PropertyChangeAction action)
         case PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE:
             SetPrivacyMode(parcel.ReadBool());
             SetSystemPrivacyMode(parcel.ReadBool());
+            SetOnlySkipSnapshot(parcel.ReadBool());
             break;
         case PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO:
             SetAspectRatio(parcel.ReadFloat());
@@ -967,6 +980,7 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     isDisplayZoomOn_ = property->isDisplayZoomOn_;
     reCalcuZoomTransformMat_ = true;
     abilityInfo_ = property->abilityInfo_;
+    onlySkipSnapshot_ = property->onlySkipSnapshot_;
 }
 }
 }
