@@ -20,6 +20,7 @@
 
 #include <common/rs_common_def.h>
 #include <ipc_skeleton.h>
+#include <hisysevent.h>
 #ifdef IMF_ENABLE
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
@@ -40,6 +41,8 @@
 #include "window_helper.h"
 #include "color_parser.h"
 #include "singleton_container.h"
+#include "perform_reporter.h"
+
 
 namespace OHOS {
 namespace Rosen {
@@ -407,8 +410,14 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
 
 WSError WindowSessionImpl::UpdateFocus(bool isFocused)
 {
-    WLOGFI("update focus: %{public}u", isFocused);
+    WLOGFI("wml.report update focus: %{public}u", isFocused);
     if (isFocused) {
+        HiSysEventWrite(
+            OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+            "FOCUS_WINDOW",
+            OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+            "PID", getpid(),
+            "UID", getuid());
         NotifyAfterFocused();
     } else {
         NotifyAfterUnfocused();
@@ -476,7 +485,6 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     WLOGFI("[hideSplit, hideMaximize]: [%{public}d, %{public}d]", hideSplitButton, hideMaximizeButton);
     uiContent_->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, false);
 }
-
 
 WMError WindowSessionImpl::SetUIContent(const std::string& contentInfo,
     NativeEngine* engine, NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability)
@@ -1304,8 +1312,25 @@ WMError WindowSessionImpl::SetBackgroundColor(const std::string& color)
 
 WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
 {
+    WLOGFI("wml.report set bg color: %{public}u", GetWindowId());
+    if (context_.get() == nullptr) {
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+
     // 0xff000000: ARGB style, means Opaque color.
-    // const bool isAlphaZero = !(color & 0xff000000);
+    const bool isAlphaZero = !(color & 0xff000000);
+    std::string bundleName;
+    std::string abilityName;
+    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
+        bundleName = context_->GetBundleName();
+        abilityName = context_->GetApplicationInfo()->name;
+    }
+
+    if (isAlphaZero && WindowHelper::IsMainWindow(GetType())) {
+        auto& reportInstance = SingletonContainer::Get<WindowInfoReporter>();
+        reportInstance.ReportZeroOpacityInfoImmediately(bundleName, abilityName);
+    }
+
     if (uiContent_ != nullptr) {
         uiContent_->SetBackgroundColor(color);
         return WMError::WM_OK;
