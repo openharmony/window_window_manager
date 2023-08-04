@@ -60,7 +60,9 @@ public:
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;
     void NotifyDumpInfoResult(const std::vector<std::string>& info) override;
     WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) override;
-    WSError GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot) override;
+    WSError GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution) override;
+    WSError ClearSession(int32_t persistentId) override;
+    WSError ClearAllSessions() override;
 
 private:
     template<typename T>

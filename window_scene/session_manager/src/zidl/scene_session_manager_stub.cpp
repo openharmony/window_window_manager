@@ -85,6 +85,10 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleNotifyDumpInfoResult),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_GRAVITY),
         &SceneSessionManagerStub::HandleSetSessionGravity),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CLEAR_SESSION),
+        &SceneSessionManagerStub::HandleClearSession),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CLEAR_ALL_SESSIONS),
+        &SceneSessionManagerStub::HandleClearAllSessions),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -410,8 +414,9 @@ int SceneSessionManagerStub::HandleGetSessionSnapshot(MessageParcel &data, Messa
 {
     WLOGFI("run HandleGetSessionSnapshot!");
     int32_t persistentId = data.ReadInt32();
+    bool isLowResolution = data.ReadBool();
     std::shared_ptr<Media::PixelMap> snapshot = std::make_shared<Media::PixelMap>();
-    const WSError& ret = GetSessionSnapshot(persistentId, snapshot);
+    const WSError& ret = GetSessionSnapshot(persistentId, snapshot, isLowResolution);
     reply.WriteParcelable(snapshot.get());
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
@@ -423,6 +428,23 @@ int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel &data, Mes
     std::vector<std::string> info;
     data.ReadStringVector(&info);
     NotifyDumpInfoResult(info);
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleClearSession(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleClearSession!");
+    int32_t persistentId = data.ReadInt32();
+    const WSError& ret = ClearSession(persistentId);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleClearAllSessions(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleClearAllSessions!");
+    const WSError& ret = ClearAllSessions();
+    reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

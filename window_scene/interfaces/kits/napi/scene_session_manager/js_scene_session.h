@@ -67,6 +67,7 @@ private:
     void ProcessClickRegister();
     void ProcessTerminateSessionRegister();
     void ProcessTerminateSessionRegisterNew();
+    void ProcessTerminateSessionRegisterTotal();
     void ProcessSessionExceptionRegister();
     void ProcessSystemBarPropertyChangeRegister();
     void ProcessNeedAvoidRegister();
@@ -89,6 +90,7 @@ private:
     void OnClick();
     void TerminateSession(const SessionInfo& info);
     void TerminateSessionNew(const SessionInfo& info, bool needStartCaller);
+    void TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType);
     void OnSessionException(const SessionInfo& info);
     static JsSessionType GetApiType(WindowType type);
     void OnSystemBarPropertyChange(const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
