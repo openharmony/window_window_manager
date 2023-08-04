@@ -585,6 +585,8 @@ WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& scene
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         sceneSession->SetParentSession(parentSceneSession);
+        WLOGFD("Update parent of subWindow success, id %{public}d, parentId %{public}d",
+            sceneSession->GetPersistentId(), parentPersistentId);
     } else if (property->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG &&
         parentPersistentId != INVALID_SESSION_ID) {
         auto parentSession = GetSceneSession(parentPersistentId);
@@ -592,9 +594,10 @@ WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& scene
             WLOGFE("Parent session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
-        WLOGFD("Add dialog id to its parent vector");
         parentSession->BindDialogToParentSession(sceneSession);
         sceneSession->SetParentSession(parentSession);
+        WLOGFD("Update parent of dialog success, id %{public}d, parentId %{public}d",
+            sceneSession->GetPersistentId(), parentPersistentId);
     }
     return WSError::WS_OK;
 }
@@ -2086,6 +2089,8 @@ WSError SceneSessionManager::BindDialogTarget(uint64_t persistentId, sptr<IRemot
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     scnSession->SetParentSession(parentSession);
+    scnSession->SetParentPersistentId(parentSession->GetPersistentId());
+    UpdateParentSession(scnSession, scnSession->GetSessionProperty());
     WLOGFD("Bind dialog success, dialog id %{public}" PRIu64 ", parent id %{public}d",
         persistentId, parentSession->GetPersistentId());
     return WSError::WS_OK;
