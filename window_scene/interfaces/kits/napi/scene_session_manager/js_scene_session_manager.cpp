@@ -38,6 +38,7 @@ namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSessionManager" };
+constexpr int WAIT_FOR_SECONDS = 2;
 const std::string CREATE_SPECIFIC_SCENE_CB = "createSpecificSession";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 const std::string OUTSIDE_DOWN_EVENT_CB = "outsideDownEvent";
@@ -87,6 +88,7 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
     BindNativeFunction(*engine, *object, "InitWithRenderServiceAdded", moduleName,
         JsSceneSessionManager::InitWithRenderServiceAdded);
     BindNativeFunction(*engine, *object, "perfRequestEx", moduleName, JsSceneSessionManager::PerfRequestEx);
+    BindNativeFunction(*engine, *object, "updateWindowMode", moduleName, JsSceneSessionManager::UpdateWindowMode);
     return engine->CreateUndefined();
 }
 
@@ -324,6 +326,13 @@ NativeValue* JsSceneSessionManager::PerfRequestEx(NativeEngine* engine, NativeCa
     WLOGD("[NAPI]PerfRequestEx");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
     return (me != nullptr) ? me->OnPerfRequestEx(*engine, *info) : nullptr;
+}
+
+NativeValue* JsSceneSessionManager::UpdateWindowMode(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGI("[NAPI]UpdateWindowMode");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
+    return (me != nullptr) ? me->OnUpdateWindowMode(*engine, *info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject)
@@ -573,8 +582,12 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionActivation(NativeEngine
     bool isNewActive = true;
     ConvertFromJsValue(engine, info.argv[1], isNewActive);
 
-    SceneSessionManager::GetInstance().RequestSceneSessionActivation(sceneSession, isNewActive);
-    return engine.CreateUndefined();
+    int32_t errCode = static_cast<int32_t>(WSErrorCode::WS_ERROR_TIMEOUT);
+    auto future = SceneSessionManager::GetInstance().RequestSceneSessionActivation(sceneSession, isNewActive);
+    if (future.wait_for(std::chrono::seconds(WAIT_FOR_SECONDS)) == std::future_status::ready) {
+        errCode = future.get();
+    }
+    return engine.CreateNumber(errCode);
 }
 
 NativeValue* JsSceneSessionManager::OnRequestSceneSessionBackground(NativeEngine& engine, NativeCallbackInfo& info)
@@ -811,6 +824,32 @@ NativeValue* JsSceneSessionManager::OnPerfRequestEx(NativeEngine& engine, Native
     OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequestEx(cmdId, onOffTag, msg);
     WLOGFD("[NAPI]PerfRequestEx success cmdId: %{public}d onOffTag: %{public}u msg:%{public}s",
         cmdId, static_cast<uint32_t>(onOffTag), msg.c_str());
+    return engine.CreateUndefined();
+}
+
+NativeValue* JsSceneSessionManager::OnUpdateWindowMode(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    if (info.argc < 2) { // 2: params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    int32_t persistentId;
+    if (!ConvertFromJsValue(engine, info.argv[0], persistentId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to persistentId");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    int32_t windowMode;
+    if (!ConvertFromJsValue(engine, info.argv[1], windowMode)) {
+        WLOGFE("[NAPI]Failed to convert parameter to windowMode");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    SceneSessionManager::GetInstance().UpdateWindowMode(persistentId, windowMode);
     return engine.CreateUndefined();
 }
 } // namespace OHOS::Rosen

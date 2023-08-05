@@ -223,7 +223,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     abilitySessionInfo->persistentId = data.ReadInt32();
     abilitySessionInfo->state = static_cast<AAFwk::CallToState>(data.ReadInt32());
     abilitySessionInfo->uiAbilityId = data.ReadInt64();
-    abilitySessionInfo->callingTokenId = data.ReadInt32();
+    abilitySessionInfo->callingTokenId = data.ReadUint32();
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
@@ -279,10 +279,18 @@ int SessionStub::HandleCreateAndConnectSpecificSession(MessageParcel& data, Mess
     } else {
         WLOGFW("Property not exist!");
     }
+
+    sptr<IRemoteObject> token = nullptr;
+    if (property && property->GetTokenState()) {
+        token = data.ReadRemoteObject();
+    } else {
+        WLOGI("accept token is nullptr");
+    }
+
     auto persistentId = INVALID_SESSION_ID;
     sptr<ISession> sceneSession;
     CreateAndConnectSpecificSession(sessionStage, eventChannel, surfaceNode,
-        property, persistentId, sceneSession);
+        property, persistentId, sceneSession, token);
     if (sceneSession== nullptr) {
         return ERR_INVALID_STATE;
     }
