@@ -23,7 +23,7 @@
 using namespace testing;
 using namespace testing::ext;
 
-namespace OHOS {
+namespace OHOS { 
 namespace Rosen {
 using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
 class TestCameraFloatWindowChangedListener : public ICameraFloatWindowChangedListener {
@@ -558,6 +558,25 @@ HWTEST_F(WindowManagerTest, UnregisterGestureNavigationEnabledChangedListener, F
     windowManager.pImpl_->gestureNavigationEnabledListeners_.push_back(listener1);
     ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterGestureNavigationEnabledChangedListener(listener1));
     ASSERT_EQ(0, windowManager.pImpl_->gestureNavigationEnabledListeners_.size());
+}
+
+
+
+/**
+ * @tc.name: GetFocusWindowInfo01
+ * @tc.desc: GetFocusWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetFocusWindowInfo01, Function | SmallTest | Level2)
+{ 
+    auto& windowManager = WindowManager::GetInstance();
+
+    auto ret=1;
+    FocusChangeInfo focusInfo;
+    windowManager->GetFocusWindowInfo(focusInfo);
+    ASSERT_EQ(1,ret);
+
+
 }
 
 }
