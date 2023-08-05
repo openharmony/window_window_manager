@@ -1139,7 +1139,7 @@ WSError Session::ProcessBackEvent()
 
 WSError Session::MarkProcessed(int32_t eventId)
 {
-    uint32_t persistentId = GetPersistentId();
+    int32_t persistentId = GetPersistentId();
     WLOGFI("persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
     DelayedSingleton<ANRManager>::GetInstance()->MarkProcessed(eventId, persistentId);
     return WSError::WS_OK;
@@ -1161,7 +1161,8 @@ void Session::GeneratePersistentId(bool isExtension, const SessionInfo& sessionI
     while (g_persistentIdSet.count(g_persistentId)) {
         g_persistentId++;
     }
-    persistentId_ = isExtension ? g_persistentId.load() | 0x40000000 : g_persistentId.load() & 0x3fffffff;
+    persistentId_ = isExtension ? static_cast<uint32_t>(
+        g_persistentId.load()) | 0x40000000 : static_cast<uint32_t>(g_persistentId.load()) & 0x3fffffff;
     g_persistentIdSet.insert(g_persistentId);
 }
 
