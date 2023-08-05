@@ -945,7 +945,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         AddClientDeathRecipient(sessionStage, sceneSession);
         if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
             auto sessionInfo = sceneSession->GetSessionInfo();
-            WindowInfoReporter::GetInstance().InsertDestroyReportInfo(sessionInfo.bundleName_);
+            WindowInfoReporter::GetInstance().InsertCreateReportInfo(sessionInfo.bundleName_);
         }
         return errCode;
     };
@@ -2154,7 +2154,7 @@ void SceneSessionManager::StartWindowInfoReportLoop()
         isReportTaskStart_ = false;
         StartWindowInfoReportLoop();
     };
-    int64_t delayTime = 1000 * 60; // an hour. 1000 * 60 * 60
+    int64_t delayTime = 1000 * 60 * 60; // an hour. 1000 * 60 * 60
     bool ret = eventHandler_->PostTask(task, "WindowInfoReport", delayTime);
     if (!ret) {
         WLOGFE("wml.report post listener callback task failed. the task name is WindowInfoReport");
