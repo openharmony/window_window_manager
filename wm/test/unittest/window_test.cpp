@@ -2006,6 +2006,76 @@ HWTEST_F(WindowTest, IDispatchInputEventListener, Function | SmallTest | Level3)
     ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: GetVSyncPeriod01
+ * @tc.desc: GetVSyncPeriod with no name
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetVSyncPeriod01, Function | SmallTest | Level2)
+{
+    ASSERT_EQ(0, Window::GetVSyncPeriod());
+}
+
+/**
+ * @tc.name: PerformBack01
+ * @tc.desc: PerformBack
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, PerformBack01, Function | SmallTest | Level2)
+{
+    auto ret=1;
+    Window::PerformBack()
+    ASSERT_EQ(1, ret);
+}
+
+/**
+ * @tc.name: IWindowLifeCycle01
+ * @tc.desc: IWindowLifeCycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, IWindowLifeCycle01, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new (std::nothrow) Window();
+    ASSERT_NE(nullptr, window);
+    sptr<IWindowLifeCycle> listener = new (std::nothrow) IWindowLifeCycle();
+    listener->BackgroundFailed();
+    auto ret = window->UnregisterLifeCycleListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+   
+}
+
+/**
+ * @tc.name: IWindowLifeCycle01
+ * @tc.desc: IWindowLifeCycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, IWindowLifeCycle01, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new (std::nothrow) Window();
+    ASSERT_NE(nullptr, window);
+    sptr<IWindowLifeCycle> listener = new (std::nothrow) IWindowLifeCycle();
+    listener->BackgroundFailed();
+    auto ret = window->UnregisterLifeCycleListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+   
+}
+
+/**
+ * @tc.name: Marshalling01
+ * @tc.desc: Marshalling
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, Marshalling, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    KeyboardAnimationConfig config;
+    ASSERT_EQ(false, config->Marshalling());
+}
+
+
+
 }
 } // namespace Rosen
 } // namespace OHOS

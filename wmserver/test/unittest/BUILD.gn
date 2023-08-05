@@ -47,6 +47,7 @@ group("unittest") {
     ":wmserver_window_snapshot_test",
     ":wmserver_window_system_effect_test",
     ":wmserver_window_zorder_policy_test",
+    ":wmserver_mock_session_manager_service_test",
   ]
 }
 
@@ -403,6 +404,16 @@ ohos_unittest("wmserver_window_group_mgr_test") {
   module_out_path = module_out_path
   configs = test_public_config
   sources = [ "window_group_mgr_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wmserver_mock_session_manager_service_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "mock_session_manager_service_test.cpp" ]
 
   deps = test_inner_deps
   public_deps = test_public_deps
