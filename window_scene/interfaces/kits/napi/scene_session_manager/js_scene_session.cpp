@@ -44,6 +44,7 @@ const std::string PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB = "pendingSessi
 const std::string NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB = "needDefaultAnimationFlagChange";
 const std::string CUSTOM_ANIMATION_PLAYING_CB = "isCustomAnimationPlaying";
 const std::string SHOW_WHEN_LOCKED_CB = "sessionShowWhenLockedChange";
+const std::string REQUESTED_ORIENTATION_CHANGE_CB = "sessionRequestedOrientationChange";
 } // namespace
 
 NativeValue* JsSceneSession::Create(NativeEngine& engine, const sptr<SceneSession>& session)
@@ -108,6 +109,7 @@ JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& s
         { NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB, &JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister },
         { CUSTOM_ANIMATION_PLAYING_CB,                  &JsSceneSession::ProcessIsCustomAnimationPlaying },
         { SHOW_WHEN_LOCKED_CB,            &JsSceneSession::ProcessShowWhenLockedRegister },
+        { REQUESTED_ORIENTATION_CHANGE_CB,            &JsSceneSession::ProcessRequestedOrientationChange }
     };
 
     sptr<SceneSession::SessionChangeCallback> sessionchangeCallback = new (std::nothrow)
@@ -442,6 +444,18 @@ void JsSceneSession::ProcessShowWhenLockedRegister()
     }
     sessionchangeCallback->OnShowWhenLocked_(session->IsShowWhenLocked());
     WLOGFD("ProcessShowWhenLockedRegister success");
+}
+
+void JsSceneSession::ProcessRequestedOrientationChange()
+{
+    auto sessionchangeCallback = sessionchangeCallback_.promote();
+    if (sessionchangeCallback == nullptr) {
+        WLOGFE("sessionchangeCallback is nullptr");
+        return;
+    }
+    sessionchangeCallback->OnRequestedOrientationChange_ = std::bind(
+        &JsSceneSession::OnReuqestedOrientationChange, this, std::placeholders::_1);
+    WLOGFD("ProcessRequestedOrientationChange success");
 }
 
 void JsSceneSession::Finalizer(NativeEngine* engine, void* data, void* hint)
@@ -1071,6 +1085,34 @@ void JsSceneSession::OnShowWhenLocked(bool showWhenLocked)
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
     AsyncTask::Schedule("JsSceneSession::OnShowWhenLocked", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation)
+{
+    WLOGFI("[NAPI]OnReuqestedOrientationChange %{public}u", orientation);
+    auto iter = jsCbMap_.find(REQUESTED_ORIENTATION_CHANGE_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    if (WINDOW_ORIENTATION_TO_JS_SESSION_MAP.count(static_cast<Orientation>(orientation)) == 0) {
+        WLOGFE("[NAPI]failed %{public}u since no this type", orientation);
+        return;
+    }
+    uint32_t value = static_cast<uint32_t>(WINDOW_ORIENTATION_TO_JS_SESSION_MAP.at(
+        static_cast<Orientation>(orientation)));
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [jsCallBack, rotation = value, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            NativeValue* jsSessionRotationObj = CreateJsValue(engine, rotation);
+            NativeValue* argv[] = { jsSessionRotationObj };
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+            WLOGFI("[NAPI]change rotation success %{public}u", rotation);
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSession::OnReuqestedOrientationChange", engine_,
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
