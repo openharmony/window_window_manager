@@ -748,7 +748,7 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
         if (scnSession == nullptr) {
             WLOGFE("session is nullptr");
             promise->set_value(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
-            return;
+            return WSError::WS_ERROR_INVALID_WINDOW;
         }
 
         auto persistentId = scnSession->GetPersistentId();
@@ -757,13 +757,13 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
         if (!GetSceneSession(persistentId)) {
             WLOGFE("session is invalid with %{public}d", persistentId);
             promise->set_value(static_cast<int32_t>(WSError::WS_ERROR_INVALID_SESSION));
-            return;
+            return WSError::WS_ERROR_INVALID_WINDOW;
         }
 
         auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
         if (!scnSessionInfo) {
             promise->set_value(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
-            return;
+            return WSError::WS_ERROR_INVALID_WINDOW;
         }
 
         scnSessionInfo->isNewWant = isNewActive;
@@ -774,9 +774,8 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
             auto sessionInfo = scnSession->GetSessionInfo();
             WindowInfoReporter::GetInstance().InsertShowReportInfo(sessionInfo.bundleName_);
         }
-        return WSError::WS_OK;
         promise->set_value(static_cast<int32_t>(errCode));
-        return;
+        return WSError::WS_OK;
     };
 
     taskScheduler_->PostAsyncTask(task);
