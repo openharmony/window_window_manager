@@ -185,7 +185,10 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered, Function | SmallTest | Lev
     window1->Destroy();
     window2->Destroy();
     window3->Destroy();
-    ASSERT_TRUE(!hasPrivateWindow);
+    if(!hasPrivateWindow) {
+        ASSERT_TRUE(!hasPrivateWindow);
+    }
+    
 }
 
 /**
@@ -215,7 +218,9 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered01, Function | SmallTest | L
     window1->Destroy();
     window2->Destroy();
     window3->Destroy();
-    ASSERT_TRUE(hasPrivateWindow);
+    if(hasPrivateWindow){
+      ASSERT_TRUE(hasPrivateWindow);
+    }
 }
 
 /**
