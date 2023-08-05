@@ -54,6 +54,7 @@
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/scene_session.h"
 #include "session_helper.h"
+#include "window_helper.h"
 #include "session/screen/include/screen_session.h"
 #include "session_manager/include/screen_session_manager.h"
 #include "singleton_container.h"
@@ -155,7 +156,12 @@ void SceneSessionManager::Init()
     // create handler for inner command at server
     eventLoop_ = AppExecFwk::EventRunner::Create(WINDOW_INFO_REPORT_THREAD);
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
-    if (HiviewDFX::Watchdog::GetInstance().AddThread(WINDOW_INFO_REPORT_THREAD, eventHandler_)) {
+    if (eventHandler_ == nullptr) {
+        WLOGFE("Invalid eventHander");
+        return ;
+    }
+    int ret = HiviewDFX::Watchdog::GetInstance().AddThread(WINDOW_INFO_REPORT_THREAD, eventHandler_);
+    if (ret != 0) {
         WLOGFW("Add thread %{public}s to watchdog failed.", WINDOW_INFO_REPORT_THREAD.c_str());
     }
 
@@ -751,6 +757,11 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         scnSessionInfo->isNewWant = isNewActive;
         AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
+
+        if (WindowHelper::IsMainWindow(scnSession->GetWindowType())) {
+            auto sessionInfo = scnSession->GetSessionInfo();
+            WindowInfoReporter::GetInstance().InsertShowReportInfo(sessionInfo.bundleName_);
+        }
         return WSError::WS_OK;
     };
 
@@ -789,6 +800,10 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo);
         } else {
             AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo, true);
+        }
+        if (WindowHelper::IsMainWindow(scnSession->GetWindowType())) {
+            auto sessionInfo = scnSession->GetSessionInfo();
+            WindowInfoReporter::GetInstance().InsertHideReportInfo(sessionInfo.bundleName_);
         }
         return WSError::WS_OK;
     };
@@ -928,6 +943,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         }
         session = sceneSession;
         AddClientDeathRecipient(sessionStage, sceneSession);
+        if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+            auto sessionInfo = sceneSession->GetSessionInfo();
+            WindowInfoReporter::GetInstance().InsertDestroyReportInfo(sessionInfo.bundleName_);
+        }
         return errCode;
     };
 
@@ -1021,6 +1040,10 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t& 
         {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMap_.erase(persistentId);
+        }
+        if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+            auto sessionInfo = sceneSession->GetSessionInfo();
+            WindowInfoReporter::GetInstance().InsertDestroyReportInfo(sessionInfo.bundleName_);
         }
         return ret;
     };
@@ -2117,7 +2140,13 @@ void SceneSessionManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, 
 
 void SceneSessionManager::StartWindowInfoReportLoop()
 {
-    if (isReportTaskStart_ || eventHandler_ == nullptr) {
+    WLOGFI("wml.report loop");
+    if (eventHandler_ == nullptr) {
+        WLOGFE("wml.report event null");
+        return ;
+    }
+    if (isReportTaskStart_) {
+        WLOGFE("wml.report is ReportTask Start");
         return;
     }
     auto task = [this]() {
@@ -2125,10 +2154,10 @@ void SceneSessionManager::StartWindowInfoReportLoop()
         isReportTaskStart_ = false;
         StartWindowInfoReportLoop();
     };
-    int64_t delayTime = 1000 * 60 * 60; // an hour.
+    int64_t delayTime = 1000 * 60; // an hour. 1000 * 60 * 60
     bool ret = eventHandler_->PostTask(task, "WindowInfoReport", delayTime);
     if (!ret) {
-        WLOGFE("post listener callback task failed. the task name is WindowInfoReport");
+        WLOGFE("wml.report post listener callback task failed. the task name is WindowInfoReport");
         return;
     }
     isReportTaskStart_ = true;

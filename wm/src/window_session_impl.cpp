@@ -410,7 +410,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
 
 WSError WindowSessionImpl::UpdateFocus(bool isFocused)
 {
-    WLOGFD("update focus: %{public}u", isFocused);
+    WLOGFD("wml.report update focus: %{public}u", isFocused);
     if (isFocused) {
         HiSysEventWrite(
             OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
@@ -1312,6 +1312,7 @@ WMError WindowSessionImpl::SetBackgroundColor(const std::string& color)
 
 WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
 {
+    WLOGFI("wml.report set bg color: %{public}u", GetWindowId());
     if (context_.get() == nullptr) {
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
