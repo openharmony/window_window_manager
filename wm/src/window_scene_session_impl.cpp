@@ -31,7 +31,6 @@
 #include "wm_common.h"
 #include "wm_math.h"
 #include "session_manager_agent_controller.h"
-#include "window_impl.h"
 #include <transaction/rs_interfaces.h>
 #include "surface_capture_future.h"
 
@@ -243,17 +242,16 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
             OHOS::AppExecFwk::DisplayOrientation displayOrientation =
                 static_cast<OHOS::AppExecFwk::DisplayOrientation>(
                     static_cast<uint32_t>(abilityInfo->orientation));
-            if (ABILITY_TO_WMS_ORIENTATION_MAP.count(displayOrientation) == 0) {
+            if (ABILITY_TO_SESSION_ORIENTATION_MAP.count(displayOrientation) == 0) {
                 WLOGFE("id:%{public}u Do not support this Orientation type", GetWindowId());
                 return;
             }
-            Orientation orientation = ABILITY_TO_WMS_ORIENTATION_MAP.at(displayOrientation);
+            Orientation orientation = ABILITY_TO_SESSION_ORIENTATION_MAP.at(displayOrientation);
             if (orientation < Orientation::BEGIN || orientation > Orientation::END) {
                 WLOGFE("Set orientation from ability failed");
                 return;
             }
             property_->SetRequestedOrientation(orientation);
-            UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
         }
     }
 }
