@@ -120,9 +120,6 @@ bool DoSomethingForWindowManagerImpl(WindowManager& windowManager, const uint8_t
     startPos += GetObject<DisplayId>(displayId, data + startPos, size - startPos);
     GetObject<SystemBarRegionTints>(tints, data + startPos, size - startPos);
     windowManager.UpdateSystemBarRegionTints(displayId, tints);
-    sptr<IGestureNavigationEnabledChangedListener> gestureListener = new GestureNavigationEnabledChangedListener();
-    windowManager.RegisterGestureNavigationEnabledChangedListener(gestureListener);
-    windowManager.UnregisterGestureNavigationEnabledChangedListener(gestureListener);
 
     return true;
 }
@@ -149,7 +146,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     }
     WindowManager& windowManager = WindowManager::GetInstance();
     CheckAccessibilityWindowInfo(windowManager, data, size);
-    DoSomethingForWindowManagerImpl(windowManager, data, size);
     Parcel focusChangeInfoParcel;
     if (focusChangeInfoParcel.WriteBuffer(data, size)) {
         FocusChangeInfo::Unmarshalling(focusChangeInfoParcel);
@@ -189,6 +185,9 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     sptr<IWaterMarkFlagChangedListener> waterMarkFlagChangedListener = new WaterMarkFlagChangedListener();
     windowManager.RegisterWaterMarkFlagChangedListener(waterMarkFlagChangedListener);
     windowManager.UnregisterWaterMarkFlagChangedListener(waterMarkFlagChangedListener);
+    sptr<IGestureNavigationEnabledChangedListener> gestureListener = new GestureNavigationEnabledChangedListener();
+    windowManager.RegisterGestureNavigationEnabledChangedListener(gestureListener);
+    windowManager.UnregisterGestureNavigationEnabledChangedListener(gestureListener);
     return true;
 }
 } // namespace.OHOS

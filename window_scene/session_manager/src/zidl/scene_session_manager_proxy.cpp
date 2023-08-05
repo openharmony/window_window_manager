@@ -31,7 +31,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSe
 }
 WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session)
+    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session, sptr<IRemoteObject> token)
 {
     MessageOption option(MessageOption::TF_SYNC);
     MessageParcel data;
@@ -55,12 +55,15 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
 
     if (property) {
         if (!data.WriteBool(true) || !data.WriteParcelable(property.GetRefPtr())) {
-            WLOGFE("Write property failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
     } else {
         if (!data.WriteBool(false)) {
-            WLOGFE("Write property failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    }
+    if (token != nullptr) {
+        if (!data.WriteRemoteObject(token)) {
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
@@ -191,8 +194,7 @@ WSError SceneSessionManagerProxy::UpdateSessionAvoidAreaListener(int32_t& persis
         data, reply, option) != ERR_NONE) {
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    uint32_t ret = reply.ReadInt32();
-    return static_cast<WSError>(ret);
+    return static_cast<WSError>(reply.ReadInt32());
 }
 
 WMError SceneSessionManagerProxy::RegisterWindowManagerAgent(WindowManagerAgentType type,

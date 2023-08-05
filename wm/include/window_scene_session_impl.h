@@ -102,7 +102,8 @@ public:
     WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) override;
     WMError SetAlpha(float alpha) override;
     void DumpSessionElementInfo(const std::vector<std::string>& params) override;
-    
+    WSError UpdateWindowMode(WindowMode mode) override;
+
 protected:
     void DestroySubWindow();
     WMError CreateAndConnectSpecificSession();
@@ -125,6 +126,7 @@ private:
     void TransformSurfaceNode(const Transform& trans);
     void AdjustWindowAnimationFlag(bool withAnimation = false);
     WMError UpdateAnimationFlagProperty(bool withAnimation);
+    WMError UpdateWindowModeImmediately(WindowMode mode);
 
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;
