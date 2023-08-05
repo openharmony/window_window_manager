@@ -942,6 +942,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         }
         session = sceneSession;
         AddClientDeathRecipient(sessionStage, sceneSession);
+        NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
         return errCode;
     };
 
@@ -2315,33 +2316,44 @@ void SceneSessionManager::InitPersistentStorage()
 WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
 {
     WLOGFI("GetAccessibilityWindowInfo Called.");
-    std::map<int32_t, sptr<SceneSession>>::iterator iter;
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (iter = sceneSessionMap_.begin(); iter != sceneSessionMap_.end(); iter++) {
-        sptr<SceneSession> sceneSession = iter->second;
-        if (sceneSession == nullptr) {
-            WLOGFW("null scene session");
-            continue;
+    auto task = [this, &infos]() {
+        std::map<int32_t, sptr<SceneSession>>::iterator iter;
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (iter = sceneSessionMap_.begin(); iter != sceneSessionMap_.end(); iter++) {
+            sptr<SceneSession> sceneSession = iter->second;
+            if (sceneSession == nullptr) {
+                WLOGFW("null scene session");
+                continue;
+            }
+            WLOGFD("name = %{public}s, isSystem = %{public}d, persistendId = %{public}d, winType = %{public}d, "
+                "state = %{public}d, visible = %{public}d", sceneSession->GetWindowName().c_str(),
+                sceneSession->GetSessionInfo().isSystem_, iter->first, sceneSession->GetWindowType(),
+                sceneSession->GetSessionState(), sceneSession->IsVisible());
+            if (IsSessionVisible(sceneSession)) {
+                FillWindowInfo(infos, iter->second);
+            }
         }
-        WLOGFD("name = %{public}s, isSystem = %{public}d, persistendId = %{public}d, winType = %{public}d, "
-            "state = %{public}d, visible = %{public}d", sceneSession->GetWindowName().c_str(),
-            sceneSession->GetSessionInfo().isSystem_, iter->first, sceneSession->GetWindowType(),
-            sceneSession->GetSessionState(), sceneSession->IsVisible());
-        if (IsSessionVisible(sceneSession)) {
-            FillWindowInfo(infos, iter->second);
-        }
-    }
-    return WMError::WM_OK;
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task);
 }
 
 void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpdateType type)
 {
     WLOGFI("NotifyWindowInfoChange, persistentId = %{public}d, updateType = %{public}d", persistentId, type);
-    std::vector<sptr<AccessibilityWindowInfo>> infos;
-
     sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
-    FillWindowInfo(infos, sceneSession);
-    SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(infos, type);
+    if (sceneSession == nullptr) {
+        WLOGFE("GetSessionSnapshot sceneSession nullptr!");
+        return;
+    }
+    wptr<SceneSession> weakSceneSession(sceneSession);
+    auto task = [this, weakSceneSession, type]() {
+        std::vector<sptr<AccessibilityWindowInfo>> infos;
+        auto scnSession = weakSceneSession.promote();
+        FillWindowInfo(infos, scnSession);
+        SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(infos, type);
+    };
+    taskScheduler_->PostAsyncTask(task);
 }
 
 void SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,
