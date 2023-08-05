@@ -84,6 +84,7 @@ public:
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
     WSError UpdateFocus(bool focus) override;
+    WSError UpdateWindowMode(WindowMode mode) override;
     WSError HandleBackEvent() override { return WSError::WS_OK; }
     WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;
 
@@ -162,7 +163,6 @@ protected:
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
 
     sptr<WindowSessionProperty> property_;
-    WindowMode windowMode_ = WindowMode::WINDOW_MODE_UNDEFINED;
     SystemSessionConfig windowSystemConfig_;
     NotifyNativeWinDestroyFunc notifyNativeFunc_;
 

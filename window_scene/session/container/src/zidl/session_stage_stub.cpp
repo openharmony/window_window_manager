@@ -49,6 +49,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleDumpSessionElementInfo),
     std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_TOUCH_OUTSIDE),
         &SessionStageStub::HandleNotifyTouchOutside),
+    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_WINDOW_MODE_CHANGE),
+        &SessionStageStub::HandleUpdateWindowMode),
 };
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -179,6 +181,15 @@ int SessionStageStub::HandleNotifyTouchOutside(MessageParcel& data, MessageParce
 {
     WLOGFD("HandleNotifyTouchOutside!");
     NotifyTouchOutside();
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleUpdateWindowMode(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleUpdateWindowMode!");
+    WindowMode mode = static_cast<WindowMode>(data.ReadUint32());
+    WSError errCode = UpdateWindowMode(mode);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

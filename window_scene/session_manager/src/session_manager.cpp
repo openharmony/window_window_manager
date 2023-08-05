@@ -125,7 +125,7 @@ void SessionManager::InitSceneSessionManagerProxy()
 
 void SessionManager::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session)
+    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session, sptr<IRemoteObject> token)
 {
     WLOGFD("CreateAndConnectSpecificSession");
     GetSceneSessionManagerProxy();
@@ -134,7 +134,7 @@ void SessionManager::CreateAndConnectSpecificSession(const sptr<ISessionStage>& 
         return;
     }
     sceneSessionManagerProxy_->CreateAndConnectSpecificSession(sessionStage, eventChannel,
-        surfaceNode, property, persistentId, session);
+        surfaceNode, property, persistentId, session, token);
 }
 
 void SessionManager::DestroyAndDisconnectSpecificSession(const int32_t& persistentId)
