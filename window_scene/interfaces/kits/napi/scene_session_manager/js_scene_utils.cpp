@@ -74,7 +74,7 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
             WLOGFE("[NAPI]Failed to convert parameter to persistentId");
             return false;
         }
-        sessionInfo.persistentId_ = static_cast<uint64_t>(persistentId);
+        sessionInfo.persistentId_ = persistentId;
     }
     if (jsCallState->TypeOf() != NATIVE_UNDEFINED) {
         int32_t callState;

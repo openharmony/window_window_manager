@@ -38,6 +38,8 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Session" };
+std::atomic<int32_t> g_persistentId = INVALID_SESSION_ID;
+std::set<int32_t> g_persistentIdSet;
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 constexpr int32_t UID_TRANSFORM_DIVISOR = 200000;  // local account id = uid / UID_TRANSFORM_DIVISOR
 std::string GetCurrentTime()
@@ -50,9 +52,6 @@ std::string GetCurrentTime()
 }
 } // namespace
 
-std::atomic<int32_t> Session::sessionId_(INVALID_SESSION_ID);
-std::set<int32_t> Session::persistIdSet_;
-
 int32_t Session::GetPersistentId() const
 {
     return persistentId_;
@@ -64,6 +63,14 @@ int32_t Session::GetParentPersistentId() const
         return property_->GetParentPersistentId();
     }
     return INVALID_SESSION_ID;
+}
+
+void Session::SetParentPersistentId(int32_t parentId)
+{
+    if (property_ == nullptr) {
+        return;
+    }
+    property_->SetParentPersistentId(parentId);
 }
 
 void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -753,15 +760,27 @@ void Session::SetParentSession(const sptr<Session>& session)
 
 void Session::BindDialogToParentSession(const sptr<Session>& session)
 {
+    auto iter = std::find(dialogVec_.begin(), dialogVec_.end(), session);
+    if (iter != dialogVec_.end()) {
+        WLOGFW("Dialog is existed in parentVec, id: %{public}d, parentId: %{public}d",
+            session->GetPersistentId(), GetPersistentId());
+        return;
+    }
     dialogVec_.push_back(session);
+    WLOGFD("Bind dialog success, id: %{public}d, parentId: %{public}d",
+        session->GetPersistentId(), GetPersistentId());
 }
 
 void Session::RemoveDialogToParentSession(const sptr<Session>& session)
 {
     auto iter = std::find(dialogVec_.begin(), dialogVec_.end(), session);
     if (iter != dialogVec_.end()) {
+        WLOGFD("Remove dialog success, id: %{public}d, parentId: %{public}d",
+            session->GetPersistentId(), GetPersistentId());
         dialogVec_.erase(iter);
     }
+    WLOGFW("Remove dialog failed, id: %{public}d, parentId: %{public}d",
+        session->GetPersistentId(), GetPersistentId());
 }
 
 std::vector<sptr<Session>> Session::GetDialogVector() const
@@ -1002,6 +1021,16 @@ WSError Session::UpdateFocus(bool isFocused)
     return WSError::WS_OK;
 }
 
+WSError Session::UpdateWindowMode(WindowMode mode)
+{
+    WLOGFI("Session update window mode, id: %{public}d, mode: %{public}d", GetPersistentId(),
+        static_cast<int32_t>(mode));
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    return sessionStage_->UpdateWindowMode(mode);
+}
+
 void Session::SetSessionRect(const WSRect& rect)
 {
     winRect_ = rect;
@@ -1062,7 +1091,7 @@ WSError Session::RaiseToAppTop()
 
 WSError Session::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session)
+    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session, sptr<IRemoteObject> token)
 {
     return WSError::WS_OK;
 }
@@ -1110,7 +1139,7 @@ WSError Session::ProcessBackEvent()
 
 WSError Session::MarkProcessed(int32_t eventId)
 {
-    uint32_t persistentId = GetPersistentId();
+    int32_t persistentId = GetPersistentId();
     WLOGFI("persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
     DelayedSingleton<ANRManager>::GetInstance()->MarkProcessed(eventId, persistentId);
     return WSError::WS_OK;
@@ -1119,21 +1148,22 @@ WSError Session::MarkProcessed(int32_t eventId)
 void Session::GeneratePersistentId(bool isExtension, const SessionInfo& sessionInfo)
 {
     if (sessionInfo.persistentId_ != INVALID_SESSION_ID) {
-        persistIdSet_.insert(sessionInfo.persistentId_);
-        persistentId_ = static_cast<int32_t>(sessionInfo.persistentId_);
+        g_persistentIdSet.insert(sessionInfo.persistentId_);
+        persistentId_ = sessionInfo.persistentId_;
         return;
     }
 
-    if (sessionId_ == INVALID_SESSION_ID) {
-        sessionId_++; // init non system session id from 2
+    if (g_persistentId == INVALID_SESSION_ID) {
+        g_persistentId++; // init non system session id from 2
     }
 
-    sessionId_++;
-    while (persistIdSet_.count(sessionId_) > 0) {
-        sessionId_++;
+    g_persistentId++;
+    while (g_persistentIdSet.count(g_persistentId)) {
+        g_persistentId++;
     }
-    persistentId_ = isExtension ? sessionId_.load() | 0x40000000 : sessionId_.load() & 0x3fffffff;
-    persistIdSet_.insert(sessionId_);
+    persistentId_ = isExtension ? static_cast<uint32_t>(
+        g_persistentId.load()) | 0x40000000 : static_cast<uint32_t>(g_persistentId.load()) & 0x3fffffff;
+    g_persistentIdSet.insert(g_persistentId);
 }
 
 sptr<ScenePersistence> Session::GetScenePersistence() const
