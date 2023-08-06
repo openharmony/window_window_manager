@@ -735,4 +735,19 @@ WSError SceneSession::NotifyTouchOutside()
     }
     return sessionStage_->NotifyTouchOutside();
 }
+
+void SceneSession::SetRequestedOrientation(Orientation orientation)
+{
+    WLOGFI("id: %{public}d orientation: %{public}u", GetPersistentId(), static_cast<uint32_t>(orientation));
+    property_->SetRequestedOrientation(orientation);
+    if (sessionChangeCallback_ && sessionChangeCallback_->OnRequestedOrientationChange_) {
+        sessionChangeCallback_->OnRequestedOrientationChange_(static_cast<uint32_t>(orientation));
+    }
+}
+
+Orientation SceneSession::GetRequestedOrientation() const
+{
+    return property_->GetRequestedOrientation();
+}
+
 } // namespace OHOS::Rosen

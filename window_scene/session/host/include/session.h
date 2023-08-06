@@ -190,8 +190,6 @@ public:
     WSError SetBrightness(float brightness);
     float GetBrightness() const;
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info);
-    void SetRequestedOrientation(Orientation orientation);
-    Orientation GetRequestedOrientation() const;
 
     bool IsSessionValid() const;
     bool IsActive() const;
