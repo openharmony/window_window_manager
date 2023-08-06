@@ -73,6 +73,7 @@ private:
     void ProcessSessionDefaultAnimationFlagChangeRegister();
     void ProcessIsCustomAnimationPlaying();
     void ProcessShowWhenLockedRegister();
+    void ProcessRequestedOrientationChange();
 
     void PendingSessionActivation(SessionInfo& info);
     void OnSessionStateChange(const SessionState& state);
@@ -95,6 +96,7 @@ private:
     void OnDefaultAnimationFlagChange(bool isNeedDefaultAnimationFlag);
     void OnIsCustomAnimationPlaying(bool status);
     void OnShowWhenLocked(bool showWhenLocked);
+    void OnReuqestedOrientationChange(uint32_t orientation);
 
     NativeEngine& engine_;
     wptr<SceneSession> weakSession_ = nullptr;
