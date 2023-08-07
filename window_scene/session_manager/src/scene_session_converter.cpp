@@ -30,10 +30,10 @@ WSError SceneSessionConverter::ConvertToMissionInfos(std::vector<sptr<SceneSessi
         missionInfo.id = (*iter)->GetPersistentId();
         missionInfo.runningState = (*iter)->IsActive();
         missionInfo.lockedState = ((*iter)->GetSessionInfo()).lockedState;
-        missionInfo.label = ((*iter)->GetSessionInfo()).label;
-        missionInfo.iconPath = ((*iter)->GetSessionInfo()).iconPath;
+        missionInfo.label = ((*iter)->GetSessionInfo().abilityInfo)->label;
+        missionInfo.iconPath = ((*iter)->GetSessionInfo().abilityInfo)->iconPath;
         missionInfo.want = *(((*iter)->GetSessionInfo()).want);
-        missionInfo.continuable = ((*iter)->GetSessionInfo()).continuable;
+        missionInfo.continuable = ((*iter)->GetSessionInfo().abilityInfo)->continuable;
         missionInfo.time = ((*iter)->GetSessionInfo()).time;
         missionInfo.continueState = (AAFwk::ContinueState)(AAFwk::ContinueState::CONTINUESTATE_UNKNOWN
             + (((*iter)->GetSessionInfo()).continueState - Rosen::ContinueState::CONTINUESTATE_UNKNOWN));
@@ -51,10 +51,10 @@ WSError SceneSessionConverter::ConvertToMissionInfo(sptr<SceneSession>& sceneSes
     missionInfo.id = sceneSession->GetPersistentId();
     missionInfo.runningState = sceneSession->IsActive();
     missionInfo.lockedState = (sceneSession->GetSessionInfo()).lockedState;
-    missionInfo.label = (sceneSession->GetSessionInfo()).label;
-    missionInfo.iconPath = (sceneSession->GetSessionInfo()).iconPath;
+    missionInfo.label = (sceneSession->GetSessionInfo().abilityInfo)->label;
+    missionInfo.iconPath = (sceneSession->GetSessionInfo().abilityInfo)->iconPath;
     missionInfo.want = *((sceneSession->GetSessionInfo()).want);
-    missionInfo.continuable = (sceneSession->GetSessionInfo()).continuable;
+    missionInfo.continuable = (sceneSession->GetSessionInfo().abilityInfo)->continuable;
     missionInfo.time = (sceneSession->GetSessionInfo()).time;
     missionInfo.continueState = (AAFwk::ContinueState) (AAFwk::ContinueState::CONTINUESTATE_UNKNOWN
         + ((sceneSession->GetSessionInfo()).continueState - Rosen::ContinueState::CONTINUESTATE_UNKNOWN));
