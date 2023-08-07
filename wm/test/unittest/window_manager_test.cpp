@@ -570,12 +570,10 @@ HWTEST_F(WindowManagerTest, UnregisterGestureNavigationEnabledChangedListener, F
 HWTEST_F(WindowManagerTest, GetFocusWindowInfo01, Function | SmallTest | Level2)
 { 
     auto& windowManager = WindowManager::GetInstance();
-
     auto ret=1;
     FocusChangeInfo focusInfo;
-    windowManager->GetFocusWindowInfo(focusInfo);
+    windowManager.GetFocusWindowInfo(focusInfo);
     ASSERT_EQ(1,ret);
-
 
 }
 
