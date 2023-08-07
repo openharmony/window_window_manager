@@ -233,7 +233,7 @@ void WindowInfoReporter::ReportZeroOpacityInfoImmediately(const std::string& bun
 void WindowInfoReporter::ReportRecordedInfos()
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    WLOGFD("----Report HiSysEvent write all-----");
+    WLOGFD("----.report HiSysEvent write all-----");
     Report("WM_REPORT_WINDOW_CREATE", GetMsgString(windowCreateReportInfos_));
     Report("WM_REPORT_WINDOW_SHOW", GetMsgString(windowShowReportInfos_));
     Report("WM_REPORT_WINDOW_HIDE", GetMsgString(windowHideReportInfos_));
