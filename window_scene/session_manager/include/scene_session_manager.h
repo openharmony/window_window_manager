@@ -24,8 +24,10 @@
 #include "common/include/task_scheduler.h"
 #include "future.h"
 #include "interfaces/include/ws_common.h"
+#include "mission_snapshot.h"
 #include "session_listener_controller.h"
 #include "scene_session_converter.h"
+#include "scb_session_handler.h"
 #include "session/host/include/root_scene_session.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "wm_single_instance.h"
@@ -108,6 +110,8 @@ public:
     int32_t GetCurrentUserId() const;
     void StartWindowInfoReportLoop();
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
+    void NotifyCompleteFirstFrameDrawing(int32_t persistentId);
+    void NotifySessionMovedToFront(int32_t persistentId);
     WSError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent);
     WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label);
     WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon);
@@ -122,14 +126,15 @@ public:
 
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener);
     WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener);
-    WSError GetSessionInfos(int32_t numMax, std::vector<SessionInfoBean>& sessionInfos);
-    WSError GetSessionInfo(int32_t persistentId, SessionInfoBean& sessionInfo);
+    WSError GetSessionInfos(const std::string& deviceId, int32_t numMax, std::vector<SessionInfoBean>& sessionInfos);
+    WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo);
     WSError GetAllAbilityInfos(const AAFwk::Want &want, int32_t userId,
         std::vector<AppExecFwk::AbilityInfo> &abilityInfos);
 
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller);
     WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener);
-    WSError GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution);
+    WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
+                               std::shared_ptr<Media::PixelMap>& snapshot, bool isLowResolution);
     WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState);
     WSError ClearSession(int32_t persistentId);
     WSError ClearAllSessions();
@@ -195,6 +200,13 @@ private:
     std::string CreateCurve(
         const WindowSceneConfig::ConfigItem& curveConfig, const std::string& nodeName = "keyboardAnimation");
 
+    bool CheckIsRemote(const std::string& deviceId);
+    bool GetLocalDeviceId(std::string& localDeviceId);
+    std::string AnonymizeDeviceId(const std::string& deviceId);
+    int GetRemoteSessionInfos(const std::string& deviceId, int32_t numMax,
+                              std::vector<SessionInfoBean> &sessionInfos);
+    int GetRemoteSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo);
+
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
     WSError UpdateBrightness(int32_t persistentId);
     void SetDisplayBrightness(float brightness);
@@ -211,6 +223,7 @@ private:
     void RegisterInputMethodShownFunc(const sptr<SceneSession>& sceneSession);
     void OnInputMethodShown(const int32_t& persistentId);
     void RegisterInputMethodHideFunc(const sptr<SceneSession>& sceneSession);
+    void RegisterSessionExceptionFunc(const sptr<SceneSession>& sceneSession);
     bool IsSessionVisible(const sptr<SceneSession>& session);
     void DumpSessionInfo(const sptr<SceneSession>& session, std::ostringstream& oss);
     void DumpAllAppSessionInfo(std::ostringstream& oss);
@@ -224,6 +237,7 @@ private:
     std::shared_ptr<AbilityRuntime::Context> rootSceneContext_;
     std::shared_mutex sceneSessionMapMutex_;
     std::map<int32_t, sptr<SceneSession>> sceneSessionMap_;
+    sptr<ScbSessionHandler> scbSessionHandler_;
     std::shared_ptr<SessionListenerController> listenerController_;
     std::map<sptr<IRemoteObject>, int32_t> remoteObjectMap_;
     std::set<sptr<SceneSession>> avoidAreaListenerSessionSet_;
@@ -264,6 +278,8 @@ private:
     WSError ClearSession(sptr<SceneSession> sceneSession);
     bool IsSessionClearable(sptr<SceneSession> scnSession);
     void GetAllClearableSessions(std::vector<sptr<SceneSession>>& sessionVector);
+    int GetRemoteSessionSnapshotInfo(const std::string& deviceId, int32_t sessionId,
+                                     AAFwk::MissionSnapshot& sessionSnapshot);
 
     const int32_t BROKER_UID = 5528;
     const int32_t BROKER_RESERVE_UID = 5005;

@@ -37,7 +37,7 @@ WSError SceneSessionConverter::ConvertToMissionInfos(std::vector<sptr<SceneSessi
         missionInfo.time = ((*iter)->GetSessionInfo()).time;
         missionInfo.continueState = (AAFwk::ContinueState)(AAFwk::ContinueState::CONTINUESTATE_UNKNOWN
             + (((*iter)->GetSessionInfo()).continueState - Rosen::ContinueState::CONTINUESTATE_UNKNOWN));
-        missionInfos.push_back(missionInfo);
+        missionInfos.push_back(std::move(missionInfo));
     }
     return WSError::WS_OK;
 }

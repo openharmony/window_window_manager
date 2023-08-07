@@ -96,13 +96,15 @@ public:
 
     virtual WSError RegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
     virtual WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
-    virtual WSError GetSessionInfos(int32_t numMax, std::vector<SessionInfoBean>& sessionInfos) = 0;
-    virtual WSError GetSessionInfo(int32_t persistentId, SessionInfoBean& sessionInfo) = 0;
+    virtual WSError GetSessionInfos(const std::string& deviceId,
+                                    int32_t numMax, std::vector<SessionInfoBean>& sessionInfos) = 0;
+    virtual WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) = 0;
     virtual WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState) = 0;
 
     virtual WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) = 0;
     virtual WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) = 0;
-    virtual WSError GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution) = 0;
+    virtual WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
+                                       std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution) = 0;
     virtual WSError ClearSession(int32_t persistentId) = 0;
     virtual WSError ClearAllSessions() = 0;
 
