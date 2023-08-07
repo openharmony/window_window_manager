@@ -1284,16 +1284,8 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
-            bool prePrivacyMode = sceneSession->GetWindowSessionProperty()->GetPrivacyMode() ||
-                sceneSession->GetWindowSessionProperty()->GetSystemPrivacyMode();
             bool isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
-            if (prePrivacyMode != isPrivacyMode) {
-                sceneSession->GetWindowSessionProperty()->SetPrivacyMode(isPrivacyMode);
-                sceneSession->GetWindowSessionProperty()->SetSystemPrivacyMode(isPrivacyMode);
-                sceneSession->GetSurfaceNode()->SetSecurityLayer(isPrivacyMode);
-                RSTransaction::FlushImplicitTransaction();
-                UpdatePrivateStateAndNotify(isPrivacyMode);
-            }
+            sceneSession->SetPrivacyMode(isPrivacyMode);
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE: {
