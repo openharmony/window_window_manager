@@ -409,25 +409,20 @@ void Session::FillSessionInfo(SessionInfo &sessionInfo)
     if (sessionInfo.startMethod != OHOS::Rosen::StartMethod::START_CALL) {
         sessionInfo.startMethod = OHOS::Rosen::StartMethod::START_NORMAL;
     }
-    sessionInfo.removeSessionAfterTerminate = abilityInfo->removeMissionAfterTerminate;
-    sessionInfo.excludeFromSessions = abilityInfo->excludeFromMissions;
-    sessionInfo.continuable = abilityInfo->continuable;
-    sessionInfo.unClearable = abilityInfo->unclearableMission;
+    sessionInfo.abilityInfo = abilityInfo;
     sessionInfo.time = GetCurrentTime();
-    sessionInfo.label = abilityInfo->label;
-    sessionInfo.iconPath = abilityInfo->iconPath;
     WLOGFI("FillSessionInfo end, removeMissionAfterTerminate: %{public}d excludeFromMissions: %{public}d "
-        "unclearable:%{public}d,continuable:%{public}d  label:%{public}s iconPath:%{public}s",
-        sessionInfo.removeSessionAfterTerminate, sessionInfo.excludeFromSessions, sessionInfo.unClearable,
-        sessionInfo.continuable, sessionInfo.label.c_str(), sessionInfo.iconPath.c_str());
+        " label:%{public}s iconPath:%{public}s",
+        abilityInfo->removeMissionAfterTerminate, abilityInfo->excludeFromMissions,
+        abilityInfo->label.c_str(), abilityInfo->iconPath.c_str());
 }
 
-sptr<AppExecFwk::AbilityInfo> Session::QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
-    const std::string& abilityName, const std::string& moduleName)
+std::shared_ptr<AppExecFwk::AbilityInfo> Session::QueryAbilityInfoFromBMS(const int32_t uId,
+    const std::string& bundleName, const std::string& abilityName, const std::string& moduleName)
 {
     AAFwk::Want want;
     want.SetElementName("", bundleName, abilityName, moduleName);
-    sptr<AppExecFwk::AbilityInfo> abilityInfo = new (std::nothrow) AppExecFwk::AbilityInfo();
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     if (abilityInfo == nullptr) {
         return nullptr;
     }

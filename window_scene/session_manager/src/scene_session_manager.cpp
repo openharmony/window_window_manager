@@ -2004,6 +2004,21 @@ WSError SceneSessionManager::GetSessionInfo(int32_t persistentId, SessionInfoBea
     return WSError::WS_OK;
 }
 
+WSError SceneSessionManager::GetAllAbilityInfos(const AAFwk::Want &want, int32_t userId,
+    std::vector<AppExecFwk::AbilityInfo> &abilityInfos)
+{
+    if (bundleMgr_ == nullptr) {
+        WLOGFE("bundleMgr_ is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    auto ret = bundleMgr_->QueryAllAbilityInfos(want, userId, abilityInfos);
+    if (!ret) {
+        WLOGFE("Query all ability infos from BMS failed!");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    return WSError::WS_OK;
+}
+
 WSError SceneSessionManager::TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller)
 {
     WLOGFI("run SetSessionIcon");
