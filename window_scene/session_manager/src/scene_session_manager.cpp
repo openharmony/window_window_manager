@@ -2803,6 +2803,7 @@ WSError SceneSessionManager::ClearAllSessions()
 void SceneSessionManager::GetAllClearableSessions(std::vector<sptr<SceneSession>> sessionVector)
 {
     WLOGFI("run GetAllClearableSessions");
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto &item : sceneSessionMap_) {
         auto scnSession = item.second;
         if (IsSessionClearable(scnSession)) {
