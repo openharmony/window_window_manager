@@ -608,7 +608,7 @@ HWTEST_F(WindowSessionTest, CreateAndConnectSpecificSession01, Function | SmallT
     scensession->RegisterSessionChangeCallback(scensessionchangeCallBack);
     result = scensession->CreateAndConnectSpecificSession(mockSessionStage, testWindowEventChannel, surfaceNode_,
                                                           property_, persistentId, session_);
-    if(resul==WSError::WS_OK){
+    if(result==WSError::WS_OK){
         ASSERT_EQ(result, WSError::WS_OK);
     }
     

@@ -20,6 +20,7 @@
 #include "mock_IWindow.h"
 #include "mock_RSIWindowAnimationController.h"
 #include "window_manager_service.h"
+#include "mock_session_manager_service.h"
 
 #include <thread>
 
@@ -64,23 +65,23 @@ public:
     void TearDown() override;
 
     void SetAceessTokenPermission(const std::string processName);
-    sptr<WindowManagerService> wms = new WindowManagerService();
+    sptr<MockSessionManagerService> wms = new MockSessionManagerService();
 };
 
-void WindowManagerServiceTest::SetUpTestCase()
+void MockSessionManagerServiceTest::SetUpTestCase()
 {
 }
 
-void WindowManagerServiceTest::TearDownTestCase()
+void MockSessionManagerServiceTest::TearDownTestCase()
 {
 }
 
-void WindowManagerServiceTest::SetUp()
+void MockSessionManagerServiceTest::SetUp()
 {
-    CommonTestUtils::SetAceessTokenPermission("WindowManagerServiceTest");
+    CommonTestUtils::SetAceessTokenPermission("MockSessionManagerServiceTest");
 }
 
-void WindowManagerServiceTest::TearDown()
+void MockSessionManagerServiceTest::TearDown()
 {
 }
 
@@ -128,7 +129,7 @@ HWTEST_F(MockSessionManagerServiceTest, OnStart01, Function | SmallTest | Level2
 {
     auto ret=1;
     sptr<MockSessionManagerService> mms = new MockSessionManagerService();
-    mms->OnStart()
+    mms->OnStart();
     ASSERT_EQ(1,ret);
 }
 
@@ -140,8 +141,10 @@ HWTEST_F(MockSessionManagerServiceTest, OnStart01, Function | SmallTest | Level2
 HWTEST_F(MockSessionManagerServiceTest, OnRemoteDied01, Function | SmallTest | Level2)
 {
     auto ret = 1;
-    sptr<MockSessionManagerService::SMSDeathRecipient> smsDeathRecipient_ = new MockSessionManagerService::SMSDeathRecipient();
-    smsDeathRecipient_->OnRemoteDie();
+    wptr<IRemoteObject> remote
+    auto recipient=
+    sptr<MockSessionManagerService::SMSDeathRecipient>(new (std::nothrow)MockSessionManagerService::SMSDeathRecipient()) ;
+    recipient->OnRemoteDie(remote);
     ASSERT_EQ(1, ret);
 }
 }
