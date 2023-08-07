@@ -2823,7 +2823,7 @@ bool SceneSessionManager::IsSessionClearable(sptr<SceneSession> scnSession)
         WLOGFI("persistentId %{public}d is excludeFromMissions", scnSession->GetPersistentId());
         return false;
     }
-    if (sessionInfo.abilityInfo != nullptr || sessionInfo.abilityInfo -> unClearable) {
+    if (sessionInfo.abilityInfo != nullptr || sessionInfo.abilityInfo -> unclearableMission) {
         WLOGFI("persistentId %{public}d is unclearable", scnSession->GetPersistentId());
         return false;
     }
