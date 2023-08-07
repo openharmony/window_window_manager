@@ -2038,23 +2038,27 @@ WSError SceneSessionManager::TerminateSessionNew(const sptr<AAFwk::SessionInfo> 
 WSError SceneSessionManager::GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution)
 {
     WLOGFI("run GetSessionSnapshot");
-    sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
-    if (!sceneSession) {
-        WLOGFE("fail to find session by persistentId: %{public}d", persistentId);
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
-    auto oriSnapshot = sceneSession->Snapshot();
-    if (oriSnapshot != nullptr) {
-        if (isLowResolution) {
-            OHOS::Media::InitializationOptions options;
-            options.size.width = oriSnapshot->GetWidth() / 2;
-            options.size.height = oriSnapshot->GetHeight() / 2;
-            std::unique_ptr<OHOS::Media::PixelMap> reducedPixelMap = OHOS::Media::PixelMap::Create(*oriSnapshot, options);
-            snapshot = std::shared_ptr<OHOS::Media::PixelMap>(reducedPixelMap.release());
-        } else {
-            snapshot = oriSnapshot;
+    auto task = [this, persistentId, &snapshot, isLowResolution]() {
+        sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
+        if (!sceneSession) {
+            WLOGFE("fail to find session by persistentId: %{public}d", persistentId);
+            return WSError::WS_ERROR_INVALID_PARAM;
         }
-    }
+        auto oriSnapshot = sceneSession->Snapshot();
+        if (oriSnapshot != nullptr) {
+            if (isLowResolution) {
+                OHOS::Media::InitializationOptions options;
+                options.size.width = oriSnapshot->GetWidth() / 2;
+                options.size.height = oriSnapshot->GetHeight() / 2;
+                std::unique_ptr<OHOS::Media::PixelMap> reducedPixelMap = OHOS::Media::PixelMap::Create(*oriSnapshot, options);
+                snapshot = std::shared_ptr<OHOS::Media::PixelMap>(reducedPixelMap.release());
+            } else {
+                snapshot = oriSnapshot;
+            }
+        }
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
 
@@ -2758,8 +2762,12 @@ void SceneSessionManager::OnScreenshot(DisplayId displayId)
 WSError SceneSessionManager::ClearSession(int32_t persistentId)
 {
     WLOGFI("run ClearSession with persistentId: %{public}d", persistentId);
-    sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
-    return ClearSession(sceneSession);
+    auto task = [this, persistentId]() {
+        sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
+        return ClearSession(sceneSession);
+    };
+    taskScheduler_->PostAsyncTask(task);
+    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::ClearSession(sptr<SceneSession> sceneSession)
@@ -2779,12 +2787,16 @@ WSError SceneSessionManager::ClearSession(sptr<SceneSession> sceneSession)
 
 WSError SceneSessionManager::ClearAllSessions()
 {
-    WLOGFI("run ClearSession");
-    std::vector<sptr<SceneSession>> sessionVector;
-    GetAllClearableSessions(sessionVector);
-    for (uint32_t i = 0; i < sessionVector.size(); i++) {
-        ClearSession(sessionVector[i]);
-    }
+    WLOGFI("run ClearAllSessions");
+    auto task = [this]() {
+        std::vector<sptr<SceneSession>> sessionVector;
+        GetAllClearableSessions(sessionVector);
+        for (uint32_t i = 0; i < sessionVector.size(); i++) {
+            ClearSession(sessionVector[i]);
+        }
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
 
@@ -2814,6 +2826,11 @@ bool SceneSessionManager::IsSessionClearable(sptr<SceneSession> scnSession)
         WLOGFI("persistentId %{public}d is unclearable", scnSession->GetPersistentId());
         return false;
     }
+    if (sessionInfo.isSystem_) {
+        WLOGFI("persistentId %{public}d is system app", scnSession->GetPersistentId());
+        return false;
+    }
+
     return true;
 }
 } // namespace OHOS::Rosen
