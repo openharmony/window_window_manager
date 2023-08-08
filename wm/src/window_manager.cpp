@@ -127,12 +127,13 @@ void WindowManager::Impl::NotifyAccessibilityWindowInfo(const std::vector<sptr<A
         return;
     }
     for (auto& info : infos) {
-        WLOGFD("NotifyAccessibilityWindowInfo: wid[%{public}u], rect[%{public}d %{public}d %{public}d %{public}d]," \
+        WLOGFD("NotifyAccessibilityWindowInfo: wid[%{public}u], innerWid_[%{public}u], uiNodeId_[%{public}u]," \
+            "rect[%{public}d %{public}d %{public}d %{public}d]," \
             "isFocused[%{public}d], isDecorEnable[%{public}d], displayId[%{public}" PRIu64"], layer[%{public}u]," \
             "mode[%{public}u], type[%{public}u, updateType[%{public}d]",
-            info->wid_, info->windowRect_.width_, info->windowRect_.height_, info->windowRect_.posX_,
-            info->windowRect_.posY_, info->focused_, info->isDecorEnable_, info->displayId_, info->layer_,
-            info->mode_, info->type_, type);
+            info->wid_, info->innerWid_, info->uiNodeId_, info->windowRect_.width_, info->windowRect_.height_,
+            info->windowRect_.posX_, info->windowRect_.posY_, info->focused_, info->isDecorEnable_, info->displayId_,
+            info->layer_, info->mode_, info->type_, type);
     }
 
     std::vector<sptr<IWindowUpdateListener>> windowUpdateListeners;
