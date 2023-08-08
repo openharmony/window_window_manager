@@ -195,7 +195,7 @@ HWTEST_F(WindowSessionTest, IsSessionValid01, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest, UpdateWindowSessionProperty01, Function | SmallTest | Level2)
 {
     session_->state_ = SessionState::STATE_DISCONNECT;
-    ASSERT_EQ(session_->UpdateWindowSessionProperty(nullptr), WSError::WS_OK);   
+    ASSERT_EQ(session_->UpdateWindowSessionProperty(nullptr), WSError::WS_OK);
 }
 
 /**
