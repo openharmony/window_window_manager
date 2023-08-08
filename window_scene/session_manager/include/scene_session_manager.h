@@ -261,7 +261,7 @@ private:
         std::bind(&SceneSessionManager::DestroySpecificSession, this, std::placeholders::_1));
     WSError ClearSession(sptr<SceneSession> sceneSession);
     bool IsSessionClearable(sptr<SceneSession> scnSession);
-    void GetAllClearableSessions(std::vector<sptr<SceneSession>> sessionVector);
+    void GetAllClearableSessions(std::vector<sptr<SceneSession>>& sessionVector);
 };
 } // namespace OHOS::Rosen
 

@@ -2823,11 +2823,15 @@ bool SceneSessionManager::IsSessionClearable(sptr<SceneSession> scnSession)
         return false;
     }
     SessionInfo sessionInfo = scnSession->GetSessionInfo();
-    if (sessionInfo.abilityInfo != nullptr || sessionInfo.abilityInfo->excludeFromMissions) {
+    if (scnSession.abilityInfo == nullptr) {
+        WLOGFI("scnSession abilityInfo is nullptr");
+        return false;
+    }
+    if (sessionInfo.abilityInfo->excludeFromMissions) {
         WLOGFI("persistentId %{public}d is excludeFromMissions", scnSession->GetPersistentId());
         return false;
     }
-    if (sessionInfo.abilityInfo != nullptr || sessionInfo.abilityInfo->unclearableMission) {
+    if (sessionInfo.abilityInfo->unclearableMission) {
         WLOGFI("persistentId %{public}d is unclearable", scnSession->GetPersistentId());
         return false;
     }
