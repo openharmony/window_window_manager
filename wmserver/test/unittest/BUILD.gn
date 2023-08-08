@@ -25,6 +25,7 @@ group("unittest") {
     ":wmserver_drag_controller_test",
     ":wmserver_input_window_monitor_test",
     ":wmserver_minimize_app_test",
+    ":wmserver_mock_session_manager_service_test",
     ":wmserver_remote_animation_test",
     ":wmserver_starting_window_test",
     ":wmserver_window_controller_test",
@@ -47,7 +48,6 @@ group("unittest") {
     ":wmserver_window_snapshot_test",
     ":wmserver_window_system_effect_test",
     ":wmserver_window_zorder_policy_test",
-    ":wmserver_mock_session_manager_service_test",
   ]
 }
 
@@ -84,6 +84,7 @@ test_inner_deps = [
   "${window_base_path}/utils:libwmutil",
   "${window_base_path}/wm:libwm",
   "../..:libwms",
+  "../..:sms",
   "../../../dmserver:libdms",
   "../../../test/common/utils:libtestutil",
   "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
