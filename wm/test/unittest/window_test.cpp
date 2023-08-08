@@ -2029,7 +2029,7 @@ HWTEST_F(WindowTest, PerformBack01, Function | SmallTest | Level2)
     auto ret=1;
     sptr<Window> window = new (std::nothrow) Window();
     ASSERT_NE(nullptr, window);
-    window->PerformBack()
+    window->PerformBack();
     ASSERT_EQ(1, ret);
 }
 
