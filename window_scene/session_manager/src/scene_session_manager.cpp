@@ -1419,7 +1419,7 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
         WLOGFE("session is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }
-    if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+    if (!(sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW || sceneSession->GetSessionInfo().isSystem_)) {
         WLOGW("only app main window can set brightness");
         return WSError::WS_DO_NOTHING;
     }
@@ -1756,6 +1756,7 @@ WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
         // focusId change
         if (isFocused) {
             SetFocusedSession(persistentId);
+            UpdateBrightness(focusedSessionId_);
             // notify RS
             WLOGFD("current focus session: windowId: %{public}d, windowName: %{public}s, bundleName: %{public}s,"
             " abilityName: %{public}s, pid: %{public}d, uid: %{public}d", persistentId,
