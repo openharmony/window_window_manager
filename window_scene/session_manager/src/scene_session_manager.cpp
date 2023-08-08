@@ -1308,6 +1308,9 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_MODE: {
+            if (sceneSession->GetSessionProperty() != nullptr) {
+                sceneSession->GetSessionProperty()->SetWindowMode(property->GetWindowMode());
+            }
             NotifyWindowInfoChange(property->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             break;
         }
@@ -1330,6 +1333,11 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
                 sceneSession->GetSessionProperty()->SetDecorEnable(property->IsDecorEnable());
             }
             break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS: {
+            if (sceneSession->GetSessionProperty() != nullptr) {
+                sceneSession->GetSessionProperty()->SetWindowLimits(property->GetWindowLimits());
+            }
         }
         default:
             break;
