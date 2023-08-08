@@ -802,7 +802,6 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreenByApiVersion, Function |
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    // EXPECT_CALL(*(session), OnSessionEvent(SessionEvent::EVENT_MAXIMIZE)).WillOnce(Return(WSError::WS_OK));
     ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreenByApiVersion(false));
 }
 
