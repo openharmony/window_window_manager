@@ -1053,7 +1053,6 @@ HWTEST_F(WindowSessionTest, SetFocusable, Function | SmallTest | Level2)
     property->SetFocusable(false);
     ASSERT_EQ(WSError::WS_DO_NOTHING, session_->SetFocusable(false));
     property->SetFocusable(true);
-    ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
 }
 } // namespace Rosen

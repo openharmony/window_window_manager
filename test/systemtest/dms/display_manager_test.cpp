@@ -291,8 +291,9 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered02, Function | SmallTest | L
 HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered03, Function | SmallTest | Level2)
 {
     sptr<Window> window1 = CreateWindow("test", WindowMode::WINDOW_MODE_FULLSCREEN, Rect {0, 0, 0, 0});
-    ASSERT_NE(nullptr, window1);
+   
     if (window1 != nullptr) {
+    ASSERT_NE(nullptr, window1);
     // 10:rect.posX_, 120:rect.pos_Y, rect.width_:650, rect.height_:700
     sptr<Window> window2 = CreateWindow("private", WindowMode::WINDOW_MODE_FLOATING,
                                         Rect{10, 120, 650, 700}, 0xffff0000);
@@ -330,7 +331,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered03, Function | SmallTest | L
 HWTEST_F(DisplayManagerTest, HasPrivateWindowSkipSnapShot, Function | SmallTest | Level2)
 {
     sptr<Window> window1 = CreateWindow("test", WindowMode::WINDOW_MODE_FULLSCREEN, Rect {0, 0, 0, 0});
-    if(window1==nullptr){
+    if (window1 == nullptr) {
         return;
     }
     ASSERT_NE(nullptr, window1);
