@@ -2035,15 +2035,30 @@ WSError SceneSessionManager::TerminateSessionNew(const sptr<AAFwk::SessionInfo> 
     return errCode;
 }
 
-WSError SceneSessionManager::GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot)
+WSError SceneSessionManager::GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution)
 {
     WLOGFI("run GetSessionSnapshot");
-    sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
-    if (!sceneSession) {
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    snapshot = sceneSession->Snapshot();
-    return WSError::WS_OK;
+    auto task = [this, persistentId, &snapshot, isLowResolution]() {
+        sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
+        if (!sceneSession) {
+            WLOGFE("fail to find session by persistentId: %{public}d", persistentId);
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+        auto oriSnapshot = sceneSession->Snapshot();
+        if (oriSnapshot != nullptr) {
+            if (isLowResolution) {
+                OHOS::Media::InitializationOptions options;
+                options.size.width = oriSnapshot->GetWidth() / 2; // low resolution ratio
+                options.size.height = oriSnapshot->GetHeight() / 2; // low resolution ratio
+                std::unique_ptr<OHOS::Media::PixelMap> reducedPixelMap = OHOS::Media::PixelMap::Create(*oriSnapshot, options);
+                snapshot = std::shared_ptr<OHOS::Media::PixelMap>(reducedPixelMap.release());
+            } else {
+                snapshot = oriSnapshot;
+            }
+        }
+        return WSError::WS_OK;
+    };
+    return taskScheduler_->PostSyncTask(task);
 }
 
 WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionChangeListener> sessionListener)
@@ -2741,5 +2756,85 @@ void SceneSessionManager::OnScreenshot(DisplayId displayId)
         }
     };
     taskScheduler_->PostAsyncTask(task);
+}
+
+WSError SceneSessionManager::ClearSession(int32_t persistentId)
+{
+    WLOGFI("run ClearSession with persistentId: %{public}d", persistentId);
+    auto task = [this, persistentId]() {
+        sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
+        return ClearSession(sceneSession);
+    };
+    taskScheduler_->PostAsyncTask(task);
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::ClearSession(sptr<SceneSession> sceneSession)
+{
+    WLOGFI("run ClearSession");
+    if (sceneSession == nullptr) {
+        WLOGFE("sceneSession is nullptr");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!IsSessionClearable(sceneSession)) {
+        WLOGFI("sceneSession cannot be clear, persistentId %{public}d.", sceneSession->GetPersistentId());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    const WSError& errCode = sceneSession->Clear();
+    return errCode;
+}
+
+WSError SceneSessionManager::ClearAllSessions()
+{
+    WLOGFI("run ClearAllSessions");
+    auto task = [this]() {
+        std::vector<sptr<SceneSession>> sessionVector;
+        GetAllClearableSessions(sessionVector);
+        for (uint32_t i = 0; i < sessionVector.size(); i++) {
+            ClearSession(sessionVector[i]);
+        }
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostAsyncTask(task);
+    return WSError::WS_OK;
+}
+
+void SceneSessionManager::GetAllClearableSessions(std::vector<sptr<SceneSession>>& sessionVector)
+{
+    WLOGFI("run GetAllClearableSessions");
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto &item : sceneSessionMap_) {
+        auto scnSession = item.second;
+        if (IsSessionClearable(scnSession)) {
+            sessionVector.push_back(scnSession);
+        }
+    }
+}
+
+bool SceneSessionManager::IsSessionClearable(sptr<SceneSession> scnSession)
+{
+    if (scnSession == nullptr) {
+        WLOGFI("scnSession is nullptr");
+        return false;
+    }
+    SessionInfo sessionInfo = scnSession->GetSessionInfo();
+    if (sessionInfo.abilityInfo == nullptr) {
+        WLOGFI("scnSession abilityInfo is nullptr");
+        return false;
+    }
+    if (sessionInfo.abilityInfo->excludeFromMissions) {
+        WLOGFI("persistentId %{public}d is excludeFromMissions", scnSession->GetPersistentId());
+        return false;
+    }
+    if (sessionInfo.abilityInfo->unclearableMission) {
+        WLOGFI("persistentId %{public}d is unclearable", scnSession->GetPersistentId());
+        return false;
+    }
+    if (sessionInfo.isSystem_) {
+        WLOGFI("persistentId %{public}d is system app", scnSession->GetPersistentId());
+        return false;
+    }
+
+    return true;
 }
 } // namespace OHOS::Rosen
