@@ -741,7 +741,7 @@ WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
         WLOGFE("SetAspectRatio failed because of nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (ratio == MathHelper::INF || ratio == MathHelper::NAG_INF || std::isnan(ratio)) {
+    if (ratio == MathHelper::INF || ratio == MathHelper::NAG_INF || std::isnan(ratio) || MathHelper::NearZero(ratio)) {
         WLOGFE("SetAspectRatio failed, because of wrong value: %{public}f", ratio);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -757,8 +757,7 @@ WMError WindowSceneSessionImpl::ResetAspectRatio()
         WLOGFE("no host session found");
         return WMError::WM_ERROR_NULLPTR;
     }
-    hostSession_->SetAspectRatio(0.0f);
-    return WMError::WM_OK;
+    return static_cast<WMError>(hostSession_->SetAspectRatio(0.0f));
 }
 
 WmErrorCode WindowSceneSessionImpl::RaiseToAppTop()
