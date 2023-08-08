@@ -2058,12 +2058,7 @@ WSError SceneSessionManager::GetSessionSnapshot(int32_t persistentId, std::share
         }
         return WSError::WS_OK;
     };
-    bool ret = taskScheduler_->PostTask(task);
-    if (!ret) {
-        WLOGFE("fail to post task.");
-        return WSError::WS_ERROR_FAIL_TO_GET_SNAPSHOT;
-    }
-    return WSError::WS_OK;
+    return taskScheduler_->PostSyncTask(task);
 }
 
 WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionChangeListener> sessionListener)
@@ -2823,7 +2818,7 @@ bool SceneSessionManager::IsSessionClearable(sptr<SceneSession> scnSession)
         return false;
     }
     SessionInfo sessionInfo = scnSession->GetSessionInfo();
-    if (scnSession.abilityInfo == nullptr) {
+    if (sessionInfo.abilityInfo == nullptr) {
         WLOGFI("scnSession abilityInfo is nullptr");
         return false;
     }
