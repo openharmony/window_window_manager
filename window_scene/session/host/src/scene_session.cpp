@@ -669,7 +669,9 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
         WLOGFE("screen session is null");
         return;
     }
-    ScreenSessionManager::GetInstance().UpdatePrivateStateAndNotify(screenSession, isPrivacy);
+    if (GetSessionState() == SessionState::STATE_FOREGROUND || GetSessionState() == SessionState::STATE_ACTIVE) {
+        ScreenSessionManager::GetInstance().UpdatePrivateStateAndNotify(screenSession, isPrivacy);
+    }
 }
 
 WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
