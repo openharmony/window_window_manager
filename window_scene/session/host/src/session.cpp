@@ -767,7 +767,8 @@ WSError Session::NotifyDestroy()
 
 void Session::SetSessionContinueState(const ContinueState& continueState)
 {
-    auto sessionInfo =  GetSessionInfo();
+    auto sessionInfo = GetSessionInfo();
+    WLOGFD("SetSessionContinueState, continueState : %{public}d", static_cast<int32_t>(continueState));
     sessionInfo.continueState = continueState;
 }
 
