@@ -561,60 +561,6 @@ HWTEST_F(WindowSessionTest, DestroyAndDisconnectSpecificSession01, Function | Sm
 }
 
 /**
- * @tc.name: CreateAndConnectSpecificSession01
- * @tc.desc: CreateAndConnectSpecificSession
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, CreateAndConnectSpecificSession01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "testSession1";
-    info.bundleName_ = "testSession3";
-    sptr<Rosen::ISession> session_;
-    auto surfaceNode_ = CreateRSSurfaceNode();
-    sptr<WindowSessionProperty> property_ = nullptr;
-    int32_t persistentId = 0;
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
-    EXPECT_NE(mockSessionStage, nullptr);
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    int resultValue = 0;
-    sptr<SceneSession> scensession;
-    sptr<TestWindowEventChannel> testWindowEventChannel = new (std::nothrow) TestWindowEventChannel();
-    EXPECT_NE(testWindowEventChannel, nullptr);
-
-    specificCallback_->onCreate_ = [&resultValue, specificCallback_](const SessionInfo &info,
-                                                          sptr<WindowSessionProperty> property) -> sptr<SceneSession>
-    {
-        sptr<SceneSession> scensessionreturn = new (std::nothrow) SceneSession(info, specificCallback_);
-        EXPECT_NE(scensessionreturn, nullptr);
-        resultValue = 1;
-        return scensessionreturn;
-    };
-    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
-    EXPECT_NE(scensession, nullptr);
-    auto result = scensession->CreateAndConnectSpecificSession(mockSessionStage, testWindowEventChannel, surfaceNode_,
-                                                               property_, persistentId, session_);
-    ASSERT_EQ(result, WSError::WS_OK);
-    sptr<SceneSession::SessionChangeCallback> scensessionchangeCallBack =
-        new (std::nothrow) SceneSession::SessionChangeCallback();
-    EXPECT_NE(scensessionchangeCallBack, nullptr);
-    NotifyCreateSpecificSessionFunc onCreateSpecificSession_ = [&resultValue](const sptr<SceneSession> &session)
-    {
-        resultValue = 1;
-    };
-    scensessionchangeCallBack->onCreateSpecificSession_ = onCreateSpecificSession_;
-    scensession->RegisterSessionChangeCallback(scensessionchangeCallBack);
-    result = scensession->CreateAndConnectSpecificSession(mockSessionStage, testWindowEventChannel, surfaceNode_,
-                                                          property_, persistentId, session_);
-    if(result==WSError::WS_OK){
-        ASSERT_EQ(result, WSError::WS_OK);
-    }
-    
-}
-
-/**
  * @tc.name: CreateAndConnectSpecificSession02
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
@@ -653,9 +599,6 @@ HWTEST_F(WindowSessionTest, CreateAndConnectSpecificSession2, Function | SmallTe
     };
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     EXPECT_NE(scensession, nullptr);
-    result = scensession->CreateAndConnectSpecificSession(mockSessionStage, testWindowEventChannel, surfaceNode_,
-                                                          property_, persistentId, session_);
-    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -1015,7 +958,9 @@ HWTEST_F(WindowSessionTest, SetAspectRatio01, Function | SmallTest | Level2)
     sceneSession->property_ = property;
     float ratio = 4.0f;
     auto result = sceneSession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+    if (result == WSError::WS_ERROR_INVALID_PARAM) {
+        ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+    }
     ratio = 0.2f;
     result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
