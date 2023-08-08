@@ -169,32 +169,33 @@ WSError SceneSession::SetAspectRatio(float ratio)
         vpr = display->GetVirtualPixelRatio();
         WLOGD("vpr = %{public}f", vpr);
     }
-
-    auto limits = property_->GetWindowLimits();
-    if (IsDecorEnable()) {
-        if (limits.minWidth_ && limits.maxHeight_ &&
-            MathHelper::LessNotEqual(ratio, static_cast<float>(SessionUtils::ToLayoutWidth(limits.minWidth_, vpr)) /
-            SessionUtils::ToLayoutHeight(limits.maxHeight_, vpr))) {
-            WLOGE("Failed, because aspectRatio is smaller than minWidth/maxHeight");
-            return WSError::WS_ERROR_INVALID_PARAM;
-        } else if (limits.minHeight_ && limits.maxWidth_ &&
-            MathHelper::GreatNotEqual(ratio, static_cast<float>(SessionUtils::ToLayoutWidth(limits.maxWidth_, vpr)) /
-            SessionUtils::ToLayoutHeight(limits.minHeight_, vpr))) {
-            WLOGE("Failed, because aspectRatio is bigger than maxWidth/minHeight");
-            return WSError::WS_ERROR_INVALID_PARAM;
-        }
-    } else {
-        if (limits.minWidth_ && limits.maxHeight_ && MathHelper::LessNotEqual(ratio,
-            static_cast<float>(limits.minWidth_) / limits.maxHeight_)) {
-            WLOGE("Failed, because aspectRatio is smaller than minWidth/maxHeight");
-            return WSError::WS_ERROR_INVALID_PARAM;
-        } else if (limits.minHeight_ && limits.maxWidth_ && MathHelper::GreatNotEqual(ratio,
-            static_cast<float>(limits.maxWidth_) / limits.minHeight_)) {
-            WLOGE("Failed, because aspectRatio is bigger than maxWidth/minHeight");
-            return WSError::WS_ERROR_INVALID_PARAM;
+    if (!MathHelper::NearZero(ratio)) {
+        auto limits = property_->GetWindowLimits();
+        if (IsDecorEnable()) {
+            if (limits.minWidth_ && limits.maxHeight_ &&
+                MathHelper::LessNotEqual(ratio, static_cast<float>(SessionUtils::ToLayoutWidth(limits.minWidth_, vpr)) /
+                SessionUtils::ToLayoutHeight(limits.maxHeight_, vpr))) {
+                WLOGE("Failed, because aspectRatio is smaller than minWidth/maxHeight");
+                return WSError::WS_ERROR_INVALID_PARAM;
+            } else if (limits.minHeight_ && limits.maxWidth_ &&
+                MathHelper::GreatNotEqual(ratio,
+                static_cast<float>(SessionUtils::ToLayoutWidth(limits.maxWidth_, vpr)) /
+                SessionUtils::ToLayoutHeight(limits.minHeight_, vpr))) {
+                WLOGE("Failed, because aspectRatio is bigger than maxWidth/minHeight");
+                return WSError::WS_ERROR_INVALID_PARAM;
+            }
+        } else {
+            if (limits.minWidth_ && limits.maxHeight_ && MathHelper::LessNotEqual(ratio,
+                static_cast<float>(limits.minWidth_) / limits.maxHeight_)) {
+                WLOGE("Failed, because aspectRatio is smaller than minWidth/maxHeight");
+                return WSError::WS_ERROR_INVALID_PARAM;
+            } else if (limits.minHeight_ && limits.maxWidth_ && MathHelper::GreatNotEqual(ratio,
+                static_cast<float>(limits.maxWidth_) / limits.minHeight_)) {
+                WLOGE("Failed, because aspectRatio is bigger than maxWidth/minHeight");
+                return WSError::WS_ERROR_INVALID_PARAM;
+            }
         }
     }
-
     aspectRatio_ = ratio;
     if (moveDragController_) {
         moveDragController_->SetAspectRatio(ratio);
