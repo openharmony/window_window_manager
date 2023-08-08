@@ -228,6 +228,7 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
                 static_cast<float>(abilityInfo->maxWindowRatio), static_cast<float>(abilityInfo->minWindowRatio)
             });
             UpdateWindowSizeLimits();
+            UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
             // get support modes configuration
             uint32_t modeSupportInfo = WindowHelper::ConvertSupportModesToSupportInfo(abilityInfo->windowModes);
             if (modeSupportInfo == 0) {

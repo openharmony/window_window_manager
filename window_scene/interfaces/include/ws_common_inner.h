@@ -43,6 +43,7 @@ enum class WSPropertyChangeAction : uint32_t {
     ACTION_UPDATE_ASPECT_RATIO = 1 << 16,
     ACTION_UPDATE_MAXIMIZE_STATE = 1 << 17,
     ACTION_UPDATE_DECOR_ENABLE = 1 << 18,
+    ACTION_UPDATE_WINDOW_LIMITS = 1 << 19,
 };
 }
 }
