@@ -96,7 +96,9 @@ ohos_shared_library("screen_session") {
   deps = [ "${window_base_path}/utils:libwmutil" ]
 
   external_deps = [
+    "c_utils:utils",
     "graphic_2d:librender_service_client",
+    "hilog:libhilog",
     "init:libbegetutil",
   ]
 

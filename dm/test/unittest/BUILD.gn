@@ -39,6 +39,11 @@ ohos_unittest("dm_display_test") {
   sources = [ "display_test.cpp" ]
 
   deps = [ ":dm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("dm_display_change_unit_test") {
@@ -47,6 +52,11 @@ ohos_unittest("dm_display_change_unit_test") {
   sources = [ "display_change_unit_test.cpp" ]
 
   deps = [ ":dm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("dm_display_power_unit_test") {
@@ -55,6 +65,11 @@ ohos_unittest("dm_display_power_unit_test") {
   sources = [ "display_power_unit_test.cpp" ]
 
   deps = [ ":dm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("dm_screenshot_test") {
@@ -63,6 +78,11 @@ ohos_unittest("dm_screenshot_test") {
   sources = [ "screenshot_test.cpp" ]
 
   deps = [ ":dm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("dm_screen_manager_test") {
@@ -73,6 +93,11 @@ ohos_unittest("dm_screen_manager_test") {
   sources = [ "screen_manager_test.cpp" ]
 
   deps = [ ":dm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("dm_screen_test") {
@@ -81,6 +106,11 @@ ohos_unittest("dm_screen_test") {
   sources = [ "screen_test.cpp" ]
 
   deps = [ ":dm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("dm_screen_group_test") {
@@ -89,6 +119,11 @@ ohos_unittest("dm_screen_group_test") {
   sources = [ "screen_group_test.cpp" ]
 
   deps = [ ":dm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("dm_display_manager_adapter_test") {
@@ -97,6 +132,11 @@ ohos_unittest("dm_display_manager_adapter_test") {
   sources = [ "display_manager_adapter_test.cpp" ]
 
   deps = [ ":dm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("dm_display_manager_test") {
@@ -107,6 +147,11 @@ ohos_unittest("dm_display_manager_test") {
   sources = [ "display_manager_test.cpp" ]
 
   deps = [ ":dm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("dm_display_manager_agent_stub_test") {
@@ -115,6 +160,11 @@ ohos_unittest("dm_display_manager_agent_stub_test") {
   sources = [ "display_manager_agent_stub_test.cpp" ]
 
   deps = [ ":dm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ## Build dm_unittest_common.a {{{
