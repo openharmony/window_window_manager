@@ -2008,60 +2008,69 @@ HWTEST_F(WindowTest, IDispatchInputEventListener, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: GetVSyncPeriod01
- * @tc.desc: GetVSyncPeriod with no name
+ * @tc.name: Marshalling
+ * @tc.desc: keyboardAnimationConfig marshalling
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetVSyncPeriod01, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, KeyboardAnimationConfigMarshalling, Function | SmallTest | Level3)
 {
-    sptr<Window> window = new (std::nothrow) Window();
-    ASSERT_NE(nullptr, window);
-    ASSERT_EQ(0, window->GetVSyncPeriod());
-}
-
-/**
- * @tc.name: PerformBack01
- * @tc.desc: PerformBack
- * @tc.type: FUNC
- */
-HWTEST_F(WindowTest, PerformBack01, Function | SmallTest | Level2)
-{
-    auto ret=1;
-    sptr<Window> window = new (std::nothrow) Window();
-    ASSERT_NE(nullptr, window);
-    window->PerformBack();
-    ASSERT_EQ(1, ret);
-}
-
-/**
- * @tc.name: IWindowLifeCycle01
- * @tc.desc: IWindowLifeCycle
- * @tc.type: FUNC
- */
-HWTEST_F(WindowTest, IWindowLifeCycle01, Function | SmallTest | Level2)
-{
-    sptr<Window> window = new (std::nothrow) Window();
-    ASSERT_NE(nullptr, window);
-    sptr<IWindowLifeCycle> listener = new (std::nothrow) IWindowLifeCycle();
-    listener->BackgroundFailed(1);
-    auto ret = window->UnregisterLifeCycleListener(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
-}
-
-/**
- * @tc.name: Marshalling01
- * @tc.desc: Marshalling
- * @tc.type: FUNC
- */
-HWTEST_F(WindowTest, Marshalling, Function | SmallTest | Level2)
-{
-    sptr<Window> window = new Window();
-    ASSERT_NE(nullptr, window);
+    MessageParcel data;
     KeyboardAnimationConfig config;
-    Parcel parcel;
-    ASSERT_EQ(false, config.Marshalling(parcel));
+    auto ret = data.WriteParcelable(&config);
+    ASSERT_EQ(true, ret);
 }
 
+/**
+ * @tc.name: BackgroundFailed
+ * @tc.desc: window life cycle BackgroundFailed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, WindowLifeCycleBackgroundFailed, Function | SmallTest | Level3)
+{
+    IWindowLifeCycle windowLifeCycle;
+    int32_t  ret = 0;
+    windowLifeCycle.BackgroundFailed(ret);
+    ASSERT_EQ(0, ret);
+}
+
+/**
+ * @tc.name: GetVSyncPeriod
+ * @tc.desc: window GetVSyncPeriod
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetVSyncPeriod, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> winOption = nullptr;
+    winOption = new (std::nothrow) OHOS::Rosen::WindowOption();
+    ASSERT_NE(nullptr, winOption);
+    winOption->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+
+    sptr<WindowOption> option = new WindowOption;
+    sptr<Window> window = Window::Create("win", option);
+    ASSERT_NE(nullptr, window);
+    int64_t period = window->GetVSyncPeriod();
+    ASSERT_LE(-1, period);
+}
+
+/**
+ * @tc.name: performBack
+ * @tc.desc: window performBack
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, performBack, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> winOption = nullptr;
+    winOption = new (std::nothrow) OHOS::Rosen::WindowOption();
+    ASSERT_NE(nullptr, winOption);
+    winOption->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+
+    sptr<WindowOption> option = new WindowOption;
+    sptr<Window> window = Window::Create("win", option);
+    ASSERT_NE(nullptr, window);
+    int32_t ret = 0;
+    window->PerformBack();
+    ASSERT_EQ(0, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

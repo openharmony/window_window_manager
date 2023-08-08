@@ -20,7 +20,9 @@
 
 #include "anr_handler.h"
 #include "color_parser.h"
+#include "singleton_container.h"
 #include "display_manager.h"
+#include "perform_reporter.h"
 #include "session_permission.h"
 #include "session/container/include/window_event_channel.h"
 #include "session_manager/include/session_manager.h"
@@ -31,7 +33,6 @@
 #include "wm_common.h"
 #include "wm_math.h"
 #include "session_manager_agent_controller.h"
-#include "window_impl.h"
 #include <transaction/rs_interfaces.h>
 #include "surface_capture_future.h"
 
@@ -243,17 +244,16 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
             OHOS::AppExecFwk::DisplayOrientation displayOrientation =
                 static_cast<OHOS::AppExecFwk::DisplayOrientation>(
                     static_cast<uint32_t>(abilityInfo->orientation));
-            if (ABILITY_TO_WMS_ORIENTATION_MAP.count(displayOrientation) == 0) {
+            if (ABILITY_TO_SESSION_ORIENTATION_MAP.count(displayOrientation) == 0) {
                 WLOGFE("id:%{public}u Do not support this Orientation type", GetWindowId());
                 return;
             }
-            Orientation orientation = ABILITY_TO_WMS_ORIENTATION_MAP.at(displayOrientation);
+            Orientation orientation = ABILITY_TO_SESSION_ORIENTATION_MAP.at(displayOrientation);
             if (orientation < Orientation::BEGIN || orientation > Orientation::END) {
                 WLOGFE("Set orientation from ability failed");
                 return;
             }
             property_->SetRequestedOrientation(orientation);
-            UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
         }
     }
 }
@@ -741,7 +741,7 @@ WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
         WLOGFE("SetAspectRatio failed because of nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (ratio == MathHelper::INF || ratio == MathHelper::NAG_INF || std::isnan(ratio)) {
+    if (ratio == MathHelper::INF || ratio == MathHelper::NAG_INF || std::isnan(ratio) || MathHelper::NearZero(ratio)) {
         WLOGFE("SetAspectRatio failed, because of wrong value: %{public}f", ratio);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -757,8 +757,7 @@ WMError WindowSceneSessionImpl::ResetAspectRatio()
         WLOGFE("no host session found");
         return WMError::WM_ERROR_NULLPTR;
     }
-    hostSession_->SetAspectRatio(0.0f);
-    return WMError::WM_OK;
+    return static_cast<WMError>(hostSession_->SetAspectRatio(0.0f));
 }
 
 WmErrorCode WindowSceneSessionImpl::RaiseToAppTop()
@@ -1105,6 +1104,8 @@ WSError WindowSceneSessionImpl::HandleBackEvent()
         WLOGD("Back key event is consumed");
         return WSError::WS_OK;
     }
+    WLOGFD("report Back");
+    SingletonContainer::Get<WindowInfoReporter>().ReportBackButtonInfoImmediately();
     // notify back event to host session
     PerformBack();
     return WSError::WS_OK;

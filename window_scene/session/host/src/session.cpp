@@ -329,16 +329,6 @@ float Session::GetBrightness() const
     return property_->GetBrightness();
 }
 
-void Session::SetRequestedOrientation(Orientation orientation)
-{
-    property_->SetRequestedOrientation(orientation);
-}
-
-Orientation Session::GetRequestedOrientation() const
-{
-    return property_->GetRequestedOrientation();
-}
-
 bool Session::IsSessionValid() const
 {
     bool res = state_ > SessionState::STATE_DISCONNECT && state_ < SessionState::STATE_END;
@@ -419,25 +409,20 @@ void Session::FillSessionInfo(SessionInfo &sessionInfo)
     if (sessionInfo.startMethod != OHOS::Rosen::StartMethod::START_CALL) {
         sessionInfo.startMethod = OHOS::Rosen::StartMethod::START_NORMAL;
     }
-    sessionInfo.removeSessionAfterTerminate = abilityInfo->removeMissionAfterTerminate;
-    sessionInfo.excludeFromSessions = abilityInfo->excludeFromMissions;
-    sessionInfo.continuable = abilityInfo->continuable;
-    sessionInfo.unClearable = abilityInfo->unclearableMission;
+    sessionInfo.abilityInfo = abilityInfo;
     sessionInfo.time = GetCurrentTime();
-    sessionInfo.label = abilityInfo->label;
-    sessionInfo.iconPath = abilityInfo->iconPath;
     WLOGFI("FillSessionInfo end, removeMissionAfterTerminate: %{public}d excludeFromMissions: %{public}d "
-        "unclearable:%{public}d,continuable:%{public}d  label:%{public}s iconPath:%{public}s",
-        sessionInfo.removeSessionAfterTerminate, sessionInfo.excludeFromSessions, sessionInfo.unClearable,
-        sessionInfo.continuable, sessionInfo.label.c_str(), sessionInfo.iconPath.c_str());
+        " label:%{public}s iconPath:%{public}s",
+        abilityInfo->removeMissionAfterTerminate, abilityInfo->excludeFromMissions,
+        abilityInfo->label.c_str(), abilityInfo->iconPath.c_str());
 }
 
-sptr<AppExecFwk::AbilityInfo> Session::QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
-    const std::string& abilityName, const std::string& moduleName)
+std::shared_ptr<AppExecFwk::AbilityInfo> Session::QueryAbilityInfoFromBMS(const int32_t uId,
+    const std::string& bundleName, const std::string& abilityName, const std::string& moduleName)
 {
     AAFwk::Want want;
     want.SetElementName("", bundleName, abilityName, moduleName);
-    sptr<AppExecFwk::AbilityInfo> abilityInfo = new (std::nothrow) AppExecFwk::AbilityInfo();
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     if (abilityInfo == nullptr) {
         return nullptr;
     }
@@ -653,6 +638,39 @@ WSError Session::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessi
 void Session::SetTerminateSessionListenerNew(const NotifyTerminateSessionFuncNew& func)
 {
     terminateSessionFuncNew_ = func;
+}
+
+WSError Session::TerminateSessionTotal(const sptr<AAFwk::SessionInfo> abilitySessionInfo, TerminateType terminateType)
+{
+    if (abilitySessionInfo == nullptr) {
+        WLOGFE("abilitySessionInfo is null");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    SessionInfo info;
+    info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
+    info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
+    info.callerToken_ = abilitySessionInfo->callerToken;
+    info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
+    sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
+    sessionInfo_.resultCode = abilitySessionInfo->resultCode;
+    if (terminateSessionFuncTotal_) {
+        terminateSessionFuncTotal_(info, terminateType);
+    }
+    return WSError::WS_OK;
+}
+
+void Session::SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncTotal& func)
+{
+    terminateSessionFuncTotal_ = func;
+}
+
+WSError Session::Clear()
+{
+    SessionInfo info = GetSessionInfo();
+    if (terminateSessionFuncTotal_) {
+        terminateSessionFuncTotal_(info, TerminateType::CLOSE_AND_CLEAR_MULTITASK);
+    }
+    return WSError::WS_OK;
 }
 
 WSError Session::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo)

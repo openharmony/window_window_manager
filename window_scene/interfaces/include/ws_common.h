@@ -26,6 +26,9 @@
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
 }
+namespace OHOS::AppExecFwk {
+struct AbilityInfo;
+}
 
 namespace OHOS::Rosen {
 constexpr int32_t INVALID_SESSION_ID = 0;
@@ -46,6 +49,8 @@ enum class WSError : int32_t {
     WS_ERROR_OPER_FULLSCREEN_FAILED,
     WS_ERROR_REPEAT_OPERATION,
     WS_ERROR_INVALID_SESSION,
+    WS_ERROR_UNCLEARABLE_SESSION,
+    WS_ERROR_FAIL_TO_GET_SNAPSHOT,
 
     WS_ERROR_DEVICE_NOT_SUPPORT = 801, // the value do not change.It is defined on all system
 
@@ -119,6 +124,7 @@ struct SessionInfo {
 
     sptr<AAFwk::Want> want;
     std::shared_ptr<AAFwk::AbilityStartSetting> startSetting = nullptr;
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
     int32_t resultCode;
     int32_t requestCode;
     int32_t errorCode;
@@ -128,15 +134,8 @@ struct SessionInfo {
     uint32_t callState_ = 0;
     uint32_t callingTokenId_ = 0;
     StartMethod startMethod;
-    // whether to display in the sessions list
-    bool excludeFromSessions = false;
-    bool removeSessionAfterTerminate = false;
-    bool unClearable = false;
     bool lockedState = false;
-    bool continuable = false;
     std::string time;
-    std::string label;
-    std::string iconPath;
     ContinueState continueState = ContinueState::CONTINUESTATE_ACTIVE;
     int64_t uiAbilityId_ = 0;
 };
@@ -260,5 +259,16 @@ enum class SessionGravity : uint32_t {
     SESSION_GRAVITY_FLOAT = 0,
     SESSION_GRAVITY_BOTTOM,
 };
+
+/**
+ * @brief TerminateType session terminate type.
+ */
+enum class TerminateType : uint32_t {
+    CLOSE_AND_KEEP_MULTITASK = 0,
+    CLOSE_AND_CLEAR_MULTITASK,
+    CLOSE_AND_START_CALLER,
+    CLOSE_BY_EXCEPTION,
+};
+
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

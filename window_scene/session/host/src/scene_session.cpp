@@ -17,6 +17,7 @@
 
 #include <iterator>
 #include <pointer_event.h>
+#include <transaction/rs_transaction.h>
 
 #include "interfaces/include/ws_common.h"
 #include "session/host/include/scene_persistent_storage.h"
@@ -168,32 +169,33 @@ WSError SceneSession::SetAspectRatio(float ratio)
         vpr = display->GetVirtualPixelRatio();
         WLOGD("vpr = %{public}f", vpr);
     }
-
-    auto limits = property_->GetWindowLimits();
-    if (IsDecorEnable()) {
-        if (limits.minWidth_ && limits.maxHeight_ &&
-            MathHelper::LessNotEqual(ratio, static_cast<float>(SessionUtils::ToLayoutWidth(limits.minWidth_, vpr)) /
-            SessionUtils::ToLayoutHeight(limits.maxHeight_, vpr))) {
-            WLOGE("Failed, because aspectRatio is smaller than minWidth/maxHeight");
-            return WSError::WS_ERROR_INVALID_PARAM;
-        } else if (limits.minHeight_ && limits.maxWidth_ &&
-            MathHelper::GreatNotEqual(ratio, static_cast<float>(SessionUtils::ToLayoutWidth(limits.maxWidth_, vpr)) /
-            SessionUtils::ToLayoutHeight(limits.minHeight_, vpr))) {
-            WLOGE("Failed, because aspectRatio is bigger than maxWidth/minHeight");
-            return WSError::WS_ERROR_INVALID_PARAM;
-        }
-    } else {
-        if (limits.minWidth_ && limits.maxHeight_ && MathHelper::LessNotEqual(ratio,
-            static_cast<float>(limits.minWidth_) / limits.maxHeight_)) {
-            WLOGE("Failed, because aspectRatio is smaller than minWidth/maxHeight");
-            return WSError::WS_ERROR_INVALID_PARAM;
-        } else if (limits.minHeight_ && limits.maxWidth_ && MathHelper::GreatNotEqual(ratio,
-            static_cast<float>(limits.maxWidth_) / limits.minHeight_)) {
-            WLOGE("Failed, because aspectRatio is bigger than maxWidth/minHeight");
-            return WSError::WS_ERROR_INVALID_PARAM;
+    if (!MathHelper::NearZero(ratio)) {
+        auto limits = property_->GetWindowLimits();
+        if (IsDecorEnable()) {
+            if (limits.minWidth_ && limits.maxHeight_ &&
+                MathHelper::LessNotEqual(ratio, static_cast<float>(SessionUtils::ToLayoutWidth(limits.minWidth_, vpr)) /
+                SessionUtils::ToLayoutHeight(limits.maxHeight_, vpr))) {
+                WLOGE("Failed, because aspectRatio is smaller than minWidth/maxHeight");
+                return WSError::WS_ERROR_INVALID_PARAM;
+            } else if (limits.minHeight_ && limits.maxWidth_ &&
+                MathHelper::GreatNotEqual(ratio,
+                static_cast<float>(SessionUtils::ToLayoutWidth(limits.maxWidth_, vpr)) /
+                SessionUtils::ToLayoutHeight(limits.minHeight_, vpr))) {
+                WLOGE("Failed, because aspectRatio is bigger than maxWidth/minHeight");
+                return WSError::WS_ERROR_INVALID_PARAM;
+            }
+        } else {
+            if (limits.minWidth_ && limits.maxHeight_ && MathHelper::LessNotEqual(ratio,
+                static_cast<float>(limits.minWidth_) / limits.maxHeight_)) {
+                WLOGE("Failed, because aspectRatio is smaller than minWidth/maxHeight");
+                return WSError::WS_ERROR_INVALID_PARAM;
+            } else if (limits.minHeight_ && limits.maxWidth_ && MathHelper::GreatNotEqual(ratio,
+                static_cast<float>(limits.maxWidth_) / limits.minHeight_)) {
+                WLOGE("Failed, because aspectRatio is bigger than maxWidth/minHeight");
+                return WSError::WS_ERROR_INVALID_PARAM;
+            }
         }
     }
-
     aspectRatio_ = ratio;
     if (moveDragController_) {
         moveDragController_->SetAspectRatio(ratio);
@@ -643,6 +645,33 @@ bool SceneSession::IsVisible() const
     return isVisible_;
 }
 
+void SceneSession::SetPrivacyMode(bool isPrivacy)
+{
+    if (!property_) {
+        WLOGFE("property_ is null");
+        return;
+    }
+    if (!surfaceNode_) {
+        WLOGFE("surfaceNode_ is null");
+        return;
+    }
+    bool lastPrivacyMode = property_->GetPrivacyMode() || property_->GetSystemPrivacyMode();
+    if (lastPrivacyMode == isPrivacy) {
+        WLOGFW("privacy mode is not change, do nothing");
+        return;
+    }
+    property_->SetPrivacyMode(isPrivacy);
+    property_->SetSystemPrivacyMode(isPrivacy);
+    surfaceNode_->SetSecurityLayer(isPrivacy);
+    RSTransaction::FlushImplicitTransaction();
+    auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);
+    if (screenSession == nullptr) {
+        WLOGFE("screen session is null");
+        return;
+    }
+    ScreenSessionManager::GetInstance().UpdatePrivateStateAndNotify(screenSession, isPrivacy);
+}
+
 WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 {
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onWindowAnimationFlagChange_) {
@@ -735,4 +764,19 @@ WSError SceneSession::NotifyTouchOutside()
     }
     return sessionStage_->NotifyTouchOutside();
 }
+
+void SceneSession::SetRequestedOrientation(Orientation orientation)
+{
+    WLOGFI("id: %{public}d orientation: %{public}u", GetPersistentId(), static_cast<uint32_t>(orientation));
+    property_->SetRequestedOrientation(orientation);
+    if (sessionChangeCallback_ && sessionChangeCallback_->OnRequestedOrientationChange_) {
+        sessionChangeCallback_->OnRequestedOrientationChange_(static_cast<uint32_t>(orientation));
+    }
+}
+
+Orientation SceneSession::GetRequestedOrientation() const
+{
+    return property_->GetRequestedOrientation();
+}
+
 } // namespace OHOS::Rosen
