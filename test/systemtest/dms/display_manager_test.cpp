@@ -162,7 +162,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered, Function | SmallTest | Lev
     auto displayHeight = DisplayManagerTest::displayHeight_;
 
     sptr<Window> window1 = CreateWindow("test", WindowMode::WINDOW_MODE_FULLSCREEN, Rect {0, 0, 0, 0});
-    if (window != nullptr) {
+    if (window1 != nullptr) {
         ASSERT_NE(nullptr, window1);
         // 10:rect.posX_, 120:rect.posY_, 650:rect.width, 500:rect.height
         sptr<Window> window2 = CreateWindow("private", WindowMode::WINDOW_MODE_FLOATING,
@@ -206,29 +206,28 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered01, Function | SmallTest | L
     sptr<Window> window1 = CreateWindow("test", WindowMode::WINDOW_MODE_FULLSCREEN, Rect {0, 0, 0, 0});
     
     // 10:rect.posX_, 120:rect.posY_, 650:rect.width, 500:rect.height
-    if(window1!=nullptr) {
-    ASSERT_NE(nullptr, window1);
-    sptr<Window> window2 = CreateWindow("private", WindowMode::WINDOW_MODE_FLOATING,
-        Rect {10, 120, 650, 500}, 0xffff0000);
-    ASSERT_NE(nullptr, window2);
-    window2->SetPrivacyMode(true);
-    // 5:rect.posX_, 110:rect.posY_, 650:rect.width, 500:rect.height
-    sptr<Window> window3 = CreateWindow("covered", WindowMode::WINDOW_MODE_FLOATING,
-        Rect {5, 110, 650, 500}, 0xff00ff00);
-    ASSERT_NE(nullptr, window3);
+    if (window1 != nullptr) {
+        ASSERT_NE(nullptr, window1);
+        sptr<Window> window2 = CreateWindow("private", WindowMode::WINDOW_MODE_FLOATING,
+                                            Rect{10, 120, 650, 500}, 0xffff0000);
+        ASSERT_NE(nullptr, window2);
+        window2->SetPrivacyMode(true);
+        // 5:rect.posX_, 110:rect.posY_, 650:rect.width, 500:rect.height
+        sptr<Window> window3 = CreateWindow("covered", WindowMode::WINDOW_MODE_FLOATING,
+                                            Rect{5, 110, 650, 500}, 0xff00ff00);
+        ASSERT_NE(nullptr, window3);
 
-    sleep(WAIT_FOR_SYNC_US);
-    bool hasPrivateWindow = false;
-    DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
-    DisplayManager::GetInstance().HasPrivateWindow(id, hasPrivateWindow);
-    window1->Destroy();
-    window2->Destroy();
-    window3->Destroy();
-    if(hasPrivateWindow){
-      ASSERT_TRUE(hasPrivateWindow);
+        sleep(WAIT_FOR_SYNC_US);
+        bool hasPrivateWindow = false;
+        DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
+        DisplayManager::GetInstance().HasPrivateWindow(id, hasPrivateWindow);
+        window1->Destroy();
+        window2->Destroy();
+        window3->Destroy();
+        if (hasPrivateWindow) {
+            ASSERT_TRUE(hasPrivateWindow);
+        }
     }
-    }
-
 }
 
 /**
@@ -243,7 +242,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered02, Function | SmallTest | L
     auto displayHeight = DisplayManagerTest::displayHeight_;
 
     sptr<Window> window1 = CreateWindow("test", WindowMode::WINDOW_MODE_FULLSCREEN, Rect {0, 0, 0, 0});
-    if(window1!=nullptr) {
+    if (window1 != nullptr) {
     ASSERT_NE(nullptr, window1);
     // 10:rect.posX_, 120:rect.posY_, 650:rect.width, 500:rect.height
     sptr<Window> window2 = CreateWindow("private", WindowMode::WINDOW_MODE_FLOATING,
@@ -278,10 +277,9 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered02, Function | SmallTest | L
     window3->Destroy();
     window4->Destroy();
     if (!hasPrivateWindow) {
-        ASSERT_TRUE(!hasPrivateWindow);
+            ASSERT_TRUE(!hasPrivateWindow);
     }
     }
-
 }
 
 /**
@@ -339,7 +337,6 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowSkipSnapShot, Function | SmallTest 
     // 10:rect.posX_, 120:rect.posY_, 650:rect.width, 500:rect.height
     sptr<Window> window2 = CreateWindow("private", WindowMode::WINDOW_MODE_FLOATING,
         Rect {10, 120, 650, 500}, 0xffff0000);
-    if(window!=nullptr) {
     ASSERT_NE(nullptr, window2);
     window2->SetSnapshotSkip(true);
     sleep(WAIT_FOR_SYNC_US);
@@ -350,7 +347,6 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowSkipSnapShot, Function | SmallTest 
     window2->Destroy();
     if (hasPrivateWindow) {
         ASSERT_TRUE(hasPrivateWindow);
-    }
     }
 }
 
