@@ -49,6 +49,8 @@ enum class WSError : int32_t {
     WS_ERROR_OPER_FULLSCREEN_FAILED,
     WS_ERROR_REPEAT_OPERATION,
     WS_ERROR_INVALID_SESSION,
+    WS_ERROR_UNCLEARABLE_SESSION,
+    WS_ERROR_FAIL_TO_GET_SNAPSHOT,
 
     WS_ERROR_DEVICE_NOT_SUPPORT = 801, // the value do not change.It is defined on all system
 
@@ -257,5 +259,16 @@ enum class SessionGravity : uint32_t {
     SESSION_GRAVITY_FLOAT = 0,
     SESSION_GRAVITY_BOTTOM,
 };
+
+/**
+ * @brief TerminateType session terminate type.
+ */
+enum class TerminateType : uint32_t {
+    CLOSE_AND_KEEP_MULTITASK = 0,
+    CLOSE_AND_CLEAR_MULTITASK,
+    CLOSE_AND_START_CALLER,
+    CLOSE_BY_EXCEPTION,
+};
+
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

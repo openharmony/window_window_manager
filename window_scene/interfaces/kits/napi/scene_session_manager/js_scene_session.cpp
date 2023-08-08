@@ -36,6 +36,7 @@ const std::string SESSION_TOUCHABLE_CHANGE_CB = "sessionTouchableChange";
 const std::string CLICK_CB = "click";
 const std::string TERMINATE_SESSION_CB = "terminateSession";
 const std::string TERMINATE_SESSION_CB_NEW = "terminateSessionNew";
+const std::string TERMINATE_SESSION_CB_TOTAL = "terminateSessionTotal";
 const std::string SESSION_EXCEPTION_CB = "sessionException";
 const std::string SYSTEMBAR_PROPERTY_CHANGE_CB = "systemBarPropertyChange";
 const std::string NEED_AVOID_CB = "needAvoid";
@@ -101,6 +102,7 @@ JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& s
         { CLICK_CB,                       &JsSceneSession::ProcessClickRegister },
         { TERMINATE_SESSION_CB,           &JsSceneSession::ProcessTerminateSessionRegister },
         { TERMINATE_SESSION_CB_NEW,       &JsSceneSession::ProcessTerminateSessionRegisterNew },
+        { TERMINATE_SESSION_CB_TOTAL,           &JsSceneSession::ProcessTerminateSessionRegisterTotal },
         { SESSION_EXCEPTION_CB,           &JsSceneSession::ProcessSessionExceptionRegister },
         { SYSTEMBAR_PROPERTY_CHANGE_CB,   &JsSceneSession::ProcessSystemBarPropertyChangeRegister },
         { NEED_AVOID_CB,          &JsSceneSession::ProcessNeedAvoidRegister },
@@ -269,6 +271,21 @@ void JsSceneSession::ProcessTerminateSessionRegisterNew()
     }
     session->SetTerminateSessionListenerNew(func);
     WLOGFD("ProcessTerminateSessionRegisterNew success");
+}
+
+void JsSceneSession::ProcessTerminateSessionRegisterTotal()
+{
+    WLOGFD("begin to run ProcessTerminateSessionRegisterTotal");
+    NotifyTerminateSessionFuncTotal func = [this](const SessionInfo& info, TerminateType terminateType) {
+        this->TerminateSessionTotal(info, terminateType);
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    session->SetTerminateSessionListenerTotal(func);
+    WLOGFD("ProcessTerminateSessionRegisterTotal success");
 }
 
 void JsSceneSession::ProcessPendingSessionToForegroundRegister()
@@ -940,6 +957,36 @@ void JsSceneSession::TerminateSessionNew(const SessionInfo& info, bool needStart
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
     AsyncTask::Schedule("JsSceneSession::TerminateSessionNew", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsSceneSession::TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType)
+{
+    WLOGFI("[NAPI]run TerminateSession, bundleName = %{public}s, id = %{public}s, terminateType = %{public}d",
+        info.bundleName_.c_str(), info.abilityName_.c_str(), static_cast<int32_t>(terminateType));
+    auto iter = jsCbMap_.find(TERMINATE_SESSION_CB_TOTAL);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [info, terminateType, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (!jsCallBack) {
+                WLOGFE("[NAPI]jsCallBack is nullptr");
+                return;
+            }
+            NativeValue* jsTerminateType = CreateJsValue(engine, static_cast<int32_t>(terminateType));
+            if (jsTerminateType == nullptr) {
+                WLOGFE("[NAPI]this target jsTerminateType is nullptr");
+                return;
+            }
+            NativeValue* argv[] = { jsTerminateType  };
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSession::terminateSessionTotal", engine_,
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 

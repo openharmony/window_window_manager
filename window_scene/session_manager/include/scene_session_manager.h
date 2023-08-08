@@ -129,8 +129,10 @@ public:
 
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller);
     WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener);
-    WSError GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot);
+    WSError GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution);
     WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState);
+    WSError ClearSession(int32_t persistentId);
+    WSError ClearAllSessions();
 
     void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
     void InitPersistentStorage();
@@ -257,6 +259,9 @@ private:
     sptr<SceneSession> callingSession_ = nullptr;
     sptr<AgentDeathRecipient> windowDeath_ = new AgentDeathRecipient(
         std::bind(&SceneSessionManager::DestroySpecificSession, this, std::placeholders::_1));
+    WSError ClearSession(sptr<SceneSession> sceneSession);
+    bool IsSessionClearable(sptr<SceneSession> scnSession);
+    void GetAllClearableSessions(std::vector<sptr<SceneSession>>& sessionVector);
 };
 } // namespace OHOS::Rosen
 

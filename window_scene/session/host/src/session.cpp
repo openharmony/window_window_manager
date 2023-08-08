@@ -640,6 +640,39 @@ void Session::SetTerminateSessionListenerNew(const NotifyTerminateSessionFuncNew
     terminateSessionFuncNew_ = func;
 }
 
+WSError Session::TerminateSessionTotal(const sptr<AAFwk::SessionInfo> abilitySessionInfo, TerminateType terminateType)
+{
+    if (abilitySessionInfo == nullptr) {
+        WLOGFE("abilitySessionInfo is null");
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    SessionInfo info;
+    info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
+    info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
+    info.callerToken_ = abilitySessionInfo->callerToken;
+    info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
+    sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
+    sessionInfo_.resultCode = abilitySessionInfo->resultCode;
+    if (terminateSessionFuncTotal_) {
+        terminateSessionFuncTotal_(info, terminateType);
+    }
+    return WSError::WS_OK;
+}
+
+void Session::SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncTotal& func)
+{
+    terminateSessionFuncTotal_ = func;
+}
+
+WSError Session::Clear()
+{
+    SessionInfo info = GetSessionInfo();
+    if (terminateSessionFuncTotal_) {
+        terminateSessionFuncTotal_(info, TerminateType::CLOSE_AND_CLEAR_MULTITASK);
+    }
+    return WSError::WS_OK;
+}
+
 WSError Session::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
     if (abilitySessionInfo == nullptr) {

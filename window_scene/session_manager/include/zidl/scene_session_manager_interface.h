@@ -70,6 +70,8 @@ public:
         TRANS_ID_UPDATE_AVOIDAREA_LISTENER,
         TRANS_ID_GET_SESSION_SNAPSHOT,
         TRANS_ID_NOTIFY_DUMP_INFO_RESULT,
+        TRANS_ID_CLEAR_SESSION,
+        TRANS_ID_CLEAR_ALL_SESSIONS,
     };
 
     virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -95,7 +97,9 @@ public:
 
     virtual WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) = 0;
     virtual WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) = 0;
-    virtual WSError GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot) = 0;
+    virtual WSError GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution) = 0;
+    virtual WSError ClearSession(int32_t persistentId) = 0;
+    virtual WSError ClearAllSessions() = 0;
 
     // interfaces of IWindowManager
     WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
