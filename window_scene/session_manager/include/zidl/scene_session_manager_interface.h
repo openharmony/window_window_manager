@@ -69,6 +69,7 @@ public:
         TRANS_ID_GET_SESSION_DUMP_INFO,
         TRANS_ID_UPDATE_AVOIDAREA_LISTENER,
         TRANS_ID_GET_SESSION_SNAPSHOT,
+        TRANS_ID_SET_SESSION_CONTINUE_STATE,
         TRANS_ID_NOTIFY_DUMP_INFO_RESULT,
         TRANS_ID_CLEAR_SESSION,
         TRANS_ID_CLEAR_ALL_SESSIONS,
@@ -94,6 +95,7 @@ public:
     virtual WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
     virtual WSError GetSessionInfos(int32_t numMax, std::vector<SessionInfoBean>& sessionInfos) = 0;
     virtual WSError GetSessionInfo(int32_t persistentId, SessionInfoBean& sessionInfo) = 0;
+    virtual WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState) = 0;
 
     virtual WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) = 0;
     virtual WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) = 0;
