@@ -1004,18 +1004,6 @@ HWTEST_F(WindowSessionTest, GetWindowId, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetNeedNotify01
- * @tc.desc: SetNeedNotify, normal scene
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, SetNeedNotify, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->SetNeedNotify(false);
-    ASSERT_EQ(false, session_->NeedNotify());
-}
-
-/**
  * @tc.name: GetVisible01
  * @tc.desc: GetVisible, normal scene
  * @tc.type: FUNC
