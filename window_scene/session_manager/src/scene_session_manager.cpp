@@ -2048,8 +2048,8 @@ WSError SceneSessionManager::GetSessionSnapshot(int32_t persistentId, std::share
         if (oriSnapshot != nullptr) {
             if (isLowResolution) {
                 OHOS::Media::InitializationOptions options;
-                options.size.width = oriSnapshot->GetWidth() / 2;
-                options.size.height = oriSnapshot->GetHeight() / 2;
+                options.size.width = oriSnapshot->GetWidth() / 2; // low resolution ratio
+                options.size.height = oriSnapshot->GetHeight() / 2; // low resolution ratio
                 std::unique_ptr<OHOS::Media::PixelMap> reducedPixelMap = OHOS::Media::PixelMap::Create(*oriSnapshot, options);
                 snapshot = std::shared_ptr<OHOS::Media::PixelMap>(reducedPixelMap.release());
             } else {
@@ -2058,7 +2058,11 @@ WSError SceneSessionManager::GetSessionSnapshot(int32_t persistentId, std::share
         }
         return WSError::WS_OK;
     };
-    taskScheduler_->PostAsyncTask(task);
+    bool ret = taskScheduler_->PostTask(task);
+    if (!ret) {
+        WLOGFE("fail to post task.");
+        return WSError::WS_ERROR_FAIL_TO_GET_SNAPSHOT;
+    }
     return WSError::WS_OK;
 }
 
@@ -2778,7 +2782,7 @@ WSError SceneSessionManager::ClearSession(sptr<SceneSession> sceneSession)
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (!IsSessionClearable(sceneSession)) {
-        WLOGFI("sceneSession cannot be clear, persistentId %{public}d.", sceneSession -> GetPersistentId());
+        WLOGFI("sceneSession cannot be clear, persistentId %{public}d.", sceneSession->GetPersistentId());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     const WSError& errCode = sceneSession->Clear();
@@ -2800,7 +2804,7 @@ WSError SceneSessionManager::ClearAllSessions()
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::GetAllClearableSessions(std::vector<sptr<SceneSession>> sessionVector)
+void SceneSessionManager::GetAllClearableSessions(std::vector<sptr<SceneSession>>& sessionVector)
 {
     WLOGFI("run GetAllClearableSessions");
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -2818,12 +2822,12 @@ bool SceneSessionManager::IsSessionClearable(sptr<SceneSession> scnSession)
         WLOGFI("scnSession is nullptr");
         return false;
     }
-    SessionInfo sessionInfo = scnSession -> GetSessionInfo();
-    if (sessionInfo.abilityInfo != nullptr || sessionInfo.abilityInfo -> excludeFromMissions) {
+    SessionInfo sessionInfo = scnSession->GetSessionInfo();
+    if (sessionInfo.abilityInfo != nullptr || sessionInfo.abilityInfo->excludeFromMissions) {
         WLOGFI("persistentId %{public}d is excludeFromMissions", scnSession->GetPersistentId());
         return false;
     }
-    if (sessionInfo.abilityInfo != nullptr || sessionInfo.abilityInfo -> unclearableMission) {
+    if (sessionInfo.abilityInfo != nullptr || sessionInfo.abilityInfo->unclearableMission) {
         WLOGFI("persistentId %{public}d is unclearable", scnSession->GetPersistentId());
         return false;
     }
