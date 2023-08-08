@@ -30,6 +30,7 @@
 #include "session_info.h"
 #include "mission_listener_interface.h"
 #include "mission_info.h"
+#include "iability_manager_collaborator.h"
 
 namespace OHOS::Media {
 class PixelMap;
@@ -72,6 +73,8 @@ public:
         TRANS_ID_NOTIFY_DUMP_INFO_RESULT,
         TRANS_ID_CLEAR_SESSION,
         TRANS_ID_CLEAR_ALL_SESSIONS,
+        TRANS_ID_REGISTER_COLLABORATOR,
+        TRANS_ID_UNREGISTER_COLLABORATOR,
     };
 
     virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -101,6 +104,8 @@ public:
     virtual WSError ClearSession(int32_t persistentId) = 0;
     virtual WSError ClearAllSessions() = 0;
 
+    virtual WSError RegisterIAbilityManagerCollaborator(int32_t type, const sptr<AAFwk::IAbilityManagerCollaborator> &impl) = 0;
+    virtual WSError UnregisterIAbilityManagerCollaborator(int32_t type) = 0;
     // interfaces of IWindowManager
     WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,

@@ -60,6 +60,31 @@ bool SessionPermission::IsSystemCalling()
     return isSystemApp;
 }
 
+bool SessionPermission::IsSACalling()
+{
+    const auto& tokenId = IPCSkeleton::GetCallingTokenID();
+    const auto& flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
+    if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+        WLOGFW("SA Called, tokenId: %{public}u, flag: %{public}u", tokenId, flag);
+        return true;
+    }
+    WLOGFD("Not SA called");
+    return false;
+}
+
+bool SessionPermission::VerifyCallingPermission(const std::string &permissionName)
+{
+    WLOGFI("VerifyCallingPermission permission %{public}s", permissionName.c_str());
+    auto callerToken = IPCSkeleton::GetCallingTokenID();
+    int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName);
+    if (ret != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
+        WLOGFE("permission %{public}s: PERMISSION_DENIED", permissionName.c_str());
+        return false;
+    }
+    WLOGFI("verify AccessToken success");
+    return true;
+}
+
 bool SessionPermission::IsStartByHdcd()
 {
     OHOS::Security::AccessToken::NativeTokenInfo info;
