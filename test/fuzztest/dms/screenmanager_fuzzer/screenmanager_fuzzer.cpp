@@ -23,6 +23,9 @@
 #include "screen_manager.h"
 
 namespace OHOS::Rosen {
+namespace {
+    constexpr size_t DATA_MIN_SIZE = 32;
+}
 class ScreenListener : public ScreenManager::IScreenListener {
 public:
     virtual void OnConnect(ScreenId screenId) override
@@ -93,7 +96,7 @@ bool ScreenPowerFuzzTest(const uint8_t *data, size_t size)
 
 bool MakeMirrorWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
 {
-    if (data == nullptr || size < sizeof(VirtualScreenOption)) {
+    if (data == nullptr || size < DATA_MIN_SIZE) {
         return false;
     }
     size_t startPos = 0;
@@ -102,6 +105,8 @@ bool MakeMirrorWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
     screenManager.RegisterScreenListener(screenListener);
     sptr<ScreenManager::IScreenGroupListener> screenGroupListener = new ScreenGroupListener();
     screenManager.RegisterScreenGroupListener(screenGroupListener);
+    screenManager.UnregisterScreenGroupListener(screenGroupListener);
+    screenManager.UnregisterScreenListener(screenListener);
 
     std::string name = "screen";
     VirtualScreenOption option = { name };
@@ -111,9 +116,7 @@ bool MakeMirrorWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
     startPos += GetObject<int32_t>(option.flags_, data + startPos, size - startPos);
     GetObject<bool>(option.isForShot_, data + startPos, size - startPos);
     ScreenId screenId = screenManager.CreateVirtualScreen(option);
-    if (screenId == SCREEN_ID_INVALID) {
-        return false;
-    }
+
     screenManager.SetVirtualScreenSurface(screenId, nullptr);
 
     // make mirror
@@ -121,7 +124,6 @@ bool MakeMirrorWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
     screenManager.MakeMirror(0, { screenId }, groupId);
     if (groupId == SCREEN_ID_INVALID) {
         screenManager.DestroyVirtualScreen(screenId);
-        return false;
     }
     sptr<ScreenGroup> group = screenManager.GetScreenGroup(groupId);
     if (group == nullptr) {
@@ -130,9 +132,6 @@ bool MakeMirrorWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
     }
     std::vector<ScreenId> ids = group->GetChildIds();
     screenManager.RemoveVirtualScreenFromGroup(ids);
-    screenManager.DestroyVirtualScreen(screenId);
-    screenManager.UnregisterScreenGroupListener(screenGroupListener);
-    screenManager.UnregisterScreenListener(screenListener);
     return true;
 }
 
@@ -147,6 +146,8 @@ bool MakeExpandWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
     screenManager.RegisterScreenListener(screenListener);
     sptr<ScreenManager::IScreenGroupListener> screenGroupListener = new ScreenGroupListener();
     screenManager.RegisterScreenGroupListener(screenGroupListener);
+    screenManager.UnregisterScreenGroupListener(screenGroupListener);
+    screenManager.UnregisterScreenListener(screenListener);
 
     std::string name = "screen";
     VirtualScreenOption option = { name };
@@ -156,9 +157,7 @@ bool MakeExpandWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
     startPos += GetObject<int32_t>(option.flags_, data + startPos, size - startPos);
     GetObject<bool>(option.isForShot_, data + startPos, size - startPos);
     ScreenId screenId = screenManager.CreateVirtualScreen(option);
-    if (screenId == SCREEN_ID_INVALID) {
-        return false;
-    }
+
     screenManager.SetVirtualScreenSurface(screenId, nullptr);
     // make expand
     std::vector<ExpandOption> options = {{0, 0, 0}, {screenId, 0, 0}};
@@ -166,7 +165,6 @@ bool MakeExpandWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
     screenManager.MakeExpand(options, groupId);
     if (groupId == SCREEN_ID_INVALID) {
         screenManager.DestroyVirtualScreen(screenId);
-        return false;
     }
     sptr<ScreenGroup> group = screenManager.GetScreenGroup(groupId);
     if (group == nullptr) {
@@ -175,9 +173,6 @@ bool MakeExpandWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
     }
     std::vector<ScreenId> ids = group->GetChildIds();
     screenManager.RemoveVirtualScreenFromGroup(ids);
-    screenManager.DestroyVirtualScreen(screenId);
-    screenManager.UnregisterScreenGroupListener(screenGroupListener);
-    screenManager.UnregisterScreenListener(screenListener);
     return true;
 }
 
@@ -201,14 +196,10 @@ bool CreateAndDestroyVirtualScreenFuzzTest(const uint8_t *data, size_t size)
     startPos += GetObject<int32_t>(option.flags_, data + startPos, size - startPos);
     startPos += GetObject<bool>(option.isForShot_, data + startPos, size - startPos);
     ScreenId screenId = screenManager.CreateVirtualScreen(option);
-    if (screenId == SCREEN_ID_INVALID) {
-        return false;
-    }
-    screenManager.DestroyVirtualScreen(screenId);
-    GetObject<ScreenId>(screenId, data + startPos, size - startPos);
-    screenManager.DestroyVirtualScreen(screenId);
+
     screenManager.UnregisterScreenGroupListener(screenGroupListener);
     screenManager.UnregisterScreenListener(screenListener);
+    screenManager.GetScreenById(screenId);
     return true;
 }
 
@@ -271,7 +262,7 @@ bool MakeMirrorFuzzTest(const uint8_t *data, size_t size)
 {
     ScreenId screenId;
     // 10 screens.
-    if (data == nullptr || size < sizeof(ScreenId) * 10) {
+    if (data == nullptr || size < sizeof(ScreenId)) {
         return false;
     }
     size_t startPos = 0;
@@ -299,7 +290,7 @@ bool MakeExpandFuzzTest(const uint8_t *data, size_t size)
 {
     ScreenId screenId;
     // 10 screens.
-    if (data == nullptr || size < sizeof(ScreenId) * 10) {
+    if (data == nullptr || size < sizeof(ScreenId)) {
         return false;
     }
     size_t startPos = 0;
@@ -342,6 +333,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::Rosen::CreateAndDestroyVirtualScreenFuzzTest(data, size);
     OHOS::Rosen::SetVirtualScreenSurfaceFuzzTest(data, size);
     OHOS::Rosen::RemoveVirtualScreenFromGroupFuzzTest(data, size);
+    OHOS::Rosen::SetScreenRotationLockedFuzzTest(data, size);
+    OHOS::Rosen::IsScreenRotationLocked(data, size);
     return 0;
 }
 
