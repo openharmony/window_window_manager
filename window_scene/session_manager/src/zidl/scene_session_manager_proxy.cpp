@@ -828,4 +828,60 @@ WSError SceneSessionManagerProxy::ClearAllSessions()
     }
     return static_cast<WSError>(reply.ReadInt32());
 }
+
+WSError SceneSessionManagerProxy::RegisterIAbilityManagerCollaborator(int32_t type, const sptr<AAFwk::IAbilityManagerCollaborator> &impl)
+{
+    WLOGFI("run SceneSessionManagerProxy::RegisterIAbilityManagerCollaborator");
+    if (!impl) {
+        WLOGFE("impl is nullptr");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("Write interface token failed.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteInt32(type)) {
+        WLOGFE("type write failed.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteRemoteObject(impl->AsObject())) {
+        WLOGFE("impl write failed.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_COLLABORATOR),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
+WSError SceneSessionManagerProxy::UnregisterIAbilityManagerCollaborator(int32_t type)
+{
+    WLOGFI("run SceneSessionManagerProxy::UnregisterIAbilityManagerCollaborator");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("Write interface token failed.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteInt32(type)) {
+        WLOGFE("type write failed.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNREGISTER_COLLABORATOR),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen
