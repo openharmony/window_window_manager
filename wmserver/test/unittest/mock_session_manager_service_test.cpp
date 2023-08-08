@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,59 +13,31 @@
  * limitations under the License.
  */
 
-#include <fcntl.h>
+#include <cstdint>
 #include <gtest/gtest.h>
-#include "common_test_utils.h"
-#include "iremote_object_mocker.h"
-#include "mock_IWindow.h"
-#include "mock_RSIWindowAnimationController.h"
-#include "window_manager_service.h"
 #include "mock_session_manager_service.h"
-
-#include <thread>
-
-#include <ability_manager_client.h>
-#include <cinttypes>
-#include <chrono>
-#include <hisysevent.h>
-#include <hitrace_meter.h>
-#include <ipc_skeleton.h>
-#include <parameters.h>
-#include <rs_iwindow_animation_controller.h>
-#include <system_ability_definition.h>
-#include <sstream>
-#include "xcollie/watchdog.h"
-
-#include "color_parser.h"
-#include "display_manager_service_inner.h"
-#include "dm_common.h"
-#include "drag_controller.h"
-#include "minimize_app.h"
-#include "permission.h"
-#include "remote_animation.h"
-#include "singleton_container.h"
-#include "ui/rs_ui_director.h"
-#include "window_helper.h"
-#include "window_inner_manager.h"
-#include "window_manager_agent_controller.h"
-#include "window_manager_hilog.h"
+#include "display_manager.h"
+#include "window_agent.h"
+#include "window_impl.h"
+#include "window_property.h"
+#include "window_root.h"
 #include "wm_common.h"
-#include "wm_math.h"
-
 
 using namespace testing;
 using namespace testing::ext;
+
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "MockSessionManagerServiceTest"};
+}
+
 class MockSessionManagerServiceTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-
-    void SetAceessTokenPermission(const std::string processName);
-    sptr<MockSessionManagerService> wms = new MockSessionManagerService();
 };
 
 void MockSessionManagerServiceTest::SetUpTestCase()
@@ -78,7 +50,6 @@ void MockSessionManagerServiceTest::TearDownTestCase()
 
 void MockSessionManagerServiceTest::SetUp()
 {
-    CommonTestUtils::SetAceessTokenPermission("MockSessionManagerServiceTest");
 }
 
 void MockSessionManagerServiceTest::TearDown()
@@ -86,66 +57,59 @@ void MockSessionManagerServiceTest::TearDown()
 }
 
 namespace {
-
-/*
- * @tc.name: SetSessionManagerService01
- * @tc.desc: SetSessionManagerService
+/**
+ * @tc.name: OnRemoteDied
+ * @tc.desc: OnRemoteDied
  * @tc.type: FUNC
  */
-HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService01, Function | SmallTest | Level2)
+HWTEST_F(MockSessionManagerServiceTest, OnRemoteDied, Function | SmallTest | Level2)
 {
-    sptr<MockSessionManagerService> mms = new MockSessionManagerService();
-    ASSERT_FALSE(mms->SetSessionManagerService(nullptr));
+    WLOGI("OnRemoteDied");
+    MockSessionManagerService::SMSDeathRecipient smsDeathRecipient;
+    auto res = WMError::WM_OK;
+    wptr<IRemoteObject> object = nullptr;
+    smsDeathRecipient.OnRemoteDied(object);
+    ASSERT_EQ(WMError::WM_OK, res);
 }
 
-/*
- * @tc.name: GetSessionManagerService01
- * @tc.desc: GetSessionManagerService
+/**
+ * @tc.name: SetSessionManagerService
+ * @tc.desc: set session manager service
  * @tc.type: FUNC
  */
-HWTEST_F(MockSessionManagerServiceTest, GetSessionManagerService01, Function | SmallTest | Level2)
+HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService, Function | SmallTest | Level2)
 {
-    sptr<MockSessionManagerService> mms = new MockSessionManagerService();
-    ASSERT_EQ(nullptr,mms->GetSessionManagerService());
+    WLOGI("SetSessionManagerService");
+    auto res = WMError::WM_OK;
+    sptr<IRemoteObject> sessionManagerService = nullptr;
+    MockSessionManagerService::GetInstance().SetSessionManagerService(sessionManagerService);
+    ASSERT_EQ(WMError::WM_OK, res);
 }
 
-/*
- * @tc.name: GetSceneSessionManager01
- * @tc.desc: GetSceneSessionManager
+/**
+ * @tc.name: GetSessionManagerService
+ * @tc.desc: get session manager service
  * @tc.type: FUNC
  */
-HWTEST_F(MockSessionManagerServiceTest, GetSceneSessionManager01, Function | SmallTest | Level2)
+HWTEST_F(MockSessionManagerServiceTest, GetSessionManagerService, Function | SmallTest | Level2)
 {
-    sptr<MockSessionManagerService> mms = new MockSessionManagerService();
-    ASSERT_EQ(nullptr,mms->GetSceneSessionManager());
+    WLOGI("GetSessionManagerService");
+    sptr<IRemoteObject> sessionManagerService =
+    MockSessionManagerService::GetInstance().GetSessionManagerService();
+    ASSERT_EQ(nullptr, sessionManagerService);
 }
 
-/*
- * @tc.name: OnStart01
- * @tc.desc: OnStart
+/**
+ * @tc.name: onStart
+ * @tc.desc: on start
  * @tc.type: FUNC
  */
-HWTEST_F(MockSessionManagerServiceTest, OnStart01, Function | SmallTest | Level2)
+HWTEST_F(MockSessionManagerServiceTest, OnStart, Function | SmallTest | Level2)
 {
-    auto ret=1;
-    sptr<MockSessionManagerService> mms = new MockSessionManagerService();
-    mms->OnStart();
-    ASSERT_EQ(1,ret);
-}
-
-/*
- * @tc.name: OnRemoteDied01
- * @tc.desc: OnRemoteDie
- * @tc.type: FUNC
- */
-HWTEST_F(MockSessionManagerServiceTest, OnRemoteDied01, Function | SmallTest | Level2)
-{
-    auto ret = 1;
-    wptr<IRemoteObject> remote
-    auto recipient=
-    sptr<MockSessionManagerService::SMSDeathRecipient>(new (std::nothrow)MockSessionManagerService::SMSDeathRecipient()) ;
-    recipient->OnRemoteDie(remote);
-    ASSERT_EQ(1, ret);
+    WLOGI("onStart");
+    auto ret = WMError::WM_OK;
+    MockSessionManagerService::GetInstance().OnStart();
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 }
 }

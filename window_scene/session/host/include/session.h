@@ -51,6 +51,7 @@ using NotifySessionTouchableChangeFunc = std::function<void(const bool touchable
 using NotifyClickFunc = std::function<void()>;
 using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
 using NotifyTerminateSessionFuncNew = std::function<void(const SessionInfo& info, bool needStartCaller)>;
+using NotifyTerminateSessionFuncTotal = std::function<void(const SessionInfo& info, TerminateType terminateType)>;
 using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
 using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info)>;
@@ -137,6 +138,9 @@ public:
     void SetTerminateSessionListenerNew(const NotifyTerminateSessionFuncNew& func);
     void SetSessionExceptionListener(const NotifySessionExceptionFunc& func);
     WSError NotifySessionException(const sptr<AAFwk::SessionInfo> info) override;
+    WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
+    void SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncTotal& func);
+    WSError Clear();
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
     void SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func);
     void NotifySessionStateChange(const SessionState& state);
@@ -190,14 +194,14 @@ public:
     WSError SetBrightness(float brightness);
     float GetBrightness() const;
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info);
-    void SetRequestedOrientation(Orientation orientation);
-    Orientation GetRequestedOrientation() const;
 
     bool IsSessionValid() const;
     bool IsActive() const;
 
     sptr<IRemoteObject> dialogTargetToken_ = nullptr;
     int32_t GetWindowId() const;
+    void SetAppIndex(const int32_t appIndex);
+    int32_t GetAppIndex() const;
     void SetCallingPid(int32_t id);
     void SetCallingUid(int32_t id);
     int32_t GetCallingPid() const;
@@ -244,6 +248,7 @@ protected:
     NotifyClickFunc clickFunc_;
     NotifyTerminateSessionFunc terminateSessionFunc_;
     NotifyTerminateSessionFuncNew terminateSessionFuncNew_;
+    NotifyTerminateSessionFuncTotal terminateSessionFuncTotal_;
     NotifySessionExceptionFunc sessionExceptionFunc_;
     NotifyPendingSessionToForegroundFunc pendingSessionToForegroundFunc_;
     NotifyPendingSessionToBackgroundForDelegatorFunc pendingSessionToBackgroundForDelegatorFunc_;
@@ -257,7 +262,7 @@ protected:
 
 private:
     void FillSessionInfo(SessionInfo& sessionInfo);
-    sptr<AppExecFwk::AbilityInfo> QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
+    std::shared_ptr<AppExecFwk::AbilityInfo> QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
         const std::string& abilityName, const std::string& moduleName);
     bool CheckDialogOnForeground();
 
@@ -293,6 +298,7 @@ private:
 
     int32_t callingPid_ = { 0 };
     int32_t callingUid_ = { 0 };
+    int32_t appIndex_ = { 0 };
     std::string callingBundleName_ { "unknow" };
     bool isVisible_ {false};
     bool needNotify_ {true};

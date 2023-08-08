@@ -47,6 +47,7 @@ using NotifySystemBarPropertyChangeFunc = std::function<void(
 using NotifyNeedAvoidFunc = std::function<void(bool status)>;
 using NotifyWindowAnimationFlagChangeFunc = std::function<void(const bool flag)>;
 using NotifyShowWhenLockedFunc = std::function<void(bool showWhenLocked)>;
+using NotifyReqOrientationChangeFunc = std::function<void(uint32_t orientation)>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -70,6 +71,7 @@ public:
         NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
         NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
         NotifyShowWhenLockedFunc OnShowWhenLocked_;
+        NotifyReqOrientationChangeFunc OnRequestedOrientationChange_;
     };
 
     // func for change window scene pattern property
@@ -128,11 +130,14 @@ public:
     const std::string& GetWindowName() const;
     bool IsDecorEnable();
     void UpdateNativeVisibility(bool visible);
+    void SetPrivacyMode(bool isPrivacy);
     bool IsVisible() const;
     bool IsFloatingWindowAppType() const;
     void DumpSessionElementInfo(const std::vector<std::string>& params);
     static const wptr<SceneSession> GetEnterWindow();
     static void ClearEnterWindow();
+    void SetRequestedOrientation(Orientation orientation);
+    Orientation GetRequestedOrientation() const;
 
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 private:

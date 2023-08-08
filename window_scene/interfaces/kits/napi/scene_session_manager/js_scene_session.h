@@ -44,11 +44,13 @@ private:
     static NativeValue* UpdateNativeVisibility(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetShowRecent(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetZOrder(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetPrivacyMode(NativeEngine* engine, NativeCallbackInfo* info);
 
     NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnUpdateNativeVisibility(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetShowRecent(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetZOrder(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetPrivacyMode(NativeEngine& engine, NativeCallbackInfo& info);
 
     bool IsCallbackRegistered(const std::string& type, NativeValue* jsListenerObject);
     bool IsCallbackTypeSupported(const std::string& type);
@@ -65,6 +67,7 @@ private:
     void ProcessClickRegister();
     void ProcessTerminateSessionRegister();
     void ProcessTerminateSessionRegisterNew();
+    void ProcessTerminateSessionRegisterTotal();
     void ProcessSessionExceptionRegister();
     void ProcessSystemBarPropertyChangeRegister();
     void ProcessNeedAvoidRegister();
@@ -73,6 +76,7 @@ private:
     void ProcessSessionDefaultAnimationFlagChangeRegister();
     void ProcessIsCustomAnimationPlaying();
     void ProcessShowWhenLockedRegister();
+    void ProcessRequestedOrientationChange();
 
     void PendingSessionActivation(SessionInfo& info);
     void OnSessionStateChange(const SessionState& state);
@@ -86,6 +90,7 @@ private:
     void OnClick();
     void TerminateSession(const SessionInfo& info);
     void TerminateSessionNew(const SessionInfo& info, bool needStartCaller);
+    void TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType);
     void OnSessionException(const SessionInfo& info);
     static JsSessionType GetApiType(WindowType type);
     void OnSystemBarPropertyChange(const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
@@ -95,6 +100,7 @@ private:
     void OnDefaultAnimationFlagChange(bool isNeedDefaultAnimationFlag);
     void OnIsCustomAnimationPlaying(bool status);
     void OnShowWhenLocked(bool showWhenLocked);
+    void OnReuqestedOrientationChange(uint32_t orientation);
 
     NativeEngine& engine_;
     wptr<SceneSession> weakSession_ = nullptr;
