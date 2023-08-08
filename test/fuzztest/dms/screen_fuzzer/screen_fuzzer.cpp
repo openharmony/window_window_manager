@@ -138,9 +138,7 @@ bool ColorGamutsFuzzTest(sptr<Screen> screen, const uint8_t *data, size_t size)
     std::vector<ScreenColorGamut> colorGamuts;
     screen->GetScreenSupportedColorGamuts(colorGamuts);
     size_t colorGamutsSize = colorGamuts.size();
-    if (colorGamutsSize == 0) {
-        return false;
-    }
+
     int32_t index = colorGamutIdx % colorGamutsSize;
     screen->SetScreenColorGamut(index);
     ScreenColorGamut colorGamut;
