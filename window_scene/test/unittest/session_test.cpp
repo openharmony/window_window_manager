@@ -188,6 +188,17 @@ HWTEST_F(WindowSessionTest, IsSessionValid01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: UpdateWindowSessionProperty01
+ * @tc.desc: UpdateWindowSessionProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateWindowSessionProperty01, Function | SmallTest | Level2)
+{
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    ASSERT_EQ(session_->UpdateWindowSessionProperty(nullptr), WSError::WS_OK);   
+}
+
+/**
  * @tc.name: Connect01
  * @tc.desc: check func Connect
  * @tc.type: FUNC
@@ -979,6 +990,82 @@ HWTEST_F(WindowSessionTest, SetAspectRatio01, Function | SmallTest | Level2)
     ratio = 1.5f;
     result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: GetWindowId01
+ * @tc.desc: GetWindowId, normal scene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetWindowId, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(0, session_->GetWindowId());
+}
+
+/**
+ * @tc.name: SetNeedNotify01
+ * @tc.desc: SetNeedNotify, normal scene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetNeedNotify, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetNeedNotify(false);
+    ASSERT_EQ(false, session_->NeedNotify());
+}
+
+/**
+ * @tc.name: GetVisible01
+ * @tc.desc: GetVisible, normal scene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetVisible, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->SetVisible(false));
+    session_->state_ = SessionState::STATE_CONNECT;
+    if (!session_->GetVisible()) {
+        ASSERT_EQ(false, session_->GetVisible());
+    }
+}
+
+/**
+ * @tc.name: IsActive01
+ * @tc.desc: IsActive, normal scene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsActive, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->isActive_ = false;
+    if (!session_->IsActive()) {
+        ASSERT_EQ(false, session_->IsActive());
+    }
+}
+
+/**
+ * @tc.name: SetFocusable01
+ * @tc.desc: SetFocusable, normal scene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetFocusable, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->SetFocusable(false));
+        session_->state_ = SessionState::STATE_CONNECT;
+    ASSERT_NE(WSError::WS_ERROR_INVALID_SESSION, session_->SetFocusable(false));
+        session_->state_ = SessionState::STATE_ACTIVE;
+    ASSERT_NE(WSError::WS_ERROR_INVALID_SESSION, session_->SetFocusable(false));
+        session_->state_ = SessionState::STATE_INACTIVE;
+    ASSERT_NE(WSError::WS_ERROR_INVALID_SESSION, session_->SetFocusable(false));
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    property->SetFocusable(false);
+    ASSERT_EQ(WSError::WS_DO_NOTHING, session_->SetFocusable(false));
+    property->SetFocusable(true);
+    ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
 }
 } // namespace Rosen

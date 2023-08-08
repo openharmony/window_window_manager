@@ -86,7 +86,6 @@ test_inner_deps = [
   "${window_base_path}/wm:libwm",
   "${window_base_path}/wmserver:sms",
   "../..:libwms",
-  "../..:sms",
   "../../../dmserver:libdms",
   "../../../test/common/utils:libtestutil",
   "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
