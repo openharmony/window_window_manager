@@ -28,18 +28,15 @@ group("unittest") {
     ":wmserver_mock_screen_manager_service_test",
     ":wmserver_mock_session_manager_service_test",
     ":wmserver_remote_animation_test",
-    ":wmserver_starting_window_test",
     ":wmserver_window_controller_test",
     ":wmserver_window_display_zoom_controller_test",
     ":wmserver_window_dumper_test",
     ":wmserver_window_freeze_controller_test",
-    ":wmserver_window_group_mgr_test",
     ":wmserver_window_inner_manager_test",
     ":wmserver_window_inner_window_test",
     ":wmserver_window_layout_policy_test",
     ":wmserver_window_manager_config_test",
     ":wmserver_window_manager_proxy_test",
-    ":wmserver_window_manager_service_test",
     ":wmserver_window_manager_service_utils_test",
     ":wmserver_window_manager_stub_test",
     ":wmserver_window_node_container_test",
@@ -111,17 +108,6 @@ test_public_config = [
   "../../../resources/config/build:coverage_flags",
   "../../../resources/config/build:testcase_flags",
 ]
-
-ohos_unittest("wmserver_window_manager_service_test") {
-  module_out_path = module_out_path
-
-  sources = [ "window_manager_service_test.cpp" ]
-  configs = test_public_config
-
-  deps = test_inner_deps
-  public_deps = test_public_deps
-  external_deps = test_external_deps
-}
 
 ohos_unittest("wmserver_input_window_monitor_test") {
   module_out_path = module_out_path
@@ -241,16 +227,6 @@ ohos_unittest("wmserver_window_manager_stub_test") {
   module_out_path = module_out_path
   configs = test_public_config
   sources = [ "window_manager_stub_test.cpp" ]
-
-  deps = test_inner_deps
-  public_deps = test_public_deps
-  external_deps = test_external_deps
-}
-
-ohos_unittest("wmserver_starting_window_test") {
-  module_out_path = module_out_path
-  configs = test_public_config
-  sources = [ "starting_window_test.cpp" ]
 
   deps = test_inner_deps
   public_deps = test_public_deps
@@ -400,16 +376,6 @@ ohos_unittest("wmserver_window_manager_service_utils_test") {
   } else {
     external_deps += [ "init_lite:libbegetutil" ]
   }
-}
-
-ohos_unittest("wmserver_window_group_mgr_test") {
-  module_out_path = module_out_path
-  configs = test_public_config
-  sources = [ "window_group_mgr_test.cpp" ]
-
-  deps = test_inner_deps
-  public_deps = test_public_deps
-  external_deps = test_external_deps
 }
 
 ohos_unittest("wmserver_mock_screen_manager_service_test") {
