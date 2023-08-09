@@ -91,6 +91,10 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleClearSession),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CLEAR_ALL_SESSIONS),
         &SceneSessionManagerStub::HandleClearAllSessions),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_COLLABORATOR),
+        &SceneSessionManagerStub::HandleRegisterCollaborator),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNREGISTER_COLLABORATOR),
+        &SceneSessionManagerStub::HandleUnregisterCollaborator),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -456,6 +460,25 @@ int SceneSessionManagerStub::HandleClearAllSessions(MessageParcel &data, Message
 {
     WLOGFI("run HandleClearAllSessions!");
     const WSError& ret = ClearAllSessions();
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRegisterCollaborator(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleRegisterCollaborator!");
+    int32_t type = data.ReadInt32();
+    sptr<AAFwk::IAbilityManagerCollaborator> collaborator = iface_cast<AAFwk::IAbilityManagerCollaborator>(data.ReadRemoteObject());
+    const WSError& ret = RegisterIAbilityManagerCollaborator(type, collaborator);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleUnregisterCollaborator(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleUnregisterCollaborator!");
+    int32_t type = data.ReadInt32();
+    const WSError& ret = UnregisterIAbilityManagerCollaborator(type);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }

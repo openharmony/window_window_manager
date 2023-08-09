@@ -64,6 +64,8 @@ public:
     WSError GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution) override;
     WSError ClearSession(int32_t persistentId) override;
     WSError ClearAllSessions() override;
+    WSError RegisterIAbilityManagerCollaborator(int32_t type, const sptr<AAFwk::IAbilityManagerCollaborator> &impl) override;
+    WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
 
 private:
     template<typename T>

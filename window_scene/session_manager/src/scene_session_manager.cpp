@@ -2770,6 +2770,11 @@ void SceneSessionManager::OnScreenshot(DisplayId displayId)
 WSError SceneSessionManager::ClearSession(int32_t persistentId)
 {
     WLOGFI("run ClearSession with persistentId: %{public}d", persistentId);
+    if (!SessionPermission::IsSACalling()) {
+        WLOGFI("invalid permission");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+
     auto task = [this, persistentId]() {
         sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
         return ClearSession(sceneSession);
@@ -2844,6 +2849,55 @@ bool SceneSessionManager::IsSessionClearable(sptr<SceneSession> scnSession)
         return false;
     }
 
+    return true;
+}
+
+WSError SceneSessionManager::RegisterIAbilityManagerCollaborator(int32_t type, const sptr<AAFwk::IAbilityManagerCollaborator> &impl)
+{
+    WLOGFI("RegisterIAbilityManagerCollaborator with type : %{public}d", type);
+    auto isSaCall = SessionPermission::IsSACalling();
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    if (!isSaCall || (callingUid != BROKER_UID && callingUid != BROKER_RESERVE_UID)) {
+        WLOGFE("The interface only support for broker");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    if (!CheckCollaboratorType(type)) {
+        WLOGFE("collaborator register failed, invalid type.");
+        return WSError::WS_ERROR_INVALID_TYPE;
+    }
+    {
+        std::shared_lock<std::shared_mutex> lock(collaboratorMapLock_);
+        collaboratorMap_[type] = impl;
+    }
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::UnregisterIAbilityManagerCollaborator(int32_t type)
+{
+    WLOGFI("UnregisterIAbilityManagerCollaborator with type : %{public}d", type);
+    auto isSaCall = SessionPermission::IsSACalling();
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    if (!isSaCall || (callingUid != BROKER_UID && callingUid != BROKER_RESERVE_UID)) {
+        WLOGFE("The interface only support for broker");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    if (!CheckCollaboratorType(type)) {
+        WLOGFE("collaborator unregister failed, invalid type.");
+        return WSError::WS_ERROR_INVALID_TYPE;
+    }
+    {
+        std::shared_lock<std::shared_mutex> lock(collaboratorMapLock_);
+        collaboratorMap_.erase(type);
+    }
+    return WSError::WS_OK;
+}
+
+bool SceneSessionManager::CheckCollaboratorType(int32_t type)
+{
+    if (type != CollaboratorType::RESERVE_TYPE && type != CollaboratorType::OTHERS_TYPE) {
+        WLOGFE("type is invalid");
+        return false;
+    }
     return true;
 }
 } // namespace OHOS::Rosen
