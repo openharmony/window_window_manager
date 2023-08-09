@@ -37,7 +37,10 @@ ohos_fuzztest("DisplayManagerIPCFuzzTest") {
     "${window_base_path}/dm:libdm",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]
+
   external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
