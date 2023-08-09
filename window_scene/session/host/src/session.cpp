@@ -515,11 +515,7 @@ WSError Session::Disconnect()
     SessionState state = GetSessionState();
     WLOGFI("Disconnect session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
-    state_ = SessionState::STATE_INACTIVE;
-    Background();
-    if (GetSessionState() == SessionState::STATE_BACKGROUND) {
-        UpdateSessionState(SessionState::STATE_DISCONNECT);
-    }
+    UpdateSessionState(SessionState::STATE_DISCONNECT);
     NotifyDisconnect();
     DelayedSingleton<ANRManager>::GetInstance()->OnSessionLost(persistentId_);
     return WSError::WS_OK;
