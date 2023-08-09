@@ -50,28 +50,5 @@ void WindowDialogWindowTest::SetUp()
 void WindowDialogWindowTest::TearDown()
 {
 }
-
-static sptr<WindowScene> CreateWindowScene()
-{
-    sptr<IWindowLifeCycle> listener = nullptr;
-    WindowDialogWindowTest::abilityContext_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
-
-    sptr<WindowScene> scene = new WindowScene();
-    scene->Init(0, WindowDialogWindowTest::abilityContext_, listener);
-    return scene;
-}
-
-static sptr<Window> CreateDialogWindow(sptr<WindowScene> scene, WindowType type, Rect rect, std::string name = "")
-{
-    sptr<WindowOption> option = new WindowOption();
-    option->SetWindowType(type);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    option->SetWindowRect(rect);
-
-    static int cnt = 0;
-    std::string winName = (name == "") ? "DialogWindowTest" + std::to_string(cnt++) : name;
-
-    return Window::Create(winName, option, scene->GetMainWindow()->GetContext());
-}
 } // namespace Rosen
 } // namespace OHOS
