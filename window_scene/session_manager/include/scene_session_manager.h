@@ -154,6 +154,8 @@ public:
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
     void RegisterWindowFocusChanged(const WindowFocusChangedFunc& func);
 
+    WSError RegisterIAbilityManagerCollaborator(int32_t type, const sptr<AAFwk::IAbilityManagerCollaborator> &impl);
+    WSError UnregisterIAbilityManagerCollaborator(int32_t type);
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
@@ -262,6 +264,13 @@ private:
     WSError ClearSession(sptr<SceneSession> sceneSession);
     bool IsSessionClearable(sptr<SceneSession> scnSession);
     void GetAllClearableSessions(std::vector<sptr<SceneSession>>& sessionVector);
+
+    const int32_t BROKER_UID = 5528;
+    const int32_t BROKER_RESERVE_UID = 5005;
+    std::shared_mutex collaboratorMapLock_;
+    std::unordered_map<int32_t, sptr<AAFwk::IAbilityManagerCollaborator>> collaboratorMap_;
+
+    bool CheckCollaboratorType(int32_t type);
 };
 } // namespace OHOS::Rosen
 

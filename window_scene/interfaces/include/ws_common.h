@@ -278,5 +278,14 @@ enum class TerminateType : uint32_t {
     CLOSE_BY_EXCEPTION,
 };
 
+/**
+ * @brief collaborator type.
+ */
+enum CollaboratorType {
+    DEFAULT_TYPE = 0,
+    RESERVE_TYPE,
+    OTHERS_TYPE,
+};
+
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
