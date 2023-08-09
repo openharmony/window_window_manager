@@ -134,7 +134,7 @@ namespace {
 HWTEST_F(DisplayManagerTest, HasPrivateWindow, Function | SmallTest | Level2)
 {
     sptr<Window> window = CreateWindow("test", WindowMode::WINDOW_MODE_FULLSCREEN, Rect {0, 0, 0, 0});
-    if ( window != nullptr) {
+    if (window != nullptr) {
         ASSERT_NE(nullptr, window);
         window->SetPrivacyMode(true);
         sleep(WAIT_FOR_SYNC_US);

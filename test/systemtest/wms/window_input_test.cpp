@@ -24,7 +24,6 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t WAIT_ASYNC_US = 100000;  // 100ms
 }
 using Utils = WindowTestUtils;
 class WindowInputTest : public testing::Test {

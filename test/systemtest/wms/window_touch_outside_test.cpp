@@ -27,7 +27,6 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using Utils = WindowTestUtils;
-const int WAIT_CALLBACK_US = 10000;  // 10000 us
 
 class WindowTouchOutsideTestListener : public ITouchOutsideListener {
 public:
