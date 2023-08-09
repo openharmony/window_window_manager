@@ -336,10 +336,10 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 
 void BaseAdapter::Clear()
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if ((displayManagerServiceProxy_ != nullptr) && (displayManagerServiceProxy_->AsObject() != nullptr)) {
         displayManagerServiceProxy_->AsObject()->RemoveDeathRecipient(dmsDeath_);
     }
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     isProxyValid_ = false;
 }
 
