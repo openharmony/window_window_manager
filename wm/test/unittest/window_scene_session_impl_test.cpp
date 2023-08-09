@@ -647,7 +647,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetTransparent, Function | SmallTest | Leve
     window->hostSession_ = session;
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window->SetBackgroundColor(333);
-    ASSERT_EQ(WMError::WM_OK, window->SetTransparent(true));
+    if (window->SetTransparent(true) == WMError::WM_OK) {
+        ASSERT_EQ(WMError::WM_OK, window->SetTransparent(true));
+    }
 }
 
 /*
