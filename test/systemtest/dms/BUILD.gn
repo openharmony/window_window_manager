@@ -21,10 +21,12 @@ group("systemtest") {
 
   deps = [
     ":dms_display_change_test",
+    ":dms_display_manager_test",
     ":dms_display_minimal_test",
     ":dms_display_power_test",
     ":dms_private_window_test",
     ":dms_screen_manager_test",
+    ":dms_screenshot_test",
   ]
 }
 
@@ -44,6 +46,14 @@ ohos_systemtest("dms_display_minimal_test") {
   deps = [ ":dms_systemtest_common" ]
 }
 
+ohos_systemtest("dms_display_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "display_manager_test.cpp" ]
+
+  deps = [ ":dms_systemtest_common" ]
+}
+
 ohos_systemtest("dms_display_power_test") {
   module_out_path = module_out_path
 
@@ -56,6 +66,14 @@ ohos_systemtest("dms_display_change_test") {
   module_out_path = module_out_path
 
   sources = [ "display_change_test.cpp" ]
+
+  deps = [ ":dms_systemtest_common" ]
+}
+
+ohos_systemtest("dms_screenshot_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screenshot_test.cpp" ]
 
   deps = [ ":dms_systemtest_common" ]
 }
