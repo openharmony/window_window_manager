@@ -998,6 +998,11 @@ void SceneSessionManager::NotifySessionTouchOutside(int32_t action, int32_t x, i
         if (sceneSession == nullptr) {
             continue;
         }
+        if (sceneSession->GetSessionInfo().isSystem_ ||
+            (sceneSession->GetSessionState() != SessionState::STATE_FOREGROUND &&
+            sceneSession->GetSessionState() != SessionState::STATE_ACTIVE)) {
+            continue;
+        }
         auto persistentId = sceneSession->GetPersistentId();
         auto touchHotAreaRects = sceneSession->GetTouchHotAreas();
         if (!touchHotAreaRects.empty()) {
