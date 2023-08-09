@@ -74,6 +74,17 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     }
 }
 
+WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
+{
+    WSError ret = Session::Connect(sessionStage, eventChannel, surfaceNode, systemConfig, property, token);
+    if (ret != WSError::WS_OK) {
+        return ret;
+    }
+    NotifyPropertyWhenConnect();
+    return WSError::WS_OK;
+}
+
 WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
 {
     // use property from client
@@ -312,6 +323,18 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
         sessionChangeCallback_->OnSystemBarPropertyChange_(property_->GetSystemBarProperty());
     }
     return WSError::WS_OK;
+}
+
+void SceneSession::NotifyPropertyWhenConnect()
+{
+    WLOGFI("Notify property when connect.");
+    if (property_ == nullptr) {
+        WLOGFD("id: %{public}d property is nullptr", persistentId_);
+        return;
+    }
+    NotifySessionFocusableChange(property_->GetFocusable());
+    NotifySessionTouchableChange(property_->GetTouchable());
+    OnShowWhenLocked(IsShowWhenLocked());
 }
 
 WSError SceneSession::OnNeedAvoid(bool status)

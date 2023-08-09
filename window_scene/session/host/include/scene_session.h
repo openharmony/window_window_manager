@@ -82,6 +82,9 @@ public:
     SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
     ~SceneSession() = default;
 
+    WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
+        sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr) override;
     WSError Foreground(sptr<WindowSessionProperty> property) override;
     WSError Background() override;
     WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
@@ -149,6 +152,7 @@ private:
     std::string GetRatioPreferenceKey();
     bool SaveAspectRatio(float ratio);
     void NotifyIsCustomAnimatiomPlaying(bool isPlaying);
+    void NotifyPropertyWhenConnect();
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
     sptr<MoveDragController> moveDragController_ = nullptr;
