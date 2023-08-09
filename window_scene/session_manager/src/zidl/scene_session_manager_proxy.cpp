@@ -766,6 +766,32 @@ WSError SceneSessionManagerProxy::GetSessionSnapshot(int32_t persistentId, std::
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+WSError SceneSessionManagerProxy::SetSessionContinueState(const sptr<IRemoteObject> &token,
+    const ContinueState& continueState)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteRemoteObject(token)) {
+        WLOGFE("Write token failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(static_cast<int32_t>(continueState))) {
+        WLOGFE("Write continueState failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_CONTINUE_STATE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
 void SceneSessionManagerProxy::NotifyDumpInfoResult(const std::vector<std::string>& info)
 {
     MessageParcel data;

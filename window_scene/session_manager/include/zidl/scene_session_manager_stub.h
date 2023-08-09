@@ -57,6 +57,7 @@ private:
     int HandleGetSessionInfos(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply);
 
+    int HandleSetSessionContinueState(MessageParcel &data, MessageParcel &reply);
     int HandleTerminateSessionNew(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionDump(MessageParcel &data, MessageParcel &reply);
     int HandleUpdateSessionAvoidAreaListener(MessageParcel& data, MessageParcel& reply);

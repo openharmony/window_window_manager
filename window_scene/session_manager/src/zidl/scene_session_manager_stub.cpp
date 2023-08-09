@@ -83,6 +83,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleGetSessionDump),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT),
         &SceneSessionManagerStub::HandleNotifyDumpInfoResult),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_CONTINUE_STATE),
+        &SceneSessionManagerStub::HandleSetSessionContinueState),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_GRAVITY),
         &SceneSessionManagerStub::HandleSetSessionGravity),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CLEAR_SESSION),
@@ -362,6 +364,16 @@ int SceneSessionManagerStub::HandleGetAccessibilityWindowInfo(MessageParcel &dat
         return ERR_TRANSACTION_FAILED;
     }
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetSessionContinueState(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("HandleSetSessionContinueState");
+    sptr <IRemoteObject> token = data.ReadRemoteObject();
+    auto continueState = static_cast<ContinueState>(data.ReadInt32());
+    const WSError &ret = SetSessionContinueState(token, continueState);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
 
