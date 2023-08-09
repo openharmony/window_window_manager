@@ -687,12 +687,9 @@ void WindowImplFuzzTest(const uint8_t* data, size_t size)
     if (window == nullptr) {
         return;
     }
-    std::shared_ptr<AbilityRuntime::AbilityContext> context =
+    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext =
         std::make_shared<AbilityRuntime::AbilityContextImpl>();
-    OHOS::Rosen::WMError error = window->Create(option->GetParentId(), context);
-    if (error != OHOS::Rosen::WMError::WM_OK) {
-        return;
-    }
+    window->Create(option->GetParentId(), abilityContext);
 
     size_t startPos = 0;
     uint32_t reason = 0;
@@ -700,6 +697,9 @@ void WindowImplFuzzTest(const uint8_t* data, size_t size)
     startPos += GetObject(reason, data + startPos, size - startPos);
     startPos += GetObject(withAnimation, data + startPos, size - startPos);
     window->Show(reason, withAnimation);
+    std::shared_ptr<AbilityRuntime::Context> context = nullptr;
+    startPos += GetObject(context, data + startPos, size - startPos);
+    window->GetTopWindowWithContext(context);
 
     OHOS::CheckWindowImplFunctionsPart1(window, data, size);
     OHOS::CheckWindowImplFunctionsPart2(window, data, size);
