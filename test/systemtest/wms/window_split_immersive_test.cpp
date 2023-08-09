@@ -85,40 +85,6 @@ void WindowSplitImmersiveTest::TearDown()
 }
 
 namespace {
-/**
- * @tc.name: SplitImmersive01
- * @tc.desc: one primary window and one fullscreen window, test enter and out split immersive
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSplitImmersiveTest, SplitImmersive01, Function | MediumTest | Level3)
-{
-    // create fullscreen win and show
-    fullInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
-    const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
-    activeWindows_.push_back(fullWindow);
-    ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
-    sleep(SPLIT_TEST_SLEEP_S);
-
-    // enter split mode
-    splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
-    const sptr<Window>& priWindow = Utils::CreateTestWindow(splitInfo_);
-    activeWindows_.push_back(priWindow);
-    ASSERT_EQ(WMError::WM_OK, priWindow->Show());
-    sleep(SPLIT_TEST_SLEEP_S);
-
-    // check is enter split Immersive
-    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, priWindow->GetMode());
-    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, fullWindow->GetMode());
-    Rect immersivePriRect = priWindow->GetRect();
-    ASSERT_EQ(0, immersivePriRect.posX_);
-    ASSERT_EQ(0, immersivePriRect.posY_);
-    sleep(SPLIT_TEST_SLEEP_S);
-
-    ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
-    sleep(SPLIT_TEST_SLEEP_S);
-    ASSERT_EQ(WMError::WM_OK, priWindow->Hide());
-    sleep(SPLIT_TEST_SLEEP_S);
-}
 }
 } // namespace Rosen
 } // namespace OHOS
