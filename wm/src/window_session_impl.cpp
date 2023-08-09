@@ -656,6 +656,11 @@ WMError WindowSessionImpl::SetBrightness(float brightness)
     return WMError::WM_OK;
 }
 
+float WindowSessionImpl::GetBrightness() const
+{
+    return property_->GetBrightness();
+}
+
 void WindowSessionImpl::SetRequestedOrientation(Orientation orientation)
 {
     if (property_->GetRequestedOrientation() == orientation) {
