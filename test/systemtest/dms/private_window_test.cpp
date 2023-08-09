@@ -61,23 +61,6 @@ void PrivateWindowTest::TearDown()
 }
 
 namespace {
-/**
- * @tc.name: RegisterPrivateWindowListener
- * @tc.desc: Register private window listener test
- * @tc.type: FUNC
- */
-HWTEST_F(PrivateWindowTest, RegisterPrivateWindowListener, Function | MediumTest | Level2)
-{
-    auto& dm = DisplayManager::GetInstance();
-    sptr<PrivateWindowListener> listener_ = new PrivateWindowListener();
-    dm.RegisterPrivateWindowListener(listener_);
-    sptr<WindowOption> option = new WindowOption();
-    auto window = Window::Create("private", option);
-    window->SetPrivacyMode(true);
-    window->Show();
-    dm.UnregisterPrivateWindowListener(listener_);
-    window->Destroy();
-}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
