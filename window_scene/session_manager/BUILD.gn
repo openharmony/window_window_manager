@@ -131,6 +131,7 @@ ohos_shared_library("scene_session_manager") {
 ohos_shared_library("screen_session_manager") {
   sources = [
     "../../dm/src/zidl/display_manager_agent_proxy.cpp",
+    "src/fold_screen_controller/fold_screen_state_machine.cpp",
     "src/screen_cutout_controller.cpp",
     "src/screen_rotation_property.cpp",
     "src/screen_scene_config.cpp",
