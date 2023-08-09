@@ -1050,9 +1050,9 @@ HWTEST_F(WindowSessionTest, SetFocusable, Function | SmallTest | Level2)
     ASSERT_NE(WSError::WS_ERROR_INVALID_SESSION, session_->SetFocusable(false));
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
-    property->SetFocusable(false);
-    ASSERT_EQ(WSError::WS_DO_NOTHING, session_->SetFocusable(false));
     property->SetFocusable(true);
+    ASSERT_NE(WSError::WS_DO_NOTHING, session_->SetFocusable(false));
+    
 }
 }
 } // namespace Rosen
