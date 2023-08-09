@@ -331,6 +331,7 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
     adapter_.Clear();
     SingletonContainer::Get<DisplayManager>().OnRemoteDied();
     SingletonContainer::Get<ScreenManager>().OnRemoteDied();
+    SingletonContainer::Get<SessionManager>().ClearSessionManagerProxy();
     return;
 }
 
