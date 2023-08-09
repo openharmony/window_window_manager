@@ -18,7 +18,26 @@ module_out_path = "window_manager/snapshot"
 group("unittest") {
   testonly = true
 
-  deps = []
+  deps = [
+    ":snapshot_display_test",
+    ":snapshot_utils_test",
+  ]
+}
+
+ohos_unittest("snapshot_utils_test") {
+  module_out_path = module_out_path
+
+  sources = [ "snapshot_utils_test.cpp" ]
+
+  deps = [ ":utils_unittest_common" ]
+}
+
+ohos_unittest("snapshot_display_test") {
+  module_out_path = module_out_path
+
+  sources = [ "snapshot_display_test.cpp" ]
+
+  deps = [ ":utils_unittest_common" ]
 }
 
 ## Build utils_unittest_common.a {{{
