@@ -2358,7 +2358,7 @@ void SceneSessionManager::RelayoutKeyBoard(sptr<SceneSession> sceneSession)
     requestRect.posY_ = defaultDisplayInfo->GetHeight() -
         static_cast<int32_t>(requestRect.height_);
     sceneSession->GetSessionProperty()->SetRequestRect(requestRect);
-    sceneSession->UpdateSessionRect(SessionHelper::TransferToWSRect(requestRect), SizeChangeReason::RESIZE);
+    sceneSession->UpdateSessionRect(SessionHelper::TransferToWSRect(requestRect), SizeChangeReason::UNDEFINED);
 }
 
 void SceneSessionManager::InitPersistentStorage()

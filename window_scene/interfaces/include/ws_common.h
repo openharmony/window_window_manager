@@ -196,6 +196,14 @@ struct WSRect {
     {
         return !this->operator==(a);
     }
+
+    bool IsEmpty() const
+    {
+        if (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0) {
+            return true;
+        }
+        return false;
+    }
 };
 
 struct WindowShadowConfig {

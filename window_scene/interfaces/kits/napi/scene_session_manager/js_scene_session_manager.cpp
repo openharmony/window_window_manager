@@ -63,6 +63,7 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
     object->SetNativePointer(jsSceneSessionManager.release(), JsSceneSessionManager::Finalizer, nullptr);
     object->SetProperty("SessionState", CreateJsSessionState(*engine));
     object->SetProperty("SessionType", SessionTypeInit(engine));
+    object->SetProperty("SessionSizeChangeReason", CreateJsSessionSizeChangeReason(*engine));
 
     const char* moduleName = "JsSceneSessionManager";
     BindNativeFunction(*engine, *object, "getRootSceneSession", moduleName, JsSceneSessionManager::GetRootSceneSession);

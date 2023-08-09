@@ -32,6 +32,7 @@
 #include "window_manager_hilog.h"
 #include "iservice_registry.h"
 #include "if_system_ability_manager.h"
+#include "session_helper.h"
 #include "system_ability_definition.h"
 #include "bundle_mgr_interface.h"
 
@@ -1058,6 +1059,30 @@ void Session::SetSessionRect(const WSRect& rect)
 WSRect Session::GetSessionRect() const
 {
     return winRect_;
+}
+
+void Session::SetSessionRequestRect(const WSRect& rect)
+{
+    if (property_ == nullptr) {
+        WLOGFD("id: %{public}d property is nullptr", persistentId_);
+        return;
+    }
+    property_->SetRequestRect(SessionHelper::TransferToRect(rect));
+    WLOGFD("is: %{public}d, rect: [%{public}d, %{public}d, %{public}u, %{public}u]", persistentId_,
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
+}
+
+WSRect Session::GetSessionRequestRect() const
+{
+    WSRect rect;
+    if (property_ == nullptr) {
+        WLOGFD("id: %{public}d property is nullptr", persistentId_);
+        return rect;
+    }
+    rect = SessionHelper::TransferToWSRect(property_->GetRequestRect());
+    WLOGFD("is: %{public}d, rect: [%{public}d, %{public}d, %{public}u, %{public}u]", persistentId_,
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
+    return rect;
 }
 
 WSError Session::UpdateActiveStatus(bool isActive)
