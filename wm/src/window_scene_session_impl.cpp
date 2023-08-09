@@ -587,28 +587,16 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
 
     const auto& windowRect = GetRect();
     const auto& requestRect = GetRequestRect();
-    Rect rect;
-    if (state_ <= WindowState::STATE_CREATED) {
-        rect = requestRect;
-    } else {
-        rect = WindowHelper::IsMainFloatingWindow(GetType(), GetMode()) ? windowRect : requestRect;
-    }
-    Rect newRect = { x, y, rect.width_, rect.height_ }; // must keep x/y
-    WLOGFD("Id:%{public}d, type: %{public}d, mode: %{public}d, requestRect: [%{public}d, %{public}d, %{public}d, "
-        "%{public}d], windowRect: [%{public}d, %{public}d, %{public}d, %{public}d], "
-        "newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
-        property_->GetPersistentId(), GetType(), GetMode(), requestRect.posX_, requestRect.posY_,
+    Rect newRect = { x, y, requestRect.width_, requestRect.height_ }; // must keep x/y
+    WLOGFD("Id:%{public}d, state: %{public}d, type: %{public}d, mode: %{public}d, requestRect: "
+        "[%{public}d, %{public}d, %{public}d, %{public}d], windowRect: [%{public}d, %{public}d, "
+        "%{public}d, %{public}d], newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+        property_->GetPersistentId(), state_, GetType(), GetMode(), requestRect.posX_, requestRect.posY_,
         requestRect.width_, requestRect.height_, windowRect.posX_, windowRect.posY_,
         windowRect.width_, windowRect.height_, newRect.posX_, newRect.posY_,
         newRect.width_, newRect.height_);
 
     property_->SetRequestRect(newRect);
-    if (state_ == WindowState::STATE_HIDDEN || state_ < WindowState::STATE_CREATED) {
-        WLOGFD("Window is hidden or not created! id: %{public}d, oriPos: [%{public}d, %{public}d, "
-            "movePos: [%{public}d, %{public}d]", property_->GetPersistentId(), rect.posX_, rect.posY_, x, y);
-        return WMError::WM_OK;
-    }
-
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto ret = hostSession_->UpdateSessionRect(wsRect, SizeChangeReason::MOVE);
     return static_cast<WMError>(ret);
@@ -707,30 +695,16 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 
     const auto& windowRect = GetRect();
     const auto& requestRect = GetRequestRect();
-    Rect rect;
-    if (state_ <= WindowState::STATE_CREATED) {
-        rect = requestRect;
-    } else {
-        rect = WindowHelper::IsMainFloatingWindow(GetType(), GetMode()) ? windowRect : requestRect;
-    }
-
-    Rect newRect = { rect.posX_, rect.posY_, width, height }; // must keep w/h
-    WLOGFD("Id:%{public}d, type: %{public}d, mode: %{public}d, requestRect: [%{public}d, %{public}d, %{public}d, "
-        "%{public}d], windowRect: [%{public}d, %{public}d, %{public}d, %{public}d], "
-        "newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
-        property_->GetPersistentId(), GetType(), GetMode(), requestRect.posX_, requestRect.posY_,
+    Rect newRect = { requestRect.posX_, requestRect.posY_, width, height }; // must keep w/h
+    WLOGFD("Id:%{public}d, state: %{public}d, type: %{public}d, mode: %{public}d, requestRect: "
+        "[%{public}d, %{public}d, %{public}d, %{public}d], windowRect: [%{public}d, %{public}d, "
+        "%{public}d, %{public}d], newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+        property_->GetPersistentId(), state_, GetType(), GetMode(), requestRect.posX_, requestRect.posY_,
         requestRect.width_, requestRect.height_, windowRect.posX_, windowRect.posY_,
         windowRect.width_, windowRect.height_, newRect.posX_, newRect.posY_,
         newRect.width_, newRect.height_);
 
     property_->SetRequestRect(newRect);
-    if (state_ == WindowState::STATE_HIDDEN || state_ < WindowState::STATE_CREATED) {
-        WLOGFD("Window is hidden or not created! id: %{public}d, oriSize: [%{public}u, %{public}u, "
-            "newSize [%{public}u, %{public}u], state: %{public}u", property_->GetPersistentId(), rect.width_,
-            rect.height_, width, height, static_cast<uint32_t>(state_));
-        return WMError::WM_OK;
-    }
-
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto ret = hostSession_->UpdateSessionRect(wsRect, SizeChangeReason::RESIZE);
     return static_cast<WMError>(ret);

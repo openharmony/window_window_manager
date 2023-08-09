@@ -144,6 +144,49 @@ NativeValue* CreateJsSessionState(NativeEngine& engine)
     return objValue;
 }
 
+NativeValue* CreateJsSessionSizeChangeReason(NativeEngine& engine)
+{
+    NativeValue *objValue = engine.CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("UNDEFINED", CreateJsValue(engine,
+        static_cast<int32_t>(SizeChangeReason::UNDEFINED)));
+    object->SetProperty("MAXIMIZE", CreateJsValue(engine,
+        static_cast<int32_t>(SizeChangeReason::MAXIMIZE)));
+    object->SetProperty("RECOVER", CreateJsValue(engine,
+        static_cast<int32_t>(SizeChangeReason::RECOVER)));
+    object->SetProperty("ROTATION", CreateJsValue(engine,
+        static_cast<int32_t>(SizeChangeReason::ROTATION)));
+    object->SetProperty("DRAG", CreateJsValue(engine,
+        static_cast<int32_t>(SizeChangeReason::DRAG)));
+    object->SetProperty("DRAG_START", CreateJsValue(engine,
+        static_cast<int32_t>(SizeChangeReason::DRAG_START)));
+    object->SetProperty("DRAG_END", CreateJsValue(engine,
+        static_cast<int32_t>(SizeChangeReason::DRAG_END)));
+    object->SetProperty("RESIZE", CreateJsValue(engine,
+        static_cast<int32_t>(SizeChangeReason::RESIZE)));
+    object->SetProperty("MOVE", CreateJsValue(engine,
+        static_cast<int32_t>(SizeChangeReason::MOVE)));
+    object->SetProperty("HIDE", CreateJsValue(engine,
+        static_cast<int32_t>(SizeChangeReason::HIDE)));
+    object->SetProperty("TRANSFORM", CreateJsValue(engine,
+        static_cast<int32_t>(SizeChangeReason::TRANSFORM)));
+    object->SetProperty("CUSTOM_ANIMATION_SHOW", CreateJsValue(engine,
+        static_cast<int32_t>(SizeChangeReason::CUSTOM_ANIMATION_SHOW)));
+    object->SetProperty("FULL_TO_SPLIT", CreateJsValue(engine,
+        static_cast<int32_t>(SizeChangeReason::FULL_TO_SPLIT)));
+    object->SetProperty("SPLIT_TO_FULL", CreateJsValue(engine,
+        static_cast<int32_t>(SizeChangeReason::SPLIT_TO_FULL)));
+    object->SetProperty("END", CreateJsValue(engine,
+        static_cast<int32_t>(SizeChangeReason::END)));
+
+    return objValue;
+}
+
 NativeValue* CreateJsSessionRect(NativeEngine& engine, const WSRect& rect)
 {
     WLOGFD("CreateJsSessionRect.");
