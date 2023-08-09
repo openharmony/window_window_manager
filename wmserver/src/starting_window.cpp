@@ -321,6 +321,7 @@ void StartingWindow::AddNodeOnRSTree(sptr<WindowNode>& node, bool isMultiDisplay
             }
             dms.UpdateRSTree(displayId, displayId, node->leashWinSurfaceNode_, true, isMultiDisplay);
             node->leashWinSurfaceNode_->AddChild(node->startingWinSurfaceNode_, -1);
+            WLOGFD("Add startingWinSurfaceNode_ to leashWinSurfaceNode_ end during cold start");
         } else { // hot start
             const auto& displayIdVec = node->GetShowingDisplays();
             for (auto& shownDisplayId : displayIdVec) {
@@ -338,6 +339,7 @@ void StartingWindow::AddNodeOnRSTree(sptr<WindowNode>& node, bool isMultiDisplay
                     }
                 }
             }
+            WLOGFD("Update RsTree with hot start");
         }
     };
     wptr<WindowNode> weakNode = node;
