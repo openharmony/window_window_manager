@@ -806,7 +806,13 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
         return engine.CreateUndefined();
     }
 
-    SceneSessionManager::GetInstance().RequestSceneSessionDestruction(sceneSession);
+    bool needRemoveSession = false;
+    if (info.argc == 2 && info.argv[1]->TypeOf() == NATIVE_BOOLEAN) { // 2: params total num
+        ConvertFromJsValue(engine, info.argv[1], needRemoveSession);
+        WLOGFD("[NAPI]needRemoveSession: %{public}u", needRemoveSession);
+    }
+
+    SceneSessionManager::GetInstance().RequestSceneSessionDestruction(sceneSession, needRemoveSession);
     return engine.CreateUndefined();
 }
 
