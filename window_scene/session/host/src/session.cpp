@@ -89,6 +89,13 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
     return surfaceNode_;
 }
 
+std::shared_ptr<Media::PixelMap> Session::GetSnapshot()
+{
+    auto snapshot = snapshot_;
+    snapshot_.reset();
+    return snapshot;
+}
+
 SessionInfo& Session::GetSessionInfo()
 {
     return sessionInfo_;
@@ -516,6 +523,10 @@ WSError Session::Disconnect()
     SessionState state = GetSessionState();
     WLOGFI("Disconnect session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
+    if (state == SessionState::STATE_ACTIVE) {
+        state_ = SessionState::STATE_INACTIVE;
+    }
+    Background();
     UpdateSessionState(SessionState::STATE_DISCONNECT);
     NotifyDisconnect();
     DelayedSingleton<ANRManager>::GetInstance()->OnSessionLost(persistentId_);

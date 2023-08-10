@@ -120,9 +120,9 @@ WSError SceneSession::Background()
     if (ret != WSError::WS_OK) {
         return ret;
     }
-    auto snapshot = Snapshot();
-    if (scenePersistence_ && snapshot) {
-        scenePersistence_->SaveSnapshot(snapshot);
+    snapshot_ = Snapshot();
+    if (scenePersistence_ && snapshot_) {
+        scenePersistence_->SaveSnapshot(snapshot_);
     }
     NotifyBackground();
     UpdateCameraFloatWindowStatus(false);
