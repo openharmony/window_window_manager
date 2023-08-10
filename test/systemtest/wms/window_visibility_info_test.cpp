@@ -182,6 +182,53 @@ void WindowVisibilityInfoTest::WaitForCallback()
 }
 
 namespace {
+/**
+* @tc.name: WindowVisibilityInfoTest01
+* @tc.desc: window show or hide
+* @tc.type: FUNC
+* @tc.require: issueI5FSQW
+*/
+HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest01, Function | MediumTest | Level1)
+{
+    floatAppInfo_.name = "window1";
+    floatAppInfo_.rect = {0, 0, 300, 100};
+    sptr<Window> window1 = Utils::CreateTestWindow(floatAppInfo_);
+
+    subAppInfo_.name = "subWindow1";
+    subAppInfo_.rect = {0, 600, 300, 100};
+    subAppInfo_.parentId = window1->GetWindowId();
+    sptr<Window> subWindow1 = Utils::CreateTestWindow(subAppInfo_);
+
+    bool isWindowVisible = false;
+    bool isSubWindowVisible = false;
+
+    [[maybe_unused]] uint32_t visibilityInfoCount = 0;
+    ASSERT_EQ(WMError::WM_OK, window1->Show());
+    isWindowVisible = FillColor(window1);
+    WaitForCallback();
+    visibilityInfoCount = isWindowVisible ? 1 : 0;
+    ResetCallbackCalledFLag();
+
+    ASSERT_EQ(WMError::WM_OK, subWindow1->Show());
+    isSubWindowVisible = FillColor(subWindow1);
+    WaitForCallback();
+    visibilityInfoCount = isSubWindowVisible ? 1 : 0;
+    ResetCallbackCalledFLag();
+
+    ASSERT_EQ(WMError::WM_OK, subWindow1->Hide());
+    WaitForCallback();
+    visibilityInfoCount = isSubWindowVisible ? 1 : 0;
+    ResetCallbackCalledFLag();
+
+    ASSERT_EQ(WMError::WM_OK, window1->Hide());
+    WaitForCallback();
+    visibilityInfoCount = isWindowVisible ? 1 : 0;
+    ResetCallbackCalledFLag();
+
+    window1->Destroy();
+    subWindow1->Destroy();
+    sleep(2);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -27,6 +27,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using Utils = WindowTestUtils;
+const int WAIT_CALLBACK_US = 10000;  // 10000 us
 
 class WindowTouchOutsideTestListener : public ITouchOutsideListener {
 public:
@@ -104,6 +105,84 @@ void WindowTouchOutsideTest::TearDownTestCase()
 }
 
 namespace {
+/**
+ * @tc.name: onTouchInside
+ * @tc.desc: can't not receive a inside touch event
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTouchOutsideTest, onTouchInside, Function | MediumTest | Level3)
+{
+    const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
+    firstWindow->RegisterTouchOutsideListener(windowlistener1_);
+    firstWindow->Show();
+    SingletonContainer::Get<WindowAdapter>().ProcessPointDown(firstWindow->GetWindowId());
+    usleep(WAIT_CALLBACK_US);
+    ASSERT_TRUE(!windowlistener1_->isTouchOutside_);
+    firstWindow->Destroy();
+}
+
+/**
+ * @tc.name: onTouchOutside
+ * @tc.desc: received an outside touch event when window state is show
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTouchOutsideTest, onTouchOutside, Function | MediumTest | Level3)
+{
+    const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
+    firstWindow->RegisterTouchOutsideListener(windowlistener1_);
+    const sptr<Window> &secondWindow = Utils::CreateTestWindow(secondWindowInfo_);
+    firstWindow->Show();
+    secondWindow->Show();
+    SingletonContainer::Get<WindowAdapter>().ProcessPointDown(secondWindow->GetWindowId());
+    usleep(WAIT_CALLBACK_US);
+    ASSERT_TRUE(windowlistener1_->isTouchOutside_);
+    firstWindow->Destroy();
+    secondWindow->Destroy();
+}
+
+/**
+ * @tc.name: onTouchOutsideNotShow
+ * @tc.desc: If the window is not in the show state, the touch outside event cannot be received
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTouchOutsideTest, onTouchOutsideNotShow, Function | MediumTest | Level3)
+{
+    const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
+    firstWindow->RegisterTouchOutsideListener(windowlistener1_);
+    const sptr<Window> &secondWindow = Utils::CreateTestWindow(secondWindowInfo_);
+    secondWindow->Show();
+    SingletonContainer::Get<WindowAdapter>().ProcessPointDown(secondWindow->GetWindowId());
+    usleep(WAIT_CALLBACK_US);
+    ASSERT_TRUE(!windowlistener1_->isTouchOutside_);
+    firstWindow->Destroy();
+    secondWindow->Destroy();
+}
+
+/**
+ * @tc.name: onTouchOutsideForAllWindow
+ * @tc.desc: All windows can receive the touch outside event
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTouchOutsideTest, onTouchOutsideForAllWindow, Function | MediumTest | Level3)
+{
+    const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
+    firstWindow->RegisterTouchOutsideListener(windowlistener1_);
+    const sptr<Window> &secondWindow = Utils::CreateTestWindow(secondWindowInfo_);
+    firstWindow->RegisterTouchOutsideListener(windowlistener2_);
+
+    firstWindow->Show();
+    secondWindow->Show();
+
+    const sptr<Window> &thirdWindow = Utils::CreateTestWindow(thirdWindowInfo_);
+    thirdWindow->Show();
+    SingletonContainer::Get<WindowAdapter>().ProcessPointDown(thirdWindow->GetWindowId());
+    usleep(WAIT_CALLBACK_US);
+    ASSERT_TRUE(windowlistener1_->isTouchOutside_);
+    ASSERT_TRUE(windowlistener2_->isTouchOutside_);
+    firstWindow->Destroy();
+    secondWindow->Destroy();
+    thirdWindow->Destroy();
+}
 } // namespace
 } // Rosen
 } // OHOS
