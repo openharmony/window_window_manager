@@ -113,16 +113,20 @@ void ScreenProperty::SetScreenRotation(Rotation rotation)
             bounds_.rect_.top_ -= static_cast<float>(height - width) / static_cast<float>(HALF_VALUE) +
                 static_cast<float>(offsetY_);
         }
-
-        if (rotation == Rotation::ROTATION_0) {
-            rotation_ = 0.f;
-        } else if (rotation == Rotation::ROTATION_90) {
+    }
+    switch (rotation) {
+        case Rotation::ROTATION_90:
             rotation_ = 90.f;
-        } else if (rotation == Rotation::ROTATION_180) {
+            break;
+        case Rotation::ROTATION_180:
             rotation_ = 180.f;
-        } else {
+            break;
+        case Rotation::ROTATION_270:
             rotation_ = 270.f;
-        }
+            break;
+        default:
+            rotation_ = 0.f;
+            break;
     }
     screenRotation_ = rotation;
 }
