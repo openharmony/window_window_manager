@@ -411,7 +411,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
 
 WSError WindowSessionImpl::UpdateFocus(bool isFocused)
 {
-    WLOGFD(".report update focus: %{public}u", isFocused);
+    WLOGFD("Report update focus: %{public}u", isFocused);
     if (isFocused) {
         HiSysEventWrite(
             OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
@@ -1323,10 +1323,7 @@ WMError WindowSessionImpl::SetBackgroundColor(const std::string& color)
 
 WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
 {
-    WLOGFD(".report set bg color: %{public}u", GetWindowId());
-    if (context_.get() == nullptr) {
-        return WMError::WM_ERROR_INVALID_OPERATION;
-    }
+    WLOGFD("Report set bg color: %{public}u", GetWindowId());
 
     // 0xff000000: ARGB style, means Opaque color.
     const bool isAlphaZero = !(color & 0xff000000);
