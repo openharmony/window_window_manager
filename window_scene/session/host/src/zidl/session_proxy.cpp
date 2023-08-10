@@ -168,7 +168,8 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         !(data.WriteInt32(abilitySessionInfo->persistentId)) ||
         !(data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state))) ||
         !(data.WriteInt64(abilitySessionInfo->uiAbilityId)) ||
-        !data.WriteInt32(abilitySessionInfo->callingTokenId)) {
+        !data.WriteInt32(abilitySessionInfo->callingTokenId) ||
+        !data.WriteBool(abilitySessionInfo->reuse)) {
         WLOGFE("WriteInterfaceToken or other param failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }

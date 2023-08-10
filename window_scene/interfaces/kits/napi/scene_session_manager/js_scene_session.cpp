@@ -835,13 +835,22 @@ void JsSceneSession::OnClick()
 
 void JsSceneSession::PendingSessionActivation(SessionInfo& info)
 {
-    WLOGI("[NAPI]pending session activation: bundleName %{public}s, moduleName %{public}s, abilityName %{public}s",
-        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
+    WLOGI("[NAPI]pending session activation: bundleName %{public}s, moduleName %{public}s, abilityName %{public}s"\
+        ", reuse %{public}d",
+        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.reuse);
     if (info.persistentId_ == 0) {
-        auto sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
+        sptr<SceneSession> sceneSession = nullptr;
+        if (info.reuse) {
+            sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(
+                info.bundleName_, info.moduleName_, info.abilityName_);
+        }
         if (sceneSession == nullptr) {
-            WLOGFE("RequestSceneSession return nullptr");
-            return;
+            WLOGFI("GetSceneSessionByName return nullptr, RequestSceneSession");
+            sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
+            if (sceneSession == nullptr) {
+                WLOGFE("RequestSceneSession return nullptr");
+                return;
+            }
         }
         info.persistentId_ = sceneSession->GetPersistentId();
         sceneSession->GetSessionInfo().persistentId_ = sceneSession->GetPersistentId();
@@ -857,6 +866,12 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
         sceneSession->GetSessionInfo().callerPersistentId_ = info.callerPersistentId_;
         sceneSession->GetSessionInfo().callingTokenId_ = info.callingTokenId_;
     }
+
+    PendingSessionActivationInner(info);
+}
+
+void JsSceneSession::PendingSessionActivationInner(SessionInfo& info)
+{
     auto iter = jsCbMap_.find(PENDING_SCENE_CB);
     if (iter == jsCbMap_.end()) {
         return;
