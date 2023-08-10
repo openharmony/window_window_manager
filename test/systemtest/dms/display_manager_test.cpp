@@ -134,9 +134,7 @@ namespace {
 HWTEST_F(DisplayManagerTest, HasPrivateWindow, Function | SmallTest | Level2)
 {
     sptr<Window> window = CreateWindow("test", WindowMode::WINDOW_MODE_FULLSCREEN, Rect {0, 0, 0, 0});
-    if (window == nullptr) {
-        return;
-    }
+    if (window != nullptr) {
         ASSERT_NE(nullptr, window);
         window->SetPrivacyMode(true);
         sleep(WAIT_FOR_SYNC_US);
@@ -149,6 +147,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindow, Function | SmallTest | Level2)
         DisplayManager::GetInstance().HasPrivateWindow(id, hasPrivateWindow);
         window->Destroy();
         ASSERT_TRUE(!hasPrivateWindow);
+    }
 }
 
 /**
@@ -163,9 +162,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered, Function | SmallTest | Lev
     auto displayHeight = DisplayManagerTest::displayHeight_;
 
     sptr<Window> window1 = CreateWindow("test", WindowMode::WINDOW_MODE_FULLSCREEN, Rect {0, 0, 0, 0});
-    if (window1 == nullptr) {
-         return;
-    }
+    if (window1 != nullptr) {
         ASSERT_NE(nullptr, window1);
         // 10:rect.posX_, 120:rect.posY_, 650:rect.width, 500:rect.height
         sptr<Window> window2 = CreateWindow("private", WindowMode::WINDOW_MODE_FLOATING,
@@ -195,7 +192,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered, Function | SmallTest | Lev
         {
             ASSERT_TRUE(!hasPrivateWindow);
         }
-    
+    }
 }
 
 /**
@@ -210,8 +207,6 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered01, Function | SmallTest | L
     
     // 10:rect.posX_, 120:rect.posY_, 650:rect.width, 500:rect.height
     if (window1 != nullptr) {
-        return;
-    }
         ASSERT_NE(nullptr, window1);
         sptr<Window> window2 = CreateWindow("private", WindowMode::WINDOW_MODE_FLOATING,
                                             Rect{10, 120, 650, 500}, 0xffff0000);
@@ -232,6 +227,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered01, Function | SmallTest | L
         if (hasPrivateWindow) {
             ASSERT_TRUE(hasPrivateWindow);
         }
+    }
 }
 
 /**
@@ -246,9 +242,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered02, Function | SmallTest | L
     auto displayHeight = DisplayManagerTest::displayHeight_;
 
     sptr<Window> window1 = CreateWindow("test", WindowMode::WINDOW_MODE_FULLSCREEN, Rect {0, 0, 0, 0});
-    if (window1 == nullptr) {
-        return;
-    }
+    if (window1 != nullptr) {
     ASSERT_NE(nullptr, window1);
     // 10:rect.posX_, 120:rect.posY_, 650:rect.width, 500:rect.height
     sptr<Window> window2 = CreateWindow("private", WindowMode::WINDOW_MODE_FLOATING,
@@ -285,6 +279,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered02, Function | SmallTest | L
     if (!hasPrivateWindow) {
             ASSERT_TRUE(!hasPrivateWindow);
     }
+    }
 }
 
 /**
@@ -297,9 +292,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered03, Function | SmallTest | L
 {
     sptr<Window> window1 = CreateWindow("test", WindowMode::WINDOW_MODE_FULLSCREEN, Rect {0, 0, 0, 0});
    
-    if (window1 == nullptr) {
-         return;
-    }
+    if (window1 != nullptr) {
     ASSERT_NE(nullptr, window1);
     // 10:rect.posX_, 120:rect.pos_Y, rect.width_:650, rect.height_:700
     sptr<Window> window2 = CreateWindow("private", WindowMode::WINDOW_MODE_FLOATING,
@@ -325,6 +318,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered03, Function | SmallTest | L
     window4->Destroy();
     if (hasPrivateWindow) {
         ASSERT_TRUE(hasPrivateWindow);
+    }
     }
 }
 
