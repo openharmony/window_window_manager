@@ -22,6 +22,7 @@
 
 using namespace testing;
 using namespace testing::ext;
+
 namespace OHOS {
 namespace Rosen {
 using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
