@@ -683,7 +683,16 @@ std::string SceneSession::GetSessionSnapshotFilePath()
 void SceneSession::UpdateNativeVisibility(bool visible)
 {
     isVisible_ = visible;
-    specificCallback_->onUpdateAvoidArea_(GetPersistentId());
+    if (specificCallback_ == nullptr) {
+        WLOGFW("specific callback is null.");
+        return;
+    }
+
+    if (visible) {
+        specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
+    } else {
+        specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
+    }
 }
 
 bool SceneSession::IsVisible() const

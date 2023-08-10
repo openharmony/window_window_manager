@@ -1267,9 +1267,19 @@ void Session::SetZOrder(uint32_t zOrder)
     zOrder_ = zOrder;
 }
 
-uint32_t Session::GetZOrder()
+uint32_t Session::GetZOrder() const
 {
     return zOrder_;
+}
+
+void Session::SetUINodeId(uint32_t uiNodeId)
+{
+    uiNodeId_ = uiNodeId;
+}
+
+uint32_t Session::GetUINodeId() const
+{
+    return uiNodeId_;
 }
 
 WSError Session::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)

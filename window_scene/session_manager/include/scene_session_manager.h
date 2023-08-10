@@ -202,7 +202,7 @@ private:
     void HandleUpdateProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action,
         const sptr<SceneSession>& sceneSession);
     void NotifyWindowInfoChange(int32_t persistentId, WindowUpdateType type);
-    void FillWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,
+    bool FillWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,
         const sptr<SceneSession>& sceneSession);
     std::vector<std::pair<uint64_t, bool>> GetWindowVisibilityChangeInfo(
         std::shared_ptr<RSOcclusionData> occlusionData);
