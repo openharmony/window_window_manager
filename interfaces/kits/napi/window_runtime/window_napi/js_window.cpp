@@ -610,6 +610,13 @@ NativeValue* JsWindow::ResetAspectRatio(NativeEngine* engine, NativeCallbackInfo
     return (me != nullptr) ? me->OnResetAspectRatio(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindow::Minimize(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGI("[NAPI]Minimize");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnMinimize(*engine, *info) : nullptr;
+}
+
 static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
     const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, wptr<Window> weakToken)
 {
@@ -3889,6 +3896,49 @@ NativeValue* JsWindow::OnResetAspectRatio(NativeEngine& engine, NativeCallbackIn
     return result;
 }
 
+NativeValue* JsWindow::OnMinimize(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("minimize the window permission denied!");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP)));
+        return engine.CreateUndefined();
+    }
+
+    if (info.argc > 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+
+    wptr<Window> weakToken(windowToken_);
+    AsyncTask::CompleteCallback complete =
+        [weakToken](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr) {
+                task.Reject(engine,
+                    CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                    "OnMinimize failed."));
+                WLOGFE("window is nullptr");
+                return;
+            }
+            WMError ret = weakWindow->Minimize();
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+            } else {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Minimize failed."));
+            }
+            WLOGI("[NAPI]Window [%{public}u, %{public}s] minimize end, ret = %{public}d",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+        };
+
+    NativeValue* lastParam = (info.argc == 0) ? nullptr :
+        (info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsWindow::OnMinimize",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
 {
     WLOGFD("Try to find window %{public}s in g_jsWindowMap", windowName.c_str());
@@ -4003,6 +4053,7 @@ void BindFunctions(NativeEngine& engine, NativeObject* object, const char *modul
     BindNativeFunction(engine, *object, "setAspectRatio", moduleName, JsWindow::SetAspectRatio);
     BindNativeFunction(engine, *object, "resetAspectRatio", moduleName, JsWindow::ResetAspectRatio);
     BindNativeFunction(engine, *object, "setWaterMarkFlag", moduleName, JsWindow::SetWaterMarkFlag);
+    BindNativeFunction(engine, *object, "minimize", moduleName, JsWindow::Minimize);
 }
 }  // namespace Rosen
 }  // namespace OHOS
