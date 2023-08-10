@@ -2226,13 +2226,13 @@ void SceneSessionManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, 
 
 void SceneSessionManager::StartWindowInfoReportLoop()
 {
-    WLOGFI(".report loop");
+    WLOGFI("Report loop");
     if (eventHandler_ == nullptr) {
-        WLOGFE(".report event null");
+        WLOGFE("Report event null");
         return ;
     }
     if (isReportTaskStart_) {
-        WLOGFE(".report is ReportTask Start");
+        WLOGFE("Report is ReportTask Start");
         return;
     }
     auto task = [this]() {
@@ -2243,7 +2243,7 @@ void SceneSessionManager::StartWindowInfoReportLoop()
     int64_t delayTime = 1000 * 60 * 60; // an hour. 1000 * 60 * 60
     bool ret = eventHandler_->PostTask(task, "WindowInfoReport", delayTime);
     if (!ret) {
-        WLOGFE(".report post listener callback task failed. the task name is WindowInfoReport");
+        WLOGFE("Report post listener callback task failed. the task name is WindowInfoReport");
         return;
     }
     isReportTaskStart_ = true;
