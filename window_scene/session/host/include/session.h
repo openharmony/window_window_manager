@@ -212,7 +212,9 @@ public:
     sptr<IRemoteObject> GetAbilityToken() const;
     WindowMode GetWindowMode();
     virtual void SetZOrder(uint32_t zOrder);
-    uint32_t GetZOrder();
+    uint32_t GetZOrder() const;
+    void SetUINodeId(uint32_t uiNodeId);
+    uint32_t GetUINodeId() const;
     WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
 
@@ -259,6 +261,7 @@ protected:
     SystemSessionConfig systemConfig_;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
     uint32_t zOrder_ = 0;
+    uint32_t uiNodeId_ = 0;
     bool isFocused_ = false;
     float aspectRatio_ = 0.0f;
 

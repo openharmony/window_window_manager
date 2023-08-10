@@ -2416,29 +2416,36 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
     auto task = [this, weakSceneSession, type]() {
         std::vector<sptr<AccessibilityWindowInfo>> infos;
         auto scnSession = weakSceneSession.promote();
-        FillWindowInfo(infos, scnSession);
-        SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(infos, type);
+        if (FillWindowInfo(infos, scnSession)) {
+            SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(infos, type);
+        }
     };
     taskScheduler_->PostAsyncTask(task);
 }
 
-void SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,
+bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,
     const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
         WLOGFW("null scene session.");
-        return;
+        return false;
+    }
+    if (sceneSession->GetSessionInfo().bundleName_.find("SCBGestureBack") != std::string::npos) {
+        WLOGFW("filter gesture window.");
+        return false;
     }
     sptr<AccessibilityWindowInfo> info = new (std::nothrow) AccessibilityWindowInfo();
     if (info == nullptr) {
         WLOGFE("null info.");
-        return;
+        return false;
     }
     if (sceneSession->GetSessionInfo().isSystem_) {
         info->wid_ = 1;
+        info->innerWid_ = static_cast<int32_t>(sceneSession->GetPersistentId());
     } else {
         info->wid_ = static_cast<int32_t>(sceneSession->GetPersistentId());
     }
+    info->uiNodeId_ = sceneSession->GetUINodeId();
     WSRect wsrect = sceneSession->GetSessionRect();
     info->windowRect_ = {wsrect.posX_, wsrect.posY_, wsrect.width_, wsrect.height_ };
     info->focused_ = sceneSession->GetPersistentId() == focusedSessionId_;
@@ -2451,6 +2458,8 @@ void SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
         info->isDecorEnable_ = property->IsDecorEnable();
     }
     infos.emplace_back(info);
+    WLOGFD("wid = %{public}d, inWid = %{public}d, uiNId = %{public}d", info->wid_, info->innerWid_, info->uiNodeId_);
+    return true;
 }
 
 std::string SceneSessionManager::GetSessionSnapshotFilePath(int32_t persistentId)
