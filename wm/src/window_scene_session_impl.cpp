@@ -977,8 +977,7 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
         windowSystemConfig_.isSystemDecorEnable_ &&
         WindowHelper::IsWindowModeSupported(windowSystemConfig_.decorModeSupportInfo_, GetMode());
     WLOGFD("get decor enable %{public}d", enable);
-    return enable;
-    
+    return enable; 
 }
 
 WMError WindowSceneSessionImpl::Minimize()
