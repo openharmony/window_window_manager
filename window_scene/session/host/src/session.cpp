@@ -467,6 +467,7 @@ WSError Session::UpdateWindowSessionProperty(sptr<WindowSessionProperty> propert
 
 WSError Session::Foreground(sptr<WindowSessionProperty> property)
 {
+    HandleDialogForeground();
     SessionState state = GetSessionState();
     WLOGFI("Foreground session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
@@ -494,8 +495,41 @@ void Session::NotifyCallingSessionForeground()
     }
 }
 
+void Session::HandleDialogBackground()
+{
+    const auto& type = GetWindowType();
+    if (type < WindowType::APP_MAIN_WINDOW_BASE || type >= WindowType::APP_MAIN_WINDOW_END) {
+        WLOGFD("Current session is not main window, id: %{public}d, type: %{public}d", GetPersistentId(), type);
+        return;
+    }
+    for (const auto& dialog : dialogVec_) {
+        if (dialog == nullptr) {
+            continue;
+        }
+        WLOGFD("Background dialog, id: %{public}d, dialogId: %{public}d", GetPersistentId(), dialog->GetPersistentId());
+        dialog->SetActive(false);
+        dialog->Background();
+    }
+}
+
+void Session::HandleDialogForeground()
+{
+    const auto& type = GetWindowType();
+    if (type < WindowType::APP_MAIN_WINDOW_BASE || type >= WindowType::APP_MAIN_WINDOW_END) {
+        WLOGFD("Current session is not main window, id: %{public}d, type: %{public}d", GetPersistentId(), type);
+    }
+    for (const auto& dialog : dialogVec_) {
+        if (dialog == nullptr) {
+            continue;
+        }
+        WLOGFD("Foreground dialog, id: %{public}d, dialogId: %{public}d", GetPersistentId(), dialog->GetPersistentId());
+        dialog->Foreground(dialog->GetSessionProperty());
+    }
+}
+
 WSError Session::Background()
 {
+    HandleDialogBackground();
     SessionState state = GetSessionState();
     WLOGFI("Background session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
