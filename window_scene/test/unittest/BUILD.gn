@@ -29,6 +29,7 @@ group("unittest") {
     ":ws_session_manager_agent_controller_test",
     ":ws_session_test",
     ":ws_window_scene_config_test",
+    ":ws_window_session_property_test",
   ]
 }
 
@@ -176,6 +177,16 @@ ohos_unittest("ws_scene_session_test") {
   ]
 }
 
+ohos_unittest("ws_window_session_property_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_session_property_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [ "c_utils:utils" ]
+}
+
 ## Build ws_unittest_common.a {{{
 config("ws_unittest_common_public_config") {
   include_dirs = [
@@ -188,6 +199,7 @@ config("ws_unittest_common_public_config") {
     "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/window_scene/session_manager/include",
     "${window_base_path}/window_scene/session_manager_service/include",
+    "${window_base_path}/window_scene/common/include",
     "${window_base_path}/window_scene",
     "${window_base_path}/window_scene/test",
     "//third_party/googletest/googlemock/include",
