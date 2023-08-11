@@ -85,6 +85,7 @@ public:
     static NativeValue* SetPrivacyMode(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetWindowPrivacyMode(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetTouchable(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetResizeByDragEnabled(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetWindowTouchable(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetTransparent(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetCallingWindow(NativeEngine* engine, NativeCallbackInfo* info);
@@ -187,6 +188,7 @@ private:
     NativeValue* OnSetPrivacyMode(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetWindowPrivacyMode(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetTouchable(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetResizeByDragEnabled(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetWindowTouchable(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetTransparent(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetCallingWindow(NativeEngine& engine, NativeCallbackInfo& info);
