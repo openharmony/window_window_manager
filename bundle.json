@@ -58,7 +58,7 @@
           "resource_management",
           "resource_schedule_service",
           "efficiency_manager",
-          "resourceschedule_frame_aware_sched_override",
+          "frame_aware_sched_override",
           "imf",
           "frame_aware_sched",
           "screenlock_mgr",
