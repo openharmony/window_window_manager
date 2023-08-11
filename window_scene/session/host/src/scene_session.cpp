@@ -710,6 +710,19 @@ void SceneSession::UpdateNativeVisibility(bool visible)
     } else {
         specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
     }
+    // update private state
+    if (!property_) {
+        WLOGFE("property_ is null");
+        return;
+    }
+    auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);
+    if (screenSession == nullptr) {
+        WLOGFE("screen session is null");
+        return;
+    }
+    if (property_->GetPrivacyMode() || property_->GetSystemPrivacyMode()) {
+        ScreenSessionManager::GetInstance().UpdatePrivateStateAndNotify(screenSession, visible);
+    }
 }
 
 bool SceneSession::IsVisible() const
@@ -741,7 +754,8 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
         WLOGFE("screen session is null");
         return;
     }
-    if (GetSessionState() == SessionState::STATE_FOREGROUND || GetSessionState() == SessionState::STATE_ACTIVE) {
+    if (GetSessionState() == SessionState::STATE_FOREGROUND || GetSessionState() == SessionState::STATE_ACTIVE
+        || (GetSessionInfo().isSystem_ && isVisible_)) {
         ScreenSessionManager::GetInstance().UpdatePrivateStateAndNotify(screenSession, isPrivacy);
     }
 }
