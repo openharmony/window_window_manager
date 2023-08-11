@@ -1134,10 +1134,28 @@ WMError WindowSceneSessionImpl::SetWindowMode(WindowMode mode)
         return ret;
     }
 
-    if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY && hostSession_) {
-        hostSession_->OnSessionEvent(SessionEvent::EVENT_SPLIT_PRIMARY);
-    } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY && hostSession_) {
-        hostSession_->OnSessionEvent(SessionEvent::EVENT_SPLIT_SECONDARY);
+    if ((mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
+        hostSession_) {
+        if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
+            hostSession_->OnSessionEvent(SessionEvent::EVENT_SPLIT_PRIMARY);
+        } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            hostSession_->OnSessionEvent(SessionEvent::EVENT_SPLIT_SECONDARY);
+        }
+
+        ret = SetLayoutFullScreenByApiVersion(true);
+        if (ret != WMError::WM_OK) {
+            WLOGFE("SetLayoutFullScreenByApiVersion errCode:%{public}d winId:%{public}u",
+                static_cast<int32_t>(ret), GetWindowId());
+            return ret;
+        }
+        SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+        statusProperty.enable_ = false;
+        ret = SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusProperty);
+        if (ret != WMError::WM_OK) {
+            WLOGFE("SetSystemBarProperty errCode:%{public}d winId:%{public}u",
+                static_cast<int32_t>(ret), GetWindowId());
+            return ret;
+        }
     }
     return WMError::WM_OK;
 }
