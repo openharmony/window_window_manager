@@ -85,6 +85,41 @@ bool SessionPermission::VerifyCallingPermission(const std::string &permissionNam
     return true;
 }
 
+bool SessionPermission::VerifySessionPermission()
+{
+    if (IsSACalling()) {
+        WLOGFI("this is SA Calling, Permission verification succeeded.");
+        return true;
+    }
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        WLOGFI("Permission verification succeeded.");
+        return true;
+    }
+    WLOGFE("Permission verification failed");
+    return false;
+}
+
+bool SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()
+{
+    if (IsSACalling() || IsShellCall()) {
+        return true;
+    }
+    auto callerToken = IPCSkeleton::GetCallingFullTokenID();
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callerToken);
+}
+
+bool SessionPermission::IsShellCall()
+{
+    auto callerToken = IPCSkeleton::GetCallingTokenID();
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
+    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
+        WLOGFI("caller tokenType is shell, verify success");
+        return true;
+    }
+    WLOGFI("Not shell called.");
+    return false;
+}
+
 bool SessionPermission::IsStartByHdcd()
 {
     OHOS::Security::AccessToken::NativeTokenInfo info;

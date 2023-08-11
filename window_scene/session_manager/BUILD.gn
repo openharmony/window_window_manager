@@ -40,6 +40,7 @@ config("session_manager_public_config") {
     "${window_base_path}/dmserver/include",
 
     # for scene session manager
+    "${ability_runtime_inner_api_path}/session_handler/include",
     "${resourceschedule_path}/ffrt/interfaces/kits",
     "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/wmserver/include",
@@ -60,7 +61,9 @@ config("session_manager_public_config") {
 ohos_shared_library("scene_session_manager") {
   sources = [
     "../../wm/src/zidl/window_manager_agent_proxy.cpp",
+    "src/distributed_client.cpp",
     "src/extension_session_manager.cpp",
+    "src/scb_session_handler.cpp",
     "src/scene_session_converter.cpp",
     "src/scene_session_manager.cpp",
     "src/session_listener_controller.cpp",
@@ -88,11 +91,13 @@ ohos_shared_library("scene_session_manager") {
     "ability_runtime:ability_manager",
     "ability_runtime:ability_start_setting",
     "ability_runtime:mission_info",
+    "ability_runtime:session_handler",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "config_policy:configpolicy_util",
     "display_manager:displaymgr",
+    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
