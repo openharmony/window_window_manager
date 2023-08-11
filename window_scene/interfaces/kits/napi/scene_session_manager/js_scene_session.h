@@ -79,6 +79,7 @@ private:
     void ProcessRequestedOrientationChange();
 
     void PendingSessionActivation(SessionInfo& info);
+    void PendingSessionActivationInner(SessionInfo& info);
     void OnSessionStateChange(const SessionState& state);
     void OnSessionEvent(uint32_t eventId);
     void OnCreateSpecificSession(const sptr<SceneSession>& sceneSession);

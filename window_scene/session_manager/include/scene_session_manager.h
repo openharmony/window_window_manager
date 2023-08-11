@@ -73,12 +73,15 @@ public:
         sptr<WindowSessionProperty> property = nullptr);
     std::future<int32_t> RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession, const bool isDelegator = false);
-    WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession);
+    WSError RequestSceneSessionDestruction(
+        const sptr<SceneSession>& sceneSession, const bool needRemoveSession = true);
     WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession);
     void StartAbilityBySpecified(const SessionInfo& sessionInfo);
     void SetRootSceneContext(AbilityRuntime::Context* context);
     sptr<RootSceneSession> GetRootSceneSession();
     sptr<SceneSession> GetSceneSession(int32_t persistentId);
+    sptr<SceneSession> GetSceneSessionByName(const std::string& bundleName,
+        const std::string& moduleName, const std::string& abilityName);
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
