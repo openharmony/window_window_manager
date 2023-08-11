@@ -993,6 +993,7 @@ void SceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
 
 void SceneSessionManager::NotifySessionTouchOutside(int32_t action, int32_t x, int32_t y)
 {
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto &item : sceneSessionMap_) {
         auto sceneSession = item.second;
         if (sceneSession == nullptr) {
@@ -2513,6 +2514,24 @@ std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowVisibilityC
     return visibilityChangeInfo;
 }
 
+sptr<SceneSession> SceneSessionManager::SelectSesssionFromMap(const uint64_t& surfaceId)
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto &item : sceneSessionMap_) {
+        auto sceneSession = item.second;
+        if (sceneSession == nullptr) {
+            continue;
+        }
+        if (sceneSession->GetSurfaceNode() == nullptr) {
+            continue;
+        }
+        if (surfaceId == sceneSession->GetSurfaceNode()->GetId()) {
+            return sceneSession;
+        }
+    }
+    return nullptr;
+}
+
 void SceneSessionManager::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclusionData> occlusiontionData)
 {
     WLOGFI("WindowVisibilityChangeCallback: entry");
@@ -2533,20 +2552,10 @@ void SceneSessionManager::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclu
     for (const auto& elem : visibilityChangeInfo) {
         uint64_t surfaceId = elem.first;
         bool isVisible = elem.second;
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        auto iter = sceneSessionMap_.begin();
-        for (; iter != sceneSessionMap_.end(); iter++) {
-            if (iter->second == nullptr || iter->second->GetSurfaceNode() == nullptr) {
-                continue;
-            }
-            if (surfaceId == iter->second->GetSurfaceNode()->GetId()) {
-                break;
-            }
-        }
-        if (iter == sceneSessionMap_.end()) {
+        sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
+        if (session == nullptr) {
             continue;
         }
-        sptr<SceneSession> session = iter->second;
         session->SetVisible(isVisible);
         windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(session->GetWindowId(), session->GetCallingPid(),
             session->GetCallingUid(), isVisible, session->GetWindowType()));
