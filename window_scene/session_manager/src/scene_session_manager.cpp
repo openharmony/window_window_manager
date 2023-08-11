@@ -64,6 +64,8 @@
 #include "xcollie/watchdog.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "session_manager_agent_controller.h"
+#include "distributed_client.h"
+#include "softbus_bus_center.h"
 #include "window_manager.h"
 #include "perform_reporter.h"
 #include "focus_change_info.h"
@@ -90,6 +92,10 @@ constexpr int32_t SCALE_DIMENSION = 2;
 constexpr int32_t TRANSLATE_DIMENSION = 2;
 constexpr int32_t ROTAION_DIMENSION = 4;
 constexpr int32_t CUBIC_CURVE_DIMENSION = 4;
+const std::string DM_PKG_NAME = "ohos.distributedhardware.devicemanager";
+constexpr int32_t NON_ANONYMIZE_LENGTH = 6;
+const std::string EMPTY_DEVICE_ID = "";
+const int32_t MAX_NUMBER_OF_DISTRIBUTED_SESSIONS = 20;
 
 constexpr int WINDOW_NAME_MAX_WIDTH = 21;
 constexpr int DISPLAY_NAME_MAX_WIDTH = 10;
@@ -167,6 +173,8 @@ void SceneSessionManager::Init()
 
     listenerController_ = std::make_shared<SessionListenerController>();
     listenerController_->Init();
+    scbSessionHandler_ = new ScbSessionHandler();
+    AAFwk::AbilityManagerClient::GetInstance()->RegisterSessionHandler(scbSessionHandler_);
 
     StartWindowInfoReportLoop();
     WLOGI("SceneSessionManager init success.");
@@ -249,6 +257,9 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     sceneSession->SetSessionContinueState(continueState);
+    DistributedClient dmsClient;
+    dmsClient.SetMissionContinueState(sceneSession->GetPersistentId(),
+                                      static_cast<AAFwk::ContinueState>(continueState));
     return WSError::WS_OK;
 }
 
@@ -883,6 +894,10 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMap_.erase(persistentId);
+            if (listenerController_ != nullptr && !(scnSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
+                WLOGFD("NotifySessionDestroyed, id: %{public}d", persistentId);
+                listenerController_->NotifySessionDestroyed(persistentId);
+            }
         }
         return WSError::WS_OK;
     };
@@ -1537,6 +1552,25 @@ static bool IsValidDigitString(const std::string& windowIdStr)
     return true;
 }
 
+void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    NotifySessionExceptionFunc sessionExceptionFunc = [this](const SessionInfo& info) {
+        if (info.errorCode == static_cast<int32_t>(AAFwk::ErrorLifecycleState::ABILITY_STATE_LOAD_TIMEOUT)) {
+            auto scnSession = GetSceneSession(info.persistentId_);
+            if (!scnSession && listenerController_ != nullptr) {
+                WLOGFD("NotifySessionClosed when ability load timeout, id: %{public}d", info.persistentId_);
+                listenerController_->NotifySessionClosed(info.persistentId_);
+            }
+        }
+    };
+    sceneSession->SetSessionExceptionListener(sessionExceptionFunc);
+    WLOGFD("RegisterSessionExceptionFunc success");
+}
+
 bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
 {
     if (session->IsVisible() || session->GetSessionState() == SessionState::STATE_ACTIVE ||
@@ -1807,6 +1841,15 @@ WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
         if (res != WSError::WS_OK) {
             return res;
         }
+        if (listenerController_ != nullptr) {
+            if (isFocused) {
+                WLOGFD("NotifySessionFocused, id: %{public}d", sceneSession->GetPersistentId());
+                listenerController_->NotifySessionFocused(sceneSession->GetPersistentId());
+            } else {
+                WLOGFD("NotifySessionUnfocused, id: %{public}d", sceneSession->GetPersistentId());
+                listenerController_->NotifySessionUnfocused(sceneSession->GetPersistentId());
+            }
+        }
         if (windowFocusChangedFunc_ != nullptr) {
             windowFocusChangedFunc_(persistentId, isFocused);
         }
@@ -1939,6 +1982,27 @@ WSError SceneSessionManager::NotifyWaterMarkFlagChangedResult(bool hasWaterMark)
     return WSError::WS_OK;
 }
 
+void SceneSessionManager::NotifyCompleteFirstFrameDrawing(int32_t persistentId)
+{
+    WLOGFI("NotifyCompleteFirstFrameDrawing, persistentId: %{public}d", persistentId);
+    auto scnSession = GetSceneSession(persistentId);
+    if (!scnSession && listenerController_ != nullptr &&
+        !(scnSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
+        WLOGFD("NotifySessionCreated, id: %{public}d", persistentId);
+        listenerController_->NotifySessionCreated(persistentId);
+    }
+}
+
+void SceneSessionManager::NotifySessionMovedToFront(int32_t persistentId)
+{
+    WLOGFI("NotifySessionMovedToFront, persistentId: %{public}d", persistentId);
+    auto scnSession = GetSceneSession(persistentId);
+    if (!scnSession && listenerController_ != nullptr &&
+        !(scnSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
+        listenerController_->NotifySessionMovedToFront(persistentId);
+    }
+}
+
 WSError SceneSessionManager::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label)
 {
     WLOGFI("run SetSessionLabel");
@@ -1952,6 +2016,10 @@ WSError SceneSessionManager::SetSessionLabel(const sptr<IRemoteObject> &token, c
         if (sceneSession->GetAbilityToken() == token) {
             WLOGFI("try to update session label.");
             sessionListener_->OnSessionLabelChange(iter.first, label);
+            if (listenerController_ != nullptr) {
+                WLOGFD("NotifySessionLabelUpdated, id: %{public}d", iter.first);
+                listenerController_->NotifySessionLabelUpdated(iter.first);
+            }
             return WSError::WS_OK;
         }
     }
@@ -1972,6 +2040,10 @@ WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject> &token,
         if (sceneSession->GetAbilityToken() == token) {
             WLOGFI("try to update session icon.");
             sessionListener_->OnSessionIconChange(iter.first, icon);
+            if (listenerController_ != nullptr && !(sceneSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
+                WLOGFD("NotifySessionIconChanged, id: %{public}d", iter.first);
+                listenerController_->NotifySessionIconChanged(iter.first, icon);
+            }
             return WSError::WS_OK;
         }
     }
@@ -1981,41 +2053,179 @@ WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject> &token,
 WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionListener>& listener)
 {
     WLOGFI("run RegisterSessionListener");
-    return listenerController_->AddSessionListener(listener);
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
+        WLOGFE("The caller is not system-app, can not use system-api");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!SessionPermission::VerifySessionPermission()) {
+        WLOGFE("The caller has not permission granted");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    auto task = [this, &listener]() {
+        return listenerController_->AddSessionListener(listener);
+    };
+    return taskScheduler_->PostSyncTask(task);
 }
 
 WSError SceneSessionManager::UnRegisterSessionListener(const sptr<ISessionListener>& listener)
 {
     WLOGFI("run UnRegisterSessionListener");
-    listenerController_->DelSessionListener(listener);
-    return WSError::WS_OK;
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
+        WLOGFE("The caller is not system-app, can not use system-api");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!SessionPermission::VerifySessionPermission()) {
+        WLOGFE("The caller has not permission granted");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    auto task = [this, &listener]() {
+        listenerController_->DelSessionListener(listener);
+        return WSError::WS_OK;
+    };
+    return taskScheduler_->PostSyncTask(task);
 }
 
-WSError SceneSessionManager::GetSessionInfos(int32_t numMax, std::vector<SessionInfoBean>& sessionInfos)
+WSError SceneSessionManager::GetSessionInfos(const std::string& deviceId, int32_t numMax,
+                                             std::vector<SessionInfoBean>& sessionInfos)
 {
     WLOGFI("run GetSessionInfos");
-    std::map<int32_t, sptr<SceneSession>>::iterator iter;
-    std::vector<sptr<SceneSession>> sceneSessionInfos;
-    for (iter = sceneSessionMap_.begin(); iter != sceneSessionMap_.end(); iter++) {
-        if (static_cast<int>(sceneSessionInfos.size()) >= numMax) {
-            break;
-        }
-        sceneSessionInfos.emplace_back(iter->second);
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
+        WLOGFE("The caller is not system-app, can not use system-api");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    return SceneSessionConverter::ConvertToMissionInfos(sceneSessionInfos, sessionInfos);
+    if (!SessionPermission::VerifySessionPermission()) {
+        WLOGFE("The caller has not permission granted");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    auto task = [this, &deviceId, numMax, &sessionInfos]() {
+        if (CheckIsRemote(deviceId)) {
+            int ret = GetRemoteSessionInfos(deviceId, numMax, sessionInfos);
+            if (ret != ERR_OK) {
+                return WSError::WS_ERROR_INVALID_PARAM;
+            } else {
+                return WSError::WS_OK;
+            }
+        }
+        std::map<int32_t, sptr<SceneSession>>::iterator iter;
+        std::vector<sptr<SceneSession>> sceneSessionInfos;
+        for (iter = sceneSessionMap_.begin(); iter != sceneSessionMap_.end(); iter++) {
+            if (static_cast<int>(sceneSessionInfos.size()) >= numMax) {
+                break;
+            }
+            sceneSessionInfos.emplace_back(iter->second);
+        }
+        return SceneSessionConverter::ConvertToMissionInfos(sceneSessionInfos, sessionInfos);
+    };
+    return taskScheduler_->PostSyncTask(task);
 }
 
-WSError SceneSessionManager::GetSessionInfo(int32_t persistentId, SessionInfoBean& sessionInfo)
+int SceneSessionManager::GetRemoteSessionInfos(const std::string& deviceId, int32_t numMax,
+                                               std::vector<SessionInfoBean>& sessionInfos)
+{
+    WLOGFI("GetRemoteSessionInfos From Dms begin");
+    DistributedClient dmsClient;
+    int result = dmsClient.GetMissionInfos(deviceId, numMax, sessionInfos);
+    if (result != ERR_OK) {
+        WLOGFE("GetRemoteMissionInfos failed, result = %{public}d", result);
+        return result;
+    }
+    return ERR_OK;
+}
+
+WSError SceneSessionManager::GetSessionInfo(const std::string& deviceId,
+                                            int32_t persistentId, SessionInfoBean& sessionInfo)
 {
     WLOGFI("run GetSessionInfo");
-    std::map<int32_t, sptr<SceneSession>>::iterator iter;
-    sptr<SceneSession> sceneSession;
-    for (iter = sceneSessionMap_.begin(); iter != sceneSessionMap_.end(); iter++) {
-        if (persistentId == iter->first) {
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
+        WLOGFE("The caller is not system-app, can not use system-api");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!SessionPermission::VerifySessionPermission()) {
+        WLOGFE("The caller has not permission granted");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    auto task = [this, &deviceId, persistentId, &sessionInfo]() {
+        if (CheckIsRemote(deviceId)) {
+            int ret = GetRemoteSessionInfo(deviceId, persistentId, sessionInfo);
+            if (ret != ERR_OK) {
+                return WSError::WS_ERROR_INVALID_PARAM;
+            } else {
+                return WSError::WS_OK;
+            }
+        }
+        std::map<int32_t, sptr<SceneSession>>::iterator iter;
+        iter = sceneSessionMap_.find(persistentId);
+        if (iter != sceneSessionMap_.end()) {
             return SceneSessionConverter::ConvertToMissionInfo(iter->second, sessionInfo);
         }
+        return WSError::WS_OK;
+    };
+    return taskScheduler_->PostSyncTask(task);
+}
+
+int SceneSessionManager::GetRemoteSessionInfo(const std::string& deviceId,
+                                              int32_t persistentId, SessionInfoBean& sessionInfo)
+{
+    WLOGFI("GetRemoteSessionInfoFromDms begin");
+    std::vector<SessionInfoBean> sessionVector;
+    int result = GetRemoteSessionInfos(deviceId, MAX_NUMBER_OF_DISTRIBUTED_SESSIONS, sessionVector);
+    if (result != ERR_OK) {
+        return result;
     }
-    return WSError::WS_OK;
+    for (auto iter = sessionVector.begin(); iter != sessionVector.end(); iter++) {
+        if (iter->id == persistentId) {
+            sessionInfo = *iter;
+            return ERR_OK;
+        }
+    }
+    WLOGFW("missionId not found");
+    return ERR_INVALID_VALUE;
+}
+
+bool SceneSessionManager::CheckIsRemote(const std::string& deviceId)
+{
+    if (deviceId.empty()) {
+        WLOGFI("CheckIsRemote: deviceId is empty.");
+        return false;
+    }
+    std::string localDeviceId;
+    if (!GetLocalDeviceId(localDeviceId)) {
+        WLOGFE("CheckIsRemote: get local deviceId failed");
+        return false;
+    }
+    if (localDeviceId == deviceId) {
+        WLOGFI("CheckIsRemote: deviceId is local.");
+        return false;
+    }
+    WLOGFD("CheckIsRemote, deviceId = %{public}s", AnonymizeDeviceId(deviceId).c_str());
+    return true;
+}
+
+bool SceneSessionManager::GetLocalDeviceId(std::string& localDeviceId)
+{
+    auto localNode = std::make_unique<NodeBasicInfo>();
+    int32_t errCode = GetLocalNodeDeviceInfo(DM_PKG_NAME.c_str(), localNode.get());
+    if (errCode != ERR_OK) {
+        WLOGFE("GetLocalNodeDeviceInfo errCode = %{public}d", errCode);
+        return false;
+    }
+    if (localNode != nullptr) {
+        localDeviceId = localNode->networkId;
+        WLOGFD("get local deviceId, deviceId = %{public}s", AnonymizeDeviceId(localDeviceId).c_str());
+        return true;
+    }
+    WLOGFE("localDeviceId null");
+    return false;
+}
+
+std::string SceneSessionManager::AnonymizeDeviceId(const std::string& deviceId)
+{
+    if (deviceId.length() < NON_ANONYMIZE_LENGTH) {
+        return EMPTY_DEVICE_ID;
+    }
+    std::string anonDeviceId = deviceId.substr(0, NON_ANONYMIZE_LENGTH);
+    anonDeviceId.append("******");
+    return anonDeviceId;
 }
 
 WSError SceneSessionManager::GetAllAbilityInfos(const AAFwk::Want &want, int32_t userId,
@@ -2049,10 +2259,30 @@ WSError SceneSessionManager::TerminateSessionNew(const sptr<AAFwk::SessionInfo> 
     return errCode;
 }
 
-WSError SceneSessionManager::GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution)
+WSError SceneSessionManager::GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
+                                                std::shared_ptr<Media::PixelMap>& snapshot, bool isLowResolution)
 {
     WLOGFI("run GetSessionSnapshot");
-    auto task = [this, persistentId, &snapshot, isLowResolution]() {
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
+        WLOGFE("The caller is not system-app, can not use system-api");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!SessionPermission::VerifySessionPermission()) {
+        WLOGFE("The caller has not permission granted");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    auto task = [this, &deviceId, persistentId, &snapshot, isLowResolution]() {
+        if (CheckIsRemote(deviceId)) {
+            WLOGFI("get remote session snapshot.");
+            std::unique_ptr<AAFwk::MissionSnapshot> missionSnapshotPtr = std::make_unique<AAFwk::MissionSnapshot>();
+            int ret = GetRemoteSessionSnapshotInfo(deviceId, persistentId, *missionSnapshotPtr);
+            if (ret != ERR_OK) {
+                return WSError::WS_ERROR_INVALID_PARAM;
+            } else {
+                snapshot = missionSnapshotPtr->snapshot;
+                return WSError::WS_OK;
+            }
+        }
         sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
         if (!sceneSession) {
             WLOGFE("fail to find session by persistentId: %{public}d", persistentId);
@@ -2073,6 +2303,21 @@ WSError SceneSessionManager::GetSessionSnapshot(int32_t persistentId, std::share
         return WSError::WS_OK;
     };
     return taskScheduler_->PostSyncTask(task);
+}
+
+int SceneSessionManager::GetRemoteSessionSnapshotInfo(const std::string& deviceId, int32_t sessionId,
+                                                      AAFwk::MissionSnapshot& sessionSnapshot)
+{
+    WLOGFI("GetRemoteSessionSnapshotInfo begin");
+    std::unique_ptr<AAFwk::MissionSnapshot> sessionSnapshotPtr = std::make_unique<AAFwk::MissionSnapshot>();
+    DistributedClient dmsClient;
+    int result = dmsClient.GetRemoteMissionSnapshotInfo(deviceId, sessionId, sessionSnapshotPtr);
+    if (result != ERR_OK) {
+        WLOGFE("GetRemoteMissionSnapshotInfo failed, result = %{public}d", result);
+        return result;
+    }
+    sessionSnapshot = *sessionSnapshotPtr;
+    return ERR_OK;
 }
 
 WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionChangeListener> sessionListener)
@@ -2477,7 +2722,12 @@ std::string SceneSessionManager::GetSessionSnapshotFilePath(int32_t persistentId
             WLOGFE("session is nullptr");
             return std::string("");
         }
-        return scnSession->GetSessionSnapshotFilePath();
+        std::string filePath = scnSession->GetSessionSnapshotFilePath();
+        if (listenerController_ != nullptr && !filePath.empty()) {
+            WLOGFD("NotifySessionSnapshotChanged, id: %{public}d", scnSession->GetPersistentId());
+            listenerController_->NotifySessionSnapshotChanged(scnSession->GetPersistentId());
+        }
+        return filePath;
     };
     return taskScheduler_->PostSyncTask(task);
 }

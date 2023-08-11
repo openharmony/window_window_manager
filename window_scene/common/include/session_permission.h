@@ -20,10 +20,16 @@
 
 namespace OHOS {
 namespace Rosen {
+namespace PermissionConstants {
+    constexpr const char* PERMISSION_MANAGE_MISSION = "ohos.permission.MANAGE_MISSIONS";
+}
 class SessionPermission {
 public:
     static bool IsSystemServiceCalling(bool needPrintLog = true);
     static bool IsSystemCalling();
+    static bool VerifySessionPermission();
+    static bool JudgeCallerIsAllowedToUseSystemAPI();
+    static bool IsShellCall();
     static bool IsStartByHdcd();
     static bool IsStartedByInputMethod();
     static bool IsSACalling();

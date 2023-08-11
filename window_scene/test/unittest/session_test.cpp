@@ -335,7 +335,7 @@ HWTEST_F(WindowSessionTest, NotifySessionException01, Function | SmallTest | Lev
     };
 
     sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
-    session_->sessionExceptionFunc_ = nullptr;
+    session_->sessionExceptionFuncs_.clear();
     session_->NotifySessionException(info);
     ASSERT_EQ(resultValue, 0);
 

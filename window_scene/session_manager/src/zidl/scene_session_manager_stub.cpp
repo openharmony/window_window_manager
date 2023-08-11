@@ -287,9 +287,10 @@ int SceneSessionManagerStub::HandleUnRegisterSessionListener(MessageParcel& data
 int SceneSessionManagerStub::HandleGetSessionInfos(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleGetSessionInfos!");
+    std::string deviceId = Str16ToStr8(data.ReadString16());
     int numMax = data.ReadInt32();
     std::vector<SessionInfoBean> missionInfos;
-    WSError errCode = GetSessionInfos(numMax, missionInfos);
+    WSError errCode = GetSessionInfos(deviceId, numMax, missionInfos);
     reply.WriteInt32(missionInfos.size());
     for (auto& it : missionInfos) {
         if (!reply.WriteParcelable(&it)) {
@@ -307,8 +308,9 @@ int SceneSessionManagerStub::HandleGetSessionInfo(MessageParcel& data, MessagePa
 {
     WLOGFI("run HandleGetSessionInfo!");
     SessionInfoBean info;
+    std::string deviceId = Str16ToStr8(data.ReadString16());
     int32_t persistentId = data.ReadInt32();
-    WSError errCode = GetSessionInfo(persistentId, info);
+    WSError errCode = GetSessionInfo(deviceId, persistentId, info);
     if (!reply.WriteParcelable(&info)) {
         WLOGFE("GetSessionInfo error");
         return ERR_INVALID_DATA;
@@ -429,10 +431,11 @@ int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel &data, Message
 int SceneSessionManagerStub::HandleGetSessionSnapshot(MessageParcel &data, MessageParcel &reply)
 {
     WLOGFI("run HandleGetSessionSnapshot!");
+    std::string deviceId = Str16ToStr8(data.ReadString16());
     int32_t persistentId = data.ReadInt32();
     bool isLowResolution = data.ReadBool();
     std::shared_ptr<Media::PixelMap> snapshot = std::make_shared<Media::PixelMap>();
-    const WSError& ret = GetSessionSnapshot(persistentId, snapshot, isLowResolution);
+    const WSError& ret = GetSessionSnapshot(deviceId, persistentId, snapshot, isLowResolution);
     reply.WriteParcelable(snapshot.get());
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;

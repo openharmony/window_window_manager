@@ -697,15 +697,30 @@ WSError Session::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySe
     sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
     sessionInfo_.errorCode = abilitySessionInfo->errorCode;
     sessionInfo_.errorReason = abilitySessionInfo->errorReason;
-    if (sessionExceptionFunc_) {
-        sessionExceptionFunc_(info);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!sessionExceptionFuncs_.empty()) {
+        for (std::shared_ptr<NotifySessionExceptionFunc> funcSptr: sessionExceptionFuncs_) {
+            auto sessionExceptionFunc = *funcSptr;
+            sessionExceptionFunc(info);
+        }
     }
     return WSError::WS_OK;
 }
 
 void Session::SetSessionExceptionListener(const NotifySessionExceptionFunc& func)
 {
-    sessionExceptionFunc_ = func;
+    if (func == nullptr) {
+        WLOGFE("func is nullptr");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    std::shared_ptr<NotifySessionExceptionFunc> funcSptr = std::make_shared<NotifySessionExceptionFunc>(func);
+    if (std::find(sessionExceptionFuncs_.begin(), sessionExceptionFuncs_.end(), funcSptr) !=
+        sessionExceptionFuncs_.end()) {
+        WLOGFW("func already regitered");
+        return;
+    }
+    sessionExceptionFuncs_.emplace_back(funcSptr);
 }
 
 void Session::SetPendingSessionToForegroundListener(const NotifyPendingSessionToForegroundFunc& func)

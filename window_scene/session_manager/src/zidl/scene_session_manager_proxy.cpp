@@ -564,7 +564,8 @@ WSError SceneSessionManagerProxy::UnRegisterSessionListener(const sptr<ISessionL
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::GetSessionInfos(int32_t numMax, std::vector<SessionInfoBean>& sessionInfos)
+WSError SceneSessionManagerProxy::GetSessionInfos(const std::string& deviceId, int32_t numMax,
+                                                  std::vector<SessionInfoBean>& sessionInfos)
 {
     WLOGFI("run SceneSessionManagerProxy::GetSessionInfos");
     MessageParcel data;
@@ -572,6 +573,10 @@ WSError SceneSessionManagerProxy::GetSessionInfos(int32_t numMax, std::vector<Se
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(deviceId)) {
+        WLOGFE("GetSessionInfos write deviceId failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteInt32(numMax)) {
@@ -591,7 +596,8 @@ WSError SceneSessionManagerProxy::GetSessionInfos(int32_t numMax, std::vector<Se
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::GetSessionInfo(int32_t persistentId, SessionInfoBean& sessionInfo)
+WSError SceneSessionManagerProxy::GetSessionInfo(const std::string& deviceId, int32_t persistentId,
+                                                 SessionInfoBean& sessionInfo)
 {
     WLOGFI("run SceneSessionManagerProxy::GetSessionInfo");
     MessageParcel data;
@@ -599,6 +605,10 @@ WSError SceneSessionManagerProxy::GetSessionInfo(int32_t persistentId, SessionIn
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(deviceId)) {
+        WLOGFE("GetSessionInfo write deviceId failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteInt32(persistentId)) {
@@ -736,7 +746,8 @@ WSError SceneSessionManagerProxy::GetSessionDumpInfo(const std::vector<std::stri
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution)
+WSError SceneSessionManagerProxy::GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
+                                                     std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -745,7 +756,10 @@ WSError SceneSessionManagerProxy::GetSessionSnapshot(int32_t persistentId, std::
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-
+    if (!data.WriteString(deviceId)) {
+        WLOGFE("Write deviceId failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (!data.WriteInt32(persistentId)) {
         WLOGFE("Write persistentId failed");
         return WSError::WS_ERROR_INVALID_PARAM;
