@@ -54,6 +54,8 @@ public:
 
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    const float FLOAT_VALUE = 2.0;
+    uint32_t MAX_WITH_SIZE = 32;
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
 };
@@ -1312,6 +1314,120 @@ HWTEST_F(WindowSceneSessionImplTest, SetAlpha01, Function | SmallTest | Level2)
         ASSERT_EQ(WMError::WM_OK, windowscenesession->SetAlpha(1.0));
     }
 }
+
+/**
+ * @tc.name: DestroySubWindow01
+ * @tc.desc: DestroySubWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, DestroySubWindow01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("DestroySubWindow");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+
+    ASSERT_NE(nullptr, windowscenesession);
+    int ret = 0;
+    windowscenesession->DestroySubWindow();
+    ASSERT_EQ(0, ret);
+}
+
+/**
+ * @tc.name: UpdateFloatingWindowSizeBySizeLimits01
+ * @tc.desc: UpdateFloatingWindowSizeBySizeLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, UpdateFloatingWindowSizeBySizeLimits01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("DestroySubWindow");
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
+    
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+    int ret = 0;
+    windowscenesession->UpdateFloatingWindowSizeBySizeLimits(MAX_WITH_SIZE,MAX_WITH_SIZE);
+    ASSERT_EQ(0, ret);
+}
+
+/**
+ * @tc.name: GetSystemSizeLimits01
+ * @tc.desc: GetSystemSizeLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, GetSystemSizeLimits01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("DestroySubWindow");
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
+    
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+    int ret = 0;
+    windowscenesession->GetSystemSizeLimits(MAX_WITH_SIZE,MAX_WITH_SIZE,FLOAT_VALUE);
+    ASSERT_EQ(0, ret);
+}
+
+/**
+ * @tc.name: UpdateAnimationFlagProperty01
+ * @tc.desc: UpdateAnimationFlagProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, UpdateAnimationFlagProperty01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("DestroySubWindow");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,  windowscenesession->UpdateAnimationFlagProperty(false));
+}
+
+/**
+ * @tc.name: UpdateWindowModeImmediately01
+ * @tc.desc: UpdateWindowModeImmediately
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, UpdateWindowModeImmediately01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("DestroySubWindow");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+    ASSERT_EQ(WMError::WM_OK, windowscenesession->UpdateWindowModeImmediately(WindowMode::WINDOW_MODE_UNDEFINED));
+    windowscenesession->state_ = WindowState::STATE_CREATED;
+    ASSERT_EQ(WMError::WM_OK, windowscenesession->UpdateWindowModeImmediately(WindowMode::WINDOW_MODE_UNDEFINED));
+}
+
+/**
+ * @tc.name: UpdateWindowMode01
+ * @tc.desc: UpdateWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, UpdateWindowMode01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("DestroySubWindow");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, windowscenesession->UpdateWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN));
+    windowscenesession->state_ = WindowState::STATE_CREATED;
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, windowscenesession->UpdateWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN));
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    windowscenesession->hostSession_ = session;
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, windowscenesession->UpdateWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN));
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
