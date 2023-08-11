@@ -126,6 +126,7 @@ public:
     WSError GetSessionInfo(int32_t persistentId, SessionInfoBean& sessionInfo);
     WSError GetAllAbilityInfos(const AAFwk::Want &want, int32_t userId,
         std::vector<AppExecFwk::AbilityInfo> &abilityInfos);
+    WSError PrepareTerminate(int32_t persistentId, bool& isPrepareTerminate);
 
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller);
     WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener);
@@ -162,6 +163,7 @@ protected:
 
 private:
     void Init();
+    void InitPrepareTerminateConfig();
     void LoadWindowSceneXml();
     void ConfigWindowSceneXml();
     void ConfigWindowEffect(const WindowSceneConfig::ConfigItem& effectConfig);
@@ -238,6 +240,7 @@ private:
     int32_t focusedSessionId_ = INVALID_SESSION_ID;
     int32_t brightnessSessionId_ = INVALID_SESSION_ID;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
+    bool isPrepareTerminateEnable_ {false};
     WSRect callingWindowRestoringRect_ = {0, 0, 0, 0};
     int32_t currentUserId_;
 
