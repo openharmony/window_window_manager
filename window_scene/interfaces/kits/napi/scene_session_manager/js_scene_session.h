@@ -59,6 +59,7 @@ private:
     void ProcessSessionStateChangeRegister();
     void ProcessSessionEventRegister();
     void ProcessCreateSpecificSessionRegister();
+    void ProcessBindDialogTargetRegister();
     void ProcessSessionRectChangeRegister();
     void ProcessRaiseToTopRegister();
     void ProcessBackPressedRegister();
@@ -83,6 +84,7 @@ private:
     void OnSessionStateChange(const SessionState& state);
     void OnSessionEvent(uint32_t eventId);
     void OnCreateSpecificSession(const sptr<SceneSession>& sceneSession);
+    void OnBindDialogTarget(const sptr<SceneSession>& sceneSession);
     void OnSessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void OnRaiseToTop();
     void OnBackPressed();
