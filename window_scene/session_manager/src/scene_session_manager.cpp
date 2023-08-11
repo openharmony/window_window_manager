@@ -992,7 +992,6 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             auto sessionInfo = sceneSession->GetSessionInfo();
             WindowInfoReporter::GetInstance().InsertCreateReportInfo(sessionInfo.bundleName_);
         }
-        NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
         return errCode;
     };
 
@@ -1927,12 +1926,14 @@ void SceneSessionManager::OnSessionStateChange(int32_t persistentId, const Sessi
     }
     switch (state) {
         case SessionState::STATE_FOREGROUND:
+            NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
             HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
             if (sceneSession->GetWindowSessionProperty()->GetPrivacyMode()) {
                 UpdatePrivateStateAndNotify(true);
             }
             break;
         case SessionState::STATE_BACKGROUND:
+            NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
             HandleKeepScreenOn(sceneSession, false);
             if (sceneSession->GetWindowSessionProperty()->GetPrivacyMode()) {
                 UpdatePrivateStateAndNotify(false);
