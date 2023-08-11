@@ -1428,6 +1428,30 @@ HWTEST_F(WindowSceneSessionImplTest, UpdateWindowMode01, Function | SmallTest | 
     ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, windowscenesession->UpdateWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN));
 }
 
+/**
+ * @tc.name: RemoveWindowFlag01
+ * @tc.desc: RemoveWindowFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, RemoveWindowFlag01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("DestroySubWindow");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowscenesession->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID));
+    windowscenesession->state_ = WindowState::STATE_CREATED;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowscenesession->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID));
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    windowscenesession->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowscenesession->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID));
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
