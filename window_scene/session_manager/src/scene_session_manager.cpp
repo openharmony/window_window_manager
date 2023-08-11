@@ -2448,6 +2448,7 @@ WSError SceneSessionManager::BindDialogTarget(uint64_t persistentId, sptr<IRemot
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     scnSession->SetParentSession(parentSession);
+    parentSession->BindDialogTarget(scnSession);
     scnSession->SetParentPersistentId(parentSession->GetPersistentId());
     UpdateParentSession(scnSession, scnSession->GetSessionProperty());
     WLOGFD("Bind dialog success, dialog id %{public}" PRIu64 ", parent id %{public}d",
@@ -2561,7 +2562,9 @@ void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
         WLOGFE("Calling session is nullptr");
         return;
     }
-    if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_)) {
+    auto property = callingSession_->GetSessionProperty();
+    if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_) &&
+        property != nullptr && property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
         WSRect overlapRect = { 0, 0, 0, 0 };
         NotifyOccupiedAreaChangeInfo(callingSession_, callingWindowRestoringRect_, overlapRect);
         callingSession_->UpdateSessionRect(callingWindowRestoringRect_, SizeChangeReason::UNDEFINED);

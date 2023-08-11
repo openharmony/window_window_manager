@@ -301,6 +301,18 @@ WSError SceneSession::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
     return errCode;
 }
 
+WSError SceneSession::BindDialogTarget(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("dialog session is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onBindDialogTarget_) {
+        sessionChangeCallback_->onBindDialogTarget_(sceneSession);
+    }
+    return WSError::WS_OK;
+}
+
 WSError SceneSession::DestroyAndDisconnectSpecificSession(const int32_t& persistentId)
 {
     WSError ret = WSError::WS_OK;
