@@ -1121,13 +1121,18 @@ NativeValue* JsWindow::OnSetWindowType(NativeEngine& engine, NativeCallbackInfo&
     AsyncTask::CompleteCallback complete =
         [weakToken, winType, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
-                WLOGFE("window is nullptr or get invalid param");
+            if (weakWindow == nullptr) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_INVALID_WINDOW)));
+                WLOGFE("window is nullptr");
                 return;
             }
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetWindowType(winType));
-            if (ret == WmErrorCode::WM_OK) {
+            if (errCode != WMError::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
+                WLOGFE("get invalid param");
+                return;
+            }
+            WMError ret = weakWindow->SetWindowType(winType);
+            if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set type failed"));
