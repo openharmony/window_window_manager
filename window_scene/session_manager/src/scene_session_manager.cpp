@@ -30,6 +30,7 @@
 #include <ipc_skeleton.h>
 #include <iservice_registry.h>
 #include <parameters.h>
+#include "parameter.h"
 #include <power_mgr_client.h>
 #include <resource_manager.h>
 #include <running_lock.h>
@@ -83,8 +84,10 @@ const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 #endif
 const std::string SCENE_SESSION_MANAGER_THREAD = "SceneSessionManager";
 const std::string WINDOW_INFO_REPORT_THREAD = "WindowInfoReportThread";
+constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
 std::recursive_mutex g_instanceMutex;
 constexpr uint32_t MAX_BRIGHTNESS = 255;
+constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 constexpr int32_t DEFAULT_USERID = -1;
 constexpr int32_t SCALE_DIMENSION = 2;
 constexpr int32_t TRANSLATE_DIMENSION = 2;
@@ -152,6 +155,7 @@ void SceneSessionManager::Init()
     ScreenSessionManager::GetInstance().SetSensorSubscriptionEnabled();
     sptr<IDisplayChangeListener> listener = new DisplayChangeListener();
     ScreenSessionManager::GetInstance().RegisterDisplayChangeListener(listener);
+    InitPrepareTerminateConfig();
 
     // create handler for inner command at server
     eventLoop_ = AppExecFwk::EventRunner::Create(WINDOW_INFO_REPORT_THREAD);
@@ -181,6 +185,17 @@ void SceneSessionManager::LoadWindowSceneXml()
         ConfigWindowSceneXml();
     } else {
         WLOGFE("Load window scene xml failed");
+    }
+}
+
+void SceneSessionManager::InitPrepareTerminateConfig()
+{
+    char value[PREPARE_TERMINATE_ENABLE_SIZE] = "false";
+    int32_t retSysParam = GetParameter(PREPARE_TERMINATE_ENABLE_PARAMETER, "false", value,
+        PREPARE_TERMINATE_ENABLE_SIZE);
+    WLOGFI("InitPrepareTerminateConfig, %{public}s value is %{public}s.", PREPARE_TERMINATE_ENABLE_PARAMETER, value);
+    if (retSysParam > 0 && !std::strcmp(value, "true")) {
+        isPrepareTerminateEnable_ = true;
     }
 }
 
@@ -735,6 +750,37 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
             sessionInfo.moduleName_);
     }
     return abilitySessionInfo;
+}
+
+WSError SceneSessionManager::PrepareTerminate(int32_t persistentId, bool& isPrepareTerminate)
+{
+    auto task = [this, persistentId, &isPrepareTerminate]() {
+        if (!isPrepareTerminateEnable_) { // not support prepareTerminate
+            isPrepareTerminate = false;
+            WLOGE("not support prepareTerminate");
+            return WSError::WS_OK;
+        }
+        auto scnSession = GetSceneSession(persistentId);
+        if (scnSession == nullptr) {
+            WLOGFE("scnSession is nullptr persistentId:%{public}d", persistentId);
+            isPrepareTerminate = false;
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
+        if (scnSessionInfo == nullptr) {
+            WLOGFE("scnSessionInfo is nullptr");
+            isPrepareTerminate = false;
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->
+            PrepareTerminateAbilityBySCB(scnSessionInfo, isPrepareTerminate);
+        WLOGI("PrepareTerminateAbilityBySCB isPrepareTerminate:%{public}d errorCode:%{public}d",
+            isPrepareTerminate, errorCode);
+        return WSError::WS_OK;
+    };
+
+    taskScheduler_->PostSyncTask(task);
+    return WSError::WS_OK;
 }
 
 std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(

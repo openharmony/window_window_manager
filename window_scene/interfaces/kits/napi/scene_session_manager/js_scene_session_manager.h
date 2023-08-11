@@ -49,6 +49,7 @@ public:
     static NativeValue* GetSessionSnapshotFilePath(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* InitWithRenderServiceAdded(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* GetAllAbilityInfos(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* PrepareTerminate(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* PerfRequestEx(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* UpdateWindowMode(NativeEngine* engine, NativeCallbackInfo* info);
 
@@ -72,6 +73,7 @@ private:
     NativeValue* CreateAbilityItemInfo(NativeEngine &engine, const AppExecFwk::AbilityInfo& abilityInfo);
     NativeValue* CreateWindowModes(NativeEngine& engine, const std::vector<AppExecFwk::SupportWindowMode>& windowModes);
     NativeValue* CreateWindowSize(NativeEngine& engine, const AppExecFwk::AbilityInfo& abilityInfo);
+    NativeValue* OnPrepareTerminate(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnPerfRequestEx(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnUpdateWindowMode(NativeEngine& engine, NativeCallbackInfo& info);
 
