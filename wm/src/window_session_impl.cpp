@@ -148,7 +148,9 @@ uint32_t WindowSessionImpl::GetWindowId() const
 
 int32_t WindowSessionImpl::GetParentId() const
 {
-    return static_cast<int32_t>(property_->GetParentPersistentId()) & 0x7fffffff; // 0xffffffff: to get low 32 bits
+    // 0xffffffff: to get low 32 bits
+    uint32_t parentID = static_cast<uint32_t>(property_->GetParentPersistentId()) & 0x7fffffff;
+    return static_cast<int32_t>(parentID);
 }
 
 bool WindowSessionImpl::IsWindowSessionInvalid() const
