@@ -29,6 +29,7 @@ const std::string SESSION_STATE_CHANGE_CB = "sessionStateChange";
 const std::string SESSION_EVENT_CB = "sessionEvent";
 const std::string SESSION_RECT_CHANGE_CB = "sessionRectChange";
 const std::string CREATE_SPECIFIC_SCENE_CB = "createSpecificSession";
+const std::string BIND_DIALOG_TARGET_CB = "bindDialogTarget";
 const std::string RAISE_TO_TOP_CB = "raiseToTop";
 const std::string BACK_PRESSED_CB = "backPressed";
 const std::string SESSION_FOCUSABLE_CHANGE_CB = "sessionFocusableChange";
@@ -95,6 +96,7 @@ JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& s
         { SESSION_EVENT_CB,               &JsSceneSession::ProcessSessionEventRegister },
         { SESSION_RECT_CHANGE_CB,         &JsSceneSession::ProcessSessionRectChangeRegister },
         { CREATE_SPECIFIC_SCENE_CB,       &JsSceneSession::ProcessCreateSpecificSessionRegister },
+        { BIND_DIALOG_TARGET_CB,       &JsSceneSession::ProcessBindDialogTargetRegister },
         { RAISE_TO_TOP_CB,                &JsSceneSession::ProcessRaiseToTopRegister },
         { BACK_PRESSED_CB,                &JsSceneSession::ProcessBackPressedRegister },
         { SESSION_FOCUSABLE_CHANGE_CB,    &JsSceneSession::ProcessSessionFocusableChangeRegister },
@@ -203,6 +205,18 @@ void JsSceneSession::ProcessCreateSpecificSessionRegister()
     sessionchangeCallback->onCreateSpecificSession_ = std::bind(&JsSceneSession::OnCreateSpecificSession,
         this, std::placeholders::_1);
     WLOGFD("ProcessCreateSpecificSessionRegister success");
+}
+
+void JsSceneSession::ProcessBindDialogTargetRegister()
+{
+    auto sessionchangeCallback = sessionchangeCallback_.promote();
+    if (sessionchangeCallback == nullptr) {
+        WLOGFE("sessionchangeCallback is nullptr");
+        return;
+    }
+    sessionchangeCallback->onBindDialogTarget_ = std::bind(&JsSceneSession::OnBindDialogTarget,
+        this, std::placeholders::_1);
+    WLOGFD("ProcessBindDialogTargetRegister success");
 }
 
 void JsSceneSession::ProcessSessionRectChangeRegister()
@@ -677,6 +691,45 @@ void JsSceneSession::OnCreateSpecificSession(const sptr<SceneSession>& sceneSess
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
     AsyncTask::Schedule("JsSceneSession::OnCreateSpecificSession", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsSceneSession::OnBindDialogTarget(const sptr<SceneSession>& sceneSession)
+{
+    WLOGFI("OnBindDialogTarget");
+    if (sceneSession == nullptr) {
+        WLOGFI("[NAPI]sceneSession is nullptr");
+        return;
+    }
+
+    WLOGFI("[NAPI]OnBindDialogTarget");
+    auto iter = jsCbMap_.find(BIND_DIALOG_TARGET_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+
+    auto jsCallBack = iter->second;
+    wptr<SceneSession> weakSession(sceneSession);
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [this, weakSession, jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto specificSession = weakSession.promote();
+            if (specificSession == nullptr) {
+                WLOGFE("[NAPI]root session or target session or engine is nullptr");
+                return;
+            }
+            NativeValue* jsSceneSessionObj = Create(*eng, specificSession);
+            if (jsSceneSessionObj == nullptr || !jsCallBack) {
+                WLOGFE("[NAPI]jsSceneSessionObj or jsCallBack is nullptr");
+                return;
+            }
+            WLOGFI("CreateJsSceneSessionObject success");
+            NativeValue* argv[] = { jsSceneSessionObj };
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSession::OnBindDialogTarget", engine_,
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
