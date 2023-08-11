@@ -223,6 +223,11 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
     WLOGFD("Id: %{public}d, reason: %{public}d, rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
         GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_, rect.height_);
+    if (moveDragController_->GetStartMoveFlag()) {
+        reason = SizeChangeReason::MOVE;
+    } else if (moveDragController_->GetStartDragFlag()) {
+        reason = SizeChangeReason::DRAG;
+    }
     WSError ret = Session::UpdateRect(rect, reason);
     if (ret == WSError::WS_OK) {
         specificCallback_->onUpdateAvoidArea_(GetPersistentId());
