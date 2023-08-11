@@ -37,6 +37,7 @@ using UpdateAvoidAreaCallback = std::function<bool(const int32_t& persistentId)>
 using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
+using NotifyBindDialogSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect, const SizeChangeReason& reason)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
@@ -63,6 +64,7 @@ public:
     // callback for notify SceneBoard
     struct SessionChangeCallback : public RefBase {
         NotifyCreateSpecificSessionFunc onCreateSpecificSession_;
+        NotifyBindDialogSessionFunc onBindDialogTarget_;
         NotifySessionRectChangeFunc onRectChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
         NotifySessionEventFunc OnSessionEvent_;
@@ -141,6 +143,7 @@ public:
     static void ClearEnterWindow();
     void SetRequestedOrientation(Orientation orientation);
     Orientation GetRequestedOrientation() const;
+    WSError BindDialogTarget(const sptr<SceneSession>& sceneSession);
 
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 private:
