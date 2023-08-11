@@ -134,6 +134,7 @@ struct SessionInfo {
     int32_t callerPersistentId_ = INVALID_SESSION_ID;
     uint32_t callState_ = 0;
     uint32_t callingTokenId_ = 0;
+    bool reuse = false;
     StartMethod startMethod;
     bool lockedState = false;
     std::string time;
