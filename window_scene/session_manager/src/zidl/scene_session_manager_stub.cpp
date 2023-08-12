@@ -45,6 +45,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleSetSessionLabel),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_ICON),
         &SceneSessionManagerStub::HandleSetSessionIcon),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_VALID_SESSION_IDS),
+        &SceneSessionManagerStub::HandleIsValidSessionIds),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_SESSION_CHANGE_LISTENER),
         &SceneSessionManagerStub::HandleRegisterSessionChangeListener),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNREGISTER_SESSION_CHANGE_LISTENER),
@@ -229,6 +231,17 @@ int SceneSessionManagerStub::HandleSetSessionIcon(MessageParcel &data, MessagePa
     std::shared_ptr<Media::PixelMap> icon(data.ReadParcelable<Media::PixelMap>());
     WSError errCode = SetSessionIcon(token, icon);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleIsValidSessionIds(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleIsValidSessionIds!");
+    std::vector<int32_t> sessionIds;
+    data.ReadInt32Vector(&sessionIds);
+    std::vector<bool> results;
+    WSError errCode = IsValidSessionIds(sessionIds, results);
+    reply.WriteBoolVector(results);
     return ERR_NONE;
 }
 
