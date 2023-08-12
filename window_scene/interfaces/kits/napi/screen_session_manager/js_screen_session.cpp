@@ -137,8 +137,7 @@ void JsScreenSession::CallJsCallback(const std::string& callbackType)
                 return;
             }
 
-            if (callbackType == ON_CONNECTION_CALLBACK || callbackType == ON_DISCONNECTION_CALLBACK
-                || callbackType == ON_PROPERTY_CHANGE_CALLBACK) {
+            if (callbackType == ON_CONNECTION_CALLBACK || callbackType == ON_DISCONNECTION_CALLBACK) {
                 auto screenSession = screenSessionWeak.promote();
                 if (screenSession == nullptr) {
                     WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
@@ -169,8 +168,42 @@ void JsScreenSession::OnDisconnect()
     CallJsCallback(ON_DISCONNECTION_CALLBACK);
 }
 
-void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty)
+void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
 {
-    CallJsCallback(ON_PROPERTY_CHANGE_CALLBACK);
+    const std::string callbackType = ON_PROPERTY_CHANGE_CALLBACK;
+    WLOGD("Call js callback: %{public}s.", callbackType.c_str());
+    if (mCallback_.count(callbackType) == 0) {
+        WLOGFE("Callback %{public}s is unregistered!", callbackType.c_str());
+        return;
+    }
+
+    auto jsCallbackRef = mCallback_[callbackType];
+    wptr<ScreenSession> screenSessionWeak(screenSession_);
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [jsCallbackRef, callbackType, screenSessionWeak](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (jsCallbackRef == nullptr) {
+                WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
+                return;
+            }
+            auto method = jsCallbackRef->Get();
+            if (method == nullptr) {
+                WLOGFE("Call js callback %{public}s failed, method is null!", callbackType.c_str());
+                return;
+            }
+            auto screenSession = screenSessionWeak.promote();
+            if (screenSession == nullptr) {
+                WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
+                return;
+            }
+            NativeValue* propertyChangeReason = CreateJsValue(engine, static_cast<int32_t>(reason));
+            NativeValue* argv[] = { JsScreenUtils::CreateJsScreenProperty(
+                engine, screenSession->GetScreenProperty()), propertyChangeReason };
+            engine.CallFunction(engine.CreateUndefined(), method, argv, ArraySize(argv));
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsScreenSession::" + callbackType, engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 } // namespace OHOS::Rosen

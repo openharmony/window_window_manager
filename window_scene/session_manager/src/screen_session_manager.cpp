@@ -335,7 +335,7 @@ DMError ScreenSessionManager::SetScreenActiveMode(ScreenId screenId, uint32_t mo
         rsInterface_.SetScreenActiveMode(rsScreenId, modeId);
         screenSession->activeIdx_ = static_cast<int32_t>(modeId);
         screenSession->UpdatePropertyByActiveMode();
-        screenSession->PropertyChange(screenSession->GetScreenProperty());
+        screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
         NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
     }
     return DMError::DM_OK;
@@ -683,7 +683,7 @@ DMError ScreenSessionManager::SetOrientationController(ScreenId screenId, Orient
         SetRotation(screenId, rotationAfter, false);
     }
     screenSession->SetOrientation(newOrientation);
-    screenSession->PropertyChange(screenSession->GetScreenProperty());
+    screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::ROTATION);
     // Notify rotation event to ScreenManager
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ORIENTATION);
     return DMError::DM_OK;
@@ -705,7 +705,7 @@ bool ScreenSessionManager::SetRotation(ScreenId screenId, Rotation rotationAfter
     WLOGFD("set orientation. rotation %{public}u", rotationAfter);
     SetDisplayBoundary(screenSession);
     screenSession->SetRotation(rotationAfter);
-    screenSession->PropertyChange(screenSession->GetScreenProperty());
+    screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::ROTATION);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
     return true;
 }
