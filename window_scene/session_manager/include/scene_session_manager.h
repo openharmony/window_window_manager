@@ -180,6 +180,9 @@ private:
     void ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig);
     void ConfigStartingWindowAnimation(const WindowSceneConfig::ConfigItem& startingWindowConfig);
     sptr<SceneSession::SpecificSessionCallback> CreateSpecificSessionCallback();
+    void FillSessionInfo(SessionInfo& sessionInfo);
+    std::shared_ptr<AppExecFwk::AbilityInfo> QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
+        const std::string& abilityName, const std::string& moduleName);
 
     void RelayoutKeyBoard(sptr<SceneSession> sceneSession);
     void RestoreCallingSessionSizeIfNeed();

@@ -30,27 +30,13 @@
 
 #include "ability_start_setting.h"
 #include "window_manager_hilog.h"
-#include "iservice_registry.h"
-#include "if_system_ability_manager.h"
 #include "session_helper.h"
-#include "system_ability_definition.h"
-#include "bundle_mgr_interface.h"
 
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Session" };
 std::atomic<int32_t> g_persistentId = INVALID_SESSION_ID;
 std::set<int32_t> g_persistentIdSet;
-constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
-constexpr int32_t UID_TRANSFORM_DIVISOR = 200000;  // local account id = uid / UID_TRANSFORM_DIVISOR
-std::string GetCurrentTime()
-{
-    struct timespec tn;
-    clock_gettime(CLOCK_REALTIME, &tn);
-    uint64_t uTime = static_cast<uint64_t>(tn.tv_sec) * NANO_SECOND_PER_SEC +
-        static_cast<uint64_t>(tn.tv_nsec);
-    return std::to_string(uTime);
-}
 } // namespace
 
 int32_t Session::GetPersistentId() const
@@ -396,7 +382,6 @@ WSError Session::ConnectImpl(const sptr<ISessionStage>& sessionStage, const sptr
     }
     property_ = property;
 
-    FillSessionInfo(GetSessionInfo());
     UpdateSessionState(SessionState::STATE_CONNECT);
     // once update rect before connect, update again when connect
     UpdateRect(winRect_, SizeChangeReason::UNDEFINED);
@@ -404,59 +389,6 @@ WSError Session::ConnectImpl(const sptr<ISessionStage>& sessionStage, const sptr
     callingBundleName_ = DelayedSingleton<ANRManager>::GetInstance()->GetBundleName(callingPid_, callingUid_);
     DelayedSingleton<ANRManager>::GetInstance()->SetApplicationInfo(persistentId_, callingPid_, callingBundleName_);
     return WSError::WS_OK;
-}
-
-void Session::FillSessionInfo(SessionInfo &sessionInfo)
-{
-    auto uid = GetCallingUid() / UID_TRANSFORM_DIVISOR;
-    auto abilityInfo = QueryAbilityInfoFromBMS(uid, sessionInfo.bundleName_, sessionInfo.abilityName_,
-        sessionInfo.moduleName_);
-    if (abilityInfo == nullptr) {
-        return;
-    }
-    if (sessionInfo.startMethod != OHOS::Rosen::StartMethod::START_CALL) {
-        sessionInfo.startMethod = OHOS::Rosen::StartMethod::START_NORMAL;
-    }
-    sessionInfo.abilityInfo = abilityInfo;
-    sessionInfo.time = GetCurrentTime();
-    WLOGFI("FillSessionInfo end, removeMissionAfterTerminate: %{public}d excludeFromMissions: %{public}d "
-        " label:%{public}s iconPath:%{public}s",
-        abilityInfo->removeMissionAfterTerminate, abilityInfo->excludeFromMissions,
-        abilityInfo->label.c_str(), abilityInfo->iconPath.c_str());
-}
-
-std::shared_ptr<AppExecFwk::AbilityInfo> Session::QueryAbilityInfoFromBMS(const int32_t uId,
-    const std::string& bundleName, const std::string& abilityName, const std::string& moduleName)
-{
-    AAFwk::Want want;
-    want.SetElementName("", bundleName, abilityName, moduleName);
-    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
-    if (abilityInfo == nullptr) {
-        return nullptr;
-    }
-    auto abilityInfoFlag = (AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
-        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION |
-        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_METADATA);
-    auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (systemAbilityMgr == nullptr) {
-        WLOGFE("Failed to get SystemAbilityManager.");
-        return nullptr;
-    }
-    auto bmsObj = systemAbilityMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    if (bmsObj == nullptr) {
-        WLOGFE("Failed to get BundleManagerService.");
-        return nullptr;
-    }
-    auto bundleMgr = iface_cast<AppExecFwk::IBundleMgr>(bmsObj);
-    if (bundleMgr == nullptr) {
-        return nullptr;
-    }
-    bool ret = bundleMgr->QueryAbilityInfo(want, abilityInfoFlag, uId, *abilityInfo);
-    if (!ret) {
-        WLOGFE("Get ability info from BMS failed!");
-        return nullptr;
-    }
-    return abilityInfo;
 }
 
 WSError Session::UpdateWindowSessionProperty(sptr<WindowSessionProperty> property)

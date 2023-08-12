@@ -14,6 +14,7 @@
  */
 
 #include "scene_session_converter.h"
+#include "ability_info.h"
 
 using namespace std;
 namespace OHOS {
