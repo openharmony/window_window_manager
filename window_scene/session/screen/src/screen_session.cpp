@@ -159,10 +159,10 @@ void ScreenSession::Disconnect()
     }
 }
 
-void ScreenSession::PropertyChange(const ScreenProperty& newProperty)
+void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
 {
     for (auto& listener : screenChangeListenerList_) {
-        listener->OnPropertyChange(newProperty);
+        listener->OnPropertyChange(newProperty, reason);
     }
 }
 
