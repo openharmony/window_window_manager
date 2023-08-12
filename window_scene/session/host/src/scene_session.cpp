@@ -125,6 +125,7 @@ WSError SceneSession::Background()
         scenePersistence_->SaveSnapshot(snapshot_);
     }
     NotifyBackground();
+    snapshot_.reset();
     UpdateCameraFloatWindowStatus(false);
     if (specificCallback_ != nullptr) {
         specificCallback_->onUpdateAvoidArea_(GetPersistentId());
