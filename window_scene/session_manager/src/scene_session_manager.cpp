@@ -2565,9 +2565,7 @@ void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
         WLOGFE("Calling session is nullptr");
         return;
     }
-    auto property = callingSession_->GetSessionProperty();
-    if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_) &&
-        property != nullptr && property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+    if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_)) {
         WSRect overlapRect = { 0, 0, 0, 0 };
         NotifyOccupiedAreaChangeInfo(callingSession_, callingWindowRestoringRect_, overlapRect);
         callingSession_->UpdateSessionRect(callingWindowRestoringRect_, SizeChangeReason::UNDEFINED);
