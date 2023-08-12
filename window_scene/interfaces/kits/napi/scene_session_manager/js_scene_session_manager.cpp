@@ -89,6 +89,7 @@ NativeValue* JsSceneSessionManager::Init(NativeEngine* engine, NativeValue* expo
     BindNativeFunction(*engine, *object, "InitWithRenderServiceAdded", moduleName,
         JsSceneSessionManager::InitWithRenderServiceAdded);
     BindNativeFunction(*engine, *object, "getAllAbilityInfo", moduleName, JsSceneSessionManager::GetAllAbilityInfos);
+    BindNativeFunction(*engine, *object, "prepareTerminate", moduleName, JsSceneSessionManager::PrepareTerminate);
     BindNativeFunction(*engine, *object, "perfRequestEx", moduleName, JsSceneSessionManager::PerfRequestEx);
     BindNativeFunction(*engine, *object, "updateWindowMode", moduleName, JsSceneSessionManager::UpdateWindowMode);
     return engine->CreateUndefined();
@@ -328,6 +329,13 @@ NativeValue* JsSceneSessionManager::GetAllAbilityInfos(NativeEngine* engine, Nat
     WLOGD("[NAPI]GetAllAbilityInfos");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
     return (me != nullptr) ? me->OnGetAllAbilityInfos(*engine, *info) : nullptr;
+}
+
+NativeValue* JsSceneSessionManager::PrepareTerminate(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGD("[NAPI]PrepareTerminate");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
+    return (me != nullptr) ? me->OnPrepareTerminate(*engine, *info) : nullptr;
 }
 
 NativeValue* JsSceneSessionManager::PerfRequestEx(NativeEngine* engine, NativeCallbackInfo* info)
@@ -929,6 +937,27 @@ NativeValue* JsSceneSessionManager::OnInitWithRenderServiceAdded(NativeEngine& e
     WLOGI("[NAPI]OnInitWithRenderServiceAdded");
     SceneSessionManager::GetInstance().InitWithRenderServiceAdded();
     return engine.CreateUndefined();
+}
+
+NativeValue* JsSceneSessionManager::OnPrepareTerminate(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGI("[NAPI]OnPrepareTerminate");
+    if (info.argc < 1) { // 1: params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    int32_t persistentId;
+    if (!ConvertFromJsValue(engine, info.argv[0], persistentId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to persistentId");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    bool isPrepareTerminate = false;
+    SceneSessionManager::GetInstance().PrepareTerminate(persistentId, isPrepareTerminate);
+    return engine.CreateBoolean(isPrepareTerminate);
 }
 
 NativeValue* JsSceneSessionManager::OnPerfRequestEx(NativeEngine& engine, NativeCallbackInfo& info)
