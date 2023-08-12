@@ -15,10 +15,14 @@
 
 #include "scene_session_converter.h"
 #include "ability_info.h"
+#include "window_manager_hilog.h"
 
 using namespace std;
 namespace OHOS {
 namespace Rosen {
+namespace {
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionConverter" };
+}
 
 WSError SceneSessionConverter::ConvertToMissionInfos(std::vector<sptr<SceneSession>>& sceneSessionInfos,
                                                      std::vector<AAFwk::MissionInfo>& missionInfos)
@@ -31,10 +35,18 @@ WSError SceneSessionConverter::ConvertToMissionInfos(std::vector<sptr<SceneSessi
         missionInfo.id = (*iter)->GetPersistentId();
         missionInfo.runningState = (*iter)->IsActive();
         missionInfo.lockedState = ((*iter)->GetSessionInfo()).lockedState;
-        missionInfo.label = ((*iter)->GetSessionInfo().abilityInfo)->label;
-        missionInfo.iconPath = ((*iter)->GetSessionInfo().abilityInfo)->iconPath;
-        missionInfo.want = *(((*iter)->GetSessionInfo()).want);
-        missionInfo.continuable = ((*iter)->GetSessionInfo().abilityInfo)->continuable;
+        if ((*iter)->GetSessionInfo().abilityInfo != nullptr) {
+            missionInfo.label = ((*iter)->GetSessionInfo().abilityInfo)->label;
+            missionInfo.iconPath = ((*iter)->GetSessionInfo().abilityInfo)->iconPath;
+            missionInfo.continuable = ((*iter)->GetSessionInfo().abilityInfo)->continuable;
+        } else {
+            WLOGFE("abilityInfo in SceneSession is nullptr, id: %{public}d", (*iter)->GetPersistentId());
+        }
+        if (((*iter)->GetSessionInfo()).want != nullptr) {
+            missionInfo.want = *(((*iter)->GetSessionInfo()).want);
+        } else {
+            WLOGFE("want in SceneSession is nullptr, id: %{public}d", (*iter)->GetPersistentId());
+        }
         missionInfo.time = ((*iter)->GetSessionInfo()).time;
         missionInfo.continueState = (AAFwk::ContinueState)(AAFwk::ContinueState::CONTINUESTATE_UNKNOWN
             + (((*iter)->GetSessionInfo()).continueState - Rosen::ContinueState::CONTINUESTATE_UNKNOWN));
@@ -52,10 +64,18 @@ WSError SceneSessionConverter::ConvertToMissionInfo(sptr<SceneSession>& sceneSes
     missionInfo.id = sceneSession->GetPersistentId();
     missionInfo.runningState = sceneSession->IsActive();
     missionInfo.lockedState = (sceneSession->GetSessionInfo()).lockedState;
-    missionInfo.label = (sceneSession->GetSessionInfo().abilityInfo)->label;
-    missionInfo.iconPath = (sceneSession->GetSessionInfo().abilityInfo)->iconPath;
-    missionInfo.want = *((sceneSession->GetSessionInfo()).want);
-    missionInfo.continuable = (sceneSession->GetSessionInfo().abilityInfo)->continuable;
+    if (sceneSession->GetSessionInfo().abilityInfo != nullptr) {
+        missionInfo.label = (sceneSession->GetSessionInfo().abilityInfo)->label;
+        missionInfo.iconPath = (sceneSession->GetSessionInfo().abilityInfo)->iconPath;
+        missionInfo.continuable = (sceneSession->GetSessionInfo().abilityInfo)->continuable;
+    } else {
+        WLOGFE("abilityInfo in SceneSession is nullptr, id: %{public}d", sceneSession->GetPersistentId());
+    }
+    if ((sceneSession->GetSessionInfo()).want != nullptr) {
+        missionInfo.want = *((sceneSession->GetSessionInfo()).want);
+    } else {
+        WLOGFE("want in SceneSession is nullptr, id: %{public}d", sceneSession->GetPersistentId());
+    }
     missionInfo.time = (sceneSession->GetSessionInfo()).time;
     missionInfo.continueState = (AAFwk::ContinueState) (AAFwk::ContinueState::CONTINUESTATE_UNKNOWN
         + ((sceneSession->GetSessionInfo()).continueState - Rosen::ContinueState::CONTINUESTATE_UNKNOWN));

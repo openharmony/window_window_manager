@@ -923,7 +923,9 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
         if (needRemoveSession) {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMap_.erase(persistentId);
-            if (listenerController_ != nullptr && !(scnSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
+            if (listenerController_ != nullptr &&
+                (scnSession->GetSessionInfo().abilityInfo) != nullptr &&
+                !(scnSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
                 WLOGFD("NotifySessionDestroyed, id: %{public}d", persistentId);
                 listenerController_->NotifySessionDestroyed(persistentId);
             }
@@ -2054,6 +2056,7 @@ void SceneSessionManager::NotifyCompleteFirstFrameDrawing(int32_t persistentId)
     WLOGFI("NotifyCompleteFirstFrameDrawing, persistentId: %{public}d", persistentId);
     auto scnSession = GetSceneSession(persistentId);
     if (!scnSession && listenerController_ != nullptr &&
+        (scnSession->GetSessionInfo().abilityInfo) != nullptr &&
         !(scnSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
         WLOGFD("NotifySessionCreated, id: %{public}d", persistentId);
         listenerController_->NotifySessionCreated(persistentId);
@@ -2065,6 +2068,7 @@ void SceneSessionManager::NotifySessionMovedToFront(int32_t persistentId)
     WLOGFI("NotifySessionMovedToFront, persistentId: %{public}d", persistentId);
     auto scnSession = GetSceneSession(persistentId);
     if (!scnSession && listenerController_ != nullptr &&
+        (scnSession->GetSessionInfo().abilityInfo) != nullptr &&
         !(scnSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
         listenerController_->NotifySessionMovedToFront(persistentId);
     }
@@ -2107,7 +2111,9 @@ WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject> &token,
         if (sceneSession->GetAbilityToken() == token) {
             WLOGFI("try to update session icon.");
             sessionListener_->OnSessionIconChange(iter.first, icon);
-            if (listenerController_ != nullptr && !(sceneSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
+            if (listenerController_ != nullptr &&
+                (sceneSession->GetSessionInfo().abilityInfo) != nullptr &&
+                !(sceneSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
                 WLOGFD("NotifySessionIconChanged, id: %{public}d", iter.first);
                 listenerController_->NotifySessionIconChanged(iter.first, icon);
             }
