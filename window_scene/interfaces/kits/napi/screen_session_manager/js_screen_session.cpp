@@ -180,7 +180,7 @@ void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, Screen
     auto jsCallbackRef = mCallback_[callbackType];
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [jsCallbackRef, callbackType, screenSessionWeak](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [jsCallbackRef, callbackType, screenSessionWeak, reason](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (jsCallbackRef == nullptr) {
                 WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
                 return;
@@ -196,8 +196,8 @@ void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, Screen
                 return;
             }
             NativeValue* propertyChangeReason = CreateJsValue(engine, static_cast<int32_t>(reason));
-            NativeValue* argv[] = { JsScreenUtils::CreateJsScreenProperty(
-                engine, screenSession->GetScreenProperty()), propertyChangeReason };
+            NativeValue* argv[] = { JsScreenUtils::CreateJsScreenProperty(engine,
+                screenSession->GetScreenProperty()), propertyChangeReason };
             engine.CallFunction(engine.CreateUndefined(), method, argv, ArraySize(argv));
         });
 
