@@ -121,3 +121,8 @@ APPLICATION_BLOCK_INPUT:
   BUNDLE_NAME: {type: STRING, desc: bundleName}
   PERSISTENT_ID: { type: INT32, desc: persistentId}
   MSG: {type: STRING, desc: event not consumed}
+
+START_WINDOW:
+  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: The event is application startup request window}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  WINDOW_NAME: {type: STRING, desc: window name}
