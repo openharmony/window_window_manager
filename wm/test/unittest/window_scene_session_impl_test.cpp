@@ -1345,13 +1345,14 @@ HWTEST_F(WindowSceneSessionImplTest, UpdateFloatingWindowSizeBySizeLimits01, Fun
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("DestroySubWindow");
     option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
-    
+
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
     int ret = 0;
-    windowscenesession->UpdateFloatingWindowSizeBySizeLimits(MAX_WITH_SIZE,MAX_WITH_SIZE);
+    windowscenesession->UpdateFloatingWindowSizeBySizeLimits(MaxWith, MaxWith);
     ASSERT_EQ(0, ret);
-}
+} 
+
 
 /**
  * @tc.name: GetSystemSizeLimits01
@@ -1363,11 +1364,11 @@ HWTEST_F(WindowSceneSessionImplTest, GetSystemSizeLimits01, Function | SmallTest
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("DestroySubWindow");
     option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
-    
+
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
     int ret = 0;
-    windowscenesession->GetSystemSizeLimits(MaxWith,MaxWith,FloatDefault);
+    windowscenesession->GetSystemSizeLimits(MaxWith, MaxWith, FloatDefault);
     ASSERT_EQ(0, ret);
 }
 
