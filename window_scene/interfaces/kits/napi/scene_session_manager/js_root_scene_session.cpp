@@ -184,8 +184,9 @@ bool JsRootSceneSession::IsCallbackRegistered(std::string type, NativeValue* jsL
 
 void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
 {
-    WLOGI("[NAPI]pending session activation: bundleName %{public}s, moduleName %{public}s, abilityName %{public}s",
-        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
+    WLOGI("[NAPI]pending session activation: bundleName %{public}s, moduleName %{public}s, abilityName %{public}s"\
+        ", reuse %{public}d",
+        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.reuse);
     sptr<SceneSession> sceneSession = GenSceneSession(info);
     if (sceneSession == nullptr) {
         WLOGFE("RequestSceneSession return nullptr");
@@ -231,22 +232,29 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
 {
     sptr<SceneSession> sceneSession;
     if (info.persistentId_ == 0) {
-        sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
+        if (info.reuse) {
+            sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(
+                info.bundleName_, info.moduleName_, info.abilityName_);
+        }
         if (sceneSession == nullptr) {
-            WLOGFE("RequestSceneSession return nullptr");
-            return sceneSession;
+            WLOGFI("GetSceneSessionByName return nullptr, RequestSceneSession");
+            sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
+            if (sceneSession == nullptr) {
+                WLOGFE("RequestSceneSession return nullptr");
+                return sceneSession;
+            }
+        } else {
+            sceneSession->GetSessionInfo().want = info.want;
+            sceneSession->GetSessionInfo().callerToken_ = info.callerToken_;
+            sceneSession->GetSessionInfo().requestCode = info.requestCode;
+            sceneSession->GetSessionInfo().callerPersistentId_ = info.callerPersistentId_;
         }
         info.persistentId_ = sceneSession->GetPersistentId();
         sceneSession->GetSessionInfo().persistentId_ = sceneSession->GetPersistentId();
     } else {
         sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
         if (sceneSession == nullptr) {
-            sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
-            if (sceneSession == nullptr) {
-                WLOGFE("GetSceneSession RequestSceneSession return nullptr");
-                return sceneSession;
-            }
-            WLOGFI("GetSceneSession return RequestSceneSession");
+            WLOGFE("GetSceneSession return nullptr");
             return sceneSession;
         }
         sceneSession->GetSessionInfo().want = info.want;

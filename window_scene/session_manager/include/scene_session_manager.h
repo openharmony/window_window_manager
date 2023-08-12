@@ -118,6 +118,7 @@ public:
     WSError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent);
     WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label);
     WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon);
+    WSError IsValidSessionIds(const std::vector<int32_t> &sessionIds, std::vector<bool> &results);
     WSError RegisterSessionListener(const sptr<ISessionChangeListener> sessionListener);
     void UnregisterSessionListener();
     void HandleTurnScreenOn(const sptr<SceneSession>& sceneSession);
