@@ -109,6 +109,15 @@ const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_WINDOW = "-w";
 const std::string ARG_DUMP_SCREEN = "-s";
 const std::string ARG_DUMP_DISPLAY = "-d";
+constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
+std::string GetCurrentTime()
+{
+    struct timespec tn;
+    clock_gettime(CLOCK_REALTIME, &tn);
+    uint64_t uTime = static_cast<uint64_t>(tn.tv_sec) * NANO_SECOND_PER_SEC +
+        static_cast<uint64_t>(tn.tv_nsec);
+    return std::to_string(uTime);
+}
 } // namespace
 
 SceneSessionManager& SceneSessionManager::GetInstance()
@@ -680,6 +689,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             sceneSession->SetCallingUid(IPCSkeleton::GetCallingUid());
             sceneSession->SetAbilityToken(rootSceneContext_ != nullptr ? rootSceneContext_->GetToken() : nullptr);
         }
+        FillSessionInfo(sceneSession->GetSessionInfo());
         auto persistentId = sceneSession->GetPersistentId();
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSession(%d )", persistentId);
         sceneSession->SetSystemConfig(systemConfig_);
@@ -1255,6 +1265,43 @@ void SceneSessionManager::GetStartPage(const SessionInfo& sessionInfo, std::stri
     }
 
     GetStartPageFromResource(abilityInfo, path, bgColor);
+}
+
+void SceneSessionManager::FillSessionInfo(SessionInfo& sessionInfo)
+{
+    auto abilityInfo = QueryAbilityInfoFromBMS(currentUserId_, sessionInfo.bundleName_, sessionInfo.abilityName_,
+        sessionInfo.moduleName_);
+    if (abilityInfo == nullptr) {
+        WLOGFE("FillSessionInfo abilityInfo is nullptr!");
+        return;
+    }
+    sessionInfo.abilityInfo = abilityInfo;
+    sessionInfo.time = GetCurrentTime();
+    WLOGFI("FillSessionInfo end, removeMissionAfterTerminate: %{public}d excludeFromMissions: %{public}d "
+           " label:%{public}s iconPath:%{public}s",
+           abilityInfo->removeMissionAfterTerminate, abilityInfo->excludeFromMissions,
+           abilityInfo->label.c_str(), abilityInfo->iconPath.c_str());
+}
+
+std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFromBMS(const int32_t uId,
+    const std::string& bundleName, const std::string& abilityName, const std::string& moduleName)
+{
+    AAFwk::Want want;
+    want.SetElementName("", bundleName, abilityName, moduleName);
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    if (abilityInfo == nullptr) {
+        WLOGFE("QueryAbilityInfoFromBMS abilityInfo is nullptr!");
+        return nullptr;
+    }
+    auto abilityInfoFlag = (AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION |
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_METADATA);
+    bool ret = bundleMgr_->QueryAbilityInfo(want, abilityInfoFlag, uId, *abilityInfo);
+    if (!ret) {
+        WLOGFE("Get ability info from BMS failed!");
+        return nullptr;
+    }
+    return abilityInfo;
 }
 
 WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)

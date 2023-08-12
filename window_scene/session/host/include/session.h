@@ -28,7 +28,6 @@
 #include "session/host/include/scene_persistence.h"
 #include "wm_common.h"
 #include "occupied_area_change_info.h"
-#include <ability_info.h>
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -268,9 +267,6 @@ protected:
     float aspectRatio_ = 0.0f;
 
 private:
-    void FillSessionInfo(SessionInfo& sessionInfo);
-    std::shared_ptr<AppExecFwk::AbilityInfo> QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
-        const std::string& abilityName, const std::string& moduleName);
     bool CheckDialogOnForeground();
     void HandleDialogForeground();
     void HandleDialogBackground();

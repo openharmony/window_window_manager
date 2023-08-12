@@ -135,7 +135,7 @@ struct SessionInfo {
     uint32_t callState_ = 0;
     uint32_t callingTokenId_ = 0;
     bool reuse = false;
-    StartMethod startMethod;
+    StartMethod startMethod = StartMethod::START_NORMAL;
     bool lockedState = false;
     std::string time;
     ContinueState continueState = ContinueState::CONTINUESTATE_ACTIVE;
