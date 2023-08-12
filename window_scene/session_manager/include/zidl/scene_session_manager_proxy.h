@@ -44,6 +44,7 @@ public:
     WMError SetGestureNavigaionEnabled(bool enable) override;
     WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) override;
     WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) override;
+    WSError IsValidSessionIds(const std::vector<int32_t> &sessionIds, std::vector<bool> &results) override;
     WSError RegisterSessionListener(const sptr<ISessionChangeListener> sessionListener) override;
     void UnregisterSessionListener() override;
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;

@@ -904,6 +904,12 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
                 WLOGFE("RequestSceneSession return nullptr");
                 return;
             }
+        } else {
+            sceneSession->GetSessionInfo().want = info.want;
+            sceneSession->GetSessionInfo().callerToken_ = info.callerToken_;
+            sceneSession->GetSessionInfo().requestCode = info.requestCode;
+            sceneSession->GetSessionInfo().callerPersistentId_ = info.callerPersistentId_;
+            sceneSession->GetSessionInfo().callingTokenId_ = info.callingTokenId_;
         }
         info.persistentId_ = sceneSession->GetPersistentId();
         sceneSession->GetSessionInfo().persistentId_ = sceneSession->GetPersistentId();
