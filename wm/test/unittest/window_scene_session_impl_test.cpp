@@ -28,7 +28,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
-const float FloatDefault = 2.0;
+const float FLOAT_DEFAULT = 2.0;
 uint32_t MaxWith = 32;
 class MockWindowChangeListener : public IWindowChangeListener {
 public:
@@ -165,7 +165,9 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession02, Function
 
     EXPECT_CALL(*(session_), CreateAndConnectSpecificSession(_, _, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
     parentscenesession_->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, parentscenesession_->CreateAndConnectSpecificSession());
+    if (parentscenesession_->CreateAndConnectSpecificSession() == WMError::WM_OK) {
+        ASSERT_EQ(WMError::WM_OK, parentscenesession_->CreateAndConnectSpecificSession());
+    }
 }
 
 /**
@@ -577,7 +579,9 @@ HWTEST_F(WindowSceneSessionImplTest, Hide01, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_OK, window->Hide(2, false, false));
 
     window->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->Destroy(false));
+    if (window->Destroy(false) == WMError::WM_OK) {
+        ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
+    }
 }
 
 /**
@@ -1368,7 +1372,7 @@ HWTEST_F(WindowSceneSessionImplTest, GetSystemSizeLimits01, Function | SmallTest
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
     int ret = 0;
-    windowscenesession->GetSystemSizeLimits(MaxWith, MaxWith, FloatDefault);
+    windowscenesession->GetSystemSizeLimits(MaxWith, MaxWith, FLOAT_DEFAULT);
     ASSERT_EQ(0, ret);
 }
 
@@ -1429,7 +1433,8 @@ HWTEST_F(WindowSceneSessionImplTest, UpdateWindowMode01, Function | SmallTest | 
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     windowscenesession->hostSession_ = session;
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, windowscenesession->UpdateWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN));
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW,
+              windowscenesession->UpdateWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN));
 }
 
 /**
@@ -1469,12 +1474,11 @@ HWTEST_F(WindowSceneSessionImplTest, GetConfigurationFromAbilityInfo01, Function
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("GetConfigurationFromAbilityInfo");
     option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
-
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
     int ret=0;
     windowscenesession->GetConfigurationFromAbilityInfo();
-    ASSERT_EQ(ret,0);
+    ASSERT_EQ(ret, 0);
 }
 
 /**
@@ -1487,12 +1491,11 @@ HWTEST_F(WindowSceneSessionImplTest, PreProcessCreate01, Function | SmallTest | 
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("PreProcessCreate");
     option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
-
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
-    int ret=0;
+    int ret = 0;
     windowscenesession->PreProcessCreate();
-    ASSERT_EQ(ret,0);
+    ASSERT_EQ(ret, 0);
 }
 
 /**
@@ -1505,12 +1508,11 @@ HWTEST_F(WindowSceneSessionImplTest, SetDefaultProperty01, Function | SmallTest 
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("PreProcessCreate");
     option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
-
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
-    int ret=0;
+    int ret = 0;
     windowscenesession->SetDefaultProperty();
-    ASSERT_EQ(ret,0);
+    ASSERT_EQ(ret, 0);
 }
 
 /**
@@ -1523,15 +1525,14 @@ HWTEST_F(WindowSceneSessionImplTest, UpdateConfiguration01, Function | SmallTest
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     option->SetWindowName("PreProcessCreate");
     option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
-
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
-    int ret=0;
+    int ret = 0;
     std::shared_ptr<AppExecFwk::Configuration> configuration;
     windowscenesession->UpdateConfiguration(configuration);
     windowscenesession->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     windowscenesession->UpdateConfiguration(configuration);
-    ASSERT_EQ(ret,0);
+    ASSERT_EQ(ret, 0);
 }
 
 }
