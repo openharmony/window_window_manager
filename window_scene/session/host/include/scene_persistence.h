@@ -16,12 +16,9 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_PERSISTENCE_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_PERSISTENCE_H
 
-#include <dirent.h>
-#include <mutex>
-#include <refbase.h>
-#include <string>
 #include <sys/stat.h>
-#include <vector>
+
+#include <refbase.h>
 
 #include "interfaces/include/ws_common.h"
 
@@ -32,7 +29,6 @@ class PixelMap;
 namespace OHOS::Rosen {
 class ScenePersistence : public RefBase {
 public:
-    ScenePersistence() = default;
     ScenePersistence(const SessionInfo& info, const int32_t& persistentId);
     ~ScenePersistence() = default;
 
@@ -48,12 +44,12 @@ public:
 
     bool IsSnapshotExisted() const;
     std::string GetSnapshotFilePath() const;
-    void SetPersistentId(const int32_t& persistId);
+    std::pair<uint32_t, uint32_t> GetSnapshotSize() const;
     void SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap);
 
 private:
     static std::string strPersistPath_;
-    SessionInfo sessionInfo_;
+    std::pair<uint32_t, uint32_t> snapshotSize_;
     std::string strSnapshotFile_;
 };
 } // namespace OHOS::Rosen
