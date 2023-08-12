@@ -689,6 +689,10 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         auto session = GetSceneSession(sessionInfo.persistentId_);
         if (session != nullptr) {
             WLOGFI("get exist session persistentId: %{public}d", sessionInfo.persistentId_);
+            if (sessionInfo.want != nullptr) {
+                session->GetSessionInfo().want = sessionInfo.want;
+                WLOGFI("RequestSceneSession update want");
+            }
             return session;
         }
     }
@@ -2168,6 +2172,22 @@ WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject> &token,
         }
     }
     return WSError::WS_ERROR_SET_SESSION_ICON_FAILED;
+}
+
+WSError SceneSessionManager::IsValidSessionIds(
+    const std::vector<int32_t> &sessionIds, std::vector<bool> &results)
+{
+    WLOGFI("run IsValidSessionIds");
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (auto i = 0; i < static_cast<int32_t>(sessionIds.size()); ++i) {
+        auto search = sceneSessionMap_.find(sessionIds.at(i));
+        if (search == sceneSessionMap_.end() || search->second == nullptr) {
+            results.push_back(false);
+            continue;
+        }
+        results.push_back(true);
+    }
+    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionListener>& listener)

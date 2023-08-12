@@ -56,6 +56,7 @@ public:
         TRANS_ID_SET_GESTURE_NAVIGATION_ENABLED,
         TRANS_ID_SET_SESSION_LABEL,
         TRANS_ID_SET_SESSION_ICON,
+        TRANS_ID_IS_VALID_SESSION_IDS,
         TRANS_ID_REGISTER_SESSION_CHANGE_LISTENER,
         TRANS_ID_UNREGISTER_SESSION_CHANGE_LISTENER,
         TRANS_ID_GET_WINDOW_INFO,
@@ -88,6 +89,7 @@ public:
     virtual WSError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent) = 0;
     virtual WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) = 0;
     virtual WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) = 0;
+    virtual WSError IsValidSessionIds(const std::vector<int32_t> &sessionIds, std::vector<bool> &results) = 0;
     virtual WSError RegisterSessionListener(const sptr<ISessionChangeListener> sessionListener) = 0;
     virtual void UnregisterSessionListener() = 0;
     virtual WSError PendingSessionToForeground(const sptr<IRemoteObject> &token) = 0;

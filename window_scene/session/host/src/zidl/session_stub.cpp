@@ -41,6 +41,7 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
     // for scene only
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_SESSION_EVENT), &SessionStub::HandleSessionEvent),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_TERMINATE), &SessionStub::HandleTerminateSession),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_EXCEPTION), &SessionStub::HandleSessionException),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_UPDATE_SESSION_RECT),
         &SessionStub::HandleUpdateSessionRect),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION),
