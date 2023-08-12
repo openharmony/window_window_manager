@@ -49,6 +49,8 @@
           "image_framework",
           "preferences",
           "hiview",
+          "ffrt",
+          "dsoftbus",
           "hicollie",
           "eventhandler",
           "c_utils",
