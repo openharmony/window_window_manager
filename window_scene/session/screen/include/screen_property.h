@@ -22,6 +22,13 @@
 #include "screen_info.h"
 
 namespace OHOS::Rosen {
+
+enum class ScreenPropertyChangeReason : uint32_t {
+    UNDEFINED = 0,
+    ROTATION,
+    CHANGE_MODE,
+    FOLD_SCREEN_EXPAND,
+};
 class ScreenProperty {
 public:
     ScreenProperty() = default;

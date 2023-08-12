@@ -39,7 +39,7 @@ public:
 
     virtual void OnConnect() = 0;
     virtual void OnDisconnect() = 0;
-    virtual void OnPropertyChange(const ScreenProperty& newProperty) = 0;
+    virtual void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason) = 0;
 };
 
 enum class ScreenState : int32_t {
@@ -111,7 +111,7 @@ public:
 
     void Connect();
     void Disconnect();
-    void PropertyChange(const ScreenProperty& newProperty);
+    void PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason);
 private:
     ScreenProperty property_;
     std::shared_ptr<RSDisplayNode> displayNode_;
