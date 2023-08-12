@@ -1355,7 +1355,7 @@ HWTEST_F(WindowSceneSessionImplTest, UpdateFloatingWindowSizeBySizeLimits01, Fun
     int ret = 0;
     windowscenesession->UpdateFloatingWindowSizeBySizeLimits(MaxWith, MaxWith);
     ASSERT_EQ(0, ret);
-} 
+}
 
 
 /**
@@ -1476,7 +1476,7 @@ HWTEST_F(WindowSceneSessionImplTest, GetConfigurationFromAbilityInfo01, Function
     option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
-    int ret=0;
+    int ret = 0;
     windowscenesession->GetConfigurationFromAbilityInfo();
     ASSERT_EQ(ret, 0);
 }
