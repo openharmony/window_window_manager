@@ -90,11 +90,11 @@ void ANRHandler::OnWindowDestroyed(int32_t persistentId)
         return;
     }
     anrHandlerState_.sendStatus.erase(persistentId);
-    if (anrHandlerState_.eventsMap.find(persistentId) == anrHandlerState_.eventsMap.end()) {
+    if (anrHandlerState_.eventsIterMap.find(persistentId) == anrHandlerState_.eventsIterMap.end()) {
         WLOGFE("PersistentId:%{public}d not in ANRHandler", persistentId);
         return;
     }
-    anrHandlerState_.eventsMap.erase(persistentId);
+    anrHandlerState_.eventsIterMap.erase(persistentId);
     WLOGFD("PersistentId:%{public}d erased in ANRHandler", persistentId);
 }
 
@@ -106,10 +106,10 @@ void ANRHandler::SetAnrHandleState(int32_t eventId, bool status)
     anrHandlerState_.sendStatus[persistentId] = status;
     if (status) {
         auto iter = anrHandlerState_.eventsToReceipt.insert(anrHandlerState_.eventsToReceipt.end(), eventId);
-        anrHandlerState_.eventsMap[persistentId] = iter;
+        anrHandlerState_.eventsIterMap[persistentId] = iter;
     } else {
         anrHandlerState_.eventsToReceipt.pop_front();
-        anrHandlerState_.eventsMap[persistentId] = anrHandlerState_.eventsToReceipt.begin();
+        anrHandlerState_.eventsIterMap[persistentId] = anrHandlerState_.eventsToReceipt.end();
         ClearExpiredEvents(eventId);
     }
 }
@@ -195,7 +195,7 @@ void ANRHandler::UpdateLatestEventId(int32_t eventId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto currentPersistentId = GetPersistentIdOfEvent(eventId);
-    auto pendingEventIter = anrHandlerState_.eventsMap[currentPersistentId];
+    auto pendingEventIter = anrHandlerState_.eventsIterMap[currentPersistentId];
     if (pendingEventIter == anrHandlerState_.eventsToReceipt.end()) {
         WLOGFE("No pending event on eventsToReceipt");
         return;

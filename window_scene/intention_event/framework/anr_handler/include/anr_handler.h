@@ -51,7 +51,7 @@ private:
         std::unordered_map<int32_t, bool> sendStatus;
         int32_t currentEventIdToReceipt { -1 };
         std::list<int32_t> eventsToReceipt;
-        std::unordered_map<int32_t, std::list<int>::iterator> eventsMap;
+        std::unordered_map<int32_t, std::list<int>::iterator> eventsIterMap;
     };
     ANRHandlerState anrHandlerState_;
     std::unordered_map<int32_t, wptr<ISessionStage>> sessionStageMap_;
