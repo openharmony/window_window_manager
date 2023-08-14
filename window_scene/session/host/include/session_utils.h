@@ -41,7 +41,7 @@ inline float ToWinHeight(const int32_t layoutHeight, float vpr)
     return layoutHeight + (WINDOW_FRAME_WIDTH + WINDOW_TITLE_BAR_HEIGHT) * vpr;
 }
 
-inline void CalcFloatWindowRectLimits(const WindowLimits& limits, int32_t maxFloatingWindowSize, float vpr,
+inline void CalcFloatWindowRectLimits(const WindowLimits& limits, uint32_t maxFloatingWindowSize, float vpr,
     int32_t& minWidth, int32_t& maxWidth, int32_t& minHeight, int32_t& maxHeight)
 {
     minWidth = limits.minWidth_;

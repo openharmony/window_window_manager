@@ -184,28 +184,15 @@ bool JsRootSceneSession::IsCallbackRegistered(std::string type, NativeValue* jsL
 
 void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
 {
-    WLOGI("[NAPI]pending session activation: bundleName %{public}s, moduleName %{public}s, abilityName %{public}s",
-        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
-    sptr<SceneSession> sceneSession;
-    if (info.persistentId_ == 0) {
-        sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
-        if (sceneSession == nullptr) {
-            WLOGFE("RequestSceneSession return nullptr");
-            return;
-        }
-        info.persistentId_ = sceneSession->GetPersistentId();
-        sceneSession->GetSessionInfo().persistentId_ = sceneSession->GetPersistentId();
-    } else {
-        sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
-        if (sceneSession == nullptr) {
-            WLOGFE("GetSceneSession return nullptr");
-            return;
-        }
-        sceneSession->GetSessionInfo().want = info.want;
-        sceneSession->GetSessionInfo().callerToken_ = info.callerToken_;
-        sceneSession->GetSessionInfo().requestCode = info.requestCode;
-        sceneSession->GetSessionInfo().callerPersistentId_ = info.callerPersistentId_;
+    WLOGI("[NAPI]pending session activation: bundleName %{public}s, moduleName %{public}s, abilityName %{public}s"\
+        ", reuse %{public}d",
+        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.reuse);
+    sptr<SceneSession> sceneSession = GenSceneSession(info);
+    if (sceneSession == nullptr) {
+        WLOGFE("RequestSceneSession return nullptr");
+        return;
     }
+    
     if (info.want != nullptr) {
         bool isNeedBackToOther = info.want->GetBoolParam(AAFwk::Want::PARAM_BACK_TO_OTHER_MISSION_STACK, false);
         WLOGFI("[NAPI]isNeedBackToOther: %{public}d", isNeedBackToOther);
@@ -239,5 +226,42 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
     AsyncTask::Schedule("JsSceneSession::PendingSessionActivation", engine_,
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
+{
+    sptr<SceneSession> sceneSession;
+    if (info.persistentId_ == 0) {
+        if (info.reuse) {
+            sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(
+                info.bundleName_, info.moduleName_, info.abilityName_);
+        }
+        if (sceneSession == nullptr) {
+            WLOGFI("GetSceneSessionByName return nullptr, RequestSceneSession");
+            sceneSession = SceneSessionManager::GetInstance().RequestSceneSession(info);
+            if (sceneSession == nullptr) {
+                WLOGFE("RequestSceneSession return nullptr");
+                return sceneSession;
+            }
+        } else {
+            sceneSession->GetSessionInfo().want = info.want;
+            sceneSession->GetSessionInfo().callerToken_ = info.callerToken_;
+            sceneSession->GetSessionInfo().requestCode = info.requestCode;
+            sceneSession->GetSessionInfo().callerPersistentId_ = info.callerPersistentId_;
+        }
+        info.persistentId_ = sceneSession->GetPersistentId();
+        sceneSession->GetSessionInfo().persistentId_ = sceneSession->GetPersistentId();
+    } else {
+        sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
+        if (sceneSession == nullptr) {
+            WLOGFE("GetSceneSession return nullptr");
+            return sceneSession;
+        }
+        sceneSession->GetSessionInfo().want = info.want;
+        sceneSession->GetSessionInfo().callerToken_ = info.callerToken_;
+        sceneSession->GetSessionInfo().requestCode = info.requestCode;
+        sceneSession->GetSessionInfo().callerPersistentId_ = info.callerPersistentId_;
+    }
+    return sceneSession;
 }
 } // namespace OHOS::Rosen

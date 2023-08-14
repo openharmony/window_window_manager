@@ -41,6 +41,11 @@ ohos_unittest("utils_display_info_test") {
   sources = [ "display_info_test.cpp" ]
 
   deps = [ ":utils_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("utils_screen_info_test") {
@@ -50,7 +55,11 @@ ohos_unittest("utils_screen_info_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [ "graphic_2d:surface" ]
+  external_deps = [
+    "c_utils:utils",
+    "graphic_2d:surface",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("utils_screen_group_info_test") {
@@ -60,7 +69,11 @@ ohos_unittest("utils_screen_group_info_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [ "graphic_2d:surface" ]
+  external_deps = [
+    "c_utils:utils",
+    "graphic_2d:surface",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("utils_string_test") {
@@ -69,6 +82,11 @@ ohos_unittest("utils_string_test") {
   sources = [ "string_util_test.cpp" ]
 
   deps = [ ":utils_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("utils_window_property_test") {
@@ -77,6 +95,11 @@ ohos_unittest("utils_window_property_test") {
   sources = [ "window_property_test.cpp" ]
 
   deps = [ ":utils_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("utils_wm_math_test") {
@@ -85,6 +108,11 @@ ohos_unittest("utils_wm_math_test") {
   sources = [ "wm_math_test.cpp" ]
 
   deps = [ ":utils_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("utils_surface_draw_test") {
@@ -101,6 +129,8 @@ ohos_unittest("utils_surface_draw_test") {
     "ability_runtime:ability_manager",
     "ability_runtime:abilitykit_native",
     "ace_engine:ace_uicontent",
+    "c_utils:utils",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
     "napi:ace_napi",
@@ -117,6 +147,8 @@ ohos_unittest("utils_window_helper_test") {
   external_deps = [
     "ability_runtime:ability_manager",
     "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
+    "hilog:libhilog",
   ]
 }
 
@@ -126,6 +158,11 @@ ohos_unittest("utils_perform_reporter_test") {
   sources = [ "perform_reporter_test.cpp" ]
 
   deps = [ ":utils_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("utils_cutout_info_test") {
@@ -134,6 +171,11 @@ ohos_unittest("utils_cutout_info_test") {
   sources = [ "cutout_info_test.cpp" ]
 
   deps = [ ":utils_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("utils_all_test") {
@@ -145,6 +187,8 @@ ohos_unittest("utils_all_test") {
 
   external_deps = [
     "ability_runtime:ability_manager",
+    "c_utils:utils",
+    "hilog:libhilog",
     "ipc:ipc_single",
   ]
 }
@@ -155,6 +199,11 @@ ohos_unittest("utils_wm_occlusion_region_test") {
   sources = [ "wm_occlusion_region_test.cpp" ]
 
   deps = [ ":utils_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("utils_window_transition_info_test") {
@@ -166,6 +215,8 @@ ohos_unittest("utils_window_transition_info_test") {
 
   external_deps = [
     "ability_runtime:ability_manager",
+    "c_utils:utils",
+    "hilog:libhilog",
     "ipc:ipc_single",
   ]
 }

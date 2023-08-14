@@ -335,7 +335,7 @@ DMError ScreenSessionManager::SetScreenActiveMode(ScreenId screenId, uint32_t mo
         rsInterface_.SetScreenActiveMode(rsScreenId, modeId);
         screenSession->activeIdx_ = static_cast<int32_t>(modeId);
         screenSession->UpdatePropertyByActiveMode();
-        screenSession->PropertyChange(screenSession->GetScreenProperty());
+        screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
         NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
     }
     return DMError::DM_OK;
@@ -634,6 +634,54 @@ DMError ScreenSessionManager::SetScreenRotationLocked(bool isLocked)
     return ScreenRotationProperty::SetScreenRotationLocked(isLocked);
 }
 
+void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, RRect bounds, int rotation)
+{
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        WLOGFE("fail to update screen rotation property, cannot find screen %{public}" PRIu64"", screenId);
+        return;
+    }
+    Rotation targetRotation = Rotation::ROTATION_0;
+    switch (rotation) {
+        case 90: // Rotation 90 degree
+            targetRotation = Rotation::ROTATION_90;
+            break;
+        case 180: // Rotation 180 degree
+            targetRotation = Rotation::ROTATION_180;
+            break;
+        case 270: // Rotation 270 degree
+            targetRotation = Rotation::ROTATION_270;
+            break;
+        default:
+            targetRotation = Rotation::ROTATION_0;
+            break;
+    }
+    sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
+    displayInfo->SetRotation(targetRotation);
+    displayInfo->SetWidth(bounds.rect_.GetWidth());
+    displayInfo->SetHeight(bounds.rect_.GetHeight());
+    NotifyDisplayChanged(displayInfo, DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
+}
+
+void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event)
+{
+    if (displayInfo == nullptr) {
+        WLOGFE("NotifyDisplayChanged error, displayInfo is nullptr.");
+        return;
+    }
+    auto task = [=] {
+        WLOGFI("NotifyDisplayChanged, displayId:%{public}" PRIu64"", displayInfo->GetDisplayId());
+        auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
+        if (agents.empty()) {
+            return;
+        }
+        for (auto& agent : agents) {
+            agent->OnDisplayChange(displayInfo, event);
+        }
+    };
+    taskScheduler_->PostAsyncTask(task);
+}
+
 DMError ScreenSessionManager::SetOrientation(ScreenId screenId, Orientation orientation)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
@@ -683,7 +731,7 @@ DMError ScreenSessionManager::SetOrientationController(ScreenId screenId, Orient
         SetRotation(screenId, rotationAfter, false);
     }
     screenSession->SetOrientation(newOrientation);
-    screenSession->PropertyChange(screenSession->GetScreenProperty());
+    screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::ROTATION);
     // Notify rotation event to ScreenManager
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ORIENTATION);
     return DMError::DM_OK;
@@ -705,7 +753,7 @@ bool ScreenSessionManager::SetRotation(ScreenId screenId, Rotation rotationAfter
     WLOGFD("set orientation. rotation %{public}u", rotationAfter);
     SetDisplayBoundary(screenSession);
     screenSession->SetRotation(rotationAfter);
-    screenSession->PropertyChange(screenSession->GetScreenProperty());
+    screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::ROTATION);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
     return true;
 }

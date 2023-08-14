@@ -17,7 +17,6 @@
 
 #include <ipc_types.h>
 #include <message_option.h>
-#include <message_parcel.h>
 #include <ui/rs_surface_node.h>
 
 #include "ability_start_setting.h"
@@ -162,13 +161,7 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor()) ||
-        !(data.WriteParcelable(&(abilitySessionInfo->want))) ||
-        !data.WriteInt32(abilitySessionInfo->requestCode) ||
-        !(data.WriteInt32(abilitySessionInfo->persistentId)) ||
-        !(data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state))) ||
-        !(data.WriteInt64(abilitySessionInfo->uiAbilityId)) ||
-        !data.WriteInt32(abilitySessionInfo->callingTokenId)) {
+    if (!WriteAbilitySessionInfoBasic(data, abilitySessionInfo)) {
         WLOGFE("WriteInterfaceToken or other param failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -201,6 +194,25 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
+}
+
+bool SessionProxy::WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
+{
+    if (abilitySessionInfo == nullptr) {
+        WLOGFE("abilitySessionInfo is null");
+        return false;
+    }
+    if (!data.WriteInterfaceToken(GetDescriptor()) ||
+        !(data.WriteParcelable(&(abilitySessionInfo->want))) ||
+        !data.WriteInt32(abilitySessionInfo->requestCode) ||
+        !(data.WriteInt32(abilitySessionInfo->persistentId)) ||
+        !(data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state))) ||
+        !(data.WriteInt64(abilitySessionInfo->uiAbilityId)) ||
+        !data.WriteInt32(abilitySessionInfo->callingTokenId) ||
+        !data.WriteBool(abilitySessionInfo->reuse)) {
+        return false;
+    }
+    return true;
 }
 
 WSError SessionProxy::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
@@ -280,7 +292,7 @@ WSError SessionProxy::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
         WLOGFE("Write erroCode info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_TERMINATE),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_EXCEPTION),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -368,7 +380,7 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
 
 WSError SessionProxy::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session)
+    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session, sptr<IRemoteObject> token)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -392,12 +404,15 @@ WSError SessionProxy::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
 
     if (property) {
         if (!data.WriteBool(true) || !data.WriteParcelable(property.GetRefPtr())) {
-            WLOGFE("Write property failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
     } else {
         if (!data.WriteBool(false)) {
-            WLOGFE("Write property failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    }
+    if (token != nullptr) {
+        if (!data.WriteRemoteObject(token)) {
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }

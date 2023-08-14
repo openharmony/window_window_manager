@@ -23,6 +23,7 @@
 #include <native_engine/native_value.h>
 #include "root_scene.h"
 #include "session/host/include/scene_session.h"
+#include "ability_info.h"
 
 namespace OHOS::Rosen {
 class JsSceneSessionManager final {
@@ -47,7 +48,10 @@ public:
     static NativeValue* SwitchUser(NativeEngine* engin, NativeCallbackInfo* info);
     static NativeValue* GetSessionSnapshotFilePath(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* InitWithRenderServiceAdded(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* GetAllAbilityInfos(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* PrepareTerminate(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* PerfRequestEx(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* UpdateWindowMode(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
     NativeValue* OnRegisterCallback(NativeEngine& engine, NativeCallbackInfo& info);
@@ -64,7 +68,14 @@ private:
     NativeValue* OnSwitchUser(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetSessionSnapshotFilePath(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnInitWithRenderServiceAdded(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnGetAllAbilityInfos(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* CreateAbilityInfos(NativeEngine& engine, const std::vector<AppExecFwk::AbilityInfo>& abilityInfos);
+    NativeValue* CreateAbilityItemInfo(NativeEngine &engine, const AppExecFwk::AbilityInfo& abilityInfo);
+    NativeValue* CreateWindowModes(NativeEngine& engine, const std::vector<AppExecFwk::SupportWindowMode>& windowModes);
+    NativeValue* CreateWindowSize(NativeEngine& engine, const AppExecFwk::AbilityInfo& abilityInfo);
+    NativeValue* OnPrepareTerminate(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnPerfRequestEx(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnUpdateWindowMode(NativeEngine& engine, NativeCallbackInfo& info);
 
     void OnGestureNavigationEnabledUpdate(bool enable);
     void OnCreateSpecificSession(const sptr<SceneSession>& sceneSession);

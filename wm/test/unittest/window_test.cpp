@@ -2006,6 +2006,71 @@ HWTEST_F(WindowTest, IDispatchInputEventListener, Function | SmallTest | Level3)
     ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: Marshalling
+ * @tc.desc: keyboardAnimationConfig marshalling
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, KeyboardAnimationConfigMarshalling, Function | SmallTest | Level3)
+{
+    MessageParcel data;
+    KeyboardAnimationConfig config;
+    auto ret = data.WriteParcelable(&config);
+    ASSERT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: BackgroundFailed
+ * @tc.desc: window life cycle BackgroundFailed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, WindowLifeCycleBackgroundFailed, Function | SmallTest | Level3)
+{
+    IWindowLifeCycle windowLifeCycle;
+    int32_t  ret = 0;
+    windowLifeCycle.BackgroundFailed(ret);
+    ASSERT_EQ(0, ret);
+}
+
+/**
+ * @tc.name: GetVSyncPeriod
+ * @tc.desc: window GetVSyncPeriod
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetVSyncPeriod, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> winOption = nullptr;
+    winOption = new (std::nothrow) OHOS::Rosen::WindowOption();
+    ASSERT_NE(nullptr, winOption);
+    winOption->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+
+    sptr<WindowOption> option = new WindowOption;
+    sptr<Window> window = Window::Create("win", option);
+    ASSERT_NE(nullptr, window);
+    int64_t period = window->GetVSyncPeriod();
+    ASSERT_LE(-1, period);
+}
+
+/**
+ * @tc.name: performBack
+ * @tc.desc: window performBack
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, performBack, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> winOption = nullptr;
+    winOption = new (std::nothrow) OHOS::Rosen::WindowOption();
+    ASSERT_NE(nullptr, winOption);
+    winOption->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+
+    sptr<WindowOption> option = new WindowOption;
+    sptr<Window> window = Window::Create("win", option);
+    ASSERT_NE(nullptr, window);
+    int32_t ret = 0;
+    window->PerformBack();
+    ASSERT_EQ(0, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

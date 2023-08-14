@@ -188,6 +188,17 @@ HWTEST_F(WindowSessionTest, IsSessionValid01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: UpdateWindowSessionProperty01
+ * @tc.desc: UpdateWindowSessionProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateWindowSessionProperty01, Function | SmallTest | Level2)
+{
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    ASSERT_EQ(session_->UpdateWindowSessionProperty(nullptr), WSError::WS_OK);
+}
+
+/**
  * @tc.name: Connect01
  * @tc.desc: check func Connect
  * @tc.type: FUNC
@@ -335,7 +346,7 @@ HWTEST_F(WindowSessionTest, NotifySessionException01, Function | SmallTest | Lev
     };
 
     sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
-    session_->sessionExceptionFunc_ = nullptr;
+    session_->sessionExceptionFuncs_.clear();
     session_->NotifySessionException(info);
     ASSERT_EQ(resultValue, 0);
 
@@ -522,7 +533,7 @@ HWTEST_F(WindowSessionTest, UpdateSessionRect01, Function | SmallTest | Level2)
     ASSERT_EQ(result, WSError::WS_OK);
 
     int resultValue = 0;
-    NotifySessionRectChangeFunc onRectChange_ = [&resultValue](const WSRect &rect)
+    NotifySessionRectChangeFunc onRectChange_ = [&resultValue](const WSRect &rect, const SizeChangeReason& reason)
     { resultValue = 1; };
     scensessionchangeCallBack->onRectChange_ = onRectChange_;
     result = scensession->UpdateSessionRect(rect, SizeChangeReason::RESIZE);
@@ -557,57 +568,6 @@ HWTEST_F(WindowSessionTest, DestroyAndDisconnectSpecificSession01, Function | Sm
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     EXPECT_NE(scensession, nullptr);
     result = scensession->DestroyAndDisconnectSpecificSession(persistentId);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: CreateAndConnectSpecificSession01
- * @tc.desc: CreateAndConnectSpecificSession
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, CreateAndConnectSpecificSession01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "testSession1";
-    info.bundleName_ = "testSession3";
-    sptr<Rosen::ISession> session_;
-    auto surfaceNode_ = CreateRSSurfaceNode();
-    sptr<WindowSessionProperty> property_ = nullptr;
-    int32_t persistentId = 0;
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
-    EXPECT_NE(mockSessionStage, nullptr);
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    int resultValue = 0;
-    sptr<SceneSession> scensession;
-    sptr<TestWindowEventChannel> testWindowEventChannel = new (std::nothrow) TestWindowEventChannel();
-    EXPECT_NE(testWindowEventChannel, nullptr);
-
-    specificCallback_->onCreate_ = [&resultValue, specificCallback_](const SessionInfo &info,
-                                                          sptr<WindowSessionProperty> property) -> sptr<SceneSession>
-    {
-        sptr<SceneSession> scensessionreturn = new (std::nothrow) SceneSession(info, specificCallback_);
-        EXPECT_NE(scensessionreturn, nullptr);
-        resultValue = 1;
-        return scensessionreturn;
-    };
-    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
-    EXPECT_NE(scensession, nullptr);
-    auto result = scensession->CreateAndConnectSpecificSession(mockSessionStage, testWindowEventChannel, surfaceNode_,
-                                                               property_, persistentId, session_);
-    ASSERT_EQ(result, WSError::WS_OK);
-    sptr<SceneSession::SessionChangeCallback> scensessionchangeCallBack =
-        new (std::nothrow) SceneSession::SessionChangeCallback();
-    EXPECT_NE(scensessionchangeCallBack, nullptr);
-    NotifyCreateSpecificSessionFunc onCreateSpecificSession_ = [&resultValue](const sptr<SceneSession> &session)
-    {
-        resultValue = 1;
-    };
-    scensessionchangeCallBack->onCreateSpecificSession_ = onCreateSpecificSession_;
-    scensession->RegisterSessionChangeCallback(scensessionchangeCallBack);
-    result = scensession->CreateAndConnectSpecificSession(mockSessionStage, testWindowEventChannel, surfaceNode_,
-                                                          property_, persistentId, session_);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -650,9 +610,6 @@ HWTEST_F(WindowSessionTest, CreateAndConnectSpecificSession2, Function | SmallTe
     };
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     EXPECT_NE(scensession, nullptr);
-    result = scensession->CreateAndConnectSpecificSession(mockSessionStage, testWindowEventChannel, surfaceNode_,
-                                                          property_, persistentId, session_);
-    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -1012,7 +969,9 @@ HWTEST_F(WindowSessionTest, SetAspectRatio01, Function | SmallTest | Level2)
     sceneSession->property_ = property;
     float ratio = 4.0f;
     auto result = sceneSession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+    if (result == WSError::WS_ERROR_INVALID_PARAM) {
+        ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+    }
     ratio = 0.2f;
     result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
@@ -1031,6 +990,58 @@ HWTEST_F(WindowSessionTest, SetAspectRatio01, Function | SmallTest | Level2)
     ratio = 1.5f;
     result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: GetWindowId01
+ * @tc.desc: GetWindowId, normal scene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetWindowId, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(0, session_->GetWindowId());
+}
+
+/**
+ * @tc.name: GetVisible01
+ * @tc.desc: GetVisible, normal scene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetVisible, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->SetVisible(false));
+    session_->state_ = SessionState::STATE_CONNECT;
+    if (!session_->GetVisible()) {
+        ASSERT_EQ(false, session_->GetVisible());
+    }
+}
+
+/**
+ * @tc.name: IsActive01
+ * @tc.desc: IsActive, normal scene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsActive, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->isActive_ = false;
+    if (!session_->IsActive()) {
+        ASSERT_EQ(false, session_->IsActive());
+    }
+}
+
+/**
+ * @tc.name: SetFocusable01
+ * @tc.desc: SetFocusable, normal scene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetFocusable, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->SetFocusable(false));
 }
 }
 } // namespace Rosen

@@ -37,7 +37,10 @@ ohos_fuzztest("ScreenManagerFuzzTest") {
     "${window_base_path}/dm:libdm",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ###############################################################################

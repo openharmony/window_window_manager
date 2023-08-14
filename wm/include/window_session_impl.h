@@ -68,6 +68,7 @@ public:
     WMError SetTouchable(bool isTouchable) override;
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;
+    virtual float GetBrightness() const override;
     void SetRequestedOrientation(Orientation orientation) override;
     bool GetTouchable() const override;
     uint32_t GetWindowId() const override;
@@ -84,8 +85,10 @@ public:
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
     WSError UpdateFocus(bool focus) override;
+    WSError UpdateWindowMode(WindowMode mode) override;
     WSError HandleBackEvent() override { return WSError::WS_OK; }
     WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;
+    WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
 
     void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;
@@ -162,13 +165,13 @@ protected:
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
 
     sptr<WindowSessionProperty> property_;
-    WindowMode windowMode_ = WindowMode::WINDOW_MODE_UNDEFINED;
     SystemSessionConfig windowSystemConfig_;
     NotifyNativeWinDestroyFunc notifyNativeFunc_;
 
     std::recursive_mutex mutex_;
     static std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> windowSessionMap_;
     static std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
+    bool isSystembarPropertiesSet_ = false;
     bool isIgnoreSafeAreaNeedNotify_ = false;
     bool isIgnoreSafeArea_ = false;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;

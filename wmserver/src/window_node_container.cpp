@@ -288,7 +288,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     WLOGI("AddWindowNode Id: %{public}u end", node->GetWindowId());
     RSInterfaces::GetInstance().SetAppWindowNum(GetAppWindowNum());
     // update private window count and notify dms private status changed
-    if (node->GetWindowProperty()->GetPrivacyMode()) {
+    if (node->GetWindowProperty()->GetPrivacyMode() && !node->GetWindowProperty()->GetOnlySkipSnapshot()) {
         UpdatePrivateStateAndNotify();
     }
     if (WindowHelper::IsMainWindow(node->GetWindowType())) {
@@ -437,7 +437,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node, bool fromA
     RSInterfaces::GetInstance().SetAppWindowNum(GetAppWindowNum());
 
     // update private window count and notify dms private status changed
-    if (node->GetWindowProperty()->GetPrivacyMode()) {
+    if (node->GetWindowProperty()->GetPrivacyMode() && !node->GetWindowProperty()->GetOnlySkipSnapshot()) {
         UpdatePrivateStateAndNotify();
     }
     if (WindowHelper::IsMainWindow(node->GetWindowType())) {
@@ -509,7 +509,7 @@ void WindowNodeContainer::UpdatePrivateWindowCount()
     TraverseContainer(windowNodes);
     uint32_t count = 0;
     for (const auto& node : windowNodes) {
-        if (node->GetWindowProperty()->GetPrivacyMode()) {
+        if (node->GetWindowProperty()->GetPrivacyMode() && !node->GetWindowProperty()->GetOnlySkipSnapshot()) {
             ++count;
         }
     }
@@ -602,6 +602,7 @@ void WindowNodeContainer::ResetAllMainFloatingWindowZOrder(sptr<WindowNode>& roo
 
 WMError WindowNodeContainer::HandleRemoveWindow(sptr<WindowNode>& node)
 {
+    WLOGFD("start");
     auto windowPair = displayGroupController_->GetWindowPairByDisplayId(node->GetDisplayId());
     if (windowPair == nullptr) {
         WLOGFE("Window pair is nullptr");
@@ -614,6 +615,7 @@ WMError WindowNodeContainer::HandleRemoveWindow(sptr<WindowNode>& node)
         dividerWindow != nullptr) {
         UpdateWindowNode(dividerWindow, WindowUpdateReason::UPDATE_RECT);
     }
+    WLOGFD("end");
     return WMError::WM_OK;
 }
 
@@ -1934,7 +1936,8 @@ bool WindowNodeContainer::HasPrivateWindow()
     std::vector<sptr<WindowNode>> windowNodes;
     TraverseContainer(windowNodes);
     for (const auto& node : windowNodes) {
-        if (node->isVisible_ && node->GetWindowProperty()->GetPrivacyMode()) {
+        if (node->isVisible_ && node->GetWindowProperty()->GetPrivacyMode() &&
+        !node->GetWindowProperty()->GetOnlySkipSnapshot()) {
             WLOGI("window name %{public}s", node->GetWindowName().c_str());
             return true;
         }

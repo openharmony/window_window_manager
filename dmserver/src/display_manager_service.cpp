@@ -79,7 +79,7 @@ void DisplayManagerService::OnStart()
     }
     sptr<DisplayManagerService> dms = this;
     dms->IncStrongRef(nullptr);
-    if (!Publish(this)) {
+    if (!Publish(sptr<DisplayManagerService>(this))) {
         WLOGFE("Publish failed");
     }
     WLOGFI("end");

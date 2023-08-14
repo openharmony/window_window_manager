@@ -41,6 +41,7 @@ const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
     // for scene only
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_SESSION_EVENT), &SessionStub::HandleSessionEvent),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_TERMINATE), &SessionStub::HandleTerminateSession),
+    std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_EXCEPTION), &SessionStub::HandleSessionException),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_UPDATE_SESSION_RECT),
         &SessionStub::HandleUpdateSessionRect),
     std::make_pair(static_cast<uint32_t>(SessionMessage::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION),
@@ -223,7 +224,8 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     abilitySessionInfo->persistentId = data.ReadInt32();
     abilitySessionInfo->state = static_cast<AAFwk::CallToState>(data.ReadInt32());
     abilitySessionInfo->uiAbilityId = data.ReadInt64();
-    abilitySessionInfo->callingTokenId = data.ReadInt32();
+    abilitySessionInfo->callingTokenId = data.ReadUint32();
+    abilitySessionInfo->reuse = data.ReadBool();
     if (data.ReadBool()) {
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
@@ -279,10 +281,18 @@ int SessionStub::HandleCreateAndConnectSpecificSession(MessageParcel& data, Mess
     } else {
         WLOGFW("Property not exist!");
     }
+
+    sptr<IRemoteObject> token = nullptr;
+    if (property && property->GetTokenState()) {
+        token = data.ReadRemoteObject();
+    } else {
+        WLOGI("accept token is nullptr");
+    }
+
     auto persistentId = INVALID_SESSION_ID;
     sptr<ISession> sceneSession;
     CreateAndConnectSpecificSession(sessionStage, eventChannel, surfaceNode,
-        property, persistentId, sceneSession);
+        property, persistentId, sceneSession, token);
     if (sceneSession== nullptr) {
         return ERR_INVALID_STATE;
     }
