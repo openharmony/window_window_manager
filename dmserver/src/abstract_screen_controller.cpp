@@ -506,6 +506,7 @@ bool AbstractScreenController::RemoveChildFromGroup(sptr<AbstractScreen> screen,
     }
     if (screenGroup->GetChildCount() == 0) {
         // Group removed, need to do something.
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
         dmsScreenGroupMap_.erase(screenGroup->dmsId_);
         dmsScreenMap_.erase(screenGroup->dmsId_);
     }

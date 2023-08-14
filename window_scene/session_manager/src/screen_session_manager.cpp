@@ -892,6 +892,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
         return SCREEN_ID_INVALID;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:CreateVirtualScreen(%s)", option.name_.c_str());
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     ScreenId smsScreenId = SCREEN_ID_INVALID;
     if (!screenIdManager_.ConvertToSmsScreenId(rsId, smsScreenId)) {
         WLOGFI("SCB: ScreenSessionManager::CreateVirtualScreen !ConvertToSmsScreenId(rsId, smsScreenId)");
@@ -902,10 +903,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
             screenIdManager_.DeleteScreenId(smsScreenId);
             return SCREEN_ID_INVALID;
         }
-        {
-            std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-            screenSessionMap_.insert(std::make_pair(smsScreenId, screenSession));
-        }
+        screenSessionMap_.insert(std::make_pair(smsScreenId, screenSession));
         NotifyScreenConnected(screenSession->ConvertToScreenInfo());
         if (deathRecipient_ == nullptr) {
             WLOGFI("SCB: ScreenSessionManager::CreateVirtualScreen Create deathRecipient");
@@ -942,6 +940,7 @@ DMError ScreenSessionManager::SetVirtualScreenSurface(ScreenId screenId, sptr<IB
 DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
 {
     WLOGI("SCB: ScreenSessionManager::DestroyVirtualScreen Enter");
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     ScreenId rsScreenId = SCREEN_ID_INVALID;
     screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId);
 
@@ -963,7 +962,6 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:DestroyVirtualScreen(%" PRIu64")", screenId);
     if (rsScreenId != SCREEN_ID_INVALID && GetScreenSession(screenId) != nullptr) {
-        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
         auto smsScreenMapIter = screenSessionMap_.find(screenId);
         if (smsScreenMapIter != screenSessionMap_.end()) {
             auto screenGroup = RemoveFromGroupLocked(smsScreenMapIter->second);
