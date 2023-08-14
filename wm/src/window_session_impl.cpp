@@ -291,9 +291,9 @@ WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
     // delete after replace WSError with WMError
     WMError res = static_cast<WMError>(ret);
     if (res == WMError::WM_OK) {
-        NotifyAfterForeground();
         state_ = WindowState::STATE_SHOWN;
         requestState_ = WindowState::STATE_SHOWN;
+        NotifyAfterForeground();
     } else {
         NotifyForegroundFailed(res);
     }
@@ -314,9 +314,9 @@ WMError WindowSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFrom
         NotifyBackgroundFailed(WMError::WM_DO_NOTHING);
         return WMError::WM_OK;
     }
-    NotifyAfterBackground();
     state_ = WindowState::STATE_HIDDEN;
     requestState_ = WindowState::STATE_HIDDEN;
+    NotifyAfterBackground();
     return WMError::WM_OK;
 }
 
