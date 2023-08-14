@@ -261,14 +261,34 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
     }
 }
 
+uint32_t WindowSceneSessionImpl::UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal,
+                                                 uint32_t defaultVal, float vpr)
+{
+    bool validConfig = minVal < configVal && configVal < maxVal;
+    return validConfig ? static_cast<uint32_t>(configVal * vpr) : static_cast<uint32_t>(defaultVal * vpr);
+}
+
 WindowLimits WindowSceneSessionImpl::GetSystemSizeLimits(uint32_t displayWidth,
     uint32_t displayHeight, float vpr)
 {
     WindowLimits systemLimits;
     systemLimits.maxWidth_ = static_cast<uint32_t>(maxFloatingWindowSize_ * vpr);
     systemLimits.maxHeight_ = static_cast<uint32_t>(maxFloatingWindowSize_ * vpr);
-    systemLimits.minWidth_ = static_cast<uint32_t>(MIN_FLOATING_WIDTH * vpr);
-    systemLimits.minHeight_ = static_cast<uint32_t>(MIN_FLOATING_HEIGHT * vpr);
+    
+    if (WindowHelper::IsMainWindow(GetType())) {
+        systemLimits.minWidth_ = UpdateConfigVal(0, displayWidth, windowSystemConfig_.miniWidthOfMainWindow_,
+                                                 MIN_FLOATING_WIDTH, vpr);
+        systemLimits.minHeight_ = UpdateConfigVal(0, displayHeight, windowSystemConfig_.miniHeightOfMainWindow_,
+                                                  MIN_FLOATING_HEIGHT, vpr);
+    } else if (WindowHelper::IsSubWindow(GetType())) {
+        systemLimits.minWidth_ = UpdateConfigVal(0, displayWidth, windowSystemConfig_.miniWidthOfSubWindow_,
+                                                 MIN_FLOATING_WIDTH, vpr);
+        systemLimits.minHeight_ = UpdateConfigVal(0, displayHeight, windowSystemConfig_.miniHeightOfSubWindow_,
+                                                  MIN_FLOATING_HEIGHT, vpr);
+    } else {
+        systemLimits.minWidth_ = static_cast<uint32_t>(MIN_FLOATING_WIDTH * vpr);
+        systemLimits.minHeight_ = static_cast<uint32_t>(MIN_FLOATING_HEIGHT * vpr);
+    }
     WLOGFI("[System SizeLimits] [maxWidth: %{public}u, minWidth: %{public}u, maxHeight: %{public}u, "
         "minHeight: %{public}u]", systemLimits.maxWidth_, systemLimits.minWidth_,
         systemLimits.maxHeight_, systemLimits.minHeight_);

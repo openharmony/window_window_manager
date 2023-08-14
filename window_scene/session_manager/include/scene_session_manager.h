@@ -182,6 +182,9 @@ private:
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig);
     void ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig);
     void ConfigStartingWindowAnimation(const WindowSceneConfig::ConfigItem& startingWindowConfig);
+    void ConfigWindowSizeLimits();
+    void ConfigMainWindowSizeLimits(const WindowSceneConfig::ConfigItem& mainWindowSizeConifg);
+    void ConfigSubWindowSizeLimits(const WindowSceneConfig::ConfigItem& subWindowSizeConifg);
     sptr<SceneSession::SpecificSessionCallback> CreateSpecificSessionCallback();
     void FillSessionInfo(SessionInfo& sessionInfo);
     std::shared_ptr<AppExecFwk::AbilityInfo> QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
