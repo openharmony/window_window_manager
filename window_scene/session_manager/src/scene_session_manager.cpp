@@ -1432,7 +1432,8 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
         WLOGFE("session is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }
-    if (!(sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW || sceneSession->GetSessionInfo().isSystem_)) {
+    if (!(sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
+            sceneSession->GetSessionInfo().isSystem_)) {
         WLOGW("only app main window can set brightness");
         return WSError::WS_DO_NOTHING;
     }
@@ -1756,6 +1757,28 @@ WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& 
     return WSError::WS_ERROR_INVALID_OPERATION;
 }
 
+void FocusIDChange(int32_t persistentId, sptr<SceneSession>& sceneSession)
+{
+    // notify RS
+    WLOGFD("current focus session: windowId: %{public}d, windowName: %{public}s, bundleName: %{public}s,"
+        " abilityName: %{public}s, pid: %{public}d, uid: %{public}d", persistentId,
+        sceneSession->GetWindowSessionProperty()->GetWindowName().c_str(),
+        sceneSession->GetSessionInfo().bundleName_.c_str(),
+        sceneSession->GetSessionInfo().abilityName_.c_str(),
+        sceneSession->GetCallingPid(), sceneSession->GetCallingUid());
+    uint64_t focusNodeId = 0; // 0 means invalid
+    if (sceneSession->GetSurfaceNode() == nullptr) {
+        WLOGFW("focused window surfaceNode is null");
+    } else {
+        focusNodeId = sceneSession->GetSurfaceNode()->GetId();
+    }
+    FocusAppInfo appInfo = {
+        sceneSession->GetCallingPid(), sceneSession->GetCallingUid(),
+        sceneSession->GetSessionInfo().bundleName_,
+        sceneSession->GetSessionInfo().abilityName_, focusNodeId};
+    RSInterfaces::GetInstance().SetFocusAppInfo(appInfo);
+}
+
 WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
 {
     auto task = [this, persistentId, isFocused]() {
@@ -1770,25 +1793,7 @@ WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
         if (isFocused) {
             SetFocusedSession(persistentId);
             UpdateBrightness(focusedSessionId_);
-            // notify RS
-            WLOGFD("current focus session: windowId: %{public}d, windowName: %{public}s, bundleName: %{public}s,"
-            " abilityName: %{public}s, pid: %{public}d, uid: %{public}d", persistentId,
-            sceneSession->GetWindowSessionProperty()->GetWindowName().c_str(),
-            sceneSession->GetSessionInfo().bundleName_.c_str(),
-            sceneSession->GetSessionInfo().abilityName_.c_str(),
-            sceneSession->GetCallingPid(), sceneSession->GetCallingUid());
-            uint64_t focusNodeId = 0; // 0 means invalid
-            if (sceneSession->GetSurfaceNode() == nullptr) {
-                WLOGFW("focused window surfaceNode is null");
-            } else {
-                focusNodeId = sceneSession->GetSurfaceNode()->GetId();
-            }
-            FocusAppInfo appInfo = {
-                sceneSession->GetCallingPid(), sceneSession->GetCallingUid(),
-                sceneSession->GetSessionInfo().bundleName_, sceneSession->GetSessionInfo().abilityName_,
-                focusNodeId
-            };
-            RSInterfaces::GetInstance().SetFocusAppInfo(appInfo);
+            FocusIDChange(persistentId, sceneSession);
         } else if (persistentId == GetFocusedSession()) {
             SetFocusedSession(INVALID_SESSION_ID);
         }

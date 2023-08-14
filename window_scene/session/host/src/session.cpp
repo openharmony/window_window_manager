@@ -366,7 +366,8 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 }
 
 WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
+    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
 {
     callingPid_ = IPCSkeleton::GetCallingPid();
     callingUid_ = IPCSkeleton::GetCallingUid();
@@ -374,7 +375,8 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
 }
 
 WSError Session::ConnectImpl(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
+    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
 {
     WLOGFI("Connect session, id: %{public}d, state: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()));
@@ -874,7 +876,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW) {
         WLOGFD("Action:%{public}s, eventId:%{public}d, report without timer",
-        pointerEvent->DumpPointerAction(), pointerEvent->GetId());
+            pointerEvent->DumpPointerAction(), pointerEvent->GetId());
     } else {
         DelayedSingleton<ANRManager>::GetInstance()->AddTimer(pointerEvent->GetId(), persistentId_);
     }

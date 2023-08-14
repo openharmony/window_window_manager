@@ -34,7 +34,7 @@ static int deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
     if (option != nullptr) {
-       name_ = option->GetWindowName();
+        name_ = option->GetWindowName();
     } else {
         name_ = "main_window";
     }
@@ -178,7 +178,6 @@ bool WindowImpl::IsMainHandlerAvailable() const
 
 SystemBarProperty WindowImpl::GetSystemBarPropertyByType(WindowType type) const
 {
-    
     return SystemBarProperty();
 }
 
@@ -614,7 +613,7 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
 {
     if (uiContent_ == nullptr) {
         WLOGFE("ConsumePointerEvent to uiContent failed,uiContent_ is null");
-        return; 
+        return;
     }
     (void)uiContent_->ProcessPointerEvent(pointerEvent);
 }
@@ -785,7 +784,7 @@ void WindowImpl::SetViewportConfig(const Ace::ViewportConfig& config)
         height_ = config.Height();
         isUpdate = true;
     }
-    if (abs(density_ - config.Density()) >= 0.000001) {
+    if (abs(density_ - config.Density()) >= 1e-6) {
         density_ = config.Density();
         isUpdate = true;
     }
@@ -795,7 +794,7 @@ void WindowImpl::SetViewportConfig(const Ace::ViewportConfig& config)
     }
     if (isUpdate) {
         UpdateViewportConfig();
-    }    
+    }
 }
 
 void WindowImpl::UpdateViewportConfig()
@@ -808,7 +807,6 @@ void WindowImpl::UpdateViewportConfig()
     if (uiContent_ != nullptr) {
         uiContent_->UpdateViewportConfig(config, WindowSizeChangeReason::UNDEFINED);
     }
-    
 }
 
 void WindowImpl::SetOrientation(Orientation orientation)
