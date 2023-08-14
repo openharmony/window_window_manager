@@ -272,12 +272,6 @@ NativeValue* JsWindowStage::OffEvent(NativeEngine& engine, NativeCallbackInfo& i
         return engine.CreateUndefined();
     }
     NativeValue* value = nullptr;
-    if (info.argv[1] == nullptr || info.argv[1]->TypeOf() != NATIVE_FUNCTION) {
-        g_listenerManager->UnregisterListener(window, eventString, CaseType::CASE_STAGE, nullptr);
-    } else {
-        g_listenerManager->UnregisterListener(window, eventString, CaseType::CASE_STAGE, info.argv[1]);
-    }
-
     if (info.argc == 1) {
         g_listenerManager->UnregisterListener(window, eventString, CaseType::CASE_STAGE, nullptr);
     } else {
