@@ -85,7 +85,7 @@ sptr<CutoutInfo> DisplayCutoutController::GetCutoutInfo(DisplayId displayId)
         CalcBuiltInDisplayWaterfallRects();
         waterfallDisplayAreaRects = waterfallDisplayAreaRects_;
     }
-    sptr<CutoutInfo> cutoutInfo = new CutoutInfo(boundingRects, waterfallDisplayAreaRects);
+    sptr<CutoutInfo> cutoutInfo(new CutoutInfo(boundingRects, waterfallDisplayAreaRects));
     return cutoutInfo;
 }
 
