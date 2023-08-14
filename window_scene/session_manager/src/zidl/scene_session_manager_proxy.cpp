@@ -31,7 +31,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSe
 }
 WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session)
+    sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session, sptr<IRemoteObject> token)
 {
     MessageOption option(MessageOption::TF_SYNC);
     MessageParcel data;
@@ -55,12 +55,15 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
 
     if (property) {
         if (!data.WriteBool(true) || !data.WriteParcelable(property.GetRefPtr())) {
-            WLOGFE("Write property failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
     } else {
         if (!data.WriteBool(false)) {
-            WLOGFE("Write property failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    }
+    if (token != nullptr) {
+        if (!data.WriteRemoteObject(token)) {
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
@@ -191,8 +194,7 @@ WSError SceneSessionManagerProxy::UpdateSessionAvoidAreaListener(int32_t& persis
         data, reply, option) != ERR_NONE) {
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    uint32_t ret = reply.ReadInt32();
-    return static_cast<WSError>(ret);
+    return static_cast<WSError>(reply.ReadInt32());
 }
 
 WMError SceneSessionManagerProxy::RegisterWindowManagerAgent(WindowManagerAgentType type,
@@ -388,6 +390,32 @@ WSError SceneSessionManagerProxy::SetSessionIcon(const sptr<IRemoteObject> &toke
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+WSError SceneSessionManagerProxy::IsValidSessionIds(
+    const std::vector<int32_t> &sessionIds, std::vector<bool> &results)
+{
+    WLOGFI("run SceneSessionManagerProxy::IsValidSessionIds");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32Vector(sessionIds)) {
+        WLOGFE("Write sessionIds failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_VALID_SESSION_IDS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    reply.ReadBoolVector(&results);
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
 WSError SceneSessionManagerProxy::RegisterSessionListener(const sptr<ISessionChangeListener> sessionListener)
 {
     WLOGFI("run SceneSessionManagerProxy::RegisterSessionListener");
@@ -562,7 +590,8 @@ WSError SceneSessionManagerProxy::UnRegisterSessionListener(const sptr<ISessionL
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::GetSessionInfos(int32_t numMax, std::vector<SessionInfoBean>& sessionInfos)
+WSError SceneSessionManagerProxy::GetSessionInfos(const std::string& deviceId, int32_t numMax,
+                                                  std::vector<SessionInfoBean>& sessionInfos)
 {
     WLOGFI("run SceneSessionManagerProxy::GetSessionInfos");
     MessageParcel data;
@@ -570,6 +599,10 @@ WSError SceneSessionManagerProxy::GetSessionInfos(int32_t numMax, std::vector<Se
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(deviceId)) {
+        WLOGFE("GetSessionInfos write deviceId failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteInt32(numMax)) {
@@ -589,7 +622,8 @@ WSError SceneSessionManagerProxy::GetSessionInfos(int32_t numMax, std::vector<Se
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::GetSessionInfo(int32_t persistentId, SessionInfoBean& sessionInfo)
+WSError SceneSessionManagerProxy::GetSessionInfo(const std::string& deviceId, int32_t persistentId,
+                                                 SessionInfoBean& sessionInfo)
 {
     WLOGFI("run SceneSessionManagerProxy::GetSessionInfo");
     MessageParcel data;
@@ -597,6 +631,10 @@ WSError SceneSessionManagerProxy::GetSessionInfo(int32_t persistentId, SessionIn
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(deviceId)) {
+        WLOGFE("GetSessionInfo write deviceId failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteInt32(persistentId)) {
@@ -734,7 +772,8 @@ WSError SceneSessionManagerProxy::GetSessionDumpInfo(const std::vector<std::stri
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot)
+WSError SceneSessionManagerProxy::GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
+                                                     std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -743,9 +782,17 @@ WSError SceneSessionManagerProxy::GetSessionSnapshot(int32_t persistentId, std::
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-
+    if (!data.WriteString(deviceId)) {
+        WLOGFE("Write deviceId failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (!data.WriteInt32(persistentId)) {
         WLOGFE("Write persistentId failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    if (!data.WriteBool(isLowResolution)) {
+        WLOGFE("Write isLowResolution failed");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
 
@@ -756,6 +803,32 @@ WSError SceneSessionManagerProxy::GetSessionSnapshot(int32_t persistentId, std::
     }
     std::shared_ptr<Media::PixelMap> sessionSnapshot(reply.ReadParcelable<Media::PixelMap>());
     snapshot = sessionSnapshot;
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
+WSError SceneSessionManagerProxy::SetSessionContinueState(const sptr<IRemoteObject> &token,
+    const ContinueState& continueState)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteRemoteObject(token)) {
+        WLOGFE("Write token failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(static_cast<int32_t>(continueState))) {
+        WLOGFE("Write continueState failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_CONTINUE_STATE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     return static_cast<WSError>(reply.ReadInt32());
 }
 
@@ -777,5 +850,104 @@ void SceneSessionManagerProxy::NotifyDumpInfoResult(const std::vector<std::strin
         WLOGFE("SendRequest failed");
         return;
     }
+}
+
+WSError SceneSessionManagerProxy::ClearSession(int32_t persistentId)
+{
+    WLOGFI("run SceneSessionManagerProxy::ClearSession");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("ClearSession WriteInterfaceToken failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    if (!data.WriteInt32(persistentId)) {
+        WLOGFE("Write persistentId failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CLEAR_SESSION),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
+WSError SceneSessionManagerProxy::ClearAllSessions()
+{
+    WLOGFI("run SceneSessionManagerProxy::ClearSession");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("ClearAllSessions WriteInterfaceToken failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CLEAR_ALL_SESSIONS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
+WSError SceneSessionManagerProxy::RegisterIAbilityManagerCollaborator(int32_t type, const sptr<AAFwk::IAbilityManagerCollaborator> &impl)
+{
+    WLOGFI("run SceneSessionManagerProxy::RegisterIAbilityManagerCollaborator");
+    if (!impl) {
+        WLOGFE("impl is nullptr");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("Write interface token failed.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteInt32(type)) {
+        WLOGFE("type write failed.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteRemoteObject(impl->AsObject())) {
+        WLOGFE("impl write failed.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_COLLABORATOR),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
+WSError SceneSessionManagerProxy::UnregisterIAbilityManagerCollaborator(int32_t type)
+{
+    WLOGFI("run SceneSessionManagerProxy::UnregisterIAbilityManagerCollaborator");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("Write interface token failed.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteInt32(type)) {
+        WLOGFE("type write failed.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNREGISTER_COLLABORATOR),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
 }
 } // namespace OHOS::Rosen

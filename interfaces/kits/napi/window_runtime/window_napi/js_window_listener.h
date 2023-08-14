@@ -43,6 +43,7 @@ const std::string SCREENSHOT_EVENT_CB = "screenshot";
 const std::string DIALOG_TARGET_TOUCH_CB = "dialogTargetTouch";
 const std::string DIALOG_DEATH_RECIPIENT_CB = "dialogDeathRecipient";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
+const std::string WATER_MARK_FLAG_CHANGE_CB = "waterMarkFlagChange";
 
 class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
@@ -53,6 +54,7 @@ class JsWindowListener : public IWindowChangeListener,
                          public IScreenshotListener,
                          public IDialogTargetTouchListener,
                          public IDialogDeathRecipientListener,
+                         public IWaterMarkFlagChangedListener,
                          public IGestureNavigationEnabledChangedListener {
 public:
     JsWindowListener(NativeEngine* engine, NativeReference* callback)
@@ -74,6 +76,7 @@ public:
     void OnDialogTargetTouch() const override;
     void OnDialogDeathRecipient() const override;
     void OnGestureNavigationEnabledUpdate(bool enable) override;
+    void OnWaterMarkFlagUpdate(bool showWaterMark) override;
     void CallJsMethod(const char* methodName, NativeValue* const* argv = nullptr, size_t argc = 0);
 private:
     WindowState state_ {WindowState::STATE_INITIAL};

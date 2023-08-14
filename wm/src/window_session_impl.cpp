@@ -20,6 +20,7 @@
 
 #include <common/rs_common_def.h>
 #include <ipc_skeleton.h>
+#include <hisysevent.h>
 #ifdef IMF_ENABLE
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
@@ -40,6 +41,8 @@
 #include "window_helper.h"
 #include "color_parser.h"
 #include "singleton_container.h"
+#include "perform_reporter.h"
+
 
 namespace OHOS {
 namespace Rosen {
@@ -107,6 +110,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetTurnScreenOn(option->IsTurnScreenOn());
     property_->SetKeepScreenOn(option->IsKeepScreenOn());
     property_->SetWindowMode(option->GetWindowMode());
+    property_->SetWindowFlags(option->GetWindowFlags());
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 }
@@ -144,7 +148,9 @@ uint32_t WindowSessionImpl::GetWindowId() const
 
 int32_t WindowSessionImpl::GetParentId() const
 {
-    return static_cast<int32_t>(property_->GetParentPersistentId()) & 0x7fffffff; // 0xffffffff: to get low 32 bits
+    // 0xffffffff: to get low 32 bits
+    uint32_t parentID = static_cast<uint32_t>(property_->GetParentPersistentId()) & 0x7fffffff;
+    return static_cast<int32_t>(parentID);
 }
 
 bool WindowSessionImpl::IsWindowSessionInvalid() const
@@ -183,7 +189,7 @@ ColorSpace WindowSessionImpl::GetColorSpaceFromSurfaceGamut(GraphicColorGamut co
         }
     }
     WLOGFE("try to get not exist ColorSpace");
-    
+
     return ColorSpace::COLOR_SPACE_DEFAULT;
 }
 
@@ -407,12 +413,23 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
 
 WSError WindowSessionImpl::UpdateFocus(bool isFocused)
 {
-    WLOGFI("update focus: %{public}u", isFocused);
+    WLOGFD("Report update focus: %{public}u", isFocused);
     if (isFocused) {
+        HiSysEventWrite(
+            OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+            "FOCUS_WINDOW",
+            OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+            "PID", getpid(),
+            "UID", getuid());
         NotifyAfterFocused();
     } else {
         NotifyAfterUnfocused();
     }
+    return WSError::WS_OK;
+}
+
+WSError WindowSessionImpl::UpdateWindowMode(WindowMode mode)
+{
     return WSError::WS_OK;
 }
 
@@ -477,7 +494,6 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     uiContent_->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, false);
 }
 
-
 WMError WindowSessionImpl::SetUIContent(const std::string& contentInfo,
     NativeEngine* engine, NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability)
 {
@@ -508,7 +524,12 @@ WMError WindowSessionImpl::SetUIContent(const std::string& contentInfo,
         version = context_->GetApplicationInfo()->apiCompatibleVersion;
     }
     // 10 ArkUI new framework support after API10
-    if (version < 10 || isIgnoreSafeAreaNeedNotify_) {
+    if (version < 10) {
+        SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
+        if (!isSystembarPropertiesSet_) {
+            SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, SystemBarProperty());
+        }
+    } else if (isIgnoreSafeAreaNeedNotify_) {
         SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
         isIgnoreSafeAreaNeedNotify_ = false;
     }
@@ -546,9 +567,9 @@ void WindowSessionImpl::NotifyModeChange(WindowMode mode, bool hasDeco)
     if (hostSession_) {
         property_->SetWindowMode(mode);
         property_->SetDecorEnable(hasDeco);
-        hostSession_->UpdateWindowSessionProperty(property_);
     }
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE);
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE);
 }
 
 std::shared_ptr<RSSurfaceNode> WindowSessionImpl::GetSurfaceNode() const
@@ -641,6 +662,11 @@ WMError WindowSessionImpl::SetBrightness(float brightness)
         return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS);
     }
     return WMError::WM_OK;
+}
+
+float WindowSessionImpl::GetBrightness() const
+{
+    return property_->GetBrightness();
 }
 
 void WindowSessionImpl::SetRequestedOrientation(Orientation orientation)
@@ -1224,7 +1250,7 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
     } else if (uiContent_) {
         isConsumed = uiContent_->ProcessKeyEvent(keyEvent);
         if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
-            windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN &&
+            property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
             property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL) {
             WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
             Recover();
@@ -1304,8 +1330,22 @@ WMError WindowSessionImpl::SetBackgroundColor(const std::string& color)
 
 WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
 {
+    WLOGFD("Report set bg color: %{public}u", GetWindowId());
+
     // 0xff000000: ARGB style, means Opaque color.
-    // const bool isAlphaZero = !(color & 0xff000000);
+    const bool isAlphaZero = !(color & 0xff000000);
+    std::string bundleName;
+    std::string abilityName;
+    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
+        bundleName = context_->GetBundleName();
+        abilityName = context_->GetApplicationInfo()->name;
+    }
+
+    if (isAlphaZero && WindowHelper::IsMainWindow(GetType())) {
+        auto& reportInstance = SingletonContainer::Get<WindowInfoReporter>();
+        reportInstance.ReportZeroOpacityInfoImmediately(bundleName, abilityName);
+    }
+
     if (uiContent_ != nullptr) {
         uiContent_->SetBackgroundColor(color);
         return WMError::WM_OK;
@@ -1349,6 +1389,11 @@ WMError WindowSessionImpl::SetWindowGravity(WindowGravity gravity, uint32_t perc
 {
     return SessionManager::GetInstance().SetSessionGravity(GetPersistentId(),
         static_cast<SessionGravity>(gravity), percent);
+}
+
+WMError WindowSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
+{
+    return WMError::WM_OK;
 }
 
 void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)

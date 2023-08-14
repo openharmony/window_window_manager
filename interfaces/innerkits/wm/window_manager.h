@@ -139,6 +139,8 @@ public:
     static AccessibilityWindowInfo* Unmarshalling(Parcel& parcel);
 
     int32_t wid_;
+    int32_t innerWid_;
+    int32_t uiNodeId_;
     Rect windowRect_;
     bool focused_ { false };
     bool isDecorEnable_ { false };

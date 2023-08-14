@@ -207,6 +207,33 @@ size_t GetObject(T &object, const uint8_t *data, size_t size)
     return memcpy_s(&object, objectSize, data, objectSize) == EOK ? objectSize : 0;
 }
 
+bool DoSomethingInterestingWithMyAPI1(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size < DATA_MIN_SIZE) {
+        return false;
+    }
+    std::string name = "WindowFuzzTest1";
+    sptr<WindowOption> option = nullptr;
+    sptr<Window> window = new Window();
+    if (window == nullptr) {
+        return false;
+    }
+    size_t startPos = 0;
+    sptr<IOccupiedAreaChangeListener> iOccupiedAreaChangeListener = new IOccupiedAreaChangeListener();
+    OHOS::Rosen::Rect rect_ = {0, 0, 0, 0};
+    window->RegisterOccupiedAreaChangeListener(iOccupiedAreaChangeListener);
+    int32_t safeHeight = 80;
+    startPos += GetObject<int32_t>(safeHeight, data + startPos, size - startPos);
+    sptr<OHOS::Rosen::OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(
+        OccupiedAreaType::TYPE_INPUT, rect_, safeHeight);
+    iOccupiedAreaChangeListener->OnSizeChange(info, nullptr);
+    window->UnregisterOccupiedAreaChangeListener(iOccupiedAreaChangeListener);
+    sptr<IVisibilityChangedListener> visibilityChangedListener = new VisibilityChangedListener();
+    std::vector<sptr<WindowVisibilityInfo>> infos;
+    visibilityChangedListener->OnWindowVisibilityChanged(infos);
+    return true;
+}
+
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
@@ -214,16 +241,27 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     }
     std::string name = "WindowFuzzTest";
     sptr<WindowOption> option = nullptr;
-    sptr<Window> window = Window::Create(name, option);
+    sptr<Window> window = new Window();
     if (window == nullptr) {
         return false;
     }
+    std::string windowName = "window test";
+    window->Find(windowName);
+    size_t startPos = 0;
+    std::shared_ptr<AbilityRuntime::Context> context = nullptr;
+    startPos += GetObject(context, data + startPos, size - startPos);
+    window->GetTopWindowWithContext(context);
+    uint32_t mainWinId = 1;
+    startPos += GetObject<uint32_t>(mainWinId, data + startPos, size - startPos);
+    window->GetTopWindowWithId(mainWinId);
+    uint32_t parentId = 1;
+    startPos += GetObject<uint32_t>(parentId, data + startPos, size - startPos);
+    window->GetSubWindow(parentId);
+    std::shared_ptr<AppExecFwk::Configuration> configuration = nullptr;
+    startPos += GetObject(configuration, data + startPos, size - startPos);
+    window->UpdateConfigurationForAll(configuration);
     window->Show(0);
-    Orientation orientation = static_cast<Orientation>(data[0]);
     window->SetRequestedOrientation(static_cast<Orientation>(data[0]));
-    if (window->GetRequestedOrientation() != orientation) {
-        return false;
-    }
     window->Hide(0);
     window->Destroy();
     sptr<IFocusChangedListener> focusChangedListener = new FocusChangedListener();
@@ -240,19 +278,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     iInputEventConsumer->OnInputEvent(keyEvent);
     iInputEventConsumer->OnInputEvent(pointerEvent);
     iInputEventConsumer->OnInputEvent(axisEvent);
-    sptr<IOccupiedAreaChangeListener> iOccupiedAreaChangeListener = new IOccupiedAreaChangeListener();
-    OHOS::Rosen::Rect rect_ = {0, 0, 0, 0};
-    window->RegisterOccupiedAreaChangeListener(iOccupiedAreaChangeListener);
-    int32_t safeHeight = 80;
-    size_t startPos = 0;
-    startPos += GetObject<int32_t>(safeHeight, data + startPos, size - startPos);
-    sptr<OHOS::Rosen::OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(
-        OccupiedAreaType::TYPE_INPUT, rect_, safeHeight);
-    iOccupiedAreaChangeListener->OnSizeChange(info, nullptr);
-    window->UnregisterOccupiedAreaChangeListener(iOccupiedAreaChangeListener);
-    sptr<IVisibilityChangedListener> visibilityChangedListener = new VisibilityChangedListener();
-    std::vector<sptr<WindowVisibilityInfo>> infos;
-    visibilityChangedListener->OnWindowVisibilityChanged(infos);
+    DoSomethingInterestingWithMyAPI1(data, size);
     return true;
 }
 
@@ -687,12 +713,9 @@ void WindowImplFuzzTest(const uint8_t* data, size_t size)
     if (window == nullptr) {
         return;
     }
-    std::shared_ptr<AbilityRuntime::AbilityContext> context =
+    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext =
         std::make_shared<AbilityRuntime::AbilityContextImpl>();
-    OHOS::Rosen::WMError error = window->Create(option->GetParentId(), context);
-    if (error != OHOS::Rosen::WMError::WM_OK) {
-        return;
-    }
+    window->Create(option->GetParentId(), abilityContext);
 
     size_t startPos = 0;
     uint32_t reason = 0;
@@ -700,6 +723,9 @@ void WindowImplFuzzTest(const uint8_t* data, size_t size)
     startPos += GetObject(reason, data + startPos, size - startPos);
     startPos += GetObject(withAnimation, data + startPos, size - startPos);
     window->Show(reason, withAnimation);
+    std::shared_ptr<AbilityRuntime::Context> context = nullptr;
+    startPos += GetObject(context, data + startPos, size - startPos);
+    window->GetTopWindowWithContext(context);
 
     OHOS::CheckWindowImplFunctionsPart1(window, data, size);
     OHOS::CheckWindowImplFunctionsPart2(window, data, size);

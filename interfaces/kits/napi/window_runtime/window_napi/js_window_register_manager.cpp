@@ -28,6 +28,7 @@ JsWindowRegisterManager::JsWindowRegisterManager()
     listenerProcess_[CaseType::CASE_WINDOW_MANAGER] = {
         {SYSTEM_BAR_TINT_CHANGE_CB,            &JsWindowRegisterManager::ProcessSystemBarChangeRegister               },
         {GESTURE_NAVIGATION_ENABLED_CHANGE_CB, &JsWindowRegisterManager::ProcessGestureNavigationEnabledChangeRegister},
+        {WATER_MARK_FLAG_CHANGE_CB,            &JsWindowRegisterManager::ProcessWaterMarkFlagChangeRegister           },
     };
     // white register list for window
     listenerProcess_[CaseType::CASE_WINDOW] = {
@@ -172,6 +173,20 @@ WmErrorCode JsWindowRegisterManager::ProcessGestureNavigationEnabledChangeRegist
     return ret;
 }
 
+WmErrorCode JsWindowRegisterManager::ProcessWaterMarkFlagChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister)
+{
+    sptr<IWaterMarkFlagChangedListener> thisListener(listener);
+    WmErrorCode ret;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<WindowManager>().RegisterWaterMarkFlagChangedListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<WindowManager>().UnregisterWaterMarkFlagChangedListener(thisListener));
+    }
+    return ret;
+}
 WmErrorCode JsWindowRegisterManager::ProcessTouchOutsideRegister(sptr<JsWindowListener> listener,
     sptr<Window> window, bool isRegister)
 {

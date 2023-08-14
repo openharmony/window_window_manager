@@ -346,7 +346,8 @@ sptr<WindowProperty> WindowProxy::GetWindowProperty()
         WLOGFE("SendRequest failed");
         return nullptr;
     }
-    return reply.ReadParcelable<WindowProperty>();
+    sptr<WindowProperty> property = reply.ReadParcelable<WindowProperty>();
+    return property;
 }
 
 WMError WindowProxy::NotifyTouchOutside()

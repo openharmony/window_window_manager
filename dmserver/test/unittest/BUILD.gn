@@ -40,6 +40,11 @@ ohos_unittest("dmserver_abstract_screen_controller_test") {
   sources = [ "abstract_screen_controller_test.cpp" ]
 
   deps = [ ":dmserver_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("dmserver_display_manager_agent_controller_test") {
@@ -48,6 +53,11 @@ ohos_unittest("dmserver_display_manager_agent_controller_test") {
   sources = [ "display_manager_agent_controller_test.cpp" ]
 
   deps = [ ":dmserver_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("dmserver_abstract_display_test") {
@@ -56,6 +66,11 @@ ohos_unittest("dmserver_abstract_display_test") {
   sources = [ "abstract_display_test.cpp" ]
 
   deps = [ ":dmserver_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("dmserver_display_manager_service_test") {
@@ -64,6 +79,11 @@ ohos_unittest("dmserver_display_manager_service_test") {
   sources = [ "display_manager_service_test.cpp" ]
 
   deps = [ ":dmserver_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("dmserver_display_manager_proxy_test") {
@@ -73,7 +93,11 @@ ohos_unittest("dmserver_display_manager_proxy_test") {
 
   deps = [ ":dmserver_unittest_common" ]
 
-  external_deps = [ "graphic_2d:surface" ]
+  external_deps = [
+    "c_utils:utils",
+    "graphic_2d:surface",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("dmserver_screen_rotation_controller_test") {
@@ -83,9 +107,14 @@ ohos_unittest("dmserver_screen_rotation_controller_test") {
 
   deps = [ ":dmserver_unittest_common" ]
 
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+
   if (window_manager_feature_subscribe_motion) {
     if (defined(global_parts_info) && defined(global_parts_info.msdp_motion)) {
-      external_deps = [ "motion:motion_interface_native" ]
+      external_deps += [ "motion:motion_interface_native" ]
       defines = [ "WM_SUBSCRIBE_MOTION_ENABLE" ]
     }
   }
@@ -97,6 +126,11 @@ ohos_unittest("dmserver_display_dumper_test") {
   sources = [ "display_dumper_test.cpp" ]
 
   deps = [ ":dmserver_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("dmserver_display_cutout_controller_test") {
@@ -105,6 +139,11 @@ ohos_unittest("dmserver_display_cutout_controller_test") {
   sources = [ "display_cutout_controller_test.cpp" ]
 
   deps = [ ":dmserver_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("dmserver_abstract_screen_test") {
@@ -113,6 +152,11 @@ ohos_unittest("dmserver_abstract_screen_test") {
   sources = [ "abstract_screen_test.cpp" ]
 
   deps = [ ":dmserver_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("dmserver_abstract_display_controller_test") {
@@ -121,6 +165,11 @@ ohos_unittest("dmserver_abstract_display_controller_test") {
   sources = [ "abstract_display_controller_test.cpp" ]
 
   deps = [ ":dmserver_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_unittest("dmserver_display_manager_config_test") {
@@ -134,7 +183,11 @@ ohos_unittest("dmserver_display_manager_config_test") {
     "//third_party/libxml2:libxml2",
   ]
 
-  external_deps = [ "config_policy:configpolicy_util" ]
+  external_deps = [
+    "c_utils:utils",
+    "config_policy:configpolicy_util",
+    "hilog:libhilog",
+  ]
 }
 
 ## Build dmserver_unittest_common.a {{{

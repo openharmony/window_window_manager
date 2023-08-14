@@ -17,6 +17,7 @@
 #include <cinttypes>
 #include <hitrace_meter.h>
 #include <new>
+#include <transaction/rs_interfaces.h>
 #include "ability_context.h"
 #include "display_manager.h"
 #include "dm_common.h"
@@ -26,6 +27,8 @@
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "window_option.h"
+#include "pixel_map_napi.h"
+#include "permission.h"
 #include "singleton_container.h"
 namespace OHOS {
 namespace Rosen {
@@ -118,6 +121,12 @@ NativeValue* JsWindowManager::SetGestureNavigationEnabled(NativeEngine* engine, 
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(engine, info);
     return (me != nullptr) ? me->OnSetGestureNavigationEnabled(*engine, *info) : nullptr;
+}
+
+NativeValue* JsWindowManager::SetWaterMarkImage(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(engine, info);
+    return (me != nullptr) ? me->OnSetWaterMarkImage(*engine, *info) : nullptr;
 }
 
 static void GetNativeContext(NativeEngine& engine, NativeValue* nativeContext, void*& contextPtr, WMError& errCode)
@@ -925,6 +934,61 @@ NativeValue* JsWindowManager::OnSetGestureNavigationEnabled(NativeEngine& engine
     return result;
 }
 
+NativeValue* JsWindowManager::OnSetWaterMarkImage(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFD("OnSetWaterMarkImage");
+    NativeValue* nativeObject = nullptr;
+    NativeValue* nativeBoolean = nullptr;
+    if (info.argc < 2) { // 2: params num
+        WLOGFE("Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    } else {
+        if (info.argc > 0 && info.argv[0]->TypeOf() == NATIVE_OBJECT) {
+            nativeObject = info.argv[0];
+            nativeBoolean = (info.argc == 1) ? nullptr :
+                (info.argv[1]->TypeOf() == NATIVE_BOOLEAN ? info.argv[1] : nullptr);
+        }
+    }
+    
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    pixelMap = OHOS::Media::PixelMapNapi::GetPixelMap(reinterpret_cast<napi_env>(&engine),
+        reinterpret_cast<napi_value>(nativeObject));
+    if (pixelMap == nullptr) {
+        WLOGFE("Failed to convert parameter to PixelMap");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+
+    NativeBoolean* nativeBool = ConvertNativeValueTo<NativeBoolean>(nativeBoolean);
+    if (nativeBool == nullptr) {
+        WLOGFE("Failed to convert parameter to bool");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    bool isShow = static_cast<bool>(*nativeBool);
+
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set watermark image permission denied!");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP)));
+        return engine.CreateUndefined();
+    }
+
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            RSInterfaces::GetInstance().ShowWatermark(pixelMap, isShow);
+            task.Resolve(engine, engine.CreateUndefined());
+            WLOGD("OnSetWaterMarkImage success");
+        };
+    // 2: maximum params num; 2: index of callback
+    NativeValue* lastParam = (info.argc <= 2) ? nullptr :
+        (info.argv[2]->TypeOf() == NATIVE_FUNCTION ? info.argv[2] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsWindowManager::OnSetWaterMarkImage",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 NativeValue* JsWindowManagerInit(NativeEngine* engine, NativeValue* exportObj)
 {
     WLOGFD("JsWindowManagerInit");
@@ -968,6 +1032,7 @@ NativeValue* JsWindowManagerInit(NativeEngine* engine, NativeValue* exportObj)
     BindNativeFunction(*engine, *object, "setWindowLayoutMode", moduleName, JsWindowManager::SetWindowLayoutMode);
     BindNativeFunction(*engine, *object, "setGestureNavigationEnabled", moduleName,
         JsWindowManager::SetGestureNavigationEnabled);
+    BindNativeFunction(*engine, *object, "setWaterMarkImage", moduleName, JsWindowManager::SetWaterMarkImage);
     return engine->CreateUndefined();
 }
 }  // namespace Rosen

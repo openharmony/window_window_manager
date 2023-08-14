@@ -68,7 +68,6 @@ ohos_shared_library("scene_session") {
     "ability_base:session_info",
     "ability_base:want",
     "ability_runtime:ability_start_setting",
-    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
@@ -77,7 +76,6 @@ ohos_shared_library("scene_session") {
     "ipc:ipc_single",
     "power_manager:powermgr_client",
     "preferences:native_preferences",
-    "samgr:samgr_proxy",
   ]
 
   innerapi_tags = [ "platformsdk" ]
@@ -96,7 +94,9 @@ ohos_shared_library("screen_session") {
   deps = [ "${window_base_path}/utils:libwmutil" ]
 
   external_deps = [
+    "c_utils:utils",
     "graphic_2d:librender_service_client",
+    "hilog:libhilog",
     "init:libbegetutil",
   ]
 

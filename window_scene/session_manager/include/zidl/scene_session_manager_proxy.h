@@ -29,7 +29,8 @@ public:
 
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session) override;
+        sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
+        sptr<IRemoteObject> token = nullptr) override;
     WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId) override;
     WSError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) override;
     WSError BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;
@@ -43,6 +44,7 @@ public:
     WMError SetGestureNavigaionEnabled(bool enable) override;
     WSError SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label) override;
     WSError SetSessionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon) override;
+    WSError IsValidSessionIds(const std::vector<int32_t> &sessionIds, std::vector<bool> &results) override;
     WSError RegisterSessionListener(const sptr<ISessionChangeListener> sessionListener) override;
     void UnregisterSessionListener() override;
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
@@ -52,14 +54,21 @@ public:
 
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;
     WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override;
-    WSError GetSessionInfos(int32_t numMax, std::vector<SessionInfoBean>& sessionInfos) override;
-    WSError GetSessionInfo(int32_t persistentId, SessionInfoBean& sessionInfo) override;
+    WSError GetSessionInfos(const std::string& deviceId, int32_t numMax,
+                            std::vector<SessionInfoBean>& sessionInfos) override;
+    WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) override;
 
+    WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState) override;
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) override;
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;
     void NotifyDumpInfoResult(const std::vector<std::string>& info) override;
     WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) override;
-    WSError GetSessionSnapshot(int32_t persistentId, std::shared_ptr<Media::PixelMap> &snapshot) override;
+    WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
+                               std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution) override;
+    WSError ClearSession(int32_t persistentId) override;
+    WSError ClearAllSessions() override;
+    WSError RegisterIAbilityManagerCollaborator(int32_t type, const sptr<AAFwk::IAbilityManagerCollaborator> &impl) override;
+    WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
 
 private:
     template<typename T>
