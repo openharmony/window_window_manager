@@ -164,7 +164,6 @@ HWTEST_F(SceneSessionTest, GetGlobalMaximizeMode01, Function | SmallTest | Level
     EXPECT_NE(specificCallback_, nullptr);
 
     sptr<SceneSession> scensession;
-
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     scensession->isActive_ = true;
@@ -239,15 +238,15 @@ HWTEST_F(SceneSessionTest, GetTouchHotAreas01, Function | SmallTest | Level2)
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
-    Rect windowRect = { 1, 1, 1, 1 };
+    Rect windowRect = {1, 1, 1, 1};
     std::vector<Rect> rects;
     uint32_t hotAreasNum = 10;
     uint32_t hotAreaWidth = windowRect.width_ / hotAreasNum;
     uint32_t hotAreaHeight = windowRect.height_ / hotAreasNum;
     for (uint32_t i = 0; i < hotAreasNum; ++i) {
-        rects.emplace_back(Rect{ hotAreaWidth * i, hotAreaHeight * i, hotAreaWidth, hotAreaHeight });
+        rects.emplace_back(Rect{hotAreaWidth * i, hotAreaHeight * i, hotAreaWidth, hotAreaHeight});
     }
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
 
     ASSERT_NE(nullptr, property);
     property->SetTouchHotAreas(rects);
@@ -271,8 +270,8 @@ HWTEST_F(SceneSessionTest, SetTurnScreenOn01, Function | SmallTest | Level2)
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, scensession->NotifyTouchOutside() );
-    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, scensession->NotifyTouchOutside());
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
     ASSERT_NE(mockSessionStage, nullptr);
     ASSERT_EQ(WSError::WS_OK, scensession->SetTurnScreenOn(false));
     ASSERT_EQ(false, scensession->IsTurnScreenOn());
@@ -297,8 +296,8 @@ HWTEST_F(SceneSessionTest, UpdateWindowAnimationFlag01, Function | SmallTest | L
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, scensession->NotifyTouchOutside() );
-    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, scensession->NotifyTouchOutside());
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
     ASSERT_NE(mockSessionStage, nullptr);
     ASSERT_EQ(WSError::WS_OK, scensession->UpdateWindowAnimationFlag(false));
 }

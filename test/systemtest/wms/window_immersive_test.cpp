@@ -426,11 +426,10 @@ HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest01, Function | MediumTest | 
 HWTEST_F(WindowImmersiveTest, DockWindowTest01, Function | MediumTest | Level3)
 {
     const sptr<Window>& dockWindow = Utils::CreateDockWindow();
-    if(dockWindow==nullptr) {
+    if (dockWindow == nullptr) {
         return;
     }
     ASSERT_EQ(WMError::WM_OK, dockWindow->Show());
-
     const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppinfo_);
 
     usleep(WAIT_ASYNC_US);
