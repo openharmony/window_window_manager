@@ -1750,7 +1750,7 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
     NotifySessionExceptionFunc sessionExceptionFunc = [this](const SessionInfo& info) {
         if (info.errorCode == static_cast<int32_t>(AAFwk::ErrorLifecycleState::ABILITY_STATE_LOAD_TIMEOUT)) {
             auto scnSession = GetSceneSession(info.persistentId_);
-            if (!scnSession && listenerController_ != nullptr) {
+            if (scnSession && listenerController_ != nullptr) {
                 WLOGFD("NotifySessionClosed when ability load timeout, id: %{public}d", info.persistentId_);
                 listenerController_->NotifySessionClosed(info.persistentId_);
             }
@@ -2177,7 +2177,7 @@ void SceneSessionManager::NotifyCompleteFirstFrameDrawing(int32_t persistentId)
 {
     WLOGFI("NotifyCompleteFirstFrameDrawing, persistentId: %{public}d", persistentId);
     auto scnSession = GetSceneSession(persistentId);
-    if (!scnSession && listenerController_ != nullptr &&
+    if (scnSession && listenerController_ != nullptr &&
         (scnSession->GetSessionInfo().abilityInfo) != nullptr &&
         !(scnSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
         WLOGFD("NotifySessionCreated, id: %{public}d", persistentId);
@@ -2189,7 +2189,7 @@ void SceneSessionManager::NotifySessionMovedToFront(int32_t persistentId)
 {
     WLOGFI("NotifySessionMovedToFront, persistentId: %{public}d", persistentId);
     auto scnSession = GetSceneSession(persistentId);
-    if (!scnSession && listenerController_ != nullptr &&
+    if (scnSession && listenerController_ != nullptr &&
         (scnSession->GetSessionInfo().abilityInfo) != nullptr &&
         !(scnSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
         listenerController_->NotifySessionMovedToFront(persistentId);
@@ -2273,7 +2273,12 @@ WSError SceneSessionManager::RegisterSessionListener(const sptr<ISessionListener
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, &listener]() {
-        return listenerController_->AddSessionListener(listener);
+        if (listenerController_ != nullptr) {
+            return listenerController_->AddSessionListener(listener);
+        } else {
+            WLOGFE("The listenerController is nullptr");
+            return WSError::WS_DO_NOTHING;
+        }
     };
     return taskScheduler_->PostSyncTask(task);
 }
@@ -2290,8 +2295,13 @@ WSError SceneSessionManager::UnRegisterSessionListener(const sptr<ISessionListen
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, &listener]() {
-        listenerController_->DelSessionListener(listener);
-        return WSError::WS_OK;
+        if (listenerController_ != nullptr) {
+            listenerController_->DelSessionListener(listener);
+            return WSError::WS_OK;
+        } else {
+            WLOGFE("The listenerController is nullptr");
+            return WSError::WS_DO_NOTHING;
+        }
     };
     return taskScheduler_->PostSyncTask(task);
 }
