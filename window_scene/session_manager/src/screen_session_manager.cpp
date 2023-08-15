@@ -1063,7 +1063,6 @@ DMError ScreenSessionManager::MakeExpand(std::vector<ScreenId> screenId,
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MakeExpand");
     if (!OnMakeExpand(allExpandScreenIds, points)) {
-        WLOGFE("make expand failed.");
         return DMError::DM_ERROR_NULLPTR;
     }
     auto screen = GetScreenSession(allExpandScreenIds[0]);
@@ -1076,6 +1075,8 @@ DMError ScreenSessionManager::MakeExpand(std::vector<ScreenId> screenId,
 
 bool ScreenSessionManager::OnMakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
 {
+    ScreenId defaultScreenId = GetDefaultAbstractScreenId();
+    WLOGI("OnMakeExpand, defaultScreenId:%{public}" PRIu64"", defaultScreenId);
     auto defaultScreen = GetScreenSession(defaultScreenId);
     if (defaultScreen == nullptr) {
         WLOGFI("OnMakeExpand failed.");
