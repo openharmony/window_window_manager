@@ -869,4 +869,35 @@ Orientation SceneSession::GetRequestedOrientation() const
     return property_->GetRequestedOrientation();
 }
 
+int32_t SceneSession::GetCollaboratorType() const
+{
+    return collaboratorType_;
+}
+
+void SceneSession::SetCollaboratorType(int32_t collaboratorType)
+{
+    collaboratorType_ = collaboratorType;
+}
+
+std::shared_ptr<AppExecFwk::AbilityInfo> SceneSession::GetAbilityInfo()
+{
+    SessionInfo& sessionInfo = GetSessionInfo();
+    return sessionInfo.abilityInfo;
+}
+
+void SceneSession::SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo)
+{
+    SessionInfo& sessionInfo = GetSessionInfo();
+    sessionInfo.abilityInfo = abilityInfo;
+}
+
+void SceneSession::UpdateBrokerPersistentId(int32_t persistendId)
+{
+    brokerPersistentId_ = persistendId;
+}
+
+int32_t SceneSession::GetBrokerPersistentId()
+{
+    return brokerPersistentId_;
+}
 } // namespace OHOS::Rosen
