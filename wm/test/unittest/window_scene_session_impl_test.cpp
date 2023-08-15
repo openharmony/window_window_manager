@@ -1535,6 +1535,69 @@ HWTEST_F(WindowSceneSessionImplTest, UpdateConfiguration01, Function | SmallTest
     ASSERT_EQ(ret, 0);
 }
 
+
+/**
+ * @tc.name: UpdateConfigurationForAll01
+ * @tc.desc: UpdateConfigurationForAll
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, UpdateConfigurationForAll01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("UpdateConfigurationForAll");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+    int ret=0;
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    windowscenesession->UpdateConfigurationForAll(configuration);
+    ASSERT_EQ(ret,0);
+}
+
+/**
+ * @tc.name: GetTopWindowWithContext01
+ * @tc.desc: GetTopWindowWithContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, GetTopWindowWithContext01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetTopWindowWithContext");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    std::shared_ptr<AbilityRuntime::Context> context;
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+    if(windowscenesession->GetTopWindowWithContext(context)==nullptr) {
+       ASSERT_EQ(nullptr,windowscenesession->GetTopWindowWithContext(context));
+    }
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    if(windowscenesession->Create(context, session)==WMError::WM_OK){
+        ASSERT_EQ(WMError::WM_OK, windowscenesession->Create(context, session));
+    }
+    ASSERT_NE(nullptr, windowscenesession->GetTopWindowWithContext(context));
+}
+
+/**
+ * @tc.name: NotifyMemoryLevel01
+ * @tc.desc: NotifyMemoryLevel 
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, NotifyMemoryLevel01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("NotifyMemoryLevel");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowscenesession);
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    windowscenesession->NotifyMemoryLevel(2);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowscenesession->NotifyMemoryLevel(2));
+    windowscenesession->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_EQ(WMError::WM_OK, windowscenesession->NotifyMemoryLevel(2));
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

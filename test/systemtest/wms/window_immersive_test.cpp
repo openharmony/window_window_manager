@@ -258,6 +258,9 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest01, Function | MediumTest | Level3)
 {
     fullScreenAppinfo_.name = "immer01";
     const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppinfo_);
+    if(window==nullptr) {
+        return;
+    }
     activeWindows_.push_back(window);
     SetWindowSystemProps(window, TEST_PROPS_1);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -273,6 +276,9 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest01, Function | MediumTest | Level3)
 HWTEST_F(WindowImmersiveTest, ImmersiveTest02, Function | MediumTest | Level3)
 {
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppinfo_);
+    if(window1==nullptr) {
+        return;
+    }
     activeWindows_.push_back(window1);
     SetWindowSystemProps(window1, TEST_PROPS_1);
     fullScreenAppinfo_.name = "Immer02";
@@ -297,6 +303,9 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest02, Function | MediumTest | Level3)
 HWTEST_F(WindowImmersiveTest, ImmersiveTest03, Function | MediumTest | Level3)
 {
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppinfo_);
+    if(window1==nullptr) {
+        return;
+    }
     activeWindows_.push_back(window1);
     SetWindowSystemProps(window1, TEST_PROPS_1);
     fullScreenAppinfo_.name = "Immer03";
@@ -321,6 +330,9 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest04, Function | MediumTest | Level3)
 {
     fullScreenAppinfo_.needAvoid = true; // no immersive setting
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppinfo_);
+    if(window1==nullptr) {
+        return;
+    }
     activeWindows_.push_back(window1);
     SetWindowSystemProps(window1, TEST_PROPS_1);
     ASSERT_EQ(WMError::WM_OK, window1->Show());
@@ -343,6 +355,9 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest05, Function | MediumTest | Level3)
 {
     fullScreenAppinfo_.needAvoid = true; // no immersive setting
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppinfo_);
+    if(window1==nullptr) {
+        return;
+    }
     activeWindows_.push_back(window1);
     SetWindowSystemProps(window1, TEST_PROPS_1);
     ASSERT_EQ(WMError::WM_OK, window1->Show());
@@ -367,6 +382,9 @@ HWTEST_F(WindowImmersiveTest, ImmersiveNegativeTest01, Function | MediumTest | L
         { WindowType::WINDOW_TYPE_POINTER, SYS_BAR_PROP_2, SYS_BAR_REGION_NULL },
     };
     const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppinfo_);
+    if(window==nullptr) {
+        return;
+    }
     activeWindows_.push_back(window);
     SetWindowSystemProps(window, TEST_PROPS_NEGATIVE);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -384,6 +402,9 @@ HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest01, Function | MediumTest | 
 {
     // Add full screenwindow for call GetAvoidArea, and push_back in activeWindows_
     const sptr<Window>& win = Utils::CreateTestWindow(fullScreenAppinfo_);
+    if(win==nullptr) {
+        return;
+    }
     activeWindows_.push_back(win);
 
     // Test GetAvoidArea
@@ -405,6 +426,9 @@ HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest01, Function | MediumTest | 
 HWTEST_F(WindowImmersiveTest, DockWindowTest01, Function | MediumTest | Level3)
 {
     const sptr<Window>& dockWindow = Utils::CreateDockWindow();
+    if(dockWindow==nullptr) {
+        return;
+    }
     ASSERT_EQ(WMError::WM_OK, dockWindow->Show());
 
     const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppinfo_);

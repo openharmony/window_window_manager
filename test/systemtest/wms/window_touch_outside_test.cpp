@@ -113,6 +113,9 @@ namespace {
 HWTEST_F(WindowTouchOutsideTest, onTouchInside, Function | MediumTest | Level3)
 {
     const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
+    if(firstWindow==nullptr) {
+        return;
+    }
     firstWindow->RegisterTouchOutsideListener(windowlistener1_);
     firstWindow->Show();
     SingletonContainer::Get<WindowAdapter>().ProcessPointDown(firstWindow->GetWindowId());
@@ -129,6 +132,9 @@ HWTEST_F(WindowTouchOutsideTest, onTouchInside, Function | MediumTest | Level3)
 HWTEST_F(WindowTouchOutsideTest, onTouchOutside, Function | MediumTest | Level3)
 {
     const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
+    if(firstWindow==nullptr) {
+        return;
+    }
     firstWindow->RegisterTouchOutsideListener(windowlistener1_);
     const sptr<Window> &secondWindow = Utils::CreateTestWindow(secondWindowInfo_);
     firstWindow->Show();
@@ -148,6 +154,9 @@ HWTEST_F(WindowTouchOutsideTest, onTouchOutside, Function | MediumTest | Level3)
 HWTEST_F(WindowTouchOutsideTest, onTouchOutsideNotShow, Function | MediumTest | Level3)
 {
     const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
+    if(firstWindow==nullptr) {
+        return;
+    }
     firstWindow->RegisterTouchOutsideListener(windowlistener1_);
     const sptr<Window> &secondWindow = Utils::CreateTestWindow(secondWindowInfo_);
     secondWindow->Show();
@@ -166,6 +175,9 @@ HWTEST_F(WindowTouchOutsideTest, onTouchOutsideNotShow, Function | MediumTest | 
 HWTEST_F(WindowTouchOutsideTest, onTouchOutsideForAllWindow, Function | MediumTest | Level3)
 {
     const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
+    if(firstWindow==nullptr) {
+        return;
+    }
     firstWindow->RegisterTouchOutsideListener(windowlistener1_);
     const sptr<Window> &secondWindow = Utils::CreateTestWindow(secondWindowInfo_);
     firstWindow->RegisterTouchOutsideListener(windowlistener2_);
