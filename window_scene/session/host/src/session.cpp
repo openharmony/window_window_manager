@@ -1308,37 +1308,4 @@ bool Session::GetBufferAvailable() const
 {
     return bufferAvailable_;
 }
-
-int32_t Session::GetCollaboratorType() const
-{
-    return collaboratorType_;
-}
-
-void Session::SetCollaboratorType(int32_t collaboratorType)
-{
-    collaboratorType_ = collaboratorType;
-}
-
-std::shared_ptr<AppExecFwk::AbilityInfo> Session::GetAbilityInfo()
-{
-    SessionInfo& sessionInfo = GetSessionInfo();
-    return sessionInfo.abilityInfo;
-}
-
-void Session::SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo)
-{
-    SessionInfo& sessionInfo = GetSessionInfo();
-    sessionInfo.abilityInfo = abilityInfo;
-}
-
-void Session::UpdateBrokerPersistentId(int32_t persistendId)
-{
-    brokerPersistentId_ = persistendId;
-}
-
-int32_t Session::GetBrokerPersistentId()
-{
-    return brokerPersistentId_;
-}
-
 } // namespace OHOS::Rosen
