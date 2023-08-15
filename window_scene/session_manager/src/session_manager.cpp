@@ -18,6 +18,7 @@
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 
+#include "singleton_delegator.h"
 #include "window_manager_hilog.h"
 #include "mock_session_manager_service_interface.h"
 
@@ -118,9 +119,36 @@ void SessionManager::InitSceneSessionManagerProxy()
         return;
     }
     sceneSessionManagerProxy_ = iface_cast<ISceneSessionManager>(remoteObject);
+    if (sceneSessionManagerProxy_) {
+        ssmDeath_ = new (std::nothrow) SSMDeathRecipient();
+        if (!ssmDeath_) {
+            WLOGFE("Failed to create death Recipient ptr WMSDeathRecipient");
+            return;
+        }
+        if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(ssmDeath_)) {
+            WLOGFE("Failed to add death recipient");
+            return;
+        }
+    }
     if (!sceneSessionManagerProxy_) {
         WLOGFW("Get scene session manager proxy failed, nullptr");
     }
+}
+
+void SSMDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
+{
+    if (wptrDeath == nullptr) {
+        WLOGFE("SSMDeathRecipient wptrDeath is null");
+        return;
+    }
+
+    sptr<IRemoteObject> object = wptrDeath.promote();
+    if (!object) {
+        WLOGFE("SSMDeathRecipient object is null");
+        return;
+    }
+    WLOGI("ssm OnRemoteDied");
+    SingletonContainer::Get<SessionManager>().ClearSessionManagerProxy();
 }
 
 void SessionManager::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
