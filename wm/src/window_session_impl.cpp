@@ -632,6 +632,17 @@ WMError WindowSessionImpl::SetTouchable(bool isTouchable)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
 }
 
+WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
+{
+    WLOGFD("set dragEnabled");
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    property_->SetDragEnabled(dragEnabled);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
+}
+
 bool WindowSessionImpl::GetTouchable() const
 {
     return property_->GetTouchable();
