@@ -1547,6 +1547,13 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
             if (sceneSession->GetSessionProperty() != nullptr) {
                 sceneSession->GetSessionProperty()->SetWindowLimits(property->GetWindowLimits());
             }
+            break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED: {
+            if (sceneSession->GetSessionProperty() != nullptr) {
+                sceneSession->GetSessionProperty()->SetDragEnabled(property->GetDragEnabled());
+            }
+            break;
         }
         default:
             break;
