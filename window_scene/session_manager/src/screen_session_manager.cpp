@@ -755,7 +755,7 @@ bool ScreenSessionManager::SetRotation(ScreenId screenId, Rotation rotationAfter
     screenSession->SetRotation(rotationAfter);
     screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::ROTATION);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
-    NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), ScreenChangeEvent::UPDATE_ROTATION);
+    NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::UPDATE_ROTATION);
     return true;
 }
 
@@ -1019,7 +1019,8 @@ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<Scre
     return DMError::DM_OK;
 }
 
-DMError ScreenSessionManager::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
+DMError ScreenSessionManager::MakeExpand(std::vector<ScreenId> screenId,
+                                         std::vector<Point> startPoint,
                                          ScreenId& screenGroupId)
 {
     WLOGFI("SCB:ScreenSessionManager::MakeExpand enter!");
@@ -1028,8 +1029,7 @@ DMError ScreenSessionManager::MakeExpand(std::vector<ScreenId> screenId, std::ve
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     if (screenId.empty() || startPoint.empty() || screenId.size() != startPoint.size()) {
-        WLOGFE("create expand fail, input params is invalid. "
-            "screenId vector size :%{public}ud, startPoint vector size :%{public}ud",
+        WLOGFE("create expand fail, screenId size:%{public}ud,startPoint size:%{public}ud",
             static_cast<uint32_t>(screenId.size()), static_cast<uint32_t>(startPoint.size()));
         return DMError::DM_ERROR_INVALID_PARAM;
     }
@@ -1042,7 +1042,6 @@ DMError ScreenSessionManager::MakeExpand(std::vector<ScreenId> screenId, std::ve
         pointsMap[screenId[i]] = startPoint[i];
     }
     ScreenId defaultScreenId = GetDefaultAbstractScreenId();
-    WLOGFI("MakeExpand, defaultScreenId:%{public}" PRIu64"", defaultScreenId);
     auto allExpandScreenIds = GetAllValidScreenIds(screenId);
     auto iter = std::find(allExpandScreenIds.begin(), allExpandScreenIds.end(), defaultScreenId);
     if (iter != allExpandScreenIds.end()) {
@@ -1063,26 +1062,38 @@ DMError ScreenSessionManager::MakeExpand(std::vector<ScreenId> screenId, std::ve
         }
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MakeExpand");
+    if (!OnMakeExpand(allExpandScreenIds, points)) {
+        WLOGFE("make expand failed.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    auto screen = GetScreenSession(allExpandScreenIds[0]);
+    if (screen == nullptr || GetAbstractScreenGroup(screen->groupSmsId_) == nullptr) {
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    screenGroupId = screen->groupSmsId_;
+    return DMError::DM_OK;
+}
 
+bool ScreenSessionManager::OnMakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
+{
     auto defaultScreen = GetScreenSession(defaultScreenId);
     if (defaultScreen == nullptr) {
-        WLOGFI("MakeExpand failed.");
-        return DMError::DM_ERROR_NULLPTR;
+        WLOGFI("OnMakeExpand failed.");
+        return false;
     }
     auto group = GetAbstractScreenGroup(defaultScreen->groupSmsId_);
     if (group == nullptr) {
         group = AddToGroupLocked(defaultScreen);
         if (group == nullptr) {
             WLOGFE("group is nullptr");
-            return DMError::DM_ERROR_NULLPTR;
+            return false;
         }
         NotifyScreenGroupChanged(defaultScreen->ConvertToScreenInfo(), ScreenGroupChangeEvent::ADD_TO_GROUP);
     }
     bool filterExpandScreen = group->combination_ == ScreenCombination::SCREEN_EXPAND;
     ChangeScreenGroup(group, screenId, startPoint, filterExpandScreen, ScreenCombination::SCREEN_EXPAND);
-    WLOGFI("MakeExpand success");
-    screenGroupId = defaultScreen->groupSmsId_;
-    return DMError::DM_OK;
+    WLOGFI("OnMakeExpand success");
+    return true;
 }
 
 bool ScreenSessionManager::ScreenIdManager::ConvertToRsScreenId(ScreenId smsScreenId, ScreenId& rsScreenId) const
