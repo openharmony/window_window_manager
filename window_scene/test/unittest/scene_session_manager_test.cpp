@@ -29,6 +29,28 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr int WAIT_SLEEP_TIME = 1;
+    using ConfigItem = WindowSceneConfig::ConfigItem;
+    ConfigItem ReadConfig(const std::string& xmlStr)
+    {
+        ConfigItem config;
+        xmlDocPtr docPtr = xmlParseMemory(xmlStr.c_str(), xmlStr.length() + 1);
+        if (docPtr == nullptr) {
+            return config;
+        }
+
+        xmlNodePtr rootPtr = xmlDocGetRootElement(docPtr);
+        if (rootPtr == nullptr || rootPtr->name == nullptr ||
+            xmlStrcmp(rootPtr->name, reinterpret_cast<const xmlChar*>("Configs"))) {
+            xmlFreeDoc(docPtr);
+            return config;
+        }
+
+        std::map<std::string, ConfigItem> configMap;
+        config.SetValue(configMap);
+        WindowSceneConfig::ReadConfig(rootPtr, *config.mapValue_);
+        xmlFreeDoc(docPtr);
+        return config;
+    }
 }
 class SceneSessionManagerTest : public testing::Test {
 public:
@@ -124,6 +146,32 @@ HWTEST_F(SceneSessionManagerTest, RegisterWindowManagerAgent, Function | SmallTe
         type, windowManagerAgent));
 }
 
+/**
+ * @tc.name: ConfigWindowSizeLimits01
+ * @tc.desc: call ConfigWindowSizeLimits and check the systemConfig_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowSizeLimits01, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<mainWindowSizeLimits>"
+        "<miniWidth>10</miniWidth>"
+        "<miniHeight>20</miniHeight>"
+        "</mainWindowSizeLimits>"
+        "<subWindowSizeLimits>"
+        "<miniWidth>30</miniWidth>"
+        "<miniHeight>40</miniHeight>"
+        "</subWindowSizeLimits>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSizeLimits();
+    ASSERT_EQ(sceneSessionManager->systemConfig_.miniWidthOfMainWindow_, 10);
+    ASSERT_EQ(sceneSessionManager->systemConfig_.miniHeightOfMainWindow_, 20);
+    ASSERT_EQ(sceneSessionManager->systemConfig_.miniWidthOfSubWindow_, 30);
+    ASSERT_EQ(sceneSessionManager->systemConfig_.miniHeightOfSubWindow_, 40);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

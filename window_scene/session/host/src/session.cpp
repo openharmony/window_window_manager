@@ -15,6 +15,7 @@
 
 #include "session/host/include/session.h"
 
+#include "ability_info.h"
 #include "ipc_skeleton.h"
 #include "key_event.h"
 #include "pointer_event.h"
