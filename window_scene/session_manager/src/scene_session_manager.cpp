@@ -271,6 +271,8 @@ void SceneSessionManager::ConfigWindowSceneXml()
     if (item.IsMap()) {
         ConfigStartingWindowAnimation(item);
     }
+
+    ConfigWindowSizeLimits();
 }
 WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &token,
     const ContinueState& continueState)
@@ -554,6 +556,58 @@ std::string SceneSessionManager::CreateCurve(const WindowSceneConfig::ConfigItem
         }
     }
     return curveName;
+}
+
+void SceneSessionManager::ConfigWindowSizeLimits()
+{
+    const auto& config = WindowSceneConfig::GetConfig();
+    WindowSceneConfig::ConfigItem item = config["mainWindowSizeLimits"];
+    if (item.IsMap()) {
+        ConfigMainWindowSizeLimits(item);
+    }
+
+    item = config["subWindowSizeLimits"];
+    if (item.IsMap()) {
+        ConfigSubWindowSizeLimits(item);
+    }
+}
+
+void SceneSessionManager::ConfigMainWindowSizeLimits(const WindowSceneConfig::ConfigItem& mainWindowSizeConifg)
+{
+    auto item = mainWindowSizeConifg["miniWidth"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1) {
+            systemConfig_.miniWidthOfMainWindow_ = static_cast<uint32_t>(numbers[0]);
+        }
+    }
+
+    item = mainWindowSizeConifg["miniHeight"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1) {
+            systemConfig_.miniHeightOfMainWindow_ = static_cast<uint32_t>(numbers[0]);
+        }
+    }
+}
+
+void SceneSessionManager::ConfigSubWindowSizeLimits(const WindowSceneConfig::ConfigItem& subWindowSizeConifg)
+{
+    auto item = subWindowSizeConifg["miniWidth"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1) {
+            systemConfig_.miniWidthOfSubWindow_ = static_cast<uint32_t>(numbers[0]);
+        }
+    }
+
+    item = subWindowSizeConifg["miniHeight"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1) {
+            systemConfig_.miniHeightOfSubWindow_ = static_cast<uint32_t>(numbers[0]);
+        }
+    }
 }
 
 void SceneSessionManager::SetRootSceneContext(AbilityRuntime::Context* context)
