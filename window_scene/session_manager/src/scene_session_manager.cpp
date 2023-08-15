@@ -2781,7 +2781,10 @@ void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
     if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_)) {
         WSRect overlapRect = { 0, 0, 0, 0 };
         NotifyOccupiedAreaChangeInfo(callingSession_, callingWindowRestoringRect_, overlapRect);
-        callingSession_->UpdateSessionRect(callingWindowRestoringRect_, SizeChangeReason::UNDEFINED);
+        if (callingSession_->GetSessionProperty() &&
+            callingSession_->GetSessionProperty()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+            callingSession_->UpdateSessionRect(callingWindowRestoringRect_, SizeChangeReason::UNDEFINED);
+        }
     }
     callingWindowRestoringRect_ = { 0, 0, 0, 0 };
     callingSession_ = nullptr;
