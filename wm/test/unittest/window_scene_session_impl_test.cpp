@@ -28,7 +28,6 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
-const float FLOAT_DEFAULT = 2.0;
 uint32_t MaxWith = 32;
 class MockWindowChangeListener : public IWindowChangeListener {
 public:
@@ -1357,25 +1356,6 @@ HWTEST_F(WindowSceneSessionImplTest, UpdateFloatingWindowSizeBySizeLimits01, Fun
     ASSERT_EQ(0, ret);
 }
 
-
-/**
- * @tc.name: GetSystemSizeLimits01
- * @tc.desc: GetSystemSizeLimits
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest, GetSystemSizeLimits01, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowName("DestroySubWindow");
-    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
-
-    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, windowscenesession);
-    int ret = 0;
-    windowscenesession->GetSystemSizeLimits(MaxWith, MaxWith, FLOAT_DEFAULT);
-    ASSERT_EQ(0, ret);
-}
-
 /**
  * @tc.name: UpdateAnimationFlagProperty01
  * @tc.desc: UpdateAnimationFlagProperty
@@ -1598,6 +1578,47 @@ HWTEST_F(WindowSceneSessionImplTest, NotifyMemoryLevel01, Function | SmallTest |
     ASSERT_EQ(WMError::WM_OK, windowscenesession->NotifyMemoryLevel(2));
 }
 
+/**
+ * @tc.name: GetSystemSizeLimits01
+ * @tc.desc: GetSystemSizeLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, GetSystemSizeLimits01, Function | SmallTest | Level2)
+{
+    constexpr uint32_t minMainWidth = 10;
+    constexpr uint32_t minMainHeight = 20;
+    constexpr uint32_t minSubWidth = 30;
+    constexpr uint32_t minSubHeight = 40;
+    constexpr uint32_t displayWidth = 100;
+    constexpr uint32_t displayHeight = 100;
+    constexpr float displayVpr = 1;
+
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetSystemSizeLimits01");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
+
+    ASSERT_NE(nullptr, windowscenesession);
+    windowscenesession->windowSystemConfig_.miniWidthOfMainWindow_ = minMainWidth;
+    windowscenesession->windowSystemConfig_.miniHeightOfMainWindow_ = minMainHeight;
+    windowscenesession->windowSystemConfig_.miniWidthOfSubWindow_ = minSubWidth;
+    windowscenesession->windowSystemConfig_.miniHeightOfSubWindow_ = minSubHeight;
+    
+    WindowLimits limits = windowscenesession->GetSystemSizeLimits(displayWidth, displayHeight, displayVpr);
+    ASSERT_EQ(limits.minWidth_, minMainWidth);
+    ASSERT_EQ(limits.minHeight_, minMainHeight);
+
+    windowscenesession->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    limits = windowscenesession->GetSystemSizeLimits(displayWidth, displayHeight, displayVpr);
+    ASSERT_EQ(limits.minWidth_, minSubWidth);
+    ASSERT_EQ(limits.minHeight_, minSubHeight);
+
+    windowscenesession->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    limits = windowscenesession->GetSystemSizeLimits(displayWidth, displayHeight, displayVpr);
+    ASSERT_EQ(limits.minWidth_, MIN_FLOATING_WIDTH);
+    ASSERT_EQ(limits.minHeight_, MIN_FLOATING_HEIGHT);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

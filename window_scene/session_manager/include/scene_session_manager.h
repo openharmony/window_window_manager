@@ -49,6 +49,11 @@ class ResourceManager;
 } // namespace OHOS::Global::Resource
 
 namespace OHOS::Rosen {
+namespace AncoConsts {
+    constexpr const char* ANCO_MISSION_ID = "ohos.anco.param.missionId";
+    constexpr const char* ANCO_SESSION_ID = "ohos.anco.param.sessionId";
+}
+
 class SceneSession;
 class AccessibilityWindowInfo;
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
@@ -182,6 +187,9 @@ private:
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig);
     void ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig);
     void ConfigStartingWindowAnimation(const WindowSceneConfig::ConfigItem& startingWindowConfig);
+    void ConfigWindowSizeLimits();
+    void ConfigMainWindowSizeLimits(const WindowSceneConfig::ConfigItem& mainWindowSizeConifg);
+    void ConfigSubWindowSizeLimits(const WindowSceneConfig::ConfigItem& subWindowSizeConifg);
     sptr<SceneSession::SpecificSessionCallback> CreateSpecificSessionCallback();
     void FillSessionInfo(SessionInfo& sessionInfo);
     std::shared_ptr<AppExecFwk::AbilityInfo> QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
@@ -298,6 +306,16 @@ private:
     std::unordered_map<int32_t, sptr<AAFwk::IAbilityManagerCollaborator>> collaboratorMap_;
 
     bool CheckCollaboratorType(int32_t type);
+    void QueryAbilityInfoFromBMS(const int32_t uId,
+        const SessionInfo& sessionInfo, AppExecFwk::AbilityInfo& abilityInfo);
+    void NotifyStartAbility(int32_t collaboratorType, const SessionInfo& sessionInfo);
+    void NotifySessionCreate(const sptr<SceneSession> sceneSession, SessionInfo& sessionInfo);
+    void NotifyLoadAbility(int32_t collaboratorType, sptr<AAFwk::SessionInfo> abilitySessionInfo,
+        std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
+    void NotifyUpdateSessionInfo(const sptr<SceneSession> sceneSession);
+    void NotifyClearSession(int32_t collaboratorType, int32_t persistentId);
+    void NotifyMoveSessionToForeground(int32_t collaboratorType, int32_t persistendId);
+    void PreHandleCollaborator(sptr<SceneSession> sceneSession);
 };
 } // namespace OHOS::Rosen
 

@@ -96,7 +96,7 @@ float ScreenProperty::GetVirtualPixelRatio() const
 
 void ScreenProperty::SetScreenRotation(Rotation rotation)
 {
-    bool enableRotation = system::GetParameter("debug.window.rotation.enabled", "0") == "1";
+    bool enableRotation = system::GetParameter("debug.window.rotation.enabled", "1") == "1";
     if (!enableRotation) {
         return;
     }
