@@ -916,6 +916,7 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
             WLOGFI("set anco persistentId: %{public}d for type: %{public}d",
                 scnSession->GetBrokerPersistentId(), scnSession->GetCollaboratorType());
             scnSessionInfo->want.SetParam(AncoConsts::ANCO_MISSION_ID, scnSession->GetBrokerPersistentId());
+            scnSessionInfo->collaboratorType = scnSession->GetCollaboratorType();
         }
         auto errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
 
