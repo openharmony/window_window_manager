@@ -152,7 +152,7 @@ private:
     MaximizeMode maximizeMode_ = MaximizeMode::MODE_RECOVER;
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     WindowLimits limits_;
-    SessionGravity sessionGravity_ = SessionGravity::SESSION_GRAVITY_BOTTOM;
+    SessionGravity sessionGravity_ = SessionGravity::SESSION_GRAVITY_DEFAULT;
     uint32_t sessionGravitySizePercent_ = 0;
     uint32_t modeSupportInfo_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
