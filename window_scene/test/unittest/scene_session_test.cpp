@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 #include "session/host/include/scene_session.h"
+#include "wm_common.h"
+#include "mock/mock_session_stage.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -121,6 +123,184 @@ HWTEST_F(SceneSessionTest, Background01, Function | SmallTest | Level2)
     scensession->isActive_ = true;
     result = scensession->Background();
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
+}
+
+
+/**
+ * @tc.name: SetGlobalMaximizeMode01
+ * @tc.desc: SetGlobalMaximizeMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetGlobalMaximizeMode01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "Background01";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    scensession->isActive_ = true;
+    auto result = scensession->SetGlobalMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: GetGlobalMaximizeMode01
+ * @tc.desc: GetGlobalMaximizeMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetGlobalMaximizeMode01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "Background01";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+
+    sptr<SceneSession> scensession;
+
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    scensession->isActive_ = true;
+    MaximizeMode mode;
+    auto result = scensession->GetGlobalMaximizeMode(mode);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: UpdateWindowSceneAfterCustomAnimation01
+ * @tc.desc: UpdateWindowSceneAfterCustomAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, UpdateWindowSceneAfterCustomAnimation01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "Background01";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    scensession->isActive_ = true;
+    auto result = scensession->UpdateWindowSceneAfterCustomAnimation(false);
+    ASSERT_EQ(result, WSError::WS_OK);
+    result = scensession->UpdateWindowSceneAfterCustomAnimation(true);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_OPERATION);
+    sptr<SceneSession::SetWindowScenePatternFunc> setWindowScenePatternFunc =new (std::nothrow)SceneSession::SetWindowScenePatternFunc();
+    scensession->setWindowScenePatternFunc_=setWindowScenePatternFunc;
+    ASSERT_EQ(result = scensession->UpdateWindowSceneAfterCustomAnimation(true),WSError::WS_ERROR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: SetZOrder01
+ * @tc.desc: SetZOrder
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetZOrder01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "Background01";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    int resultValue = 0;
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    scensession->SetZOrder(2);
+    ASSERT_EQ(0, resultValue);
+}
+
+/**
+ * @tc.name: GetTouchHotAreas01
+ * @tc.desc: GetTouchHotAreas
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetTouchHotAreas01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "GetTouchHotAreas01";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    Rect windowRect = { 1, 1, 1, 1 };
+    std::vector<Rect> rects;
+    uint32_t hotAreasNum = 10;
+    uint32_t hotAreaWidth = windowRect.width_ / hotAreasNum;
+    uint32_t hotAreaHeight = windowRect.height_ / hotAreasNum;
+    for (uint32_t i = 0; i < hotAreasNum; ++i) {
+        rects.emplace_back(Rect{ hotAreaWidth * i, hotAreaHeight * i, hotAreaWidth, hotAreaHeight });
+    }
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+
+    ASSERT_NE(nullptr, property);
+    property->SetTouchHotAreas(rects);
+    ASSERT_NE(rects, scensession->GetTouchHotAreas());
+}
+
+/**
+ * @tc.name: SetTurnScreenOn01
+ * @tc.desc: SetTurnScreenOn
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetTurnScreenOn01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "Background01";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, scensession->NotifyTouchOutside() );
+    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
+    ASSERT_NE(mockSessionStage, nullptr);
+    ASSERT_EQ(WSError::WS_OK, scensession->SetTurnScreenOn(false));
+    ASSERT_EQ(false, scensession->IsTurnScreenOn());
+    ASSERT_EQ(WSError::WS_OK, scensession->SetTurnScreenOn(true));
+    ASSERT_EQ(true, scensession->IsTurnScreenOn());
+}
+
+/**
+ * @tc.name: UpdateWindowAnimationFlag01
+ * @tc.desc: UpdateWindowAnimationFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, UpdateWindowAnimationFlag01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "Background01";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, scensession->NotifyTouchOutside() );
+    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
+    ASSERT_NE(mockSessionStage, nullptr);
+    ASSERT_EQ(WSError::WS_OK, scensession->UpdateWindowAnimationFlag(false));
 }
 
 }

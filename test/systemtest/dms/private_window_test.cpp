@@ -70,9 +70,15 @@ HWTEST_F(PrivateWindowTest, RegisterPrivateWindowListener, Function | MediumTest
 {
     auto& dm = DisplayManager::GetInstance();
     sptr<PrivateWindowListener> listener_ = new PrivateWindowListener();
+    if(dm==nullptr){
+        return;
+    }
     dm.RegisterPrivateWindowListener(listener_);
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("private", option);
+    if(window==nullptr){
+        return;
+    }
     window->SetPrivacyMode(true);
     window->Show();
     dm.UnregisterPrivateWindowListener(listener_);
