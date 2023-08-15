@@ -26,16 +26,8 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneUtils" };
 }
 
-bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, SessionInfo& sessionInfo)
+bool IsJsBundleNameUndefind(NativeEngine& engine, NativeValue* jsBundleName, SessionInfo& sessionInfo)
 {
-    NativeValue* jsBundleName = jsObject->GetProperty("bundleName");
-    NativeValue* jsModuleName = jsObject->GetProperty("moduleName");
-    NativeValue* jsAbilityName = jsObject->GetProperty("abilityName");
-    NativeValue* jsIsSystem = jsObject->GetProperty("isSystem");
-    NativeValue* jsPersistentId = jsObject->GetProperty("persistentId");
-    NativeValue* jsCallState = jsObject->GetProperty("callState");
-    NativeValue* jsSessionType = jsObject->GetProperty("sessionType");
-
     if (jsBundleName->TypeOf() != NATIVE_UNDEFINED) {
         std::string bundleName;
         if (!ConvertFromJsValue(engine, jsBundleName, bundleName)) {
@@ -44,6 +36,11 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
         }
         sessionInfo.bundleName_ = bundleName;
     }
+    return true;
+}
+
+bool IsJsModuleNameUndefind(NativeEngine& engine, NativeValue* jsModuleName, SessionInfo& sessionInfo)
+{
     if (jsModuleName->TypeOf() != NATIVE_UNDEFINED) {
         std::string moduleName;
         if (!ConvertFromJsValue(engine, jsModuleName, moduleName)) {
@@ -52,6 +49,11 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
         }
         sessionInfo.moduleName_ = moduleName;
     }
+    return true;
+}
+
+bool IsJsAbilityUndefind(NativeEngine& engine, NativeValue* jsAbilityName, SessionInfo& sessionInfo)
+{
     if (jsAbilityName->TypeOf() != NATIVE_UNDEFINED) {
         std::string abilityName;
         if (!ConvertFromJsValue(engine, jsAbilityName, abilityName)) {
@@ -60,6 +62,11 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
         }
         sessionInfo.abilityName_ = abilityName;
     }
+    return true;
+}
+
+bool IsJsIsSystemUndefind(NativeEngine& engine, NativeValue* jsIsSystem, SessionInfo& sessionInfo)
+{
     if (jsIsSystem->TypeOf() != NATIVE_UNDEFINED) {
         bool isSystem;
         if (!ConvertFromJsValue(engine, jsIsSystem, isSystem)) {
@@ -68,6 +75,11 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
         }
         sessionInfo.isSystem_ = isSystem;
     }
+    return true;
+}
+
+bool IsJsPersistentIdUndefind(NativeEngine& engine, NativeValue* jsPersistentId, SessionInfo& sessionInfo)
+{
     if (jsPersistentId->TypeOf() != NATIVE_UNDEFINED) {
         int32_t persistentId;
         if (!ConvertFromJsValue(engine, jsPersistentId, persistentId)) {
@@ -76,6 +88,11 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
         }
         sessionInfo.persistentId_ = persistentId;
     }
+    return true;
+}
+
+bool IsJsCallStateUndefind(NativeEngine& engine, NativeValue* jsCallState, SessionInfo& sessionInfo)
+{
     if (jsCallState->TypeOf() != NATIVE_UNDEFINED) {
         int32_t callState;
         if (!ConvertFromJsValue(engine, jsCallState, callState)) {
@@ -84,6 +101,11 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
         }
         sessionInfo.callState_ = static_cast<uint32_t>(callState);
     }
+    return true;
+}
+
+bool IsJsSessionTypeUndefind(NativeEngine& engine, NativeValue* jsSessionType, SessionInfo& sessionInfo)
+{
     if (jsSessionType->TypeOf() != NATIVE_UNDEFINED) {
         uint32_t windowType = 0;
         if (!ConvertFromJsValue(engine, jsSessionType, windowType)) {
@@ -94,6 +116,40 @@ bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, Sess
             sessionInfo.windowType_ = static_cast<uint32_t>(
                 JS_SESSION_TO_WINDOW_TYPE_MAP.at(static_cast<JsSessionType>(windowType)));
         }
+    }
+    return true;
+}
+
+bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, SessionInfo& sessionInfo)
+{
+    NativeValue* jsBundleName = jsObject->GetProperty("bundleName");
+    NativeValue* jsModuleName = jsObject->GetProperty("moduleName");
+    NativeValue* jsAbilityName = jsObject->GetProperty("abilityName");
+    NativeValue* jsIsSystem = jsObject->GetProperty("isSystem");
+    NativeValue* jsPersistentId = jsObject->GetProperty("persistentId");
+    NativeValue* jsCallState = jsObject->GetProperty("callState");
+    NativeValue* jsSessionType = jsObject->GetProperty("sessionType");
+
+    if (!IsJsBundleNameUndefind(engine, jsBundleName, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsModuleNameUndefind(engine, jsModuleName, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsAbilityUndefind(engine, jsAbilityName, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsIsSystemUndefind(engine, jsIsSystem, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsPersistentIdUndefind(engine, jsPersistentId, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsCallStateUndefind(engine, jsCallState, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsSessionTypeUndefind(engine, jsSessionType, sessionInfo)) {
+        return false;
     }
     return true;
 }

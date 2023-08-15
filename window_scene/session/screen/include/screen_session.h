@@ -63,7 +63,7 @@ public:
     sptr<SupportedScreenModes> GetActiveScreenMode() const;
     ScreenSourceMode GetSourceMode() const;
     void SetScreenCombination(ScreenCombination combination);
-    ScreenCombination GetScreenCombination() const; 
+    ScreenCombination GetScreenCombination() const;
 
     Orientation GetOrientation() const;
     void SetOrientation(Orientation orientation);
