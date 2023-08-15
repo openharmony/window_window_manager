@@ -228,13 +228,6 @@ public:
         return std::vector<Rect>();
     }
 
-    int32_t GetCollaboratorType() const;
-    void SetCollaboratorType(int32_t collaboratorType);
-    std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfo();
-    void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
-    void UpdateBrokerPersistentId(int32_t persistendId);
-    int32_t GetBrokerPersistentId();
-
 protected:
     void GeneratePersistentId(const bool isExtension, const SessionInfo& sessionInfo);
     void UpdateSessionState(SessionState state);
@@ -242,7 +235,6 @@ protected:
     void UpdateSessionTouchable(bool touchable);
 
     int32_t persistentId_ = INVALID_SESSION_ID;
-    int32_t brokerPersistentId_ = INVALID_SESSION_ID;
     SessionState state_ = SessionState::STATE_DISCONNECT;
     SessionInfo sessionInfo_;
     sptr<WindowSessionProperty> property_;
@@ -308,7 +300,6 @@ private:
 
     std::vector<sptr<Session>> dialogVec_;
     sptr<Session> parentSession_;
-    int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
 
     int32_t callingPid_ = { 0 };
     int32_t callingUid_ = { 0 };

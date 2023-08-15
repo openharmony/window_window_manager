@@ -3419,7 +3419,9 @@ void SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, const Ses
     }
     auto collaborator = iter->second;
     uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
-    collaborator->NotifyStartAbility(*(sessionInfo.abilityInfo), currentUserId_, *(sessionInfo.want), accessTokenIDEx);
+    if (collaborator != nullptr) {
+        collaborator->NotifyStartAbility(*(sessionInfo.abilityInfo), currentUserId_, *(sessionInfo.want), accessTokenIDEx);
+    }
 }
 
 void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, SessionInfo& sessionInfo)
@@ -3434,7 +3436,9 @@ void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, S
     auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
     abilitySessionInfo->persistentId = sceneSession->GetBrokerPersistentId();
     abilitySessionInfo->want = *(sessionInfo.want);
-    collaborator->NotifyMissionCreated(abilitySessionInfo);
+    if (collaborator != nullptr) {
+        collaborator->NotifyMissionCreated(abilitySessionInfo);
+    }
 }
 
 void SceneSessionManager::NotifyLoadAbility(int32_t collaboratorType,
@@ -3447,7 +3451,9 @@ void SceneSessionManager::NotifyLoadAbility(int32_t collaboratorType,
         return;
     }
     auto collaborator = iter->second;
-    collaborator->NotifyLoadAbility(*abilityInfo, abilitySessionInfo);
+    if (collaborator != nullptr) {
+        collaborator->NotifyLoadAbility(*abilityInfo, abilitySessionInfo);
+    }
 }
 
 
@@ -3466,7 +3472,9 @@ void SceneSessionManager::NotifyUpdateSessionInfo(sptr<SceneSession> sceneSessio
     auto collaborator = iter->second;
     auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
     abilitySessionInfo->persistentId = sceneSession->GetBrokerPersistentId();
-    collaborator->UpdateMissionInfo(abilitySessionInfo);
+    if (collaborator != nullptr) {
+        collaborator->UpdateMissionInfo(abilitySessionInfo);
+    }
 }
 
 void SceneSessionManager::NotifyMoveSessionToForeground(int32_t collaboratorType, int32_t persistentId)
@@ -3478,7 +3486,9 @@ void SceneSessionManager::NotifyMoveSessionToForeground(int32_t collaboratorType
         return;
     }
     auto collaborator = iter->second;
-    collaborator->NotifyMoveMissionToForeground(persistentId);
+    if (collaborator != nullptr) {
+        collaborator->NotifyMoveMissionToForeground(persistentId);
+    }
 }
 
 void SceneSessionManager::NotifyClearSession(int32_t collaboratorType, int32_t persistentId)
@@ -3490,12 +3500,17 @@ void SceneSessionManager::NotifyClearSession(int32_t collaboratorType, int32_t p
         return;
     }
     auto collaborator = iter->second;
-    collaborator->NotifyClearMission(persistentId);
+    if (collaborator != nullptr) {
+        collaborator->NotifyClearMission(persistentId);
+    }
 }
 
 void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession> sceneSession)
 {
     WLOGFI("run PreHandleCollaborator");
+    if (sceneSession == nullptr) {
+        return;
+    }
     SessionInfo& newSessionInfo = sceneSession->GetSessionInfo();
     if (newSessionInfo.abilityInfo == nullptr) {
         newSessionInfo.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
