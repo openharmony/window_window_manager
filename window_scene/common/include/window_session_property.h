@@ -173,6 +173,10 @@ struct SystemSessionConfig : public Parcelable {
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     KeyboardAnimationConfig keyboardAnimationConfig_;
     uint32_t maxFloatingWindowSize_ = UINT32_MAX;
+    uint32_t miniWidthOfMainWindow_ = 0;
+    uint32_t miniHeightOfMainWindow_ = 0;
+    uint32_t miniWidthOfSubWindow_ = 0;
+    uint32_t miniHeightOfSubWindow_ = 0;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -184,6 +188,11 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteUint32(static_cast<uint32_t>(defaultWindowMode_)) ||
             !parcel.WriteParcelable(&keyboardAnimationConfig_) ||
             !parcel.WriteUint32(maxFloatingWindowSize_)) {
+            return false;
+        }
+
+        if (!parcel.WriteUint32(miniWidthOfMainWindow_) || !parcel.WriteUint32(miniHeightOfMainWindow_) ||
+            !parcel.WriteUint32(miniWidthOfSubWindow_) || !parcel.WriteUint32(miniHeightOfSubWindow_)) {
             return false;
         }
 
@@ -203,6 +212,10 @@ struct SystemSessionConfig : public Parcelable {
         sptr<KeyboardAnimationConfig> keyboardConfig = parcel.ReadParcelable<KeyboardAnimationConfig>();
         config->keyboardAnimationConfig_ = *keyboardConfig;
         config->maxFloatingWindowSize_ = parcel.ReadUint32();
+        config->miniWidthOfMainWindow_ = parcel.ReadUint32();
+        config->miniHeightOfMainWindow_ = parcel.ReadUint32();
+        config->miniWidthOfSubWindow_ = parcel.ReadUint32();
+        config->miniHeightOfSubWindow_ = parcel.ReadUint32();
         return config;
     }
 };

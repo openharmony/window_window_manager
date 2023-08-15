@@ -115,6 +115,15 @@ enum class StartMethod : int32_t {
     START_CALL
 };
 
+/**
+ * @brief collaborator type.
+ */
+enum CollaboratorType : int32_t {
+    DEFAULT_TYPE = 0,
+    RESERVE_TYPE,
+    OTHERS_TYPE,
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
@@ -123,9 +132,9 @@ struct SessionInfo {
     uint32_t windowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     sptr<IRemoteObject> callerToken_ = nullptr;
 
-    sptr<AAFwk::Want> want;
+    mutable sptr<AAFwk::Want> want;
     std::shared_ptr<AAFwk::AbilityStartSetting> startSetting = nullptr;
-    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
+    mutable std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
     int32_t resultCode;
     int32_t requestCode;
     int32_t errorCode;
@@ -279,15 +288,5 @@ enum class TerminateType : uint32_t {
     CLOSE_AND_START_CALLER,
     CLOSE_BY_EXCEPTION,
 };
-
-/**
- * @brief collaborator type.
- */
-enum CollaboratorType {
-    DEFAULT_TYPE = 0,
-    RESERVE_TYPE,
-    OTHERS_TYPE,
-};
-
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
