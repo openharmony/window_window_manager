@@ -83,7 +83,7 @@ namespace {
 HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo01, Function | MediumTest | Level3)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(fullAppInfo_1_);
-    if(window==nullptr){
+    if (window == nullptr) {
         return;
     }
     window->SetRequestModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
@@ -99,7 +99,7 @@ HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo01, Function | MediumTe
 HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo02, Function | MediumTest | Level3)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(fullAppInfo_1_);
-    if(window==nullptr){
+    if (window == nullptr) {
         return;
     }
     window->SetRequestModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
@@ -127,7 +127,7 @@ HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo02, Function | MediumTe
 HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo03, Function | MediumTest | Level3)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(fullAppInfo_1_);
-    if(window==nullptr){
+    if (window == nullptr) {
         return;
     }
     window->SetRequestModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
@@ -159,7 +159,7 @@ HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo03, Function | MediumTe
 HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo04, Function | MediumTest | Level3)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(fullAppInfo_1_);
-    if(window==nullptr){
+    if (window == nullptr) {
         return;
     }
     window->SetRequestModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING |
@@ -178,7 +178,7 @@ HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo04, Function | MediumTe
 HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo05, Function | MediumTest | Level3)
 {
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullAppInfo_1_);
-    if(window1==nullptr){
+    if (window1 == nullptr) {
         return;
     }
     window1->SetRequestModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
@@ -204,7 +204,7 @@ HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo05, Function | MediumTe
 HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo06, Function | MediumTest | Level3)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(fullAppInfo_1_);
-    if(window==nullptr) {
+    if (window == nullptr) {
         return;
     }
     window->SetRequestModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
