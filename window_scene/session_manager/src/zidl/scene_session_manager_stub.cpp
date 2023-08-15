@@ -240,7 +240,6 @@ int SceneSessionManagerStub::HandleIsValidSessionIds(MessageParcel &data, Messag
     std::vector<int32_t> sessionIds;
     data.ReadInt32Vector(&sessionIds);
     std::vector<bool> results;
-    WSError errCode = IsValidSessionIds(sessionIds, results);
     reply.WriteBoolVector(results);
     return ERR_NONE;
 }
