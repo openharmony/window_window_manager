@@ -201,6 +201,7 @@ ohos_shared_library("session_manager") {
     "ability_base:session_info",
     "ability_base:want",
     "ability_runtime:mission_info",
+    "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image_native",

@@ -25,6 +25,11 @@
 #include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
+class SSMDeathRecipient : public IRemoteObject::DeathRecipient {
+public:
+    virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
+};
+
 class SessionManager {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManager);
 public:
@@ -57,6 +62,7 @@ private:
     sptr<ISceneSessionManager> sceneSessionManagerProxy_ = nullptr;
     sptr<IScreenSessionManager> screenSessionManagerProxy_ = nullptr;
     sptr<ScreenLock::ScreenLockManagerInterface> screenLockManagerProxy_ = nullptr;
+    sptr<SSMDeathRecipient> ssmDeath_ = nullptr;
 };
 } // namespace OHOS::Rosen
 
