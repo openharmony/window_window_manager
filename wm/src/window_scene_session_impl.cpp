@@ -185,6 +185,12 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     hostSession_ = iSession;
     context_ = context;
     AdjustWindowAnimationFlag();
+    if (context->GetApplicationInfo() && context->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
+        !SessionPermission::IsSystemCalling()) {
+        WLOGI("Remove window flag WINDOW_FLAG_SHOW_WHEN_LOCKED");
+        property_->SetWindowFlags(property_->GetWindowFlags() &
+            (~(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED))));
+    }
     if (hostSession_) { // main window
         ret = Connect();
     } else { // system or sub window
@@ -1248,6 +1254,12 @@ WMError WindowSceneSessionImpl::SetTransparent(bool isTransparent)
 
 WMError WindowSceneSessionImpl::AddWindowFlag(WindowFlag flag)
 {
+    if (flag == WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED && context_ && context_->GetApplicationInfo() &&
+        context_->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
+        !SessionPermission::IsSystemCalling()) {
+        WLOGI("Can not add window flag WINDOW_FLAG_SHOW_WHEN_LOCKED");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     uint32_t updateFlags = property_->GetWindowFlags() | (static_cast<uint32_t>(flag));
     return SetWindowFlags(updateFlags);
 }
