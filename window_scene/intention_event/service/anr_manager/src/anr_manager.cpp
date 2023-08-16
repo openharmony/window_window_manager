@@ -28,6 +28,7 @@ namespace Rosen {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ANRManager" };
 constexpr int32_t MAX_ANR_TIMER_COUNT { 64 };
+constexpr int32_t NONEXISTENT_TIMER_ID { -1 };
 } // namespace
 
 ANRManager::ANRManager() {}
@@ -66,15 +67,19 @@ void ANRManager::AddTimer(int32_t eventId, int32_t persistentId)
         }
         std::vector<int32_t> timerIds = eventStage_.GetTimerIds(persistentId);
         for (int32_t item : timerIds) {
-            if (item != -1) {
-                TimerMgr->RemoveTimer(item);
-                anrTimerCount_--;
-            }
+            TimerMgr->RemoveTimer(item);
+            anrTimerCount_--;
         }
         WLOGFE("Anr callback leave. persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
     });
+    if (timerId == NONEXISTENT_TIMER_ID) {
+        WLOGFD("AddTimer for eventId:%{public}d, persistentId:%{public}d failed, result from timerManager",
+            eventId, persistentId);
+        return;
+    }
     anrTimerCount_++;
     eventStage_.SaveANREvent(persistentId, eventId, timerId);
+    WLOGFD("AddTimer timerId:%{public}d for eventId:%{public}d, persistentId:%{public}d", timerId, eventId, persistentId);
 }
 
 void ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
@@ -82,12 +87,10 @@ void ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
     WLOGFD("Event: eventId:%{public}d, persistentId:%{public}d", eventId, persistentId);
-    std::list<int32_t> timerIds = eventStage_.DelEvents(persistentId, eventId);
+    std::vector<int32_t> timerIds = eventStage_.DelEvents(persistentId, eventId);
     for (int32_t item : timerIds) {
-        if (item != -1) {
-            TimerMgr->RemoveTimer(item);
-            anrTimerCount_--;
-        }
+        TimerMgr->RemoveTimer(item);
+        anrTimerCount_--;
     }
 }
 
@@ -140,12 +143,11 @@ ANRManager::AppInfo ANRManager::GetAppInfoByPersistentId(int32_t persistentId)
 
 void ANRManager::RemoveTimers(int32_t persistentId)
 {
+    WLOGFD("Remove timers for persistentId:%{public}d", persistentId);
     std::vector<int32_t> timerIds = eventStage_.GetTimerIds(persistentId);
     for (int32_t item : timerIds) {
-        if (item != -1) {
-            TimerMgr->RemoveTimer(item);
-            anrTimerCount_--;
-        }
+        TimerMgr->RemoveTimer(item);
+        anrTimerCount_--;
     }
 }
 

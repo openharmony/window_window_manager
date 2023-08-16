@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <list>
 #include <map>
 #include <vector>
 
@@ -27,7 +26,7 @@ public:
     bool CheckAnrStatus(int32_t persistentId);
     void SaveANREvent(int32_t persistentId, int32_t eventId, int32_t timerId);
     std::vector<int32_t> GetTimerIds(int32_t persistentId);
-    std::list<int32_t> DelEvents(int32_t persistentId, int32_t eventId);
+    std::vector<int32_t> DelEvents(int32_t persistentId, int32_t eventId);
     void OnSessionLost(int32_t persistentId);
 private:
     struct EventTime {
