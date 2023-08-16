@@ -176,7 +176,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow04, Function | MediumTest | Level2)
 
     struct Rect rect = {0, 0, 100, 200};
     sptr<Window> dialogWindow0 = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect, "dialog0");
-    if(dialogWindow0==nullptr) {
+    if (dialogWindow0 == nullptr) {
         return;
     }
     ASSERT_NE(nullptr, dialogWindow0);

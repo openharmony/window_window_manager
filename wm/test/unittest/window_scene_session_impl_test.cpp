@@ -1553,7 +1553,7 @@ HWTEST_F(WindowSceneSessionImplTest, GetTopWindowWithContext01, Function | Small
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
-    if(windowscenesession->Create(context, session)==WMError::WM_OK){
+    if (windowscenesession->Create(context, session) == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, windowscenesession->Create(context, session));
     }
     ASSERT_NE(nullptr, windowscenesession->GetTopWindowWithContext(context));
@@ -1561,7 +1561,7 @@ HWTEST_F(WindowSceneSessionImplTest, GetTopWindowWithContext01, Function | Small
 
 /**
  * @tc.name: NotifyMemoryLevel01
- * @tc.desc: NotifyMemoryLevel 
+ * @tc.desc: NotifyMemoryLevel
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneSessionImplTest, NotifyMemoryLevel01, Function | SmallTest | Level2)

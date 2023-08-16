@@ -258,7 +258,7 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest01, Function | MediumTest | Level3)
 {
     fullScreenAppinfo_.name = "immer01";
     const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppinfo_);
-    if(window==nullptr) {
+    if (window == nullptr) {
         return;
     }
     activeWindows_.push_back(window);
@@ -276,7 +276,7 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest01, Function | MediumTest | Level3)
 HWTEST_F(WindowImmersiveTest, ImmersiveTest02, Function | MediumTest | Level3)
 {
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppinfo_);
-    if(window1==nullptr) {
+    if (window1 == nullptr) {
         return;
     }
     activeWindows_.push_back(window1);
@@ -330,7 +330,7 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest04, Function | MediumTest | Level3)
 {
     fullScreenAppinfo_.needAvoid = true; // no immersive setting
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppinfo_);
-    if(window1==nullptr) {
+    if (window1 == nullptr) {
         return;
     }
     activeWindows_.push_back(window1);
