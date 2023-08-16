@@ -88,6 +88,7 @@ void AbstractScreen::UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, b
     }
 
     if (needToUpdate) {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
         if (isAdd) {
             appSurfaceNodes_.push_back(surfaceNode);
         } else {
@@ -116,6 +117,7 @@ DMError AbstractScreen::AddSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfaceNo
         rsDisplayNode_->AddChild(surfaceNode, -1);
     }
     if (needToRecord) {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
         nativeSurfaceNodes_.push_back(surfaceNode);
     }
     auto transactionProxy = RSTransactionProxy::GetInstance();
@@ -131,6 +133,7 @@ DMError AbstractScreen::RemoveSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfac
         WLOGFE("Node is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     };
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find_if(nativeSurfaceNodes_.begin(), nativeSurfaceNodes_.end(), [surfaceNode]
         (std::shared_ptr<RSSurfaceNode> node) {
         return surfaceNode->GetId() == node->GetId();
@@ -229,6 +232,7 @@ void AbstractScreen::InitRSDefaultDisplayNode(const RSDisplayNodeConfig& config,
     rsDisplayNode_ = rsDisplayNode;
     SetPropertyForDisplayNode(rsDisplayNode_, config, startPoint);
 
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     // update RSTree for default display
     for (auto node: appSurfaceNodes_) {
         UpdateRSTree(node, true, false);
