@@ -912,6 +912,9 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
             deathRecipient_ =
                 new AgentDeathRecipient([this](const sptr<IRemoteObject>& agent) { OnRemoteDied(agent); });
         }
+        if (displayManagerAgent == nullptr) {
+            return smsScreenId;
+        }
         auto agIter = screenAgentMap_.find(displayManagerAgent);
         if (agIter == screenAgentMap_.end()) {
             displayManagerAgent->AddDeathRecipient(deathRecipient_);
