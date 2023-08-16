@@ -3447,6 +3447,14 @@ void SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, const Ses
 void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, SessionInfo& sessionInfo)
 {
     WLOGFI("run NotifySessionCreate");
+    if (sceneSession == nullptr) {
+        WLOGFE("sceneSession is nullptr");
+        return;
+    }
+    if (sessionInfo.want == nullptr) {
+        WLOGFE("sessionInfo.want is nullptr");
+        return;
+    }
     auto iter = collaboratorMap_.find(sceneSession->GetCollaboratorType());
     if (iter == collaboratorMap_.end()) {
         WLOGFE("Fail to found collaborator with type: %{public}d", sceneSession->GetCollaboratorType());
@@ -3544,6 +3552,11 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession> sceneSession)
     if(CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
         WLOGFI("try to run NotifyStartAbility and NotifySessionCreate");
         NotifyStartAbility(sceneSession->GetCollaboratorType(), newSessionInfo);
+        if (newSessionInfo.want != nullptr) {
+            WLOGFI("broker persistentId: %{public}d", newSessionInfo.want->GetIntParam(AncoConsts::ANCO_SESSION_ID, 0));
+        } else {
+            WLOGFE("newSessionInfo.want is nullptr");
+        }
         NotifySessionCreate(sceneSession, newSessionInfo);
     }
 }
