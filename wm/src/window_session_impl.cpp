@@ -372,7 +372,8 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         int heightRange = 50;
         if (std::abs((int)(GetRect().width_) - (int)(wmRect.width_)) > widthRange ||
             std::abs((int)(GetRect().height_) - (int)(wmRect.height_)) > heightRange) {
-            wmReason = WindowSizeChangeReason::MAXIMIZE;
+            wmReason = wmReason == WindowSizeChangeReason::UNDEFINED ?
+                WindowSizeChangeReason::MAXIMIZE : wmReason;
         }
     }
     auto preRect = GetRect();
