@@ -52,6 +52,7 @@ NativeValue* JsScreenSessionManager::Init(NativeEngine* engine, NativeValue* exp
     auto jsScreenSessionManager = std::make_unique<JsScreenSessionManager>(*engine);
     object->SetNativePointer(jsScreenSessionManager.release(), JsScreenSessionManager::Finalizer, nullptr);
     object->SetProperty("ScreenConnectChangeType", JsScreenUtils::CreateJsScreenConnectChangeType(*engine));
+    object->SetProperty("ScreenPropertyChangeReason", JsScreenUtils::CreateJsScreenPropertyChangeReason(*engine));
 
     const char* moduleName = "JsScreenSessionManager";
     BindNativeFunction(*engine, *object, "on", moduleName, JsScreenSessionManager::RegisterCallback);
