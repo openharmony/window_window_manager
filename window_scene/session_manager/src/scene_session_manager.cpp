@@ -2737,7 +2737,7 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(const sptr<SceneSe
     SessionGravity gravity;
     uint32_t percent = 0;
     sceneSession->GetSessionProperty()->GetSessionGravity(gravity, percent);
-    if (gravity != SessionGravity::SESSION_GRAVITY_BOTTOM) {
+    if (gravity != SessionGravity::SESSION_GRAVITY_BOTTOM && gravity != SessionGravity::SESSION_GRAVITY_DEFAULT) {
         WLOGFI("input method window gravity is not bottom, no need to raise calling window");
         return;
     }
@@ -2832,11 +2832,11 @@ void SceneSessionManager::RelayoutKeyBoard(sptr<SceneSession> sceneSession)
 
     auto requestRect = sceneSession->GetSessionProperty()->GetRequestRect();
     if (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) {
+        requestRect.width_ = static_cast<uint32_t>(defaultDisplayInfo->GetWidth());
+        requestRect.posX_ = 0;
         if (percent != 0) {
-            requestRect.width_ = static_cast<uint32_t>(defaultDisplayInfo->GetWidth());
             requestRect.height_ =
                 static_cast<uint32_t>(defaultDisplayInfo->GetHeight()) * percent / 100u; // 100: for calc percent.
-            requestRect.posX_ = 0;
         }
     }
     requestRect.posY_ = defaultDisplayInfo->GetHeight() -
@@ -3218,7 +3218,7 @@ bool SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_BOUNDS);
 
         WindowType type = sceneSession->GetWindowType();
-        SessionGravity gravity = SessionGravity::SESSION_GRAVITY_BOTTOM;
+        SessionGravity gravity = SessionGravity::SESSION_GRAVITY_DEFAULT;
         uint32_t percent = 0;
         if (sceneSession->GetSessionProperty() != nullptr) {
             sceneSession->GetSessionProperty()->GetSessionGravity(gravity, percent);
@@ -3226,7 +3226,8 @@ bool SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
         if (type == WindowType::WINDOW_TYPE_STATUS_BAR ||
             type == WindowType::WINDOW_TYPE_NAVIGATION_BAR ||
             (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
-            gravity == SessionGravity::SESSION_GRAVITY_BOTTOM)) {
+            (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM ||
+            gravity == SessionGravity::SESSION_GRAVITY_DEFAULT))) {
             AvoidAreaType avoidType = (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) ?
                 AvoidAreaType::TYPE_KEYBOARD : AvoidAreaType::TYPE_SYSTEM;
             for (auto& session : avoidAreaListenerSessionSet_) {
