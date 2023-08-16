@@ -102,7 +102,7 @@ HWTEST_F(WindowSplitTest, SplitWindow01, Function | MediumTest | Level3)
     sleep(SPLIT_TEST_SLEEP_S);
 
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
-    if(fullWindow==nullptr){
+    if (fullWindow == nullptr) {
         return;
     }
     activeWindows_.push_back(fullWindow);
@@ -135,7 +135,7 @@ HWTEST_F(WindowSplitTest, SplitWindow02, Function | MediumTest | Level3)
     splitInfo_.mode = WindowMode::WINDOW_MODE_FULLSCREEN;
 
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
-    if(fullWindow==nullptr){
+    if (fullWindow == nullptr) {
         return;
     }
     activeWindows_.push_back(fullWindow);
@@ -177,7 +177,7 @@ HWTEST_F(WindowSplitTest, SplitScreen03, Function | MediumTest | Level3)
     ASSERT_TRUE(Utils::InitSplitRects());
 
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
-    if(fullWindow==nullptr){
+    if (fullWindow == nullptr) {
         return;
     }
     activeWindows_.push_back(fullWindow);
@@ -213,7 +213,7 @@ HWTEST_F(WindowSplitTest, SplitScreen04, Function | MediumTest | Level3)
     ASSERT_TRUE(Utils::InitSplitRects());
 
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
-    if(fullWindow==nullptr){
+    if (fullWindow == nullptr) {
         return;
     }
 
