@@ -1405,17 +1405,6 @@ void SceneSessionManager::FillSessionInfo(SessionInfo& sessionInfo)
            " label:%{public}s iconPath:%{public}s",
            abilityInfo->removeMissionAfterTerminate, abilityInfo->excludeFromMissions,
            abilityInfo->label.c_str(), abilityInfo->iconPath.c_str());
-    WLOGFI("ability codePath: %{public}s", newSessionInfo.abilityInfo->applicationInfo.codePath.c_str());
-    if (sessionInfo.abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE)) {
-        sceneSession->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
-    } else if (sessionInfo.abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
-        sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
-    }    
-    if(CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
-        WLOGFI("try to run NotifyStartAbility and NotifySessionCreate");
-        NotifyStartAbility(sceneSession->GetCollaboratorType(), sessionInfo);
-        NotifySessionCreate(sceneSession, sessionInfo);
-    }
 }
 
 std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFromBMS(const int32_t uId,
