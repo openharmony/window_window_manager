@@ -28,6 +28,8 @@ enum class ScreenPropertyChangeReason : uint32_t {
     ROTATION,
     CHANGE_MODE,
     FOLD_SCREEN_EXPAND,
+    SCREEN_CONNECT,
+    SCREEN_DISCONNECT,
 };
 class ScreenProperty {
 public:
