@@ -231,7 +231,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom05, Function | MediumTest | Level3)
 
     windowInfo_.name = "DisplayZoom05";
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
-    if(window==nullptr) {
+    if (window == nullptr) {
         return;
     }
     Window* ptr = window.GetRefPtr();
@@ -278,7 +278,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom06, Function | MediumTest | Level3)
     windowInfo_.name = "DisplayZoom06";
     windowInfo_.type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
-    if(window==nullptr) {
+    if (window == nullptr) {
         return;
     }
     Window* ptr = window.GetRefPtr();

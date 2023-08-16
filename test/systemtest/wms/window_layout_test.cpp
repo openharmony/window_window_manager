@@ -176,6 +176,9 @@ HWTEST_F(WindowLayoutTest, LayoutWindow02, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
+    if (window == nullptr) {
+        return;
+    }
     activeWindows_.push_back(window);
 
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -207,6 +210,10 @@ HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     sptr<Window> appWin = Utils::CreateTestWindow(info);
+    if (appWin == nullptr) {
+        return;
+    }
+
     activeWindows_.push_back(appWin);
 
     // statusBar window
@@ -242,6 +249,9 @@ HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
 {
     // statusBar window
     sptr<Window> statBar = Utils::CreateStatusBarWindow();
+    if (statBar == nullptr) {
+        return;
+    }
     activeWindows_.push_back(statBar);
 
     // naviBar window
@@ -280,12 +290,14 @@ HWTEST_F(WindowLayoutTest, LayoutWindow07, Function | MediumTest | Level3)
 {
     // statusBar window
     sptr<Window> statBar = Utils::CreateStatusBarWindow();
+    if (statBar == nullptr) {
+        return;
+    }
     activeWindows_.push_back(statBar);
 
     // naviBar window
     sptr<Window> naviBar = Utils::CreateNavigationBarWindow();
     activeWindows_.push_back(naviBar);
-
     // sys window
     Utils::TestWindowInfo info = {
         .name = "main7",
@@ -327,6 +339,9 @@ HWTEST_F(WindowLayoutTest, LayoutWindow08, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
+    if (window == nullptr) {
+        return;
+    }
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -354,6 +369,9 @@ HWTEST_F(WindowLayoutTest, LayoutWindow09, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
+    if (window == nullptr) {
+        return;
+    }
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
 
@@ -386,6 +404,9 @@ HWTEST_F(WindowLayoutTest, LayoutWindow10, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
+    if (window == nullptr) {
+        return;
+    }
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -420,6 +441,9 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
     };
 
     const sptr<Window>& window = Utils::CreateTestWindow(info);
+    if (window == nullptr) {
+        return;
+    }
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -485,6 +509,9 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
+    if (window == nullptr) {
+        return;
+    }
     activeWindows_.push_back(window);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     usleep(WAIT_SYANC_US);
@@ -548,6 +575,9 @@ HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
+    if (window == nullptr) {
+        return;
+    }
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -575,6 +605,9 @@ HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
+    if (window == nullptr) {
+        return;
+    }
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());

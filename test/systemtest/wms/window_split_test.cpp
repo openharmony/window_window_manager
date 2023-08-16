@@ -92,7 +92,7 @@ HWTEST_F(WindowSplitTest, SplitWindow01, Function | MediumTest | Level3)
     splitInfo_.mode = WindowMode::WINDOW_MODE_FULLSCREEN;
 
     const sptr<Window>& priWindow = Utils::CreateTestWindow(splitInfo_);
-    if(priWindow==nullptr){
+    if (priWindow == nullptr) {
         return;
     }
     activeWindows_.push_back(priWindow);
