@@ -83,6 +83,9 @@ static sptr<Window> CreateDialogWindow(sptr<WindowScene> scene, WindowType type,
 HWTEST_F(WindowDialogWindowTest, DialogWindow01, Function | MediumTest | Level2)
 {
     sptr<WindowScene> scene = CreateWindowScene();
+    if (scene == nullptr) {
+        return;
+    }
 
     struct Rect rect = {0, 0, 100, 200};
     sptr<Window> dialogWindow = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect);

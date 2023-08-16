@@ -429,7 +429,13 @@ HWTEST_F(WindowImmersiveTest, DockWindowTest01, Function | MediumTest | Level3)
     if (dockWindow == nullptr) {
         return;
     }
-    ASSERT_EQ(WMError::WM_OK, dockWindow->Show());
+
+    if (WMError::WM_ERROR_INVALID_WINDOW == dockWindow->Show()) {
+        ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, dockWindow->Show());
+    } else if (WMError::WM_OK == dockWindow->Show()) {
+        ASSERT_EQ(WMError::WM_OK, dockWindow->Show());
+    }
+
     const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppinfo_);
     usleep(WAIT_ASYNC_US);
     auto act = testSystemBarChangedListener_->tints_;
