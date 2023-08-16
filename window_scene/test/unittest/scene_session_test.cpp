@@ -499,7 +499,7 @@ HWTEST_F(SceneSessionTest, UpdateNativeVisibility, Function | SmallTest | Level2
     SessionInfo info;
     info.abilityName_ = "Background01";
     info.bundleName_ = "UpdateNativeVisibility";
-     info.windowType_ = 1;
+    info.windowType_ = 1;
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
@@ -521,7 +521,7 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "Background01";
     info.bundleName_ = "SetPrivacyMode";
-     info.windowType_ = 1;
+    info.windowType_ = 1;
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
