@@ -15,6 +15,7 @@
 
 #include "session/host/include/scene_session.h"
 
+#include <hitrace_meter.h>
 #include <iterator>
 #include <pointer_event.h>
 #include <transaction/rs_transaction.h>
@@ -137,9 +138,11 @@ WSError SceneSession::Background()
 WSError SceneSession::OnSessionEvent(SessionEvent event)
 {
     WLOGFD("SceneSession OnSessionEvent event: %{public}d", static_cast<int32_t>(event));
-    if (event == SessionEvent::EVENT_START_MOVE && moveDragController_) {
+    if (event == SessionEvent::EVENT_START_MOVE && moveDragController_ && !moveDragController_->GetStartDragFlag()) {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::StartMove");
         moveDragController_->InitMoveDragProperty();
         moveDragController_->SetStartMoveFlag(true);
+        ClacFirstMoveTargetRect();
     }
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSessionEvent_) {
         sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event));
@@ -529,7 +532,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
                 return  WSError::WS_OK;
             }
         }
-
+        UpdateMoveTempProperty(pointerEvent);
         if (moveDragController_->GetStartMoveFlag()) {
             return moveDragController_->ConsumeMoveEvent(pointerEvent, winRect_);
         }
@@ -552,6 +555,7 @@ void SceneSession::ClearEnterWindow()
 void SceneSession::NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason)
 {
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onRectChange_) {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::NotifySessionRectChange");
         sessionChangeCallback_->onRectChange_(rect, reason);
     }
 }
@@ -904,4 +908,77 @@ int32_t SceneSession::GetBrokerPersistentId()
 {
     return brokerPersistentId_;
 }
+
+WSError SceneSession::UpdateMoveTempProperty(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    int32_t pointerId = pointerEvent->GetPointerId();
+    int32_t startPointerId = moveTempProperty_.pointerId_;
+    if (startPointerId != -1 && startPointerId != pointerId) {
+        WLOGFI("block unnecessary pointer event inside the window");
+        return WSError::WS_DO_NOTHING;
+    }
+    MMI::PointerEvent::PointerItem pointerItem;
+    int32_t sourceType = pointerEvent->GetSourceType();
+    if (!pointerEvent->GetPointerItem(pointerId, pointerItem) ||
+        (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+        pointerEvent->GetButtonId() != MMI::PointerEvent::MOUSE_BUTTON_LEFT)) {
+        WLOGFW("invalid pointerEvent");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+
+    int32_t pointerDisplayX = pointerItem.GetDisplayX();
+    int32_t pointerDisplayY = pointerItem.GetDisplayY();
+    switch (pointerEvent->GetPointerAction()) {
+        case MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
+        case MMI::PointerEvent::POINTER_ACTION_DOWN:
+            moveTempProperty_.pointerId_ = pointerId;
+            moveTempProperty_.lastDownPointerPosX_ = pointerDisplayX;
+            moveTempProperty_.lastDownPointerPosY_ = pointerDisplayY;
+            moveTempProperty_.lastDownPointerWindowX_ = pointerItem.GetWindowX();
+            moveTempProperty_.lastDownPointerWindowY_ = pointerItem.GetWindowY();
+            break;
+        case MMI::PointerEvent::POINTER_ACTION_MOVE:
+            moveTempProperty_.lastMovePointerPosX_ = pointerDisplayX;
+            moveTempProperty_.lastMovePointerPosY_ = pointerDisplayY;
+            break;
+        case MMI::PointerEvent::POINTER_ACTION_UP:
+        case MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
+        case MMI::PointerEvent::POINTER_ACTION_CANCEL: {
+            moveTempProperty_ = { -1, -1, -1, -1, -1, -1, -1 };
+            break;
+        }
+        default:
+            break;
+    }
+    return WSError::WS_OK;
+}
+
+void SceneSession::ClacFirstMoveTargetRect()
+{
+    if (!moveDragController_->GetStartMoveFlag() || moveTempProperty_.isEmpty()) {
+        return;
+    }
+
+    WSRect originalRect = {
+        moveTempProperty_.lastDownPointerPosX_ - moveTempProperty_.lastDownPointerWindowX_,
+        moveTempProperty_.lastDownPointerPosY_ - moveTempProperty_.lastDownPointerWindowY_,
+        winRect_.width_,
+        winRect_.height_
+    };
+    moveDragController_->SetOriginalValue(moveTempProperty_.pointerId_, moveTempProperty_.lastDownPointerPosX_,
+        moveTempProperty_.lastDownPointerPosY_, originalRect);
+
+    int32_t offsetX = moveTempProperty_.lastMovePointerPosX_ - moveTempProperty_.lastDownPointerPosX_;
+    int32_t offsetY = moveTempProperty_.lastMovePointerPosY_ - moveTempProperty_.lastDownPointerPosY_;
+    WSRect targetRect = {
+        originalRect.posX_ + offsetX,
+        originalRect.posY_ + offsetY,
+        originalRect.width_,
+        originalRect.height_
+    };
+    WLOGFD("first move rect: [%{public}d, %{public}d, %{public}u, %{public}u]", targetRect.posX_, targetRect.posY_,
+        targetRect.width_, targetRect.height_);
+    NotifySessionRectChange(targetRect);
+}
+
 } // namespace OHOS::Rosen
