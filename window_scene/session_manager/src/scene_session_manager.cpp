@@ -1034,7 +1034,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
             return WSError::WS_ERROR_NULLPTR;
         }
         if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
-            NotifyClearSession(scnSession->GetCollaboratorType(), persistentId);
+            NotifyClearSession(scnSession->GetCollaboratorType(), scnSessionInfo->persistentId);
         }
         AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
