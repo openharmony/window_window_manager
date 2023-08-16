@@ -346,7 +346,11 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     winRect_ = rect;
-    sessionStage_->UpdateRect(rect, reason);
+    if (sessionStage_ != nullptr) {
+        sessionStage_->UpdateRect(rect, reason);
+    } else {
+        WLOGFE("sessionStage_ is nullptr");
+    }
     return WSError::WS_OK;
 }
 
