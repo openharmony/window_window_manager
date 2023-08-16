@@ -331,5 +331,25 @@ void JsWindowListener::OnGestureNavigationEnabledUpdate(bool enable)
     AsyncTask::Schedule("JsWindowListener::OnGestureNavigationEnabledUpdate",
         *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
+
+void JsWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
+{
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
+        [self = weakRef_, showWaterMark, eng = engine_] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            auto thisListener = self.promote();
+            if (thisListener == nullptr || eng == nullptr) {
+                WLOGFE("[NAPI]this listener or engine is nullptr");
+                return;
+            }
+            NativeValue* argv[] = {CreateJsValue(*eng, showWaterMark)};
+            thisListener->CallJsMethod(WATER_MARK_FLAG_CHANGE_CB.c_str(), argv, ArraySize(argv));
+        }
+    );
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsWindowListener::OnWaterMarkFlagUpdate",
+        *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
 } // namespace Rosen
 } // namespace OHOS

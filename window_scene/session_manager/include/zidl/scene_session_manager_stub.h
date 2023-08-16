@@ -44,6 +44,7 @@ private:
     int HandleGetFocusSessionInfo(MessageParcel &data, MessageParcel &reply);
     int HandleSetSessionLabel(MessageParcel &data, MessageParcel &reply);
     int HandleSetSessionIcon(MessageParcel &data, MessageParcel &reply);
+    int HandleIsValidSessionIds(MessageParcel &data, MessageParcel &reply);
     int HandleRegisterSessionChangeListener(MessageParcel &data, MessageParcel &reply);
     int HandleUnRegisterSessionChangeListener(MessageParcel &data, MessageParcel &reply);
     int HandlePendingSessionToForeground(MessageParcel &data, MessageParcel &reply);
@@ -57,12 +58,17 @@ private:
     int HandleGetSessionInfos(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply);
 
+    int HandleSetSessionContinueState(MessageParcel &data, MessageParcel &reply);
     int HandleTerminateSessionNew(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionDump(MessageParcel &data, MessageParcel &reply);
     int HandleUpdateSessionAvoidAreaListener(MessageParcel& data, MessageParcel& reply);
     int HandleBindDialogTarget(MessageParcel &data, MessageParcel &reply);
     int HandleGetSessionSnapshot(MessageParcel &data, MessageParcel &reply);
     int HandleNotifyDumpInfoResult(MessageParcel &data, MessageParcel &reply);
+    int HandleClearSession(MessageParcel &data, MessageParcel &reply);
+    int HandleClearAllSessions(MessageParcel &data, MessageParcel &reply);
+    int HandleRegisterCollaborator(MessageParcel &data, MessageParcel &reply);
+    int HandleUnregisterCollaborator(MessageParcel &data, MessageParcel &reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H

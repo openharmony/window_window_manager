@@ -1318,6 +1318,13 @@ public:
      *
      */
     virtual void PerformBack() {}
+    /**
+     * @brief Set the drag enabled flag of a window.
+     *
+     * @param dragEnabled true means the window can be resized by dragging, otherwise means the opposite.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetResizeByDragEnabled(bool dragEnabled) { return WMError::WM_OK; }
 };
 }
 }

@@ -19,18 +19,10 @@ if (is_mingw || is_mac || is_linux) {
   ispreview = true
 }
 if (!ispreview) {
-  ohos_shared_library("previewer_window") {
-    libs = []
-    sources = []
-    part_name = "window_manager"
-    subsystem_name = "window"
+  group("previewer_window") {
   }
 
-  ohos_shared_library("previewer_window_napi") {
-    libs = []
-    sources = []
-    part_name = "window_manager"
-    subsystem_name = "window"
+  group("previewer_window_napi") {
   }
 } else {
   if (current_os == "mac") {

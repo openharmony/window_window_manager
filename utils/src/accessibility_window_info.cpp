@@ -24,7 +24,8 @@ namespace OHOS {
 namespace Rosen {
 bool AccessibilityWindowInfo::Marshalling(Parcel& parcel) const
 {
-    return parcel.WriteInt32(wid_) && parcel.WriteUint32(windowRect_.width_) &&
+    return parcel.WriteInt32(wid_) && parcel.WriteInt32(innerWid_) && parcel.WriteInt32(uiNodeId_) &&
+        parcel.WriteUint32(windowRect_.width_) &&
         parcel.WriteUint32(windowRect_.height_) && parcel.WriteInt32(windowRect_.posX_) &&
         parcel.WriteInt32(windowRect_.posY_) && parcel.WriteBool(focused_) && parcel.WriteBool(isDecorEnable_) &&
         parcel.WriteUint64(displayId_)  && parcel.WriteUint32(layer_) &&
@@ -37,7 +38,8 @@ AccessibilityWindowInfo* AccessibilityWindowInfo::Unmarshalling(Parcel& parcel)
     if (info == nullptr) {
         return nullptr;
     }
-    bool res = parcel.ReadInt32(info->wid_) && parcel.ReadUint32(info->windowRect_.width_) &&
+    bool res = parcel.ReadInt32(info->wid_) && parcel.ReadInt32(info->innerWid_) && parcel.ReadInt32(info->uiNodeId_) &&
+        parcel.ReadUint32(info->windowRect_.width_) &&
         parcel.ReadUint32(info->windowRect_.height_) && parcel.ReadInt32(info->windowRect_.posX_) &&
         parcel.ReadInt32(info->windowRect_.posY_) && parcel.ReadBool(info->focused_) &&
         parcel.ReadBool(info->isDecorEnable_) && parcel.ReadUint64(info->displayId_) &&

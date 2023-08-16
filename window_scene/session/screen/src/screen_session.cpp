@@ -123,7 +123,8 @@ ScreenProperty ScreenSession::GetScreenProperty() const
     return property_;
 }
 
-void ScreenSession::UpdatePropertyByActiveMode() {
+void ScreenSession::UpdatePropertyByActiveMode()
+{
     sptr<SupportedScreenModes> mode = GetActiveScreenMode();
     if (mode != nullptr) {
         auto screeBounds = property_.GetBounds();
@@ -159,10 +160,10 @@ void ScreenSession::Disconnect()
     }
 }
 
-void ScreenSession::PropertyChange(const ScreenProperty& newProperty)
+void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
 {
     for (auto& listener : screenChangeListenerList_) {
-        listener->OnPropertyChange(newProperty);
+        listener->OnPropertyChange(newProperty, reason);
     }
 }
 
@@ -198,6 +199,11 @@ void ScreenSession::SetRotation(Rotation rotation)
 void ScreenSession::SetScreenRequestedOrientation(Orientation orientation)
 {
     property_.SetScreenRequestedOrientation(orientation);
+}
+
+void ScreenSession::SetScreenRotationLocked(bool isLocked)
+{
+    isScreenLocked_ = isLocked;
 }
 
 Orientation ScreenSession::GetScreenRequestedOrientation() const

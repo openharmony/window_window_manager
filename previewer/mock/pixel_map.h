@@ -22,15 +22,15 @@ namespace OHOS {
 namespace Media {
 class PixelMap : public Parcelable {
 public:
-  int32_t GetWidth()
-  {
-    return 0;
-  }
+    int32_t GetWidth()
+    {
+        return 0;
+    }
 
-  int32_t GetHeight()
-  {
-    return 0;
-  }
+    int32_t GetHeight()
+    {
+        return 0;
+    }
 };
 }
 }

@@ -26,6 +26,9 @@
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
 }
+namespace OHOS::AppExecFwk {
+struct AbilityInfo;
+}
 
 namespace OHOS::Rosen {
 constexpr int32_t INVALID_SESSION_ID = 0;
@@ -46,6 +49,8 @@ enum class WSError : int32_t {
     WS_ERROR_OPER_FULLSCREEN_FAILED,
     WS_ERROR_REPEAT_OPERATION,
     WS_ERROR_INVALID_SESSION,
+    WS_ERROR_UNCLEARABLE_SESSION,
+    WS_ERROR_FAIL_TO_GET_SNAPSHOT,
 
     WS_ERROR_DEVICE_NOT_SUPPORT = 801, // the value do not change.It is defined on all system
 
@@ -83,6 +88,7 @@ const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP {
     { WSError::WS_OK,                    WSErrorCode::WS_OK },
     { WSError::WS_DO_NOTHING,            WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
     { WSError::WS_ERROR_INVALID_SESSION, WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
+    { WSError::WS_ERROR_INVALID_PARAM, WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
     { WSError::WS_ERROR_IPC_FAILED,      WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY },
     { WSError::WS_ERROR_NULLPTR,         WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
 };
@@ -109,6 +115,15 @@ enum class StartMethod : int32_t {
     START_CALL
 };
 
+/**
+ * @brief collaborator type.
+ */
+enum CollaboratorType : int32_t {
+    DEFAULT_TYPE = 0,
+    RESERVE_TYPE,
+    OTHERS_TYPE,
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
@@ -117,8 +132,9 @@ struct SessionInfo {
     uint32_t windowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     sptr<IRemoteObject> callerToken_ = nullptr;
 
-    sptr<AAFwk::Want> want;
+    mutable sptr<AAFwk::Want> want;
     std::shared_ptr<AAFwk::AbilityStartSetting> startSetting = nullptr;
+    mutable std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
     int32_t resultCode;
     int32_t requestCode;
     int32_t errorCode;
@@ -127,16 +143,10 @@ struct SessionInfo {
     int32_t callerPersistentId_ = INVALID_SESSION_ID;
     uint32_t callState_ = 0;
     uint32_t callingTokenId_ = 0;
-    StartMethod startMethod;
-    // whether to display in the sessions list
-    bool excludeFromSessions = false;
-    bool removeSessionAfterTerminate = false;
-    bool unClearable = false;
+    bool reuse = false;
+    StartMethod startMethod = StartMethod::START_NORMAL;
     bool lockedState = false;
-    bool continuable = false;
     std::string time;
-    std::string label;
-    std::string iconPath;
     ContinueState continueState = ContinueState::CONTINUESTATE_ACTIVE;
     int64_t uiAbilityId_ = 0;
 };
@@ -196,6 +206,14 @@ struct WSRect {
     bool operator!=(const WSRect& a) const
     {
         return !this->operator==(a);
+    }
+
+    bool IsEmpty() const
+    {
+        if (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0) {
+            return true;
+        }
+        return false;
     }
 };
 
@@ -259,6 +277,17 @@ struct AppWindowSceneConfig {
 enum class SessionGravity : uint32_t {
     SESSION_GRAVITY_FLOAT = 0,
     SESSION_GRAVITY_BOTTOM,
+    SESSION_GRAVITY_DEFAULT,
+};
+
+/**
+ * @brief TerminateType session terminate type.
+ */
+enum class TerminateType : uint32_t {
+    CLOSE_AND_KEEP_MULTITASK = 0,
+    CLOSE_AND_CLEAR_MULTITASK,
+    CLOSE_AND_START_CALLER,
+    CLOSE_BY_EXCEPTION,
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

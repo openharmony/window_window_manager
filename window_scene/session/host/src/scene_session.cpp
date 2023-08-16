@@ -15,8 +15,10 @@
 
 #include "session/host/include/scene_session.h"
 
+#include <hitrace_meter.h>
 #include <iterator>
 #include <pointer_event.h>
+#include <transaction/rs_transaction.h>
 
 #include "interfaces/include/ws_common.h"
 #include "session/host/include/scene_persistent_storage.h"
@@ -73,6 +75,17 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     }
 }
 
+WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
+{
+    WSError ret = Session::Connect(sessionStage, eventChannel, surfaceNode, systemConfig, property, token);
+    if (ret != WSError::WS_OK) {
+        return ret;
+    }
+    NotifyPropertyWhenConnect();
+    return WSError::WS_OK;
+}
+
 WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
 {
     // use property from client
@@ -108,11 +121,12 @@ WSError SceneSession::Background()
     if (ret != WSError::WS_OK) {
         return ret;
     }
-    auto snapshot = Snapshot();
-    if (scenePersistence_ && snapshot) {
-        scenePersistence_->SaveSnapshot(snapshot);
+    snapshot_ = Snapshot();
+    if (scenePersistence_ && snapshot_) {
+        scenePersistence_->SaveSnapshot(snapshot_);
     }
     NotifyBackground();
+    snapshot_.reset();
     UpdateCameraFloatWindowStatus(false);
     if (specificCallback_ != nullptr) {
         specificCallback_->onUpdateAvoidArea_(GetPersistentId());
@@ -124,9 +138,11 @@ WSError SceneSession::Background()
 WSError SceneSession::OnSessionEvent(SessionEvent event)
 {
     WLOGFD("SceneSession OnSessionEvent event: %{public}d", static_cast<int32_t>(event));
-    if (event == SessionEvent::EVENT_START_MOVE && moveDragController_) {
+    if (event == SessionEvent::EVENT_START_MOVE && moveDragController_ && !moveDragController_->GetStartDragFlag()) {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::StartMove");
         moveDragController_->InitMoveDragProperty();
         moveDragController_->SetStartMoveFlag(true);
+        ClacFirstMoveTargetRect();
     }
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSessionEvent_) {
         sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event));
@@ -168,32 +184,33 @@ WSError SceneSession::SetAspectRatio(float ratio)
         vpr = display->GetVirtualPixelRatio();
         WLOGD("vpr = %{public}f", vpr);
     }
-
-    auto limits = property_->GetWindowLimits();
-    if (IsDecorEnable()) {
-        if (limits.minWidth_ && limits.maxHeight_ &&
-            MathHelper::LessNotEqual(ratio, static_cast<float>(SessionUtils::ToLayoutWidth(limits.minWidth_, vpr)) /
-            SessionUtils::ToLayoutHeight(limits.maxHeight_, vpr))) {
-            WLOGE("Failed, because aspectRatio is smaller than minWidth/maxHeight");
-            return WSError::WS_ERROR_INVALID_PARAM;
-        } else if (limits.minHeight_ && limits.maxWidth_ &&
-            MathHelper::GreatNotEqual(ratio, static_cast<float>(SessionUtils::ToLayoutWidth(limits.maxWidth_, vpr)) /
-            SessionUtils::ToLayoutHeight(limits.minHeight_, vpr))) {
-            WLOGE("Failed, because aspectRatio is bigger than maxWidth/minHeight");
-            return WSError::WS_ERROR_INVALID_PARAM;
-        }
-    } else {
-        if (limits.minWidth_ && limits.maxHeight_ && MathHelper::LessNotEqual(ratio,
-            static_cast<float>(limits.minWidth_) / limits.maxHeight_)) {
-            WLOGE("Failed, because aspectRatio is smaller than minWidth/maxHeight");
-            return WSError::WS_ERROR_INVALID_PARAM;
-        } else if (limits.minHeight_ && limits.maxWidth_ && MathHelper::GreatNotEqual(ratio,
-            static_cast<float>(limits.maxWidth_) / limits.minHeight_)) {
-            WLOGE("Failed, because aspectRatio is bigger than maxWidth/minHeight");
-            return WSError::WS_ERROR_INVALID_PARAM;
+    if (!MathHelper::NearZero(ratio)) {
+        auto limits = property_->GetWindowLimits();
+        if (IsDecorEnable()) {
+            if (limits.minWidth_ && limits.maxHeight_ &&
+                MathHelper::LessNotEqual(ratio, static_cast<float>(SessionUtils::ToLayoutWidth(limits.minWidth_, vpr)) /
+                SessionUtils::ToLayoutHeight(limits.maxHeight_, vpr))) {
+                WLOGE("Failed, because aspectRatio is smaller than minWidth/maxHeight");
+                return WSError::WS_ERROR_INVALID_PARAM;
+            } else if (limits.minHeight_ && limits.maxWidth_ &&
+                MathHelper::GreatNotEqual(ratio,
+                static_cast<float>(SessionUtils::ToLayoutWidth(limits.maxWidth_, vpr)) /
+                SessionUtils::ToLayoutHeight(limits.minHeight_, vpr))) {
+                WLOGE("Failed, because aspectRatio is bigger than maxWidth/minHeight");
+                return WSError::WS_ERROR_INVALID_PARAM;
+            }
+        } else {
+            if (limits.minWidth_ && limits.maxHeight_ && MathHelper::LessNotEqual(ratio,
+                static_cast<float>(limits.minWidth_) / limits.maxHeight_)) {
+                WLOGE("Failed, because aspectRatio is smaller than minWidth/maxHeight");
+                return WSError::WS_ERROR_INVALID_PARAM;
+            } else if (limits.minHeight_ && limits.maxWidth_ && MathHelper::GreatNotEqual(ratio,
+                static_cast<float>(limits.maxWidth_) / limits.minHeight_)) {
+                WLOGE("Failed, because aspectRatio is bigger than maxWidth/minHeight");
+                return WSError::WS_ERROR_INVALID_PARAM;
+            }
         }
     }
-
     aspectRatio_ = ratio;
     if (moveDragController_) {
         moveDragController_->SetAspectRatio(ratio);
@@ -208,8 +225,13 @@ WSError SceneSession::SetAspectRatio(float ratio)
 
 WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
-    WLOGFD("UpdateRect [%{public}d, %{public}d, %{public}u, %{public}u]", rect.posX_, rect.posY_,
-        rect.width_, rect.height_);
+    WLOGFD("Id: %{public}d, reason: %{public}d, rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
+        GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_, rect.height_);
+    if (moveDragController_->GetStartMoveFlag()) {
+        reason = SizeChangeReason::MOVE;
+    } else if (moveDragController_->GetStartDragFlag()) {
+        reason = SizeChangeReason::DRAG;
+    }
     WSError ret = Session::UpdateRect(rect, reason);
     if (ret == WSError::WS_OK) {
         specificCallback_->onUpdateAvoidArea_(GetPersistentId());
@@ -219,11 +241,34 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 
 WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
 {
-    WLOGFI("UpdateSessionRect [%{public}d, %{public}d, %{public}u, %{public}u]", rect.posX_, rect.posY_,
-        rect.width_, rect.height_);
-    SetSessionRect(rect);
-    NotifySessionRectChange(rect);
-    UpdateRect(rect, reason);
+    auto newWinRect = winRect_;
+    auto newRequestRect = GetSessionRequestRect();
+    if (reason == SizeChangeReason::MOVE) {
+        newWinRect.posX_ = rect.posX_;
+        newWinRect.posY_ = rect.posY_;
+        newRequestRect.posX_ = rect.posX_;
+        newRequestRect.posY_ = rect.posY_;
+        SetSessionRect(newWinRect);
+        SetSessionRequestRect(newRequestRect);
+        NotifySessionRectChange(newRequestRect, reason);
+    } else if (reason == SizeChangeReason::RESIZE) {
+        newWinRect.width_ = rect.width_;
+        newWinRect.height_ = rect.height_;
+        newRequestRect.width_ = rect.width_;
+        newRequestRect.height_ = rect.height_;
+        SetSessionRect(newWinRect);
+        SetSessionRequestRect(newRequestRect);
+        NotifySessionRectChange(newRequestRect, reason);
+    } else {
+        SetSessionRect(rect);
+        NotifySessionRectChange(rect, reason);
+    }
+
+    WLOGFI("Id: %{public}d, reason: %{public}d, rect: [%{public}d, %{public}d, %{public}u, %{public}u], "
+        "newRequestRect: [%{public}d, %{public}d, %{public}u, %{public}u], newWinRect: [%{public}d, "
+        "%{public}d, %{public}u, %{public}u]", GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_,
+        rect.height_, newRequestRect.posX_, newRequestRect.posY_, newRequestRect.width_, newRequestRect.height_,
+        newWinRect.posX_, newWinRect.posY_, newWinRect.width_, newWinRect.height_);
     return WSError::WS_OK;
 }
 
@@ -260,6 +305,18 @@ WSError SceneSession::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
     return errCode;
 }
 
+WSError SceneSession::BindDialogTarget(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("dialog session is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onBindDialogTarget_) {
+        sessionChangeCallback_->onBindDialogTarget_(sceneSession);
+    }
+    return WSError::WS_OK;
+}
+
 WSError SceneSession::DestroyAndDisconnectSpecificSession(const int32_t& persistentId)
 {
     WSError ret = WSError::WS_OK;
@@ -287,6 +344,18 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
         sessionChangeCallback_->OnSystemBarPropertyChange_(property_->GetSystemBarProperty());
     }
     return WSError::WS_OK;
+}
+
+void SceneSession::NotifyPropertyWhenConnect()
+{
+    WLOGFI("Notify property when connect.");
+    if (property_ == nullptr) {
+        WLOGFD("id: %{public}d property is nullptr", persistentId_);
+        return;
+    }
+    NotifySessionFocusableChange(property_->GetFocusable());
+    NotifySessionTouchableChange(property_->GetTouchable());
+    OnShowWhenLocked(IsShowWhenLocked());
 }
 
 WSError SceneSession::OnNeedAvoid(bool status)
@@ -449,6 +518,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             enterSession_ = wptr<SceneSession>(this);
         }
     }
+
     if (property_ && property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
         WindowHelper::IsMainWindow(property_->GetWindowType()) &&
         property_->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
@@ -456,10 +526,13 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             WLOGE("moveDragController_ is null");
             return Session::TransferPointerEvent(pointerEvent);
         }
-        moveDragController_->HandleMouseStyle(pointerEvent, winRect_);
-        if (moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property_, systemConfig_)) {
-            return  WSError::WS_OK;
+        if (property_->GetDragEnabled()) {
+            moveDragController_->HandleMouseStyle(pointerEvent, winRect_);
+            if (moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property_, systemConfig_)) {
+                return  WSError::WS_OK;
+            }
         }
+        UpdateMoveTempProperty(pointerEvent);
         if (moveDragController_->GetStartMoveFlag()) {
             return moveDragController_->ConsumeMoveEvent(pointerEvent, winRect_);
         }
@@ -479,10 +552,11 @@ void SceneSession::ClearEnterWindow()
     enterSession_ = nullptr;
 }
 
-void SceneSession::NotifySessionRectChange(const WSRect& rect)
+void SceneSession::NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason)
 {
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onRectChange_) {
-        sessionChangeCallback_->onRectChange_(rect);
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::NotifySessionRectChange");
+        sessionChangeCallback_->onRectChange_(rect, reason);
     }
 }
 
@@ -635,12 +709,65 @@ std::string SceneSession::GetSessionSnapshotFilePath()
 void SceneSession::UpdateNativeVisibility(bool visible)
 {
     isVisible_ = visible;
+    if (specificCallback_ == nullptr) {
+        WLOGFW("specific callback is null.");
+        return;
+    }
+
+    if (visible) {
+        specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_ADDED);
+    } else {
+        specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
+    }
     specificCallback_->onUpdateAvoidArea_(GetPersistentId());
+    // update private state
+    if (!property_) {
+        WLOGFE("property_ is null");
+        return;
+    }
+    auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);
+    if (screenSession == nullptr) {
+        WLOGFE("screen session is null");
+        return;
+    }
+    if (property_->GetPrivacyMode() || property_->GetSystemPrivacyMode()) {
+        ScreenSessionManager::GetInstance().UpdatePrivateStateAndNotify(screenSession, visible);
+    }
 }
 
 bool SceneSession::IsVisible() const
 {
     return isVisible_;
+}
+
+void SceneSession::SetPrivacyMode(bool isPrivacy)
+{
+    if (!property_) {
+        WLOGFE("property_ is null");
+        return;
+    }
+    if (!surfaceNode_) {
+        WLOGFE("surfaceNode_ is null");
+        return;
+    }
+    bool lastPrivacyMode = property_->GetPrivacyMode() || property_->GetSystemPrivacyMode();
+    if (lastPrivacyMode == isPrivacy) {
+        WLOGFW("privacy mode is not change, do nothing");
+        return;
+    }
+    property_->SetPrivacyMode(isPrivacy);
+    property_->SetSystemPrivacyMode(isPrivacy);
+    surfaceNode_->SetSecurityLayer(isPrivacy);
+    RSTransaction::FlushImplicitTransaction();
+    auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);
+    if (screenSession == nullptr) {
+        WLOGFE("screen session is null");
+        return;
+    }
+    if (GetSessionState() == SessionState::STATE_FOREGROUND || GetSessionState() == SessionState::STATE_ACTIVE
+        || (GetSessionInfo().isSystem_ && isVisible_)) {
+        ScreenSessionManager::GetInstance().UpdatePrivateStateAndNotify(screenSession, isPrivacy);
+    }
 }
 
 WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
@@ -735,4 +862,113 @@ WSError SceneSession::NotifyTouchOutside()
     }
     return sessionStage_->NotifyTouchOutside();
 }
+
+void SceneSession::SetRequestedOrientation(Orientation orientation)
+{
+    WLOGFI("id: %{public}d orientation: %{public}u", GetPersistentId(), static_cast<uint32_t>(orientation));
+    property_->SetRequestedOrientation(orientation);
+    if (sessionChangeCallback_ && sessionChangeCallback_->OnRequestedOrientationChange_) {
+        sessionChangeCallback_->OnRequestedOrientationChange_(static_cast<uint32_t>(orientation));
+    }
+}
+
+Orientation SceneSession::GetRequestedOrientation() const
+{
+    return property_->GetRequestedOrientation();
+}
+
+int32_t SceneSession::GetCollaboratorType() const
+{
+    return collaboratorType_;
+}
+
+void SceneSession::SetCollaboratorType(int32_t collaboratorType)
+{
+    collaboratorType_ = collaboratorType;
+}
+
+std::shared_ptr<AppExecFwk::AbilityInfo> SceneSession::GetAbilityInfo()
+{
+    SessionInfo& sessionInfo = GetSessionInfo();
+    return sessionInfo.abilityInfo;
+}
+
+void SceneSession::SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo)
+{
+    SessionInfo& sessionInfo = GetSessionInfo();
+    sessionInfo.abilityInfo = abilityInfo;
+}
+
+WSError SceneSession::UpdateMoveTempProperty(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    int32_t pointerId = pointerEvent->GetPointerId();
+    int32_t startPointerId = moveTempProperty_.pointerId_;
+    if (startPointerId != -1 && startPointerId != pointerId) {
+        WLOGFI("block unnecessary pointer event inside the window");
+        return WSError::WS_DO_NOTHING;
+    }
+    MMI::PointerEvent::PointerItem pointerItem;
+    int32_t sourceType = pointerEvent->GetSourceType();
+    if (!pointerEvent->GetPointerItem(pointerId, pointerItem) ||
+        (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+        pointerEvent->GetButtonId() != MMI::PointerEvent::MOUSE_BUTTON_LEFT)) {
+        WLOGFW("invalid pointerEvent");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+
+    int32_t pointerDisplayX = pointerItem.GetDisplayX();
+    int32_t pointerDisplayY = pointerItem.GetDisplayY();
+    switch (pointerEvent->GetPointerAction()) {
+        case MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
+        case MMI::PointerEvent::POINTER_ACTION_DOWN:
+            moveTempProperty_.pointerId_ = pointerId;
+            moveTempProperty_.lastDownPointerPosX_ = pointerDisplayX;
+            moveTempProperty_.lastDownPointerPosY_ = pointerDisplayY;
+            moveTempProperty_.lastDownPointerWindowX_ = pointerItem.GetWindowX();
+            moveTempProperty_.lastDownPointerWindowY_ = pointerItem.GetWindowY();
+            break;
+        case MMI::PointerEvent::POINTER_ACTION_MOVE:
+            moveTempProperty_.lastMovePointerPosX_ = pointerDisplayX;
+            moveTempProperty_.lastMovePointerPosY_ = pointerDisplayY;
+            break;
+        case MMI::PointerEvent::POINTER_ACTION_UP:
+        case MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
+        case MMI::PointerEvent::POINTER_ACTION_CANCEL: {
+            moveTempProperty_ = { -1, -1, -1, -1, -1, -1, -1 };
+            break;
+        }
+        default:
+            break;
+    }
+    return WSError::WS_OK;
+}
+
+void SceneSession::ClacFirstMoveTargetRect()
+{
+    if (!moveDragController_->GetStartMoveFlag() || moveTempProperty_.isEmpty()) {
+        return;
+    }
+
+    WSRect originalRect = {
+        moveTempProperty_.lastDownPointerPosX_ - moveTempProperty_.lastDownPointerWindowX_,
+        moveTempProperty_.lastDownPointerPosY_ - moveTempProperty_.lastDownPointerWindowY_,
+        winRect_.width_,
+        winRect_.height_
+    };
+    moveDragController_->SetOriginalValue(moveTempProperty_.pointerId_, moveTempProperty_.lastDownPointerPosX_,
+        moveTempProperty_.lastDownPointerPosY_, originalRect);
+
+    int32_t offsetX = moveTempProperty_.lastMovePointerPosX_ - moveTempProperty_.lastDownPointerPosX_;
+    int32_t offsetY = moveTempProperty_.lastMovePointerPosY_ - moveTempProperty_.lastDownPointerPosY_;
+    WSRect targetRect = {
+        originalRect.posX_ + offsetX,
+        originalRect.posY_ + offsetY,
+        originalRect.width_,
+        originalRect.height_
+    };
+    WLOGFD("first move rect: [%{public}d, %{public}d, %{public}u, %{public}u]", targetRect.posX_, targetRect.posY_,
+        targetRect.width_, targetRect.height_);
+    NotifySessionRectChange(targetRect);
+}
+
 } // namespace OHOS::Rosen

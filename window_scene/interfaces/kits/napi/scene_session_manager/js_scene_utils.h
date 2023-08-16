@@ -20,6 +20,7 @@
 #include <native_engine/native_engine.h>
 #include <native_engine/native_value.h>
 
+#include "dm_common.h"
 #include "interfaces/include/ws_common.h"
 #include "wm_common.h"
 
@@ -47,6 +48,23 @@ enum class JsSessionType : uint32_t {
     TYPE_LAUNCHER_RECENT,
     TYPE_SCENE_BOARD,
     TYPE_DRAGGING_EFFECT,
+};
+
+// should same with bundlemanager ability info
+enum class JsSessionOrientation : uint32_t {
+    UNSPECIFIED = 0,
+    LANDSCAPE,
+    PORTRAIT,
+    FOLLOWRECENT,
+    LANDSCAPE_INVERTED,
+    PORTRAIT_INVERTED,
+    AUTO_ROTATION,
+    AUTO_ROTATION_LANDSCAPE,
+    AUTO_ROTATION_PORTRAIT,
+    AUTO_ROTATION_RESTRICTED,
+    AUTO_ROTATION_LANDSCAPE_RESTRICTED,
+    AUTO_ROTATION_PORTRAIT_RESTRICTED,
+    LOCKED,
 };
 
 const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
@@ -97,9 +115,26 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_DRAGGING_EFFECT,   WindowType::WINDOW_TYPE_DRAGGING_EFFECT     },
 };
 
+const std::map<Orientation, JsSessionOrientation> WINDOW_ORIENTATION_TO_JS_SESSION_MAP {
+    {Orientation::UNSPECIFIED,                        JsSessionOrientation::UNSPECIFIED             },
+    {Orientation::VERTICAL,                           JsSessionOrientation::PORTRAIT                },
+    {Orientation::HORIZONTAL,                         JsSessionOrientation::LANDSCAPE               },
+    {Orientation::REVERSE_VERTICAL,                   JsSessionOrientation::PORTRAIT_INVERTED       },
+    {Orientation::REVERSE_HORIZONTAL,                 JsSessionOrientation::LANDSCAPE_INVERTED      },
+    {Orientation::SENSOR,                             JsSessionOrientation::AUTO_ROTATION           },
+    {Orientation::SENSOR_VERTICAL,                    JsSessionOrientation::AUTO_ROTATION_PORTRAIT  },
+    {Orientation::SENSOR_HORIZONTAL,                  JsSessionOrientation::AUTO_ROTATION_LANDSCAPE },
+    {Orientation::AUTO_ROTATION_RESTRICTED,           JsSessionOrientation::AUTO_ROTATION_RESTRICTED},
+    {Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED,
+        JsSessionOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED},
+    {Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED,
+        JsSessionOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED},
+    {Orientation::LOCKED,                             JsSessionOrientation::LOCKED                  },
+};
 bool ConvertSessionInfoFromJs(NativeEngine& engine, NativeObject* jsObject, SessionInfo& sessionInfo);
 NativeValue* CreateJsSessionInfo(NativeEngine& engine, const SessionInfo& sessionInfo);
 NativeValue* CreateJsSessionState(NativeEngine& engine);
+NativeValue* CreateJsSessionSizeChangeReason(NativeEngine& engine);
 NativeValue* CreateJsSessionRect(NativeEngine& engine, const WSRect& rect);
 NativeValue* CreateJsSystemBarPropertyArrayObject(
     NativeEngine& engine, const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);

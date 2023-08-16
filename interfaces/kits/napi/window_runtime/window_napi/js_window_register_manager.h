@@ -54,6 +54,8 @@ private:
         bool isRegister);
     WmErrorCode ProcessGestureNavigationEnabledChangeRegister(sptr<JsWindowListener> listener,
         sptr<Window> window, bool isRegister);
+    WmErrorCode ProcessWaterMarkFlagChangeRegister(sptr<JsWindowListener> listener,
+        sptr<Window> window, bool isRegister);
     using Func = WmErrorCode(JsWindowRegisterManager::*)(sptr<JsWindowListener>, sptr<Window> window, bool);
     std::map<std::string, std::map<NativeReference*, sptr<JsWindowListener>>> jsCbMap_;
     std::mutex mtx_;

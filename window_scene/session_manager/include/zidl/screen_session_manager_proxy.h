@@ -64,6 +64,9 @@ public:
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
 
+    virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
+                               ScreenId& screenGroupId) override;
+
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
 
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;

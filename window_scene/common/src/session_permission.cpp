@@ -60,6 +60,66 @@ bool SessionPermission::IsSystemCalling()
     return isSystemApp;
 }
 
+bool SessionPermission::IsSACalling()
+{
+    const auto& tokenId = IPCSkeleton::GetCallingTokenID();
+    const auto& flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
+    if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+        WLOGFW("SA Called, tokenId: %{public}u, flag: %{public}u", tokenId, flag);
+        return true;
+    }
+    WLOGFD("Not SA called");
+    return false;
+}
+
+bool SessionPermission::VerifyCallingPermission(const std::string &permissionName)
+{
+    WLOGFI("VerifyCallingPermission permission %{public}s", permissionName.c_str());
+    auto callerToken = IPCSkeleton::GetCallingTokenID();
+    int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName);
+    if (ret != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
+        WLOGFE("permission %{public}s: PERMISSION_DENIED", permissionName.c_str());
+        return false;
+    }
+    WLOGFI("verify AccessToken success");
+    return true;
+}
+
+bool SessionPermission::VerifySessionPermission()
+{
+    if (IsSACalling()) {
+        WLOGFI("this is SA Calling, Permission verification succeeded.");
+        return true;
+    }
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        WLOGFI("Permission verification succeeded.");
+        return true;
+    }
+    WLOGFE("Permission verification failed");
+    return false;
+}
+
+bool SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()
+{
+    if (IsSACalling() || IsShellCall()) {
+        return true;
+    }
+    auto callerToken = IPCSkeleton::GetCallingFullTokenID();
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callerToken);
+}
+
+bool SessionPermission::IsShellCall()
+{
+    auto callerToken = IPCSkeleton::GetCallingTokenID();
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
+    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
+        WLOGFI("caller tokenType is shell, verify success");
+        return true;
+    }
+    WLOGFI("Not shell called.");
+    return false;
+}
+
 bool SessionPermission::IsStartByHdcd()
 {
     OHOS::Security::AccessToken::NativeTokenInfo info;

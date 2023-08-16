@@ -24,7 +24,7 @@ namespace Rosen {
 class MockScreenManagerServiceProxy : public IRemoteProxy<IMockScreenManagerInterface> {
 public:
     explicit MockScreenManagerServiceProxy(const sptr<IRemoteObject>& impl) :
-        IRemoteProxy<IMockScreenManagerInterface>(impl) {};
+    IRemoteProxy<IMockScreenManagerInterface>(impl) {};
     ~MockScreenManagerServiceProxy() {};
 
     void GetScreenDumpInfo(const std::vector<std::string>& params, std::string& info) override;

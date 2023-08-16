@@ -31,15 +31,27 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SessionManager)
 
 void SessionManager::ClearSessionManagerProxy()
 {
-    mockSessionManagerServiceProxy_ = nullptr;
-    sessionManagerServiceProxy_ = nullptr;
-    sceneSessionManagerProxy_ = nullptr;
-    screenSessionManagerProxy_ = nullptr;
-    screenLockManagerProxy_ = nullptr;
+    std::unique_lock<std::shared_mutex> lock(proxyMutex_);
+    if (mockSessionManagerServiceProxy_ != nullptr) {
+        mockSessionManagerServiceProxy_ = nullptr;
+    }
+    if (sessionManagerServiceProxy_ != nullptr) {
+        sessionManagerServiceProxy_ = nullptr;
+    }
+    if (sceneSessionManagerProxy_ != nullptr) {
+        sceneSessionManagerProxy_ = nullptr;
+    }
+    if (screenSessionManagerProxy_ != nullptr) {
+        screenSessionManagerProxy_ = nullptr;
+    }
+    if (screenLockManagerProxy_ != nullptr) {
+        screenLockManagerProxy_ = nullptr;
+    }
 }
 
 sptr<ScreenLock::ScreenLockManagerInterface> SessionManager::GetScreenLockManagerProxy()
 {
+    std::shared_lock<std::shared_mutex> lock(proxyMutex_);
     InitSessionManagerServiceProxy();
     InitScreenLockManagerProxy();
     return screenLockManagerProxy_;
@@ -47,6 +59,7 @@ sptr<ScreenLock::ScreenLockManagerInterface> SessionManager::GetScreenLockManage
 
 sptr<IScreenSessionManager> SessionManager::GetScreenSessionManagerProxy()
 {
+    std::shared_lock<std::shared_mutex> lock(proxyMutex_);
     InitSessionManagerServiceProxy();
     InitScreenSessionManagerProxy();
     return screenSessionManagerProxy_;
@@ -54,6 +67,7 @@ sptr<IScreenSessionManager> SessionManager::GetScreenSessionManagerProxy()
 
 sptr<ISceneSessionManager> SessionManager::GetSceneSessionManagerProxy()
 {
+    std::shared_lock<std::shared_mutex> lock(proxyMutex_);
     InitSessionManagerServiceProxy();
     InitSceneSessionManagerProxy();
     return sceneSessionManagerProxy_;

@@ -15,12 +15,15 @@
 
 #include "window_scene_session_impl.h"
 
+#include <ability_manager_client.h>
 #include <parameters.h>
 #include <transaction/rs_transaction.h>
 
 #include "anr_handler.h"
 #include "color_parser.h"
+#include "singleton_container.h"
 #include "display_manager.h"
+#include "perform_reporter.h"
 #include "session_permission.h"
 #include "session/container/include/window_event_channel.h"
 #include "session_manager/include/session_manager.h"
@@ -28,10 +31,10 @@
 #include "window_adapter.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
+#include "window_prepare_terminate.h"
 #include "wm_common.h"
 #include "wm_math.h"
 #include "session_manager_agent_controller.h"
-#include "window_impl.h"
 #include <transaction/rs_interfaces.h>
 #include "surface_capture_future.h"
 
@@ -227,6 +230,7 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
                 static_cast<float>(abilityInfo->maxWindowRatio), static_cast<float>(abilityInfo->minWindowRatio)
             });
             UpdateWindowSizeLimits();
+            UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
             // get support modes configuration
             uint32_t modeSupportInfo = WindowHelper::ConvertSupportModesToSupportInfo(abilityInfo->windowModes);
             if (modeSupportInfo == 0) {
@@ -243,19 +247,25 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
             OHOS::AppExecFwk::DisplayOrientation displayOrientation =
                 static_cast<OHOS::AppExecFwk::DisplayOrientation>(
                     static_cast<uint32_t>(abilityInfo->orientation));
-            if (ABILITY_TO_WMS_ORIENTATION_MAP.count(displayOrientation) == 0) {
+            if (ABILITY_TO_SESSION_ORIENTATION_MAP.count(displayOrientation) == 0) {
                 WLOGFE("id:%{public}u Do not support this Orientation type", GetWindowId());
                 return;
             }
-            Orientation orientation = ABILITY_TO_WMS_ORIENTATION_MAP.at(displayOrientation);
+            Orientation orientation = ABILITY_TO_SESSION_ORIENTATION_MAP.at(displayOrientation);
             if (orientation < Orientation::BEGIN || orientation > Orientation::END) {
                 WLOGFE("Set orientation from ability failed");
                 return;
             }
             property_->SetRequestedOrientation(orientation);
-            UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
         }
     }
+}
+
+uint32_t WindowSceneSessionImpl::UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal,
+                                                 uint32_t defaultVal, float vpr)
+{
+    bool validConfig = minVal < configVal && configVal < maxVal;
+    return validConfig ? static_cast<uint32_t>(configVal * vpr) : static_cast<uint32_t>(defaultVal * vpr);
 }
 
 WindowLimits WindowSceneSessionImpl::GetSystemSizeLimits(uint32_t displayWidth,
@@ -264,8 +274,21 @@ WindowLimits WindowSceneSessionImpl::GetSystemSizeLimits(uint32_t displayWidth,
     WindowLimits systemLimits;
     systemLimits.maxWidth_ = static_cast<uint32_t>(maxFloatingWindowSize_ * vpr);
     systemLimits.maxHeight_ = static_cast<uint32_t>(maxFloatingWindowSize_ * vpr);
-    systemLimits.minWidth_ = static_cast<uint32_t>(MIN_FLOATING_WIDTH * vpr);
-    systemLimits.minHeight_ = static_cast<uint32_t>(MIN_FLOATING_HEIGHT * vpr);
+
+    if (WindowHelper::IsMainWindow(GetType())) {
+        systemLimits.minWidth_ = UpdateConfigVal(0, displayWidth, windowSystemConfig_.miniWidthOfMainWindow_,
+                                                 MIN_FLOATING_WIDTH, vpr);
+        systemLimits.minHeight_ = UpdateConfigVal(0, displayHeight, windowSystemConfig_.miniHeightOfMainWindow_,
+                                                  MIN_FLOATING_HEIGHT, vpr);
+    } else if (WindowHelper::IsSubWindow(GetType())) {
+        systemLimits.minWidth_ = UpdateConfigVal(0, displayWidth, windowSystemConfig_.miniWidthOfSubWindow_,
+                                                 MIN_FLOATING_WIDTH, vpr);
+        systemLimits.minHeight_ = UpdateConfigVal(0, displayHeight, windowSystemConfig_.miniHeightOfSubWindow_,
+                                                  MIN_FLOATING_HEIGHT, vpr);
+    } else {
+        systemLimits.minWidth_ = static_cast<uint32_t>(MIN_FLOATING_WIDTH * vpr);
+        systemLimits.minHeight_ = static_cast<uint32_t>(MIN_FLOATING_HEIGHT * vpr);
+    }
     WLOGFI("[System SizeLimits] [maxWidth: %{public}u, minWidth: %{public}u, maxHeight: %{public}u, "
         "minHeight: %{public}u]", systemLimits.maxWidth_, systemLimits.minWidth_,
         systemLimits.maxHeight_, systemLimits.minHeight_);
@@ -492,7 +515,7 @@ WSError WindowSceneSessionImpl::SetActive(bool active)
 void WindowSceneSessionImpl::DestroySubWindow()
 {
     for (auto elem : subWindowSessionMap_) {
-        WLOGFE("Id: %{public}d, size: %{public}zu", elem.first, subWindowSessionMap_.size());
+        WLOGFI("Id: %{public}d, size: %{public}zu", elem.first, subWindowSessionMap_.size());
     }
 
     const int32_t& parentPersistentId = property_->GetParentPersistentId();
@@ -586,28 +609,16 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y)
 
     const auto& windowRect = GetRect();
     const auto& requestRect = GetRequestRect();
-    Rect rect;
-    if (state_ <= WindowState::STATE_CREATED) {
-        rect = requestRect;
-    } else {
-        rect = WindowHelper::IsMainFloatingWindow(GetType(), GetMode()) ? windowRect : requestRect;
-    }
-    Rect newRect = { x, y, rect.width_, rect.height_ }; // must keep x/y
-    WLOGFD("Id:%{public}d, type: %{public}d, mode: %{public}d, requestRect: [%{public}d, %{public}d, %{public}d, "
-        "%{public}d], windowRect: [%{public}d, %{public}d, %{public}d, %{public}d], "
-        "newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
-        property_->GetPersistentId(), GetType(), GetMode(), requestRect.posX_, requestRect.posY_,
+    Rect newRect = { x, y, requestRect.width_, requestRect.height_ }; // must keep x/y
+    WLOGFD("Id:%{public}d, state: %{public}d, type: %{public}d, mode: %{public}d, requestRect: "
+        "[%{public}d, %{public}d, %{public}d, %{public}d], windowRect: [%{public}d, %{public}d, "
+        "%{public}d, %{public}d], newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+        property_->GetPersistentId(), state_, GetType(), GetMode(), requestRect.posX_, requestRect.posY_,
         requestRect.width_, requestRect.height_, windowRect.posX_, windowRect.posY_,
         windowRect.width_, windowRect.height_, newRect.posX_, newRect.posY_,
         newRect.width_, newRect.height_);
 
     property_->SetRequestRect(newRect);
-    if (state_ == WindowState::STATE_HIDDEN || state_ < WindowState::STATE_CREATED) {
-        WLOGFD("Window is hidden or not created! id: %{public}d, oriPos: [%{public}d, %{public}d, "
-            "movePos: [%{public}d, %{public}d]", property_->GetPersistentId(), rect.posX_, rect.posY_, x, y);
-        return WMError::WM_OK;
-    }
-
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto ret = hostSession_->UpdateSessionRect(wsRect, SizeChangeReason::MOVE);
     return static_cast<WMError>(ret);
@@ -706,30 +717,16 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 
     const auto& windowRect = GetRect();
     const auto& requestRect = GetRequestRect();
-    Rect rect;
-    if (state_ <= WindowState::STATE_CREATED) {
-        rect = requestRect;
-    } else {
-        rect = WindowHelper::IsMainFloatingWindow(GetType(), GetMode()) ? windowRect : requestRect;
-    }
-
-    Rect newRect = { rect.posX_, rect.posY_, width, height }; // must keep w/h
-    WLOGFD("Id:%{public}d, type: %{public}d, mode: %{public}d, requestRect: [%{public}d, %{public}d, %{public}d, "
-        "%{public}d], windowRect: [%{public}d, %{public}d, %{public}d, %{public}d], "
-        "newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
-        property_->GetPersistentId(), GetType(), GetMode(), requestRect.posX_, requestRect.posY_,
+    Rect newRect = { requestRect.posX_, requestRect.posY_, width, height }; // must keep w/h
+    WLOGFD("Id:%{public}d, state: %{public}d, type: %{public}d, mode: %{public}d, requestRect: "
+        "[%{public}d, %{public}d, %{public}d, %{public}d], windowRect: [%{public}d, %{public}d, "
+        "%{public}d, %{public}d], newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+        property_->GetPersistentId(), state_, GetType(), GetMode(), requestRect.posX_, requestRect.posY_,
         requestRect.width_, requestRect.height_, windowRect.posX_, windowRect.posY_,
         windowRect.width_, windowRect.height_, newRect.posX_, newRect.posY_,
         newRect.width_, newRect.height_);
 
     property_->SetRequestRect(newRect);
-    if (state_ == WindowState::STATE_HIDDEN || state_ < WindowState::STATE_CREATED) {
-        WLOGFD("Window is hidden or not created! id: %{public}d, oriSize: [%{public}u, %{public}u, "
-            "newSize [%{public}u, %{public}u], state: %{public}u", property_->GetPersistentId(), rect.width_,
-            rect.height_, width, height, static_cast<uint32_t>(state_));
-        return WMError::WM_OK;
-    }
-
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto ret = hostSession_->UpdateSessionRect(wsRect, SizeChangeReason::RESIZE);
     return static_cast<WMError>(ret);
@@ -741,7 +738,7 @@ WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
         WLOGFE("SetAspectRatio failed because of nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (ratio == MathHelper::INF || ratio == MathHelper::NAG_INF || std::isnan(ratio)) {
+    if (ratio == MathHelper::INF || ratio == MathHelper::NAG_INF || std::isnan(ratio) || MathHelper::NearZero(ratio)) {
         WLOGFE("SetAspectRatio failed, because of wrong value: %{public}f", ratio);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -757,8 +754,7 @@ WMError WindowSceneSessionImpl::ResetAspectRatio()
         WLOGFE("no host session found");
         return WMError::WM_ERROR_NULLPTR;
     }
-    hostSession_->SetAspectRatio(0.0f);
-    return WMError::WM_OK;
+    return static_cast<WMError>(hostSession_->SetAspectRatio(0.0f));
 }
 
 WmErrorCode WindowSceneSessionImpl::RaiseToAppTop()
@@ -868,12 +864,12 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
 
 WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
 {
-    if (hostSession_ == nullptr) {
-        return WMError::WM_ERROR_NULLPTR;
-    }
     WLOGFI("winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
     if (hostSession_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
+    }
+    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
     SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -933,6 +929,7 @@ WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const Syst
     if (property_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
+    isSystembarPropertiesSet_ = true;
     property_->SetSystemBarProperty(type, property);
     WMError ret = NotifyWindowSessionProperty();
     if (ret != WMError::WM_OK) {
@@ -947,6 +944,9 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
     WLOGFI("winId:%{public}u status:%{public}d", GetWindowId(), static_cast<int32_t>(status));
     if (hostSession_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
+    }
+    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
     SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -1069,8 +1069,34 @@ WMError WindowSceneSessionImpl::Close()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (WindowHelper::IsMainWindow(GetType()) && hostSession_) {
-        hostSession_->OnSessionEvent(SessionEvent::EVENT_CLOSE);
+    if (WindowHelper::IsMainWindow(GetType())) {
+        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+        if (!abilityContext) {
+            return Destroy(true);
+        }
+        WindowPrepareTerminateHandler* handler = new(std::nothrow) WindowPrepareTerminateHandler();
+        if (handler == nullptr) {
+            WLOGFW("new WindowPrepareTerminateHandler failed, do close window");
+            hostSession_->OnSessionEvent(SessionEvent::EVENT_CLOSE);
+            return WMError::WM_OK;
+        }
+        wptr<ISession> hostSessionWptr = hostSession_;
+        PrepareTerminateFunc func = [hostSessionWptr]() {
+            auto weakSession = hostSessionWptr.promote();
+            if (weakSession == nullptr) {
+                WLOGFW("this session wptr is nullptr");
+                return;
+            }
+            weakSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
+        };
+        handler->SetPrepareTerminateFun(func);
+        sptr<AAFwk::IPrepareTerminateCallback> callback = handler;
+        if (AAFwk::AbilityManagerClient::GetInstance()->PrepareTerminateAbility(abilityContext->GetToken(),
+            callback) != ERR_OK) {
+            WLOGFW("RegisterWindowManagerServiceHandler failed, do close window");
+            hostSession_->OnSessionEvent(SessionEvent::EVENT_CLOSE);
+            return WMError::WM_OK;
+        }
     }
 
     return WMError::WM_OK;
@@ -1105,6 +1131,8 @@ WSError WindowSceneSessionImpl::HandleBackEvent()
         WLOGD("Back key event is consumed");
         return WSError::WS_OK;
     }
+    WLOGFD("report Back");
+    SingletonContainer::Get<WindowInfoReporter>().ReportBackButtonInfoImmediately();
     // notify back event to host session
     PerformBack();
     return WSError::WS_OK;
@@ -1158,9 +1186,9 @@ WMError WindowSceneSessionImpl::SetWindowMode(WindowMode mode)
         return ret;
     }
 
-    if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY && hostSession_) {
+    if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_SPLIT_PRIMARY);
-    } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY && hostSession_) {
+    } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         hostSession_->OnSessionEvent(SessionEvent::EVENT_SPLIT_SECONDARY);
     }
     return WMError::WM_OK;

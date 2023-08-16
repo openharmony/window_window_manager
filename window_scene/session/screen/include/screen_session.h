@@ -39,7 +39,7 @@ public:
 
     virtual void OnConnect() = 0;
     virtual void OnDisconnect() = 0;
-    virtual void OnPropertyChange(const ScreenProperty& newProperty) = 0;
+    virtual void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason) = 0;
 };
 
 enum class ScreenState : int32_t {
@@ -63,7 +63,7 @@ public:
     sptr<SupportedScreenModes> GetActiveScreenMode() const;
     ScreenSourceMode GetSourceMode() const;
     void SetScreenCombination(ScreenCombination combination);
-    ScreenCombination GetScreenCombination() const; 
+    ScreenCombination GetScreenCombination() const;
 
     Orientation GetOrientation() const;
     void SetOrientation(Orientation orientation);
@@ -96,6 +96,7 @@ public:
     DMError SetPrivateSessionCount(int32_t count);
     bool HasPrivateSession() const;
     void SetDisplayBoundary(const RectF& rect, const uint32_t& offsetY);
+    void SetScreenRotationLocked(bool isLocked);
 
     std::string name_ { "UNKNOW" };
     ScreenId screenId_ {};
@@ -108,10 +109,11 @@ public:
     bool isScreenGroup_ { false };
     ScreenId groupSmsId_ { SCREEN_ID_INVALID };
     ScreenId lastGroupSmsId_ { SCREEN_ID_INVALID };
+    bool isScreenLocked_ = true;
 
     void Connect();
     void Disconnect();
-    void PropertyChange(const ScreenProperty& newProperty);
+    void PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason);
 private:
     ScreenProperty property_;
     std::shared_ptr<RSDisplayNode> displayNode_;

@@ -199,7 +199,7 @@ WMError WindowController::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
     WMError res = GetFocusWindowNode(displayId, windowNode);
     if (res == WMError::WM_OK) {
         WLOGFD("Get focus window info success");
-        focusInfo.windowId_ = static_cast<uint32_t>(windowNode->GetWindowId());
+        focusInfo.windowId_ = static_cast<int32_t>(windowNode->GetWindowId());
         focusInfo.displayId_ = windowNode->GetDisplayId();
         focusInfo.pid_ = windowNode->GetCallingPid();
         focusInfo.uid_ = windowNode->GetCallingUid();
@@ -1514,14 +1514,18 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         }
         case PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
             bool isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
+            bool onlySkipSnapshot = property->GetOnlySkipSnapshot();
             node->GetWindowProperty()->SetPrivacyMode(isPrivacyMode);
             node->GetWindowProperty()->SetSystemPrivacyMode(isPrivacyMode);
+            node->GetWindowProperty()->SetOnlySkipSnapshot(onlySkipSnapshot);
             node->surfaceNode_->SetSecurityLayer(isPrivacyMode);
             if (node->leashWinSurfaceNode_ != nullptr) {
                 node->leashWinSurfaceNode_->SetSecurityLayer(isPrivacyMode);
             }
             RSTransaction::FlushImplicitTransaction();
-            UpdatePrivateStateAndNotify(node);
+            if (!onlySkipSnapshot) {
+                UpdatePrivateStateAndNotify(node);
+            }
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO: {
