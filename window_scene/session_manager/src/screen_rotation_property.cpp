@@ -101,6 +101,11 @@ void ScreenRotationProperty::HandleSensorEventInput(DeviceRotation deviceRotatio
         WLOGFW("deviceRotation is invalid, return.");
         return;
     }
+    auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
+    if (!screenSession || screenSession->isScreenLocked_) {
+        WLOGFW("screenSession is null or isScreenLocked_ is true.");
+        return;
+    }
     Orientation orientation = GetPreferredOrientation();
     currentDisplayRotation_ = GetCurrentDisplayRotation();
     lastSensorRotationConverted_ = deviceRotation;
