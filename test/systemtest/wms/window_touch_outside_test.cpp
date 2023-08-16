@@ -113,7 +113,7 @@ namespace {
 HWTEST_F(WindowTouchOutsideTest, onTouchInside, Function | MediumTest | Level3)
 {
     const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
-    if(firstWindow==nullptr) {
+    if (firstWindow == nullptr) {
         return;
     }
     firstWindow->RegisterTouchOutsideListener(windowlistener1_);
