@@ -95,8 +95,7 @@ HWTEST_F(WindowSplitImmersiveTest, SplitImmersive01, Function | MediumTest | Lev
     // create fullscreen win and show
     fullInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
-
-    if(fullWindow==nullptr){
+    if (fullWindow == nullptr) {
         return;
     }
 
