@@ -63,11 +63,18 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
         property_->SetWindowType(static_cast<WindowType>(info.windowType_));
     }
 
-    if (sessionInfo_.isSystem_) {
-        auto name = sessionInfo_.bundleName_;
-        auto pos = name.find_last_of('.');
-        name = (pos == std::string::npos) ? name : name.substr(pos + 1); // skip '.'
+    auto name = sessionInfo_.bundleName_;
+    auto pos = name.find_last_of('.');
+    name = (pos == std::string::npos) ? name : name.substr(pos + 1); // skip '.'
 
+    if (WindowHelper::IsMainWindow(GetWindowType())) {
+        Rosen::RSSurfaceNodeConfig leashWinconfig;
+        leashWinconfig.SurfaceNodeName = "WindowScene_" + name + std::to_string(GetPersistentId());
+        leashWinSurfaceNode_ = Rosen::RSSurfaceNode::Create(leashWinconfig,
+            Rosen::RSSurfaceNodeType::LEASH_WINDOW_NODE);
+    }
+
+    if (sessionInfo_.isSystem_) {
         Rosen::RSSurfaceNodeConfig config;
         config.SurfaceNodeName = name;
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
@@ -285,6 +292,9 @@ WSError SceneSession::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
     sptr<SceneSession> sceneSession;
     if (specificCallback_ != nullptr) {
         SessionInfo sessionInfo;
+        if (property) {
+            sessionInfo.windowType_ = static_cast<uint32_t>(property->GetWindowType());
+        }
         sceneSession = specificCallback_->onCreate_(sessionInfo, property);
     }
     if (sceneSession == nullptr) {
@@ -750,6 +760,9 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
     property_->SetPrivacyMode(isPrivacy);
     property_->SetSystemPrivacyMode(isPrivacy);
     surfaceNode_->SetSecurityLayer(isPrivacy);
+    if (leashWinSurfaceNode_ != nullptr) {
+        leashWinSurfaceNode_->SetSecurityLayer(isPrivacy);
+    }
     RSTransaction::FlushImplicitTransaction();
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);
     if (screenSession == nullptr) {
