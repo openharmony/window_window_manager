@@ -913,9 +913,7 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
         }
         scnSessionInfo->isNewWant = isNewActive;
         if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
-            WLOGFI("set anco persistentId: %{public}d for type: %{public}d",
-                scnSession->GetBrokerPersistentId(), scnSession->GetCollaboratorType());
-            scnSessionInfo->want.SetParam(AncoConsts::ANCO_MISSION_ID, scnSession->GetBrokerPersistentId());
+            scnSessionInfo->want.SetParam(AncoConsts::ANCO_MISSION_ID, scnSessionInfo->persistentId);
             scnSessionInfo->collaboratorType = scnSession->GetCollaboratorType();
         }
         auto errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo);
@@ -925,10 +923,9 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
             WindowInfoReporter::GetInstance().InsertShowReportInfo(sessionInfo.bundleName_);
         }
         if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
-            scnSessionInfo->persistentId = scnSession->GetBrokerPersistentId();
             NotifyLoadAbility(scnSession->GetCollaboratorType(), scnSessionInfo, sessionInfo.abilityInfo);
             NotifyUpdateSessionInfo(scnSession);
-            NotifyMoveSessionToForeground(scnSession->GetCollaboratorType(), scnSession->GetBrokerPersistentId());
+            NotifyMoveSessionToForeground(scnSession->GetCollaboratorType(), scnSessionInfo->persistentId);
         }  
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
         promise->set_value(static_cast<int32_t>(errCode));
@@ -1037,7 +1034,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
             return WSError::WS_ERROR_NULLPTR;
         }
         if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
-            NotifyClearSession(scnSession->GetCollaboratorType(), scnSession->GetBrokerPersistentId());
+            NotifyClearSession(scnSession->GetCollaboratorType(), scnSessionInfo->persistentId);
         }
         AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
@@ -3450,6 +3447,14 @@ void SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, const Ses
 void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, SessionInfo& sessionInfo)
 {
     WLOGFI("run NotifySessionCreate");
+    if (sceneSession == nullptr) {
+        WLOGFE("sceneSession is nullptr");
+        return;
+    }
+    if (sessionInfo.want == nullptr) {
+        WLOGFE("sessionInfo.want is nullptr");
+        return;
+    }
     auto iter = collaboratorMap_.find(sceneSession->GetCollaboratorType());
     if (iter == collaboratorMap_.end()) {
         WLOGFE("Fail to found collaborator with type: %{public}d", sceneSession->GetCollaboratorType());
@@ -3457,7 +3462,6 @@ void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, S
     }
     auto collaborator = iter->second;
     auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
-    abilitySessionInfo->persistentId = sceneSession->GetBrokerPersistentId();
     abilitySessionInfo->want = *(sessionInfo.want);
     if (collaborator != nullptr) {
         collaborator->NotifyMissionCreated(abilitySessionInfo);
@@ -3494,7 +3498,6 @@ void SceneSessionManager::NotifyUpdateSessionInfo(sptr<SceneSession> sceneSessio
     }
     auto collaborator = iter->second;
     auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
-    abilitySessionInfo->persistentId = sceneSession->GetBrokerPersistentId();
     if (collaborator != nullptr) {
         collaborator->UpdateMissionInfo(abilitySessionInfo);
     }
@@ -3536,25 +3539,23 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession> sceneSession)
     }
     SessionInfo& newSessionInfo = sceneSession->GetSessionInfo();
     if (newSessionInfo.abilityInfo == nullptr) {
-        newSessionInfo.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
-        if (newSessionInfo.abilityInfo != nullptr) {
-            QueryAbilityInfoFromBMS(currentUserId_, newSessionInfo, *(newSessionInfo.abilityInfo));
-            if (newSessionInfo.abilityInfo != nullptr) {
-                WLOGFI("ability codePath: %{public}s", newSessionInfo.abilityInfo->applicationInfo.codePath.c_str());
-                if (newSessionInfo.abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE)) {
-                    sceneSession->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
-                } else if (newSessionInfo.abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
-                    sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
-                }                
-            }
-        }
+        WLOGFE("abilityInfo is nullptr");
+        return;
     }
+
+    WLOGFI("ability codePath: %{public}s", newSessionInfo.abilityInfo->applicationInfo.codePath.c_str());
+    if (newSessionInfo.abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE)) {
+        sceneSession->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
+    } else if (newSessionInfo.abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
+        sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
+    }    
     if(CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
         WLOGFI("try to run NotifyStartAbility and NotifySessionCreate");
         NotifyStartAbility(sceneSession->GetCollaboratorType(), newSessionInfo);
         if (newSessionInfo.want != nullptr) {
-            WLOGFI("reset new persistentId: %{public}d", newSessionInfo.want->GetIntParam(AncoConsts::ANCO_SESSION_ID, 0));
-            sceneSession->UpdateBrokerPersistentId(newSessionInfo.want->GetIntParam(AncoConsts::ANCO_SESSION_ID, 0));
+            WLOGFI("broker persistentId: %{public}d", newSessionInfo.want->GetIntParam(AncoConsts::ANCO_SESSION_ID, 0));
+        } else {
+            WLOGFE("newSessionInfo.want is nullptr");
         }
         NotifySessionCreate(sceneSession, newSessionInfo);
     }
