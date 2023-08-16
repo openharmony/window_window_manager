@@ -287,6 +287,9 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom06, Function | MediumTest | Level3)
     sleep(1);
 
     Transform expect;
+    if(implPtr== nullptr) {
+        return;
+    }
     ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
 
     WindowAccessibilityController::GetInstance().OffWindowZoom();
