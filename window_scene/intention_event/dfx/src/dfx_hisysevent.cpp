@@ -34,7 +34,7 @@ void DfxHisysevent::ApplicationBlockInput(int32_t eventId, int32_t pid, const st
         "PID", pid,
         "BUNDLE_NAME", bundleName,
         "PERSISTENT_ID", persistentId,
-        "MSG", "User input does not respond");
+        "MSG", "User input does not respond normally, report by sceneBoard.");
     if (ret != 0) {
         WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
     }

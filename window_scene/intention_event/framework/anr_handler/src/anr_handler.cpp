@@ -51,6 +51,7 @@ ANRHandler::~ANRHandler() {}
 void ANRHandler::SetSessionStage(int32_t eventId, const wptr<ISessionStage> &sessionStage)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    WLOGFD("SetSessionStage for eventId:%{public}d", eventId);
     sessionStageMap_[eventId] = sessionStage;
 }
 
