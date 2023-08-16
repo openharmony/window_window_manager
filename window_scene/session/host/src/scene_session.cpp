@@ -899,16 +899,6 @@ void SceneSession::SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo
     sessionInfo.abilityInfo = abilityInfo;
 }
 
-void SceneSession::UpdateBrokerPersistentId(int32_t persistendId)
-{
-    brokerPersistentId_ = persistendId;
-}
-
-int32_t SceneSession::GetBrokerPersistentId()
-{
-    return brokerPersistentId_;
-}
-
 WSError SceneSession::UpdateMoveTempProperty(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     int32_t pointerId = pointerEvent->GetPointerId();
