@@ -48,8 +48,7 @@ void WindowLayoutTest::SetUpTestCase()
     SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(0);
     sleep(2);
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
-    if (display == nullptr)
-    {
+    if (display == nullptr) {
         return;
     }
     ASSERT_TRUE((display != nullptr));
@@ -96,9 +95,9 @@ void WindowLayoutTest::InitAvoidArea()
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-   if(window==nullptr) {
-     return;
-   }
+    if (window == nullptr) {
+        return;
+    }
     window->Show();
     window->SetLayoutFullScreen(true);
     window->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, WindowTestUtils::systemAvoidArea_);

@@ -1528,7 +1528,7 @@ HWTEST_F(WindowSceneSessionImplTest, UpdateConfigurationForAll01, Function | Sma
     option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
-    int ret=0;
+    int ret = 0;
     std::shared_ptr<AppExecFwk::Configuration> configuration;
     windowscenesession->UpdateConfigurationForAll(configuration);
     ASSERT_EQ(ret,0);
@@ -1547,8 +1547,8 @@ HWTEST_F(WindowSceneSessionImplTest, GetTopWindowWithContext01, Function | Small
     std::shared_ptr<AbilityRuntime::Context> context;
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
-    if(windowscenesession->GetTopWindowWithContext(context)==nullptr) {
-       ASSERT_EQ(nullptr,windowscenesession->GetTopWindowWithContext(context));
+    if (windowscenesession->GetTopWindowWithContext(context) == nullptr) {
+        ASSERT_EQ(nullptr, windowscenesession->GetTopWindowWithContext(context));
     }
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
