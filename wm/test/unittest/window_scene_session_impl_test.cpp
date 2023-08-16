@@ -1528,10 +1528,10 @@ HWTEST_F(WindowSceneSessionImplTest, UpdateConfigurationForAll01, Function | Sma
     option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> windowscenesession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowscenesession);
-    int ret = 0;
+    int ret=0;
     std::shared_ptr<AppExecFwk::Configuration> configuration;
     windowscenesession->UpdateConfigurationForAll(configuration);
-    ASSERT_EQ(ret, 0);
+    ASSERT_EQ(ret,0);
 }
 
 /**

@@ -194,9 +194,10 @@ HWTEST_F(SceneSessionTest, UpdateWindowSceneAfterCustomAnimation01, Function | S
     ASSERT_EQ(result, WSError::WS_OK);
     result = scensession->UpdateWindowSceneAfterCustomAnimation(true);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_OPERATION);
-    sptr<SceneSession::SetWindowScenePatternFunc> setWindowScenePatternFunc =new (std::nothrow)SceneSession::SetWindowScenePatternFunc();
-    scensession->setWindowScenePatternFunc_=setWindowScenePatternFunc;
-    ASSERT_EQ(result = scensession->UpdateWindowSceneAfterCustomAnimation(true),WSError::WS_ERROR_INVALID_OPERATION);
+    sptr<SceneSession::SetWindowScenePatternFunc> setWindowScenePatternFunc =
+        new (std::nothrow) SceneSession::SetWindowScenePatternFunc();
+    scensession->setWindowScenePatternFunc_ = setWindowScenePatternFunc;
+    ASSERT_EQ(result = scensession->UpdateWindowSceneAfterCustomAnimation(true), WSError::WS_ERROR_INVALID_OPERATION);
 }
 
 /**
