@@ -766,11 +766,12 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             sceneSession->SetCallingUid(IPCSkeleton::GetCallingUid());
             sceneSession->SetAbilityToken(rootSceneContext_ != nullptr ? rootSceneContext_->GetToken() : nullptr);
         }
-        FillSessionInfo(sceneSession);
+        FillSessionInfo(sceneSession->GetSessionInfo());
         auto persistentId = sceneSession->GetPersistentId();
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSession(%d )", persistentId);
         sceneSession->SetSystemConfig(systemConfig_);
         UpdateParentSession(sceneSession, property);
+        PreHandleCollaborator(sceneSession);
         {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMap_.insert({ persistentId, sceneSession });
@@ -1390,9 +1391,8 @@ void SceneSessionManager::GetStartPage(const SessionInfo& sessionInfo, std::stri
     GetStartPageFromResource(abilityInfo, path, bgColor);
 }
 
-void SceneSessionManager::FillSessionInfo(sptr<SceneSession> sceneSession)
+void SceneSessionManager::FillSessionInfo(SessionInfo& sessionInfo)
 {
-    SessionInfo& sessionInfo = sceneSession->GetSessionInfo();
     auto abilityInfo = QueryAbilityInfoFromBMS(currentUserId_, sessionInfo.bundleName_, sessionInfo.abilityName_,
         sessionInfo.moduleName_);
     if (abilityInfo == nullptr) {
@@ -1405,7 +1405,7 @@ void SceneSessionManager::FillSessionInfo(sptr<SceneSession> sceneSession)
            " label:%{public}s iconPath:%{public}s",
            abilityInfo->removeMissionAfterTerminate, abilityInfo->excludeFromMissions,
            abilityInfo->label.c_str(), abilityInfo->iconPath.c_str());
-    WLOGFI("ability codePath: %{public}s", sessionInfo.abilityInfo->applicationInfo.codePath.c_str());
+    WLOGFI("ability codePath: %{public}s", newSessionInfo.abilityInfo->applicationInfo.codePath.c_str());
     if (sessionInfo.abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE)) {
         sceneSession->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
     } else if (sessionInfo.abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
@@ -3533,4 +3533,30 @@ void SceneSessionManager::NotifyClearSession(int32_t collaboratorType, int32_t p
         collaborator->NotifyClearMission(persistentId);
     }
 }
+
+void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession> sceneSession)
+{
+    WLOGFI("run PreHandleCollaborator");
+    if (sceneSession == nullptr) {
+        return;
+    }
+    SessionInfo& newSessionInfo = sceneSession->GetSessionInfo();
+    if (newSessionInfo.abilityInfo == nullptr) {
+        WLOGFE("abilityInfo is nullptr");
+        return;
+    }
+
+    WLOGFI("ability codePath: %{public}s", newSessionInfo.abilityInfo->applicationInfo.codePath.c_str());
+    if (newSessionInfo.abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE)) {
+        sceneSession->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
+    } else if (newSessionInfo.abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
+        sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
+    }    
+    if(CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
+        WLOGFI("try to run NotifyStartAbility and NotifySessionCreate");
+        NotifyStartAbility(sceneSession->GetCollaboratorType(), newSessionInfo);
+        NotifySessionCreate(sceneSession, newSessionInfo);
+    }
+}
+
 } // namespace OHOS::Rosen
