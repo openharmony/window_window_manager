@@ -534,7 +534,26 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode, Function | SmallTest | Level2)
     ASSERT_EQ(0, ret);
 }
 
-
+/**
+ * @tc.name: IsFloatingWindowAppType
+ * @tc.desc: IsFloatingWindowAppType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsFloatingWindowAppType, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    ASSERT_EQ(false, scensession->IsFloatingWindowAppType());
+}
 
 }
 }
