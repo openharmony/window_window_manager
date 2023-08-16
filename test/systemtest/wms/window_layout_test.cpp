@@ -48,10 +48,10 @@ void WindowLayoutTest::SetUpTestCase()
     SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(0);
     sleep(2);
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
-
-    if(display==nullptr){
-     return;
-   }
+    if (display == nullptr)
+    {
+        return;
+    }
     ASSERT_TRUE((display != nullptr));
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
     Utils::InitByDisplayRect(displayRect);
@@ -96,7 +96,7 @@ void WindowLayoutTest::InitAvoidArea()
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-   if(window==nullptr){
+   if(window==nullptr) {
      return;
    }
     window->Show();
@@ -147,9 +147,9 @@ HWTEST_F(WindowLayoutTest, LayoutWindow01, Function | MediumTest | Level3)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-   if(window==nullptr){
-     return;
-   }
+    if (window == nullptr) {
+        return;
+    }
     ASSERT_EQ(true, window != nullptr);
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
