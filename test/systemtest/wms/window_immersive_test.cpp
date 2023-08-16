@@ -355,7 +355,7 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest05, Function | MediumTest | Level3)
 {
     fullScreenAppinfo_.needAvoid = true; // no immersive setting
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppinfo_);
-    if(window1==nullptr) {
+    if (window1 == nullptr) {
         return;
     }
     activeWindows_.push_back(window1);
@@ -402,7 +402,7 @@ HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest01, Function | MediumTest | 
 {
     // Add full screenwindow for call GetAvoidArea, and push_back in activeWindows_
     const sptr<Window>& win = Utils::CreateTestWindow(fullScreenAppinfo_);
-    if(win==nullptr) {
+    if (win == nullptr) {
         return;
     }
     activeWindows_.push_back(win);
@@ -431,7 +431,6 @@ HWTEST_F(WindowImmersiveTest, DockWindowTest01, Function | MediumTest | Level3)
     }
     ASSERT_EQ(WMError::WM_OK, dockWindow->Show());
     const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppinfo_);
-
     usleep(WAIT_ASYNC_US);
     auto act = testSystemBarChangedListener_->tints_;
     for (SystemBarRegionTint tint : act) {
