@@ -657,6 +657,10 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, RRect
             break;
     }
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
+    if (displayInfo == nullptr) {
+        WLOGFE("fail to update screen rotation property, displayInfo is nullptr");
+        return;
+    }
     displayInfo->SetRotation(targetRotation);
     displayInfo->SetWidth(bounds.rect_.GetWidth());
     displayInfo->SetHeight(bounds.rect_.GetHeight());
