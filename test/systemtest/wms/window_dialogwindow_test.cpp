@@ -205,7 +205,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow05, Function | MediumTest | Level2)
 
     struct Rect rect = {0, 0, 100, 200};
     sptr<Window> dialogWindow = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect);
-    if(dialogWindow==nullptr) {
+    if (dialogWindow == nullptr) {
         return;
     }
     ASSERT_NE(nullptr, dialogWindow);
@@ -232,7 +232,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow06, Function | MediumTest | Level2)
 
     struct Rect rect = {0, 0, 100, 200};
     sptr<Window> dialogWindow = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect);
-    if(dialogWindow==nullptr) {
+    if (dialogWindow == nullptr) {
         return;
     }
     ASSERT_NE(nullptr, dialogWindow);
@@ -261,7 +261,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow07, Function | MediumTest | Level2)
 
     struct Rect rect = {0, 0, 100, 200};
     sptr<Window> dialogWindow = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect);
-    if(dialogWindow==nullptr) {
+    if (dialogWindow == nullptr) {
         return;
     }
     ASSERT_NE(nullptr, dialogWindow);
