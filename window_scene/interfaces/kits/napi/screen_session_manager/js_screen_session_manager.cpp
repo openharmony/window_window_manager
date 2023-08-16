@@ -56,7 +56,7 @@ NativeValue* JsScreenSessionManager::Init(NativeEngine* engine, NativeValue* exp
     const char* moduleName = "JsScreenSessionManager";
     BindNativeFunction(*engine, *object, "on", moduleName, JsScreenSessionManager::RegisterCallback);
     BindNativeFunction(*engine, *object, "updateScreenRotationProperty", moduleName,
-        JsScreenSessionManager::RegisterCallback);
+        JsScreenSessionManager::UpdateScreenRotationProperty);
     return engine->CreateUndefined();
 }
 
