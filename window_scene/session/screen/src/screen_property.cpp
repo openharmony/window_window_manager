@@ -262,5 +262,4 @@ Orientation ScreenProperty::GetScreenRequestedOrientation() const
 {
     return screenRequestedOrientation_;
 }
-
 } // namespace OHOS::Rosen

@@ -201,6 +201,11 @@ void ScreenSession::SetScreenRequestedOrientation(Orientation orientation)
     property_.SetScreenRequestedOrientation(orientation);
 }
 
+void ScreenSession::SetScreenRotationLocked(bool isLocked)
+{
+    isScreenLocked_ = isLocked;
+}
+
 Orientation ScreenSession::GetScreenRequestedOrientation() const
 {
     return property_.GetScreenRequestedOrientation();
