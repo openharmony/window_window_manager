@@ -515,7 +515,7 @@ WSError WindowSceneSessionImpl::SetActive(bool active)
 void WindowSceneSessionImpl::DestroySubWindow()
 {
     for (auto elem : subWindowSessionMap_) {
-        WLOGFE("Id: %{public}d, size: %{public}zu", elem.first, subWindowSessionMap_.size());
+        WLOGFI("Id: %{public}d, size: %{public}zu", elem.first, subWindowSessionMap_.size());
     }
 
     const int32_t& parentPersistentId = property_->GetParentPersistentId();
