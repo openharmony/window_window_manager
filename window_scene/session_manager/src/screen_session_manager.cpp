@@ -239,6 +239,12 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSession(ScreenId screenId) co
     return iter->second;
 }
 
+sptr<ScreenSession> ScreenSessionManager::GetDefaultScreenSession()
+{
+    GetDefaultScreenId();
+    return GetScreenSession(defaultScreenId_);
+}
+
 sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo()
 {
     GetDefaultScreenId();

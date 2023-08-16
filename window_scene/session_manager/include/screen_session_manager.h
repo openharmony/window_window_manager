@@ -44,6 +44,7 @@ class ScreenSessionManager : public ScreenSessionManagerStub {
 WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenSessionManager)
 public:
     sptr<ScreenSession> GetScreenSession(ScreenId screenId) const;
+    sptr<ScreenSession> GetDefaultScreenSession();
     std::vector<ScreenId> GetAllScreenIds();
 
     sptr<DisplayInfo> GetDefaultDisplayInfo() override;
