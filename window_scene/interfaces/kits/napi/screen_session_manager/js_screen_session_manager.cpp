@@ -55,6 +55,8 @@ NativeValue* JsScreenSessionManager::Init(NativeEngine* engine, NativeValue* exp
 
     const char* moduleName = "JsScreenSessionManager";
     BindNativeFunction(*engine, *object, "on", moduleName, JsScreenSessionManager::RegisterCallback);
+    BindNativeFunction(*engine, *object, "updateScreenRotationProperty", moduleName,
+        JsScreenSessionManager::UpdateScreenRotationProperty);
     return engine->CreateUndefined();
 }
 
@@ -141,6 +143,13 @@ NativeValue* JsScreenSessionManager::RegisterCallback(NativeEngine* engine, Nati
     return (me != nullptr) ? me->OnRegisterCallback(*engine, *info) : nullptr;
 }
 
+NativeValue* JsScreenSessionManager::UpdateScreenRotationProperty(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGD("Update screen rotation property.");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(engine, info);
+    return (me != nullptr) ? me->OnUpdateScreenRotationProperty(*engine, *info) : nullptr;
+}
+
 NativeValue* JsScreenSessionManager::OnRegisterCallback(NativeEngine& engine, const NativeCallbackInfo& info)
 {
     WLOGD("On register callback.");
@@ -178,6 +187,42 @@ NativeValue* JsScreenSessionManager::OnRegisterCallback(NativeEngine& engine, co
     screenConnectionCallback_ = callbackRef;
     sptr<IScreenConnectionListener> screenConnectionListener(this);
     ScreenSessionManager::GetInstance().RegisterScreenConnectionListener(screenConnectionListener);
+    return engine.CreateUndefined();
+}
+
+NativeValue* JsScreenSessionManager::OnUpdateScreenRotationProperty(NativeEngine& engine,
+    const NativeCallbackInfo& info)
+{
+    if (info.argc < 3) { // 3: params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    int32_t screenId;
+    if (!ConvertFromJsValue(engine, info.argv[0], screenId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to screenId");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    RRect bounds;
+    NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[1]);
+    if (nativeObj == nullptr) {
+        WLOGFE("[NAPI]Failed to convert object to RRect bounds");
+        return engine.CreateUndefined();
+    } else if (!ConvertRRectFromJs(engine, nativeObj, bounds)) {
+        WLOGFE("[NAPI]Failed to get bounds from js object");
+        return engine.CreateUndefined();
+    }
+    int rotation;
+    if (!ConvertFromJsValue(engine, info.argv[2], rotation)) { // 2: the 3rd argv
+        WLOGFE("[NAPI]Failed to convert parameter to rotation");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return engine.CreateUndefined();
+    }
+    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(screenId, bounds, rotation);
     return engine.CreateUndefined();
 }
 } // namespace OHOS::Rosen

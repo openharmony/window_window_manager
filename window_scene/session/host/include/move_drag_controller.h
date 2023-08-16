@@ -43,19 +43,6 @@ enum class AreaType : uint32_t {
 
 class MoveDragController : public RefBase {
 public:
-    struct MoveDragProperty {
-        int32_t pointerId_;
-        int32_t originalPointerPosX_;
-        int32_t originalPointerPosY_;
-        WSRect originalRect_;
-        WSRect targetRect_;
-
-        bool isEmpty() const
-        {
-            return (pointerId_ == -1 && originalPointerPosX_ == -1 && originalPointerPosY_ == -1);
-        }
-    };
-
     MoveDragController(int32_t persistentId);
     ~MoveDragController() = default;
 
@@ -65,6 +52,7 @@ public:
     bool GetStartDragFlag() const;
     WSRect GetTargetRect() const;
     void InitMoveDragProperty();
+    void SetOriginalValue(int32_t pointerId, int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect);
     void SetAspectRatio(float ratio);
     WSError ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
     bool ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
@@ -72,6 +60,19 @@ public:
     void HandleMouseStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& winRect);
 
 private:
+    struct MoveDragProperty {
+        int32_t pointerId_ = -1;
+        int32_t originalPointerPosX_ = -1;
+        int32_t originalPointerPosY_ = -1;
+        WSRect originalRect_ = { 0, 0, 0, 0 };
+        WSRect targetRect_ = { 0, 0, 0, 0 };
+
+        bool isEmpty() const
+        {
+            return (pointerId_ == -1 && originalPointerPosX_ == -1 && originalPointerPosY_ == -1);
+        }
+    };
+
     enum AxisType { UNDEFINED, X_AXIS, Y_AXIS };
     constexpr static float NEAR_ZERO = 0.001f;
 
@@ -108,7 +109,7 @@ private:
     AreaType type_ = AreaType::UNDEFINED;
     AxisType mainMoveAxis_ = AxisType::UNDEFINED;
     WindowLimits limits_;
-    MoveDragProperty moveDragProperty_ = { -1, -1, -1, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } };
+    MoveDragProperty moveDragProperty_;
     SessionRectChangeCallBack sessionRectChangeCallBack_;
     int32_t persistentId_;
 

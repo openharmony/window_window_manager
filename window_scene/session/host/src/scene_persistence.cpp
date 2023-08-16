@@ -15,10 +15,6 @@
 
 #include "session/host/include/scene_persistence.h"
 
-#include <dirent.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
 #include "image_packer.h"
 #include "window_manager_hilog.h"
 
@@ -31,10 +27,11 @@ constexpr uint8_t IMAGE_QUALITY = 85;
 
 std::string ScenePersistence::strPersistPath_;
 
-ScenePersistence::ScenePersistence(const SessionInfo& info, const int32_t& persistentId) : sessionInfo_(info)
+ScenePersistence::ScenePersistence(const SessionInfo& info, const int32_t& persistentId)
 {
+    uint32_t fileID = static_cast<uint32_t>(persistentId) & 0x3fffffff;
     strSnapshotFile_ =
-        strPersistPath_ + sessionInfo_.bundleName_ + UNDERLINE_SEPARATOR + std::to_string(persistentId & 0x3fffffff);
+        strPersistPath_ + info.bundleName_ + UNDERLINE_SEPARATOR + std::to_string(fileID);
 }
 
 void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap)
@@ -59,12 +56,18 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
     imagePacker.AddImage(*pixelMap);
     int64_t packedSize = 0;
     imagePacker.FinalizePacking(packedSize);
+    snapshotSize_ = { pixelMap->GetWidth(), pixelMap->GetHeight() };
     WLOGFD("save snapshot packedSize : %{public}" PRIu64 "", packedSize);
 }
 
 std::string ScenePersistence::GetSnapshotFilePath() const
 {
     return strSnapshotFile_;
+}
+
+std::pair<uint32_t, uint32_t> ScenePersistence::GetSnapshotSize() const
+{
+    return snapshotSize_;
 }
 
 bool ScenePersistence::IsSnapshotExisted() const

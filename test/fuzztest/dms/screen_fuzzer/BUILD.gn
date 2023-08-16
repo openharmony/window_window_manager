@@ -39,7 +39,10 @@ ohos_fuzztest("ScreenFuzzTest") {
     "${window_base_path}/utils:libwmutil",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ###############################################################################

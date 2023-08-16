@@ -45,6 +45,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleSetSessionLabel),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_ICON),
         &SceneSessionManagerStub::HandleSetSessionIcon),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_VALID_SESSION_IDS),
+        &SceneSessionManagerStub::HandleIsValidSessionIds),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_SESSION_CHANGE_LISTENER),
         &SceneSessionManagerStub::HandleRegisterSessionChangeListener),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNREGISTER_SESSION_CHANGE_LISTENER),
@@ -83,8 +85,18 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleGetSessionDump),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT),
         &SceneSessionManagerStub::HandleNotifyDumpInfoResult),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_CONTINUE_STATE),
+        &SceneSessionManagerStub::HandleSetSessionContinueState),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_GRAVITY),
         &SceneSessionManagerStub::HandleSetSessionGravity),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CLEAR_SESSION),
+        &SceneSessionManagerStub::HandleClearSession),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CLEAR_ALL_SESSIONS),
+        &SceneSessionManagerStub::HandleClearAllSessions),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_COLLABORATOR),
+        &SceneSessionManagerStub::HandleRegisterCollaborator),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNREGISTER_COLLABORATOR),
+        &SceneSessionManagerStub::HandleUnregisterCollaborator),
 };
 
 int SceneSessionManagerStub::OnRemoteRequest(uint32_t code,
@@ -222,6 +234,16 @@ int SceneSessionManagerStub::HandleSetSessionIcon(MessageParcel &data, MessagePa
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleIsValidSessionIds(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleIsValidSessionIds!");
+    std::vector<int32_t> sessionIds;
+    data.ReadInt32Vector(&sessionIds);
+    std::vector<bool> results;
+    reply.WriteBoolVector(results);
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleRegisterSessionChangeListener(MessageParcel &data, MessageParcel &reply)
 {
     WLOGFI("run HandleRegisterSessionChangeListener!");
@@ -277,9 +299,10 @@ int SceneSessionManagerStub::HandleUnRegisterSessionListener(MessageParcel& data
 int SceneSessionManagerStub::HandleGetSessionInfos(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleGetSessionInfos!");
+    std::string deviceId = Str16ToStr8(data.ReadString16());
     int numMax = data.ReadInt32();
     std::vector<SessionInfoBean> missionInfos;
-    WSError errCode = GetSessionInfos(numMax, missionInfos);
+    WSError errCode = GetSessionInfos(deviceId, numMax, missionInfos);
     reply.WriteInt32(missionInfos.size());
     for (auto& it : missionInfos) {
         if (!reply.WriteParcelable(&it)) {
@@ -297,8 +320,9 @@ int SceneSessionManagerStub::HandleGetSessionInfo(MessageParcel& data, MessagePa
 {
     WLOGFI("run HandleGetSessionInfo!");
     SessionInfoBean info;
+    std::string deviceId = Str16ToStr8(data.ReadString16());
     int32_t persistentId = data.ReadInt32();
-    WSError errCode = GetSessionInfo(persistentId, info);
+    WSError errCode = GetSessionInfo(deviceId, persistentId, info);
     if (!reply.WriteParcelable(&info)) {
         WLOGFE("GetSessionInfo error");
         return ERR_INVALID_DATA;
@@ -361,6 +385,16 @@ int SceneSessionManagerStub::HandleGetAccessibilityWindowInfo(MessageParcel &dat
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleSetSessionContinueState(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("HandleSetSessionContinueState");
+    sptr <IRemoteObject> token = data.ReadRemoteObject();
+    auto continueState = static_cast<ContinueState>(data.ReadInt32());
+    const WSError &ret = SetSessionContinueState(token, continueState);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleSetSessionGravity(MessageParcel &data, MessageParcel &reply)
 {
     WLOGFI("run HandleSetSessionGravity!");
@@ -409,9 +443,11 @@ int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel &data, Message
 int SceneSessionManagerStub::HandleGetSessionSnapshot(MessageParcel &data, MessageParcel &reply)
 {
     WLOGFI("run HandleGetSessionSnapshot!");
+    std::string deviceId = Str16ToStr8(data.ReadString16());
     int32_t persistentId = data.ReadInt32();
+    bool isLowResolution = data.ReadBool();
     std::shared_ptr<Media::PixelMap> snapshot = std::make_shared<Media::PixelMap>();
-    const WSError& ret = GetSessionSnapshot(persistentId, snapshot);
+    const WSError& ret = GetSessionSnapshot(deviceId, persistentId, snapshot, isLowResolution);
     reply.WriteParcelable(snapshot.get());
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
@@ -423,6 +459,42 @@ int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel &data, Mes
     std::vector<std::string> info;
     data.ReadStringVector(&info);
     NotifyDumpInfoResult(info);
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleClearSession(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleClearSession!");
+    int32_t persistentId = data.ReadInt32();
+    const WSError& ret = ClearSession(persistentId);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleClearAllSessions(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleClearAllSessions!");
+    const WSError& ret = ClearAllSessions();
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRegisterCollaborator(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleRegisterCollaborator!");
+    int32_t type = data.ReadInt32();
+    sptr<AAFwk::IAbilityManagerCollaborator> collaborator = iface_cast<AAFwk::IAbilityManagerCollaborator>(data.ReadRemoteObject());
+    const WSError& ret = RegisterIAbilityManagerCollaborator(type, collaborator);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleUnregisterCollaborator(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleUnregisterCollaborator!");
+    int32_t type = data.ReadInt32();
+    const WSError& ret = UnregisterIAbilityManagerCollaborator(type);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

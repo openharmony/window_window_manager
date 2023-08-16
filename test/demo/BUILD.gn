@@ -37,7 +37,10 @@ ohos_executable("demo_mirror_screen_listener") {
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
   ]
 
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 
   part_name = "window_manager"
   subsystem_name = "window"
@@ -81,6 +84,11 @@ ohos_executable("demo_snapshot_virtual_screen") {
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]
 
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+
   part_name = "window_manager"
   subsystem_name = "window"
 }
@@ -98,7 +106,10 @@ ohos_executable("demo_system_sub_window") {
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
   ]
 
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 
   part_name = "window_manager"
   subsystem_name = "window"
@@ -114,7 +125,11 @@ ohos_executable("demo_freeze_display") {
     "//foundation/multimedia/image_framework/interfaces/innerkits/include",
   ]
   deps = [ "${window_base_path}/dm:libdm" ]
-  external_deps = [ "image_framework:image_native" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "image_framework:image_native",
+  ]
   part_name = "window_manager"
   subsystem_name = "window"
 }
@@ -132,7 +147,10 @@ ohos_executable("demo_water_mark_listener") {
     "${window_base_path}/wm:libwm",
   ]
 
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 
   part_name = "window_manager"
   subsystem_name = "window"
@@ -159,6 +177,7 @@ ohos_executable("demo_session_manager") {
 
   external_deps = [
     "c_utils:utils",
+    "hilog:libhilog",
     "ipc:ipc_core",
   ]
 

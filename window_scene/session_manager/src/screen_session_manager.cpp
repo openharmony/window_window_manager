@@ -239,6 +239,12 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSession(ScreenId screenId) co
     return iter->second;
 }
 
+sptr<ScreenSession> ScreenSessionManager::GetDefaultScreenSession()
+{
+    GetDefaultScreenId();
+    return GetScreenSession(defaultScreenId_);
+}
+
 sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo()
 {
     GetDefaultScreenId();
@@ -335,7 +341,7 @@ DMError ScreenSessionManager::SetScreenActiveMode(ScreenId screenId, uint32_t mo
         rsInterface_.SetScreenActiveMode(rsScreenId, modeId);
         screenSession->activeIdx_ = static_cast<int32_t>(modeId);
         screenSession->UpdatePropertyByActiveMode();
-        screenSession->PropertyChange(screenSession->GetScreenProperty());
+        screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
         NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
     }
     return DMError::DM_OK;
@@ -480,6 +486,8 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     auto screenCapability = rsInterface_.GetScreenCapability(screenId);
     ScreenProperty property;
     property.SetRotation(0.0f);
+    property.SetPhyWidth(screenCapability.GetPhyWidth());
+    property.SetPhyHeight(screenCapability.GetPhyHeight());
     property.SetBounds(screenBounds);
     if (isDensityDpiLoad_) {
         property.SetVirtualPixelRatio(densityDpi_);
@@ -487,8 +495,6 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         property.UpdateVirtualPixelRatio(screenBounds);
     }
     property.SetRefreshRate(screenRefreshRate);
-    property.SetPhyWidth(screenCapability.GetPhyWidth());
-    property.SetPhyHeight(screenCapability.GetPhyHeight());
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession(screenId, property, GetDefaultAbstractScreenId());
     if (!session) {
         WLOGFE("screen session is nullptr");
@@ -634,6 +640,58 @@ DMError ScreenSessionManager::SetScreenRotationLocked(bool isLocked)
     return ScreenRotationProperty::SetScreenRotationLocked(isLocked);
 }
 
+void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, RRect bounds, int rotation)
+{
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        WLOGFE("fail to update screen rotation property, cannot find screen %{public}" PRIu64"", screenId);
+        return;
+    }
+    Rotation targetRotation = Rotation::ROTATION_0;
+    switch (rotation) {
+        case 90: // Rotation 90 degree
+            targetRotation = Rotation::ROTATION_90;
+            break;
+        case 180: // Rotation 180 degree
+            targetRotation = Rotation::ROTATION_180;
+            break;
+        case 270: // Rotation 270 degree
+            targetRotation = Rotation::ROTATION_270;
+            break;
+        default:
+            targetRotation = Rotation::ROTATION_0;
+            break;
+    }
+    sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
+    if (displayInfo == nullptr) {
+        WLOGFE("fail to update screen rotation property, displayInfo is nullptr");
+        return;
+    }
+    displayInfo->SetRotation(targetRotation);
+    displayInfo->SetWidth(bounds.rect_.GetWidth());
+    displayInfo->SetHeight(bounds.rect_.GetHeight());
+    NotifyDisplayChanged(displayInfo, DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
+}
+
+void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event)
+{
+    if (displayInfo == nullptr) {
+        WLOGFE("NotifyDisplayChanged error, displayInfo is nullptr.");
+        return;
+    }
+    auto task = [=] {
+        WLOGFI("NotifyDisplayChanged, displayId:%{public}" PRIu64"", displayInfo->GetDisplayId());
+        auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
+        if (agents.empty()) {
+            return;
+        }
+        for (auto& agent : agents) {
+            agent->OnDisplayChange(displayInfo, event);
+        }
+    };
+    taskScheduler_->PostAsyncTask(task);
+}
+
 DMError ScreenSessionManager::SetOrientation(ScreenId screenId, Orientation orientation)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
@@ -683,7 +741,7 @@ DMError ScreenSessionManager::SetOrientationController(ScreenId screenId, Orient
         SetRotation(screenId, rotationAfter, false);
     }
     screenSession->SetOrientation(newOrientation);
-    screenSession->PropertyChange(screenSession->GetScreenProperty());
+    screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::ROTATION);
     // Notify rotation event to ScreenManager
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ORIENTATION);
     return DMError::DM_OK;
@@ -705,8 +763,9 @@ bool ScreenSessionManager::SetRotation(ScreenId screenId, Rotation rotationAfter
     WLOGFD("set orientation. rotation %{public}u", rotationAfter);
     SetDisplayBoundary(screenSession);
     screenSession->SetRotation(rotationAfter);
-    screenSession->PropertyChange(screenSession->GetScreenProperty());
+    screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::ROTATION);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
+    NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::UPDATE_ROTATION);
     return true;
 }
 
@@ -844,6 +903,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
         return SCREEN_ID_INVALID;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:CreateVirtualScreen(%s)", option.name_.c_str());
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     ScreenId smsScreenId = SCREEN_ID_INVALID;
     if (!screenIdManager_.ConvertToSmsScreenId(rsId, smsScreenId)) {
         WLOGFI("SCB: ScreenSessionManager::CreateVirtualScreen !ConvertToSmsScreenId(rsId, smsScreenId)");
@@ -854,15 +914,15 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
             screenIdManager_.DeleteScreenId(smsScreenId);
             return SCREEN_ID_INVALID;
         }
-        {
-            std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-            screenSessionMap_.insert(std::make_pair(smsScreenId, screenSession));
-        }
+        screenSessionMap_.insert(std::make_pair(smsScreenId, screenSession));
         NotifyScreenConnected(screenSession->ConvertToScreenInfo());
         if (deathRecipient_ == nullptr) {
             WLOGFI("SCB: ScreenSessionManager::CreateVirtualScreen Create deathRecipient");
             deathRecipient_ =
                 new AgentDeathRecipient([this](const sptr<IRemoteObject>& agent) { OnRemoteDied(agent); });
+        }
+        if (displayManagerAgent == nullptr) {
+            return smsScreenId;
         }
         auto agIter = screenAgentMap_.find(displayManagerAgent);
         if (agIter == screenAgentMap_.end()) {
@@ -894,6 +954,7 @@ DMError ScreenSessionManager::SetVirtualScreenSurface(ScreenId screenId, sptr<IB
 DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
 {
     WLOGI("SCB: ScreenSessionManager::DestroyVirtualScreen Enter");
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     ScreenId rsScreenId = SCREEN_ID_INVALID;
     screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId);
 
@@ -915,7 +976,6 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:DestroyVirtualScreen(%" PRIu64")", screenId);
     if (rsScreenId != SCREEN_ID_INVALID && GetScreenSession(screenId) != nullptr) {
-        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
         auto smsScreenMapIter = screenSessionMap_.find(screenId);
         if (smsScreenMapIter != screenSessionMap_.end()) {
             auto screenGroup = RemoveFromGroupLocked(smsScreenMapIter->second);
@@ -968,6 +1028,84 @@ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<Scre
     }
     screenGroupId = mainScreen->groupSmsId_;
     return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::MakeExpand(std::vector<ScreenId> screenId,
+                                         std::vector<Point> startPoint,
+                                         ScreenId& screenGroupId)
+{
+    WLOGFI("SCB:ScreenSessionManager::MakeExpand enter!");
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("SCB:ScreenSessionManager::MakeExpand permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (screenId.empty() || startPoint.empty() || screenId.size() != startPoint.size()) {
+        WLOGFE("create expand fail, screenId size:%{public}ud,startPoint size:%{public}ud",
+            static_cast<uint32_t>(screenId.size()), static_cast<uint32_t>(startPoint.size()));
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    std::map<ScreenId, Point> pointsMap;
+    uint32_t size = screenId.size();
+    for (uint32_t i = 0; i < size; i++) {
+        if (pointsMap.find(screenId[i]) != pointsMap.end()) {
+            continue;
+        }
+        pointsMap[screenId[i]] = startPoint[i];
+    }
+    ScreenId defaultScreenId = GetDefaultAbstractScreenId();
+    auto allExpandScreenIds = GetAllValidScreenIds(screenId);
+    auto iter = std::find(allExpandScreenIds.begin(), allExpandScreenIds.end(), defaultScreenId);
+    if (iter != allExpandScreenIds.end()) {
+        allExpandScreenIds.erase(iter);
+    }
+    if (allExpandScreenIds.empty()) {
+        WLOGFE("allExpandScreenIds is empty. make expand failed.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    std::shared_ptr<RSDisplayNode> rsDisplayNode;
+    std::vector<Point> points;
+    for (uint32_t i = 0; i < allExpandScreenIds.size(); i++) {
+        rsDisplayNode = GetRSDisplayNodeByScreenId(allExpandScreenIds[i]);
+        points.emplace_back(pointsMap[allExpandScreenIds[i]]);
+        if (rsDisplayNode != nullptr) {
+            rsDisplayNode->SetDisplayOffset(pointsMap[allExpandScreenIds[i]].posX_,
+                pointsMap[allExpandScreenIds[i]].posY_);
+        }
+    }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MakeExpand");
+    if (!OnMakeExpand(allExpandScreenIds, points)) {
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    auto screen = GetScreenSession(allExpandScreenIds[0]);
+    if (screen == nullptr || GetAbstractScreenGroup(screen->groupSmsId_) == nullptr) {
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    screenGroupId = screen->groupSmsId_;
+    return DMError::DM_OK;
+}
+
+bool ScreenSessionManager::OnMakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
+{
+    ScreenId defaultScreenId = GetDefaultAbstractScreenId();
+    WLOGI("OnMakeExpand, defaultScreenId:%{public}" PRIu64"", defaultScreenId);
+    auto defaultScreen = GetScreenSession(defaultScreenId);
+    if (defaultScreen == nullptr) {
+        WLOGFI("OnMakeExpand failed.");
+        return false;
+    }
+    auto group = GetAbstractScreenGroup(defaultScreen->groupSmsId_);
+    if (group == nullptr) {
+        group = AddToGroupLocked(defaultScreen);
+        if (group == nullptr) {
+            WLOGFE("group is nullptr");
+            return false;
+        }
+        NotifyScreenGroupChanged(defaultScreen->ConvertToScreenInfo(), ScreenGroupChangeEvent::ADD_TO_GROUP);
+    }
+    bool filterExpandScreen = group->combination_ == ScreenCombination::SCREEN_EXPAND;
+    ChangeScreenGroup(group, screenId, startPoint, filterExpandScreen, ScreenCombination::SCREEN_EXPAND);
+    WLOGFI("OnMakeExpand success");
+    return true;
 }
 
 bool ScreenSessionManager::ScreenIdManager::ConvertToRsScreenId(ScreenId smsScreenId, ScreenId& rsScreenId) const
@@ -1304,6 +1442,7 @@ void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, con
         if (filterScreen && screen->groupSmsId_ == group->screenId_ && group->HasChild(screen->screenId_)) {
             continue;
         }
+        NotifyDisplayDestroy(screenId);
         auto originGroup = RemoveFromGroupLocked(screen);
         addChildPos.emplace_back(startPoints[i]);
         removeChildResMap[screenId] = originGroup != nullptr;
@@ -1342,6 +1481,7 @@ void ScreenSessionManager::AddScreenToGroup(sptr<ScreenSessionGroup> group,
         } else {
             WLOGFD("default, AddChild failed");
         }
+        NotifyDisplayCreate(screen->ConvertToDisplayInfo());
     }
 
     NotifyScreenGroupChanged(removeFromGroup, ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
@@ -1516,6 +1656,33 @@ void ScreenSessionManager::NotifyScreenDisconnected(ScreenId screenId)
         OnScreenDisconnect(screenId);
     };
     taskScheduler_->PostAsyncTask(task);
+}
+
+void ScreenSessionManager::NotifyDisplayCreate(sptr<DisplayInfo> displayInfo)
+{
+    if (displayInfo == nullptr) {
+        return;
+    }
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    WLOGFI("NotifyDisplayCreate");
+    for (auto& agent : agents) {
+        agent->OnDisplayCreate(displayInfo);
+    }
+}
+
+void ScreenSessionManager::NotifyDisplayDestroy(DisplayId displayId)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    WLOGFI("NotifyDisplayDestroy");
+    for (auto& agent : agents) {
+        agent->OnDisplayDestroy(displayId);
+    }
 }
 
 void ScreenSessionManager::NotifyScreenGroupChanged(

@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_H
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_H
 
+#include <shared_mutex>
 #include "screenlock_manager_interface.h"
 
 #include "session_manager_service_interface.h"
@@ -63,6 +64,7 @@ private:
     sptr<IScreenSessionManager> screenSessionManagerProxy_ = nullptr;
     sptr<ScreenLock::ScreenLockManagerInterface> screenLockManagerProxy_ = nullptr;
     sptr<SSMDeathRecipient> ssmDeath_ = nullptr;
+    std::shared_mutex proxyMutex_;
 };
 } // namespace OHOS::Rosen
 

@@ -90,6 +90,7 @@ public:
     void SetAspectRatio(float ratio);
     void SetWindowGravity(WindowGravity gravity, uint32_t percent);
     void SetMaximizeMode(MaximizeMode maximizeMode);
+    void SetOnlySkipSnapshot(bool onlySkip);
 
     const std::string& GetWindowName() const;
     const AbilityInfo& GetAbilityInfo() const;
@@ -138,6 +139,7 @@ public:
     float GetAspectRatio() const;
     void GetWindowGravity(WindowGravity& gravity, uint32_t& percent) const;
     MaximizeMode GetMaximizeMode() const;
+    bool GetOnlySkipSnapshot();
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static WindowProperty* Unmarshalling(Parcel& parcel);
@@ -211,6 +213,7 @@ private:
     float aspectRatio_ {0.0};
     WindowGravity windowGravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
     uint32_t windowGravitySizePercent_ = 0;
+    bool onlySkipSnapshot_ = false;
 
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(uint32_t, ApiCompatibleVersion, apiCompatibleVersion, 0u);

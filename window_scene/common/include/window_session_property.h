@@ -60,6 +60,7 @@ public:
     void SetWindowRect(const struct Rect& rect);
     void SetFocusable(bool isFocusable);
     void SetTouchable(bool isTouchable);
+    void SetDragEnabled(bool dragEnabled);
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
     void SetBrightness(float brightness);
@@ -94,6 +95,7 @@ public:
     WindowType GetWindowType() const;
     bool GetFocusable() const;
     bool GetTouchable() const;
+    bool GetDragEnabled() const;
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
     float GetBrightness() const;
@@ -136,6 +138,7 @@ private:
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW }; // type main window
     bool focusable_ { true };
     bool touchable_ { true };
+    bool dragEnabled_ = { true };
     bool tokenState_ { false };
     bool turnScreenOn_ = false;
     bool keepScreenOn_ = false;
@@ -152,7 +155,7 @@ private:
     MaximizeMode maximizeMode_ = MaximizeMode::MODE_RECOVER;
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     WindowLimits limits_;
-    SessionGravity sessionGravity_ = SessionGravity::SESSION_GRAVITY_BOTTOM;
+    SessionGravity sessionGravity_ = SessionGravity::SESSION_GRAVITY_DEFAULT;
     uint32_t sessionGravitySizePercent_ = 0;
     uint32_t modeSupportInfo_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
@@ -173,6 +176,10 @@ struct SystemSessionConfig : public Parcelable {
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     KeyboardAnimationConfig keyboardAnimationConfig_;
     uint32_t maxFloatingWindowSize_ = UINT32_MAX;
+    uint32_t miniWidthOfMainWindow_ = 0;
+    uint32_t miniHeightOfMainWindow_ = 0;
+    uint32_t miniWidthOfSubWindow_ = 0;
+    uint32_t miniHeightOfSubWindow_ = 0;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -184,6 +191,11 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteUint32(static_cast<uint32_t>(defaultWindowMode_)) ||
             !parcel.WriteParcelable(&keyboardAnimationConfig_) ||
             !parcel.WriteUint32(maxFloatingWindowSize_)) {
+            return false;
+        }
+
+        if (!parcel.WriteUint32(miniWidthOfMainWindow_) || !parcel.WriteUint32(miniHeightOfMainWindow_) ||
+            !parcel.WriteUint32(miniWidthOfSubWindow_) || !parcel.WriteUint32(miniHeightOfSubWindow_)) {
             return false;
         }
 
@@ -203,6 +215,10 @@ struct SystemSessionConfig : public Parcelable {
         sptr<KeyboardAnimationConfig> keyboardConfig = parcel.ReadParcelable<KeyboardAnimationConfig>();
         config->keyboardAnimationConfig_ = *keyboardConfig;
         config->maxFloatingWindowSize_ = parcel.ReadUint32();
+        config->miniWidthOfMainWindow_ = parcel.ReadUint32();
+        config->miniHeightOfMainWindow_ = parcel.ReadUint32();
+        config->miniWidthOfSubWindow_ = parcel.ReadUint32();
+        config->miniHeightOfSubWindow_ = parcel.ReadUint32();
         return config;
     }
 };

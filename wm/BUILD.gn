@@ -21,6 +21,7 @@ config("libwm_private_config") {
     "include",
     "../wmserver/include",
     "../wmserver/include/zidl",
+    "../window_scene/session/host/include",
     "//foundation/arkui/napi",  # because of ability_context.h
   ]
 }
@@ -59,6 +60,7 @@ ohos_static_library("libwm_static") {
     "src/window_manager.cpp",
     "src/window_manager_agent.cpp",
     "src/window_option.cpp",
+    "src/window_prepare_terminate.cpp",
     "src/window_scene.cpp",
     "src/window_scene_session_impl.cpp",
     "src/window_session_impl.cpp",
@@ -112,10 +114,9 @@ ohos_static_library("libwm_static") {
 
   if (defined(global_parts_info)) {
     if (defined(
-        global_parts_info.hmosresourceschedule_resourceschedule_frame_aware_sched_override)) {
+        global_parts_info.hmosresourceschedule_frame_aware_sched_override)) {
       defines += [ "FRAME_TRACE_ENABLE" ]
-      external_deps +=
-          [ "resourceschedule_frame_aware_sched_override:frame_trace_intf" ]
+      external_deps += [ "frame_aware_sched_override:frame_trace_intf" ]
     } else if (defined(global_parts_info.resourceschedule_frame_aware_sched)) {
       defines += [ "FRAME_TRACE_ENABLE" ]
       external_deps += [ "frame_aware_sched:frame_trace_intf" ]
@@ -171,6 +172,7 @@ ohos_shared_library("libwm") {
     "src/window_manager.cpp",
     "src/window_manager_agent.cpp",
     "src/window_option.cpp",
+    "src/window_prepare_terminate.cpp",
     "src/window_scene.cpp",
     "src/window_scene_session_impl.cpp",
     "src/window_session_impl.cpp",
@@ -224,10 +226,9 @@ ohos_shared_library("libwm") {
 
   if (defined(global_parts_info)) {
     if (defined(
-        global_parts_info.hmosresourceschedule_resourceschedule_frame_aware_sched_override)) {
+        global_parts_info.hmosresourceschedule_frame_aware_sched_override)) {
       defines += [ "FRAME_TRACE_ENABLE" ]
-      external_deps +=
-          [ "resourceschedule_frame_aware_sched_override:frame_trace_intf" ]
+      external_deps += [ "frame_aware_sched_override:frame_trace_intf" ]
     } else if (defined(global_parts_info.resourceschedule_frame_aware_sched)) {
       defines += [ "FRAME_TRACE_ENABLE" ]
       external_deps += [ "frame_aware_sched:frame_trace_intf" ]

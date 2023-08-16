@@ -45,6 +45,7 @@ ohos_fuzztest("WindowUtilMathFuzzTest") {
 
   external_deps = [
     "c_utils:utils",
+    "hilog:libhilog",
     "ipc:ipc_single",
   ]
 }
