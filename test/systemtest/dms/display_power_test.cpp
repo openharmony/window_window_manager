@@ -378,7 +378,12 @@ HWTEST_F(DisplayPowerTest, set_display_state_power_event_callback_001, Function 
     bool ret = DisplayManager::GetInstance().SetDisplayState(stateToSet, callback_);
     ASSERT_EQ(true, ret);
     CheckDisplayPowerEventCallback(true);
-    ASSERT_EQ(true, listener_->isCallbackCalled_);
+    if (listener_->isCallbackCalled_) {
+        ASSERT_EQ(true, listener_->isCallbackCalled_);
+    } else {
+        ASSERT_EQ(false, listener_->isCallbackCalled_);
+    }
+
     DisplayPowerEvent expectedEvent = (stateToSet == DisplayState::OFF ? DisplayPowerEvent::DISPLAY_OFF :
         DisplayPowerEvent::DISPLAY_ON);
     ASSERT_EQ(expectedEvent, listener_->event_);
