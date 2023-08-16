@@ -1707,6 +1707,11 @@ void ScreenSessionManager::NotifyScreenGroupChanged(
 
 void ScreenSessionManager::NotifyPrivateSessionStateChanged(bool hasPrivate)
 {
+    if (hasPrivate == screenPrivacyStates) {
+        WLOGFD("screen session state is not changed, return");
+        return;
+    }
+    screenPrivacyStates = hasPrivate;
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER);
     if (agents.empty()) {
         return;
@@ -1717,19 +1722,16 @@ void ScreenSessionManager::NotifyPrivateSessionStateChanged(bool hasPrivate)
     }
 }
 
-void ScreenSessionManager::UpdatePrivateStateAndNotify(sptr<ScreenSession>& screenSession, bool isAddingPrivateSession)
+void ScreenSessionManager::SetScreenPrivacyState(ScreenId id, bool hasPrivate)
 {
-    int32_t prePrivateSessionCount = screenSession->GetPrivateSessionCount();
-    WLOGFD("before update : privateWindow count: %{public}u", prePrivateSessionCount);
-    screenSession->SetPrivateSessionCount(prePrivateSessionCount + (isAddingPrivateSession ? 1 : -1));
-    if (prePrivateSessionCount == 0 && isAddingPrivateSession) {
-        NotifyPrivateSessionStateChanged(true);
-        return;
-    }
-    if (prePrivateSessionCount == 1 && !isAddingPrivateSession) {
-        NotifyPrivateSessionStateChanged(false);
-        return;
-    }
+    auto screenSession = GetScreenSession(id);
+    screenSession->SetPrivateSessionForeground(hasPrivate);
+    NotifyPrivateSessionStateChanged(hasPrivate);
+}
+
+ScreenId ScreenSessionManager::GetScreenSessionIdBySceneSessionId(uint32_t persistentId)
+{
+    return 0; // current only has one screen
 }
 
 DMError ScreenSessionManager::HasPrivateWindow(DisplayId id, bool& hasPrivateWindow)
@@ -1745,7 +1747,7 @@ DMError ScreenSessionManager::HasPrivateWindow(DisplayId id, bool& hasPrivateWin
     if (screenSession == nullptr) {
         return DMError::DM_ERROR_NULLPTR;
     }
-    hasPrivateWindow = screenSession->HasPrivateSession();
+    hasPrivateWindow = screenSession->HasPrivateSessionForeground();
     WLOGFD("id: %{public}" PRIu64" has private window: %{public}u", id, static_cast<uint32_t>(hasPrivateWindow));
     return DMError::DM_OK;
 }

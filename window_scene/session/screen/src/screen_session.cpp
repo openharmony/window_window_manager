@@ -409,6 +409,16 @@ bool ScreenSession::HasPrivateSession() const
     return privateSessionCount_ > 0;
 }
 
+bool ScreenSession::HasPrivateSessionForeground() const
+{
+    return hasPrivateWindowForground_;
+}
+
+void ScreenSession::SetPrivateSessionForeground(bool hasPrivate)
+{
+    hasPrivateWindowForground_ = hasPrivate;
+}
+
 void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint)
 {
     if (displayNode_ != nullptr) {
