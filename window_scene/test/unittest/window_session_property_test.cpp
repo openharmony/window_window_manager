@@ -49,6 +49,19 @@ HWTEST_F(WindowSessionPropertyTest, SetDragEnabled001, Function | SmallTest | Le
     property->SetDragEnabled(false);
     ASSERT_EQ(property->GetDragEnabled(), false);
 }
+
+/**
+ * @tc.name: SetRaiseEnabled001
+ * @tc.desc: SetRaiseEnabled and GetRaiseEnabled to check the value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetRaiseEnabled001, Function | SmallTest | Level2)
+{
+    WindowSessionProperty* property = new WindowSessionProperty();
+    ASSERT_EQ(property->GetRaiseEnabled(), true);
+    property->SetRaiseEnabled(false);
+    ASSERT_EQ(property->GetRaiseEnabled(), false);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
