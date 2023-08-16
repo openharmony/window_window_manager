@@ -151,8 +151,6 @@ public:
     void SetCollaboratorType(int32_t collaboratorType);
     std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfo();
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
-    void UpdateBrokerPersistentId(int32_t persistendId);
-    int32_t GetBrokerPersistentId();
 private:
     struct MoveTempProperty {
         int32_t pointerId_ = -1;
@@ -188,7 +186,6 @@ private:
     bool isVisible_ = false;
     static wptr<SceneSession> enterSession_;
     static std::mutex enterSessionMutex_;
-    int32_t brokerPersistentId_ = INVALID_SESSION_ID;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     MoveTempProperty moveTempProperty_;
 };

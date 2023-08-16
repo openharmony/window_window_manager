@@ -191,7 +191,7 @@ private:
     void ConfigMainWindowSizeLimits(const WindowSceneConfig::ConfigItem& mainWindowSizeConifg);
     void ConfigSubWindowSizeLimits(const WindowSceneConfig::ConfigItem& subWindowSizeConifg);
     sptr<SceneSession::SpecificSessionCallback> CreateSpecificSessionCallback();
-    void FillSessionInfo(sptr<SceneSession> sceneSession);
+    void FillSessionInfo(SessionInfo& sessionInfo);
     std::shared_ptr<AppExecFwk::AbilityInfo> QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
         const std::string& abilityName, const std::string& moduleName);
 
@@ -315,6 +315,7 @@ private:
     void NotifyUpdateSessionInfo(const sptr<SceneSession> sceneSession);
     void NotifyClearSession(int32_t collaboratorType, int32_t persistentId);
     void NotifyMoveSessionToForeground(int32_t collaboratorType, int32_t persistendId);
+    void PreHandleCollaborator(sptr<SceneSession> sceneSession);
 };
 } // namespace OHOS::Rosen
 
