@@ -88,6 +88,8 @@ public:
     virtual DMError DestroyVirtualScreen(ScreenId screenId) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
+    virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
+                               ScreenId& screenGroupId) override;
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode) override;
@@ -109,6 +111,8 @@ public:
     sptr<SupportedScreenModes> GetScreenModesByDisplayId(DisplayId displayId);
     sptr<ScreenInfo> GetScreenInfoByDisplayId(DisplayId displayId);
     void UpdateScreenRotationProperty(ScreenId screenId, RRect bounds, int rotation);
+    void NotifyDisplayCreate(sptr<DisplayInfo> displayInfo);
+    void NotifyDisplayDestroy(DisplayId displayId);
     void NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event);
 
     std::vector<ScreenId> GetAllScreenIds() const;
@@ -174,9 +178,8 @@ private:
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
-
+    bool OnMakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
-
     std::string TransferTypeToString(ScreenType type) const;
 
     class ScreenIdManager {
