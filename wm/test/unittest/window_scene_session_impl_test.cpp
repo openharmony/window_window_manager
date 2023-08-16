@@ -1531,7 +1531,7 @@ HWTEST_F(WindowSceneSessionImplTest, UpdateConfigurationForAll01, Function | Sma
     int ret = 0;
     std::shared_ptr<AppExecFwk::Configuration> configuration;
     windowscenesession->UpdateConfigurationForAll(configuration);
-    ASSERT_EQ(ret,0);
+    ASSERT_EQ(ret, 0);
 }
 
 /**
