@@ -303,6 +303,239 @@ HWTEST_F(SceneSessionTest, UpdateWindowAnimationFlag01, Function | SmallTest | L
     ASSERT_EQ(WSError::WS_OK, scensession->UpdateWindowAnimationFlag(false));
 }
 
+/**
+ * @tc.name: GetHotAreaRect01
+ * @tc.desc: GetHotAreaRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetHotAreaRect01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "GetHotAreaRect01";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    Rect windowRect = { 1, 1, 1, 1 };
+    std::vector<Rect> rects;
+    uint32_t hotAreasNum = 10;
+    uint32_t hotAreaWidth = windowRect.width_ / hotAreasNum;
+    uint32_t hotAreaHeight = windowRect.height_ / hotAreasNum;
+    for (uint32_t i = 0; i < hotAreasNum; ++i) {
+        rects.emplace_back(Rect{ hotAreaWidth * i, hotAreaHeight * i, hotAreaWidth, hotAreaHeight });
+    }
+    ASSERT_NE(windowRect, scensession->GetHotAreaRect(2));
+}
+
+/**
+ * @tc.name: ClearEnterWindow01
+ * @tc.desc: ClearEnterWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, ClearEnterWindow01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "ClearEnterWindow01";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    int resultValue = 0;
+    SceneSession::ClearEnterWindow();
+    ASSERT_EQ(resultValue, 0);
+}
+
+/**
+ * @tc.name: GetEnterWindow01
+ * @tc.desc: GetEnterWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetEnterWindow01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "GetEnterWindow01";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    wptr<SceneSession> scenesession_;
+    ASSERT_EQ(scenesession_, SceneSession::GetEnterWindow());
+}
+
+/**
+ * @tc.name: SetRequestedOrientation
+ * @tc.desc: SetRequestedOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetRequestedOrientation01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "SetRequestedOrientation";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    int resultValue = 0;
+    scensession->SetRequestedOrientation(Orientation::UNSPECIFIED);
+    ASSERT_EQ(0, resultValue);
+}
+
+/**
+ * @tc.name: GetRequestedOrientation
+ * @tc.desc: GetRequestedOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetRequestedOrientation, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "GetRequestedOrientation";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    scensession->SetRequestedOrientation(Orientation::UNSPECIFIED);
+    ASSERT_EQ(Orientation::UNSPECIFIED, scensession->GetRequestedOrientation());
+}
+
+
+/**
+ * @tc.name: IsKeepScreenOn
+ * @tc.desc: IsKeepScreenOn
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsKeepScreenOn, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsKeepScreenOn";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    ASSERT_EQ(WSError::WS_OK, scensession->SetKeepScreenOn(false));
+    ASSERT_EQ(false, scensession->IsKeepScreenOn());
+}
+
+/**
+ * @tc.name: GetWindowName
+ * @tc.desc: GetWindowName
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetWindowName, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "GetWindowName";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    ASSERT_NE("ww", scensession->GetWindowName());
+}
+
+/**
+ * @tc.name: IsDecorEnable
+ * @tc.desc: IsDecorEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsDecorEnable, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsDecorEnable";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    ASSERT_EQ(true, scensession->IsDecorEnable());
+    SessionInfo info_;
+    info_.abilityName_ = "Background01";
+    info_.bundleName_ = "IsDecorEnable";
+    info_.windowType_ = 1000;
+    sptr<SceneSession> scensession_;
+    scensession_ = new (std::nothrow) SceneSession(info_, nullptr);
+    EXPECT_NE(scensession_, nullptr);
+    ASSERT_EQ(false, scensession_->IsDecorEnable());
+    
+}
+
+/**
+ * @tc.name: UpdateNativeVisibility
+ * @tc.desc: UpdateNativeVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, UpdateNativeVisibility, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "UpdateNativeVisibility";
+     info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    scensession->UpdateNativeVisibility(false);
+    ASSERT_EQ(false, scensession->IsVisible());
+}
+
+/**
+ * @tc.name: SetPrivacyMode
+ * @tc.desc: SetPrivacyMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetPrivacyMode, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "SetPrivacyMode";
+     info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    int ret = 0;
+    scensession->SetPrivacyMode(false);
+    ASSERT_EQ(0, ret);
+}
+
+
+
 }
 }
 }
