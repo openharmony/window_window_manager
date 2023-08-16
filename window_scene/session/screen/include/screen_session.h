@@ -96,6 +96,7 @@ public:
     DMError SetPrivateSessionCount(int32_t count);
     bool HasPrivateSession() const;
     void SetDisplayBoundary(const RectF& rect, const uint32_t& offsetY);
+    void SetScreenRotationLocked(bool isLocked);
 
     std::string name_ { "UNKNOW" };
     ScreenId screenId_ {};
@@ -108,6 +109,7 @@ public:
     bool isScreenGroup_ { false };
     ScreenId groupSmsId_ { SCREEN_ID_INVALID };
     ScreenId lastGroupSmsId_ { SCREEN_ID_INVALID };
+    bool isScreenLocked_ = true;
 
     void Connect();
     void Disconnect();
