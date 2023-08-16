@@ -1325,6 +1325,13 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError SetResizeByDragEnabled(bool dragEnabled) { return WMError::WM_OK; }
+    /**
+     * @brief Set the raise enabled flag of a window.
+     *
+     * @param raiseEnabled true means the window can be raised by click, otherwise means the opposite.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetRaiseByClickEnabled(bool raiseEnabled) { return WMError::WM_OK; }
 };
 }
 }
