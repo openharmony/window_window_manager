@@ -24,10 +24,12 @@ group("unittest") {
     ":ws_scene_session_manager_test",
     ":ws_scene_session_test",
     ":ws_screen_cutout_controller_test",
+    ":ws_screen_rotation_property_test",
     ":ws_screen_scene_config_test",
     ":ws_screen_session_manager_test",
     ":ws_session_manager_agent_controller_test",
     ":ws_session_test",
+    ":ws_window_event_channel_test",
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
   ]
@@ -185,6 +187,19 @@ ohos_unittest("ws_window_session_property_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [ "c_utils:utils" ]
+}
+
+ohos_unittest("ws_window_event_channel_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_event_channel_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ## Build ws_unittest_common.a {{{
