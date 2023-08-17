@@ -32,6 +32,14 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, 
 {
     Rosen::RSDisplayNodeConfig config = { .screenId = screenId_ };
     displayNode_ = Rosen::RSDisplayNode::Create(config);
+    if (displayNode_) {
+        displayNode_->SetFrame(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
+            property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
+        displayNode_->SetBounds(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
+            property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
+    } else {
+        WLOGFE("Failed to create displayNode, displayNode is null!");
+    }
     RSTransaction::FlushImplicitTransaction();
 }
 
@@ -41,6 +49,14 @@ ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId r
     (void)rsId_;
     Rosen::RSDisplayNodeConfig config = { .screenId = screenId_ };
     displayNode_ = Rosen::RSDisplayNode::Create(config);
+    if (displayNode_) {
+        displayNode_->SetFrame(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
+            property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
+        displayNode_->SetBounds(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
+            property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
+    } else {
+        WLOGFE("Failed to create displayNode, displayNode is null!");
+    }
     RSTransaction::FlushImplicitTransaction();
 }
 
