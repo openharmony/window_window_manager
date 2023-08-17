@@ -1554,10 +1554,7 @@ WMError WindowSceneSessionImpl::SetTurnScreenOn(bool turnScreenOn)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     property_->SetTurnScreenOn(turnScreenOn);
-    if (state_ == WindowState::STATE_SHOWN) {
-        return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
-    }
-    return WMError::WM_OK;
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
 }
 
 bool WindowSceneSessionImpl::IsTurnScreenOn() const
@@ -1572,10 +1569,7 @@ WMError WindowSceneSessionImpl::SetKeepScreenOn(bool keepScreenOn)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     property_->SetKeepScreenOn(keepScreenOn);
-    if (state_ == WindowState::STATE_SHOWN) {
-        return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
-    }
-    return WMError::WM_OK;
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
 }
 
 bool WindowSceneSessionImpl::IsKeepScreenOn() const
