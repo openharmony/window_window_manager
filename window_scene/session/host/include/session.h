@@ -59,6 +59,7 @@ using NotifyCallingSessionBackgroundFunc = std::function<void()>;
 
 class ILifecycleListener {
 public:
+    virtual void OnActivation() = 0;
     virtual void OnConnect() = 0;
     virtual void OnForeground() = 0;
     virtual void OnBackground() = 0;
@@ -117,6 +118,7 @@ public:
     WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     void NotifyRemoteReady() override;
     void NotifyExtensionDied() override;
+    void NotifyActivation();
     void NotifyConnect();
     void NotifyForeground();
     void NotifyBackground();
