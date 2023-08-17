@@ -76,6 +76,11 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
     return surfaceNode_;
 }
 
+std::shared_ptr<RSSurfaceNode> Session::GetLeashWinSurfaceNode() const
+{
+    return leashWinSurfaceNode_;
+}
+
 std::shared_ptr<Media::PixelMap> Session::GetSnapshot() const
 {
     return snapshot_;
