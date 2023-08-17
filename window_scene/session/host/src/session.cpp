@@ -834,6 +834,9 @@ bool Session::CheckDialogOnForeground()
 
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         if (CheckDialogOnForeground()) {
             WLOGFD("Has dialog on foreground, not transfer pointer event");
@@ -849,18 +852,16 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         WLOGFE("PointerEvent is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    WLOGFD("Session TransferPointEvent, eventId:%{public}d, persistentId:%{public}d, "
-        "bundleName:%{public}s, pid:%{public}d",
-        pointerEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
+    WLOGFD("Session TransferPointEvent, eventId:%{public}d, persistentId:%{public}d, bundleName:%{public}s, "
+        "pid:%{public}d", pointerEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
-        WLOGFD("The pointerEvent does not report normally, "
-            "bundleName:%{public}s not response, pid:%{public}d, persistentId:%{public}d",
-            callingBundleName_.c_str(), callingPid_, persistentId_);
+        WLOGFD("The pointerEvent does not report normally, bundleName:%{public}s not response, pid:%{public}d, "
+            "persistentId:%{public}d", callingBundleName_.c_str(), callingPid_, persistentId_);
         return WSError::WS_DO_NOTHING;
     }
-    auto action = pointerEvent->GetPointerAction();
-    if (!isFocused_ && GetFocusable() && (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
-    action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN)) {
+    auto pointerAction = pointerEvent->GetPointerAction();
+    if (!isFocused_ && GetFocusable() && (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN)) {
         NotifyClick();
     }
     if (!windowEventChannel_) {
@@ -871,7 +872,6 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         WLOGFE("TransferPointer failed");
         return ret;
     }
-    auto pointerAction = pointerEvent->GetPointerAction();
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
@@ -886,6 +886,9 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
 
 WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         if (CheckDialogOnForeground()) {
             WLOGFD("Has dialog on foreground, not transfer pointer event");
