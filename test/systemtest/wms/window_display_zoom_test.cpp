@@ -287,7 +287,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom06, Function | MediumTest | Level3)
     sleep(1);
 
     Transform expect;
-    if(implPtr== nullptr) {
+    if (implPtr == nullptr) {
         return;
     }
     implPtr->GetWindowProperty()->SetZoomTransform(expect);

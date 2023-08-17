@@ -486,7 +486,6 @@ HWTEST_F(SceneSessionTest, IsDecorEnable, Function | SmallTest | Level2)
     scensession_ = new (std::nothrow) SceneSession(info_, nullptr);
     EXPECT_NE(scensession_, nullptr);
     ASSERT_EQ(false, scensession_->IsDecorEnable());
-    
 }
 
 /**
