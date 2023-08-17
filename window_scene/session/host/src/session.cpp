@@ -126,6 +126,16 @@ bool Session::UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, 
     return true;
 }
 
+void Session::NotifyActivation()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (!listener.expired()) {
+            listener.lock()->OnActivation();
+        }
+    }
+}
+
 void Session::NotifyConnect()
 {
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
@@ -499,6 +509,7 @@ WSError Session::Disconnect()
         if (scenePersistence_ && snapshot_) {
             scenePersistence_->SaveSnapshot(snapshot_);
         }
+        isActive_ = false;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     UpdateSessionState(SessionState::STATE_DISCONNECT);
