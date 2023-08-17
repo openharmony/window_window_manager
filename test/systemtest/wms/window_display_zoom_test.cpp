@@ -74,9 +74,6 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom01, Function | MediumTest | Level3)
 
     windowInfo_.name = "DisplayZoom01";
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
-    if (window == nullptr) {
-        return;
-    }
     Window* ptr = window.GetRefPtr();
     WindowImpl* implPtr = (WindowImpl*)ptr;
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -124,9 +121,6 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom02, Function | MediumTest | Level3)
 {
     windowInfo_.name = "DisplayZoom02";
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
-    if (window == nullptr) {
-        return;
-    }
     ASSERT_EQ(WMError::WM_OK, window->Show());
     sleep(1);
 
@@ -159,9 +153,6 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom03, Function | MediumTest | Level3)
 {
     windowInfo_.name = "DisplayZoom03";
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
-    if (window == nullptr) {
-        return;
-    }
     Window* ptr = window.GetRefPtr();
     WindowImpl* implPtr = (WindowImpl*)ptr;
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -191,9 +182,6 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom04, Function | MediumTest | Level3)
 
     windowInfo_.name = "DisplayZoom04";
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
-    if (window == nullptr) {
-        return;
-    }
     Window* ptr = window.GetRefPtr();
     WindowImpl* implPtr = (WindowImpl*)ptr;
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -231,9 +219,6 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom05, Function | MediumTest | Level3)
 
     windowInfo_.name = "DisplayZoom05";
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
-    if (window == nullptr) {
-        return;
-    }
     Window* ptr = window.GetRefPtr();
     WindowImpl* implPtr = (WindowImpl*)ptr;
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -278,19 +263,14 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom06, Function | MediumTest | Level3)
     windowInfo_.name = "DisplayZoom06";
     windowInfo_.type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
-    if (window == nullptr) {
-        return;
-    }
     Window* ptr = window.GetRefPtr();
     WindowImpl* implPtr = (WindowImpl*)ptr;
     ASSERT_EQ(WMError::WM_OK, window->Show());
     sleep(1);
 
     Transform expect;
-    if (implPtr == nullptr) {
-        return;
-    }
     ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
+
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     window->Destroy();
 }
