@@ -15,6 +15,7 @@
 
 #include "session/host/include/move_drag_controller.h"
 
+#include <hitrace_meter.h>
 #include <pointer_event.h>
 #include "input_manager.h"
 
@@ -65,6 +66,15 @@ void MoveDragController::InitMoveDragProperty()
     moveDragProperty_ = { -1, -1, -1, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } };
 }
 
+void MoveDragController::SetOriginalValue(int32_t pointerId, int32_t pointerPosX, int32_t pointerPosY,
+    const WSRect& winRect)
+{
+    moveDragProperty_.pointerId_ = pointerId;
+    moveDragProperty_.originalPointerPosX_ = pointerPosX;
+    moveDragProperty_.originalPointerPosY_ = pointerPosY;
+    moveDragProperty_.originalRect_ = winRect;
+}
+
 void MoveDragController::SetAspectRatio(float ratio)
 {
     aspectRatio_ = ratio;
@@ -77,13 +87,16 @@ WSError MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerE
         WLOGE("ConsumeMoveEvent stop because of nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
+    if (GetStartDragFlag()) {
+        WLOGFI("the window is being resized");
+        return WSError::WS_DO_NOTHING;
+    }
     int32_t pointerId = pointerEvent->GetPointerId();
     int32_t startPointerId = moveDragProperty_.pointerId_;
     if (startPointerId != -1 && startPointerId != pointerId) {
         WLOGFI("block unnecessary pointer event inside the window");
         return WSError::WS_DO_NOTHING;
     }
-
     MMI::PointerEvent::PointerItem pointerItem;
     int32_t sourceType = pointerEvent->GetSourceType();
     if (!pointerEvent->GetPointerItem(pointerId, pointerItem) ||
@@ -118,13 +131,18 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
         WLOGE("ConsumeDragEvent stop because of nullptr");
         return false;
     }
-    if (!isStartDrag_ && pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_DOWN &&
+    if (GetStartMoveFlag()) {
+        WLOGFI("the window is being moved");
+        return false;
+    }
+    if (!GetStartDragFlag() && pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_DOWN &&
         pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         return false;
     }
     int32_t pointerId = pointerEvent->GetPointerId();
     int32_t startPointerId = moveDragProperty_.pointerId_;
-    if (isStartDrag_ && startPointerId != -1 && startPointerId != pointerId) {
+    if (GetStartDragFlag() && startPointerId != -1 && startPointerId != pointerId) {
+        WLOGFI("block unnecessary pointer event inside the window");
         return false;
     }
     MMI::PointerEvent::PointerItem pointerItem;
@@ -205,6 +223,7 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
         pointerEvent->GetButtonId() != MMI::PointerEvent::MOUSE_BUTTON_LEFT) {
         return false;
     }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "MoveDragController::EventDownInit");
     int32_t pointerId = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerId, pointerItem);

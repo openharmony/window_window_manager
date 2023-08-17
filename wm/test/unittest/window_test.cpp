@@ -2071,6 +2071,19 @@ HWTEST_F(WindowTest, performBack, Function | SmallTest | Level3)
     window->PerformBack();
     ASSERT_EQ(0, ret);
 }
+
+/**
+ * @tc.name: SetResizeByDragEnabled
+ * @tc.desc: set dragEnabled flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetResizeByDragEnabled, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    ASSERT_EQ(WMError::WM_OK, window->SetResizeByDragEnabled(true));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

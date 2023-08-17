@@ -60,6 +60,7 @@ public:
     void SetWindowRect(const struct Rect& rect);
     void SetFocusable(bool isFocusable);
     void SetTouchable(bool isTouchable);
+    void SetDragEnabled(bool dragEnabled);
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
     void SetBrightness(float brightness);
@@ -94,6 +95,7 @@ public:
     WindowType GetWindowType() const;
     bool GetFocusable() const;
     bool GetTouchable() const;
+    bool GetDragEnabled() const;
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
     float GetBrightness() const;
@@ -136,6 +138,7 @@ private:
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW }; // type main window
     bool focusable_ { true };
     bool touchable_ { true };
+    bool dragEnabled_ = { true };
     bool tokenState_ { false };
     bool turnScreenOn_ = false;
     bool keepScreenOn_ = false;
@@ -152,7 +155,7 @@ private:
     MaximizeMode maximizeMode_ = MaximizeMode::MODE_RECOVER;
     WindowMode windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     WindowLimits limits_;
-    SessionGravity sessionGravity_ = SessionGravity::SESSION_GRAVITY_BOTTOM;
+    SessionGravity sessionGravity_ = SessionGravity::SESSION_GRAVITY_DEFAULT;
     uint32_t sessionGravitySizePercent_ = 0;
     uint32_t modeSupportInfo_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {

@@ -66,6 +66,7 @@ public:
     WindowState GetRequestWindowState() const;
     WMError SetFocusable(bool isFocusable) override;
     WMError SetTouchable(bool isTouchable) override;
+    WMError SetResizeByDragEnabled(bool dragEnabled) override;
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;
     virtual float GetBrightness() const override;

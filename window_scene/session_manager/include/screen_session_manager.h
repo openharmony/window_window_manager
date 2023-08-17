@@ -44,6 +44,7 @@ class ScreenSessionManager : public ScreenSessionManagerStub {
 WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenSessionManager)
 public:
     sptr<ScreenSession> GetScreenSession(ScreenId screenId) const;
+    sptr<ScreenSession> GetDefaultScreenSession();
     std::vector<ScreenId> GetAllScreenIds();
 
     sptr<DisplayInfo> GetDefaultDisplayInfo() override;
@@ -88,6 +89,8 @@ public:
     virtual DMError DestroyVirtualScreen(ScreenId screenId) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
+    virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
+                               ScreenId& screenGroupId) override;
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode) override;
@@ -109,6 +112,8 @@ public:
     sptr<SupportedScreenModes> GetScreenModesByDisplayId(DisplayId displayId);
     sptr<ScreenInfo> GetScreenInfoByDisplayId(DisplayId displayId);
     void UpdateScreenRotationProperty(ScreenId screenId, RRect bounds, int rotation);
+    void NotifyDisplayCreate(sptr<DisplayInfo> displayInfo);
+    void NotifyDisplayDestroy(DisplayId displayId);
     void NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event);
 
     std::vector<ScreenId> GetAllScreenIds() const;
@@ -144,7 +149,8 @@ public:
     void NotifyScreenGroupChanged(const std::vector<sptr<ScreenInfo>>& screenInfo, ScreenGroupChangeEvent event);
 
     void NotifyPrivateSessionStateChanged(bool hasPrivate);
-    void UpdatePrivateStateAndNotify(sptr<ScreenSession>& screenSession, bool isAddingPrivateSession);
+    void SetScreenPrivacyState(ScreenId id, bool hasPrivate);
+    ScreenId GetScreenSessionIdBySceneSessionId(uint32_t persistentId);
     DMError HasPrivateWindow(DisplayId id, bool& hasPrivateWindow) override;
 
     void OnScreenConnect(const sptr<ScreenInfo> screenInfo);
@@ -174,9 +180,8 @@ private:
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
-
+    bool OnMakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
-
     std::string TransferTypeToString(ScreenType type) const;
 
     class ScreenIdManager {
@@ -223,6 +228,8 @@ private:
 
     bool isDensityDpiLoad_ = false;
     float densityDpi_ { 1.0f };
+
+    bool screenPrivacyStates = false;
 };
 } // namespace OHOS::Rosen
 

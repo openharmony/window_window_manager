@@ -151,9 +151,22 @@ public:
     void SetCollaboratorType(int32_t collaboratorType);
     std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfo();
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
-    void UpdateBrokerPersistentId(int32_t persistendId);
-    int32_t GetBrokerPersistentId();
 private:
+    struct MoveTempProperty {
+        int32_t pointerId_ = -1;
+        int32_t lastDownPointerPosX_ = -1;
+        int32_t lastDownPointerPosY_ = -1;
+        int32_t lastDownPointerWindowX_ = -1;
+        int32_t lastDownPointerWindowY_ = -1;
+        int32_t lastMovePointerPosX_ = -1;
+        int32_t lastMovePointerPosY_ = -1;
+
+        bool isEmpty() const
+        {
+            return (pointerId_ == -1 && lastDownPointerPosX_ == -1 && lastDownPointerPosY_ == -1);
+        }
+    };
+
     void UpdateCameraFloatWindowStatus(bool isShowing);
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void SetSessionRectChangeCallback();
@@ -163,6 +176,9 @@ private:
     bool SaveAspectRatio(float ratio);
     void NotifyIsCustomAnimatiomPlaying(bool isPlaying);
     void NotifyPropertyWhenConnect();
+    WSError UpdateMoveTempProperty(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void ClacFirstMoveTargetRect();
+
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
     sptr<MoveDragController> moveDragController_ = nullptr;
@@ -170,9 +186,8 @@ private:
     bool isVisible_ = false;
     static wptr<SceneSession> enterSession_;
     static std::mutex enterSessionMutex_;
-    int32_t brokerPersistentId_ = INVALID_SESSION_ID;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
-
+    MoveTempProperty moveTempProperty_;
 };
 } // namespace OHOS::Rosen
 

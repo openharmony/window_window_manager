@@ -100,6 +100,7 @@ private:
     std::string name_ { "UNKNOW" };
     uint32_t phyWidth_ { UINT32_MAX };
     uint32_t phyHeight_ { UINT32_MAX };
+    mutable std::recursive_mutex mutex_;
 };
 
 class AbstractScreenGroup : public AbstractScreen {
