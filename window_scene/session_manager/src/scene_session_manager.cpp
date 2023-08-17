@@ -1492,6 +1492,7 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
         case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
             bool isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
             sceneSession->SetPrivacyMode(isPrivacyMode);
+            UpdatePrivateStateAndNotify(sceneSession->GetPersistentId());
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE: {
@@ -2076,14 +2077,36 @@ void SceneSessionManager::RegisterWindowFocusChanged(const WindowFocusChangedFun
     windowFocusChangedFunc_ = func;
 }
 
-void SceneSessionManager::UpdatePrivateStateAndNotify(bool isAddingPrivateSession)
+std::map<int32_t, sptr<SceneSession>>& SceneSessionManager::GetSessionMapByScreenId(ScreenId id)
 {
-    auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);
-    if (screenSession == nullptr) {
-        WLOGFE("screen session is null");
-        return;
-    }
-    ScreenSessionManager::GetInstance().UpdatePrivateStateAndNotify(screenSession, isAddingPrivateSession);
+    return sceneSessionMap_; // only has one screen, return all
+}
+
+void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
+{
+    ScreenId id = ScreenSessionManager::GetInstance().GetScreenSessionIdBySceneSessionId(persistentId);
+    auto sessionMap = GetSessionMapByScreenId(id);
+    int counts = GetSceneSessionPrivacyModeCount(sessionMap);
+    bool hasPrivateWindow = (counts != 0);
+    ScreenSessionManager::GetInstance().SetScreenPrivacyState(id, hasPrivateWindow);
+}
+
+int SceneSessionManager::GetSceneSessionPrivacyModeCount(const std::map<int32_t, sptr<SceneSession>>& sessionMap)
+{
+    auto countFunc = [](std::pair<int32_t, sptr<SceneSession>> sessionPair) -> bool {
+        sptr<SceneSession> sceneSession = sessionPair.second;
+        bool isForground =  sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
+            sceneSession->GetSessionState() == SessionState::STATE_ACTIVE;
+        bool isPrivate = sceneSession->GetSessionProperty() != nullptr &&
+            sceneSession->GetSessionProperty()->GetPrivacyMode();
+        bool IsSystemWindowVisible = sceneSession->GetSessionInfo().isSystem_ && sceneSession->IsVisible();
+        return (isForground || IsSystemWindowVisible) && isPrivate;
+        if ((isForground || IsSystemWindowVisible) && isPrivate) {
+            return true;
+        }
+        return false;
+    };
+    return std::count_if(sessionMap.begin(), sessionMap.end(), countFunc);
 }
 
 void SceneSessionManager::RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession)
@@ -2111,16 +2134,12 @@ void SceneSessionManager::OnSessionStateChange(int32_t persistentId, const Sessi
         case SessionState::STATE_FOREGROUND:
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
             HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
-            if (sceneSession->GetWindowSessionProperty()->GetPrivacyMode()) {
-                UpdatePrivateStateAndNotify(true);
-            }
+            UpdatePrivateStateAndNotify(persistentId);
             break;
         case SessionState::STATE_BACKGROUND:
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
             HandleKeepScreenOn(sceneSession, false);
-            if (sceneSession->GetWindowSessionProperty()->GetPrivacyMode()) {
-                UpdatePrivateStateAndNotify(false);
-            }
+            UpdatePrivateStateAndNotify(persistentId);
             break;
         default:
             break;

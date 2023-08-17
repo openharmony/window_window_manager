@@ -149,7 +149,8 @@ public:
     void NotifyScreenGroupChanged(const std::vector<sptr<ScreenInfo>>& screenInfo, ScreenGroupChangeEvent event);
 
     void NotifyPrivateSessionStateChanged(bool hasPrivate);
-    void UpdatePrivateStateAndNotify(sptr<ScreenSession>& screenSession, bool isAddingPrivateSession);
+    void SetScreenPrivacyState(ScreenId id, bool hasPrivate);
+    ScreenId GetScreenSessionIdBySceneSessionId(uint32_t persistentId);
     DMError HasPrivateWindow(DisplayId id, bool& hasPrivateWindow) override;
 
     void OnScreenConnect(const sptr<ScreenInfo> screenInfo);
@@ -227,6 +228,8 @@ private:
 
     bool isDensityDpiLoad_ = false;
     float densityDpi_ { 1.0f };
+
+    bool screenPrivacyStates = false;
 };
 } // namespace OHOS::Rosen
 
