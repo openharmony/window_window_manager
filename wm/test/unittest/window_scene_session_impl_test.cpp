@@ -1553,9 +1553,9 @@ HWTEST_F(WindowSceneSessionImplTest, GetTopWindowWithContext01, Function | Small
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
-    if (windowscenesession->Create(context, session) == WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, windowscenesession->Create(context, session));
-    }
+    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*(session), CreateAndConnectSpecificSession(_, _, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
+    ASSERT_EQ(WMError::WM_OK, windowscenesession->Create(abilityContext_, session));
     ASSERT_NE(nullptr, windowscenesession->GetTopWindowWithContext(context));
 }
 
