@@ -92,9 +92,8 @@ public:
     DMError SetScreenGamutMap(ScreenGamutMap gamutMap);
     DMError SetScreenColorTransform();
 
-    int32_t GetPrivateSessionCount() const;
-    DMError SetPrivateSessionCount(int32_t count);
-    bool HasPrivateSession() const;
+    bool HasPrivateSessionForeground() const;
+    void SetPrivateSessionForeground(bool hasPrivate);
     void SetDisplayBoundary(const RectF& rect, const uint32_t& offsetY);
     void SetScreenRotationLocked(bool isLocked);
 
@@ -120,7 +119,7 @@ private:
     ScreenState screenState_ { ScreenState::INIT };
     std::vector<IScreenChangeListener*> screenChangeListenerList_;
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
-    int32_t privateSessionCount_ { 0 };
+    bool hasPrivateWindowForeground_ = false;
 };
 
 class ScreenSessionGroup : public ScreenSession {

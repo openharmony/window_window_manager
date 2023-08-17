@@ -624,6 +624,7 @@ NativeValue* JsSceneSession::OnUpdateNativeVisibility(NativeEngine& engine, Nati
         return engine.CreateUndefined();
     }
     session->UpdateNativeVisibility(visible);
+    SceneSessionManager::GetInstance().UpdatePrivateStateAndNotify(session->GetPersistentId());
     WLOGFI("[NAPI]OnUpdateNativeVisibility end");
     return engine.CreateUndefined();
 }
@@ -651,6 +652,7 @@ NativeValue* JsSceneSession::OnSetPrivacyMode(NativeEngine& engine, NativeCallba
         return engine.CreateUndefined();
     }
     session->SetPrivacyMode(isPrivacy);
+    SceneSessionManager::GetInstance().UpdatePrivateStateAndNotify(session->GetPersistentId());
     WLOGFI("[NAPI]OnSetPrivacyMode end");
     return engine.CreateUndefined();
 }
