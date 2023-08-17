@@ -79,7 +79,8 @@ void ANRManager::AddTimer(int32_t eventId, int32_t persistentId)
     }
     anrTimerCount_++;
     eventStage_.SaveANREvent(persistentId, eventId, timerId);
-    WLOGFD("AddTimer timerId:%{public}d for eventId:%{public}d, persistentId:%{public}d", timerId, eventId, persistentId);
+    WLOGFD("AddTimer for persistentId:%{public}d, timerId:%{public}d, eventId:%{public}d",
+        persistentId, timerId, eventId);
 }
 
 void ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
