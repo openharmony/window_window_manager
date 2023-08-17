@@ -149,7 +149,8 @@ public:
     WSError ClearSession(int32_t persistentId);
     WSError ClearAllSessions();
 
-    void UpdatePrivateStateAndNotify(bool isAddingPrivateSession);
+    std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
+    void UpdatePrivateStateAndNotify(uint32_t persistentId);
     void InitPersistentStorage();
     std::string GetSessionSnapshotFilePath(int32_t persistentId);
     void OnOutsideDownEvent(int32_t x, int32_t y);
@@ -171,6 +172,8 @@ public:
 
     WSError RegisterIAbilityManagerCollaborator(int32_t type, const sptr<AAFwk::IAbilityManagerCollaborator> &impl);
     WSError UnregisterIAbilityManagerCollaborator(int32_t type);
+
+    int GetSceneSessionPrivacyModeCount(const std::map<int32_t, sptr<SceneSession>>& sessionMap);
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;

@@ -19,6 +19,7 @@
 #include <securec.h>
 
 #include "screen_session_manager.h"
+#include "parameters.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -91,8 +92,18 @@ void ScreenRotationProperty::SetDefaultDeviceRotationOffset(uint32_t defaultDevi
 
 void ScreenRotationProperty::HandleSensorEventInput(DeviceRotation deviceRotation)
 {
+    auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
+    if (!isPhone) {
+        WLOGFW("device is not phone, return.");
+        return;
+    }
     if (deviceRotation == DeviceRotation::INVALID) {
         WLOGFW("deviceRotation is invalid, return.");
+        return;
+    }
+    auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
+    if (!screenSession || screenSession->isScreenLocked_) {
+        WLOGFW("screenSession is null or isScreenLocked_ is true.");
         return;
     }
     Orientation orientation = GetPreferredOrientation();

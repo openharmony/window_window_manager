@@ -63,6 +63,11 @@ void WindowSessionProperty::SetTouchable(bool isTouchable)
     touchable_ = isTouchable;
 }
 
+void WindowSessionProperty::SetDragEnabled(bool dragEnabled)
+{
+    dragEnabled_ = dragEnabled;
+}
+
 void WindowSessionProperty::SetBrightness(float brightness)
 {
     brightness_ = brightness;
@@ -126,6 +131,11 @@ bool WindowSessionProperty::GetFocusable() const
 bool WindowSessionProperty::GetTouchable() const
 {
     return touchable_;
+}
+
+bool WindowSessionProperty::GetDragEnabled() const
+{
+    return dragEnabled_;
 }
 
 float WindowSessionProperty::GetBrightness() const
@@ -433,7 +443,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
         parcel.WriteUint32(flags_) &&
-        parcel.WriteBool(isDecorEnable_) &&
+        parcel.WriteBool(isDecorEnable_) && parcel.WriteBool(dragEnabled_) &&
         MarshallingWindowLimits(parcel) &&
         MarshallingSystemBarMap(parcel) && parcel.WriteUint32(animationFlag_) &&
         parcel.WriteBool(isFloatingWindowAppType_) && MarshallingTouchHotAreas(parcel);
@@ -470,6 +480,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
     property->SetWindowFlags(parcel.ReadUint32());
     property->SetDecorEnable(parcel.ReadBool());
+    property->SetDragEnabled(parcel.ReadBool());
     UnmarshallingWindowLimits(parcel, property);
     UnMarshallingSystemBarMap(parcel, property);
     property->SetAnimationFlag(parcel.ReadUint32());
@@ -487,6 +498,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     type_ = property->type_;
     focusable_= property->focusable_;
     touchable_ = property->touchable_;
+    dragEnabled_ = property->dragEnabled_;
     tokenState_ = property->tokenState_;
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;

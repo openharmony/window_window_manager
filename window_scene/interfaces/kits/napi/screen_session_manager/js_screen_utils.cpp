@@ -85,6 +85,33 @@ NativeValue* JsScreenUtils::CreateJsScreenConnectChangeType(NativeEngine& engine
     return objValue;
 }
 
+NativeValue* JsScreenUtils::CreateJsScreenPropertyChangeReason(NativeEngine& engine)
+{
+    auto objValue = engine.CreateObject();
+    if (objValue == nullptr) {
+        WLOGFE("Failed to create object!");
+        return engine.CreateUndefined();
+    }
+    auto object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to convert object!");
+        return engine.CreateUndefined();
+    }
+    object->SetProperty("UNDEFINED", CreateJsValue(engine,
+        static_cast<int32_t>(ScreenPropertyChangeReason::UNDEFINED)));
+    object->SetProperty("ROTATION", CreateJsValue(engine,
+        static_cast<int32_t>(ScreenPropertyChangeReason::ROTATION)));
+    object->SetProperty("CHANGE_MODE", CreateJsValue(engine,
+        static_cast<int32_t>(ScreenPropertyChangeReason::CHANGE_MODE)));
+    object->SetProperty("FOLD_SCREEN_EXPAND", CreateJsValue(engine,
+        static_cast<int32_t>(ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND)));
+    object->SetProperty("SCREEN_CONNECT", CreateJsValue(engine,
+        static_cast<int32_t>(ScreenPropertyChangeReason::SCREEN_CONNECT)));
+    object->SetProperty("SCREEN_DISCONNECT", CreateJsValue(engine,
+        static_cast<int32_t>(ScreenPropertyChangeReason::SCREEN_DISCONNECT)));
+    return objValue;
+}
+
 bool ConvertRRectFromJs(NativeEngine& engine, NativeObject* jsObject, RRect& bound)
 {
     NativeValue* jsLeft = jsObject->GetProperty("left");

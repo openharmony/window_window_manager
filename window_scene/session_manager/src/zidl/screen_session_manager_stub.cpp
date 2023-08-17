@@ -206,6 +206,25 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteUint64(static_cast<uint64_t>(screenGroupId));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_EXPAND: {
+            std::vector<ScreenId> screenId;
+            if (!data.ReadUInt64Vector(&screenId)) {
+                WLOGE("fail to receive expand screen in stub.");
+                break;
+            }
+            std::vector<Point> startPoint;
+            if (!MarshallingHelper::UnmarshallingVectorObj<Point>(data, startPoint, [](Parcel& parcel, Point& point) {
+                    return parcel.ReadInt32(point.posX_) && parcel.ReadInt32(point.posY_);
+                })) {
+                WLOGE("fail to receive startPoint in stub.");
+                break;
+            }
+            ScreenId screenGroupId = INVALID_SCREEN_ID;
+            DMError ret = MakeExpand(screenId, startPoint, screenGroupId);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            reply.WriteUint64(static_cast<uint64_t>(screenGroupId));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_GET_SCREEN_GROUP_INFO_BY_ID: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             auto screenGroupInfo = GetScreenGroupInfoById(screenId);

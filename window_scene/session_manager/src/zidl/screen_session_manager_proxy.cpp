@@ -674,6 +674,43 @@ DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId,
     return ret;
 }
 
+DMError ScreenSessionManagerProxy::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
+                                              ScreenId& screenGroupId)
+{
+    WLOGFW("SCB: ScreenSessionManagerProxy::MakeExpand: ENTER");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("SCB: ScreenSessionManagerProxy::MakeExpand: remote is null");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("SCB: ScreenSessionManagerProxy::MakeExpand: WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUInt64Vector(screenId)) {
+        WLOGFE("SCB: ScreenSessionManagerProxy::MakeExpand: write screenId failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!MarshallingHelper::MarshallingVectorObj<Point>(data, startPoint, [](Parcel& parcel, const Point& point) {
+            return parcel.WriteInt32(point.posX_) && parcel.WriteInt32(point.posY_);
+        })) {
+        WLOGFE("SCB: ScreenSessionManagerProxy::MakeExpand: write startPoint failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_EXPAND),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SCB: ScreenSessionManagerProxy::MakeExpand: SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    screenGroupId = static_cast<ScreenId>(reply.ReadUint64());
+    return ret;
+}
+
 sptr<ScreenGroupInfo> ScreenSessionManagerProxy::GetScreenGroupInfoById(ScreenId screenId)
 {
     WLOGFW("SCB: ScreenSessionManagerProxy::GetScreenGroupInfoById: ENTER!");

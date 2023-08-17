@@ -206,6 +206,7 @@ class WindowManager {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowManager);
 friend class WindowManagerAgent;
 friend class WMSDeathRecipient;
+friend class SSMDeathRecipient;
 public:
     /**
      * @brief Register focus changed listener.

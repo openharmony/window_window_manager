@@ -185,6 +185,12 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     hostSession_ = iSession;
     context_ = context;
     AdjustWindowAnimationFlag();
+    if (context->GetApplicationInfo() && context->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
+        !SessionPermission::IsSystemCalling()) {
+        WLOGI("Remove window flag WINDOW_FLAG_SHOW_WHEN_LOCKED");
+        property_->SetWindowFlags(property_->GetWindowFlags() &
+            (~(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED))));
+    }
     if (hostSession_) { // main window
         ret = Connect();
     } else { // system or sub window
@@ -274,7 +280,7 @@ WindowLimits WindowSceneSessionImpl::GetSystemSizeLimits(uint32_t displayWidth,
     WindowLimits systemLimits;
     systemLimits.maxWidth_ = static_cast<uint32_t>(maxFloatingWindowSize_ * vpr);
     systemLimits.maxHeight_ = static_cast<uint32_t>(maxFloatingWindowSize_ * vpr);
-    
+
     if (WindowHelper::IsMainWindow(GetType())) {
         systemLimits.minWidth_ = UpdateConfigVal(0, displayWidth, windowSystemConfig_.miniWidthOfMainWindow_,
                                                  MIN_FLOATING_WIDTH, vpr);
@@ -515,7 +521,7 @@ WSError WindowSceneSessionImpl::SetActive(bool active)
 void WindowSceneSessionImpl::DestroySubWindow()
 {
     for (auto elem : subWindowSessionMap_) {
-        WLOGFE("Id: %{public}d, size: %{public}zu", elem.first, subWindowSessionMap_.size());
+        WLOGFI("Id: %{public}d, size: %{public}zu", elem.first, subWindowSessionMap_.size());
     }
 
     const int32_t& parentPersistentId = property_->GetParentPersistentId();
@@ -1186,28 +1192,10 @@ WMError WindowSceneSessionImpl::SetWindowMode(WindowMode mode)
         return ret;
     }
 
-    if ((mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
-        hostSession_) {
-        if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
-            hostSession_->OnSessionEvent(SessionEvent::EVENT_SPLIT_PRIMARY);
-        } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            hostSession_->OnSessionEvent(SessionEvent::EVENT_SPLIT_SECONDARY);
-        }
-
-        ret = SetLayoutFullScreenByApiVersion(true);
-        if (ret != WMError::WM_OK) {
-            WLOGFE("SetLayoutFullScreenByApiVersion errCode:%{public}d winId:%{public}u",
-                static_cast<int32_t>(ret), GetWindowId());
-            return ret;
-        }
-        SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-        statusProperty.enable_ = false;
-        ret = SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusProperty);
-        if (ret != WMError::WM_OK) {
-            WLOGFE("SetSystemBarProperty errCode:%{public}d winId:%{public}u",
-                static_cast<int32_t>(ret), GetWindowId());
-            return ret;
-        }
+    if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
+        hostSession_->OnSessionEvent(SessionEvent::EVENT_SPLIT_PRIMARY);
+    } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        hostSession_->OnSessionEvent(SessionEvent::EVENT_SPLIT_SECONDARY);
     }
     return WMError::WM_OK;
 }
@@ -1248,6 +1236,12 @@ WMError WindowSceneSessionImpl::SetTransparent(bool isTransparent)
 
 WMError WindowSceneSessionImpl::AddWindowFlag(WindowFlag flag)
 {
+    if (flag == WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED && context_ && context_->GetApplicationInfo() &&
+        context_->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
+        !SessionPermission::IsSystemCalling()) {
+        WLOGI("Can not add window flag WINDOW_FLAG_SHOW_WHEN_LOCKED");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     uint32_t updateFlags = property_->GetWindowFlags() | (static_cast<uint32_t>(flag));
     return SetWindowFlags(updateFlags);
 }

@@ -35,7 +35,7 @@ const std::string ARG_DUMP_SCREEN = "-s";
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(MockScreenManagerService)
-bool registerResult = !SceneBoardJudgement::IsSceneBoardEnabled() ? false :
+const bool REGISTE_RRESULT = !SceneBoardJudgement::IsSceneBoardEnabled() ? false :
     SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<MockScreenManagerService>());
 
 MockScreenManagerService::MockScreenManagerService() : SystemAbility(DISPLAY_MANAGER_SERVICE_SA_ID, true)
@@ -172,8 +172,8 @@ void MockScreenManagerService::InitScreenSessionManager()
 
 bool MockScreenManagerService::RegisterMockScreenManagerService()
 {
-    WLOGFI("registerResult %{public}d", registerResult);
-    if (!registerResult) {
+    WLOGFI("REGISTE_RRESULT %{public}d", REGISTE_RRESULT);
+    if (!REGISTE_RRESULT) {
         !SceneBoardJudgement::IsSceneBoardEnabled() ? false :
             SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<MockScreenManagerService>());
     }

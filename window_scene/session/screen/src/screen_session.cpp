@@ -123,7 +123,8 @@ ScreenProperty ScreenSession::GetScreenProperty() const
     return property_;
 }
 
-void ScreenSession::UpdatePropertyByActiveMode() {
+void ScreenSession::UpdatePropertyByActiveMode()
+{
     sptr<SupportedScreenModes> mode = GetActiveScreenMode();
     if (mode != nullptr) {
         auto screeBounds = property_.GetBounds();
@@ -198,6 +199,11 @@ void ScreenSession::SetRotation(Rotation rotation)
 void ScreenSession::SetScreenRequestedOrientation(Orientation orientation)
 {
     property_.SetScreenRequestedOrientation(orientation);
+}
+
+void ScreenSession::SetScreenRotationLocked(bool isLocked)
+{
+    isScreenLocked_ = isLocked;
 }
 
 Orientation ScreenSession::GetScreenRequestedOrientation() const
@@ -392,20 +398,14 @@ DMError ScreenSession::SetScreenColorTransform()
     return DMError::DM_OK;
 }
 
-int32_t ScreenSession::GetPrivateSessionCount() const
+bool ScreenSession::HasPrivateSessionForeground() const
 {
-    return privateSessionCount_;
+    return hasPrivateWindowForeground_;
 }
 
-DMError ScreenSession::SetPrivateSessionCount(int32_t count)
+void ScreenSession::SetPrivateSessionForeground(bool hasPrivate)
 {
-    privateSessionCount_ = count;
-    return DMError::DM_OK;
-}
-
-bool ScreenSession::HasPrivateSession() const
-{
-    return privateSessionCount_ > 0;
+    hasPrivateWindowForeground_ = hasPrivate;
 }
 
 void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint)

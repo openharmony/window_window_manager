@@ -277,6 +277,7 @@ struct AppWindowSceneConfig {
 enum class SessionGravity : uint32_t {
     SESSION_GRAVITY_FLOAT = 0,
     SESSION_GRAVITY_BOTTOM,
+    SESSION_GRAVITY_DEFAULT,
 };
 
 /**

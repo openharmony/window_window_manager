@@ -46,7 +46,8 @@ NativeValue* JsScreenSession::Create(NativeEngine& engine, const sptr<ScreenSess
 
     const char* moduleName = "JsScreenSession";
     BindNativeFunction(engine, *object, "on", moduleName, JsScreenSession::RegisterCallback);
-
+    BindNativeFunction(engine, *object, "setScreenRotationLocked", moduleName,
+        JsScreenSession::SetScreenRotationLocked);
     return objValue;
 }
 
@@ -61,6 +62,38 @@ JsScreenSession::JsScreenSession(NativeEngine& engine, const sptr<ScreenSession>
 {}
 
 JsScreenSession::~JsScreenSession() {}
+
+NativeValue* JsScreenSession::SetScreenRotationLocked(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(engine, info);
+    return (me != nullptr) ? me->OnSetScreenRotationLocked(*engine, *info) : nullptr;
+}
+
+NativeValue* JsScreenSession::OnSetScreenRotationLocked(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGI("JsScreenSession::OnSetScreenRotationLocked is called");
+    if (info.argc < 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    bool isLocked = true;
+    NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
+    if (nativeVal == nullptr) {
+        WLOGFE("ConvertNativeValueTo isLocked failed!");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    isLocked = static_cast<bool>(*nativeVal);
+    if (screenSession_ == nullptr) {
+        WLOGFE("Failed to register screen change listener, session is null!");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    screenSession_->SetScreenRotationLocked(isLocked);
+    WLOGFI("SetScreenRotationLocked %{public}u success.", static_cast<uint32_t>(isLocked));
+    return engine.CreateUndefined();
+}
 
 void JsScreenSession::RegisterScreenChangeListener()
 {

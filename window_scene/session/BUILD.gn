@@ -71,6 +71,7 @@ ohos_shared_library("scene_session") {
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
