@@ -457,16 +457,17 @@ NativeValue* JsSceneSessionManager::OnGetAllAbilityInfos(NativeEngine& engine, N
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
     }
-    WSErrorCode errCode = WSErrorCode::WS_OK;
+    auto errCode = std::make_shared<int32_t>(static_cast<int32_t>(WSErrorCode::WS_OK));
     auto abilityInfos = std::make_shared<std::vector<AppExecFwk::AbilityInfo>>();
-    auto execute = [obj = this, want, userId, infos = abilityInfos, &errCode] () {
-        errCode = WS_JS_TO_ERROR_CODE_MAP.at(
+    auto execute = [obj = this, want, userId, infos = abilityInfos, errCode] () {
+        auto code = WS_JS_TO_ERROR_CODE_MAP.at(
             SceneSessionManager::GetInstance().GetAllAbilityInfos(want, userId, *infos));
+        *errCode = static_cast<int32_t>(code);
     };
     auto complete = [obj = this, errCode, infos = abilityInfos]
         (NativeEngine &engine, AsyncTask &task, int32_t status) {
-        if (errCode != WSErrorCode::WS_OK) {
-            task.RejectWithCustomize(engine, CreateJsValue(engine, errCode),
+        if (*errCode != static_cast<int32_t>(WSErrorCode::WS_OK)) {
+            task.RejectWithCustomize(engine, CreateJsValue(engine, *errCode),
                 CreateJsValue(engine, "invalid params can not get All AbilityInfos!"));
             return;
         }
