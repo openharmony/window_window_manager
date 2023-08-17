@@ -954,4 +954,13 @@ void SceneSession::ClacFirstMoveTargetRect()
     NotifySessionRectChange(targetRect);
 }
 
+void SceneSession::SetSelfToken(sptr<IRemoteObject> selfToken)
+{
+    selfToken_ = selfToken;
+}
+
+sptr<IRemoteObject> SceneSession::GetSelfToken()
+{
+    return selfToken_;
+}
 } // namespace OHOS::Rosen

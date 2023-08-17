@@ -3120,10 +3120,7 @@ sptr<SceneSession> SceneSessionManager::FindSessionByToken(const sptr<IRemoteObj
         if (pair.second == nullptr) {
             return false;
         }
-        if (pair.second -> GetAbilityToken() == token) {
-            return true;
-        }
-        return false;
+        return pair.second->GetAbilityToken() == token || pair.second->GetSelfToken() == token;
     };
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     auto iter = std::find_if(sceneSessionMap_.begin(), sceneSessionMap_.end(), cmpFunc);
@@ -3481,6 +3478,7 @@ void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, S
     }
     auto collaborator = iter->second;
     auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
+    sceneSession->SetSelfToken(abilitySessionInfo->sessionToken);
     abilitySessionInfo->want = *(sessionInfo.want);
     if (collaborator != nullptr) {
         collaborator->NotifyMissionCreated(abilitySessionInfo);
@@ -3568,7 +3566,7 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession> sceneSession)
     } else if (newSessionInfo.abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
         sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
     }    
-    if(CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
+    if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
         WLOGFI("try to run NotifyStartAbility and NotifySessionCreate");
         NotifyStartAbility(sceneSession->GetCollaboratorType(), newSessionInfo);
         if (newSessionInfo.want != nullptr) {
