@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "iremote_object.h"
 #include "session/host/include/session.h"
 #include "session/host/include/move_drag_controller.h"
 #include "wm_common.h"
@@ -151,6 +152,8 @@ public:
     void SetCollaboratorType(int32_t collaboratorType);
     std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfo();
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
+    void SetSelfToken(sptr<IRemoteObject> selfToken);
+    sptr<IRemoteObject> GetSelfToken();
 private:
     struct MoveTempProperty {
         int32_t pointerId_ = -1;
@@ -188,6 +191,7 @@ private:
     static std::mutex enterSessionMutex_;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     MoveTempProperty moveTempProperty_;
+    sptr<IRemoteObject> selfToken_ = nullptr;
 };
 } // namespace OHOS::Rosen
 

@@ -688,34 +688,12 @@ WSError SceneSessionManagerProxy::TerminateSessionNew(const sptr<AAFwk::SessionI
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteParcelable(&(abilitySessionInfo->want))) {
-        WLOGFE("Write want info failed");
+    if (!data.WriteParcelable(abilitySessionInfo)) {
+        WLOGFE("write abilitySessionInfo failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (abilitySessionInfo->callerToken) {
-        if (!data.WriteBool(true) || !data.WriteRemoteObject(abilitySessionInfo->callerToken)) {
-            WLOGFE("Write ability info failed");
-            return WSError::WS_ERROR_IPC_FAILED;
-        }
-    } else {
-        if (!data.WriteBool(false)) {
-            WLOGFE("Write ability info failed");
-            return WSError::WS_ERROR_IPC_FAILED;
-        }
-    }
-    if (abilitySessionInfo->sessionToken) {
-        if (!data.WriteBool(true) || !data.WriteRemoteObject(abilitySessionInfo->sessionToken)) {
-            WLOGFE("Write ability sessionToken failed");
-            return WSError::WS_ERROR_IPC_FAILED;
-        }
-    } else {
-        if (!data.WriteBool(false)) {
-            WLOGFE("Write ability sessionToken failed");
-            return WSError::WS_ERROR_IPC_FAILED;
-        }
-    }
-    if (!data.WriteBool(needStartCaller) || !data.WriteInt32(abilitySessionInfo->resultCode)) {
-        WLOGFE("Write needStartCaller or result code failed");
+    if (!data.WriteBool(needStartCaller)) {
+        WLOGFE("Write needStartCaller failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_TERMINATE_SESSION_NEW),
