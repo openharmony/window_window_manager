@@ -338,17 +338,8 @@ int SceneSessionManagerStub::HandleGetSessionInfo(MessageParcel& data, MessagePa
 int SceneSessionManagerStub::HandleTerminateSessionNew(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("run HandleTerminateSessionNew");
-    sptr<AAFwk::SessionInfo> abilitySessionInfo(new AAFwk::SessionInfo());
-    std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
-    abilitySessionInfo->want = *want;
-    if (data.ReadBool()) {
-        abilitySessionInfo->callerToken = data.ReadRemoteObject();
-    }
-    if (data.ReadBool()) {
-        abilitySessionInfo->sessionToken = data.ReadRemoteObject();
-    }
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = data.ReadParcelable<AAFwk::SessionInfo>();
     bool needStartCaller = data.ReadBool();
-    abilitySessionInfo->resultCode = data.ReadInt32();
     const WSError& errCode = TerminateSessionNew(abilitySessionInfo, needStartCaller);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
