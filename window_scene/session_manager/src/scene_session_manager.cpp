@@ -3280,11 +3280,14 @@ void SceneSessionManager::OnScreenshot(DisplayId displayId)
 WSError SceneSessionManager::ClearSession(int32_t persistentId)
 {
     WLOGFI("run ClearSession with persistentId: %{public}d", persistentId);
-    if (!SessionPermission::IsSACalling()) {
-        WLOGFI("invalid permission");
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
+        WLOGFE("The caller is not system-app, can not use system-api");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!SessionPermission::VerifySessionPermission()) {
+        WLOGFE("The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-
     auto task = [this, persistentId]() {
         sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
         return ClearSession(sceneSession);
@@ -3311,6 +3314,14 @@ WSError SceneSessionManager::ClearSession(sptr<SceneSession> sceneSession)
 WSError SceneSessionManager::ClearAllSessions()
 {
     WLOGFI("run ClearAllSessions");
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
+        WLOGFE("The caller is not system-app, can not use system-api");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!SessionPermission::VerifySessionPermission()) {
+        WLOGFE("The caller has not permission granted");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
     auto task = [this]() {
         std::vector<sptr<SceneSession>> sessionVector;
         GetAllClearableSessions(sessionVector);
