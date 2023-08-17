@@ -307,7 +307,7 @@ std::vector<DisplayId> ScreenSessionManager::GetAllDisplayIds()
 
 sptr<ScreenInfo> ScreenSessionManager::GetScreenInfoById(ScreenId screenId)
 {
-    auto screenSession = GetOrCreateScreenSession(screenId);
+    auto screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
         WLOGE("SCB: ScreenSessionManager::GetScreenInfoById cannot find screenInfo: %{public}" PRIu64"", screenId);
         return nullptr;
