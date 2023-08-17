@@ -2102,10 +2102,6 @@ int SceneSessionManager::GetSceneSessionPrivacyModeCount(const std::map<int32_t,
             sceneSession->GetSessionProperty()->GetPrivacyMode();
         bool IsSystemWindowVisible = sceneSession->GetSessionInfo().isSystem_ && sceneSession->IsVisible();
         return (isForground || IsSystemWindowVisible) && isPrivate;
-        if ((isForground || IsSystemWindowVisible) && isPrivate) {
-            return true;
-        }
-        return false;
     };
     return std::count_if(sessionMap.begin(), sessionMap.end(), countFunc);
 }
