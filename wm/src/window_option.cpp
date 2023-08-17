@@ -21,6 +21,7 @@ namespace OHOS {
 namespace Rosen {
 WindowOption::WindowOption(): windowTag_(WindowTag::SYSTEM_WINDOW)
 {
+    AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
 }
 
 void WindowOption::SetWindowRect(const struct Rect& rect)
