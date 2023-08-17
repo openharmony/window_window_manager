@@ -911,6 +911,7 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
             promise->set_value(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
+        scnSession->NotifyActivation();
         scnSessionInfo->isNewWant = isNewActive;
         if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
             scnSessionInfo->want.SetParam(AncoConsts::ANCO_MISSION_ID, scnSessionInfo->persistentId);
