@@ -242,6 +242,7 @@ public:
     virtual void CreateSurfaceNode(const std::string name, const SendRenderDataCallback& callback) = 0;
     virtual void SetContentInfoCallback(const ContentInfoCallback& callback) = 0;
     virtual WMError SetResizeByDragEnabled(bool dragEnabled) = 0;
+    virtual WMError SetRaiseByClickEnabled(bool raiseEnabled) = 0;
 };
 }
 }

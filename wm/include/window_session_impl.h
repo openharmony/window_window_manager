@@ -67,6 +67,7 @@ public:
     WMError SetFocusable(bool isFocusable) override;
     WMError SetTouchable(bool isTouchable) override;
     WMError SetResizeByDragEnabled(bool dragEnabled) override;
+    WMError SetRaiseByClickEnabled(bool raiseEnabled) override;
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;
     virtual float GetBrightness() const override;
