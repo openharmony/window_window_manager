@@ -164,7 +164,6 @@ public:
     WSError MarkProcessed(int32_t eventId) override;
 
     sptr<ScenePersistence> GetScenePersistence() const;
-    void SetSessionContinueState(const ContinueState& continueState);
     void SetParentSession(const sptr<Session>& session);
     void BindDialogToParentSession(const sptr<Session>& session);
     void RemoveDialogToParentSession(const sptr<Session>& session);
