@@ -1332,6 +1332,12 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError SetRaiseByClickEnabled(bool raiseEnabled) { return WMError::WM_OK; }
+    /**
+     * @brief Raise one app sub window above another.
+     *
+     * @return WM_OK means raise success, others means raise failed.
+     */
+    virtual WmErrorCode RaiseAboveTarget(int32_t subWindowId) { return WmErrorCode::WM_OK; }
 };
 }
 }
