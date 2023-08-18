@@ -2156,16 +2156,6 @@ void SceneSessionManager::OnSessionStateChange(int32_t persistentId, const Sessi
     }
 }
 
-void SceneSessionManager::SetWaterMarkSessionCount(int32_t count)
-{
-    waterMarkSessionCount_ = count;
-}
-
-int32_t SceneSessionManager::GetWaterMarkSessionCount() const
-{
-    return waterMarkSessionCount_;
-}
-
 WSError SceneSessionManager::SetWindowFlags(const sptr<SceneSession>& sceneSession, uint32_t flags)
 {
     if (sceneSession == nullptr) {
@@ -2178,10 +2168,7 @@ WSError SceneSessionManager::SetWindowFlags(const sptr<SceneSession>& sceneSessi
     }
     uint32_t oldFlags = property->GetWindowFlags();
     property->SetWindowFlags(flags);
-    // notify when visibility change
-    if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) {
-        CheckAndNotifyWaterMarkChangedResult(flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK));
-    }
+    CheckAndNotifyWaterMarkChangedResult();
     if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) {
         sceneSession->OnShowWhenLocked(flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
     }
@@ -2189,19 +2176,26 @@ WSError SceneSessionManager::SetWindowFlags(const sptr<SceneSession>& sceneSessi
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult(bool isAddingWaterMark)
+void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult()
 {
-    int32_t preWaterMarkSessionCount = GetWaterMarkSessionCount();
-    WLOGFD("before update : water mark count: %{public}u", preWaterMarkSessionCount);
-    SetWaterMarkSessionCount(preWaterMarkSessionCount + (isAddingWaterMark ? 1 : -1));
-    if (preWaterMarkSessionCount == 0 && isAddingWaterMark) {
-        NotifyWaterMarkFlagChangedResult(true);
-        return;
+    bool currentWaterMarkShowState = false;
+    for (auto iter: sceneSessionMap_) {
+        auto session = iter.second;
+        if (!session || !session->GetSessionProperty()) {
+            continue;
+        }
+        bool hasWaterMark = session->GetSessionProperty()->GetWindowFlags()
+            & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
+        if (hasWaterMark && session->GetVisible()) {
+            currentWaterMarkShowState = true;
+            break;
+        }
     }
-    if (preWaterMarkSessionCount == 1 && !isAddingWaterMark) {
-        NotifyWaterMarkFlagChangedResult(false);
-        return;
+    if (lastWaterMarkShowState_ ^ currentWaterMarkShowState) {
+        lastWaterMarkShowState_ = currentWaterMarkShowState;
+        NotifyWaterMarkFlagChangedResult(currentWaterMarkShowState);
     }
+    return;
 }
 
 WSError SceneSessionManager::NotifyWaterMarkFlagChangedResult(bool hasWaterMark)
@@ -3077,11 +3071,8 @@ void SceneSessionManager::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclu
 #endif
         WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
             session->GetWindowId(), isVisible);
-        if (session->GetWindowSessionProperty()->GetWindowFlags() &
-        static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) {
-            CheckAndNotifyWaterMarkChangedResult(isVisible);
-        }
-}
+        CheckAndNotifyWaterMarkChangedResult();
+    }
         if (windowVisibilityInfos.size() != 0) {
             WLOGI("Notify windowvisibilityinfo changed start");
             SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
@@ -3118,10 +3109,7 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
             sceneSession->GetCallingPid(), sceneSession->GetCallingUid(), false, sceneSession->GetWindowType()));
         WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
             sceneSession->GetWindowId(), sceneSession->GetVisible());
-        if (sceneSession->GetWindowSessionProperty()->GetWindowFlags() &
-        static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) {
-            CheckAndNotifyWaterMarkChangedResult(false);
-        }
+        CheckAndNotifyWaterMarkChangedResult();
         SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
 }
