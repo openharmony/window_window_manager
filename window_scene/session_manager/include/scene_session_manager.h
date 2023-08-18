@@ -160,8 +160,6 @@ public:
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
     WSError SetWindowFlags(const sptr<SceneSession>& sceneSession, uint32_t flags);
 
-    void SetWaterMarkSessionCount(int32_t count);
-    int32_t GetWaterMarkSessionCount() const;
     void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> callingSession,
         const WSRect& rect, const WSRect& occupiedArea);
     void OnScreenshot(DisplayId displayId);
@@ -291,9 +289,9 @@ private:
     sptr<ISessionChangeListener> sessionListener_;
     sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject> &token);
 
-    void CheckAndNotifyWaterMarkChangedResult(bool isAddingWaterMark);
+    void CheckAndNotifyWaterMarkChangedResult();
     WSError NotifyWaterMarkFlagChangedResult(bool hasWaterMark);
-    int32_t waterMarkSessionCount_ { 0 };
+    bool lastWaterMarkShowState_ { false };
     WindowFocusChangedFunc windowFocusChangedFunc_;
     sptr<SceneSession> callingSession_ = nullptr;
     sptr<AgentDeathRecipient> windowDeath_ = new AgentDeathRecipient(
