@@ -121,7 +121,8 @@ WSError SceneSession::Background()
     if (ret != WSError::WS_OK) {
         return ret;
     }
-    snapshot_ = Snapshot();
+    constexpr float scale = 0.5;
+    snapshot_ = Snapshot(scale);
     if (scenePersistence_ && snapshot_) {
         scenePersistence_->SaveSnapshot(snapshot_);
     }

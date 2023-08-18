@@ -79,7 +79,7 @@ public:
 
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
-    std::shared_ptr<Media::PixelMap> Snapshot();
+    std::shared_ptr<Media::PixelMap> Snapshot(float scale = 1);
     SessionState GetSessionState() const;
     SessionInfo& GetSessionInfo();
     sptr<WindowSessionProperty> GetSessionProperty() const;
