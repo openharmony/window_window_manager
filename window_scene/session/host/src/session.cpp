@@ -798,13 +798,6 @@ WSError Session::NotifyDestroy()
     return sessionStage_->NotifyDestroy();
 }
 
-void Session::SetSessionContinueState(const ContinueState& continueState)
-{
-    auto sessionInfo = GetSessionInfo();
-    WLOGFD("SetSessionContinueState, continueState : %{public}d", static_cast<int32_t>(continueState));
-    sessionInfo.continueState = continueState;
-}
-
 void Session::SetParentSession(const sptr<Session>& session)
 {
     parentSession_ = session;
