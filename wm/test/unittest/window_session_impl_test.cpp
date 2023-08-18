@@ -1301,6 +1301,29 @@ HWTEST_F(WindowSessionImplTest, SetAceAbilityHandler, Function | SmallTest | Lev
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetAceAbilityHandler end";
 }
+
+/**
+ * @tc.name: SetRaiseByClickEnabled01
+ * @tc.desc: SetRaiseByClickEnabled and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetRaiseByClickEnabled01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetRaiseByClickEnabled01");
+    sptr<WindowSessionImpl> window = new(std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    WMError retCode = window->SetRaiseByClickEnabled(true);
+    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    retCode = window->SetRaiseByClickEnabled(true);
+    ASSERT_EQ(retCode, WMError::WM_DO_NOTHING);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -1464,6 +1464,19 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
     return WSError::WS_OK;
 }
 
+void SceneSessionManager::UpdatePropertyRaiseEnabled(const sptr<WindowSessionProperty>& property,
+                                                     const sptr<SceneSession>& sceneSession)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("Update property raiseEnabled permission denied!");
+        return;
+    }
+
+    if (sceneSession->GetSessionProperty() != nullptr) {
+        sceneSession->GetSessionProperty()->SetRaiseEnabled(property->GetRaiseEnabled());
+    }
+}
+
 void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action, const sptr<SceneSession>& sceneSession)
 {
@@ -1565,6 +1578,10 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
             if (sceneSession->GetSessionProperty() != nullptr) {
                 sceneSession->GetSessionProperty()->SetDragEnabled(property->GetDragEnabled());
             }
+            break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED: {
+            UpdatePropertyRaiseEnabled(property, sceneSession);
             break;
         }
         default:

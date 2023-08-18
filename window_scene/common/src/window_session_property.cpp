@@ -68,6 +68,11 @@ void WindowSessionProperty::SetDragEnabled(bool dragEnabled)
     dragEnabled_ = dragEnabled;
 }
 
+void WindowSessionProperty::SetRaiseEnabled(bool raiseEnabled)
+{
+    raiseEnabled_ = raiseEnabled;
+}
+
 void WindowSessionProperty::SetBrightness(float brightness)
 {
     brightness_ = brightness;
@@ -136,6 +141,11 @@ bool WindowSessionProperty::GetTouchable() const
 bool WindowSessionProperty::GetDragEnabled() const
 {
     return dragEnabled_;
+}
+
+bool WindowSessionProperty::GetRaiseEnabled() const
+{
+    return raiseEnabled_;
 }
 
 float WindowSessionProperty::GetBrightness() const
@@ -442,7 +452,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteFloat(brightness_) &&
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
-        parcel.WriteUint32(flags_) &&
+        parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) &&
         parcel.WriteBool(isDecorEnable_) && parcel.WriteBool(dragEnabled_) &&
         MarshallingWindowLimits(parcel) &&
         MarshallingSystemBarMap(parcel) && parcel.WriteUint32(animationFlag_) &&
@@ -479,6 +489,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));
     property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
     property->SetWindowFlags(parcel.ReadUint32());
+    property->SetRaiseEnabled(parcel.ReadBool());
     property->SetDecorEnable(parcel.ReadBool());
     property->SetDragEnabled(parcel.ReadBool());
     UnmarshallingWindowLimits(parcel, property);
@@ -499,6 +510,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     focusable_= property->focusable_;
     touchable_ = property->touchable_;
     dragEnabled_ = property->dragEnabled_;
+    raiseEnabled_ = property->raiseEnabled_;
     tokenState_ = property->tokenState_;
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
