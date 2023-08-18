@@ -339,6 +339,11 @@ float Session::GetBrightness() const
 
 bool Session::IsSessionValid() const
 {
+    if (sessionInfo_.isSystem_) {
+        WLOGFI("session is system, id: %{public}d, name: %{public}s, state: %{public}u",
+            GetPersistentId(), sessionInfo_.bundleName_.c_str(), state_);
+        return false;
+    }
     bool res = state_ > SessionState::STATE_DISCONNECT && state_ < SessionState::STATE_END;
     if (!res) {
         WLOGFI("session is already destroyed or not created! id: %{public}d state: %{public}u",
