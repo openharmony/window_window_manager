@@ -147,6 +147,7 @@ public:
     void SetRequestedOrientation(Orientation orientation);
     Orientation GetRequestedOrientation() const;
     WSError BindDialogTarget(const sptr<SceneSession>& sceneSession);
+    void DumpMissionInfo(std::vector<std::string> &info) const;
 
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 

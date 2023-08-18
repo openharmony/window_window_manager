@@ -954,6 +954,30 @@ void SceneSession::SetCollaboratorType(int32_t collaboratorType)
     collaboratorType_ = collaboratorType;
 }
 
+void SceneSession::DumpMissionInfo(std::vector<std::string> &info) const
+{
+    std::string dumpInfo = "      Mission ID #" + std::to_string(persistentId_);
+    info.push_back(dumpInfo);
+    dumpInfo = "        mission name [" + SessionUtils::ConvertSessionName(sessionInfo_.bundleName_,
+        sessionInfo_.abilityName_, sessionInfo_.moduleName_, sessionInfo_.appIndex_) + "]";
+    info.push_back(dumpInfo);
+    dumpInfo = "        runningState [" + std::string(isActive_ ? "FOREGROUND" : "BACKGROUND") + "]";
+    info.push_back(dumpInfo);
+    dumpInfo = "        lockedState [" + std::to_string(sessionInfo_.lockedState) + "]";
+    info.push_back(dumpInfo);
+    auto abilityInfo = sessionInfo_.abilityInfo;
+    dumpInfo = "        continuable [" + (abilityInfo ? std::to_string(abilityInfo->continuable) : " ") + "]";
+    info.push_back(dumpInfo);
+    dumpInfo = "        timeStamp [" + sessionInfo_.time + "]";
+    info.push_back(dumpInfo);
+    dumpInfo = "        label [" + (abilityInfo ? abilityInfo->label : " ") + "]";
+    info.push_back(dumpInfo);
+    dumpInfo = "        iconPath [" + (abilityInfo ? abilityInfo->iconPath : " ") + "]";
+    info.push_back(dumpInfo);
+    dumpInfo = "        want [" + (sessionInfo_.want ? sessionInfo_.want->ToUri() : " ") + "]";
+    info.push_back(dumpInfo);
+}
+
 std::shared_ptr<AppExecFwk::AbilityInfo> SceneSession::GetAbilityInfo()
 {
     SessionInfo& sessionInfo = GetSessionInfo();

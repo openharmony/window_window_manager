@@ -1057,6 +1057,25 @@ HWTEST_F(SceneSessionTest, NotifyPropertyWhenConnect, Function | SmallTest | Lev
     scensession->NotifyPropertyWhenConnect();
     ASSERT_EQ(ret, 1);
 }
+
+/**
+ * @tc.name: DumpMissionInfo
+ * @tc.desc: DumpMissionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, DumpMissionInfo, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.bundleName_ = "SceneSessionTest";
+    info.abilityName_ = "DumpMissionInfo";
+    info.windowType_ = 1;
+    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    std::vector<std::string> infos;
+    scensession->DumpMissionInfo(infos);
+    ASSERT_FALSE(infos.empty());
+}
+
 }
 }
 }
