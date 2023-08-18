@@ -185,7 +185,8 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     hostSession_ = iSession;
     context_ = context;
     AdjustWindowAnimationFlag();
-    if (context->GetApplicationInfo() && context->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
+    if (context && context->GetApplicationInfo() &&
+        context->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
         !SessionPermission::IsSystemCalling()) {
         WLOGI("Remove window flag WINDOW_FLAG_SHOW_WHEN_LOCKED");
         property_->SetWindowFlags(property_->GetWindowFlags() &
