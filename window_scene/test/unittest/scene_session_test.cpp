@@ -822,7 +822,7 @@ HWTEST_F(SceneSessionTest, IsShowWhenLocked, Function | SmallTest | Level2)
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ASSERT_EQ(scensession->IsShowWhenLocked(),false);
-    sceneSession->property_ = property;
+    scensession->property_ = property;
     property->SetWindowFlags(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     ASSERT_EQ(scensession->IsShowWhenLocked(),true);
 } 
