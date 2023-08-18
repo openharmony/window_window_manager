@@ -105,16 +105,6 @@ bool DoSomethingForWindowManagerImpl(WindowManager& windowManager, const uint8_t
     startPos += GetObject<bool>(enable, data + startPos, size - startPos);
     windowManager.SetGestureNavigaionEnabled(enable);
 
-    Parcel windowVisibilityInfosParcel;
-    if (windowVisibilityInfosParcel.WriteBuffer(data, size)) {
-        std::vector<sptr<WindowVisibilityInfo>> infos;
-        if (MarshallingHelper::UnmarshallingVectorParcelableObj<WindowVisibilityInfo>(windowVisibilityInfosParcel,
-            infos)) {
-            windowManager.GetVisibilityWindowInfo(infos);
-            windowManager.UpdateWindowVisibilityInfo(infos);
-        }
-    }
-
     DisplayId displayId;
     SystemBarRegionTints tints;
     startPos += GetObject<DisplayId>(displayId, data + startPos, size - startPos);
@@ -128,15 +118,22 @@ void CheckAccessibilityWindowInfo(WindowManager& windowManager, const uint8_t* d
 {
     Parcel accessibilityWindowInfosParcel;
     if (accessibilityWindowInfosParcel.WriteBuffer(data, size)) {
-        std::vector<sptr<AccessibilityWindowInfo>> infos;
-        if (MarshallingHelper::UnmarshallingVectorParcelableObj<AccessibilityWindowInfo>(accessibilityWindowInfosParcel,
-            infos)) {
-            windowManager.GetAccessibilityWindowInfo(infos);
-            WindowUpdateType type;
-            GetObject<WindowUpdateType>(type, data, size);
-            windowManager.NotifyAccessibilityWindowInfo(infos, type);
-        }
+        std::vector<sptr<AccessibilityWindowInfo>> windowInfos;
+        MarshallingHelper::UnmarshallingVectorParcelableObj<AccessibilityWindowInfo>(accessibilityWindowInfosParcel,
+            windowInfos);
+        windowManager.GetAccessibilityWindowInfo(windowInfos);
+        WindowUpdateType type;
+        GetObject<WindowUpdateType>(type, data, size);
+        windowManager.NotifyAccessibilityWindowInfo(windowInfos, type);
     }
+    
+    Parcel windowVisibilityInfosParcel;
+    windowVisibilityInfosParcel.WriteBuffer(data, size);
+    std::vector<sptr<WindowVisibilityInfo>> visibilitynfos;
+    MarshallingHelper::UnmarshallingVectorParcelableObj<WindowVisibilityInfo>(windowVisibilityInfosParcel,
+            visibilitynfos);
+    windowManager.GetVisibilityWindowInfo(visibilitynfos);
+    windowManager.UpdateWindowVisibilityInfo(visibilitynfos);
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
