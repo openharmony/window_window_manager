@@ -743,10 +743,6 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         auto session = GetSceneSession(sessionInfo.persistentId_);
         if (session != nullptr) {
             WLOGFI("get exist session persistentId: %{public}d", sessionInfo.persistentId_);
-            if (sessionInfo.want != nullptr) {
-                session->GetSessionInfo().want = sessionInfo.want;
-                WLOGFI("RequestSceneSession update want");
-            }
             return session;
         }
     }
@@ -785,6 +781,20 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
     };
 
     return taskScheduler_->PostSyncTask(task);
+}
+
+void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
+{
+    if (sessionInfo.persistentId_ != 0) {
+        auto session = GetSceneSession(sessionInfo.persistentId_);
+        if (session != nullptr) {
+            WLOGFI("get exist session persistentId: %{public}d", sessionInfo.persistentId_);
+            if (sessionInfo.want != nullptr) {
+                session->GetSessionInfo().want = sessionInfo.want;
+                WLOGFI("RequestSceneSession update want");
+            }
+        }
+    }
 }
 
 void SceneSessionManager::RegisterInputMethodShownFunc(const sptr<SceneSession>& sceneSession)
