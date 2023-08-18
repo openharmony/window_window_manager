@@ -55,6 +55,7 @@ public:
     WSError UpdateWindowSessionProperty(sptr<WindowSessionProperty> property) override;
     WSError SetAspectRatio(float ratio) override;
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
+    WSError RaiseAboveTarget(int32_t subWindowId) override;
 
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;

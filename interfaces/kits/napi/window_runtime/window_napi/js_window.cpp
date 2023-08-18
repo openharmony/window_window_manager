@@ -631,6 +631,13 @@ NativeValue* JsWindow::Minimize(NativeEngine* engine, NativeCallbackInfo* info)
     return (me != nullptr) ? me->OnMinimize(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindow::RaiseAboveTarget(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGI("[NAPI]RaiseAboveTarget");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnRaiseAboveTarget(*engine, *info) : nullptr;
+}
+
 static void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
     const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, wptr<Window> weakToken)
 {
@@ -2846,6 +2853,60 @@ NativeValue* JsWindow::OnSetRaiseByClickEnabled(NativeEngine& engine, NativeCall
     return result;
 }
 
+NativeValue* JsWindow::OnRaiseAboveTarget(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("minimize the window permission denied!");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP)));
+        return engine.CreateUndefined();
+    }
+    WmErrorCode errCode = WmErrorCode::WM_OK;
+    if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
+        WLOGFE("Argc is invalid: %{public}zu", info.argc);
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+    int32_t subWindowId = -1;
+    if (errCode == WmErrorCode::WM_OK) {
+        NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
+        if (nativeVal == nullptr || static_cast<int32_t>(*nativeVal) <= 0) {
+            WLOGFE("Failed to convert parameter to subWindowId");
+            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        } else {
+            subWindowId = static_cast<int32_t>(*nativeVal);
+        }
+    }
+
+    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+
+    wptr<Window> weakToken(windowToken_);
+    AsyncTask::CompleteCallback complete =
+        [weakToken, subWindowId, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WmErrorCode::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                return;
+            }
+            WmErrorCode ret = weakWindow->RaiseAboveTarget(subWindowId);
+            if (ret == WmErrorCode::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+            } else {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set raiseAboveTarget failed"));
+            }
+            WLOGI("Window [%{public}u, %{public}s] set raiseAboveTarget end",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+        };
+
+    NativeValue* lastParam = (info.argc <= 1) ? nullptr :
+        (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsWindow::RaiseAboveTarget",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 NativeValue* JsWindow::OnSetWindowTouchable(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
@@ -4163,6 +4224,7 @@ void BindFunctions(NativeEngine& engine, NativeObject* object, const char *modul
     BindNativeFunction(engine, *object, "minimize", moduleName, JsWindow::Minimize);
     BindNativeFunction(engine, *object, "setResizeByDragEnabled", moduleName, JsWindow::SetResizeByDragEnabled);
     BindNativeFunction(engine, *object, "setRaiseByClickEnabled", moduleName, JsWindow::SetRaiseByClickEnabled);
+    BindNativeFunction(engine, *object, "raiseAboveTarget", moduleName, JsWindow::RaiseAboveTarget);
 }
 }  // namespace Rosen
 }  // namespace OHOS
