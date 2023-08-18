@@ -937,14 +937,14 @@ void JsSceneSession::OnClick()
 
 void JsSceneSession::PendingSessionActivation(SessionInfo& info)
 {
-    WLOGI("[NAPI]pending session activation: bundleName %{public}s, moduleName %{public}s, abilityName %{public}s"\
-        ", reuse %{public}d",
-        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.reuse);
+    WLOGI("[NAPI]pending session activation: bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, \
+        appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
+        info.abilityName_.c_str(), info.appIndex_, info.reuse);
     if (info.persistentId_ == 0) {
         sptr<SceneSession> sceneSession = nullptr;
         if (info.reuse) {
             sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(
-                info.bundleName_, info.moduleName_, info.abilityName_);
+                info.bundleName_, info.moduleName_, info.abilityName_, info.appIndex_);
         }
         if (sceneSession == nullptr) {
             WLOGFI("GetSceneSessionByName return nullptr, RequestSceneSession");
