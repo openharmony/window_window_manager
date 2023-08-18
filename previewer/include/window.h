@@ -243,6 +243,7 @@ public:
     virtual void SetContentInfoCallback(const ContentInfoCallback& callback) = 0;
     virtual WMError SetResizeByDragEnabled(bool dragEnabled) = 0;
     virtual WMError SetRaiseByClickEnabled(bool raiseEnabled) = 0;
+    virtual WmErrorCode RaiseAboveTarget(int32_t subWindowId) = 0;
 };
 }
 }

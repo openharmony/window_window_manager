@@ -788,6 +788,30 @@ WmErrorCode WindowSceneSessionImpl::RaiseToAppTop()
     return static_cast<WmErrorCode>(ret);
 }
 
+WmErrorCode WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
+{
+    auto parentId = GetParentId();
+    if (parentId == INVALID_SESSION_ID) {
+        WLOGFE("Only the children of the main window can be raised!");
+        return WmErrorCode::WM_ERROR_INVALID_PARENT;
+    }
+
+    if (!WindowHelper::IsSubWindow(GetType())) {
+        WLOGFE("Must be app sub window window!");
+        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+    }
+
+    if (state_ != WindowState::STATE_SHOWN) {
+        WLOGFE("The sub window must be shown!");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    if (!hostSession_) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    const WSError& ret = hostSession_->RaiseAboveTarget(subWindowId);
+    return static_cast<WmErrorCode>(ret);
+}
+
 WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 {
     uint32_t windowId = GetWindowId();
