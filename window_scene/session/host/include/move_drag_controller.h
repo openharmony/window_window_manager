@@ -27,7 +27,7 @@ class PointerEvent;
 
 namespace OHOS::Rosen {
 
-using SessionRectChangeCallBack = std::function<void(void)>;
+using MoveDragCallback = std::function<void(const SizeChangeReason&)>;
 
 enum class AreaType : uint32_t {
     UNDEFINED = 0,
@@ -46,22 +46,25 @@ public:
     MoveDragController(int32_t persistentId);
     ~MoveDragController() = default;
 
-    void RegisterSessionRectChangeCallback(const SessionRectChangeCallBack& callBack);
+    void RegisterMoveDragCallback(const MoveDragCallback& callBack);
     void SetStartMoveFlag(bool flag);
     bool GetStartMoveFlag() const;
     bool GetStartDragFlag() const;
     WSRect GetTargetRect() const;
     void InitMoveDragProperty();
-    void SetOriginalValue(int32_t pointerId, int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect);
+    void SetOriginalValue(int32_t pointerId, int32_t pointerType,
+        int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect);
     void SetAspectRatio(float ratio);
-    WSError ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
+    bool ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
     bool ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
         const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
     void HandleMouseStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& winRect);
+    void ClacFirstMoveTargetRect(const WSRect& windowRect);
 
 private:
     struct MoveDragProperty {
         int32_t pointerId_ = -1;
+        int32_t pointerType_ = -1;
         int32_t originalPointerPosX_ = -1;
         int32_t originalPointerPosY_ = -1;
         WSRect originalRect_ = { 0, 0, 0, 0 };
@@ -73,10 +76,26 @@ private:
         }
     };
 
+    struct MoveTempProperty {
+        int32_t pointerId_ = -1;
+        int32_t pointerType_ = -1;
+        int32_t lastDownPointerPosX_ = -1;
+        int32_t lastDownPointerPosY_ = -1;
+        int32_t lastDownPointerWindowX_ = -1;
+        int32_t lastDownPointerWindowY_ = -1;
+        int32_t lastMovePointerPosX_ = -1;
+        int32_t lastMovePointerPosY_ = -1;
+
+        bool isEmpty() const
+        {
+            return (pointerId_ == -1 && lastDownPointerPosX_ == -1 && lastDownPointerPosY_ == -1);
+        }
+    };
+
     enum AxisType { UNDEFINED, X_AXIS, Y_AXIS };
     constexpr static float NEAR_ZERO = 0.001f;
 
-    void CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
+    bool CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
     bool EventDownInit(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
         const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
     AreaType GetAreaType(int32_t pointWinX, int32_t pointWinY, int32_t sourceType, const WSRect& rect);
@@ -88,7 +107,7 @@ private:
     void FixTranslateByLimits(int32_t& tranX, int32_t& tranY);
     bool InitMainAxis(AreaType type, int32_t tranX, int32_t tranY);
     void ConvertXYByAspectRatio(int32_t& tx, int32_t& ty, float aspectRatio);
-    void ProcessSessionRectChange(void);
+    void ProcessSessionRectChange(const SizeChangeReason& reason);
     void InitDecorValue(const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
 
     float GetVirtualPixelRatio() const;
@@ -96,6 +115,9 @@ private:
     bool IsPointInDragHotZone(int32_t startPointPosX, int32_t startPointPosY,
         int32_t sourceType, const WSRect& winRect);
     void CalculateStartRectExceptHotZone(float vpr, const WSRect& winRect);
+    WSError UpdateMoveTempProperty(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    bool CheckDragEventLegal(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        const sptr<WindowSessionProperty> property);
 
     bool isStartMove_ = false;
     bool isStartDrag_ = false;
@@ -110,7 +132,7 @@ private:
     AxisType mainMoveAxis_ = AxisType::UNDEFINED;
     WindowLimits limits_;
     MoveDragProperty moveDragProperty_;
-    SessionRectChangeCallBack sessionRectChangeCallBack_;
+    MoveDragCallback moveDragCallback_;
     int32_t persistentId_;
 
     enum class DragType : uint32_t {
@@ -131,6 +153,7 @@ private:
     Rect rectExceptCorner_ { 0, 0, 0, 0 };
     uint32_t mouseStyleID_ = 0;
     DragType dragType_ = DragType::DRAG_UNDEFINED;
+    MoveTempProperty moveTempProperty_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MOVE_DRAG_CONTROLLER_H
