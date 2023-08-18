@@ -572,6 +572,30 @@ HWTEST_F(WindowManagerTest, GetFocusWindowInfo, Function | SmallTest | Level2)
     WindowManager::GetInstance().GetFocusWindowInfo(focusInfo);
     ASSERT_EQ(0, ret);
 }
+
+/**
+ * @tc.name: MinimizeAllAppWindows
+ * @tc.desc: window MinimizeAllAppWindows
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, MinimizeAllAppWindows, Function | SmallTest | Level2)
+{
+    DisplayId displayId = 0;
+    WMError ret = WindowManager::GetInstance().MinimizeAllAppWindows(displayId);
+    ASSERT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetWindowLayoutMode
+ * @tc.desc: window SetWindowLayoutMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, SetWindowLayoutMode, Function | SmallTest | Level2)
+{
+    WindowLayoutMode mode = WindowLayoutMode::BASE;
+    WMError ret = WindowManager::GetInstance().SetWindowLayoutMode(mode);
+    ASSERT_EQ(ret, WMError::WM_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
