@@ -18,7 +18,7 @@
 namespace OHOS {
 namespace Rosen {
 
-void ScbSessionHandler::OnSessionMovedToFront(int sessionId)
+void ScbSessionHandler::OnSessionMovedToFront(int32_t sessionId)
 {
     SceneSessionManager::GetInstance().NotifySessionMovedToFront(sessionId);
 }
