@@ -73,6 +73,23 @@ HWTEST_F(MockSessionManagerServiceTest, OnRemoteDied, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: OnRemoteDied
+ * @tc.desc: OnRemoteDied
+ * @tc.type: FUNC
+ */
+HWTEST_F(MockSessionManagerServiceTest, OnRemoteDied1, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "MockSessionManagerServiceTest: OnRemoteDied1 start";
+    WLOGI("OnRemoteDied");
+    MockSessionManagerService::SMSDeathRecipient* mService = new MockSessionManagerService::SMSDeathRecipient();
+    auto res = WMError::WM_OK;
+    wptr<IRemoteObject> object = nullptr;
+    mService->OnRemoteDied(object);
+    ASSERT_EQ(WMError::WM_OK, res);
+    GTEST_LOG_(INFO) << "MockSessionManagerServiceTest: OnRemoteDied1 end";
+}
+
+/**
  * @tc.name: SetSessionManagerService
  * @tc.desc: set session manager service
  * @tc.type: FUNC
@@ -110,6 +127,22 @@ HWTEST_F(MockSessionManagerServiceTest, OnStart, Function | SmallTest | Level2)
     auto ret = WMError::WM_OK;
     MockSessionManagerService::GetInstance().OnStart();
     ASSERT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: onStart
+ * @tc.desc: on start
+ * @tc.type: FUNC
+ */
+HWTEST_F(MockSessionManagerServiceTest, OnStart1, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "MockSessionManagerServiceTest: OnStart1 start";
+    MockSessionManagerService* mService = new MockSessionManagerService();
+    WLOGI("onStart");
+    auto ret = WMError::WM_OK;
+    mService->OnStart();
+    ASSERT_EQ(ret, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "MockSessionManagerServiceTest: OnStart1 end";
 }
 }
 }
