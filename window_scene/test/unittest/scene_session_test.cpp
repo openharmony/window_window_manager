@@ -554,6 +554,452 @@ HWTEST_F(SceneSessionTest, IsFloatingWindowAppType, Function | SmallTest | Level
     ASSERT_EQ(false, scensession->IsFloatingWindowAppType());
 }
 
+
+
+/**
+ * @tc.name: DumpSessionElementInfo01
+ * @tc.desc: DumpSessionElementInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, DumpSessionElementInfo, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
+    ASSERT_NE(mockSessionStage, nullptr);
+    std::vector<std::string> params;
+    scensession->DumpSessionElementInfo(params);
+    int ret =1;
+    scensession->sessionStage_ = mockSessionStage;
+    scensession->DumpSessionElementInfo(params);
+    ASSERT_EQ(ret, 1);
+}
+
+
+/**
+ * @tc.name: SaveAspectRatio
+ * @tc.desc: SaveAspectRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SaveAspectRatio, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    ASSERT_EQ(true, scensession->SaveAspectRatio(0.1));
+}
+
+/**
+ * @tc.name: NotifyIsCustomAnimatiomPlaying
+ * @tc.desc: NotifyIsCustomAnimatiomPlaying
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, NotifyIsCustomAnimatiomPlaying, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    scensession->NotifyIsCustomAnimatiomPlaying(false);
+}
+
+/**
+ * @tc.name: NotifySessionRectChange
+ * @tc.desc: NotifySessionRectChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, NotifySessionRectChange, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    WSRect overlapRect = { 0, 0, 0, 0 };
+    scensession->NotifySessionRectChange(overlapRect,SizeChangeReason::ROTATION);
+}
+
+/**
+ * @tc.name: OnSessionRectChange
+ * @tc.desc: OnSessionRectChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetSessionRectChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    int ret =1;
+    scensession->OnSessionRectChange();
+    ASSERT_EQ(ret, 1);
+}
+
+/**
+ * @tc.name: FixRectByAspectRatio
+ * @tc.desc: FixRectByAspectRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, FixRectByAspectRatio, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    WSRect originalRect_ = { 0, 0, 0, 0 };
+    ASSERT_EQ(false, scensession->FixRectByAspectRatio(originalRect_));
+}
+
+/**
+ * @tc.name: GetKeyboardAvoidArea
+ * @tc.desc: GetKeyboardAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetKeyboardAvoidArea, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+        specificCallback_->onGetSceneSessionVectorByType_ = [](WindowType type)-> std::vector<sptr<SceneSession>>
+    {
+        std::vector<sptr<SceneSession>> backgroundSession;
+        return backgroundSession;
+    };
+
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
+    EXPECT_NE(scensession, nullptr);
+    WSRect overlapRect = { 0, 0, 0, 0 };
+    AvoidArea avoidArea;
+    int ret =1;
+    scensession->GetKeyboardAvoidArea(overlapRect,avoidArea);
+    ASSERT_EQ(ret, 1);
+}
+
+/**
+ * @tc.name: GetCutoutAvoidArea
+ * @tc.desc: GetCutoutAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetCutoutAvoidArea, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(scensession, nullptr);
+    WSRect overlapRect = { 0, 0, 0, 0 };
+    AvoidArea avoidArea;
+    int ret =1;
+    scensession->GetCutoutAvoidArea(overlapRect,avoidArea);
+    ASSERT_EQ(ret, 1);
+} 
+
+/**
+ * @tc.name: SetSystemBarProperty
+ * @tc.desc: SetSystemBarProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetSystemBarProperty, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
+    EXPECT_NE(scensession, nullptr);
+    scensession->property_ = nullptr;
+    SystemBarProperty statusBarProperty;
+    scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA,statusBarProperty);
+    ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA,statusBarProperty), WSError::WS_ERROR_NULLPTR);
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    scensession->property_ = property;
+    ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA,statusBarProperty), WSError::WS_OK);
+
+} 
+
+/**
+ * @tc.name: OnShowWhenLocked
+ * @tc.desc: OnShowWhenLocked 
+ * @tc.type: FUNC ok
+ */
+HWTEST_F(SceneSessionTest, OnShowWhenLocked, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
+    EXPECT_NE(scensession, nullptr);
+    int ret =0;
+    scensession->OnShowWhenLocked(false);
+    ASSERT_EQ(ret ,0);
+} 
+
+/**
+ * @tc.name: IsShowWhenLocked
+ * @tc.desc: IsShowWhenLocked
+ * @tc.type: FUNC ok
+ */
+HWTEST_F(SceneSessionTest, IsShowWhenLocked, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
+    EXPECT_NE(scensession, nullptr);
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_EQ(scensession->IsShowWhenLocked(),false);
+    sceneSession->property_ = property;
+    property->SetWindowFlags(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
+    ASSERT_EQ(scensession->IsShowWhenLocked(),true);
+} 
+
+/**
+ * @tc.name: GetAvoidAreaByType
+ * @tc.desc: GetAvoidAreaByType
+ * @tc.type: FUNC ok
+ */
+HWTEST_F(SceneSessionTest, GetAvoidAreaByType, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
+    EXPECT_NE(scensession, nullptr);
+    sceneSession->property_ = nullptr;
+    AvoidArea avoidArea;
+    scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT);
+    scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM);
+    scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_KEYBOARD);
+    scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM_GESTURE);
+    ASSERT_NE(scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT),avoidArea);
+    ASSERT_NE(scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM);,avoidArea);
+} 
+
+/**
+ * @tc.name: TransferPointerEvent
+ * @tc.desc: TransferPointerEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, TransferPointerEvent, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
+    EXPECT_NE(scensession, nullptr);
+    std::shared_ptr<MMI::PointerEvent>& pointerEvent;
+    scensession->TransferPointerEvent(pointerEvent);
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent), WSError::WS_OK);
+} 
+
+/**
+ * @tc.name: CalculateAvoidAreaRect
+ * @tc.desc: CalculateAvoidAreaRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, CalculateAvoidAreaRect, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
+    EXPECT_NE(scensession, nullptr);
+    int ret =0;
+    WSRect overlapRect = { 0, 0, 0, 0 };
+    WSRect avoidRect = { 0, 0, 0, 0 };
+    AvoidArea avoidArea;
+    scensession->CalculateAvoidAreaRect(overlapRect,avoidRect,avoidArea);
+    WSRect overlapRect_ = { 1, 1, 1, 1 };
+    WSRect avoidRect_ = { 1, 1, 1, 1 };
+    scensession->CalculateAvoidAreaRect(overlapRect_,avoidRect_,avoidArea)
+    ASSERT_EQ(, WSError::WS_OK);
+    ASSERT_EQ(ret ,0);
+}
+
+/**
+ * @tc.name: OnNeedAvoid
+ * @tc.desc: OnNeedAvoid
+ * @tc.type: FUNC  
+ */
+HWTEST_F(SceneSessionTest, OnNeedAvoid, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
+    EXPECT_NE(scensession, nullptr);
+    ASSERT_EQ(scensession->OnNeedAvoid(false) ,WSError::WS_OK);
+} 
+
+/**
+ * @tc.name: SetCollaboratorType
+ * @tc.desc: SetCollaboratorType
+ * @tc.type: FUNC  
+ */
+HWTEST_F(SceneSessionTest, SetCollaboratorType, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
+    EXPECT_NE(scensession, nullptr);
+    scensession->SetCollaboratorType(2);
+    ASSERT_EQ(scensession->GetCollaboratorType() ,2);
+} 
+
+/**
+ * @tc.name: GetAbilityInfo
+ * @tc.desc: GetAbilityInfo
+ * @tc.type: FUNC  
+ */
+HWTEST_F(SceneSessionTest, SetCollaboratorType, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
+    EXPECT_NE(scensession, nullptr);
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo;
+    scensession->SetAbilitySessionInfo(abilityInfo);
+    ASSERT_EQ(scensession->GetAbilityInfo() ,abilityInfo);
+}
+
+/**
+ * @tc.name: SetSelfToken
+ * @tc.desc: SetSelfToken
+ * @tc.type: FUNC  
+ */
+HWTEST_F(SceneSessionTest, SetSelfToken, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "SetSelfToken";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
+    EXPECT_NE(scensession, nullptr);
+    sptr<IRemoteObject> selfToken;
+    scensession->SetSelfToken(selfToken);
+    ASSERT_EQ(scensession->GetSelfToken() ,selfToken);
+} 
+
+
+
+
 }
 }
 }
