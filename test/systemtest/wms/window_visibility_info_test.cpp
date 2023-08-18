@@ -193,6 +193,9 @@ HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest01, Function | Medium
     floatAppInfo_.name = "window1";
     floatAppInfo_.rect = {0, 0, 300, 100};
     sptr<Window> window1 = Utils::CreateTestWindow(floatAppInfo_);
+    if (window1 == nullptr) {
+        return;
+    }
 
     subAppInfo_.name = "subWindow1";
     subAppInfo_.rect = {0, 600, 300, 100};
