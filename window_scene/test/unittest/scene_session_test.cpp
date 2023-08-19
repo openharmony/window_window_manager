@@ -17,6 +17,8 @@
 #include "session/host/include/scene_session.h"
 #include "wm_common.h"
 #include "mock/mock_session_stage.h"
+#include "input_event.h"
+#include <pointer_event.h>
 
 using namespace testing;
 using namespace testing::ext;
