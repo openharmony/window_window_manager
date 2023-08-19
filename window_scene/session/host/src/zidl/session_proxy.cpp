@@ -542,13 +542,17 @@ AvoidArea SessionProxy::GetAvoidAreaByType(AvoidAreaType type)
     return *area;
 }
 
-WSError SessionProxy::RequestSessionBack()
+WSError SessionProxy::RequestSessionBack(bool needMoveToBackground)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(needMoveToBackground)) {
+        WLOGFE("Write needMoveToBackground failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(SessionMessage::TRANS_ID_BACKPRESSED),
