@@ -201,6 +201,20 @@ ohos_unittest("ws_window_event_channel_test") {
   ]
 }
 
+ohos_unittest("ws_screen_rotation_property_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screen_rotation_property_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "sensor:sensor_interface_native",
+  ]
+}
+
 ## Build ws_unittest_common.a {{{
 config("ws_unittest_common_public_config") {
   include_dirs = [
@@ -283,6 +297,7 @@ ohos_static_library("ws_unittest_common") {
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "sensor:sensor_interface_native",
   ]
 
   part_name = "window_manager"
