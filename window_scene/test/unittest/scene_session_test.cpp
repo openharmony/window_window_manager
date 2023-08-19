@@ -641,7 +641,7 @@ HWTEST_F(SceneSessionTest, NotifySessionRectChange, Function | SmallTest | Level
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     WSRect overlapRect = { 0, 0, 0, 0 };
-    scensession->NotifySessionRectChange(overlapRect,SizeChangeReason::ROTATION);
+    scensession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION);
 }
 
 /**
@@ -716,8 +716,8 @@ HWTEST_F(SceneSessionTest, GetCutoutAvoidArea, Function | SmallTest | Level2)
     EXPECT_NE(scensession, nullptr);
     WSRect overlapRect = { 0, 0, 0, 0 };
     AvoidArea avoidArea;
-    int ret =1;
-    scensession->GetCutoutAvoidArea(overlapRect,avoidArea);
+    int ret = 1;
+    scensession->GetCutoutAvoidArea(overlapRect, avoidArea);
     ASSERT_EQ(ret, 1);
 } 
 
@@ -742,21 +742,20 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty, Function | SmallTest | Level2)
     EXPECT_NE(scensession, nullptr);
     scensession->property_ = nullptr;
     SystemBarProperty statusBarProperty;
-    scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA,statusBarProperty);
-    ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA,statusBarProperty), 
-        WSError::WS_ERROR_NULLPTR);
+    scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty);
+    ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
+              WSError::WS_ERROR_NULLPTR);
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     scensession->property_ = property;
-    ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA,statusBarProperty), 
-        WSError::WS_OK);
-
-} 
+    ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
+              WSError::WS_OK);
+}
 
 /**
  * @tc.name: OnShowWhenLocked
- * @tc.desc: OnShowWhenLocked 
+ * @tc.desc: OnShowWhenLocked
  * @tc.type: FUNC ok
  */
 HWTEST_F(SceneSessionTest, OnShowWhenLocked, Function | SmallTest | Level2)
@@ -775,7 +774,7 @@ HWTEST_F(SceneSessionTest, OnShowWhenLocked, Function | SmallTest | Level2)
     int ret = 0;
     scensession->OnShowWhenLocked(false);
     ASSERT_EQ(ret, 0);
-} 
+}
 
 /**
  * @tc.name: IsShowWhenLocked
@@ -798,10 +797,10 @@ HWTEST_F(SceneSessionTest, IsShowWhenLocked, Function | SmallTest | Level2)
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ASSERT_EQ(scensession->IsShowWhenLocked(),false);
+    ASSERT_EQ(scensession->IsShowWhenLocked(), false);
     scensession->property_ = property;
     property->SetWindowFlags(4);
-    ASSERT_EQ(scensession->IsShowWhenLocked(),true);
+    ASSERT_EQ(scensession->IsShowWhenLocked(), true);
 } 
 
 /**
@@ -844,7 +843,7 @@ HWTEST_F(SceneSessionTest, GetAvoidAreaByType, Function | SmallTest | Level2)
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM_GESTURE);
     ASSERT_TRUE(scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT)==avoidArea);
     ASSERT_TRUE(scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT)==avoidArea);
-} 
+}
 
 /**
  * @tc.name: TransferPointerEvent
@@ -898,15 +897,15 @@ HWTEST_F(SceneSessionTest, CalculateAvoidAreaRect, Function | SmallTest | Level2
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     EXPECT_NE(scensession, nullptr);
-    int ret =0;
+    int ret = 0;
     WSRect overlapRect = { 0, 0, 0, 0 };
     WSRect avoidRect = { 0, 0, 0, 0 };
     AvoidArea avoidArea;
-    scensession->CalculateAvoidAreaRect(overlapRect,avoidRect,avoidArea);
+    scensession->CalculateAvoidAreaRect(overlapRect, avoidRect, avoidArea);
     WSRect overlapRect_ = { 1, 1, 1, 1 };
     WSRect avoidRect_ = { 1, 1, 1, 1 };
-    scensession->CalculateAvoidAreaRect(overlapRect_,avoidRect_,avoidArea);
-    ASSERT_EQ(ret ,0);
+    scensession->CalculateAvoidAreaRect(overlapRect_, avoidRect_, avoidArea);
+    ASSERT_EQ(ret, 0);
 }
 
 /**
@@ -927,7 +926,7 @@ HWTEST_F(SceneSessionTest, OnNeedAvoid, Function | SmallTest | Level2)
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     EXPECT_NE(scensession, nullptr);
-    ASSERT_EQ(scensession->OnNeedAvoid(false) ,WSError::WS_OK);
+    ASSERT_EQ(scensession->OnNeedAvoid(false), WSError::WS_OK);
 } 
 
 /**
@@ -949,7 +948,7 @@ HWTEST_F(SceneSessionTest, SetCollaboratorType, Function | SmallTest | Level2)
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     EXPECT_NE(scensession, nullptr);
     scensession->SetCollaboratorType(2);
-    ASSERT_EQ(scensession->GetCollaboratorType() ,2);
+    ASSERT_EQ(scensession->GetCollaboratorType(), 2);
 } 
 
 /**
@@ -972,7 +971,7 @@ HWTEST_F(SceneSessionTest, GetAbilityInfo, Function | SmallTest | Level2)
     EXPECT_NE(scensession, nullptr);
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo;
     scensession->SetAbilitySessionInfo(abilityInfo);
-    ASSERT_EQ(scensession->GetAbilityInfo() ,abilityInfo);
+    ASSERT_EQ(scensession->GetAbilityInfo(), abilityInfo);
 }
 
 
@@ -994,8 +993,8 @@ HWTEST_F(SceneSessionTest, UpdateCameraFloatWindowStatus, Function | SmallTest |
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     EXPECT_NE(scensession, nullptr);
-    int ret =1 ;
-        specificCallback_->onCameraFloatSessionChange_ = [](uint32_t accessTokenId, bool isShowing){};
+    int ret = 1;
+    specificCallback_->onCameraFloatSessionChange_ = [](uint32_t accessTokenId, bool isShowing) {};
 
     scensession->UpdateCameraFloatWindowStatus(false);
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
@@ -1007,7 +1006,7 @@ HWTEST_F(SceneSessionTest, UpdateCameraFloatWindowStatus, Function | SmallTest |
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
     scensession->property_ = property;
     scensession->UpdateCameraFloatWindowStatus(false);
-    ASSERT_EQ(ret ,1);
+    ASSERT_EQ(ret, 1);
 } 
 
 
@@ -1032,8 +1031,8 @@ HWTEST_F(SceneSessionTest, GetRatioPreferenceKey, Function | SmallTest | Level2)
     EXPECT_NE(scensession, nullptr);
     std::string key = info.bundleName_ + info.moduleName_ + info.abilityName_;
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
-    ASSERT_EQ(key ,scensession->GetRatioPreferenceKey());
-} 
+    ASSERT_EQ(key, scensession->GetRatioPreferenceKey());
+}
 
 /**
  * @tc.name: NotifyPropertyWhenConnect
