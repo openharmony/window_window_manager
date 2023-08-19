@@ -574,11 +574,11 @@ HWTEST_F(SceneSessionTest, DumpSessionElementInfo, Function | SmallTest | Level2
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
-    sptr<SessionStageMocker> mockSessionStage = new(std::nothrow) SessionStageMocker();
+    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
     ASSERT_NE(mockSessionStage, nullptr);
     std::vector<std::string> params;
     scensession->DumpSessionElementInfo(params);
-    int ret =1;
+    int ret = 1;
     scensession->sessionStage_ = mockSessionStage;
     scensession->DumpSessionElementInfo(params);
     ASSERT_EQ(ret, 1);
@@ -662,7 +662,7 @@ HWTEST_F(SceneSessionTest, SetSessionRectChangeCallback, Function | SmallTest | 
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
-    int ret =1;
+    int ret = 1;
     scensession->OnSessionRectChange();
     ASSERT_EQ(ret, 1);
 }
@@ -704,8 +704,7 @@ HWTEST_F(SceneSessionTest, GetKeyboardAvoidArea, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
-        specificCallback_->onGetSceneSessionVectorByType_ = [](WindowType type)-> std::vector<sptr<SceneSession>>
-    {
+    specificCallback_->onGetSceneSessionVectorByType_ = [](WindowType type) -> std::vector<sptr<SceneSession>> {
         std::vector<sptr<SceneSession>> backgroundSession;
         return backgroundSession;
     };
@@ -713,10 +712,10 @@ HWTEST_F(SceneSessionTest, GetKeyboardAvoidArea, Function | SmallTest | Level2)
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     EXPECT_NE(scensession, nullptr);
-    WSRect overlapRect = { 0, 0, 0, 0 };
+    WSRect overlapRect = {0, 0, 0, 0};
     AvoidArea avoidArea;
-    int ret =1;
-    scensession->GetKeyboardAvoidArea(overlapRect,avoidArea);
+    int ret = 1;
+    scensession->GetKeyboardAvoidArea(overlapRect, avoidArea);
     ASSERT_EQ(ret, 1);
 }
 
@@ -767,12 +766,14 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty, Function | SmallTest | Level2)
     scensession->property_ = nullptr;
     SystemBarProperty statusBarProperty;
     scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA,statusBarProperty);
-    ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA,statusBarProperty), WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA,statusBarProperty), 
+        WSError::WS_ERROR_NULLPTR);
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     scensession->property_ = property;
-    ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA,statusBarProperty), WSError::WS_OK);
+    ASSERT_EQ(scensession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA,statusBarProperty), 
+        WSError::WS_OK);
 
 } 
 
@@ -794,9 +795,9 @@ HWTEST_F(SceneSessionTest, OnShowWhenLocked, Function | SmallTest | Level2)
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     EXPECT_NE(scensession, nullptr);
-    int ret =0;
+    int ret = 0;
     scensession->OnShowWhenLocked(false);
-    ASSERT_EQ(ret ,0);
+    ASSERT_EQ(ret, 0);
 } 
 
 /**
@@ -934,7 +935,7 @@ HWTEST_F(SceneSessionTest, CalculateAvoidAreaRect, Function | SmallTest | Level2
 /**
  * @tc.name: OnNeedAvoid
  * @tc.desc: OnNeedAvoid
- * @tc.type: FUNC  
+ * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest, OnNeedAvoid, Function | SmallTest | Level2)
 {
@@ -955,7 +956,7 @@ HWTEST_F(SceneSessionTest, OnNeedAvoid, Function | SmallTest | Level2)
 /**
  * @tc.name: SetCollaboratorType
  * @tc.desc: SetCollaboratorType
- * @tc.type: FUNC  
+ * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest, SetCollaboratorType, Function | SmallTest | Level2)
 {
@@ -977,7 +978,7 @@ HWTEST_F(SceneSessionTest, SetCollaboratorType, Function | SmallTest | Level2)
 /**
  * @tc.name: GetAbilityInfo
  * @tc.desc: GetAbilityInfo
- * @tc.type: FUNC  
+ * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest, GetAbilityInfo, Function | SmallTest | Level2)
 {
@@ -1001,7 +1002,7 @@ HWTEST_F(SceneSessionTest, GetAbilityInfo, Function | SmallTest | Level2)
 /**
  * @tc.name: UpdateCameraFloatWindowStatus
  * @tc.desc: UpdateCameraFloatWindowStatus
- * @tc.type: FUNC  
+ * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest, UpdateCameraFloatWindowStatus, Function | SmallTest | Level2)
 {
@@ -1030,14 +1031,13 @@ HWTEST_F(SceneSessionTest, UpdateCameraFloatWindowStatus, Function | SmallTest |
     scensession->property_ = property;
     scensession->UpdateCameraFloatWindowStatus(false);
     ASSERT_EQ(ret ,1);
-
 } 
 
 
 /**
  * @tc.name: GetRatioPreferenceKey
  * @tc.desc: GetRatioPreferenceKey
- * @tc.type: FUNC  
+ * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest, GetRatioPreferenceKey, Function | SmallTest | Level2)
 {
@@ -1056,13 +1056,12 @@ HWTEST_F(SceneSessionTest, GetRatioPreferenceKey, Function | SmallTest | Level2)
     std::string key = info.bundleName_ + info.moduleName_ + info.abilityName_;
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     ASSERT_EQ(key ,scensession->GetRatioPreferenceKey());
-
 } 
 
 /**
  * @tc.name: NotifyPropertyWhenConnect
  * @tc.desc: NotifyPropertyWhenConnect
- * @tc.type: FUNC  
+ * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest, NotifyPropertyWhenConnect, Function | SmallTest | Level2)
 {
@@ -1078,7 +1077,7 @@ HWTEST_F(SceneSessionTest, NotifyPropertyWhenConnect, Function | SmallTest | Lev
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
-    int ret =1 ;
+    int ret = 1;
     std::string key = info.bundleName_ + info.moduleName_ + info.abilityName_;
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     scensession->NotifyPropertyWhenConnect();
@@ -1086,14 +1085,13 @@ HWTEST_F(SceneSessionTest, NotifyPropertyWhenConnect, Function | SmallTest | Lev
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     scensession->property_ = property;
     scensession->NotifyPropertyWhenConnect();
-    ASSERT_EQ(ret ,1);
-
+    ASSERT_EQ(ret, 1);
 } 
 
 /**
  * @tc.name: UpdateMoveTempProperty
- * @tc.desc: UpdateMoveTempProperty  
- * @tc.type: FUNC  
+ * @tc.desc: UpdateMoveTempProperty
+ * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest, UpdateMoveTempProperty, Function | SmallTest | Level2)
 {
@@ -1119,13 +1117,12 @@ HWTEST_F(SceneSessionTest, UpdateMoveTempProperty, Function | SmallTest | Level2
     pointerItem.SetPointerId(0);
     scensession->moveTempProperty_.pointerId_=3;
     ASSERT_EQ(WSError::WS_DO_NOTHING,scensession->UpdateMoveTempProperty(pointerEvent));
-
 } 
 
 /**
  * @tc.name: ClacFirstMoveTargetRect
  * @tc.desc: ClacFirstMoveTargetRect  
- * @tc.type: FUNC  
+ * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest, ClacFirstMoveTargetRect, Function | SmallTest | Level2)
 {
@@ -1147,7 +1144,6 @@ HWTEST_F(SceneSessionTest, ClacFirstMoveTargetRect, Function | SmallTest | Level
     scensession->moveDragController_->SetStartMoveFlag(true);
     scensession->ClacFirstMoveTargetRect();
     ASSERT_EQ(ret ,1);
-
 } 
 }
 }
