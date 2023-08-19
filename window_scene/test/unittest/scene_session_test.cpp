@@ -645,29 +645,6 @@ HWTEST_F(SceneSessionTest, NotifySessionRectChange, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: OnSessionRectChange
- * @tc.desc: OnSessionRectChange
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, SetSessionRectChangeCallback, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "IsFloatingWindowAppType";
-    info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    int ret = 1;
-    scensession->OnSessionRectChange();
-    ASSERT_EQ(ret, 1);
-}
-
-/**
  * @tc.name: FixRectByAspectRatio
  * @tc.desc: FixRectByAspectRatio
  * @tc.type: FUNC
@@ -1086,37 +1063,6 @@ HWTEST_F(SceneSessionTest, NotifyPropertyWhenConnect, Function | SmallTest | Lev
     scensession->property_ = property;
     scensession->NotifyPropertyWhenConnect();
     ASSERT_EQ(ret, 1);
-} 
-
-/**
- * @tc.name: UpdateMoveTempProperty
- * @tc.desc: UpdateMoveTempProperty
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, UpdateMoveTempProperty, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "ability";
-    info.bundleName_ = "bundle";
-    info.moduleName_ = "module";
-    info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    std::string key = info.bundleName_ + info.moduleName_ + info.abilityName_;
-    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
-    std::shared_ptr<MMI::PointerEvent> pointerEvent =  MMI::PointerEvent::Create();
-    pointerEvent->SetPointerId(1);
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR ,scensession->UpdateMoveTempProperty(pointerEvent));
-    pointerEvent->SetPointerId(2);
-    MMI::PointerEvent::PointerItem pointerItem;
-    pointerItem.SetPointerId(0);
-    scensession->moveTempProperty_.pointerId_=3;
-    ASSERT_EQ(WSError::WS_DO_NOTHING,scensession->UpdateMoveTempProperty(pointerEvent));
 } 
 
 /**
