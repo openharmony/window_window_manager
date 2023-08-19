@@ -719,7 +719,7 @@ HWTEST_F(SceneSessionTest, GetCutoutAvoidArea, Function | SmallTest | Level2)
     int ret = 1;
     scensession->GetCutoutAvoidArea(overlapRect, avoidArea);
     ASSERT_EQ(ret, 1);
-} 
+}
 
 /**
  * @tc.name: SetSystemBarProperty
@@ -877,7 +877,7 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent, Function | SmallTest | Level2)
     scensession->property_ = property;
     scensession->moveDragController_->moveDragProperty_.pointerId_ = 0;
     ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent), WSError::WS_ERROR_NULLPTR);
-} 
+}
 
 /**
  * @tc.name: CalculateAvoidAreaRect
@@ -927,7 +927,7 @@ HWTEST_F(SceneSessionTest, OnNeedAvoid, Function | SmallTest | Level2)
     scensession = new (std::nothrow) SceneSession(info, specificCallback_);
     EXPECT_NE(scensession, nullptr);
     ASSERT_EQ(scensession->OnNeedAvoid(false), WSError::WS_OK);
-} 
+}
 
 /**
  * @tc.name: SetCollaboratorType
