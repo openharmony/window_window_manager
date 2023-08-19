@@ -801,7 +801,7 @@ HWTEST_F(SceneSessionTest, IsShowWhenLocked, Function | SmallTest | Level2)
     scensession->property_ = property;
     property->SetWindowFlags(4);
     ASSERT_EQ(scensession->IsShowWhenLocked(), true);
-} 
+}
 
 /**
  * @tc.name: GetAvoidAreaByType
@@ -945,7 +945,7 @@ HWTEST_F(SceneSessionTest, SetCollaboratorType, Function | SmallTest | Level2)
     EXPECT_NE(scensession, nullptr);
     scensession->SetCollaboratorType(2);
     ASSERT_EQ(scensession->GetCollaboratorType(), 2);
-} 
+}
 
 /**
  * @tc.name: GetAbilityInfo
@@ -969,7 +969,6 @@ HWTEST_F(SceneSessionTest, GetAbilityInfo, Function | SmallTest | Level2)
     scensession->SetAbilitySessionInfo(abilityInfo);
     ASSERT_EQ(scensession->GetAbilityInfo(), abilityInfo);
 }
-
 
 /**
  * @tc.name: UpdateCameraFloatWindowStatus
@@ -1003,8 +1002,7 @@ HWTEST_F(SceneSessionTest, UpdateCameraFloatWindowStatus, Function | SmallTest |
     scensession->property_ = property;
     scensession->UpdateCameraFloatWindowStatus(false);
     ASSERT_EQ(ret, 1);
-} 
-
+}
 
 /**
  * @tc.name: GetRatioPreferenceKey
@@ -1058,7 +1056,7 @@ HWTEST_F(SceneSessionTest, NotifyPropertyWhenConnect, Function | SmallTest | Lev
     scensession->property_ = property;
     scensession->NotifyPropertyWhenConnect();
     ASSERT_EQ(ret, 1);
-} 
+}
 }
 }
 }
