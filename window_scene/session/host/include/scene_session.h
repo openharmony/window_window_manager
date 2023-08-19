@@ -167,7 +167,7 @@ private:
     bool SaveAspectRatio(float ratio);
     void NotifyIsCustomAnimatiomPlaying(bool isPlaying);
     void NotifyPropertyWhenConnect();
-    void SetSurfaceBound(const WSRect& rect);
+    void SetSurfaceBounds(const WSRect& rect);
     void UpdateWinRectForSystemBar(WSRect& rect);
 
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
