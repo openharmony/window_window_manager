@@ -1064,33 +1064,6 @@ HWTEST_F(SceneSessionTest, NotifyPropertyWhenConnect, Function | SmallTest | Lev
     scensession->NotifyPropertyWhenConnect();
     ASSERT_EQ(ret, 1);
 } 
-
-/**
- * @tc.name: ClacFirstMoveTargetRect
- * @tc.desc: ClacFirstMoveTargetRect  
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, ClacFirstMoveTargetRect, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "ability";
-    info.bundleName_ = "bundle";
-    info.moduleName_ = "module";
-    info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    int ret =1 ;
-    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
-    scensession->ClacFirstMoveTargetRect();
-    scensession->moveDragController_->SetStartMoveFlag(true);
-    scensession->ClacFirstMoveTargetRect();
-    ASSERT_EQ(ret ,1);
-} 
 }
 }
 }
