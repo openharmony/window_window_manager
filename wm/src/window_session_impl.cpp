@@ -50,10 +50,6 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
 }
 
-std::unordered_map<ColorSpace, GraphicColorGamut> WindowSessionImpl::colorSpaceConvertMap = {
-    {ColorSpace::COLOR_SPACE_DEFAULT, GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB},
-    {ColorSpace::COLOR_SPACE_WIDE_GAMUT, GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DCI_P3},
-};
 std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
 std::map<int32_t, std::vector<sptr<IWindowChangeListener>>> WindowSessionImpl::windowChangeListeners_;
 std::map<int32_t, std::vector<sptr<IAvoidAreaChangedListener>>> WindowSessionImpl::avoidAreaChangeListeners_;
@@ -183,23 +179,26 @@ sptr<ISession> WindowSessionImpl::GetHostSession() const
 
 ColorSpace WindowSessionImpl::GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut)
 {
-    for (std::pair<ColorSpace, GraphicColorGamut> p: colorSpaceConvertMap) {
-        if (p.second == colorGamut) {
-            return p.first;
-        }
+    if (colorGamut == GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB) {
+        return ColorSpace::COLOR_SPACE_DEFAULT;
+    } else if (colorGamut == GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DCI_P3) {
+        return ColorSpace::COLOR_SPACE_WIDE_GAMUT;
+    } else {
+        WLOGFE("try to get not exist ColorSpace");
+        return ColorSpace::COLOR_SPACE_DEFAULT;
     }
-    WLOGFE("try to get not exist ColorSpace");
-
-    return ColorSpace::COLOR_SPACE_DEFAULT;
 }
 
 GraphicColorGamut WindowSessionImpl::GetSurfaceGamutFromColorSpace(ColorSpace colorSpace)
 {
-    if (colorSpaceConvertMap.count(colorSpace)) {
-        return colorSpaceConvertMap[colorSpace];
+    if (colorSpace == ColorSpace::COLOR_SPACE_DEFAULT) {
+        return GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB;
+    } else if (colorSpace == ColorSpace::COLOR_SPACE_WIDE_GAMUT) {
+        return GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DCI_P3;
+    } else {
+        WLOGFE("try to get not exist colorGamut");
+        return GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB;
     }
-    WLOGFE("try to get not exist colorGamut");
-    return GRAPHIC_COLOR_GAMUT_SRGB;
 }
 
 bool WindowSessionImpl::IsSupportWideGamut()
