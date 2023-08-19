@@ -15,6 +15,7 @@
 
 #include "session_manager/include/extension_session_manager.h"
 
+#include <hitrace_meter.h>
 #include <ability_manager_client.h>
 #include <session_info.h>
 #include <start_options.h>
@@ -72,6 +73,7 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
         auto persistentId = extensionSession->GetPersistentId();
         WLOGFI("create session persistentId: %{public}d, bundleName: %{public}s, abilityName: %{public}s",
             persistentId, sessionInfo.bundleName_.c_str(), sessionInfo.abilityName_.c_str());
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:RequestExtensionSession");
         extensionSessionMap_.insert({ persistentId, extensionSession });
         return extensionSession;
     };
@@ -92,6 +94,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(
         }
         auto persistentId = extSession->GetPersistentId();
         WLOGFI("Activate session with persistentId: %{public}d", persistentId);
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:RequestExtensionSessionActivation");
         if (extensionSessionMap_.count(persistentId) == 0) {
             WLOGFE("Session is invalid!");
             return WSError::WS_ERROR_INVALID_SESSION;
@@ -122,6 +125,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
         }
         auto persistentId = extSession->GetPersistentId();
         WLOGFI("Background session with persistentId: %{public}d", persistentId);
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:RequestExtensionSessionBackground");
         extSession->SetActive(false);
         extSession->Background();
         if (extensionSessionMap_.count(persistentId) == 0) {
@@ -152,6 +156,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
         }
         auto persistentId = extSession->GetPersistentId();
         WLOGFI("Destroy session with persistentId: %{public}d", persistentId);
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:RequestExtensionSessionDestruction");
         extSession->Disconnect();
         if (extensionSessionMap_.count(persistentId) == 0) {
             WLOGFE("Session is invalid!");
