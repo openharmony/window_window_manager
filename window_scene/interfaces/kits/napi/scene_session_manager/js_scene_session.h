@@ -89,7 +89,7 @@ private:
     void OnSessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void OnRaiseToTop();
     void OnRaiseAboveTarget(int32_t subWindowId);
-    void OnBackPressed();
+    void OnBackPressed(bool needMoveToBackground);
     void OnSessionFocusableChange(bool isFocusable);
     void OnSessionTouchableChange(bool touchable);
     void OnClick();
