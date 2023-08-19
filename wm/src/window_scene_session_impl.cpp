@@ -196,6 +196,10 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         ret = Connect();
     } else { // system or sub window
         if (WindowHelper::IsSystemWindow(GetType())) {
+            if (GetType() == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW) {
+                WLOGFI("System sub window is not support");
+                return WMError::WM_ERROR_INVALID_TYPE;
+            }
             // Not valid system window type for session should return WMError::WM_OK;
             if (!IsValidSystemWindowType(GetType())) {
                 return WMError::WM_OK;
