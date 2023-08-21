@@ -2769,6 +2769,7 @@ void SceneSessionManager::StartWindowInfoReportLoop()
 
 void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(const sptr<SceneSession>& sceneSession)
 {
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     if (callingSession_ == nullptr) {
         WLOGFE("calling session is nullptr");
         return;
@@ -2812,6 +2813,7 @@ void SceneSessionManager::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> 
 
 void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
 {
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     WLOGFD("RestoreCallingSessionSizeIfNeed");
     if (callingSession_ == nullptr) {
         WLOGFE("Calling session is nullptr");
