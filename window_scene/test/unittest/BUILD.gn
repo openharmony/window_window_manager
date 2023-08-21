@@ -28,6 +28,7 @@ group("unittest") {
     ":ws_screen_session_manager_test",
     ":ws_session_manager_agent_controller_test",
     ":ws_session_test",
+    ":ws_window_event_channel_test",
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
   ]
@@ -187,6 +188,46 @@ ohos_unittest("ws_window_session_property_test") {
   external_deps = [ "c_utils:utils" ]
 }
 
+ohos_unittest("ws_window_event_channel_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_event_channel_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_screen_rotation_property_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screen_rotation_property_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "sensor:sensor_interface_native",
+  ]
+}
+
+ohos_unittest("ws_move_drag_controller_test") {
+  module_out_path = module_out_path
+
+  sources = [ "move_drag_controller_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 ## Build ws_unittest_common.a {{{
 config("ws_unittest_common_public_config") {
   include_dirs = [
@@ -269,6 +310,7 @@ ohos_static_library("ws_unittest_common") {
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "sensor:sensor_interface_native",
   ]
 
   part_name = "window_manager"
