@@ -23,6 +23,7 @@
 #include <getopt.h>
 #include <hitrace_meter.h>
 #include <image_type.h>
+#include "image_packer.h"
 #include <iostream>
 #include <ostream>
 #include <csetjmp>
@@ -57,6 +58,8 @@ constexpr uint32_t RGBA8888_MASK_BLUE = 0x000000FF;
 constexpr uint32_t RGBA8888_MASK_GREEN = 0x0000FF00;
 constexpr uint32_t RGBA8888_MASK_RED = 0x00FF0000;
 
+constexpr uint8_t PACKER_QUALITY = 75;
+constexpr uint32_t PACKER_SUCCESS = 0;
 struct MissionErrorMgr : public jpeg_error_mgr {
     jmp_buf environment;
 };
@@ -352,8 +355,36 @@ bool SnapShotUtils::WriteToJpeg(int fd, const WriteToJpegParam &param)
     return ret;
 }
 
+bool SnapShotUtils::SaveSnapShot(const std::string &fileName, Media::PixelMap &pixelMap)
+{
+    OHOS::Media::ImagePacker imagePacker;
+    OHOS::Media::PackOption option;
+    option.format = "image/jpeg";
+    option.quality = PACKER_QUALITY;
+    option.numberHint = 1;
+    std::set<std::string> formats;
+    auto ret = imagePacker.GetSupportedFormats(formats);
+    if (ret) {
+        std::cout << "error: get supported formats error" << std::endl;
+        return false;
+    }
+
+    imagePacker.StartPacking(fileName, option);
+    imagePacker.AddImage(pixelMap);
+    int64_t packedSize = 0;
+    uint32_t ret = imagePacker.FinalizePacking(packedSize);
+    if (ret != PACKER_SUCCESS) {
+        std::cout << "error:FinalizePacking error" << std::endl;
+        return false;
+    }
+    return true;
+}
+
 bool SnapShotUtils::WriteToJpegWithPixelMap(const std::string &fileName, Media::PixelMap &pixelMap)
 {
+    if (pixelMap.GetAllocatorType() == Media::AllocatorType::DMA_ALLOC) {
+        return SaveSnapShot(fileName, pixelMap);
+    }
     WriteToJpegParam param;
     param.width = static_cast<uint32_t>(pixelMap.GetWidth());
     param.height = static_cast<uint32_t>(pixelMap.GetHeight());
