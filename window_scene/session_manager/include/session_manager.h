@@ -64,7 +64,7 @@ private:
     sptr<IScreenSessionManager> screenSessionManagerProxy_ = nullptr;
     sptr<ScreenLock::ScreenLockManagerInterface> screenLockManagerProxy_ = nullptr;
     sptr<SSMDeathRecipient> ssmDeath_ = nullptr;
-    std::shared_mutex proxyMutex_;
+    std::recursive_mutex mutex_;
 };
 } // namespace OHOS::Rosen
 

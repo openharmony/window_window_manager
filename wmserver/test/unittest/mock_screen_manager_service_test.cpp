@@ -71,6 +71,19 @@ HWTEST_F(MockScreenManagerServiceTest, OnStart1, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: OnStart2
+ * @tc.desc: on start
+ * @tc.type: FUNC
+ */
+HWTEST_F(MockScreenManagerServiceTest, OnStart2, Function | SmallTest | Level2)
+{
+    MockScreenManagerService* mService = new MockScreenManagerService();
+    auto res = WMError::WM_OK;
+    mService->OnStart();
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
  * @tc.name: GetScreenDumpInfo
  * @tc.desc: get screen dump info
  * @tc.type: FUNC
@@ -85,6 +98,21 @@ HWTEST_F(MockScreenManagerServiceTest, GetScreenDumpInfo, Function | SmallTest |
 }
 
 /**
+ * @tc.name: GetScreenDumpInfo
+ * @tc.desc: get screen dump info
+ * @tc.type: FUNC
+ */
+HWTEST_F(MockScreenManagerServiceTest, GetScreenDumpInfo2, Function | SmallTest | Level2)
+{
+    MockScreenManagerService* mService = new MockScreenManagerService();
+    std::vector<std::string> params;
+    std::string info;
+    auto ret = WMError::WM_OK;
+    mService->GetScreenDumpInfo(params, info);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
  * @tc.name: Dump
  * @tc.desc: Dump
  * @tc.type: FUNC
@@ -95,6 +123,49 @@ HWTEST_F(MockScreenManagerServiceTest, Dump, Function | SmallTest | Level2)
     auto ret = 0;
     ret = MockScreenManagerService::GetInstance().Dump(0, args);
     ASSERT_NE(0, ret);
+}
+
+/**
+ * @tc.name: Dump
+ * @tc.desc: Dump
+ * @tc.type: FUNC
+ */
+HWTEST_F(MockScreenManagerServiceTest, Dump2, Function | SmallTest | Level2)
+{
+    MockScreenManagerService* mService = new MockScreenManagerService();
+    std::vector<std::u16string> args;
+    auto ret = 0;
+    ret = mService->Dump(0, args);
+    ASSERT_NE(0, ret);
+}
+
+/**
+ * @tc.name: SetSessionManagerService
+ * @tc.desc: SetSessionManagerService
+ * @tc.type: FUNC
+ */
+HWTEST_F(MockScreenManagerServiceTest, SetSessionManagerService1, Function | SmallTest | Level2)
+{
+    std::vector<std::u16string> args;
+    auto ret = 0;
+    sptr<IRemoteObject> sessionManagerService = nullptr;
+    MockScreenManagerService::GetInstance().SetSessionManagerService(sessionManagerService);
+    ASSERT_EQ(0, ret);
+}
+
+/**
+ * @tc.name: SetSessionManagerService
+ * @tc.desc: SetSessionManagerService
+ * @tc.type: FUNC
+ */
+HWTEST_F(MockScreenManagerServiceTest, SetSessionManagerService2, Function | SmallTest | Level2)
+{
+    MockScreenManagerService* mService = new MockScreenManagerService();
+    std::vector<std::u16string> args;
+    auto ret = 0;
+    sptr<IRemoteObject> sessionManagerService = nullptr;
+    mService->SetSessionManagerService(sessionManagerService);
+    ASSERT_EQ(0, ret);
 }
 }
 }

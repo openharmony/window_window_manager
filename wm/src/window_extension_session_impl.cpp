@@ -75,9 +75,8 @@ WMError WindowExtensionSessionImpl::Resize(uint32_t width, uint32_t height)
 
 WMError WindowExtensionSessionImpl::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
 {
-    if (state_ < WindowState::STATE_CREATED) {
-        WLOGFE("Extension invalid [name:%{public}s, id:%{public}d], state:%{public}u",
-            property_->GetWindowName().c_str(), property_->GetPersistentId(), state_);
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("Window session invalid.");
         return WMError::WM_ERROR_REPEAT_OPERATION;
     }
     return static_cast<WMError>(hostSession_->TransferAbilityResult(resultCode, want));
@@ -85,9 +84,8 @@ WMError WindowExtensionSessionImpl::TransferAbilityResult(uint32_t resultCode, c
 
 WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
-    if (state_ < WindowState::STATE_CREATED) {
-        WLOGFE("Extension invalid [name:%{public}s, id:%{public}d], state:%{public}u",
-            property_->GetWindowName().c_str(), property_->GetPersistentId(), state_);
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("Window session invalid.");
         return WMError::WM_ERROR_REPEAT_OPERATION;
     }
     return static_cast<WMError>(hostSession_->TransferExtensionData(wantParams));
@@ -95,9 +93,8 @@ WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParam
 
 void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func)
 {
-    if (state_ < WindowState::STATE_CREATED) {
-        WLOGFE("Extension invalid [name:%{public}s, id:%{public}d], state:%{public}u",
-            property_->GetWindowName().c_str(), property_->GetPersistentId(), state_);
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("Window session invalid.");
         return;
     }
     notifyTransferComponentDataFunc_ = std::move(func);

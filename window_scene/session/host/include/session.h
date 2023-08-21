@@ -78,8 +78,9 @@ public:
     void SetSessionRect(const WSRect& rect);
 
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
+    std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
-    std::shared_ptr<Media::PixelMap> Snapshot();
+    std::shared_ptr<Media::PixelMap> Snapshot(float scale = 1);
     SessionState GetSessionState() const;
     SessionInfo& GetSessionInfo();
     sptr<WindowSessionProperty> GetSessionProperty() const;
@@ -229,6 +230,7 @@ public:
     {
         return std::vector<Rect>();
     }
+    WSError RaiseAboveTarget(int32_t subWindowId) override;
 
 protected:
     void GeneratePersistentId(const bool isExtension, const SessionInfo& sessionInfo);
@@ -241,6 +243,7 @@ protected:
     SessionInfo sessionInfo_;
     sptr<WindowSessionProperty> property_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
+    std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
     std::shared_ptr<Media::PixelMap> snapshot_;
     sptr<ISessionStage> sessionStage_;
     bool isActive_ = false;

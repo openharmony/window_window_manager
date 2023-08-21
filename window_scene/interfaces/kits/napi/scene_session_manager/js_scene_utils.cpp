@@ -367,6 +367,7 @@ NativeValue* SessionTypeInit(NativeEngine* engine)
     SetTypeProperty(object, engine, "TYPE_LAUNCHER_RECENT", JsSessionType::TYPE_LAUNCHER_RECENT);
     SetTypeProperty(object, engine, "TYPE_SCENE_BOARD", JsSessionType::TYPE_SCENE_BOARD);
     SetTypeProperty(object, engine, "TYPE_DRAGGING_EFFECT", JsSessionType::TYPE_DRAGGING_EFFECT);
+    SetTypeProperty(object, engine, "TYPE_INPUT_METHOD_STATUS_BAR", JsSessionType::TYPE_INPUT_METHOD_STATUS_BAR);
     return objValue;
 }
 } // namespace OHOS::Rosen

@@ -307,7 +307,7 @@ std::vector<DisplayId> ScreenSessionManager::GetAllDisplayIds()
 
 sptr<ScreenInfo> ScreenSessionManager::GetScreenInfoById(ScreenId screenId)
 {
-    auto screenSession = GetOrCreateScreenSession(screenId);
+    auto screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
         WLOGE("SCB: ScreenSessionManager::GetScreenInfoById cannot find screenInfo: %{public}" PRIu64"", screenId);
         return nullptr;
@@ -702,6 +702,7 @@ DMError ScreenSessionManager::SetOrientation(ScreenId screenId, Orientation orie
         WLOGFE("SCB: ScreenSessionManager set orientation: %{public}u", static_cast<uint32_t>(orientation));
         return DMError::DM_ERROR_INVALID_PARAM;
     }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetOrientation");
     return SetOrientationController(screenId, orientation, false);
 }
 
@@ -711,6 +712,7 @@ DMError ScreenSessionManager::SetOrientationFromWindow(DisplayId displayId, Orie
     if (displayInfo == nullptr) {
         return DMError::DM_ERROR_NULLPTR;
     }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetOrientationFromWindow");
     return SetOrientationController(displayInfo->GetScreenId(), orientation, true);
 }
 

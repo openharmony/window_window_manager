@@ -67,6 +67,7 @@ public:
     WMError SetFocusable(bool isFocusable) override;
     WMError SetTouchable(bool isTouchable) override;
     WMError SetResizeByDragEnabled(bool dragEnabled) override;
+    WMError SetRaiseByClickEnabled(bool raiseEnabled) override;
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;
     virtual float GetBrightness() const override;
@@ -181,7 +182,6 @@ private:
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
     static GraphicColorGamut GetSurfaceGamutFromColorSpace(ColorSpace colorSpace);
-    static std::unordered_map<ColorSpace, GraphicColorGamut> colorSpaceConvertMap;
 
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);

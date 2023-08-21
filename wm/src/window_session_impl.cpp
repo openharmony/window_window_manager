@@ -50,10 +50,6 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
 }
 
-std::unordered_map<ColorSpace, GraphicColorGamut> WindowSessionImpl::colorSpaceConvertMap = {
-    {ColorSpace::COLOR_SPACE_DEFAULT, GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB},
-    {ColorSpace::COLOR_SPACE_WIDE_GAMUT, GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DCI_P3},
-};
 std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
 std::map<int32_t, std::vector<sptr<IWindowChangeListener>>> WindowSessionImpl::windowChangeListeners_;
 std::map<int32_t, std::vector<sptr<IAvoidAreaChangedListener>>> WindowSessionImpl::avoidAreaChangeListeners_;
@@ -183,23 +179,26 @@ sptr<ISession> WindowSessionImpl::GetHostSession() const
 
 ColorSpace WindowSessionImpl::GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut)
 {
-    for (std::pair<ColorSpace, GraphicColorGamut> p: colorSpaceConvertMap) {
-        if (p.second == colorGamut) {
-            return p.first;
-        }
+    if (colorGamut == GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB) {
+        return ColorSpace::COLOR_SPACE_DEFAULT;
+    } else if (colorGamut == GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DCI_P3) {
+        return ColorSpace::COLOR_SPACE_WIDE_GAMUT;
+    } else {
+        WLOGFE("try to get not exist ColorSpace");
+        return ColorSpace::COLOR_SPACE_DEFAULT;
     }
-    WLOGFE("try to get not exist ColorSpace");
-
-    return ColorSpace::COLOR_SPACE_DEFAULT;
 }
 
 GraphicColorGamut WindowSessionImpl::GetSurfaceGamutFromColorSpace(ColorSpace colorSpace)
 {
-    if (colorSpaceConvertMap.count(colorSpace)) {
-        return colorSpaceConvertMap[colorSpace];
+    if (colorSpace == ColorSpace::COLOR_SPACE_DEFAULT) {
+        return GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB;
+    } else if (colorSpace == ColorSpace::COLOR_SPACE_WIDE_GAMUT) {
+        return GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DCI_P3;
+    } else {
+        WLOGFE("try to get not exist colorGamut");
+        return GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB;
     }
-    WLOGFE("try to get not exist colorGamut");
-    return GRAPHIC_COLOR_GAMUT_SRGB;
 }
 
 bool WindowSessionImpl::IsSupportWideGamut()
@@ -291,9 +290,9 @@ WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
     // delete after replace WSError with WMError
     WMError res = static_cast<WMError>(ret);
     if (res == WMError::WM_OK) {
-        NotifyAfterForeground();
         state_ = WindowState::STATE_SHOWN;
         requestState_ = WindowState::STATE_SHOWN;
+        NotifyAfterForeground();
     } else {
         NotifyForegroundFailed(res);
     }
@@ -314,9 +313,9 @@ WMError WindowSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFrom
         NotifyBackgroundFailed(WMError::WM_DO_NOTHING);
         return WMError::WM_OK;
     }
-    NotifyAfterBackground();
     state_ = WindowState::STATE_HIDDEN;
     requestState_ = WindowState::STATE_HIDDEN;
+    NotifyAfterBackground();
     return WMError::WM_OK;
 }
 
@@ -372,7 +371,8 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         int heightRange = 50;
         if (std::abs((int)(GetRect().width_) - (int)(wmRect.width_)) > widthRange ||
             std::abs((int)(GetRect().height_) - (int)(wmRect.height_)) > heightRange) {
-            wmReason = WindowSizeChangeReason::MAXIMIZE;
+            wmReason = wmReason == WindowSizeChangeReason::UNDEFINED ?
+                WindowSizeChangeReason::MAXIMIZE : wmReason;
         }
     }
     auto preRect = GetRect();
@@ -641,6 +641,17 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
 
     property_->SetDragEnabled(dragEnabled);
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
+}
+
+WMError WindowSessionImpl::SetRaiseByClickEnabled(bool raiseEnabled)
+{
+    WLOGFD("set raiseEnabled");
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    property_->SetRaiseEnabled(raiseEnabled);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED);
 }
 
 bool WindowSessionImpl::GetTouchable() const

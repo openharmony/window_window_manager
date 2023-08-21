@@ -78,6 +78,7 @@ private:
     void ProcessIsCustomAnimationPlaying();
     void ProcessShowWhenLockedRegister();
     void ProcessRequestedOrientationChange();
+    void ProcessRaiseAboveTargetRegister();
 
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(SessionInfo& info);
@@ -87,6 +88,7 @@ private:
     void OnBindDialogTarget(const sptr<SceneSession>& sceneSession);
     void OnSessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void OnRaiseToTop();
+    void OnRaiseAboveTarget(int32_t subWindowId);
     void OnBackPressed();
     void OnSessionFocusableChange(bool isFocusable);
     void OnSessionTouchableChange(bool touchable);
