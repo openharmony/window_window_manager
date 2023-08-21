@@ -170,6 +170,7 @@ NativeValue* CreateJsSessionInfo(NativeEngine& engine, const SessionInfo& sessio
     object->SetProperty("callerPersistentId", CreateJsValue(engine,
         static_cast<int32_t>(sessionInfo.callerPersistentId_)));
     object->SetProperty("callState", CreateJsValue(engine, static_cast<int32_t>(sessionInfo.callState_)));
+    object->SetProperty("windowMode", CreateJsValue(engine, static_cast<int32_t>(sessionInfo.windowMode)));
     return objValue;
 }
 

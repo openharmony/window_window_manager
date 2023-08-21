@@ -473,12 +473,12 @@ HWTEST_F(WindowSessionTest, RequestSessionBack, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
 
-    ASSERT_EQ(WSError::WS_DO_NOTHING, session_->RequestSessionBack());
+    ASSERT_EQ(WSError::WS_DO_NOTHING, session_->RequestSessionBack(false));
 
-    NotifyBackPressedFunc callback = []() {};
+    NotifyBackPressedFunc callback = [](bool needMoveToBackground) {};
 
     session_->SetBackPressedListenser(callback);
-    ASSERT_EQ(WSError::WS_OK, session_->RequestSessionBack());
+    ASSERT_EQ(WSError::WS_OK, session_->RequestSessionBack(false));
 }
 
 /**
@@ -691,6 +691,7 @@ HWTEST_F(WindowSessionTest, ConsumeMoveEvent02, Function | SmallTest | Level2)
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };
+    sceneSession->moveDragController_->isStartMove_ = true;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_TRUE(pointerEvent);
     pointerEvent->SetAgentWindowId(1);

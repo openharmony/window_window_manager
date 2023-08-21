@@ -1168,16 +1168,37 @@ WSError WindowSceneSessionImpl::HandleBackEvent()
     }
     WLOGFD("report Back");
     SingletonContainer::Get<WindowInfoReporter>().ReportBackButtonInfoImmediately();
+    if (handler_ == nullptr) {
+        WLOGFE("HandleBackEvent handler_ is nullptr!");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
     // notify back event to host session
-    PerformBack();
+    wptr<WindowSceneSessionImpl> weak = this;
+    auto task = [weak]() {
+        auto weakSession = weak.promote();
+        if (weakSession == nullptr) {
+            WLOGFE("HandleBackEvent session wptr is nullptr");
+            return;
+        }
+        weakSession->PerformBack();
+    };
+    if (!handler_->PostTask(task)) {
+        WLOGFE("Failed to post PerformBack");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
     return WSError::WS_OK;
 }
 
 void WindowSceneSessionImpl::PerformBack()
 {
     if (hostSession_) {
-        WLOGFD("Transfer back event to host session");
-        hostSession_->RequestSessionBack();
+        bool needMoveToBackground = false;
+        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+        if (abilityContext != nullptr) {
+            abilityContext->OnBackPressedCallBack(needMoveToBackground);
+        }
+        WLOGFI("Transfer back event to host session needMoveToBackground %{public}d", needMoveToBackground);
+        hostSession_->RequestSessionBack(needMoveToBackground);
     }
 }
 
