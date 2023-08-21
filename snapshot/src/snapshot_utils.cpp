@@ -372,8 +372,8 @@ bool SnapShotUtils::SaveSnapShot(const std::string &fileName, Media::PixelMap &p
     imagePacker.StartPacking(fileName, option);
     imagePacker.AddImage(pixelMap);
     int64_t packedSize = 0;
-    uint32_t ret = imagePacker.FinalizePacking(packedSize);
-    if (ret != PACKER_SUCCESS) {
+    uint32_t res = imagePacker.FinalizePacking(packedSize);
+    if (res != PACKER_SUCCESS) {
         std::cout << "error:FinalizePacking error" << std::endl;
         return false;
     }
