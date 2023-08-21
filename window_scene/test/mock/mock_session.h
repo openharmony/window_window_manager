@@ -43,7 +43,7 @@ public:
     MOCK_METHOD1(PendingSessionActivation, WSError(const sptr<AAFwk::SessionInfo> info));
     MOCK_METHOD1(UpdateActiveStatus, WSError(bool isActive));
     MOCK_METHOD1(OnSessionEvent, WSError(SessionEvent event));
-    MOCK_METHOD0(RequestSessionBack, WSError(void));
+    MOCK_METHOD1(RequestSessionBack, WSError(bool needMoveToBackground));
     MOCK_METHOD0(RaiseToAppTop, WSError(void));
     MOCK_METHOD1(GetAvoidAreaByType, AvoidArea(AvoidAreaType type));
     MOCK_METHOD1(SetAspectRatio, WSError(float ratio));
