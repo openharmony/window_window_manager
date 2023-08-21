@@ -19,6 +19,7 @@
 #include <iremote_broker.h>
 #include <iservice_registry.h>
 
+#include "ability.h"
 #include "ability_context.h"
 #include "ability_context_impl.h"
 #include "js_runtime.h"
@@ -703,23 +704,14 @@ void CheckWindowImplFunctionsPart9(sptr<WindowImpl> window, const uint8_t* data,
     window->UnregisterDisplayMoveListener(displayMoveListener);
     AAFwk::Want want;
     window->OnNewWant(want);
-}
-
-void CheckWindowImplFunctionsPart10(sptr<WindowImpl> window, const uint8_t* data, size_t size)
-{
-    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
-        return;
-    }
     size_t startPos = 0;
     const std::string contentInfo = "WindowFuzzTest";
-    AbilityRuntime::Runtime::Options options;
-    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
-    NativeEngine& engine = jsRuntime->GetNativeEngine();
-    NativeValue* storage = engine.CreateObject();
+    NativeEngine* engine = nullptr;
+    NativeValue* storage = nullptr;
     bool isDistributed = false;
     startPos += GetObject(isDistributed, data + startPos, size - startPos);
-    AppExecFwk::Ability* ability = nullptr;
-    window->SetUIContent(contentInfo, &engine, storage, isDistributed, ability);
+    AppExecFwk::Ability ability;
+    window->SetUIContent(contentInfo, engine, storage, isDistributed, &ability);
 }
 
 void WindowImplFuzzTest(const uint8_t* data, size_t size)
@@ -754,7 +746,6 @@ void WindowImplFuzzTest(const uint8_t* data, size_t size)
     OHOS::CheckWindowImplFunctionsPart7(window, data, size);
     OHOS::CheckWindowImplFunctionsPart8(window, data, size);
     OHOS::CheckWindowImplFunctionsPart9(window, data, size);
-    OHOS::CheckWindowImplFunctionsPart10(window, data, size);
 
     window->Hide(reason, withAnimation);
     window->Destroy();
