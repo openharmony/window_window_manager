@@ -19,11 +19,13 @@ group("unittest") {
   testonly = true
 
   deps = [
+    ":ws_move_drag_controller_test",
     ":ws_scene_session_manager_proxy_test",
     ":ws_scene_session_manager_stub_test",
     ":ws_scene_session_manager_test",
     ":ws_scene_session_test",
     ":ws_screen_cutout_controller_test",
+    ":ws_screen_rotation_property_test",
     ":ws_screen_scene_config_test",
     ":ws_screen_session_manager_test",
     ":ws_session_manager_agent_controller_test",
