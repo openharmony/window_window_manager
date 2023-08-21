@@ -82,7 +82,7 @@ bool WindowSceneSessionImpl::IsValidSystemWindowType(const WindowType& type)
         type == WindowType::WINDOW_TYPE_VOICE_INTERACTION || type == WindowType::WINDOW_TYPE_POINTER ||
         type == WindowType::WINDOW_TYPE_TOAST || type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT ||
         type == WindowType::WINDOW_TYPE_SEARCHING_BAR || type == WindowType::WINDOW_TYPE_PANEL ||
-        type == WindowType::WINDOW_TYPE_VOLUME_OVERLAY)) {
+        type == WindowType::WINDOW_TYPE_VOLUME_OVERLAY || type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR)) {
         WLOGFW("Invalid type: %{public}u", GetType());
         return false;
     }
@@ -185,7 +185,8 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     hostSession_ = iSession;
     context_ = context;
     AdjustWindowAnimationFlag();
-    if (context->GetApplicationInfo() && context->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
+    if (context && context->GetApplicationInfo() &&
+        context->GetApplicationInfo()->apiCompatibleVersion >= 9 && // 9: api version
         !SessionPermission::IsSystemCalling()) {
         WLOGI("Remove window flag WINDOW_FLAG_SHOW_WHEN_LOCKED");
         property_->SetWindowFlags(property_->GetWindowFlags() &
@@ -195,6 +196,10 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         ret = Connect();
     } else { // system or sub window
         if (WindowHelper::IsSystemWindow(GetType())) {
+            if (GetType() == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW) {
+                WLOGFI("System sub window is not support");
+                return WMError::WM_ERROR_INVALID_TYPE;
+            }
             // Not valid system window type for session should return WMError::WM_OK;
             if (!IsValidSystemWindowType(GetType())) {
                 return WMError::WM_OK;
@@ -784,6 +789,30 @@ WmErrorCode WindowSceneSessionImpl::RaiseToAppTop()
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     const WSError& ret = hostSession_->RaiseToAppTop();
+    return static_cast<WmErrorCode>(ret);
+}
+
+WmErrorCode WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
+{
+    auto parentId = GetParentId();
+    if (parentId == INVALID_SESSION_ID) {
+        WLOGFE("Only the children of the main window can be raised!");
+        return WmErrorCode::WM_ERROR_INVALID_PARENT;
+    }
+
+    if (!WindowHelper::IsSubWindow(GetType())) {
+        WLOGFE("Must be app sub window window!");
+        return WmErrorCode::WM_ERROR_INVALID_CALLING;
+    }
+
+    if (state_ != WindowState::STATE_SHOWN) {
+        WLOGFE("The sub window must be shown!");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    if (!hostSession_) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    const WSError& ret = hostSession_->RaiseAboveTarget(subWindowId);
     return static_cast<WmErrorCode>(ret);
 }
 
@@ -1566,10 +1595,7 @@ WMError WindowSceneSessionImpl::SetTurnScreenOn(bool turnScreenOn)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     property_->SetTurnScreenOn(turnScreenOn);
-    if (state_ == WindowState::STATE_SHOWN) {
-        return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
-    }
-    return WMError::WM_OK;
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
 }
 
 bool WindowSceneSessionImpl::IsTurnScreenOn() const
@@ -1584,10 +1610,7 @@ WMError WindowSceneSessionImpl::SetKeepScreenOn(bool keepScreenOn)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     property_->SetKeepScreenOn(keepScreenOn);
-    if (state_ == WindowState::STATE_SHOWN) {
-        return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
-    }
-    return WMError::WM_OK;
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
 }
 
 bool WindowSceneSessionImpl::IsKeepScreenOn() const

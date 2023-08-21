@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "iremote_object.h"
 #include "session/host/include/session.h"
 #include "session/host/include/move_drag_controller.h"
 #include "wm_common.h"
@@ -49,6 +50,7 @@ using NotifyNeedAvoidFunc = std::function<void(bool status)>;
 using NotifyWindowAnimationFlagChangeFunc = std::function<void(const bool flag)>;
 using NotifyShowWhenLockedFunc = std::function<void(bool showWhenLocked)>;
 using NotifyReqOrientationChangeFunc = std::function<void(uint32_t orientation)>;
+using NotifyRaiseAboveTargetFunc = std::function<void(int32_t subWindowId)>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -74,6 +76,7 @@ public:
         NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
         NotifyShowWhenLockedFunc OnShowWhenLocked_;
         NotifyReqOrientationChangeFunc OnRequestedOrientationChange_;
+        NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
     };
 
     // func for change window scene pattern property
@@ -151,33 +154,21 @@ public:
     void SetCollaboratorType(int32_t collaboratorType);
     std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfo();
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
+    void SetSelfToken(sptr<IRemoteObject> selfToken);
+    sptr<IRemoteObject> GetSelfToken();
+    WSError RaiseAboveTarget(int32_t subWindowId) override;
 private:
-    struct MoveTempProperty {
-        int32_t pointerId_ = -1;
-        int32_t lastDownPointerPosX_ = -1;
-        int32_t lastDownPointerPosY_ = -1;
-        int32_t lastDownPointerWindowX_ = -1;
-        int32_t lastDownPointerWindowY_ = -1;
-        int32_t lastMovePointerPosX_ = -1;
-        int32_t lastMovePointerPosY_ = -1;
-
-        bool isEmpty() const
-        {
-            return (pointerId_ == -1 && lastDownPointerPosX_ == -1 && lastDownPointerPosY_ == -1);
-        }
-    };
-
     void UpdateCameraFloatWindowStatus(bool isShowing);
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
-    void SetSessionRectChangeCallback();
-    void OnSessionRectChange();
+    void SetMoveDragCallback();
+    void OnMoveDragCallback(const SizeChangeReason& reason);
     bool FixRectByAspectRatio(WSRect& rect);
     std::string GetRatioPreferenceKey();
     bool SaveAspectRatio(float ratio);
     void NotifyIsCustomAnimatiomPlaying(bool isPlaying);
     void NotifyPropertyWhenConnect();
-    WSError UpdateMoveTempProperty(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void ClacFirstMoveTargetRect();
+    void SetSurfaceBound(const WSRect& rect);
+    void UpdateWinRectForSystemBar(WSRect& rect);
 
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
@@ -187,7 +178,7 @@ private:
     static wptr<SceneSession> enterSession_;
     static std::mutex enterSessionMutex_;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
-    MoveTempProperty moveTempProperty_;
+    sptr<IRemoteObject> selfToken_ = nullptr;
 };
 } // namespace OHOS::Rosen
 

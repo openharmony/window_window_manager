@@ -76,6 +76,11 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
     return surfaceNode_;
 }
 
+std::shared_ptr<RSSurfaceNode> Session::GetLeashWinSurfaceNode() const
+{
+    return leashWinSurfaceNode_;
+}
+
 std::shared_ptr<Media::PixelMap> Session::GetSnapshot() const
 {
     return snapshot_;
@@ -334,6 +339,11 @@ float Session::GetBrightness() const
 
 bool Session::IsSessionValid() const
 {
+    if (sessionInfo_.isSystem_) {
+        WLOGFI("session is system, id: %{public}d, name: %{public}s, state: %{public}u",
+            GetPersistentId(), sessionInfo_.bundleName_.c_str(), state_);
+        return false;
+    }
     bool res = state_ > SessionState::STATE_DISCONNECT && state_ < SessionState::STATE_END;
     if (!res) {
         WLOGFI("session is already destroyed or not created! id: %{public}d state: %{public}u",
@@ -505,7 +515,8 @@ WSError Session::Disconnect()
     WLOGFI("Disconnect session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
     if (state == SessionState::STATE_ACTIVE) {
-        snapshot_ = Snapshot();
+        constexpr float scale = 0.5;
+        snapshot_ = Snapshot(scale);
         if (scenePersistence_ && snapshot_) {
             scenePersistence_->SaveSnapshot(snapshot_);
         }
@@ -957,10 +968,9 @@ WSError Session::TransferFocusStateEvent(bool focusState)
     return windowEventChannel_->TransferFocusState(focusState);
 }
 
-std::shared_ptr<Media::PixelMap> Session::Snapshot()
+std::shared_ptr<Media::PixelMap> Session::Snapshot(float scale)
 {
     auto callback = std::make_shared<SurfaceCaptureFuture>();
-    constexpr float scale = 0.5;
     bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, scale, scale);
     if (!ret) {
         WLOGFE("TakeSurfaceCapture failed");
@@ -1143,6 +1153,11 @@ WSError Session::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& r
 }
 
 WSError Session::RaiseToAppTop()
+{
+    return WSError::WS_OK;
+}
+
+WSError Session::RaiseAboveTarget(int32_t subWindowId)
 {
     return WSError::WS_OK;
 }

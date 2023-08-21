@@ -844,5 +844,15 @@ WMError WindowImpl::SetResizeByDragEnabled(bool dragEnabled)
 {
     return WMError::WM_OK;
 }
+
+WMError WindowImpl::SetRaiseByClickEnabled(bool raiseEnabled)
+{
+    return WMError::WM_OK;
+}
+
+WmErrorCode WindowImpl::RaiseAboveTarget(int32_t subWindowId)
+{
+    return WmErrorCode::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS

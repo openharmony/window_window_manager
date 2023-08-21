@@ -660,20 +660,20 @@ HWTEST_F(WindowSessionTest, ConsumeMoveEvent01, Function | SmallTest | Level2)
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
     auto result = sceneSession->moveDragController_->ConsumeMoveEvent(pointerEvent, originalRect);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+    ASSERT_FALSE(result);
 
     pointerEvent = MMI::PointerEvent::Create();
     ASSERT_TRUE(pointerEvent);
     pointerEvent->SetPointerId(1);
     sceneSession->moveDragController_->moveDragProperty_.pointerId_ = 0;
     result = sceneSession->moveDragController_->ConsumeMoveEvent(pointerEvent, originalRect);
-    ASSERT_EQ(result, WSError::WS_DO_NOTHING);
+    ASSERT_FALSE(result);
 
     pointerEvent->SetPointerId(0);
     pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
     pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_RIGHT);
     result = sceneSession->moveDragController_->ConsumeMoveEvent(pointerEvent, originalRect);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+    ASSERT_FALSE(result);
 }
 
 /**
@@ -706,25 +706,25 @@ HWTEST_F(WindowSessionTest, ConsumeMoveEvent02, Function | SmallTest | Level2)
     pointerItem.SetWindowX(15);
     pointerItem.SetWindowY(400);
     auto result = sceneSession->moveDragController_->ConsumeMoveEvent(pointerEvent, originalRect);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, true);
 
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
     pointerItem.SetDisplayX(145);
     pointerItem.SetDisplayY(550);
     result = sceneSession->moveDragController_->ConsumeMoveEvent(pointerEvent, originalRect);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, true);
 
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
     pointerItem.SetDisplayX(175);
     pointerItem.SetDisplayY(600);
     result = sceneSession->moveDragController_->ConsumeMoveEvent(pointerEvent, originalRect);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, true);
 
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
     pointerItem.SetDisplayX(205);
     pointerItem.SetDisplayY(650);
     result = sceneSession->moveDragController_->ConsumeMoveEvent(pointerEvent, originalRect);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, true);
 }
 
 /**

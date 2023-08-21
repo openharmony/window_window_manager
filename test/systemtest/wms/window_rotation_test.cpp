@@ -138,6 +138,9 @@ HWTEST_F(WindowRotationTest, WindowRotationTest1, Function | MediumTest | Level3
     fullInfo_.name  = "fullscreen.1";
     fullInfo_.orientation_ = Orientation::UNSPECIFIED;
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
+    if (fullWindow == nullptr) {
+        return;
+    }
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetMode());
@@ -171,7 +174,11 @@ HWTEST_F(WindowRotationTest, WindowRotationTest2, Function | MediumTest | Level3
     fullInfo_.name  = "fullscreen.2";
     fullInfo_.orientation_ = Orientation::REVERSE_HORIZONTAL;
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
+    if (fullWindow == nullptr) {
+        return;
+    }
     activeWindows_.push_back(fullWindow);
+
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetMode());
     sleep(SPLIT_TEST_SLEEP_S);
@@ -208,6 +215,9 @@ HWTEST_F(WindowRotationTest, WindowRotationTest3, Function | MediumTest | Level3
     fullInfo_.orientation_ = Orientation::REVERSE_HORIZONTAL;
     fullInfo_.mode = WindowMode::WINDOW_MODE_FLOATING;
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
+    if (fullWindow == nullptr) {
+        return;
+    }
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
     ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, fullWindow->GetMode());
@@ -241,6 +251,9 @@ HWTEST_F(WindowRotationTest, WindowRotationTest4, Function | MediumTest | Level3
     fullInfo_.name  = "fullscreen.4";
     fullInfo_.orientation_ = Orientation::HORIZONTAL;
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
+    if (fullWindow == nullptr) {
+        return;
+    }
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetMode());
@@ -279,6 +292,9 @@ HWTEST_F(WindowRotationTest, WindowRotationTest5, Function | MediumTest | Level3
     fullInfo_.name  = "fullscreen.5";
     fullInfo_.orientation_ = Orientation::HORIZONTAL;
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
+    if (fullWindow == nullptr) {
+        return;
+    }
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetMode());

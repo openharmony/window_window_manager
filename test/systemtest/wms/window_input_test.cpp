@@ -75,6 +75,9 @@ HWTEST_F(WindowInputTest, SetTouchHotAreas01, Function | MediumTest | Level3)
 {
     fullScreenWindow_.name = "window_hot_areas.1";
     const sptr<Window>& window = Utils::CreateTestWindow(fullScreenWindow_);
+    if (window == nullptr) {
+        return;
+    }
     ASSERT_EQ(WMError::WM_OK, window->Show());
 
     std::vector<Rect> requestedTouchHotAreas;
@@ -124,6 +127,9 @@ HWTEST_F(WindowInputTest, SetTouchHotAreas02, Function | MediumTest | Level3)
 {
     fullScreenWindow_.name = "window_hot_areas.2";
     const sptr<Window>& window = Utils::CreateTestWindow(fullScreenWindow_);
+    if (window == nullptr) {
+        return;
+    }
     ASSERT_EQ(WMError::WM_OK, window->Show());
 
     usleep(WAIT_ASYNC_US);

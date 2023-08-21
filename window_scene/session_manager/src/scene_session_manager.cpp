@@ -743,10 +743,6 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         auto session = GetSceneSession(sessionInfo.persistentId_);
         if (session != nullptr) {
             WLOGFI("get exist session persistentId: %{public}d", sessionInfo.persistentId_);
-            if (sessionInfo.want != nullptr) {
-                session->GetSessionInfo().want = sessionInfo.want;
-                WLOGFI("RequestSceneSession update want");
-            }
             return session;
         }
     }
@@ -785,6 +781,20 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
     };
 
     return taskScheduler_->PostSyncTask(task);
+}
+
+void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
+{
+    if (sessionInfo.persistentId_ != 0) {
+        auto session = GetSceneSession(sessionInfo.persistentId_);
+        if (session != nullptr) {
+            WLOGFI("get exist session persistentId: %{public}d", sessionInfo.persistentId_);
+            if (sessionInfo.want != nullptr) {
+                session->GetSessionInfo().want = sessionInfo.want;
+                WLOGFI("RequestSceneSession update want");
+            }
+        }
+    }
 }
 
 void SceneSessionManager::RegisterInputMethodShownFunc(const sptr<SceneSession>& sceneSession)
@@ -1105,6 +1115,9 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     auto task = [this, sessionStage, eventChannel, surfaceNode, property, &persistentId, &session, token, pid, uid]() {
         // create specific session
         SessionInfo info;
+        if (property) {
+            info.windowType_ = static_cast<uint32_t>(property->GetWindowType());
+        }
         sptr<SceneSession> sceneSession = RequestSceneSession(info, property);
         if (sceneSession == nullptr) {
             return WSError::WS_ERROR_NULLPTR;
@@ -1445,10 +1458,24 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
             return;
         }
         WLOGI("Id: %{public}d, action: %{public}u", sceneSession->GetPersistentId(), action);
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:UpdateProperty");
         weakSession->HandleUpdateProperty(property, action, sceneSession);
     };
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::UpdatePropertyRaiseEnabled(const sptr<WindowSessionProperty>& property,
+                                                     const sptr<SceneSession>& sceneSession)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("Update property raiseEnabled permission denied!");
+        return;
+    }
+
+    if (sceneSession->GetSessionProperty() != nullptr) {
+        sceneSession->GetSessionProperty()->SetRaiseEnabled(property->GetRaiseEnabled());
+    }
 }
 
 void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>& property,
@@ -1554,6 +1581,10 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
             }
             break;
         }
+        case WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED: {
+            UpdatePropertyRaiseEnabled(property, sceneSession);
+            break;
+        }
         default:
             break;
     }
@@ -1599,6 +1630,7 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
             return;
         }
         WLOGI("keep screen on: [%{public}s, %{public}d]", sceneSession->GetWindowName().c_str(), requireLock);
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:HandleKeepScreenOn");
         ErrCode res;
         std::string identity = IPCSkeleton::ResetCallingIdentity();
         if (requireLock) {
@@ -2102,10 +2134,6 @@ int SceneSessionManager::GetSceneSessionPrivacyModeCount(const std::map<int32_t,
             sceneSession->GetSessionProperty()->GetPrivacyMode();
         bool IsSystemWindowVisible = sceneSession->GetSessionInfo().isSystem_ && sceneSession->IsVisible();
         return (isForground || IsSystemWindowVisible) && isPrivate;
-        if ((isForground || IsSystemWindowVisible) && isPrivate) {
-            return true;
-        }
-        return false;
     };
     return std::count_if(sessionMap.begin(), sessionMap.end(), countFunc);
 }
@@ -2147,16 +2175,6 @@ void SceneSessionManager::OnSessionStateChange(int32_t persistentId, const Sessi
     }
 }
 
-void SceneSessionManager::SetWaterMarkSessionCount(int32_t count)
-{
-    waterMarkSessionCount_ = count;
-}
-
-int32_t SceneSessionManager::GetWaterMarkSessionCount() const
-{
-    return waterMarkSessionCount_;
-}
-
 WSError SceneSessionManager::SetWindowFlags(const sptr<SceneSession>& sceneSession, uint32_t flags)
 {
     if (sceneSession == nullptr) {
@@ -2169,10 +2187,7 @@ WSError SceneSessionManager::SetWindowFlags(const sptr<SceneSession>& sceneSessi
     }
     uint32_t oldFlags = property->GetWindowFlags();
     property->SetWindowFlags(flags);
-    // notify when visibility change
-    if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) {
-        CheckAndNotifyWaterMarkChangedResult(flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK));
-    }
+    CheckAndNotifyWaterMarkChangedResult();
     if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) {
         sceneSession->OnShowWhenLocked(flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
     }
@@ -2180,19 +2195,26 @@ WSError SceneSessionManager::SetWindowFlags(const sptr<SceneSession>& sceneSessi
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult(bool isAddingWaterMark)
+void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult()
 {
-    int32_t preWaterMarkSessionCount = GetWaterMarkSessionCount();
-    WLOGFD("before update : water mark count: %{public}u", preWaterMarkSessionCount);
-    SetWaterMarkSessionCount(preWaterMarkSessionCount + (isAddingWaterMark ? 1 : -1));
-    if (preWaterMarkSessionCount == 0 && isAddingWaterMark) {
-        NotifyWaterMarkFlagChangedResult(true);
-        return;
+    bool currentWaterMarkShowState = false;
+    for (auto iter: sceneSessionMap_) {
+        auto session = iter.second;
+        if (!session || !session->GetSessionProperty()) {
+            continue;
+        }
+        bool hasWaterMark = session->GetSessionProperty()->GetWindowFlags()
+            & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
+        if (hasWaterMark && session->GetVisible()) {
+            currentWaterMarkShowState = true;
+            break;
+        }
     }
-    if (preWaterMarkSessionCount == 1 && !isAddingWaterMark) {
-        NotifyWaterMarkFlagChangedResult(false);
-        return;
+    if (lastWaterMarkShowState_ ^ currentWaterMarkShowState) {
+        lastWaterMarkShowState_ = currentWaterMarkShowState;
+        NotifyWaterMarkFlagChangedResult(currentWaterMarkShowState);
     }
+    return;
 }
 
 WSError SceneSessionManager::NotifyWaterMarkFlagChangedResult(bool hasWaterMark)
@@ -3068,11 +3090,8 @@ void SceneSessionManager::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclu
 #endif
         WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
             session->GetWindowId(), isVisible);
-        if (session->GetWindowSessionProperty()->GetWindowFlags() &
-        static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) {
-            CheckAndNotifyWaterMarkChangedResult(isVisible);
-        }
-}
+        CheckAndNotifyWaterMarkChangedResult();
+    }
         if (windowVisibilityInfos.size() != 0) {
             WLOGI("Notify windowvisibilityinfo changed start");
             SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
@@ -3109,10 +3128,7 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
             sceneSession->GetCallingPid(), sceneSession->GetCallingUid(), false, sceneSession->GetWindowType()));
         WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
             sceneSession->GetWindowId(), sceneSession->GetVisible());
-        if (sceneSession->GetWindowSessionProperty()->GetWindowFlags() &
-        static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK)) {
-            CheckAndNotifyWaterMarkChangedResult(false);
-        }
+        CheckAndNotifyWaterMarkChangedResult();
         SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
 }
@@ -3124,10 +3140,7 @@ sptr<SceneSession> SceneSessionManager::FindSessionByToken(const sptr<IRemoteObj
         if (pair.second == nullptr) {
             return false;
         }
-        if (pair.second -> GetAbilityToken() == token) {
-            return true;
-        }
-        return false;
+        return pair.second->GetAbilityToken() == token || pair.second->GetSelfToken() == token;
     };
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     auto iter = std::find_if(sceneSessionMap_.begin(), sceneSessionMap_.end(), cmpFunc);
@@ -3301,11 +3314,14 @@ void SceneSessionManager::OnScreenshot(DisplayId displayId)
 WSError SceneSessionManager::ClearSession(int32_t persistentId)
 {
     WLOGFI("run ClearSession with persistentId: %{public}d", persistentId);
-    if (!SessionPermission::IsSACalling()) {
-        WLOGFI("invalid permission");
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
+        WLOGFE("The caller is not system-app, can not use system-api");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!SessionPermission::VerifySessionPermission()) {
+        WLOGFE("The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-
     auto task = [this, persistentId]() {
         sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
         return ClearSession(sceneSession);
@@ -3332,6 +3348,14 @@ WSError SceneSessionManager::ClearSession(sptr<SceneSession> sceneSession)
 WSError SceneSessionManager::ClearAllSessions()
 {
     WLOGFI("run ClearAllSessions");
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
+        WLOGFE("The caller is not system-app, can not use system-api");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!SessionPermission::VerifySessionPermission()) {
+        WLOGFE("The caller has not permission granted");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
     auto task = [this]() {
         std::vector<sptr<SceneSession>> sessionVector;
         GetAllClearableSessions(sessionVector);
@@ -3485,6 +3509,7 @@ void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, S
     }
     auto collaborator = iter->second;
     auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
+    sceneSession->SetSelfToken(abilitySessionInfo->sessionToken);
     abilitySessionInfo->want = *(sessionInfo.want);
     if (collaborator != nullptr) {
         collaborator->NotifyMissionCreated(abilitySessionInfo);
@@ -3572,7 +3597,7 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession> sceneSession)
     } else if (newSessionInfo.abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
         sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
     }    
-    if(CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
+    if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
         WLOGFI("try to run NotifyStartAbility and NotifySessionCreate");
         NotifyStartAbility(sceneSession->GetCollaboratorType(), newSessionInfo);
         if (newSessionInfo.want != nullptr) {
