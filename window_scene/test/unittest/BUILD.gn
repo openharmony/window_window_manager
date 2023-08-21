@@ -31,6 +31,8 @@ group("unittest") {
     ":ws_window_event_channel_test",
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
+    ":ws_screen_rotation_property_test",
+    ":ws_move_drag_controller_test",
   ]
 }
 
