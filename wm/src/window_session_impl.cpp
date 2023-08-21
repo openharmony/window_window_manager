@@ -661,6 +661,13 @@ bool WindowSessionImpl::GetTouchable() const
 
 WMError WindowSessionImpl::SetWindowType(WindowType type)
 {
+    if (type != WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW && !SessionPermission::IsSystemCalling()) {
+        WLOGFE("set window type permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     property_->SetWindowType(type);
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
     return WMError::WM_OK;
