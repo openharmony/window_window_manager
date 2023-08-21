@@ -577,11 +577,14 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     info.startSetting = abilitySessionInfo->startSetting;
     info.callingTokenId_ = abilitySessionInfo->callingTokenId;
     info.reuse = abilitySessionInfo->reuse;
+    if (info.want != nullptr) {
+        info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
+    }
     WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
-    WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}d, callingTokenId:%{public}d, \
-        uiAbilityId: %{public}" PRIu64 "", info.callState_, info.persistentId_, info.callingTokenId_,
-        info.uiAbilityId_);
+    WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}d, callingTokenId:%{public}d," \
+        "uiAbilityId: %{public}" PRIu64 ", windowMode: %{public}d",
+        info.callState_, info.persistentId_, info.callingTokenId_, info.uiAbilityId_, info.windowMode);
     if (pendingSessionActivationFunc_) {
         pendingSessionActivationFunc_(info);
     }
@@ -1187,13 +1190,13 @@ void Session::SetSystemConfig(const SystemSessionConfig& systemConfig)
     systemConfig_ = systemConfig;
 }
 
-WSError Session::RequestSessionBack()
+WSError Session::RequestSessionBack(bool needMoveToBackground)
 {
     if (!backPressedFunc_) {
         WLOGFW("Session didn't register back event consumer!");
         return WSError::WS_DO_NOTHING;
     }
-    backPressedFunc_();
+    backPressedFunc_(needMoveToBackground);
     return WSError::WS_OK;
 }
 

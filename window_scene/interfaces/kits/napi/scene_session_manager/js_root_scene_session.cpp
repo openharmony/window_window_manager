@@ -200,9 +200,14 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
             int32_t realCallerSessionId = SceneSessionManager::GetInstance().GetFocusedSession();
             WLOGFI("[NAPI]need to back to other session: %{public}d", realCallerSessionId);
             if (sceneSession != nullptr) {
-                sceneSession->GetSessionInfo().persistentId_ = realCallerSessionId;
+                sceneSession->GetSessionInfo().callerPersistentId_ = realCallerSessionId;
             }
             info.callerPersistentId_ = realCallerSessionId;
+        } else {
+            info.callerPersistentId_ = 0;
+            if (sceneSession != nullptr) {
+                sceneSession->GetSessionInfo().callerPersistentId_ = 0;
+            }
         }
     }
     auto iter = jsCbMap_.find(PENDING_SCENE_CB);

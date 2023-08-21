@@ -473,12 +473,12 @@ HWTEST_F(WindowSessionTest, RequestSessionBack, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
 
-    ASSERT_EQ(WSError::WS_DO_NOTHING, session_->RequestSessionBack());
+    ASSERT_EQ(WSError::WS_DO_NOTHING, session_->RequestSessionBack(false));
 
-    NotifyBackPressedFunc callback = []() {};
+    NotifyBackPressedFunc callback = [](bool needMoveToBackground) {};
 
     session_->SetBackPressedListenser(callback);
-    ASSERT_EQ(WSError::WS_OK, session_->RequestSessionBack());
+    ASSERT_EQ(WSError::WS_OK, session_->RequestSessionBack(false));
 }
 
 /**

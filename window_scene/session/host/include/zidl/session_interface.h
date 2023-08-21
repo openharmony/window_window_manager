@@ -89,7 +89,7 @@ public:
     virtual WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId) = 0;
     virtual WSError OnNeedAvoid(bool status) = 0;
     virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type) = 0;
-    virtual WSError RequestSessionBack() = 0;
+    virtual WSError RequestSessionBack(bool needMoveToBackground) = 0;
     virtual WSError MarkProcessed(int32_t eventId) = 0;
     virtual WSError SetGlobalMaximizeMode(MaximizeMode mode) = 0;
     virtual WSError GetGlobalMaximizeMode(MaximizeMode& mode) = 0;
