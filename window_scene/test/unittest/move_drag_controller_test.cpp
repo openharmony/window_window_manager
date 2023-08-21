@@ -68,7 +68,7 @@ HWTEST_F(MoveDragControllerTest, SetStartMoveFlag, Function | SmallTest | Level1
 {
     int32_t res = 0;
     moveDragController->SetStartMoveFlag(true);
-    ASSERT_EQ(0 , res);
+    ASSERT_EQ(0, res);
 }
 
 /**
@@ -80,7 +80,7 @@ HWTEST_F(MoveDragControllerTest, GetStartMoveFlag, Function | SmallTest | Level1
 {
     moveDragController->SetStartMoveFlag(true);
     bool res = moveDragController->GetStartMoveFlag();
-    ASSERT_EQ(true , res);
+    ASSERT_EQ(true, res);
 }
 
 /**
@@ -91,7 +91,7 @@ HWTEST_F(MoveDragControllerTest, GetStartMoveFlag, Function | SmallTest | Level1
 HWTEST_F(MoveDragControllerTest, GetStartDragFlag, Function | SmallTest | Level1)
 {
     bool res = moveDragController->GetStartDragFlag();
-    ASSERT_EQ(false , res);
+    ASSERT_EQ(false, res);
 }
 
 /**
@@ -105,10 +105,10 @@ HWTEST_F(MoveDragControllerTest, GetTargetRect, Function | SmallTest | Level1)
     int32_t pos = 0;
     moveDragController->InitMoveDragProperty();
     WSRect res = moveDragController->GetTargetRect();
-    ASSERT_EQ(tmp , res.height_);
-    ASSERT_EQ(tmp , res.width_);
-    ASSERT_EQ(pos , res.posX_);
-    ASSERT_EQ(pos , res.posY_);
+    ASSERT_EQ(tmp, res.height_);
+    ASSERT_EQ(tmp, res.width_);
+    ASSERT_EQ(pos, res.posX_);
+    ASSERT_EQ(pos, res.posY_);
 }
 
 /**
@@ -120,7 +120,7 @@ HWTEST_F(MoveDragControllerTest, InitMoveDragProperty, Function | SmallTest | Le
 {
     int32_t res = 0;
     moveDragController->InitMoveDragProperty();
-    ASSERT_EQ(0 , res);
+    ASSERT_EQ(0, res);
 }
 
 /**
@@ -137,7 +137,7 @@ HWTEST_F(MoveDragControllerTest, SetOriginalValue, Function | SmallTest | Level1
     int32_t pointerPosY = 30;
     WSRect winRect = { 100, 100, 1000, 1000 };
     moveDragController->SetOriginalValue(pointerId, pointerPosX, pointerPosY, winRect);
-    ASSERT_EQ(0 , res);
+    ASSERT_EQ(0, res);
 }
 
 /**
@@ -149,7 +149,7 @@ HWTEST_F(MoveDragControllerTest, SetAspectRatio, Function | SmallTest | Level1)
 {
     int32_t res = 0;
     moveDragController->SetAspectRatio(0.5);
-    ASSERT_EQ(0 , res);
+    ASSERT_EQ(0, res);
 }
 
 /**
@@ -165,7 +165,7 @@ HWTEST_F(MoveDragControllerTest, CalcMoveTargetRect, Function | SmallTest | Leve
     WSRect originalRect = { 100, 100, 1000, 1000 };
 
     moveDragController->CalcMoveTargetRect(pointerEvent, originalRect);
-    ASSERT_EQ(0 , res);
+    ASSERT_EQ(0, res);
 
     pointerEvent = MMI::PointerEvent::Create();
     int32_t pointerId = pointerEvent->GetPointerId();
@@ -173,9 +173,8 @@ HWTEST_F(MoveDragControllerTest, CalcMoveTargetRect, Function | SmallTest | Leve
     int32_t pointerPosY = 30;
     moveDragController->SetOriginalValue(pointerId, pointerPosX, pointerPosY, originalRect);
     moveDragController->CalcMoveTargetRect(pointerEvent, originalRect);
-    ASSERT_EQ(0 , res);
+    ASSERT_EQ(0, res);
 }
-
 }
 }
 }
