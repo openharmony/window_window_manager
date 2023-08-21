@@ -332,7 +332,12 @@ int SessionStub::HandleRaiseAboveTarget(MessageParcel& data, MessageParcel& repl
 int SessionStub::HandleBackPressed(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleBackPressed!");
-    WSError errCode = RequestSessionBack();
+    bool needMoveToBackground = false;
+    if (!data.ReadBool(needMoveToBackground)) {
+        WLOGFE("Read needMoveToBackground from parcel failed!");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = RequestSessionBack(needMoveToBackground);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

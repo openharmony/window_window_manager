@@ -428,8 +428,8 @@ void JsSceneSession::OnSessionEvent(uint32_t eventId)
 
 void JsSceneSession::ProcessBackPressedRegister()
 {
-    NotifyBackPressedFunc func = [this]() {
-        this->OnBackPressed();
+    NotifyBackPressedFunc func = [this](bool needMoveToBackground) {
+        this->OnBackPressed(needMoveToBackground);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -1006,21 +1006,23 @@ void JsSceneSession::PendingSessionActivationInner(SessionInfo& info)
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsSceneSession::OnBackPressed()
+void JsSceneSession::OnBackPressed(bool needMoveToBackground)
 {
-    WLOGFI("[NAPI]OnBackPressed");
+    WLOGFI("[NAPI]OnBackPressed needMoveToBackground %{public}d", needMoveToBackground);
     auto iter = jsCbMap_.find(BACK_PRESSED_CB);
     if (iter == jsCbMap_.end()) {
         return;
     }
     auto jsCallBack = iter->second;
     auto complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [needMoveToBackground, jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (!jsCallBack) {
                 WLOGFE("[NAPI]jsCallBack is nullptr");
                 return;
             }
-            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), {}, 0);
+            NativeValue* jsNeedMoveToBackgroundObj = CreateJsValue(engine, needMoveToBackground);
+            NativeValue* argv[] = { jsNeedMoveToBackgroundObj };
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
         });
 
     NativeReference* callback = nullptr;
