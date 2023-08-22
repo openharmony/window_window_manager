@@ -93,7 +93,7 @@ namespace {
         ASSERT_EQ(false, controller->IsDisplayRotationHorizontal(Rotation::ROTATION_0));
         ASSERT_EQ(false, controller->IsDisplayRotationHorizontal(Rotation::ROTATION_180));
         ASSERT_EQ(true, controller->IsDisplayRotationHorizontal(Rotation::ROTATION_90));
-        ASSERT_EQ(true, controller->IsDisplayRotationHorizontal(Rotation::ROTATION_270));   
+        ASSERT_EQ(true, controller->IsDisplayRotationHorizontal(Rotation::ROTATION_270));
     }
 
     /**
