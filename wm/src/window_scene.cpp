@@ -20,6 +20,8 @@
 #include "static_call.h"
 #include "window_impl.h"
 #include "window_manager_hilog.h"
+#include "singleton_container.h"
+#include "perform_reporter.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -61,7 +63,9 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
         return WMError::WM_ERROR_NULLPTR;
     }
     mainWindow_->RegisterLifeCycleListener(listener);
-
+    // report when application startup request window
+    SingletonContainer::Get<WindowInfoReporter>()
+        .ReportStartWindow(option->GetBundleName(), mainWindow_->GetWindowName());
     return WMError::WM_OK;
 }
 
@@ -85,7 +89,9 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
         return WMError::WM_ERROR_NULLPTR;
     }
     mainWindow_->RegisterLifeCycleListener(listener);
-
+    // report when application startup request window
+    SingletonContainer::Get<WindowInfoReporter>()
+        .ReportStartWindow(option->GetBundleName(), mainWindow_->GetWindowName());
     return WMError::WM_OK;
 }
 

@@ -128,6 +128,7 @@ struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
     std::string abilityName_ = "";
+    int32_t appIndex_ = 0;
     bool isSystem_ = false;
     uint32_t windowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     sptr<IRemoteObject> callerToken_ = nullptr;

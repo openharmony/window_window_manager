@@ -372,6 +372,18 @@ HWTEST_F(ScreenSceneConfigTest, SetCutoutSvgPath, Function | SmallTest | Level3)
     auto result_ = ScreenSceneConfig::GetCutoutBoundaryRect();
     ASSERT_NE(0, result_.size());
 }
+
+/**
+ * @tc.name: SetCurvedCompressionAreaInLandscape
+ * @tc.desc: SetCurvedCompressionAreaInLandscape func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, SetCurvedCompressionAreaInLandscape, Function | SmallTest | Level3)
+{
+    int res = 0;
+    ScreenSceneConfig::SetCurvedCompressionAreaInLandscape();
+    ASSERT_EQ(0, res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

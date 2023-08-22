@@ -71,6 +71,10 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_MISSION_INFO_BY_ID),
         &SceneSessionManagerStub::HandleGetSessionInfo),
 
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_DUMP_SESSION_ALL),
+        &SceneSessionManagerStub::HandleDumpSessionAll),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_DUMP_SESSION_WITH_ID),
+        &SceneSessionManagerStub::HandleDumpSessionWithId),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_TERMINATE_SESSION_NEW),
         &SceneSessionManagerStub::HandleTerminateSessionNew),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_AVOIDAREA_LISTENER),
@@ -331,6 +335,41 @@ int SceneSessionManagerStub::HandleGetSessionInfo(MessageParcel& data, MessagePa
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         WLOGFE("GetSessionInfo result error");
         return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleDumpSessionAll(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFI("run HandleDumpSessionAll!");
+    std::vector<std::string> infos;
+    WSError errCode = DumpSessionAll(infos);
+    if (!reply.WriteStringVector(infos)) {
+        WLOGFE("HandleDumpSessionAll write info failed.");
+        return ERR_TRANSACTION_FAILED;
+    }
+
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        WLOGFE("HandleDumpSessionAll write errcode failed.");
+        return ERR_TRANSACTION_FAILED;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleDumpSessionWithId(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFI("run HandleDumpSessionWithId!");
+    int32_t persistentId = data.ReadInt32();
+    std::vector<std::string> infos;
+    WSError errCode = DumpSessionWithId(persistentId, infos);
+    if (!reply.WriteStringVector(infos)) {
+        WLOGFE("HandleDumpSessionWithId write info failed.");
+        return ERR_TRANSACTION_FAILED;
+    }
+
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        WLOGFE("HandleDumpSessionWithId write errcode failed.");
+        return ERR_TRANSACTION_FAILED;
     }
     return ERR_NONE;
 }
