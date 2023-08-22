@@ -148,6 +148,8 @@ HWTEST_F(ScreenSessionManagerTest, VirtualScreen, Function | SmallTest | Level3)
 }
 
 
+
+
 /**
  * @tc.name: GetScreenSession
  * @tc.desc: GetScreenSession virtual screen
@@ -255,7 +257,10 @@ HWTEST_F(ScreenSessionManagerTest, NotifyScreenChanged, Function | SmallTest | L
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "GetDefaultScreenSession";
-    ssm_->NotifyScreenChanged(5,0);
+    sptr<ScreenInfo> screenInfo;
+    ssm_->NotifyScreenChanged(screenInfo,ScreenChangeEvent::UPDATE_ORIENTATION);
+    screenInfo=new ScreenInfo();
+    ssm_->NotifyScreenChanged(screenInfo,ScreenChangeEvent::UPDATE_ORIENTATION);
 }
 
 /**
@@ -268,7 +273,6 @@ HWTEST_F(ScreenSessionManagerTest, SetVirtualPixelRatio, Function | SmallTest | 
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "GetDefaultScreenSession";
-    
     ASSERT_EQ(DMError::DM_ERROR_UNKNOWN, ssm_->SetVirtualPixelRatio(2,0.1));
 }
 
@@ -279,12 +283,9 @@ HWTEST_F(ScreenSessionManagerTest, SetVirtualPixelRatio, Function | SmallTest | 
  */
 HWTEST_F(ScreenSessionManagerTest, GetScreenColorGamut, Function | SmallTest | Level3)
 {
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
-    VirtualScreenOption virtualOption;
-    virtualOption.name_ = "GetDefaultScreenSession";
-    ScreenColorGamut screenColorGamut;
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->GetScreenColorGamut(SCREEN_ID_INVALID,screenColorGamut));
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->GetScreenColorGamut(2,screenColorGamut));
+    ScreenColorGamut colorGamut = ScreenColorGamut::COLOR_GAMUT_SRGB;
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->GetScreenColorGamut(1,colorGamut));
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->GetScreenColorGamut(2,colorGamut));
 }
 
 /**
@@ -297,7 +298,6 @@ HWTEST_F(ScreenSessionManagerTest, LoadScreenSceneXml, Function | SmallTest | Le
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "GetDefaultScreenSession";
-    ScreenColorGamut screenColorGamut;
     int ret =0;
     ssm_->LoadScreenSceneXml();
     ASSERT_EQ(ret, 0);
@@ -314,13 +314,12 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenGamutMap, Function | SmallTest | Lev
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "GetDefaultScreenSession";
-    ScreenColorGamut screenColorGamut;
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
     ScreenGamutMap gamutMap;
-    ASSERT_EQ(DMError::DM_ERROR_RENDER_SERVICE_FAILED, ssm_->GetScreenGamutMap(gamutMap));
+    ASSERT_EQ(DMError::DM_ERROR_RENDER_SERVICE_FAILED, ssm_->GetScreenGamutMap(2,gamutMap));
 }
 
 /**
@@ -333,16 +332,14 @@ HWTEST_F(ScreenSessionManagerTest, MakeExpand, Function | SmallTest | Level3)
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "MakeExpand";
-    ScreenColorGamut screenColorGamut;
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
-
     std::vector<ScreenId> mirrorScreenIds;
     std::vector<Point> startPoints;
-    ScreenId screenGroupId1 = DISPLAY_ID_INVALID;
-    ASSERT_EQ(DMError::DM_ERROR_RENDER_SERVICE_FAILED, ssm_->MakeExpand(mirrorScreenIds,startPoints));
+    ScreenId screenGroupId2 = DISPLAY_ID_INVALID;
+    ASSERT_EQ(DMError::DM_ERROR_RENDER_SERVICE_FAILED, ssm_->MakeExpand(mirrorScreenIds,startPoints,screenGroupId2));
 }
 
 /**
@@ -355,12 +352,10 @@ HWTEST_F(ScreenSessionManagerTest, OnMakeExpand, Function | SmallTest | Level3)
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "OnMakeExpand";
-    ScreenColorGamut screenColorGamut;
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
-
     std::vector<ScreenId> mirrorScreenIds;
     std::vector<Point> startPoints;
     ASSERT_EQ(false, ssm_->OnMakeExpand(mirrorScreenIds,startPoints));
@@ -376,13 +371,12 @@ HWTEST_F(ScreenSessionManagerTest, ConvertToRsScreenId, Function | SmallTest | L
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "ConvertToRsScreenId";
-    ScreenColorGamut screenColorGamut;
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
-
-    ASSERT_EQ(false, ssm_->ConvertToRsScreenId(2,2));
+    ScreenSessionManager::ScreenIdManager sim;
+    sim.ConvertToRsScreenId(2);
 }
 
 /**
@@ -395,31 +389,15 @@ HWTEST_F(ScreenSessionManagerTest, ConvertToSmsScreenId, Function | SmallTest | 
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "ConvertToSmsScreenId";
-    ScreenColorGamut screenColorGamut;
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
-    ASSERT_EQ(false, ssm_->ConvertToSmsScreenId(2));
+    ScreenSessionManager::ScreenIdManager sim;
+    ASSERT_EQ(false, sim.ConvertToSmsScreenId(2));
 }
 
-/**
- * @tc.name: CreateAndGetNewScreenId
- * @tc.desc: CreateAndGetNewScreenId virtual screen
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, CreateAndGetNewScreenId, Function | SmallTest | Level3)
-{
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
-    VirtualScreenOption virtualOption;
-    virtualOption.name_ = "CreateAndGetNewScreenId";
-    ScreenColorGamut screenColorGamut;
-    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    if (screenId != VIRTUAL_SCREEN_ID) {
-        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
-    }
-    ASSERT_NE(2, ssm_->CreateAndGetNewScreenId(2));
-}
+
 
 /**
  * @tc.name: DeleteScreenId
@@ -431,31 +409,14 @@ HWTEST_F(ScreenSessionManagerTest, DeleteScreenId, Function | SmallTest | Level3
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "DeleteScreenId";
-    ScreenColorGamut screenColorGamut;
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
-    ASSERT_EQ(false, ssm_->DeleteScreenId(99));
+    ScreenSessionManager::ScreenIdManager sim;
+    ASSERT_EQ(false, sim.DeleteScreenId(99));
 }
 
-/**
- * @tc.name: DeleteScreenId
- * @tc.desc: DeleteScreenId virtual screen
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, DeleteScreenId, Function | SmallTest | Level3)
-{
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
-    VirtualScreenOption virtualOption;
-    virtualOption.name_ = "DeleteScreenId";
-    ScreenColorGamut screenColorGamut;
-    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    if (screenId != VIRTUAL_SCREEN_ID) {
-        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
-    }
-    ASSERT_EQ(false, ssm_->DeleteScreenId(99));
-}
 
 /**
  * @tc.name: HasRsScreenId
@@ -467,12 +428,13 @@ HWTEST_F(ScreenSessionManagerTest, HasRsScreenId, Function | SmallTest | Level3)
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "DeleteScreenId";
-    ScreenColorGamut screenColorGamut;
+    
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
-    ASSERT_EQ(false, ssm_->HasRsScreenId(99));
+    ScreenSessionManager::ScreenIdManager sim;
+    ASSERT_EQ(false, sim.HasRsScreenId(99));
 }
 
 /**
@@ -485,48 +447,204 @@ HWTEST_F(ScreenSessionManagerTest, GetDefaultAbstractScreenId, Function | SmallT
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "DeleteScreenId";
-    ScreenColorGamut screenColorGamut;
+    
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
-    ASSERT_EQ(false, ssm_->GetDefaultAbstractScreenId(99));
+    ASSERT_EQ(false, ssm_->GetDefaultAbstractScreenId());
 }
 
 /**
- * @tc.name: GetDefaultAbstractScreenId
- * @tc.desc: HasRsScreenId virtual screen
+ * @tc.name: InitVirtualScreen
+ * @tc.desc: InitVirtualScreen virtual screen
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, GetDefaultAbstractScreenId, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerTest, InitVirtualScreen, Function | SmallTest | Level3)
 {
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "DeleteScreenId";
-    ScreenColorGamut screenColorGamut;
+    
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
-    ASSERT_EQ(false, ssm_->GetDefaultAbstractScreenId(99));
+    VirtualScreenOption option;
+    ASSERT_EQ(false, ssm_->InitVirtualScreen(1,2,option));
 }
 
 /**
- * @tc.name: GetDefaultAbstractScreenId
- * @tc.desc: HasRsScreenId virtual screen
+ * @tc.name: InitAbstractScreenModesInfo
+ * @tc.desc: InitAbstractScreenModesInfo virtual screen
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, GetDefaultAbstractScreenId, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerTest, InitAbstractScreenModesInfo, Function | SmallTest | Level3)
 {
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "DeleteScreenId";
-    ScreenColorGamut screenColorGamut;
+    
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
-    ASSERT_EQ(false, ssm_->GetDefaultAbstractScreenId(99));
+    sptr<ScreenSession> screenSession =new  (std::nothrow) ScreenSession();
+    ASSERT_EQ(false, ssm_->InitAbstractScreenModesInfo(screenSession));
+}
+
+
+/**
+ * @tc.name: InitAndGetScreen
+ * @tc.desc: InitAndGetScreen virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, InitAndGetScreen, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "DeleteScreenId";
+    
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    ASSERT_EQ(false, ssm_->InitAndGetScreen(2));
+}
+
+
+
+/**
+ * @tc.name: AddToGroupLocked
+ * @tc.desc: AddToGroupLocked virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AddToGroupLocked, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "DeleteScreenId";
+    
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    sptr<ScreenSession> newScreen=nullptr;
+    ASSERT_EQ(false, ssm_->AddToGroupLocked(newScreen));
+}
+
+/**
+ * @tc.name: AddAsFirstScreenLocked
+ * @tc.desc: AddAsFirstScreenLocked virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AddAsFirstScreenLocked, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "DeleteScreenId";
+    
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    sptr<ScreenSession> newScreen;
+    ASSERT_EQ(false, ssm_->AddAsFirstScreenLocked(newScreen));
+}
+
+/**
+ * @tc.name: AddAsSuccedentScreenLocked
+ * @tc.desc: AddAsSuccedentScreenLocked virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AddAsSuccedentScreenLocked, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "DeleteScreenId";
+    
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    sptr<ScreenSession> newScreen;
+    ASSERT_EQ(false, ssm_->AddAsSuccedentScreenLocked(newScreen));
+}
+
+/**
+ * @tc.name: RemoveFromGroupLocked
+ * @tc.desc: RemoveFromGroupLocked virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RemoveFromGroupLocked, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "DeleteScreenId";
+    
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    sptr<ScreenSession> newScreen;
+    ASSERT_EQ(false, ssm_->RemoveFromGroupLocked(newScreen));
+}
+
+/**
+ * @tc.name: RemoveChildFromGroup
+ * @tc.desc: RemoveChildFromGroup virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RemoveChildFromGroup, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "DeleteScreenId";
+    
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    sptr<ScreenSession> screen;
+    sptr<ScreenSessionGroup> screenGroup;
+    ASSERT_EQ(false, ssm_->RemoveChildFromGroup(screen,screenGroup));
+}
+
+/**
+ * @tc.name: SetMirror
+ * @tc.desc: SetMirror virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetMirror, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "DeleteScreenId";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    std::vector<ScreenId> screens {0, 1, 2, 3, 4, 5, 6, 7};
+    ASSERT_EQ(false, ssm_->SetMirror(2,screens));
+}
+
+/**
+ * @tc.name: GetAbstractScreenGroup
+ * @tc.desc: GetAbstractScreenGroup virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetAbstractScreenGroup, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "DeleteScreenId";
+
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    sptr<ScreenSessionGroup> sreengroup;
+    ASSERT_EQ(sreengroup, ssm_->GetAbstractScreenGroup(2));
 }
 
 
