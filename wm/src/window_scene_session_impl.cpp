@@ -1192,6 +1192,10 @@ WSError WindowSceneSessionImpl::HandleBackEvent()
 
 void WindowSceneSessionImpl::PerformBack()
 {
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        WLOGFI("PerformBack is not MainWindow, return");
+        return;
+    }
     if (hostSession_) {
         bool needMoveToBackground = false;
         auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
