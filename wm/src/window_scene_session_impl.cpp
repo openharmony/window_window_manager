@@ -404,7 +404,7 @@ void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersist
 
 WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
-    WLOGFI("Window Show [name:%{public}s, id:%{public}d, type:%{public}u], reason:%{public}u state:%{pubic}u",
+    WLOGFI("Window Show [name:%{public}s, id:%{public}d, type:%{public}u], reason:%{public}u state:%{public}u",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), GetType(), reason, state_);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
@@ -414,6 +414,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
     if (state_ == WindowState::STATE_SHOWN) {
         WLOGFD("window session is alreay shown [name:%{public}s, id:%{public}d, type: %{public}u]",
             property_->GetWindowName().c_str(), property_->GetPersistentId(), GetType());
+        NotifyAfterForeground(true, false);
         return WMError::WM_OK;
     }
     if (hostSession_ == nullptr) {
