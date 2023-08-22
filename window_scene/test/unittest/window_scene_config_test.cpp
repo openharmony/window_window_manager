@@ -372,6 +372,31 @@ HWTEST_F(WindowSceneConfigTest, LoadConfigXml, Function | SmallTest | Level2)
     ASSERT_EQ(true, result);
 }
 
+/**
+ * @tc.name: ReadFloatNumbersConfigInfo
+ * @tc.desc: ReadFloatNumbersConfigInfo test
+ * @tc.type: FUNC 
+ */
+HWTEST_F(WindowSceneConfigTest, ReadFloatNumbersConfigInfo, Function | SmallTest | Level2)
+{
+    xmlNodePtr currNode = xmlNewNode(NULL,BAD_CAST"nodeName");
+    auto result = WindowSceneConfig::ReadFloatNumbersConfigInfo(currNode,false);
+    ASSERT_EQ(0, result.size());
+}
+
+/**
+ * @tc.name: ReadStringConfigInfo
+ * @tc.desc: ReadStringConfigInfo test
+ * @tc.type: FUNC 
+ */
+HWTEST_F(WindowSceneConfigTest, ReadStringConfigInfo, Function | SmallTest | Level2)
+{
+    xmlNodePtr currNode = xmlNewNode(NULL,BAD_CAST"nodeName");
+    auto result = WindowSceneConfig::ReadStringConfigInfo(currNode);
+    ASSERT_EQ(0, result.size());
+}
+
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
