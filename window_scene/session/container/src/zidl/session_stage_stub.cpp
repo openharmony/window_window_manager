@@ -14,7 +14,7 @@
  */
 
 #include "session/container/include/zidl/session_stage_stub.h"
-#include "session/container/include/zidl/session_stage_interface_code.h"
+#include "session/container/include/zidl/session_stage_ipc_interface_code.h"
 
 #include <ipc_types.h>
 
