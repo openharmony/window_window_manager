@@ -19,7 +19,7 @@
 /* SAID: 4606 */
 namespace OHOS {
 namespace Rosen {
-enum class SessionStageInterfaceCode {
+enum class WindowEventInterfaceCode {
     TRANS_ID_TRANSFER_KEY_EVENT = 0,
     TRANS_ID_TRANSFER_POINTER_EVENT,
     TRANS_ID_TRANSFER_FOCUS_ACTIVE_EVENT,
