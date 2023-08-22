@@ -502,6 +502,10 @@ void WindowSceneSessionImpl::SetDefaultProperty()
             property_->SetFocusable(false);
             break;
         }
+        case WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR:{
+            property_->SetFocusable(false);
+            break;
+        }
         default:
             break;
     }
