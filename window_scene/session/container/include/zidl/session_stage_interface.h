@@ -32,22 +32,6 @@ class ISessionStage : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISessionStage");
 
-    enum class SessionStageMessage : uint32_t {
-        TRANS_ID_SET_ACTIVE,
-        TRANS_ID_NOTIFY_SIZE_CHANGE,
-        TRANS_ID_HANDLE_BACK_EVENT,
-        TRANS_ID_NOTIFY_FOCUS_CHANGE,
-        TRANS_ID_NOTIFY_DESTROY,
-        TRANS_ID_NOTIFY_TOUCH_DIALOG_TARGET,
-        TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA,
-        TRANS_ID_NOTIFY_OCCUPIED_AREA_CHANGE_INFO,
-        TRANS_ID_UPDATE_AVOID_AREA,
-        TRANS_ID_NOTIFY_SCREEN_SHOT,
-        TRANS_ID_DUMP_SESSSION_ELEMENT_INFO,
-        TRANS_ID_NOTIFY_TOUCH_OUTSIDE,
-        TRANS_ID_NOTIFY_WINDOW_MODE_CHANGE
-    };
-
     virtual void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
     virtual void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) {}
     virtual void NotifyFocusActiveEvent(bool isFocusActive) {}

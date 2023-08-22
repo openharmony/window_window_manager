@@ -14,6 +14,7 @@
  */
 
 #include "session/container/include/zidl/session_stage_stub.h"
+#include "session/container/include/zidl/session_stage_interface_code.h"
 
 #include <ipc_types.h>
 
@@ -25,31 +26,31 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Session
 }
 
 const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
-    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_SET_ACTIVE),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_ACTIVE),
         &SessionStageStub::HandleSetActive),
-    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_SIZE_CHANGE),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SIZE_CHANGE),
         &SessionStageStub::HandleUpdateRect),
-    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_HANDLE_BACK_EVENT),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_HANDLE_BACK_EVENT),
         &SessionStageStub::HandleBackEventInner),
-    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_FOCUS_CHANGE),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOCUS_CHANGE),
         &SessionStageStub::HandleUpdateFocus),
-    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_DESTROY),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DESTROY),
         &SessionStageStub::HandleNotifyDestroy),
-    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_TOUCH_DIALOG_TARGET),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TOUCH_DIALOG_TARGET),
         &SessionStageStub::HandleNotifyTouchDialogTarget),
-    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA),
         &SessionStageStub::HandleNotifyTransferComponentData),
-    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_OCCUPIED_AREA_CHANGE_INFO),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_OCCUPIED_AREA_CHANGE_INFO),
         &SessionStageStub::HandleNotifyOccupiedAreaChange),
-    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_UPDATE_AVOID_AREA),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_AVOID_AREA),
         &SessionStageStub::HandleUpdateAvoidArea),
-    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_SCREEN_SHOT),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SCREEN_SHOT),
         &SessionStageStub::HandleNotifyScreenshot),
-    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_DUMP_SESSSION_ELEMENT_INFO),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_DUMP_SESSSION_ELEMENT_INFO),
         &SessionStageStub::HandleDumpSessionElementInfo),
-    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_TOUCH_OUTSIDE),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TOUCH_OUTSIDE),
         &SessionStageStub::HandleNotifyTouchOutside),
-    std::make_pair(static_cast<uint32_t>(SessionStageMessage::TRANS_ID_NOTIFY_WINDOW_MODE_CHANGE),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_MODE_CHANGE),
         &SessionStageStub::HandleUpdateWindowMode),
 };
 
