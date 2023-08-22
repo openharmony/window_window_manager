@@ -23,6 +23,7 @@
 #include "zidl/window_manager_agent_interface.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
+#include "context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -499,7 +500,8 @@ HWTEST_F(SceneSessionManagerTest, CreateCurve, Function | SmallTest | Level3)
 HWTEST_F(SceneSessionManagerTest, SetRootSceneContext, Function | SmallTest | Level3)
 {
     int ret = 0;
-    ssm_->SetRootSceneContext(nullptr);
+    std::weak_ptr<AbilityRuntime::Context> contextWeakPtr;
+    ssm_->SetRootSceneContext(contextWeakPtr);
     ASSERT_EQ(ret, 0);
 }
 
