@@ -302,6 +302,7 @@ private:
 
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
+    bool isTerminating = false;
 
     std::vector<sptr<Session>> dialogVec_;
     sptr<Session> parentSession_;

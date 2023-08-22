@@ -253,6 +253,8 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
             sceneSession->GetSessionInfo().callerToken_ = info.callerToken_;
             sceneSession->GetSessionInfo().requestCode = info.requestCode;
             sceneSession->GetSessionInfo().callerPersistentId_ = info.callerPersistentId_;
+            sceneSession->GetSessionInfo().uiAbilityId_ = info.uiAbilityId_;
+            sceneSession->GetSessionInfo().startSetting = info.startSetting;
         }
         info.persistentId_ = sceneSession->GetPersistentId();
         sceneSession->GetSessionInfo().persistentId_ = sceneSession->GetPersistentId();
@@ -266,6 +268,8 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
         sceneSession->GetSessionInfo().callerToken_ = info.callerToken_;
         sceneSession->GetSessionInfo().requestCode = info.requestCode;
         sceneSession->GetSessionInfo().callerPersistentId_ = info.callerPersistentId_;
+        sceneSession->GetSessionInfo().uiAbilityId_ = info.uiAbilityId_;
+        sceneSession->GetSessionInfo().startSetting = info.startSetting;
     }
     return sceneSession;
 }
