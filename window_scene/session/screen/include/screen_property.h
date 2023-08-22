@@ -59,6 +59,7 @@ public:
 
     void SetScreenRotation(Rotation rotation);
     Rotation GetScreenRotation() const;
+    void UpdateScreenRotation(Rotation rotation);
 
     void SetOrientation(Orientation orientation);
     Orientation GetOrientation() const;
