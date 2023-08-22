@@ -112,6 +112,11 @@ DMError ScreenSessionManager::RegisterDisplayManagerAgent(
         WLOGFE("register display manager agent permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
+    if (type < DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER
+        || type > DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER) {
+        WLOGFE("SCB:DisplayManagerAgentType: %{public}u", static_cast<uint32_t>(type));
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
     if ((displayManagerAgent == nullptr) || (displayManagerAgent->AsObject() == nullptr)) {
         WLOGFE("displayManagerAgent invalid");
         return DMError::DM_ERROR_NULLPTR;
