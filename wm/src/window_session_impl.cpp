@@ -694,6 +694,8 @@ float WindowSessionImpl::GetBrightness() const
 
 void WindowSessionImpl::SetRequestedOrientation(Orientation orientation)
 {
+    WLOGFI("lastReqOrientation: %{public}u target:%{public}u state_:%{public}u",
+        property_->GetRequestedOrientation(), orientation, state_);
     if (property_->GetRequestedOrientation() == orientation) {
         return;
     }
@@ -701,6 +703,15 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation)
     if (state_ == WindowState::STATE_SHOWN) {
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
     }
+}
+
+Orientation WindowSessionImpl::GetRequestedOrientation()
+{
+    if (!property_) {
+        WLOGFE("property_ is nullptr id: %{public}d", GetPersistentId());
+        return Orientation::UNSPECIFIED;
+    }
+    return property_->GetRequestedOrientation();
 }
 
 std::string WindowSessionImpl::GetContentInfo()
