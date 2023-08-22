@@ -83,7 +83,7 @@ public:
         const sptr<SceneSession>& sceneSession, const bool needRemoveSession = true);
     WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession);
     void StartAbilityBySpecified(const SessionInfo& sessionInfo);
-    void SetRootSceneContext(AbilityRuntime::Context* context);
+    void SetRootSceneContext(const std::weak_ptr<AbilityRuntime::Context>& contextWeak);
     sptr<RootSceneSession> GetRootSceneSession();
     sptr<SceneSession> GetSceneSession(int32_t persistentId);
     sptr<SceneSession> GetSceneSessionByName(const std::string& bundleName,
@@ -257,7 +257,7 @@ private:
     void UpdatePropertyRaiseEnabled(const sptr<WindowSessionProperty>& property,
                                     const sptr<SceneSession>& sceneSession);
     sptr<RootSceneSession> rootSceneSession_;
-    std::shared_ptr<AbilityRuntime::Context> rootSceneContext_;
+    std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;
     std::shared_mutex sceneSessionMapMutex_;
     std::map<int32_t, sptr<SceneSession>> sceneSessionMap_;
     sptr<ScbSessionHandler> scbSessionHandler_;
