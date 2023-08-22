@@ -81,6 +81,66 @@ namespace {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         ASSERT_NE(nullptr, controller->GetScreenCutoutInfo());
     }
+
+    /**
+     * @tc.name: IsDisplayRotationHorizontal
+     * @tc.desc: IsDisplayRotationHorizontal func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, IsDisplayRotationHorizontal, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        ASSERT_EQ(false, controller->IsDisplayRotationHorizontal(Rotation::ROTATION_0));
+        ASSERT_EQ(false, controller->IsDisplayRotationHorizontal(Rotation::ROTATION_180));
+        ASSERT_EQ(true, controller->IsDisplayRotationHorizontal(Rotation::ROTATION_90));
+        ASSERT_EQ(true, controller->IsDisplayRotationHorizontal(Rotation::ROTATION_270));   
+    }
+
+    /**
+     * @tc.name: ConvertDeviceToDisplayRotation01
+     * @tc.desc: ConvertDeviceToDisplayRotation func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, ConvertDeviceToDisplayRotation01, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        ASSERT_EQ(Rotation::ROTATION_0, controller->ConvertDeviceToDisplayRotation(DeviceRotationValue::INVALID));
+    }
+
+    /**
+     * @tc.name: GetCurrentDisplayRotation01
+     * @tc.desc: GetCurrentDisplayRotation func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, GetCurrentDisplayRotation01, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        ASSERT_EQ(Rotation::ROTATION_0, controller->GetCurrentDisplayRotation());
+    }
+
+    /**
+     * @tc.name: ProcessRotationMapping
+     * @tc.desc: ProcessRotationMapping func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, ProcessRotationMapping, Function | SmallTest | Level3)
+    {
+        int res = 0;
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        controller->ProcessRotationMapping();
+        ASSERT_EQ(0, res);
+    }
+
+    /**
+     * @tc.name: GetOffsetY
+     * @tc.desc: GetOffsetY func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, GetOffsetY, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        ASSERT_EQ(0, controller->GetOffsetY());
+    }
 }
 } // namespace Rosen
 } // namespace OHOS
