@@ -208,7 +208,8 @@ HWTEST_F(WindowAgentTest, UpdateOccupiedAreaAndRect, Function | SmallTest | Leve
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, overlapRect);
     auto syncTransactionController = RSSyncTransactionController::GetInstance();
 
-    WMError err = windowAgent_->UpdateOccupiedAreaAndRect(info, overlapRect, syncTransactionController->GetRSTransaction());
+    WMError err = windowAgent_->UpdateOccupiedAreaAndRect(
+        info, overlapRect, syncTransactionController->GetRSTransaction());
     ASSERT_EQ(err, WMError::WM_OK);
 
     windowAgent_->window_ = nullptr;
