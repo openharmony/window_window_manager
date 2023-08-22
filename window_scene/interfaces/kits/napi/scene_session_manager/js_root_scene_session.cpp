@@ -145,7 +145,7 @@ NativeValue* JsRootSceneSession::OnLoadContent(NativeEngine& engine, NativeCallb
         return engine.CreateUndefined();
     }
     auto contextWeakPtr = *contextNativePointer;
-    SceneSessionManager::GetInstance().SetRootSceneContext(contextWeakPtr.lock().get());
+    SceneSessionManager::GetInstance().SetRootSceneContext(contextWeakPtr);
 
     std::shared_ptr<NativeReference> contentStorage =
         (storage == nullptr) ? nullptr : std::shared_ptr<NativeReference>(engine.CreateReference(storage, 1));

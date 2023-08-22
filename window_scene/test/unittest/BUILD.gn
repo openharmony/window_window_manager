@@ -143,6 +143,8 @@ ohos_unittest("ws_scene_session_manager_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_base:configuration",
+    "ability_runtime:ability_context_native",
     "c_utils:utils",
     "hilog:libhilog",
   ]

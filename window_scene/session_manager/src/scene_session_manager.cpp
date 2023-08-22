@@ -610,9 +610,9 @@ void SceneSessionManager::ConfigSubWindowSizeLimits(const WindowSceneConfig::Con
     }
 }
 
-void SceneSessionManager::SetRootSceneContext(AbilityRuntime::Context* context)
+void SceneSessionManager::SetRootSceneContext(const std::weak_ptr<AbilityRuntime::Context>& contextWeak)
 {
-    rootSceneContext_ = std::shared_ptr<AbilityRuntime::Context>(context);
+    rootSceneContextWeak_ = contextWeak;
 }
 
 sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
@@ -761,7 +761,8 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         if (sessionInfo.isSystem_) {
             sceneSession->SetCallingPid(IPCSkeleton::GetCallingPid());
             sceneSession->SetCallingUid(IPCSkeleton::GetCallingUid());
-            sceneSession->SetAbilityToken(rootSceneContext_ != nullptr ? rootSceneContext_->GetToken() : nullptr);
+            auto rootContext = rootSceneContextWeak_.lock();
+            sceneSession->SetAbilityToken(rootContext != nullptr ? rootContext->GetToken() : nullptr);
         }
         FillSessionInfo(sceneSession->GetSessionInfo());
         auto persistentId = sceneSession->GetPersistentId();
