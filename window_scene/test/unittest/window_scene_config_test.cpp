@@ -375,7 +375,7 @@ HWTEST_F(WindowSceneConfigTest, LoadConfigXml, Function | SmallTest | Level2)
 /**
  * @tc.name: ReadFloatNumbersConfigInfo
  * @tc.desc: ReadFloatNumbersConfigInfo test
- * @tc.type: FUNC 
+ * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneConfigTest, ReadFloatNumbersConfigInfo, Function | SmallTest | Level2)
 {
@@ -387,7 +387,7 @@ HWTEST_F(WindowSceneConfigTest, ReadFloatNumbersConfigInfo, Function | SmallTest
 /**
  * @tc.name: ReadStringConfigInfo
  * @tc.desc: ReadStringConfigInfo test
- * @tc.type: FUNC 
+ * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneConfigTest, ReadStringConfigInfo, Function | SmallTest | Level2)
 {
