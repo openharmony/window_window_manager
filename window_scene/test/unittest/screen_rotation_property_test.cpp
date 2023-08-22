@@ -298,7 +298,8 @@ HWTEST_F(ScreenRotationPropertyTest, ProcessSwitchToSensorRelatedOrientation, Fu
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessSwitchToSensorRelatedOrientation start";
     ScreenRotationProperty::Init();
     int32_t res = 0;
-    ScreenRotationProperty::ProcessSwitchToSensorRelatedOrientation(Orientation::BEGIN, DeviceRotation::ROTATION_PORTRAIT);
+    ScreenRotationProperty::ProcessSwitchToSensorRelatedOrientation(
+        Orientation::BEGIN, DeviceRotation::ROTATION_PORTRAIT);
     ASSERT_EQ(0, res);
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessSwitchToSensorRelatedOrientation end";
 }
@@ -416,7 +417,7 @@ HWTEST_F(ScreenRotationPropertyTest, CalcTargetDisplayRotation, Function | Small
     ScreenRotationProperty::Init();
     Orientation requestedOrientation = Orientation::VERTICAL;
     DeviceRotation sensorRotationConverted = DeviceRotation::ROTATION_LANDSCAPE;
-    auto result = ScreenRotationProperty::CalcTargetDisplayRotation(requestedOrientation,sensorRotationConverted);
+    auto result = ScreenRotationProperty::CalcTargetDisplayRotation(requestedOrientation, sensorRotationConverted);
     ASSERT_EQ(ScreenRotationProperty::lastSensorDecidedRotation_, result);
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: CalcTargetDisplayRotation end";
 }
