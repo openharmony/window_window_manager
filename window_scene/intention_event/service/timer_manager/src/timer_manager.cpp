@@ -38,7 +38,7 @@ TimerManager::~TimerManager() {}
 void TimerManager::Init()
 {
     CALL_DEBUG_ENTER;
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (state_ != TimerMgrState::STATE_RUNNING) {
         timerWorker_ = std::thread(std::bind(&TimerManager::OnThread, this));
         state_ = TimerMgrState::STATE_RUNNING;
@@ -49,31 +49,31 @@ void TimerManager::Init()
 
 void TimerManager::Stop()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     OnStop();
 }
 
 int32_t TimerManager::AddTimer(int32_t intervalMs, std::function<void()> callback)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     return AddTimerInternal(intervalMs, callback);
 }
 
 int32_t TimerManager::RemoveTimer(int32_t timerId)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     return RemoveTimerInternal(timerId);
 }
 
 int32_t TimerManager::CalcNextDelay()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     return CalcNextDelayInternal();
 }
 
 void TimerManager::ProcessTimers()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     ProcessTimersInternal();
 }
 
