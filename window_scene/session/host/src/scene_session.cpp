@@ -284,6 +284,10 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
 
 WSError SceneSession::RaiseToAppTop()
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("raise to app top permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onRaiseToTop_) {
         sessionChangeCallback_->onRaiseToTop_();
     }
