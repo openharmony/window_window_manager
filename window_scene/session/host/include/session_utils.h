@@ -20,6 +20,8 @@
 
 namespace OHOS::Rosen {
 namespace SessionUtils {
+constexpr const char* SESSION_NAME_MARK_HEAD = "#";
+constexpr const char* SESSION_NAME_SEPARATOR = ":";
 
 inline float ToLayoutWidth(const int32_t winWidth, float vpr)
 {
@@ -54,6 +56,20 @@ inline void CalcFloatWindowRectLimits(const WindowLimits& limits, uint32_t maxFl
     maxHeight = std::min(maxHeight, static_cast<int32_t>(maxFloatingWindowSize * vpr));
 }
 
+inline std::string ConvertSessionName(const std::string &bundleName, const std::string &name,
+    const std::string &moduleName, const int32_t appIndex = 0)
+{
+    std::string strName;
+    if (appIndex == 0) {
+        strName = SESSION_NAME_MARK_HEAD + bundleName + SESSION_NAME_SEPARATOR + moduleName +
+            SESSION_NAME_SEPARATOR + name;
+    } else {
+        strName = SESSION_NAME_MARK_HEAD + bundleName + SESSION_NAME_SEPARATOR + std::to_string(appIndex) +
+            SESSION_NAME_SEPARATOR + moduleName + SESSION_NAME_SEPARATOR + name;
+    }
+
+    return strName;
+}
 } // namespace SessionUtils
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_UTILS_H
