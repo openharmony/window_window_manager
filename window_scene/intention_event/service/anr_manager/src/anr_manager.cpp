@@ -51,7 +51,8 @@ void ANRManager::AddTimer(int32_t eventId, int32_t persistentId)
         WLOGFD("AddAnrTimer failed, anrTimerCount exceeded %{public}d", MAX_ANR_TIMER_COUNT);
         return;
     }
-    int32_t timerId = DelayedSingleton<TimerManager>::GetInstance()->AddTimer(ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME, [this, eventId, persistentId]() {
+    int32_t timerId = DelayedSingleton<TimerManager>::GetInstance()->AddTimer(ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME,
+        [this, eventId, persistentId]() {
         WLOGFE("Anr callback enter. persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
         DelayedSingleton<EventStage>::GetInstance()->SetAnrStatus(persistentId, true);
         AppInfo appInfo = GetAppInfoByPersistentId(persistentId);
