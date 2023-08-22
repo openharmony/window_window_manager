@@ -90,6 +90,10 @@ void SessionManager::InitSessionManagerServiceProxy()
         return;
     }
     mockSessionManagerServiceProxy_ = iface_cast<IMockSessionManagerInterface>(remoteObject);
+    if (!mockSessionManagerServiceProxy_) {
+        WLOGFW("Get mock session manager service proxy failed, nullptr");
+        return;
+    }
     sessionManagerServiceProxy_ = iface_cast<ISessionManagerService>(
             mockSessionManagerServiceProxy_->GetSessionManagerService());
     if (!sessionManagerServiceProxy_) {
@@ -149,6 +153,14 @@ void SessionManager::InitSceneSessionManagerProxy()
     }
 }
 
+void SessionManager::Clear()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if ((sceneSessionManagerProxy_ != nullptr) && (sceneSessionManagerProxy_->AsObject() != nullptr)) {
+        sceneSessionManagerProxy_->AsObject()->RemoveDeathRecipient(ssmDeath_);
+    }
+}
+
 void SSMDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 {
     if (wptrDeath == nullptr) {
@@ -162,6 +174,7 @@ void SSMDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
         return;
     }
     WLOGI("ssm OnRemoteDied");
+    SingletonContainer::Get<SessionManager>().Clear();
     SingletonContainer::Get<SessionManager>().ClearSessionManagerProxy();
 }
 
