@@ -1056,6 +1056,64 @@ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<Scre
     return DMError::DM_OK;
 }
 
+DMError ScreenSessionManager::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("StopMirror permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    auto allMirrorScreenIds = GetAllValidScreenIds(mirrorScreenIds);
+    if (allMirrorScreenIds.empty()) {
+        WLOGFI("SCB: StopMirror done. screens' size:%{public}u", static_cast<uint32_t>(allMirrorScreenIds.size()));
+        return DMError::DM_OK;
+    }
+
+    DMError ret = StopScreens(allMirrorScreenIds, ScreenCombination::SCREEN_MIRROR);
+    if (ret != DMError::DM_OK) {
+        WLOGFE("SCB: StopMirror failed.");
+        return ret;
+    }
+
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::StopScreens(const std::vector<ScreenId>& screenIds, ScreenCombination stopCombination)
+{
+    for (ScreenId screenId : screenIds) {
+        WLOGFI("SCB: StopMirror ScreenId: %{public}" PRIu64"", screenId);
+        auto screen = GetScreenSession(screenId);
+        if (screen == nullptr) {
+            WLOGFW("SCB: StopMirror screen:%{public}" PRIu64" is nullptr", screenId);
+            continue;
+        }
+        auto iter = smsScreenGroupMap_.find(screen->groupSmsId_);
+        if (iter == smsScreenGroupMap_.end()) {
+            WLOGFW("SCB: StopMirror groupDmsId:%{public}" PRIu64"is not in smsScreenGroupMap_", screen->groupSmsId_);
+            continue;
+        }
+        sptr<ScreenSessionGroup> screenGroup = iter->second;
+        if (screenGroup == nullptr) {
+            WLOGFW("SCB: StopMirror screenGroup:%{public}" PRIu64" is nullptr", screen->groupSmsId_);
+            continue;
+        }
+        if (screenGroup->combination_ != stopCombination) {
+            WLOGFW("SCB: StopMirror try to stop screen in another combination");
+            continue;
+        }
+        if (screenGroup->combination_ == ScreenCombination::SCREEN_MIRROR &&
+            screen->screenId_ == screenGroup->mirrorScreenId_) {
+            WLOGFW("SCB: StopMirror try to stop main mirror screen");
+            continue;
+        }
+        bool res = RemoveChildFromGroup(screen, screenGroup);
+        if (res) {
+            NotifyScreenGroupChanged(screen->ConvertToScreenInfo(), ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
+        }
+    }
+    return DMError::DM_OK;
+}
+
+
 DMError ScreenSessionManager::MakeExpand(std::vector<ScreenId> screenId,
                                          std::vector<Point> startPoint,
                                          ScreenId& screenGroupId)
@@ -1132,6 +1190,27 @@ bool ScreenSessionManager::OnMakeExpand(std::vector<ScreenId> screenId, std::vec
     ChangeScreenGroup(group, screenId, startPoint, filterExpandScreen, ScreenCombination::SCREEN_EXPAND);
     WLOGFI("OnMakeExpand success");
     return true;
+}
+
+DMError ScreenSessionManager::StopExpand(const std::vector<ScreenId>& expandScreenIds)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("StopExpand permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    auto allExpandScreenIds = GetAllValidScreenIds(expandScreenIds);
+    if (allExpandScreenIds.empty()) {
+        WLOGFI("SCB: StopExpand done. screens' size:%{public}u", static_cast<uint32_t>(allExpandScreenIds.size()));
+        return DMError::DM_OK;
+    }
+
+    DMError ret = StopScreens(allExpandScreenIds, ScreenCombination::SCREEN_EXPAND);
+    if (ret != DMError::DM_OK) {
+        WLOGFE("SCB: StopExpand stop expand failed.");
+        return ret;
+    }
+
+    return DMError::DM_OK;
 }
 
 bool ScreenSessionManager::ScreenIdManager::ConvertToRsScreenId(ScreenId smsScreenId, ScreenId& rsScreenId) const
