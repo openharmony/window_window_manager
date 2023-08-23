@@ -1766,7 +1766,10 @@ WSError SceneSessionManager::SetFocusedSession(int32_t persistentId)
         return WSError::WS_DO_NOTHING;
     }
     focusedSessionId_ = persistentId;
-    NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
+    auto sceneSession = GetSceneSession(persistentId);
+    if (IsSessionVisible(sceneSession)) {
+        NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
+    }
     return WSError::WS_OK;
 }
 
