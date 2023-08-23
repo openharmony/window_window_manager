@@ -55,8 +55,8 @@ private:
     ANRManager::AppInfo GetAppInfoByPersistentId(int32_t persistentId);
 private:
     std::atomic_bool switcher_ { true };
+    std::atomic_int32_t anrTimerCount_ { 0 };
     std::mutex mtx_;
-    int32_t anrTimerCount_ { 0 };
     std::unordered_map<int32_t, AppInfo> applicationMap_;
     std::function<void(int32_t)> anrObserver_;
     std::function<void(int32_t, std::string&, int32_t)> appInfoGetter_;
