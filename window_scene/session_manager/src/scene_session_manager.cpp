@@ -956,7 +956,7 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
 void SceneSessionManager::NotifyCollaboratorAfterStart(sptr<SceneSession>& scnSession,
     sptr<AAFwk::SessionInfo>& scnSessionInfo)
 {
-    if (scnSession == nullptr) {
+    if (scnSession == nullptr || scnSessionInfo == nullptr) {
         return;
     }
     if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
