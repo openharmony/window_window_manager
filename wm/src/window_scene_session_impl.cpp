@@ -514,6 +514,10 @@ void WindowSceneSessionImpl::SetDefaultProperty()
 WSError WindowSceneSessionImpl::SetActive(bool active)
 {
     WLOGFD("active status: %{public}d", active);
+    if (hostSession_ == nullptr) {
+        WLOGFD("hostSession_ nullptr");
+        return ;
+    }
     if (!WindowHelper::IsMainWindow(GetType())) {
         WSError ret = hostSession_->UpdateActiveStatus(active);
         if (ret != WSError::WS_OK) {
