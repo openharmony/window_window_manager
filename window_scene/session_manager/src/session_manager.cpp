@@ -32,6 +32,10 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SessionManager)
 void SessionManager::ClearSessionManagerProxy()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    WLOGFI("ClearSessionManagerProxy enter!");
+    if ((sceneSessionManagerProxy_ != nullptr) && (sceneSessionManagerProxy_->AsObject() != nullptr)) {
+        sceneSessionManagerProxy_->AsObject()->RemoveDeathRecipient(ssmDeath_);
+    }
     if (mockSessionManagerServiceProxy_ != nullptr) {
         mockSessionManagerServiceProxy_ = nullptr;
     }

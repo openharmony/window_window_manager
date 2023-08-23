@@ -34,6 +34,8 @@
 #include "session_helper.h"
 
 namespace OHOS::Rosen {
+const std::string DLP_INDEX = "ohos.dlp.params.index";
+
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Session" };
 std::atomic<int32_t> g_persistentId = INVALID_SESSION_ID;
@@ -357,6 +359,11 @@ bool Session::IsActive() const
     return isActive_;
 }
 
+bool Session::IsSystemSession() const
+{
+    return sessionInfo_.isSystem_;
+}
+
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
     WLOGFI("session update rect: id: %{public}d, rect[%{public}d, %{public}d, %{public}u, %{public}u], "\
@@ -387,9 +394,9 @@ WSError Session::ConnectImpl(const sptr<ISessionStage>& sessionStage, const sptr
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
     sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
 {
-    WLOGFI("Connect session, id: %{public}d, state: %{public}u", GetPersistentId(),
-        static_cast<uint32_t>(GetSessionState()));
-    if (GetSessionState() != SessionState::STATE_DISCONNECT) {
+    WLOGFI("Connect session, id: %{public}d, state: %{public}u, isTerminating: %{public}d", GetPersistentId(),
+        static_cast<uint32_t>(GetSessionState()), isTerminating);
+    if (GetSessionState() != SessionState::STATE_DISCONNECT && !isTerminating) {
         WLOGFE("state is not disconnect!");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -527,6 +534,7 @@ WSError Session::Disconnect()
     NotifyDisconnect();
     snapshot_.reset();
     DelayedSingleton<ANRManager>::GetInstance()->OnSessionLost(persistentId_);
+    isTerminating = false;
     return WSError::WS_OK;
 }
 
@@ -567,6 +575,7 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.moduleName_ = abilitySessionInfo->want.GetModuleName();
+    info.appIndex_ = abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0);
     info.persistentId_ = abilitySessionInfo->persistentId;
     info.callerPersistentId_ = GetPersistentId();
     info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
@@ -580,8 +589,9 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     if (info.want != nullptr) {
         info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
     }
-    WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s",
-        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
+    WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s, \
+        appIndex:%{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(),
+        info.appIndex_);
     WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}d, callingTokenId:%{public}d," \
         "uiAbilityId: %{public}" PRIu64 ", windowMode: %{public}d",
         info.callState_, info.persistentId_, info.callingTokenId_, info.uiAbilityId_, info.windowMode);
@@ -607,6 +617,11 @@ WSError Session::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionI
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (isTerminating) {
+        WLOGFE("TerminateSession isTerminating, return!");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    isTerminating = true;
     SessionInfo info;
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -631,6 +646,11 @@ WSError Session::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessi
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (isTerminating) {
+        WLOGFE("TerminateSessionNew isTerminating, return!");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    isTerminating = true;
     SessionInfo info;
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -655,6 +675,11 @@ WSError Session::TerminateSessionTotal(const sptr<AAFwk::SessionInfo> abilitySes
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (isTerminating) {
+        WLOGFE("TerminateSessionTotal isTerminating, return!");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    isTerminating = true;
     SessionInfo info;
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -675,9 +700,14 @@ void Session::SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncT
 
 WSError Session::Clear()
 {
+    if (isTerminating) {
+        WLOGFE("Clear isTerminating, return!");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    isTerminating = true;
     SessionInfo info = GetSessionInfo();
-    if (terminateSessionFuncTotal_) {
-        terminateSessionFuncTotal_(info, TerminateType::CLOSE_AND_CLEAR_MULTITASK);
+    if (terminateSessionFuncNew_) {
+        terminateSessionFuncNew_(info, false);
     }
     return WSError::WS_OK;
 }
@@ -688,6 +718,11 @@ WSError Session::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySe
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (isTerminating) {
+        WLOGFE("NotifySessionException isTerminating, return!");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    isTerminating = true;
     SessionInfo info;
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -848,7 +883,7 @@ bool Session::CheckDialogOnForeground()
 
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    if (!IsSessionValid()) {
+    if (!IsSystemSession() && !IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
@@ -900,7 +935,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
 
 WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    if (!IsSessionValid()) {
+    if (!IsSystemSession() && !IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {

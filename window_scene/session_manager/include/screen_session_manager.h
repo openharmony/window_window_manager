@@ -27,6 +27,7 @@
 #include "agent_death_recipient.h"
 #include "screen.h"
 #include "screen_cutout_controller.h"
+#include "fold_screen_controller/fold_screen_controller.h"
 
 namespace OHOS::Rosen {
 class IScreenConnectionListener : public RefBase {
@@ -163,6 +164,11 @@ public:
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
     void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
 
+    //Fold Screen
+    void SetFoldDisplayMode(FoldDisplayMode displayMode) override;
+    FoldDisplayMode GetFoldDisplayMode() override;
+    ScreenProperty GetPhyScreenProperty(ScreenId screenId);
+
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;
@@ -225,11 +231,16 @@ private:
     sptr<IDisplayChangeListener> displayChangeListener_;
     sptr<SessionDisplayPowerController> sessionDisplayPowerController_;
     sptr<ScreenCutoutController> screenCutoutController_;
+    sptr<FoldScreenController> foldScreenController_;
 
     bool isDensityDpiLoad_ = false;
     float densityDpi_ { 1.0f };
 
     bool screenPrivacyStates = false;
+
+    //Fold Screen
+    std::map<ScreenId, ScreenProperty> phyScreenPropMap_;
+    mutable std::recursive_mutex phyScreenPropMapMutex_;
 };
 } // namespace OHOS::Rosen
 

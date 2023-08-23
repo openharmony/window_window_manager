@@ -20,6 +20,7 @@ group("unittest") {
 
   deps = [
     ":wm_input_transfer_station_test",
+    ":wm_window_agent_test",
     ":wm_window_effect_test",
     ":wm_window_frame_trace_impl_test",
     ":wm_window_impl_listener_test",
@@ -246,6 +247,19 @@ ohos_unittest("wm_window_frame_trace_impl_test") {
   module_out_path = module_out_path
   defines = [ "FRAME_TRACE_ENABLE" ]
   sources = [ "window_frame_trace_impl_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("wm_window_agent_test") {
+  module_out_path = module_out_path
+  defines = [ "FRAME_TRACE_ENABLE" ]
+  sources = [ "window_agent_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 

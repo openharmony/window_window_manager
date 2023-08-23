@@ -15,14 +15,18 @@
 
 #include <list>
 #include <map>
+#include <mutex>
 #include <vector>
 
 #include "noncopyable.h"
+#include "singleton.h"
 
 namespace OHOS {
 namespace Rosen {
-class EventStage {
+class EventStage final {
+    DECLARE_DELAYED_SINGLETON(EventStage);
 public:
+    DISALLOW_COPY_AND_MOVE(EventStage);
     void SetAnrStatus(int32_t persistentId, bool status);
     bool CheckAnrStatus(int32_t persistentId);
     void SaveANREvent(int32_t persistentId, int32_t eventId, int32_t timerId);
@@ -34,6 +38,7 @@ private:
         int32_t eventId { 0 };
         int32_t timerId { -1 };
     };
+    std::mutex mutex_;
     std::map<int32_t, std::vector<EventTime>> events_;
     std::map<int32_t, bool> isAnrProcess_;
 };

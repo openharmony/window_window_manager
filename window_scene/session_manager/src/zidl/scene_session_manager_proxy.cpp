@@ -655,6 +655,54 @@ WSError SceneSessionManagerProxy::GetSessionInfo(const std::string& deviceId, in
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+WSError SceneSessionManagerProxy::DumpSessionAll(std::vector<std::string> &infos)
+{
+    WLOGFI("run SceneSessionManagerProxy::DumpSessionAll");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("DumpSessionAll write interface token failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_DUMP_SESSION_ALL),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("DumpSessionAll sendRequest failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!reply.ReadStringVector(&infos)) {
+        WLOGFE("DumpSessionAll read session info failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
+WSError SceneSessionManagerProxy::DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos)
+{
+    WLOGFI("run SceneSessionManagerProxy::DumpSessionWithId");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("DumpSessionWithId write interface token failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(persistentId)) {
+        WLOGFE("DumpSessionWithId write persistentId failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_DUMP_SESSION_WITH_ID),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("DumpSessionWithId sendRequest failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!reply.ReadStringVector(&infos)) {
+        WLOGFE("DumpSessionWithId read session info failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
 template<typename T>
 WSError SceneSessionManagerProxy::GetParcelableInfos(MessageParcel& reply, std::vector<T>& parcelableInfos)
 {

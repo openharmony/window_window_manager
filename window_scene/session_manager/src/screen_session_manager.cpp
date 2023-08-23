@@ -53,6 +53,7 @@ ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetIns
     LoadScreenSceneXml();
     taskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_THREAD);
     screenCutoutController_ = new (std::nothrow) ScreenCutoutController();
+    foldScreenController_ = new (std::nothrow) FoldScreenController();
     sessionDisplayPowerController_ = new SessionDisplayPowerController(
         std::bind(&ScreenSessionManager::NotifyDisplayStateChange, this,
             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
@@ -111,6 +112,11 @@ DMError ScreenSessionManager::RegisterDisplayManagerAgent(
         && !SessionPermission::IsStartByHdcd()) {
         WLOGFE("register display manager agent permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (type < DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER
+        || type > DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER) {
+        WLOGFE("SCB:DisplayManagerAgentType: %{public}u", static_cast<uint32_t>(type));
+        return DMError::DM_ERROR_INVALID_PARAM;
     }
     if ((displayManagerAgent == nullptr) || (displayManagerAgent->AsObject() == nullptr)) {
         WLOGFE("displayManagerAgent invalid");
@@ -214,17 +220,25 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
         return;
     }
     if (screenEvent == ScreenEvent::CONNECTED) {
-        for (auto listener : screenConnectionListenerList_) {
-            listener->OnScreenConnect(screenSession);
+        if (screenId == 0) {
+            for (auto listener : screenConnectionListenerList_) {
+                listener->OnScreenConnect(screenSession);
+            }
+            screenSession->Connect();
         }
-        screenSession->Connect();
     } else if (screenEvent == ScreenEvent::DISCONNECTED) {
         screenSession->Disconnect();
         for (auto listener : screenConnectionListenerList_) {
             listener->OnScreenDisconnect(screenSession);
         }
-        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-        screenSessionMap_.erase(screenId);
+        {
+            std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+            screenSessionMap_.erase(screenId);
+        }
+        {
+            std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
+            phyScreenPropMap_.erase(screenId);
+        }
     }
 }
 
@@ -495,6 +509,16 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         property.UpdateVirtualPixelRatio(screenBounds);
     }
     property.SetRefreshRate(screenRefreshRate);
+
+    {
+        std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
+        phyScreenPropMap_[screenId] = property;
+    }
+
+    if (screenId != 0) {
+        return nullptr;
+    }
+
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession(screenId, property, GetDefaultAbstractScreenId());
     if (!session) {
         WLOGFE("screen session is nullptr");
@@ -1936,5 +1960,36 @@ void ScreenSessionManager::DumpSpecialScreenInfo(ScreenId id, std::string& dumpI
     oss << "RequestOrientation: " << static_cast<uint32_t>(session->GetScreenRequestedOrientation()) << std::endl;
     oss << "NodeId: " << nodeId << std::endl;
     dumpInfo.append(oss.str());
+}
+
+//Fold Screen
+ScreenProperty ScreenSessionManager::GetPhyScreenProperty(ScreenId screenId)
+{
+    std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
+    ScreenProperty property;
+    auto iter = phyScreenPropMap_.find(screenId);
+    if (iter == phyScreenPropMap_.end()) {
+        WLOGFI("Error found physic screen config with id: %{public}" PRIu64, screenId);
+        return property;
+    }
+    return iter->second;
+}
+
+void ScreenSessionManager::SetFoldDisplayMode(FoldDisplayMode displayMode)
+{
+    if (foldScreenController_ == nullptr) {
+        WLOGFW("SetFoldDisplayMode foldScreenController_ is null");
+        return;
+    }
+    foldScreenController_->SetDisplayMode(displayMode);
+}
+
+FoldDisplayMode ScreenSessionManager::GetFoldDisplayMode()
+{
+    if (foldScreenController_ == nullptr) {
+        WLOGFW("GetFoldDisplayMode foldScreenController_ is null");
+        return FoldDisplayMode::UNKNOWN;
+    }
+    return foldScreenController_->GetDisplayMode();
 }
 } // namespace OHOS::Rosen
