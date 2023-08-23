@@ -532,10 +532,6 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "loadContent");
     WLOGFD("SetUIContent: %{public}s", contentInfo.c_str());
-    if (engine == nullptr && storage == nullptr) {
-        WLOGFE("engine or storage is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
     if (uiContent_) {
         uiContent_->Destroy();
     }
