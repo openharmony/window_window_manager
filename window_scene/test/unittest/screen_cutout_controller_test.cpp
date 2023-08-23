@@ -93,9 +93,7 @@ namespace {
         DMRect emptyRect = {0, 0, 0, 0};
         DMRect emptyRect_ = {1, 2, 3, 3};
         std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
-        int ret = 0;
         controller->ConvertBoundaryRectsByRotation(boundaryRects);
-        ASSERT_EQ(ret, 0);
         delete controller;
     }
 
@@ -113,9 +111,7 @@ namespace {
         sptr<DisplayInfo> displayInfo = new DisplayInfo();
         displayInfo->SetWidth(35);
         displayInfo->SetHeight(35);
-        int ret = 0;
         controller->CheckBoundaryRects(boundaryRects, displayInfo);
-        ASSERT_EQ(ret, 0);
         delete displayInfo;
         delete controller;
     }
@@ -128,9 +124,7 @@ namespace {
     HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects, Function | SmallTest | Level3)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        int ret = 0;
         controller->CalcWaterfallRects();
-        ASSERT_EQ(ret, 0);
         delete controller;
     }
 
@@ -146,7 +140,6 @@ namespace {
         uint32_t displayHeight = 1024;
         uint32_t displayWidth = 512;
         std::vector<uint32_t> realNumVec = {16, 32, 8, 8};
-        int ret = 0;
         rotation = Rotation::ROTATION_0;
         controller->CalcWaterfallRectsByRotation(rotation, displayHeight, displayWidth, realNumVec);
         rotation = Rotation::ROTATION_90;
@@ -155,7 +148,6 @@ namespace {
         controller->CalcWaterfallRectsByRotation(rotation, displayHeight, displayWidth, realNumVec);
         rotation = Rotation::ROTATION_270;
         controller->CalcWaterfallRectsByRotation(rotation, displayHeight, displayWidth, realNumVec);
-        ASSERT_EQ(ret, 0);
         delete controller;
     }
 
@@ -224,10 +216,8 @@ namespace {
      */
     HWTEST_F(ScreenCutoutControllerTest, ProcessRotationMapping, Function | SmallTest | Level3)
     {
-        int res = 0;
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         controller->ProcessRotationMapping();
-        ASSERT_EQ(0, res);
     }
 
     /**
