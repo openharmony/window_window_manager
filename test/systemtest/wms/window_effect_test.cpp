@@ -202,18 +202,18 @@ HWTEST_F(WindowEffectTest, WindowEffect07, Function | MediumTest | Level3)
 }
 
 /**
- * @tc.name: WindowEffect07
+ * @tc.name: WindowEffect08
  * @tc.desc: Set window backdrop blur style
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEffectTest, WindowEffect07, Function | MediumTest | Level3)
+HWTEST_F(WindowEffectTest, WindowEffect08, Function | MediumTest | Level3)
 {
     const sptr<Window> &window = Utils::CreateTestWindow(windowInfo_);
     ASSERT_NE(nullptr, window);
     WindowAccessibilityController::GetInstance().OffWindowZoom();
-    sleep(0.5);
+    sleep(1);
     WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 2);
-    sleep(0.5);
+    sleep(1);
     WindowAccessibilityController::GetInstance().SetAnchorOffset(-100, -100);
 }
 

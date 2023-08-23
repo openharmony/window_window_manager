@@ -155,7 +155,6 @@ HWTEST_F(MockSessionManagerServiceTest, Dump, Function | SmallTest | Level2)
 {
     MockSessionManagerService* mService = new MockSessionManagerService();
     WLOGI("onStart");
-    auto ret = WMError::WM_OK;
     std::vector<std::u16string> args;
     ASSERT_EQ(-1, mService->Dump(-2,args));
 }
@@ -169,7 +168,6 @@ HWTEST_F(MockSessionManagerServiceTest, GetScreenDumpInfo, Function | SmallTest 
 {
     MockSessionManagerService* mService = new MockSessionManagerService();
     WLOGI("onStart");
-    auto ret = WMError::WM_OK;
     sptr<IRemoteObject> sessionManagerService = nullptr;
     ASSERT_EQ(sessionManagerService, mService->GetSceneSessionManager());
 }
