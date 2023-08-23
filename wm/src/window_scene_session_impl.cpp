@@ -516,7 +516,7 @@ WSError WindowSceneSessionImpl::SetActive(bool active)
     WLOGFD("active status: %{public}d", active);
     if (hostSession_ == nullptr) {
         WLOGFD("hostSession_ nullptr");
-        return ;
+        return WSError::WS_ERROR_INVALID_WINDOW;
     }
     if (!WindowHelper::IsMainWindow(GetType())) {
         WSError ret = hostSession_->UpdateActiveStatus(active);
