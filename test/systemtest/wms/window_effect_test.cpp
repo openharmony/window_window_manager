@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include "display_manager_proxy.h"
 #include "window_test_utils.h"
+#include "window_accessibility_controller.h"
 #include "wm_common.h"
 using namespace testing;
 using namespace testing::ext;
@@ -199,6 +200,23 @@ HWTEST_F(WindowEffectTest, WindowEffect07, Function | MediumTest | Level3)
 
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: WindowEffect07
+ * @tc.desc: Set window backdrop blur style
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEffectTest, WindowEffect07, Function | MediumTest | Level3)
+{
+    const sptr<Window> &window = Utils::CreateTestWindow(windowInfo_);
+    ASSERT_NE(nullptr, window);
+    WindowAccessibilityController::GetInstance().OffWindowZoom();
+    sleep(0.5);
+    WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 2);
+    sleep(0.5);
+    WindowAccessibilityController::GetInstance().SetAnchorOffset(-100, -100);
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
