@@ -227,6 +227,20 @@ HWTEST_F(ScreenTest, GetParentId, Function | SmallTest | Level2)
     EXPECT_CALL(m->Mock(), GetScreenInfo(_)).Times(1).WillOnce(Return(screenInfo));
     ASSERT_EQ(SCREEN_ID_INVALID, screen_->GetParentId());
 }
+
+/**
+ * @tc.name: GetRotation
+ * @tc.desc: for interface coverage and check GetRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenTest, GetRotation, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<ScreenInfo> screenInfo = screen_->GetScreenInfo();
+    screenInfo->SetParentId(0);
+    EXPECT_CALL(m->Mock(), GetScreenInfo(_)).Times(1).WillOnce(Return(screenInfo));
+    ASSERT_NE(Rotation::ROTATION_0, screen_->GetRotation());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
