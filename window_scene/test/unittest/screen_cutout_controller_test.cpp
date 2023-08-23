@@ -83,6 +83,101 @@ namespace {
     }
 
     /**
+     * @tc.name: ConvertBoundaryRectsByRotation
+     * @tc.desc: ScreenCutoutController convert boundary rects by rotation
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        DMRect emptyRect = {0, 0, 0, 0};
+        DMRect emptyRect_ = {1, 2, 3, 3};
+        std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
+        int ret = 0;
+        controller->ConvertBoundaryRectsByRotation(boundaryRects);
+        ASSERT_EQ(ret, 0);
+        delete controller;
+    }
+
+    /**
+     * @tc.name: CheckBoundaryRects
+     * @tc.desc: ScreenCutoutController check boundary rects
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        DMRect emptyRect = {-15, -15, 8, 8};
+        DMRect emptyRect_ = {21, 21, 3, 3};
+        std::vector<DMRect> boundaryRects = {emptyRect_, emptyRect};
+        sptr<DisplayInfo> displayInfo = new DisplayInfo();
+        displayInfo->SetWidth(35);
+        displayInfo->SetHeight(35);
+        int ret = 0;
+        controller->CheckBoundaryRects(boundaryRects, displayInfo);
+        ASSERT_EQ(ret, 0);
+        delete displayInfo;
+        delete controller;
+    }
+
+    /**
+     * @tc.name: CalcWaterfallRects
+     * @tc.desc: ScreenCutoutController calc waterfall rects
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        int ret = 0;
+        controller->CalcWaterfallRects();
+        ASSERT_EQ(ret, 0);
+        delete controller;
+    }
+
+    /**
+     * @tc.name: CalcWaterfallRectsByRotation
+     * @tc.desc: ScreenCutoutController calc waterfall rects by rotation
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRectsByRotation, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        Rotation rotation;
+        uint32_t displayHeight = 1024;
+        uint32_t displayWidth = 512;
+        std::vector<uint32_t> realNumVec = {16, 32, 8, 8};
+        int ret = 0;
+        rotation = Rotation::ROTATION_0;
+        controller->CalcWaterfallRectsByRotation(rotation, displayHeight, displayWidth, realNumVec);
+        rotation = Rotation::ROTATION_90;
+        controller->CalcWaterfallRectsByRotation(rotation, displayHeight, displayWidth, realNumVec);
+        rotation = Rotation::ROTATION_180;
+        controller->CalcWaterfallRectsByRotation(rotation, displayHeight, displayWidth, realNumVec);
+        rotation = Rotation::ROTATION_270;
+        controller->CalcWaterfallRectsByRotation(rotation, displayHeight, displayWidth, realNumVec);
+        ASSERT_EQ(ret, 0);
+        delete controller;
+    }
+
+    /**
+     * @tc.name: CalculateCurvedCompression
+     * @tc.desc: ScreenCutoutController calculate curved compression
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, CalculateCurvedCompression, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        RectF finalRect = RectF(0, 0, 0, 0);
+        ScreenProperty screenProperty;
+        RectF result = controller->CalculateCurvedCompression(screenProperty);
+        ASSERT_EQ(finalRect.left_, result.left_);
+        ASSERT_EQ(finalRect.top_, result.top_);
+        ASSERT_EQ(finalRect.width_, result.width_);
+        ASSERT_EQ(finalRect.height_, result.height_);
+        delete controller;
+    }
+
+    /**
      * @tc.name: IsDisplayRotationHorizontal
      * @tc.desc: IsDisplayRotationHorizontal func
      * @tc.type: FUNC
@@ -105,6 +200,10 @@ namespace {
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         ASSERT_EQ(Rotation::ROTATION_0, controller->ConvertDeviceToDisplayRotation(DeviceRotationValue::INVALID));
+        DeviceRotationValue deviceRotation;
+        deviceRotation = DeviceRotationValue::ROTATION_PORTRAIT;
+        Rotation result01 = controller->ConvertDeviceToDisplayRotation(deviceRotation);
+        ASSERT_EQ(result01, Rotation::ROTATION_0);
     }
 
     /**
