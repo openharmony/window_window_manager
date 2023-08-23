@@ -536,5 +536,5 @@ HWTEST_F(StartingWindowTest, SetAnimationConfig, Function | SmallTest | Level2)
     ASSERT_EQ(0, res);
 }
 }
-}// namespace Rosen
-} // namespace OHOS
+}
+}
