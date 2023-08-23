@@ -282,10 +282,12 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &
         WLOGFI("fail to find session by token.");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    sceneSession->SetSessionContinueState(continueState);
+    sceneSession->GetSessionInfo().continueState = continueState;
     DistributedClient dmsClient;
     dmsClient.SetMissionContinueState(sceneSession->GetPersistentId(),
-                                      static_cast<AAFwk::ContinueState>(continueState));
+        static_cast<AAFwk::ContinueState>(continueState));
+    WLOGFI("SetSessionContinueState sessionId:%{public}d, continueState:%{public}d",
+        sceneSession->GetPersistentId(), continueState);
     return WSError::WS_OK;
 }
 
@@ -763,6 +765,11 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             sceneSession->SetCallingUid(IPCSkeleton::GetCallingUid());
             auto rootContext = rootSceneContextWeak_.lock();
             sceneSession->SetAbilityToken(rootContext != nullptr ? rootContext->GetToken() : nullptr);
+        } else {
+            WLOGFD("RequestSceneSession:persistentId %{public}d, bundleName: %{public}s, moduleName: %{public}s,"
+                "abilityName: %{public}s want:%{public}s", sceneSession->GetPersistentId(),
+                sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str(),
+                sessionInfo.want == nullptr ? "nullptr" : sessionInfo.want->ToString().c_str());
         }
         FillSessionInfo(sceneSession->GetSessionInfo());
         auto persistentId = sceneSession->GetPersistentId();
@@ -793,7 +800,7 @@ void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
             WLOGFI("get exist session persistentId: %{public}d", sessionInfo.persistentId_);
             if (sessionInfo.want != nullptr) {
                 session->GetSessionInfo().want = sessionInfo.want;
-                WLOGFI("RequestSceneSession update want");
+                WLOGFI("RequestSceneSession update want, persistentId:%{public}d", sessionInfo.persistentId_);
             }
             if (session->GetSessionInfo().abilityInfo == nullptr) {
                 FillSessionInfo(session->GetSessionInfo());
@@ -1417,6 +1424,14 @@ void SceneSessionManager::GetStartPage(const SessionInfo& sessionInfo, std::stri
 
 void SceneSessionManager::FillSessionInfo(SessionInfo& sessionInfo)
 {
+    if (sessionInfo.bundleName_.empty()) {
+        WLOGFE("FillSessionInfo bundleName_ is null");
+        return;
+    }
+    if (sessionInfo.isSystem_) {
+        WLOGFD("FillSessionInfo systemScene!");
+        return;
+    }
     auto abilityInfo = QueryAbilityInfoFromBMS(currentUserId_, sessionInfo.bundleName_, sessionInfo.abilityName_,
         sessionInfo.moduleName_);
     if (abilityInfo == nullptr) {
@@ -2391,10 +2406,28 @@ WSError SceneSessionManager::GetSessionInfos(const std::string& deviceId, int32_
         std::map<int32_t, sptr<SceneSession>>::iterator iter;
         std::vector<sptr<SceneSession>> sceneSessionInfos;
         for (iter = sceneSessionMap_.begin(); iter != sceneSessionMap_.end(); iter++) {
+            auto sceneSession = iter->second;
+            if (sceneSession == nullptr) {
+                WLOGFE("session: %{public}d is nullptr", sceneSession->GetPersistentId());
+                continue;
+            }
+            auto sessionInfo = sceneSession->GetSessionInfo();
+            if (sessionInfo.isSystem_) {
+                WLOGFD("sessionId: %{public}d  isSystemScene", sceneSession->GetPersistentId());
+                continue;
+            }
+            auto want = sessionInfo.want;
+            if (want == nullptr || sessionInfo.bundleName_.empty() || want->GetElement().GetBundleName().empty()) {
+                WLOGFE("session: %{public}d, want is null or bundleName is empty or want bundleName is empty",
+                    sceneSession->GetPersistentId());
+                continue;
+            }
             if (static_cast<int>(sceneSessionInfos.size()) >= numMax) {
                 break;
             }
-            sceneSessionInfos.emplace_back(iter->second);
+            WLOGFD("GetSessionInfos session: %{public}d, bundleName:%{public}s", sceneSession->GetPersistentId(),
+                sessionInfo.bundleName_.c_str());
+            sceneSessionInfos.emplace_back(sceneSession);
         }
         return SceneSessionConverter::ConvertToMissionInfos(sceneSessionInfos, sessionInfos);
     };
@@ -2438,6 +2471,25 @@ WSError SceneSessionManager::GetSessionInfo(const std::string& deviceId,
         std::map<int32_t, sptr<SceneSession>>::iterator iter;
         iter = sceneSessionMap_.find(persistentId);
         if (iter != sceneSessionMap_.end()) {
+            auto sceneSession = iter->second;
+            if (sceneSession == nullptr) {
+                WLOGFE("session: %{public}d is nullptr", persistentId);
+                return WSError::WS_ERROR_INVALID_PARAM;
+            }
+            auto sceneSessionInfo = sceneSession->GetSessionInfo();
+            if (sceneSessionInfo.isSystem_) {
+                WLOGFD("sessionId: %{public}d  isSystemScene", persistentId);
+                return WSError::WS_ERROR_INVALID_PARAM;
+            }
+            auto want = sceneSessionInfo.want;
+            if (want == nullptr || sceneSessionInfo.bundleName_.empty() ||
+                want->GetElement().GetBundleName().empty()) {
+                WLOGFE("session: %{public}d, want is null or bundleName is empty or want bundleName is empty",
+                    persistentId);
+                return WSError::WS_ERROR_INTERNAL_ERROR;
+            }
+            WLOGFD("GetSessionInfo sessionId:%{public}d bundleName:%{public}s", persistentId,
+                sceneSessionInfo.bundleName_.c_str());
             return SceneSessionConverter::ConvertToMissionInfo(iter->second, sessionInfo);
         }
         return WSError::WS_OK;
