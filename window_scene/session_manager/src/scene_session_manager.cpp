@@ -795,6 +795,10 @@ void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
                 session->GetSessionInfo().want = sessionInfo.want;
                 WLOGFI("RequestSceneSession update want");
             }
+            if (session->GetSessionInfo().abilityInfo == nullptr) {
+                FillSessionInfo(session->GetSessionInfo());
+                PreHandleCollaborator(session);
+            }
         }
     }
 }
@@ -918,6 +922,10 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
 
+        if (scnSession->GetSessionInfo().abilityInfo == nullptr) {
+            FillSessionInfo(scnSession->GetSessionInfo());
+            PreHandleCollaborator(scnSession);
+        }
         auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
         if (!scnSessionInfo) {
             promise->set_value(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
@@ -3545,6 +3553,12 @@ void SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, const Ses
     if (iter == collaboratorMap_.end()) {
         WLOGFE("Fail to found collaborator with type: %{public}d", collaboratorType);
         return;
+    }
+    if (sessionInfo.want == nullptr) {
+        WLOGFI("sessionInfo.want is nullptr, init");
+        sessionInfo.want = new AAFwk::Want();
+        sessionInfo.want->SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_,
+            sessionInfo.moduleName_);
     }
     auto collaborator = iter->second;
     uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
