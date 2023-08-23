@@ -321,6 +321,7 @@ private:
     void NotifyClearSession(int32_t collaboratorType, int32_t persistentId);
     void NotifyMoveSessionToForeground(int32_t collaboratorType, int32_t persistendId);
     void PreHandleCollaborator(sptr<SceneSession> sceneSession);
+    void NotifyCollaboratorAfterStart(sptr<SceneSession>& scnSession, sptr<AAFwk::SessionInfo>& scnSessionInfo);
 };
 } // namespace OHOS::Rosen
 
