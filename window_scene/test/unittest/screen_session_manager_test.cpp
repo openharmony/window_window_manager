@@ -152,6 +152,7 @@ HWTEST_F(ScreenSessionManagerTest, VirtualScreen, Function | SmallTest | Level3)
  * @tc.desc: GetScreenSession virtual screen
  * @tc.type: FUNC
  */
+
 HWTEST_F(ScreenSessionManagerTest, GetScreenSession, Function | SmallTest | Level3)
 {
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
