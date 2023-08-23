@@ -34,6 +34,8 @@
 #include "session_helper.h"
 
 namespace OHOS::Rosen {
+const std::string DLP_INDEX = "ohos.dlp.params.index";
+
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Session" };
 std::atomic<int32_t> g_persistentId = INVALID_SESSION_ID;
@@ -567,6 +569,7 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.moduleName_ = abilitySessionInfo->want.GetModuleName();
+    info.appIndex_ = abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0);
     info.persistentId_ = abilitySessionInfo->persistentId;
     info.callerPersistentId_ = GetPersistentId();
     info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
@@ -580,8 +583,9 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     if (info.want != nullptr) {
         info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
     }
-    WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s",
-        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
+    WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s, \
+        appIndex:%{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(),
+        info.appIndex_);
     WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}d, callingTokenId:%{public}d," \
         "uiAbilityId: %{public}" PRIu64 ", windowMode: %{public}d",
         info.callState_, info.persistentId_, info.callingTokenId_, info.uiAbilityId_, info.windowMode);

@@ -69,8 +69,6 @@ private:
     std::thread timerWorker_;
     std::list<std::unique_ptr<TimerItem>> timers_;
 };
-
-#define TimerMgr ::OHOS::DelayedSingleton<TimerManager>::GetInstance()
 } // namespace Rosen
 } // namespace OHOS
 #endif // TIMER_MANAGER_H

@@ -610,9 +610,9 @@ void SceneSessionManager::ConfigSubWindowSizeLimits(const WindowSceneConfig::Con
     }
 }
 
-void SceneSessionManager::SetRootSceneContext(AbilityRuntime::Context* context)
+void SceneSessionManager::SetRootSceneContext(const std::weak_ptr<AbilityRuntime::Context>& contextWeak)
 {
-    rootSceneContext_ = std::shared_ptr<AbilityRuntime::Context>(context);
+    rootSceneContextWeak_ = contextWeak;
 }
 
 sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
@@ -648,14 +648,15 @@ sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
 }
 
 sptr<SceneSession> SceneSessionManager::GetSceneSessionByName(const std::string& bundleName,
-    const std::string& moduleName, const std::string& abilityName)
+    const std::string& moduleName, const std::string& abilityName, const int32_t appIndex)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto &item : sceneSessionMap_) {
         auto sceneSession = item.second;
         if (sceneSession->GetSessionInfo().bundleName_ == bundleName &&
             sceneSession->GetSessionInfo().moduleName_ == moduleName &&
-            sceneSession->GetSessionInfo().abilityName_ == abilityName) {
+            sceneSession->GetSessionInfo().abilityName_ == abilityName &&
+            sceneSession->GetSessionInfo().appIndex_ == appIndex) {
             return sceneSession;
         }
     }
@@ -749,9 +750,9 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
 
     sptr<SceneSession::SpecificSessionCallback> specificCb = CreateSpecificSessionCallback();
     auto task = [this, sessionInfo, specificCb, property]() {
-        WLOGFI("sessionInfo: bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, type %{public}u",
-            sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
-            sessionInfo.abilityName_.c_str(), sessionInfo.windowType_);
+        WLOGFI("sessionInfo: bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, \
+            appIndex: %{public}d, type %{public}u", sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
+            sessionInfo.abilityName_.c_str(), sessionInfo.appIndex_, sessionInfo.windowType_);
         sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, specificCb);
         if (sceneSession == nullptr) {
             WLOGFE("sceneSession is nullptr!");
@@ -760,7 +761,8 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         if (sessionInfo.isSystem_) {
             sceneSession->SetCallingPid(IPCSkeleton::GetCallingPid());
             sceneSession->SetCallingUid(IPCSkeleton::GetCallingUid());
-            sceneSession->SetAbilityToken(rootSceneContext_ != nullptr ? rootSceneContext_->GetToken() : nullptr);
+            auto rootContext = rootSceneContextWeak_.lock();
+            sceneSession->SetAbilityToken(rootContext != nullptr ? rootContext->GetToken() : nullptr);
         }
         FillSessionInfo(sceneSession->GetSessionInfo());
         auto persistentId = sceneSession->GetPersistentId();
@@ -2500,6 +2502,43 @@ std::string SceneSessionManager::AnonymizeDeviceId(const std::string& deviceId)
     return anonDeviceId;
 }
 
+WSError SceneSessionManager::DumpSessionAll(std::vector<std::string> &infos)
+{
+    WLOGFI("Dump all session.");
+    auto task = [this, &infos]() {
+        std::string dumpInfo = "User ID #" + std::to_string(currentUserId_);
+        infos.push_back(dumpInfo);
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto &item : sceneSessionMap_) {
+            auto& session = item.second;
+            if (session) {
+                session->DumpMissionInfo(infos);
+            }
+        }
+        return WSError::WS_OK;
+    };
+
+    return taskScheduler_->PostSyncTask(task);
+}
+
+WSError SceneSessionManager::DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos)
+{
+    WLOGFI("Dump session with id %{public}d", persistentId);
+    auto task = [this, persistentId, &infos]() {
+        std::string dumpInfo = "User ID #" + std::to_string(currentUserId_);
+        infos.push_back(dumpInfo);
+        auto session = GetSceneSession(persistentId);
+        if (session) {
+            session->DumpMissionInfo(infos);
+        } else {
+            infos.push_back("error: invalid mission number, please see 'aa dump --mission-list'.");
+        }
+        return WSError::WS_OK;
+    };
+
+    return taskScheduler_->PostSyncTask(task);
+}
+
 WSError SceneSessionManager::GetAllAbilityInfos(const AAFwk::Want &want, int32_t userId,
     std::vector<AppExecFwk::AbilityInfo> &abilityInfos)
 {
@@ -2683,6 +2722,11 @@ sptr<SceneSession> SceneSessionManager::FindMainWindowWithToken(sptr<IRemoteObje
 
 WSError SceneSessionManager::BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken)
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("BindDialogTarget permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+
     if (targetToken == nullptr) {
         WLOGFE("Target token is null");
         return WSError::WS_ERROR_NULLPTR;
@@ -2714,6 +2758,14 @@ WSError SceneSessionManager::BindDialogTarget(uint64_t persistentId, sptr<IRemot
 WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
+    if (type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR ||
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED ||
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG) {
+        if (!SessionPermission::IsSystemCalling()) {
+            WLOGFE("RegisterWindowManagerAgent permission denied!");
+            return WMError::WM_ERROR_NOT_SYSTEM_APP;
+        }
+    }
     if ((windowManagerAgent == nullptr) || (windowManagerAgent->AsObject() == nullptr)) {
         WLOGFE("windowManagerAgent is null");
         return WMError::WM_ERROR_NULLPTR;
@@ -2727,6 +2779,14 @@ WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType t
 WMError SceneSessionManager::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
+    if (type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR ||
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED ||
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG) {
+        if (!SessionPermission::IsSystemCalling()) {
+            WLOGFE("UnregisterWindowManagerAgent permission denied!");
+            return WMError::WM_ERROR_NOT_SYSTEM_APP;
+        }
+    }
     if ((windowManagerAgent == nullptr) || (windowManagerAgent->AsObject() == nullptr)) {
         WLOGFE("windowManagerAgent is null");
         return WMError::WM_ERROR_NULLPTR;

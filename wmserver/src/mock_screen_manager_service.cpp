@@ -32,6 +32,8 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "MockS
 const std::string ARG_DUMP_HELP = "-h";
 const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_SCREEN = "-s";
+const std::string ARG_FOLD_DISPLAY_FULL = "-f";
+const std::string ARG_FOLD_DISPLAY_MAIN = "-m";
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(MockScreenManagerService)
@@ -61,7 +63,11 @@ void MockScreenManagerService::ShowHelpInfo(std::string& dumpInfo)
         .append(" -a                             ")
         .append("|dump all screen information in the system\n")
         .append(" -s {screen id}")
-        .append("|dump specified screen information\n");
+        .append("|dump specified screen information\n")
+        .append(" -f                             ")
+        .append("|switch the screen to full display mode\n")
+        .append(" -m                             ")
+        .append("|switch the screen to main display mode\n");
 }
 
 void MockScreenManagerService::ShowIllegalArgsInfo(std::string& dumpInfo)
@@ -136,6 +142,11 @@ int MockScreenManagerService::Dump(int fd, const std::vector<std::u16string>& ar
         ShowHelpInfo(dumpInfo);
     } else if (params.size() == 1 && params[0] == ARG_DUMP_HELP) { // 1: params num
         ShowHelpInfo(dumpInfo);
+    } else if (params.size() == 1 && (params[0] == ARG_FOLD_DISPLAY_FULL || params[0] == ARG_FOLD_DISPLAY_MAIN)) {
+        int errCode = SetFoldDisplayMode(params[0]);
+        if (errCode != 0) {
+            ShowIllegalArgsInfo(dumpInfo);
+        }
     } else {
         int errCode = DumpScreenInfo(params, dumpInfo);
         if (errCode != 0) {
@@ -190,5 +201,23 @@ void MockScreenManagerService::SetSessionManagerService(const sptr<IRemoteObject
     sessionManagerService_ = sessionManagerService;
 }
 
+int MockScreenManagerService::SetFoldDisplayMode(const std::string& modeParam)
+{
+    if (modeParam.empty()) {
+        return -1;
+    }
+    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+    if (modeParam == ARG_FOLD_DISPLAY_FULL) {
+        displayMode = FoldDisplayMode::FULL;
+    } else if (modeParam == ARG_FOLD_DISPLAY_MAIN) {
+        displayMode = FoldDisplayMode::MAIN;
+    } else {
+        WLOGFW("SetFoldDisplayMode mode not support");
+        return -1;
+    }
+    sptr<IScreenSessionManager> screenSessionManagerProxy = iface_cast<IScreenSessionManager>(screenSessionManager_);
+    screenSessionManagerProxy->SetFoldDisplayMode(displayMode);
+    return 0;
+}
 } // namespace Rosen
 } // namespace OHOS
