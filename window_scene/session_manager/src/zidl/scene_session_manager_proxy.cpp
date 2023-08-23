@@ -601,7 +601,7 @@ WSError SceneSessionManagerProxy::GetSessionInfos(const std::string& deviceId, i
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteString(deviceId)) {
+    if (!data.WriteString16(Str8ToStr16(deviceId))) {
         WLOGFE("GetSessionInfos write deviceId failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -633,7 +633,7 @@ WSError SceneSessionManagerProxy::GetSessionInfo(const std::string& deviceId, in
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteString(deviceId)) {
+    if (!data.WriteString16(Str8ToStr16(deviceId))) {
         WLOGFE("GetSessionInfo write deviceId failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
