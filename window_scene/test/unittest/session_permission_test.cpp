@@ -48,7 +48,7 @@ void SessionPermissionTest::SetUp()
 void SessionPermissionTest::TearDown()
 {
 }
-namespace{
+namespace {
 
 /**
  * @tc.name: IsSystemServiceCalling
@@ -56,7 +56,7 @@ namespace{
  * @tc.type: FUNC
  */
 HWTEST_F(SessionPermissionTest, IsSystemServiceCalling, Function | SmallTest | Level1)
-{ 
+{
     bool needPrintLog = true;
     bool result = SessionPermission::IsSystemServiceCalling(needPrintLog);
     ASSERT_EQ(false, result);
@@ -68,7 +68,7 @@ HWTEST_F(SessionPermissionTest, IsSystemServiceCalling, Function | SmallTest | L
  * @tc.type: FUNC
  */
 HWTEST_F(SessionPermissionTest, IsSACalling, Function | SmallTest | Level1)
-{ 
+{
     bool result = SessionPermission::IsSACalling();
     ASSERT_EQ(false, result);
 }
@@ -140,6 +140,6 @@ HWTEST_F(SessionPermissionTest, IsStartedByInputMethod, Function | SmallTest | L
     ASSERT_EQ(false, result);
 }
 
-} // namespacecd 
+} // namespacecd
 } // namespace Rosen
 } // namespace OHOS
