@@ -31,7 +31,6 @@
 #include <iservice_registry.h>
 #include <parameters.h>
 #include "parameter.h"
-#include "session/host/include/session.h"
 #include <power_mgr_client.h>
 #include <resource_manager.h>
 #include <running_lock.h>
