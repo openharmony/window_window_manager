@@ -222,13 +222,9 @@ HWTEST_F(MockSessionManagerServiceTest, Dump2, Function | SmallTest | Level2)
 HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService2, Function | SmallTest | Level2)
 {
     MockScreenManagerService* mService = new MockScreenManagerService();
-    std::vector<std::u16string> args;
-    auto ret = 0;
     sptr<IRemoteObject> sessionManagerService = nullptr;
     mService->SetSessionManagerService(sessionManagerService);
-    ASSERT_EQ(0, ret);
 }
-
 }
 }
 }
