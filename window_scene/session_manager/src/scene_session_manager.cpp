@@ -923,14 +923,14 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
 
+        if (scnSession->GetSessionInfo().abilityInfo == nullptr) {
+            FillSessionInfo(scnSession->GetSessionInfo());
+            PreHandleCollaborator(scnSession);
+        }
         auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
         if (!scnSessionInfo) {
             promise->set_value(static_cast<int32_t>(WSError::WS_ERROR_NULLPTR));
             return WSError::WS_ERROR_INVALID_WINDOW;
-        }
-        if (sceneSession->GetSessionInfo().abilityInfo == nullptr) {
-            FillSessionInfo(sceneSession->GetSessionInfo());
-            PreHandleCollaborator(sceneSession);
         }
         scnSession->NotifyActivation();
         scnSessionInfo->isNewWant = isNewActive;
