@@ -64,6 +64,8 @@ public:
 
     void ReportBackButtonInfoImmediately();
     void ReportZeroOpacityInfoImmediately(const std::string& bundleName, const std::string& packageName);
+    // report when application startup request window
+    void ReportStartWindow(const std::string& bundleName, const std::string& windowName);
     void ReportRecordedInfos();
 
 private:

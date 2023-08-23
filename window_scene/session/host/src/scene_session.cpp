@@ -236,6 +236,12 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
     WLOGFD("Id: %{public}d, reason: %{public}d, rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
         GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_, rect.height_);
+    bool isMoveOrDrag = moveDragController_ &&
+        (moveDragController_->GetStartDragFlag() || moveDragController_->GetStartMoveFlag());
+    if (isMoveOrDrag && reason == SizeChangeReason::UNDEFINED) {
+        WLOGFD("skip redundant rect update!");
+        return WSError::WS_ERROR_REPEAT_OPERATION;
+    }
     WSError ret = Session::UpdateRect(rect, reason);
     if (ret == WSError::WS_OK) {
         specificCallback_->onUpdateAvoidArea_(GetPersistentId());
@@ -278,6 +284,10 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
 
 WSError SceneSession::RaiseToAppTop()
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("raise to app top permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onRaiseToTop_) {
         sessionChangeCallback_->onRaiseToTop_();
     }
@@ -679,10 +689,11 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
         UpdateWinRectForSystemBar(rect);
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-        "SceneSession::OnMoveDragCallback [%{public}d, %{public}d, %{public}u, %{public}u]",
-        rect.posX_, rect.posY_, rect.width_, rect.height_);
-    SetSurfaceBound(rect);
-    UpdateRect(rect, reason);
+        "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
+    SetSurfaceBounds(rect);
+    if (reason != SizeChangeReason::MOVE) {
+        UpdateRect(rect, reason);
+    }
     if (reason == SizeChangeReason::DRAG_END) {
         NotifySessionRectChange(rect, reason);
         OnSessionEvent(SessionEvent::EVENT_END_MOVE);
@@ -691,6 +702,10 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
 
 void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
 {
+    if (!specificCallback_) {
+        WLOGFE("specificCallback_ is null!");
+        return;
+    }
     std::vector<sptr<SceneSession>> statusBarVector =
         specificCallback_->onGetSceneSessionVectorByType_(WindowType::WINDOW_TYPE_STATUS_BAR);
     for (auto& statusBar : statusBarVector) {
@@ -708,7 +723,7 @@ void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
         rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
 
-void SceneSession::SetSurfaceBound(const WSRect& rect)
+void SceneSession::SetSurfaceBounds(const WSRect& rect)
 {
     auto rsTransaction = RSTransactionProxy::GetInstance();
     if (rsTransaction) {
@@ -718,7 +733,7 @@ void SceneSession::SetSurfaceBound(const WSRect& rect)
         leashWinSurfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);
     } else {
-        WLOGE("SetSurfaceBound surfaceNode is null!");
+        WLOGE("SetSurfaceBounds surfaceNode is null!");
     }
     if (rsTransaction) {
         rsTransaction->Commit();
@@ -941,6 +956,30 @@ int32_t SceneSession::GetCollaboratorType() const
 void SceneSession::SetCollaboratorType(int32_t collaboratorType)
 {
     collaboratorType_ = collaboratorType;
+}
+
+void SceneSession::DumpMissionInfo(std::vector<std::string> &info) const
+{
+    std::string dumpInfo = "      Mission ID #" + std::to_string(persistentId_);
+    info.push_back(dumpInfo);
+    dumpInfo = "        mission name [" + SessionUtils::ConvertSessionName(sessionInfo_.bundleName_,
+        sessionInfo_.abilityName_, sessionInfo_.moduleName_, sessionInfo_.appIndex_) + "]";
+    info.push_back(dumpInfo);
+    dumpInfo = "        runningState [" + std::string(isActive_ ? "FOREGROUND" : "BACKGROUND") + "]";
+    info.push_back(dumpInfo);
+    dumpInfo = "        lockedState [" + std::to_string(sessionInfo_.lockedState) + "]";
+    info.push_back(dumpInfo);
+    auto abilityInfo = sessionInfo_.abilityInfo;
+    dumpInfo = "        continuable [" + (abilityInfo ? std::to_string(abilityInfo->continuable) : " ") + "]";
+    info.push_back(dumpInfo);
+    dumpInfo = "        timeStamp [" + sessionInfo_.time + "]";
+    info.push_back(dumpInfo);
+    dumpInfo = "        label [" + (abilityInfo ? abilityInfo->label : " ") + "]";
+    info.push_back(dumpInfo);
+    dumpInfo = "        iconPath [" + (abilityInfo ? abilityInfo->iconPath : " ") + "]";
+    info.push_back(dumpInfo);
+    dumpInfo = "        want [" + (sessionInfo_.want ? sessionInfo_.want->ToUri() : " ") + "]";
+    info.push_back(dumpInfo);
 }
 
 std::shared_ptr<AppExecFwk::AbilityInfo> SceneSession::GetAbilityInfo()

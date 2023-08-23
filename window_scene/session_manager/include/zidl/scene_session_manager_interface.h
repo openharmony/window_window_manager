@@ -67,6 +67,8 @@ public:
         TRANS_ID_UNREGISTER_SESSION_LISTENER,
         TRANS_ID_GET_MISSION_INFOS,
         TRANS_ID_GET_MISSION_INFO_BY_ID,
+        TRANS_ID_DUMP_SESSION_ALL,
+        TRANS_ID_DUMP_SESSION_WITH_ID,
         TRANS_ID_TERMINATE_SESSION_NEW,
         TRANS_ID_GET_SESSION_DUMP_INFO,
         TRANS_ID_UPDATE_AVOIDAREA_LISTENER,
@@ -101,6 +103,8 @@ public:
     virtual WSError GetSessionInfos(const std::string& deviceId,
                                     int32_t numMax, std::vector<SessionInfoBean>& sessionInfos) = 0;
     virtual WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) = 0;
+    virtual WSError DumpSessionAll(std::vector<std::string> &infos) = 0;
+    virtual WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos) = 0;
     virtual WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState) = 0;
 
     virtual WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) = 0;

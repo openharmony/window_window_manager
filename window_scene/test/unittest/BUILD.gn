@@ -19,18 +19,53 @@ group("unittest") {
   testonly = true
 
   deps = [
+    ":ws_move_drag_controller_test",
     ":ws_scene_session_manager_proxy_test",
     ":ws_scene_session_manager_stub_test",
     ":ws_scene_session_manager_test",
     ":ws_scene_session_test",
     ":ws_screen_cutout_controller_test",
+    ":ws_screen_property_test",
+    ":ws_screen_rotation_property_test",
     ":ws_screen_scene_config_test",
     ":ws_screen_session_manager_test",
+    ":ws_screen_session_test",
     ":ws_session_manager_agent_controller_test",
     ":ws_session_test",
     ":ws_window_event_channel_test",
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
+  ]
+}
+
+ohos_unittest("ws_screen_session_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [ "${window_base_path}/window_scene/session/screen/include" ]
+  sources = [ "screen_session_test.cpp" ]
+
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/session:screen_session",
+  ]
+
+  external_deps = [ "c_utils:utils" ]
+}
+
+ohos_unittest("ws_screen_property_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [ "${window_base_path}/window_scene/session/screen/include" ]
+  sources = [ "screen_property_test.cpp" ]
+
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/session:screen_session",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "graphic_2d:librender_service_client",
   ]
 }
 
@@ -108,6 +143,8 @@ ohos_unittest("ws_scene_session_manager_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = [
+    "ability_base:configuration",
+    "ability_runtime:ability_context_native",
     "c_utils:utils",
     "hilog:libhilog",
   ]
