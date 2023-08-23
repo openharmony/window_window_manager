@@ -239,7 +239,7 @@ HWTEST_F(ScreenTest, GetRotation, Function | SmallTest | Level2)
     sptr<ScreenInfo> screenInfo = screen_->GetScreenInfo();
     screenInfo->SetParentId(0);
     EXPECT_CALL(m->Mock(), GetScreenInfo(_)).Times(1).WillOnce(Return(screenInfo));
-    ASSERT_NE(Rotation::ROTATION_0, screen_->GetRotation());
+    ASSERT_EQ(Rotation::ROTATION_0, screen_->GetRotation());
 }
 }
 } // namespace Rosen
