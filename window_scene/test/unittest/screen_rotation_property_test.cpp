@@ -233,6 +233,322 @@ HWTEST_F(ScreenRotationPropertyTest, ConvertSensorToDeviceRotation, Function | S
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ConvertSensorToDeviceRotation end";
 }
 
+/**
+ * @tc.name: ProcessSwitchToAutoRotationLandscapeRestricted
+ * @tc.desc: test function : ProcessSwitchToAutoRotationLandscapeRestricted
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, ProcessSwitchToAutoRotationLandscapeRestricted, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessSwitchToAutoRotationLandscapeRestricted start";
+    ScreenRotationProperty::Init();
+    int32_t res = 0;
+    ScreenRotationProperty::ProcessSwitchToAutoRotationLandscapeRestricted();
+    ASSERT_EQ(0, res);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessSwitchToAutoRotationLandscapeRestricted end";
+}
+
+/**
+ * @tc.name: ConvertRotationToDisplayOrientation
+ * @tc.desc: test function : ConvertRotationToDisplayOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, ConvertRotationToDisplayOrientation, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ConvertRotationToDisplayOrientation start";
+    ScreenRotationProperty::Init();
+    int32_t res = 0;
+    ScreenRotationProperty::ConvertRotationToDisplayOrientation(Rotation::ROTATION_90);
+    ASSERT_EQ(0, res);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ConvertSensorToDeviceRotation end";
+}
+
+/**
+ * @tc.name: ConvertDeviceToDisplayRotation
+ * @tc.desc: test function : ConvertDeviceToDisplayRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, ConvertDeviceToDisplayRotation, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ConvertDeviceToDisplayRotation start";
+    ScreenRotationProperty::Init();
+    int32_t res = 0;
+    ScreenRotationProperty::ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_PORTRAIT);
+    ASSERT_EQ(0, res);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ConvertDeviceToDisplayRotation end";
+}
+
+/**
+ * @tc.name: ProcessRotationMapping
+ * @tc.desc: test function : ProcessRotationMapping
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, ProcessRotationMapping, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessRotationMapping start";
+    ScreenRotationProperty::Init();
+    int32_t res = 0;
+    ScreenRotationProperty::ProcessRotationMapping();
+    ASSERT_EQ(0, res);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessRotationMapping end";
+}
+
+HWTEST_F(ScreenRotationPropertyTest, ProcessSwitchToSensorRelatedOrientation, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessSwitchToSensorRelatedOrientation start";
+    ScreenRotationProperty::Init();
+    int32_t res = 0;
+    ScreenRotationProperty::ProcessSwitchToSensorRelatedOrientation(
+        Orientation::BEGIN, DeviceRotation::ROTATION_PORTRAIT);
+    ASSERT_EQ(0, res);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessSwitchToSensorRelatedOrientation end";
+}
+
+/**
+ * @tc.name: GetCurrentDisplayRotation
+ * @tc.desc: test function : GetCurrentDisplayRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, GetCurrentDisplayRotation, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: GetCurrentDisplayRotation start";
+    ScreenRotationProperty::Init();
+    int32_t res = 0;
+    ScreenRotationProperty::GetCurrentDisplayRotation();
+    ASSERT_EQ(0, res);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: GetCurrentDisplayRotation end";
+}
+
+/**
+ * @tc.name: HandleSensorEventInput
+ * @tc.desc: test function : HandleSensorEventInput
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, HandleSensorEventInput, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: HandleSensorEventInput start";
+    ScreenRotationProperty::Init();
+    int32_t res = 0;
+    ScreenRotationProperty::HandleSensorEventInput(DeviceRotation::INVALID);
+    ASSERT_EQ(0, res);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: HandleSensorEventInput end";
+}
+
+/**
+ * @tc.name: ProcessSwitchToSensorUnrelatedOrientation
+ * @tc.desc: test function : ProcessSwitchToSensorUnrelatedOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, ProcessSwitchToSensorUnrelatedOrientation, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessSwitchToSensorUnrelatedOrientation start";
+    ScreenRotationProperty::Init();
+    int32_t res = 0;
+    ScreenRotationProperty::ProcessSwitchToSensorUnrelatedOrientation(ScreenRotationProperty::lastOrientationType_);
+    ASSERT_EQ(0, res);
+    ScreenRotationProperty::ProcessSwitchToSensorUnrelatedOrientation(Orientation::UNSPECIFIED);
+    ASSERT_EQ(0, res);
+    ScreenRotationProperty::ProcessSwitchToSensorUnrelatedOrientation(Orientation::VERTICAL);
+    ASSERT_EQ(0, res);
+    ScreenRotationProperty::ProcessSwitchToSensorUnrelatedOrientation(Orientation::REVERSE_VERTICAL);
+    ASSERT_EQ(0, res);
+    ScreenRotationProperty::ProcessSwitchToSensorUnrelatedOrientation(Orientation::HORIZONTAL);
+    ASSERT_EQ(0, res);
+    ScreenRotationProperty::ProcessSwitchToSensorUnrelatedOrientation(Orientation::REVERSE_HORIZONTAL);
+    ASSERT_EQ(0, res);
+    ScreenRotationProperty::ProcessSwitchToSensorUnrelatedOrientation(Orientation::BEGIN);
+    ASSERT_EQ(0, res);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessSwitchToSensorUnrelatedOrientation end";
+}
+
+/**
+ * @tc.name: ProcessAutoRotationPortraitOrientation
+ * @tc.desc: ProcessAutoRotationPortraitOrientation func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, ProcessAutoRotationPortraitOrientation, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessAutoRotationPortraitOrientation start";
+    ScreenRotationProperty::Init();
+    DeviceRotation sensorRotationConverted = DeviceRotation::ROTATION_LANDSCAPE;
+    auto result = ScreenRotationProperty::ProcessAutoRotationPortraitOrientation(sensorRotationConverted);
+    ASSERT_EQ(ScreenRotationProperty::currentDisplayRotation_, result);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessAutoRotationPortraitOrientation end";
+}
+
+/**
+ * @tc.name: ProcessAutoRotationLandscapeOrientation
+ * @tc.desc: ProcessAutoRotationLandscapeOrientation func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, ProcessAutoRotationLandscapeOrientation, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessAutoRotationLandscapeOrientation start";
+    ScreenRotationProperty::Init();
+    DeviceRotation sensorRotationConverted = DeviceRotation::ROTATION_LANDSCAPE;
+    auto result = ScreenRotationProperty::ProcessAutoRotationLandscapeOrientation(sensorRotationConverted);
+    ASSERT_EQ(ScreenRotationProperty::currentDisplayRotation_, result);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessAutoRotationLandscapeOrientation end";
+}
+
+/**
+ * @tc.name: CalcDeviceRotation
+ * @tc.desc: CalcDeviceRotation func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, CalcDeviceRotation, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: CalcDeviceRotation start";
+    ScreenRotationProperty::Init();
+    SensorRotation sensorRotation = SensorRotation::INVALID;
+    auto result = ScreenRotationProperty::CalcDeviceRotation(sensorRotation);
+    ASSERT_EQ(DeviceRotation::INVALID, result);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: CalcTargetDisplayRotation end";
+}
+
+/**
+ * @tc.name: CalcTargetDisplayRotation
+ * @tc.desc: CalcTargetDisplayRotation func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, CalcTargetDisplayRotation, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: CalcTargetDisplayRotation start";
+    ScreenRotationProperty::Init();
+    Orientation requestedOrientation = Orientation::VERTICAL;
+    DeviceRotation sensorRotationConverted = DeviceRotation::ROTATION_LANDSCAPE;
+    auto result = ScreenRotationProperty::CalcTargetDisplayRotation(requestedOrientation, sensorRotationConverted);
+    ASSERT_EQ(ScreenRotationProperty::lastSensorDecidedRotation_, result);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: CalcTargetDisplayRotation end";
+}
+
+/**
+ * @tc.name: IsCurrentDisplayVertical
+ * @tc.desc: IsCurrentDisplayVertical func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, IsCurrentDisplayVertical, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: IsCurrentDisplayVertical start";
+    ScreenRotationProperty::Init();
+    auto result = ScreenRotationProperty::IsCurrentDisplayVertical();
+    ASSERT_EQ(false, result);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: IsCurrentDisplayVertical end";
+}
+
+/**
+ * @tc.name: IsDeviceRotationVertical
+ * @tc.desc: IsDeviceRotationVertical func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, IsDeviceRotationVertical, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: IsDeviceRotationVertical start";
+    ScreenRotationProperty::Init();
+    DeviceRotation deviceRotation = DeviceRotation::ROTATION_PORTRAIT;
+    auto result = ScreenRotationProperty::IsDeviceRotationVertical(deviceRotation);
+    ASSERT_EQ(true, result);
+    deviceRotation = DeviceRotation::ROTATION_PORTRAIT_INVERTED;
+    result = ScreenRotationProperty::IsDeviceRotationVertical(deviceRotation);
+    ASSERT_EQ(true, result);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: IsDeviceRotationVertical end";
+}
+
+/**
+ * @tc.name: IsDeviceRotationHorizontal
+ * @tc.desc: IsDeviceRotationHorizontal func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, IsDeviceRotationHorizontal, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: IsDeviceRotationHorizontal start";
+    ScreenRotationProperty::Init();
+    DeviceRotation deviceRotation = DeviceRotation::ROTATION_LANDSCAPE;
+    auto result = ScreenRotationProperty::IsDeviceRotationHorizontal(deviceRotation);
+    ASSERT_EQ(true, result);
+    deviceRotation = DeviceRotation::ROTATION_LANDSCAPE_INVERTED;
+    result = ScreenRotationProperty::IsDeviceRotationHorizontal(deviceRotation);
+    ASSERT_EQ(true, result);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: IsDeviceRotationHorizontal end";
+}
+
+/**
+ * @tc.name: IsCurrentDisplayHorizontal
+ * @tc.desc: IsCurrentDisplayHorizontal func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, IsCurrentDisplayHorizontal, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: IsCurrentDisplayHorizontal start";
+    ScreenRotationProperty::Init();
+    auto result = ScreenRotationProperty::IsCurrentDisplayHorizontal();
+    ASSERT_EQ(true, result);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: IsCurrentDisplayHorizontal end";
+}
+
+/**
+ * @tc.name: IsDefaultDisplayRotationPortrait
+ * @tc.desc: IsDefaultDisplayRotationPortrait func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, IsDefaultDisplayRotationPortrait, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: IsDefaultDisplayRotationPortrait start";
+    ScreenRotationProperty::Init();
+    auto result = ScreenRotationProperty::IsDefaultDisplayRotationPortrait();
+    ASSERT_EQ(true, result);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: IsDefaultDisplayRotationPortrait end";
+}
+
+/**
+ * @tc.name: IsDisplayRotationVertical
+ * @tc.desc: IsDisplayRotationVertical func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, IsDisplayRotationVertical, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: IsDisplayRotationVertical start";
+    ScreenRotationProperty::Init();
+    Rotation rotation = Rotation::ROTATION_0;
+    auto result = ScreenRotationProperty::IsDisplayRotationVertical(rotation);
+    ASSERT_EQ(true, result);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: IsDisplayRotationVertical end";
+}
+
+/**
+ * @tc.name: IsDisplayRotationHorizontal
+ * @tc.desc: IsDisplayRotationHorizontal func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, IsDisplayRotationHorizontal, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: IsDisplayRotationHorizontal start";
+    ScreenRotationProperty::Init();
+    Rotation rotation = Rotation::ROTATION_0;
+    auto result = ScreenRotationProperty::IsDisplayRotationHorizontal(rotation);
+    ASSERT_EQ(false, result);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: IsDisplayRotationHorizontal end";
+}
+
+/**
+ * @tc.name: ProcessOrientationSwitch
+ * @tc.desc: ProcessOrientationSwitch func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationPropertyTest, ProcessOrientationSwitch, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessOrientationSwitch start";
+    ScreenRotationProperty::Init();
+    Orientation orientation = Orientation::BEGIN;
+    int res = 0;
+    ScreenRotationProperty::ProcessOrientationSwitch(orientation);
+    ASSERT_EQ(res, 0);
+    orientation = Orientation::SENSOR;
+    ScreenRotationProperty::ProcessOrientationSwitch(orientation);
+    ASSERT_EQ(res, 0);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessOrientationSwitch start";
+}
+
 }
 
 }

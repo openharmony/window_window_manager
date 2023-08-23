@@ -202,6 +202,7 @@ public:
 
     bool IsSessionValid() const;
     bool IsActive() const;
+    bool IsSystemSession() const;
 
     sptr<IRemoteObject> dialogTargetToken_ = nullptr;
     int32_t GetWindowId() const;
@@ -302,6 +303,7 @@ private:
 
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
+    bool isTerminating = false;
 
     std::vector<sptr<Session>> dialogVec_;
     sptr<Session> parentSession_;

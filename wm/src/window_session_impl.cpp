@@ -274,8 +274,8 @@ WMError WindowSessionImpl::Connect()
 
 WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
 {
-    WLOGFI("Window Show [name:%{public}s, id:%{public}d, type:%{public}u], reason:%{public}u state:%{pubic}u",
-        property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType(), reason, state_);
+    WLOGFI("Window Show [name:%{public}s, id:%{public}d, type:%{public}u], reason:%{public}u state:%{public}u",
+        property_->GetWindowName().c_str(), property_->GetPersistentId(), GetType(), reason, state_);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -283,6 +283,7 @@ WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation)
     if (state_ == WindowState::STATE_SHOWN) {
         WLOGFD("window session is alreay shown [name:%{public}s, id:%{public}d, type: %{public}u]",
             property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType());
+        NotifyAfterForeground(true, false);
         return WMError::WM_OK;
     }
 
@@ -661,6 +662,13 @@ bool WindowSessionImpl::GetTouchable() const
 
 WMError WindowSessionImpl::SetWindowType(WindowType type)
 {
+    if (type != WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW && !SessionPermission::IsSystemCalling()) {
+        WLOGFE("set window type permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     property_->SetWindowType(type);
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
     return WMError::WM_OK;
@@ -1265,6 +1273,21 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         inputEventConsumer = inputEventConsumer_;
+    }
+    int32_t keyCode = keyEvent->GetKeyCode();
+    int32_t keyAction = keyEvent->GetKeyAction();
+    if (keyCode == MMI::KeyEvent::KEYCODE_BACK && keyAction == MMI::KeyEvent::KEY_ACTION_UP) {
+        WLOGFI("input event is consumed by back, return");
+        if (inputEventConsumer != nullptr) {
+            WLOGFD("Transfer key event to inputEventConsumer");
+            if (inputEventConsumer->OnInputEvent(keyEvent)) {
+                return;
+            }
+            PerformBack();
+            return;
+        }
+        HandleBackEvent();
+        return;
     }
     if (inputEventConsumer != nullptr) {
         WLOGD("Transfer key event to inputEventConsumer");
