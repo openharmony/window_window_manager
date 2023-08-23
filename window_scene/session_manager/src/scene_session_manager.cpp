@@ -943,11 +943,7 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
         if (WindowHelper::IsMainWindow(scnSession->GetWindowType())) {
             WindowInfoReporter::GetInstance().InsertShowReportInfo(sessionInfo.bundleName_);
         }
-        if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
-            NotifyLoadAbility(scnSession->GetCollaboratorType(), scnSessionInfo, sessionInfo.abilityInfo);
-            NotifyUpdateSessionInfo(scnSession);
-            NotifyMoveSessionToForeground(scnSession->GetCollaboratorType(), scnSessionInfo->persistentId);
-        }  
+        NotifyCollaboratorAfterStart(scnSession, scnSessionInfo);
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
         promise->set_value(static_cast<int32_t>(errCode));
         return WSError::WS_OK;
@@ -955,6 +951,19 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
 
     taskScheduler_->PostAsyncTask(task);
     return future;
+}
+
+void SceneSessionManager::NotifyCollaboratorAfterStart(sptr<SceneSession>& scnSession,
+    sptr<AAFwk::SessionInfo>& scnSessionInfo)
+{
+    if (scnSession == nullptr) {
+        return;
+    }
+    if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
+        NotifyLoadAbility(scnSession->GetCollaboratorType(), scnSessionInfo, sessionInfo.abilityInfo);
+        NotifyUpdateSessionInfo(scnSession);
+        NotifyMoveSessionToForeground(scnSession->GetCollaboratorType(), scnSessionInfo->persistentId);
+    }
 }
 
 WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession,
