@@ -37,9 +37,12 @@ public:
     void GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const;
 
 private:
+
+
     sptr<WindowRoot> windowRoot_;
     std::map<sptr<WindowNodeContainer>, uint32_t> focusedWindowMap_;
-    void NotifyAccessibilityWindowInfo(const std::vector<sptr<WindowNode>>& nodes, uint32_t focusedWindow,
+    void NotifyAccessibilityWindowInfo(const std::vector<sptr<WindowNode>>& nodes, u
+    int32_t focusedWindow,
         WindowUpdateType type) const;
     void FillAccessibilityWindowInfo(const std::vector<sptr<WindowNode>>& nodes, uint32_t focusedWindow,
         std::vector<sptr<AccessibilityWindowInfo>>& windowInfo) const;
