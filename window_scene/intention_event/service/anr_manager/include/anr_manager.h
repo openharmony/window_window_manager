@@ -35,7 +35,6 @@ class ANRManager final {
 public:
     DISALLOW_COPY_AND_MOVE(ANRManager);
     void Init();
-    void SwitchAnr(bool status);
     void AddTimer(int32_t eventId, int32_t persistentId);
     void MarkProcessed(int32_t eventId, int32_t persistentId);
     bool IsANRTriggered(int32_t persistentId);
@@ -49,9 +48,11 @@ private:
         int32_t pid { -1 };
         std::string bundleName { "unknow" };
     };
-    ANRManager::AppInfo GetAppInfoByPersistentId(int32_t persistentId);
+    void SwitchAnr(bool status);
     void RemoveTimers(int32_t persistentId);
     void RemovePersistentId(int32_t persistentId);
+    void ExecuteAnrObserver(int32_t pid);
+    ANRManager::AppInfo GetAppInfoByPersistentId(int32_t persistentId);
 private:
     std::atomic_bool switcher_ { true };
     std::mutex mtx_;
@@ -59,7 +60,6 @@ private:
     std::unordered_map<int32_t, AppInfo> applicationMap_;
     std::function<void(int32_t)> anrObserver_;
     std::function<void(int32_t, std::string&, int32_t)> appInfoGetter_;
-    EventStage eventStage_;
 };
 } // namespace Rosen
 } // namespace OHOS

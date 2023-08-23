@@ -29,13 +29,18 @@ namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "EventStage" };
 } // namespace
 
+EventStage::EventStage() {}
+EventStage::~EventStage() {}
+
 void EventStage::SetAnrStatus(int32_t persistentId, bool status)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     isAnrProcess_[persistentId] = status;
 }
 
 bool EventStage::CheckAnrStatus(int32_t persistentId)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     if (isAnrProcess_.find(persistentId) != isAnrProcess_.end()) {
         return isAnrProcess_[persistentId];
     }
@@ -45,12 +50,14 @@ bool EventStage::CheckAnrStatus(int32_t persistentId)
 
 void EventStage::SaveANREvent(int32_t persistentId, int32_t eventId, int32_t timerId)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     EventTime eventTime { eventId, timerId };
     events_[persistentId].push_back(eventTime);
 }
 
 std::vector<int32_t> EventStage::GetTimerIds(int32_t persistentId)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     if (events_.find(persistentId) == events_.end()) {
         WLOGFD("Current events have no event for persistentId:%{public}d", persistentId);
         return {};
@@ -64,6 +71,7 @@ std::vector<int32_t> EventStage::GetTimerIds(int32_t persistentId)
 
 std::vector<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t eventId)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     WLOGFD("Delete events, persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
     if (events_.find(persistentId) == events_.end()) {
         WLOGFD("Current events have no event persistentId:%{public}d", persistentId);
@@ -78,13 +86,14 @@ std::vector<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t eventId
         timerIds.push_back(iter->timerId);
     }
     events.erase(events.begin(), fistMatchIter);
-    SetAnrStatus(persistentId, false);
+    isAnrProcess_[persistentId] = false;
     return timerIds;
 }
 
 void EventStage::OnSessionLost(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mutex_);
     events_.erase(persistentId);
     isAnrProcess_.erase(persistentId);
 }

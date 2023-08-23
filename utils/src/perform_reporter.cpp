@@ -26,6 +26,9 @@ namespace {
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowInfoReporter)
 
+constexpr char EVENT_KEY_BUNDLE_NAME[] = "BUNDLE_NAME";
+constexpr char EVENT_KEY_WINDOW_NAME[] = "WINDOW_NAME";
+
 /**
  * @brief Construct a new Perform Reporter:: Perform Reporter object
  *
@@ -228,6 +231,19 @@ void WindowInfoReporter::ReportZeroOpacityInfoImmediately(const std::string& bun
     std::ostringstream oss;
     oss << "{ PROCESS_NAME:" << bundleName.c_str() << ", PACKAGE_NAME:" << "" << packageName.c_str() << " }";
     Report("WM_REPORT_WINDOW_OPACITY_ZERO", oss.str());
+}
+
+void WindowInfoReporter::ReportStartWindow(const std::string& bundleName, const std::string& windowName)
+{
+    std::string eventName = "START_WINDOW";
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        EVENT_KEY_BUNDLE_NAME, bundleName,
+        EVENT_KEY_WINDOW_NAME, windowName);
+    if (ret != 0) {
+        WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
+    }
 }
 
 void WindowInfoReporter::ReportRecordedInfos()

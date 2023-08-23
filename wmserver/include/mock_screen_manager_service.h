@@ -44,6 +44,7 @@ private:
     int DumpAllScreenInfo(std::string& dumpInfo);
     int DumpSpecifiedScreenInfo(ScreenId screenId, std::string& dumpInfo);
     bool IsValidDigitString(const std::string& idStr) const;
+    int SetFoldDisplayMode(const std::string& modeParam);
 
     void InitScreenSessionManager();
 

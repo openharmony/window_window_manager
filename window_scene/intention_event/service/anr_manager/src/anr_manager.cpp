@@ -38,7 +38,7 @@ void ANRManager::Init()
 {
     CALL_DEBUG_ENTER;
     SwitchAnr(true);
-    TimerMgr->Init();
+    DelayedSingleton<TimerManager>::GetInstance()->Init();
 }
 
 void ANRManager::AddTimer(int32_t eventId, int32_t persistentId)
@@ -52,22 +52,18 @@ void ANRManager::AddTimer(int32_t eventId, int32_t persistentId)
         WLOGFD("AddAnrTimer failed, anrTimerCount exceeded %{public}d", MAX_ANR_TIMER_COUNT);
         return;
     }
-    int32_t timerId = TimerMgr->AddTimer(ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME, [this, eventId, persistentId]() {
+    int32_t timerId = DelayedSingleton<TimerManager>::GetInstance()->AddTimer(ANRTimeOutTime::INPUT_UI_TIMEOUT_TIME,
+        [this, eventId, persistentId]() {
         WLOGFE("Anr callback enter. persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
-        eventStage_.SetAnrStatus(persistentId, true);
+        DelayedSingleton<EventStage>::GetInstance()->SetAnrStatus(persistentId, true);
         AppInfo appInfo = GetAppInfoByPersistentId(persistentId);
         DfxHisysevent::ApplicationBlockInput(eventId, appInfo.pid, appInfo.bundleName, persistentId);
-        WLOGFE("Application not responding. persistentId:%{public}d, eventId:%{public}d,"
-            "pid:%{public}d, bundleName:%{public}s",
-            persistentId, eventId, appInfo.pid, appInfo.bundleName.c_str());
-        if (anrObserver_ != nullptr) {
-            anrObserver_(appInfo.pid);
-        } else {
-            WLOGFE("AnrObserver is nullptr, do nothing");
-        }
-        std::vector<int32_t> timerIds = eventStage_.GetTimerIds(persistentId);
+        WLOGFE("Application not responding. persistentId:%{public}d, eventId:%{public}d, pid:%{public}d, "
+            "bundleName:%{public}s", persistentId, eventId, appInfo.pid, appInfo.bundleName.c_str());
+        ExecuteAnrObserver(appInfo.pid);
+        std::vector<int32_t> timerIds = DelayedSingleton<EventStage>::GetInstance()->GetTimerIds(persistentId);
         for (int32_t item : timerIds) {
-            TimerMgr->RemoveTimer(item);
+            DelayedSingleton<TimerManager>::GetInstance()->RemoveTimer(item);
             anrTimerCount_--;
         }
         WLOGFE("Anr callback leave. persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
@@ -78,7 +74,7 @@ void ANRManager::AddTimer(int32_t eventId, int32_t persistentId)
         return;
     }
     anrTimerCount_++;
-    eventStage_.SaveANREvent(persistentId, eventId, timerId);
+    DelayedSingleton<EventStage>::GetInstance()->SaveANREvent(persistentId, eventId, timerId);
     WLOGFD("AddTimer for persistentId:%{public}d, timerId:%{public}d, eventId:%{public}d",
         persistentId, timerId, eventId);
 }
@@ -90,7 +86,7 @@ void ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
     WLOGFD("Event: eventId:%{public}d, persistentId:%{public}d", eventId, persistentId);
     std::vector<int32_t> timerIds = eventStage_.DelEvents(persistentId, eventId);
     for (int32_t item : timerIds) {
-        TimerMgr->RemoveTimer(item);
+        DelayedSingleton<TimerManager>::GetInstance()->RemoveTimer(item);
         anrTimerCount_--;
     }
 }
@@ -98,7 +94,7 @@ void ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
 bool ANRManager::IsANRTriggered(int32_t persistentId)
 {
     std::lock_guard<std::mutex> guard(mtx_);
-    if (eventStage_.CheckAnrStatus(persistentId)) {
+    if (DelayedSingleton<EventStage>::GetInstance()->CheckAnrStatus(persistentId)) {
         WLOGFE("Application not respond, persistentId:%{public}d -> pid:%{public}d, bundleName:%{public}s",
             persistentId, applicationMap_[persistentId].pid, applicationMap_[persistentId].bundleName.c_str());
         return true;
@@ -145,9 +141,9 @@ ANRManager::AppInfo ANRManager::GetAppInfoByPersistentId(int32_t persistentId)
 void ANRManager::RemoveTimers(int32_t persistentId)
 {
     WLOGFD("Remove timers for persistentId:%{public}d", persistentId);
-    std::vector<int32_t> timerIds = eventStage_.GetTimerIds(persistentId);
+    std::vector<int32_t> timerIds = DelayedSingleton<EventStage>::GetInstance()->GetTimerIds(persistentId);
     for (int32_t item : timerIds) {
-        TimerMgr->RemoveTimer(item);
+        DelayedSingleton<TimerManager>::GetInstance()->RemoveTimer(item);
         anrTimerCount_--;
     }
 }
@@ -155,7 +151,7 @@ void ANRManager::RemoveTimers(int32_t persistentId)
 void ANRManager::RemovePersistentId(int32_t persistentId)
 {
     applicationMap_.erase(persistentId);
-    eventStage_.OnSessionLost(persistentId);
+    DelayedSingleton<EventStage>::GetInstance()->OnSessionLost(persistentId);
 }
 
 void ANRManager::SwitchAnr(bool status)
@@ -188,5 +184,14 @@ std::string ANRManager::GetBundleName(int32_t pid, int32_t uid)
     return bundleName;
 }
 
+void ANRManager::ExecuteAnrObserver(int32_t pid)
+{
+    CALL_DEBUG_ENTER;
+    if (anrObserver_ != nullptr) {
+        anrObserver_(pid);
+    } else {
+        WLOGFE("AnrObserver is nullptr, do nothing");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

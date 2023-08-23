@@ -58,6 +58,8 @@ public:
                             std::vector<SessionInfoBean>& sessionInfos) override;
     WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) override;
 
+    WSError DumpSessionAll(std::vector<std::string> &infos) override;
+    WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos) override;
     WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState) override;
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) override;
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;
