@@ -920,6 +920,10 @@ DMError ScreenSessionManager::GetScreenSupportedColorGamuts(ScreenId screenId,
 ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
                                                    const sptr<IRemoteObject>& displayManagerAgent)
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("create virtual screen permission denied!");
+        return SCREEN_ID_INVALID;
+    }
     WLOGFI("SCB: ScreenSessionManager::CreateVirtualScreen ENTER");
     ScreenId rsId = rsInterface_.CreateVirtualScreen(option.name_, option.width_,
         option.height_, option.surface_, SCREEN_ID_INVALID, option.flags_);
@@ -963,6 +967,10 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
 
 DMError ScreenSessionManager::SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface)
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("set virtual screenSurface permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     WLOGFI("SCB: ScreenSessionManager::SetVirtualScreenSurface ENTER");
     ScreenId rsScreenId;
     int32_t res = -1;
@@ -979,6 +987,10 @@ DMError ScreenSessionManager::SetVirtualScreenSurface(ScreenId screenId, sptr<IB
 
 DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("destroy virtual screen permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     WLOGI("SCB: ScreenSessionManager::DestroyVirtualScreen Enter");
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     ScreenId rsScreenId = SCREEN_ID_INVALID;

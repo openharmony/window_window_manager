@@ -533,6 +533,11 @@ DMError DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<Scr
 
 DMError DisplayManagerService::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)
 {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("stop mirror permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+
     auto allMirrorScreenIds = abstractScreenController_->GetAllValidScreenIds(mirrorScreenIds);
     if (allMirrorScreenIds.empty()) {
         WLOGFI("stop mirror done. screens' size:%{public}u", static_cast<uint32_t>(allMirrorScreenIds.size()));
@@ -700,6 +705,10 @@ DMError DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds,
 
 DMError DisplayManagerService::StopExpand(const std::vector<ScreenId>& expandScreenIds)
 {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        WLOGFE("stop expand permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     auto allExpandScreenIds = abstractScreenController_->GetAllValidScreenIds(expandScreenIds);
     if (allExpandScreenIds.empty()) {
         WLOGFI("stop expand done. screens' size:%{public}u", static_cast<uint32_t>(allExpandScreenIds.size()));
