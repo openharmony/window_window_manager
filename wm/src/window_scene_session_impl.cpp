@@ -514,11 +514,11 @@ void WindowSceneSessionImpl::SetDefaultProperty()
 WSError WindowSceneSessionImpl::SetActive(bool active)
 {
     WLOGFD("active status: %{public}d", active);
-    if (hostSession_ == nullptr) {
-        WLOGFD("hostSession_ nullptr");
-        return WSError::WS_ERROR_INVALID_WINDOW;
-    }
     if (!WindowHelper::IsMainWindow(GetType())) {
+        if (hostSession_ == nullptr) {
+            WLOGFD("hostSession_ nullptr");
+            return WSError::WS_ERROR_INVALID_WINDOW;
+        }
         WSError ret = hostSession_->UpdateActiveStatus(active);
         if (ret != WSError::WS_OK) {
             return ret;
