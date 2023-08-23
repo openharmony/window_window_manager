@@ -960,7 +960,8 @@ void SceneSessionManager::NotifyCollaboratorAfterStart(sptr<SceneSession>& scnSe
         return;
     }
     if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
-        NotifyLoadAbility(scnSession->GetCollaboratorType(), scnSessionInfo, sessionInfo.abilityInfo);
+        NotifyLoadAbility(scnSession->GetCollaboratorType(),
+            scnSessionInfo, scnSession->GetSessionInfo().abilityInfo);
         NotifyUpdateSessionInfo(scnSession);
         NotifyMoveSessionToForeground(scnSession->GetCollaboratorType(), scnSessionInfo->persistentId);
     }
