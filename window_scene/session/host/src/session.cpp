@@ -680,8 +680,8 @@ void Session::SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncT
 WSError Session::Clear()
 {
     SessionInfo info = GetSessionInfo();
-    if (terminateSessionFuncTotal_) {
-        terminateSessionFuncTotal_(info, TerminateType::CLOSE_AND_CLEAR_MULTITASK);
+    if (terminateSessionFuncNew_) {
+        terminateSessionFuncNew_(info, false);
     }
     return WSError::WS_OK;
 }
