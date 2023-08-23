@@ -959,6 +959,8 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
             sceneSession->GetSessionInfo().requestCode = info.requestCode;
             sceneSession->GetSessionInfo().callerPersistentId_ = info.callerPersistentId_;
             sceneSession->GetSessionInfo().callingTokenId_ = info.callingTokenId_;
+            sceneSession->GetSessionInfo().uiAbilityId_ = info.uiAbilityId_;
+            sceneSession->GetSessionInfo().startSetting = info.startSetting;
         }
         info.persistentId_ = sceneSession->GetPersistentId();
         sceneSession->GetSessionInfo().persistentId_ = sceneSession->GetPersistentId();
@@ -973,6 +975,8 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
         sceneSession->GetSessionInfo().requestCode = info.requestCode;
         sceneSession->GetSessionInfo().callerPersistentId_ = info.callerPersistentId_;
         sceneSession->GetSessionInfo().callingTokenId_ = info.callingTokenId_;
+        sceneSession->GetSessionInfo().uiAbilityId_ = info.uiAbilityId_;
+        sceneSession->GetSessionInfo().startSetting = info.startSetting;
     }
 
     PendingSessionActivationInner(info);
