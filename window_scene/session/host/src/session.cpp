@@ -938,6 +938,10 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
     if (!IsSystemSession() && !IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (keyEvent == nullptr) {
+        WLOGFE("KeyEvent is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         if (CheckDialogOnForeground()) {
             WLOGFD("Has dialog on foreground, not transfer pointer event");
@@ -948,13 +952,11 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
             WLOGFD("Its main window has dialog on foreground, not transfer pointer event");
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
+    } else if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG &&
+        keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_BACK) {
+        return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    if (keyEvent == nullptr) {
-        WLOGFE("KeyEvent is nullptr");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    WLOGFD("Session TransferKeyEvent, eventId:%{public}d, persistentId:%{public}d, "
-        "bundleName:%{public}s, pid:%{public}d",
+    WLOGFD("Session TransferKeyEvent eventId:%{public}d persistentId:%{public}d bundleName:%{public}s pid:%{public}d",
         keyEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
         WLOGFD("The keyEvent does not report normally, "
