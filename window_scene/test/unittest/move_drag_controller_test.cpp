@@ -133,10 +133,11 @@ HWTEST_F(MoveDragControllerTest, SetOriginalValue, Function | SmallTest | Level1
     int32_t res = 0;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     int32_t pointerId = pointerEvent->GetPointerId();
+    int32_t pointerType = pointerEvent->GetSourceType();
     int32_t pointerPosX = 10;
     int32_t pointerPosY = 30;
     WSRect winRect = { 100, 100, 1000, 1000 };
-    moveDragController->SetOriginalValue(pointerId, pointerPosX, pointerPosY, winRect);
+    moveDragController->SetOriginalValue(pointerId, pointerType, pointerPosX, pointerPosY, winRect);
     ASSERT_EQ(0, res);
 }
 
@@ -169,9 +170,10 @@ HWTEST_F(MoveDragControllerTest, CalcMoveTargetRect, Function | SmallTest | Leve
 
     pointerEvent = MMI::PointerEvent::Create();
     int32_t pointerId = pointerEvent->GetPointerId();
+    int32_t pointerType = pointerEvent->GetSourceType();
     int32_t pointerPosX = 10;
     int32_t pointerPosY = 30;
-    moveDragController->SetOriginalValue(pointerId, pointerPosX, pointerPosY, originalRect);
+    moveDragController->SetOriginalValue(pointerId, pointerType, pointerPosX, pointerPosY, originalRect);
     moveDragController->CalcMoveTargetRect(pointerEvent, originalRect);
     ASSERT_EQ(0, res);
 }

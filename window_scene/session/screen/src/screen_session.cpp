@@ -60,6 +60,14 @@ ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId r
     RSTransaction::FlushImplicitTransaction();
 }
 
+void ScreenSession::SetDisplayNodeScreenId(ScreenId screenId)
+{
+    if (displayNode_ != nullptr) {
+        WLOGFI("SetDisplayNodeScreenId %{public}" PRIu64"", screenId);
+        displayNode_->SetScreenId(screenId);
+    }
+}
+
 void ScreenSession::RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener)
 {
     if (screenChangeListener == nullptr) {

@@ -83,11 +83,11 @@ public:
         const sptr<SceneSession>& sceneSession, const bool needRemoveSession = true);
     WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession);
     void StartAbilityBySpecified(const SessionInfo& sessionInfo);
-    void SetRootSceneContext(AbilityRuntime::Context* context);
+    void SetRootSceneContext(const std::weak_ptr<AbilityRuntime::Context>& contextWeak);
     sptr<RootSceneSession> GetRootSceneSession();
     sptr<SceneSession> GetSceneSession(int32_t persistentId);
     sptr<SceneSession> GetSceneSessionByName(const std::string& bundleName,
-        const std::string& moduleName, const std::string& abilityName);
+        const std::string& moduleName, const std::string& abilityName, const int32_t appIndex);
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
@@ -138,6 +138,8 @@ public:
     WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener);
     WSError GetSessionInfos(const std::string& deviceId, int32_t numMax, std::vector<SessionInfoBean>& sessionInfos);
     WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo);
+    WSError DumpSessionAll(std::vector<std::string> &infos);
+    WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos);
     WSError GetAllAbilityInfos(const AAFwk::Want &want, int32_t userId,
         std::vector<AppExecFwk::AbilityInfo> &abilityInfos);
     WSError PrepareTerminate(int32_t persistentId, bool& isPrepareTerminate);
@@ -255,7 +257,7 @@ private:
     void UpdatePropertyRaiseEnabled(const sptr<WindowSessionProperty>& property,
                                     const sptr<SceneSession>& sceneSession);
     sptr<RootSceneSession> rootSceneSession_;
-    std::shared_ptr<AbilityRuntime::Context> rootSceneContext_;
+    std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;
     std::shared_mutex sceneSessionMapMutex_;
     std::map<int32_t, sptr<SceneSession>> sceneSessionMap_;
     sptr<ScbSessionHandler> scbSessionHandler_;

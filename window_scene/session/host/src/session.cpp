@@ -34,6 +34,8 @@
 #include "session_helper.h"
 
 namespace OHOS::Rosen {
+const std::string DLP_INDEX = "ohos.dlp.params.index";
+
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Session" };
 std::atomic<int32_t> g_persistentId = INVALID_SESSION_ID;
@@ -567,6 +569,7 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.moduleName_ = abilitySessionInfo->want.GetModuleName();
+    info.appIndex_ = abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0);
     info.persistentId_ = abilitySessionInfo->persistentId;
     info.callerPersistentId_ = GetPersistentId();
     info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
@@ -580,8 +583,9 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     if (info.want != nullptr) {
         info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
     }
-    WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s",
-        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
+    WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s, \
+        appIndex:%{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(),
+        info.appIndex_);
     WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}d, callingTokenId:%{public}d," \
         "uiAbilityId: %{public}" PRIu64 ", windowMode: %{public}d",
         info.callState_, info.persistentId_, info.callingTokenId_, info.uiAbilityId_, info.windowMode);
@@ -848,6 +852,9 @@ bool Session::CheckDialogOnForeground()
 
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         if (CheckDialogOnForeground()) {
             WLOGFD("Has dialog on foreground, not transfer pointer event");
@@ -863,17 +870,16 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         WLOGFE("PointerEvent is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    WLOGFD("Session TransferPointEvent, eventId:%{public}d, persistentId:%{public}d, "
-        "bundleName:%{public}s, pid:%{public}d",
-        pointerEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
+    WLOGFD("Session TransferPointEvent, eventId:%{public}d, persistentId:%{public}d, bundleName:%{public}s, "
+        "pid:%{public}d", pointerEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
-        WLOGFD("The pointerEvent does not report normally, bundleName:%{public}s not response, pid:%{public}d",
-            callingBundleName_.c_str(), callingPid_);
+        WLOGFD("The pointerEvent does not report normally, bundleName:%{public}s not response, pid:%{public}d, "
+            "persistentId:%{public}d", callingBundleName_.c_str(), callingPid_, persistentId_);
         return WSError::WS_DO_NOTHING;
     }
-    auto action = pointerEvent->GetPointerAction();
-    if (!isFocused_ && GetFocusable() && (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
-    action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN)) {
+    auto pointerAction = pointerEvent->GetPointerAction();
+    if (!isFocused_ && GetFocusable() && (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN)) {
         NotifyClick();
     }
     if (!windowEventChannel_) {
@@ -884,7 +890,6 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         WLOGFE("TransferPointer failed");
         return ret;
     }
-    auto pointerAction = pointerEvent->GetPointerAction();
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
@@ -899,6 +904,9 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
 
 WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         if (CheckDialogOnForeground()) {
             WLOGFD("Has dialog on foreground, not transfer pointer event");
@@ -918,8 +926,9 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
         "bundleName:%{public}s, pid:%{public}d",
         keyEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
-        WLOGFD("The keyEvent does not report normally, bundleName:%{public}s not response, pid:%{public}d",
-            callingBundleName_.c_str(), callingPid_);
+        WLOGFD("The keyEvent does not report normally, "
+            "bundleName:%{public}s not response, pid:%{public}d, persistentId:%{public}d",
+            callingBundleName_.c_str(), callingPid_, persistentId_);
         return WSError::WS_DO_NOTHING;
     }
     if (!windowEventChannel_) {
