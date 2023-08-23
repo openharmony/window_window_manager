@@ -1058,11 +1058,11 @@ void SceneSession::SetCollaboratorType(int32_t collaboratorType)
     collaboratorType_ = collaboratorType;
 }
 
-void SceneSession::DumpMissionInfo(std::vector<std::string> &info) const
+void SceneSession::DumpSessionInfo(std::vector<std::string> &info) const
 {
-    std::string dumpInfo = "      Mission ID #" + std::to_string(persistentId_);
+    std::string dumpInfo = "      Session ID #" + std::to_string(persistentId_);
     info.push_back(dumpInfo);
-    dumpInfo = "        mission name [" + SessionUtils::ConvertSessionName(sessionInfo_.bundleName_,
+    dumpInfo = "        session name [" + SessionUtils::ConvertSessionName(sessionInfo_.bundleName_,
         sessionInfo_.abilityName_, sessionInfo_.moduleName_, sessionInfo_.appIndex_) + "]";
     info.push_back(dumpInfo);
     dumpInfo = "        runningState [" + std::string(isActive_ ? "FOREGROUND" : "BACKGROUND") + "]";
