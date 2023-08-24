@@ -206,6 +206,16 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteUint64(static_cast<uint64_t>(screenGroupId));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_STOP_MIRROR: {
+            std::vector<ScreenId> mirrorScreenIds;
+            if (!data.ReadUInt64Vector(&mirrorScreenIds)) {
+                WLOGE("fail to receive mirror screens in stub.");
+                break;
+            }
+            DMError ret = StopMirror(mirrorScreenIds);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_EXPAND: {
             std::vector<ScreenId> screenId;
             if (!data.ReadUInt64Vector(&screenId)) {
@@ -223,6 +233,16 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             DMError ret = MakeExpand(screenId, startPoint, screenGroupId);
             reply.WriteInt32(static_cast<int32_t>(ret));
             reply.WriteUint64(static_cast<uint64_t>(screenGroupId));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_STOP_EXPAND: {
+            std::vector<ScreenId> expandScreenIds;
+            if (!data.ReadUInt64Vector(&expandScreenIds)) {
+                WLOGE("fail to receive expand screens in stub.");
+                break;
+            }
+            DMError ret = StopExpand(expandScreenIds);
+            reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_SCREEN_GROUP_INFO_BY_ID: {
