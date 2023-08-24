@@ -51,14 +51,20 @@ ANRHandler::~ANRHandler() {}
 void ANRHandler::SetSessionStage(int32_t eventId, const wptr<ISessionStage> &sessionStage)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (sessionStage == nullptr) {
+        WLOGFE("SessionStage of eventId:%{public}d is nullptr", eventId);
+        sessionStageMap_[eventId] = nullptr;
+        return;
+    }
     sessionStageMap_[eventId] = sessionStage;
+    WLOGFI("SetSessionStage for eventId:%{public}d, persistentId:%{public}d", eventId, sessionStage->GetPersistentId());
 }
 
 void ANRHandler::HandleEventConsumed(int32_t eventId, int64_t actionTime)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     int32_t currentPersistentId = GetPersistentIdOfEvent(eventId);
-    WLOGFD("Processed eventId:%{public}d, persistentId:%{public}d", eventId, currentPersistentId);
+    WLOGFI("Processed eventId:%{public}d, persistentId:%{public}d", eventId, currentPersistentId);
     if (IsOnEventHandler(currentPersistentId)) {
         UpdateLatestEventId(eventId);
         return;
@@ -117,7 +123,7 @@ void ANRHandler::MarkProcessed()
         return;
     }
     int32_t eventId = anrHandlerState_.eventsToReceipt.front();
-    WLOGFD("EventId:%{public}d ", eventId);
+    WLOGFI("MarkProcessed eventId:%{public}d, persistentId:%{public}d", eventId, GetPersistentIdOfEvent(eventId));
     if (sessionStageMap_.find(eventId) == sessionStageMap_.end()) {
         WLOGFE("SessionStage for eventId:%{public}d is not in sessionStageMap", eventId);
     } else if (sessionStageMap_[eventId] == nullptr) {

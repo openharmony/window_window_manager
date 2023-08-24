@@ -894,8 +894,6 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         WLOGFE("PointerEvent is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    WLOGFD("Session TransferPointEvent, eventId:%{public}d, persistentId:%{public}d, bundleName:%{public}s, "
-        "pid:%{public}d", pointerEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
         WLOGFD("The pointerEvent does not report normally, bundleName:%{public}s not response, pid:%{public}d, "
             "persistentId:%{public}d", callingBundleName_.c_str(), callingPid_, persistentId_);
@@ -914,6 +912,8 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         WLOGFE("TransferPointer failed");
         return ret;
     }
+    WLOGFI("Session TransferPointEvent, eventId:%{public}d, persistentId:%{public}d, bundleName:%{public}s, "
+        "pid:%{public}d", pointerEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
