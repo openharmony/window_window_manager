@@ -25,6 +25,8 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
+    constexpr int RGB565_PIXEL_BYTES = 2;
+    constexpr int RGB888_PIXEL_BYTES = 3;
     constexpr int BPP = 4;
 }
 class SnapshotUtilsTest : public testing::Test {
@@ -92,6 +94,10 @@ HWTEST_F(SnapshotUtilsTest, Check03, Function | SmallTest | Level3)
     ASSERT_EQ(false, SnapShotUtils::CheckFileNameValid(fileName2));
     std::string fileName3 = "/data/test.png";
     ASSERT_EQ(false, SnapShotUtils::CheckFileNameValid(fileName3));
+    std::string fileName4 = "test.png";
+    ASSERT_EQ(false, SnapShotUtils::CheckFileNameValid(fileName4));
+    std::string fileName5 = "/data";
+    ASSERT_EQ(false, SnapShotUtils::CheckFileNameValid(fileName5));
 }
 
 /**
@@ -254,6 +260,57 @@ HWTEST_F(SnapshotUtilsTest, Write07, Function | MediumTest | Level3)
 }
 
 /**
+ * @tc.name: Write08
+ * @tc.desc: Write custom jpeg using invalid file names and valid WriteToJpegParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotUtilsTest, Write08, Function | MediumTest | Level3)
+{
+    WriteToJpegParam param = {
+        .width = 256,
+        .height = 256,
+        .stride = 256 * RGB565_PIXEL_BYTES,
+        .format = Media::PixelFormat::RGB_565,
+        .data = new uint8_t
+    };
+    ASSERT_FALSE(SnapShotUtils::WriteToJpeg("", param));
+}
+
+/**
+ * @tc.name: Write09
+ * @tc.desc: Write custom jpeg using valid file names and invalid WriteToJpegParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotUtilsTest, Write09, Function | MediumTest | Level3)
+{
+    WriteToJpegParam param = {
+        .width = 256,
+        .height = 256,
+        .stride = 256 * RGB565_PIXEL_BYTES,
+        .format = Media::PixelFormat::RGB_565,
+        .data = nullptr
+    };
+    ASSERT_FALSE(SnapShotUtils::WriteToJpeg(defaultFile_, param));
+}
+
+/**
+ * @tc.name: Write10
+ * @tc.desc: Write custom jpeg using valid fd and invalid WriteToJpegParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotUtilsTest, Write10, Function | MediumTest | Level3)
+{
+    WriteToJpegParam param = {
+        .width = 256,
+        .height = 256,
+        .stride = 256 * RGB565_PIXEL_BYTES,
+        .format = Media::PixelFormat::RGB_565,
+        .data = nullptr
+    };
+    ASSERT_FALSE(SnapShotUtils::WriteToJpeg(1, param));
+}
+
+/**
  * @tc.name: CheckWHValid
  * @tc.desc: Check width and height whether valid
  * @tc.type: FUNC
@@ -331,6 +388,90 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid04, Function | SmallTest | Level3)
         .data = nullptr
     };
     ASSERT_EQ(false, SnapShotUtils::CheckParamValid(paramInvalidData));
+}
+
+/**
+ * @tc.name: CheckParamValid05
+ * @tc.desc: Check jpeg param whether valid data
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotUtilsTest, CheckParamValid05, Function | SmallTest | Level3)
+{
+    WriteToJpegParam paramInvalidData = {
+        .width = 256,
+        .height = 256,
+        .stride = 256 * RGB565_PIXEL_BYTES,
+        .format = Media::PixelFormat::RGB_565,
+        .data = nullptr
+    };
+    ASSERT_EQ(false, SnapShotUtils::CheckParamValid(paramInvalidData));
+}
+
+/**
+ * @tc.name: CheckParamValid06
+ * @tc.desc: Check jpeg param whether valid data
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotUtilsTest, CheckParamValid06, Function | SmallTest | Level3)
+{
+    WriteToJpegParam paramInvalidData = {
+        .width = 256,
+        .height = 256,
+        .stride = 1,
+        .format = Media::PixelFormat::RGB_565,
+        .data = nullptr
+    };
+    ASSERT_EQ(false, SnapShotUtils::CheckParamValid(paramInvalidData));
+}
+
+/**
+ * @tc.name: CheckParamValid07
+ * @tc.desc: Check jpeg param whether valid data
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotUtilsTest, CheckParamValid07, Function | SmallTest | Level3)
+{
+    WriteToJpegParam paramInvalidData = {
+        .width = 256,
+        .height = 256,
+        .stride = 256 * RGB888_PIXEL_BYTES,
+        .format = Media::PixelFormat::RGB_888,
+        .data = nullptr
+    };
+    ASSERT_EQ(false, SnapShotUtils::CheckParamValid(paramInvalidData));
+}
+
+/**
+ * @tc.name: CheckParamValid08
+ * @tc.desc: Check jpeg param whether valid data
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotUtilsTest, CheckParamValid08, Function | SmallTest | Level3)
+{
+    WriteToJpegParam paramInvalidData = {
+        .width = 256,
+        .height = 256,
+        .stride = 1,
+        .format = Media::PixelFormat::RGB_888,
+        .data = nullptr
+    };
+    ASSERT_EQ(false, SnapShotUtils::CheckParamValid(paramInvalidData));
+}
+
+/**
+ * @tc.name: ProcessDisplayId01
+ * @tc.desc: Check RGBA8888ToRGB888
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotUtilsTest, ProcessDisplayId01, Function | SmallTest | Level3)
+{
+    Rosen::DisplayId displayId = 1;
+    bool isDisplayIdSet = false;
+    ASSERT_EQ(true, SnapShotUtils::ProcessDisplayId(displayId, isDisplayIdSet));
+    isDisplayIdSet = true;
+    ASSERT_EQ(true, SnapShotUtils::ProcessDisplayId(displayId, isDisplayIdSet));
+    displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
+    ASSERT_EQ(true, SnapShotUtils::ProcessDisplayId(displayId, isDisplayIdSet));
 }
 }
 } // namespace Rosen
