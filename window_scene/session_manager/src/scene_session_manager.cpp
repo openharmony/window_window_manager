@@ -277,18 +277,30 @@ void SceneSessionManager::ConfigWindowSceneXml()
 WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &token,
     const ContinueState& continueState)
 {
-    sptr<SceneSession> sceneSession = FindSessionByToken(token);
-    if (sceneSession == nullptr) {
-        WLOGFI("fail to find session by token.");
-        return WSError::WS_ERROR_INVALID_PARAM;
+    WLOGFI("run SetSessionContinueState");
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
+        WLOGFE("The caller is not system-app, can not use system-api");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    sceneSession->GetSessionInfo().continueState = continueState;
-    DistributedClient dmsClient;
-    dmsClient.SetMissionContinueState(sceneSession->GetPersistentId(),
-        static_cast<AAFwk::ContinueState>(continueState));
-    WLOGFI("SetSessionContinueState sessionId:%{public}d, continueState:%{public}d",
-        sceneSession->GetPersistentId(), continueState);
-    return WSError::WS_OK;
+    if (!SessionPermission::VerifySessionPermission()) {
+        WLOGFE("The caller has not permission granted");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    auto task = [this, token, continueState]() {
+        sptr <SceneSession> sceneSession = FindSessionByToken(token);
+        if (sceneSession == nullptr) {
+            WLOGFI("fail to find session by token.");
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+        sceneSession->GetSessionInfo().continueState = continueState;
+        DistributedClient dmsClient;
+        dmsClient.SetMissionContinueState(sceneSession->GetPersistentId(),
+            static_cast<AAFwk::ContinueState>(continueState));
+        WLOGFI("SetSessionContinueState sessionId:%{public}d, continueState:%{public}d",
+            sceneSession->GetPersistentId(), continueState);
+        return WSError::WS_OK;
+    };
+    return taskScheduler_->PostSyncTask(task);
 }
 
 void SceneSessionManager::ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig)
@@ -3515,6 +3527,82 @@ void SceneSessionManager::GetAllClearableSessions(std::vector<sptr<SceneSession>
     }
 }
 
+WSError SceneSessionManager::LockSession(int32_t sessionId)
+{
+    WLOGFI("run LockSession with persistentId: %{public}d", sessionId);
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
+        WLOGFE("The caller is not system-app, can not use system-api");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!SessionPermission::VerifySessionPermission()) {
+        WLOGFE("The caller has not permission granted");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    auto task = [this, sessionId]() {
+        auto sceneSession = GetSceneSession(sessionId);
+        if (sceneSession == nullptr) {
+            WLOGFE("can not find sceneSession, sessionId:%{public}d", sessionId);
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+        sceneSession->GetSessionInfo().lockedState = true;
+        return WSError::WS_OK;
+    };
+    return taskScheduler_->PostSyncTask(task);
+}
+
+WSError SceneSessionManager::UnlockSession(int32_t sessionId)
+{
+    WLOGFI("run UnlockSession with persistentId: %{public}d", sessionId);
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
+        WLOGFE("The caller is not system-app, can not use system-api");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!SessionPermission::VerifySessionPermission()) {
+        WLOGFE("The caller has not permission granted");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    auto task = [this, sessionId]() {
+        auto sceneSession = GetSceneSession(sessionId);
+        if (sceneSession == nullptr) {
+            WLOGFE("can not find sceneSession, sessionId:%{public}d", sessionId);
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+        sceneSession->GetSessionInfo().lockedState = false;
+        return WSError::WS_OK;
+    };
+    return taskScheduler_->PostSyncTask(task);
+}
+
+WSError SceneSessionManager::MoveSessionsToForeground(const std::vector <std::int32_t> &sessionIds)
+{
+    WLOGFI("run MoveSessionsToForeground");
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
+        WLOGFE("The caller is not system-app, can not use system-api");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!SessionPermission::VerifySessionPermission()) {
+        WLOGFE("The caller has not permission granted");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds)
+{
+    WLOGFI("run MoveSessionsToBackground");
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
+        WLOGFE("The caller is not system-app, can not use system-api");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!SessionPermission::VerifySessionPermission()) {
+        WLOGFE("The caller has not permission granted");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+
+    return WSError::WS_OK;
+}
+
 bool SceneSessionManager::IsSessionClearable(sptr<SceneSession> scnSession)
 {
     if (scnSession == nullptr) {
@@ -3536,6 +3624,10 @@ bool SceneSessionManager::IsSessionClearable(sptr<SceneSession> scnSession)
     }
     if (sessionInfo.isSystem_) {
         WLOGFI("persistentId %{public}d is system app", scnSession->GetPersistentId());
+        return false;
+    }
+    if (sessionInfo.lockedState) {
+        WLOGFI("persistentId %{public}d is in lockedState", scnSession->GetPersistentId());
         return false;
     }
 
