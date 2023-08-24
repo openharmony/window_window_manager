@@ -16,9 +16,11 @@
 #include "session/host/include/session.h"
 
 #include "ability_info.h"
+#include "input_manager.h"
 #include "ipc_skeleton.h"
 #include "key_event.h"
 #include "pointer_event.h"
+// #include "../../proxy/include/window_info.h"
 
 #include "anr_manager.h"
 #include "foundation/ability/ability_base/interfaces/kits/native/want/include/want.h"
@@ -40,7 +42,23 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Session" };
 std::atomic<int32_t> g_persistentId = INVALID_SESSION_ID;
 std::set<int32_t> g_persistentIdSet;
+constexpr float INNER_BORDER_VP = 5.0f;
+constexpr float OUTSIDE_BORDER_VP = 4.0f;
+constexpr float INNER_ANGLE_VP = 4.0f;
 } // namespace
+
+Session::Session(const SessionInfo& info) : sessionInfo_(info)
+{
+    using type = std::underlying_type_t<MMI::WindowArea>;
+    for (type area = static_cast<type>(MMI::WindowArea::FOCUS_ON_TOP);
+        area <= static_cast<type>(MMI::WindowArea::FOCUS_ON_BOTTOM_RIGHT); ++area) {
+        auto ret = windowAreas_.insert(
+            std::pair<MMI::WindowArea, WSRectF>(static_cast<MMI::WindowArea>(area), WSRectF()));
+        if (!ret.second) {
+            WLOGFE("Failed to insert area:%{public}d", area);
+        }
+    }
+}
 
 int32_t Session::GetPersistentId() const
 {
@@ -364,6 +382,122 @@ bool Session::IsSystemSession() const
     return sessionInfo_.isSystem_;
 }
 
+WSError Session::SetPointerStyle(MMI::WindowArea area)
+{
+    WLOGFD("Information to be set: pid:%{public}d, windowId:%{public}d, MMI::WindowArea:%{public}s",
+        callingPid_, persistentId_, DumpPointerWindowArea(area));
+    // MMI::InputManager::GetInstance()->SetWindowPointerStyle(area, callingPid_, persistentId_);
+    return WSError::WS_OK;
+}
+
+WSRectF Session::UpdateTopBottomArea(const WSRectF& rect, MMI::WindowArea area)
+{
+    const float innerBorder = INNER_BORDER_VP * vpr_;
+    const float outsideBorder = OUTSIDE_BORDER_VP * vpr_;
+    const float innerAngle = INNER_ANGLE_VP * vpr_;
+    const float horizontalBorderLength = outsideBorder + innerAngle;
+    const float verticalBorderLength = outsideBorder + innerBorder;
+    const size_t innerAngleCount = 2;
+    WSRectF tbRect;
+    tbRect.posX_ = rect.posX_ + horizontalBorderLength;
+    tbRect.width_ = rect.width_ - horizontalBorderLength * innerAngleCount;
+    tbRect.height_ = verticalBorderLength;
+    if (area == MMI::WindowArea::FOCUS_ON_TOP) {
+        tbRect.posY_ = rect.posY_;
+    } else if (area == MMI::WindowArea::FOCUS_ON_BOTTOM) {
+        tbRect.posY_ = rect.posY_ + rect.height_ - verticalBorderLength;
+    } else {
+        return WSRectF();
+    }
+    return tbRect;
+}
+
+WSRectF Session::UpdateLeftRightArea(const WSRectF& rect, MMI::WindowArea area)
+{
+    const float innerBorder = INNER_BORDER_VP * vpr_;
+    const float outsideBorder = OUTSIDE_BORDER_VP * vpr_;
+    const float innerAngle = INNER_ANGLE_VP * vpr_;
+    const float verticalBorderLength = outsideBorder + innerAngle;
+    const float horizontalBorderLength = outsideBorder + innerBorder;
+    const size_t innerAngleCount = 2;
+    WSRectF lrRect;
+    lrRect.posY_ = rect.posY_ + horizontalBorderLength;
+    lrRect.width_ = horizontalBorderLength;
+    lrRect.height_ = rect.height_ - verticalBorderLength * innerAngleCount;
+    if (area == MMI::WindowArea::FOCUS_ON_LEFT) {
+        lrRect.posX_ = rect.posX_;
+    } else if (area == MMI::WindowArea::FOCUS_ON_RIGHT) {
+        lrRect.posX_ = rect.posX_ + rect.width_ - horizontalBorderLength;
+    } else {
+        return WSRectF();
+    }
+    return lrRect;
+}
+
+WSRectF Session::UpdateInnerAngleArea(const WSRectF& rect, MMI::WindowArea area)
+{
+    const float outsideBorder = OUTSIDE_BORDER_VP * vpr_;
+    const float innerAngle = INNER_ANGLE_VP * vpr_;
+    WSRectF iaRect;
+    iaRect.width_ = outsideBorder + innerAngle;
+    iaRect.height_ = outsideBorder + innerAngle;
+    if (area == MMI::WindowArea::FOCUS_ON_TOP_LEFT) {
+        iaRect.posX_ = rect.posX_;
+        iaRect.posY_ = rect.posY_;
+    } else if (area == MMI::WindowArea::FOCUS_ON_TOP_RIGHT) {
+        iaRect.posX_ = rect.posX_ + rect.width_ - iaRect.width_;
+        iaRect.posY_ = rect.posY_;
+    } else if (area == MMI::WindowArea::FOCUS_ON_BOTTOM_LEFT) {
+        iaRect.posX_ = rect.posX_;
+        iaRect.posY_ = rect.posY_ + rect.height_ - iaRect.height_;
+    } else if (area == MMI::WindowArea::FOCUS_ON_BOTTOM_RIGHT) {
+        iaRect.posX_ = rect.posX_ + rect.width_ - iaRect.width_;
+        iaRect.posY_ = rect.posY_ + rect.height_ - iaRect.height_;
+    } else {
+        return WSRectF();
+    }
+    return iaRect;
+}
+
+WSRectF Session::UpdateHotRect(const WSRect& rect)
+{
+    WSRectF newRect;
+    const float outsideBorder = OUTSIDE_BORDER_VP * vpr_;
+    const size_t ioutsideBorderCount = 2;
+    newRect.posX_ = rect.posX_ - outsideBorder;
+    newRect.posY_ = rect.posY_ - outsideBorder;
+    newRect.width_ = rect.width_ + outsideBorder * ioutsideBorderCount;
+    newRect.height_ = rect.height_ + outsideBorder * ioutsideBorderCount;
+    return newRect;
+}
+
+void Session::UpdatePointerArea(const WSRect& rect)
+{
+    if (IsSystemSession()) {
+        return;
+    }
+    if (!(GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+         GetWindowMode()== WindowMode::WINDOW_MODE_FLOATING)) {
+        return;
+    }
+    if (preRect_ == rect) {
+        WLOGFD("The window area does not change");
+        return;
+    }
+    WSRectF hotRect = UpdateHotRect(rect);
+    for (const auto &[area, _] : windowAreas_) {
+        if (area == MMI::WindowArea::FOCUS_ON_TOP || area == MMI::WindowArea::FOCUS_ON_BOTTOM) {
+            windowAreas_[area] = UpdateTopBottomArea(hotRect, area);
+        } else if (area == MMI::WindowArea::FOCUS_ON_RIGHT || area == MMI::WindowArea::FOCUS_ON_LEFT) {
+            windowAreas_[area] = UpdateLeftRightArea(hotRect, area);
+        } else if (area == MMI::WindowArea::FOCUS_ON_TOP_LEFT || area == MMI::WindowArea::FOCUS_ON_TOP_RIGHT ||
+            area == MMI::WindowArea::FOCUS_ON_BOTTOM_LEFT || area == MMI::WindowArea::FOCUS_ON_BOTTOM_RIGHT) {
+            windowAreas_[area] = UpdateInnerAngleArea(hotRect, area);
+        }
+    }
+    preRect_ = rect;
+}
+
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
     WLOGFI("session update rect: id: %{public}d, rect[%{public}d, %{public}d, %{public}u, %{public}u], "\
@@ -378,6 +512,7 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
     } else {
         WLOGFE("sessionStage_ is nullptr");
     }
+    UpdatePointerArea(winRect_);
     return WSError::WS_OK;
 }
 
@@ -853,6 +988,27 @@ bool Session::CheckDialogOnForeground()
         }
     }
     return false;
+}
+
+const char* Session::DumpPointerWindowArea(MMI::WindowArea area) const
+{
+    const std::map<MMI::WindowArea, const char*> areaMap = {
+        { MMI::WindowArea::FOCUS_ON_INNER, "FOCUS_ON_INNER" },
+        { MMI::WindowArea::FOCUS_ON_TOP, "FOCUS_ON_TOP" },
+        { MMI::WindowArea::FOCUS_ON_BOTTOM, "FOCUS_ON_BOTTOM" },
+        { MMI::WindowArea::FOCUS_ON_LEFT, "FOCUS_ON_LEFT" },
+        { MMI::WindowArea::FOCUS_ON_RIGHT, "FOCUS_ON_RIGHT" },
+        { MMI::WindowArea::FOCUS_ON_BOTTOM_LEFT, "FOCUS_ON_BOTTOM_LEFT" },
+        { MMI::WindowArea::FOCUS_ON_BOTTOM_RIGHT, "FOCUS_ON_BOTTOM_RIGHT" },
+        { MMI::WindowArea::FOCUS_ON_TOP_LEFT, "FOCUS_ON_TOP_LEFT" },
+        { MMI::WindowArea::FOCUS_ON_TOP_RIGHT, "FOCUS_ON_TOP_RIGHT" },
+        { MMI::WindowArea::EXIT, "EXIT" }
+    };
+    auto iter = areaMap.find(area);
+    if (iter == areaMap.end()) {
+        return "UNKNOW";
+    }
+    return iter->second;
 }
 
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)

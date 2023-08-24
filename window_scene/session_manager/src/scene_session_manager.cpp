@@ -42,6 +42,8 @@
 #include <transaction/rs_transaction.h>
 #include <transaction/rs_interfaces.h>
 
+#include "input_manager.h"
+
 #ifdef RES_SCHED_ENABLE
 #include "res_type.h"
 #include "res_sched_client.h"
@@ -183,14 +185,19 @@ void SceneSessionManager::Init()
     if (ret != 0) {
         WLOGFW("Add thread %{public}s to watchdog failed.", WINDOW_INFO_REPORT_THREAD.c_str());
     }
-
+    InitWindowChecker();
     listenerController_ = std::make_shared<SessionListenerController>();
     listenerController_->Init();
     scbSessionHandler_ = new ScbSessionHandler();
     AAFwk::AbilityManagerClient::GetInstance()->RegisterSessionHandler(scbSessionHandler_);
-
     StartWindowInfoReportLoop();
     WLOGI("SceneSessionManager init success.");
+}
+
+void SceneSessionManager::InitWindowChecker()
+{
+    auto windowChecker_ = std::make_shared<WindowChecker>();
+    // MMI::InputManager::GetInstance()->SetWindowCheckerHandler(windowChecker_);
 }
 
 void SceneSessionManager::LoadWindowSceneXml()
@@ -735,6 +742,32 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onWindowInfoUpdate_ = std::bind(&SceneSessionManager::NotifyWindowInfoChange,
         this, std::placeholders::_1, std::placeholders::_2);
     return specificCb;
+}
+
+int32_t SceneSessionManager::CheckWindowId(int32_t windowId)
+{
+    auto task = [this, windowId]() -> int32_t {
+        std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        auto iter = sceneSessionMap_.find(windowId);
+        if (iter == sceneSessionMap_.end()) {
+            WLOGFE("Window(%{public}d) cannot set cursor style", windowId);
+            return INVALID_PID;
+        }
+        auto sceneSession = iter->second;
+        if (sceneSession == nullptr) {
+            WLOGFE("sceneSession(%{public}d) is nullptr", windowId);
+            return INVALID_PID;
+        }
+        int32_t pid = sceneSession->GetCallingPid();
+        WLOGFD("Window(%{public}d) to set the cursor style, pid:%{public}d", windowId, pid);
+        return pid;
+    };
+    return taskScheduler_->PostSyncTask(task);
+}
+
+int32_t SceneSessionManager::WindowChecker::CheckWindowId(int32_t windowId) const
+{
+    return SceneSessionManager::GetInstance().CheckWindowId(windowId);
 }
 
 sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo,

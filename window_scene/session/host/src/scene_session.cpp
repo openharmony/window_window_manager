@@ -20,6 +20,8 @@
 #include <pointer_event.h>
 #include <transaction/rs_transaction.h>
 
+// #include "../../proxy/include/window_info.h"
+
 #include "common/include/session_permission.h"
 #include "interfaces/include/ws_common.h"
 #include "session/host/include/scene_persistent_storage.h"
@@ -41,7 +43,7 @@ wptr<SceneSession> SceneSession::enterSession_ = nullptr;
 std::mutex SceneSession::enterSessionMutex_;
 
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
-    : Session(info)
+    : Session(info), preWindowArea_(MMI::WindowArea::EXIT)
 {
     GeneratePersistentId(false, info);
     if (!info.bundleName_.empty()) {
@@ -534,6 +536,95 @@ WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAre
     return sessionStage_->UpdateAvoidArea(avoidArea, type);
 }
 
+void SceneSession::HandleStyleEvent(MMI::WindowArea area)
+{
+    if (Session::SetPointerStyle(area) != WSError::WS_OK) {
+        WLOGFE("Failed to set the cursor style");
+    }
+
+    preWindowArea_ = area;
+}
+
+WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
+{
+    if (displayX < 0 || displayY < 0) {
+        WLOGE("Illegal parameter, displayX:%{public}d, displayY:%{public}d", displayX, displayY);
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    auto iter = Session::windowAreas_.cend();
+    if (!Session::IsSystemSession() &&
+        Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+        Session::GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        iter = Session::windowAreas_.cbegin();
+        for (;iter != Session::windowAreas_.cend(); ++iter) {
+            WSRectF rect = iter->second;
+            if (rect.IsInRegion(displayX, displayY)) {
+                break;
+            }
+        }
+    }
+    MMI::WindowArea area = MMI::WindowArea::EXIT;
+    if (iter == Session::windowAreas_.cend()) {
+        bool isInRegion = false;
+        WSRect rect = Session::winRect_;
+        if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+            Session::GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+            WSRectF rectF = Session::UpdateHotRect(rect);
+            isInRegion = rectF.IsInRegion(displayX, displayY);
+        } else {
+            isInRegion = rect.IsInRegion(displayX, displayY);
+        }
+        if (!isInRegion) {
+            WLOGFE("The wrong event(%{public}d, %{public}d) could not be matched to the region:" \
+                "[%{public}d, %{public}d, %{public}u, %{public}u]",
+                displayX, displayY, rect.posX_, rect.posY_, rect.width_, rect.height_);
+            return WSError::WS_ERROR_INVALID_TYPE;
+        }
+        area = MMI::WindowArea::FOCUS_ON_INNER;
+    } else {
+        area = iter->first;
+    }
+    if (area != preWindowArea_) {
+        HandleStyleEvent(area);
+    }
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (pointerEvent == nullptr) {
+        WLOGFE("pointerEvent is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (pointerEvent->GetSourceType() != MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        return WSError::WS_DO_NOTHING;
+    }
+    if (!(pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_MOVE &&
+         pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE)) {
+        return WSError::WS_DO_NOTHING;
+    }
+
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+        WLOGFE("Get pointeritem failed");
+        pointerEvent->MarkProcessed();
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    int32_t mousePointX = pointerItem.GetDisplayX();
+    int32_t mousePointY = pointerItem.GetDisplayY();
+
+    auto displayInfo = ScreenSessionManager::GetInstance().GetDisplayInfoById(pointerEvent->GetTargetDisplayId());
+    if (displayInfo != nullptr) {
+        float vpr = displayInfo->GetVirtualPixelRatio();
+        if (vpr <= 0) {
+            vpr = 1.5f;
+        }
+        Session::SetVpr(vpr);
+    }
+    return HandleEnterWinwdowArea(mousePointX, mousePointY);
+}
+
 WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     WLOGFD("SceneSession TransferPointEvent");
@@ -548,6 +639,13 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
     }
 
+    static bool isNew = false;
+    if (isNew) {
+        auto ret = HandlePointerStyle(pointerEvent);
+        if (ret != WSError::WS_OK && ret != WSError::WS_DO_NOTHING) {
+            WLOGFE("Failed to update the mouse cursor style");
+        }
+    }
     if (property_ && property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
         WindowHelper::IsMainWindow(property_->GetWindowType()) &&
         property_->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
@@ -556,7 +654,9 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             return Session::TransferPointerEvent(pointerEvent);
         }
         if (property_->GetDragEnabled()) {
-            moveDragController_->HandleMouseStyle(pointerEvent, winRect_);
+            if (!isNew) {
+                moveDragController_->HandleMouseStyle(pointerEvent, winRect_);
+            }
             if (moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property_, systemConfig_)) {
                 return  WSError::WS_OK;
             }
