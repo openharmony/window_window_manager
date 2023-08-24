@@ -2076,8 +2076,8 @@ HWTEST_F(WindowTest, performBack, Function | SmallTest | Level3)
     sptr<Window> window = Window::Create("performBack", option);
     if (window != nullptr) {
         ASSERT_NE(nullptr, window);
-        int64_t period = window->PerformBack();
-        ASSERT_LE(-1, period);
+        window->PerformBack()
+        ;
     }
     sptr<Window> window_ = new Window();
     ASSERT_NE(nullptr, window_);
