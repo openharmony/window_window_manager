@@ -27,6 +27,7 @@ public:
     virtual ~FoldScreenPolicy();
     virtual void ChangeScreenDisplayMode(FoldDisplayMode displayMode);
     virtual FoldDisplayMode GetScreenDisplayMode();
+    virtual void SendSensorResult(FoldStatus foldStatus);
     ScreenId screenId_;
     ScreenProperty screenProperty_;
     mutable std::recursive_mutex displayModeMutex_;

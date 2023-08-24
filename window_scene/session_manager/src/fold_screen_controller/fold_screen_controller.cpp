@@ -15,6 +15,7 @@
 
 #include "fold_screen_controller/fold_screen_controller.h"
 #include "fold_screen_controller/dual_display_device_policy.h"
+#include "fold_screen_controller/fold_screen_sensor_manager.h"
 
 #include "window_manager_hilog.h"
 
@@ -30,6 +31,7 @@ FoldScreenController::FoldScreenController()
         WLOGE("FoldScreenPolicy is null");
         return;
     }
+    FoldScreenSensorManager::GetInstance().SetFoldScreenPolicy(foldScreenPolicy_);
 }
 
 FoldScreenController::~FoldScreenController()
