@@ -56,6 +56,7 @@
 #include "interfaces/include/ws_common_inner.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/scene_session.h"
+#include "session/host/include/session_utils.h"
 #include "session_helper.h"
 #include "window_helper.h"
 #include "session/screen/include/screen_session.h"
@@ -892,6 +893,8 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     sptr<ISession> iSession(scnSession);
     abilitySessionInfo->sessionToken = iSession->AsObject();
     abilitySessionInfo->callerToken = sessionInfo.callerToken_;
+    abilitySessionInfo->sessionName = SessionUtils::ConvertSessionName(sessionInfo.bundleName_,
+        sessionInfo.abilityName_, sessionInfo.moduleName_, sessionInfo.appIndex_);
     abilitySessionInfo->persistentId = scnSession->GetPersistentId();
     abilitySessionInfo->requestCode = sessionInfo.requestCode;
     abilitySessionInfo->resultCode = sessionInfo.resultCode;
@@ -1812,7 +1815,7 @@ WSError SceneSessionManager::SetFocusedSession(int32_t persistentId)
     }
     focusedSessionId_ = persistentId;
     auto sceneSession = GetSceneSession(persistentId);
-    if (IsSessionVisible(sceneSession)) {
+    if (sceneSession && IsSessionVisible(sceneSession)) {
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
     }
     return WSError::WS_OK;
@@ -2613,6 +2616,11 @@ std::string SceneSessionManager::AnonymizeDeviceId(const std::string& deviceId)
 WSError SceneSessionManager::DumpSessionAll(std::vector<std::string> &infos)
 {
     WLOGFI("Dump all session.");
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("DumpSessionAll permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+
     auto task = [this, &infos]() {
         std::string dumpInfo = "User ID #" + std::to_string(currentUserId_);
         infos.push_back(dumpInfo);
@@ -2620,7 +2628,7 @@ WSError SceneSessionManager::DumpSessionAll(std::vector<std::string> &infos)
         for (const auto &item : sceneSessionMap_) {
             auto& session = item.second;
             if (session) {
-                session->DumpMissionInfo(infos);
+                session->DumpSessionInfo(infos);
             }
         }
         return WSError::WS_OK;
@@ -2632,12 +2640,17 @@ WSError SceneSessionManager::DumpSessionAll(std::vector<std::string> &infos)
 WSError SceneSessionManager::DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos)
 {
     WLOGFI("Dump session with id %{public}d", persistentId);
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("DumpSessionWithId permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+
     auto task = [this, persistentId, &infos]() {
         std::string dumpInfo = "User ID #" + std::to_string(currentUserId_);
         infos.push_back(dumpInfo);
         auto session = GetSceneSession(persistentId);
         if (session) {
-            session->DumpMissionInfo(infos);
+            session->DumpSessionInfo(infos);
         } else {
             infos.push_back("error: invalid mission number, please see 'aa dump --mission-list'.");
         }

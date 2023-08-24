@@ -1059,20 +1059,20 @@ HWTEST_F(SceneSessionTest, NotifyPropertyWhenConnect, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: DumpMissionInfo
- * @tc.desc: DumpMissionInfo
+ * @tc.name: DumpSessionInfo
+ * @tc.desc: DumpSessionInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, DumpMissionInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest, DumpSessionInfo, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.bundleName_ = "SceneSessionTest";
-    info.abilityName_ = "DumpMissionInfo";
+    info.abilityName_ = "DumpSessionInfo";
     info.windowType_ = 1;
     sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
     std::vector<std::string> infos;
-    scensession->DumpMissionInfo(infos);
+    scensession->DumpSessionInfo(infos);
     ASSERT_FALSE(infos.empty());
 }
 
