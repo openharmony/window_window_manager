@@ -243,7 +243,7 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason)
         return WSError::WS_ERROR_REPEAT_OPERATION;
     }
     WSError ret = Session::UpdateRect(rect, reason);
-    if (ret == WSError::WS_OK) {
+    if ((ret == WSError::WS_OK || sessionInfo_.isSystem_) && specificCallback_ != nullptr) {
         specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     }
     return ret;
