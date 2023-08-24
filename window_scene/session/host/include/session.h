@@ -33,6 +33,7 @@ namespace OHOS::MMI {
 class PointerEvent;
 class KeyEvent;
 class AxisEvent;
+enum class WindowArea;
 } // namespace OHOS::MMI
 
 namespace OHOS::Media {
@@ -69,7 +70,7 @@ public:
 
 class Session : public SessionStub, public virtual RefBase {
 public:
-    explicit Session(const SessionInfo& info) : sessionInfo_(info) {}
+    explicit Session(const SessionInfo& info);
     virtual ~Session() = default;
 
     int32_t GetPersistentId() const;
@@ -233,7 +234,35 @@ public:
     }
     WSError RaiseAboveTarget(int32_t subWindowId) override;
 
+    void SetVpr(float vpr)
+    {
+        vpr_ = vpr;
+    }
+
+    bool operator==(const Session* session) const
+    {
+        if (session == nullptr) {
+            return false;
+        }
+        return (persistentId_ == session->persistentId_ && callingPid_ == session->callingPid_);
+    }
+
+    bool operator!=(const Session* session) const
+    {
+        return !this->operator==(session);
+    }
+
+    virtual void HandleStyleEvent(MMI::WindowArea area) {};
+    WSError SetPointerStyle(MMI::WindowArea area);
+    const char* DumpPointerWindowArea(MMI::WindowArea area) const;
+    WSRectF UpdateHotRect(const WSRect& rect);
+
 protected:
+    WSRectF UpdateTopBottomArea(const WSRectF& rect, MMI::WindowArea area);
+    WSRectF UpdateLeftRightArea(const WSRectF& rect, MMI::WindowArea area);
+    WSRectF UpdateInnerAngleArea(const WSRectF& rect, MMI::WindowArea area);
+    void UpdatePointerArea(const WSRect& rect);
+
     void GeneratePersistentId(const bool isExtension, const SessionInfo& sessionInfo);
     void UpdateSessionState(SessionState state);
     void UpdateSessionFocusable(bool isFocusable);
@@ -271,6 +300,7 @@ protected:
     uint32_t uiNodeId_ = 0;
     bool isFocused_ = false;
     float aspectRatio_ = 0.0f;
+    std::map<MMI::WindowArea, WSRectF> windowAreas_;
 
 private:
     bool CheckDialogOnForeground();
@@ -307,6 +337,7 @@ private:
     std::vector<sptr<Session>> dialogVec_;
     sptr<Session> parentSession_;
 
+    WSRect preRect_;
     int32_t callingPid_ = { 0 };
     int32_t callingUid_ = { 0 };
     int32_t appIndex_ = { 0 };
@@ -314,6 +345,7 @@ private:
     bool isVisible_ {false};
     bool needNotify_ {true};
     sptr<IRemoteObject> abilityToken_ = nullptr;
+    float vpr_ { 1.5f };
 };
 } // namespace OHOS::Rosen
 

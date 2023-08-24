@@ -159,6 +159,10 @@ public:
     sptr<IRemoteObject> GetSelfToken();
     WSError RaiseAboveTarget(int32_t subWindowId) override;
 private:
+    void HandleStyleEvent(MMI::WindowArea area) override;
+    WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
+    WSError HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+
     void UpdateCameraFloatWindowStatus(bool isShowing);
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void SetMoveDragCallback();
@@ -176,6 +180,7 @@ private:
     sptr<MoveDragController> moveDragController_ = nullptr;
     sptr<SetWindowScenePatternFunc> setWindowScenePatternFunc_ = nullptr;
     bool isVisible_ = false;
+    MMI::WindowArea preWindowArea_;
     static wptr<SceneSession> enterSession_;
     static std::mutex enterSessionMutex_;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
