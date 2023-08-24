@@ -19,6 +19,7 @@ group("unittest") {
   testonly = true
 
   deps = [
+    ":ws_event_stage_test",
     ":ws_move_drag_controller_test",
     ":ws_scene_session_manager_proxy_test",
     ":ws_scene_session_manager_stub_test",
@@ -36,6 +37,21 @@ group("unittest") {
     ":ws_window_event_channel_test",
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
+  ]
+}
+
+ohos_unittest("ws_event_stage_test") {
+  module_out_path = module_out_path
+
+  sources = [ "event_stage_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_base:want",
+    "c_utils:utils",
+    "hilog:libhilog",
   ]
 }
 
@@ -300,6 +316,7 @@ config("ws_unittest_common_public_config") {
     "${window_base_path}/window_scene/common/include",
     "${window_base_path}/window_scene",
     "${window_base_path}/window_scene/test",
+    "${window_base_path}/window_scene/intention_event/service/event_stage/include",
     "//third_party/googletest/googlemock/include",
 
     # for window_manager_interface
@@ -345,6 +362,7 @@ ohos_static_library("ws_unittest_common") {
     "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session_manager:scene_session_manager",
     "${window_base_path}/window_scene/session_manager:screen_session_manager",
