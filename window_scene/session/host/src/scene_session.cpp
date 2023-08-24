@@ -251,6 +251,35 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason)
     return ret;
 }
 
+bool SceneSession::UpdateInputMethodSessionRect(const WSRect&rect, WSRect& newWinRect, WSRect& newRequestRect)
+{
+    SessionGravity gravity;
+    uint32_t percent = 0;
+    property_->GetSessionGravity(gravity, percent);
+    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
+        (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT)) {
+        auto defaultDisplayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+        if (defaultDisplayInfo == nullptr) {
+            WLOGFE("defaultDisplayInfo is nullptr");
+            return false;
+        }
+
+        newWinRect.width_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ?
+            static_cast<uint32_t>(defaultDisplayInfo->GetWidth()) : rect.width_;
+        newRequestRect.width_ = newWinRect.width_;
+        newWinRect.height_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM && percent != 0) ?
+            static_cast<uint32_t>(defaultDisplayInfo->GetHeight()) * percent / 100u : rect.height_;
+        newRequestRect.height_ = newWinRect.height_;
+        newWinRect.posX_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ? 0 : rect.posX_;
+        newRequestRect.posX_ = newWinRect.posX_;
+        newWinRect.posY_ = defaultDisplayInfo->GetHeight() - static_cast<int32_t>(newWinRect.height_);
+        newRequestRect.posY_ = newWinRect.posY_;
+
+        return true;
+    }
+    return false;
+}
+
 WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
 {
     auto newWinRect = winRect_;
@@ -264,10 +293,12 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
         SetSessionRequestRect(newRequestRect);
         NotifySessionRectChange(newRequestRect, reason);
     } else if (reason == SizeChangeReason::RESIZE) {
-        newWinRect.width_ = rect.width_;
-        newWinRect.height_ = rect.height_;
-        newRequestRect.width_ = rect.width_;
-        newRequestRect.height_ = rect.height_;
+        if (!UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect)) {
+            newWinRect.width_ = rect.width_;
+            newWinRect.height_ = rect.height_;
+            newRequestRect.width_ = rect.width_;
+            newRequestRect.height_ = rect.height_;
+        }
         SetSessionRect(newWinRect);
         SetSessionRequestRect(newRequestRect);
         NotifySessionRectChange(newRequestRect, reason);
