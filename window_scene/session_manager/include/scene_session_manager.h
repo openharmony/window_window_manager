@@ -151,6 +151,10 @@ public:
     WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState);
     WSError ClearSession(int32_t persistentId);
     WSError ClearAllSessions();
+    WSError LockSession(int32_t sessionId);
+    WSError UnlockSession(int32_t sessionId);
+    WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds);
+    WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds);
 
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);

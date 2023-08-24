@@ -799,7 +799,7 @@ WSError SceneSessionManagerProxy::GetSessionDumpInfo(const std::vector<std::stri
 }
 
 WSError SceneSessionManagerProxy::GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
-                                                     std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution)
+    std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -808,7 +808,7 @@ WSError SceneSessionManagerProxy::GetSessionSnapshot(const std::string& deviceId
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    if (!data.WriteString(deviceId)) {
+    if (!data.WriteString16(Str8ToStr16(deviceId))) {
         WLOGFE("Write deviceId failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -876,6 +876,96 @@ void SceneSessionManagerProxy::NotifyDumpInfoResult(const std::vector<std::strin
         WLOGFE("SendRequest failed");
         return;
     }
+}
+
+WSError SceneSessionManagerProxy::LockSession(int32_t sessionId)
+{
+    WLOGFI("run SceneSessionManagerProxy::LockSession");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("Write interface token failed.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteInt32(sessionId)) {
+        WLOGFE("Write persistentId failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_LOCK_SESSION),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
+WSError SceneSessionManagerProxy::UnlockSession(int32_t sessionId)
+{
+    WLOGFI("run SceneSessionManagerProxy::UnlockSession");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("Write interface token failed.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteInt32(sessionId)) {
+        WLOGFE("Write persistentId failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNLOCK_SESSION),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
+WSError SceneSessionManagerProxy::MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds)
+{
+    WLOGFI("run SceneSessionManagerProxy::MoveSessionsToForeground");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteInt32Vector(sessionIds)) {
+        WLOGFE("Write sessionIds failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_MOVE_MISSIONS_TO_FOREGROUND),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
+WSError SceneSessionManagerProxy::MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds)
+{
+    WLOGFI("run SceneSessionManagerProxy::MoveSessionsToBackground");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteInt32Vector(sessionIds)) {
+        WLOGFE("Write sessionIds failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_MOVE_MISSIONS_TO_BACKGROUND),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
 }
 
 WSError SceneSessionManagerProxy::ClearSession(int32_t persistentId)
