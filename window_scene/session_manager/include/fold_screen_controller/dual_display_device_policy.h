@@ -25,6 +25,7 @@ public:
     DualDisplayDevicePolicy();
     ~DualDisplayDevicePolicy() = default;
     void ChangeScreenDisplayMode(FoldDisplayMode displayMode) override;
+    void SendSensorResult(FoldStatus foldStatus) override;
     FoldDisplayMode GetScreenDisplayMode() override;
 };
 } // namespace OHOS::Rosen
