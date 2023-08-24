@@ -234,6 +234,10 @@ private:
     float GetDisplayBrightness() const;
     void HandleUpdateProperty(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action,
         const sptr<SceneSession>& sceneSession);
+    void UpdateHideNonSystemOverlayWindows(const sptr<WindowSessionProperty>& property,
+        const sptr<SceneSession>& sceneSession);
+    void UpdateForceHideState(const sptr<SceneSession>& sceneSession, const sptr<WindowSessionProperty>& property,
+        bool add);
     void NotifyWindowInfoChange(int32_t persistentId, WindowUpdateType type);
     bool FillWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,
         const sptr<SceneSession>& sceneSession);
@@ -260,6 +264,8 @@ private:
     std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;
     std::shared_mutex sceneSessionMapMutex_;
     std::map<int32_t, sptr<SceneSession>> sceneSessionMap_;
+    std::map<int32_t, sptr<SceneSession>> systemTopSceneSessionMap_;
+    std::map<int32_t, sptr<SceneSession>> nonSystemFloatSceneSessionMap_;
     sptr<ScbSessionHandler> scbSessionHandler_;
     std::shared_ptr<SessionListenerController> listenerController_;
     std::map<sptr<IRemoteObject>, int32_t> remoteObjectMap_;

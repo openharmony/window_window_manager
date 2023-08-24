@@ -2099,6 +2099,19 @@ HWTEST_F(WindowTest, SetRaiseByClickEnabled, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_OK, window->SetRaiseByClickEnabled(true));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: HideNonSystemOverlayWindows
+ * @tc.desc: set shouldHide flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, HideNonSystemOverlayWindows, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    ASSERT_EQ(WMError::WM_OK, window->HideNonSystemOverlayWindows(false));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

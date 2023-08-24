@@ -1040,6 +1040,8 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
             {
                 std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
                 sceneSessionMap_.erase(dialog->GetPersistentId());
+                systemTopSceneSessionMap_.erase(dialog->GetPersistentId());
+                nonSystemFloatSceneSessionMap_.erase(dialog->GetPersistentId());
             }
         }
         return WSError::WS_OK;
@@ -1079,6 +1081,8 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
         if (needRemoveSession) {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMap_.erase(persistentId);
+            systemTopSceneSessionMap_.erase(persistentId);
+            nonSystemFloatSceneSessionMap_.erase(persistentId);
             if (listenerController_ != nullptr &&
                 (scnSession->GetSessionInfo().abilityInfo) != nullptr &&
                 !(scnSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
@@ -1265,6 +1269,8 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t& 
         {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMap_.erase(persistentId);
+            systemTopSceneSessionMap_.erase(persistentId);
+            nonSystemFloatSceneSessionMap_.erase(persistentId);
         }
         if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
             auto sessionInfo = sceneSession->GetSessionInfo();
@@ -1620,8 +1626,93 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
             UpdatePropertyRaiseEnabled(property, sceneSession);
             break;
         }
+        case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_OVERLAY_WINDOWS: {
+            UpdateHideNonSystemOverlayWindows(property, sceneSession);
+            break;
+        }
         default:
             break;
+    }
+}
+
+void SceneSessionManager::UpdateHideNonSystemOverlayWindows(const sptr<WindowSessionProperty>& proper
+    const sptr<SceneSession>& sceneSession)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("Update property hideNonSystemOverlayWindows permission denied!");
+        return;
+    }
+    auto propertyOld = sceneSession->GetSessionProperty();
+    if (propertyOld == nullptr) {
+        WLOGFI("UpdateHideNonSystemOverlayWindows, session property null");
+        return;
+    }
+    bool hideNonSystemOverlayWindowsOld = propertyOld->GetHideNonSystemOverlayWindows();
+    bool hideNonSystemOverlayWindowsNew = property->GetHideNonSystemOverlayWindows();
+    if (hideNonSystemOverlayWindowsOld != hideNonSystemOverlayWindowsNew) {
+        if (!IsSessionVisible(sceneSession)) {
+            if (hideNonSystemOverlayWindowsOld) {
+                systemTopSceneSessionMap_.erase(sceneSession->GetPersistentId());
+            } else {
+                nonSystemFloatSceneSessionMap_.erase(sceneSession->GetPersistentId());
+            }
+        } else {
+            if (hideNonSystemOverlayWindowsOld) {
+                UpdateForceHideState(sceneSession, propertyOld, false);
+            } else {
+                UpdateForceHideState(sceneSession, property, true);
+            }
+        }
+        propertyOld->SetHideNonSystemOverlayWindows(hideNonSystemOverlayWindowsNew);
+    }
+}
+
+void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSession,
+    const sptr<WindowSessionProperty>& property, bool add)
+{
+    if (property == nullptr) {
+        WLOGFD("property is nullptr");
+        return;
+    }
+    auto persistentId = sceneSession->GetPersistentId();
+    bool forceHideFloatOld = !systemTopSceneSessionMap_.empty();
+    bool notifyAll = false;
+    if (add) {
+        if (property->GetHideNonSystemOverlayWindows()) {
+            systemTopSceneSessionMap_.insert({ persistentId, sceneSession });
+            if (property->IsFloatingWindowAppType()) {
+                nonSystemFloatSceneSessionMap_.erase(persistentId);
+            }
+            notifyAll = !forceHideFloatOld;
+        } else if (property->IsFloatingWindowAppType()) {
+            nonSystemFloatSceneSessionMap_.insert({ persistentId, sceneSession });
+            if (forceHideFloatOld && !property->GetForceHide()) {
+                sceneSession->NotifyForceHideChange(true);
+            }
+        }
+    } else {
+        if (property->GetHideNonSystemOverlayWindows()) {
+            systemTopSceneSessionMap_.erase(persistentId);
+            if (property->IsFloatingWindowAppType()) {
+                nonSystemFloatSceneSessionMap_.insert({ persistentId, sceneSession });
+            }
+            notifyAll = forceHideFloatOld && systemTopSceneSessionMap_.empty();
+        } else if (property->IsFloatingWindowAppType()) {
+            nonSystemFloatSceneSessionMap_.erase(persistentId);
+            if (property->GetForceHide()) {
+                sceneSession->NotifyForceHideChange(false);
+            }
+        }
+    }
+    if (notifyAll) {
+        bool forceHideFloatNew = !systemTopSceneSessionMap_.empty();
+        for (const auto &item : nonSystemFloatSceneSessionMap_) {
+            auto forceHideSceneSession = item.second;
+            auto forceHideProperty = forceHideSceneSession->GetWindowSessionProperty();
+            if (forceHideProperty && forceHideFloatNew != forceHideProperty->GetForceHide()) {
+                forceHideSceneSession->NotifyForceHideChange(forceHideFloatNew);
+            }
+        }
     }
 }
 
@@ -2199,11 +2290,13 @@ void SceneSessionManager::OnSessionStateChange(int32_t persistentId, const Sessi
     }
     switch (state) {
         case SessionState::STATE_FOREGROUND:
+            UpdateForceHideState(sceneSession, sceneSession->GetWindowSessionProperty(), true);
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
             HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
             UpdatePrivateStateAndNotify(persistentId);
             break;
         case SessionState::STATE_BACKGROUND:
+            UpdateForceHideState(sceneSession, sceneSession->GetWindowSessionProperty(), false);
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
             HandleKeepScreenOn(sceneSession, false);
             UpdatePrivateStateAndNotify(persistentId);

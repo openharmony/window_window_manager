@@ -1324,6 +1324,29 @@ HWTEST_F(WindowSessionImplTest, SetRaiseByClickEnabled01, Function | SmallTest |
     retCode = window->SetRaiseByClickEnabled(true);
     ASSERT_EQ(retCode, WMError::WM_DO_NOTHING);
 }
+
+/**
+ * @tc.name: HideNonSystemOverlayWindows01
+ * @tc.desc: HideNonSystemOverlayWindows and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, HideNonSystemOverlayWindows01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("HideNonSystemOverlayWindows01");
+    sptr<WindowSessionImpl> window = new(std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    WMError retCode = window->HideNonSystemOverlayWindows(false);
+    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    retCode = window->HideNonSystemOverlayWindows(false);
+    ASSERT_EQ(retCode, WMError::WM_DO_NOTHING);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -48,6 +48,7 @@ const std::string CUSTOM_ANIMATION_PLAYING_CB = "isCustomAnimationPlaying";
 const std::string SHOW_WHEN_LOCKED_CB = "sessionShowWhenLockedChange";
 const std::string REQUESTED_ORIENTATION_CHANGE_CB = "sessionRequestedOrientationChange";
 const std::string RAISE_ABOVE_TARGET_CB = "raiseAboveTarget";
+const std::string FORCE_HIDE_CHANGE_CB = "sessionForceHideChange";
 } // namespace
 
 NativeValue* JsSceneSession::Create(NativeEngine& engine, const sptr<SceneSession>& session)
@@ -116,7 +117,8 @@ JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& s
         { CUSTOM_ANIMATION_PLAYING_CB,                  &JsSceneSession::ProcessIsCustomAnimationPlaying },
         { SHOW_WHEN_LOCKED_CB,            &JsSceneSession::ProcessShowWhenLockedRegister },
         { REQUESTED_ORIENTATION_CHANGE_CB,            &JsSceneSession::ProcessRequestedOrientationChange },
-        { RAISE_ABOVE_TARGET_CB,          &JsSceneSession::ProcessRaiseAboveTargetRegister }
+        { RAISE_ABOVE_TARGET_CB,          &JsSceneSession::ProcessRaiseAboveTargetRegister },
+        { FORCE_HIDE_CHANGE_CB,           &JsSceneSession::ProcessForceHideChangeRegister }
     };
 
     sptr<SceneSession::SessionChangeCallback> sessionchangeCallback = new (std::nothrow)
@@ -503,6 +505,42 @@ void JsSceneSession::ProcessRequestedOrientationChange()
     sessionchangeCallback->OnRequestedOrientationChange_ = std::bind(
         &JsSceneSession::OnReuqestedOrientationChange, this, std::placeholders::_1);
     WLOGFD("ProcessRequestedOrientationChange success");
+}
+
+void JsSceneSession::ProcessForceHideChangeRegister()
+{
+    auto sessionchangeCallback = sessionchangeCallback_.promote();
+    if (sessionchangeCallback == nullptr) {
+        WLOGFE("sessionchangeCallback is nullptr");
+        return;
+    }
+    sessionchangeCallback->OnForceHideChange_ = std::bind(&JsSceneSession::OnForceHideChange,
+        this, std::placeholders::_1);
+    WLOGFD("ProcessForceHideChangeRegister success");
+}
+
+void JsSceneSession::OnForceHideChange(bool hide)
+{
+    WLOGFI("[NAPI]OnForceHideChange, hide: %{public}u", hide);
+    auto iter = jsCbMap_.find(FORCE_HIDE_CHANGE_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [hide, jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (!jsCallBack) {
+                WLOGFE("[NAPI]jsCallBack is nullptr");
+                return;
+            }
+            NativeValue* jsSessionForceHideObj = CreateJsValue(engine, hide);
+            NativeValue* argv[] = { jsSessionForceHideObj };
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+        });
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSession::OnForceHideChange", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsSceneSession::Finalizer(NativeEngine* engine, void* data, void* hint)
