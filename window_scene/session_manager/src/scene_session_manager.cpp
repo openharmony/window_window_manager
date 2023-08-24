@@ -1635,7 +1635,7 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
     }
 }
 
-void SceneSessionManager::UpdateHideNonSystemOverlayWindows(const sptr<WindowSessionProperty>& proper
+void SceneSessionManager::UpdateHideNonSystemOverlayWindows(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
