@@ -3475,6 +3475,122 @@ HWTEST_F(WindowImplTest, SetAlpha01, Function | SmallTest | Level2)
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: AddWindowFlag01
+ * @tc.desc: AddWindowFlag Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, AddWindowFlag01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowImpl> window = new WindowImpl(option);
+    WindowFlag flag = WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED;
+    WMError err = window->AddWindowFlag(flag);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, err);
+    delete window;
+    delete option;
+}
+
+/**
+ * @tc.name: RemoveWindowFlag01
+ * @tc.desc: RemoveWindowFlag Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, RemoveWindowFlag01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowImpl> window = new WindowImpl(option);
+    WindowFlag flag = WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED;
+    WMError err = window->RemoveWindowFlag(flag);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, err);
+    delete window;
+    delete option;
+}
+
+/**
+ * @tc.name: IsSupportWideGamut
+ * @tc.desc: IsSupportWideGamut Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, IsSupportWideGamut, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_EQ(true, window->IsSupportWideGamut());
+    delete window;
+    delete option;
+}
+
+/**
+ * @tc.name: SetColorSpace
+ * @tc.desc: SetColorSpace Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, SetColorSpace, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowImpl> window = new WindowImpl(option);
+    window->SetColorSpace(ColorSpace::COLOR_SPACE_DEFAULT);
+    delete window;
+    delete option;
+}
+
+/**
+ * @tc.name: GetColorSpace
+ * @tc.desc: GetColorSpace Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, GetColorSpace, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_EQ(ColorSpace::COLOR_SPACE_DEFAULT, window->GetColorSpace());
+    delete window;
+    delete option;
+}
+
+/**
+ * @tc.name: SetAspectRatio01
+ * @tc.desc: SetAspectRatio Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, SetAspectRatio01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_EQ(WMError::WM_OK, window->SetAspectRatio(0.1f));
+    delete window;
+    delete option;
+}
+
+/**
+ * @tc.name: SetAspectRatio02
+ * @tc.desc: SetAspectRatio Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, SetAspectRatio02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetAspectRatio(0.0001f));
+    delete window;
+    delete option;
+}
+
+/**
+ * @tc.name: ResetAspectRatio01
+ * @tc.desc: ResetAspectRatio Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, ResetAspectRatio01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_EQ(WMError::WM_OK, window->ResetAspectRatio());
+    delete window;
+    delete option;
+}
 }
 } // namespace Rosen
 } // namespace OHOS
