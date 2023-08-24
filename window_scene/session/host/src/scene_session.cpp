@@ -83,6 +83,12 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     }
 }
 
+void SceneSession::Destroy()
+{
+    WLOGFI("SceneSession Destroy id: %{public}d", GetPersistentId());
+    sessionChangeCallback_ = nullptr;
+}
+
 WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
 {
