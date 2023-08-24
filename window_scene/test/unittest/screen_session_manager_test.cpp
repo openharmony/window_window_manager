@@ -138,7 +138,10 @@ HWTEST_F(ScreenSessionManagerTest, VirtualScreen, Function | SmallTest | Level3)
     auto result1 = ssm_->SetVirtualScreenSurface(VIRTUAL_SCREEN_ID, nullptr);
     ASSERT_EQ(DMError::DM_ERROR_RENDER_SERVICE_FAILED, result1);
     sptr<IConsumerSurface> surface = OHOS::IConsumerSurface::Create();
-    auto result2 = ssm_->SetVirtualScreenSurface(VIRTUAL_SCREEN_ID, surface->GetProducer());
+    auto result2 = ssm_->SetVir
+    
+    
+    tualScreenSurface(VIRTUAL_SCREEN_ID, surface->GetProducer());
     if (DMError::DM_ERROR_RENDER_SERVICE_FAILED == result2) {
         ASSERT_EQ(DMError::DM_ERROR_RENDER_SERVICE_FAILED, result2);
     }
