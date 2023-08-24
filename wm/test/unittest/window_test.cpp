@@ -2049,7 +2049,7 @@ HWTEST_F(WindowTest, GetVSyncPeriod, Function | SmallTest | Level3)
 
     sptr<WindowOption> option = new WindowOption;
     sptr<Window> window = Window::Create("win", option);
-    if(window!=nullptr) {
+    if (window != nullptr) {
         ASSERT_NE(nullptr, window);
         int64_t period = window->GetVSyncPeriod();
         ASSERT_LE(-1, period);
@@ -2074,7 +2074,7 @@ HWTEST_F(WindowTest, performBack, Function | SmallTest | Level3)
 
     sptr<WindowOption> option = new WindowOption;
     sptr<Window> window = Window::Create("performBack", option);
-        if(window!=nullptr) {
+    if (window != nullptr) {
         ASSERT_NE(nullptr, window);
         int64_t period = window->PerformBack();
         ASSERT_LE(-1, period);

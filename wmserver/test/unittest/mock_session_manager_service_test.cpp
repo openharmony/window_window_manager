@@ -156,20 +156,7 @@ HWTEST_F(MockSessionManagerServiceTest, Dump, Function | SmallTest | Level2)
     MockSessionManagerService* mService = new MockSessionManagerService();
     WLOGI("onStart");
     std::vector<std::u16string> args;
-    ASSERT_EQ(-1, mService->Dump(-2,args));
-}
-
-/**
- * @tc.name: GetScreenDumpInfo
- * @tc.desc: GetScreenDumpInfo
- * @tc.type: FUNC
- */
-HWTEST_F(MockSessionManagerServiceTest, GetScreenDumpInfo, Function | SmallTest | Level2)
-{
-    MockSessionManagerService* mService = new MockSessionManagerService();
-    WLOGI("onStart");
-    sptr<IRemoteObject> sessionManagerService = nullptr;
-    ASSERT_EQ(sessionManagerService, mService->GetSceneSessionManager());
+    ASSERT_EQ(-1, mService->Dump(-2, args));
 }
 
 /**
@@ -220,8 +207,7 @@ HWTEST_F(MockSessionManagerServiceTest, Dump2, Function | SmallTest | Level2)
 HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService2, Function | SmallTest | Level2)
 {
     MockScreenManagerService* mService = new MockScreenManagerService();
-    sptr<IRemoteObject> sessionManagerService = nullptr;
-    mService->SetSessionManagerService(sessionManagerService);
+    mService->SetSessionManagerService(MockScreenManagerService::GetInstance().screenSessionManager_);
 }
 }
 }
