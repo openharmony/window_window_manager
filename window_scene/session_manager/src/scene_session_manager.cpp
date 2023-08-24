@@ -2803,10 +2803,54 @@ WSError SceneSessionManager::GetAllAbilityInfos(const AAFwk::Want &want, int32_t
         WLOGFE("bundleMgr_ is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    auto ret = bundleMgr_->QueryAllAbilityInfos(want, userId, abilityInfos);
-    if (!ret) {
-        WLOGFE("Query all ability infos from BMS failed!");
+    auto elementName = want.GetElement();
+    int32_t ret{0};
+    auto flag = (AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION |
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_METADATA |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE));
+    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    if (elementName.GetBundleName().empty() && elementName.GetAbilityName().empty()) {
+        WLOGFD("want is empty queryAllAbilityInfos");
+        ret = static_cast<int32_t>(bundleMgr_->GetBundleInfosV9(flag, bundleInfos, userId));
+        if (ret) {
+            WLOGFE("Query all ability infos from BMS failed!");
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+    } else if (!elementName.GetBundleName().empty()) {
+        AppExecFwk::BundleInfo bundleInfo;
+        WLOGFD("bundleName is not empty, query abilityInfo of %{public}s", elementName.GetBundleName().c_str());
+        ret = static_cast<int32_t>(bundleMgr_->GetBundleInfoV9(elementName.GetBundleName(), flag, bundleInfo, userId));
+        if (ret) {
+            WLOGFE("Query ability info from BMS failed!");
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+        bundleInfos.push_back(bundleInfo);
+    } else {
+        WLOGFE("invalid want:%{public}s", want.ToString().c_str());
         return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    return GetAbilityInfosFromBundleInfo(bundleInfos, abilityInfos);
+}
+
+WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
+    std::vector<AppExecFwk::AbilityInfo> &abilityInfos)
+{
+    if (bundleInfos.empty()) {
+        WLOGFE("bundleInfos is empty");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    for (auto bundleInfo: bundleInfos) {
+        auto hapModulesList = bundleInfo.hapModuleInfos;
+        if (hapModulesList.empty()) {
+            WLOGFD("hapModulesList is empty");
+            continue;
+        }
+        for (auto hapModule: hapModulesList) {
+            auto abilityInfoList = hapModule.abilityInfos;
+            abilityInfos.insert(abilityInfos.end(), abilityInfoList.begin(), abilityInfoList.end());
+        }
     }
     return WSError::WS_OK;
 }
@@ -3862,26 +3906,6 @@ bool SceneSessionManager::CheckCollaboratorType(int32_t type)
         return false;
     }
     return true;
-}
-
-void SceneSessionManager::QueryAbilityInfoFromBMS(const int32_t uId,
-    const SessionInfo& sessionInfo, AppExecFwk::AbilityInfo& abilityInfo)
-{
-    WLOGFI("run QueryAbilityInfoFromBMS");
-    if (bundleMgr_ == nullptr) {
-        WLOGFE("bundleMgr_ is nullptr!");
-        return;
-    }
-
-    AAFwk::Want want;
-    want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
-    auto abilityInfoFlag = (AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
-        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION |
-        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_METADATA);
-    bool ret = bundleMgr_->QueryAbilityInfo(want, abilityInfoFlag, uId, abilityInfo);
-    if (!ret) {
-        WLOGFE("Get ability info from BMS failed!");
-    }
 }
 
 void SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, const SessionInfo& sessionInfo)
