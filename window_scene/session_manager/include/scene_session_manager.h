@@ -43,6 +43,7 @@ class SessionInfo;
 namespace OHOS::AppExecFwk {
 class IBundleMgr;
 struct AbilityInfo;
+struct BundleInfo;
 } // namespace OHOS::AppExecFwk
 
 namespace OHOS::Global::Resource {
@@ -274,6 +275,8 @@ private:
     void AddClientDeathRecipient(const sptr<ISessionStage>& sessionStage, const sptr<SceneSession>& sceneSession);
     void DestroySpecificSession(const sptr<IRemoteObject>& remoteObject);
     void CleanUserMap();
+    WSError GetAbilityInfosFromBundleInfo(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
+        std::vector<AppExecFwk::AbilityInfo> &abilityInfos);
     void UpdatePropertyRaiseEnabled(const sptr<WindowSessionProperty>& property,
                                     const sptr<SceneSession>& sceneSession);
     sptr<RootSceneSession> rootSceneSession_;
@@ -336,8 +339,6 @@ private:
     std::unordered_map<int32_t, sptr<AAFwk::IAbilityManagerCollaborator>> collaboratorMap_;
 
     bool CheckCollaboratorType(int32_t type);
-    void QueryAbilityInfoFromBMS(const int32_t uId,
-        const SessionInfo& sessionInfo, AppExecFwk::AbilityInfo& abilityInfo);
     void NotifyStartAbility(int32_t collaboratorType, const SessionInfo& sessionInfo);
     void NotifySessionCreate(const sptr<SceneSession> sceneSession, SessionInfo& sessionInfo);
     void NotifyLoadAbility(int32_t collaboratorType, sptr<AAFwk::SessionInfo> abilitySessionInfo,
