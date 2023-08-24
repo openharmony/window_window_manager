@@ -989,13 +989,18 @@ void JsSceneSession::PendingSessionActivationInner(SessionInfo& info)
         return;
     }
     auto jsCallBack = iter->second;
+    std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [info, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [sessionInfo, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (!jsCallBack) {
                 WLOGFE("[NAPI]jsCallBack is nullptr");
                 return;
             }
-            NativeValue* jsSessionInfo = CreateJsSessionInfo(engine, info);
+            if (sessionInfo == nullptr) {
+                WLOGFE("[NAPI]sessionInfo is nullptr");
+                return;
+            }
+            NativeValue* jsSessionInfo = CreateJsSessionInfo(engine, *sessionInfo);
             if (jsSessionInfo == nullptr) {
                 WLOGFE("[NAPI]this target session info is nullptr");
                 return;
@@ -1044,13 +1049,18 @@ void JsSceneSession::TerminateSession(const SessionInfo& info)
         return;
     }
     auto jsCallBack = iter->second;
+    std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [info, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [sessionInfo, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (!jsCallBack) {
                 WLOGFE("[NAPI]jsCallBack is nullptr");
                 return;
             }
-            NativeValue* jsSessionInfo = CreateJsSessionInfo(engine, info);
+            if (sessionInfo == nullptr) {
+                WLOGFE("[NAPI]sessionInfo is nullptr");
+                return;
+            }
+            NativeValue* jsSessionInfo = CreateJsSessionInfo(engine, *sessionInfo);
             if (jsSessionInfo == nullptr) {
                 WLOGFE("[NAPI]this target session info is nullptr");
                 return;
@@ -1075,7 +1085,7 @@ void JsSceneSession::TerminateSessionNew(const SessionInfo& info, bool needStart
     }
     auto jsCallBack = iter->second;
     auto complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [info, needStartCaller, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [needStartCaller, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (!jsCallBack) {
                 WLOGFE("[NAPI]jsCallBack is nullptr");
                 return;
@@ -1105,7 +1115,7 @@ void JsSceneSession::TerminateSessionTotal(const SessionInfo& info, TerminateTyp
     }
     auto jsCallBack = iter->second;
     auto complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [info, terminateType, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [terminateType, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (!jsCallBack) {
                 WLOGFE("[NAPI]jsCallBack is nullptr");
                 return;
@@ -1134,13 +1144,18 @@ void JsSceneSession::OnSessionException(const SessionInfo& info)
         return;
     }
     auto jsCallBack = iter->second;
+    std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [info, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [sessionInfo, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (!jsCallBack) {
                 WLOGFE("[NAPI]jsCallBack is nullptr");
                 return;
             }
-            NativeValue* jsSessionInfo = CreateJsSessionInfo(engine, info);
+            if (sessionInfo == nullptr) {
+                WLOGFE("[NAPI]sessionInfo is nullptr");
+                return;
+            }
+            NativeValue* jsSessionInfo = CreateJsSessionInfo(engine, *sessionInfo);
             if (jsSessionInfo == nullptr) {
                 WLOGFE("[NAPI]this target session info is nullptr");
                 return;
@@ -1165,13 +1180,18 @@ void JsSceneSession::PendingSessionToForeground(const SessionInfo& info)
         return;
     }
     auto jsCallBack = iter->second;
+    std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [info, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [sessionInfo, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (!jsCallBack) {
                 WLOGFE("[NAPI]jsCallBack is nullptr");
                 return;
             }
-            NativeValue* jsSessionInfo = CreateJsSessionInfo(engine, info);
+            if (sessionInfo == nullptr) {
+                WLOGFE("[NAPI]sessionInfo is nullptr");
+                return;
+            }
+            NativeValue* jsSessionInfo = CreateJsSessionInfo(engine, *sessionInfo);
             if (jsSessionInfo == nullptr) {
                 WLOGFE("[NAPI]this target session info is nullptr");
                 return;
@@ -1196,13 +1216,18 @@ void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& i
         return;
     }
     auto jsCallBack = iter->second;
+    std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [info, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [sessionInfo, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (!jsCallBack) {
                 WLOGFE("[NAPI]jsCallBack is nullptr");
                 return;
             }
-            NativeValue* jsSessionInfo = CreateJsSessionInfo(engine, info);
+            if (sessionInfo == nullptr) {
+                WLOGFE("[NAPI]sessionInfo is nullptr");
+                return;
+            }
+            NativeValue* jsSessionInfo = CreateJsSessionInfo(engine, *sessionInfo);
             if (jsSessionInfo == nullptr) {
                 WLOGFE("[NAPI]this target session info is nullptr");
                 return;
