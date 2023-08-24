@@ -412,7 +412,11 @@ WSError Session::ConnectImpl(const sptr<ISessionStage>& sessionStage, const sptr
     if (property) {
         property->SetPersistentId(GetPersistentId());
     }
-    property_ = property;
+    if (property_ == nullptr) {
+        property_ = property;
+    } else {
+        property_->CopyFrom(property);
+    }
 
     UpdateSessionState(SessionState::STATE_CONNECT);
     // once update rect before connect, update again when connect

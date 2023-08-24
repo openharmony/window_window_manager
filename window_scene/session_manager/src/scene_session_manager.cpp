@@ -1085,6 +1085,8 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
                 WLOGFD("NotifySessionDestroyed, id: %{public}d", persistentId);
                 listenerController_->NotifySessionDestroyed(persistentId);
             }
+        } else {
+            scnSession->Destroy();
         }
         return WSError::WS_OK;
     };
