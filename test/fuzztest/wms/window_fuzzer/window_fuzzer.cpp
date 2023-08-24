@@ -19,7 +19,6 @@
 #include <iremote_broker.h>
 #include <iservice_registry.h>
 
-#include "ability.h"
 #include "ability_context.h"
 #include "ability_context_impl.h"
 #include "js_runtime.h"
@@ -706,14 +705,6 @@ void CheckWindowImplFunctionsPart9(sptr<WindowImpl> window, const uint8_t* data,
     window->UnregisterDisplayMoveListener(displayMoveListener);
     AAFwk::Want want;
     window->OnNewWant(want);
-    size_t startPos = 0;
-    const std::string contentInfo = "WindowFuzzTest";
-    NativeEngine* engine = nullptr;
-    NativeValue* storage = nullptr;
-    bool isDistributed = false;
-    startPos += GetObject(isDistributed, data + startPos, size - startPos);
-    AppExecFwk::Ability ability;
-    window->SetUIContent(contentInfo, engine, storage, isDistributed, &ability);
 }
 
 void WindowImplFuzzTest(const uint8_t* data, size_t size)
