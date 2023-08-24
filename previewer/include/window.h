@@ -244,6 +244,7 @@ public:
     virtual WMError SetResizeByDragEnabled(bool dragEnabled) = 0;
     virtual WMError SetRaiseByClickEnabled(bool raiseEnabled) = 0;
     virtual WmErrorCode RaiseAboveTarget(int32_t subWindowId) = 0;
+    virtual WMError HideNonSystemOverlayWindows(int32_t shouldHide) = 0;
 };
 }
 }

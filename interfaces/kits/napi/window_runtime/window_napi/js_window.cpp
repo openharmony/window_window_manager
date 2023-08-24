@@ -442,6 +442,13 @@ NativeValue* JsWindow::SetRaiseByClickEnabled(NativeEngine* engine, NativeCallba
     return (me != nullptr) ? me->OnSetRaiseByClickEnabled(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindow::HideNonSystemOverlayWindows(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGI("HideNonSystemOverlayWindows");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnHideNonSystemOverlayWindows(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindow::SetWindowTouchable(NativeEngine* engine, NativeCallbackInfo* info)
 {
     WLOGI("SetTouchable");
@@ -2960,6 +2967,49 @@ NativeValue* JsWindow::OnSetRaiseByClickEnabled(NativeEngine& engine, NativeCall
     return result;
 }
 
+NativeValue* JsWindow::OnHideNonSystemOverlayWindows(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WMError errCode = WMError::WM_OK;
+    if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
+        WLOGFE("Argc is invalid: %{public}zu", info.argc);
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    bool shouldHide = false;
+    if (errCode == WMError::WM_OK) {
+        NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
+        if (nativeVal == nullptr) {
+            WLOGFE("Failed to convert parameter to shouldHide");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            shouldHide = static_cast<bool>(*nativeVal);
+        }
+    }
+    wptr<Window> weakToken(windowToken_);
+    AsyncTask::CompleteCallback complete =
+        [weakToken, shouldHide, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                return;
+            }
+            WMError ret = weakWindow->HideNonSystemOverlayWindows(shouldHide);
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+            } else {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
+                            "Hide non-system overlay windows failed"));
+            }
+            WLOGI("Window [%{public}u, %{public}s] hide non-system overlay windows end",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+        };
+    NativeValue* lastParam = (info.argc <= 1) ? nullptr :
+        (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsWindow::HideNonSystemOverlayWindows",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 NativeValue* JsWindow::OnRaiseAboveTarget(NativeEngine& engine, NativeCallbackInfo& info)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
@@ -4355,6 +4405,8 @@ void BindFunctions(NativeEngine& engine, NativeObject* object, const char *modul
     BindNativeFunction(engine, *object, "setResizeByDragEnabled", moduleName, JsWindow::SetResizeByDragEnabled);
     BindNativeFunction(engine, *object, "setRaiseByClickEnabled", moduleName, JsWindow::SetRaiseByClickEnabled);
     BindNativeFunction(engine, *object, "raiseAboveTarget", moduleName, JsWindow::RaiseAboveTarget);
+    BindNativeFunction(engine, *object, "hideNonSystemOverlayWindows", moduleName,
+        JsWindow::HideNonSystemOverlayWindows);
 }
 }  // namespace Rosen
 }  // namespace OHOS

@@ -68,6 +68,16 @@ void WindowSessionProperty::SetDragEnabled(bool dragEnabled)
     dragEnabled_ = dragEnabled;
 }
 
+void WindowSessionProperty::SetHideNonSystemOverlayWindows(bool hide)
+{
+    hideNonSystemOverlayWindows_ = hide;
+}
+
+void WindowSessionProperty::SetForceHide(bool hide)
+{
+    forceHide_ = hide;
+}
+
 void WindowSessionProperty::SetRaiseEnabled(bool raiseEnabled)
 {
     raiseEnabled_ = raiseEnabled;
@@ -141,6 +151,16 @@ bool WindowSessionProperty::GetTouchable() const
 bool WindowSessionProperty::GetDragEnabled() const
 {
     return dragEnabled_;
+}
+
+bool WindowSessionProperty::GetHideNonSystemOverlayWindows() const
+{
+    return hideNonSystemOverlayWindows_;
+}
+
+bool WindowSessionProperty::GetForceHide() const
+{
+    return forceHide_;
 }
 
 bool WindowSessionProperty::GetRaiseEnabled() const
@@ -454,6 +474,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
         parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) &&
         parcel.WriteBool(isDecorEnable_) && parcel.WriteBool(dragEnabled_) &&
+        parcel.WriteBool(hideNonSystemOverlayWindows_) && parcel.WriteBool(forceHide_) &&
         MarshallingWindowLimits(parcel) &&
         MarshallingSystemBarMap(parcel) && parcel.WriteUint32(animationFlag_) &&
         parcel.WriteBool(isFloatingWindowAppType_) && MarshallingTouchHotAreas(parcel);
@@ -492,6 +513,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetRaiseEnabled(parcel.ReadBool());
     property->SetDecorEnable(parcel.ReadBool());
     property->SetDragEnabled(parcel.ReadBool());
+    property->SetHideNonSystemOverlayWindows(parcel.ReadBool());
+    property->SetForceHide(parcel.ReadBool());
     UnmarshallingWindowLimits(parcel, property);
     UnMarshallingSystemBarMap(parcel, property);
     property->SetAnimationFlag(parcel.ReadUint32());
@@ -510,6 +533,8 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     focusable_= property->focusable_;
     touchable_ = property->touchable_;
     dragEnabled_ = property->dragEnabled_;
+    hideNonSystemOverlayWindows_ = property->hideNonSystemOverlayWindows_;
+    forceHide_ = property->forceHide_;
     raiseEnabled_ = property->raiseEnabled_;
     tokenState_ = property->tokenState_;
     turnScreenOn_ = property->turnScreenOn_;

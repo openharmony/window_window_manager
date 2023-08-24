@@ -61,6 +61,8 @@ public:
     void SetFocusable(bool isFocusable);
     void SetTouchable(bool isTouchable);
     void SetDragEnabled(bool dragEnabled);
+    void SetHideNonSystemOverlayWindows(bool hide);
+    void SetForceHide(bool hide);
     void SetRaiseEnabled(bool raiseEnabled);
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
@@ -97,6 +99,8 @@ public:
     bool GetFocusable() const;
     bool GetTouchable() const;
     bool GetDragEnabled() const;
+    bool GetHideNonSystemOverlayWindows() const;
+    bool GetForceHide() const;
     bool GetRaiseEnabled() const;
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
@@ -170,6 +174,8 @@ private:
     Transform trans_;
     bool isFloatingWindowAppType_ = false;
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
+    bool hideNonSystemOverlayWindows_ = false;
+    bool forceHide_ = false;
 };
 
 struct SystemSessionConfig : public Parcelable {

@@ -854,5 +854,10 @@ WmErrorCode WindowImpl::RaiseAboveTarget(int32_t subWindowId)
 {
     return WmErrorCode::WM_OK;
 }
+
+WMError WindowImpl::HideNonSystemOverlayWindows(bool shouldHide)
+{
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS

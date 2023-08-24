@@ -208,6 +208,7 @@ public:
     virtual WMError SetResizeByDragEnabled(bool dragEnabled) override;
     virtual WMError SetRaiseByClickEnabled(bool raiseEnabled) override;
     virtual WmErrorCode RaiseAboveTarget(int32_t subWindowId) override;
+    virtual WMError HideNonSystemOverlayWindows(bool shouldHide) override;
 private:
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> subWindowMap_;
