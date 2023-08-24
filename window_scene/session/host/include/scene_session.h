@@ -87,6 +87,8 @@ public:
     SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
     ~SceneSession() = default;
 
+    void Destroy();
+
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr) override;
