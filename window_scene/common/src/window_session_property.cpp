@@ -68,9 +68,9 @@ void WindowSessionProperty::SetDragEnabled(bool dragEnabled)
     dragEnabled_ = dragEnabled;
 }
 
-void WindowSessionProperty::SetHideNonSystemOverlayWindows(bool hide)
+void WindowSessionProperty::SetHideNonSystemFloatingWindows(bool hide)
 {
-    hideNonSystemOverlayWindows_ = hide;
+    hideNonSystemFloatingWindows_ = hide;
 }
 
 void WindowSessionProperty::SetForceHide(bool hide)
@@ -153,9 +153,9 @@ bool WindowSessionProperty::GetDragEnabled() const
     return dragEnabled_;
 }
 
-bool WindowSessionProperty::GetHideNonSystemOverlayWindows() const
+bool WindowSessionProperty::GetHideNonSystemFloatingWindows() const
 {
-    return hideNonSystemOverlayWindows_;
+    return hideNonSystemFloatingWindows_;
 }
 
 bool WindowSessionProperty::GetForceHide() const
@@ -474,7 +474,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
         parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) &&
         parcel.WriteBool(isDecorEnable_) && parcel.WriteBool(dragEnabled_) &&
-        parcel.WriteBool(hideNonSystemOverlayWindows_) && parcel.WriteBool(forceHide_) &&
+        parcel.WriteBool(hideNonSystemFloatingWindows_) && parcel.WriteBool(forceHide_) &&
         MarshallingWindowLimits(parcel) &&
         MarshallingSystemBarMap(parcel) && parcel.WriteUint32(animationFlag_) &&
         parcel.WriteBool(isFloatingWindowAppType_) && MarshallingTouchHotAreas(parcel);
@@ -513,7 +513,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetRaiseEnabled(parcel.ReadBool());
     property->SetDecorEnable(parcel.ReadBool());
     property->SetDragEnabled(parcel.ReadBool());
-    property->SetHideNonSystemOverlayWindows(parcel.ReadBool());
+    property->SetHideNonSystemFloatingWindows(parcel.ReadBool());
     property->SetForceHide(parcel.ReadBool());
     UnmarshallingWindowLimits(parcel, property);
     UnMarshallingSystemBarMap(parcel, property);
@@ -533,7 +533,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     focusable_= property->focusable_;
     touchable_ = property->touchable_;
     dragEnabled_ = property->dragEnabled_;
-    hideNonSystemOverlayWindows_ = property->hideNonSystemOverlayWindows_;
+    hideNonSystemFloatingWindows_ = property->hideNonSystemFloatingWindows_;
     forceHide_ = property->forceHide_;
     raiseEnabled_ = property->raiseEnabled_;
     tokenState_ = property->tokenState_;

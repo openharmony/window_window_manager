@@ -855,7 +855,7 @@ WmErrorCode WindowImpl::RaiseAboveTarget(int32_t subWindowId)
     return WmErrorCode::WM_OK;
 }
 
-WMError WindowImpl::HideNonSystemOverlayWindows(bool shouldHide)
+WMError WindowImpl::HideNonSystemFloatingWindows(bool shouldHide)
 {
     return WMError::WM_OK;
 }

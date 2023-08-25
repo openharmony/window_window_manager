@@ -64,16 +64,16 @@ HWTEST_F(WindowSessionPropertyTest, SetRaiseEnabled001, Function | SmallTest | L
 }
 
 /**
- * @tc.name: SetHideNonSystemOverlayWindows001
- * @tc.desc: SetHideNonSystemOverlayWindows and GetHideNonSystemOverlayWindows to check the value
+ * @tc.name: SetHideNonSystemFloatingWindows001
+ * @tc.desc: SetHideNonSystemFloatingWindows and GetHideNonSystemFloatingWindows to check the value
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, SetHideNonSystemOverlayWindows001, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionPropertyTest, SetHideNonSystemFloatingWindows001, Function | SmallTest | Level2)
 {
     WindowSessionProperty* property = new WindowSessionProperty();
-    ASSERT_EQ(property->GetHideNonSystemOverlayWindows(), false);
-    property->SetHideNonSystemOverlayWindows(true);
-    ASSERT_EQ(property->GetHideNonSystemOverlayWindows(), true);
+    ASSERT_EQ(property->GetHideNonSystemFloatingWindows(), false);
+    property->SetHideNonSystemFloatingWindows(true);
+    ASSERT_EQ(property->GetHideNonSystemFloatingWindows(), true);
 }
 } // namespace
 } // namespace Rosen

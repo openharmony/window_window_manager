@@ -655,14 +655,14 @@ WMError WindowSessionImpl::SetRaiseByClickEnabled(bool raiseEnabled)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED);
 }
 
-WMError WindowSessionImpl::HideNonSystemOverlayWindows(bool shouldHide)
+WMError WindowSessionImpl::HideNonSystemFloatingWindows(bool shouldHide)
 {
-    WLOGFD("hide non-system overlay windows");
+    WLOGFD("hide non-system floating windows");
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    property_->SetHideNonSystemOverlayWindows(shouldHide);
-    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
+    property_->SetHideNonSystemFloatingWindows(shouldHide);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS);
 }
 
 bool WindowSessionImpl::GetTouchable() const
