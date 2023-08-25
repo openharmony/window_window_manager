@@ -2975,6 +2975,10 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(const sptr<SceneSe
     newRect.posY_ = softInputSessionRect.posY_ - static_cast<int32_t>(newRect.height_);
     newRect.posY_ = std::max(newRect.posY_, STATUS_BAR_AVOID_AREA);
 
+    if (callingSession_->GetSessionProperty() &&
+        callingSession_->GetSessionProperty()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        needUpdateSessionRect_ = true;
+    }
     callingWindowRestoringRect_ = callingSessionRect;
     NotifyOccupiedAreaChangeInfo(callingSession_, newRect, softInputSessionRect);
     callingSession_->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
@@ -3003,11 +3007,12 @@ void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
     if (!SessionHelper::IsEmptyRect(callingWindowRestoringRect_)) {
         WSRect overlapRect = { 0, 0, 0, 0 };
         NotifyOccupiedAreaChangeInfo(callingSession_, callingWindowRestoringRect_, overlapRect);
-        if (callingSession_->GetSessionProperty() &&
+        if (needUpdateSessionRect_ && callingSession_->GetSessionProperty() &&
             callingSession_->GetSessionProperty()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
             callingSession_->UpdateSessionRect(callingWindowRestoringRect_, SizeChangeReason::UNDEFINED);
         }
     }
+    needUpdateSessionRect_ = false;
     callingWindowRestoringRect_ = { 0, 0, 0, 0 };
     callingSession_ = nullptr;
 }
