@@ -60,6 +60,7 @@ namespace AncoConsts {
 class SceneSession;
 class AccessibilityWindowInfo;
 using NotifyCreateSpecificSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
+using ProcessStatusBarEnabledChangeFunc = std::function<void(bool enable)>;
 using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable)>;
 using ProcessOutsideDownEventFunc = std::function<void(int32_t x, int32_t y)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
@@ -98,6 +99,7 @@ public:
     WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId);
     WSError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
     void SetCreateSpecificSessionListener(const NotifyCreateSpecificSessionFunc& func);
+    void SetStatusBarEnabledChangeListener(const ProcessStatusBarEnabledChangeFunc& func);
     void SetGestureNavigationEnabledChangeListener(const ProcessGestureNavigationEnabledChangeFunc& func);
     void SetOutsideDownEventListener(const ProcessOutsideDownEventFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
@@ -278,6 +280,7 @@ private:
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
 
     NotifyCreateSpecificSessionFunc createSpecificSessionFunc_;
+    ProcessStatusBarEnabledChangeFunc statusBarEnabledChangeFunc_;
     ProcessGestureNavigationEnabledChangeFunc gestureNavigationEnabledChangeFunc_;
     ProcessOutsideDownEventFunc outsideDownEventFunc_;
     DumpRootSceneElementInfoFunc dumpRootSceneFunc_;
