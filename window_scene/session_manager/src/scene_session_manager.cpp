@@ -1353,6 +1353,27 @@ void SceneSessionManager::CleanUserMap()
         }
     }
     WLOGFI("CleanUserMap out size = %{public}zu", sceneSessionMap_.size());
+
+    WLOGFI("Clean systemTopSceneSessionMap in size = %{public}zu", systemTopSceneSessionMap_.size());
+    iter = systemTopSceneSessionMap_.begin();
+    while (iter != systemTopSceneSessionMap_.end()) {
+        if (iter->second != nullptr && !iter->second->GetSessionInfo().isSystem_) {
+            iter = systemTopSceneSessionMap_.erase(iter);
+        } else {
+            iter++;
+        }
+    }
+    WLOGFI("Clean systemTopSceneSessionMap out size = %{public}zu", systemTopSceneSessionMap_.size());
+    WLOGFI("Clean nonSystemFloatSceneSessionMap in size = %{public}zu", nonSystemFloatSceneSessionMap_.size());
+    iter = nonSystemFloatSceneSessionMap_.begin();
+    while (iter != nonSystemFloatSceneSessionMap_.end()) {
+        if (iter->second != nullptr && !iter->second->GetSessionInfo().isSystem_) {
+            iter = nonSystemFloatSceneSessionMap_.erase(iter);
+        } else {
+            iter++;
+        }
+    }
+    WLOGFI("Clean nonSystemFloatSceneSessionMap out size = %{public}zu", nonSystemFloatSceneSessionMap_.size());
 }
 
 WSError SceneSessionManager::SwitchUser(int32_t oldUserId, int32_t newUserId, std::string &fileDir)
@@ -1680,29 +1701,28 @@ void SceneSessionManager::UpdateHideNonSystemFloatingWindows(const sptr<WindowSe
         WLOGFE("Update property hideNonSystemFloatingWindows permission denied!");
         return;
     }
+
     auto propertyOld = sceneSession->GetSessionProperty();
     if (propertyOld == nullptr) {
         WLOGFI("UpdateHideNonSystemFloatingWindows, session property null");
         return;
     }
+
     bool hideNonSystemFloatingWindowsOld = propertyOld->GetHideNonSystemFloatingWindows();
     bool hideNonSystemFloatingWindowsNew = property->GetHideNonSystemFloatingWindows();
-    if (hideNonSystemFloatingWindowsOld != hideNonSystemFloatingWindowsNew) {
-        if (!IsSessionVisible(sceneSession)) {
-            if (hideNonSystemFloatingWindowsOld) {
-                systemTopSceneSessionMap_.erase(sceneSession->GetPersistentId());
-            } else {
-                nonSystemFloatSceneSessionMap_.erase(sceneSession->GetPersistentId());
-            }
-        } else {
-            if (hideNonSystemFloatingWindowsOld) {
-                UpdateForceHideState(sceneSession, propertyOld, false);
-            } else {
-                UpdateForceHideState(sceneSession, property, true);
-            }
-        }
-        propertyOld->SetHideNonSystemFloatingWindows(hideNonSystemFloatingWindowsNew);
+    if (hideNonSystemFloatingWindowsOld == hideNonSystemFloatingWindowsNew) {
+        WLOGFI("property hideNonSystemFloatingWindows not change");
+        return;
     }
+
+    if (IsSessionVisible(sceneSession)) {
+        if (hideNonSystemFloatingWindowsOld) {
+            UpdateForceHideState(sceneSession, propertyOld, false);
+        } else {
+            UpdateForceHideState(sceneSession, property, true);
+        }
+    }
+    propertyOld->SetHideNonSystemFloatingWindows(hideNonSystemFloatingWindowsNew);
 }
 
 void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSession,
@@ -1718,22 +1738,16 @@ void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSe
     if (add) {
         if (property->GetHideNonSystemFloatingWindows()) {
             systemTopSceneSessionMap_.insert({ persistentId, sceneSession });
-            if (property->IsFloatingWindowAppType()) {
-                nonSystemFloatSceneSessionMap_.erase(persistentId);
-            }
             notifyAll = !forceHideFloatOld;
         } else if (property->IsFloatingWindowAppType()) {
             nonSystemFloatSceneSessionMap_.insert({ persistentId, sceneSession });
-            if (forceHideFloatOld && !property->GetForceHide()) {
+            if (forceHideFloatOld) {
                 sceneSession->NotifyForceHideChange(true);
             }
         }
     } else {
         if (property->GetHideNonSystemFloatingWindows()) {
             systemTopSceneSessionMap_.erase(persistentId);
-            if (property->IsFloatingWindowAppType()) {
-                nonSystemFloatSceneSessionMap_.insert({ persistentId, sceneSession });
-            }
             notifyAll = forceHideFloatOld && systemTopSceneSessionMap_.empty();
         } else if (property->IsFloatingWindowAppType()) {
             nonSystemFloatSceneSessionMap_.erase(persistentId);

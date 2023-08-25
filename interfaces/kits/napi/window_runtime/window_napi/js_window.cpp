@@ -2969,12 +2969,6 @@ NativeValue* JsWindow::OnSetRaiseByClickEnabled(NativeEngine& engine, NativeCall
 
 NativeValue* JsWindow::OnHideNonSystemFloatingWindows(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        WLOGFE("HideNonSystemFloatingWindows is not allowed since window is not system window");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
-        return engine.CreateUndefined();
-    }
-
     WMError errCode = WMError::WM_OK;
     if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
         WLOGFE("Argc is invalid: %{public}zu", info.argc);
@@ -2998,6 +2992,12 @@ NativeValue* JsWindow::OnHideNonSystemFloatingWindows(NativeEngine& engine, Nati
                 WLOGFE("window is nullptr");
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR),
                     "window is nullptr."));
+                return;
+            }
+            if (!WindowHelper::IsSystemWindow(weakWindow->GetType()) || weakWindow->IsFloatingWindowAppType()) {
+                WLOGFE("HideNonSystemFloatingWindows is not allowed since window is app floating window");
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING),
+                    "HideNonSystemFloatingWindows is not allowed since window is app window"));
                 return;
             }
             if (errCode != WMError::WM_OK) {
