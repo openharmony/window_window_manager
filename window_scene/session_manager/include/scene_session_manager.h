@@ -177,21 +177,14 @@ public:
     WSError RegisterIAbilityManagerCollaborator(int32_t type, const sptr<AAFwk::IAbilityManagerCollaborator> &impl);
     WSError UnregisterIAbilityManagerCollaborator(int32_t type);
 
-    int32_t CheckWindowId(int32_t windowId);
+    WMError CheckWindowId(int32_t windowId, int32_t &pid);
     int GetSceneSessionPrivacyModeCount(const std::map<int32_t, sptr<SceneSession>>& sessionMap);
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
-    struct WindowChecker : public MMI::IWindowChecker {
-    public:
-        WindowChecker() = default;
-        ~WindowChecker() = default;
-        int32_t CheckWindowId(int32_t windowId) const override;
-    };
 
 private:
     void Init();
-    void InitWindowChecker();
     void InitPrepareTerminateConfig();
     void LoadWindowSceneXml();
     void ConfigWindowSceneXml();

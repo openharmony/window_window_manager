@@ -52,6 +52,7 @@ private:
     int HandleGetFocusSessionToken(MessageParcel &data, MessageParcel &reply);
     int HandleSetGestureNavigationEnabled(MessageParcel &data, MessageParcel &reply);
     int HandleSetSessionGravity(MessageParcel &data, MessageParcel &reply);
+    int HandleCheckWindowId(MessageParcel &data, MessageParcel &reply);
 
     int HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
     int HandleUnRegisterSessionListener(MessageParcel& data, MessageParcel& reply);

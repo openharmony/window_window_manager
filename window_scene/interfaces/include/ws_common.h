@@ -338,41 +338,4 @@ enum class TerminateType : uint32_t {
     CLOSE_BY_EXCEPTION,
 };
 } // namespace OHOS::Rosen
-
-/**
- * @brief This declaration needs to be deleted after the multimodalinput definition
- */
-namespace OHOS::MMI {
-struct IWindowChecker {
-public:
-    IWindowChecker() = default;
-    virtual ~IWindowChecker() = default;
-    virtual int32_t CheckWindowId(int32_t windowId) const = 0;
-};
-
-/**
- * @brief Enumerates the area where the mouse cursor.
- */
-enum class WindowArea: int32_t {
-    ENTER = 0,
-    EXIT,
-    FOCUS_ON_INNER,
-    FOCUS_ON_TOP,
-    FOCUS_ON_BOTTOM,
-    FOCUS_ON_LEFT,
-    FOCUS_ON_RIGHT,
-    FOCUS_ON_TOP_LEFT,
-    FOCUS_ON_TOP_RIGHT,
-    FOCUS_ON_BOTTOM_LEFT,
-    FOCUS_ON_BOTTOM_RIGHT,
-    TOP_LEFT_LIMIT,
-    TOP_RIGHT_LIMIT,
-    TOP_LIMIT,
-    LEFT_LIMIT,
-    RIGHT_LIMIT,
-    BOTTOM_LEFT_LIMIT,
-    BOTTOM_LIMIT,
-    BOTTOM_RIGHT_LIMIT
-};
-} // namespace OHOS::MMI
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
