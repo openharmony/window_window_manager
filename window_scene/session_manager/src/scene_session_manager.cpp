@@ -1215,6 +1215,15 @@ void SceneSessionManager::SetCreateSpecificSessionListener(const NotifyCreateSpe
     createSpecificSessionFunc_ = func;
 }
 
+void SceneSessionManager::SetStatusBarEnabledChangeListener(const ProcessStatusBarEnabledChangeFunc& func)
+{
+    WLOGFD("SetStatusBarEnabledChangeListener");
+    if (!func) {
+        WLOGFD("set func is null");
+    }
+    statusBarEnabledChangeFunc_ = func;
+}
+
 void SceneSessionManager::SetGestureNavigationEnabledChangeListener(
     const ProcessGestureNavigationEnabledChangeFunc& func)
 {
@@ -1796,11 +1805,15 @@ WMError SceneSessionManager::SetGestureNavigaionEnabled(bool enable)
     }
     WLOGFD("SetGestureNavigationEnabled, enable: %{public}d", enable);
     auto task = [this, enable]() {
-        if (!gestureNavigationEnabledChangeFunc_) {
+        if (!gestureNavigationEnabledChangeFunc_ && !statusBarEnabledChangeFunc_) {
             WLOGFE("callback func is null");
             return WMError::WM_DO_NOTHING;
-        } else {
+        }
+        if (gestureNavigationEnabledChangeFunc_) {
             gestureNavigationEnabledChangeFunc_(enable);
+        }
+        if (statusBarEnabledChangeFunc_) {
+            statusBarEnabledChangeFunc_(enable);
         }
         return WMError::WM_OK;
     };
