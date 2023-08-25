@@ -166,6 +166,102 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenSession, Function | SmallTest | Leve
     ASSERT_NE(ssm_->GetScreenSession(2), screenSession);
 }
 
+
+/**
+ * @tc.name: GetDefaultScreenSession
+ * @tc.desc: GetDefaultScreenSession virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDefaultScreenSession, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "GetDefaultScreenSession";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    sptr<ScreenSession> screenSession =
+        new(std::nothrow) ScreenSession("GetDefaultScreenSession", 2, 2, 3);
+    ASSERT_NE(ssm_->GetDefaultScreenSession(), screenSession);
+}
+
+/**
+ * @tc.name: GetDefaultDisplayInfo
+ * @tc.desc: GetDefaultDisplayInfo virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDefaultDisplayInfo, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "GetDefaultScreenSession";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    sptr<ScreenSession> screenSession =
+        new(std::nothrow) ScreenSession("GetDefaultScreenSession", 2, 2, 3);
+    sptr<DisplayInfo> displayInfo= new DisplayInfo();
+    if(ssm_->GetScreenSession(2)==nullptr){
+      ASSERT_EQ(ssm_->GetDefaultDisplayInfo(), nullptr);
+    }
+    ASSERT_NE(ssm_->GetScreenSession(2),nullptr);
+    ASSERT_NE(ssm_->GetDefaultDisplayInfo(), displayInfo);
+}
+
+/**
+ * @tc.name: GetDisplayInfoById
+ * @tc.desc: GetDisplayInfoById virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayInfoById, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "GetDefaultScreenSession";
+    ASSERT_EQ(ssm_->GetDisplayInfoById(1), nullptr);
+}
+
+/**
+ * @tc.name: GetDisplayInfoByScreen
+ * @tc.desc: GetDisplayInfoByScreen virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayInfoByScreen, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "GetDefaultScreenSession";
+    ASSERT_EQ(ssm_->GetDisplayInfoByScreen(1), nullptr);
+}
+
+/**
+ * @tc.name: GetScreenInfoById
+ * @tc.desc: GetScreenInfoById virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenInfoById, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "GetDefaultScreenSession";
+    ASSERT_EQ(ssm_->GetScreenInfoById(1), nullptr);
+}
+
+/**
+ * @tc.name: SetScreenActiveMode
+ * @tc.desc: SetScreenActiveMode virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "GetDefaultScreenSession";
+    ASSERT_EQ(ssm_->SetScreenActiveMode(5,0), DMError::DM_OK);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

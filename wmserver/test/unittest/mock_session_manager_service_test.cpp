@@ -209,6 +209,17 @@ HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService2, Function | Sm
     MockScreenManagerService* mService = new MockScreenManagerService();
     mService->SetSessionManagerService(MockScreenManagerService::GetInstance().screenSessionManager_);
 }
+
+/**
+ * @tc.name: SetSessionManagerService
+ * @tc.desc: SetSessionManagerService
+ * @tc.type: FUNC
+ */
+HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService2, Function | SmallTest | Level2)
+{
+    MockScreenManagerService* mService = new MockScreenManagerService();
+    mService->GetSceneSessionManager(nullptr);
+}
 }
 }
 }
