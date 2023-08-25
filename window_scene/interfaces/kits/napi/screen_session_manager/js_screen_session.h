@@ -42,6 +42,8 @@ private:
     void OnConnect() override;
     void OnDisconnect() override;
     void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason) override;
+    void OnSensorRotationChange(float sensorRotation) override;
+    void OnScreenOrientationChange(float screenOrientation) override;
 
     NativeEngine& engine_;
     sptr<ScreenSession> screenSession_;

@@ -87,4 +87,9 @@ FoldDisplayMode DualDisplayDevicePolicy::GetScreenDisplayMode()
     std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
     return currentDisplayMode_;
 }
+
+void DualDisplayDevicePolicy::SendSensorResult(FoldStatus foldStatus)
+{
+    WLOGI("SendSensorResult FoldStatus: %{public}d", foldStatus);
+}
 } // namespace OHOS::Rosen
