@@ -386,8 +386,8 @@ void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersist
     if (newState == WindowState::STATE_HIDDEN) {
         for (auto subwindow : subWindows) {
             if (subwindow != nullptr && subwindow->GetWindowState() == WindowState::STATE_SHOWN) {
-                subwindow->NotifyAfterBackground();
                 subwindow->state_ = WindowState::STATE_HIDDEN;
+                subwindow->NotifyAfterBackground();
             }
         }
     // when main window show and subwindow whose state is shown should show and notify user
@@ -395,8 +395,8 @@ void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersist
         for (auto subwindow : subWindows) {
             if (subwindow != nullptr && subwindow->GetWindowState() == WindowState::STATE_HIDDEN &&
                 subwindow->GetRequestWindowState() == WindowState::STATE_SHOWN) {
-                subwindow->NotifyAfterForeground();
                 subwindow->state_ = WindowState::STATE_SHOWN;
+                subwindow->NotifyAfterForeground();
             }
         }
     }
@@ -432,9 +432,9 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         if (WindowHelper::IsMainWindow(GetType())) {
             UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
         }
-        NotifyAfterForeground();
         state_ = WindowState::STATE_SHOWN;
         requestState_ = WindowState::STATE_SHOWN;
+        NotifyAfterForeground();
     } else {
         NotifyForegroundFailed(ret);
     }
@@ -483,9 +483,9 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         if (WindowHelper::IsMainWindow(GetType())) {
             UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
         }
-        NotifyAfterBackground();
         state_ = WindowState::STATE_HIDDEN;
         requestState_ = WindowState::STATE_HIDDEN;
+        NotifyAfterBackground();
     }
     return res;
 }
