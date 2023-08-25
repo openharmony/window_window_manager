@@ -62,7 +62,7 @@ using ProcessOutsideDownEventFunc = std::function<void(int32_t x, int32_t y)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using DumpRootSceneElementInfoFunc = std::function<void(const std::vector<std::string>& params,
     std::vector<std::string>& infos)>;
-using WindowFocusChangedFunc = std::function<void(int32_t persistentId, bool isFocused)>;
+using WindowChangedFunc = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 
 class DisplayChangeListener : public IDisplayChangeListener {
 public:
@@ -169,7 +169,7 @@ public:
     void SetDumpRootSceneElementInfoListener(const DumpRootSceneElementInfoFunc& func);
 
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
-    void RegisterWindowFocusChanged(const WindowFocusChangedFunc& func);
+    void RegisterWindowChanged(const WindowChangedFunc& func);
 
     WSError RegisterIAbilityManagerCollaborator(int32_t type, const sptr<AAFwk::IAbilityManagerCollaborator> &impl);
     WSError UnregisterIAbilityManagerCollaborator(int32_t type);
@@ -295,7 +295,7 @@ private:
     void CheckAndNotifyWaterMarkChangedResult();
     WSError NotifyWaterMarkFlagChangedResult(bool hasWaterMark);
     bool lastWaterMarkShowState_ { false };
-    WindowFocusChangedFunc windowFocusChangedFunc_;
+    WindowChangedFunc WindowChangedFunc_;
     sptr<SceneSession> callingSession_ = nullptr;
     sptr<AgentDeathRecipient> windowDeath_ = new AgentDeathRecipient(
         std::bind(&SceneSessionManager::DestroySpecificSession, this, std::placeholders::_1));
