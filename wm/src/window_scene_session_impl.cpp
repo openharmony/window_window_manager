@@ -195,6 +195,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     if (hostSession_) { // main window
         ret = Connect();
     } else { // system or sub window
+        WLOGFI("Create system or sub window");
         if (WindowHelper::IsSystemWindow(GetType())) {
             if (GetType() == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW) {
                 WLOGFI("System sub window is not support");
@@ -206,10 +207,6 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
             }
         } else if (!WindowHelper::IsSubWindow(GetType())) {
             return WMError::WM_ERROR_INVALID_TYPE;
-        }
-        if (GetType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-            WLOGFI("Create input method and sleep 3s");
-            sleep(3); // sleep 3s
         }
         ret = CreateAndConnectSpecificSession();
     }
