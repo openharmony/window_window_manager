@@ -33,7 +33,7 @@ public:
 };
 
 void TransferAbilityResultTest(uint32_t resultCode, const AAFwk::Want& want)
-{   
+{
     resultCode--;
 }
 
