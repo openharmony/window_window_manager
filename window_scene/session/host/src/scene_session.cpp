@@ -17,11 +17,13 @@
 
 #include <hitrace_meter.h>
 #include <iterator>
+#include <memory>
 #include <pointer_event.h>
 #include <transaction/rs_transaction.h>
 
 #include "common/include/session_permission.h"
 #include "interfaces/include/ws_common.h"
+#include "pixel_map.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session_utils.h"
 #include "session_manager/include/screen_session_manager.h"
@@ -930,6 +932,23 @@ std::string SceneSession::GetSessionSnapshotFilePath()
     }
     if (scenePersistence_ != nullptr) {
         return scenePersistence_->GetSnapshotFilePath();
+    }
+    return "";
+}
+
+void SceneSession::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap> &icon)
+{
+    WLOGFI("run SaveUpdatedIcon");
+    if (scenePersistence_ != nullptr) {
+        scenePersistence_->SaveUpdatedIcon(icon);
+    }
+}
+
+std::string SceneSession::GetUpdatedIconPath()
+{
+    WLOGFI("run GetUpdatedIconPath");
+    if (scenePersistence_ != nullptr) {
+        return scenePersistence_->GetUpdatedIconPath();
     }
     return "";
 }

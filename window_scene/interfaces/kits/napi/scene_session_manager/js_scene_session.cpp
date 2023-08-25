@@ -19,6 +19,7 @@
 #include "session/host/include/session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
+#include <string>
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
@@ -38,6 +39,8 @@ const std::string CLICK_CB = "click";
 const std::string TERMINATE_SESSION_CB = "terminateSession";
 const std::string TERMINATE_SESSION_CB_NEW = "terminateSessionNew";
 const std::string TERMINATE_SESSION_CB_TOTAL = "terminateSessionTotal";
+const std::string UPDATE_SESSION_LABEL_CB = "updateSessionLabel";
+const std::string UPDATE_SESSION_ICON_CB = "updateSessionIcon";
 const std::string SESSION_EXCEPTION_CB = "sessionException";
 const std::string SYSTEMBAR_PROPERTY_CHANGE_CB = "systemBarPropertyChange";
 const std::string NEED_AVOID_CB = "needAvoid";
@@ -107,6 +110,8 @@ JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& s
         { TERMINATE_SESSION_CB_NEW,       &JsSceneSession::ProcessTerminateSessionRegisterNew },
         { TERMINATE_SESSION_CB_TOTAL,           &JsSceneSession::ProcessTerminateSessionRegisterTotal },
         { SESSION_EXCEPTION_CB,           &JsSceneSession::ProcessSessionExceptionRegister },
+        { UPDATE_SESSION_LABEL_CB,        &JsSceneSession::ProcessUpdateSessionLabelRegister },
+        { UPDATE_SESSION_ICON_CB,         &JsSceneSession::ProcessUpdateSessionIconRegister },
         { SYSTEMBAR_PROPERTY_CHANGE_CB,   &JsSceneSession::ProcessSystemBarPropertyChangeRegister },
         { NEED_AVOID_CB,          &JsSceneSession::ProcessNeedAvoidRegister },
         { PENDING_SESSION_TO_FOREGROUND_CB,           &JsSceneSession::ProcessPendingSessionToForegroundRegister },
@@ -1132,6 +1137,94 @@ void JsSceneSession::TerminateSessionTotal(const SessionInfo& info, TerminateTyp
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
     AsyncTask::Schedule("JsSceneSession::terminateSessionTotal", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsSceneSession::UpdateSessionLabel(const std:string &label)
+{
+    WLOGFI("[NAPI]run UpdateSessionLabel");
+    auto iter = jsCbMap_.find(UPDATE_SESSION_LABEL_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [label, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (!jsCallBack) {
+                WLOGFE("[NAPI]jsCallBack is nullptr");
+                return;
+            }
+            NativeValue* jsLabel = CreateJsValue(engine, static_cast<int32_t>(label));
+            if (jsLabel == nullptr) {
+                WLOGFE("[NAPI]this target jsLabel is nullptr");
+                return;
+            }
+            NativeValue* argv[] = { jsLabel  };
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSession::UpdateSessionLabel", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsSceneSession::ProcessUpdateSessionLabelRegister()
+{
+    WLOGFD("begin to run ProcessUpdateSessionLabelRegister");
+    NotifySessionLabelUpdated func = [this](const std::string& label) {
+        this->UpdateSessionIcon(label);
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    session->SetUpdateSessionLabelListener(func);
+    WLOGFD("ProcessUpdateSessionLabelRegister success");
+}
+
+void JsSceneSession::ProcessUpdateSessionIconRegister()
+{
+    WLOGFD("begin to run ProcessUpdateSessionIconRegister");
+    NotifySessionIconUpdated func = [this](const std::string& iconPath) {
+        this->UpdateSessionIcon(iconPath);
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    session->SetUpdateSessionIconListener(func);
+    WLOGFD("ProcessUpdateSessionIconRegister success");
+}
+
+void JsSceneSession::UpdateSessionIcon(const std:string &iconPath)
+{
+    WLOGFI("[NAPI]run UpdateSessionIcon");
+    auto iter = jsCbMap_.find(UPDATE_SESSION_ICON_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [iconPath, jsCallBack](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (!jsCallBack) {
+                WLOGFE("[NAPI]jsCallBack is nullptr");
+                return;
+            }
+            NativeValue* jsIconPath = CreateJsValue(engine, static_cast<int32_t>(iconPath));
+            if (jsIconPath == nullptr) {
+                WLOGFE("[NAPI]this target jsIconPath is nullptr");
+                return;
+            }
+            NativeValue* argv[] = { jsIconPath  };
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSession::UpdateSessionIcon", engine_,
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 

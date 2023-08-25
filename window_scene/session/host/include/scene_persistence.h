@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_PERSISTENCE_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_PERSISTENCE_H
 
+#include <string>
 #include <sys/stat.h>
 
 #include <refbase.h>
@@ -42,15 +43,29 @@ public:
         return true;
     }
 
+    static inline bool CreateUpdatedIconDir(const std::string& strFilesDir)
+    {
+        strPersistUpdatedIconPath_ = strFilesDir + "/UpdatedIcon/";
+        constexpr mode_t MKDIR_MODE = 0740;
+        if (mkdir(strPersistUpdatedIconPath_.c_str(), MKDIR_MODE) != 0) {
+            return false;
+        }
+        return true;
+    }
+
     bool IsSnapshotExisted() const;
     std::string GetSnapshotFilePath() const;
     std::pair<uint32_t, uint32_t> GetSnapshotSize() const;
     void SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap);
+    void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& pixelMap);
+    std::string GetUpdatedIconPath() const;
 
 private:
     static std::string strPersistPath_;
+    static std::string strPersistUpdatedIconPath_;
     std::pair<uint32_t, uint32_t> snapshotSize_;
     std::string strSnapshotFile_;
+    std::string strUpdatedIconPath_;
 };
 } // namespace OHOS::Rosen
 
