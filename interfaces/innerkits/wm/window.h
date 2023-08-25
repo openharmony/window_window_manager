@@ -1346,6 +1346,13 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) { return WMError::WM_OK; }
+
+    /**
+     * @brief Is floating window of app type or not.
+     *
+     * @return True means floating window of app type, false means the opposite.
+     */
+    virtual bool IsFloatingWindowAppType() const { return false; }
 };
 }
 }

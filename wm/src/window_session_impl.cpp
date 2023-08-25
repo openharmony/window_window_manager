@@ -665,6 +665,11 @@ WMError WindowSessionImpl::HideNonSystemFloatingWindows(bool shouldHide)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS);
 }
 
+bool WindowSessionImpl::IsFloatingWindowAppType() const
+{
+    return property_ != nullptr && property_->IsFloatingWindowAppType();
+}
+
 bool WindowSessionImpl::GetTouchable() const
 {
     return property_->GetTouchable();
