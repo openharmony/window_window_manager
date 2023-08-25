@@ -146,6 +146,26 @@ HWTEST_F(ScreenSessionManagerTest, VirtualScreen, Function | SmallTest | Level3)
         ASSERT_NE(DMError::DM_OK, ssm_->DestroyVirtualScreen(VIRTUAL_SCREEN_ID));
     }
 }
+
+/**
+ * @tc.name: GetScreenSession
+ * @tc.desc: GetScreenSession virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenSession, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "GetScreenSession";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    sptr<ScreenSession> screenSession =
+        new(std::nothrow) ScreenSession("screenSession", 2, 2, 3);
+    ASSERT_NE(ssm_->GetScreenSession(2), screenSession);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -21,4 +21,5 @@ FoldScreenPolicy::~FoldScreenPolicy() = default;
 
 void FoldScreenPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode) {}
 FoldDisplayMode FoldScreenPolicy::GetScreenDisplayMode() { return FoldDisplayMode::UNKNOWN; }
+void FoldScreenPolicy::SendSensorResult(FoldStatus foldStatus) {}
 } // namespace OHOS::Rosen

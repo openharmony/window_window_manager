@@ -40,6 +40,8 @@ public:
     virtual void OnConnect() = 0;
     virtual void OnDisconnect() = 0;
     virtual void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason) = 0;
+    virtual void OnSensorRotationChange(float sensorRotation) = 0;
+    virtual void OnScreenOrientationChange(float screenOrientation) = 0;
 };
 
 enum class ScreenState : int32_t {
@@ -97,6 +99,7 @@ public:
     void SetPrivateSessionForeground(bool hasPrivate);
     void SetDisplayBoundary(const RectF& rect, const uint32_t& offsetY);
     void SetScreenRotationLocked(bool isLocked);
+    void UpdatePropertyAfterRotation(RRect bounds, int rotation);
 
     std::string name_ { "UNKNOW" };
     ScreenId screenId_ {};
@@ -114,7 +117,11 @@ public:
     void Connect();
     void Disconnect();
     void PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason);
+    // notify scb
+    void SensorRotationChange(Rotation sensorRotation);
+    void ScreenOrientationChange(Orientation orientation);
 private:
+    float ConvertRotationToFloat(Rotation sensorRotation);
     ScreenProperty property_;
     std::shared_ptr<RSDisplayNode> displayNode_;
     ScreenState screenState_ { ScreenState::INIT };
