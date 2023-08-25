@@ -1082,7 +1082,11 @@ void SceneSession::SetRequestedOrientation(Orientation orientation)
 
 void SceneSession::NotifyForceHideChange(bool hide)
 {
-    WLOGFI("id: %{public}d forceHide: %{public}u", GetPersistentId(), hide);
+    WLOGFI("id: %{public}d forceHide: %{public}u", persistentId_, hide);
+    if (property_ == nullptr) {
+        WLOGFD("id: %{public}d property is nullptr", persistentId_);
+        return;
+    }
     property_->SetForceHide(hide);
     if (sessionChangeCallback_ && sessionChangeCallback_->OnForceHideChange_) {
         sessionChangeCallback_->OnForceHideChange_(hide);

@@ -2994,7 +2994,14 @@ NativeValue* JsWindow::OnHideNonSystemFloatingWindows(NativeEngine& engine, Nati
     AsyncTask::CompleteCallback complete =
         [weakToken, shouldHide, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
+            if (weakWindow == nullptr) {
+                WLOGFE("window is nullptr");
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR),
+                    "window is nullptr."));
+                return;
+            }
+            if (errCode != WMError::WM_OK) {
+                WLOGFE("Invalidate params");
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
