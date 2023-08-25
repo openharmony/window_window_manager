@@ -1363,8 +1363,6 @@ NativeValue* JsSceneSession::OnSetShowRecent(NativeEngine& engine, NativeCallbac
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFE("[NAPI]session is null");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
-            "session is null"));
         return engine.CreateUndefined();
     }
     session->SetShowRecent(true);
