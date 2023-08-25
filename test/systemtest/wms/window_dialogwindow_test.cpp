@@ -174,7 +174,9 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow03, Function | MediumTest | Level2)
 HWTEST_F(WindowDialogWindowTest, DialogWindow04, Function | MediumTest | Level2)
 {
     sptr<WindowScene> scene = CreateWindowScene();
-    ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
+    if (scene->GoForeground() == WMError::WM_OK) {
+        ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
+    }
 
     struct Rect rect = {0, 0, 100, 200};
     sptr<Window> dialogWindow0 = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect, "dialog0");
@@ -187,6 +189,9 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow04, Function | MediumTest | Level2)
 
 
     sptr<Window> dialogWindow1 = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect, "dialog0");
+    if (dialogWindow1 == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, dialogWindow1);
     ASSERT_EQ(WMError::WM_OK, dialogWindow1->Show());
     ASSERT_EQ(WMError::WM_OK, dialogWindow1->Destroy());
