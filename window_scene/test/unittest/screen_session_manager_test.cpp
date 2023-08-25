@@ -201,12 +201,12 @@ HWTEST_F(ScreenSessionManagerTest, GetDefaultDisplayInfo, Function | SmallTest |
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
     sptr<ScreenSession> screenSession =
-        new(std::nothrow) ScreenSession("GetDefaultScreenSession", 2, 2, 3);
-    sptr<DisplayInfo> displayInfo= new DisplayInfo();
-    if(ssm_->GetScreenSession(2)==nullptr){
-      ASSERT_EQ(ssm_->GetDefaultDisplayInfo(), nullptr);
+        new (std::nothrow) ScreenSession("GetDefaultScreenSession", 2, 2, 3);
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    if (ssm_->GetScreenSession(2) == nullptr) {
+        ASSERT_EQ(ssm_->GetDefaultDisplayInfo(), nullptr);
     }
-    ASSERT_NE(ssm_->GetScreenSession(2),nullptr);
+    ASSERT_NE(ssm_->GetScreenSession(2), nullptr);
     ASSERT_NE(ssm_->GetDefaultDisplayInfo(), displayInfo);
 }
 
@@ -259,7 +259,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode, Function | SmallTest | L
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "GetDefaultScreenSession";
-    ASSERT_EQ(ssm_->SetScreenActiveMode(5,0), DMError::DM_OK);
+    ASSERT_EQ(ssm_->SetScreenActiveMode(5, 0), DMError::DM_OK);
 }
 
 }
