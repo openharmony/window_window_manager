@@ -20,6 +20,8 @@
 #include <pointer_event.h>
 #include <transaction/rs_transaction.h>
 
+#include "../../proxy/include/window_info.h"
+
 #include "common/include/session_permission.h"
 #include "interfaces/include/ws_common.h"
 #include "session/host/include/scene_persistent_storage.h"
@@ -682,7 +684,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
     }
 
-    static bool isNew = false;
+    static bool isNew = true;
     if (isNew) {
         auto ret = HandlePointerStyle(pointerEvent);
         if (ret != WSError::WS_OK && ret != WSError::WS_DO_NOTHING) {
