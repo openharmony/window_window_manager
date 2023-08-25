@@ -21,8 +21,6 @@
 
 #include <transaction/rs_interfaces.h>
 
-// #include "i_window_checker.h"
-
 #include "agent_death_recipient.h"
 #include "common/include/task_scheduler.h"
 #include "future.h"

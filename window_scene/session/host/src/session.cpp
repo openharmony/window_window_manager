@@ -20,7 +20,6 @@
 #include "ipc_skeleton.h"
 #include "key_event.h"
 #include "pointer_event.h"
-// #include "../../proxy/include/window_info.h"
 
 #include "anr_manager.h"
 #include "foundation/ability/ability_base/interfaces/kits/native/want/include/want.h"
