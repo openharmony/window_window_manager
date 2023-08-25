@@ -12,55 +12,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef OHOS_ROSEN_FOLD_SCREEN_SENSOR_MANAGER_H
 #define OHOS_ROSEN_FOLD_SCREEN_SENSOR_MANAGER_H
 
 #include <functional>
 #include <mutex>
 
+#include "fold_screen_controller.h"
 #include "refbase.h"
+#include "sensor_agent.h"
+#include "sensor_agent_type.h"
 #include "wm_single_instance.h"
 
 namespace OHOS {
 namespace Rosen {
 
-enum class FoldState : uint16_t {
-    FOLD_STATE_UNKNOWN,
-    FOLD_STATE_EXPAND,
-    FOLD_STATE_FOLDED,
-    FOLD_STATE_HALF_FOLDED
-};
-
 class FoldScreenSensorManager : public RefBase {
     WM_DECLARE_SINGLE_INSTANCE_BASE(FoldScreenSensorManager);
-    using FoldScreenStateCallback = std::function<void(FoldState)>;
 
 public:
-    void RegisterFoldScreenStateCallback(FoldScreenStateCallback&);
+    void UnRegisterSensorCallback();
 
+    void SetFoldScreenPolicy(sptr<FoldScreenPolicy> foldScreenPolicy);
+
+    void HandlePostureData(const SensorEvent * const event);
 private:
-    FoldScreenStateCallback mCallback_;
+    sptr<FoldScreenPolicy> foldScreenPolicy_;
 
     std::recursive_mutex mutex_;
 
-    FoldState mState_;
+    FoldStatus mState_ = FoldStatus::UNKNOWN;
+
+    SensorUser user;
+
+    void RegisterSensorCallback();
 
     void HandleSensorData(float, int);
 
-    FoldState TransferAngleToScreenState(float, int) const;
+    FoldStatus TransferAngleToScreenState(float, int) const;
 
     FoldScreenSensorManager();
 
     ~FoldScreenSensorManager() = default;
 };
-
-namespace {
-    constexpr uint16_t HALL_THRESHOLD = 1;
-    constexpr float HALF_FOLDED_MAX_THRESHOLD = 140.0F;
-    constexpr float CLOSE_HALF_FOLDED_MIN_THRESHOLD = 90.0F;
-    constexpr float OPEN_HALF_FOLDED_MIN_THRESHOLD = 25.0F;
-    constexpr float HALF_FOLDED_BUFFER = 10.0F;
-}
 } // namespace Rosen
 } // namespace OHOS
 #endif

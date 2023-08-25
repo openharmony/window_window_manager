@@ -462,6 +462,87 @@ HWTEST_F(StartingWindowTest, SetStartingWindowAnimation01, Function | SmallTest 
     node_->startingWinSurfaceNode_ = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, StartingWindow::SetStartingWindowAnimation(node_));
 }
+
+/**
+ * @tc.name: IsWindowFollowParent01
+ * @tc.desc: IsWindowFollowParent
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartingWindowTest, IsWindowFollowParent01, Function | SmallTest | Level2)
+{
+    ASSERT_EQ(false, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_DIALOG));
+
+    ASSERT_EQ(false, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_APP_SUB_WINDOW));
+
+    ASSERT_EQ(false, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_APP_COMPONENT));
+}
+
+/**
+ * @tc.name: CreateLeashAndStartingSurfaceNode01
+ * @tc.desc: CreateLeashAndStartingSurfaceNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartingWindowTest, CreateLeashAndStartingSurfaceNode01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "StartingWindow::CreateLeashAndStartingSurfaceNode01 start";
+    node_->leashWinSurfaceNode_ = nullptr;
+    ASSERT_EQ(WMError::WM_OK, StartingWindow::CreateLeashAndStartingSurfaceNode(node_));
+    usleep(10000);
+    GTEST_LOG_(INFO) << "StartingWindow::CreateLeashAndStartingSurfaceNode01 end";
+}
+
+/**
+ * @tc.name: CreateLeashAndStartingSurfaceNode02
+ * @tc.desc: CreateLeashAndStartingSurfaceNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartingWindowTest, CreateLeashAndStartingSurfaceNode02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "StartingWindow::CreateLeashAndStartingSurfaceNode02 start";
+    node_->startingWinSurfaceNode_ = nullptr;
+    ASSERT_EQ(WMError::WM_OK, StartingWindow::CreateLeashAndStartingSurfaceNode(node_));
+    usleep(10000);
+    GTEST_LOG_(INFO) << "StartingWindow::CreateLeashAndStartingSurfaceNode02 end";
+}
+
+/**
+ * @tc.name: CreateLeashAndStartingSurfaceNode03
+ * @tc.desc: CreateLeashAndStartingSurfaceNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartingWindowTest, CreateLeashAndStartingSurfaceNode03, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "StartingWindow::CreateLeashAndStartingSurfaceNode03 start";
+    ASSERT_EQ(WMError::WM_OK, StartingWindow::CreateLeashAndStartingSurfaceNode(node_));
+    usleep(10000);
+    GTEST_LOG_(INFO) << "StartingWindow::CreateLeashAndStartingSurfaceNode03 end";
+}
+
+/**
+ * @tc.name: SetDefaultWindowMode
+ * @tc.desc: SetDefaultWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartingWindowTest, SetDefaultWindowMode, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "StartingWindow::SetDefaultWindowMode start";
+    WindowMode defaultMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    StartingWindow::SetDefaultWindowMode(defaultMode);
+    GTEST_LOG_(INFO) << "StartingWindow::SetDefaultWindowMode end";
+}
+
+/**
+ * @tc.name: SetAnimationConfig
+ * @tc.desc: SetAnimationConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartingWindowTest, SetAnimationConfig, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "StartingWindow::SetAnimationConfig start";
+    auto& animationConfig = WindowNodeContainer::GetAnimationConfigRef();
+    StartingWindow::SetAnimationConfig(animationConfig);
+    GTEST_LOG_(INFO) << "StartingWindow::SetAnimationConfig end";
+}
 }
 }
 }

@@ -103,8 +103,11 @@ public:
     virtual WSError GetSessionInfos(const std::string& deviceId,
                                     int32_t numMax, std::vector<SessionInfoBean>& sessionInfos) = 0;
     virtual WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) = 0;
-    virtual WSError DumpSessionAll(std::vector<std::string> &infos) = 0;
-    virtual WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos) = 0;
+    virtual WSError DumpSessionAll(std::vector<std::string> &infos) override { return WSError::WS_OK; }
+    virtual WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos) override
+    {
+        return WSError::WS_OK;
+    }
     virtual WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState) = 0;
 
     virtual WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) = 0;

@@ -688,6 +688,24 @@ WMError WindowManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibility
     return ret;
 }
 
+WMError WindowManager::DumpSessionAll(std::vector<std::string> &infos)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().DumpSessionAll(infos);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("dump session all failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().DumpSessionWithId(persistentId, infos);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("dump session with id failed");
+    }
+    return ret;
+}
+
 WMError WindowManager::SetGestureNavigaionEnabled(bool enable) const
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().SetGestureNavigaionEnabled(enable);
