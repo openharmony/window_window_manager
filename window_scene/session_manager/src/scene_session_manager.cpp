@@ -1664,8 +1664,8 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
             UpdatePropertyRaiseEnabled(property, sceneSession);
             break;
         }
-        case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_OVERLAY_WINDOWS: {
-            UpdateHideNonSystemOverlayWindows(property, sceneSession);
+        case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS: {
+            UpdateHideNonSystemFloatingWindows(property, sceneSession);
             break;
         }
         default:
@@ -1673,35 +1673,35 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
     }
 }
 
-void SceneSessionManager::UpdateHideNonSystemOverlayWindows(const sptr<WindowSessionProperty>& property,
+void SceneSessionManager::UpdateHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        WLOGFE("Update property hideNonSystemOverlayWindows permission denied!");
+        WLOGFE("Update property hideNonSystemFloatingWindows permission denied!");
         return;
     }
     auto propertyOld = sceneSession->GetSessionProperty();
     if (propertyOld == nullptr) {
-        WLOGFI("UpdateHideNonSystemOverlayWindows, session property null");
+        WLOGFI("UpdateHideNonSystemFloatingWindows, session property null");
         return;
     }
-    bool hideNonSystemOverlayWindowsOld = propertyOld->GetHideNonSystemOverlayWindows();
-    bool hideNonSystemOverlayWindowsNew = property->GetHideNonSystemOverlayWindows();
-    if (hideNonSystemOverlayWindowsOld != hideNonSystemOverlayWindowsNew) {
+    bool hideNonSystemFloatingWindowsOld = propertyOld->GetHideNonSystemFloatingWindows();
+    bool hideNonSystemFloatingWindowsNew = property->GetHideNonSystemFloatingWindows();
+    if (hideNonSystemFloatingWindowsOld != hideNonSystemFloatingWindowsNew) {
         if (!IsSessionVisible(sceneSession)) {
-            if (hideNonSystemOverlayWindowsOld) {
+            if (hideNonSystemFloatingWindowsOld) {
                 systemTopSceneSessionMap_.erase(sceneSession->GetPersistentId());
             } else {
                 nonSystemFloatSceneSessionMap_.erase(sceneSession->GetPersistentId());
             }
         } else {
-            if (hideNonSystemOverlayWindowsOld) {
+            if (hideNonSystemFloatingWindowsOld) {
                 UpdateForceHideState(sceneSession, propertyOld, false);
             } else {
                 UpdateForceHideState(sceneSession, property, true);
             }
         }
-        propertyOld->SetHideNonSystemOverlayWindows(hideNonSystemOverlayWindowsNew);
+        propertyOld->SetHideNonSystemFloatingWindows(hideNonSystemFloatingWindowsNew);
     }
 }
 
@@ -1716,7 +1716,7 @@ void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSe
     bool forceHideFloatOld = !systemTopSceneSessionMap_.empty();
     bool notifyAll = false;
     if (add) {
-        if (property->GetHideNonSystemOverlayWindows()) {
+        if (property->GetHideNonSystemFloatingWindows()) {
             systemTopSceneSessionMap_.insert({ persistentId, sceneSession });
             if (property->IsFloatingWindowAppType()) {
                 nonSystemFloatSceneSessionMap_.erase(persistentId);
@@ -1729,7 +1729,7 @@ void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSe
             }
         }
     } else {
-        if (property->GetHideNonSystemOverlayWindows()) {
+        if (property->GetHideNonSystemFloatingWindows()) {
             systemTopSceneSessionMap_.erase(persistentId);
             if (property->IsFloatingWindowAppType()) {
                 nonSystemFloatSceneSessionMap_.insert({ persistentId, sceneSession });

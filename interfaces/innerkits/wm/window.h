@@ -1340,12 +1340,12 @@ public:
     virtual WmErrorCode RaiseAboveTarget(int32_t subWindowId) { return WmErrorCode::WM_OK; }
 
     /**
-     * @brief Hide non-system overlay windows.
+     * @brief Hide non-system floating windows.
      *
      * @param shouldHide true means the non-system windows should be hidden, otherwise means the opposite.
      * @return Errorcode of window.
      */
-    virtual WMError HideNonSystemOverlayWindows(bool shouldHide) { return WMError::WM_OK; }
+    virtual WMError HideNonSystemFloatingWindows(bool shouldHide) { return WMError::WM_OK; }
 };
 }
 }

@@ -61,7 +61,7 @@ public:
     void SetFocusable(bool isFocusable);
     void SetTouchable(bool isTouchable);
     void SetDragEnabled(bool dragEnabled);
-    void SetHideNonSystemOverlayWindows(bool hide);
+    void SetHideNonSystemFloatingWindows(bool hide);
     void SetForceHide(bool hide);
     void SetRaiseEnabled(bool raiseEnabled);
     void SetTurnScreenOn(bool turnScreenOn);
@@ -99,7 +99,7 @@ public:
     bool GetFocusable() const;
     bool GetTouchable() const;
     bool GetDragEnabled() const;
-    bool GetHideNonSystemOverlayWindows() const;
+    bool GetHideNonSystemFloatingWindows() const;
     bool GetForceHide() const;
     bool GetRaiseEnabled() const;
     bool IsTurnScreenOn() const;
@@ -174,7 +174,7 @@ private:
     Transform trans_;
     bool isFloatingWindowAppType_ = false;
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
-    bool hideNonSystemOverlayWindows_ = false;
+    bool hideNonSystemFloatingWindows_ = false;
     bool forceHide_ = false;
 };
 
