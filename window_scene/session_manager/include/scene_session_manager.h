@@ -289,6 +289,7 @@ private:
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     bool isPrepareTerminateEnable_ {false};
     WSRect callingWindowRestoringRect_ = {0, 0, 0, 0};
+    bool needUpdateSessionRect_ = false;
     int32_t currentUserId_;
 
     std::shared_ptr<TaskScheduler> taskScheduler_;
