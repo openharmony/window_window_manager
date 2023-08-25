@@ -15,6 +15,7 @@
 
 #include "anr_handler.h"
 
+#include <algorithm>
 #include <cinttypes>
 #include <functional>
 #include <string>
@@ -28,8 +29,8 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ANRHandler" };
-constexpr int64_t MAX_MARK_PROCESS_DELAY_TIME { 3500000 };
-constexpr int64_t MIN_MARK_PROCESS_DELAY_TIME { 50000 };
+constexpr int64_t MAX_MARK_PROCESS_DELAY_TIME_US { 3000000 };
+constexpr int64_t MARK_PROCESS_DELAY_TIME_BIAS_US { 1500000 };
 constexpr int32_t INVALID_EVENT_ID { -1 };
 constexpr int32_t INVALID_PERSISTENT_ID { -1 };
 constexpr int32_t TIME_TRANSITION { 1000 };
@@ -57,14 +58,15 @@ void ANRHandler::SetSessionStage(int32_t eventId, const wptr<ISessionStage> &ses
         return;
     }
     sessionStageMap_[eventId] = sessionStage;
-    WLOGFI("SetSessionStage for eventId:%{public}d, persistentId:%{public}d", eventId, sessionStage->GetPersistentId());
+    WLOGFD("SetSessionStage for eventId:%{public}d, persistentId:%{public}d", eventId, sessionStage->GetPersistentId());
 }
 
 void ANRHandler::HandleEventConsumed(int32_t eventId, int64_t actionTime)
 {
+    CALL_DEBUG_ENTER;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     int32_t currentPersistentId = GetPersistentIdOfEvent(eventId);
-    WLOGFI("Processed eventId:%{public}d, persistentId:%{public}d", eventId, currentPersistentId);
+    WLOGFD("Processed eventId:%{public}d, persistentId:%{public}d", eventId, currentPersistentId);
     if (IsOnEventHandler(currentPersistentId)) {
         UpdateLatestEventId(eventId);
         return;
@@ -74,16 +76,11 @@ void ANRHandler::HandleEventConsumed(int32_t eventId, int64_t actionTime)
     WLOGFD("Processed eventId:%{public}d, persistentId:%{public}d, actionTime:%{public}" PRId64 ", "
         "currentTime:%{public}" PRId64 ", timeoutTime:%{public}" PRId64,
         eventId, currentPersistentId, actionTime, currentTime, timeoutTime);
-    if (timeoutTime < MIN_MARK_PROCESS_DELAY_TIME) {
-        SendEvent(eventId, 0);
+    if (timeoutTime >= MAX_MARK_PROCESS_DELAY_TIME_US) {
+        int64_t delayTime = std::min(timeoutTime - MARK_PROCESS_DELAY_TIME_BIAS_US, MAX_MARK_PROCESS_DELAY_TIME_US);
+        SendEvent(eventId, delayTime / TIME_TRANSITION);
     } else {
-        int64_t delayTime = 0;
-        if (timeoutTime >= MAX_MARK_PROCESS_DELAY_TIME) {
-            delayTime = MAX_MARK_PROCESS_DELAY_TIME / TIME_TRANSITION;
-        } else {
-            delayTime = timeoutTime / TIME_TRANSITION;
-        }
-        SendEvent(eventId, delayTime);
+        SendEvent(eventId, 0);
     }
 }
 
@@ -145,8 +142,9 @@ void ANRHandler::SendEvent(int32_t eventId, int64_t delayTime)
         return;
     }
     if (!eventHandler_->PostHighPriorityTask(std::bind(&ANRHandler::MarkProcessed, this), delayTime)) {
-        WLOGFE("Send dispatch event failed");
+        WLOGFE("Post eventId:%{public}d, delayTime:%{public}" PRId64 " failed", eventId, delayTime);
     }
+    WLOGFD("Post eventId:%{public}d, delayTime:%{%{public}" PRId64 " on eventHandler successfully", eventId, delayTime);
 }
 
 void ANRHandler::ClearExpiredEvents(int32_t eventId)
