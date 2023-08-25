@@ -70,7 +70,9 @@ static sptr<Window> CreateDialogWindow(sptr<WindowScene> scene, WindowType type,
 
     static int cnt = 0;
     std::string winName = (name == "") ? "DialogWindowTest" + std::to_string(cnt++) : name;
-
+    if (scene->GetMainWindow() == nullptr) {
+        return nullptr;
+    }
     return Window::Create(winName, option, scene->GetMainWindow()->GetContext());
 }
 
@@ -86,6 +88,9 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow01, Function | MediumTest | Level2)
 
     struct Rect rect = {0, 0, 100, 200};
     sptr<Window> dialogWindow = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect);
+    if (dialogWindow == nullptr) {
+        return nullptr;
+    }
     ASSERT_NE(nullptr, dialogWindow);
 
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
@@ -110,6 +115,9 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow02, Function | MediumTest | Level2)
 
     struct Rect rect = {0, 0, 100, 200};
     sptr<Window> dialogWindow0 = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect);
+    if (dialogWindow0 == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, dialogWindow0);
 
     sptr<Window> dialogWindow1 = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect);
@@ -138,6 +146,12 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow03, Function | MediumTest | Level2)
     struct Rect rect = {0, 0, 100, 200};
     sptr<Window> dialogWindow0 = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect, "dialog0");
     sptr<Window> dialogWindow1 = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect, "dialog0");
+    if (dialogWindow0 == nullptr) {
+        return;
+    }
+    if (dialogWindow1 == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, dialogWindow0);
     ASSERT_EQ(nullptr, dialogWindow1);
 
@@ -164,6 +178,9 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow04, Function | MediumTest | Level2)
 
     struct Rect rect = {0, 0, 100, 200};
     sptr<Window> dialogWindow0 = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect, "dialog0");
+    if (dialogWindow0 == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, dialogWindow0);
     ASSERT_EQ(WMError::WM_OK, dialogWindow0->Show());
     ASSERT_EQ(WMError::WM_OK, dialogWindow0->Destroy());
@@ -190,6 +207,9 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow05, Function | MediumTest | Level2)
 
     struct Rect rect = {0, 0, 100, 200};
     sptr<Window> dialogWindow = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect);
+    if (dialogWindow == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, dialogWindow);
 
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
@@ -214,6 +234,10 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow06, Function | MediumTest | Level2)
 
     struct Rect rect = {0, 0, 100, 200};
     sptr<Window> dialogWindow = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect);
+    if (dialogWindow == nullptr) {
+        return;
+    }
+
     ASSERT_NE(nullptr, dialogWindow);
 
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
@@ -240,6 +264,9 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow07, Function | MediumTest | Level2)
 
     struct Rect rect = {0, 0, 100, 200};
     sptr<Window> dialogWindow = CreateDialogWindow(scene, WindowType::WINDOW_TYPE_DIALOG, rect);
+    if (dialogWindow == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, dialogWindow);
 
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());

@@ -211,11 +211,11 @@ HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService2, Function | Sm
 }
 
 /**
- * @tc.name: SetSessionManagerService
- * @tc.desc: SetSessionManagerService
+ * @tc.name: GetSceneSessionManager
+ * @tc.desc: GetSceneSessionManager
  * @tc.type: FUNC
  */
-HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService2, Function | SmallTest | Level2)
+HWTEST_F(MockSessionManagerServiceTest, GetSceneSessionManager, Function | SmallTest | Level2)
 {
     MockSessionManagerService* mService = new MockSessionManagerService();
     mService->GetSceneSessionManager();
