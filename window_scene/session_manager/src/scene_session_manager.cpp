@@ -2334,50 +2334,44 @@ void SceneSessionManager::NotifySessionMovedToFront(int32_t persistentId)
 WSError SceneSessionManager::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label)
 {
     WLOGFI("run SetSessionLabel");
-    if (sessionListener_ == nullptr) {
-        WLOGFI("sessionListener not register, skip.");
-        return WSError::WS_OK;
+    auto sceneSession = FindSessionByToken(token);
+    if (sceneSession == nullptr) {
+        WLOGFI("fail to find session by token");
+        return WSError::WS_ERROR_SET_SESSION_LABEL_FAILED;
     }
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (auto iter : sceneSessionMap_) {
-        auto& sceneSession = iter.second;
-        if (sceneSession->GetAbilityToken() == token) {
-            WLOGFI("try to update session label.");
-            sessionListener_->OnSessionLabelChange(iter.first, label);
-            if (listenerController_ != nullptr) {
-                WLOGFD("NotifySessionLabelUpdated, id: %{public}d", iter.first);
-                listenerController_->NotifySessionLabelUpdated(iter.first);
-            }
-            return WSError::WS_OK;
-        }
+    sceneSession->SetSessionLabel(label);
+    if (sessionListener_ != nullptr) {
+        WLOGFI("try to run OnSessionLabelChange");
+        sessionListener_->OnSessionLabelChange(sceneSession->GetPersistentId(), label);
     }
-    return WSError::WS_ERROR_SET_SESSION_LABEL_FAILED;
+    if (listenerController_ != nullptr) {
+        WLOGFD("NotifySessionLabelUpdated, id: %{public}d", iter.first);
+        listenerController_->NotifySessionLabelUpdated(iter.first);
+    }
+    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject> &token,
     const std::shared_ptr<Media::PixelMap> &icon)
 {
     WLOGFI("run SetSessionIcon");
-    if (sessionListener_ == nullptr) {
-        WLOGFI("sessionListener not register, skip.");
-        return WSError::WS_OK;
+    auto sceneSession = FindSessionByToken(token);
+    if (sceneSession == nullptr) {
+        WLOGFI("fail to find session by token");
+        return WSError::WS_ERROR_SET_SESSION_LABEL_FAILED;
     }
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (auto iter : sceneSessionMap_) {
-        auto& sceneSession = iter.second;
-        if (sceneSession->GetAbilityToken() == token) {
-            WLOGFI("try to update session icon.");
-            sessionListener_->OnSessionIconChange(iter.first, icon);
-            if (listenerController_ != nullptr &&
-                (sceneSession->GetSessionInfo().abilityInfo) != nullptr &&
-                !(sceneSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
-                WLOGFD("NotifySessionIconChanged, id: %{public}d", iter.first);
-                listenerController_->NotifySessionIconChanged(iter.first, icon);
-            }
-            return WSError::WS_OK;
-        }
+    sceneSession->SetSessionIcon(icon);
+    if (sessionListener_ != nullptr) {
+        WLOGFI("try to run OnSessionIconChange.");
+        sessionListener_->OnSessionIconChange(iter.first, icon);
     }
-    return WSError::WS_ERROR_SET_SESSION_ICON_FAILED;
+    if (listenerController_ != nullptr &&
+            (sceneSession->GetSessionInfo().abilityInfo) != nullptr &&
+            !(sceneSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
+            WLOGFD("NotifySessionIconChanged, id: %{public}d", iter.first);
+            listenerController_->NotifySessionIconChanged(iter.first, icon);
+    }
+    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::IsValidSessionIds(

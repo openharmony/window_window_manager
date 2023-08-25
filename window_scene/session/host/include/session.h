@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_H
 
+#include <memory>
 #include <mutex>
 #include <set>
 #include <string>
@@ -52,6 +53,8 @@ using NotifyClickFunc = std::function<void()>;
 using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
 using NotifyTerminateSessionFuncNew = std::function<void(const SessionInfo& info, bool needStartCaller)>;
 using NotifyTerminateSessionFuncTotal = std::function<void(const SessionInfo& info, TerminateType terminateType)>;
+using NofitySessionLabelUpdatedFunc = std::function<void(const std::string &label)>;
+using NofitySessionIconUpdatedFunc = std::function<void(const std::string &iconPath)>;
 using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
 using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info)>;
@@ -147,6 +150,10 @@ public:
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
     void SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncTotal& func);
     WSError Clear();
+    WSError SetSessionLabel(const std::string &label);
+    void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);
+    WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon);
+    void SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& func);
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
     void SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func);
     void NotifySessionStateChange(const SessionState& state);
@@ -288,6 +295,8 @@ protected:
     NotifyTerminateSessionFunc terminateSessionFunc_;
     NotifyTerminateSessionFuncNew terminateSessionFuncNew_;
     NotifyTerminateSessionFuncTotal terminateSessionFuncTotal_;
+    NotifySessionLabelUpdated updateSessionLabelFunc_;
+    NotifySessionIconUpdated updateSessionIconFunc_;
     std::vector<std::shared_ptr<NotifySessionExceptionFunc>> sessionExceptionFuncs_;
     NotifyPendingSessionToForegroundFunc pendingSessionToForegroundFunc_;
     NotifyPendingSessionToBackgroundForDelegatorFunc pendingSessionToBackgroundForDelegatorFunc_;

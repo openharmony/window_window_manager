@@ -24,6 +24,7 @@
 #include "anr_manager.h"
 #include "foundation/ability/ability_base/interfaces/kits/native/want/include/want.h"
 #include "interfaces/include/ws_common.h"
+#include <string>
 #include <surface_capture_future.h>
 #include <transaction/rs_interfaces.h>
 #include <ui/rs_surface_node.h>
@@ -834,6 +835,40 @@ WSError Session::TerminateSessionTotal(const sptr<AAFwk::SessionInfo> abilitySes
 void Session::SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncTotal& func)
 {
     terminateSessionFuncTotal_ = func;
+}
+
+WSError Session::SetSessionLabel(const std::string &label)
+{
+    WLOGFI("run Session::SetSessionLabel");
+    if (updateSessionLabelFunc_) {
+        updateSessionLabelFunc_(label);
+    }
+    return WSError::WS_OK;
+}
+
+void Session::SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc &func)
+{
+    updateSessionLabelFunc_ = func;
+}
+
+WSError Session::SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon)
+{
+    WLOGFI("run Session::SetSessionIcon");
+    if (scenePersistence_ == nullptr) {
+        WLOGFI("scenePersistence_ is nullptr.");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    scenePersistence_->SaveUpdatedIcon(icon);
+    std::string updatedIconPath = scenePersistence_->GetUpdatedIconPath();
+    if (updateSessionIconFunc_) {
+        updateSessionIconFunc_(updatedIconPath);
+    }
+    return WSError::WS_OK;
+}
+
+void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc &func)
+{
+    updateSessionIconFunc_ = func;
 }
 
 WSError Session::Clear()
