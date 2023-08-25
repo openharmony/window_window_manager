@@ -687,30 +687,14 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, RRect
         WLOGFE("fail to update screen rotation property, cannot find screen %{public}" PRIu64"", screenId);
         return;
     }
-    Rotation targetRotation = Rotation::ROTATION_0;
-    switch (rotation) {
-        case 90: // Rotation 90 degree
-            targetRotation = Rotation::ROTATION_90;
-            break;
-        case 180: // Rotation 180 degree
-            targetRotation = Rotation::ROTATION_180;
-            break;
-        case 270: // Rotation 270 degree
-            targetRotation = Rotation::ROTATION_270;
-            break;
-        default:
-            targetRotation = Rotation::ROTATION_0;
-            break;
-    }
+    screenSession->UpdatePropertyAfterRotation(bounds, rotation);
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     if (displayInfo == nullptr) {
         WLOGFE("fail to update screen rotation property, displayInfo is nullptr");
         return;
     }
-    displayInfo->SetRotation(targetRotation);
-    displayInfo->SetWidth(bounds.rect_.GetWidth());
-    displayInfo->SetHeight(bounds.rect_.GetHeight());
-    NotifyDisplayChanged(displayInfo, DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
+    NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
+    NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
 }
 
 void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event)
@@ -743,7 +727,15 @@ DMError ScreenSessionManager::SetOrientation(ScreenId screenId, Orientation orie
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetOrientation");
-    return SetOrientationController(screenId, orientation, false);
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        WLOGFE("fail to set orientation, cannot find screen %{public}" PRIu64"", screenId);
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    // just for get orientation test
+    screenSession->SetOrientation(orientation);
+    screenSession->ScreenOrientationChange(orientation);
+    return DMError::DM_OK;
 }
 
 DMError ScreenSessionManager::SetOrientationFromWindow(DisplayId displayId, Orientation orientation)

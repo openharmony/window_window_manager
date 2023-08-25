@@ -131,6 +131,11 @@ void ScreenProperty::SetScreenRotation(Rotation rotation)
     screenRotation_ = rotation;
 }
 
+void ScreenProperty::UpdateScreenRotation(Rotation rotation)
+{
+    screenRotation_ = rotation;
+}
+
 Rotation ScreenProperty::GetScreenRotation() const
 {
     return screenRotation_;
