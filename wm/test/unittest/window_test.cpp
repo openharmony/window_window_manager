@@ -2110,6 +2110,7 @@ HWTEST_F(WindowTest, SetRaiseByClickEnabled, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
+/**
  * @tc.name: RaiseAboveTarget
  * @tc.desc: RaiseAboveTarget flag
  * @tc.type: FUNC
