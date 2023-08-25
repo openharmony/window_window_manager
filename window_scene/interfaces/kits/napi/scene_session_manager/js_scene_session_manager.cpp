@@ -40,6 +40,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsSceneSessionManager" };
 constexpr int WAIT_FOR_SECONDS = 2;
 const std::string CREATE_SPECIFIC_SCENE_CB = "createSpecificSession";
+const std::string STATUS_BAR_ENABLED_CHANGE_CB = "statusBarEnabledChange";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 const std::string OUTSIDE_DOWN_EVENT_CB = "outsideDownEvent";
 const std::string ARG_DUMP_HELP = "-h";
@@ -101,6 +102,7 @@ JsSceneSessionManager::JsSceneSessionManager(NativeEngine& engine) : engine_(eng
 {
     listenerFunc_ = {
         { CREATE_SPECIFIC_SCENE_CB, &JsSceneSessionManager::ProcessCreateSpecificSessionRegister },
+        { STATUS_BAR_ENABLED_CHANGE_CB, &JsSceneSessionManager::ProcessStatusBarEnabledChangeListener},
         { GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
             &JsSceneSessionManager::ProcessGestureNavigationEnabledChangeListener },
         { OUTSIDE_DOWN_EVENT_CB, &JsSceneSessionManager::ProcessOutsideDownEvent },
@@ -141,6 +143,27 @@ void JsSceneSessionManager::OnCreateSpecificSession(const sptr<SceneSession>& sc
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
     AsyncTask::Schedule("JsSceneSessionManager::OnCreateSpecificSession", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsSceneSessionManager::OnStatusBarEnabledUpdate(bool enable)
+{
+    WLOGFI("[NAPI]OnStatusBarEnabledUpdate");
+    auto iter = jsCbMap_.find(STATUS_BAR_ENABLED_CHANGE_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [this, enable, jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            NativeValue* argv[] = {CreateJsValue(*eng, enable)};
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSessionManager::OnStatusBarEnabledUpdate", engine_,
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
@@ -202,6 +225,15 @@ void JsSceneSessionManager::ProcessCreateSpecificSessionRegister()
         this->OnCreateSpecificSession(session);
     };
     SceneSessionManager::GetInstance().SetCreateSpecificSessionListener(func);
+}
+
+void JsSceneSessionManager::ProcessStatusBarEnabledChangeListener()
+{
+    ProcessStatusBarEnabledChangeFunc func = [this](bool enable) {
+        WLOGFD("StatusBarEnabledUpdate");
+        this->OnStatusBarEnabledUpdate(enable);
+    };
+    SceneSessionManager::GetInstance().SetStatusBarEnabledChangeListener(func);
 }
 
 void JsSceneSessionManager::ProcessGestureNavigationEnabledChangeListener()
