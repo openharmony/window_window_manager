@@ -42,6 +42,8 @@
 #include <transaction/rs_transaction.h>
 #include <transaction/rs_interfaces.h>
 
+#include "input_manager.h"
+
 #ifdef RES_SCHED_ENABLE
 #include "res_type.h"
 #include "res_sched_client.h"
@@ -54,6 +56,7 @@
 #include "interfaces/include/ws_common_inner.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/scene_session.h"
+#include "session/host/include/session_utils.h"
 #include "session_helper.h"
 #include "window_helper.h"
 #include "session/screen/include/screen_session.h"
@@ -183,14 +186,19 @@ void SceneSessionManager::Init()
     if (ret != 0) {
         WLOGFW("Add thread %{public}s to watchdog failed.", WINDOW_INFO_REPORT_THREAD.c_str());
     }
-
+    InitWindowChecker();
     listenerController_ = std::make_shared<SessionListenerController>();
     listenerController_->Init();
     scbSessionHandler_ = new ScbSessionHandler();
     AAFwk::AbilityManagerClient::GetInstance()->RegisterSessionHandler(scbSessionHandler_);
-
     StartWindowInfoReportLoop();
     WLOGI("SceneSessionManager init success.");
+}
+
+void SceneSessionManager::InitWindowChecker()
+{
+    auto windowChecker_ = std::make_shared<WindowChecker>();
+    // MMI::InputManager::GetInstance()->SetWindowCheckerHandler(windowChecker_);
 }
 
 void SceneSessionManager::LoadWindowSceneXml()
@@ -739,6 +747,32 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     return specificCb;
 }
 
+int32_t SceneSessionManager::CheckWindowId(int32_t windowId)
+{
+    auto task = [this, windowId]() -> int32_t {
+        std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        auto iter = sceneSessionMap_.find(windowId);
+        if (iter == sceneSessionMap_.end()) {
+            WLOGFE("Window(%{public}d) cannot set cursor style", windowId);
+            return INVALID_PID;
+        }
+        auto sceneSession = iter->second;
+        if (sceneSession == nullptr) {
+            WLOGFE("sceneSession(%{public}d) is nullptr", windowId);
+            return INVALID_PID;
+        }
+        int32_t pid = sceneSession->GetCallingPid();
+        WLOGFD("Window(%{public}d) to set the cursor style, pid:%{public}d", windowId, pid);
+        return pid;
+    };
+    return taskScheduler_->PostSyncTask(task);
+}
+
+int32_t SceneSessionManager::WindowChecker::CheckWindowId(int32_t windowId) const
+{
+    return SceneSessionManager::GetInstance().CheckWindowId(windowId);
+}
+
 sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo,
     sptr<WindowSessionProperty> property)
 {
@@ -859,6 +893,8 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     sptr<ISession> iSession(scnSession);
     abilitySessionInfo->sessionToken = iSession->AsObject();
     abilitySessionInfo->callerToken = sessionInfo.callerToken_;
+    abilitySessionInfo->sessionName = SessionUtils::ConvertSessionName(sessionInfo.bundleName_,
+        sessionInfo.abilityName_, sessionInfo.moduleName_, sessionInfo.appIndex_);
     abilitySessionInfo->persistentId = scnSession->GetPersistentId();
     abilitySessionInfo->requestCode = sessionInfo.requestCode;
     abilitySessionInfo->resultCode = sessionInfo.resultCode;
@@ -1089,6 +1125,8 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
                 WLOGFD("NotifySessionDestroyed, id: %{public}d", persistentId);
                 listenerController_->NotifySessionDestroyed(persistentId);
             }
+        } else {
+            scnSession->Destroy();
         }
         return WSError::WS_OK;
     };
@@ -1868,7 +1906,7 @@ WSError SceneSessionManager::SetFocusedSession(int32_t persistentId)
     }
     focusedSessionId_ = persistentId;
     auto sceneSession = GetSceneSession(persistentId);
-    if (IsSessionVisible(sceneSession)) {
+    if (sceneSession && IsSessionVisible(sceneSession)) {
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
     }
     return WSError::WS_OK;
@@ -2671,6 +2709,11 @@ std::string SceneSessionManager::AnonymizeDeviceId(const std::string& deviceId)
 WSError SceneSessionManager::DumpSessionAll(std::vector<std::string> &infos)
 {
     WLOGFI("Dump all session.");
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("DumpSessionAll permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+
     auto task = [this, &infos]() {
         std::string dumpInfo = "User ID #" + std::to_string(currentUserId_);
         infos.push_back(dumpInfo);
@@ -2678,7 +2721,7 @@ WSError SceneSessionManager::DumpSessionAll(std::vector<std::string> &infos)
         for (const auto &item : sceneSessionMap_) {
             auto& session = item.second;
             if (session) {
-                session->DumpMissionInfo(infos);
+                session->DumpSessionInfo(infos);
             }
         }
         return WSError::WS_OK;
@@ -2690,12 +2733,17 @@ WSError SceneSessionManager::DumpSessionAll(std::vector<std::string> &infos)
 WSError SceneSessionManager::DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos)
 {
     WLOGFI("Dump session with id %{public}d", persistentId);
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("DumpSessionWithId permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+
     auto task = [this, persistentId, &infos]() {
         std::string dumpInfo = "User ID #" + std::to_string(currentUserId_);
         infos.push_back(dumpInfo);
         auto session = GetSceneSession(persistentId);
         if (session) {
-            session->DumpMissionInfo(infos);
+            session->DumpSessionInfo(infos);
         } else {
             infos.push_back("error: invalid mission number, please see 'aa dump --mission-list'.");
         }
@@ -3070,6 +3118,10 @@ WSError SceneSessionManager::SetSessionGravity(int32_t persistentId, SessionGrav
     }
     sceneSession->GetSessionProperty()->SetSessionGravity(gravity, percent);
     RelayoutKeyBoard(sceneSession);
+    if (callingSession_ == nullptr) {
+        WLOGFD("callingSession_ is nullptr");
+        callingSession_ = GetSceneSession(focusedSessionId_);
+    }
     if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
         WLOGFD("input method is float mode");
         RestoreCallingSessionSizeIfNeed();
