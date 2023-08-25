@@ -19,7 +19,6 @@
 
 #include "fold_screen_controller/fold_screen_policy.h"
 #include "fold_screen_controller/fold_screen_state_machine.h"
-#include "fold_screen_controller/fold_screen_sensor_manager.h"
 
 namespace OHOS::Rosen {
 enum class DisplayDeviceType :uint32_t {

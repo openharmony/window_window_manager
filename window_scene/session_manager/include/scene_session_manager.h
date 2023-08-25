@@ -20,6 +20,9 @@
 #include <mutex>
 
 #include <transaction/rs_interfaces.h>
+
+// #include "i_window_checker.h"
+
 #include "agent_death_recipient.h"
 #include "common/include/task_scheduler.h"
 #include "future.h"
@@ -174,13 +177,21 @@ public:
     WSError RegisterIAbilityManagerCollaborator(int32_t type, const sptr<AAFwk::IAbilityManagerCollaborator> &impl);
     WSError UnregisterIAbilityManagerCollaborator(int32_t type);
 
+    int32_t CheckWindowId(int32_t windowId);
     int GetSceneSessionPrivacyModeCount(const std::map<int32_t, sptr<SceneSession>>& sessionMap);
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
+    struct WindowChecker : public MMI::IWindowChecker {
+    public:
+        WindowChecker() = default;
+        ~WindowChecker() = default;
+        int32_t CheckWindowId(int32_t windowId) const override;
+    };
 
 private:
     void Init();
+    void InitWindowChecker();
     void InitPrepareTerminateConfig();
     void LoadWindowSceneXml();
     void ConfigWindowSceneXml();
@@ -321,6 +332,7 @@ private:
     void NotifyClearSession(int32_t collaboratorType, int32_t persistentId);
     void NotifyMoveSessionToForeground(int32_t collaboratorType, int32_t persistendId);
     void PreHandleCollaborator(sptr<SceneSession> sceneSession);
+    void NotifyCollaboratorAfterStart(sptr<SceneSession>& scnSession, sptr<AAFwk::SessionInfo>& scnSessionInfo);
 };
 } // namespace OHOS::Rosen
 

@@ -117,6 +117,7 @@ public:
     void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
 
     WMError SetBackgroundColor(const std::string& color) override;
+    virtual Orientation GetRequestedOrientation() override;
 
     int32_t GetParentId() const;
     int32_t GetPersistentId() const override;
