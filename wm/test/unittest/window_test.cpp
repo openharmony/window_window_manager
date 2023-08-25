@@ -2110,6 +2110,18 @@ HWTEST_F(WindowTest, SetRaiseByClickEnabled, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
+ * @tc.name: RaiseAboveTarget
+ * @tc.desc: RaiseAboveTarget flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, RaiseAboveTarget, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    ASSERT_EQ(WmErrorCode::WM_OK, window->RaiseAboveTarget(2));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
 /**
  * @tc.name: HideNonSystemOverlayWindows
  * @tc.desc: set shouldHide flag
@@ -2120,18 +2132,6 @@ HWTEST_F(WindowTest, HideNonSystemOverlayWindows, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(WMError::WM_OK, window->HideNonSystemOverlayWindows(false));
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
-}
-
- * @tc.name: RaiseAboveTarget
- * @tc.desc: RaiseAboveTarget flag
- * @tc.type: FUNC
- */
-HWTEST_F(WindowTest, RaiseAboveTarget, Function | SmallTest | Level2)
-{
-    sptr<Window> window = new Window();
-    ASSERT_NE(nullptr, window);
-    ASSERT_EQ(WmErrorCode::WM_OK, window->RaiseAboveTarget(2));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 }
