@@ -21,6 +21,7 @@
 #include "input_manager.h"
 #include "singleton.h"
 #include "ui_content.h"
+#include "wm_common.h"
 
 namespace OHOS::AppExecFwk {
 class EventHandler;
@@ -43,11 +44,11 @@ public:
     void OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const override;
     void OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const override;
     void OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const override;
-    void RegisterWindowFocusChanged();
+    void RegisterWindowChanged();
 
 private:
     void UpdateLastMouseEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const;
-    void ProcessEnterLeaveEvent();
+    void ProcessEnterLeaveEventAsync();
     Ace::UIContent* uiContent_ = nullptr;
     std::weak_ptr<AppExecFwk::EventHandler> weakEventConsumer_;
     mutable std::mutex mouseEventMutex_;
