@@ -20,8 +20,6 @@
 #include <pointer_event.h>
 #include <transaction/rs_transaction.h>
 
-// #include "../../proxy/include/window_info.h"
-
 #include "common/include/session_permission.h"
 #include "interfaces/include/ws_common.h"
 #include "session/host/include/scene_persistent_storage.h"
@@ -575,8 +573,10 @@ WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAre
 
 void SceneSession::HandleStyleEvent(MMI::WindowArea area)
 {
-    if (Session::SetPointerStyle(area) != WSError::WS_OK) {
-        WLOGFE("Failed to set the cursor style");
+    if (area != MMI::WindowArea::EXIT) {
+        if (Session::SetPointerStyle(area) != WSError::WS_OK) {
+            WLOGFE("Failed to set the cursor style");
+        }
     }
 
     preWindowArea_ = area;
@@ -584,11 +584,17 @@ void SceneSession::HandleStyleEvent(MMI::WindowArea area)
 
 WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
 {
+    static Session* preSession = nullptr;
     if (displayX < 0 || displayY < 0) {
         WLOGE("Illegal parameter, displayX:%{public}d, displayY:%{public}d", displayX, displayY);
         return WSError::WS_ERROR_INVALID_PARAM;
     }
 
+    MMI::WindowArea area = MMI::WindowArea::EXIT;
+    if (preSession != nullptr && preSession != this) {
+        preSession->HandleStyleEvent(area);
+        preSession = nullptr;
+    }
     auto iter = Session::windowAreas_.cend();
     if (!Session::IsSystemSession() &&
         Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
@@ -601,7 +607,6 @@ WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
             }
         }
     }
-    MMI::WindowArea area = MMI::WindowArea::EXIT;
     if (iter == Session::windowAreas_.cend()) {
         bool isInRegion = false;
         WSRect rect = Session::winRect_;
@@ -614,7 +619,7 @@ WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
         }
         if (!isInRegion) {
             WLOGFE("The wrong event(%{public}d, %{public}d) could not be matched to the region:" \
-                "[%{public}d, %{public}d, %{public}u, %{public}u]",
+                "[%{public}d, %{public}d, %{public}d, %{public}d]",
                 displayX, displayY, rect.posX_, rect.posY_, rect.width_, rect.height_);
             return WSError::WS_ERROR_INVALID_TYPE;
         }
@@ -624,6 +629,7 @@ WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
     }
     if (area != preWindowArea_) {
         HandleStyleEvent(area);
+        preSession = this;
     }
     return WSError::WS_OK;
 }
