@@ -15,9 +15,6 @@
 
 #include "extension_session.h"
 #include <gtest/gtest.h>
-// #include "proto.h"
-// #include "util.h"
-// #include "window_manager_hilog.h"
 #include "session_info.h"
 #include "interfaces/include/ws_common.h"
 
