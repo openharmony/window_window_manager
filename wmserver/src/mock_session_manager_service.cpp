@@ -165,6 +165,10 @@ sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManager()
 {
     sptr<ISessionManagerService> sessionManagerServiceProxy =
         iface_cast<ISessionManagerService>(sessionManagerService_);
+    if (!sessionManagerServiceProxy) {
+        WLOGFE("sessionManagerServiceProxy is nullptr");
+        return nullptr;
+    }
     sptr<IRemoteObject> remoteObject = sessionManagerServiceProxy->GetSceneSessionManager();
     if (!remoteObject) {
         WLOGFW("Get scene session manager proxy failed, scene session manager service is null");

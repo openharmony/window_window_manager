@@ -13,13 +13,20 @@
  * limitations under the License.
  */
 
-#include "fold_screen_controller/fold_screen_policy.h"
+#ifndef WINDOW_EVENT_IPC_INTERFACE_CODE_H
+#define WINDOW_EVENT_IPC_INTERFACE_CODE_H
 
-namespace OHOS::Rosen {
-FoldScreenPolicy::FoldScreenPolicy() = default;
-FoldScreenPolicy::~FoldScreenPolicy() = default;
+/* SAID: 4606 */
+namespace OHOS {
+namespace Rosen {
+enum class WindowEventInterfaceCode {
+    TRANS_ID_TRANSFER_KEY_EVENT = 0,
+    TRANS_ID_TRANSFER_POINTER_EVENT,
+    TRANS_ID_TRANSFER_FOCUS_ACTIVE_EVENT,
+    TRANS_ID_TRANSFER_FOCUS_WINDOW_ID_EVENT,
+    TRANS_ID_TRANSFER_FOCUS_STATE_EVENT,
+};
+}   // namespace Rosen
+}   // namespace OHOS
 
-void FoldScreenPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode) {}
-FoldDisplayMode FoldScreenPolicy::GetScreenDisplayMode() { return FoldDisplayMode::UNKNOWN; }
-void FoldScreenPolicy::SendSensorResult(FoldStatus foldStatus) {}
-} // namespace OHOS::Rosen
+#endif  // WINDOW_EVENT_IPC_INTERFACE_CODE_H
