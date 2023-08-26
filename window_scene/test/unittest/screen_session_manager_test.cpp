@@ -214,7 +214,6 @@ HWTEST_F(ScreenSessionManagerTest, GetDefaultDisplayInfo, Function | SmallTest |
  * @tc.name: GetDisplayInfoById
  * @tc.desc: GetDisplayInfoById virtual screen
  * @tc.type: FUNC
- * 
  */
 HWTEST_F(ScreenSessionManagerTest, GetDisplayInfoById, Function | SmallTest | Level3)
 {
@@ -275,9 +274,9 @@ HWTEST_F(ScreenSessionManagerTest, NotifyScreenChanged, Function | SmallTest | L
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "GetDefaultScreenSession";
     sptr<ScreenInfo> screenInfo;
-    ssm_->NotifyScreenChanged(screenInfo,ScreenChangeEvent::UPDATE_ORIENTATION);
-    screenInfo=new ScreenInfo();
-    ssm_->NotifyScreenChanged(screenInfo,ScreenChangeEvent::UPDATE_ORIENTATION);
+    ssm_->NotifyScreenChanged(screenInfo, ScreenChangeEvent::UPDATE_ORIENTATION);
+    screenInfo = new ScreenInfo();
+    ssm_->NotifyScreenChanged(screenInfo, ScreenChangeEvent::UPDATE_ORIENTATION);
 }
 
 /**
@@ -290,7 +289,7 @@ HWTEST_F(ScreenSessionManagerTest, SetVirtualPixelRatio, Function | SmallTest | 
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "GetDefaultScreenSession";
-    ASSERT_EQ(DMError::DM_OK, ssm_->SetVirtualPixelRatio(2,0.1));
+    ASSERT_EQ(DMError::DM_OK, ssm_->SetVirtualPixelRatio(2, 0.1));
 }
 
 /**
@@ -301,8 +300,8 @@ HWTEST_F(ScreenSessionManagerTest, SetVirtualPixelRatio, Function | SmallTest | 
 HWTEST_F(ScreenSessionManagerTest, GetScreenColorGamut, Function | SmallTest | Level3)
 {
     ScreenColorGamut colorGamut = ScreenColorGamut::COLOR_GAMUT_SRGB;
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->GetScreenColorGamut(1,colorGamut));
-    ASSERT_EQ(DMError::DM_OK, ssm_->GetScreenColorGamut(2,colorGamut));
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->GetScreenColorGamut(1, colorGamut));
+    ASSERT_EQ(DMError::DM_OK, ssm_->GetScreenColorGamut(2, colorGamut));
 }
 
 /**
@@ -333,7 +332,7 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenGamutMap, Function | SmallTest | Lev
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
     ScreenGamutMap gamutMap;
-    ASSERT_EQ(DMError::DM_OK, ssm_->GetScreenGamutMap(2,gamutMap));
+    ASSERT_EQ(DMError::DM_OK, ssm_->GetScreenGamutMap(2, gamutMap));
 }
 
 /**
@@ -353,7 +352,7 @@ HWTEST_F(ScreenSessionManagerTest, MakeExpand, Function | SmallTest | Level3)
     std::vector<ScreenId> mirrorScreenIds;
     std::vector<Point> startPoints;
     ScreenId screenGroupId2 = DISPLAY_ID_INVALID;
-    ASSERT_NE(DMError::DM_ERROR_RENDER_SERVICE_FAILED, ssm_->MakeExpand(mirrorScreenIds,startPoints,screenGroupId2));
+    ASSERT_NE(DMError::DM_ERROR_RENDER_SERVICE_FAILED, ssm_->MakeExpand(mirrorScreenIds, startPoints, screenGroupId2));
 }
 }
 } // namespace Rosen

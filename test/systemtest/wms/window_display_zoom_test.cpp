@@ -281,7 +281,6 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom06, Function | MediumTest | Level3)
     if (window == nullptr) {
         return;
     }
-   
     ASSERT_EQ(WMError::WM_OK, window->Show());
     sleep(1);
     
