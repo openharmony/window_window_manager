@@ -1139,7 +1139,7 @@ void JsSceneSession::TerminateSessionTotal(const SessionInfo& info, TerminateTyp
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsSceneSession::UpdateSessionLabel(const std:string &label)
+void JsSceneSession::UpdateSessionLabel(const std::string &label)
 {
     WLOGFI("[NAPI]run UpdateSessionLabel");
     auto iter = jsCbMap_.find(UPDATE_SESSION_LABEL_CB);
@@ -1171,8 +1171,8 @@ void JsSceneSession::UpdateSessionLabel(const std:string &label)
 void JsSceneSession::ProcessUpdateSessionLabelRegister()
 {
     WLOGFD("begin to run ProcessUpdateSessionLabelRegister");
-    NotifySessionLabelUpdated func = [this](const std::string& label) {
-        this->UpdateSessionIcon(label);
+    NofitySessionLabelUpdatedFunc func = [this](const std::string& label) {
+        this->UpdateSessionLabel(label);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -1186,7 +1186,7 @@ void JsSceneSession::ProcessUpdateSessionLabelRegister()
 void JsSceneSession::ProcessUpdateSessionIconRegister()
 {
     WLOGFD("begin to run ProcessUpdateSessionIconRegister");
-    NotifySessionIconUpdated func = [this](const std::string& iconPath) {
+    NofitySessionIconUpdatedFunc func = [this](const std::string& iconPath) {
         this->UpdateSessionIcon(iconPath);
     };
     auto session = weakSession_.promote();
@@ -1198,7 +1198,7 @@ void JsSceneSession::ProcessUpdateSessionIconRegister()
     WLOGFD("ProcessUpdateSessionIconRegister success");
 }
 
-void JsSceneSession::UpdateSessionIcon(const std:string &iconPath)
+void JsSceneSession::UpdateSessionIcon(const std::string &iconPath)
 {
     WLOGFI("[NAPI]run UpdateSessionIcon");
     auto iter = jsCbMap_.find(UPDATE_SESSION_ICON_CB);
