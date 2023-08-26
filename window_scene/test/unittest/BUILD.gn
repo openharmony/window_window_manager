@@ -19,7 +19,7 @@ group("unittest") {
   testonly = true
 
   deps = [
-    "ws_scene_session_converter_test",
+    ":ws_scene_session_converter_test",
     ":ws_event_stage_test",
     ":ws_move_drag_controller_test",
     ":ws_scene_session_manager_proxy_test",
