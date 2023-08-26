@@ -442,6 +442,13 @@ NativeValue* JsWindow::SetRaiseByClickEnabled(NativeEngine* engine, NativeCallba
     return (me != nullptr) ? me->OnSetRaiseByClickEnabled(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindow::HideNonSystemFloatingWindows(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGI("HideNonSystemFloatingWindows");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnHideNonSystemFloatingWindows(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindow::SetWindowTouchable(NativeEngine* engine, NativeCallbackInfo* info)
 {
     WLOGI("SetTouchable");
@@ -2960,6 +2967,62 @@ NativeValue* JsWindow::OnSetRaiseByClickEnabled(NativeEngine& engine, NativeCall
     return result;
 }
 
+NativeValue* JsWindow::OnHideNonSystemFloatingWindows(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WMError errCode = WMError::WM_OK;
+    if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
+        WLOGFE("Argc is invalid: %{public}zu", info.argc);
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    bool shouldHide = false;
+    if (errCode == WMError::WM_OK) {
+        NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
+        if (nativeVal == nullptr) {
+            WLOGFE("Failed to convert parameter to shouldHide");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            shouldHide = static_cast<bool>(*nativeVal);
+        }
+    }
+    wptr<Window> weakToken(windowToken_);
+    AsyncTask::CompleteCallback complete =
+        [weakToken, shouldHide, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr) {
+                WLOGFE("window is nullptr");
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR),
+                    "window is nullptr."));
+                return;
+            }
+            if (!WindowHelper::IsSystemWindow(weakWindow->GetType()) || weakWindow->IsFloatingWindowAppType()) {
+                WLOGFE("HideNonSystemFloatingWindows is not allowed since window is app floating window");
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING),
+                    "HideNonSystemFloatingWindows is not allowed since window is app window"));
+                return;
+            }
+            if (errCode != WMError::WM_OK) {
+                WLOGFE("Invalidate params");
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                return;
+            }
+            WMError ret = weakWindow->HideNonSystemFloatingWindows(shouldHide);
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+            } else {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
+                            "Hide non-system floating windows failed"));
+            }
+            WLOGI("Window [%{public}u, %{public}s] hide non-system floating windows end",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+        };
+    NativeValue* lastParam = (info.argc <= 1) ? nullptr :
+        (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsWindow::HideNonSystemFloatingWindows",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 NativeValue* JsWindow::OnRaiseAboveTarget(NativeEngine& engine, NativeCallbackInfo& info)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
@@ -4355,6 +4418,8 @@ void BindFunctions(NativeEngine& engine, NativeObject* object, const char *modul
     BindNativeFunction(engine, *object, "setResizeByDragEnabled", moduleName, JsWindow::SetResizeByDragEnabled);
     BindNativeFunction(engine, *object, "setRaiseByClickEnabled", moduleName, JsWindow::SetRaiseByClickEnabled);
     BindNativeFunction(engine, *object, "raiseAboveTarget", moduleName, JsWindow::RaiseAboveTarget);
+    BindNativeFunction(engine, *object, "hideNonSystemFloatingWindows", moduleName,
+        JsWindow::HideNonSystemFloatingWindows);
 }
 }  // namespace Rosen
 }  // namespace OHOS

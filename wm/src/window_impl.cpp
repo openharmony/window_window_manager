@@ -532,10 +532,6 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "loadContent");
     WLOGFD("SetUIContent: %{public}s", contentInfo.c_str());
-    if (engine == nullptr && storage == nullptr) {
-        WLOGFE("engine or storage is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
     if (uiContent_) {
         uiContent_->Destroy();
     }
@@ -3355,7 +3351,8 @@ void WindowImpl::SetDefaultOption()
         case WindowType::WINDOW_TYPE_STATUS_BAR:
         case WindowType::WINDOW_TYPE_NAVIGATION_BAR:
         case WindowType::WINDOW_TYPE_VOLUME_OVERLAY:
-        case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT: {
+        case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT:
+        case WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             property_->SetFocusable(false);
             break;

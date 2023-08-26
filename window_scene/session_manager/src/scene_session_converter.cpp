@@ -33,7 +33,7 @@ WSError SceneSessionConverter::ConvertToMissionInfos(std::vector<sptr<SceneSessi
     for (auto iter = sceneSessionInfos.begin(); iter != sceneSessionInfos.end(); iter++) {
         AAFwk::MissionInfo missionInfo;
         missionInfo.id = (*iter)->GetPersistentId();
-        missionInfo.runningState = (*iter)->IsActive();
+        missionInfo.runningState = (*iter)->IsActive() ? 0 : -1;
         missionInfo.lockedState = ((*iter)->GetSessionInfo()).lockedState;
         if ((*iter)->GetSessionInfo().abilityInfo != nullptr) {
             missionInfo.label = ((*iter)->GetSessionInfo().abilityInfo)->label;
@@ -62,7 +62,7 @@ WSError SceneSessionConverter::ConvertToMissionInfo(sptr<SceneSession>& sceneSes
         return WSError::WS_OK;
     }
     missionInfo.id = sceneSession->GetPersistentId();
-    missionInfo.runningState = sceneSession->IsActive();
+    missionInfo.runningState = sceneSession->IsActive() ? 0 : -1;
     missionInfo.lockedState = (sceneSession->GetSessionInfo()).lockedState;
     if (sceneSession->GetSessionInfo().abilityInfo != nullptr) {
         missionInfo.label = (sceneSession->GetSessionInfo().abilityInfo)->label;

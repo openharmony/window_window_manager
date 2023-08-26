@@ -655,6 +655,21 @@ WMError WindowSessionImpl::SetRaiseByClickEnabled(bool raiseEnabled)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED);
 }
 
+WMError WindowSessionImpl::HideNonSystemFloatingWindows(bool shouldHide)
+{
+    WLOGFD("hide non-system floating windows");
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    property_->SetHideNonSystemFloatingWindows(shouldHide);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS);
+}
+
+bool WindowSessionImpl::IsFloatingWindowAppType() const
+{
+    return property_ != nullptr && property_->IsFloatingWindowAppType();
+}
+
 bool WindowSessionImpl::GetTouchable() const
 {
     return property_->GetTouchable();
@@ -701,6 +716,8 @@ float WindowSessionImpl::GetBrightness() const
 
 void WindowSessionImpl::SetRequestedOrientation(Orientation orientation)
 {
+    WLOGFI("lastReqOrientation: %{public}u target:%{public}u state_:%{public}u",
+        property_->GetRequestedOrientation(), orientation, state_);
     if (property_->GetRequestedOrientation() == orientation) {
         return;
     }
@@ -708,6 +725,15 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation)
     if (state_ == WindowState::STATE_SHOWN) {
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
     }
+}
+
+Orientation WindowSessionImpl::GetRequestedOrientation()
+{
+    if (!property_) {
+        WLOGFE("property_ is nullptr id: %{public}d", GetPersistentId());
+        return Orientation::UNSPECIFIED;
+    }
+    return property_->GetRequestedOrientation();
 }
 
 std::string WindowSessionImpl::GetContentInfo()
@@ -1273,6 +1299,21 @@ void WindowSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         inputEventConsumer = inputEventConsumer_;
+    }
+    int32_t keyCode = keyEvent->GetKeyCode();
+    int32_t keyAction = keyEvent->GetKeyAction();
+    if (keyCode == MMI::KeyEvent::KEYCODE_BACK && keyAction == MMI::KeyEvent::KEY_ACTION_UP) {
+        WLOGFI("input event is consumed by back, return");
+        if (inputEventConsumer != nullptr) {
+            WLOGFD("Transfer key event to inputEventConsumer");
+            if (inputEventConsumer->OnInputEvent(keyEvent)) {
+                return;
+            }
+            PerformBack();
+            return;
+        }
+        HandleBackEvent();
+        return;
     }
     if (inputEventConsumer != nullptr) {
         WLOGD("Transfer key event to inputEventConsumer");

@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "window_extension_proxy.h"
+#include "window_extension_client_proxy.h"
 #include "window_extension_stub.h"
 #include "window_extension_stub_impl.h"
 #include "window_extension_client_interface.h"
@@ -33,6 +34,8 @@ public:
     void TearDown() override;
     sptr<WindowExtensionStub> mockWindowExtensionStub_;
     sptr<WindowExtensionProxy> windowExtensionProxy_;
+    sptr<IRemoteObject> impl;
+    sptr<WindowExtensionClientProxy> windowExtensionClientProxy_;
 };
 
 void WindowExtensionProxyTest::SetUpTestCase()
@@ -47,6 +50,8 @@ void WindowExtensionProxyTest::SetUp()
 {
     mockWindowExtensionStub_ = new WindowExtensionStubImpl("name");
     windowExtensionProxy_ = new WindowExtensionProxy(mockWindowExtensionStub_);
+    impl = nullptr;
+    windowExtensionClientProxy_ = new WindowExtensionClientProxy(impl);
 }
 
 void WindowExtensionProxyTest::TearDown()
@@ -68,6 +73,33 @@ HWTEST_F(WindowExtensionProxyTest, SetBounds, Function | SmallTest | Level2)
     windowExtensionProxy_->GetExtensionWindow(clientToken);
     Rect rect;
     windowExtensionProxy_->SetBounds(rect);
+}
+
+/**
+ * @tc.name: OnWindowReady
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionProxyTest, OnWindowReady, Function | SmallTest | Level2)
+{
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    windowExtensionClientProxy_->OnWindowReady(surfaceNode);
+    ASSERT_EQ(nullptr, surfaceNode);
+}
+
+/**
+ * @tc.name: OnRemoteRequest
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionProxyTest, OnRemoteRequest, Function | SmallTest | Level2)
+{
+    uint32_t code = 1000;
+    MessageParcel data = {};
+    MessageParcel reply = {};
+    MessageOption option = {MessageOption::TF_SYNC};
+    ASSERT_EQ(-1, mockWindowExtensionStub_->OnRemoteRequest(code, data, reply, option));
 }
 }
 }
