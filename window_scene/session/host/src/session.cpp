@@ -1072,6 +1072,10 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     if (!IsSystemSession() && !IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (pointerEvent == nullptr) {
+        WLOGFE("PointerEvent is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         if (CheckDialogOnForeground()) {
             WLOGFD("Has dialog on foreground, not transfer pointer event");
@@ -1083,12 +1087,6 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
-    if (pointerEvent == nullptr) {
-        WLOGFE("PointerEvent is nullptr");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    WLOGFD("Session TransferPointEvent, eventId:%{public}d, persistentId:%{public}d, bundleName:%{public}s, "
-        "pid:%{public}d", pointerEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
         WLOGFD("The pointerEvent does not report normally, bundleName:%{public}s not response, pid:%{public}d, "
             "persistentId:%{public}d", callingBundleName_.c_str(), callingPid_, persistentId_);
@@ -1106,6 +1104,16 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     if (WSError ret = windowEventChannel_->TransferPointerEvent(pointerEvent); ret != WSError::WS_OK) {
         WLOGFE("TransferPointer failed");
         return ret;
+    }
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
+        WLOGFD("Session TransferPointEvent, eventId:%{public}d, action:%{public}s, persistentId:%{public}d, "
+            "bundleName:%{public}s, pid:%{public}d", pointerEvent->GetId(), pointerEvent->DumpPointerAction(),
+            persistentId_, callingBundleName_.c_str(), callingPid_);
+    } else {
+        WLOGFI("Session TransferPointEvent, eventId:%{public}d, action:%{public}s, persistentId:%{public}d, "
+            "bundleName:%{public}s, pid:%{public}d", pointerEvent->GetId(), pointerEvent->DumpPointerAction(),
+            persistentId_, callingBundleName_.c_str(), callingPid_);
     }
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW ||
