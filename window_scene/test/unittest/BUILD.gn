@@ -19,6 +19,7 @@ group("unittest") {
   testonly = true
 
   deps = [
+    "ws_scene_session_converter_test",
     ":ws_event_stage_test",
     ":ws_move_drag_controller_test",
     ":ws_scene_session_manager_proxy_test",
@@ -306,6 +307,19 @@ ohos_unittest("ws_session_display_power_controller_test") {
   module_out_path = module_out_path
 
   sources = [ "session_display_power_controller_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_scene_session_converter_test") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_converter_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 
