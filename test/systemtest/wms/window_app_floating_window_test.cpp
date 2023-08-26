@@ -126,7 +126,6 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow01, Function | MediumTest
     Rect fltWindRect = GetRectWithVpr(0, 0, 400, 600);
     sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT, fltWindRect);
     ASSERT_NE(nullptr, fltWin);
-
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
 

@@ -218,7 +218,7 @@ HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService2, Function | Sm
 HWTEST_F(MockSessionManagerServiceTest, GetSceneSessionManager, Function | SmallTest | Level2)
 {
     MockSessionManagerService* mService = new MockSessionManagerService();
-    mService->GetSceneSessionManager();
+    ASSERT_EQ(MockScreenManagerService::GetInstance().screenSessionManager_, mService->GetSceneSessionManager());
 }
 }
 }
