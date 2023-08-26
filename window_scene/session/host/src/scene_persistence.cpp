@@ -34,7 +34,6 @@ ScenePersistence::ScenePersistence(const SessionInfo& info, const int32_t& persi
     strSnapshotFile_ =
         strPersistPath_ + info.bundleName_ + UNDERLINE_SEPARATOR + std::to_string(fileID);
     strUpdatedIconPath_ = strPersistPath_ + info.bundleName_;
-        
 }
 
 void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap)

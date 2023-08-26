@@ -124,8 +124,8 @@ public:
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
     std::string GetSessionSnapshotFilePath();
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap> &icon);
-    std::string GetUpdatedIconPath():
-    void RegisterSetWindowPatternFunc(sptr<SetWindowScenePatternFunc> func)
+    std::string GetUpdatedIconPath();
+    void RegisterSetWindowPatternFunc(sptr<SetWindowScenePatternFunc> func);
     {
         setWindowScenePatternFunc_ = func;
     };
