@@ -281,6 +281,7 @@ void SceneSessionManager::ConfigWindowSceneXml()
     }
 
     ConfigWindowSizeLimits();
+    ConfigSnapshotScale();
 }
 WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &token,
     const ContinueState& continueState)
@@ -632,6 +633,19 @@ void SceneSessionManager::ConfigSubWindowSizeLimits(const WindowSceneConfig::Con
     }
 }
 
+void SceneSessionManager::ConfigSnapshotScale()
+{
+    const auto& config = WindowSceneConfig::GetConfig();
+    WindowSceneConfig::ConfigItem item = config["snapshotScale"];
+    if (item.IsFloats()) {
+        auto snapshotScale = *item.floatsValue_;
+        if (snapshotScale.size() != 1 || snapshotScale[0] <= 0 || snapshotScale[0] > 1) {
+            return;
+        }
+        snapshotScale_ = snapshotScale[0];
+    }
+}
+
 void SceneSessionManager::SetRootSceneContext(const std::weak_ptr<AbilityRuntime::Context>& contextWeak)
 {
     rootSceneContextWeak_ = contextWeak;
@@ -821,6 +835,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         auto persistentId = sceneSession->GetPersistentId();
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSession(%d )", persistentId);
         sceneSession->SetSystemConfig(systemConfig_);
+        sceneSession->SetSnapshotScale(snapshotScale_);
         UpdateParentSession(sceneSession, property);
         PreHandleCollaborator(sceneSession);
         {
