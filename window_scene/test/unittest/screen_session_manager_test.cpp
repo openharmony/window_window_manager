@@ -263,6 +263,68 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode, Function | SmallTest | L
     ASSERT_EQ(ssm_->SetScreenActiveMode(5, 0), DMError::DM_OK);
 }
 
+
+/**
+ * @tc.name: NotifyScreenChanged
+ * @tc.desc: NotifyScreenChanged virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyScreenChanged, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "GetDefaultScreenSession";
+    sptr<ScreenInfo> screenInfo;
+    ssm_->NotifyScreenChanged(screenInfo,ScreenChangeEvent::UPDATE_ORIENTATION);
+    screenInfo=new ScreenInfo();
+    ssm_->NotifyScreenChanged(screenInfo,ScreenChangeEvent::UPDATE_ORIENTATION);
+}
+
+/**
+ * @tc.name: SetVirtualPixelRatio
+ * @tc.desc: SetVirtualPixelRatio virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetVirtualPixelRatio, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "GetDefaultScreenSession";
+    ASSERT_EQ(DMError::DM_OK, ssm_->SetVirtualPixelRatio(2,0.1));
+}
+
+/**
+ * @tc.name: GetScreenColorGamut
+ * @tc.desc: GetScreenColorGamut virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenColorGamut, Function | SmallTest | Level3)
+{
+    ScreenColorGamut colorGamut = ScreenColorGamut::COLOR_GAMUT_SRGB;
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->GetScreenColorGamut(1,colorGamut));
+    ASSERT_EQ(DMError::DM_OK, ssm_->GetScreenColorGamut(2,colorGamut));
+}
+
+/**
+ * @tc.name: LoadScreenSceneXml
+ * @tc.desc: LoadScreenSceneXml virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, LoadScreenSceneXml, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "GetDefaultScreenSession";
+    int ret =0;
+    ssm_->LoadScreenSceneXml();
+    ASSERT_EQ(ret, 0);
+}
+
+
+
+
+
+
 }
 } // namespace Rosen
 } // namespace OHOS

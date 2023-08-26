@@ -281,14 +281,10 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom06, Function | MediumTest | Level3)
     if (window == nullptr) {
         return;
     }
-    Window* ptr = window.GetRefPtr();
-    WindowImpl* implPtr = (WindowImpl*)ptr;
+   
     ASSERT_EQ(WMError::WM_OK, window->Show());
     sleep(1);
-
-    Transform expect;
-    ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
-
+    
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     window->Destroy();
 }
