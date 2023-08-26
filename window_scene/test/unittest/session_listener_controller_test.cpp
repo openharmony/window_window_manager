@@ -58,6 +58,9 @@ HWTEST_F(SessionListenerControllerTest, DelSessionListener, Function | SmallTest
     sptr<ISessionListener> listener;
     ASSERT_EQ(listener, nullptr);
     slController.DelSessionListener(listener);
+    int32_t persistentId = 1;
+    slController.NotifySessionLabelUpdated(persistentId);
+    ASSERT_EQ(persistentId, 1);
     GTEST_LOG_(INFO) << "SessionListenerControllerTest: DelSessionListener end";
 }
 
@@ -75,6 +78,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionCreated, Function | SmallTe
 
     persistentId = 1;
     slController.NotifySessionCreated(persistentId);
+    ASSERT_EQ(persistentId, 1);
     GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionCreated end";
 }
 
@@ -92,6 +96,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionDestroyed, Function | Small
 
     persistentId = 1;
     slController.NotifySessionDestroyed(persistentId);
+    ASSERT_EQ(persistentId, 1);
     GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionDestroyed end";
 }
 
@@ -106,6 +111,9 @@ HWTEST_F(SessionListenerControllerTest, HandleUnInstallApp1, Function | SmallTes
     SessionListenerController slController;
     std::list<int32_t> sessions;
     slController.HandleUnInstallApp(sessions);
+    int32_t persistentId = 1;
+    slController.NotifySessionLabelUpdated(persistentId);
+    ASSERT_EQ(persistentId, 1);
     GTEST_LOG_(INFO) << "SessionListenerControllerTest: HandleUnInstallApp1 end";
 }
 
@@ -121,6 +129,9 @@ HWTEST_F(SessionListenerControllerTest, HandleUnInstallApp2, Function | SmallTes
     std::list<int32_t> sessions;
     sessions.push_front(1);
     slController.HandleUnInstallApp(sessions);
+    int32_t persistentId = 1;
+    slController.NotifySessionLabelUpdated(persistentId);
+    ASSERT_EQ(persistentId, 1);
     GTEST_LOG_(INFO) << "SessionListenerControllerTest: HandleUnInstallApp2 end";
 }
 
@@ -138,6 +149,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionSnapshotChanged, Function |
 
     persistentId = 1;
     slController.NotifySessionSnapshotChanged(persistentId);
+    ASSERT_EQ(persistentId, 1);
     GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionSnapshotChanged end";
 }
 
@@ -155,6 +167,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionMovedToFront, Function | Sm
 
     persistentId = 1;
     slController.NotifySessionMovedToFront(persistentId);
+    ASSERT_EQ(persistentId, 1);
     GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionMovedToFront end";
 }
 
@@ -172,6 +185,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionFocused, Function | SmallTe
 
     persistentId = 1;
     slController.NotifySessionFocused(persistentId);
+    ASSERT_EQ(persistentId, 1);
     GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionFocused end";
 }
 
@@ -189,6 +203,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionUnfocused, Function | Small
 
     persistentId = 1;
     slController.NotifySessionUnfocused(persistentId);
+    ASSERT_EQ(persistentId, 1);
     GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionUnfocused end";
 }
 
@@ -206,6 +221,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionClosed, Function | SmallTes
 
     persistentId = 1;
     slController.NotifySessionClosed(persistentId);
+    ASSERT_EQ(persistentId, 1);
     GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionClosed end";
 }
 
@@ -223,6 +239,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionLabelUpdated, Function | Sm
 
     persistentId = 1;
     slController.NotifySessionLabelUpdated(persistentId);
+    ASSERT_EQ(persistentId, 1);
     GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionLabelUpdated end";
 }
 
@@ -238,6 +255,9 @@ HWTEST_F(SessionListenerControllerTest, OnListenerDied, Function | SmallTest | L
     wptr<IRemoteObject> remote;
     slController.OnListenerDied(remote);
 
+    int32_t persistentId = 1;
+    slController.NotifySessionLabelUpdated(persistentId);
+    ASSERT_EQ(persistentId, 1);
     GTEST_LOG_(INFO) << "SessionListenerControllerTest: OnListenerDied end";
 }
 
@@ -265,6 +285,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionIconChanged, Function | Sma
 
     persistentId = 1;
     slController.NotifySessionIconChanged(persistentId, icon);
+    ASSERT_EQ(persistentId, 1);
     GTEST_LOG_(INFO) << "SessionListenerControllerTest: NotifySessionIconChanged end";
 }
 } // namespace
