@@ -62,6 +62,19 @@ HWTEST_F(WindowSessionPropertyTest, SetRaiseEnabled001, Function | SmallTest | L
     property->SetRaiseEnabled(false);
     ASSERT_EQ(property->GetRaiseEnabled(), false);
 }
+
+/**
+ * @tc.name: SetHideNonSystemFloatingWindows001
+ * @tc.desc: SetHideNonSystemFloatingWindows and GetHideNonSystemFloatingWindows to check the value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetHideNonSystemFloatingWindows001, Function | SmallTest | Level2)
+{
+    WindowSessionProperty* property = new WindowSessionProperty();
+    ASSERT_EQ(property->GetHideNonSystemFloatingWindows(), false);
+    property->SetHideNonSystemFloatingWindows(true);
+    ASSERT_EQ(property->GetHideNonSystemFloatingWindows(), true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

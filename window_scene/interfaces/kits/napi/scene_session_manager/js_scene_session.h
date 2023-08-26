@@ -79,6 +79,7 @@ private:
     void ProcessShowWhenLockedRegister();
     void ProcessRequestedOrientationChange();
     void ProcessRaiseAboveTargetRegister();
+    void ProcessForceHideChangeRegister();
 
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(SessionInfo& info);
@@ -106,6 +107,7 @@ private:
     void OnIsCustomAnimationPlaying(bool status);
     void OnShowWhenLocked(bool showWhenLocked);
     void OnReuqestedOrientationChange(uint32_t orientation);
+    void OnForceHideChange(bool hide);
 
     NativeEngine& engine_;
     wptr<SceneSession> weakSession_ = nullptr;

@@ -51,6 +51,7 @@ using NotifyWindowAnimationFlagChangeFunc = std::function<void(const bool flag)>
 using NotifyShowWhenLockedFunc = std::function<void(bool showWhenLocked)>;
 using NotifyReqOrientationChangeFunc = std::function<void(uint32_t orientation)>;
 using NotifyRaiseAboveTargetFunc = std::function<void(int32_t subWindowId)>;
+using NotifyForceHideChangeFunc = std::function<void(bool hide)>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -77,6 +78,7 @@ public:
         NotifyShowWhenLockedFunc OnShowWhenLocked_;
         NotifyReqOrientationChangeFunc OnRequestedOrientationChange_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
+        NotifyForceHideChangeFunc OnForceHideChange_;
     };
 
     // func for change window scene pattern property
@@ -147,6 +149,7 @@ public:
     static const wptr<SceneSession> GetEnterWindow();
     static void ClearEnterWindow();
     void SetRequestedOrientation(Orientation orientation);
+    void NotifyForceHideChange(bool hide);
     Orientation GetRequestedOrientation() const;
     WSError BindDialogTarget(const sptr<SceneSession>& sceneSession);
     void DumpSessionInfo(std::vector<std::string> &info) const;

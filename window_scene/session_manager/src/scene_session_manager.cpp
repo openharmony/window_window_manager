@@ -1076,6 +1076,8 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
             {
                 std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
                 sceneSessionMap_.erase(dialog->GetPersistentId());
+                systemTopSceneSessionMap_.erase(dialog->GetPersistentId());
+                nonSystemFloatSceneSessionMap_.erase(dialog->GetPersistentId());
             }
         }
         return WSError::WS_OK;
@@ -1115,6 +1117,8 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
         if (needRemoveSession) {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMap_.erase(persistentId);
+            systemTopSceneSessionMap_.erase(persistentId);
+            nonSystemFloatSceneSessionMap_.erase(persistentId);
             if (listenerController_ != nullptr &&
                 (scnSession->GetSessionInfo().abilityInfo) != nullptr &&
                 !(scnSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
@@ -1312,6 +1316,8 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t& 
         {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMap_.erase(persistentId);
+            systemTopSceneSessionMap_.erase(persistentId);
+            nonSystemFloatSceneSessionMap_.erase(persistentId);
         }
         if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
             auto sessionInfo = sceneSession->GetSessionInfo();
@@ -1356,6 +1362,27 @@ void SceneSessionManager::CleanUserMap()
         }
     }
     WLOGFI("CleanUserMap out size = %{public}zu", sceneSessionMap_.size());
+
+    WLOGFI("Clean systemTopSceneSessionMap in size = %{public}zu", systemTopSceneSessionMap_.size());
+    iter = systemTopSceneSessionMap_.begin();
+    while (iter != systemTopSceneSessionMap_.end()) {
+        if (iter->second != nullptr && !iter->second->GetSessionInfo().isSystem_) {
+            iter = systemTopSceneSessionMap_.erase(iter);
+        } else {
+            iter++;
+        }
+    }
+    WLOGFI("Clean systemTopSceneSessionMap out size = %{public}zu", systemTopSceneSessionMap_.size());
+    WLOGFI("Clean nonSystemFloatSceneSessionMap in size = %{public}zu", nonSystemFloatSceneSessionMap_.size());
+    iter = nonSystemFloatSceneSessionMap_.begin();
+    while (iter != nonSystemFloatSceneSessionMap_.end()) {
+        if (iter->second != nullptr && !iter->second->GetSessionInfo().isSystem_) {
+            iter = nonSystemFloatSceneSessionMap_.erase(iter);
+        } else {
+            iter++;
+        }
+    }
+    WLOGFI("Clean nonSystemFloatSceneSessionMap out size = %{public}zu", nonSystemFloatSceneSessionMap_.size());
 }
 
 WSError SceneSessionManager::SwitchUser(int32_t oldUserId, int32_t newUserId, std::string &fileDir)
@@ -1667,8 +1694,86 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
             UpdatePropertyRaiseEnabled(property, sceneSession);
             break;
         }
+        case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS: {
+            UpdateHideNonSystemFloatingWindows(property, sceneSession);
+            break;
+        }
         default:
             break;
+    }
+}
+
+void SceneSessionManager::UpdateHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
+    const sptr<SceneSession>& sceneSession)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("Update property hideNonSystemFloatingWindows permission denied!");
+        return;
+    }
+
+    auto propertyOld = sceneSession->GetSessionProperty();
+    if (propertyOld == nullptr) {
+        WLOGFI("UpdateHideNonSystemFloatingWindows, session property null");
+        return;
+    }
+
+    bool hideNonSystemFloatingWindowsOld = propertyOld->GetHideNonSystemFloatingWindows();
+    bool hideNonSystemFloatingWindowsNew = property->GetHideNonSystemFloatingWindows();
+    if (hideNonSystemFloatingWindowsOld == hideNonSystemFloatingWindowsNew) {
+        WLOGFI("property hideNonSystemFloatingWindows not change");
+        return;
+    }
+
+    if (IsSessionVisible(sceneSession)) {
+        if (hideNonSystemFloatingWindowsOld) {
+            UpdateForceHideState(sceneSession, propertyOld, false);
+        } else {
+            UpdateForceHideState(sceneSession, property, true);
+        }
+    }
+    propertyOld->SetHideNonSystemFloatingWindows(hideNonSystemFloatingWindowsNew);
+}
+
+void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSession,
+    const sptr<WindowSessionProperty>& property, bool add)
+{
+    if (property == nullptr) {
+        WLOGFD("property is nullptr");
+        return;
+    }
+    auto persistentId = sceneSession->GetPersistentId();
+    bool forceHideFloatOld = !systemTopSceneSessionMap_.empty();
+    bool notifyAll = false;
+    if (add) {
+        if (property->GetHideNonSystemFloatingWindows()) {
+            systemTopSceneSessionMap_.insert({ persistentId, sceneSession });
+            notifyAll = !forceHideFloatOld;
+        } else if (property->IsFloatingWindowAppType()) {
+            nonSystemFloatSceneSessionMap_.insert({ persistentId, sceneSession });
+            if (forceHideFloatOld) {
+                sceneSession->NotifyForceHideChange(true);
+            }
+        }
+    } else {
+        if (property->GetHideNonSystemFloatingWindows()) {
+            systemTopSceneSessionMap_.erase(persistentId);
+            notifyAll = forceHideFloatOld && systemTopSceneSessionMap_.empty();
+        } else if (property->IsFloatingWindowAppType()) {
+            nonSystemFloatSceneSessionMap_.erase(persistentId);
+            if (property->GetForceHide()) {
+                sceneSession->NotifyForceHideChange(false);
+            }
+        }
+    }
+    if (notifyAll) {
+        bool forceHideFloatNew = !systemTopSceneSessionMap_.empty();
+        for (const auto &item : nonSystemFloatSceneSessionMap_) {
+            auto forceHideSceneSession = item.second;
+            auto forceHideProperty = forceHideSceneSession->GetWindowSessionProperty();
+            if (forceHideProperty && forceHideFloatNew != forceHideProperty->GetForceHide()) {
+                forceHideSceneSession->NotifyForceHideChange(forceHideFloatNew);
+            }
+        }
     }
 }
 
@@ -2245,11 +2350,13 @@ void SceneSessionManager::OnSessionStateChange(int32_t persistentId, const Sessi
     }
     switch (state) {
         case SessionState::STATE_FOREGROUND:
+            UpdateForceHideState(sceneSession, sceneSession->GetWindowSessionProperty(), true);
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
             HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
             UpdatePrivateStateAndNotify(persistentId);
             break;
         case SessionState::STATE_BACKGROUND:
+            UpdateForceHideState(sceneSession, sceneSession->GetWindowSessionProperty(), false);
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
             HandleKeepScreenOn(sceneSession, false);
             UpdatePrivateStateAndNotify(persistentId);
