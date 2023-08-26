@@ -99,6 +99,7 @@ HWTEST_F(WindowDisplayZoomControllerTest, WindowDisplayZoomControllerTest02, Fun
     displayController_->UpdateWindowZoomInfo(1);
     std::vector<sptr<WindowNode>> nodes;
     displayController_->ClearZoomTransform(nodes);
+    ASSERT_EQ(displayId, 0);
 }
 }
 }
