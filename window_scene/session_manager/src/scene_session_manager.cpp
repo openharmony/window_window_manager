@@ -2366,10 +2366,10 @@ WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject> &token,
         sessionListener_->OnSessionIconChange(sceneSession->GetPersistentId(), icon);
     }
     if (listenerController_ != nullptr &&
-            (sceneSession->GetSessionInfo().abilityInfo) != nullptr &&
-            !(sceneSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
-            WLOGFD("NotifySessionIconChanged, id: %{public}d", sceneSession->GetPersistentId());
-            listenerController_->NotifySessionIconChanged(sceneSession->GetPersistentId(), icon);
+        (sceneSession->GetSessionInfo().abilityInfo) != nullptr &&
+        !(sceneSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
+        WLOGFD("NotifySessionIconChanged, id: %{public}d", sceneSession->GetPersistentId());
+        listenerController_->NotifySessionIconChanged(sceneSession->GetPersistentId(), icon);
     }
     return WSError::WS_OK;
 }
