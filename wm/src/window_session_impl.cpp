@@ -655,6 +655,21 @@ WMError WindowSessionImpl::SetRaiseByClickEnabled(bool raiseEnabled)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED);
 }
 
+WMError WindowSessionImpl::HideNonSystemFloatingWindows(bool shouldHide)
+{
+    WLOGFD("hide non-system floating windows");
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    property_->SetHideNonSystemFloatingWindows(shouldHide);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS);
+}
+
+bool WindowSessionImpl::IsFloatingWindowAppType() const
+{
+    return property_ != nullptr && property_->IsFloatingWindowAppType();
+}
+
 bool WindowSessionImpl::GetTouchable() const
 {
     return property_->GetTouchable();
