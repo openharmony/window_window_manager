@@ -26,12 +26,14 @@ constexpr uint8_t IMAGE_QUALITY = 85;
 }
 
 std::string ScenePersistence::strPersistPath_;
+std::string ScenePersistence::strPersistUpdatedIconPath_;
 
 ScenePersistence::ScenePersistence(const SessionInfo& info, const int32_t& persistentId)
 {
     uint32_t fileID = static_cast<uint32_t>(persistentId) & 0x3fffffff;
     strSnapshotFile_ =
         strPersistPath_ + info.bundleName_ + UNDERLINE_SEPARATOR + std::to_string(fileID);
+    strUpdatedIconPath_ = strPersistPath_ + info.bundleName_;
 }
 
 void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap)
@@ -63,6 +65,36 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
 std::string ScenePersistence::GetSnapshotFilePath() const
 {
     return strSnapshotFile_;
+}
+
+void ScenePersistence::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    if (pixelMap == nullptr || strUpdatedIconPath_.find('/') == std::string::npos) {
+        return;
+    }
+
+    OHOS::Media::ImagePacker imagePacker;
+    OHOS::Media::PackOption option;
+    option.format = "image/jpeg";
+    option.quality = IMAGE_QUALITY;
+    option.numberHint = 1;
+    std::set<std::string> formats;
+    auto ret = imagePacker.GetSupportedFormats(formats);
+    if (ret) {
+        WLOGFE("get supported formats() error : %{public}u", ret);
+        return;
+    }
+
+    imagePacker.StartPacking(GetUpdatedIconPath(), option);
+    imagePacker.AddImage(*pixelMap);
+    int64_t packedSize = 0;
+    imagePacker.FinalizePacking(packedSize);
+    WLOGFD("SaveUpdatedIcon finished");
+}
+
+std::string ScenePersistence::GetUpdatedIconPath() const
+{
+    return strUpdatedIconPath_;
 }
 
 std::pair<uint32_t, uint32_t> ScenePersistence::GetSnapshotSize() const

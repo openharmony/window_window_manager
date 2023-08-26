@@ -70,6 +70,8 @@ private:
     void ProcessTerminateSessionRegisterNew();
     void ProcessTerminateSessionRegisterTotal();
     void ProcessSessionExceptionRegister();
+    void ProcessUpdateSessionLabelRegister();
+    void ProcessUpdateSessionIconRegister();
     void ProcessSystemBarPropertyChangeRegister();
     void ProcessNeedAvoidRegister();
     void ProcessPendingSessionToForegroundRegister();
@@ -97,6 +99,8 @@ private:
     void TerminateSession(const SessionInfo& info);
     void TerminateSessionNew(const SessionInfo& info, bool needStartCaller);
     void TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType);
+    void UpdateSessionLabel(const std::string &label);
+    void UpdateSessionIcon(const std::string &iconPath);
     void OnSessionException(const SessionInfo& info);
     static JsSessionType GetApiType(WindowType type);
     void OnSystemBarPropertyChange(const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
