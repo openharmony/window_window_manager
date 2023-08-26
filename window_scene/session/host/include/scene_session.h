@@ -16,9 +16,11 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 
+#include <memory>
 #include <mutex>
 
 #include "iremote_object.h"
+#include "platform/image_native/pixel_map.h"
 #include "session/host/include/session.h"
 #include "session/host/include/move_drag_controller.h"
 #include "wm_common.h"
@@ -123,6 +125,8 @@ public:
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
     std::string GetSessionSnapshotFilePath();
+    void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap> &icon);
+    std::string GetUpdatedIconPath();
     void RegisterSetWindowPatternFunc(sptr<SetWindowScenePatternFunc> func)
     {
         setWindowScenePatternFunc_ = func;
