@@ -661,8 +661,7 @@ WSError Session::Disconnect()
     WLOGFI("Disconnect session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
     if (state == SessionState::STATE_ACTIVE) {
-        constexpr float scale = 0.5;
-        snapshot_ = Snapshot(scale);
+        snapshot_ = Snapshot();
         if (scenePersistence_ && snapshot_) {
             scenePersistence_->SaveSnapshot(snapshot_);
         }
@@ -1195,10 +1194,10 @@ WSError Session::TransferFocusStateEvent(bool focusState)
     return windowEventChannel_->TransferFocusState(focusState);
 }
 
-std::shared_ptr<Media::PixelMap> Session::Snapshot(float scale)
+std::shared_ptr<Media::PixelMap> Session::Snapshot()
 {
     auto callback = std::make_shared<SurfaceCaptureFuture>();
-    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, scale, scale);
+    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, snapshotScale_, snapshotScale_);
     if (!ret) {
         WLOGFE("TakeSurfaceCapture failed");
         return nullptr;
@@ -1417,6 +1416,11 @@ WindowType Session::GetWindowType() const
 void Session::SetSystemConfig(const SystemSessionConfig& systemConfig)
 {
     systemConfig_ = systemConfig;
+}
+
+void Session::SetSnapshotScale(const float snapshotScale)
+{
+    snapshotScale_ = snapshotScale;
 }
 
 WSError Session::RequestSessionBack(bool needMoveToBackground)
