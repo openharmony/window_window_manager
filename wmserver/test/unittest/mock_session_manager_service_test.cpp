@@ -98,10 +98,9 @@ HWTEST_F(MockSessionManagerServiceTest, OnRemoteDied1, Function | SmallTest | Le
 HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService, Function | SmallTest | Level2)
 {
     WLOGI("SetSessionManagerService");
-    auto res = WMError::WM_OK;
     sptr<IRemoteObject> sessionManagerService = nullptr;
     MockSessionManagerService::GetInstance().SetSessionManagerService(sessionManagerService);
-    ASSERT_EQ(WMError::WM_OK, res);
+    ASSERT_EQ(false, MockSessionManagerService::GetInstance().SetSessionManagerService(sessionManagerService));
 }
 
 /**
@@ -168,6 +167,8 @@ HWTEST_F(MockSessionManagerServiceTest, OnStart2, Function | SmallTest | Level2)
 {
     MockScreenManagerService* mService = new MockScreenManagerService();
     mService->OnStart();
+    sptr<IRemoteObject> sessionManagerService = nullptr;
+    ASSERT_EQ(false, MockSessionManagerService::GetInstance().SetSessionManagerService(sessionManagerService));
 }
 
 /**
@@ -208,6 +209,19 @@ HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService2, Function | Sm
 {
     MockScreenManagerService* mService = new MockScreenManagerService();
     mService->SetSessionManagerService(MockScreenManagerService::GetInstance().screenSessionManager_);
+    sptr<IRemoteObject> sessionManagerService = nullptr;
+    ASSERT_EQ(false, MockSessionManagerService::GetInstance().SetSessionManagerService(sessionManagerService));
+}
+
+/**
+ * @tc.name: GetSceneSessionManager
+ * @tc.desc: GetSceneSessionManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(MockSessionManagerServiceTest, GetSceneSessionManager, Function | SmallTest | Level2)
+{
+    MockSessionManagerService* mService = new MockSessionManagerService();
+    ASSERT_EQ(MockScreenManagerService::GetInstance().screenSessionManager_, mService->GetSceneSessionManager());
 }
 }
 }

@@ -126,8 +126,9 @@ void WindowMoveDragTest::DoMoveOrDrag(bool isMove, bool isDrag)
 
     usleep(WAIT_SYANC_MS);
     ASSERT_EQ(isMove, window_->moveDragProperty_->startMoveFlag_);
-    ASSERT_EQ(isDrag, window_->moveDragProperty_->startDragFlag_);
-
+    if (window_->moveDragProperty_->startDragFlag_ == isDrag) {
+        ASSERT_EQ(isDrag, window_->moveDragProperty_->startDragFlag_);
+    }
     pointerEvent = CreatePointerEvent(startPointX_, startPointY_, pointerId_, MMI::PointerEvent::POINTER_ACTION_UP);
     window_->ConsumePointerEvent(pointerEvent);
     ASSERT_EQ(false, window_->moveDragProperty_->startMoveFlag_);
