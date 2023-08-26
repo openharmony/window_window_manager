@@ -315,16 +315,46 @@ HWTEST_F(ScreenSessionManagerTest, LoadScreenSceneXml, Function | SmallTest | Le
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "GetDefaultScreenSession";
-    int ret =0;
     ssm_->LoadScreenSceneXml();
-    ASSERT_EQ(ret, 0);
 }
 
+/**
+ * @tc.name: GetScreenGamutMap
+ * @tc.desc: GetScreenGamutMap virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenGamutMap, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "GetDefaultScreenSession";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    ScreenGamutMap gamutMap;
+    ASSERT_EQ(DMError::DM_OK, ssm_->GetScreenGamutMap(2,gamutMap));
+}
 
-
-
-
-
+/**
+ * @tc.name: MakeExpand
+ * @tc.desc: MakeExpand virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, MakeExpand, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "MakeExpand";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    std::vector<ScreenId> mirrorScreenIds;
+    std::vector<Point> startPoints;
+    ScreenId screenGroupId2 = DISPLAY_ID_INVALID;
+    ASSERT_NE(DMError::DM_ERROR_RENDER_SERVICE_FAILED, ssm_->MakeExpand(mirrorScreenIds,startPoints,screenGroupId2));
+}
 }
 } // namespace Rosen
 } // namespace OHOS
