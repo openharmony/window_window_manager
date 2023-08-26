@@ -16,7 +16,6 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_PERSISTENCE_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_PERSISTENCE_H
 
-#include <string>
 #include <sys/stat.h>
 
 #include <refbase.h>

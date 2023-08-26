@@ -22,7 +22,6 @@
 #include <native_engine/native_engine.h>
 #include <native_engine/native_value.h>
 #include <refbase.h>
-#include <string>
 
 #include "interfaces/include/ws_common.h"
 #include "session/host/include/scene_session.h"

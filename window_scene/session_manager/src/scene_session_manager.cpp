@@ -2345,8 +2345,8 @@ WSError SceneSessionManager::SetSessionLabel(const sptr<IRemoteObject> &token, c
         sessionListener_->OnSessionLabelChange(sceneSession->GetPersistentId(), label);
     }
     if (listenerController_ != nullptr) {
-        WLOGFD("NotifySessionLabelUpdated, id: %{public}d", iter.first);
-        listenerController_->NotifySessionLabelUpdated(iter.first);
+        WLOGFD("NotifySessionLabelUpdated, id: %{public}d", sceneSession->GetPersistentId());
+        listenerController_->NotifySessionLabelUpdated(sceneSession->GetPersistentId());
     }
     return WSError::WS_OK;
 }
@@ -2363,13 +2363,13 @@ WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject> &token,
     sceneSession->SetSessionIcon(icon);
     if (sessionListener_ != nullptr) {
         WLOGFI("try to run OnSessionIconChange.");
-        sessionListener_->OnSessionIconChange(iter.first, icon);
+        sessionListener_->OnSessionIconChange(sceneSession->GetPersistentId(), icon);
     }
     if (listenerController_ != nullptr &&
             (sceneSession->GetSessionInfo().abilityInfo) != nullptr &&
             !(sceneSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
-            WLOGFD("NotifySessionIconChanged, id: %{public}d", iter.first);
-            listenerController_->NotifySessionIconChanged(iter.first, icon);
+            WLOGFD("NotifySessionIconChanged, id: %{public}d", sceneSession->GetPersistentId());
+            listenerController_->NotifySessionIconChanged(sceneSession->GetPersistentId(), icon);
     }
     return WSError::WS_OK;
 }

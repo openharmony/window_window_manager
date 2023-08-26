@@ -19,7 +19,6 @@
 #include "session/host/include/session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
-#include <string>
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
@@ -1154,7 +1153,7 @@ void JsSceneSession::UpdateSessionLabel(const std:string &label)
                 WLOGFE("[NAPI]jsCallBack is nullptr");
                 return;
             }
-            NativeValue* jsLabel = CreateJsValue(engine, static_cast<int32_t>(label));
+            NativeValue* jsLabel = CreateJsValue(engine, label);
             if (jsLabel == nullptr) {
                 WLOGFE("[NAPI]this target jsLabel is nullptr");
                 return;
@@ -1213,7 +1212,7 @@ void JsSceneSession::UpdateSessionIcon(const std:string &iconPath)
                 WLOGFE("[NAPI]jsCallBack is nullptr");
                 return;
             }
-            NativeValue* jsIconPath = CreateJsValue(engine, static_cast<int32_t>(iconPath));
+            NativeValue* jsIconPath = CreateJsValue(engine, iconPath);
             if (jsIconPath == nullptr) {
                 WLOGFE("[NAPI]this target jsIconPath is nullptr");
                 return;
