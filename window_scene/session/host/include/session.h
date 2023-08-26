@@ -295,8 +295,8 @@ protected:
     NotifyTerminateSessionFunc terminateSessionFunc_;
     NotifyTerminateSessionFuncNew terminateSessionFuncNew_;
     NotifyTerminateSessionFuncTotal terminateSessionFuncTotal_;
-    NotifySessionLabelUpdated updateSessionLabelFunc_;
-    NotifySessionIconUpdated updateSessionIconFunc_;
+    NofitySessionLabelUpdatedFunc updateSessionLabelFunc_;
+    NofitySessionIconUpdatedFunc updateSessionIconFunc_;
     std::vector<std::shared_ptr<NotifySessionExceptionFunc>> sessionExceptionFuncs_;
     NotifyPendingSessionToForegroundFunc pendingSessionToForegroundFunc_;
     NotifyPendingSessionToBackgroundForDelegatorFunc pendingSessionToBackgroundForDelegatorFunc_;
