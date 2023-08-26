@@ -125,7 +125,7 @@ public:
     std::string GetSessionSnapshotFilePath();
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap> &icon);
     std::string GetUpdatedIconPath();
-    void RegisterSetWindowPatternFunc(sptr<SetWindowScenePatternFunc> func);
+    void RegisterSetWindowPatternFunc(sptr<SetWindowScenePatternFunc> func)
     {
         setWindowScenePatternFunc_ = func;
     };
