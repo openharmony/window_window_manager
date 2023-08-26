@@ -77,6 +77,10 @@ public:
         TRANS_ID_NOTIFY_DUMP_INFO_RESULT,
         TRANS_ID_CLEAR_SESSION,
         TRANS_ID_CLEAR_ALL_SESSIONS,
+        TRANS_ID_LOCK_SESSION,
+        TRANS_ID_UNLOCK_SESSION,
+        TRANS_ID_MOVE_MISSIONS_TO_FOREGROUND,
+        TRANS_ID_MOVE_MISSIONS_TO_BACKGROUND,
         TRANS_ID_REGISTER_COLLABORATOR,
         TRANS_ID_UNREGISTER_COLLABORATOR,
     };
@@ -116,6 +120,10 @@ public:
                                        std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution) = 0;
     virtual WSError ClearSession(int32_t persistentId) = 0;
     virtual WSError ClearAllSessions() = 0;
+    virtual WSError LockSession(int32_t sessionId) = 0;
+    virtual WSError UnlockSession(int32_t sessionId) = 0;
+    virtual WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds) = 0;
+    virtual WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds) = 0;
 
     virtual WSError RegisterIAbilityManagerCollaborator(int32_t type, const sptr<AAFwk::IAbilityManagerCollaborator> &impl) = 0;
     virtual WSError UnregisterIAbilityManagerCollaborator(int32_t type) = 0;

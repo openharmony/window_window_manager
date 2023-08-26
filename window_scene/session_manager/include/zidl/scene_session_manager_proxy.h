@@ -67,6 +67,10 @@ public:
     WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) override;
     WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
                                std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution) override;
+    WSError LockSession(int32_t persistentId) override;
+    WSError UnlockSession(int32_t persistentId) override;
+    WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds) override;
+    WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds) override;
     WSError ClearSession(int32_t persistentId) override;
     WSError ClearAllSessions() override;
     WSError RegisterIAbilityManagerCollaborator(int32_t type, const sptr<AAFwk::IAbilityManagerCollaborator> &impl) override;
