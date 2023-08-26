@@ -53,7 +53,10 @@ ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetIns
     LoadScreenSceneXml();
     taskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_THREAD);
     screenCutoutController_ = new (std::nothrow) ScreenCutoutController();
-    foldScreenController_ = new (std::nothrow) FoldScreenController();
+    bool foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "") != "";
+    if (foldScreenFlag) {
+        foldScreenController_ = new (std::nothrow) FoldScreenController();
+    }
     sessionDisplayPowerController_ = new SessionDisplayPowerController(
         std::bind(&ScreenSessionManager::NotifyDisplayStateChange, this,
             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
@@ -500,7 +503,6 @@ DMError ScreenSessionManager::SetScreenColorTransform(ScreenId screenId)
 sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId screenId)
 {
     WLOGFI("SCB: ScreenSessionManager::GetOrCreateScreenSession ENTER");
-    
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     auto sessionIt = screenSessionMap_.find(screenId);
     if (sessionIt != screenSessionMap_.end()) {
