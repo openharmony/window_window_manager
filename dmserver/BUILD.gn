@@ -68,7 +68,6 @@ ohos_shared_library("libdms") {
     "hitrace:hitrace_meter",
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
-    "sensor:sensor_interface_native",
   ]
 
   if (defined(use_new_skia) && use_new_skia) {
@@ -95,6 +94,11 @@ ohos_shared_library("libdms") {
       defined(global_parts_info.resourceschedule_soc_perf)) {
     external_deps += [ "soc_perf:socperf_client" ]
     defines += [ "SOC_PERF_ENABLE" ]
+  }
+
+  if (defined(global_parts_info) && defined(global_parts_info.sensors_sensor)) {
+    external_deps += [ "sensor:sensor_interface_native" ]
+    defines += [ "SENSOR_ENABLE" ]
   }
 
   part_name = "window_manager"

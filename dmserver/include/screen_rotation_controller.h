@@ -19,8 +19,6 @@
 #include <map>
 #include <refbase.h>
 
-#include "sensor_agent.h"
-
 #include "dm_common.h"
 #include "window_manager_hilog.h"
 
@@ -59,7 +57,6 @@ public:
     static DeviceRotation ConvertSensorToDeviceRotation(SensorRotation sensorRotation);
     static DisplayOrientation ConvertRotationToDisplayOrientation(Rotation rotation);
 private:
-    static void HandleGravitySensorEventCallback(SensorEvent *event);
     static Rotation GetCurrentDisplayRotation();
     static Orientation GetPreferredOrientation();
     static void SetScreenRotation(Rotation targetRotation, bool withAnimation = true);
@@ -73,7 +70,6 @@ private:
     static bool IsCurrentDisplayVertical();
     static bool IsCurrentDisplayHorizontal();
     static bool IsSensorRelatedOrientation(Orientation orientation);
-
     static void ProcessRotationMapping();
     static void ProcessSwitchToAutoRotationPortrait(DeviceRotation rotation);
     static void ProcessSwitchToAutoRotationLandscape(DeviceRotation rotation);

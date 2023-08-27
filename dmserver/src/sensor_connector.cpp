@@ -28,6 +28,7 @@ namespace {
     constexpr int64_t ORIENTATION_SENSOR_REPORTING_RATE = 0;
     constexpr long ORIENTATION_SENSOR_CALLBACK_TIME_INTERVAL = 200; // 200ms
     constexpr int VALID_INCLINATION_ANGLE_THRESHOLD_COEFFICIENT = 3;
+
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
     constexpr int32_t MOTION_ACTION_PORTRAIT = 0;
     constexpr int32_t MOTION_ACTION_LEFT_LANDSCAPE = 1;
@@ -36,9 +37,11 @@ namespace {
 #endif
 }
 
+#ifdef SENSOR_ENABLE
 bool GravitySensorSubscriber::isGravitySensorSubscribed_ = false;
 SensorUser GravitySensorSubscriber::user_;
 long GravitySensorSubscriber::lastCallbackTime_ = 0;
+#endif
 
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
 bool MotionSubscriber::isMotionSensorSubscribed_ = false;
@@ -55,7 +58,10 @@ void SensorConnector::SubscribeRotationSensor()
         return;
     }
 #endif
+
+#ifdef SENSOR_ENABLE
     GravitySensorSubscriber::SubscribeGravitySensor();
+#endif
 }
 
 void SensorConnector::UnsubscribeRotationSensor()
@@ -63,10 +69,14 @@ void SensorConnector::UnsubscribeRotationSensor()
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
     MotionSubscriber::UnsubscribeMotionSensor();
 #endif
+
+#ifdef SENSOR_ENABLE
     GravitySensorSubscriber::UnsubscribeGravitySensor();
+#endif
 }
 
 // Gravity Sensor
+#ifdef SENSOR_ENABLE
 void GravitySensorSubscriber::SubscribeGravitySensor()
 {
     WLOGFI("dms: Subscribe gravity Sensor");
@@ -172,6 +182,7 @@ bool GravitySensorSubscriber::CheckCallbackTimeInterval()
     lastCallbackTime_ = currentTimeInMillitm;
     return true;
 }
+#endif
 
 // Motion
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
