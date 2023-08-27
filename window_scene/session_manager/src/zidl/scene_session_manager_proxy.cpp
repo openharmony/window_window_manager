@@ -825,7 +825,9 @@ WSError SceneSessionManagerProxy::GetSessionDumpInfo(const std::vector<std::stri
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    info = reply.ReadString();
+    auto infoSize = reply.ReadUint32();
+    info = reinterpret_cast<const char*>(reply.ReadRawData(infoSize));
+    WLOGFD("GetSessionDumpInfo, infoSize: %{public}d", infoSize);
     return static_cast<WSError>(reply.ReadInt32());
 }
 
@@ -898,9 +900,23 @@ void SceneSessionManagerProxy::NotifyDumpInfoResult(const std::vector<std::strin
         WLOGFE("WriteInterfaceToken pfailed");
         return;
     }
-    if (!data.WriteStringVector(info)) {
-        WLOGFE("Write info failed");
+    uint32_t vectorSize = static_cast<uint32_t>(info.size());
+    if (!data.WriteUint32(vectorSize)) {
+        WLOGFE("Write vector size failed");
         return;
+    }
+    for (const auto& elem : info) {
+        const char* curInfo = elem.c_str();
+        uint32_t curSize = static_cast<uint32_t>(strlen(curInfo));
+        WLOGFD("NotifyDumpInfoResult infoSize: %{public}u", curSize);
+        if (!data.WriteUint32(curSize)) {
+            WLOGFE("Write info size failed");
+            return;
+        }
+        if (!data.WriteRawData(curInfo, curSize)) {
+            WLOGFE("Write info failed");
+            return;
+        }
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT),
         data, reply, option) != ERR_NONE) {
