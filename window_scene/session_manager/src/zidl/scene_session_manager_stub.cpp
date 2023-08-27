@@ -469,7 +469,6 @@ int SceneSessionManagerStub::HandleSetSessionGravity(MessageParcel &data, Messag
 
 int SceneSessionManagerStub::HandleGetSessionDump(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFI("run HandleGetSessionDump");
     std::vector<std::string> params;
     if (!data.ReadStringVector(&params)) {
         WLOGFE("Fail to read params");
@@ -477,7 +476,11 @@ int SceneSessionManagerStub::HandleGetSessionDump(MessageParcel &data, MessagePa
     }
     std::string dumpInfo;
     WSError errCode = GetSessionDumpInfo(params, dumpInfo);
-    reply.WriteString(dumpInfo);
+    const char* info = dumpInfo.c_str();
+    uint32_t infoSize = static_cast<uint32_t>(strlen(info));
+    WLOGFI("HandleGetSessionDump, infoSize: %{public}d", infoSize);
+    reply.WriteUint32(infoSize);
+    reply.WriteRawData(info, infoSize);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
@@ -518,7 +521,12 @@ int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel &data, Mes
 {
     WLOGFI("HandleNotifyDumpInfoResult");
     std::vector<std::string> info;
-    data.ReadStringVector(&info);
+    uint32_t vectorSize = data.ReadUint32();
+    for (uint32_t i = 0; i < vectorSize; i++) {
+        uint32_t curSize = data.ReadUint32();
+        info.emplace_back(reinterpret_cast<const char*>(data.ReadRawData(curSize)));
+        WLOGFD("HandleNotifyDumpInfoResult count: %{public}u, infoSize: %{public}u", i, curSize);
+    }
     NotifyDumpInfoResult(info);
     return ERR_NONE;
 }

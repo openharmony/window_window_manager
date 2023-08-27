@@ -1839,6 +1839,19 @@ void WindowSceneSessionImpl::DumpSessionElementInfo(const std::vector<std::strin
     if (uiContent_ != nullptr) {
         uiContent_->DumpInfo(params, info);
     }
+
+    for (auto iter = info.begin(); iter != info.end();) {
+        if ((*iter).size() == 0) {
+            iter = info.erase(iter);
+            continue;
+        }
+        WLOGFD("ElementInfo size: %{public}u", static_cast<uint32_t>((*iter).size()));
+        iter++;
+    }
+    if (info.size() == 0) {
+        WLOGFD("ElementInfo is empty");
+        return;
+    }
     SingletonContainer::Get<WindowAdapter>().NotifyDumpInfoResult(info);
 }
 
