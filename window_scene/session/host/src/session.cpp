@@ -1447,6 +1447,10 @@ WSError Session::ProcessBackEvent()
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+        WLOGFI("dialog window don't hadnle back event");
+        return WSError::WS_OK;
+    }
     return sessionStage_->HandleBackEvent();
 }
 
