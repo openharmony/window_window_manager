@@ -297,6 +297,7 @@ void CheckWindowImplFunctionsPart1(sptr<Window> window, const uint8_t* data, siz
     window->SetTouchable(boolVal);
     window->SetResizeByDragEnabled(boolVal);
     window->SetRaiseByClickEnabled(boolVal);
+    window->HideNonSystemFloatingWindows(boolVal);
 
     WindowType windowType;
     WindowMode windowMode;

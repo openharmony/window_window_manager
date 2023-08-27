@@ -90,6 +90,28 @@ FoldDisplayMode DualDisplayDevicePolicy::GetScreenDisplayMode()
 
 void DualDisplayDevicePolicy::SendSensorResult(FoldStatus foldStatus)
 {
-    WLOGI("SendSensorResult FoldStatus: %{public}d", foldStatus);
+    WLOGI("DualDisplayDevicePolicy SendSensorResult FoldStatus: %{public}d", foldStatus);
+    FoldDisplayMode tempDisplayMode = FoldDisplayMode::UNKNOWN;
+    switch (foldStatus) {
+        case FoldStatus::EXPAND: {
+            tempDisplayMode = FoldDisplayMode::FULL;
+            break;
+        }
+        case FoldStatus::FOLDED: {
+            tempDisplayMode = FoldDisplayMode::MAIN;
+            break;
+        }
+        case FoldStatus::HALF_FOLD: {
+            tempDisplayMode = FoldDisplayMode::FULL;
+            break;
+        }
+        default: {
+            WLOGI("DualDisplayDevicePolicy SendSensorResult FoldStatus is invalid");
+        }
+    }
+
+    if (tempDisplayMode != currentDisplayMode_) {
+        ChangeScreenDisplayMode(tempDisplayMode);
+    }
 }
 } // namespace OHOS::Rosen

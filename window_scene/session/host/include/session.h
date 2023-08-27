@@ -52,6 +52,8 @@ using NotifyClickFunc = std::function<void()>;
 using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
 using NotifyTerminateSessionFuncNew = std::function<void(const SessionInfo& info, bool needStartCaller)>;
 using NotifyTerminateSessionFuncTotal = std::function<void(const SessionInfo& info, TerminateType terminateType)>;
+using NofitySessionLabelUpdatedFunc = std::function<void(const std::string &label)>;
+using NofitySessionIconUpdatedFunc = std::function<void(const std::string &iconPath)>;
 using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
 using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info)>;
@@ -81,7 +83,7 @@ public:
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
-    std::shared_ptr<Media::PixelMap> Snapshot(float scale = 1);
+    std::shared_ptr<Media::PixelMap> Snapshot();
     SessionState GetSessionState() const;
     SessionInfo& GetSessionInfo();
     sptr<WindowSessionProperty> GetSessionProperty() const;
@@ -147,6 +149,10 @@ public:
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
     void SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncTotal& func);
     WSError Clear();
+    WSError SetSessionLabel(const std::string &label);
+    void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);
+    WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon);
+    void SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& func);
     void SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func);
     void SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func);
     void NotifySessionStateChange(const SessionState& state);
@@ -159,6 +165,7 @@ public:
         sptr<IRemoteObject> token = nullptr) override;
     WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId) override;
     void SetSystemConfig(const SystemSessionConfig& systemConfig);
+    void SetSnapshotScale(const float snapshotScale);
     void SetBackPressedListenser(const NotifyBackPressedFunc& func);
     WSError ProcessBackEvent(); // send back event to session_stage
     WSError RequestSessionBack(bool needMoveToBackground) override; // receive back request from session_stage
@@ -288,12 +295,15 @@ protected:
     NotifyTerminateSessionFunc terminateSessionFunc_;
     NotifyTerminateSessionFuncNew terminateSessionFuncNew_;
     NotifyTerminateSessionFuncTotal terminateSessionFuncTotal_;
+    NofitySessionLabelUpdatedFunc updateSessionLabelFunc_;
+    NofitySessionIconUpdatedFunc updateSessionIconFunc_;
     std::vector<std::shared_ptr<NotifySessionExceptionFunc>> sessionExceptionFuncs_;
     NotifyPendingSessionToForegroundFunc pendingSessionToForegroundFunc_;
     NotifyPendingSessionToBackgroundForDelegatorFunc pendingSessionToBackgroundForDelegatorFunc_;
     NotifyCallingSessionForegroundFunc notifyCallingSessionForegroundFunc_;
     NotifyCallingSessionBackgroundFunc notifyCallingSessionBackgroundFunc_;
     SystemSessionConfig systemConfig_;
+    float snapshotScale_ = 0.5;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
     uint32_t zOrder_ = 0;
     uint32_t uiNodeId_ = 0;

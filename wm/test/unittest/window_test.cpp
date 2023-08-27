@@ -2123,6 +2123,18 @@ HWTEST_F(WindowTest, RaiseAboveTarget, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
+/**
+ * @tc.name: HideNonSystemFloatingWindows
+ * @tc.desc: set shouldHide flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, HideNonSystemFloatingWindows, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new Window();
+    ASSERT_NE(nullptr, window);
+    ASSERT_EQ(WMError::WM_OK, window->HideNonSystemFloatingWindows(false));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
