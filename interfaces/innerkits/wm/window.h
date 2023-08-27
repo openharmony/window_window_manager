@@ -1338,6 +1338,21 @@ public:
      * @return WM_OK means raise success, others means raise failed.
      */
     virtual WmErrorCode RaiseAboveTarget(int32_t subWindowId) { return WmErrorCode::WM_OK; }
+
+    /**
+     * @brief Hide non-system floating windows.
+     *
+     * @param shouldHide true means the non-system windows should be hidden, otherwise means the opposite.
+     * @return Errorcode of window.
+     */
+    virtual WMError HideNonSystemFloatingWindows(bool shouldHide) { return WMError::WM_OK; }
+
+    /**
+     * @brief Is floating window of app type or not.
+     *
+     * @return True means floating window of app type, false means the opposite.
+     */
+    virtual bool IsFloatingWindowAppType() const { return false; }
 };
 }
 }

@@ -57,6 +57,8 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandlePendingSessionToBackgroundForDelegator),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_TOKEN),
         &SceneSessionManagerStub::HandleGetFocusSessionToken),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CHECK_WINDOW_ID),
+        &SceneSessionManagerStub::HandleCheckWindowId),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_GESTURE_NAVIGATION_ENABLED),
         &SceneSessionManagerStub::HandleSetGestureNavigationEnabled),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_INFO),
@@ -97,6 +99,14 @@ const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::s
         &SceneSessionManagerStub::HandleClearSession),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CLEAR_ALL_SESSIONS),
         &SceneSessionManagerStub::HandleClearAllSessions),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_LOCK_SESSION),
+        &SceneSessionManagerStub::HandleLockSession),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNLOCK_SESSION),
+        &SceneSessionManagerStub::HandleUnlockSession),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_MOVE_MISSIONS_TO_FOREGROUND),
+        &SceneSessionManagerStub::HandleMoveSessionsToForeground),
+    std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_MOVE_MISSIONS_TO_BACKGROUND),
+        &SceneSessionManagerStub::HandleMoveSessionsToBackground),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_COLLABORATOR),
         &SceneSessionManagerStub::HandleRegisterCollaborator),
     std::make_pair(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNREGISTER_COLLABORATOR),
@@ -394,9 +404,30 @@ int SceneSessionManagerStub::HandleGetFocusSessionToken(MessageParcel &data, Mes
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleCheckWindowId(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleCheckWindowId!");
+    int32_t windowId = INVALID_WINDOW_ID;
+    if (!data.ReadInt32(windowId)) {
+        WLOGE("Failed to readInt32 windowId");
+        return ERR_INVALID_DATA;
+    }
+    int32_t pid = INVALID_PID;
+    WMError errCode = CheckWindowId(windowId, pid);
+    if (errCode != WMError::WM_OK) {
+        WLOGE("Failed to checkWindowId(%{public}d)", pid);
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(pid)) {
+        WLOGE("Failed to WriteInt32 pid");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleSetGestureNavigationEnabled(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFI("run HandleGetFocusSessionToken!");
+    WLOGFI("run HandleSetGestureNavigationEnabled!");
     bool enable = data.ReadBool();
     const WMError &ret = SetGestureNavigaionEnabled(enable);
     reply.WriteInt32(static_cast<int32_t>(ret));
@@ -505,6 +536,41 @@ int SceneSessionManagerStub::HandleClearAllSessions(MessageParcel &data, Message
 {
     WLOGFI("run HandleClearAllSessions!");
     const WSError& ret = ClearAllSessions();
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleLockSession(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleLockSession!");
+    int32_t sessionId = data.ReadInt32();
+    const WSError& ret = LockSession(sessionId);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+int SceneSessionManagerStub::HandleUnlockSession(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleUnlockSession!");
+    int32_t sessionId = data.ReadInt32();
+    const WSError& ret = UnlockSession(sessionId);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+int SceneSessionManagerStub::HandleMoveSessionsToForeground(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleMoveSessionsToForeground!");
+    std::vector<int32_t> sessionIds;
+    data.ReadInt32Vector(&sessionIds);
+    const WSError &ret = MoveSessionsToForeground(sessionIds);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+int SceneSessionManagerStub::HandleMoveSessionsToBackground(MessageParcel &data, MessageParcel &reply)
+{
+    WLOGFI("run HandleMoveSessionsToBackground!");
+    std::vector<int32_t> sessionIds;
+    data.ReadInt32Vector(&sessionIds);
+    const WSError &ret = MoveSessionsToBackground(sessionIds);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }

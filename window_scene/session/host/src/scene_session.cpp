@@ -17,13 +17,15 @@
 
 #include <hitrace_meter.h>
 #include <iterator>
+#include <memory>
 #include <pointer_event.h>
 #include <transaction/rs_transaction.h>
 
-// #include "../../proxy/include/window_info.h"
+#include "../../proxy/include/window_info.h"
 
 #include "common/include/session_permission.h"
 #include "interfaces/include/ws_common.h"
+#include "pixel_map.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session_utils.h"
 #include "session_manager/include/screen_session_manager.h"
@@ -137,8 +139,7 @@ WSError SceneSession::Background()
     if (ret != WSError::WS_OK) {
         return ret;
     }
-    constexpr float scale = 0.5;
-    snapshot_ = Snapshot(scale);
+    snapshot_ = Snapshot();
     if (scenePersistence_ && snapshot_) {
         scenePersistence_->SaveSnapshot(snapshot_);
     }
@@ -575,8 +576,10 @@ WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAre
 
 void SceneSession::HandleStyleEvent(MMI::WindowArea area)
 {
-    if (Session::SetPointerStyle(area) != WSError::WS_OK) {
-        WLOGFE("Failed to set the cursor style");
+    if (area != MMI::WindowArea::EXIT) {
+        if (Session::SetPointerStyle(area) != WSError::WS_OK) {
+            WLOGFE("Failed to set the cursor style");
+        }
     }
 
     preWindowArea_ = area;
@@ -584,11 +587,17 @@ void SceneSession::HandleStyleEvent(MMI::WindowArea area)
 
 WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
 {
+    static Session* preSession = nullptr;
     if (displayX < 0 || displayY < 0) {
         WLOGE("Illegal parameter, displayX:%{public}d, displayY:%{public}d", displayX, displayY);
         return WSError::WS_ERROR_INVALID_PARAM;
     }
 
+    MMI::WindowArea area = MMI::WindowArea::EXIT;
+    if (preSession != nullptr && preSession != this) {
+        preSession->HandleStyleEvent(area);
+        preSession = nullptr;
+    }
     auto iter = Session::windowAreas_.cend();
     if (!Session::IsSystemSession() &&
         Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
@@ -601,7 +610,6 @@ WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
             }
         }
     }
-    MMI::WindowArea area = MMI::WindowArea::EXIT;
     if (iter == Session::windowAreas_.cend()) {
         bool isInRegion = false;
         WSRect rect = Session::winRect_;
@@ -614,7 +622,7 @@ WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
         }
         if (!isInRegion) {
             WLOGFE("The wrong event(%{public}d, %{public}d) could not be matched to the region:" \
-                "[%{public}d, %{public}d, %{public}u, %{public}u]",
+                "[%{public}d, %{public}d, %{public}d, %{public}d]",
                 displayX, displayY, rect.posX_, rect.posY_, rect.width_, rect.height_);
             return WSError::WS_ERROR_INVALID_TYPE;
         }
@@ -624,6 +632,7 @@ WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
     }
     if (area != preWindowArea_) {
         HandleStyleEvent(area);
+        preSession = this;
     }
     return WSError::WS_OK;
 }
@@ -676,7 +685,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
     }
 
-    static bool isNew = false;
+    static bool isNew = true;
     if (isNew) {
         auto ret = HandlePointerStyle(pointerEvent);
         if (ret != WSError::WS_OK && ret != WSError::WS_DO_NOTHING) {
@@ -928,6 +937,23 @@ std::string SceneSession::GetSessionSnapshotFilePath()
     return "";
 }
 
+void SceneSession::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap> &icon)
+{
+    WLOGFI("run SaveUpdatedIcon");
+    if (scenePersistence_ != nullptr) {
+        scenePersistence_->SaveUpdatedIcon(icon);
+    }
+}
+
+std::string SceneSession::GetUpdatedIconPath()
+{
+    WLOGFI("run GetUpdatedIconPath");
+    if (scenePersistence_ != nullptr) {
+        return scenePersistence_->GetUpdatedIconPath();
+    }
+    return "";
+}
+
 void SceneSession::UpdateNativeVisibility(bool visible)
 {
     isVisible_ = visible;
@@ -1077,6 +1103,19 @@ void SceneSession::SetRequestedOrientation(Orientation orientation)
     property_->SetRequestedOrientation(orientation);
     if (sessionChangeCallback_ && sessionChangeCallback_->OnRequestedOrientationChange_) {
         sessionChangeCallback_->OnRequestedOrientationChange_(static_cast<uint32_t>(orientation));
+    }
+}
+
+void SceneSession::NotifyForceHideChange(bool hide)
+{
+    WLOGFI("id: %{public}d forceHide: %{public}u", persistentId_, hide);
+    if (property_ == nullptr) {
+        WLOGFD("id: %{public}d property is nullptr", persistentId_);
+        return;
+    }
+    property_->SetForceHide(hide);
+    if (sessionChangeCallback_ && sessionChangeCallback_->OnForceHideChange_) {
+        sessionChangeCallback_->OnForceHideChange_(hide);
     }
 }
 

@@ -277,6 +277,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyScreenChanged, Function | SmallTest | L
     ssm_->NotifyScreenChanged(screenInfo, ScreenChangeEvent::UPDATE_ORIENTATION);
     screenInfo = new ScreenInfo();
     ssm_->NotifyScreenChanged(screenInfo, ScreenChangeEvent::UPDATE_ORIENTATION);
+    ASSERT_EQ(ssm_->SetScreenActiveMode(5, 0), DMError::DM_OK);
 }
 
 /**
@@ -315,6 +316,7 @@ HWTEST_F(ScreenSessionManagerTest, LoadScreenSceneXml, Function | SmallTest | Le
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "GetDefaultScreenSession";
     ssm_->LoadScreenSceneXml();
+    ASSERT_EQ(ssm_->SetScreenActiveMode(5, 0), DMError::DM_OK);
 }
 
 /**

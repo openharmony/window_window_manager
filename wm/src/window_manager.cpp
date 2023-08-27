@@ -18,6 +18,8 @@
 #include <algorithm>
 #include <cinttypes>
 
+#include "input_manager.h"
+
 #include "marshalling_helper.h"
 #include "window_adapter.h"
 #include "window_manager_agent.h"
@@ -30,7 +32,13 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManager"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManager"};
+struct WindowChecker : public MMI::IWindowChecker {
+public:
+    WindowChecker() = default;
+    ~WindowChecker() = default;
+    int32_t CheckWindowId(int32_t windowId) const override;
+};
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowManager)
@@ -199,7 +207,21 @@ void WindowManager::Impl::NotifyGestureNavigationEnabledResult(bool enable)
     }
 }
 
-WindowManager::WindowManager() : pImpl_(std::make_unique<Impl>(mutex_)) {}
+WindowManager::WindowManager() : pImpl_(std::make_unique<Impl>(mutex_))
+{
+    auto windowChecker = std::make_shared<WindowChecker>();
+    MMI::InputManager::GetInstance()->SetWindowCheckerHandler(windowChecker);
+}
+
+int32_t WindowChecker::CheckWindowId(int32_t windowId) const
+{
+    int32_t pid = INVALID_PID;
+    WMError ret = SingletonContainer::Get<WindowAdapter>().CheckWindowId(windowId, pid);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("Window(%{public}d) do not allow styles to be set", windowId);
+    }
+    return pid;
+}
 
 WindowManager::~WindowManager()
 {
