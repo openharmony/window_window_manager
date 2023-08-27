@@ -20,6 +20,7 @@
 #include "ipc_skeleton.h"
 #include "key_event.h"
 #include "pointer_event.h"
+#include "../../proxy/include/window_info.h"
 
 #include "anr_manager.h"
 #include "foundation/ability/ability_base/interfaces/kits/native/want/include/want.h"
@@ -384,9 +385,9 @@ bool Session::IsSystemSession() const
 
 WSError Session::SetPointerStyle(MMI::WindowArea area)
 {
-    WLOGFD("Information to be set: pid:%{public}d, windowId:%{public}d, MMI::WindowArea:%{public}s",
+    WLOGFI("Information to be set: pid:%{public}d, windowId:%{public}d, MMI::WindowArea:%{public}s",
         callingPid_, persistentId_, DumpPointerWindowArea(area));
-    // MMI::InputManager::GetInstance()->SetWindowPointerStyle(area, callingPid_, persistentId_);
+    MMI::InputManager::GetInstance()->SetWindowPointerStyle(area, callingPid_, persistentId_);
     return WSError::WS_OK;
 }
 
