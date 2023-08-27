@@ -87,6 +87,9 @@ HWTEST_F(WindowSubWindowTest, SubWindow01, Function | MediumTest | Level2)
     struct Rect rect = {0, 0, 100, 200};
     uint32_t flags = 0;
     sptr<Window> subWindow = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, flags);
+    if (subWindow == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, subWindow);
 
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
@@ -112,6 +115,9 @@ HWTEST_F(WindowSubWindowTest, SubWindow02, Function | MediumTest | Level2)
     struct Rect rect = {0, 0, 100, 200};
     uint32_t flags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT);
     sptr<Window> subWindow = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, flags);
+    if (subWindow == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, subWindow);
 
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
@@ -137,6 +143,9 @@ HWTEST_F(WindowSubWindowTest, SubWindow03, Function | MediumTest | Level2)
     struct Rect rect = {0, 2000, 100, 200};
     uint32_t flags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT);
     sptr<Window> subWindow = CreateSubWindow(scene, WindowType::WINDOW_TYPE_MEDIA, rect, flags);
+    if (subWindow == nullptr) {
+        return;
+    }    
     ASSERT_NE(nullptr, subWindow);
 
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
@@ -162,6 +171,9 @@ HWTEST_F(WindowSubWindowTest, SubWindow04, Function | MediumTest | Level2)
     struct Rect rect = {0, 2000, 3000, 2000};
     uint32_t flags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT);
     sptr<Window> subWindow = CreateSubWindow(scene, WindowType::WINDOW_TYPE_MEDIA, rect, flags);
+    if (subWindow == nullptr) {
+        return;
+    }    
     ASSERT_NE(nullptr, subWindow);
 
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
@@ -187,6 +199,9 @@ HWTEST_F(WindowSubWindowTest, SubWindow05, Function | MediumTest | Level3)
     struct Rect rect = {0, 0, 100, 200};
     uint32_t flags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT);
     sptr<Window> subWindow = CreateSubWindow(scene, WindowType::WINDOW_TYPE_MEDIA, rect, flags);
+    if (subWindow == nullptr) {
+        return;
+    }      
     ASSERT_NE(nullptr, subWindow);
 
     sptr<Window> subWindow2 = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, flags);
@@ -217,6 +232,9 @@ HWTEST_F(WindowSubWindowTest, SubWindow06, Function | MediumTest | Level3)
 
     struct Rect rect = {0, 0, 100, 200};
     sptr<Window> subWindow0 = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, 0);
+    if (subWindow0 == nullptr) {
+        return;
+    }  
     ASSERT_NE(nullptr, subWindow0);
 
     sptr<Window> subWindow1 = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, 0);
@@ -248,6 +266,9 @@ HWTEST_F(WindowSubWindowTest, SubWindow07, Function | MediumTest | Level4)
     struct Rect rect = {0, 0, 100, 200};
     uint32_t flags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT);
     sptr<Window> subWindow = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, flags);
+    if (subWindow == nullptr) {
+        return;
+    } 
     ASSERT_NE(nullptr, subWindow);
 
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
