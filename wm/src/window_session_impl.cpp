@@ -1263,7 +1263,7 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
         WLOGFD("Pointer event is nullptr");
         return;
     }
-    
+
     std::shared_ptr<IInputEventConsumer> inputEventConsumer;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
