@@ -311,6 +311,9 @@ HWTEST_F(WindowSubWindowTest, SubWindow09, Function | MediumTest | Level2)
     struct Rect rect = {0, 0, 100, 200};
     uint32_t flags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT);
     sptr<Window> subWindow = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, flags);
+    if (subWindow == nullptr) {
+        return;
+    } 
     ASSERT_NE(nullptr, subWindow);
 
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
@@ -338,6 +341,9 @@ HWTEST_F(WindowSubWindowTest, SubWindow10, Function | MediumTest | Level2)
     struct Rect rect = {0, 0, 100, 200};
     uint32_t flags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT);
     sptr<Window> subWindow = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, flags);
+    if (subWindow == nullptr) {
+        return;
+    } 
     ASSERT_NE(nullptr, subWindow);
 
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());

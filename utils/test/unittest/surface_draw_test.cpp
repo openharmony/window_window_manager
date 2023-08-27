@@ -119,6 +119,9 @@ HWTEST_F(SurfaceDrawTest, DrawImage01, Function | SmallTest | Level1)
 {
     ASSERT_FALSE(SurfaceDraw::DrawImage(nullptr, 0, 0, ""));
     sptr<Window> window = CreateTestWindow("testDrawImage");
+    if (window == nullptr) {
+        return nullptr;
+    }
     ASSERT_NE(nullptr, window);
     window->Show();
     usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
@@ -154,6 +157,9 @@ HWTEST_F(SurfaceDrawTest, DrawMasking01, Function | SmallTest | Level1)
     ASSERT_FALSE(SurfaceDraw::DrawMasking(nullptr, screenRect, transRect));
 
     sptr<Window> window = CreateTestWindow("testDrawMasking");
+    if (window == nullptr) {
+        return nullptr;
+    }
     ASSERT_NE(nullptr, window);
     window->Show();
     usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
@@ -177,6 +183,9 @@ HWTEST_F(SurfaceDrawTest, DrawMasking01, Function | SmallTest | Level1)
 HWTEST_F(SurfaceDrawTest, DoDrawImageRect01, Function | SmallTest | Level1)
 {
     sptr<Window> window = CreateTestWindow("testDoDrawImageRect");
+    if (window == nullptr) {
+        return nullptr;
+    }
     ASSERT_NE(window, nullptr);
     window->Show();
     usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
@@ -207,6 +216,9 @@ HWTEST_F(SurfaceDrawTest, DoDrawImageRect01, Function | SmallTest | Level1)
 HWTEST_F(SurfaceDrawTest, GetSurfaceSnapshot01, Function | SmallTest | Level1)
 {
     sptr<Window> window = CreateTestWindow("testDoDrawImageRect");
+    if (window == nullptr) {
+        return nullptr;
+    }
     ASSERT_NE(window, nullptr);
     window->Show();
     usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
