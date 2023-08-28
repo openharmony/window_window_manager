@@ -66,6 +66,86 @@ HWTEST_F(SessionManagerAgentControllerTest, RegisterWindowManagerAgent, Function
         windowManagerAgent, type));
 }
 
+/**
+ * @tc.name: UpdateCameraFloatWindowStatus
+ * @tc.desc: UpdateCameraFloatWindowStatus Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerAgentControllerTest, UpdateCameraFloatWindowStatus, Function | SmallTest | Level3)
+{
+    SessionManagerAgentController::GetInstance().UpdateCameraFloatWindowStatus(0, false);
+
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    ASSERT_EQ(WMError::WM_OK, SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
+        windowManagerAgent, type));
+}
+
+/**
+ * @tc.name: UpdateFocusChangeInfo
+ * @tc.desc: UpdateFocusChangeInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerAgentControllerTest, UpdateFocusChangeInfo, Function | SmallTest | Level3)
+{
+    sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo();
+    SessionManagerAgentController::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, false);
+     
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    ASSERT_EQ(WMError::WM_OK, SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
+        windowManagerAgent, type));
+}
+
+/**
+ * @tc.name: NotifyAccessibilityWindowInfo
+ * @tc.desc: NotifyAccessibilityWindowInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerAgentControllerTest, NotifyAccessibilityWindowInfo, Function | SmallTest | Level3)
+{
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(infos,
+        WindowUpdateType::WINDOW_UPDATE_ACTIVE);
+     
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    ASSERT_EQ(WMError::WM_OK, SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
+        windowManagerAgent, type));
+}
+
+/**
+ * @tc.name: NotifyWaterMarkFlagChangedResult
+ * @tc.desc: NotifyWaterMarkFlagChangedResult Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerAgentControllerTest, NotifyWaterMarkFlagChangedResult, Function | SmallTest | Level3)
+{
+    SessionManagerAgentController::GetInstance().NotifyWaterMarkFlagChangedResult(false);
+     
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    ASSERT_EQ(WMError::WM_OK, SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
+        windowManagerAgent, type));
+}
+
+/**
+ * @tc.name: UpdateWindowVisibilityInfo
+ * @tc.desc: UpdateWindowVisibilityInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerAgentControllerTest, UpdateWindowVisibilityInfo, Function | SmallTest | Level3)
+{
+    std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+    SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
+
+     
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    ASSERT_EQ(WMError::WM_OK, SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
+        windowManagerAgent, type));
+}
+
 } // namespace Rosen
 } // namespace OHOS
 
