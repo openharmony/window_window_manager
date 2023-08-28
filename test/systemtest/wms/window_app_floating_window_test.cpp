@@ -242,14 +242,14 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow04, Function | MediumTest
     }
     ASSERT_NE(nullptr, fltWin);
 
-    if (scene->GoForeground() == WMError::WM_OK){
+    if (scene->GoForeground() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
+        ASSERT_EQ(WMError::WM_OK, fltWin->Show());
+        ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
     } else {
         ASSERT_NE(WMError::WM_OK, scene->GoForeground());
     }
-    ASSERT_EQ(WMError::WM_OK, fltWin->Show());
 
-    ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
     if (scene->GetMainWindow() == nullptr) {
         return;
     }
@@ -278,16 +278,14 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow05, Function | MediumTest
 
     if(scene->GoForeground()==WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
+        ASSERT_EQ(WMError::WM_OK, fltWin->Show());
+        ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
+        ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
+        ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
+        ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
     } else {
         ASSERT_NE(WMError::WM_OK, scene->GoForeground());
     }
-    ASSERT_EQ(WMError::WM_OK, fltWin->Show());
-
-    ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
-    ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
-
-    ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
-    ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 }
 
 /**
