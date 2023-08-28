@@ -1725,6 +1725,10 @@ void ScreenSessionManager::NotifyPrivateSessionStateChanged(bool hasPrivate)
 void ScreenSessionManager::SetScreenPrivacyState(ScreenId id, bool hasPrivate)
 {
     auto screenSession = GetScreenSession(id);
+    if (screenSession == nullptr) {
+        WLOGFE("can not get default screen now");
+        return;
+    }
     screenSession->SetPrivateSessionForeground(hasPrivate);
     NotifyPrivateSessionStateChanged(hasPrivate);
 }
