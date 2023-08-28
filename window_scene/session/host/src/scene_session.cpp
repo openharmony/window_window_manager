@@ -45,7 +45,7 @@ wptr<SceneSession> SceneSession::enterSession_ = nullptr;
 std::mutex SceneSession::enterSessionMutex_;
 
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
-    : Session(info), preWindowArea_(MMI::WindowArea::EXIT)
+    : Session(info)
 {
     GeneratePersistentId(false, info);
     if (!info.bundleName_.empty()) {
@@ -582,28 +582,26 @@ WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAre
 
 void SceneSession::HandleStyleEvent(MMI::WindowArea area)
 {
+    static std::pair<int32_t, MMI::WindowArea> preWindowArea =
+        std::make_pair(INVALID_WINDOW_ID, MMI::WindowArea::EXIT);
+    if (preWindowArea.first == Session::GetWindowId() && preWindowArea.second == area) {
+        return;
+    }
     if (area != MMI::WindowArea::EXIT) {
         if (Session::SetPointerStyle(area) != WSError::WS_OK) {
             WLOGFE("Failed to set the cursor style");
         }
     }
-
-    preWindowArea_ = area;
+    preWindowArea = { Session::GetWindowId(), area };
 }
 
 WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
 {
-    static Session* preSession = nullptr;
     if (displayX < 0 || displayY < 0) {
         WLOGE("Illegal parameter, displayX:%{public}d, displayY:%{public}d", displayX, displayY);
         return WSError::WS_ERROR_INVALID_PARAM;
     }
 
-    MMI::WindowArea area = MMI::WindowArea::EXIT;
-    if (preSession != nullptr && preSession != this) {
-        preSession->HandleStyleEvent(area);
-        preSession = nullptr;
-    }
     auto iter = Session::windowAreas_.cend();
     if (!Session::IsSystemSession() &&
         Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
@@ -616,6 +614,8 @@ WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
             }
         }
     }
+
+    MMI::WindowArea area = MMI::WindowArea::EXIT;
     if (iter == Session::windowAreas_.cend()) {
         bool isInRegion = false;
         WSRect rect = Session::winRect_;
@@ -636,10 +636,7 @@ WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
     } else {
         area = iter->first;
     }
-    if (area != preWindowArea_) {
-        HandleStyleEvent(area);
-        preSession = this;
-    }
+    HandleStyleEvent(area);
     return WSError::WS_OK;
 }
 
