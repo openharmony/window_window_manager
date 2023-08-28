@@ -250,10 +250,6 @@ WSError Session::SetFocusable(bool isFocusable)
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    if (isFocusable == property_->GetFocusable()) {
-        WLOGFD("Session focusable do not change: [%{public}d]", isFocusable);
-        return WSError::WS_DO_NOTHING;
-    }
     UpdateSessionFocusable(isFocusable);
     return WSError::WS_OK;
 }
