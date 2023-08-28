@@ -183,7 +183,7 @@ public:
     WSError UnregisterIAbilityManagerCollaborator(int32_t type);
 
     WMError CheckWindowId(int32_t windowId, int32_t &pid);
-    int GetSceneSessionPrivacyModeCount(const std::map<int32_t, sptr<SceneSession>>& sessionMap);
+    int GetSceneSessionPrivacyModeCount();
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
