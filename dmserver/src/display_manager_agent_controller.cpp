@@ -203,5 +203,29 @@ void DisplayManagerAgentController::NotifyPrivateWindowStateChanged(bool hasPriv
         agent->NotifyPrivateWindowStateChanged(hasPrivate);
     }
 }
+
+void DisplayManagerAgentController::NotifyFoldStatusChanged(FoldStatus foldStatus)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    WLOGI("FoldStatus is : %{public}u", foldStatus);
+    for (auto& agent : agents) {
+        agent->NotifyFoldStatusChanged(foldStatus);
+    }
+}
+
+void DisplayManagerAgentController::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    WLOGI("FoldDisplayMode is : %{public}u", displayMode);
+    for (auto& agent : agents) {
+        agent->NotifyDisplayModeChanged(displayMode);
+    }
+}
 }
 }
