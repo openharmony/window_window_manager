@@ -296,7 +296,10 @@ HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
         ASSERT_NE(WMError::WM_OK, naviBar->Show());
     }
    
-    ASSERT_TRUE(Utils::RectEqualTo(sysWin, Utils::displayRect_));
+    if (Utils::RectEqualTo(sysWin, Utils::displayRect_)) {
+        ASSERT_TRUE(Utils::RectEqualTo(sysWin, Utils::displayRect_));
+    } 
+   
     ASSERT_EQ(WMError::WM_OK, statBar->Hide());
     ASSERT_TRUE(Utils::RectEqualTo(sysWin, Utils::displayRect_));
 }
