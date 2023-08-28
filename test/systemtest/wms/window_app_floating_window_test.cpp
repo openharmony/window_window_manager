@@ -133,15 +133,15 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow01, Function | MediumTest
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
-    if(scene->GoForeground()==WMError::WM_OK) {
+    if (scene->GoForeground() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     } else {
         ASSERT_NE(WMError::WM_OK, scene->GoForeground());
     }
-   
+
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
 
-    if(scene->GoDestroy()==WMError::WM_OK) {
+    if (scene->GoDestroy() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
     } else {
         ASSERT_NE(WMError::WM_OK, scene->GoDestroy());
@@ -162,9 +162,9 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow02, Function | MediumTest
     sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT, fltWindRect);
     if (fltWin == nullptr) {
         return;
-    } 
+    }
     ASSERT_NE(nullptr, fltWin);
-    if(scene->GoForeground()==WMError::WM_OK) {
+    if (scene->GoForeground() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     } else {
         ASSERT_NE(WMError::WM_OK, scene->GoForeground());
@@ -203,9 +203,9 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow03, Function | MediumTest
     sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT, fltWindRect);
     if (fltWin == nullptr) {
         return;
-    } 
+    }
     ASSERT_NE(nullptr, fltWin);
-    if(scene->GoForeground()==WMError::WM_OK) {
+    if (scene->GoForeground() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     } else {
         ASSERT_NE(WMError::WM_OK, scene->GoForeground());
@@ -236,7 +236,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow04, Function | MediumTest
     sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT, fltWindRect);
     if (fltWin == nullptr) {
         return;
-    } 
+    }
     ASSERT_NE(nullptr, fltWin);
 
     if (scene->GoForeground() == WMError::WM_OK){
