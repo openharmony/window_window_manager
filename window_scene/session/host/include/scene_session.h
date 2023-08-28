@@ -89,14 +89,17 @@ public:
     };
 
     SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
-    ~SceneSession() = default;
+    virtual ~SceneSession() = default;
 
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr) override;
     WSError Foreground(sptr<WindowSessionProperty> property) override;
     WSError Background() override;
-    WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
+    WSError Disconnect() override;
+
+    WSError UpdateActiveStatus(bool isActive) override;
+    WSError UpdateWindowSessionProperty(sptr<WindowSessionProperty> property) override;
 
     WSError OnSessionEvent(SessionEvent event) override;
     WSError RaiseToAppTop() override;
@@ -107,6 +110,10 @@ public:
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
         sptr<IRemoteObject> token = nullptr) override;
     WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId) override;
+    WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
+    WSError TerminateSession(const sptr<AAFwk::SessionInfo> info) override;
+    WSError NotifySessionException(const sptr<AAFwk::SessionInfo> info) override;
+
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
     WSError OnNeedAvoid(bool status) override;
     void CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, AvoidArea& avoidArea);
@@ -118,10 +125,14 @@ public:
     WSError OnShowWhenLocked(bool showWhenLocked);
     bool IsShowWhenLocked() const;
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
+
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    WSError RequestSessionBack(bool needMoveToBackground) override;
+
     WSError SetAspectRatio(float ratio) override;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
+
     std::string GetSessionSnapshotFilePath();
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap> &icon);
     std::string GetUpdatedIconPath();
@@ -130,6 +141,7 @@ public:
         setWindowScenePatternFunc_ = func;
     };
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
+    WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
     void SetZOrder(uint32_t zOrder) override;
     std::vector<Rect> GetTouchHotAreas() const override;
     Rect GetHotAreaRect(int32_t action);
@@ -165,6 +177,7 @@ public:
     void SetSelfToken(sptr<IRemoteObject> selfToken);
     sptr<IRemoteObject> GetSelfToken();
     WSError RaiseAboveTarget(int32_t subWindowId) override;
+
 private:
     void HandleStyleEvent(MMI::WindowArea area) override;
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
@@ -177,7 +190,7 @@ private:
     bool FixRectByAspectRatio(WSRect& rect);
     std::string GetRatioPreferenceKey();
     bool SaveAspectRatio(float ratio);
-    void NotifyIsCustomAnimatiomPlaying(bool isPlaying);
+    void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void NotifyPropertyWhenConnect();
     void SetSurfaceBounds(const WSRect& rect);
     void UpdateWinRectForSystemBar(WSRect& rect);
