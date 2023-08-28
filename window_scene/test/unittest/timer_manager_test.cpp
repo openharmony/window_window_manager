@@ -58,6 +58,8 @@ HWTEST_F(TimerManagerTest, Init, Function | SmallTest | Level2)
     GTEST_LOG_(INFO) << "TimerManagerTest::Init start";
     TimerManager* timermanager = new TimerManager();
     timermanager->Init();
+    int32_t res = timermanager->RemoveTimer(0);
+    ASSERT_EQ(-1, res);
     GTEST_LOG_(INFO) << "TimerManagerTest::Init end";
 }
 
@@ -72,7 +74,8 @@ HWTEST_F(TimerManagerTest, Stop, Function | SmallTest | Level2)
     TimerManager* timermanager = new TimerManager();
     timermanager->Init();
     timermanager->Stop();
-    timermanager->Init();
+    int32_t res = timermanager->TakeNextTimerId();
+    ASSERT_EQ(res, 0);
     GTEST_LOG_(INFO) << "TimerManagerTest::Stop end";
 }
 
@@ -114,6 +117,7 @@ HWTEST_F(TimerManagerTest, ProcessTimers, Function | SmallTest | Level2)
     GTEST_LOG_(INFO) << "TimerManagerTest::ProcessTimers start";
     TimerManager* timermanager = new TimerManager();
     timermanager->ProcessTimers();
+    ASSERT_EQ(timermanager->RemoveTimerInternal(0), -1);
     GTEST_LOG_(INFO) << "TimerManagerTest::ProcessTimers start";
 }
 
@@ -127,6 +131,7 @@ HWTEST_F(TimerManagerTest, OnThread, Function | SmallTest | Level2)
     GTEST_LOG_(INFO) << "TimerManagerTest::OnThread start";
     TimerManager* timermanager = new TimerManager();
     timermanager->OnThread();
+    ASSERT_EQ(-1, timermanager->RemoveTimerInternal(0));
     GTEST_LOG_(INFO) << "TimerManagerTest::OnThread start";
 }
 
@@ -140,6 +145,7 @@ HWTEST_F(TimerManagerTest, OnStop, Function | SmallTest | Level2)
     GTEST_LOG_(INFO) << "TimerManagerTest::OnStop start";
     TimerManager* timermanager = new TimerManager();
     timermanager->OnStop();
+    ASSERT_EQ(timermanager->CalcNextDelayInternal(), 5000);
     GTEST_LOG_(INFO) << "TimerManagerTest::OnStop start";
 }
 
@@ -195,6 +201,8 @@ HWTEST_F(TimerManagerTest, ProcessTimersInternal, Function | SmallTest | Level2)
     GTEST_LOG_(INFO) << "TimerManagerTest::ProcessTimersInternal start";
     TimerManager* timermanager = new TimerManager();
     timermanager->ProcessTimersInternal();
+    int32_t res = timermanager->RemoveTimerInternal(0);
+    ASSERT_EQ(res, -1);
     GTEST_LOG_(INFO) << "TimerManagerTest::ProcessTimersInternal start";
 }
 }
