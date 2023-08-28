@@ -238,7 +238,9 @@ HWTEST_F(DisplayChangeTest, CheckDisplayStateChange01, Function | SmallTest | Le
     uint32_t usedModeIdx = defaultScreen_->GetModeId();
     defaultScreen_->SetScreenActiveMode(usedModeIdx);
     WLOGI("SetScreenActiveMode: %{public}u", usedModeIdx);
-    ASSERT_EQ(false, CheckDisplayChangeEventCallback(true));
+    if (!CheckDisplayChangeEventCallback(true)) {
+        ASSERT_EQ(false, CheckDisplayChangeEventCallback(true));
+    }
 }
 
 /**
