@@ -1032,6 +1032,7 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
                     smsScreenMapIter->second->ConvertToScreenInfo(), ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
             }
             screenSessionMap_.erase(smsScreenMapIter);
+            NotifyScreenDisconnected(screenId);
             WLOGFI("SCB: ScreenSessionManager::DestroyVirtualScreen id: %{public}" PRIu64"", screenId);
         }
     }
