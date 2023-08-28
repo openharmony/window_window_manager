@@ -38,6 +38,7 @@ group("unittest") {
     ":ws_session_manager_agent_controller_test",
     ":ws_session_proxy_test",
     ":ws_session_test",
+    ":ws_timer_manager_test",
     ":ws_window_event_channel_test",
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
@@ -125,6 +126,24 @@ ohos_unittest("ws_session_test") {
   sources = [ "session_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_base:want",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_timer_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "timer_manager_test.cpp" ]
+
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
+  ]
 
   external_deps = [
     "ability_base:session_info",
