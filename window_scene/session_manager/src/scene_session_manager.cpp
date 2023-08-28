@@ -2292,12 +2292,8 @@ WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
                 listenerController_->NotifySessionUnfocused(sceneSession->GetPersistentId());
             }
         }
-        if (windowFocusChangedFunc_ != nullptr) {
-            windowFocusChangedFunc_(persistentId, isFocused);
-        }
         return WSError::WS_OK;
     };
-
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
@@ -2314,10 +2310,10 @@ WSError SceneSessionManager::UpdateWindowMode(int32_t persistentId, int32_t wind
     return sceneSession->UpdateWindowMode(mode);
 }
 
-void SceneSessionManager::RegisterWindowFocusChanged(const WindowFocusChangedFunc& func)
+void SceneSessionManager::RegisterWindowChanged(const WindowChangedFunc& func)
 {
-    WLOGFE("RegisterWindowFocusChanged in");
-    windowFocusChangedFunc_ = func;
+    WLOGFE("RegisterWindowChanged in");
+    WindowChangedFunc_ = func;
 }
 
 std::map<int32_t, sptr<SceneSession>>& SceneSessionManager::GetSessionMapByScreenId(ScreenId id)
@@ -3304,6 +3300,9 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
         auto scnSession = weakSceneSession.promote();
         if (FillWindowInfo(infos, scnSession)) {
             SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(infos, type);
+        }
+        if (WindowChangedFunc_ != nullptr && scnSession != nullptr) {
+            WindowChangedFunc_(scnSession->GetPersistentId(), type);
         }
     };
     taskScheduler_->PostAsyncTask(task);
