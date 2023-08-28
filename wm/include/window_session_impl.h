@@ -227,6 +227,8 @@ private:
 
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
+    int16_t rotationAnimationCount_ { 0 };
+    Gravity lastGravity_ = Gravity::RESIZE;
 };
 } // namespace Rosen
 } // namespace OHOS
