@@ -20,11 +20,12 @@
 #include "ipc_skeleton.h"
 #include "key_event.h"
 #include "pointer_event.h"
-// #include "../../proxy/include/window_info.h"
+#include "../../proxy/include/window_info.h"
 
 #include "anr_manager.h"
 #include "foundation/ability/ability_base/interfaces/kits/native/want/include/want.h"
 #include "interfaces/include/ws_common.h"
+#include <string>
 #include <surface_capture_future.h>
 #include <transaction/rs_interfaces.h>
 #include <ui/rs_surface_node.h>
@@ -384,9 +385,9 @@ bool Session::IsSystemSession() const
 
 WSError Session::SetPointerStyle(MMI::WindowArea area)
 {
-    WLOGFD("Information to be set: pid:%{public}d, windowId:%{public}d, MMI::WindowArea:%{public}s",
+    WLOGFI("Information to be set: pid:%{public}d, windowId:%{public}d, MMI::WindowArea:%{public}s",
         callingPid_, persistentId_, DumpPointerWindowArea(area));
-    // MMI::InputManager::GetInstance()->SetWindowPointerStyle(area, callingPid_, persistentId_);
+    MMI::InputManager::GetInstance()->SetWindowPointerStyle(area, callingPid_, persistentId_);
     return WSError::WS_OK;
 }
 
@@ -661,8 +662,7 @@ WSError Session::Disconnect()
     WLOGFI("Disconnect session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
     if (state == SessionState::STATE_ACTIVE) {
-        constexpr float scale = 0.5;
-        snapshot_ = Snapshot(scale);
+        snapshot_ = Snapshot();
         if (scenePersistence_ && snapshot_) {
             scenePersistence_->SaveSnapshot(snapshot_);
         }
@@ -835,6 +835,40 @@ WSError Session::TerminateSessionTotal(const sptr<AAFwk::SessionInfo> abilitySes
 void Session::SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncTotal& func)
 {
     terminateSessionFuncTotal_ = func;
+}
+
+WSError Session::SetSessionLabel(const std::string &label)
+{
+    WLOGFI("run Session::SetSessionLabel");
+    if (updateSessionLabelFunc_) {
+        updateSessionLabelFunc_(label);
+    }
+    return WSError::WS_OK;
+}
+
+void Session::SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc &func)
+{
+    updateSessionLabelFunc_ = func;
+}
+
+WSError Session::SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon)
+{
+    WLOGFI("run Session::SetSessionIcon");
+    if (scenePersistence_ == nullptr) {
+        WLOGFI("scenePersistence_ is nullptr.");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    scenePersistence_->SaveUpdatedIcon(icon);
+    std::string updatedIconPath = scenePersistence_->GetUpdatedIconPath();
+    if (updateSessionIconFunc_) {
+        updateSessionIconFunc_(updatedIconPath);
+    }
+    return WSError::WS_OK;
+}
+
+void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc &func)
+{
+    updateSessionIconFunc_ = func;
 }
 
 WSError Session::Clear()
@@ -1039,6 +1073,10 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     if (!IsSystemSession() && !IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (pointerEvent == nullptr) {
+        WLOGFE("PointerEvent is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         if (CheckDialogOnForeground()) {
             WLOGFD("Has dialog on foreground, not transfer pointer event");
@@ -1050,12 +1088,6 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
-    if (pointerEvent == nullptr) {
-        WLOGFE("PointerEvent is nullptr");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    WLOGFD("Session TransferPointEvent, eventId:%{public}d, persistentId:%{public}d, bundleName:%{public}s, "
-        "pid:%{public}d", pointerEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
         WLOGFD("The pointerEvent does not report normally, bundleName:%{public}s not response, pid:%{public}d, "
             "persistentId:%{public}d", callingBundleName_.c_str(), callingPid_, persistentId_);
@@ -1073,6 +1105,16 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     if (WSError ret = windowEventChannel_->TransferPointerEvent(pointerEvent); ret != WSError::WS_OK) {
         WLOGFE("TransferPointer failed");
         return ret;
+    }
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
+        WLOGFD("Session TransferPointEvent, eventId:%{public}d, action:%{public}s, persistentId:%{public}d, "
+            "bundleName:%{public}s, pid:%{public}d", pointerEvent->GetId(), pointerEvent->DumpPointerAction(),
+            persistentId_, callingBundleName_.c_str(), callingPid_);
+    } else {
+        WLOGFI("Session TransferPointEvent, eventId:%{public}d, action:%{public}s, persistentId:%{public}d, "
+            "bundleName:%{public}s, pid:%{public}d", pointerEvent->GetId(), pointerEvent->DumpPointerAction(),
+            persistentId_, callingBundleName_.c_str(), callingPid_);
     }
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW ||
@@ -1161,10 +1203,10 @@ WSError Session::TransferFocusStateEvent(bool focusState)
     return windowEventChannel_->TransferFocusState(focusState);
 }
 
-std::shared_ptr<Media::PixelMap> Session::Snapshot(float scale)
+std::shared_ptr<Media::PixelMap> Session::Snapshot()
 {
     auto callback = std::make_shared<SurfaceCaptureFuture>();
-    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, scale, scale);
+    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, snapshotScale_, snapshotScale_);
     if (!ret) {
         WLOGFE("TakeSurfaceCapture failed");
         return nullptr;
@@ -1385,6 +1427,11 @@ void Session::SetSystemConfig(const SystemSessionConfig& systemConfig)
     systemConfig_ = systemConfig;
 }
 
+void Session::SetSnapshotScale(const float snapshotScale)
+{
+    snapshotScale_ = snapshotScale;
+}
+
 WSError Session::RequestSessionBack(bool needMoveToBackground)
 {
     if (!backPressedFunc_) {
@@ -1399,6 +1446,10 @@ WSError Session::ProcessBackEvent()
 {
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+        WLOGFI("dialog window don't hadnle back event");
+        return WSError::WS_OK;
     }
     return sessionStage_->HandleBackEvent();
 }

@@ -130,6 +130,7 @@ public:
     virtual void SetMaximizeMode(MaximizeMode maximizeMode) = 0;
     virtual MaximizeMode GetMaximizeMode() = 0;
     virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo) = 0;
+    virtual WMError CheckWindowId(int32_t windowId, int32_t &pid) { return WMError::WM_OK; }
     virtual WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) { return WSError::WS_OK; }
 };
 }
