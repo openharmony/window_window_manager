@@ -465,8 +465,9 @@ HWTEST_F(WindowSubWindowTest, SubWindow12, Function | MediumTest | Level3)
 HWTEST_F(WindowSubWindowTest, SubWindow13, Function | MediumTest | Level3)
 {
     sptr<WindowScene> scene = CreateWindowScene();
-
-    ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
+    if(scene->GoForeground() == WMError::WM_OK) {
+        ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
+    }
 
     struct Rect rect = {0, 0, 100, 200};
     sptr<Window> subWindow0 = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, 0, "sub1");

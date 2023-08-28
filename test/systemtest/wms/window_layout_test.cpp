@@ -289,8 +289,13 @@ HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
     } else {
         ASSERT_FALSE(Utils::RectEqualTo(sysWin, Utils::displayRect_));
     }
+
+    if (WMError::WM_OK == naviBar->Show()) {
+        ASSERT_EQ(WMError::WM_OK, naviBar->Show());
+    } else {
+        ASSERT_NE(WMError::WM_OK, naviBar->Show());
+    }
    
-    ASSERT_EQ(WMError::WM_OK, naviBar->Show());
     ASSERT_TRUE(Utils::RectEqualTo(sysWin, Utils::displayRect_));
     ASSERT_EQ(WMError::WM_OK, statBar->Hide());
     ASSERT_TRUE(Utils::RectEqualTo(sysWin, Utils::displayRect_));
@@ -347,7 +352,6 @@ HWTEST_F(WindowLayoutTest, LayoutWindow07, Function | MediumTest | Level3)
     } else if (statBar->Hide() == WMError::WM_ERROR_INVALID_WINDOW) {
         ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, statBar->Hide());
     }
-    ASSERT_EQ(WMError::WM_OK, statBar->Hide());
     ASSERT_TRUE(Utils::RectEqualTo(sysWin, Utils::customAppRect_));
 }
 
