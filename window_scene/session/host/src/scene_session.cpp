@@ -935,7 +935,9 @@ std::string SceneSession::GetSessionSnapshotFilePath()
     if (Session::GetSessionState() < SessionState::STATE_BACKGROUND) {
         WLOGFI("GetSessionSnapshotFilePath UpdateSnapshot");
         auto snapshot = Snapshot();
-        scenePersistence_->SaveSnapshot(snapshot);
+        if (scenePersistence_ != nullptr) {
+            scenePersistence_->SaveSnapshot(snapshot);
+        }
     }
     if (scenePersistence_ != nullptr) {
         return scenePersistence_->GetSnapshotFilePath();
