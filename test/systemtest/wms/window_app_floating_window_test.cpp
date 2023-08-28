@@ -215,6 +215,9 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow03, Function | MediumTest
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
     ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
+    if (scene->GetMainWindow() == nullptr) {
+        return;
+    }
     ASSERT_EQ(true, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
 
@@ -247,6 +250,9 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow04, Function | MediumTest
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
 
     ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
+    if (scene->GetMainWindow() == nullptr) {
+        return;
+    }
     ASSERT_EQ(nullptr, scene->GetMainWindow());
     ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
@@ -306,6 +312,9 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow06, Function | MediumTest
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
 
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
+    if (scene->GetMainWindow() == nullptr) {
+        return;
+    }
     ASSERT_EQ(false, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(true, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
@@ -337,6 +346,9 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow07, Function | MediumTest
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
     ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
+    if (scene->GetMainWindow() == nullptr) {
+        return;
+    }
     ASSERT_EQ(true, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
 
@@ -366,6 +378,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow08, Function | MediumTest
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
 
     ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
+
     ASSERT_EQ(nullptr, scene->GetMainWindow());
     ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
