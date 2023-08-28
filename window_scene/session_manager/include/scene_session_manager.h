@@ -319,6 +319,7 @@ private:
 
     void CheckAndNotifyWaterMarkChangedResult();
     WSError NotifyWaterMarkFlagChangedResult(bool hasWaterMark);
+    void ProcessPreload(const AppExecFwk::AbilityInfo& abilityInfo) const;
     bool lastWaterMarkShowState_ { false };
     WindowFocusChangedFunc windowFocusChangedFunc_;
     sptr<SceneSession> callingSession_ = nullptr;
