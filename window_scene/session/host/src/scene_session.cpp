@@ -49,7 +49,7 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
 {
     GeneratePersistentId(false, info);
     if (!info.bundleName_.empty()) {
-        scenePersistence_ = new (std::nothrow) ScenePersistence(info, GetPersistentId());
+        scenePersistence_ = new ScenePersistence(info.bundleName_, GetPersistentId());
     }
     specificCallback_ = specificCallback;
     moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
@@ -139,9 +139,11 @@ WSError SceneSession::Background()
     if (ret != WSError::WS_OK) {
         return ret;
     }
-    snapshot_ = Snapshot();
-    if (scenePersistence_ && snapshot_) {
-        scenePersistence_->SaveSnapshot(snapshot_);
+    if (WindowHelper::IsMainWindow(GetWindowType())) {
+        snapshot_ = Snapshot();
+        if (scenePersistence_ && snapshot_) {
+            scenePersistence_->SaveSnapshot(snapshot_);
+        }
     }
     NotifyBackground();
     snapshot_.reset();

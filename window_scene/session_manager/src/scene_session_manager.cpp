@@ -1410,9 +1410,8 @@ WSError SceneSessionManager::SwitchUser(int32_t oldUserId, int32_t newUserId, st
     WLOGFD("SwitchUser oldUserId : %{public}d newUserId : %{public}d path : %{public}s",
         oldUserId, newUserId, fileDir.c_str());
     auto task = [this, newUserId, &fileDir]() {
-        if (!ScenePersistence::CreateSnapshotDir(fileDir)) {
-            WLOGFD("snapshot dir existed");
-        }
+        ScenePersistence::CreateSnapshotDir(fileDir);
+        ScenePersistence::CreateUpdatedIconDir(fileDir);
         currentUserId_ = newUserId;
         std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto &item : sceneSessionMap_) {
