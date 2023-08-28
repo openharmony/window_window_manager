@@ -1866,8 +1866,9 @@ void ScreenSessionManager::NotifyPrivateSessionStateChanged(bool hasPrivate)
     }
 }
 
-void ScreenSessionManager::SetScreenPrivacyState(ScreenId id, bool hasPrivate)
+void ScreenSessionManager::SetScreenPrivacyState(bool hasPrivate)
 {
+    ScreenId id = GetDefaultScreenId();
     auto screenSession = GetScreenSession(id);
     if (screenSession == nullptr) {
         WLOGFE("can not get default screen now");
@@ -1875,11 +1876,6 @@ void ScreenSessionManager::SetScreenPrivacyState(ScreenId id, bool hasPrivate)
     }
     screenSession->SetPrivateSessionForeground(hasPrivate);
     NotifyPrivateSessionStateChanged(hasPrivate);
-}
-
-ScreenId ScreenSessionManager::GetScreenSessionIdBySceneSessionId(uint32_t persistentId)
-{
-    return 0; // current only has one screen
 }
 
 DMError ScreenSessionManager::HasPrivateWindow(DisplayId id, bool& hasPrivateWindow)
