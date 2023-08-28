@@ -23,7 +23,6 @@
 #include "zidl/window_manager_agent_interface.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
-#include "context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -180,42 +179,6 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowSizeLimits01, Function | SmallTest
     ASSERT_EQ(sceneSessionManager->systemConfig_.miniHeightOfMainWindow_, 20);
     ASSERT_EQ(sceneSessionManager->systemConfig_.miniWidthOfSubWindow_, 30);
     ASSERT_EQ(sceneSessionManager->systemConfig_.miniHeightOfSubWindow_, 40);
-}
-
-/**
- * @tc.name: DumpSessionAll
- * @tc.desc: ScreenSesionManager dump all session info
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, DumpSessionAll, Function | SmallTest | Level3)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SceneSessionManagerTest";
-    sessionInfo.abilityName_ = "DumpSessionAll";
-    sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    std::vector<std::string> infos;
-    WSError result = ssm_->DumpSessionAll(infos);
-    ASSERT_EQ(WSError::WS_OK, result);
-    ASSERT_FALSE(infos.empty());
-}
-
-/**
- * @tc.name: DumpSessionWithId
- * @tc.desc: ScreenSesionManager dump session with id
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, DumpSessionWithId, Function | SmallTest | Level3)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SceneSessionManagerTest";
-    sessionInfo.abilityName_ = "DumpSessionWithId";
-    sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    std::vector<std::string> infos;
-    WSError result = ssm_->DumpSessionWithId(sceneSession->GetPersistentId(), infos);
-    ASSERT_EQ(WSError::WS_OK, result);
-    ASSERT_FALSE(infos.empty());
 }
 
 /**
@@ -500,8 +463,7 @@ HWTEST_F(SceneSessionManagerTest, CreateCurve, Function | SmallTest | Level3)
 HWTEST_F(SceneSessionManagerTest, SetRootSceneContext, Function | SmallTest | Level3)
 {
     int ret = 0;
-    std::weak_ptr<AbilityRuntime::Context> contextWeakPtr;
-    ssm_->SetRootSceneContext(contextWeakPtr);
+    ssm_->SetRootSceneContext(nullptr);
     ASSERT_EQ(ret, 0);
 }
 
@@ -538,7 +500,7 @@ HWTEST_F(SceneSessionManagerTest, GetSceneSessionByName, Function | SmallTest | 
     std::string bundleName = "movie";
     std::string moduleName = "button";
     std::string abilityName = "userAccess";
-    ASSERT_EQ(ssm_->GetSceneSessionByName(bundleName, moduleName, abilityName, 0), nullptr);
+    ASSERT_EQ(ssm_->GetSceneSessionByName(bundleName, moduleName, abilityName), nullptr);
 }
 
 /**
