@@ -1969,7 +1969,7 @@ void ScreenSessionManager::OnScreenshot(sptr<ScreenshotInfo> info)
 
 sptr<CutoutInfo> ScreenSessionManager::GetCutoutInfo(DisplayId displayId)
 {
-    return screenCutoutController_ ? screenCutoutController_->GetScreenCutoutInfo() : nullptr;
+    return screenCutoutController_ ? screenCutoutController_->GetScreenCutoutInfo(displayId) : nullptr;
 }
 
 void ScreenSessionManager::SetDisplayBoundary(const sptr<ScreenSession> screenSession)

@@ -33,23 +33,23 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Screen
 uint32_t ScreenCutoutController::defaultDeviceRotation_ = 0;
 std::map<DeviceRotationValue, Rotation> ScreenCutoutController::deviceToDisplayRotationMap_;
 
-sptr<CutoutInfo> ScreenCutoutController::GetScreenCutoutInfo()
+sptr<CutoutInfo> ScreenCutoutController::GetScreenCutoutInfo(DisplayId displayId)
 {
     WLOGFD("get screen cutout info.");
     std::vector<DMRect> boundaryRects;
     if (!ScreenSceneConfig::GetCutoutBoundaryRect().empty()) {
-        ConvertBoundaryRectsByRotation(boundaryRects);
+        ConvertBoundaryRectsByRotation(boundaryRects, displayId);
     }
 
-    CalcWaterfallRects();
+    CalcWaterfallRects(displayId);
     sptr<CutoutInfo> cutoutInfo = new CutoutInfo(boundaryRects, waterfallDisplayAreaRects_);
     return cutoutInfo;
 }
 
-void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>& boundaryRects)
+void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>& boundaryRects, DisplayId displayId)
 {
     std::vector<DMRect> finalVector;
-    sptr<DisplayInfo> displayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+    sptr<DisplayInfo> displayInfo = ScreenSessionManager::GetInstance().GetDisplayInfoById(displayId);
     if (!displayInfo) {
         WLOGFE("displayInfo invaild");
         boundaryRects = finalVector;
@@ -69,8 +69,8 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
     switch (currentRotation) {
         case Rotation::ROTATION_90: {
             for (DMRect rect : displayBoundaryRects) {
-                finalVector.emplace_back(DMRect{
-                    .posX_ = displayHeight - rect.posY_ - rect.height_,
+                finalVector.emplace_back(DMRect {
+                    .posX_ = displayWidth - rect.posY_ - rect.height_,
                     .posY_ = rect.posX_,
                     .width_ = rect.height_,
                     .height_ = rect.width_ });
@@ -79,7 +79,7 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
         }
         case Rotation::ROTATION_180: {
             for (DMRect rect : displayBoundaryRects) {
-                finalVector.emplace_back(DMRect{ displayWidth - rect.posX_ - rect.width_,
+                finalVector.emplace_back(DMRect { displayWidth - rect.posX_ - rect.width_,
                     displayHeight - rect.posY_ - rect.height_, rect.width_, rect.height_ });
             }
             break;
@@ -87,7 +87,7 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
         case Rotation::ROTATION_270: {
             for (DMRect rect : displayBoundaryRects) {
                 finalVector.emplace_back(
-                    DMRect{ rect.posY_, displayWidth - rect.posX_ - rect.width_, rect.height_, rect.width_ });
+                    DMRect { rect.posY_, displayHeight - rect.posX_ - rect.width_, rect.height_, rect.width_ });
             }
             break;
         }
@@ -121,7 +121,7 @@ void ScreenCutoutController::CheckBoundaryRects(std::vector<DMRect>& boundaryRec
     }
 }
 
-void ScreenCutoutController::CalcWaterfallRects()
+void ScreenCutoutController::CalcWaterfallRects(DisplayId displayId)
 {
     WaterfallDisplayAreaRects emptyRects = {};
     if (!ScreenSceneConfig::IsWaterfallDisplay()) {
@@ -148,7 +148,7 @@ void ScreenCutoutController::CalcWaterfallRects()
         return;
     }
 
-    sptr<DisplayInfo> displayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+    sptr<DisplayInfo> displayInfo = ScreenSessionManager::GetInstance().GetDisplayInfoById(displayId);
     if (!displayInfo) {
         WLOGFE("displayInfo invaild");
         return;
@@ -163,12 +163,11 @@ void ScreenCutoutController::CalcWaterfallRects()
         return;
     }
 
-    CalcWaterfallRectsByRotation(ScreenSessionManager::GetInstance().GetDefaultDisplayInfo()->GetRotation(),
-        displayHeight, displayWidth, realNumVec);
+    CalcWaterfallRectsByRotation(GetCurrentDisplayRotation(displayId), displayWidth, displayHeight, realNumVec);
 }
 
-void ScreenCutoutController::CalcWaterfallRectsByRotation(Rotation rotation, uint32_t displayHeight,
-    uint32_t displayWidth, std::vector<uint32_t> realNumVec)
+void ScreenCutoutController::CalcWaterfallRectsByRotation(Rotation rotation, uint32_t displayWidth,
+    uint32_t displayHeight, std::vector<uint32_t> realNumVec)
 {
     switch (rotation) {
         case Rotation::ROTATION_0: {
@@ -178,34 +177,34 @@ void ScreenCutoutController::CalcWaterfallRectsByRotation(Rotation rotation, uin
                 CreateWaterfallRect(displayWidth - realNumVec[RIGHT], 0, realNumVec[RIGHT], displayHeight);
             DMRect bottomRect =
                 CreateWaterfallRect(0, displayHeight - realNumVec[BOTTOM], displayWidth, realNumVec[BOTTOM]);
-            waterfallDisplayAreaRects_ = WaterfallDisplayAreaRects{ leftRect, topRect, rightRect, bottomRect };
+            waterfallDisplayAreaRects_ = WaterfallDisplayAreaRects { leftRect, topRect, rightRect, bottomRect };
             return;
         }
         case Rotation::ROTATION_90: {
-            DMRect leftRect = CreateWaterfallRect(0, 0, realNumVec[BOTTOM], displayWidth);
-            DMRect topRect = CreateWaterfallRect(0, 0, displayHeight, realNumVec[LEFT]);
-            DMRect rightRect = CreateWaterfallRect(displayHeight - realNumVec[TOP], 0, realNumVec[TOP], displayWidth);
+            DMRect leftRect = CreateWaterfallRect(0, 0, realNumVec[BOTTOM], displayHeight);
+            DMRect topRect = CreateWaterfallRect(0, 0, displayWidth, realNumVec[LEFT]);
+            DMRect rightRect = CreateWaterfallRect(displayWidth - realNumVec[TOP], 0, realNumVec[TOP], displayHeight);
             DMRect bottomRect =
-                CreateWaterfallRect(0, displayWidth - realNumVec[RIGHT], displayHeight, realNumVec[RIGHT]);
-            waterfallDisplayAreaRects_ = WaterfallDisplayAreaRects{ leftRect, topRect, rightRect, bottomRect };
+                CreateWaterfallRect(0, displayHeight - realNumVec[RIGHT], displayWidth, realNumVec[RIGHT]);
+            waterfallDisplayAreaRects_ = WaterfallDisplayAreaRects { leftRect, topRect, rightRect, bottomRect };
             return;
         }
         case Rotation::ROTATION_180: {
             DMRect leftRect = CreateWaterfallRect(0, 0, realNumVec[RIGHT], displayHeight);
-            DMRect topRect = CreateWaterfallRect(0, 0, realNumVec[BOTTOM], displayWidth);
+            DMRect topRect = CreateWaterfallRect(0, 0, displayWidth, realNumVec[BOTTOM]);
             DMRect rightRect = CreateWaterfallRect(displayWidth - realNumVec[LEFT], 0, realNumVec[LEFT], displayHeight);
             DMRect bottomRect = CreateWaterfallRect(0, displayHeight - realNumVec[TOP], displayWidth, realNumVec[TOP]);
-            waterfallDisplayAreaRects_ = WaterfallDisplayAreaRects{ leftRect, topRect, rightRect, bottomRect };
+            waterfallDisplayAreaRects_ = WaterfallDisplayAreaRects { leftRect, topRect, rightRect, bottomRect };
             return;
         }
         case Rotation::ROTATION_270: {
-            DMRect leftRect = CreateWaterfallRect(0, 0, realNumVec[TOP], displayWidth);
-            DMRect topRect = CreateWaterfallRect(0, 0, displayHeight, realNumVec[RIGHT]);
+            DMRect leftRect = CreateWaterfallRect(0, 0, realNumVec[TOP], displayHeight);
+            DMRect topRect = CreateWaterfallRect(0, 0, displayWidth, realNumVec[RIGHT]);
             DMRect rightRect =
-                CreateWaterfallRect(displayHeight - realNumVec[BOTTOM], 0, realNumVec[BOTTOM], displayWidth);
+                CreateWaterfallRect(displayWidth - realNumVec[BOTTOM], 0, realNumVec[BOTTOM], displayHeight);
             DMRect bottomRect =
-                CreateWaterfallRect(0, displayWidth - realNumVec[LEFT], displayHeight, realNumVec[LEFT]);
-            waterfallDisplayAreaRects_ = WaterfallDisplayAreaRects{ leftRect, topRect, rightRect, bottomRect };
+                CreateWaterfallRect(0, displayHeight - realNumVec[LEFT], displayWidth, realNumVec[LEFT]);
+            waterfallDisplayAreaRects_ = WaterfallDisplayAreaRects { leftRect, topRect, rightRect, bottomRect };
             return;
         }
         default: {
@@ -216,9 +215,9 @@ void ScreenCutoutController::CalcWaterfallRectsByRotation(Rotation rotation, uin
 DMRect ScreenCutoutController::CreateWaterfallRect(uint32_t left, uint32_t top, uint32_t width, uint32_t height)
 {
     if (width == 0 || height == 0) {
-        return DMRect{ 0, 0, 0, 0 };
+        return DMRect { 0, 0, 0, 0 };
     }
-    return DMRect {left, top, width, height};
+    return DMRect { static_cast<int32_t>(left), static_cast<int32_t>(top), width, height };
 }
 
 RectF ScreenCutoutController::CalculateCurvedCompression(const ScreenProperty& screenProperty)
@@ -226,7 +225,7 @@ RectF ScreenCutoutController::CalculateCurvedCompression(const ScreenProperty& s
     WLOGFI("calculate curved compression");
     RectF finalRect = RectF(0, 0, 0, 0);
     sptr<DisplayInfo> displayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
-    uint32_t iCurvedSize = ScreenSceneConfig::GetCurvedCompressionAreaInLandscape();
+    uint32_t iCurvedSize = 0;
     if (!displayInfo || iCurvedSize == 0) {
         WLOGFE("display Info. invalid or curved area config value is zero");
         return finalRect;
@@ -274,7 +273,7 @@ bool ScreenCutoutController::IsDisplayRotationHorizontal(Rotation rotation)
 Rotation ScreenCutoutController::ConvertDeviceToDisplayRotation(DeviceRotationValue deviceRotation)
 {
     if (deviceRotation == DeviceRotationValue::INVALID) {
-        return GetCurrentDisplayRotation();
+        return Rotation::ROTATION_0;
     }
     if (deviceToDisplayRotationMap_.empty()) {
         ProcessRotationMapping();
@@ -282,9 +281,9 @@ Rotation ScreenCutoutController::ConvertDeviceToDisplayRotation(DeviceRotationVa
     return deviceToDisplayRotationMap_.at(deviceRotation);
 }
 
-Rotation ScreenCutoutController::GetCurrentDisplayRotation()
+Rotation ScreenCutoutController::GetCurrentDisplayRotation(DisplayId displayId)
 {
-    sptr<DisplayInfo> displayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
+    sptr<DisplayInfo> displayInfo = ScreenSessionManager::GetInstance().GetDisplayInfoById(displayId);
     if (!displayInfo) {
         WLOGFE("Cannot get default display info");
         return defaultDeviceRotation_ == 0 ? ConvertDeviceToDisplayRotation(DeviceRotationValue::ROTATION_PORTRAIT) :
@@ -301,14 +300,14 @@ void ScreenCutoutController::ProcessRotationMapping()
         (!displayInfo || (displayInfo && (displayInfo->GetWidth() < displayInfo->GetHeight()))) ? 0 : 1;
     if (deviceToDisplayRotationMap_.empty()) {
         deviceToDisplayRotationMap_ = {
-            {DeviceRotationValue::ROTATION_PORTRAIT,
-                defaultDeviceRotation_ == 0 ? Rotation::ROTATION_0 : Rotation::ROTATION_90},
-            {DeviceRotationValue::ROTATION_LANDSCAPE,
-                defaultDeviceRotation_ == 1 ? Rotation::ROTATION_0 : Rotation::ROTATION_90},
-            {DeviceRotationValue::ROTATION_PORTRAIT_INVERTED,
-                defaultDeviceRotation_ == 0 ? Rotation::ROTATION_180 : Rotation::ROTATION_270},
-            {DeviceRotationValue::ROTATION_LANDSCAPE_INVERTED,
-                defaultDeviceRotation_ == 1 ? Rotation::ROTATION_180 : Rotation::ROTATION_270},
+            { DeviceRotationValue::ROTATION_PORTRAIT,
+                defaultDeviceRotation_ == 0 ? Rotation::ROTATION_0 : Rotation::ROTATION_90 },
+            { DeviceRotationValue::ROTATION_LANDSCAPE,
+                defaultDeviceRotation_ == 1 ? Rotation::ROTATION_0 : Rotation::ROTATION_90 },
+            { DeviceRotationValue::ROTATION_PORTRAIT_INVERTED,
+                defaultDeviceRotation_ == 0 ? Rotation::ROTATION_180 : Rotation::ROTATION_270 },
+            { DeviceRotationValue::ROTATION_LANDSCAPE_INVERTED,
+                defaultDeviceRotation_ == 1 ? Rotation::ROTATION_180 : Rotation::ROTATION_270 },
         };
     }
 }
