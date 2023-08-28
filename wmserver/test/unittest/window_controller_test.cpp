@@ -1431,7 +1431,6 @@ HWTEST_F(WindowControllerTest, RecoverDefaultMouseStyle, Function | SmallTest | 
     surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
     ASSERT_EQ(WMError::WM_OK,
         windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
-
 }
 
 /**
