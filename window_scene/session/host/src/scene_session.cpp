@@ -21,6 +21,8 @@
 #include <pointer_event.h>
 #include <transaction/rs_transaction.h>
 
+#include "../../proxy/include/window_info.h"
+
 #include "common/include/session_permission.h"
 #include "interfaces/include/ws_common.h"
 #include "pixel_map.h"
@@ -506,6 +508,12 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             inputMethod->GetSessionState() != SessionState::STATE_ACTIVE) {
             continue;
         }
+        SessionGravity gravity;
+        uint32_t percent = 0;
+        inputMethod->GetSessionProperty()->GetSessionGravity(gravity, percent);
+        if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
+            continue;
+        }
         WSRect inputMethodRect = inputMethod->GetSessionRect();
         CalculateAvoidAreaRect(rect, inputMethodRect, avoidArea);
     }
@@ -683,7 +691,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
     }
 
-    static bool isNew = false;
+    static bool isNew = true;
     if (isNew) {
         auto ret = HandlePointerStyle(pointerEvent);
         if (ret != WSError::WS_OK && ret != WSError::WS_DO_NOTHING) {

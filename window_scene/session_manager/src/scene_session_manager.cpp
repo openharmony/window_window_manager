@@ -42,8 +42,6 @@
 #include <transaction/rs_transaction.h>
 #include <transaction/rs_interfaces.h>
 
-#include "input_manager.h"
-
 #ifdef RES_SCHED_ENABLE
 #include "res_type.h"
 #include "res_sched_client.h"
@@ -186,19 +184,12 @@ void SceneSessionManager::Init()
     if (ret != 0) {
         WLOGFW("Add thread %{public}s to watchdog failed.", WINDOW_INFO_REPORT_THREAD.c_str());
     }
-    InitWindowChecker();
     listenerController_ = std::make_shared<SessionListenerController>();
     listenerController_->Init();
     scbSessionHandler_ = new ScbSessionHandler();
     AAFwk::AbilityManagerClient::GetInstance()->RegisterSessionHandler(scbSessionHandler_);
     StartWindowInfoReportLoop();
     WLOGI("SceneSessionManager init success.");
-}
-
-void SceneSessionManager::InitWindowChecker()
-{
-    auto windowChecker_ = std::make_shared<WindowChecker>();
-    // MMI::InputManager::GetInstance()->SetWindowCheckerHandler(windowChecker_);
 }
 
 void SceneSessionManager::LoadWindowSceneXml()
@@ -744,6 +735,7 @@ WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& scene
             WLOGFE("Parent session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
+        parentSession->BindDialogTarget(sceneSession);
         parentSession->BindDialogToParentSession(sceneSession);
         sceneSession->SetParentSession(parentSession);
         WLOGFD("Update parent of dialog success, id %{public}d, parentId %{public}d",
@@ -773,30 +765,26 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     return specificCb;
 }
 
-int32_t SceneSessionManager::CheckWindowId(int32_t windowId)
+WMError SceneSessionManager::CheckWindowId(int32_t windowId, int32_t &pid)
 {
-    auto task = [this, windowId]() -> int32_t {
+    auto task = [this, windowId, &pid]() -> WMError {
+        pid = INVALID_PID;
         std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         auto iter = sceneSessionMap_.find(windowId);
         if (iter == sceneSessionMap_.end()) {
             WLOGFE("Window(%{public}d) cannot set cursor style", windowId);
-            return INVALID_PID;
+            return WMError::WM_ERROR_INVALID_WINDOW;
         }
         auto sceneSession = iter->second;
         if (sceneSession == nullptr) {
             WLOGFE("sceneSession(%{public}d) is nullptr", windowId);
-            return INVALID_PID;
+            return WMError::WM_ERROR_INVALID_WINDOW;
         }
-        int32_t pid = sceneSession->GetCallingPid();
+        pid = sceneSession->GetCallingPid();
         WLOGFD("Window(%{public}d) to set the cursor style, pid:%{public}d", windowId, pid);
-        return pid;
+        return WMError::WM_OK;
     };
     return taskScheduler_->PostSyncTask(task);
-}
-
-int32_t SceneSessionManager::WindowChecker::CheckWindowId(int32_t windowId) const
-{
-    return SceneSessionManager::GetInstance().CheckWindowId(windowId);
 }
 
 sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo,
@@ -846,7 +834,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         RegisterInputMethodShownFunc(sceneSession);
         RegisterInputMethodHideFunc(sceneSession);
 
-        WLOGFI("create session persistentId: %{public}d", persistentId);     
+        WLOGFI("create session persistentId: %{public}d", persistentId);
         return sceneSession;
     };
 
@@ -1123,6 +1111,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
             return WSError::WS_ERROR_NULLPTR;
         }
         auto persistentId = scnSession->GetPersistentId();
+        lastUpdatedAvoidArea_.erase(persistentId);
         DestroyDialogWithMainWindow(scnSession);
         WLOGFI("destroy session persistentId: %{public}d", persistentId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionDestruction (%" PRIu32" )", persistentId);
@@ -1226,7 +1215,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         if (property) {
             persistentId = property->GetPersistentId();
         }
-        if (createSpecificSessionFunc_) {
+        if (createSpecificSessionFunc_ && info.windowType_ != static_cast<uint32_t>(WindowType::WINDOW_TYPE_DIALOG)) {
             createSpecificSessionFunc_(sceneSession);
         }
         session = sceneSession;
@@ -1873,9 +1862,14 @@ WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSessio
     }
     sceneSession->SetBrightness(brightness);
     if (GetDisplayBrightness() != brightness) {
-        DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
-            static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
-        SetDisplayBrightness(brightness);
+        if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
+            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
+            SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
+        } else {
+            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
+                static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
+            SetDisplayBrightness(brightness);
+        }
     }
     brightnessSessionId_ = sceneSession->GetPersistentId();
     return WSError::WS_OK;
@@ -3004,7 +2998,6 @@ WSError SceneSessionManager::BindDialogTarget(uint64_t persistentId, sptr<IRemot
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     scnSession->SetParentSession(parentSession);
-    parentSession->BindDialogTarget(scnSession);
     scnSession->SetParentPersistentId(parentSession->GetPersistentId());
     UpdateParentSession(scnSession, scnSession->GetSessionProperty());
     WLOGFD("Bind dialog success, dialog id %{public}" PRIu64 ", parent id %{public}d",
@@ -4010,7 +4003,7 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession> sceneSession)
         sceneSession->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
     } else if (newSessionInfo.abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
         sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
-    }    
+    }
     if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
         WLOGFI("try to run NotifyStartAbility and NotifySessionCreate");
         NotifyStartAbility(sceneSession->GetCollaboratorType(), newSessionInfo);
