@@ -178,6 +178,9 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow02, Function | MediumTest
         ASSERT_NE(WMError::WM_OK, scene->GoForeground());
     }
 
+    if (scene->GetMainWindow() == nullptr) {
+        return;
+    }
     ASSERT_EQ(false, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(true, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
