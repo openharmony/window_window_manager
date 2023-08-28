@@ -126,10 +126,10 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow01, Function | MediumTest
     Rect fltWindRect = GetRectWithVpr(0, 0, 400, 600);
     sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT, fltWindRect);
     ASSERT_NE(nullptr, fltWin);
-    if(scene->GoForeground()==WMError::WM_OK) {
+    if (scene->GoForeground() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     }
-   
+
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
@@ -231,7 +231,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow04, Function | MediumTest
     } 
     ASSERT_NE(nullptr, fltWin);
 
-    if(scene->GoForeground()==WMError::WM_OK) {
+    if (scene->GoForeground() == WMError::WM_OK){
         ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     } else {
         ASSERT_NE(WMError::WM_OK, scene->GoForeground());
