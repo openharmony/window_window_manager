@@ -31,6 +31,8 @@ enum class DisplayManagerAgentType : uint32_t {
     DISPLAY_EVENT_LISTENER,
     SCREENSHOT_EVENT_LISTENER,
     PRIVATE_WINDOW_LISTENER,
+    FOLD_STATUS_CHANGED_LISTENER,
+    DISPLAY_MODE_CHANGED_LISTENER,
 };
 
 class IDisplayManagerAgent : public IRemoteBroker {
@@ -49,6 +51,8 @@ public:
         TRANS_ID_ON_DISPLAY_CHANGED,
         TRANS_ID_ON_SCREEN_SHOT,
         TRANS_ID_ON_PRIVATE_WINDOW,
+        TRANS_ID_ON_FOLD_STATUS_CHANGED,
+        TRANS_ID_ON_DISPLAY_MODE_CHANGED,
     };
     virtual void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status) = 0;
     virtual void NotifyDisplayStateChanged(DisplayId id, DisplayState state) = 0;
@@ -62,6 +66,8 @@ public:
     virtual void OnDisplayChange(sptr<DisplayInfo>, DisplayChangeEvent) = 0;
     virtual void OnScreenshot(sptr<ScreenshotInfo>) = 0;
     virtual void NotifyPrivateWindowStateChanged(bool hasPrivate) = 0;
+    virtual void NotifyFoldStatusChanged(FoldStatus) = 0;
+    virtual void NotifyDisplayModeChanged(FoldDisplayMode) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

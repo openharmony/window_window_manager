@@ -68,6 +68,26 @@ public:
         virtual void OnPrivateWindow([[maybe_unused]]bool hasPrivate) {}
     };
 
+    class IFoldStatusListener : public virtual RefBase {
+    public:
+        /**
+         * @brief Notify listeners when screen fold status changed.
+         *
+         * @param foldStatus Screen foldStatus.
+         */
+        virtual void OnFoldStatusChanged(FoldStatus foldStatus) {}
+    };
+
+    class IDisplayModeListener : public virtual RefBase {
+    public:
+        /**
+         * @brief Notify listeners when display mode changed.
+         *
+         * @param displayMode DisplayMode.
+         */
+        virtual void OnDisplayModeChanged(FoldDisplayMode displayMode) {}
+    };
+
     /**
      * @brief Obtain all displays.
      *
@@ -301,6 +321,38 @@ public:
     DMError UnregisterPrivateWindowListener(sptr<IPrivateWindowListener> listener);
 
     /**
+     * @brief Register a listener for the event of screen fold status changed.
+     *
+     * @param listener IFoldStatusListener.
+     * @return DM_OK means register success, others means register failed.
+     */
+    DMError RegisterFoldStatusListener(sptr<IFoldStatusListener> listener);
+
+    /**
+     * @brief Unregister an existed listener for the event of screen fold status changed.
+     *
+     * @param listener IFoldStatusListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterFoldStatusListener(sptr<IFoldStatusListener> listener);
+
+    /**
+     * @brief Register a listener for the event of dispaly mode changed.
+     *
+     * @param listener IDisplayModeListener.
+     * @return DM_OK means register success, others means register failed.
+     */
+    DMError RegisterDisplayModeListener(sptr<IDisplayModeListener> listener);
+
+    /**
+     * @brief Unregister an existed listener for the event of dispaly mode changed.
+     *
+     * @param listener IDisplayModeListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterDisplayModeListener(sptr<IDisplayModeListener> listener);
+
+    /**
      * @brief Add a surface node to the target display.
      *
      * @param displayId Target display.
@@ -308,7 +360,7 @@ public:
      * @return DM_OK means add success, others means add failed.
      */
     DMError AddSurfaceNodeToDisplay(DisplayId displayId, std::shared_ptr<class RSSurfaceNode>& surfaceNode);
-    
+
     /**
      * @brief Remove a surface node from the target display.
      *
