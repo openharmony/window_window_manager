@@ -873,9 +873,8 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
     if (version >= 10) {
         if (uiContent_ != nullptr) {
             uiContent_->SetIgnoreViewSafeArea(status);
-        } else {
-            isIgnoreSafeAreaNeedNotify_ = true;
         }
+        isIgnoreSafeAreaNeedNotify_ = true;
     } else {
         WMError ret = WMError::WM_OK;
         if (status) {

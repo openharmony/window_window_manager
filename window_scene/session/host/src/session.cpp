@@ -511,7 +511,18 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
         WLOGFE("sessionStage_ is nullptr");
     }
     UpdatePointerArea(winRect_);
+    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        NotifyCallingSessionUpdateRect();
+    }
     return WSError::WS_OK;
+}
+
+void Session::NotifyCallingSessionUpdateRect()
+{
+    if (notifyCallingSessionUpdateRectFunc_) {
+        WLOGFI("Notify calling window that input method update rect");
+        notifyCallingSessionUpdateRectFunc_(persistentId_);
+    }
 }
 
 WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
@@ -671,6 +682,9 @@ WSError Session::Disconnect()
     snapshot_.reset();
     DelayedSingleton<ANRManager>::GetInstance()->OnSessionLost(persistentId_);
     isTerminating = false;
+    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        NotifyCallingSessionBackground();
+    }
     return WSError::WS_OK;
 }
 
@@ -958,6 +972,11 @@ WSError Session::PendingSessionToBackgroundForDelegator()
         pendingSessionToBackgroundForDelegatorFunc_(info);
     }
     return WSError::WS_OK;
+}
+
+void Session::SetNotifyCallingSessionUpdateRectFunc(const NotifyCallingSessionUpdateRectFunc& func)
+{
+    notifyCallingSessionUpdateRectFunc_ = func;
 }
 
 void Session::SetNotifyCallingSessionForegroundFunc(const NotifyCallingSessionForegroundFunc& func)
