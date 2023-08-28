@@ -83,7 +83,7 @@ void ANRManager::MarkProcessed(int32_t eventId, int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
-    WLOGFI("Event: eventId:%{public}d, persistentId:%{public}d", eventId, persistentId);
+    WLOGFI("MarkProcessed eventId:%{public}d, persistentId:%{public}d", eventId, persistentId);
     std::vector<int32_t> timerIds = DelayedSingleton<EventStage>::GetInstance()->DelEvents(persistentId, eventId);
     for (int32_t item : timerIds) {
         DelayedSingleton<TimerManager>::GetInstance()->RemoveTimer(item);
