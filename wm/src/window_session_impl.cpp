@@ -655,6 +655,21 @@ WMError WindowSessionImpl::SetRaiseByClickEnabled(bool raiseEnabled)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED);
 }
 
+WMError WindowSessionImpl::HideNonSystemFloatingWindows(bool shouldHide)
+{
+    WLOGFD("hide non-system floating windows");
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    property_->SetHideNonSystemFloatingWindows(shouldHide);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS);
+}
+
+bool WindowSessionImpl::IsFloatingWindowAppType() const
+{
+    return property_ != nullptr && property_->IsFloatingWindowAppType();
+}
+
 bool WindowSessionImpl::GetTouchable() const
 {
     return property_->GetTouchable();
@@ -1244,6 +1259,11 @@ WSError WindowSessionImpl::NotifyTouchOutside()
 
 void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    if (!pointerEvent) {
+        WLOGFD("Pointer event is nullptr");
+        return;
+    }
+
     std::shared_ptr<IInputEventConsumer> inputEventConsumer;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -1252,12 +1272,18 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (inputEventConsumer != nullptr) {
         WLOGFD("Transfer pointer event to inputEventConsumer");
         (void)inputEventConsumer->OnInputEvent(pointerEvent);
-    } else if (uiContent_ != nullptr) {
-        WLOGFD("Transfer pointer event to uiContent");
-        (void)uiContent_->ProcessPointerEvent(pointerEvent);
-    } else {
-        WLOGFW("pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
-        pointerEvent->MarkProcessed();
+        return;
+    }
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        if (uiContent_ != nullptr) {
+            WLOGFD("Transfer pointer event to uiContent");
+            (void)uiContent_->ProcessPointerEvent(pointerEvent);
+        } else {
+            WLOGFW("pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
+            pointerEvent->MarkProcessed();
+        }
     }
 }
 

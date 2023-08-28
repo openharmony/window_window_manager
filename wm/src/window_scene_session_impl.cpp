@@ -195,6 +195,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     if (hostSession_) { // main window
         ret = Connect();
     } else { // system or sub window
+        WLOGFI("Create system or sub window");
         if (WindowHelper::IsSystemWindow(GetType())) {
             if (GetType() == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW) {
                 WLOGFI("System sub window is not support");
@@ -206,10 +207,6 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
             }
         } else if (!WindowHelper::IsSubWindow(GetType())) {
             return WMError::WM_ERROR_INVALID_TYPE;
-        }
-        if (GetType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-            WLOGFI("Create input method and sleep 3s");
-            sleep(3); // sleep 3s
         }
         ret = CreateAndConnectSpecificSession();
     }
@@ -386,8 +383,8 @@ void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersist
     if (newState == WindowState::STATE_HIDDEN) {
         for (auto subwindow : subWindows) {
             if (subwindow != nullptr && subwindow->GetWindowState() == WindowState::STATE_SHOWN) {
-                subwindow->NotifyAfterBackground();
                 subwindow->state_ = WindowState::STATE_HIDDEN;
+                subwindow->NotifyAfterBackground();
             }
         }
     // when main window show and subwindow whose state is shown should show and notify user
@@ -395,8 +392,8 @@ void WindowSceneSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersist
         for (auto subwindow : subWindows) {
             if (subwindow != nullptr && subwindow->GetWindowState() == WindowState::STATE_HIDDEN &&
                 subwindow->GetRequestWindowState() == WindowState::STATE_SHOWN) {
-                subwindow->NotifyAfterForeground();
                 subwindow->state_ = WindowState::STATE_SHOWN;
+                subwindow->NotifyAfterForeground();
             }
         }
     }
@@ -432,9 +429,9 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         if (WindowHelper::IsMainWindow(GetType())) {
             UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
         }
-        NotifyAfterForeground();
         state_ = WindowState::STATE_SHOWN;
         requestState_ = WindowState::STATE_SHOWN;
+        NotifyAfterForeground();
     } else {
         NotifyForegroundFailed(ret);
     }
@@ -483,9 +480,9 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         if (WindowHelper::IsMainWindow(GetType())) {
             UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
         }
-        NotifyAfterBackground();
         state_ = WindowState::STATE_HIDDEN;
         requestState_ = WindowState::STATE_HIDDEN;
+        NotifyAfterBackground();
     }
     return res;
 }
@@ -1841,6 +1838,19 @@ void WindowSceneSessionImpl::DumpSessionElementInfo(const std::vector<std::strin
     WLOGFD("ArkUI:DumpInfo");
     if (uiContent_ != nullptr) {
         uiContent_->DumpInfo(params, info);
+    }
+
+    for (auto iter = info.begin(); iter != info.end();) {
+        if ((*iter).size() == 0) {
+            iter = info.erase(iter);
+            continue;
+        }
+        WLOGFD("ElementInfo size: %{public}u", static_cast<uint32_t>((*iter).size()));
+        iter++;
+    }
+    if (info.size() == 0) {
+        WLOGFD("ElementInfo is empty");
+        return;
     }
     SingletonContainer::Get<WindowAdapter>().NotifyDumpInfoResult(info);
 }
