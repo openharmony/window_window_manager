@@ -145,7 +145,7 @@ NativeValue* JsRootSceneSession::OnLoadContent(NativeEngine& engine, NativeCallb
         return engine.CreateUndefined();
     }
     auto contextWeakPtr = *contextNativePointer;
-    SceneSessionManager::GetInstance().SetRootSceneContext(contextWeakPtr.lock().get());
+    SceneSessionManager::GetInstance().SetRootSceneContext(contextWeakPtr);
 
     std::shared_ptr<NativeReference> contentStorage =
         (storage == nullptr) ? nullptr : std::shared_ptr<NativeReference>(engine.CreateReference(storage, 1));
@@ -184,9 +184,9 @@ bool JsRootSceneSession::IsCallbackRegistered(std::string type, NativeValue* jsL
 
 void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
 {
-    WLOGI("[NAPI]pending session activation: bundleName %{public}s, moduleName %{public}s, abilityName %{public}s"\
-        ", reuse %{public}d",
-        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.reuse);
+    WLOGI("[NAPI]pending session activation: bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, \
+        appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
+        info.abilityName_.c_str(), info.appIndex_, info.reuse);
     sptr<SceneSession> sceneSession = GenSceneSession(info);
     if (sceneSession == nullptr) {
         WLOGFE("RequestSceneSession return nullptr");
@@ -239,7 +239,7 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
     if (info.persistentId_ == 0) {
         if (info.reuse) {
             sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(
-                info.bundleName_, info.moduleName_, info.abilityName_);
+                info.bundleName_, info.moduleName_, info.abilityName_, info.appIndex_);
         }
         if (sceneSession == nullptr) {
             WLOGFI("GetSceneSessionByName return nullptr, RequestSceneSession");
@@ -253,6 +253,8 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
             sceneSession->GetSessionInfo().callerToken_ = info.callerToken_;
             sceneSession->GetSessionInfo().requestCode = info.requestCode;
             sceneSession->GetSessionInfo().callerPersistentId_ = info.callerPersistentId_;
+            sceneSession->GetSessionInfo().uiAbilityId_ = info.uiAbilityId_;
+            sceneSession->GetSessionInfo().startSetting = info.startSetting;
         }
         info.persistentId_ = sceneSession->GetPersistentId();
         sceneSession->GetSessionInfo().persistentId_ = sceneSession->GetPersistentId();
@@ -266,6 +268,8 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
         sceneSession->GetSessionInfo().callerToken_ = info.callerToken_;
         sceneSession->GetSessionInfo().requestCode = info.requestCode;
         sceneSession->GetSessionInfo().callerPersistentId_ = info.callerPersistentId_;
+        sceneSession->GetSessionInfo().uiAbilityId_ = info.uiAbilityId_;
+        sceneSession->GetSessionInfo().startSetting = info.startSetting;
     }
     return sceneSession;
 }

@@ -31,14 +31,6 @@ class IWindowEventChannel : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IWindowEventChannel");
 
-    enum class WindowEventChannelMessage : uint32_t {
-        TRANS_ID_TRANSFER_KEY_EVENT,
-        TRANS_ID_TRANSFER_POINTER_EVENT,
-        TRANS_ID_TRANSFER_FOCUS_ACTIVE_EVENT,
-        TRANS_ID_TRANSFER_FOCUS_WINDOW_ID_EVENT,
-        TRANS_ID_TRANSFER_FOCUS_STATE_EVENT,
-    };
-
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
     virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
 

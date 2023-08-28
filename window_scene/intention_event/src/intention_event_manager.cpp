@@ -24,6 +24,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "IntentionEventManager" };
 std::shared_ptr<MMI::PointerEvent> g_lastMouseEvent = nullptr;
 constexpr int32_t DELAY_TIME = 15;
+
 } // namespace
 
 IntentionEventManager::IntentionEventManager() {}
@@ -49,41 +50,43 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
     auto listener =
         std::make_shared<IntentionEventManager::InputEventListener>(uiContent, eventHandler);
     MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler);
-    listener->RegisterWindowFocusChanged();
+    listener->RegisterWindowChanged();
     return true;
 }
 
-void IntentionEventManager::InputEventListener::RegisterWindowFocusChanged()
+void IntentionEventManager::InputEventListener::RegisterWindowChanged()
 {
-    SceneSessionManager::GetInstance().RegisterWindowFocusChanged(
-        [this](int32_t persistentId, bool isFocused) {
-            WLOGFD("Window focus changed, persistentId:%{public}d, isFocused:%{public}d",
-                persistentId, isFocused);
-            this->ProcessEnterLeaveEvent();
+    SceneSessionManager::GetInstance().RegisterWindowChanged(
+        [this](int32_t persistentId, WindowUpdateType type) {
+            WLOGFD("Window changed, persistentId:%{public}d, type:%{public}d",
+                persistentId, type);
+            if (type == WindowUpdateType::WINDOW_UPDATE_BOUNDS) {
+                auto enterSession = SceneSession::GetEnterWindow().promote();
+                if (enterSession == nullptr) {
+                    WLOGFE("Enter session is null, do not reissuing enter leave events");
+                    return;
+                }
+                this->ProcessEnterLeaveEventAsync();
+            }
         }
     );
 }
 
-void IntentionEventManager::InputEventListener::ProcessEnterLeaveEvent()
+void IntentionEventManager::InputEventListener::ProcessEnterLeaveEventAsync()
 {
     auto task = [this]() {
         std::lock_guard<std::mutex> guard(mouseEventMutex_);
-        auto enterSession = SceneSession::GetEnterWindow().promote();
-        if ((enterSession != nullptr) && ((g_lastMouseEvent != nullptr) &&
-            (g_lastMouseEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE))) {
-            WLOGFD("Window changed, reissuing enter leave events");
-            auto leaveEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
-            leaveEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
-            enterSession->TransferPointerEvent(leaveEvent);
-
-            auto enterEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
-            enterEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
-            if (uiContent_ == nullptr) {
-                WLOGFE("uiContent_ is null");
-                return;
-            }
-            uiContent_->ProcessPointerEvent(enterEvent);
+        if (g_lastMouseEvent == nullptr) {
+            return;
         }
+        auto pointerEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
+        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+        pointerEvent->SetButtonId(MMI::PointerEvent::BUTTON_NONE);
+        if (uiContent_ == nullptr) {
+            WLOGFE("uiContent_ is null");
+            return;
+        }
+        uiContent_->ProcessPointerEvent(pointerEvent);
     };
     auto eventHandler = weakEventConsumer_.lock();
     if (eventHandler == nullptr) {
