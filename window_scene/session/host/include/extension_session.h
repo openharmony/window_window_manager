@@ -16,9 +16,10 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_H
 
-#include "session/host/include/session.h"
 #include "want.h"
 #include "want_params.h"
+
+#include "session/host/include/session.h"
 
 namespace OHOS::Rosen {
 using NotifyTransferAbilityResultFunc = std::function<void(uint32_t resultCode, const AAFwk::Want& want)>;
@@ -31,8 +32,9 @@ public:
         NotifyTransferExtensionDataFunc transferExtensionDataFunc_;
         NotifyRemoteReadyFunc notifyRemoteReadyFunc_;
     };
-    ExtensionSession(const SessionInfo& info);
-    ~ExtensionSession() = default;
+
+    explicit ExtensionSession(const SessionInfo& info);
+    virtual ~ExtensionSession() = default;
 
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;

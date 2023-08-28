@@ -17,11 +17,13 @@
 #define OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
 
 #include <inttypes.h>
+#include <iomanip>
 #include <map>
+#include <sstream>
 #include <string>
-#include <want.h>
 
-#include "iremote_broker.h"
+#include <iremote_broker.h>
+#include <want.h>
 
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
@@ -259,6 +261,15 @@ struct WSRectT {
     {
         return GreatOrEqual(pointX, posX_) && LessOrEqual(pointX, posX_ + width_) &&
                GreatOrEqual(pointY, posY_) && LessOrEqual(pointY, posY_ + height_);
+    }
+
+    inline std::string ToString() const
+    {
+        constexpr int precision = 2;
+        std::stringstream ss;
+        ss << "[" << std::fixed << std::setprecision(precision) << posX_ << " " << posY_ << " " <<
+            width_ << " " << height_ << "]";
+        return ss.str();
     }
 };
 

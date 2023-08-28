@@ -69,6 +69,7 @@ ohos_shared_library("scene_session") {
     "ability_base:want",
     "ability_runtime:ability_start_setting",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "hitrace:hitrace_meter",

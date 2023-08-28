@@ -641,14 +641,9 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
             return rootSceneSession_;
         }
         system::SetParameter("bootevent.wms.fullscreen.ready", "true");
-        SessionInfo info;
-        rootSceneSession_ = new (std::nothrow) RootSceneSession(info);
-        if (!rootSceneSession_) {
-            WLOGFE("rootSceneSession is nullptr");
-            return nullptr;
-        }
-        sptr<ISession> iSession(rootSceneSession_);
-        AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(iSession->AsObject());
+        rootSceneSession_ = new RootSceneSession();
+        rootSceneSession_->SetEventHandler(taskScheduler_->GetEventHandler());
+        AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_->AsObject());
         return rootSceneSession_;
     };
 
@@ -800,6 +795,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             WLOGFE("sceneSession is nullptr!");
             return sceneSession;
         }
+        sceneSession->SetEventHandler(taskScheduler_->GetEventHandler());
         if (sessionInfo.isSystem_) {
             sceneSession->SetCallingPid(IPCSkeleton::GetCallingPid());
             sceneSession->SetCallingUid(IPCSkeleton::GetCallingUid());
