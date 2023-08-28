@@ -510,7 +510,7 @@ ScreenPowerState OHOS::Rosen::ScreenSessionManagerProxy::GetScreenPower(ScreenId
         WLOGFE("GetScreenPower remote is nullptr");
         return ScreenPowerState::INVALID_STATE;
     }
-    
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -674,6 +674,34 @@ DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId,
     return ret;
 }
 
+DMError ScreenSessionManagerProxy::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("StopMirror fail: remote is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("StopMirror fail: WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    bool res = data.WriteUInt64Vector(mirrorScreenIds);
+    if (!res) {
+        WLOGFE("StopMirror fail: data write failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_STOP_MIRROR),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("StopMirror fail: SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
+
 DMError ScreenSessionManagerProxy::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
                                               ScreenId& screenGroupId)
 {
@@ -709,6 +737,34 @@ DMError ScreenSessionManagerProxy::MakeExpand(std::vector<ScreenId> screenId, st
     DMError ret = static_cast<DMError>(reply.ReadInt32());
     screenGroupId = static_cast<ScreenId>(reply.ReadUint64());
     return ret;
+}
+
+DMError ScreenSessionManagerProxy::StopExpand(const std::vector<ScreenId>& expandScreenIds)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("StopExpand fail: remote is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("StopExpand fail: WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    bool res = data.WriteUInt64Vector(expandScreenIds);
+    if (!res) {
+        WLOGFE("StopExpand fail: data write failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_STOP_EXPAND),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("StopExpand fail: SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
 }
 
 sptr<ScreenGroupInfo> ScreenSessionManagerProxy::GetScreenGroupInfoById(ScreenId screenId)
@@ -1157,6 +1213,7 @@ void ScreenSessionManagerProxy::DumpAllScreensInfo(std::string& dumpInfo)
     }
     dumpInfo = reply.ReadString();
 }
+
 void ScreenSessionManagerProxy::DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -1181,5 +1238,52 @@ void ScreenSessionManagerProxy::DumpSpecialScreenInfo(ScreenId id, std::string& 
         return;
     }
     dumpInfo = reply.ReadString();
+}
+
+//Fold Screen
+void ScreenSessionManagerProxy::SetFoldDisplayMode(FoldDisplayMode displayMode)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is null");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken Failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(displayMode))) {
+        WLOGFE("Write displayMode failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE),
+                            data, reply, option) != ERR_NONE) {
+        WLOGFE("Send TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE request failed");
+    }
+}
+
+FoldDisplayMode ScreenSessionManagerProxy::GetFoldDisplayMode()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is null");
+        return FoldDisplayMode::UNKNOWN;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken Failed");
+        return FoldDisplayMode::UNKNOWN;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE),
+                            data, reply, option) != ERR_NONE) {
+        WLOGFE("Send TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE request failed");
+        return FoldDisplayMode::UNKNOWN;
+    }
+    return static_cast<FoldDisplayMode>(reply.ReadUint32());
 }
 } // namespace OHOS::Rosen

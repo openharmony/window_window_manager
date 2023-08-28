@@ -3351,7 +3351,8 @@ void WindowImpl::SetDefaultOption()
         case WindowType::WINDOW_TYPE_STATUS_BAR:
         case WindowType::WINDOW_TYPE_NAVIGATION_BAR:
         case WindowType::WINDOW_TYPE_VOLUME_OVERLAY:
-        case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT: {
+        case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT:
+        case WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             property_->SetFocusable(false);
             break;

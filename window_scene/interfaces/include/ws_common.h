@@ -51,6 +51,7 @@ enum class WSError : int32_t {
     WS_ERROR_INVALID_SESSION,
     WS_ERROR_UNCLEARABLE_SESSION,
     WS_ERROR_FAIL_TO_GET_SNAPSHOT,
+    WS_ERROR_INTERNAL_ERROR,
 
     WS_ERROR_DEVICE_NOT_SUPPORT = 801, // the value do not change.It is defined on all system
 
@@ -128,6 +129,7 @@ struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
     std::string abilityName_ = "";
+    int32_t appIndex_ = 0;
     bool isSystem_ = false;
     uint32_t windowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     sptr<IRemoteObject> callerToken_ = nullptr;
@@ -193,30 +195,75 @@ enum class SessionEvent : uint32_t {
     EVENT_SPLIT_SECONDARY,
 };
 
-struct WSRect {
-    int32_t posX_ = 0;
-    int32_t posY_ = 0;
-    uint32_t width_ = 0;
-    uint32_t height_ = 0;
+inline bool GreatOrEqual(double left, double right)
+{
+    constexpr double epsilon = -0.00001f;
+    return (left - right) > epsilon;
+}
 
-    bool operator==(const WSRect& a) const
+inline bool LessOrEqual(double left, double right)
+{
+    constexpr double epsilon = 0.00001f;
+    return (left - right) < epsilon;
+}
+
+inline bool NearEqual(const double left, const double right, const double epsilon)
+{
+    return (std::fabs(left - right) <= epsilon);
+}
+
+inline bool NearEqual(const float& left, const float& right)
+{
+    constexpr double epsilon = 0.001f;
+    return NearEqual(left, right, epsilon);
+}
+
+inline bool NearEqual(const int32_t& left, const int32_t& right)
+{
+    return left == right;
+}
+
+inline bool NearZero(const double left)
+{
+    constexpr double epsilon = 0.001f;
+    return NearEqual(left, 0.0, epsilon);
+}
+
+template<typename T>
+struct WSRectT {
+    T posX_ = 0;
+    T posY_ = 0;
+    T width_ = 0;
+    T height_ = 0;
+
+    bool operator==(const WSRectT<T>& a) const
     {
-        return (posX_ == a.posX_ && posY_ == a.posY_ && width_ == a.width_ && height_ == a.height_);
+        return (NearEqual(posX_, a.posX_) && NearEqual(posY_, a.posY_) &&
+                NearEqual(width_, a.width_) && NearEqual(height_, a.height_));
     }
 
-    bool operator!=(const WSRect& a) const
+    bool operator!=(const WSRectT<T>& a) const
     {
         return !this->operator==(a);
     }
 
     bool IsEmpty() const
     {
-        if (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0) {
+        if (NearZero(posX_) && NearZero(posY_) && NearZero(width_) && NearZero(height_)) {
             return true;
         }
         return false;
     }
+
+    inline bool IsInRegion(int32_t pointX, int32_t pointY)
+    {
+        return GreatOrEqual(pointX, posX_) && LessOrEqual(pointX, posX_ + width_) &&
+               GreatOrEqual(pointY, posY_) && LessOrEqual(pointY, posY_ + height_);
+    }
 };
+
+using WSRect = WSRectT<int32_t>;
+using WSRectF = WSRectT<float>;
 
 struct WindowShadowConfig {
     float offsetX_ = 0.0f;

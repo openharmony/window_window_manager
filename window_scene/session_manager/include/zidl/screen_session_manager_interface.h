@@ -93,6 +93,9 @@ public:
         std::shared_ptr<class RSSurfaceNode>& surfaceNode) override { return DMError::DM_OK; }
     virtual void DumpAllScreensInfo(std::string& dumpInfo) {}
     virtual void DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo) {}
+    //Fold Screen
+    virtual void SetFoldDisplayMode(FoldDisplayMode displayMode) {}
+    virtual FoldDisplayMode GetFoldDisplayMode() { return FoldDisplayMode::UNKNOWN; }
 };
 
 } // namespace Rosen

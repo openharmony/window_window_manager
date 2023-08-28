@@ -60,6 +60,7 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
+    virtual WMError CheckWindowId(int32_t windowId, int32_t &pid);
 
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);
     virtual WMError NotifyWindowTransition(sptr<WindowTransitionInfo> from, sptr<WindowTransitionInfo> to);
@@ -78,6 +79,8 @@ public:
     virtual WMError SetGestureNavigaionEnabled(bool enable);
     virtual void DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event);
     virtual void NotifyDumpInfoResult(const std::vector<std::string>& info);
+    virtual WMError DumpSessionAll(std::vector<std::string> &infos);
+    virtual WMError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos);
     virtual WMError GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
         std::vector<sptr<RSWindowAnimationTarget>>& targets);
     virtual void SetMaximizeMode(MaximizeMode maximizeMode);

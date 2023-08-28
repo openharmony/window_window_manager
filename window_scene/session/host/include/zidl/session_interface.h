@@ -32,41 +32,6 @@ class ISession : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISession");
 
-    enum class SessionMessage : uint32_t {
-        // Base
-        TRANS_ID_CONNECT = 0,
-        TRANS_ID_FOREGROUND,
-        TRANS_ID_BACKGROUND,
-        TRANS_ID_DISCONNECT,
-        TRANS_ID_ACTIVE_PENDING_SESSION,
-        TRANS_ID_UPDATE_ACTIVE_STATUS,
-        TRANS_ID_TERMINATE,
-        TRANS_ID_EXCEPTION,
-
-        // Scene
-        TRANS_ID_SESSION_EVENT = 100,
-        TRANS_ID_UPDATE_SESSION_RECT,
-        TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION,
-        TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION,
-        TRANS_ID_RAISE_TO_APP_TOP,
-        TRANS_ID_BACKPRESSED,
-        TRANS_ID_MARK_PROCESSED,
-        TRANS_ID_SET_MAXIMIZE_MODE,
-        TRANS_ID_GET_MAXIMIZE_MODE,
-        TRANS_ID_NEED_AVOID,
-        TRANS_ID_GET_AVOID_AREA,
-        TRANS_ID_UPDATE_WINDOW_SESSION_PROPERTY,
-        TRANS_ID_SET_ASPECT_RATIO,
-        TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG,
-        TRANS_ID_UPDATE_CUSTOM_ANIMATION,
-        TRANS_ID_RAISE_ABOVE_TARGET,
-
-        // Extension
-        TRANS_ID_TRANSFER_ABILITY_RESULT = 500,
-        TRANS_ID_TRANSFER_EXTENSION_DATA = 501,
-        TRANS_ID_NOTIFY_REMOTE_READY = 502,
-        TRANS_ID_NOTIFY_EXTENSION_DIED = 503
-    };
     virtual WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr) = 0;
