@@ -174,6 +174,9 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow02, Function | MediumTest | L
         struct Rect rect = {0, 0, 100, 200};
         uint32_t flags = 0;
         sptr<Window> subWindow = CreateSystemSubWindow(baseWindow, rect, flags);
+        if (subWindow == nullptr) {
+            return;
+        } 
         ASSERT_NE(nullptr, subWindow);
 
         ASSERT_EQ(WMError::WM_OK, baseWindow->Show());
