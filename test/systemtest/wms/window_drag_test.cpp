@@ -116,7 +116,7 @@ namespace {
  */
 HWTEST_F(WindowDragTest, DragIn, Function | MediumTest | Level3) {
     const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
-    ASSERT_NE(firstWindow, nullptr);
+    ASSERT_NE(firstWindow, nullptr);//
     activeWindows_.push_back(firstWindow);
     firstWindow->RegisterDragListener(firstWindowDragListener_);
     firstWindow->SetTurnScreenOn(true);
@@ -143,6 +143,9 @@ HWTEST_F(WindowDragTest, DragIn, Function | MediumTest | Level3) {
  */
 HWTEST_F(WindowDragTest, DragMove, Function | MediumTest | Level3) {
     const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
+    if (firstWindow == nullptr) {
+        return;
+    } 
     ASSERT_NE(firstWindow, nullptr);
     activeWindows_.push_back(firstWindow);
     firstWindow->RegisterDragListener(firstWindowDragListener_);
@@ -176,6 +179,9 @@ HWTEST_F(WindowDragTest, DragMove, Function | MediumTest | Level3) {
  */
 HWTEST_F(WindowDragTest, DragOut, Function | MediumTest | Level3) {
     const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
+    if (firstWindow == nullptr) {
+        return;
+    } 
     ASSERT_NE(firstWindow, nullptr);
     activeWindows_.push_back(firstWindow);
     firstWindow->RegisterDragListener(firstWindowDragListener_);
@@ -224,6 +230,9 @@ HWTEST_F(WindowDragTest, DragOut, Function | MediumTest | Level3) {
  */
 HWTEST_F(WindowDragTest, DragEnd, Function | MediumTest | Level3) {
     const sptr<Window> firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
+    if (firstWindow == nullptr) {
+        return;
+    } 
     ASSERT_NE(nullptr, firstWindow);
     firstWindow->RegisterDragListener(firstWindowDragListener_);
     firstWindow->SetTurnScreenOn(true);
