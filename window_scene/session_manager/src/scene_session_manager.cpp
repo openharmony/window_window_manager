@@ -1862,9 +1862,14 @@ WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSessio
     }
     sceneSession->SetBrightness(brightness);
     if (GetDisplayBrightness() != brightness) {
-        DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
-            static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
-        SetDisplayBrightness(brightness);
+        if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
+            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
+            SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
+        } else {
+            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
+                static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
+            SetDisplayBrightness(brightness);
+        }
     }
     brightnessSessionId_ = sceneSession->GetPersistentId();
     return WSError::WS_OK;
