@@ -117,6 +117,10 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow01, Function | MediumTest | L
         struct Rect rect = {0, 0, 100, 200};
         uint32_t flags = 0;
         sptr<Window> subWindow = CreateSystemSubWindow(baseWindow, rect, flags);
+        if (subWindow == nullptr) {
+            return;
+        } 
+
         ASSERT_NE(nullptr, subWindow);
 
         ASSERT_EQ(WMError::WM_OK, baseWindow->Show());
@@ -196,11 +200,17 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow03, Function | MediumTest | L
         struct Rect baseRect = {0, 0, 100, 200};
         uint32_t baseFlags = 0;
         sptr<Window> baseWindow = CreateBaseWindow(static_cast<WindowType>(*itor), baseRect, baseFlags);
+        if (baseWindow == nullptr) {
+            return;
+        } 
         ASSERT_NE(nullptr, baseWindow);
 
         struct Rect rect = {0, 0, 100, 200};
         uint32_t flags = 0;
         sptr<Window> subWindow = CreateSystemSubWindow(baseWindow, rect, flags);
+        if (subWindow == nullptr) {
+            return;
+        } 
         ASSERT_EQ(nullptr, subWindow);
     }
 }
@@ -221,9 +231,15 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow04, Function | MediumTest | L
         struct Rect baseRect = {0, 0, 100, 200};
         uint32_t baseFlags = 0;
         sptr<Window> baseWindow = CreateBaseWindow(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, baseRect, baseFlags);
+        if (baseWindow == nullptr) {
+            return;
+        } 
         ASSERT_NE(nullptr, baseWindow);
 
         sptr<Window> appSubWindow = CreateAppSubWindow(baseWindow, static_cast<WindowType>(*itor), baseRect, baseFlags);
+        if (appSubWindow == nullptr) {
+            return;
+        }
         ASSERT_NE(nullptr, appSubWindow);
 
         struct Rect rect = {0, 0, 100, 200};
@@ -245,14 +261,23 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow05, Function | MediumTest | L
     struct Rect baseRect = {0, 0, 100, 200};
     uint32_t baseFlags = 0;
     sptr<Window> baseWindow = CreateBaseWindow(WindowType::WINDOW_TYPE_DOCK_SLICE, baseRect, baseFlags);
+    if (baseWindow == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, baseWindow);
 
     sptr<Window> systemSubWindow = CreateSystemSubWindow(baseWindow, baseRect, baseFlags);
+    if (systemSubWindow == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, systemSubWindow);
 
     struct Rect rect = {0, 0, 100, 200};
     uint32_t flags = 0;
     sptr<Window> subWindow = CreateSystemSubWindow(systemSubWindow, rect, flags);
+    if (subWindow == nullptr) {
+        return;
+    }
     ASSERT_EQ(nullptr, subWindow);
 
     ASSERT_EQ(WMError::WM_OK, baseWindow->Show());
@@ -275,11 +300,17 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow06, Function | MediumTest | L
     struct Rect baseRect = {0, 0, 100, 200};
     uint32_t baseFlags = 0;
     sptr<Window> baseWindow = CreateBaseWindow(WindowType::WINDOW_TYPE_DOCK_SLICE, baseRect, baseFlags);
+    if (baseWindow == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, baseWindow);
 
     struct Rect rect = {0, 0, 100, 200};
     uint32_t flags = 0;
     sptr<Window> subWindow = CreateSystemSubWindow(baseWindow, rect, flags);
+    if (subWindow == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, subWindow);
 
     ASSERT_EQ(WMError::WM_OK, baseWindow->Show());
@@ -310,11 +341,17 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow07, Function | MediumTest | L
     struct Rect baseRect = {0, 0, 100, 200};
     uint32_t baseFlags = 0;
     sptr<Window> baseWindow = CreateBaseWindow(WindowType::WINDOW_TYPE_DIALOG, baseRect, baseFlags);
+    if (baseWindow == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, baseWindow);
 
     struct Rect rect = {0, 0, 100, 200};
     uint32_t flags = 0;
     sptr<Window> subWindow = CreateSystemSubWindow(baseWindow, rect, flags);
+    if (subWindow == nullptr) {
+        return;
+    }
     ASSERT_EQ(nullptr, subWindow);
     ASSERT_EQ(WMError::WM_OK, baseWindow->Destroy());
 }

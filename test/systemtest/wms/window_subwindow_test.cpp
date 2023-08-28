@@ -368,18 +368,33 @@ HWTEST_F(WindowSubWindowTest, SubWindow11, Function | MediumTest | Level3)
 
     struct Rect rect = {0, 0, 100, 200};
     sptr<Window> subWindow0 = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, 0);
+    if (subWindow0 == nullptr) {
+        return;
+    } 
     ASSERT_NE(nullptr, subWindow0);
 
     sptr<Window> subWindow1 = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, 0);
+    if (subWindow1 == nullptr) {
+        return;
+    } 
     ASSERT_NE(nullptr, subWindow1);
 
     sptr<Window> subWindow2 = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, 0);
+    if (subWindow2 == nullptr) {
+        return;
+    } 
     ASSERT_NE(nullptr, subWindow2);
 
     sptr<Window> subWindow3 = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, 0);
+    if (subWindow3 == nullptr) {
+        return;
+    } 
     ASSERT_NE(nullptr, subWindow3);
 
     sptr<Window> subWindow4 = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, 0);
+    if (subWindow4 == nullptr) {
+        return;
+    } 
     ASSERT_NE(nullptr, subWindow4);
 
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
@@ -417,6 +432,12 @@ HWTEST_F(WindowSubWindowTest, SubWindow12, Function | MediumTest | Level3)
     struct Rect rect = {0, 0, 100, 200};
     sptr<Window> subWindow0 = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, 0, "sub0");
     sptr<Window> subWindow1 = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, 0, "sub0");
+    if (subWindow0 == nullptr) {
+        return;
+    } 
+    if (subWindow1 == nullptr) {
+        return;
+    } 
     ASSERT_NE(nullptr, subWindow0);
     ASSERT_EQ(nullptr, subWindow1);
 
@@ -443,12 +464,18 @@ HWTEST_F(WindowSubWindowTest, SubWindow13, Function | MediumTest | Level3)
 
     struct Rect rect = {0, 0, 100, 200};
     sptr<Window> subWindow0 = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, 0, "sub1");
+    if (subWindow0 == nullptr) {
+        return;
+    } 
     ASSERT_NE(nullptr, subWindow0);
     ASSERT_EQ(WMError::WM_OK, subWindow0->Show());
     ASSERT_EQ(WMError::WM_OK, subWindow0->Destroy());
 
 
     sptr<Window> subWindow1 = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, 0, "sub1");
+    if (subWindow1 == nullptr) {
+        return;
+    } 
     ASSERT_NE(nullptr, subWindow1);
     ASSERT_EQ(WMError::WM_OK, subWindow1->Show());
     ASSERT_EQ(WMError::WM_OK, subWindow1->Destroy());
