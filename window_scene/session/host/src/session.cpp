@@ -422,7 +422,7 @@ WSRectF Session::UpdateLeftRightArea(const WSRectF& rect, MMI::WindowArea area)
     const float horizontalBorderLength = outsideBorder + innerBorder;
     const size_t innerAngleCount = 2;
     WSRectF lrRect;
-    lrRect.posY_ = rect.posY_ + horizontalBorderLength;
+    lrRect.posY_ = rect.posY_ + verticalBorderLength;
     lrRect.width_ = horizontalBorderLength;
     lrRect.height_ = rect.height_ - verticalBorderLength * innerAngleCount;
     if (area == MMI::WindowArea::FOCUS_ON_LEFT) {
@@ -464,11 +464,11 @@ WSRectF Session::UpdateHotRect(const WSRect& rect)
 {
     WSRectF newRect;
     const float outsideBorder = OUTSIDE_BORDER_VP * vpr_;
-    const size_t ioutsideBorderCount = 2;
+    const size_t outsideBorderCount = 2;
     newRect.posX_ = rect.posX_ - outsideBorder;
     newRect.posY_ = rect.posY_ - outsideBorder;
-    newRect.width_ = rect.width_ + outsideBorder * ioutsideBorderCount;
-    newRect.height_ = rect.height_ + outsideBorder * ioutsideBorderCount;
+    newRect.width_ = rect.width_ + outsideBorder * outsideBorderCount;
+    newRect.height_ = rect.height_ + outsideBorder * outsideBorderCount;
     return newRect;
 }
 
