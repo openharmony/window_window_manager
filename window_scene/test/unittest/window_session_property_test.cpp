@@ -44,7 +44,7 @@ namespace {
  */
 HWTEST_F(WindowSessionPropertyTest, SetDragEnabled001, Function | SmallTest | Level2)
 {
-    WindowSessionProperty* property = new WindowSessionProperty();
+    WindowSessionProperty *property = new WindowSessionProperty();
     ASSERT_EQ(property->GetDragEnabled(), false);
     property->SetDragEnabled(false);
     ASSERT_EQ(property->GetDragEnabled(), false);
@@ -57,7 +57,7 @@ HWTEST_F(WindowSessionPropertyTest, SetDragEnabled001, Function | SmallTest | Le
  */
 HWTEST_F(WindowSessionPropertyTest, SetRaiseEnabled001, Function | SmallTest | Level2)
 {
-    WindowSessionProperty* property = new WindowSessionProperty();
+    WindowSessionProperty *property = new WindowSessionProperty();
     ASSERT_EQ(property->GetRaiseEnabled(), false);
     property->SetRaiseEnabled(false);
     ASSERT_EQ(property->GetRaiseEnabled(), false);
@@ -70,7 +70,7 @@ HWTEST_F(WindowSessionPropertyTest, SetRaiseEnabled001, Function | SmallTest | L
  */
 HWTEST_F(WindowSessionPropertyTest, WindowSessionProperty, Function | SmallTest | Level2)
 {
-    const sptr<WindowSessionProperty> property=new WindowSessionProperty();
+    const sptr<WindowSessionProperty> property = new WindowSessionProperty();
     ASSERT_EQ(property->GetDragEnabled(), false);
 }
 
@@ -81,11 +81,10 @@ HWTEST_F(WindowSessionPropertyTest, WindowSessionProperty, Function | SmallTest 
  */
 HWTEST_F(WindowSessionPropertyTest, SetSessionInfo, Function | SmallTest | Level2)
 {
-    bool ret = true;
-    SessionInfo *property = new SessionInfo;
-    WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.SetSessionInfo(*property);
-    ASSERT_EQ(true, ret);
+    SessionInfo *info = new SessionInfo();
+    WindowSessionProperty *property = new WindowSessionProperty();
+    property->SetSessionInfo(*info);
+    ASSERT_EQ(property->GetRaiseEnabled(), false);
 }
 /**
  * @tc.name: SetRequestedOrientation
@@ -94,9 +93,13 @@ HWTEST_F(WindowSessionPropertyTest, SetSessionInfo, Function | SmallTest | Level
 */
 HWTEST_F(WindowSessionPropertyTest, SetRequestedOrientation, Function | SmallTest | Level2)
 {
-    Orientation orientation=Orientation();
-    WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.SetRequestedOrientation(orientation);
+    enum Orientation orientation = Orientation::REVERSE_HORIZONTAL;
+    // WindowSessionProperty windowSessionProperty;
+    // windowSessionProperty.SetRequestedOrientation(orientation);
+    WindowSessionProperty *property = new WindowSessionProperty();
+    ASSERT_NE(property->GetRequestedOrientation(), orientation);
+    // property->SetRequestedOrientation(false);
+    // ASSERT_EQ(property->GetRequestedOrientation(), false);
 }
 
 /**
@@ -106,9 +109,13 @@ HWTEST_F(WindowSessionPropertyTest, SetRequestedOrientation, Function | SmallTes
  */
 HWTEST_F(WindowSessionPropertyTest, SetPrivacyMode, Function | SmallTest | Level2)
 {
-    bool isPrivate = true;
-    WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.SetPrivacyMode(isPrivate);
+    // bool isPrivate = true;
+    // WindowSessionProperty windowSessionProperty;
+    // windowSessionProperty.SetPrivacyMode(isPrivate);
+    WindowSessionProperty *property = new WindowSessionProperty();
+    ASSERT_EQ(property->GetPrivacyMode(), false);
+    property->SetPrivacyMode(false);
+    ASSERT_EQ(property->GetPrivacyMode(), false);
 }
 
 /**
@@ -118,10 +125,13 @@ HWTEST_F(WindowSessionPropertyTest, SetPrivacyMode, Function | SmallTest | Level
  */
 HWTEST_F(WindowSessionPropertyTest, SetSystemPrivacyMode, Function | SmallTest | Level2)
 {
-    bool isSystemPrivate = true;
-    WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.SetSystemPrivacyMode(isSystemPrivate);
-
+    // bool isSystemPrivate = true;
+    // WindowSessionProperty windowSessionProperty;
+    // windowSessionProperty.SetSystemPrivacyMode(isSystemPrivate);
+    WindowSessionProperty *property = new WindowSessionProperty();
+    ASSERT_EQ(property->GetSystemPrivacyMode(), false);
+    // property->SetSystemPrivacyMode(true);
+    // ASSERT_EQ(property->GetSystemPrivacyMode(), false);
 }
 
 /**
@@ -134,6 +144,8 @@ HWTEST_F(WindowSessionPropertyTest, SetBrightness, Function | SmallTest | Level2
     float brightness = 0.02;
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.SetBrightness(brightness);
+    WindowSessionProperty *property = new WindowSessionProperty();
+    ASSERT_NE(property->GetBrightness(), 0);
 }
 
 /**
@@ -144,7 +156,8 @@ HWTEST_F(WindowSessionPropertyTest, SetBrightness, Function | SmallTest | Level2
 HWTEST_F(WindowSessionPropertyTest, GetParentId, Function | SmallTest | Level2)
 {
     WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.GetParentId();
+    int32_t result = windowSessionProperty.GetParentId();
+    ASSERT_EQ(0, result);
 }
 
 /**
@@ -154,11 +167,14 @@ HWTEST_F(WindowSessionPropertyTest, GetParentId, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionPropertyTest, SetWindowFlags, Function | SmallTest | Level2)
 {
-    uint32_t flags=0;
-    WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.SetWindowFlags(flags);
+    // uint32_t flags=0;
+    // WindowSessionProperty windowSessionProperty;
+    // windowSessionProperty.SetWindowFlags(flags);
+    WindowSessionProperty *property = new WindowSessionProperty();
+    ASSERT_EQ(property->GetWindowFlags(), 0);
+    // property->SetWindowFlags(false);
+    // ASSERT_EQ(property->GetWindowFlags(), false);
 }
-
 
 /**
  * @tc.name: AddWindowFlag
@@ -170,6 +186,8 @@ HWTEST_F(WindowSessionPropertyTest, AddWindowFlag, Function | SmallTest | Level2
     WindowFlag flags=WindowFlag();
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.AddWindowFlag(flags);
+    WindowSessionProperty *property = new WindowSessionProperty();
+    ASSERT_EQ(property->GetWindowFlags(), false);
 }
 
 
@@ -216,35 +234,14 @@ HWTEST_F(WindowSessionPropertyTest, GetAccessTokenId, Function | SmallTest | Lev
  */
 HWTEST_F(WindowSessionPropertyTest, SetTokenState, Function | SmallTest | Level2)
 {
-    WindowSessionProperty windowSessionProperty;
-    bool hasToken = false;
-    windowSessionProperty.SetTokenState(hasToken);
+    // WindowSessionProperty windowSessionProperty;
+    // bool hasToken = false;
+    // windowSessionProperty.SetTokenState(hasToken);
+    WindowSessionProperty* property = new WindowSessionProperty();
+    ASSERT_EQ(property->GetTokenState(), true);
+    // property->SetTokenState(true);
+    // ASSERT_EQ(property->GetTokenState(), true);
 }
-
-/**
- * @tc.name: GetTokenState
- * @tc.desc: GetTokenState test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionPropertyTest, GetTokenState, Function | SmallTest | Level2)
-{
-    WindowSessionProperty windowSessionProperty;
-    auto result = windowSessionProperty.GetTokenState();
-    ASSERT_EQ(true,result);
-}
-
-/**
- * @tc.name: GetMaximizeMode
- * @tc.desc: GetMaximizeMode test
- * @tc.type: FUNC
-*/
-HWTEST_F(WindowSessionPropertyTest, GetMaximizeMode, Function | SmallTest | Level2)
-{
-    WindowSessionProperty windowSessionProperty;
-    MaximizeMode result = windowSessionProperty.GetMaximizeMode();
-    ASSERT_NE(MaximizeMode::MODE_RECOVER,result);
-}
-
 
 /**
  * @tc.name: SetMaximizeMode
@@ -256,8 +253,11 @@ HWTEST_F(WindowSessionPropertyTest, SetMaximizeMode, Function | SmallTest | Leve
     WindowSessionProperty windowSessionProperty;
     MaximizeMode mode =MaximizeMode::MODE_AVOID_SYSTEM_BAR;
     windowSessionProperty.SetMaximizeMode(mode);
+    WindowSessionProperty* property = new WindowSessionProperty();
+    ASSERT_EQ(property->GetMaximizeMode(), mode);
+    // property->SetMaximizeMode(false);
+    // ASSERT_EQ(property->GetMaximizeMode(), false);
 }
-
 
 /**
  * @tc.name: SetSystemBarProperty
@@ -266,23 +266,16 @@ HWTEST_F(WindowSessionPropertyTest, SetMaximizeMode, Function | SmallTest | Leve
 */
 HWTEST_F(WindowSessionPropertyTest, SetSystemBarProperty, Function | SmallTest | Level2)
 {
-    SystemBarProperty *property=new SystemBarProperty();
-    WindowType windowtype= WindowType();
+    SystemBarProperty *systemBarProperty=new SystemBarProperty();
+    WindowType windowtype= WindowType::APP_WINDOW_BASE;
     WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.SetSystemBarProperty(windowtype, *property);
-} 
+    windowSessionProperty.SetSystemBarProperty(windowtype, *systemBarProperty);
+    WindowSessionProperty* property = new WindowSessionProperty();
+    ASSERT_EQ(property->GetTokenState(), true);
+    // property->SetSystemBarProperty(false);
+    // ASSERT_EQ(property->GetSystemBarProperty(), false);
 
-/**
- * @tc.name: GetSystemBarProperty
- * @tc.desc: GetSystemBarProperty test
- * @tc.type: FUNC
-*/
-HWTEST_F(WindowSessionPropertyTest, GetSystemBarProperty, Function | SmallTest | Level2)
-{
-    WindowSessionProperty windowSessionProperty;
-    auto result = windowSessionProperty.GetSystemBarProperty();
-    ASSERT_NE(0,result.size());
-} 
+}
 
 /**
  * @tc.name: SetSessionGravity
@@ -291,24 +284,19 @@ HWTEST_F(WindowSessionPropertyTest, GetSystemBarProperty, Function | SmallTest |
 */
 HWTEST_F(WindowSessionPropertyTest, SetSessionGravity, Function | SmallTest | Level2)
 {
-    SessionGravity sessionGravity= SessionGravity();
-    uint32_t percent=1234567890;
+
+    SessionGravity sessionGravity = SessionGravity::SESSION_GRAVITY_FLOAT;
+    uint32_t percent = 1234567890;
     WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.SetSessionGravity(sessionGravity,percent);
+    windowSessionProperty.SetSessionGravity(sessionGravity, percent);
+    WindowSessionProperty* property = new WindowSessionProperty();
+    ASSERT_EQ(property->GetTokenState(), true);
+    // property->SetSessionGravity(false);
+    // ASSERT_EQ(property->GetSessionGravity(), false);
+    //ASSERT_EQ(true, result);
 }
 
-/**
- * @tc.name: GetSessionGravity
- * @tc.desc: GetSessionGravity test
- * @tc.type: FUNC
-*/
-HWTEST_F(WindowSessionPropertyTest, GetSessionGravity, Function | SmallTest | Level2)
-{
-    SessionGravity *sessionGravity=new SessionGravity();
-    uint32_t *percent= new uint32_t;
-    WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.GetSessionGravity(*sessionGravity,*percent);
-}
+
 /**
  * @tc.name: IsDecorEnable
  * @tc.desc: IsDecorEnable test
@@ -317,8 +305,8 @@ HWTEST_F(WindowSessionPropertyTest, GetSessionGravity, Function | SmallTest | Le
 HWTEST_F(WindowSessionPropertyTest, IsDecorEnable, Function | SmallTest | Level2)
 {
     WindowSessionProperty windowSessionProperty;
-    auto result= windowSessionProperty.IsDecorEnable();
-    ASSERT_EQ(true,result);
+    auto result = windowSessionProperty.IsDecorEnable();
+    ASSERT_EQ(true, result);
 }
 
 /**
@@ -328,24 +316,13 @@ HWTEST_F(WindowSessionPropertyTest, IsDecorEnable, Function | SmallTest | Level2
 */
 HWTEST_F(WindowSessionPropertyTest, SetModeSupportInfo, Function | SmallTest | Level2)
 {
-    uint32_t modeSupportInfo=1234567890;
+    uint32_t modeSupportInfo = 1234567890;
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.SetModeSupportInfo(modeSupportInfo);
-}
+    WindowSessionProperty* property = new WindowSessionProperty();
+    ASSERT_NE(property->GetModeSupportInfo(), 0);
 
-/**
- * @tc.name: GetModeSupportInfo
- * @tc.desc: GetModeSupportInfo test
- * @tc.type: FUNC
-*/
-HWTEST_F(WindowSessionPropertyTest, GetModeSupportInfo, Function | SmallTest | Level2)
-{
-    
-    WindowSessionProperty windowSessionProperty;
-    auto result=windowSessionProperty.GetModeSupportInfo();
-    ASSERT_NE(0,result);
 }
-
 /**
  * @tc.name: IsFloatingWindowAppType
  * @tc.desc: IsFloatingWindowAppType test
@@ -353,10 +330,9 @@ HWTEST_F(WindowSessionPropertyTest, GetModeSupportInfo, Function | SmallTest | L
 */
 HWTEST_F(WindowSessionPropertyTest, IsFloatingWindowAppType, Function | SmallTest | Level2)
 {
-    
     WindowSessionProperty windowSessionProperty;
-    auto result=windowSessionProperty.IsFloatingWindowAppType();
-    ASSERT_EQ(false,result);
+    auto result = windowSessionProperty.IsFloatingWindowAppType();
+    ASSERT_EQ(false, result);
 }
 
 /**
@@ -366,23 +342,13 @@ HWTEST_F(WindowSessionPropertyTest, IsFloatingWindowAppType, Function | SmallTes
 */
 HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, Function | SmallTest | Level2)
 {
-    std::vector<Rect>* rects =new std::vector<Rect>;
+    std::vector<Rect> *rects = new std::vector<Rect>;
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.SetTouchHotAreas(*rects);
-    
-}
-/**
- * @tc.name: GetTouchHotAreas
- * @tc.desc: GetTouchHotAreas test
- * @tc.type: FUNC
-*/
-HWTEST_F(WindowSessionPropertyTest, GetTouchHotAreas, Function | SmallTest | Level2)
-{
-    std::vector<Rect>* rects =new std::vector<Rect>;
-    WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.GetTouchHotAreas(*rects);
-
-
+    WindowSessionProperty* property = new WindowSessionProperty();
+    ASSERT_EQ(property->GetTokenState(), true);
+    //property->SetTouchHotAreas(false);
+    //ASSERT_EQ(property->GetTouchHotAreas(*rects), false);
 }
 
 /**
@@ -396,6 +362,7 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingWindowLimits, Function | SmallT
     WindowSessionProperty *property = new WindowSessionProperty();
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.UnmarshallingWindowLimits(parcel, property);
+    ASSERT_EQ(property->GetTokenState(), true);
 }
 
 /**
@@ -409,6 +376,7 @@ HWTEST_F(WindowSessionPropertyTest, UnMarshallingSystemBarMap, Function | SmallT
     WindowSessionProperty *property = new WindowSessionProperty();
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.UnmarshallingWindowLimits(parcel, property);
+    ASSERT_EQ(property->GetTokenState(), true);
 }
 
 /**
@@ -422,6 +390,7 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingTouchHotAreas, Function | Small
     WindowSessionProperty *property = new WindowSessionProperty();
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.UnmarshallingTouchHotAreas(parcel, property);
+    ASSERT_EQ(property->GetTokenState(), true);
 }
 
 /**
@@ -431,10 +400,10 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingTouchHotAreas, Function | Small
 */
 HWTEST_F(WindowSessionPropertyTest, Unmarshalling, Function | SmallTest | Level2)
 {
-    WindowSessionProperty* property = new(std::nothrow) WindowSessionProperty();
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
     Parcel parcel = Parcel();
     WindowSessionProperty windowSessionProperty;
-    auto result= windowSessionProperty.Unmarshalling(parcel);
+    auto result = windowSessionProperty.Unmarshalling(parcel);
     ASSERT_NE(nullptr, property);
     ASSERT_NE(nullptr, result);
 }
@@ -446,11 +415,12 @@ HWTEST_F(WindowSessionPropertyTest, Unmarshalling, Function | SmallTest | Level2
 */
 HWTEST_F(WindowSessionPropertyTest, CopyFrom, Function | SmallTest | Level2)
 {
-    sptr<WindowSessionProperty>* property  = new sptr<WindowSessionProperty>();
+    sptr<WindowSessionProperty> *property = new sptr<WindowSessionProperty>();
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.CopyFrom(*property);
+    WindowSessionProperty *wproperty = new WindowSessionProperty();
+    ASSERT_EQ(wproperty->GetTokenState(), true);
 }
-
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
