@@ -64,6 +64,7 @@ HWTEST_F(WindowSessionPropertyTest, SetRaiseEnabled001, Function | SmallTest | L
 }
 
 /**
+<<<<<<< 0823
  * @tc.name: WindowSessionProperty
  * @tc.desc: WindowSessionProperty
  * @tc.type: FUNC

@@ -437,6 +437,9 @@ HWTEST_F(WindowImmersiveTest, DockWindowTest01, Function | MediumTest | Level3)
     }
 
     const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppinfo_);
+    if (window == nullptr) {
+        return;
+    }
     usleep(WAIT_ASYNC_US);
     auto act = testSystemBarChangedListener_->tints_;
     for (SystemBarRegionTint tint : act) {

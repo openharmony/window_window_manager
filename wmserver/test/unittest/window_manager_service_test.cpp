@@ -65,6 +65,7 @@ public:
 
     void SetAceessTokenPermission(const std::string processName);
     sptr<WindowManagerService> wms = new WindowManagerService();
+    sptr<WindowManagerServiceHandler> wmsHandler_ = new WindowManagerServiceHandler();;
 };
 
 void WindowManagerServiceTest::SetUpTestCase()
@@ -450,6 +451,55 @@ HWTEST_F(WindowManagerServiceTest, GetWindowAnimationTargets01, Function | Small
     std::vector<sptr<RSWindowAnimationTarget>> targets;
     ASSERT_EQ(WMError::WM_OK, wms->GetWindowAnimationTargets(missionIds, targets));
     ASSERT_EQ(0, targets.size());
+}
+
+/**
+ * @tc.name: OnAccountSwitched
+ * @tc.desc: OnAccountSwitched test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, OnAccountSwitched, Function | SmallTest | Level2)
+{
+    int accountId = 0;
+    ASSERT_TRUE(wms != nullptr);
+    wms->OnAccountSwitched(accountId);
+}
+
+/**
+ * @tc.name: InitWithRanderServiceAdded
+ * @tc.desc: InitWithRanderServiceAdded test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, InitWithRanderServiceAdded, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE(wms != nullptr);
+    wms->InitWithRanderServiceAdded();
+}
+
+/**
+ * @tc.name: NotifyWindowTransition02
+ * @tc.desc: NotifyWindowTransition02 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, NotifyWindowTransition02, Function | SmallTest | Level2)
+{
+    sptr<AAFwk::AbilityTransitionInfo> from = new AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> to = new AAFwk::AbilityTransitionInfo();
+    bool animaEnabled = false;
+    ASSERT_TRUE(wmsHandler_ != nullptr);
+    wmsHandler_->NotifyWindowTransition(from, to, animaEnabled);
+}
+
+/**
+ * @tc.name: NotifyAnimationAbilityDied
+ * @tc.desc: NotifyAnimationAbilityDied test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, NotifyAnimationAbilityDied, Function | SmallTest | Level2)
+{
+    sptr<AAFwk::AbilityTransitionInfo> info = new AAFwk::AbilityTransitionInfo();
+    ASSERT_TRUE(wmsHandler_ != nullptr);
+    wmsHandler_->NotifyAnimationAbilityDied(info);
 }
 }
 }

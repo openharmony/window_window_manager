@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
+#include <iremote_object.h>
 #include <gtest/gtest.h>
 #include "window_root.h"
 #include "window_manager.h"
+#include "window_manager_service.h"
 #include "display_manager.h"
 
 using namespace testing;
@@ -75,9 +77,12 @@ HWTEST_F(WindowRootTest, WindowRootTest01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowRootTest, WindowRootTest02, Function | SmallTest | Level2)
 {
+    windowRoot_->GetWindowForDumpAceHelpInfo();
     sptr<WindowProperty> property = new WindowProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
-    sptr<WindowNode> windowNode = new WindowNode(property);
+    sptr<WindowNode> windowNode;
+    windowRoot_->DestroyWindowInner(windowNode);
+    windowNode = new WindowNode(property);
     windowRoot_->SaveWindow(windowNode);
     sptr<WindowNode> node = windowRoot_->GetWindowForDumpAceHelpInfo();
     ASSERT_NE(node, nullptr);
@@ -105,6 +110,8 @@ HWTEST_F(WindowRootTest, WindowRootTest02, Function | SmallTest | Level2)
     windowRoot_->SaveWindow(windowNode);
     node = windowRoot_->GetWindowForDumpAceHelpInfo();
     ASSERT_NE(node, nullptr);
+    windowRoot_->DestroyWindowInner(windowNode);
+    windowNode->isVisible_ = true;
     windowRoot_->DestroyWindowInner(windowNode);
 }
 
@@ -172,6 +179,10 @@ HWTEST_F(WindowRootTest, WindowRootTest05, Function | SmallTest | Level2)
     windowRoot_->SaveWindow(windowNode2);
 
     auto screenGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(DISPLAY_ID_INVALID);
+    windowRoot_->GetBackgroundNodesByScreenId(screenGroupId, windowNodes);
+    sptr<WindowNode> windowNode3 = new WindowNode();
+    windowRoot_->SaveWindow(windowNode3);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(windowNode3->GetWindowId(), windowNode3));
     windowRoot_->GetBackgroundNodesByScreenId(screenGroupId, windowNodes);
 
     windowRoot_->DestroyWindowInner(windowNode1);
@@ -516,6 +527,431 @@ HWTEST_F(WindowRootTest, SetGestureNavigaionEnabled, Function | SmallTest | Leve
     ASSERT_EQ(ret, WMError::WM_OK);
 
     windowRoot_->lastGestureNativeEnabled_ = false;
+}
+
+/**
+ * @tc.name: GetWindowVisibilityChangeInfo
+ * @tc.desc: test WindowRoot GetWindowVisibilityChangeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, GetWindowVisibilityChangeInfo, Function | SmallTest | Level2)
+{
+    std::shared_ptr<RSOcclusionData> occlusionData = std::make_shared<RSOcclusionData>();
+    ASSERT_NE(occlusionData, nullptr);
+    windowRoot_->GetWindowVisibilityChangeInfo(occlusionData);
+}
+
+/**
+ * @tc.name: NotifyWindowVisibilityChange
+ * @tc.desc: test WindowRoot NotifyWindowVisibilityChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, NotifyWindowVisibilityChange, Function | SmallTest | Level2)
+{
+    std::shared_ptr<RSOcclusionData> occlusionData = std::make_shared<RSOcclusionData>();
+    ASSERT_NE(occlusionData, nullptr);
+    windowRoot_->NotifyWindowVisibilityChange(occlusionData);
+}
+
+/**
+ * @tc.name: ToggleShownStateForAllAppWindows
+ * @tc.desc: test WindowRoot ToggleShownStateForAllAppWindows
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, ToggleShownStateForAllAppWindows, Function | SmallTest | Level2)
+{
+    auto ret = windowRoot_->ToggleShownStateForAllAppWindows();
+    ASSERT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: PostProcessAddWindowNode
+ * @tc.desc: test WindowRoot PostProcessAddWindowNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, PostProcessAddWindowNode, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> node = new WindowNode();
+    sptr<WindowNode> parentNode = new WindowNode();
+    sptr<WindowNodeContainer> container;
+    auto ret = windowRoot_->PostProcessAddWindowNode(node, parentNode, container);
+    ASSERT_EQ(ret, WMError::WM_DO_NOTHING);
+}
+
+/**
+ * @tc.name: BindDialogToParent
+ * @tc.desc: test WindowRoot BindDialogToParent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, BindDialogToParent, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> node = new WindowNode();
+    sptr<WindowNode> parentNode = new WindowNode();
+    auto ret = windowRoot_->BindDialogToParent(node, parentNode);
+    ASSERT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: UpdateFocusableProperty
+ * @tc.desc: test WindowRoot UpdateFocusableProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, UpdateFocusableProperty, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 1;
+    windowRoot_->UpdateFocusableProperty(windowId);
+    auto node = windowRoot_->GetWindowNode(windowId);
+    ASSERT_EQ(node, nullptr);
+}
+
+/**
+ * @tc.name: SetWindowMode
+ * @tc.desc: test WindowRoot SetWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, SetWindowMode, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> node = new WindowNode();
+    WindowMode dstMode = WindowMode::WINDOW_MODE_UNDEFINED;
+    auto ret = windowRoot_->SetWindowMode(node, dstMode);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_DISPLAY);
+    dstMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    ret = windowRoot_->SetWindowMode(node, dstMode);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_DISPLAY);
+}
+
+/**
+ * @tc.name: DestroyWindowSelf
+ * @tc.desc: test WindowRoot DestroyWindowSelf
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, DestroyWindowSelf, Function | SmallTest | Level2)
+{
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_TRUE((display != nullptr));
+    sptr<WindowNode> node = new WindowNode();
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
+    auto ret = windowRoot_->DestroyWindowSelf(node, container);
+    ASSERT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: IsVerticalDisplay
+ * @tc.desc: test WindowRoot IsVerticalDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, IsVerticalDisplay, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> node = new WindowNode();
+    ASSERT_EQ(false, windowRoot_->IsVerticalDisplay(node));
+}
+
+/**
+ * @tc.name: RequestFocus
+ * @tc.desc: test WindowRoot RequestFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, RequestFocus, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 1;
+    auto ret = windowRoot_->RequestFocus(windowId);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: RequestActiveWindow
+ * @tc.desc: test WindowRoot RequestActiveWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, RequestActiveWindow, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 1;
+    auto ret = windowRoot_->RequestActiveWindow(windowId);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: ProcessWindowStateChange
+ * @tc.desc: test WindowRoot ProcessWindowStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, ProcessWindowStateChange, Function | SmallTest | Level2)
+{
+    WindowState state = WindowState::STATE_INITIAL;
+    WindowStateChangeReason reason = WindowStateChangeReason::NORMAL;
+    windowRoot_->ProcessWindowStateChange(state, reason);
+    ASSERT_EQ(reason, WindowStateChangeReason::NORMAL);
+}
+
+/**
+ * @tc.name: NotifySystemBarTints
+ * @tc.desc: test WindowRoot NotifySystemBarTints
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, NotifySystemBarTints, Function | SmallTest | Level2)
+{
+    ScreenId displayGroupId = 1;
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_TRUE((display != nullptr));
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
+    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
+    windowRoot_->NotifySystemBarTints();
+}
+
+/**
+ * @tc.name: NotifyDesktopUnfrozen
+ * @tc.desc: test WindowRoot NotifyDesktopUnfrozen
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, NotifyDesktopUnfrozen, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> windowNode3 = new WindowNode();
+    windowRoot_->SaveWindow(windowNode3);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(windowNode3->GetWindowId(), windowNode3));
+    auto ret = windowRoot_->NotifyDesktopUnfrozen();
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+}
+
+/**
+ * @tc.name: RaiseZOrderForAppWindow
+ * @tc.desc: test WindowRoot RaiseZOrderForAppWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, RaiseZOrderForAppWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> windowNode2 = nullptr;
+    auto ret = windowRoot_->RaiseZOrderForAppWindow(windowNode2);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    sptr<WindowNode> windowNode3 = new WindowNode();
+    ret = windowRoot_->RaiseZOrderForAppWindow(windowNode3);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: DispatchKeyEvent
+ * @tc.desc: test WindowRoot DispatchKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, DispatchKeyEvent, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> windowNode = new WindowNode();
+    std::shared_ptr<MMI::KeyEvent> event = nullptr;
+    ASSERT_TRUE((windowRoot_ != nullptr));
+    windowRoot_->DispatchKeyEvent(windowNode, event);
+}
+
+/**
+ * @tc.name: GetTopWindowId
+ * @tc.desc: test WindowRoot GetTopWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, GetTopWindowId, Function | SmallTest | Level2)
+{
+    uint32_t mainWinId = 0;
+    uint32_t topWinId = 1;
+    auto ret = windowRoot_->GetTopWindowId(mainWinId, topWinId);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+}
+
+/**
+ * @tc.name: SetWindowLayoutMode
+ * @tc.desc: test WindowRoot SetWindowLayoutMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, SetWindowLayoutMode, Function | SmallTest | Level2)
+{
+    DisplayId displayId = 1;
+    WindowLayoutMode mode = WindowLayoutMode::BASE;
+    auto ret = windowRoot_->SetWindowLayoutMode(displayId, mode);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: GetAllDisplayIds
+ * @tc.desc: test WindowRoot GetAllDisplayIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, GetAllDisplayIds, Function | SmallTest | Level2)
+{
+    ScreenId displayGroupId = 1;
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_TRUE((display != nullptr));
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
+    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
+    windowRoot_->GetAllDisplayIds();
+}
+
+/**
+ * @tc.name: GenAllWindowsLogInfo
+ * @tc.desc: test WindowRoot GenAllWindowsLogInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, GenAllWindowsLogInfo, Function | SmallTest | Level2)
+{
+    ScreenId displayGroupId = 1;
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_TRUE((display != nullptr));
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
+    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
+    windowRoot_->GenAllWindowsLogInfo();
+}
+
+/**
+ * @tc.name: FocusFaultDetection
+ * @tc.desc: test WindowRoot FocusFaultDetection
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, FocusFaultDetection, Function | SmallTest | Level2)
+{
+    ScreenId displayGroupId = 1;
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_TRUE((display != nullptr));
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
+    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
+    windowRoot_->needCheckFocusWindow = false;
+    windowRoot_->FocusFaultDetection();
+}
+
+/**
+ * @tc.name: ProcessExpandDisplayCreate
+ * @tc.desc: test WindowRoot ProcessExpandDisplayCreate
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, ProcessExpandDisplayCreate, Function | SmallTest | Level2)
+{
+    ScreenId displayGroupId = 1;
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_TRUE((display != nullptr));
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
+    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
+    DisplayId defaultDisplayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
+    ASSERT_NE(display, nullptr);
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    displayInfo->SetWidth(100);
+    displayInfo->SetHeight(100);
+    std::map<DisplayId, Rect> displayRectMap = {};
+    windowRoot_->ProcessExpandDisplayCreate(defaultDisplayId, displayInfo, displayRectMap);
+}
+
+/**
+ * @tc.name: GetAllDisplayRectsByDisplayInfo
+ * @tc.desc: test WindowRoot GetAllDisplayRectsByDisplayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, GetAllDisplayRectsByDisplayInfo, Function | SmallTest | Level2)
+{
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
+    ASSERT_TRUE((windowRoot_ != nullptr));
+    windowRoot_->GetAllDisplayRectsByDisplayInfo(displayInfoMap);
+}
+
+/**
+ * @tc.name: ProcessDisplayCreate
+ * @tc.desc: test WindowRoot ProcessDisplayCreate
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, ProcessDisplayCreate, Function | SmallTest | Level2)
+{
+    DisplayId defaultDisplayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_TRUE((display != nullptr));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
+    windowRoot_->ProcessDisplayCreate(defaultDisplayId, displayInfo, displayInfoMap);
+}
+
+/**
+ * @tc.name: MoveNotShowingWindowToDefaultDisplay
+ * @tc.desc: test WindowRoot MoveNotShowingWindowToDefaultDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, MoveNotShowingWindowToDefaultDisplay, Function | SmallTest | Level2)
+{
+    DisplayId defaultDisplayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
+    ASSERT_TRUE((windowRoot_ != nullptr));
+    DisplayId displayId = 1;
+    sptr<WindowNode> node = new WindowNode();
+    windowRoot_->windowNodeMap_.insert(std::make_pair(node->GetWindowId(), node));
+    windowRoot_->MoveNotShowingWindowToDefaultDisplay(defaultDisplayId, displayId);
+}
+
+/**
+ * @tc.name: ProcessDisplayDestroy
+ * @tc.desc: test WindowRoot ProcessDisplayDestroy
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, ProcessDisplayDestroy, Function | SmallTest | Level2)
+{
+    DisplayId defaultDisplayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_TRUE((display != nullptr));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
+    windowRoot_->ProcessDisplayDestroy(defaultDisplayId, displayInfo, displayInfoMap);
+}
+
+/**
+ * @tc.name: ProcessDisplayChange
+ * @tc.desc: test WindowRoot ProcessDisplayChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, ProcessDisplayChange, Function | SmallTest | Level2)
+{
+    DisplayId defaultDisplayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_TRUE((display != nullptr));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
+    DisplayStateChangeType type = DisplayStateChangeType::BEFORE_SUSPEND;
+    windowRoot_->ProcessDisplayChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+}
+
+/**
+ * @tc.name: GetDisplayGroupRect
+ * @tc.desc: test WindowRoot GetDisplayGroupRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, GetDisplayGroupRect, Function | SmallTest | Level2)
+{
+    DisplayId displayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
+    ASSERT_TRUE((windowRoot_ != nullptr));
+    windowRoot_->GetDisplayGroupRect(displayId);
+}
+
+/**
+ * @tc.name: RemoveSingleUserWindowNodes
+ * @tc.desc: test WindowRoot RemoveSingleUserWindowNodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, RemoveSingleUserWindowNodes, Function | SmallTest | Level2)
+{
+    int accountId = 1;
+    ASSERT_TRUE((windowRoot_ != nullptr));
+    windowRoot_->RemoveSingleUserWindowNodes(accountId);
+}
+
+/**
+ * @tc.name: TakeWindowPairSnapshot
+ * @tc.desc: test WindowRoot TakeWindowPairSnapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, TakeWindowPairSnapshot, Function | SmallTest | Level2)
+{
+    DisplayId displayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
+    bool flag = windowRoot_->TakeWindowPairSnapshot(displayId);
+    ASSERT_EQ(false, flag);
+}
+
+/**
+ * @tc.name: ClearWindowPairSnapshot
+ * @tc.desc: test WindowRoot ClearWindowPairSnapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, ClearWindowPairSnapshot, Function | SmallTest | Level2)
+{
+    DisplayId displayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
+    ASSERT_TRUE((windowRoot_ != nullptr));
+    windowRoot_->ClearWindowPairSnapshot(displayId);
 }
 }
 }
