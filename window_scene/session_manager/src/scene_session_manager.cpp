@@ -2316,23 +2316,16 @@ void SceneSessionManager::RegisterWindowChanged(const WindowChangedFunc& func)
     WindowChangedFunc_ = func;
 }
 
-std::map<int32_t, sptr<SceneSession>>& SceneSessionManager::GetSessionMapByScreenId(ScreenId id)
-{
-    return sceneSessionMap_; // only has one screen, return all
-}
-
 void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
 {
-    ScreenId id = ScreenSessionManager::GetInstance().GetScreenSessionIdBySceneSessionId(persistentId);
-    auto sessionMap = GetSessionMapByScreenId(id);
-    int counts = GetSceneSessionPrivacyModeCount(sessionMap);
+    int counts = GetSceneSessionPrivacyModeCount();
     bool hasPrivateWindow = (counts != 0);
-    ScreenSessionManager::GetInstance().SetScreenPrivacyState(id, hasPrivateWindow);
+    ScreenSessionManager::GetInstance().SetScreenPrivacyState(hasPrivateWindow);
 }
 
-int SceneSessionManager::GetSceneSessionPrivacyModeCount(const std::map<int32_t, sptr<SceneSession>>& sessionMap)
+int SceneSessionManager::GetSceneSessionPrivacyModeCount()
 {
-    auto countFunc = [](std::pair<int32_t, sptr<SceneSession>> sessionPair) -> bool {
+    auto countFunc = [](const std::pair<int32_t, sptr<SceneSession>>& sessionPair) -> bool {
         sptr<SceneSession> sceneSession = sessionPair.second;
         bool isForground =  sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
             sceneSession->GetSessionState() == SessionState::STATE_ACTIVE;
@@ -2341,7 +2334,8 @@ int SceneSessionManager::GetSceneSessionPrivacyModeCount(const std::map<int32_t,
         bool IsSystemWindowVisible = sceneSession->GetSessionInfo().isSystem_ && sceneSession->IsVisible();
         return (isForground || IsSystemWindowVisible) && isPrivate;
     };
-    return std::count_if(sessionMap.begin(), sessionMap.end(), countFunc);
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    return std::count_if(sceneSessionMap_.begin(), sceneSessionMap_.end(), countFunc);
 }
 
 void SceneSessionManager::RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession)
