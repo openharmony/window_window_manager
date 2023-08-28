@@ -2173,16 +2173,43 @@ WSError SceneSessionManager::NotifyWaterMarkFlagChangedResult(bool hasWaterMark)
     return WSError::WS_OK;
 }
 
+void SceneSessionManager::ProcessPreload(const AppExecFwk::AbilityInfo &abilityInfo) const
+{
+    if (!bundleMgr_) {
+        WLOGFE("bundle manager is nullptr.");
+        return;
+    }
+
+    AAFwk::Want want;
+    want.SetElementName(abilityInfo.deviceId, abilityInfo.bundleName, abilityInfo.name, abilityInfo.moduleName);
+    auto uid = abilityInfo.uid;
+    want.SetParam("uid", uid);
+    bundleMgr_->ProcessPreload(want);
+}
+
 void SceneSessionManager::NotifyCompleteFirstFrameDrawing(int32_t persistentId)
 {
     WLOGFI("NotifyCompleteFirstFrameDrawing, persistentId: %{public}d", persistentId);
     auto scnSession = GetSceneSession(persistentId);
-    if (!scnSession && listenerController_ != nullptr &&
-        (scnSession->GetSessionInfo().abilityInfo) != nullptr &&
-        !(scnSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
+    if (scnSession == nullptr) {
+        return;
+    }
+    auto abilityInfoPtr = scnSession->GetSessionInfo().abilityInfo;
+    if (abilityInfoPtr == nullptr) {
+        return;
+    }
+    if ((listenerController_ != nullptr) && !(abilityInfoPtr->excludeFromMissions)) {
         WLOGFD("NotifySessionCreated, id: %{public}d", persistentId);
         listenerController_->NotifySessionCreated(persistentId);
     }
+
+    if (taskScheduler_ == nullptr) {
+        return;
+    }
+    auto task = [this, abilityInfoPtr]() {
+        ProcessPreload(*abilityInfoPtr);
+    };
+    return taskScheduler_->PostAsyncTask(task);
 }
 
 void SceneSessionManager::NotifySessionMovedToFront(int32_t persistentId)
