@@ -93,6 +93,12 @@ WMError WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     return windowManagerServiceProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
 }
 
+WMError WindowAdapter::CheckWindowId(int32_t windowId, int32_t &pid)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    return windowManagerServiceProxy_->CheckWindowId(windowId, pid);
+}
+
 WMError WindowAdapter::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
@@ -351,6 +357,18 @@ void WindowAdapter::NotifyDumpInfoResult(const std::vector<std::string>& info)
 {
     INIT_PROXY_CHECK_RETURN();
     windowManagerServiceProxy_->NotifyDumpInfoResult(info);
+}
+
+WMError WindowAdapter::DumpSessionAll(std::vector<std::string> &infos)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    return static_cast<WMError>(windowManagerServiceProxy_->DumpSessionAll(infos));
+}
+
+WMError WindowAdapter::DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    return static_cast<WMError>(windowManagerServiceProxy_->DumpSessionWithId(persistentId, infos));
 }
 
 WMError WindowAdapter::GetWindowAnimationTargets(std::vector<uint32_t> missionIds,

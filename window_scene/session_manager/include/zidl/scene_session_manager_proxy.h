@@ -51,6 +51,7 @@ public:
     WSError PendingSessionToForeground(const sptr<IRemoteObject> &token) override;
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject> &token) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject> &token) override;
+    WMError CheckWindowId(int32_t windowId, int32_t &pid) override;
 
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;
     WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override;
@@ -58,6 +59,8 @@ public:
                             std::vector<SessionInfoBean>& sessionInfos) override;
     WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) override;
 
+    WSError DumpSessionAll(std::vector<std::string> &infos) override;
+    WSError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos) override;
     WSError SetSessionContinueState(const sptr<IRemoteObject> &token, const ContinueState& continueState) override;
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) override;
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;
@@ -65,6 +68,10 @@ public:
     WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) override;
     WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
                                std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution) override;
+    WSError LockSession(int32_t persistentId) override;
+    WSError UnlockSession(int32_t persistentId) override;
+    WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds) override;
+    WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds) override;
     WSError ClearSession(int32_t persistentId) override;
     WSError ClearAllSessions() override;
     WSError RegisterIAbilityManagerCollaborator(int32_t type, const sptr<AAFwk::IAbilityManagerCollaborator> &impl) override;

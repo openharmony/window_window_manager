@@ -27,6 +27,7 @@
 #include "agent_death_recipient.h"
 #include "screen.h"
 #include "screen_cutout_controller.h"
+#include "fold_screen_controller/fold_screen_controller.h"
 
 namespace OHOS::Rosen {
 class IScreenConnectionListener : public RefBase {
@@ -89,8 +90,10 @@ public:
     virtual DMError DestroyVirtualScreen(ScreenId screenId) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
+    virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) override;
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
                                ScreenId& screenGroupId) override;
+    virtual DMError StopExpand(const std::vector<ScreenId>& expandScreenIds) override;
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode) override;
@@ -142,6 +145,7 @@ public:
         std::map<ScreenId, bool>& removeChildResMap);
 
     DMError SetMirror(ScreenId screenId, std::vector<ScreenId> screens);
+    DMError StopScreens(const std::vector<ScreenId>& screenIds, ScreenCombination stopCombination);
 
     void NotifyScreenConnected(sptr<ScreenInfo> screenInfo);
     void NotifyScreenDisconnected(ScreenId screenId);
@@ -162,6 +166,11 @@ public:
     void OnScreenshot(sptr<ScreenshotInfo> info);
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
     void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
+
+    //Fold Screen
+    void SetFoldDisplayMode(FoldDisplayMode displayMode) override;
+    FoldDisplayMode GetFoldDisplayMode() override;
+    ScreenProperty GetPhyScreenProperty(ScreenId screenId);
 
 protected:
     ScreenSessionManager();
@@ -225,11 +234,16 @@ private:
     sptr<IDisplayChangeListener> displayChangeListener_;
     sptr<SessionDisplayPowerController> sessionDisplayPowerController_;
     sptr<ScreenCutoutController> screenCutoutController_;
+    sptr<FoldScreenController> foldScreenController_;
 
     bool isDensityDpiLoad_ = false;
     float densityDpi_ { 1.0f };
 
     bool screenPrivacyStates = false;
+
+    //Fold Screen
+    std::map<ScreenId, ScreenProperty> phyScreenPropMap_;
+    mutable std::recursive_mutex phyScreenPropMapMutex_;
 };
 } // namespace OHOS::Rosen
 

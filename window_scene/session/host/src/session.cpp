@@ -16,13 +16,16 @@
 #include "session/host/include/session.h"
 
 #include "ability_info.h"
+#include "input_manager.h"
 #include "ipc_skeleton.h"
 #include "key_event.h"
 #include "pointer_event.h"
+#include "../../proxy/include/window_info.h"
 
 #include "anr_manager.h"
 #include "foundation/ability/ability_base/interfaces/kits/native/want/include/want.h"
 #include "interfaces/include/ws_common.h"
+#include <string>
 #include <surface_capture_future.h>
 #include <transaction/rs_interfaces.h>
 #include <ui/rs_surface_node.h>
@@ -34,11 +37,29 @@
 #include "session_helper.h"
 
 namespace OHOS::Rosen {
+const std::string DLP_INDEX = "ohos.dlp.params.index";
+
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Session" };
 std::atomic<int32_t> g_persistentId = INVALID_SESSION_ID;
 std::set<int32_t> g_persistentIdSet;
+constexpr float INNER_BORDER_VP = 5.0f;
+constexpr float OUTSIDE_BORDER_VP = 4.0f;
+constexpr float INNER_ANGLE_VP = 4.0f;
 } // namespace
+
+Session::Session(const SessionInfo& info) : sessionInfo_(info)
+{
+    using type = std::underlying_type_t<MMI::WindowArea>;
+    for (type area = static_cast<type>(MMI::WindowArea::FOCUS_ON_TOP);
+        area <= static_cast<type>(MMI::WindowArea::FOCUS_ON_BOTTOM_RIGHT); ++area) {
+        auto ret = windowAreas_.insert(
+            std::pair<MMI::WindowArea, WSRectF>(static_cast<MMI::WindowArea>(area), WSRectF()));
+        if (!ret.second) {
+            WLOGFE("Failed to insert area:%{public}d", area);
+        }
+    }
+}
 
 int32_t Session::GetPersistentId() const
 {
@@ -357,6 +378,127 @@ bool Session::IsActive() const
     return isActive_;
 }
 
+bool Session::IsSystemSession() const
+{
+    return sessionInfo_.isSystem_;
+}
+
+WSError Session::SetPointerStyle(MMI::WindowArea area)
+{
+    WLOGFI("Information to be set: pid:%{public}d, windowId:%{public}d, MMI::WindowArea:%{public}s",
+        callingPid_, persistentId_, DumpPointerWindowArea(area));
+    MMI::InputManager::GetInstance()->SetWindowPointerStyle(area, callingPid_, persistentId_);
+    return WSError::WS_OK;
+}
+
+WSRectF Session::UpdateTopBottomArea(const WSRectF& rect, MMI::WindowArea area)
+{
+    const float innerBorder = INNER_BORDER_VP * vpr_;
+    const float outsideBorder = OUTSIDE_BORDER_VP * vpr_;
+    const float innerAngle = INNER_ANGLE_VP * vpr_;
+    const float horizontalBorderLength = outsideBorder + innerAngle;
+    const float verticalBorderLength = outsideBorder + innerBorder;
+    const size_t innerAngleCount = 2;
+    WSRectF tbRect;
+    tbRect.posX_ = rect.posX_ + horizontalBorderLength;
+    tbRect.width_ = rect.width_ - horizontalBorderLength * innerAngleCount;
+    tbRect.height_ = verticalBorderLength;
+    if (area == MMI::WindowArea::FOCUS_ON_TOP) {
+        tbRect.posY_ = rect.posY_;
+    } else if (area == MMI::WindowArea::FOCUS_ON_BOTTOM) {
+        tbRect.posY_ = rect.posY_ + rect.height_ - verticalBorderLength;
+    } else {
+        return WSRectF();
+    }
+    return tbRect;
+}
+
+WSRectF Session::UpdateLeftRightArea(const WSRectF& rect, MMI::WindowArea area)
+{
+    const float innerBorder = INNER_BORDER_VP * vpr_;
+    const float outsideBorder = OUTSIDE_BORDER_VP * vpr_;
+    const float innerAngle = INNER_ANGLE_VP * vpr_;
+    const float verticalBorderLength = outsideBorder + innerAngle;
+    const float horizontalBorderLength = outsideBorder + innerBorder;
+    const size_t innerAngleCount = 2;
+    WSRectF lrRect;
+    lrRect.posY_ = rect.posY_ + horizontalBorderLength;
+    lrRect.width_ = horizontalBorderLength;
+    lrRect.height_ = rect.height_ - verticalBorderLength * innerAngleCount;
+    if (area == MMI::WindowArea::FOCUS_ON_LEFT) {
+        lrRect.posX_ = rect.posX_;
+    } else if (area == MMI::WindowArea::FOCUS_ON_RIGHT) {
+        lrRect.posX_ = rect.posX_ + rect.width_ - horizontalBorderLength;
+    } else {
+        return WSRectF();
+    }
+    return lrRect;
+}
+
+WSRectF Session::UpdateInnerAngleArea(const WSRectF& rect, MMI::WindowArea area)
+{
+    const float outsideBorder = OUTSIDE_BORDER_VP * vpr_;
+    const float innerAngle = INNER_ANGLE_VP * vpr_;
+    WSRectF iaRect;
+    iaRect.width_ = outsideBorder + innerAngle;
+    iaRect.height_ = outsideBorder + innerAngle;
+    if (area == MMI::WindowArea::FOCUS_ON_TOP_LEFT) {
+        iaRect.posX_ = rect.posX_;
+        iaRect.posY_ = rect.posY_;
+    } else if (area == MMI::WindowArea::FOCUS_ON_TOP_RIGHT) {
+        iaRect.posX_ = rect.posX_ + rect.width_ - iaRect.width_;
+        iaRect.posY_ = rect.posY_;
+    } else if (area == MMI::WindowArea::FOCUS_ON_BOTTOM_LEFT) {
+        iaRect.posX_ = rect.posX_;
+        iaRect.posY_ = rect.posY_ + rect.height_ - iaRect.height_;
+    } else if (area == MMI::WindowArea::FOCUS_ON_BOTTOM_RIGHT) {
+        iaRect.posX_ = rect.posX_ + rect.width_ - iaRect.width_;
+        iaRect.posY_ = rect.posY_ + rect.height_ - iaRect.height_;
+    } else {
+        return WSRectF();
+    }
+    return iaRect;
+}
+
+WSRectF Session::UpdateHotRect(const WSRect& rect)
+{
+    WSRectF newRect;
+    const float outsideBorder = OUTSIDE_BORDER_VP * vpr_;
+    const size_t ioutsideBorderCount = 2;
+    newRect.posX_ = rect.posX_ - outsideBorder;
+    newRect.posY_ = rect.posY_ - outsideBorder;
+    newRect.width_ = rect.width_ + outsideBorder * ioutsideBorderCount;
+    newRect.height_ = rect.height_ + outsideBorder * ioutsideBorderCount;
+    return newRect;
+}
+
+void Session::UpdatePointerArea(const WSRect& rect)
+{
+    if (IsSystemSession()) {
+        return;
+    }
+    if (!(GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+         GetWindowMode()== WindowMode::WINDOW_MODE_FLOATING)) {
+        return;
+    }
+    if (preRect_ == rect) {
+        WLOGFD("The window area does not change");
+        return;
+    }
+    WSRectF hotRect = UpdateHotRect(rect);
+    for (const auto &[area, _] : windowAreas_) {
+        if (area == MMI::WindowArea::FOCUS_ON_TOP || area == MMI::WindowArea::FOCUS_ON_BOTTOM) {
+            windowAreas_[area] = UpdateTopBottomArea(hotRect, area);
+        } else if (area == MMI::WindowArea::FOCUS_ON_RIGHT || area == MMI::WindowArea::FOCUS_ON_LEFT) {
+            windowAreas_[area] = UpdateLeftRightArea(hotRect, area);
+        } else if (area == MMI::WindowArea::FOCUS_ON_TOP_LEFT || area == MMI::WindowArea::FOCUS_ON_TOP_RIGHT ||
+            area == MMI::WindowArea::FOCUS_ON_BOTTOM_LEFT || area == MMI::WindowArea::FOCUS_ON_BOTTOM_RIGHT) {
+            windowAreas_[area] = UpdateInnerAngleArea(hotRect, area);
+        }
+    }
+    preRect_ = rect;
+}
+
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
     WLOGFI("session update rect: id: %{public}d, rect[%{public}d, %{public}d, %{public}u, %{public}u], "\
@@ -371,6 +513,7 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
     } else {
         WLOGFE("sessionStage_ is nullptr");
     }
+    UpdatePointerArea(winRect_);
     return WSError::WS_OK;
 }
 
@@ -387,9 +530,9 @@ WSError Session::ConnectImpl(const sptr<ISessionStage>& sessionStage, const sptr
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
     sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
 {
-    WLOGFI("Connect session, id: %{public}d, state: %{public}u", GetPersistentId(),
-        static_cast<uint32_t>(GetSessionState()));
-    if (GetSessionState() != SessionState::STATE_DISCONNECT) {
+    WLOGFI("Connect session, id: %{public}d, state: %{public}u, isTerminating: %{public}d", GetPersistentId(),
+        static_cast<uint32_t>(GetSessionState()), isTerminating);
+    if (GetSessionState() != SessionState::STATE_DISCONNECT && !isTerminating) {
         WLOGFE("state is not disconnect!");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -405,7 +548,11 @@ WSError Session::ConnectImpl(const sptr<ISessionStage>& sessionStage, const sptr
     if (property) {
         property->SetPersistentId(GetPersistentId());
     }
-    property_ = property;
+    if (property_ == nullptr) {
+        property_ = property;
+    } else {
+        property_->CopyFrom(property);
+    }
 
     UpdateSessionState(SessionState::STATE_CONNECT);
     // once update rect before connect, update again when connect
@@ -515,8 +662,7 @@ WSError Session::Disconnect()
     WLOGFI("Disconnect session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
     if (state == SessionState::STATE_ACTIVE) {
-        constexpr float scale = 0.5;
-        snapshot_ = Snapshot(scale);
+        snapshot_ = Snapshot();
         if (scenePersistence_ && snapshot_) {
             scenePersistence_->SaveSnapshot(snapshot_);
         }
@@ -527,6 +673,7 @@ WSError Session::Disconnect()
     NotifyDisconnect();
     snapshot_.reset();
     DelayedSingleton<ANRManager>::GetInstance()->OnSessionLost(persistentId_);
+    isTerminating = false;
     return WSError::WS_OK;
 }
 
@@ -567,6 +714,7 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.moduleName_ = abilitySessionInfo->want.GetModuleName();
+    info.appIndex_ = abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0);
     info.persistentId_ = abilitySessionInfo->persistentId;
     info.callerPersistentId_ = GetPersistentId();
     info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
@@ -580,8 +728,9 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     if (info.want != nullptr) {
         info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
     }
-    WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s",
-        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
+    WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s, \
+        appIndex:%{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(),
+        info.appIndex_);
     WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}d, callingTokenId:%{public}d," \
         "uiAbilityId: %{public}" PRIu64 ", windowMode: %{public}d",
         info.callState_, info.persistentId_, info.callingTokenId_, info.uiAbilityId_, info.windowMode);
@@ -607,6 +756,11 @@ WSError Session::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionI
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (isTerminating) {
+        WLOGFE("TerminateSession isTerminating, return!");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    isTerminating = true;
     SessionInfo info;
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -631,6 +785,11 @@ WSError Session::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessi
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (isTerminating) {
+        WLOGFE("TerminateSessionNew isTerminating, return!");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    isTerminating = true;
     SessionInfo info;
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -655,6 +814,11 @@ WSError Session::TerminateSessionTotal(const sptr<AAFwk::SessionInfo> abilitySes
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (isTerminating) {
+        WLOGFE("TerminateSessionTotal isTerminating, return!");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    isTerminating = true;
     SessionInfo info;
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -673,11 +837,50 @@ void Session::SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncT
     terminateSessionFuncTotal_ = func;
 }
 
+WSError Session::SetSessionLabel(const std::string &label)
+{
+    WLOGFI("run Session::SetSessionLabel");
+    if (updateSessionLabelFunc_) {
+        updateSessionLabelFunc_(label);
+    }
+    return WSError::WS_OK;
+}
+
+void Session::SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc &func)
+{
+    updateSessionLabelFunc_ = func;
+}
+
+WSError Session::SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon)
+{
+    WLOGFI("run Session::SetSessionIcon");
+    if (scenePersistence_ == nullptr) {
+        WLOGFI("scenePersistence_ is nullptr.");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    scenePersistence_->SaveUpdatedIcon(icon);
+    std::string updatedIconPath = scenePersistence_->GetUpdatedIconPath();
+    if (updateSessionIconFunc_) {
+        updateSessionIconFunc_(updatedIconPath);
+    }
+    return WSError::WS_OK;
+}
+
+void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc &func)
+{
+    updateSessionIconFunc_ = func;
+}
+
 WSError Session::Clear()
 {
+    if (isTerminating) {
+        WLOGFE("Clear isTerminating, return!");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    isTerminating = true;
     SessionInfo info = GetSessionInfo();
-    if (terminateSessionFuncTotal_) {
-        terminateSessionFuncTotal_(info, TerminateType::CLOSE_AND_CLEAR_MULTITASK);
+    if (terminateSessionFuncNew_) {
+        terminateSessionFuncNew_(info, false);
     }
     return WSError::WS_OK;
 }
@@ -688,6 +891,11 @@ WSError Session::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySe
         WLOGFE("abilitySessionInfo is null");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (isTerminating) {
+        WLOGFE("NotifySessionException isTerminating, return!");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    isTerminating = true;
     SessionInfo info;
     info.abilityName_ = abilitySessionInfo->want.GetElement().GetAbilityName();
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
@@ -789,13 +997,6 @@ WSError Session::NotifyDestroy()
     return sessionStage_->NotifyDestroy();
 }
 
-void Session::SetSessionContinueState(const ContinueState& continueState)
-{
-    auto sessionInfo = GetSessionInfo();
-    WLOGFD("SetSessionContinueState, continueState : %{public}d", static_cast<int32_t>(continueState));
-    sessionInfo.continueState = continueState;
-}
-
 void Session::SetParentSession(const sptr<Session>& session)
 {
     parentSession_ = session;
@@ -846,8 +1047,36 @@ bool Session::CheckDialogOnForeground()
     return false;
 }
 
+const char* Session::DumpPointerWindowArea(MMI::WindowArea area) const
+{
+    const std::map<MMI::WindowArea, const char*> areaMap = {
+        { MMI::WindowArea::FOCUS_ON_INNER, "FOCUS_ON_INNER" },
+        { MMI::WindowArea::FOCUS_ON_TOP, "FOCUS_ON_TOP" },
+        { MMI::WindowArea::FOCUS_ON_BOTTOM, "FOCUS_ON_BOTTOM" },
+        { MMI::WindowArea::FOCUS_ON_LEFT, "FOCUS_ON_LEFT" },
+        { MMI::WindowArea::FOCUS_ON_RIGHT, "FOCUS_ON_RIGHT" },
+        { MMI::WindowArea::FOCUS_ON_BOTTOM_LEFT, "FOCUS_ON_BOTTOM_LEFT" },
+        { MMI::WindowArea::FOCUS_ON_BOTTOM_RIGHT, "FOCUS_ON_BOTTOM_RIGHT" },
+        { MMI::WindowArea::FOCUS_ON_TOP_LEFT, "FOCUS_ON_TOP_LEFT" },
+        { MMI::WindowArea::FOCUS_ON_TOP_RIGHT, "FOCUS_ON_TOP_RIGHT" },
+        { MMI::WindowArea::EXIT, "EXIT" }
+    };
+    auto iter = areaMap.find(area);
+    if (iter == areaMap.end()) {
+        return "UNKNOW";
+    }
+    return iter->second;
+}
+
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    if (!IsSystemSession() && !IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (pointerEvent == nullptr) {
+        WLOGFE("PointerEvent is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         if (CheckDialogOnForeground()) {
             WLOGFD("Has dialog on foreground, not transfer pointer event");
@@ -859,21 +1088,14 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
-    if (pointerEvent == nullptr) {
-        WLOGFE("PointerEvent is nullptr");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    WLOGFD("Session TransferPointEvent, eventId:%{public}d, persistentId:%{public}d, "
-        "bundleName:%{public}s, pid:%{public}d",
-        pointerEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
-        WLOGFD("The pointerEvent does not report normally, bundleName:%{public}s not response, pid:%{public}d",
-            callingBundleName_.c_str(), callingPid_);
+        WLOGFD("The pointerEvent does not report normally, bundleName:%{public}s not response, pid:%{public}d, "
+            "persistentId:%{public}d", callingBundleName_.c_str(), callingPid_, persistentId_);
         return WSError::WS_DO_NOTHING;
     }
-    auto action = pointerEvent->GetPointerAction();
-    if (!isFocused_ && GetFocusable() && (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
-    action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN)) {
+    auto pointerAction = pointerEvent->GetPointerAction();
+    if (!isFocused_ && GetFocusable() && (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN)) {
         NotifyClick();
     }
     if (!windowEventChannel_) {
@@ -884,7 +1106,16 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         WLOGFE("TransferPointer failed");
         return ret;
     }
-    auto pointerAction = pointerEvent->GetPointerAction();
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
+        WLOGFD("Session TransferPointEvent, eventId:%{public}d, action:%{public}s, persistentId:%{public}d, "
+            "bundleName:%{public}s, pid:%{public}d", pointerEvent->GetId(), pointerEvent->DumpPointerAction(),
+            persistentId_, callingBundleName_.c_str(), callingPid_);
+    } else {
+        WLOGFI("Session TransferPointEvent, eventId:%{public}d, action:%{public}s, persistentId:%{public}d, "
+            "bundleName:%{public}s, pid:%{public}d", pointerEvent->GetId(), pointerEvent->DumpPointerAction(),
+            persistentId_, callingBundleName_.c_str(), callingPid_);
+    }
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
@@ -899,6 +1130,13 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
 
 WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
+    if (!IsSystemSession() && !IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (keyEvent == nullptr) {
+        WLOGFE("KeyEvent is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         if (CheckDialogOnForeground()) {
             WLOGFD("Has dialog on foreground, not transfer pointer event");
@@ -909,17 +1147,16 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
             WLOGFD("Its main window has dialog on foreground, not transfer pointer event");
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
+    } else if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG &&
+        keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_BACK) {
+        return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    if (keyEvent == nullptr) {
-        WLOGFE("KeyEvent is nullptr");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    WLOGFD("Session TransferKeyEvent, eventId:%{public}d, persistentId:%{public}d, "
-        "bundleName:%{public}s, pid:%{public}d",
+    WLOGFD("Session TransferKeyEvent eventId:%{public}d persistentId:%{public}d bundleName:%{public}s pid:%{public}d",
         keyEvent->GetId(), persistentId_, callingBundleName_.c_str(), callingPid_);
     if (DelayedSingleton<ANRManager>::GetInstance()->IsANRTriggered(persistentId_)) {
-        WLOGFD("The keyEvent does not report normally, bundleName:%{public}s not response, pid:%{public}d",
-            callingBundleName_.c_str(), callingPid_);
+        WLOGFD("The keyEvent does not report normally, "
+            "bundleName:%{public}s not response, pid:%{public}d, persistentId:%{public}d",
+            callingBundleName_.c_str(), callingPid_, persistentId_);
         return WSError::WS_DO_NOTHING;
     }
     if (!windowEventChannel_) {
@@ -966,10 +1203,10 @@ WSError Session::TransferFocusStateEvent(bool focusState)
     return windowEventChannel_->TransferFocusState(focusState);
 }
 
-std::shared_ptr<Media::PixelMap> Session::Snapshot(float scale)
+std::shared_ptr<Media::PixelMap> Session::Snapshot()
 {
     auto callback = std::make_shared<SurfaceCaptureFuture>();
-    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, scale, scale);
+    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, snapshotScale_, snapshotScale_);
     if (!ret) {
         WLOGFE("TakeSurfaceCapture failed");
         return nullptr;
@@ -1190,6 +1427,11 @@ void Session::SetSystemConfig(const SystemSessionConfig& systemConfig)
     systemConfig_ = systemConfig;
 }
 
+void Session::SetSnapshotScale(const float snapshotScale)
+{
+    snapshotScale_ = snapshotScale;
+}
+
 WSError Session::RequestSessionBack(bool needMoveToBackground)
 {
     if (!backPressedFunc_) {
@@ -1204,6 +1446,10 @@ WSError Session::ProcessBackEvent()
 {
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+        WLOGFI("dialog window don't hadnle back event");
+        return WSError::WS_OK;
     }
     return sessionStage_->HandleBackEvent();
 }

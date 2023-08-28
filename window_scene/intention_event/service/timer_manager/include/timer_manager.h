@@ -20,6 +20,7 @@
 #include <functional>
 #include <list>
 #include <memory>
+#include <mutex>
 #include <thread>
 
 #include "singleton.h"
@@ -63,12 +64,11 @@ private:
     void ProcessTimersInternal();
 
 private:
+    std::recursive_mutex mutex_;
     std::atomic<TimerMgrState> state_ { TimerMgrState::STATE_NOT_START };
     std::thread timerWorker_;
     std::list<std::unique_ptr<TimerItem>> timers_;
 };
-
-#define TimerMgr ::OHOS::DelayedSingleton<TimerManager>::GetInstance()
 } // namespace Rosen
 } // namespace OHOS
 #endif // TIMER_MANAGER_H

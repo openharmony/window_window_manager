@@ -596,6 +596,46 @@ HWTEST_F(WindowManagerTest, SetWindowLayoutMode, Function | SmallTest | Level2)
     WMError ret = WindowManager::GetInstance().SetWindowLayoutMode(mode);
     ASSERT_EQ(ret, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: UpdateCameraFloatWindowStatus
+ * @tc.desc: UpdateCameraFloatWindowStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UpdateCameraFloatWindowStatus, Function | SmallTest | Level2)
+{
+    uint32_t accessTokenId = 0;
+    bool isShowing = true;
+    auto ret = 0;
+    WindowManager::GetInstance().UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
+    ASSERT_EQ(0, ret);
+}
+
+/**
+ * @tc.name: NotifyWaterMarkFlagChangedResult
+ * @tc.desc: NotifyWaterMarkFlagChangedResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyWaterMarkFlagChangedResult, Function | SmallTest | Level2)
+{
+    bool showwatermark = true;
+    auto ret = 0;
+    WindowManager::GetInstance().NotifyWaterMarkFlagChangedResult(showwatermark);
+    ASSERT_EQ(0, ret);
+}
+
+/**
+ * @tc.name: NotifyGestureNavigationEnabledResult
+ * @tc.desc: NotifyGestureNavigationEnabledResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyGestureNavigationEnabledResult, Function | SmallTest | Level2)
+{
+    bool enable = true;
+    auto ret = 0;
+    WindowManager::GetInstance().NotifyGestureNavigationEnabledResult(enable);
+    ASSERT_EQ(0, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

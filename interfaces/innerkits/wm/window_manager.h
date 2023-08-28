@@ -358,6 +358,22 @@ public:
      */
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
 
+    /**
+     * @brief Dump all session info
+     *
+     * @param infos session infos
+     * @return WM_OK means set success, others means set failed.
+     */
+    WMError DumpSessionAll(std::vector<std::string> &infos);
+
+    /**
+     * @brief Dump session info with id
+     *
+     * @param infos session infos
+     * @return WM_OK means set success, others means set failed.
+     */
+    WMError DumpSessionWithId(int32_t persistentId, std::vector<std::string> &infos);
+
 private:
     WindowManager();
     ~WindowManager();

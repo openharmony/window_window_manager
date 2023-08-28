@@ -52,12 +52,15 @@ private:
     int HandleGetFocusSessionToken(MessageParcel &data, MessageParcel &reply);
     int HandleSetGestureNavigationEnabled(MessageParcel &data, MessageParcel &reply);
     int HandleSetSessionGravity(MessageParcel &data, MessageParcel &reply);
+    int HandleCheckWindowId(MessageParcel &data, MessageParcel &reply);
 
     int HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
     int HandleUnRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionInfos(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply);
 
+    int HandleDumpSessionAll(MessageParcel& data, MessageParcel& reply);
+    int HandleDumpSessionWithId(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionContinueState(MessageParcel &data, MessageParcel &reply);
     int HandleTerminateSessionNew(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionDump(MessageParcel &data, MessageParcel &reply);
@@ -67,6 +70,10 @@ private:
     int HandleNotifyDumpInfoResult(MessageParcel &data, MessageParcel &reply);
     int HandleClearSession(MessageParcel &data, MessageParcel &reply);
     int HandleClearAllSessions(MessageParcel &data, MessageParcel &reply);
+    int HandleLockSession(MessageParcel &data, MessageParcel &reply);
+    int HandleUnlockSession(MessageParcel &data, MessageParcel &reply);
+    int HandleMoveSessionsToForeground(MessageParcel &data, MessageParcel &reply);
+    int HandleMoveSessionsToBackground(MessageParcel &data, MessageParcel &reply);
     int HandleRegisterCollaborator(MessageParcel &data, MessageParcel &reply);
     int HandleUnregisterCollaborator(MessageParcel &data, MessageParcel &reply);
 };
