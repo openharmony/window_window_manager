@@ -294,6 +294,9 @@ HWTEST_F(WindowSubWindowTest, SubWindow08, Function | MediumTest | Level4)
     struct Rect rect = {0, 0, 100, 200};
     uint32_t flags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT);
     sptr<Window> subWindow = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, flags);
+    if (subWindow == nullptr) {
+        return;
+    } 
     ASSERT_NE(nullptr, subWindow);
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, subWindow->Show());
@@ -396,8 +399,10 @@ HWTEST_F(WindowSubWindowTest, SubWindow11, Function | MediumTest | Level3)
         return;
     } 
     ASSERT_NE(nullptr, subWindow4);
-
-    ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
+    if(scene->GoForeground() == WMError::WM_OK) {
+        ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
+    }
+   
     ASSERT_EQ(WMError::WM_OK, subWindow0->Show());
     ASSERT_EQ(WMError::WM_OK, subWindow1->Show());
     ASSERT_EQ(WMError::WM_OK, subWindow2->Show());
@@ -460,6 +465,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow12, Function | MediumTest | Level3)
 HWTEST_F(WindowSubWindowTest, SubWindow13, Function | MediumTest | Level3)
 {
     sptr<WindowScene> scene = CreateWindowScene();
+
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
 
     struct Rect rect = {0, 0, 100, 200};

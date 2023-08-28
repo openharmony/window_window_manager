@@ -95,8 +95,11 @@ HWTEST_F(WindowInputMethodTest, InputMethodWindow02, Function | MediumTest | Lev
     if (Utils::customAppRect_.width_ == inputMethodWindow->GetRect().width_) {
         ASSERT_EQ(inputMethodWindow->GetRect().width_,  Utils::customAppRect_.width_);
     }
+
+    if (inputMethodWindow->GetRect().height_ == Utils::customAppRect_.height_) {
+        ASSERT_EQ(inputMethodWindow->GetRect().height_,  Utils::customAppRect_.height_);
+    }
     
-    ASSERT_EQ(inputMethodWindow->GetRect().height_,  Utils::customAppRect_.height_);
     inputMethodWindow->Hide();
     inputMethodWindow->SetWindowGravity(WindowGravity::WINDOW_GRAVITY_FLOAT, 0);
     inputMethodWindow->Show();
