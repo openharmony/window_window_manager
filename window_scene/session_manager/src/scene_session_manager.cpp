@@ -831,6 +831,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             sceneSessionMap_.insert({ persistentId, sceneSession });
         }
         RegisterSessionStateChangeNotifyManagerFunc(sceneSession);
+        RegisterInputMethodUpdateFunc(sceneSession);
         RegisterInputMethodShownFunc(sceneSession);
         RegisterInputMethodHideFunc(sceneSession);
 
@@ -857,6 +858,31 @@ void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
             }
         }
     }
+}
+
+void SceneSessionManager::RegisterInputMethodUpdateFunc(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    NotifyCallingSessionForegroundFunc onInputMethodUpdate = [this](int32_t persistentId) {
+        this->OnInputMethodUpdate(persistentId);
+    };
+    sceneSession->SetNotifyCallingSessionUpdateRectFunc(onInputMethodUpdate);
+    WLOGFD("RegisterInputMethodUpdateFunc success");
+}
+
+void SceneSessionManager::OnInputMethodUpdate(const int32_t& persistentId)
+{
+    WLOGFD("Resize input method calling window");
+    auto scnSession = GetSceneSession(persistentId);
+    if (scnSession == nullptr) {
+        WLOGFE("Input method is null");
+        return;
+    }
+    callingSession_ = GetSceneSession(focusedSessionId_);
+    ResizeSoftInputCallingSessionIfNeed(scnSession, true);
 }
 
 void SceneSessionManager::RegisterInputMethodShownFunc(const sptr<SceneSession>& sceneSession)
@@ -3108,7 +3134,8 @@ void SceneSessionManager::StartWindowInfoReportLoop()
     isReportTaskStart_ = true;
 }
 
-void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(const sptr<SceneSession>& sceneSession)
+void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
+    const sptr<SceneSession>& sceneSession, bool isInputUpdated)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     if (callingSession_ == nullptr) {
@@ -3123,25 +3150,44 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(const sptr<SceneSe
         return;
     }
 
+    bool isCallingSessionFloating;
+    if (callingSession_->GetSessionProperty() &&
+        callingSession_->GetSessionProperty()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        isCallingSessionFloating = true;
+    } else {
+        isCallingSessionFloating = false;
+    }
+
     const WSRect& softInputSessionRect = sceneSession->GetSessionRect();
-    const WSRect& callingSessionRect = callingSession_->GetSessionRect();
+    WSRect callingSessionRect;
+    if (isInputUpdated && isCallingSessionFloating) {
+        callingSessionRect = callingWindowRestoringRect_;
+    } else {
+        callingSessionRect = callingSession_->GetSessionRect();
+    }
     if (SessionHelper::IsEmptyRect(SessionHelper::GetOverlap(softInputSessionRect, callingSessionRect, 0, 0))) {
         WLOGFD("There is no overlap area");
         return;
     }
 
     // calculate new rect of calling window
-    WSRect newRect = callingSessionRect;
+    WSRect newRect;
+    if (isInputUpdated && isCallingSessionFloating) {
+        newRect = callingWindowRestoringRect_;
+    } else {
+        newRect = callingSessionRect;
+    }
     newRect.posY_ = softInputSessionRect.posY_ - static_cast<int32_t>(newRect.height_);
     newRect.posY_ = std::max(newRect.posY_, STATUS_BAR_AVOID_AREA);
 
-    if (callingSession_->GetSessionProperty() &&
-        callingSession_->GetSessionProperty()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        needUpdateSessionRect_ = true;
+    if (!isInputUpdated) {
+        callingWindowRestoringRect_ = callingSessionRect;
     }
-    callingWindowRestoringRect_ = callingSessionRect;
     NotifyOccupiedAreaChangeInfo(callingSession_, newRect, softInputSessionRect);
-    callingSession_->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
+    if (isCallingSessionFloating) {
+        needUpdateSessionRect_ = true;
+        callingSession_->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
+    }
 }
 
 void SceneSessionManager::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> callingSession,
@@ -3593,10 +3639,51 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistent
     return needUpdate;
 }
 
+void SceneSessionManager::UpdateAvoidSessionAvoidArea(WindowType type, bool& needUpdate)
+{
+    bool ret = true;
+    AvoidAreaType avoidType = (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) ?
+        AvoidAreaType::TYPE_KEYBOARD : AvoidAreaType::TYPE_SYSTEM;
+    for (auto& session : avoidAreaListenerSessionSet_) {
+        if (!session->IsVisible()) {
+            continue;
+        }
+        AvoidArea avoidArea = session->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
+        ret = UpdateSessionAvoidAreaIfNeed(
+            session->GetPersistentId(), avoidArea, static_cast<AvoidAreaType>(avoidType));
+        needUpdate = needUpdate || ret;
+    }
+
+    return;
+}
+
+void SceneSessionManager::UpdateNormalSessionAvoidArea(
+    const int32_t& persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate)
+{
+    bool ret = true;
+    if (!sceneSession->IsVisible()) {
+        needUpdate = false;
+        return;
+    }
+    if (avoidAreaListenerSessionSet_.find(sceneSession) == avoidAreaListenerSessionSet_.end()) {
+        WLOGD("id:%{public}d is not in avoidAreaListenerNodes, don't update avoid area.", persistentId);
+        needUpdate = false;
+        return;
+    }
+    uint32_t start = static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM);
+    uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_KEYBOARD);
+    for (uint32_t avoidType = start; avoidType <= end; avoidType++) {
+        AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
+        ret = UpdateSessionAvoidAreaIfNeed(persistentId, avoidArea, static_cast<AvoidAreaType>(avoidType));
+        needUpdate = needUpdate || ret;
+    }
+
+    return;
+}
+
 bool SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
 {
     auto task = [this, persistentId]() {
-        bool ret = true;
         bool needUpdate = false;
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
@@ -3616,26 +3703,9 @@ bool SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
             (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
             (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM ||
             gravity == SessionGravity::SESSION_GRAVITY_DEFAULT))) {
-            AvoidAreaType avoidType = (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) ?
-                AvoidAreaType::TYPE_KEYBOARD : AvoidAreaType::TYPE_SYSTEM;
-            for (auto& session : avoidAreaListenerSessionSet_) {
-                AvoidArea avoidArea = session->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
-                ret = UpdateSessionAvoidAreaIfNeed(
-                    session->GetPersistentId(), avoidArea, static_cast<AvoidAreaType>(avoidType));
-                needUpdate = needUpdate || ret;
-            }
+            UpdateAvoidSessionAvoidArea(type, needUpdate);
         } else {
-            if (avoidAreaListenerSessionSet_.find(sceneSession) == avoidAreaListenerSessionSet_.end()) {
-                WLOGD("id:%{public}d is not in avoidAreaListenerNodes, don't update avoid area.", persistentId);
-                return false;
-            }
-            uint32_t start = static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM);
-            uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_KEYBOARD);
-            for (uint32_t avoidType = start; avoidType <= end; avoidType++) {
-                AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
-                ret = UpdateSessionAvoidAreaIfNeed(persistentId, avoidArea, static_cast<AvoidAreaType>(avoidType));
-                needUpdate = needUpdate || ret;
-            }
+            UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
         }
 
         return needUpdate;
