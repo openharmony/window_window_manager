@@ -36,6 +36,7 @@
 #include "xcollie/watchdog.h"
 
 #include "color_parser.h"
+#include "display_manager.h"
 #include "display_manager_service_inner.h"
 #include "dm_common.h"
 #include "drag_controller.h"
@@ -65,6 +66,8 @@ public:
 
     void SetAceessTokenPermission(const std::string processName);
     sptr<WindowManagerService> wms = new WindowManagerService();
+    sptr<WindowManagerServiceHandler> wmsHandler_ = new WindowManagerServiceHandler();
+    sptr<IDisplayChangeListener> listener = new DisplayChangeListener();
 };
 
 void WindowManagerServiceTest::SetUpTestCase()
@@ -450,6 +453,415 @@ HWTEST_F(WindowManagerServiceTest, GetWindowAnimationTargets01, Function | Small
     std::vector<sptr<RSWindowAnimationTarget>> targets;
     ASSERT_EQ(WMError::WM_OK, wms->GetWindowAnimationTargets(missionIds, targets));
     ASSERT_EQ(0, targets.size());
+}
+
+/**
+ * @tc.name: OnAccountSwitched
+ * @tc.desc: OnAccountSwitched test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, OnAccountSwitched, Function | SmallTest | Level2)
+{
+    int accountId = 0;
+    ASSERT_TRUE(wms != nullptr);
+    wms->OnAccountSwitched(accountId);
+}
+
+/**
+ * @tc.name: InitWithRanderServiceAdded
+ * @tc.desc: InitWithRanderServiceAdded test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, InitWithRanderServiceAdded, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE(wms != nullptr);
+    wms->InitWithRanderServiceAdded();
+}
+
+/**
+ * @tc.name: NotifyWindowTransition02
+ * @tc.desc: NotifyWindowTransition02 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, NotifyWindowTransition02, Function | SmallTest | Level2)
+{
+    sptr<AAFwk::AbilityTransitionInfo> from = new AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> to = new AAFwk::AbilityTransitionInfo();
+    bool animaEnabled = false;
+    ASSERT_TRUE(wmsHandler_ != nullptr);
+    wmsHandler_->NotifyWindowTransition(from, to, animaEnabled);
+}
+
+/**
+ * @tc.name: NotifyAnimationAbilityDied
+ * @tc.desc: NotifyAnimationAbilityDied test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, NotifyAnimationAbilityDied, Function | SmallTest | Level2)
+{
+    sptr<AAFwk::AbilityTransitionInfo> info = new AAFwk::AbilityTransitionInfo();
+    ASSERT_TRUE(wmsHandler_ != nullptr);
+    wmsHandler_->NotifyAnimationAbilityDied(info);
+}
+
+/**
+ * @tc.name: StartingWindow02
+ * @tc.desc: StartingWindow02 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, StartingWindow02, Function | SmallTest | Level2)
+{
+    sptr<AAFwk::AbilityTransitionInfo> info = new AAFwk::AbilityTransitionInfo();
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    ASSERT_TRUE(wmsHandler_ != nullptr);
+    wmsHandler_->StartingWindow(info, pixelMap);
+}
+
+/**
+ * @tc.name: StartingWindow03
+ * @tc.desc: StartingWindow03 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, StartingWindow03, Function | SmallTest | Level2)
+{
+    sptr<AAFwk::AbilityTransitionInfo> info = new AAFwk::AbilityTransitionInfo();
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    uint32_t bgColor = 1;
+    ASSERT_TRUE(wmsHandler_ != nullptr);
+    wmsHandler_->StartingWindow(info, pixelMap, bgColor);
+}
+
+/**
+ * @tc.name: CancelStartingWindow01
+ * @tc.desc: CancelStartingWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, CancelStartingWindow01, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> abilityToken = nullptr;
+    wms->startingOpen_ = false;
+    ASSERT_TRUE(wms != nullptr);
+    wmsHandler_->CancelStartingWindow(abilityToken);
+}
+
+/**
+ * @tc.name: MoveMissionsToForeground02
+ * @tc.desc: MoveMissionsToForeground test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, MoveMissionsToForeground02, Function | SmallTest | Level2)
+{
+    const std::vector<int32_t> missionIds;
+    int32_t topMissionId = 1;
+    wms->windowGroupMgr_ = nullptr;
+    ASSERT_TRUE(wms != nullptr);
+    wmsHandler_->MoveMissionsToForeground(missionIds, topMissionId);
+}
+
+/**
+ * @tc.name: Init
+ * @tc.desc: Init test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, Init, Function | SmallTest | Level2)
+{
+    wms->windowRoot_ = new WindowRoot(nullptr);
+    wms->Init();
+    ASSERT_NE(wms->windowRoot_, nullptr);
+}
+
+/**
+ * @tc.name: Dump
+ * @tc.desc: Dump test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, Dump, Function | SmallTest | Level2)
+{
+    int fd = 2;
+    std::vector<std::u16string> args;
+    wms->Dump(fd, args);
+    ASSERT_EQ(fd, 2);
+}
+
+/**
+ * @tc.name: ConfigStartingWindowAnimation
+ * @tc.desc: ConfigStartingWindowAnimation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, ConfigStartingWindowAnimation, Function | SmallTest | Level2)
+{
+    WindowManagerConfig::ConfigItem animeConfig;
+    ASSERT_TRUE(wms != nullptr);
+    wms->ConfigStartingWindowAnimation(animeConfig);
+}
+
+/**
+ * @tc.name: RequestFocus
+ * @tc.desc: RequestFocus test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, RequestFocus, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 1;
+    WMError res = wms->RequestFocus(windowId);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: GetAvoidAreaByType
+ * @tc.desc: GetAvoidAreaByType test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, GetAvoidAreaByType, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 1;
+    AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
+    ASSERT_TRUE(wms != nullptr);
+    wms->GetAvoidAreaByType(windowId, avoidAreaType);
+}
+
+/**
+ * @tc.name: NotifyDisplayStateChange
+ * @tc.desc: NotifyDisplayStateChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, NotifyDisplayStateChange, Function | SmallTest | Level2)
+{
+    DisplayId defaultDisplayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
+    DisplayStateChangeType type = DisplayStateChangeType::BEFORE_SUSPEND;
+    ASSERT_TRUE(wms != nullptr);
+    wms->NotifyDisplayStateChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+}
+
+/**
+ * @tc.name: OnDisplayStateChange
+ * @tc.desc: OnDisplayStateChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, OnDisplayStateChange, Function | SmallTest | Level2)
+{
+    DisplayId defaultDisplayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
+    DisplayStateChangeType type = DisplayStateChangeType::BEFORE_SUSPEND;
+    ASSERT_TRUE(listener != nullptr);
+    listener->OnDisplayStateChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+}
+
+/**
+ * @tc.name: NotifyServerReadyToMoveOrDrag
+ * @tc.desc: NotifyServerReadyToMoveOrDrag test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, NotifyServerReadyToMoveOrDrag, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 1;
+    sptr<WindowProperty> windowProperty;
+    sptr<MoveDragProperty> moveDragProperty;
+    ASSERT_TRUE(wms != nullptr);
+    wms->NotifyServerReadyToMoveOrDrag(windowId, windowProperty, moveDragProperty);
+}
+
+/**
+ * @tc.name: ProcessPointDown
+ * @tc.desc: ProcessPointDown test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, ProcessPointDown, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 1;
+    bool isPointDown = false;
+    ASSERT_TRUE(wms != nullptr);
+    wms->ProcessPointDown(windowId, isPointDown);
+}
+
+/**
+ * @tc.name: MinimizeAllAppWindows
+ * @tc.desc: MinimizeAllAppWindows test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, MinimizeAllAppWindows, Function | SmallTest | Level2)
+{
+    DisplayId displayId = 1;
+    WMError res = wms->MinimizeAllAppWindows(displayId);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: ToggleShownStateForAllAppWindows
+ * @tc.desc: ToggleShownStateForAllAppWindows test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, ToggleShownStateForAllAppWindows, Function | SmallTest | Level2)
+{
+    WMError res = wms->ToggleShownStateForAllAppWindows();
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: GetTopWindowId
+ * @tc.desc: GetTopWindowId test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, GetTopWindowId, Function | SmallTest | Level2)
+{
+    uint32_t mainWinId = 1;
+    uint32_t topWinId = 1;
+    WMError res = wms->GetTopWindowId(mainWinId, topWinId);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
+}
+
+/**
+ * @tc.name: SetWindowLayoutMode
+ * @tc.desc: SetWindowLayoutMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, SetWindowLayoutMode, Function | SmallTest | Level2)
+{
+    WindowLayoutMode mode = WindowLayoutMode::BASE;
+    WMError res = wms->SetWindowLayoutMode(mode);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: GetAccessibilityWindowInfo
+ * @tc.desc: GetAccessibilityWindowInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, GetAccessibilityWindowInfo, Function | SmallTest | Level2)
+{
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    WMError res = wms->GetAccessibilityWindowInfo(infos);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: GetVisibilityWindowInfo
+ * @tc.desc: GetVisibilityWindowInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, GetVisibilityWindowInfo, Function | SmallTest | Level2)
+{
+    std::vector<sptr<WindowVisibilityInfo>> infos;
+    WMError res = wms->GetVisibilityWindowInfo(infos);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: RaiseToAppTop
+ * @tc.desc: RaiseToAppTop test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, RaiseToAppTop, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 1;
+    WmErrorCode res = wms->RaiseToAppTop(windowId);
+    ASSERT_EQ(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, res);
+}
+
+/**
+ * @tc.name: GetSnapshot
+ * @tc.desc: GetSnapshot test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, GetSnapshot, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 1;
+    ASSERT_EQ(nullptr, wms->GetSnapshot(windowId));
+}
+
+/**
+ * @tc.name: MinimizeWindowsByLauncher
+ * @tc.desc: MinimizeWindowsByLauncher test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, MinimizeWindowsByLauncher, Function | SmallTest | Level2)
+{
+    std::vector<uint32_t> windowIds;
+    bool isAnimated = false;
+    sptr<RSIWindowAnimationFinishedCallback> finishCallback;
+    ASSERT_TRUE(wms != nullptr);
+    wms->MinimizeWindowsByLauncher(windowIds, isAnimated, finishCallback);
+}
+
+/**
+ * @tc.name: SetAnchorAndScale
+ * @tc.desc: SetAnchorAndScale test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, SetAnchorAndScale, Function | SmallTest | Level2)
+{
+    int32_t x = 1;
+    int32_t y = 2;
+    float scale = 0.1;
+    ASSERT_TRUE(wms != nullptr);
+    wms->SetAnchorAndScale(x, y, scale);
+}
+
+/**
+ * @tc.name: SetAnchorOffset
+ * @tc.desc: SetAnchorOffset test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, SetAnchorOffset, Function | SmallTest | Level2)
+{
+    int32_t deltaX = 1;
+    int32_t deltaY = 2;
+    ASSERT_TRUE(wms != nullptr);
+    wms->SetAnchorOffset(deltaX, deltaY);
+}
+
+/**
+ * @tc.name: OffWindowZoom
+ * @tc.desc: OffWindowZoom test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, OffWindowZoom, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE(wms != nullptr);
+    wms->OffWindowZoom();
+}
+
+/**
+ * @tc.name: UpdateRsTree
+ * @tc.desc: UpdateRsTree test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, UpdateRsTree, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 1;
+    bool isAdd = false;
+    ASSERT_TRUE(wms != nullptr);
+    wms->UpdateRsTree(windowId, isAdd);
+}
+
+/**
+ * @tc.name: OnScreenshot
+ * @tc.desc: OnScreenshot test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, OnScreenshot, Function | SmallTest | Level2)
+{
+    DisplayId displayId = 1;
+    ASSERT_TRUE(wms != nullptr);
+    wms->OnScreenshot(displayId);
+}
+
+/**
+ * @tc.name: HasPrivateWindow
+ * @tc.desc: HasPrivateWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, HasPrivateWindow, Function | SmallTest | Level2)
+{
+    DisplayId displayId = 1;
+    bool hasPrivateWindow = false;
+    ASSERT_TRUE(wms != nullptr);
+    wms->HasPrivateWindow(displayId, hasPrivateWindow);
 }
 }
 }

@@ -134,6 +134,8 @@ void CheckAccessibilityWindowInfo(WindowManager& windowManager, const uint8_t* d
             visibilitynfos);
     windowManager.GetVisibilityWindowInfo(visibilitynfos);
     windowManager.UpdateWindowVisibilityInfo(visibilitynfos);
+    bool enable = false;
+    windowManager.SetGestureNavigaionEnabled(enable);
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)

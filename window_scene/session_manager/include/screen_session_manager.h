@@ -153,8 +153,7 @@ public:
     void NotifyScreenGroupChanged(const std::vector<sptr<ScreenInfo>>& screenInfo, ScreenGroupChangeEvent event);
 
     void NotifyPrivateSessionStateChanged(bool hasPrivate);
-    void SetScreenPrivacyState(ScreenId id, bool hasPrivate);
-    ScreenId GetScreenSessionIdBySceneSessionId(uint32_t persistentId);
+    void SetScreenPrivacyState(bool hasPrivate);
     DMError HasPrivateWindow(DisplayId id, bool& hasPrivateWindow) override;
 
     void OnScreenConnect(const sptr<ScreenInfo> screenInfo);

@@ -383,10 +383,25 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     property_->SetWindowRect(wmRect);
     auto task = [this, wmReason, wmRect, preRect]() mutable {
         RSTransaction::FlushImplicitTransaction();
+        auto node = GetSurfaceNode();
+        if (!node) {
+            return;
+        }
+        if (rotationAnimationCount_ == 0) {
+            lastGravity_ = node->GetStagingProperties().GetFrameGravity();
+            node->SetFrameGravity(Gravity::RESIZE);
+        }
+        rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(600);
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
-        RSNode::OpenImplicitAnimation(protocol, curve);
+        RSNode::OpenImplicitAnimation(protocol, curve, [this, weak = std::weak_ptr<RSSurfaceNode>(node)]() {
+            rotationAnimationCount_--;
+            auto node = weak.lock();
+            if (rotationAnimationCount_ == 0 && node) {
+                node->SetFrameGravity(lastGravity_);
+            }
+        });
         if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_)) {
             NotifySizeChange(wmRect, wmReason);
             lastSizeChangeReason_ = wmReason;

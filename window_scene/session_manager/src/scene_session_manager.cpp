@@ -1410,9 +1410,8 @@ WSError SceneSessionManager::SwitchUser(int32_t oldUserId, int32_t newUserId, st
     WLOGFD("SwitchUser oldUserId : %{public}d newUserId : %{public}d path : %{public}s",
         oldUserId, newUserId, fileDir.c_str());
     auto task = [this, newUserId, &fileDir]() {
-        if (!ScenePersistence::CreateSnapshotDir(fileDir)) {
-            WLOGFD("snapshot dir existed");
-        }
+        ScenePersistence::CreateSnapshotDir(fileDir);
+        ScenePersistence::CreateUpdatedIconDir(fileDir);
         currentUserId_ = newUserId;
         std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto &item : sceneSessionMap_) {
@@ -2292,12 +2291,8 @@ WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
                 listenerController_->NotifySessionUnfocused(sceneSession->GetPersistentId());
             }
         }
-        if (windowFocusChangedFunc_ != nullptr) {
-            windowFocusChangedFunc_(persistentId, isFocused);
-        }
         return WSError::WS_OK;
     };
-
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
@@ -2314,29 +2309,22 @@ WSError SceneSessionManager::UpdateWindowMode(int32_t persistentId, int32_t wind
     return sceneSession->UpdateWindowMode(mode);
 }
 
-void SceneSessionManager::RegisterWindowFocusChanged(const WindowFocusChangedFunc& func)
+void SceneSessionManager::RegisterWindowChanged(const WindowChangedFunc& func)
 {
-    WLOGFE("RegisterWindowFocusChanged in");
-    windowFocusChangedFunc_ = func;
-}
-
-std::map<int32_t, sptr<SceneSession>>& SceneSessionManager::GetSessionMapByScreenId(ScreenId id)
-{
-    return sceneSessionMap_; // only has one screen, return all
+    WLOGFE("RegisterWindowChanged in");
+    WindowChangedFunc_ = func;
 }
 
 void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
 {
-    ScreenId id = ScreenSessionManager::GetInstance().GetScreenSessionIdBySceneSessionId(persistentId);
-    auto sessionMap = GetSessionMapByScreenId(id);
-    int counts = GetSceneSessionPrivacyModeCount(sessionMap);
+    int counts = GetSceneSessionPrivacyModeCount();
     bool hasPrivateWindow = (counts != 0);
-    ScreenSessionManager::GetInstance().SetScreenPrivacyState(id, hasPrivateWindow);
+    ScreenSessionManager::GetInstance().SetScreenPrivacyState(hasPrivateWindow);
 }
 
-int SceneSessionManager::GetSceneSessionPrivacyModeCount(const std::map<int32_t, sptr<SceneSession>>& sessionMap)
+int SceneSessionManager::GetSceneSessionPrivacyModeCount()
 {
-    auto countFunc = [](std::pair<int32_t, sptr<SceneSession>> sessionPair) -> bool {
+    auto countFunc = [](const std::pair<int32_t, sptr<SceneSession>>& sessionPair) -> bool {
         sptr<SceneSession> sceneSession = sessionPair.second;
         bool isForground =  sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
             sceneSession->GetSessionState() == SessionState::STATE_ACTIVE;
@@ -2345,7 +2333,8 @@ int SceneSessionManager::GetSceneSessionPrivacyModeCount(const std::map<int32_t,
         bool IsSystemWindowVisible = sceneSession->GetSessionInfo().isSystem_ && sceneSession->IsVisible();
         return (isForground || IsSystemWindowVisible) && isPrivate;
     };
-    return std::count_if(sessionMap.begin(), sessionMap.end(), countFunc);
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    return std::count_if(sceneSessionMap_.begin(), sceneSessionMap_.end(), countFunc);
 }
 
 void SceneSessionManager::RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession)
@@ -2672,8 +2661,10 @@ WSError SceneSessionManager::GetSessionInfo(const std::string& deviceId,
             WLOGFD("GetSessionInfo sessionId:%{public}d bundleName:%{public}s", persistentId,
                 sceneSessionInfo.bundleName_.c_str());
             return SceneSessionConverter::ConvertToMissionInfo(iter->second, sessionInfo);
+        } else {
+            WLOGFW("sessionId: %{public}d not found", persistentId);
+            return WSError::WS_ERROR_INVALID_PARAM;
         }
-        return WSError::WS_OK;
     };
     return taskScheduler_->PostSyncTask(task);
 }
@@ -3304,6 +3295,9 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
         auto scnSession = weakSceneSession.promote();
         if (FillWindowInfo(infos, scnSession)) {
             SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(infos, type);
+        }
+        if (WindowChangedFunc_ != nullptr && scnSession != nullptr) {
+            WindowChangedFunc_(scnSession->GetPersistentId(), type);
         }
     };
     taskScheduler_->PostAsyncTask(task);

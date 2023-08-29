@@ -33,6 +33,7 @@
 #include <want.h>
 
 #include "ability_start_setting.h"
+#include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "session_helper.h"
 
@@ -45,7 +46,7 @@ std::atomic<int32_t> g_persistentId = INVALID_SESSION_ID;
 std::set<int32_t> g_persistentIdSet;
 constexpr float INNER_BORDER_VP = 5.0f;
 constexpr float OUTSIDE_BORDER_VP = 4.0f;
-constexpr float INNER_ANGLE_VP = 4.0f;
+constexpr float INNER_ANGLE_VP = 16.0f;
 } // namespace
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
@@ -251,10 +252,6 @@ WSError Session::SetFocusable(bool isFocusable)
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    if (isFocusable == property_->GetFocusable()) {
-        WLOGFD("Session focusable do not change: [%{public}d]", isFocusable);
-        return WSError::WS_DO_NOTHING;
-    }
     UpdateSessionFocusable(isFocusable);
     return WSError::WS_OK;
 }
@@ -422,7 +419,7 @@ WSRectF Session::UpdateLeftRightArea(const WSRectF& rect, MMI::WindowArea area)
     const float horizontalBorderLength = outsideBorder + innerBorder;
     const size_t innerAngleCount = 2;
     WSRectF lrRect;
-    lrRect.posY_ = rect.posY_ + horizontalBorderLength;
+    lrRect.posY_ = rect.posY_ + verticalBorderLength;
     lrRect.width_ = horizontalBorderLength;
     lrRect.height_ = rect.height_ - verticalBorderLength * innerAngleCount;
     if (area == MMI::WindowArea::FOCUS_ON_LEFT) {
@@ -464,11 +461,11 @@ WSRectF Session::UpdateHotRect(const WSRect& rect)
 {
     WSRectF newRect;
     const float outsideBorder = OUTSIDE_BORDER_VP * vpr_;
-    const size_t ioutsideBorderCount = 2;
+    const size_t outsideBorderCount = 2;
     newRect.posX_ = rect.posX_ - outsideBorder;
     newRect.posY_ = rect.posY_ - outsideBorder;
-    newRect.width_ = rect.width_ + outsideBorder * ioutsideBorderCount;
-    newRect.height_ = rect.height_ + outsideBorder * ioutsideBorderCount;
+    newRect.width_ = rect.width_ + outsideBorder * outsideBorderCount;
+    newRect.height_ = rect.height_ + outsideBorder * outsideBorderCount;
     return newRect;
 }
 
@@ -661,7 +658,7 @@ WSError Session::Disconnect()
     SessionState state = GetSessionState();
     WLOGFI("Disconnect session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
-    if (state == SessionState::STATE_ACTIVE) {
+    if (state == SessionState::STATE_ACTIVE && WindowHelper::IsMainWindow(GetWindowType())) {
         snapshot_ = Snapshot();
         if (scenePersistence_ && snapshot_) {
             scenePersistence_->SaveSnapshot(snapshot_);
