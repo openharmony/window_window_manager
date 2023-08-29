@@ -573,7 +573,7 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property)
     WLOGFI("Foreground session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
     if (state != SessionState::STATE_CONNECT && state != SessionState::STATE_BACKGROUND) {
-        WLOGFE("state invalid!");
+        WLOGFE("Foreground state invalid! state:%{public}u", state);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
 
@@ -635,7 +635,7 @@ WSError Session::Background()
     WLOGFI("Background session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
     if (state != SessionState::STATE_INACTIVE) {
-        WLOGFE("state invalid!");
+        WLOGFE("Background state invalid! state:%{public}u", state);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
@@ -1100,7 +1100,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         return WSError::WS_ERROR_NULLPTR;
     }
     if (WSError ret = windowEventChannel_->TransferPointerEvent(pointerEvent); ret != WSError::WS_OK) {
-        WLOGFE("TransferPointer failed");
+        WLOGFE("TransferPointer failed, ret:%{public}d", ret);
         return ret;
     }
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
@@ -1162,7 +1162,7 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
     }
     WLOGD("TransferKeyEvent, id: %{public}d", persistentId_);
     if (WSError ret = windowEventChannel_->TransferKeyEvent(keyEvent); ret != WSError::WS_OK) {
-        WLOGFE("TransferKeyEvent failed");
+        WLOGFE("TransferKeyEvent failed, ret:%{public}d", ret);
         return ret;
     }
     DelayedSingleton<ANRManager>::GetInstance()->AddTimer(keyEvent->GetId(), persistentId_);

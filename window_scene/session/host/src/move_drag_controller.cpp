@@ -611,7 +611,7 @@ void MoveDragController::HandleMouseStyle(const std::shared_ptr<MMI::PointerEven
 
     MMI::PointerEvent::PointerItem pointerItem;
     if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
-        WLOGFE("Get pointeritem failed");
+        WLOGFE("Get pointeritem failed, PointerId:%{public}d", pointerEvent->GetPointerId());
         pointerEvent->MarkProcessed();
         return;
     }

@@ -732,7 +732,7 @@ WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& scene
         parentPersistentId != INVALID_SESSION_ID) {
         auto parentSession = GetSceneSession(parentPersistentId);
         if (parentSession == nullptr) {
-            WLOGFE("Parent session is nullptr");
+            WLOGFE("Parent session is nullptr, parentPersistentId:%{public}d", parentPersistentId);
             return WSError::WS_ERROR_NULLPTR;
         }
         parentSession->BindDialogTarget(sceneSession);
@@ -931,7 +931,7 @@ WSError SceneSessionManager::PrepareTerminate(int32_t persistentId, bool& isPrep
     auto task = [this, persistentId, &isPrepareTerminate]() {
         if (!isPrepareTerminateEnable_) { // not support prepareTerminate
             isPrepareTerminate = false;
-            WLOGE("not support prepareTerminate");
+            WLOGE("not support prepareTerminate, persistentId%{public}d", persistentId);
             return WSError::WS_OK;
         }
         auto scnSession = GetSceneSession(persistentId);
@@ -942,7 +942,7 @@ WSError SceneSessionManager::PrepareTerminate(int32_t persistentId, bool& isPrep
         }
         auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
         if (scnSessionInfo == nullptr) {
-            WLOGFE("scnSessionInfo is nullptr");
+            WLOGFE("scnSessionInfo is nullptr, persistentId:%{public}d", persistentId);
             isPrepareTerminate = false;
             return WSError::WS_ERROR_NULLPTR;
         }
@@ -2252,7 +2252,7 @@ WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
         // notify session and client
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
-            WLOGFE("could not find window");
+            WLOGFE("could not find window, persistentId:%{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
         // focusId change
@@ -2298,7 +2298,7 @@ WSError SceneSessionManager::UpdateWindowMode(int32_t persistentId, int32_t wind
     WLOGFD("update window mode, id: %{public}d, mode: %{public}d", persistentId, windowMode);
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        WLOGFE("could not find window");
+        WLOGFE("could not find window, persistentId:%{public}d", persistentId);
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     WindowMode mode = static_cast<WindowMode>(windowMode);
@@ -2348,7 +2348,7 @@ void SceneSessionManager::RegisterSessionStateChangeNotifyManagerFunc(sptr<Scene
 
 void SceneSessionManager::OnSessionStateChange(int32_t persistentId, const SessionState& state)
 {
-    WLOGFD("Session state change, id: %{public}d", persistentId);
+    WLOGFD("Session state change, id: %{public}d, state:%{public}u", persistentId, state);
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         WLOGFD("session is nullptr");
@@ -3031,11 +3031,11 @@ WSError SceneSessionManager::BindDialogTarget(uint64_t persistentId, sptr<IRemot
     }
     auto scnSession = GetSceneSession(static_cast<int32_t>(persistentId));
     if (scnSession == nullptr) {
-        WLOGFE("Session is nullptr");
+        WLOGFE("Session is nullptr, persistentId:%{public}" PRIu64, persistentId);
         return WSError::WS_ERROR_NULLPTR;
     }
     if (scnSession->GetWindowType() != WindowType::WINDOW_TYPE_DIALOG) {
-        WLOGFE("Session is not dialog window");
+        WLOGFE("Session is not dialog window, window type:%{public}u", scnSession->GetWindowType());
         return WSError::WS_OK;
     }
     scnSession->dialogTargetToken_ = targetToken;
