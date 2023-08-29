@@ -636,6 +636,33 @@ HWTEST_F(WindowManagerTest, NotifyGestureNavigationEnabledResult, Function | Sma
     WindowManager::GetInstance().NotifyGestureNavigationEnabledResult(enable);
     ASSERT_EQ(0, ret);
 }
+
+/**
+ * @tc.name: DumpSessionAll
+ * @tc.desc: DumpSessionAll
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, DumpSessionAll, Function | SmallTest | Level2)
+{
+    std::vector<std::string> infos;
+    infos.push_back("DumpSessionWithId");
+    WMError res = WindowManager::GetInstance().DumpSessionAll(infos);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: DumpSessionWithId
+ * @tc.desc: DumpSessionWithId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, DumpSessionWithId, Function | SmallTest | Level2)
+{
+    std::vector<std::string> infos;
+    infos.push_back("DumpSessionWithId");
+    int32_t persistentId = 0;
+    WMError res = WindowManager::GetInstance().DumpSessionWithId(persistentId, infos);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
