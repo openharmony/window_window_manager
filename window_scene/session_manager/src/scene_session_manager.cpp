@@ -466,12 +466,14 @@ void SceneSessionManager::ConfigKeyboardAnimation(const WindowSceneConfig::Confi
     WindowSceneConfig::ConfigItem item = animationConfig["timing"];
     if (item.IsMap() && item.mapValue_->count("curve")) {
         appWindowSceneConfig_.keyboardAnimation_.curveType_ = CreateCurve(item["curve"]);
+        systemConfig_.keyboardAnimationConfig_.curveType_ = CreateCurve(item["curve"]);
     }
     item = animationConfig["timing"]["durationIn"];
     if (item.IsInts()) {
         auto numbers = *item.intsValue_;
         if (numbers.size() == 1) { // durationIn
             appWindowSceneConfig_.keyboardAnimation_.durationIn_ = static_cast<uint32_t>(numbers[0]);
+            systemConfig_.keyboardAnimationConfig_.durationIn_ = static_cast<uint32_t>(numbers[0]);
         }
     }
     item = animationConfig["timing"]["durationOut"];
@@ -479,6 +481,7 @@ void SceneSessionManager::ConfigKeyboardAnimation(const WindowSceneConfig::Confi
         auto numbers = *item.intsValue_;
         if (numbers.size() == 1) { // durationOut
             appWindowSceneConfig_.keyboardAnimation_.durationOut_ = static_cast<uint32_t>(numbers[0]);
+            systemConfig_.keyboardAnimationConfig_.durationOut_ = static_cast<uint32_t>(numbers[0]);
         }
     }
 }
