@@ -68,6 +68,7 @@ public:
     sptr<WindowManagerService> wms = new WindowManagerService();
     sptr<WindowManagerServiceHandler> wmsHandler_ = new WindowManagerServiceHandler();
     sptr<IDisplayChangeListener> listener = new DisplayChangeListener();
+    sptr<IWindowInfoQueriedListener> windowInfoQueriedListener = new WindowInfoQueriedListener();
 };
 
 void WindowManagerServiceTest::SetUpTestCase()
@@ -852,16 +853,77 @@ HWTEST_F(WindowManagerServiceTest, OnScreenshot, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: HasPrivateWindow
- * @tc.desc: HasPrivateWindow test
+ * @tc.name: HasPrivateWindow01
+ * @tc.desc: HasPrivateWindow01 test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, HasPrivateWindow, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerServiceTest, HasPrivateWindow01, Function | SmallTest | Level2)
 {
     DisplayId displayId = 1;
     bool hasPrivateWindow = false;
     ASSERT_TRUE(wms != nullptr);
     wms->HasPrivateWindow(displayId, hasPrivateWindow);
+}
+
+/**
+ * @tc.name: SetGestureNavigaionEnabled
+ * @tc.desc: SetGestureNavigaionEnabled test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, SetGestureNavigaionEnabled, Function | SmallTest | Level2)
+{
+    bool enable = false;
+    ASSERT_TRUE(wms != nullptr);
+    WMError res = wms->SetGestureNavigaionEnabled(enable);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: HasPrivateWindow02
+ * @tc.desc: HasPrivateWindow02 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, HasPrivateWindow02, Function | SmallTest | Level2)
+{
+    DisplayId displayId = 1;
+    bool hasPrivateWindow = false;
+    ASSERT_TRUE(windowInfoQueriedListener != nullptr);
+    windowInfoQueriedListener->HasPrivateWindow(displayId, hasPrivateWindow);
+}
+
+/**
+ * @tc.name: SetMaximizeMode
+ * @tc.desc: SetMaximizeMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, SetMaximizeMode, Function | SmallTest | Level2)
+{
+    MaximizeMode maximizeMode = MaximizeMode::MODE_AVOID_SYSTEM_BAR;
+    ASSERT_TRUE(wms != nullptr);
+    wms->SetMaximizeMode(maximizeMode);
+}
+
+/**
+ * @tc.name: GetMaximizeMode
+ * @tc.desc: GetMaximizeMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, GetMaximizeMode, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE(wms != nullptr);
+    ASSERT_EQ(MaximizeMode::MODE_RECOVER, wms->GetMaximizeMode());
+}
+
+/**
+ * @tc.name: GetFocusWindowInfo
+ * @tc.desc: GetFocusWindowInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, GetFocusWindowInfo, Function | SmallTest | Level2)
+{
+    FocusChangeInfo focusInfo;
+    ASSERT_TRUE(wms != nullptr);
+    wms->GetFocusWindowInfo(focusInfo);
 }
 }
 }
