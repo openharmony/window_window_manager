@@ -2399,16 +2399,19 @@ WSError SceneSessionManager::SetWindowFlags(const sptr<SceneSession>& sceneSessi
 void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult()
 {
     bool currentWaterMarkShowState = false;
-    for (auto iter: sceneSessionMap_) {
-        auto session = iter.second;
-        if (!session || !session->GetSessionProperty()) {
-            continue;
-        }
-        bool hasWaterMark = session->GetSessionProperty()->GetWindowFlags()
-            & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
-        if (hasWaterMark && session->GetVisible()) {
-            currentWaterMarkShowState = true;
-            break;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& iter: sceneSessionMap_) {
+            auto& session = iter.second;
+            if (!session || !session->GetSessionProperty()) {
+                continue;
+            }
+            bool hasWaterMark = session->GetSessionProperty()->GetWindowFlags()
+                & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
+            if (hasWaterMark && session->GetVisible()) {
+                currentWaterMarkShowState = true;
+                break;
+            }
         }
     }
     if (lastWaterMarkShowState_ ^ currentWaterMarkShowState) {
