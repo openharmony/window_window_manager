@@ -984,10 +984,10 @@ HWTEST_F(SceneSessionManagerTest, QueryAbilityInfoFromBMS, Function | SmallTest 
     sessionInfo_.moduleName_ = "ModuleName";
     AppExecFwk::AbilityInfo abilityInfo_;
     int32_t collaboratorType_ = CollaboratorType::RESERVE_TYPE;
-    ssm_->QueryAbilityInfoFromBMS(uId_, sessionInfo_, abilityInfo_);
+    ssm_->QueryAbilityInfoFromBMS(uId_, sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_);
     EXPECT_EQ(sessionInfo_.want, nullptr);
     ssm_->Init();
-    ssm_->QueryAbilityInfoFromBMS(uId_, sessionInfo_, abilityInfo_);
+    ssm_->QueryAbilityInfoFromBMS(uId_, sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_);
     ssm_->NotifyStartAbility(collaboratorType_, sessionInfo_);
     sessionInfo_.want = new AAFwk::Want();
     collaboratorType_ = CollaboratorType::OTHERS_TYPE;
