@@ -45,7 +45,7 @@ std::atomic<int32_t> g_persistentId = INVALID_SESSION_ID;
 std::set<int32_t> g_persistentIdSet;
 constexpr float INNER_BORDER_VP = 5.0f;
 constexpr float OUTSIDE_BORDER_VP = 4.0f;
-constexpr float INNER_ANGLE_VP = 4.0f;
+constexpr float INNER_ANGLE_VP = 16.0f;
 } // namespace
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
