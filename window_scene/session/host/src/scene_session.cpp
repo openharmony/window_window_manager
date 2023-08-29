@@ -87,12 +87,6 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     }
 }
 
-void SceneSession::Destroy()
-{
-    WLOGFI("SceneSession Destroy id: %{public}d", GetPersistentId());
-    sessionChangeCallback_ = nullptr;
-}
-
 WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
 {
@@ -173,6 +167,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
 void SceneSession::RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>&
     sessionChangeCallback)
 {
+    std::lock_guard<std::mutex> guard(sessionChangeCbMutex_);
     sessionChangeCallback_ = sessionChangeCallback;
 }
 
@@ -740,6 +735,7 @@ void SceneSession::ClearEnterWindow()
 
 void SceneSession::NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason)
 {
+    std::lock_guard<std::mutex> guard(sessionChangeCbMutex_);
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onRectChange_) {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::NotifySessionRectChange");
         sessionChangeCallback_->onRectChange_(rect, reason);
