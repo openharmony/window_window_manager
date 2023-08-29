@@ -657,5 +657,5 @@ HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
     ASSERT_TRUE(Utils::RectEqualTo(window, expect2));
 }
 }
-}// namespace Rosen
-}// namespace OHOS
+} // namespace Rosen
+} // namespace OHOS
