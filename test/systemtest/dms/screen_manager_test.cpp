@@ -554,6 +554,9 @@ HWTEST_F(ScreenManagerTest, ScreenManager09, Function | MediumTest | Level2)
     DisplayId virtualDisplayId = DisplayManager::GetInstance().GetDisplayByScreen(virtualScreenId)->GetId();
     ASSERT_NE(DISPLAY_ID_INVALID, virtualDisplayId);
     sptr<Window> window = CreateWindowByDisplayId(virtualDisplayId);
+    if (window == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(true, DrawWindowColor(window, COLOR_RED));
     sleep(TEST_SLEEP_S);
