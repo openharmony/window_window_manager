@@ -270,6 +270,42 @@ void DisplayManagerAgentProxy::NotifyPrivateWindowStateChanged(bool hasPrivate)
         WLOGFE("SendRequest failed");
     }
 }
+
+void DisplayManagerAgentProxy::NotifyFoldStatusChanged(FoldStatus foldStatus)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(foldStatus))) {
+        WLOGFE("Write foldStatus failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_ON_FOLD_STATUS_CHANGED, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
+void DisplayManagerAgentProxy::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(displayMode))) {
+        WLOGFE("Write displayMode failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_ON_DISPLAY_MODE_CHANGED, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
 
