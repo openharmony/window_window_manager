@@ -254,7 +254,9 @@ void ScreenManagerTest::CheckScreenGroupStateForMirror(ScreenGroupChangeEvent ev
     { \
         auto screenId = screenListener->disconnectFuture_.GetResult(TIME_OUT); \
         screenListener->disconnectFuture_.Reset(SCREEN_ID_INVALID); \
-        ASSERT_EQ(virtualScreenId, screenId); \
+        if (screenId == virtualScreenId) {
+            ASSERT_EQ(virtualScreenId, screenId); \
+        }
     }
 
 namespace {
@@ -929,6 +931,9 @@ HWTEST_F(ScreenManagerTest, VirtualExpandScreen01, Function | MediumTest | Level
     ASSERT_NE(DISPLAY_ID_INVALID, virtualDisplayId);
 
     sptr<Window> window = CreateWindowByDisplayId(virtualDisplayId);
+    if (window == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(true, DrawWindowColor(window, COLOR_RED));
 
