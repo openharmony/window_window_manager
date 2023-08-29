@@ -281,8 +281,6 @@ HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
 
     if (Utils::RectEqualTo(sysWin, Utils::displayRect_)) {
         ASSERT_TRUE(Utils::RectEqualTo(sysWin, Utils::displayRect_));
-    } else {
-        ASSERT_FALSE(Utils::RectEqualTo(sysWin, Utils::displayRect_));
     }
     if (Utils::RectEqualTo(sysWin, Utils::displayRect_)) {
         ASSERT_TRUE(Utils::RectEqualTo(sysWin, Utils::displayRect_));
@@ -292,8 +290,6 @@ HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
 
     if (WMError::WM_OK == naviBar->Show()) {
         ASSERT_EQ(WMError::WM_OK, naviBar->Show());
-    } else {
-        ASSERT_NE(WMError::WM_OK, naviBar->Show());
     }
    
     if (Utils::RectEqualTo(sysWin, Utils::displayRect_)) {
@@ -302,11 +298,10 @@ HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
    
     if (WMError::WM_OK == statBar->Hide()) {
         ASSERT_EQ(WMError::WM_OK, statBar->Hide());
-    } 
+    }
     if (Utils::RectEqualTo(sysWin, Utils::displayRect_)) {
         ASSERT_TRUE(Utils::RectEqualTo(sysWin, Utils::displayRect_));
     }
-   
 }
 
 /**
@@ -662,5 +657,5 @@ HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
     ASSERT_TRUE(Utils::RectEqualTo(window, expect2));
 }
 }
-} // namespace Rosen
-} // namespace OHOS
+}// namespace Rosen
+}// namespace OHOS
