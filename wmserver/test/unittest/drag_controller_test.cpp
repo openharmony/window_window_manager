@@ -478,7 +478,7 @@ HWTEST_F(DragControllerTest, UpdateDragInfo02, Function | SmallTest | Level2)
     sptr<DragController> dragcontroller = new DragController(windowRoot_);
     dragcontroller->UpdateDragInfo(windowId);
     sptr<WindowNode> dragNode = windowRoot_->GetWindowNode(windowId);
-    ASSERT_EQ(dragNode, nullptr); 
+    ASSERT_EQ(dragNode, nullptr);
 }
 
 /**
@@ -492,7 +492,7 @@ HWTEST_F(DragControllerTest, StartDrag01, Function | SmallTest | Level2)
     sptr<DragController> dragcontroller = new DragController(windowRoot_);
     dragcontroller->StartDrag(windowId);
     sptr<WindowNode> dragNode = windowRoot_->GetWindowNode(windowId);
-    ASSERT_EQ(dragNode, nullptr); 
+    ASSERT_EQ(dragNode, nullptr);
 }
 
 /**
@@ -506,7 +506,7 @@ HWTEST_F(DragControllerTest, FinishDrag01, Function | SmallTest | Level2)
     sptr<DragController> dragcontroller = new DragController(windowRoot_);
     dragcontroller->FinishDrag(windowId);
     sptr<WindowNode> dragNode = windowRoot_->GetWindowNode(windowId);
-    ASSERT_EQ(dragNode, nullptr); 
+    ASSERT_EQ(dragNode, nullptr);
 }
 
 /**
@@ -521,7 +521,7 @@ HWTEST_F(DragControllerTest, GetHitWindow01, Function | SmallTest | Level2)
     point.x = 1;
     point.y = 1;
     sptr<DragController> dragcontroller = new DragController(windowRoot_);
-    ASSERT_EQ(nullptr, dragcontroller->GetHitWindow(id, point)); 
+    ASSERT_EQ(nullptr, dragcontroller->GetHitWindow(id, point));
 }
 
 /**
@@ -536,7 +536,7 @@ HWTEST_F(DragControllerTest, GetHitWindow02, Function | SmallTest | Level2)
     point.x = 1;
     point.y = 2;
     sptr<DragController> dragcontroller = new DragController(windowRoot_);
-    ASSERT_EQ(nullptr, dragcontroller->GetHitWindow(id, point)); 
+    ASSERT_EQ(nullptr, dragcontroller->GetHitWindow(id, point));
 }
 
 /**
@@ -553,7 +553,7 @@ HWTEST_F(DragControllerTest, GetHitWindow03, Function | SmallTest | Level2)
     sptr<DragController> dragcontroller = new DragController(windowRoot_);
     sptr<WindowNodeContainer> container = windowRoot_->GetOrCreateWindowNodeContainer(id);
     ASSERT_EQ(nullptr, container);
-    ASSERT_EQ(nullptr, dragcontroller->GetHitWindow(id, point)); 
+    ASSERT_EQ(nullptr, dragcontroller->GetHitWindow(id, point));
 }
 
 /**
@@ -565,7 +565,7 @@ HWTEST_F(DragControllerTest, Init02, Function | SmallTest | Level2)
 {
     ASSERT_TRUE(moveDragController_);
     auto ret = moveDragController_->Init();
-    ASSERT_EQ(true, ret); 
+    ASSERT_EQ(true, ret);
 }
 }
 } // namespace Rosen
