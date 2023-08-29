@@ -21,6 +21,7 @@
 #include "window_helper.h"
 #include "window_layout_policy.h"
 #include "window_layout_policy_cascade.h"
+#include "window_layout_policy_tile.h"
 #include "window_node_container.h"
 
 using namespace testing;
@@ -53,12 +54,14 @@ public:
     static sptr<DisplayInfo> defaultDisplayInfo_;
     static sptr<DisplayGroupController> displayGroupController_;
     static sptr<WindowLayoutPolicyCascade> layoutPolicy_;
+    static sptr<WindowLayoutPolicyTile> layoutPolicyTile_;
 };
 
 sptr<WindowNodeContainer> WindowLayoutPolicyTest::container_ = nullptr;
 DisplayGroupInfo& WindowLayoutPolicyTest::displayGroupInfo_ = DisplayGroupInfo::GetInstance();
 sptr<DisplayGroupController> WindowLayoutPolicyTest::displayGroupController_ = nullptr;
 sptr<WindowLayoutPolicyCascade> WindowLayoutPolicyTest::layoutPolicy_ = nullptr;
+sptr<WindowLayoutPolicyTile> WindowLayoutPolicyTest::layoutPolicyTile_ = nullptr;
 sptr<DisplayInfo> WindowLayoutPolicyTest::defaultDisplayInfo_ = nullptr;
 WindowInfo WindowLayoutPolicyTest::windowInfo_ = {
     .winRect_ = { 0, 0, 0, 0 },
@@ -91,6 +94,7 @@ void WindowLayoutPolicyTest::SetUpTestCase()
     container_ = new WindowNodeContainer(defaultDisplayInfo_, display->GetScreenId());
     displayGroupController_ = container_->displayGroupController_;
     layoutPolicy_ = static_cast<WindowLayoutPolicyCascade*>(container_->GetLayoutPolicy().GetRefPtr());
+    layoutPolicyTile_ = static_cast<WindowLayoutPolicyTile*>(container_->GetLayoutPolicy().GetRefPtr());
 }
 
 void WindowLayoutPolicyTest::TearDownTestCase()
@@ -99,6 +103,7 @@ void WindowLayoutPolicyTest::TearDownTestCase()
     defaultDisplayInfo_ = nullptr;
     displayGroupController_ = nullptr;
     layoutPolicy_ = nullptr;
+    layoutPolicyTile_ = nullptr;
 }
 
 void WindowLayoutPolicyTest::SetUp()
@@ -1301,6 +1306,41 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateSurfaceBounds, Function | SmallTest | Lev
 
     node->SetWindowSizeChangeReason(WindowSizeChangeReason::UNDEFINED);
     layoutPolicy_->UpdateSurfaceBounds(node, winRect, preRect);
+}
+
+/**
+ * @tc.name: PerformWindowLayout
+ * @tc.desc: test WindowLayoutPolicyTile PerformWindowLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, PerformWindowLayout, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    ASSERT_TRUE(node != nullptr);
+    WindowUpdateType updateType = WindowUpdateType::WINDOW_UPDATE_ACTIVE;
+    layoutPolicyTile_->PerformWindowLayout(node, updateType);
+}
+
+/**
+ * @tc.name: UpdateLayoutRect
+ * @tc.desc: test WindowLayoutPolicyTile UpdateLayoutRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, UpdateLayoutRect, Function | SmallTest | Level2)
+{
+    sptr<WindowProperty> property = new WindowProperty();
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property->SetWindowFlags(1);
+    sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    ASSERT_TRUE(node != nullptr);
+    Rect winRect = { 200, 200, 50, 20 };  // rect : 200, 200, 50, 50
+    node->SetWindowRect(winRect);
+    node->SetRequestRect(winRect);
+    node->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
+    node->SetCallingWindow(1);
+    layoutPolicyTile_->UpdateLayoutRect(node);
 }
 }
 }
