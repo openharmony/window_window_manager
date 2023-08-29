@@ -196,10 +196,10 @@ ohos_unittest("ws_scene_session_manager_test") {
     "ability_base:configuration",
     "ability_base:session_info",
     "ability_runtime:ability_context_native",
-    "c_utils:utils",
-    "hilog:libhilog",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "hilog:libhilog",
   ]
 }
 
