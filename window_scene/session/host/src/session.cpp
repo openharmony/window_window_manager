@@ -33,6 +33,7 @@
 #include <want.h>
 
 #include "ability_start_setting.h"
+#include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "session_helper.h"
 
@@ -657,7 +658,7 @@ WSError Session::Disconnect()
     SessionState state = GetSessionState();
     WLOGFI("Disconnect session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
-    if (state == SessionState::STATE_ACTIVE) {
+    if (state == SessionState::STATE_ACTIVE && WindowHelper::IsMainWindow(GetWindowType())) {
         snapshot_ = Snapshot();
         if (scenePersistence_ && snapshot_) {
             scenePersistence_->SaveSnapshot(snapshot_);
