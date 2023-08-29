@@ -298,7 +298,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
    
     if (Utils::RectEqualTo(sysWin, Utils::displayRect_)) {
         ASSERT_TRUE(Utils::RectEqualTo(sysWin, Utils::displayRect_));
-    } 
+    }
    
     ASSERT_EQ(WMError::WM_OK, statBar->Hide());
     ASSERT_TRUE(Utils::RectEqualTo(sysWin, Utils::displayRect_));

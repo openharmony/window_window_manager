@@ -235,7 +235,7 @@ HWTEST_F(WindowDragTest, DragEnd, Function | MediumTest | Level3) {
     const sptr<Window> firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     if (firstWindow == nullptr) {
         return;
-    } 
+    }
     ASSERT_NE(nullptr, firstWindow);
     firstWindow->RegisterDragListener(firstWindowDragListener_);
     firstWindow->SetTurnScreenOn(true);

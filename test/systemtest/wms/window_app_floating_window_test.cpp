@@ -172,7 +172,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow02, Function | MediumTest
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
 
-    if(scene->GoForeground()==WMError::WM_OK) {
+    if (scene->GoForeground() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     } else {
         ASSERT_NE(WMError::WM_OK, scene->GoForeground());
@@ -276,7 +276,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow05, Function | MediumTest
     }
     ASSERT_NE(nullptr, fltWin);
 
-    if(scene->GoForeground()==WMError::WM_OK) {
+    if (scene->GoForeground() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
         ASSERT_EQ(WMError::WM_OK, fltWin->Show());
         ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
