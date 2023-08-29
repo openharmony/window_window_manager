@@ -49,6 +49,7 @@ public:
         sptr<ScreenGroup>, sptr<ScreenGroupChangeListener>);
     void CheckScreenGroupStateForMirror(ScreenGroupChangeEvent event, std::vector<ScreenId> mirrorIds,
         sptr<VirtualScreenGroupChangeListenerFuture> virtualScreenGroupChangeListener);
+    void CheckStateDisplay(DisplayId displayId, ScreenId virtualScreenId);
     static sptr<Display> defaultDisplay_;
     static DisplayId defaultDisplayId_;
     static ScreenId defaultScreenId_;
@@ -176,6 +177,35 @@ sptr<Window> ScreenManagerTest::CreateWindowByDisplayId(DisplayId displayId)
     option->SetWindowName("VirtualWindow01");
     sptr<Window> window = Window::Create(option->GetWindowName(), option);
     return window;
+}
+
+void ScreenManagerTest::CheckStateDisplay(DisplayId virtualDisplayId,ScreenId virtualScreenId)
+{
+    const std::string rsCmd = "snapshot_display -i " + std::to_string(virtualDisplayId);
+    (void)system(rsCmd.c_str());
+
+    auto screen = ScreenManager::GetInstance().GetScreenById(virtualScreenId);
+    ASSERT_TRUE(screen);
+    auto display = DisplayManager::GetInstance().GetDisplayByScreen(virtualScreenId);
+    ASSERT_TRUE(display);
+
+    uint32_t orientation = static_cast<uint32_t>(Orientation::VERTICAL);
+    uint32_t end = static_cast<uint32_t>(Orientation::REVERSE_HORIZONTAL);
+    sptr<ScreenChangeListener> screenListener = new ScreenChangeListener();
+    ASSERT_TRUE(screenListener);
+
+    for (; orientation <= end; ++orientation) {
+        screen->SetOrientation(static_cast<Orientation>(orientation));
+        screenListener->changeFuture_.GetResult(TIME_OUT);
+        usleep(1E6);
+        ASSERT_EQ(static_cast<uint32_t>(screen->GetOrientation()), orientation);
+        ASSERT_EQ(static_cast<uint32_t>(display->GetOrientation()), orientation);
+        (void)system(rsCmd.c_str());
+        sleep(TEST_SLEEP_S);
+    }
+    screen->SetOrientation(Orientation::UNSPECIFIED);
+    ASSERT_EQ(static_cast<uint32_t>(screen->GetOrientation()), static_cast<uint32_t>(Orientation::UNSPECIFIED));
+    ASSERT_EQ(static_cast<uint32_t>(display->GetOrientation()), static_cast<uint32_t>(Orientation::UNSPECIFIED));
 }
 
 #define CHECK_TEST_INIT_SCREEN_STATE \
@@ -937,30 +967,7 @@ HWTEST_F(ScreenManagerTest, VirtualExpandScreen01, Function | MediumTest | Level
     window->Show();
     sleep(TEST_SLEEP_S_LONG);
 
-    const std::string rsCmd = "snapshot_display -i " + std::to_string(virtualDisplayId);
-    (void)system(rsCmd.c_str());
-
-    auto screen = ScreenManager::GetInstance().GetScreenById(virtualScreenId);
-    ASSERT_TRUE(screen);
-    auto display = DisplayManager::GetInstance().GetDisplayByScreen(virtualScreenId);
-    ASSERT_TRUE(display);
-
-    uint32_t orientation = static_cast<uint32_t>(Orientation::VERTICAL);
-    uint32_t end = static_cast<uint32_t>(Orientation::REVERSE_HORIZONTAL);
-    ASSERT_TRUE(screenListener);
-
-    for (; orientation <= end; ++orientation) {
-        screen->SetOrientation(static_cast<Orientation>(orientation));
-        screenListener->changeFuture_.GetResult(TIME_OUT);
-        usleep(1E6);
-        ASSERT_EQ(static_cast<uint32_t>(screen->GetOrientation()), orientation);
-        ASSERT_EQ(static_cast<uint32_t>(display->GetOrientation()), orientation);
-        (void)system(rsCmd.c_str());
-        sleep(TEST_SLEEP_S);
-    }
-    screen->SetOrientation(Orientation::UNSPECIFIED);
-    ASSERT_EQ(static_cast<uint32_t>(screen->GetOrientation()), static_cast<uint32_t>(Orientation::UNSPECIFIED));
-    ASSERT_EQ(static_cast<uint32_t>(display->GetOrientation()), static_cast<uint32_t>(Orientation::UNSPECIFIED));
+    CheckStateDisplay(virtualDisplayId,virtualScreenId);
 
     window->Destroy();
     DMError res = ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
