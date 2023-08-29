@@ -15,185 +15,114 @@
 
 // gtest
 #include <gtest/gtest.h>
+#include "avoid_area_controller.h"
+#include "window_manager.h"
 #include "window_test_utils.h"
-
+#include "wm_common.h"
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
 using Utils = WindowTestUtils;
-class WindowMultiAbilityTest : public testing::Test {
+
+class WindowSplitImmersiveTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
+    void IsShowTopBar(const sptr<Window>& top, bool isShow);
+    void HideAndUnregister(const sptr<Window>& fullWindow, const sptr<Window>& priWindow, const sptr<Window>& top);
+
+    std::vector<sptr<Window>> activeWindows_;
+    Utils::TestWindowInfo fullInfo_;
+    Utils::TestWindowInfo splitInfo_;
+
+private:
+    static constexpr uint32_t SPLIT_TEST_SLEEP_S = 1; // split test sleep time
 };
 
-void WindowMultiAbilityTest::SetUpTestCase()
+void WindowSplitImmersiveTest::SetUpTestCase()
 {
 }
 
-void WindowMultiAbilityTest::TearDownTestCase()
+void WindowSplitImmersiveTest::TearDownTestCase()
 {
 }
 
-void WindowMultiAbilityTest::SetUp()
+void WindowSplitImmersiveTest::SetUp()
 {
+    fullInfo_ = {
+        .name = "fullscreen.1",
+        .rect = Utils::customAppRect_,
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
+    };
+
+    splitInfo_ = {
+        .name = "primary.1",
+        .rect = Utils::customAppRect_,
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
+    };
+
+    activeWindows_.clear();
 }
 
-void WindowMultiAbilityTest::TearDown()
+void WindowSplitImmersiveTest::TearDown()
 {
+    while (!activeWindows_.empty()) {
+        ASSERT_EQ(WMError::WM_OK, activeWindows_.back()->Destroy());
+        activeWindows_.pop_back();
+    }
 }
 
+namespace {
 /**
- * @tc.name: MultiAbilityWindow01
- * @tc.desc: Five scene process in one thread
+ * @tc.name: SplitImmersive01
+ * @tc.desc: one primary window and one fullscreen window, test enter and out split immersive
  * @tc.type: FUNC
  */
-HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow01, Function | MediumTest | Level2)
+HWTEST_F(WindowSplitImmersiveTest, SplitImmersive01, Function | MediumTest | Level3)
 {
-    sptr<WindowScene> scene1 = Utils::CreateWindowScene();
-    sptr<WindowScene> scene2 = Utils::CreateWindowScene();
-    sptr<WindowScene> scene3 = Utils::CreateWindowScene();
-    sptr<WindowScene> scene4 = Utils::CreateWindowScene();
-    sptr<WindowScene> scene5 = Utils::CreateWindowScene();
-
-    if(scene1->GoForeground()==WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, scene1->GoForeground());
-        ASSERT_EQ(WMError::WM_OK, scene2->GoForeground());
-        ASSERT_EQ(WMError::WM_OK, scene3->GoForeground());
-        ASSERT_EQ(WMError::WM_OK, scene4->GoForeground());
-        ASSERT_EQ(WMError::WM_OK, scene5->GoForeground());
-    } else {
-        ASSERT_NE(WMError::WM_OK, scene1->GoForeground());
-        ASSERT_NE(WMError::WM_OK, scene2->GoForeground());
-        ASSERT_NE(WMError::WM_OK, scene3->GoForeground());
-        ASSERT_NE(WMError::WM_OK, scene4->GoForeground());
-        ASSERT_NE(WMError::WM_OK, scene5->GoForeground());
+    // create fullscreen win and show
+    fullInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+    const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
+    if (fullWindow == nullptr) {
+        return;
     }
 
-    if(scene1->GoBackground()==WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, scene5->GoBackground());
-        ASSERT_EQ(WMError::WM_OK, scene4->GoBackground());
-        ASSERT_EQ(WMError::WM_OK, scene3->GoBackground());
-        ASSERT_EQ(WMError::WM_OK, scene2->GoBackground());
-        ASSERT_EQ(WMError::WM_OK, scene1->GoBackground());
-        ASSERT_EQ(WMError::WM_OK, scene1->GoDestroy());
-        ASSERT_EQ(WMError::WM_OK, scene2->GoDestroy());
-        ASSERT_EQ(WMError::WM_OK, scene3->GoDestroy());
-        ASSERT_EQ(WMError::WM_OK, scene4->GoDestroy());
-        ASSERT_EQ(WMError::WM_OK, scene5->GoDestroy());
-    }
+    activeWindows_.push_back(fullWindow);
+    ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
+    sleep(SPLIT_TEST_SLEEP_S);
+
+    // enter split mode
+    splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+    const sptr<Window>& priWindow = Utils::CreateTestWindow(splitInfo_);
+    activeWindows_.push_back(priWindow);
+    ASSERT_EQ(WMError::WM_OK, priWindow->Show());
+    sleep(SPLIT_TEST_SLEEP_S);
+
+    // check is enter split Immersive
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, priWindow->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, fullWindow->GetMode());
+    Rect immersivePriRect = priWindow->GetRect();
+    ASSERT_EQ(0, immersivePriRect.posX_);
+    ASSERT_EQ(0, immersivePriRect.posY_);
+    sleep(SPLIT_TEST_SLEEP_S);
+
+    ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
+    sleep(SPLIT_TEST_SLEEP_S);
+    ASSERT_EQ(WMError::WM_OK, priWindow->Hide());
+    sleep(SPLIT_TEST_SLEEP_S);
 }
-
-/**
- * @tc.name: MultiAbilityWindow04
- * @tc.desc: Five scene process in one thread, create/show/hide/destroy in order
- * @tc.type: FUNC
- */
-HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, Function | MediumTest | Level3)
-{
-    sptr<WindowScene> scene1 = Utils::CreateWindowScene();
-    if (scene1->GoForeground() == WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, scene1->GoForeground());
-    } else {
-        ASSERT_NE(WMError::WM_OK, scene1->GoForeground());
-    }
-
-    if(scene1->GoBackground()==WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, scene1->GoBackground());
-        ASSERT_EQ(WMError::WM_OK, scene1->GoDestroy());
-    }
-   
-
-    sptr<WindowScene> scene2 = Utils::CreateWindowScene();
-    ASSERT_EQ(WMError::WM_OK, scene2->GoForeground());
-    if(scene2->GoBackground()==WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, scene2->GoBackground());
-    }
-    ASSERT_EQ(WMError::WM_OK, scene2->GoDestroy());
-
-    sptr<WindowScene> scene3 = Utils::CreateWindowScene();
-    if(scene3->GoForeground()==WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, scene3->GoForeground());
-    }
-    if(scene3->GoBackground()==WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, scene3->GoBackground());
-    }
-    ASSERT_EQ(WMError::WM_OK, scene3->GoBackground());
-    ASSERT_EQ(WMError::WM_OK, scene3->GoDestroy());
-
-    sptr<WindowScene> scene4 = Utils::CreateWindowScene();
-    if(scene4->GoForeground()==WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, scene4->GoForeground());
-    }
-    if(scene4->GoBackground()==WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, scene4->GoBackground());
-    }
-
-    ASSERT_EQ(WMError::WM_OK, scene4->GoDestroy());
-
-    sptr<WindowScene> scene5 = Utils::CreateWindowScene();
-    if(scene5->GoForeground()==WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, scene5->GoForeground());
-    }
-    if(scene5->GoBackground()==WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, scene5->GoBackground());
-    }
-
-    ASSERT_EQ(WMError::WM_OK, scene5->GoDestroy());
-}
-
-/**
- * @tc.name: MultiAbilityWindow05
- * @tc.desc: Five scene process in one thread, create/show/hide/destroy out of order
- * @tc.type: FUNC
- */
-HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, Function | MediumTest | Level3)
-{
-    sptr<WindowScene> scene1 = Utils::CreateWindowScene();
-    if(scene1->GoForeground()==WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, scene1->GoForeground());
-    } else {
-        ASSERT_NE(WMError::WM_OK, scene1->GoForeground());
-    }
-
-    sptr<WindowScene> scene2 = Utils::CreateWindowScene();
-    sptr<WindowScene> scene3 = Utils::CreateWindowScene();
-    if(scene3->GoForeground()==WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, scene3->GoForeground());
-    } else {
-        ASSERT_NE(WMError::WM_OK, scene3->GoForeground());
-    }
-
-    if(scene1->GoBackground()==WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, scene1->GoBackground());
-        ASSERT_EQ(WMError::WM_OK, scene1->GoDestroy());
-    } 
-   
-    sptr<WindowScene> scene4 = Utils::CreateWindowScene();
-
-    if(scene3->GoBackground()==WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, scene3->GoBackground());
-    } 
-    if(scene2->GoForeground()==WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, scene2->GoForeground());
-        ASSERT_EQ(WMError::WM_OK, scene4->GoForeground());
-        ASSERT_EQ(WMError::WM_OK, scene2->GoBackground());
-    } 
-    
-    sptr<WindowScene> scene5 = Utils::CreateWindowScene();
-    ASSERT_EQ(WMError::WM_OK, scene3->GoDestroy());
-    if(scene5->GoForeground()==WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, scene5->GoForeground());
-        ASSERT_EQ(WMError::WM_OK, scene5->GoBackground());
-        ASSERT_EQ(WMError::WM_OK, scene4->GoBackground());
-    } 
-    ASSERT_EQ(WMError::WM_OK, scene4->GoDestroy());
-    ASSERT_EQ(WMError::WM_OK, scene5->GoDestroy());
-    ASSERT_EQ(WMError::WM_OK, scene2->GoDestroy());
 }
 } // namespace Rosen
 } // namespace OHOS
