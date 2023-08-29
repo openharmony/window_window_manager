@@ -254,9 +254,7 @@ void ScreenManagerTest::CheckScreenGroupStateForMirror(ScreenGroupChangeEvent ev
     { \
         auto screenId = screenListener->disconnectFuture_.GetResult(TIME_OUT); \
         screenListener->disconnectFuture_.Reset(SCREEN_ID_INVALID); \
-        if (screenId == virtualScreenId) {
-            ASSERT_EQ(virtualScreenId, screenId); \
-        }
+        ASSERT_EQ(virtualScreenId, screenId); \
     }
 
 namespace {
