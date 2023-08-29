@@ -234,7 +234,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow06, Function | MediumTest | Level3)
     sptr<Window> subWindow0 = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, 0);
     if (subWindow0 == nullptr) {
         return;
-    } 
+    }
     ASSERT_NE(nullptr, subWindow0);
 
     sptr<Window> subWindow1 = CreateSubWindow(scene, WindowType::WINDOW_TYPE_APP_SUB_WINDOW, rect, 0);
