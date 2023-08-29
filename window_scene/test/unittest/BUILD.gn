@@ -31,6 +31,8 @@ group("unittest") {
     ":ws_screen_property_test",
     ":ws_screen_rotation_property_test",
     ":ws_screen_scene_config_test",
+    ":ws_screen_session_manager_stub_test",
+    ":ws_screen_sensor_connector_test",
     ":ws_screen_session_manager_test",
     ":ws_screen_session_test",
     ":ws_session_display_power_controller_test",
@@ -39,6 +41,7 @@ group("unittest") {
     ":ws_session_proxy_test",
     ":ws_session_test",
     ":ws_window_event_channel_test",
+    ":ws_timer_manager_test",
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
   ]
@@ -134,6 +137,21 @@ ohos_unittest("ws_session_test") {
   ]
 }
 
+ohos_unittest("ws_timer_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "timer_manager_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_base:want",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("ws_screen_cutout_controller_test") {
   module_out_path = module_out_path
 
@@ -156,6 +174,33 @@ ohos_unittest("ws_screen_scene_config_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_screen_session_manager_stub_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screen_session_manager_stub_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_screen_sensor_connector_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screen_sensor_connector_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "sensor:sensor_interface_native",
   ]
 }
 

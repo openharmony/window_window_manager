@@ -32,6 +32,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    static sptr<WindowRoot> windowRoot_;
 private:
     static sptr<MoveDragController> moveDragController_;
     static std::shared_ptr<MMI::IInputEventConsumer> inputListener_;
@@ -39,6 +40,7 @@ private:
 
 sptr<MoveDragController> DragControllerTest::moveDragController_ = nullptr;
 std::shared_ptr<MMI::IInputEventConsumer> DragControllerTest::inputListener_ = nullptr;
+sptr<WindowRoot> DragControllerTest::windowRoot_ = nullptr;
 
 void DragControllerTest::SetUpTestCase()
 {
@@ -65,10 +67,12 @@ void DragControllerTest::TearDownTestCase()
 
 void DragControllerTest::SetUp()
 {
+    windowRoot_ = new WindowRoot(nullptr);
 }
 
 void DragControllerTest::TearDown()
 {
+    windowRoot_ = nullptr;
 }
 
 namespace {
@@ -448,6 +452,120 @@ HWTEST_F(DragControllerTest, HandlePointerEvent, Function | SmallTest | Level2)
 
     moveDragController_->windowProperty_ = nullptr;
     moveDragController_->moveDragProperty_ = nullptr;
+}
+
+/**
+ * @tc.name: UpdateDragInfo01
+ * @tc.desc: UpdateDragInfo01
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerTest, UpdateDragInfo01, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE(moveDragController_);
+    uint32_t windowId = 0;
+    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    dragcontroller->UpdateDragInfo(windowId);
+}
+
+/**
+ * @tc.name: UpdateDragInfo02
+ * @tc.desc: UpdateDragInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerTest, UpdateDragInfo02, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 1;
+    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    dragcontroller->UpdateDragInfo(windowId);
+    sptr<WindowNode> dragNode = windowRoot_->GetWindowNode(windowId);
+    ASSERT_EQ(dragNode, nullptr); 
+}
+
+/**
+ * @tc.name: StartDrag01
+ * @tc.desc: StartDrag01
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerTest, StartDrag01, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 1;
+    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    dragcontroller->StartDrag(windowId);
+    sptr<WindowNode> dragNode = windowRoot_->GetWindowNode(windowId);
+    ASSERT_EQ(dragNode, nullptr); 
+}
+
+/**
+ * @tc.name: FinishDrag01
+ * @tc.desc: FinishDrag01
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerTest, FinishDrag01, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 1;
+    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    dragcontroller->FinishDrag(windowId);
+    sptr<WindowNode> dragNode = windowRoot_->GetWindowNode(windowId);
+    ASSERT_EQ(dragNode, nullptr); 
+}
+
+/**
+ * @tc.name: GetHitWindow01
+ * @tc.desc: GetHitWindow01
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerTest, GetHitWindow01, Function | SmallTest | Level2)
+{
+    DisplayId id = 0;
+    PointInfo point;
+    point.x = 1;
+    point.y = 1;
+    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    ASSERT_EQ(nullptr, dragcontroller->GetHitWindow(id, point)); 
+}
+
+/**
+ * @tc.name: GetHitWindow02
+ * @tc.desc: GetHitWindow02
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerTest, GetHitWindow02, Function | SmallTest | Level2)
+{
+    DisplayId id = DISPLAY_ID_INVALID;
+    PointInfo point;
+    point.x = 1;
+    point.y = 2;
+    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    ASSERT_EQ(nullptr, dragcontroller->GetHitWindow(id, point)); 
+}
+
+/**
+ * @tc.name: GetHitWindow03
+ * @tc.desc: GetHitWindow03
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerTest, GetHitWindow03, Function | SmallTest | Level2)
+{
+    DisplayId id = 1;
+    PointInfo point;
+    point.x = 1;
+    point.y = 2;
+    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    sptr<WindowNodeContainer> container = windowRoot_->GetOrCreateWindowNodeContainer(id);
+    ASSERT_EQ(nullptr, container);
+    ASSERT_EQ(nullptr, dragcontroller->GetHitWindow(id, point)); 
+}
+
+/**
+ * @tc.name: Init01
+ * @tc.desc: Init01
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerTest, Init02, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE(moveDragController_);
+    auto ret = moveDragController_->Init();
+    ASSERT_EQ(true, ret); 
 }
 }
 } // namespace Rosen
