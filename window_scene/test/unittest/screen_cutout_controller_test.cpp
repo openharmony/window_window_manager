@@ -79,7 +79,8 @@ namespace {
     HWTEST_F(ScreenCutoutControllerTest, GetScreenCutoutInfo, Function | SmallTest | Level3)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        ASSERT_NE(nullptr, controller->GetScreenCutoutInfo());
+        DisplayId displayId = 0;
+        ASSERT_NE(nullptr, controller->GetScreenCutoutInfo(displayId));
     }
 
     /**
@@ -92,8 +93,9 @@ namespace {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         DMRect emptyRect = {0, 0, 0, 0};
         DMRect emptyRect_ = {1, 2, 3, 3};
+        DisplayId displayId = 0;
         std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
-        controller->ConvertBoundaryRectsByRotation(boundaryRects);
+        controller->ConvertBoundaryRectsByRotation(boundaryRects, displayId);
         delete controller;
     }
 
@@ -123,8 +125,9 @@ namespace {
      */
     HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects, Function | SmallTest | Level3)
     {
+        DisplayId displayId = 0;
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        controller->CalcWaterfallRects();
+        controller->CalcWaterfallRects(displayId);
         delete controller;
     }
 
@@ -205,8 +208,9 @@ namespace {
      */
     HWTEST_F(ScreenCutoutControllerTest, GetCurrentDisplayRotation01, Function | SmallTest | Level3)
     {
+        DisplayId displayId = 0;
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        ASSERT_EQ(Rotation::ROTATION_0, controller->GetCurrentDisplayRotation());
+        ASSERT_EQ(Rotation::ROTATION_0, controller->GetCurrentDisplayRotation(displayId));
     }
 
     /**

@@ -32,21 +32,21 @@ enum class DeviceRotationValue: int32_t {
 class ScreenCutoutController : public RefBase {
 public:
     ScreenCutoutController() {};
-    sptr<CutoutInfo> GetScreenCutoutInfo();
+    sptr<CutoutInfo> GetScreenCutoutInfo(DisplayId displayId);
     RectF CalculateCurvedCompression(const ScreenProperty& screenProperty);
     uint32_t GetOffsetY();
 
 private:
-    void CalcWaterfallRects();
+    void CalcWaterfallRects(DisplayId displayId);
     void ProcessRotationMapping();
     void CalcWaterfallRectsByRotation(Rotation rotation, uint32_t displayHeight, uint32_t displayWidth,
         std::vector<uint32_t> realNumVec);
     void CheckBoundaryRects(std::vector<DMRect>& boundaryRects, sptr<DisplayInfo> displayInfo);
-    void ConvertBoundaryRectsByRotation(std::vector<DMRect>& boundaryRects);
+    void ConvertBoundaryRectsByRotation(std::vector<DMRect>& boundaryRects, DisplayId displayId);
     bool IsDisplayRotationHorizontal(Rotation rotation);
     DMRect CreateWaterfallRect(uint32_t left, uint32_t top, uint32_t width, uint32_t height);
     Rotation ConvertDeviceToDisplayRotation(DeviceRotationValue deviceRotation);
-    Rotation GetCurrentDisplayRotation();
+    Rotation GetCurrentDisplayRotation(DisplayId displayId);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(bool, WaterfallDisplayCompressionStatus, waterfallDisplayCompressionStatus, false);
 
     static uint32_t defaultDeviceRotation_;
