@@ -716,7 +716,7 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     info.callerPersistentId_ = GetPersistentId();
     info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
     info.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
-    info.want = new AAFwk::Want(abilitySessionInfo->want);
+    info.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
     info.requestCode = abilitySessionInfo->requestCode;
     info.callerToken_ = abilitySessionInfo->callerToken;
     info.startSetting = abilitySessionInfo->startSetting;
@@ -763,7 +763,7 @@ WSError Session::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionI
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.callerToken_ = abilitySessionInfo->callerToken;
     info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
-    sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
+    sessionInfo_.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
     sessionInfo_.resultCode = abilitySessionInfo->resultCode;
     if (terminateSessionFunc_) {
         terminateSessionFunc_(info);
@@ -792,7 +792,7 @@ WSError Session::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessi
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.callerToken_ = abilitySessionInfo->callerToken;
     info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
-    sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
+    sessionInfo_.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
     sessionInfo_.resultCode = abilitySessionInfo->resultCode;
     if (terminateSessionFuncNew_) {
         terminateSessionFuncNew_(info, needStartCaller);
@@ -821,7 +821,7 @@ WSError Session::TerminateSessionTotal(const sptr<AAFwk::SessionInfo> abilitySes
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.callerToken_ = abilitySessionInfo->callerToken;
     info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
-    sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
+    sessionInfo_.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
     sessionInfo_.resultCode = abilitySessionInfo->resultCode;
     if (terminateSessionFuncTotal_) {
         terminateSessionFuncTotal_(info, terminateType);
@@ -900,7 +900,7 @@ WSError Session::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySe
     info.errorCode = abilitySessionInfo->errorCode;
     info.errorReason = abilitySessionInfo->errorReason;
     info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
-    sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
+    sessionInfo_.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
     sessionInfo_.errorCode = abilitySessionInfo->errorCode;
     sessionInfo_.errorReason = abilitySessionInfo->errorReason;
     std::lock_guard<std::recursive_mutex> lock(mutex_);

@@ -898,7 +898,7 @@ HWTEST_F(SceneSessionManagerTest, PreHandleCollaborator, Function | SmallTest | 
     ssm_->PreHandleCollaborator(scensession);
     EXPECT_EQ(scensession->GetSessionInfo().want, nullptr);
     scensession = nullptr;
-    info.want = new AAFwk::Want();
+    info.want = std::make_shared<AAFwk::Want>();
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->PreHandleCollaborator(scensession);
     ASSERT_NE(scensession->GetSessionInfo().want, nullptr);
@@ -957,7 +957,7 @@ HWTEST_F(SceneSessionManagerTest, NotifySessionCreate, Function | SmallTest | Le
     ssm_->NotifySessionCreate(nullptr, info);
     EXPECT_EQ(info.want, nullptr);
     ssm_->NotifySessionCreate(scensession, info);
-    info.want = new AAFwk::Want();
+    info.want = std::make_shared<AAFwk::Want>();
     scensession = nullptr;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->NotifySessionCreate(scensession, info);
@@ -989,7 +989,7 @@ HWTEST_F(SceneSessionManagerTest, QueryAbilityInfoFromBMS, Function | SmallTest 
     ssm_->Init();
     ssm_->QueryAbilityInfoFromBMS(uId_, sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_);
     ssm_->NotifyStartAbility(collaboratorType_, sessionInfo_);
-    sessionInfo_.want = new AAFwk::Want();
+    sessionInfo_.want = std::make_shared<AAFwk::Want>();
     collaboratorType_ = CollaboratorType::OTHERS_TYPE;
     ssm_->NotifyStartAbility(collaboratorType_, sessionInfo_);
     ASSERT_NE(sessionInfo_.want, nullptr);
