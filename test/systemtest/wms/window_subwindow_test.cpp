@@ -490,5 +490,5 @@ HWTEST_F(WindowSubWindowTest, SubWindow13, Function | MediumTest | Level3)
     sleep(1);
     scene->GoDestroy();
 }
-}// namespace Rosen
-}// namespace OHOS
+} // namespace Rosen
+} // namespace OHOS
