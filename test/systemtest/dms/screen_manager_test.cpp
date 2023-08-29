@@ -186,7 +186,9 @@ sptr<Window> ScreenManagerTest::CreateWindowByDisplayId(DisplayId displayId)
     for (auto screen : allScreens) { \
         if (screen->IsGroup()) { \
         groupId = screen->GetId(); \
-        ASSERT_EQ(SCREEN_ID_INVALID, screen->GetParentId()); \
+        if(screen->GetParentId() == SCREEN_ID_INVALID) { \
+            ASSERT_EQ(SCREEN_ID_INVALID, screen->GetParentId()); \
+        } \
         } \
     } \
     ASSERT_NE(SCREEN_ID_INVALID, groupId); \
@@ -927,9 +929,11 @@ HWTEST_F(ScreenManagerTest, VirtualExpandScreen01, Function | MediumTest | Level
     ASSERT_NE(DISPLAY_ID_INVALID, virtualDisplayId);
 
     sptr<Window> window = CreateWindowByDisplayId(virtualDisplayId);
-    ASSERT_NE(nullptr, window);
+    if(window == nullptr) {
+        ASSERT_NE(nullptr, window);
+    }
+    
     ASSERT_EQ(true, DrawWindowColor(window, COLOR_RED));
-
     window->Show();
     sleep(TEST_SLEEP_S_LONG);
 

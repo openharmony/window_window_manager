@@ -1902,11 +1902,10 @@ HWTEST_F(WindowImplTest, GetSubWindow, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, subWindow->Create(window->GetWindowId()));
 
     auto subWindowVec = sptr<Window>(window)->GetSubWindow(window->GetWindowId());
-    if(subWindowVec.size() == 1) {
+    if (subWindowVec.size() == 1) {
         ASSERT_EQ(1, subWindowVec.size());
         ASSERT_EQ(sptr<Window>(subWindow), subWindowVec[0]);
     }
-    
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
@@ -3253,10 +3252,10 @@ HWTEST_F(WindowImplTest, UpdateWindowStateWhenShow, Function | SmallTest | Level
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("main");
     sptr<WindowImpl> mainWindow = new WindowImpl(option);
-    if(mainWindow->Create(INVALID_WINDOW_ID) == WMError::WM_OK) {
+    if (mainWindow->Create(INVALID_WINDOW_ID) == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, mainWindow->Create(INVALID_WINDOW_ID));
     }
-   
+
     ASSERT_EQ(WmErrorCode::WM_OK, mainWindow->UpdateWindowStateWhenShow());
 
     option = new WindowOption();
