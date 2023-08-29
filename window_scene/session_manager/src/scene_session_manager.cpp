@@ -2662,8 +2662,10 @@ WSError SceneSessionManager::GetSessionInfo(const std::string& deviceId,
             WLOGFD("GetSessionInfo sessionId:%{public}d bundleName:%{public}s", persistentId,
                 sceneSessionInfo.bundleName_.c_str());
             return SceneSessionConverter::ConvertToMissionInfo(iter->second, sessionInfo);
+        } else {
+            WLOGFW("sessionId: %{public}d not found", persistentId);
+            return WSError::WS_ERROR_INVALID_PARAM;
         }
-        return WSError::WS_OK;
     };
     return taskScheduler_->PostSyncTask(task);
 }
