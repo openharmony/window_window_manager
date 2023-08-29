@@ -179,7 +179,7 @@ sptr<Window> ScreenManagerTest::CreateWindowByDisplayId(DisplayId displayId)
     return window;
 }
 
-void ScreenManagerTest::CheckStateDisplay(DisplayId virtualDisplayId,ScreenId virtualScreenId)
+void ScreenManagerTest::CheckStateDisplay(DisplayId virtualDisplayId, ScreenId virtualScreenId)
 {
     const std::string rsCmd = "snapshot_display -i " + std::to_string(virtualDisplayId);
     (void)system(rsCmd.c_str());
@@ -216,9 +216,9 @@ void ScreenManagerTest::CheckStateDisplay(DisplayId virtualDisplayId,ScreenId vi
     for (auto screen : allScreens) { \
         if (screen->IsGroup()) { \
         groupId = screen->GetId(); \
-        if(screen->GetParentId() == SCREEN_ID_INVALID) { \
+        if (screen->GetParentId() == SCREEN_ID_INVALID) { \
             ASSERT_EQ(SCREEN_ID_INVALID, screen->GetParentId()); \
-        } \
+            } \
         } \
     } \
     ASSERT_NE(SCREEN_ID_INVALID, groupId); \
@@ -969,8 +969,7 @@ HWTEST_F(ScreenManagerTest, VirtualExpandScreen01, Function | MediumTest | Level
     window->Show();
     sleep(TEST_SLEEP_S_LONG);
 
-    CheckStateDisplay(virtualDisplayId,virtualScreenId);
-
+    CheckStateDisplay(virtualDisplayId, virtualScreenId);
     window->Destroy();
     DMError res = ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
     sleep(TEST_SLEEP_S);
