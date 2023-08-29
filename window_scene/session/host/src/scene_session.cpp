@@ -589,7 +589,7 @@ void SceneSession::HandleStyleEvent(MMI::WindowArea area)
     }
     if (area != MMI::WindowArea::EXIT) {
         if (Session::SetPointerStyle(area) != WSError::WS_OK) {
-            WLOGFE("Failed to set the cursor style");
+            WLOGFE("Failed to set the cursor style, WSError:%{public}d", Session::SetPointerStyle(area));
         }
     }
     preWindowArea = { Session::GetWindowId(), area };
@@ -691,8 +691,8 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     static bool isNew = true;
     if (isNew) {
         auto ret = HandlePointerStyle(pointerEvent);
-        if (ret != WSError::WS_OK && ret != WSError::WS_DO_NOTHING) {
-            WLOGFE("Failed to update the mouse cursor style");
+        if ((ret != WSError::WS_OK) && (ret != WSError::WS_DO_NOTHING)) {
+            WLOGFE("Failed to update the mouse cursor style, ret:%{public}d", ret);
         }
     }
     if (property_ && property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
@@ -975,7 +975,7 @@ void SceneSession::UpdateNativeVisibility(bool visible)
     specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     // update private state
     if (!property_) {
-        WLOGFE("property_ is null");
+        WLOGFE("UpdateNativeVisibility property_ is null");
         return;
     }
 }
@@ -988,7 +988,7 @@ bool SceneSession::IsVisible() const
 void SceneSession::SetPrivacyMode(bool isPrivacy)
 {
     if (!property_) {
-        WLOGFE("property_ is null");
+        WLOGFE("SetPrivacyMode property_ is null");
         return;
     }
     if (!surfaceNode_) {
@@ -997,7 +997,7 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
     }
     bool lastPrivacyMode = property_->GetPrivacyMode() || property_->GetSystemPrivacyMode();
     if (lastPrivacyMode == isPrivacy) {
-        WLOGFW("privacy mode is not change, do nothing");
+        WLOGFW("privacy mode is not change, do nothing, isPrivacy:%{public}d", isPrivacy);
         return;
     }
     property_->SetPrivacyMode(isPrivacy);
