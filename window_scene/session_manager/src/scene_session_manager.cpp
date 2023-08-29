@@ -1418,7 +1418,7 @@ void SceneSessionManager::GetStartPage(const SessionInfo& sessionInfo, std::stri
         WLOGFE("bundle manager is nullptr.");
         return;
     }
-
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetStartPage");
     AAFwk::Want want;
     want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
     AppExecFwk::AbilityInfo abilityInfo;
