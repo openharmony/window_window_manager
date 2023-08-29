@@ -128,7 +128,8 @@ DMError ScreenSession::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamu
 {
     auto ret = RSInterfaces::GetInstance().GetScreenSupportedColorGamuts(rsId_, colorGamuts);
     if (ret != StatusCode::SUCCESS) {
-        WLOGE("SCB: ScreenSession::GetScreenSupportedColorGamuts fail! rsId %{public}" PRIu64"", rsId_);
+        WLOGE("SCB: ScreenSession::GetScreenSupportedColorGamuts fail! rsId %{public}" PRIu64", ret:%{public}d",
+            rsId_, ret);
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
     WLOGI("SCB: ScreenSession::GetScreenSupportedColorGamuts ok! rsId %{public}" PRIu64", size %{public}u",
