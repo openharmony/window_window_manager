@@ -40,6 +40,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    sptr<WindowInnerManager> wim_ = new WindowInnerManager();
 };
 
 void WindowInnerManagerTest::SetUpTestCase()
@@ -182,6 +183,165 @@ HWTEST_F(WindowInnerManagerTest, ConsumePointerEvent, Function | SmallTest | Lev
     windowInnerManager.moveDragController_->activeWindowId_ = INVALID_WINDOW_ID;
     windowInnerManager.ConsumePointerEvent(pointerEvent);
     ASSERT_EQ(windowInnerManager.moveDragController_->moveEvent_->agentWindowId_, pointerEvent->agentWindowId_);
+}
+
+/**
+ * @tc.name: Start
+ * @tc.desc: test WindowInnerManager Start
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowInnerManagerTest, Start, Function | SmallTest | Level2)
+{
+    wim_->state_ = InnerWMRunningState::STATE_RUNNING;
+    bool enableRecentholder = false;
+    wim_->Start(enableRecentholder);
+    ASSERT_EQ(wim_->state_, InnerWMRunningState::STATE_RUNNING);
+}
+
+/**
+ * @tc.name: CreateInnerWindow
+ * @tc.desc: test WindowInnerManager CreateInnerWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowInnerManagerTest, CreateInnerWindow, Function | SmallTest | Level2)
+{
+    wim_->isRecentHolderEnable_ = true;
+    std::string name = "test";
+    DisplayId displayId = 1;
+    Rect rect = {0.0, 0.0, 100.0, 100.0};
+    WindowType type = WindowType::WINDOW_TYPE_PLACEHOLDER;
+    WindowMode mode = WindowMode::WINDOW_MODE_FLOATING;
+    wim_->CreateInnerWindow(name, displayId, rect, type, mode);
+    ASSERT_EQ(wim_->isRecentHolderEnable_, true);
+}
+
+/**
+ * @tc.name: DestroyInnerWindow
+ * @tc.desc: test WindowInnerManager DestroyInnerWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowInnerManagerTest, DestroyInnerWindow, Function | SmallTest | Level2)
+{
+    wim_->isRecentHolderEnable_ = true;
+    DisplayId displayId = 1;
+    WindowType type = WindowType::WINDOW_TYPE_PLACEHOLDER;
+    wim_->DestroyInnerWindow(displayId, type);
+    ASSERT_EQ(wim_->isRecentHolderEnable_, true);
+}
+
+/**
+ * @tc.name: UpdateInnerWindow
+ * @tc.desc: test WindowInnerManager UpdateInnerWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowInnerManagerTest, UpdateInnerWindow, Function | SmallTest | Level2)
+{
+    wim_->isRecentHolderEnable_ = true;
+    DisplayId displayId = 1;
+    WindowType type = WindowType::WINDOW_TYPE_PLACEHOLDER;
+    uint32_t width = 200;
+    uint32_t height = 200;
+    wim_->UpdateInnerWindow(displayId, type, width, height);
+    ASSERT_EQ(wim_->isRecentHolderEnable_, true);
+}
+
+/**
+ * @tc.name: TerminateAbility
+ * @tc.desc: test WindowInnerManager TerminateAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowInnerManagerTest, TerminateAbility, Function | SmallTest | Level2)
+{
+    wim_->isRecentHolderEnable_ = true;
+    sptr<WindowNode> node = new WindowNode();
+    wptr<WindowNode> node1 = node;
+    wim_->TerminateAbility(node1);
+    ASSERT_EQ(wim_->isRecentHolderEnable_, true);
+}
+
+/**
+ * @tc.name: CloseAbility
+ * @tc.desc: test WindowInnerManager CloseAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowInnerManagerTest, CloseAbility, Function | SmallTest | Level2)
+{
+    wim_->isRecentHolderEnable_ = true;
+    sptr<WindowNode> node = new WindowNode();
+    wptr<WindowNode> node1 = node;
+    wim_->CloseAbility(node1);
+    ASSERT_EQ(wim_->isRecentHolderEnable_, true);
+}
+
+/**
+ * @tc.name: CompleteFirstFrameDrawing
+ * @tc.desc: test WindowInnerManager CompleteFirstFrameDrawing
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowInnerManagerTest, CompleteFirstFrameDrawing, Function | SmallTest | Level2)
+{
+    wim_->isRecentHolderEnable_ = true;
+    sptr<WindowNode> node = new WindowNode();
+    wptr<WindowNode> node1 = node;
+    wim_->CompleteFirstFrameDrawing(node1);
+    ASSERT_EQ(wim_->isRecentHolderEnable_, true);
+}
+
+/**
+ * @tc.name: UpdateMissionSnapShot
+ * @tc.desc: test WindowInnerManager UpdateMissionSnapShot
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowInnerManagerTest, UpdateMissionSnapShot, Function | SmallTest | Level2)
+{
+    wim_->isRecentHolderEnable_ = true;
+    sptr<WindowNode> node = new WindowNode();
+    wptr<WindowNode> node1 = node;
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    wim_->UpdateMissionSnapShot(node1, pixelMap);
+    ASSERT_EQ(wim_->isRecentHolderEnable_, true);
+}
+
+/**
+ * @tc.name: GetPid
+ * @tc.desc: test WindowInnerManager GetPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowInnerManagerTest, GetPid, Function | SmallTest | Level2)
+{
+    ASSERT_EQ(wim_->GetPid(), INVALID_PID);
+}
+
+/**
+ * @tc.name: SetInputEventConsumer
+ * @tc.desc: test WindowInnerManager SetInputEventConsumer
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowInnerManagerTest, SetInputEventConsumer, Function | SmallTest | Level2)
+{
+    wim_->moveDragController_ = nullptr;
+    wim_->SetInputEventConsumer();
+    ASSERT_EQ(wim_->moveDragController_, nullptr);
+    wim_->moveDragController_ = new MoveDragController();
+    wim_->SetInputEventConsumer();
+    ASSERT_NE(wim_->moveDragController_, nullptr);
+}
+
+/**
+ * @tc.name: StartWindowInfoReportLoop
+ * @tc.desc: test WindowInnerManager StartWindowInfoReportLoop
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowInnerManagerTest, StartWindowInfoReportLoop, Function | SmallTest | Level2)
+{
+    wim_->isReportTaskStart_ = true;
+    wim_->eventHandler_ = nullptr;
+    wim_->StartWindowInfoReportLoop();
+    ASSERT_EQ(wim_->isReportTaskStart_, true);
+    wim_->isReportTaskStart_ = false;
+    wim_->eventHandler_ = std::make_shared<EventHandler>(EventRunner::Create());
+    wim_->StartWindowInfoReportLoop();
+    ASSERT_EQ(wim_->isReportTaskStart_, true);
 }
 }
 }
