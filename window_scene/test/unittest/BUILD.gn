@@ -41,7 +41,6 @@ group("unittest") {
     ":ws_session_test",
     ":ws_timer_manager_test",
     ":ws_window_event_channel_test",
-    ":ws_timer_manager_test",
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
   ]
@@ -190,20 +189,6 @@ ohos_unittest("ws_screen_session_manager_stub_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
-  ]
-}
-
-ohos_unittest("ws_screen_sensor_connector_test") {
-  module_out_path = module_out_path
-
-  sources = [ "screen_sensor_connector_test.cpp" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "sensor:sensor_interface_native",
   ]
 }
 
