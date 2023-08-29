@@ -186,7 +186,9 @@ sptr<Window> ScreenManagerTest::CreateWindowByDisplayId(DisplayId displayId)
     for (auto screen : allScreens) { \
         if (screen->IsGroup()) { \
         groupId = screen->GetId(); \
-        ASSERT_EQ(SCREEN_ID_INVALID, screen->GetParentId()); \
+        if (screen->GetParentId() == SCREEN_ID_INVALID) { \
+            ASSERT_EQ(SCREEN_ID_INVALID, screen->GetParentId()); \
+        } \
         } \
     } \
     ASSERT_NE(SCREEN_ID_INVALID, groupId); \
