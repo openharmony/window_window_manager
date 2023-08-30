@@ -125,7 +125,7 @@ HWTEST_F(ScreenRotationPropertyTest, SetDefaultDeviceRotationOffset, Function | 
     ScreenRotationProperty::SetDefaultDeviceRotationOffset(offset);
     offset = 0;
     ScreenRotationProperty::SetDefaultDeviceRotationOffset(offset);
-    ASSERT_EQ(offset,ScreenRotationProperty::defaultDeviceRotationOffset_);
+    ASSERT_EQ(offset, ScreenRotationProperty::defaultDeviceRotationOffset_);
 }
 
 /**
@@ -306,7 +306,8 @@ HWTEST_F(ScreenRotationPropertyTest, ProcessRotationMapping, Function | SmallTes
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessRotationMapping_PORTRAIT start";
     ScreenRotationProperty::defaultDeviceRotation_ = 0;
     ScreenRotationProperty::ProcessRotationMapping();
-    ASSERT_EQ(Rotation::ROTATION_0, ScreenRotationProperty::deviceToDisplayRotationMap_.at(DeviceRotation::ROTATION_PORTRAIT));
+    ASSERT_EQ(Rotation::ROTATION_0,
+        ScreenRotationProperty::deviceToDisplayRotationMap_.at(DeviceRotation::ROTATION_PORTRAIT));
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessRotationMapping_PORTRAIT end";
 }
 
