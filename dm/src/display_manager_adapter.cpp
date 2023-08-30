@@ -429,6 +429,41 @@ DMError DisplayManagerAdapter::RemoveSurfaceNodeFromDisplay(DisplayId displayId,
     return displayManagerServiceProxy_->RemoveSurfaceNodeFromDisplay(displayId, surfaceNode);
 }
 
+bool DisplayManagerAdapter::IsFoldable()
+{
+    INIT_PROXY_CHECK_RETURN(false);
+
+    return displayManagerServiceProxy_->IsFoldable();
+}
+
+FoldStatus DisplayManagerAdapter::GetFoldStatus()
+{
+    INIT_PROXY_CHECK_RETURN(FoldStatus::UNKNOWN);
+
+    return displayManagerServiceProxy_->GetFoldStatus();
+}
+
+FoldDisplayMode DisplayManagerAdapter::GetFoldDisplayMode()
+{
+    INIT_PROXY_CHECK_RETURN(FoldDisplayMode::UNKNOWN);
+
+    return displayManagerServiceProxy_->GetFoldDisplayMode();
+}
+
+void DisplayManagerAdapter::SetFoldDisplayMode(const FoldDisplayMode mode)
+{
+    INIT_PROXY_CHECK_RETURN();
+
+    return displayManagerServiceProxy_->SetFoldDisplayMode(mode);
+}
+
+sptr<FoldCreaseRegion> DisplayManagerAdapter::GetCurrentFoldCreaseRegion()
+{
+    INIT_PROXY_CHECK_RETURN(nullptr);
+
+    return displayManagerServiceProxy_->GetCurrentFoldCreaseRegion();
+}
+
 sptr<ScreenGroupInfo> ScreenManagerAdapter::GetScreenGroupInfoById(ScreenId screenId)
 {
     if (screenId == SCREEN_ID_INVALID) {

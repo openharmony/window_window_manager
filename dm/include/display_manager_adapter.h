@@ -25,6 +25,7 @@
 #include "screen_group.h"
 #include "dm_common.h"
 #include "display_manager_interface.h"
+#include "fold_screen_info.h"
 #include "singleton_delegator.h"
 
 namespace OHOS::Rosen {
@@ -73,6 +74,16 @@ public:
     virtual DMError AddSurfaceNodeToDisplay(DisplayId displayId, std::shared_ptr<class RSSurfaceNode>& surfaceNode);
     virtual DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId,
         std::shared_ptr<class RSSurfaceNode>& surfaceNode);
+
+    virtual bool IsFoldable();
+
+    virtual FoldStatus GetFoldStatus();
+
+    virtual FoldDisplayMode GetFoldDisplayMode();
+
+    virtual void SetFoldDisplayMode(const FoldDisplayMode);
+
+    virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
 };

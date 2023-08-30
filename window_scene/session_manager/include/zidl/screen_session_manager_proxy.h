@@ -96,8 +96,15 @@ public:
     virtual void DumpAllScreensInfo(std::string& dumpInfo) override;
     virtual void DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo) override;
     //Fold Screen
-    virtual void SetFoldDisplayMode(FoldDisplayMode displayMode) override;
-    virtual FoldDisplayMode GetFoldDisplayMode() override;
+    void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
+
+    FoldDisplayMode GetFoldDisplayMode() override;
+
+    bool IsFoldable() override;
+
+    FoldStatus GetFoldStatus() override;
+
+    sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
 };
