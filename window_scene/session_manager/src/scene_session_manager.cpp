@@ -1828,31 +1828,33 @@ void SceneSessionManager::HandleTurnScreenOn(const sptr<SceneSession>& sceneSess
 
 void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock)
 {
-    auto task = [this, sceneSession, requireLock]() {
-        if (sceneSession == nullptr) {
+    wptr<SceneSession> weakSceneSession(sceneSession);
+    auto task = [this, weakSceneSession, requireLock]() {
+        auto scnSession = weakSceneSession.promote();
+        if (scnSession == nullptr) {
             WLOGFE("session is invalid");
             return;
         }
-        if (requireLock && sceneSession->keepScreenLock_ == nullptr) {
+        if (requireLock && scnSession->keepScreenLock_ == nullptr) {
             // reset ipc identity
             std::string identity = IPCSkeleton::ResetCallingIdentity();
-            sceneSession->keepScreenLock_ =
-                PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock(sceneSession->GetWindowName(),
+            scnSession->keepScreenLock_ =
+                PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock(scnSession->GetWindowName(),
                 PowerMgr::RunningLockType::RUNNINGLOCK_SCREEN);
             // set ipc identity to raw
             IPCSkeleton::SetCallingIdentity(identity);
         }
-        if (sceneSession->keepScreenLock_ == nullptr) {
+        if (scnSession->keepScreenLock_ == nullptr) {
             return;
         }
-        WLOGI("keep screen on: [%{public}s, %{public}d]", sceneSession->GetWindowName().c_str(), requireLock);
+        WLOGI("keep screen on: [%{public}s, %{public}d]", scnSession->GetWindowName().c_str(), requireLock);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:HandleKeepScreenOn");
         ErrCode res;
         std::string identity = IPCSkeleton::ResetCallingIdentity();
         if (requireLock) {
-            res = sceneSession->keepScreenLock_->Lock();
+            res = scnSession->keepScreenLock_->Lock();
         } else {
-            res = sceneSession->keepScreenLock_->UnLock();
+            res = scnSession->keepScreenLock_->UnLock();
         }
         // set ipc identity to raw
         IPCSkeleton::SetCallingIdentity(identity);
