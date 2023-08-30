@@ -20,6 +20,7 @@ group("unittest") {
 
   deps = [
     ":ws_event_stage_test",
+    ":ws_extension_session_manager_test",
     ":ws_extension_session_test",
     ":ws_move_drag_controller_test",
     ":ws_scene_session_converter_test",
@@ -31,6 +32,7 @@ group("unittest") {
     ":ws_screen_property_test",
     ":ws_screen_rotation_property_test",
     ":ws_screen_scene_config_test",
+    ":ws_screen_session_manager_stub_test",
     ":ws_screen_session_manager_test",
     ":ws_screen_session_test",
     ":ws_session_display_power_controller_test",
@@ -181,6 +183,19 @@ ohos_unittest("ws_screen_scene_config_test") {
   ]
 }
 
+ohos_unittest("ws_screen_session_manager_stub_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screen_session_manager_stub_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("ws_screen_session_manager_test") {
   module_out_path = module_out_path
 
@@ -216,7 +231,10 @@ ohos_unittest("ws_scene_session_manager_test") {
 
   external_deps = [
     "ability_base:configuration",
+    "ability_base:session_info",
     "ability_runtime:ability_context_native",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "hilog:libhilog",
   ]
@@ -413,6 +431,19 @@ ohos_unittest("ws_window_event_channel_proxy_test") {
   module_out_path = module_out_path
 
   sources = [ "window_event_channel_proxy_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_extension_session_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "extension_session_manager_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 

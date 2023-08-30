@@ -36,7 +36,7 @@ std::shared_ptr<AppExecFwk::EventHandler> TaskScheduler::GetEventHandler()
 void TaskScheduler::PostVoidSyncTask(Task task)
 {
     if (handler_ == nullptr) {
-        WLOGFE("Failed to post task, handler is null!");
+        WLOGFE("PostVoidSyncTask Failed to post task, handler is null!");
         return;
     }
     handler_->PostSyncTask(std::move(task), AppExecFwk::EventQueue::Priority::IMMEDIATE);
@@ -45,7 +45,7 @@ void TaskScheduler::PostVoidSyncTask(Task task)
 void TaskScheduler::PostAsyncTask(Task task, int64_t delayTime)
 {
     if (handler_ == nullptr) {
-        WLOGFE("Failed to post task, handler is null!");
+        WLOGFE("PostVoidSyncTask Failed to post task, handler is null!");
         return;
     }
     handler_->PostTask(std::move(task), delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);

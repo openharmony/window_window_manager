@@ -818,7 +818,7 @@ HWTEST_F(WindowControllerTest, RequestFocus, Function | SmallTest | Level3)
     sptr<WindowProperty> property = new WindowProperty();
     std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
     sptr<WindowNode> windowNode = new WindowNode(property);
-    windowRoot_->windowNodeMap_.insert(std::make_pair(1, windowNode));
+    windowRoot_->windowNodeMap_.insert(std::make_pair(0, windowNode));
 
     uint32_t windowId;
     property->SetParentId(INVALID_WINDOW_ID);
@@ -828,10 +828,11 @@ HWTEST_F(WindowControllerTest, RequestFocus, Function | SmallTest | Level3)
     surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
     ASSERT_EQ(WMError::WM_OK, windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
 
-    WMError res = windowController_->RequestFocus(false);
+    WMError res = windowController_->RequestFocus(10);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res);
 
-    res = windowController_->RequestFocus(true);
+    windowId = windowNode->GetWindowId();
+    res = windowController_->RequestFocus(windowId);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
 }
 
@@ -1603,6 +1604,10 @@ HWTEST_F(WindowControllerTest, UpdateProperty2, Function | SmallTest | Level3)
     property->SetParentId(INVALID_WINDOW_ID);
     property->SetWindowType(WindowType::APP_WINDOW_BASE);
 
+    uint32_t windowId = windowNode->GetWindowId();
+    ASSERT_EQ(nullptr, windowRoot_->GetWindowNode(windowId));
+    ASSERT_NE(nullptr, property);
+
     PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_RECT;
     WMError res = windowController_->UpdateProperty(property, action);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res);
@@ -1610,7 +1615,7 @@ HWTEST_F(WindowControllerTest, UpdateProperty2, Function | SmallTest | Level3)
 
 /**
  * @tc.name: UpdateProperty
- * @tc.desc: Window controller UpdateProperty
+ * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_RECT
  * @tc.type: FUNC
  */
 HWTEST_F(WindowControllerTest, UpdateProperty3, Function | SmallTest | Level3)
@@ -1621,19 +1626,543 @@ HWTEST_F(WindowControllerTest, UpdateProperty3, Function | SmallTest | Level3)
     std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
     sptr<WindowNode> windowNode = new WindowNode(property);
     property->SetParentId(INVALID_WINDOW_ID);
-    property->SetWindowType(WindowType::APP_WINDOW_BASE);
-    windowRoot_->windowNodeMap_.insert(std::make_pair(1, windowNode));
+    windowRoot_->windowNodeMap_.insert(std::make_pair(0, windowNode));
 
     uint32_t windowId = windowNode->GetWindowId();
     struct RSSurfaceNodeConfig surfaceNodeConfig;
-    surfaceNodeConfig.SurfaceNodeName = "UpdateProperty";
+    surfaceNodeConfig.SurfaceNodeName = "UpdateProperty3";
+    surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_EQ(WMError::WM_OK,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+    ASSERT_NE(nullptr, windowRoot_->GetWindowNode(windowId));
+    ASSERT_NE(nullptr, property);
+
+    PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_RECT;
+    WMError res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
+
+    windowNode->SetWindowRect({50, 50, 50, 50});
+    windowNode->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, res);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    property->SetWindowSizeChangeReason(WindowSizeChangeReason::UNDEFINED);
+    res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, res);
+
+    property->SetWindowSizeChangeReason(WindowSizeChangeReason::RESIZE);
+    res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, res);
+
+    property->SetWindowSizeChangeReason(WindowSizeChangeReason::MOVE);
+    res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, res);
+}
+
+/**
+ * @tc.name: UpdateProperty
+ * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_MODE
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, UpdateProperty4, Function | SmallTest | Level3)
+{
+    windowRoot_->windowNodeMap_.clear();
+    sptr<IWindow> window;
+    sptr<WindowProperty> property = new WindowProperty();
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    property->SetParentId(INVALID_WINDOW_ID);
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(0, windowNode));
+
+    uint32_t windowId = windowNode->GetWindowId();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    surfaceNodeConfig.SurfaceNodeName = "UpdateProperty4";
     surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
     ASSERT_EQ(WMError::WM_OK,
         windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
 
-    PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_RECT;
+    ASSERT_NE(nullptr, windowRoot_->GetWindowNode(windowId));
+    ASSERT_NE(nullptr, property);
+    PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_MODE;
     WMError res = windowController_->UpdateProperty(property, action);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, res);
+}
+
+/**
+ * @tc.name: UpdateProperty
+ * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_FLAGS
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, UpdateProperty5, Function | SmallTest | Level3)
+{
+    windowRoot_->windowNodeMap_.clear();
+    sptr<IWindow> window;
+    sptr<WindowProperty> property = new WindowProperty();
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    property->SetParentId(INVALID_WINDOW_ID);
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(0, windowNode));
+
+    uint32_t windowId = windowNode->GetWindowId();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    surfaceNodeConfig.SurfaceNodeName = "UpdateProperty5";
+    surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_EQ(WMError::WM_OK,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+
+    ASSERT_NE(nullptr, windowRoot_->GetWindowNode(windowId));
+    ASSERT_NE(nullptr, property);
+    PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_FLAGS;
+    WMError res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, res);
+}
+
+/**
+ * @tc.name: UpdateProperty
+ * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_OTHER_PROPS
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, UpdateProperty6, Function | SmallTest | Level3)
+{
+    windowRoot_->windowNodeMap_.clear();
+    sptr<IWindow> window;
+    sptr<WindowProperty> property = new WindowProperty();
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    property->SetParentId(INVALID_WINDOW_ID);
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(0, windowNode));
+
+    uint32_t windowId = windowNode->GetWindowId();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    surfaceNodeConfig.SurfaceNodeName = "UpdateProperty6";
+    surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_EQ(WMError::WM_OK,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+
+    ASSERT_NE(nullptr, windowRoot_->GetWindowNode(windowId));
+    ASSERT_NE(nullptr, property);
+    PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_OTHER_PROPS;
+    WMError res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: UpdateProperty
+ * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_FOCUSABLE
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, UpdateProperty7, Function | SmallTest | Level3)
+{
+    windowRoot_->windowNodeMap_.clear();
+    sptr<IWindow> window;
+    sptr<WindowProperty> property = new WindowProperty();
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    property->SetParentId(INVALID_WINDOW_ID);
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(0, windowNode));
+
+    uint32_t windowId = windowNode->GetWindowId();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    surfaceNodeConfig.SurfaceNodeName = "UpdateProperty7";
+    surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_EQ(WMError::WM_OK,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+
+    ASSERT_NE(nullptr, windowRoot_->GetWindowNode(windowId));
+    ASSERT_NE(nullptr, property);
+    PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_FOCUSABLE;
+    WMError res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: UpdateProperty
+ * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_TOUCHABLE
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, UpdateProperty8, Function | SmallTest | Level3)
+{
+    windowRoot_->windowNodeMap_.clear();
+    sptr<IWindow> window;
+    sptr<WindowProperty> property = new WindowProperty();
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    property->SetParentId(INVALID_WINDOW_ID);
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(0, windowNode));
+
+    uint32_t windowId = windowNode->GetWindowId();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    surfaceNodeConfig.SurfaceNodeName = "UpdateProperty8";
+    surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_EQ(WMError::WM_OK,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+
+    ASSERT_NE(nullptr, windowRoot_->GetWindowNode(windowId));
+    ASSERT_NE(nullptr, property);
+    PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_TOUCHABLE;
+    WMError res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: UpdateProperty
+ * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_CALLING_WINDOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, UpdateProperty9, Function | SmallTest | Level3)
+{
+    windowRoot_->windowNodeMap_.clear();
+    sptr<IWindow> window;
+    sptr<WindowProperty> property = new WindowProperty();
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    property->SetParentId(INVALID_WINDOW_ID);
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(0, windowNode));
+
+    uint32_t windowId = windowNode->GetWindowId();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    surfaceNodeConfig.SurfaceNodeName = "UpdateProperty9";
+    surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_EQ(WMError::WM_OK,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+
+    ASSERT_NE(nullptr, windowRoot_->GetWindowNode(windowId));
+    ASSERT_NE(nullptr, property);
+    PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW;
+    WMError res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: UpdateProperty
+ * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_ORIENTATION
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, UpdateProperty10, Function | SmallTest | Level3)
+{
+    windowRoot_->windowNodeMap_.clear();
+    sptr<IWindow> window;
+    sptr<WindowProperty> property = new WindowProperty();
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    property->SetParentId(INVALID_WINDOW_ID);
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(0, windowNode));
+
+    uint32_t windowId = windowNode->GetWindowId();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    surfaceNodeConfig.SurfaceNodeName = "UpdateProperty10";
+    surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_EQ(WMError::WM_OK,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+
+    ASSERT_NE(nullptr, windowRoot_->GetWindowNode(windowId));
+    ASSERT_NE(nullptr, property);
+    PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_ORIENTATION;
+    WMError res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: UpdateProperty
+ * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_TURN_SCREEN_ON
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, UpdateProperty11, Function | SmallTest | Level3)
+{
+    windowRoot_->windowNodeMap_.clear();
+    sptr<IWindow> window;
+    sptr<WindowProperty> property = new WindowProperty();
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    property->SetParentId(INVALID_WINDOW_ID);
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(0, windowNode));
+
+    uint32_t windowId = windowNode->GetWindowId();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    surfaceNodeConfig.SurfaceNodeName = "UpdateProperty11";
+    surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_EQ(WMError::WM_OK,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+
+    ASSERT_NE(nullptr, windowRoot_->GetWindowNode(windowId));
+    ASSERT_NE(nullptr, property);
+    PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON;
+    WMError res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: UpdateProperty
+ * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_KEEP_SCREEN_ON
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, UpdateProperty12, Function | SmallTest | Level3)
+{
+    windowRoot_->windowNodeMap_.clear();
+    sptr<IWindow> window;
+    sptr<WindowProperty> property = new WindowProperty();
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    property->SetParentId(INVALID_WINDOW_ID);
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(0, windowNode));
+
+    uint32_t windowId = windowNode->GetWindowId();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    surfaceNodeConfig.SurfaceNodeName = "UpdateProperty12";
+    surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_EQ(WMError::WM_OK,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+
+    ASSERT_NE(nullptr, windowRoot_->GetWindowNode(windowId));
+    ASSERT_NE(nullptr, property);
+    PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON;
+    WMError res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+
+/**
+ * @tc.name: UpdateProperty
+ * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_SET_BRIGHTNESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, UpdateProperty13, Function | SmallTest | Level3)
+{
+    windowRoot_->windowNodeMap_.clear();
+    sptr<IWindow> window;
+    sptr<WindowProperty> property = new WindowProperty();
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    property->SetParentId(INVALID_WINDOW_ID);
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(0, windowNode));
+
+    uint32_t windowId = windowNode->GetWindowId();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    surfaceNodeConfig.SurfaceNodeName = "UpdateProperty13";
+    surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_EQ(WMError::WM_OK,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+
+    ASSERT_NE(nullptr, windowRoot_->GetWindowNode(windowId));
+    ASSERT_NE(nullptr, property);
+    PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS;
+    WMError res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: UpdateProperty
+ * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_MODE_SUPPORT_INFO
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, UpdateProperty14, Function | SmallTest | Level3)
+{
+    windowRoot_->windowNodeMap_.clear();
+    sptr<IWindow> window;
+    sptr<WindowProperty> property = new WindowProperty();
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    property->SetParentId(INVALID_WINDOW_ID);
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(0, windowNode));
+
+    uint32_t windowId = windowNode->GetWindowId();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    surfaceNodeConfig.SurfaceNodeName = "UpdateProperty14";
+    surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_EQ(WMError::WM_OK,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+
+    ASSERT_NE(nullptr, windowRoot_->GetWindowNode(windowId));
+    ASSERT_NE(nullptr, property);
+    PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO;
+    WMError res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: UpdateProperty
+ * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_TOUCH_HOT_AREA
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, UpdateProperty15, Function | SmallTest | Level3)
+{
+    windowRoot_->windowNodeMap_.clear();
+    sptr<IWindow> window;
+    sptr<WindowProperty> property = new WindowProperty();
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    property->SetParentId(INVALID_WINDOW_ID);
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(0, windowNode));
+
+    uint32_t windowId = windowNode->GetWindowId();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    surfaceNodeConfig.SurfaceNodeName = "UpdateProperty15";
+    surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_EQ(WMError::WM_OK,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+
+    ASSERT_NE(nullptr, windowRoot_->GetWindowNode(windowId));
+    ASSERT_NE(nullptr, property);
+    PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA;
+    WMError res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: UpdateProperty
+ * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_ANIMATION_FLAG
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, UpdateProperty16, Function | SmallTest | Level3)
+{
+    windowRoot_->windowNodeMap_.clear();
+    sptr<IWindow> window;
+    sptr<WindowProperty> property = new WindowProperty();
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    property->SetParentId(INVALID_WINDOW_ID);
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(0, windowNode));
+
+    uint32_t windowId = windowNode->GetWindowId();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    surfaceNodeConfig.SurfaceNodeName = "UpdateProperty16";
+    surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_EQ(WMError::WM_OK,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+
+    ASSERT_NE(nullptr, windowRoot_->GetWindowNode(windowId));
+    ASSERT_NE(nullptr, property);
+    PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG;
+    WMError res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: UpdateProperty
+ * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_TRANSFORM_PROPERTY
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, UpdateProperty17, Function | SmallTest | Level3)
+{
+    windowRoot_->windowNodeMap_.clear();
+    sptr<IWindow> window;
+    sptr<WindowProperty> property = new WindowProperty();
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    property->SetParentId(INVALID_WINDOW_ID);
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(0, windowNode));
+
+    uint32_t windowId = windowNode->GetWindowId();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    surfaceNodeConfig.SurfaceNodeName = "UpdateProperty17";
+    surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_EQ(WMError::WM_OK,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+
+    ASSERT_NE(nullptr, windowRoot_->GetWindowNode(windowId));
+    ASSERT_NE(nullptr, property);
+    PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY;
+    WMError res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, res);
+}
+
+/**
+ * @tc.name: UpdateProperty
+ * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_ASPECT_RATIO
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, UpdateProperty19, Function | SmallTest | Level3)
+{
+    windowRoot_->windowNodeMap_.clear();
+    sptr<IWindow> window;
+    sptr<WindowProperty> property = new WindowProperty();
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    property->SetParentId(INVALID_WINDOW_ID);
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(0, windowNode));
+
+    uint32_t windowId = windowNode->GetWindowId();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    surfaceNodeConfig.SurfaceNodeName = "UpdateProperty19";
+    surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_EQ(WMError::WM_OK,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+
+    ASSERT_NE(nullptr, windowRoot_->GetWindowNode(windowId));
+    ASSERT_NE(nullptr, property);
+    PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
+    WMError res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: UpdateProperty
+ * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_MAXIMIZE_STATE ResizeRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, UpdateProperty20, Function | SmallTest | Level3)
+{
+    windowRoot_->windowNodeMap_.clear();
+    sptr<IWindow> window;
+    sptr<WindowProperty> property = new WindowProperty();
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    property->SetParentId(INVALID_WINDOW_ID);
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(0, windowNode));
+
+    uint32_t windowId = windowNode->GetWindowId();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    surfaceNodeConfig.SurfaceNodeName = "UpdateProperty20";
+    surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_EQ(WMError::WM_OK,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+    ASSERT_NE(nullptr, windowRoot_->GetWindowNode(windowId));
+    ASSERT_NE(nullptr, property);
+    PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE;
+    WMError res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
+
+    windowNode->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, res);
+
+    property->SetWindowSizeChangeReason(WindowSizeChangeReason::MOVE);
+    property->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
+    res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, res);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, res);
+
+    property->SetWindowSizeChangeReason(WindowSizeChangeReason::RESIZE);
+    res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, res);
+
+    property->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
+    res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, res);
+
+    property->SetWindowSizeChangeReason(WindowSizeChangeReason::MAXIMIZE);
+    res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, res);
 }
 }
 }

@@ -33,6 +33,7 @@
 #include <want.h>
 
 #include "ability_start_setting.h"
+#include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "session_helper.h"
 
@@ -45,7 +46,7 @@ std::atomic<int32_t> g_persistentId = INVALID_SESSION_ID;
 std::set<int32_t> g_persistentIdSet;
 constexpr float INNER_BORDER_VP = 5.0f;
 constexpr float OUTSIDE_BORDER_VP = 4.0f;
-constexpr float INNER_ANGLE_VP = 4.0f;
+constexpr float INNER_ANGLE_VP = 16.0f;
 } // namespace
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
@@ -510,7 +511,18 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
         WLOGFE("sessionStage_ is nullptr");
     }
     UpdatePointerArea(winRect_);
+    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        NotifyCallingSessionUpdateRect();
+    }
     return WSError::WS_OK;
+}
+
+void Session::NotifyCallingSessionUpdateRect()
+{
+    if (notifyCallingSessionUpdateRectFunc_) {
+        WLOGFI("Notify calling window that input method update rect");
+        notifyCallingSessionUpdateRectFunc_(persistentId_);
+    }
 }
 
 WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
@@ -572,7 +584,7 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property)
     WLOGFI("Foreground session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
     if (state != SessionState::STATE_CONNECT && state != SessionState::STATE_BACKGROUND) {
-        WLOGFE("state invalid!");
+        WLOGFE("Foreground state invalid! state:%{public}u", state);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
 
@@ -634,7 +646,7 @@ WSError Session::Background()
     WLOGFI("Background session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
     if (state != SessionState::STATE_INACTIVE) {
-        WLOGFE("state invalid!");
+        WLOGFE("Background state invalid! state:%{public}u", state);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
@@ -657,7 +669,7 @@ WSError Session::Disconnect()
     SessionState state = GetSessionState();
     WLOGFI("Disconnect session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
-    if (state == SessionState::STATE_ACTIVE) {
+    if (state == SessionState::STATE_ACTIVE && WindowHelper::IsMainWindow(GetWindowType())) {
         snapshot_ = Snapshot();
         if (scenePersistence_ && snapshot_) {
             scenePersistence_->SaveSnapshot(snapshot_);
@@ -670,6 +682,9 @@ WSError Session::Disconnect()
     snapshot_.reset();
     DelayedSingleton<ANRManager>::GetInstance()->OnSessionLost(persistentId_);
     isTerminating = false;
+    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        NotifyCallingSessionBackground();
+    }
     return WSError::WS_OK;
 }
 
@@ -715,7 +730,7 @@ WSError Session::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ability
     info.callerPersistentId_ = GetPersistentId();
     info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
     info.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
-    info.want = new AAFwk::Want(abilitySessionInfo->want);
+    info.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
     info.requestCode = abilitySessionInfo->requestCode;
     info.callerToken_ = abilitySessionInfo->callerToken;
     info.startSetting = abilitySessionInfo->startSetting;
@@ -762,7 +777,7 @@ WSError Session::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionI
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.callerToken_ = abilitySessionInfo->callerToken;
     info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
-    sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
+    sessionInfo_.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
     sessionInfo_.resultCode = abilitySessionInfo->resultCode;
     if (terminateSessionFunc_) {
         terminateSessionFunc_(info);
@@ -791,7 +806,7 @@ WSError Session::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessi
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.callerToken_ = abilitySessionInfo->callerToken;
     info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
-    sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
+    sessionInfo_.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
     sessionInfo_.resultCode = abilitySessionInfo->resultCode;
     if (terminateSessionFuncNew_) {
         terminateSessionFuncNew_(info, needStartCaller);
@@ -820,7 +835,7 @@ WSError Session::TerminateSessionTotal(const sptr<AAFwk::SessionInfo> abilitySes
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.callerToken_ = abilitySessionInfo->callerToken;
     info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
-    sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
+    sessionInfo_.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
     sessionInfo_.resultCode = abilitySessionInfo->resultCode;
     if (terminateSessionFuncTotal_) {
         terminateSessionFuncTotal_(info, terminateType);
@@ -899,7 +914,7 @@ WSError Session::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySe
     info.errorCode = abilitySessionInfo->errorCode;
     info.errorReason = abilitySessionInfo->errorReason;
     info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
-    sessionInfo_.want = new AAFwk::Want(abilitySessionInfo->want);
+    sessionInfo_.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
     sessionInfo_.errorCode = abilitySessionInfo->errorCode;
     sessionInfo_.errorReason = abilitySessionInfo->errorReason;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -957,6 +972,11 @@ WSError Session::PendingSessionToBackgroundForDelegator()
         pendingSessionToBackgroundForDelegatorFunc_(info);
     }
     return WSError::WS_OK;
+}
+
+void Session::SetNotifyCallingSessionUpdateRectFunc(const NotifyCallingSessionUpdateRectFunc& func)
+{
+    notifyCallingSessionUpdateRectFunc_ = func;
 }
 
 void Session::SetNotifyCallingSessionForegroundFunc(const NotifyCallingSessionForegroundFunc& func)
@@ -1099,7 +1119,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         return WSError::WS_ERROR_NULLPTR;
     }
     if (WSError ret = windowEventChannel_->TransferPointerEvent(pointerEvent); ret != WSError::WS_OK) {
-        WLOGFE("TransferPointer failed");
+        WLOGFE("TransferPointer failed, ret:%{public}d", ret);
         return ret;
     }
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
@@ -1161,7 +1181,7 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
     }
     WLOGD("TransferKeyEvent, id: %{public}d", persistentId_);
     if (WSError ret = windowEventChannel_->TransferKeyEvent(keyEvent); ret != WSError::WS_OK) {
-        WLOGFE("TransferKeyEvent failed");
+        WLOGFE("TransferKeyEvent failed, ret:%{public}d", ret);
         return ret;
     }
     DelayedSingleton<ANRManager>::GetInstance()->AddTimer(keyEvent->GetId(), persistentId_);

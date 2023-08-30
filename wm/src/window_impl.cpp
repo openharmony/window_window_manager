@@ -756,9 +756,8 @@ WMError WindowImpl::SetLayoutFullScreen(bool status)
     if (version >= 10) {
         if (uiContent_ != nullptr) {
             uiContent_->SetIgnoreViewSafeArea(status);
-        } else {
-            isIgnoreSafeAreaNeedNotify_ = true;
         }
+        isIgnoreSafeAreaNeedNotify_ = true;
     } else {
         if (status) {
             ret = RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);

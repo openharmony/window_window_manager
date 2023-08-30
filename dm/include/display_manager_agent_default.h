@@ -37,6 +37,8 @@ public:
     void OnDisplayChange(const sptr<DisplayInfo>, DisplayChangeEvent) override {};
     void OnScreenshot(sptr<ScreenshotInfo>) override {};
     void NotifyPrivateWindowStateChanged(bool hasPrivate) override {};
+    void NotifyFoldStatusChanged(FoldStatus foldStatus) override {};
+    void NotifyDisplayModeChanged(FoldDisplayMode displayMode) override {};
 };
 }
 }

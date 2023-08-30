@@ -111,6 +111,18 @@ HWTEST_F(EventStageTest, DelEvents, Function | SmallTest | Level1)
     int32_t eventId = 0;
     eventStage_.DelEvents(persistentId, eventId);
 }
+
+/**
+ * @tc.name: OnSessionLost
+ * @tc.desc: test function : OnSessionLost
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventStageTest, OnSessionLost, Function | SmallTest | Level1)
+{
+    int32_t persistentId = 0;
+    eventStage_.OnSessionLost(persistentId);
+    ASSERT_EQ(false, eventStage_.CheckAnrStatus(persistentId));
+}
 }
 }
 }

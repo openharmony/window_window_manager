@@ -710,7 +710,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSession(NativeEngine& engine, 
     if (info.argc == 2 && info.argv[1]->TypeOf() != NATIVE_UNDEFINED) {
         OHOS::AppExecFwk::UnwrapWant(reinterpret_cast<napi_env>(&engine),
             reinterpret_cast<napi_value>(info.argv[1]), want);
-        sessionInfo.want = new(std::nothrow) AAFwk::Want(want);
+        sessionInfo.want = std::make_shared<AAFwk::Want>(want);
     }
 
     WLOGFI("[NAPI]SessionInfo [%{public}s, %{public}s, %{public}s], errCode = %{public}d",
@@ -761,7 +761,7 @@ NativeValue* JsSceneSessionManager::OnUpdateSceneSessionWant(NativeEngine& engin
         return engine.CreateUndefined();
     }
 
-    sessionInfo.want = new(std::nothrow) AAFwk::Want(want);
+    sessionInfo.want = std::make_shared<AAFwk::Want>(want);
 
     WLOGFI("[NAPI]SessionInfo [%{public}s, %{public}s, %{public}s, %{public}d]", sessionInfo.bundleName_.c_str(),
         sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str(), sessionInfo.persistentId_);
