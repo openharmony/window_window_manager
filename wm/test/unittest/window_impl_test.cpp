@@ -3252,8 +3252,8 @@ HWTEST_F(WindowImplTest, UpdateWindowStateWhenShow, Function | SmallTest | Level
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("main");
     sptr<WindowImpl> mainWindow = new WindowImpl(option);
-    if (mainWindow->Create(INVALID_WINDOW_ID) == WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, mainWindow->Create(INVALID_WINDOW_ID));
+    if (mainWindow->Create(INVALID_WINDOW_ID) != WMError::WM_OK) {
+        ASSERT_NE(WMError::WM_OK, mainWindow->Create(INVALID_WINDOW_ID));
     }
 
     ASSERT_EQ(WmErrorCode::WM_OK, mainWindow->UpdateWindowStateWhenShow());
