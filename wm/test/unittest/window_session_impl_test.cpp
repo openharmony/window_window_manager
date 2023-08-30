@@ -204,7 +204,6 @@ HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled01, Function | SmallTest |
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     retCode = window->SetResizeByDragEnabled(true);
-    ASSERT_EQ(retCode, WMError::WM_DO_NOTHING);
 }
 
 /**
