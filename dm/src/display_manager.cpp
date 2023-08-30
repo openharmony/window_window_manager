@@ -46,6 +46,17 @@ public:
     sptr<Display> GetDefaultDisplaySync();
     sptr<Display> GetDisplayById(DisplayId displayId);
     DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
+
+    bool IsFoldable();
+
+    FoldStatus GetFoldStatus();
+
+    FoldDisplayMode GetFoldDisplayMode();
+
+    void SetFoldDisplayMode(const FoldDisplayMode);
+
+    sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
+
     DMError RegisterDisplayListener(sptr<IDisplayListener> listener);
     DMError UnregisterDisplayListener(sptr<IDisplayListener> listener);
     bool SetDisplayState(DisplayState state, DisplayStateCallback callback);
@@ -548,6 +559,56 @@ DMError DisplayManager::HasPrivateWindow(DisplayId displayId, bool& hasPrivateWi
 DMError DisplayManager::Impl::HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow)
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().HasPrivateWindow(displayId, hasPrivateWindow);
+}
+
+bool DisplayManager::IsFoldable()
+{
+    return pImpl_->IsFoldable();
+}
+
+bool DisplayManager::Impl::IsFoldable()
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().IsFoldable();
+}
+
+FoldStatus DisplayManager::GetFoldStatus()
+{
+    return pImpl_->GetFoldStatus();
+}
+
+FoldStatus DisplayManager::Impl::GetFoldStatus()
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetFoldStatus();
+}
+
+FoldDisplayMode DisplayManager::GetFoldDisplayMode()
+{
+    return pImpl_->GetFoldDisplayMode();
+}
+
+FoldDisplayMode DisplayManager::Impl::GetFoldDisplayMode()
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetFoldDisplayMode();
+}
+
+void DisplayManager::SetFoldDisplayMode(const FoldDisplayMode mode)
+{
+    pImpl_->SetFoldDisplayMode(mode);
+}
+
+void DisplayManager::Impl::SetFoldDisplayMode(const FoldDisplayMode mode)
+{
+    SingletonContainer::Get<DisplayManagerAdapter>().SetFoldDisplayMode(mode);
+}
+
+sptr<FoldCreaseRegion> DisplayManager::GetCurrentFoldCreaseRegion()
+{
+    return pImpl_->GetCurrentFoldCreaseRegion();
+}
+
+sptr<FoldCreaseRegion> DisplayManager::Impl::GetCurrentFoldCreaseRegion()
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetCurrentFoldCreaseRegion();
 }
 
 DMError DisplayManager::Impl::RegisterDisplayListener(sptr<IDisplayListener> listener)

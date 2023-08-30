@@ -2073,7 +2073,7 @@ void ScreenSessionManager::DumpSpecialScreenInfo(ScreenId id, std::string& dumpI
     dumpInfo.append(oss.str());
 }
 
-//Fold Screen
+// --- Fold Screen ---
 ScreenProperty ScreenSessionManager::GetPhyScreenProperty(ScreenId screenId)
 {
     std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
@@ -2086,7 +2086,7 @@ ScreenProperty ScreenSessionManager::GetPhyScreenProperty(ScreenId screenId)
     return iter->second;
 }
 
-void ScreenSessionManager::SetFoldDisplayMode(FoldDisplayMode displayMode)
+void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
 {
     if (foldScreenController_ == nullptr) {
         WLOGFW("SetFoldDisplayMode foldScreenController_ is null");
@@ -2102,5 +2102,32 @@ FoldDisplayMode ScreenSessionManager::GetFoldDisplayMode()
         return FoldDisplayMode::UNKNOWN;
     }
     return foldScreenController_->GetDisplayMode();
+}
+
+bool ScreenSessionManager::IsFoldable()
+{
+    if (foldScreenController_ == nullptr) {
+        WLOGFW("foldScreenController_ is null");
+        return false;
+    }
+    return foldScreenController_->IsFoldable();
+}
+
+FoldStatus ScreenSessionManager::GetFoldStatus()
+{
+    if (foldScreenController_ == nullptr) {
+        WLOGFW("foldScreenController_ is null");
+        return FoldStatus::UNKNOWN;
+    }
+    return foldScreenController_->GetFoldStatus();
+}
+
+sptr<FoldCreaseRegion> ScreenSessionManager::GetCurrentFoldCreaseRegion()
+{
+    if (foldScreenController_ == nullptr) {
+        WLOGFW("foldScreenController_ is null");
+        return nullptr;
+    }
+    return foldScreenController_->GetCurrentFoldCreaseRegion();
 }
 } // namespace OHOS::Rosen

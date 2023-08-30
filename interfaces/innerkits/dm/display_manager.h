@@ -22,6 +22,7 @@
 
 #include "display.h"
 #include "dm_common.h"
+#include "fold_screen_info.h"
 #include "wm_single_instance.h"
 #include "screenshot_info.h"
 
@@ -369,6 +370,41 @@ public:
      * @return DM_OK means remove success, others means remove failed.
      */
     DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId, std::shared_ptr<class RSSurfaceNode>& surfaceNode);
+
+    /**
+     * @brief Check whether the device is foldable.
+     *
+     * @return true means the device is foldable.
+     */
+    bool IsFoldable();
+
+    /**
+     * @brief Get the current fold status of the foldable device.
+     *
+     * @return fold status of device.
+     */
+    FoldStatus GetFoldStatus();
+
+    /**
+     * @brief Get the display mode of the foldable device.
+     *
+     * @return display mode of the foldable device.
+     */
+    FoldDisplayMode GetFoldDisplayMode();
+
+    /**
+     * @brief Change the display mode of the foldable device.
+     *
+     * @param mode target display mode to change.
+     */
+    void SetFoldDisplayMode(const FoldDisplayMode mode);
+
+    /**
+     * @brief Get the fold crease region in the current display mode.
+     *
+     * @return fold crease region in the current display mode.
+     */
+    sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
 
     constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 3840; // max resolution, 4K
 

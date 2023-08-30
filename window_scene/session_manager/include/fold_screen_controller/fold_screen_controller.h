@@ -19,6 +19,7 @@
 
 #include "fold_screen_controller/fold_screen_policy.h"
 #include "fold_screen_controller/fold_screen_state_machine.h"
+#include "fold_screen_info.h"
 
 namespace OHOS::Rosen {
 enum class DisplayDeviceType :uint32_t {
@@ -31,9 +32,14 @@ class FoldScreenController : public RefBase {
 public:
     FoldScreenController();
     virtual ~FoldScreenController();
-    void SetDisplayMode(FoldDisplayMode displayMode);
+    void SetDisplayMode(const FoldDisplayMode displayMode);
     FoldDisplayMode GetDisplayMode();
 
+    bool IsFoldable();
+
+    FoldStatus GetFoldStatus();
+
+    sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
 private:
     sptr<FoldScreenPolicy> GetFoldScreenPolicy(DisplayDeviceType productType);
     sptr<FoldScreenPolicy> foldScreenPolicy_;
