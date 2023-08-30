@@ -58,7 +58,9 @@ void ANRHandler::SetSessionStage(int32_t eventId, const wptr<ISessionStage> &ses
         return;
     }
     sessionStageMap_[eventId] = sessionStage;
-    WLOGFD("SetSessionStage for eventId:%{public}d, persistentId:%{public}d", eventId, sessionStage->GetPersistentId());
+    int32_t persistentId = sessionStage->GetPersistentId();
+    windowEventMap_[persistentId].insert(eventId);
+    WLOGFD("SetSessionStage for eventId:%{public}d, persistentId:%{public}d", eventId, persistentId);
 }
 
 void ANRHandler::HandleEventConsumed(int32_t eventId, int64_t actionTime)
@@ -99,6 +101,7 @@ void ANRHandler::OnWindowDestroyed(int32_t persistentId)
     }
     anrHandlerState_.eventsIterMap.erase(persistentId);
     WLOGFD("PersistentId:%{public}d erased in ANRHandler", persistentId);
+    ClearEventsOfDestroyedWindow(persistentId);
 }
 
 void ANRHandler::SetAnrHandleState(int32_t eventId, bool status)
@@ -168,6 +171,15 @@ void ANRHandler::ClearExpiredEvents(int32_t eventId)
             iter++;
         }
     }
+    if (windowEventMap_.find(persistentId) == windowEventMap_.end()) {
+        WLOGFD("No events of persistentId:%{public}d in windowEventMap", persistentId);
+        return;
+    }
+    for (const auto& elem : windowEventMap_[persistentId]) {
+        if (elem <= eventId) {
+            windowEventMap_[persistentId].erase(elem);
+        }
+    }
 }
 
 int32_t ANRHandler::GetPersistentIdOfEvent(int32_t eventId)
@@ -208,6 +220,20 @@ void ANRHandler::UpdateLatestEventId(int32_t eventId)
         WLOGFD("Replace eventId:%{public}d by newer eventId:%{public}d", *pendingEventIter, eventId);
         *pendingEventIter = eventId;
     }
+}
+
+void ANRHandler::ClearEventsOfDestroyedWindow(int32_t persistentId)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (windowEventMap_.find(persistentId) == windowEventMap_.end()) {
+        WLOGFE("No persistentId:%{public}d in windowEventMap", persistentId);
+        return;
+    }
+    for (const auto& eventId : windowEventMap_[persistentId]) {
+        sessionStageMap_.erase(eventId);
+    }
+    windowEventMap_.erase(persistentId);
+    WLOGFD("Clear events of persistentId:%{public}d in sessionStageMap and windowEventMap ", persistentId);
 }
 } // namespace Rosen
 } // namespace OHOS
