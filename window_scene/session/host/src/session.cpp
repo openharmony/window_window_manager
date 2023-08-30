@@ -606,7 +606,13 @@ void Session::HandleDialogBackground()
         WLOGFD("Current session is not main window, id: %{public}d, type: %{public}d", GetPersistentId(), type);
         return;
     }
-    for (const auto& dialog : dialogVec_) {
+
+    std::vector<sptr<Session>> dialogVec;
+    {
+        std::unique_lock<std::mutex> lock(dialogVecMutex_);
+        dialogVec = dialogVec_;
+    }
+    for (const auto& dialog : dialogVec) {
         if (dialog == nullptr) {
             continue;
         }
@@ -622,7 +628,13 @@ void Session::HandleDialogForeground()
     if (type < WindowType::APP_MAIN_WINDOW_BASE || type >= WindowType::APP_MAIN_WINDOW_END) {
         WLOGFD("Current session is not main window, id: %{public}d, type: %{public}d", GetPersistentId(), type);
     }
-    for (const auto& dialog : dialogVec_) {
+
+    std::vector<sptr<Session>> dialogVec;
+    {
+        std::unique_lock<std::mutex> lock(dialogVecMutex_);
+        dialogVec = dialogVec_;
+    }
+    for (const auto& dialog : dialogVec) {
         if (dialog == nullptr) {
             continue;
         }
@@ -1004,6 +1016,7 @@ void Session::SetParentSession(const sptr<Session>& session)
 
 void Session::BindDialogToParentSession(const sptr<Session>& session)
 {
+    std::unique_lock<std::mutex> lock(dialogVecMutex_);
     auto iter = std::find(dialogVec_.begin(), dialogVec_.end(), session);
     if (iter != dialogVec_.end()) {
         WLOGFW("Dialog is existed in parentVec, id: %{public}d, parentId: %{public}d",
@@ -1017,6 +1030,7 @@ void Session::BindDialogToParentSession(const sptr<Session>& session)
 
 void Session::RemoveDialogToParentSession(const sptr<Session>& session)
 {
+    std::unique_lock<std::mutex> lock(dialogVecMutex_);
     auto iter = std::find(dialogVec_.begin(), dialogVec_.end(), session);
     if (iter != dialogVec_.end()) {
         WLOGFD("Remove dialog success, id: %{public}d, parentId: %{public}d",
@@ -1029,11 +1043,13 @@ void Session::RemoveDialogToParentSession(const sptr<Session>& session)
 
 std::vector<sptr<Session>> Session::GetDialogVector() const
 {
+    std::unique_lock<std::mutex> lock(dialogVecMutex_);
     return dialogVec_;
 }
 
 bool Session::CheckDialogOnForeground()
 {
+    std::unique_lock<std::mutex> lock(dialogVecMutex_);
     if (dialogVec_.empty()) {
         return false;
     }

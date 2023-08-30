@@ -344,6 +344,7 @@ private:
     bool bufferAvailable_ = false;
     bool isTerminating = false;
 
+    mutable std::mutex dialogVecMutex_;
     std::vector<sptr<Session>> dialogVec_;
     sptr<Session> parentSession_;
 
