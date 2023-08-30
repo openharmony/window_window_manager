@@ -96,11 +96,21 @@ HWTEST_F(ScreenRotationPropertyTest, IsScreenRotationLocked, Function | SmallTes
 HWTEST_F(ScreenRotationPropertyTest, SetScreenRotationLocked, Function | SmallTest | Level1)
 {
     ScreenRotationProperty::Init();
-    DMError ret = ScreenRotationProperty::SetScreenRotationLocked(true);
+    bool isLocked = true;
+    DMError ret = ScreenRotationProperty::SetScreenRotationLocked(isLocked);
     ASSERT_EQ(DMError::DM_OK, ret);
-    ret = ScreenRotationProperty::SetScreenRotationLocked(false);
+    isLocked = false;
+    ScreenRotationProperty::GetCurrentDisplayRotation();
+    ScreenRotationProperty::ConvertDeviceToDisplayRotation(DeviceRotation::INVALID);
+    ret = ScreenRotationProperty::SetScreenRotationLocked(isLocked);
     ASSERT_EQ(DMError::DM_OK, ret);
-
+    ScreenRotationProperty::ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_LANDSCAPE);
+    Orientation currentOrientation = ScreenRotationProperty::GetPreferredOrientation();
+    ScreenRotationProperty::IsSensorRelatedOrientation(currentOrientation);
+    ret = ScreenRotationProperty::SetScreenRotationLocked(isLocked);
+    ScreenRotationProperty::IsSensorRelatedOrientation(Orientation::UNSPECIFIED);
+    ret = ScreenRotationProperty::SetScreenRotationLocked(isLocked);
+    ASSERT_EQ(DMError::DM_OK, ret);
 }
 
 /**
@@ -111,8 +121,11 @@ HWTEST_F(ScreenRotationPropertyTest, SetScreenRotationLocked, Function | SmallTe
 HWTEST_F(ScreenRotationPropertyTest, SetDefaultDeviceRotationOffset, Function | SmallTest | Level1)
 {
     ScreenRotationProperty::Init();
-    uint32_t offset = 0;
+    uint32_t offset = -1;
     ScreenRotationProperty::SetDefaultDeviceRotationOffset(offset);
+    offset = 0;
+    ScreenRotationProperty::SetDefaultDeviceRotationOffset(offset);
+    ASSERT_EQ(offset,ScreenRotationProperty::defaultDeviceRotationOffset_);
 }
 
 /**
@@ -136,9 +149,11 @@ HWTEST_F(ScreenRotationPropertyTest, SetScreenRotation, Function | SmallTest | L
 {
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: SetScreenRotation start";
     ScreenRotationProperty::Init();
-    int32_t res = 0;
-    ScreenRotationProperty::SetScreenRotation(Rotation::ROTATION_0);
-    ASSERT_EQ(0, res);
+    Rotation targetRotation = ScreenRotationProperty::GetCurrentDisplayRotation();
+    ScreenRotationProperty::SetScreenRotation(targetRotation);
+    targetRotation = Rotation::ROTATION_90;
+    ScreenRotationProperty::SetScreenRotation(targetRotation);
+    ASSERT_EQ(false, ScreenSessionManager::GetInstance().SetRotationFromWindow(targetRotation));
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: SetScreenRotation end";
 }
 
@@ -272,9 +287,12 @@ HWTEST_F(ScreenRotationPropertyTest, ConvertDeviceToDisplayRotation, Function | 
 {
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ConvertDeviceToDisplayRotation start";
     ScreenRotationProperty::Init();
-    int32_t res = 0;
-    ScreenRotationProperty::ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_PORTRAIT);
-    ASSERT_EQ(0, res);
+    DeviceRotation deviceRotation = DeviceRotation::INVALID;
+    Rotation rotation  = ScreenRotationProperty::ConvertDeviceToDisplayRotation(deviceRotation);
+    ASSERT_EQ(ScreenRotationProperty::GetCurrentDisplayRotation(), rotation);
+    deviceRotation = DeviceRotation::ROTATION_PORTRAIT;
+    rotation  = ScreenRotationProperty::ConvertDeviceToDisplayRotation(deviceRotation);
+    ASSERT_EQ(ScreenRotationProperty::deviceToDisplayRotationMap_.at(deviceRotation), rotation);
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ConvertDeviceToDisplayRotation end";
 }
 
@@ -285,22 +303,40 @@ HWTEST_F(ScreenRotationPropertyTest, ConvertDeviceToDisplayRotation, Function | 
  */
 HWTEST_F(ScreenRotationPropertyTest, ProcessRotationMapping, Function | SmallTest | Level1)
 {
-    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessRotationMapping start";
-    ScreenRotationProperty::Init();
-    int32_t res = 0;
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessRotationMapping_PORTRAIT start";
+    ScreenRotationProperty::defaultDeviceRotation_ = 0;
     ScreenRotationProperty::ProcessRotationMapping();
-    ASSERT_EQ(0, res);
-    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessRotationMapping end";
+    ASSERT_EQ(Rotation::ROTATION_0, ScreenRotationProperty::deviceToDisplayRotationMap_.at(DeviceRotation::ROTATION_PORTRAIT));
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessRotationMapping_PORTRAIT end";
 }
 
+/**
+ * @tc.name: ProcessSwitchToSensorRelatedOrientation
+ * @tc.desc: test function : ProcessSwitchToSensorRelatedOrientation
+ * @tc.type: FUNC
+ */
 HWTEST_F(ScreenRotationPropertyTest, ProcessSwitchToSensorRelatedOrientation, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessSwitchToSensorRelatedOrientation start";
     ScreenRotationProperty::Init();
-    int32_t res = 0;
-    ScreenRotationProperty::ProcessSwitchToSensorRelatedOrientation(
-        Orientation::BEGIN, DeviceRotation::ROTATION_PORTRAIT);
-    ASSERT_EQ(0, res);
+    Orientation orientation = Orientation::AUTO_ROTATION_RESTRICTED;
+    DeviceRotation sensorRotationConverted = DeviceRotation::INVALID;
+    ScreenRotationProperty::isScreenRotationLocked_ = true;
+    ScreenRotationProperty::ProcessSwitchToSensorRelatedOrientation(orientation, sensorRotationConverted);
+    ASSERT_EQ(ScreenRotationProperty::GetCurrentDisplayRotation(), ScreenRotationProperty::rotationLockedRotation_);
+    orientation = Orientation::SENSOR;
+    sensorRotationConverted = DeviceRotation::ROTATION_PORTRAIT;
+    ScreenRotationProperty::ProcessSwitchToSensorRelatedOrientation(orientation, sensorRotationConverted);
+    ASSERT_EQ(ScreenRotationProperty::deviceToDisplayRotationMap_.at(sensorRotationConverted),
+        ScreenRotationProperty::ConvertDeviceToDisplayRotation(sensorRotationConverted));
+    orientation = Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED;
+    ScreenRotationProperty::ProcessSwitchToSensorRelatedOrientation(orientation, sensorRotationConverted);
+    orientation = Orientation::SENSOR_VERTICAL;
+    ScreenRotationProperty::ProcessSwitchToSensorRelatedOrientation(orientation, sensorRotationConverted);
+    orientation = Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED;
+    ScreenRotationProperty::ProcessSwitchToSensorRelatedOrientation(orientation, sensorRotationConverted);
+    orientation = Orientation::SENSOR_HORIZONTAL;
+    ScreenRotationProperty::ProcessSwitchToSensorRelatedOrientation(orientation, sensorRotationConverted);
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessSwitchToSensorRelatedOrientation end";
 }
 
@@ -313,9 +349,17 @@ HWTEST_F(ScreenRotationPropertyTest, GetCurrentDisplayRotation, Function | Small
 {
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: GetCurrentDisplayRotation start";
     ScreenRotationProperty::Init();
-    int32_t res = 0;
-    ScreenRotationProperty::GetCurrentDisplayRotation();
-    ASSERT_EQ(0, res);
+    ScreenSessionManager *screenSessionManager = new ScreenSessionManager;
+    sptr<DisplayInfo> defaultDisplayInfo = screenSessionManager->GetDefaultDisplayInfo();
+    Rotation rotation = ScreenRotationProperty::GetCurrentDisplayRotation();
+    ASSERT_EQ(defaultDisplayInfo->GetRotation(), rotation);
+    defaultDisplayInfo = nullptr;
+    rotation = ScreenRotationProperty::GetCurrentDisplayRotation();
+    ASSERT_EQ(ScreenRotationProperty::ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_PORTRAIT), rotation);
+    ScreenRotationProperty::defaultDeviceRotation_ = 1;
+    rotation = ScreenRotationProperty::GetCurrentDisplayRotation();
+    ASSERT_EQ(ScreenRotationProperty::ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_LANDSCAPE), rotation);
+    delete screenSessionManager;
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: GetCurrentDisplayRotation end";
 }
 
@@ -328,6 +372,19 @@ HWTEST_F(ScreenRotationPropertyTest, HandleSensorEventInput, Function | SmallTes
 {
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: HandleSensorEventInput start";
     ScreenRotationProperty::Init();
+    DeviceRotation deviceRotation = DeviceRotation::INVALID;
+    ScreenRotationProperty::HandleSensorEventInput(deviceRotation);
+    deviceRotation = DeviceRotation::ROTATION_PORTRAIT;
+    ScreenSessionManager *screenSessionManager = new ScreenSessionManager;
+    auto defaultDisplayInfo = screenSessionManager->GetDefaultDisplayInfo();
+    ScreenRotationProperty::HandleSensorEventInput(deviceRotation);
+    Orientation orientation = Orientation::BEGIN;
+    ScreenRotationProperty::IsSensorRelatedOrientation(orientation);
+    ScreenRotationProperty::HandleSensorEventInput(deviceRotation);
+    orientation = Orientation::SENSOR;
+    ScreenRotationProperty::GetCurrentDisplayRotation();
+    ScreenRotationProperty::ConvertDeviceToDisplayRotation(deviceRotation);
+    ScreenRotationProperty::HandleSensorEventInput(deviceRotation);
     int32_t res = 0;
     ScreenRotationProperty::HandleSensorEventInput(DeviceRotation::INVALID);
     ASSERT_EQ(0, res);
@@ -372,7 +429,10 @@ HWTEST_F(ScreenRotationPropertyTest, ProcessAutoRotationPortraitOrientation, Fun
     ScreenRotationProperty::Init();
     DeviceRotation sensorRotationConverted = DeviceRotation::ROTATION_LANDSCAPE;
     auto result = ScreenRotationProperty::ProcessAutoRotationPortraitOrientation(sensorRotationConverted);
-    ASSERT_EQ(ScreenRotationProperty::currentDisplayRotation_, result);
+    ASSERT_EQ(ScreenRotationProperty::GetCurrentDisplayRotation(), result);
+    sensorRotationConverted = DeviceRotation::ROTATION_PORTRAIT;
+    result = ScreenRotationProperty::ProcessAutoRotationPortraitOrientation(sensorRotationConverted);
+    ASSERT_EQ(ScreenRotationProperty::ConvertDeviceToDisplayRotation(sensorRotationConverted), result);
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessAutoRotationPortraitOrientation end";
 }
 
@@ -385,9 +445,12 @@ HWTEST_F(ScreenRotationPropertyTest, ProcessAutoRotationLandscapeOrientation, Fu
 {
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessAutoRotationLandscapeOrientation start";
     ScreenRotationProperty::Init();
-    DeviceRotation sensorRotationConverted = DeviceRotation::ROTATION_LANDSCAPE;
-    auto result = ScreenRotationProperty::ProcessAutoRotationLandscapeOrientation(sensorRotationConverted);
-    ASSERT_EQ(ScreenRotationProperty::currentDisplayRotation_, result);
+    DeviceRotation sensorRotationConverted = DeviceRotation::ROTATION_PORTRAIT;
+    auto result = ScreenRotationProperty::ProcessAutoRotationPortraitOrientation(sensorRotationConverted);
+    ASSERT_EQ(ScreenRotationProperty::GetCurrentDisplayRotation(), result);
+    sensorRotationConverted = DeviceRotation::ROTATION_LANDSCAPE;
+    result = ScreenRotationProperty::ProcessAutoRotationPortraitOrientation(sensorRotationConverted);
+    ASSERT_EQ(ScreenRotationProperty::ConvertDeviceToDisplayRotation(sensorRotationConverted), result);
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: ProcessAutoRotationLandscapeOrientation end";
 }
 
@@ -403,7 +466,12 @@ HWTEST_F(ScreenRotationPropertyTest, CalcDeviceRotation, Function | SmallTest | 
     SensorRotation sensorRotation = SensorRotation::INVALID;
     auto result = ScreenRotationProperty::CalcDeviceRotation(sensorRotation);
     ASSERT_EQ(DeviceRotation::INVALID, result);
-    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: CalcTargetDisplayRotation end";
+    sensorRotation = SensorRotation::ROTATION_0;
+    ScreenRotationProperty::defaultDeviceRotationOffset_ = 90;
+    ScreenRotationProperty::defaultDeviceRotation_ = 1;
+    result = ScreenRotationProperty::CalcDeviceRotation(sensorRotation);
+    ASSERT_EQ(DeviceRotation::ROTATION_PORTRAIT_INVERTED, result);
+    GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: CalcDeviceRotation end";
 }
 
 /**
@@ -415,10 +483,40 @@ HWTEST_F(ScreenRotationPropertyTest, CalcTargetDisplayRotation, Function | Small
 {
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: CalcTargetDisplayRotation start";
     ScreenRotationProperty::Init();
-    Orientation requestedOrientation = Orientation::VERTICAL;
+    Orientation requestedOrientation = Orientation::SENSOR;
     DeviceRotation sensorRotationConverted = DeviceRotation::ROTATION_LANDSCAPE;
     auto result = ScreenRotationProperty::CalcTargetDisplayRotation(requestedOrientation, sensorRotationConverted);
-    ASSERT_EQ(ScreenRotationProperty::lastSensorDecidedRotation_, result);
+    ASSERT_EQ(ScreenRotationProperty::ConvertDeviceToDisplayRotation(sensorRotationConverted), result);
+    requestedOrientation = Orientation::SENSOR_VERTICAL;
+    result = ScreenRotationProperty::CalcTargetDisplayRotation(requestedOrientation, sensorRotationConverted);
+    ASSERT_EQ(ScreenRotationProperty::ProcessAutoRotationPortraitOrientation(sensorRotationConverted), result);
+    requestedOrientation = Orientation::SENSOR_HORIZONTAL;
+    result = ScreenRotationProperty::CalcTargetDisplayRotation(requestedOrientation, sensorRotationConverted);
+    ASSERT_EQ(ScreenRotationProperty::ProcessAutoRotationLandscapeOrientation(sensorRotationConverted), result);
+    requestedOrientation = Orientation::AUTO_ROTATION_RESTRICTED;
+    ScreenRotationProperty::isScreenRotationLocked_ = true;
+    result = ScreenRotationProperty::CalcTargetDisplayRotation(requestedOrientation, sensorRotationConverted);
+    ASSERT_EQ(ScreenRotationProperty::GetCurrentDisplayRotation(), result);
+    ScreenRotationProperty::isScreenRotationLocked_ = false;
+    result = ScreenRotationProperty::CalcTargetDisplayRotation(requestedOrientation, sensorRotationConverted);
+    ASSERT_EQ(ScreenRotationProperty::ConvertDeviceToDisplayRotation(sensorRotationConverted), result);
+    requestedOrientation = Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED;
+    ScreenRotationProperty::isScreenRotationLocked_ = true;
+    result = ScreenRotationProperty::CalcTargetDisplayRotation(requestedOrientation, sensorRotationConverted);
+    ASSERT_EQ(ScreenRotationProperty::GetCurrentDisplayRotation(), result);
+    ScreenRotationProperty::isScreenRotationLocked_ = false;
+    result = ScreenRotationProperty::CalcTargetDisplayRotation(requestedOrientation, sensorRotationConverted);
+    ASSERT_EQ(ScreenRotationProperty::ProcessAutoRotationPortraitOrientation(sensorRotationConverted), result);
+    requestedOrientation = Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED;
+    ScreenRotationProperty::isScreenRotationLocked_ = true;
+    result = ScreenRotationProperty::CalcTargetDisplayRotation(requestedOrientation, sensorRotationConverted);
+    ASSERT_EQ(ScreenRotationProperty::GetCurrentDisplayRotation(), result);
+    ScreenRotationProperty::isScreenRotationLocked_ = false;
+    result = ScreenRotationProperty::CalcTargetDisplayRotation(requestedOrientation, sensorRotationConverted);
+    ASSERT_EQ(ScreenRotationProperty::ProcessAutoRotationLandscapeOrientation(sensorRotationConverted), result);
+    requestedOrientation = Orientation::LOCKED;
+    result = ScreenRotationProperty::CalcTargetDisplayRotation(requestedOrientation, sensorRotationConverted);
+    ASSERT_EQ(ScreenRotationProperty::GetCurrentDisplayRotation(), result);
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: CalcTargetDisplayRotation end";
 }
 
@@ -482,7 +580,7 @@ HWTEST_F(ScreenRotationPropertyTest, IsCurrentDisplayHorizontal, Function | Smal
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: IsCurrentDisplayHorizontal start";
     ScreenRotationProperty::Init();
     auto result = ScreenRotationProperty::IsCurrentDisplayHorizontal();
-    ASSERT_EQ(true, result);
+    ASSERT_EQ(false, result);
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: IsCurrentDisplayHorizontal end";
 }
 
@@ -524,9 +622,9 @@ HWTEST_F(ScreenRotationPropertyTest, IsDisplayRotationHorizontal, Function | Sma
 {
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: IsDisplayRotationHorizontal start";
     ScreenRotationProperty::Init();
-    Rotation rotation = Rotation::ROTATION_0;
+    Rotation rotation = Rotation::ROTATION_90;
     auto result = ScreenRotationProperty::IsDisplayRotationHorizontal(rotation);
-    ASSERT_EQ(false, result);
+    ASSERT_EQ(true, result);
     GTEST_LOG_(INFO) << "ScreenRotationPropertyTest: IsDisplayRotationHorizontal end";
 }
 
