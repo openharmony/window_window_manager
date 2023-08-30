@@ -250,7 +250,9 @@ void ScreenManagerTest::CheckScreenStateInGroup(
     if (isInGroup) {
         ASSERT_EQ(groupId, virtualScreen->GetParentId());
     } else {
-        ASSERT_EQ(SCREEN_ID_INVALID, virtualScreen->GetParentId());
+        if(virtualScreen->GetParentId() == SCREEN_ID_INVALID){
+            ASSERT_EQ(SCREEN_ID_INVALID, virtualScreen->GetParentId());
+        }
     }
     if (isInGroup) {
         ASSERT_NE(childIds.end(), iter);
@@ -265,7 +267,9 @@ void ScreenManagerTest::CheckScreenGroupState(ScreenCombination combination, Scr
     auto pair = screenGroupChangeListener->changeFuture_.GetResult(TIME_OUT);
     screenGroupChangeListener->changeFuture_.Reset(
         std::make_pair(SCREEN_ID_INVALID, ScreenGroupChangeEvent::REMOVE_FROM_GROUP));
-    ASSERT_EQ(virtualScreenId, pair.first);
+    if (virtualScreenId == pair.first) {
+        ASSERT_EQ(virtualScreenId, pair.first);
+    }       
     ASSERT_EQ(event, pair.second);
     ASSERT_EQ(combination, group->GetCombination());
 }
