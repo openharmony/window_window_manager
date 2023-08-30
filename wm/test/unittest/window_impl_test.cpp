@@ -3332,7 +3332,7 @@ HWTEST_F(WindowImplTest, UpdateDecorEnable, Function | SmallTest | Level3)
     ASSERT_FALSE(window->IsDecorEnable());
     ASSERT_FALSE(window->property_->GetDecorEnable());
     window->UnregisterWindowChangeListener(sptr<IWindowChangeListener>(listener));
-    ASSERT_EQ(WMError::WM_OK, mainWindow->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
