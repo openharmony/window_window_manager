@@ -389,6 +389,7 @@ NativeValue* SessionTypeInit(NativeEngine* engine)
     SetTypeProperty(object, engine, "TYPE_INPUT_METHOD_STATUS_BAR", JsSessionType::TYPE_INPUT_METHOD_STATUS_BAR);
     SetTypeProperty(object, engine, "TYPE_GLOBAL_SEARCH", JsSessionType::TYPE_GLOBAL_SEARCH);
     SetTypeProperty(object, engine, "TYPE_NEGATIVE_SCREEN", JsSessionType::TYPE_NEGATIVE_SCREEN);
+    SetTypeProperty(object, engine, "TYPE_VOICE_INTERACTION", JsSessionType::TYPE_VOICE_INTERACTION);
     return objValue;
 }
 } // namespace OHOS::Rosen
