@@ -3240,6 +3240,7 @@ HWTEST_F(WindowImplTest, UpdateWindowStateWhenHide, Function | SmallTest | Level
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, mainWindow->Destroy());
+    ASSERT_EQ(WMError::WM_OK, subWindow->Destroy());
 }
 
 /*
@@ -3346,7 +3347,7 @@ HWTEST_F(WindowImplTest, Find01, Function | SmallTest | Level2)
     option->SetWindowName("Find01");
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_EQ(nullptr, WindowImpl::Find("Find01"));
-    ASSERT_EQ(WMError::WM_OK, mainWindow->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
@@ -3594,7 +3595,7 @@ HWTEST_F(WindowImplTest, CreateWindowImpl, Function | SmallTest | Level3)
     sptr<WindowImpl> window4 = new WindowImpl(option4);
     ASSERT_NE(window4, nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
-    ASSERT_EQ(WMError::WM_OK, windo1->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window1->Destroy());
     ASSERT_EQ(WMError::WM_OK, window2->Destroy());
     ASSERT_EQ(WMError::WM_OK, window3->Destroy());
     ASSERT_EQ(WMError::WM_OK, window4->Destroy());

@@ -231,7 +231,6 @@ void ScreenManagerTest::CheckStateDisplay(DisplayId virtualDisplayId, ScreenId v
         } \
         ASSERT_NE(nullptr, group); \
     } \
-   
     sptr<ScreenChangeListener> screenListener = new ScreenChangeListener(); \
     sptr<ScreenGroupChangeListener> screenGroupChangeListener = new ScreenGroupChangeListener(); \
     sptr<VirtualScreenGroupChangeListenerFuture> virtualScreenGroupChangeListener \
