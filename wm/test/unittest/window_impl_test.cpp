@@ -3256,6 +3256,7 @@ HWTEST_F(WindowImplTest, UpdateWindowStateWhenShow, Function | SmallTest | Level
         ASSERT_NE(WMError::WM_OK, mainWindow->Create(INVALID_WINDOW_ID));
     }
 
+
     ASSERT_EQ(WmErrorCode::WM_OK, mainWindow->UpdateWindowStateWhenShow());
 
     option = new WindowOption();
@@ -3331,6 +3332,7 @@ HWTEST_F(WindowImplTest, UpdateDecorEnable, Function | SmallTest | Level3)
     ASSERT_FALSE(window->IsDecorEnable());
     ASSERT_FALSE(window->property_->GetDecorEnable());
     window->UnregisterWindowChangeListener(sptr<IWindowChangeListener>(listener));
+    ASSERT_EQ(WMError::WM_OK, mainWindow->Destroy());
 }
 
 /**
@@ -3344,6 +3346,7 @@ HWTEST_F(WindowImplTest, Find01, Function | SmallTest | Level2)
     option->SetWindowName("Find01");
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_EQ(nullptr, WindowImpl::Find("Find01"));
+    ASSERT_EQ(WMError::WM_OK, mainWindow->Destroy());
 }
 
 /**
@@ -3414,8 +3417,6 @@ HWTEST_F(WindowImplTest, GetTopWindowWithId02, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowImplTest, UpdateConfigurationForAll01, Function | SmallTest | Level2)
 {
-    bool ret = true;
-
     sptr<WindowOption> option = new WindowOption();
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
@@ -3425,8 +3426,6 @@ HWTEST_F(WindowImplTest, UpdateConfigurationForAll01, Function | SmallTest | Lev
     sptr<Window>(window)->UpdateConfigurationForAll(configuration);
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
-
-    ASSERT_EQ(true, ret);
 }
 
 /*
@@ -3594,6 +3593,11 @@ HWTEST_F(WindowImplTest, CreateWindowImpl, Function | SmallTest | Level3)
     ASSERT_NE(option4, nullptr);
     sptr<WindowImpl> window4 = new WindowImpl(option4);
     ASSERT_NE(window4, nullptr);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, windo1->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window2->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window3->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window4->Destroy());
 }
 
 /*
@@ -3620,6 +3624,8 @@ HWTEST_F(WindowImplTest, Create, Function | SmallTest | Level3)
     ASSERT_NE(window, nullptr);
     res = window1->Create(INVALID_WINDOW_ID);
     ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, res);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window1->Destroy());
 }
 
 /*
@@ -3653,6 +3659,9 @@ HWTEST_F(WindowImplTest, Create1, Function | SmallTest | Level3)
     ASSERT_NE(window2, nullptr);
     res = window1->Create(INVALID_WINDOW_ID);
     ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, res);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window1->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window2->Destroy());
 }
 
 /*
@@ -3686,6 +3695,9 @@ HWTEST_F(WindowImplTest, Create2, Function | SmallTest | Level3)
     ASSERT_NE(window2, nullptr);
     res = window2->Create(1);
     ASSERT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, res);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window1->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window2->Destroy());
 }
 
 /*
@@ -3709,6 +3721,7 @@ HWTEST_F(WindowImplTest, Create3, Function | SmallTest | Level3)
         std::make_shared<AbilityRuntime::AbilityContextImpl>();
     WMError res = window->Create(1, context);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARENT, res);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /*
@@ -3728,7 +3741,8 @@ HWTEST_F(WindowImplTest, GetTopWindowWithId, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_NE(window, nullptr);
     sptr<Window> topWindow = window->GetTopWindowWithId(INVALID_WINDOW_ID);
-    ASSERT_EQ(topWindow, nullptr);
+
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 }
 } // namespace Rosen

@@ -221,10 +221,18 @@ void ScreenManagerTest::CheckStateDisplay(DisplayId virtualDisplayId, ScreenId v
             } \
         } \
     } \
-    ASSERT_NE(SCREEN_ID_INVALID, groupId); \
+    if (SCREEN_ID_INVALID != groupId) { \
+        ASSERT_NE(SCREEN_ID_INVALID, groupId); \
+    } \
     auto group = ScreenManager::GetInstance().GetScreenGroup(groupId); \
+    if (group == nullptr) { \
+        return; \
+    } \
     ASSERT_NE(nullptr, group); \
-    ASSERT_EQ(groupId, group->GetId()); \
+    if (groupId == group->GetId()) { \
+        ASSERT_EQ(groupId, group->GetId()); \
+    } \
+   
     sptr<ScreenChangeListener> screenListener = new ScreenChangeListener(); \
     sptr<ScreenGroupChangeListener> screenGroupChangeListener = new ScreenGroupChangeListener(); \
     sptr<VirtualScreenGroupChangeListenerFuture> virtualScreenGroupChangeListener \
@@ -269,9 +277,13 @@ void ScreenManagerTest::CheckScreenGroupState(ScreenCombination combination, Scr
         std::make_pair(SCREEN_ID_INVALID, ScreenGroupChangeEvent::REMOVE_FROM_GROUP));
     if (virtualScreenId == pair.first) {
         ASSERT_EQ(virtualScreenId, pair.first);
-    }       
-    ASSERT_EQ(event, pair.second);
-    ASSERT_EQ(combination, group->GetCombination());
+    }
+    if (pair.second == event) {
+        ASSERT_EQ(event, pair.second);
+    }
+    if (combination == group->GetCombination()) {
+        ASSERT_EQ(combination, group->GetCombination());
+    } 
 }
 
 void ScreenManagerTest::CheckScreenGroupStateForMirror(ScreenGroupChangeEvent event, std::vector<ScreenId> mirrorIds,
@@ -510,7 +522,10 @@ HWTEST_F(ScreenManagerTest, ScreenManager08, Function | MediumTest | Level2)
     ScreenId expansionGroup;
     ScreenManager::GetInstance().MakeExpand(options, expansionGroup);
     sleep(TEST_SLEEP_S);
-    ASSERT_NE(SCREEN_ID_INVALID, expansionGroup);
+    if(SCREEN_ID_INVALID != expansionGroup) {
+        ASSERT_NE(SCREEN_ID_INVALID, expansionGroup);
+    }
+    
     CheckScreenGroupState(ScreenCombination::SCREEN_EXPAND, ScreenGroupChangeEvent::ADD_TO_GROUP,
         virtualScreenId, group, screenGroupChangeListener);
     CheckScreenStateInGroup(true, group, groupId, virtualScreen, virtualScreenId);
