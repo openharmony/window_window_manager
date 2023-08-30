@@ -39,8 +39,11 @@ group("unittest") {
     ":ws_session_listener_controller_test",
     ":ws_session_manager_agent_controller_test",
     ":ws_session_proxy_test",
+    ":ws_session_stage_proxy_test",
+    ":ws_session_stage_stub_test",
     ":ws_session_test",
     ":ws_timer_manager_test",
+    ":ws_window_event_channel_proxy_test",
     ":ws_window_event_channel_test",
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
@@ -397,6 +400,46 @@ ohos_unittest("ws_scene_session_converter_test") {
   ]
 }
 
+ohos_unittest("ws_session_stage_proxy_test") {
+  module_out_path = module_out_path
+
+  sources = [ "session_stage_proxy_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:base",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_session_stage_stub_test") {
+  module_out_path = module_out_path
+
+  sources = [ "session_stage_stub_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_window_event_channel_proxy_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_event_channel_proxy_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("ws_extension_session_manager_test") {
   module_out_path = module_out_path
 
@@ -437,6 +480,9 @@ config("ws_unittest_common_public_config") {
     "${ability_runtime_inner_api_path}/ability_manager/include",
     "${window_base_path}/wm/include",
     "${window_base_path}/wm/include/zidl",
+
+    # for session
+    "${window_base_path}/window_scene/session/container/include/zidl",
 
     # for session_manager
     "${multimodalinput_path}/input/interfaces/native/innerkits/event/include",
