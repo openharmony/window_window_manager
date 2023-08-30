@@ -2164,6 +2164,66 @@ HWTEST_F(WindowControllerTest, UpdateProperty20, Function | SmallTest | Level3)
     res = windowController_->UpdateProperty(property, action);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, res);
 }
+
+/**
+ * @tc.name: MinimizeWindowsByLauncher
+ * @tc.desc: Window controller MinimizeWindowsByLauncher
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, MinimizeWindowsByLauncher, Function | SmallTest | Level3)
+{
+    windowRoot_->windowNodeMap_.clear();
+    sptr<IWindow> window;
+    sptr<WindowProperty> property = new WindowProperty();
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    property->SetParentId(INVALID_WINDOW_ID);
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(0, windowNode));
+
+    uint32_t windowId = windowNode->GetWindowId();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    surfaceNodeConfig.SurfaceNodeName = "MinimizeWindowsByLauncher";
+    surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+
+    std::vector<uint32_t> windowIds;
+    windowIds.push_back(windowId);
+    bool isAnimated = true;
+    sptr<RSIWindowAnimationFinishedCallback> finishCallback;
+    windowController_->MinimizeWindowsByLauncher(windowIds, isAnimated, finishCallback);
+    isAnimated = false;
+    windowController_->MinimizeWindowsByLauncher(windowIds, isAnimated, finishCallback);
+    ASSERT_EQ(WMError::WM_OK,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+}
+
+/**
+ * @tc.name: OnScreenshot
+ * @tc.desc: Window controller OnScreenshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, OnScreenshot, Function | SmallTest | Level3)
+{
+    windowRoot_->windowNodeMap_.clear();
+    sptr<IWindow> window;
+    sptr<WindowProperty> property = new WindowProperty();
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    property->SetParentId(INVALID_WINDOW_ID);
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(0, windowNode));
+
+    uint32_t windowId = windowNode->GetWindowId();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    surfaceNodeConfig.SurfaceNodeName = "OnScreenshot";
+    surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+
+    DisplayId displayId = static_cast<DisplayId>(windowId);
+    windowController_->OnScreenshot(10);
+    windowController_->OnScreenshot(displayId);
+    ASSERT_EQ(WMError::WM_OK,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+}
 }
 }
 }
