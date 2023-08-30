@@ -211,6 +211,7 @@ void SceneSessionManager::LoadWindowSceneXml()
     } else {
         WLOGFE("Load window scene xml failed");
     }
+    ConfigDefaultKeyboardAnimation();
 }
 
 void SceneSessionManager::InitPrepareTerminateConfig()
@@ -465,8 +466,9 @@ void SceneSessionManager::ConfigKeyboardAnimation(const WindowSceneConfig::Confi
 {
     WindowSceneConfig::ConfigItem item = animationConfig["timing"];
     if (item.IsMap() && item.mapValue_->count("curve")) {
-        appWindowSceneConfig_.keyboardAnimation_.curveType_ = CreateCurve(item["curve"]);
-        systemConfig_.keyboardAnimationConfig_.curveType_ = CreateCurve(item["curve"]);
+        std::string curveType = CreateCurve(item["curve"]);
+        appWindowSceneConfig_.keyboardAnimation_.curveType_ = curveType;
+        systemConfig_.keyboardAnimationConfig_.curveType_ = curveType;
     }
     item = animationConfig["timing"]["durationIn"];
     if (item.IsInts()) {
@@ -484,6 +486,35 @@ void SceneSessionManager::ConfigKeyboardAnimation(const WindowSceneConfig::Confi
             systemConfig_.keyboardAnimationConfig_.durationOut_ = static_cast<uint32_t>(numbers[0]);
         }
     }
+}
+
+void SceneSessionManager::ConfigDefaultKeyboardAnimation()
+{
+    constexpr char CURVETYPE[] = "interpolatingSpring";
+    constexpr float CTRLX1 = 0;
+    constexpr float CTRLY1 = 1;
+    constexpr float CTRLX2 = 342;
+    constexpr float CTRLY2 = 37;
+    constexpr uint32_t DURATION = 150;
+
+    if (!systemConfig_.keyboardAnimationConfig_.curveType_.empty()) {
+        return;
+    }
+
+    appWindowSceneConfig_.keyboardAnimation_.curveType_ = CURVETYPE;
+    appWindowSceneConfig_.keyboardAnimation_.ctrlX1_ = CTRLX1;
+    appWindowSceneConfig_.keyboardAnimation_.ctrlY1_ = CTRLY1;
+    appWindowSceneConfig_.keyboardAnimation_.ctrlX2_ = CTRLX2;
+    appWindowSceneConfig_.keyboardAnimation_.ctrlY2_ = CTRLY2;
+    appWindowSceneConfig_.keyboardAnimation_.durationIn_ = DURATION;
+    appWindowSceneConfig_.keyboardAnimation_.durationOut_ = DURATION;
+
+    systemConfig_.keyboardAnimationConfig_.curveType_ = CURVETYPE;
+    std::vector<float> keyboardCurveParams = {CTRLX1, CTRLY1, CTRLX2, CTRLY2};
+    systemConfig_.keyboardAnimationConfig_.curveParams_.assign(
+        keyboardCurveParams.begin(), keyboardCurveParams.end());;
+    systemConfig_.keyboardAnimationConfig_.durationIn_ = DURATION;
+    systemConfig_.keyboardAnimationConfig_.durationOut_ = DURATION;
 }
 
 void SceneSessionManager::ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig)
@@ -574,6 +605,8 @@ std::string SceneSessionManager::CreateCurve(const WindowSceneConfig::ConfigItem
             appWindowSceneConfig_.keyboardAnimation_.ctrlY1_ = numbers[1]; // 1 ctrlY1
             appWindowSceneConfig_.keyboardAnimation_.ctrlX2_ = numbers[2]; // 2 ctrlX2
             appWindowSceneConfig_.keyboardAnimation_.ctrlY2_ = numbers[3]; // 3 ctrlY2
+
+            systemConfig_.keyboardAnimationConfig_.curveParams_.assign(numbers.begin(), numbers.end());
         }
     } else {
         auto iter = curveSet.find(name);
@@ -849,7 +882,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         RegisterInputMethodShownFunc(sceneSession);
         RegisterInputMethodHideFunc(sceneSession);
 
-        WLOGFI("create session persistentId: %{public}d", persistentId);     
+        WLOGFI("create session persistentId: %{public}d", persistentId);
         return sceneSession;
     };
 
@@ -4013,7 +4046,7 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession> sceneSession)
         sceneSession->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
     } else if (newSessionInfo.abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
         sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
-    }    
+    }
     if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
         WLOGFI("try to run NotifyStartAbility and NotifySessionCreate");
         NotifyStartAbility(sceneSession->GetCollaboratorType(), newSessionInfo);
