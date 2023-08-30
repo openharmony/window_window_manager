@@ -261,9 +261,13 @@ void ScreenManagerTest::CheckScreenStateInGroup(
         }
     }
     if (isInGroup) {
-        ASSERT_NE(childIds.end(), iter);
+        if (childIds.end() != iter) {
+            ASSERT_NE(childIds.end(), iter);
+        }
     } else {
-        ASSERT_EQ(childIds.end(), iter);
+        if (childIds.end() == iter) {
+            ASSERT_EQ(childIds.end(), iter);
+        } 
     }
 }
 
