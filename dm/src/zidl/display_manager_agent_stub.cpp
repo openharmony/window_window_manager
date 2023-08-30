@@ -125,6 +125,24 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
             NotifyPrivateWindowStateChanged(hasPrivate);
             break;
         }
+        case TRANS_ID_ON_FOLD_STATUS_CHANGED: {
+            uint32_t foldStatus;
+            if (!data.ReadUint32(foldStatus)) {
+                WLOGFE("Read FoldStatus failed");
+                return -1;
+            }
+            NotifyFoldStatusChanged(static_cast<FoldStatus>(foldStatus));
+            break;
+        }
+        case TRANS_ID_ON_DISPLAY_MODE_CHANGED: {
+            uint32_t displayMode;
+            if (!data.ReadUint32(displayMode)) {
+                WLOGFE("Read FoldDisplayMode failed");
+                return -1;
+            }
+            NotifyDisplayModeChanged(static_cast<FoldDisplayMode>(displayMode));
+            break;
+        }
         default: {
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

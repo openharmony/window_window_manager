@@ -36,7 +36,8 @@ void DfxHisysevent::ApplicationBlockInput(int32_t eventId, int32_t pid, std::str
         "PERSISTENT_ID", persistentId,
         "MSG", "User input does not respond");
     if (ret != 0) {
-        WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
+        WLOGFE("Write HiSysEvent error, ret:%{public}d, eventId:%{public}d, pid:%{public}d, bundleName:%{public}s, "
+                "persistentId:%{public}d", ret, eventId, pid, bundleName.c_str(), persistentId);
     }
 }
 } // namespace Rosen

@@ -132,7 +132,9 @@ int32_t TimerManager::AddTimerInternal(int32_t intervalMs, std::function<void()>
     timer->intervalMs = intervalMs;
     auto nowTime = GetMillisTime();
     if (!AddInt64(nowTime, timer->intervalMs, timer->nextCallTime)) {
-        WLOGFE("The addition of nextCallTime in TimerItem overflows");
+        WLOGFE("The addition of nextCallTime in TimerItem overflows, nowTime:%{public}" PRId64
+                ", timerId:%{public}d, intervalMs:%{public}d, nextCallTime:%{public}" PRId64,
+                nowTime, timer->id, timer->intervalMs, timer->nextCallTime);
         return NONEXISTENT_ID;
     }
     timer->callback = callback;

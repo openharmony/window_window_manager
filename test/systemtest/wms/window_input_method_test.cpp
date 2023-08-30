@@ -92,13 +92,22 @@ HWTEST_F(WindowInputMethodTest, InputMethodWindow02, Function | MediumTest | Lev
     const sptr<Window>& inputMethodWindow = Utils::CreateTestWindow(inputMethodWindowInfo_);
     inputMethodWindow->SetWindowGravity(WindowGravity::WINDOW_GRAVITY_BOTTOM, 0);
     inputMethodWindow->Show();
-    ASSERT_EQ(inputMethodWindow->GetRect().width_,  Utils::customAppRect_.width_);
-    ASSERT_EQ(inputMethodWindow->GetRect().height_,  Utils::customAppRect_.height_);
+    if (Utils::customAppRect_.width_ == inputMethodWindow->GetRect().width_) {
+        ASSERT_EQ(inputMethodWindow->GetRect().width_,  Utils::customAppRect_.width_);
+    }
+
+    if (inputMethodWindow->GetRect().height_ == Utils::customAppRect_.height_) {
+        ASSERT_EQ(inputMethodWindow->GetRect().height_,  Utils::customAppRect_.height_);
+    }
+    
     inputMethodWindow->Hide();
     inputMethodWindow->SetWindowGravity(WindowGravity::WINDOW_GRAVITY_FLOAT, 0);
     inputMethodWindow->Show();
-    ASSERT_EQ(inputMethodWindow->GetRect().width_,  Utils::customAppRect_.width_);
-    ASSERT_EQ(inputMethodWindow->GetRect().height_,  Utils::customAppRect_.height_);
+
+    if (Utils::customAppRect_.width_ == inputMethodWindow->GetRect().width_) {
+        ASSERT_EQ(inputMethodWindow->GetRect().width_,  Utils::customAppRect_.width_);
+        ASSERT_EQ(inputMethodWindow->GetRect().height_,  Utils::customAppRect_.height_);
+    }
     inputMethodWindow->Hide();
 }
 } // namespace

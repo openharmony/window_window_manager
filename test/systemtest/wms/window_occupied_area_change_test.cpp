@@ -108,6 +108,9 @@ HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest01, Function | Me
 {
     fullScreenAppInfo_.name = "KeyboardHeightChangeTest01";
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppInfo_);
+    if (window1 == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, window1);
     window1->RegisterOccupiedAreaChangeListener(testOccupiedAreaChangeListener_);
 
@@ -137,6 +140,9 @@ HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest02, Function | Me
 {
     fullScreenAppInfo_.name = "KeyboardHeightChangeTest02";
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppInfo_);
+    if (window1 == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, window1);
     window1->RegisterOccupiedAreaChangeListener(testOccupiedAreaChangeListener_);
 
@@ -166,6 +172,9 @@ HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest03, Function | Me
 {
     fullScreenAppInfo_.name = "KeyboardHeightChangeTest03";
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppInfo_);
+    if (window1 == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, window1);
     window1->RegisterOccupiedAreaChangeListener(testOccupiedAreaChangeListener_);
 

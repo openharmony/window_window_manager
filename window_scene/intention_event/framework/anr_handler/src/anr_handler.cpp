@@ -193,7 +193,7 @@ void ANRHandler::UpdateLatestEventId(int32_t eventId)
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto currentPersistentId = GetPersistentIdOfEvent(eventId);
     for (auto& event : anrHandlerState_.eventsToReceipt) {
-        if (GetPersistentIdOfEvent(event) == currentPersistentId && eventId > event) {
+        if ((GetPersistentIdOfEvent(event) == currentPersistentId) && (eventId > event)) {
             WLOGFD("Replace eventId:%{public}d by newer eventId:%{public}d", event, eventId);
             event = eventId;
             break;
