@@ -278,14 +278,6 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &
     const ContinueState& continueState)
 {
     WLOGFI("run SetSessionContinueState");
-    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
-        WLOGFE("The caller is not system-app, can not use system-api");
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
-    }
-    if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The caller has not permission granted");
-        return WSError::WS_ERROR_INVALID_PERMISSION;
-    }
     auto task = [this, token, continueState]() {
         sptr <SceneSession> sceneSession = FindSessionByToken(token);
         if (sceneSession == nullptr) {
