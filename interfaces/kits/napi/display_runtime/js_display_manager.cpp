@@ -91,6 +91,36 @@ static NativeValue* HasPrivateWindow(NativeEngine* engine, NativeCallbackInfo* i
     return (me != nullptr) ? me->OnHasPrivateWindow(*engine, *info) : nullptr;
 }
 
+static NativeValue* IsFoldable(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    auto* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
+    return (me != nullptr) ? me->OnIsFoldable(*engine, *info) : nullptr;
+}
+
+static NativeValue* GetFoldStatus(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    auto* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
+    return (me != nullptr) ? me->OnGetFoldStatus(*engine, *info) : nullptr;
+}
+
+static NativeValue* GetFoldDisplayMode(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    auto* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
+    return (me != nullptr) ? me->OnGetFoldDisplayMode(*engine, *info) : nullptr;
+}
+
+static NativeValue* SetFoldDisplayMode(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    auto* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
+    return (me != nullptr) ? me->OnSetFoldDisplayMode(*engine, *info) : nullptr;
+}
+
+static NativeValue* GetCurrentFoldCreaseRegion(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    auto* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
+    return (me != nullptr) ? me->OnGetCurrentFoldCreaseRegion(*engine, *info) : nullptr;
+}
+
 private:
 std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsDisplayListener>>> jsCbMap_;
 std::mutex mtx_;
@@ -428,6 +458,98 @@ NativeValue* CreateJsDisplayArrayObject(NativeEngine& engine, std::vector<sptr<D
     }
     return arrayValue;
 }
+
+NativeValue* OnIsFoldable(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    if (info.argc >= ARGC_ONE) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    bool foldable = SingletonContainer::Get<DisplayManager>().IsFoldable();
+    WLOGI("[NAPI]" PRIu64", isFoldable = %{public}u", foldable);
+    return engine.CreateBoolean(foldable);
+}
+
+NativeValue* OnGetFoldStatus(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    if (info.argc >= ARGC_ONE) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    FoldStatus status = SingletonContainer::Get<DisplayManager>().GetFoldStatus();
+    WLOGI("[NAPI]" PRIu64", getFoldStatus = %{public}u", status);
+    return CreateJsValue(engine, status);
+}
+
+NativeValue* OnGetFoldDisplayMode(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    if (info.argc >= ARGC_ONE) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    FoldDisplayMode mode = SingletonContainer::Get<DisplayManager>().GetFoldDisplayMode();
+    WLOGI("[NAPI]" PRIu64", getFoldDisplayMode = %{public}u", mode);
+    return CreateJsValue(engine, mode);
+}
+
+NativeValue* OnSetFoldDisplayMode(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    if (info.argc < ARGC_ONE) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    FoldDisplayMode mode = FoldDisplayMode::UNKNOWN;
+    if (!ConvertFromJsValue(engine, info.argv[0], mode)) {
+        WLOGFE("[NAPI]Failed to convert parameter to FoldDisplayMode");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    SingletonContainer::Get<DisplayManager>().SetFoldDisplayMode(mode);
+    WLOGI("[NAPI]" PRIu64", setFoldDisplayMode");
+    return engine.CreateUndefined();
+}
+
+NativeValue* OnGetCurrentFoldCreaseRegion(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    if (info.argc >= ARGC_ONE) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    sptr<FoldCreaseRegion> region = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion();
+    WLOGI("[NAPI]" PRIu64", getCurrentFoldCreaseRegion");
+    return CreateJsFoldCreaseRegionObject(engine, region);
+}
+
+NativeValue* CreateJsFoldCreaseRegionObject(NativeEngine& engine, sptr<FoldCreaseRegion> region)
+{
+    WLOGI("JsDisplay::CreateJsFoldCreaseRegionObject is called");
+    NativeValue* objValue = engine.CreateObject();
+    auto* object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to convert prop to jsObject");
+        return engine.CreateUndefined();
+    }
+    if (region == nullptr) {
+        WLOGFE("Get null fold crease region");
+        return engine.CreateUndefined();
+    }
+    DisplayId displayId = region->GetDisplayId();
+    std::vector<DMRect> creaseRects = region->GetCreaseRects();
+    object->SetProperty("displayId", CreateJsValue(engine, static_cast<uint32_t>(displayId)));
+    object->SetProperty("creaseRects", CreateJsCreaseRectsArrayObject(engine, creaseRects));
+    return objValue;
+}
+
+NativeValue* CreateJsCreaseRectsArrayObject(NativeEngine& engine, std::vector<DMRect> creaseRects)
+{
+    NativeValue* arrayValue = engine.CreateArray(creaseRects.size());
+    auto* array = ConvertNativeValueTo<NativeArray>(arrayValue);
+    size_t i = 0;
+    for (const auto& rect : creaseRects) {
+        array->SetElement(i++, CreateJsRectObject(engine, rect));
+    }
+    return arrayValue;
+}
 };
 
 NativeValue* InitDisplayState(NativeEngine* engine)
@@ -563,6 +685,55 @@ NativeValue* InitDisplayError(NativeEngine* engine)
     return objValue;
 }
 
+NativeValue* InitFoldStatus(NativeEngine* engine)
+{
+    WLOGI("InitFoldStatus called");
+
+    if (engine == nullptr) {
+        WLOGFE("engine is nullptr");
+        return nullptr;
+    }
+
+    NativeValue* objValue = engine->CreateObject();
+    auto* object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+    object->SetProperty("FOLD_STATUS_UNKNOWN", CreateJsValue(*engine, static_cast<uint32_t>(FoldStatus::UNKNOWN)));
+    object->SetProperty("FOLD_STATUS_EXPANDED", CreateJsValue(*engine, static_cast<uint32_t>(FoldStatus::EXPAND)));
+    object->SetProperty("FOLD_STATUS_FOLDED", CreateJsValue(*engine, static_cast<uint32_t>(FoldStatus::FOLDED)));
+    object->SetProperty("FOLD_STATUS_HALF_FOLDED",
+        CreateJsValue(*engine, static_cast<uint32_t>(FoldStatus::HALF_FOLD)));
+    return objValue;
+}
+
+NativeValue* InitFoldDisplayMode(NativeEngine* engine)
+{
+    WLOGI("IniFoldDisplayMode called");
+
+    if (engine == nullptr) {
+        WLOGFE("engine is nullptr");
+        return nullptr;
+    }
+
+    NativeValue* objValue = engine->CreateObject();
+    auto* object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("FOLD_DISPLAY_MODE_UNKNOWN",
+        CreateJsValue(*engine, static_cast<uint32_t>(FoldDisplayMode::UNKNOWN)));
+    object->SetProperty("FOLD_DISPLAY_MODE_FULL", CreateJsValue(*engine, static_cast<uint32_t>(FoldDisplayMode::FULL)));
+    object->SetProperty("FOLD_DISPLAY_MODE_MAIN", CreateJsValue(*engine, static_cast<uint32_t>(FoldDisplayMode::MAIN)));
+    object->SetProperty("FOLD_DISPLAY_MODE_SUB", CreateJsValue(*engine, static_cast<uint32_t>(FoldDisplayMode::SUB)));
+    object->SetProperty("FOLD_DISPLAY_MODE_COORDINATION",
+        CreateJsValue(*engine, static_cast<uint32_t>(FoldDisplayMode::COORDINATION)));
+    return objValue;
+}
+
 NativeValue* JsDisplayManagerInit(NativeEngine* engine, NativeValue* exportObj)
 {
     WLOGI("JsDisplayManagerInit is called");
@@ -585,6 +756,8 @@ NativeValue* JsDisplayManagerInit(NativeEngine* engine, NativeValue* exportObj)
     object->SetProperty("Orientation", InitOrientation(engine));
     object->SetProperty("DmErrorCode", InitDisplayErrorCode(engine));
     object->SetProperty("DMError", InitDisplayError(engine));
+    object->SetProperty("FoldStatus", InitFoldStatus(engine));
+    object->SetProperty("FoldDisplayMode", InitFoldDisplayMode(engine));
 
     const char *moduleName = "JsDisplayManager";
     BindNativeFunction(*engine, *object, "getDefaultDisplay", moduleName, JsDisplayManager::GetDefaultDisplay);
@@ -592,6 +765,12 @@ NativeValue* JsDisplayManagerInit(NativeEngine* engine, NativeValue* exportObj)
     BindNativeFunction(*engine, *object, "getAllDisplay", moduleName, JsDisplayManager::GetAllDisplay);
     BindNativeFunction(*engine, *object, "getAllDisplays", moduleName, JsDisplayManager::GetAllDisplays);
     BindNativeFunction(*engine, *object, "hasPrivateWindow", moduleName, JsDisplayManager::HasPrivateWindow);
+    BindNativeFunction(*engine, *object, "isFoldable", moduleName, JsDisplayManager::IsFoldable);
+    BindNativeFunction(*engine, *object, "getFoldStatus", moduleName, JsDisplayManager::GetFoldStatus);
+    BindNativeFunction(*engine, *object, "getFoldDisplayMode", moduleName, JsDisplayManager::GetFoldDisplayMode);
+    BindNativeFunction(*engine, *object, "setFoldDisplayMode", moduleName, JsDisplayManager::SetFoldDisplayMode);
+    BindNativeFunction(*engine, *object, "getCurrentFoldCreaseRegion", moduleName,
+        JsDisplayManager::GetCurrentFoldCreaseRegion);
     BindNativeFunction(*engine, *object, "on", moduleName, JsDisplayManager::RegisterDisplayManagerCallback);
     BindNativeFunction(*engine, *object, "off", moduleName, JsDisplayManager::UnregisterDisplayManagerCallback);
     return engine->CreateUndefined();

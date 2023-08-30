@@ -167,8 +167,16 @@ public:
     void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
 
     //Fold Screen
-    void SetFoldDisplayMode(FoldDisplayMode displayMode) override;
+    void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
+
     FoldDisplayMode GetFoldDisplayMode() override;
+
+    bool IsFoldable() override;
+
+    FoldStatus GetFoldStatus() override;
+
+    sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
+
     ScreenProperty GetPhyScreenProperty(ScreenId screenId);
 
 protected:
