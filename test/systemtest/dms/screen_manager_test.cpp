@@ -282,7 +282,7 @@ void ScreenManagerTest::CheckScreenGroupState(ScreenCombination combination, Scr
     }
     if (combination == group->GetCombination()) {
         ASSERT_EQ(combination, group->GetCombination());
-    } 
+    }
 }
 
 void ScreenManagerTest::CheckScreenGroupStateForMirror(ScreenGroupChangeEvent event, std::vector<ScreenId> mirrorIds,
@@ -521,10 +521,10 @@ HWTEST_F(ScreenManagerTest, ScreenManager08, Function | MediumTest | Level2)
     ScreenId expansionGroup;
     ScreenManager::GetInstance().MakeExpand(options, expansionGroup);
     sleep(TEST_SLEEP_S);
-    if(SCREEN_ID_INVALID != expansionGroup) {
+    if (SCREEN_ID_INVALID != expansionGroup) {
         ASSERT_NE(SCREEN_ID_INVALID, expansionGroup);
     }
-    
+
     CheckScreenGroupState(ScreenCombination::SCREEN_EXPAND, ScreenGroupChangeEvent::ADD_TO_GROUP,
         virtualScreenId, group, screenGroupChangeListener);
     CheckScreenStateInGroup(true, group, groupId, virtualScreen, virtualScreenId);
