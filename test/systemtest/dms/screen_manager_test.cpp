@@ -225,12 +225,11 @@ void ScreenManagerTest::CheckStateDisplay(DisplayId virtualDisplayId, ScreenId v
         ASSERT_NE(SCREEN_ID_INVALID, groupId); \
     } \
     auto group = ScreenManager::GetInstance().GetScreenGroup(groupId); \
-    if (group == nullptr) { \
-        return; \
-    } \
-    ASSERT_NE(nullptr, group); \
-    if (groupId == group->GetId()) { \
-        ASSERT_EQ(groupId, group->GetId()); \
+    if (group != nullptr) { \
+        if (groupId == group->GetId()) { \
+            ASSERT_EQ(groupId, group->GetId()); \
+        } \
+        ASSERT_NE(nullptr, group); \
     } \
    
     sptr<ScreenChangeListener> screenListener = new ScreenChangeListener(); \
@@ -258,7 +257,7 @@ void ScreenManagerTest::CheckScreenStateInGroup(
     if (isInGroup) {
         ASSERT_EQ(groupId, virtualScreen->GetParentId());
     } else {
-        if(virtualScreen->GetParentId() == SCREEN_ID_INVALID){
+        if (virtualScreen->GetParentId() == SCREEN_ID_INVALID) {
             ASSERT_EQ(SCREEN_ID_INVALID, virtualScreen->GetParentId());
         }
     }
