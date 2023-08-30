@@ -159,6 +159,15 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         WLOGFE("focusedSceneSession is null");
         return;
     }
+    if (focusedSceneSession->GetSessionInfo().isSystem_) {
+        WLOGFD("Syetem window scene, transfer key event to root scene");
+        if (uiContent_ == nullptr) {
+            WLOGFE("uiContent_ is null");
+            return;
+        }
+        uiContent_->ProcessKeyEvent(keyEvent);
+        return;
+    }
     focusedSceneSession->TransferKeyEvent(keyEvent);
 }
 
