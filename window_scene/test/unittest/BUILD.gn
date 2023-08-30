@@ -20,6 +20,7 @@ group("unittest") {
 
   deps = [
     ":ws_event_stage_test",
+    ":ws_extension_session_manager_test",
     ":ws_extension_session_test",
     ":ws_move_drag_controller_test",
     ":ws_scene_session_converter_test",
@@ -387,6 +388,19 @@ ohos_unittest("ws_scene_session_converter_test") {
   module_out_path = module_out_path
 
   sources = [ "scene_session_converter_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_extension_session_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "extension_session_manager_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 
