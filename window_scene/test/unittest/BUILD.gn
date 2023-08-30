@@ -31,6 +31,7 @@ group("unittest") {
     ":ws_screen_property_test",
     ":ws_screen_rotation_property_test",
     ":ws_screen_scene_config_test",
+    ":ws_screen_session_manager_stub_test",
     ":ws_screen_session_manager_test",
     ":ws_screen_session_test",
     ":ws_session_display_power_controller_test",
@@ -169,6 +170,19 @@ ohos_unittest("ws_screen_scene_config_test") {
   module_out_path = module_out_path
 
   sources = [ "screen_scene_config_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_screen_session_manager_stub_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screen_session_manager_stub_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 
