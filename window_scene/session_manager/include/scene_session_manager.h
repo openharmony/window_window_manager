@@ -331,7 +331,7 @@ private:
     int GetRemoteSessionSnapshotInfo(const std::string& deviceId, int32_t sessionId,
                                      AAFwk::MissionSnapshot& sessionSnapshot);
 
-    const int32_t BROKER_UID = 5528;
+    const int32_t BROKER_UID = 5557;
     const int32_t BROKER_RESERVE_UID = 5005;
     std::shared_mutex collaboratorMapLock_;
     std::unordered_map<int32_t, sptr<AAFwk::IAbilityManagerCollaborator>> collaboratorMap_;
