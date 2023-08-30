@@ -3638,17 +3638,20 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentI
         return WSError::WS_DO_NOTHING;
     }
     if (haveListener) {
-        avoidAreaListenerSessionSet_.insert(sceneSession);
+        avoidAreaListenerSessionSet_.insert(persistentId);
     } else {
         lastUpdatedAvoidArea_.erase(persistentId);
-        avoidAreaListenerSessionSet_.erase(sceneSession);
+        avoidAreaListenerSessionSet_.erase(persistentId);
     }
     return WSError::WS_OK;
 }
 
 bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistentId,
-    const AvoidArea& avoidArea, AvoidAreaType avoidAreaType)
+    const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType)
 {
+    if (sceneSession == nullptr) {
+        return false;
+    }
     auto iter = lastUpdatedAvoidArea_.find(persistentId);
     bool needUpdate = true;
 
@@ -3667,11 +3670,6 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistent
         }
     }
     if (needUpdate) {
-        auto sceneSession = GetSceneSession(persistentId);
-        if (sceneSession == nullptr) {
-            WLOGFE("sceneSession is nullptr.");
-            return false;
-        }
         lastUpdatedAvoidArea_[persistentId][avoidAreaType] = avoidArea;
         sceneSession->UpdateAvoidArea(new AvoidArea(avoidArea), avoidAreaType);
     }
@@ -3684,13 +3682,14 @@ void SceneSessionManager::UpdateAvoidSessionAvoidArea(WindowType type, bool& nee
     bool ret = true;
     AvoidAreaType avoidType = (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) ?
         AvoidAreaType::TYPE_KEYBOARD : AvoidAreaType::TYPE_SYSTEM;
-    for (auto& session : avoidAreaListenerSessionSet_) {
-        if (!session->IsVisible()) {
+    for (auto& persistentId : avoidAreaListenerSessionSet_) {
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr || !sceneSession->IsVisible()) {
             continue;
         }
-        AvoidArea avoidArea = session->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
+        AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
         ret = UpdateSessionAvoidAreaIfNeed(
-            session->GetPersistentId(), avoidArea, static_cast<AvoidAreaType>(avoidType));
+            persistentId, sceneSession, avoidArea, static_cast<AvoidAreaType>(avoidType));
         needUpdate = needUpdate || ret;
     }
 
@@ -3701,11 +3700,11 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
     const int32_t& persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate)
 {
     bool ret = true;
-    if (!sceneSession->IsVisible()) {
+    if (sceneSession == nullptr || !sceneSession->IsVisible()) {
         needUpdate = false;
         return;
     }
-    if (avoidAreaListenerSessionSet_.find(sceneSession) == avoidAreaListenerSessionSet_.end()) {
+    if (avoidAreaListenerSessionSet_.find(persistentId) == avoidAreaListenerSessionSet_.end()) {
         WLOGD("id:%{public}d is not in avoidAreaListenerNodes, don't update avoid area.", persistentId);
         needUpdate = false;
         return;
@@ -3714,7 +3713,8 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
     uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_KEYBOARD);
     for (uint32_t avoidType = start; avoidType <= end; avoidType++) {
         AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
-        ret = UpdateSessionAvoidAreaIfNeed(persistentId, avoidArea, static_cast<AvoidAreaType>(avoidType));
+        ret = UpdateSessionAvoidAreaIfNeed(
+            persistentId, sceneSession, avoidArea, static_cast<AvoidAreaType>(avoidType));
         needUpdate = needUpdate || ret;
     }
 
