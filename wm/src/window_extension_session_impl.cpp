@@ -173,7 +173,6 @@ WMError WindowExtensionSessionImpl::SetUIContent(const std::string& contentInfo,
         }
     } else if (isIgnoreSafeAreaNeedNotify_) {
         SetLayoutFullScreenByApiVersion(isIgnoreSafeArea_);
-        isIgnoreSafeAreaNeedNotify_ = false;
     }
 
     UpdateDecorEnable(true);
