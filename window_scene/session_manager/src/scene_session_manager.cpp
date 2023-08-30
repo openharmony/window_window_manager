@@ -4017,7 +4017,7 @@ void SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, const Ses
     }
     if (sessionInfo.want == nullptr) {
         WLOGFI("sessionInfo.want is nullptr, init");
-        sessionInfo.want = new AAFwk::Want();
+        sessionInfo.want = std::make_shared<AAFwk::Want>();
         sessionInfo.want->SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_,
             sessionInfo.moduleName_);
     }
