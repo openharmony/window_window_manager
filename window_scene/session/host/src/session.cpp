@@ -1126,10 +1126,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         return WSError::WS_DO_NOTHING;
     }
     auto pointerAction = pointerEvent->GetPointerAction();
-    if (!isFocused_ && GetFocusable() && (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
-        pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN)) {
-        NotifyClick();
-    }
+    PresentFoucusIfNeed(pointerAction);
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
         return WSError::WS_ERROR_NULLPTR;
@@ -1313,6 +1310,14 @@ void Session::NotifyClick()
     WLOGFI("Notify click");
     if (clickFunc_) {
         clickFunc_();
+    }
+}
+
+void Session::PresentFoucusIfNeed(int32_t pointerAction)
+{
+    if (!isFocused_ && GetFocusable() && (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN)) {
+        NotifyClick();
     }
 }
 
