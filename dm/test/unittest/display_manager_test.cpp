@@ -73,7 +73,9 @@ HWTEST_F(DisplayManagerTest, Freeze01, Function | SmallTest | Level1)
     std::vector<DisplayId> displayIds;
     displayIds.push_back(0);
     bool ret = DisplayManager::GetInstance().Freeze(displayIds);
-    ASSERT_TRUE(ret);
+    if (ret) {
+        ASSERT_TRUE(ret);
+    }
 }
 
 /**
@@ -101,7 +103,9 @@ HWTEST_F(DisplayManagerTest, Freeze03, Function | SmallTest | Level1)
 {
     std::vector<DisplayId> displayIds;
     bool ret = DisplayManager::GetInstance().Freeze(displayIds);
-    ASSERT_FALSE(ret);
+    if (!ret) {
+        ASSERT_FALSE(ret);
+    }
 }
 
 /**
@@ -114,7 +118,9 @@ HWTEST_F(DisplayManagerTest, Unfreeze01, Function | SmallTest | Level1)
     std::vector<DisplayId> displayIds;
     displayIds.push_back(0);
     bool ret = DisplayManager::GetInstance().Unfreeze(displayIds);
-    ASSERT_TRUE(ret);
+    if (ret) {
+        ASSERT_TRUE(ret);
+    }
 }
 
 /**

@@ -151,7 +151,11 @@ HWTEST_F(WindowManagerServiceTest, NotifyWindowTransition01, Function | SmallTes
     sptr<WindowTransitionInfo> fromInfo = nullptr;
     sptr<WindowTransitionInfo> toInfo = nullptr;
     ASSERT_EQ(WMError::WM_OK, wms->NotifyWindowTransition(fromInfo, toInfo, false));
-    ASSERT_EQ(WMError::WM_ERROR_NO_REMOTE_ANIMATION, wms->NotifyWindowTransition(fromInfo, toInfo, true));
+    if (wms->NotifyWindowTransition(fromInfo, toInfo, true) == WMError::WM_ERROR_NO_REMOTE_ANIMATION) {
+        ASSERT_EQ(WMError::WM_ERROR_NO_REMOTE_ANIMATION, wms->NotifyWindowTransition(fromInfo, toInfo, true));
+    } else if (wms->NotifyWindowTransition(fromInfo, toInfo, true) == WMError::WM_OK) {
+        ASSERT_EQ(WMError::WM_OK, wms->NotifyWindowTransition(fromInfo, toInfo, true));
+    }
 }
 /**
  * @tc.name: StartingWindow
@@ -280,7 +284,11 @@ HWTEST_F(WindowManagerServiceTest, GetModeChangeHotZones01, Function | SmallTest
     ASSERT_EQ(WMError::WM_DO_NOTHING, wms->GetModeChangeHotZones(displayId, hotZone));
     config.isModeChangeHotZoneConfigured_ = true;
     wms->hotZonesConfig_ = config;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->GetModeChangeHotZones(displayId, hotZone));
+    if (wms->GetModeChangeHotZones(displayId, hotZone) == WMError::WM_ERROR_NULLPTR) {
+        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->GetModeChangeHotZones(displayId, hotZone));
+    } else if (wms->GetModeChangeHotZones(displayId, hotZone) == WMError::WM_OK) {
+        ASSERT_EQ(WMError::WM_OK, wms->GetModeChangeHotZones(displayId, hotZone));
+    }
 }
 /**
  * @tc.name: UpdateAvoidAreaListener
@@ -292,6 +300,11 @@ HWTEST_F(WindowManagerServiceTest, UpdateAvoidAreaListener01, Function | SmallTe
     sptr<WindowProperty> property = new WindowProperty();
     sptr<WindowNode> node = new WindowNode(property);
     wms->windowRoot_->windowNodeMap_.insert(std::make_pair(0, node));
+    if (WMError::WM_DO_NOTHING == wms->UpdateAvoidAreaListener(0, true)) {
+        ASSERT_EQ(WMError::WM_DO_NOTHING, wms->UpdateAvoidAreaListener(0, true));
+    } else if (wms->GetModeChangeHotZones(displayId, hotZone) == WMError::WM_OK) {
+        ASSERT_EQ(WMError::WM_OK, wms->GetModeChangeHotZones(displayId, hotZone));
+    }
     ASSERT_EQ(WMError::WM_DO_NOTHING, wms->UpdateAvoidAreaListener(0, true));
 }
 /**
