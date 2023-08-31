@@ -70,8 +70,8 @@ public:
                                std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution) override;
     WSError LockSession(int32_t persistentId) override;
     WSError UnlockSession(int32_t persistentId) override;
-    WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds) override;
-    WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds) override;
+    WSError MoveSessionsToForeground(const std::vector<int32_t>& sessionIds, int32_t topSessionId) override;
+    WSError MoveSessionsToBackground(const std::vector<int32_t>& sessionIds, std::vector<int32_t>& result) override;
     WSError ClearSession(int32_t persistentId) override;
     WSError ClearAllSessions() override;
     WSError RegisterIAbilityManagerCollaborator(int32_t type, const sptr<AAFwk::IAbilityManagerCollaborator> &impl) override;
