@@ -3754,10 +3754,59 @@ bool SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
     return taskScheduler_->PostSyncTask(task);
 }
 
+void SceneSessionManager::SetVirtualPixelRatioChangeListener(const ProcessVirtualPixelRatioChangeFunc& func)
+{
+    processVirtualPixelRatioChangeFunc_ = func;
+    WLOGFI("SetVirtualPixelRatioChangeListener");
+}
+
+vodi SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
+    const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
+{
+    if (displayInfo == nullptr) {
+        WLOGFE("SceneSessionManager::ProcessVirtualPixelRatioChange displayInfo is nullptr.");
+        return;
+    }
+    auto task = [this, displayInfo]() {
+        if (processVirtualPixelRatioChangeFunc_ != nullptr) {
+            Rect rect = { displayInfo->GetOffsetX(), displayInfo->GetOffsetY(),
+                displayInfo->GetWidth(), displayInfo->GetHeight()
+            };
+            processVirtualPixelRatioChangeFunc_(displayInfo->GetVirtualPixelRatio(), rect);
+        }
+
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto &item : sceneSessionMap_) {
+            auto scnSession = item.second;
+            if (scnSession == nullptr) {
+                WLOGEW("SceneSessionManager::ProcessVirtualPixelRatioChange null scene session");
+                continue;
+            }
+            SessionInfo sessionInfo = scnSession->GetSessionInfo();
+            if (sessionInfo.isSystem_ || !scnSession->IsActive()) continue;
+            WSRect window_rect = scnSession->GetSessionRect();
+            scnSession->UpdateDensity();
+            WLOGFD("UpdateDensity name=%{public}s, persistendId=%{public}d, winType=%{public}d, "
+                "state=%{public}d, visible-%{public}d", scnSession->GetWindowName().c_str(), item.first,
+                scnSession->GetWindowType(), scnSession->GetSessionState(), scnSession->IsVisible());
+        }
+    };
+    taskScheduler_->PostSyncTask(task);
+}
+
 void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
     const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
-    return;
+    WLOGFD("DisplayChangeListener::OnDisplayStateChange: %{public}u", type);
+    switch (type) {
+        case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
+            SceneSessionManager::GetInstance().ProcessVirtualPixelRatioChange(defaultDisplayId,
+                displayInfo, displayInfoMap, type);
+            break;
+        }
+        default:
+            return;
+    }
 }
 
 void DisplayChangeListener::OnScreenshot(DisplayId displayId)
