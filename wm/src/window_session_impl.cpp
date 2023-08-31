@@ -1026,8 +1026,8 @@ void WindowSessionImpl::NotifyBackgroundFailed(WMError ret)
 
 WSError WindowSessionImpl::MarkProcessed(int32_t eventId)
 {
-    if (hostSession_ == nullptr) {
-        WLOGFE("hostSession is nullptr");
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("HostSession is invalid");
         return WSError::WS_DO_NOTHING;
     }
     return hostSession_->MarkProcessed(eventId);

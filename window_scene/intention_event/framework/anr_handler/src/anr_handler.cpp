@@ -89,22 +89,14 @@ void ANRHandler::OnWindowDestroyed(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (anrHandlerState_.sendStatus.find(persistentId) == anrHandlerState_.sendStatus.end()) {
-        WLOGFE("PersistentId:%{public}d not in ANRHandler", persistentId);
-        return;
-    }
     anrHandlerState_.sendStatus.erase(persistentId);
-    if (anrHandlerState_.eventsIterMap.find(persistentId) == anrHandlerState_.eventsIterMap.end()) {
-        WLOGFE("PersistentId:%{public}d not in ANRHandler", persistentId);
-        return;
-    }
     anrHandlerState_.eventsIterMap.erase(persistentId);
-    WLOGFD("PersistentId:%{public}d erased in ANRHandler", persistentId);
     for (const auto &elem : sessionStageMap_) {
         if (elem.second.persistentId == persistentId) {
             sessionStageMap_.erase(elem.first);
         }
     }
+    WLOGFD("PersistentId:%{public}d and its events erased in ANRHandler", persistentId);
 }
 
 void ANRHandler::SetAnrHandleState(int32_t eventId, bool status)
@@ -136,10 +128,13 @@ void ANRHandler::MarkProcessed()
     WLOGFI("MarkProcessed eventId:%{public}d, persistentId:%{public}d", eventId, GetPersistentIdOfEvent(eventId));
     if (sessionStageMap_.find(eventId) == sessionStageMap_.end()) {
         WLOGFE("SessionStage for eventId:%{public}d is not in sessionStageMap", eventId);
-    } else if (sessionStageMap_[eventId].sessionStage == nullptr) {
-        WLOGFE("SessionStage for eventId:%{public}d is nullptr", eventId);
-    } else if (WSError ret = sessionStageMap_[eventId].sessionStage->MarkProcessed(eventId); ret != WSError::WS_OK) {
-        WLOGFE("Send to sceneBoard failed, ret:%{public}d", ret);
+    } else {
+        sptr<ISessionStage> session = sessionStageMap_[eventId].sessionStage.promote();
+        if (session == nullptr) {
+            WLOGFE("SessionStage for eventId:%{public}d is nullptr", eventId);
+        } else if (WSError ret = session->MarkProcessed(eventId); ret != WSError::WS_OK) {
+            WLOGFE("Send to sceneBoard failed, ret:%{public}d", ret);
+        }
     }
     SetAnrHandleState(eventId, false);
 }
@@ -165,13 +160,11 @@ void ANRHandler::ClearExpiredEvents(int32_t eventId)
     CALL_DEBUG_ENTER;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     int32_t persistentId = GetPersistentIdOfEvent(eventId);
-    for (auto iter = sessionStageMap_.begin(); iter != sessionStageMap_.end();) {
-        auto currentPersistentId = GetPersistentIdOfEvent(iter->first);
-        if (iter->first < eventId &&
+    for (const auto& elem : sessionStageMap_) {
+        auto currentPersistentId = GetPersistentIdOfEvent(elem.first);
+        if (elem.first < eventId &&
             (currentPersistentId == persistentId || currentPersistentId == INVALID_PERSISTENT_ID)) {
-            sessionStageMap_.erase(iter++);
-        } else {
-            iter++;
+            sessionStageMap_.erase(elem.first);
         }
     }
 }
