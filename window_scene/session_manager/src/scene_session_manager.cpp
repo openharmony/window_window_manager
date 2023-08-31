@@ -3716,7 +3716,7 @@ void SceneSessionManager::UpdateAvoidSessionAvoidArea(WindowType type, bool& nee
         AvoidAreaType::TYPE_KEYBOARD : AvoidAreaType::TYPE_SYSTEM;
     for (auto& persistentId : avoidAreaListenerSessionSet_) {
         auto sceneSession = GetSceneSession(persistentId);
-        if (sceneSession == nullptr || !sceneSession->IsVisible()) {
+        if (sceneSession == nullptr || !IsSessionVisible(sceneSession)) {
             continue;
         }
         AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
@@ -3732,7 +3732,7 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
     const int32_t& persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate)
 {
     bool ret = true;
-    if (sceneSession == nullptr || !sceneSession->IsVisible()) {
+    if (sceneSession == nullptr || !IsSessionVisible(sceneSession)) {
         needUpdate = false;
         return;
     }
