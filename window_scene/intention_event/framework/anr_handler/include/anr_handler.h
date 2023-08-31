@@ -20,7 +20,6 @@
 #include <mutex>
 #include <list>
 #include <unordered_map>
-#include <unordered_set>
 
 #include "event_handler.h"
 #include "nocopyable.h"
@@ -45,7 +44,6 @@ private:
     int32_t GetPersistentIdOfEvent(int32_t eventId);
     bool IsOnEventHandler(int32_t persistentId);
     void UpdateLatestEventId(int32_t eventId);
-    void ClearEventsOfDestroyedWindow(int32_t persistentId);
 private:
     std::recursive_mutex mutex_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ { nullptr };
@@ -56,8 +54,11 @@ private:
         std::unordered_map<int32_t, std::list<int>::iterator> eventsIterMap;
     };
     ANRHandlerState anrHandlerState_;
-    std::unordered_map<int32_t, wptr<ISessionStage>> sessionStageMap_;
-    std::unordered_map<int32_t, std::unordered_set<int32_t>> windowEventMap_;
+    struct SessionInfo {
+        int32_t persistentId;
+        wptr<ISessionStage> sessionStage;
+    };
+    std::unordered_map<int32_t, SessionInfo> sessionStageMap_;
 };
 } // namespace Rosen
 } // namespace OHOS

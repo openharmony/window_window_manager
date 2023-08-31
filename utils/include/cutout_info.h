@@ -21,6 +21,7 @@
 #include "class_var_definition.h"
 #include "display.h"
 #include "dm_common.h"
+#include "noncopyable.h"
 
 namespace OHOS::Rosen {
 struct DMRect {

@@ -278,14 +278,6 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &
     const ContinueState& continueState)
 {
     WLOGFI("run SetSessionContinueState");
-    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
-        WLOGFE("The caller is not system-app, can not use system-api");
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
-    }
-    if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The caller has not permission granted");
-        return WSError::WS_ERROR_INVALID_PERMISSION;
-    }
     auto task = [this, token, continueState]() {
         sptr <SceneSession> sceneSession = FindSessionByToken(token);
         if (sceneSession == nullptr) {
@@ -732,7 +724,7 @@ WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& scene
         parentPersistentId != INVALID_SESSION_ID) {
         auto parentSession = GetSceneSession(parentPersistentId);
         if (parentSession == nullptr) {
-            WLOGFE("Parent session is nullptr");
+            WLOGFE("Parent session is nullptr, parentPersistentId:%{public}d", parentPersistentId);
             return WSError::WS_ERROR_NULLPTR;
         }
         parentSession->BindDialogTarget(sceneSession);
@@ -831,6 +823,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             sceneSessionMap_.insert({ persistentId, sceneSession });
         }
         RegisterSessionStateChangeNotifyManagerFunc(sceneSession);
+        RegisterInputMethodUpdateFunc(sceneSession);
         RegisterInputMethodShownFunc(sceneSession);
         RegisterInputMethodHideFunc(sceneSession);
 
@@ -857,6 +850,31 @@ void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
             }
         }
     }
+}
+
+void SceneSessionManager::RegisterInputMethodUpdateFunc(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        WLOGFE("session is nullptr");
+        return;
+    }
+    NotifyCallingSessionForegroundFunc onInputMethodUpdate = [this](int32_t persistentId) {
+        this->OnInputMethodUpdate(persistentId);
+    };
+    sceneSession->SetNotifyCallingSessionUpdateRectFunc(onInputMethodUpdate);
+    WLOGFD("RegisterInputMethodUpdateFunc success");
+}
+
+void SceneSessionManager::OnInputMethodUpdate(const int32_t& persistentId)
+{
+    WLOGFD("Resize input method calling window");
+    auto scnSession = GetSceneSession(persistentId);
+    if (scnSession == nullptr) {
+        WLOGFE("Input method is null");
+        return;
+    }
+    callingSession_ = GetSceneSession(focusedSessionId_);
+    ResizeSoftInputCallingSessionIfNeed(scnSession, true);
 }
 
 void SceneSessionManager::RegisterInputMethodShownFunc(const sptr<SceneSession>& sceneSession)
@@ -931,7 +949,7 @@ WSError SceneSessionManager::PrepareTerminate(int32_t persistentId, bool& isPrep
     auto task = [this, persistentId, &isPrepareTerminate]() {
         if (!isPrepareTerminateEnable_) { // not support prepareTerminate
             isPrepareTerminate = false;
-            WLOGE("not support prepareTerminate");
+            WLOGE("not support prepareTerminate, persistentId%{public}d", persistentId);
             return WSError::WS_OK;
         }
         auto scnSession = GetSceneSession(persistentId);
@@ -942,7 +960,7 @@ WSError SceneSessionManager::PrepareTerminate(int32_t persistentId, bool& isPrep
         }
         auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
         if (scnSessionInfo == nullptr) {
-            WLOGFE("scnSessionInfo is nullptr");
+            WLOGFE("scnSessionInfo is nullptr, persistentId:%{public}d", persistentId);
             isPrepareTerminate = false;
             return WSError::WS_ERROR_NULLPTR;
         }
@@ -1141,8 +1159,6 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
                 WLOGFD("NotifySessionDestroyed, id: %{public}d", persistentId);
                 listenerController_->NotifySessionDestroyed(persistentId);
             }
-        } else {
-            scnSession->Destroy();
         }
         return WSError::WS_OK;
     };
@@ -1410,9 +1426,8 @@ WSError SceneSessionManager::SwitchUser(int32_t oldUserId, int32_t newUserId, st
     WLOGFD("SwitchUser oldUserId : %{public}d newUserId : %{public}d path : %{public}s",
         oldUserId, newUserId, fileDir.c_str());
     auto task = [this, newUserId, &fileDir]() {
-        if (!ScenePersistence::CreateSnapshotDir(fileDir)) {
-            WLOGFD("snapshot dir existed");
-        }
+        ScenePersistence::CreateSnapshotDir(fileDir);
+        ScenePersistence::CreateUpdatedIconDir(fileDir);
         currentUserId_ = newUserId;
         std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto &item : sceneSessionMap_) {
@@ -1508,7 +1523,7 @@ void SceneSessionManager::GetStartPage(const SessionInfo& sessionInfo, std::stri
         WLOGFE("bundle manager is nullptr.");
         return;
     }
-
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetStartPage");
     AAFwk::Want want;
     want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
     AppExecFwk::AbilityInfo abilityInfo;
@@ -1637,8 +1652,6 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION: {
-            ScreenSessionManager::GetInstance().
-                SetOrientationFromWindow(property->GetDisplayId(), property->GetRequestedOrientation());
             sceneSession->SetRequestedOrientation(property->GetRequestedOrientation());
             break;
         }
@@ -1815,31 +1828,33 @@ void SceneSessionManager::HandleTurnScreenOn(const sptr<SceneSession>& sceneSess
 
 void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSession, bool requireLock)
 {
-    auto task = [this, sceneSession, requireLock]() {
-        if (sceneSession == nullptr) {
+    wptr<SceneSession> weakSceneSession(sceneSession);
+    auto task = [this, weakSceneSession, requireLock]() {
+        auto scnSession = weakSceneSession.promote();
+        if (scnSession == nullptr) {
             WLOGFE("session is invalid");
             return;
         }
-        if (requireLock && sceneSession->keepScreenLock_ == nullptr) {
+        if (requireLock && scnSession->keepScreenLock_ == nullptr) {
             // reset ipc identity
             std::string identity = IPCSkeleton::ResetCallingIdentity();
-            sceneSession->keepScreenLock_ =
-                PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock(sceneSession->GetWindowName(),
+            scnSession->keepScreenLock_ =
+                PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock(scnSession->GetWindowName(),
                 PowerMgr::RunningLockType::RUNNINGLOCK_SCREEN);
             // set ipc identity to raw
             IPCSkeleton::SetCallingIdentity(identity);
         }
-        if (sceneSession->keepScreenLock_ == nullptr) {
+        if (scnSession->keepScreenLock_ == nullptr) {
             return;
         }
-        WLOGI("keep screen on: [%{public}s, %{public}d]", sceneSession->GetWindowName().c_str(), requireLock);
+        WLOGI("keep screen on: [%{public}s, %{public}d]", scnSession->GetWindowName().c_str(), requireLock);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:HandleKeepScreenOn");
         ErrCode res;
         std::string identity = IPCSkeleton::ResetCallingIdentity();
         if (requireLock) {
-            res = sceneSession->keepScreenLock_->Lock();
+            res = scnSession->keepScreenLock_->Lock();
         } else {
-            res = sceneSession->keepScreenLock_->UnLock();
+            res = scnSession->keepScreenLock_->UnLock();
         }
         // set ipc identity to raw
         IPCSkeleton::SetCallingIdentity(identity);
@@ -2257,7 +2272,7 @@ WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
         // notify session and client
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
-            WLOGFE("could not find window");
+            WLOGFE("could not find window, persistentId:%{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
         // focusId change
@@ -2292,12 +2307,8 @@ WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
                 listenerController_->NotifySessionUnfocused(sceneSession->GetPersistentId());
             }
         }
-        if (windowFocusChangedFunc_ != nullptr) {
-            windowFocusChangedFunc_(persistentId, isFocused);
-        }
         return WSError::WS_OK;
     };
-
     taskScheduler_->PostAsyncTask(task);
     return WSError::WS_OK;
 }
@@ -2307,36 +2318,29 @@ WSError SceneSessionManager::UpdateWindowMode(int32_t persistentId, int32_t wind
     WLOGFD("update window mode, id: %{public}d, mode: %{public}d", persistentId, windowMode);
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        WLOGFE("could not find window");
+        WLOGFE("could not find window, persistentId:%{public}d", persistentId);
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     WindowMode mode = static_cast<WindowMode>(windowMode);
     return sceneSession->UpdateWindowMode(mode);
 }
 
-void SceneSessionManager::RegisterWindowFocusChanged(const WindowFocusChangedFunc& func)
+void SceneSessionManager::RegisterWindowChanged(const WindowChangedFunc& func)
 {
-    WLOGFE("RegisterWindowFocusChanged in");
-    windowFocusChangedFunc_ = func;
-}
-
-std::map<int32_t, sptr<SceneSession>>& SceneSessionManager::GetSessionMapByScreenId(ScreenId id)
-{
-    return sceneSessionMap_; // only has one screen, return all
+    WLOGFE("RegisterWindowChanged in");
+    WindowChangedFunc_ = func;
 }
 
 void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
 {
-    ScreenId id = ScreenSessionManager::GetInstance().GetScreenSessionIdBySceneSessionId(persistentId);
-    auto sessionMap = GetSessionMapByScreenId(id);
-    int counts = GetSceneSessionPrivacyModeCount(sessionMap);
+    int counts = GetSceneSessionPrivacyModeCount();
     bool hasPrivateWindow = (counts != 0);
-    ScreenSessionManager::GetInstance().SetScreenPrivacyState(id, hasPrivateWindow);
+    ScreenSessionManager::GetInstance().SetScreenPrivacyState(hasPrivateWindow);
 }
 
-int SceneSessionManager::GetSceneSessionPrivacyModeCount(const std::map<int32_t, sptr<SceneSession>>& sessionMap)
+int SceneSessionManager::GetSceneSessionPrivacyModeCount()
 {
-    auto countFunc = [](std::pair<int32_t, sptr<SceneSession>> sessionPair) -> bool {
+    auto countFunc = [](const std::pair<int32_t, sptr<SceneSession>>& sessionPair) -> bool {
         sptr<SceneSession> sceneSession = sessionPair.second;
         bool isForground =  sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
             sceneSession->GetSessionState() == SessionState::STATE_ACTIVE;
@@ -2345,7 +2349,8 @@ int SceneSessionManager::GetSceneSessionPrivacyModeCount(const std::map<int32_t,
         bool IsSystemWindowVisible = sceneSession->GetSessionInfo().isSystem_ && sceneSession->IsVisible();
         return (isForground || IsSystemWindowVisible) && isPrivate;
     };
-    return std::count_if(sessionMap.begin(), sessionMap.end(), countFunc);
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    return std::count_if(sceneSessionMap_.begin(), sceneSessionMap_.end(), countFunc);
 }
 
 void SceneSessionManager::RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession)
@@ -2363,7 +2368,7 @@ void SceneSessionManager::RegisterSessionStateChangeNotifyManagerFunc(sptr<Scene
 
 void SceneSessionManager::OnSessionStateChange(int32_t persistentId, const SessionState& state)
 {
-    WLOGFD("Session state change, id: %{public}d", persistentId);
+    WLOGFD("Session state change, id: %{public}d, state:%{public}u", persistentId, state);
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         WLOGFD("session is nullptr");
@@ -2410,16 +2415,19 @@ WSError SceneSessionManager::SetWindowFlags(const sptr<SceneSession>& sceneSessi
 void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult()
 {
     bool currentWaterMarkShowState = false;
-    for (auto iter: sceneSessionMap_) {
-        auto session = iter.second;
-        if (!session || !session->GetSessionProperty()) {
-            continue;
-        }
-        bool hasWaterMark = session->GetSessionProperty()->GetWindowFlags()
-            & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
-        if (hasWaterMark && session->GetVisible()) {
-            currentWaterMarkShowState = true;
-            break;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& iter: sceneSessionMap_) {
+            auto& session = iter.second;
+            if (!session || !session->GetSessionProperty()) {
+                continue;
+            }
+            bool hasWaterMark = session->GetSessionProperty()->GetWindowFlags()
+                & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_WATER_MARK);
+            if (hasWaterMark && session->GetVisible()) {
+                currentWaterMarkShowState = true;
+                break;
+            }
         }
     }
     if (lastWaterMarkShowState_ ^ currentWaterMarkShowState) {
@@ -2436,16 +2444,43 @@ WSError SceneSessionManager::NotifyWaterMarkFlagChangedResult(bool hasWaterMark)
     return WSError::WS_OK;
 }
 
+void SceneSessionManager::ProcessPreload(const AppExecFwk::AbilityInfo &abilityInfo) const
+{
+    if (!bundleMgr_) {
+        WLOGFE("bundle manager is nullptr.");
+        return;
+    }
+
+    AAFwk::Want want;
+    want.SetElementName(abilityInfo.deviceId, abilityInfo.bundleName, abilityInfo.name, abilityInfo.moduleName);
+    auto uid = abilityInfo.uid;
+    want.SetParam("uid", uid);
+    bundleMgr_->ProcessPreload(want);
+}
+
 void SceneSessionManager::NotifyCompleteFirstFrameDrawing(int32_t persistentId)
 {
     WLOGFI("NotifyCompleteFirstFrameDrawing, persistentId: %{public}d", persistentId);
     auto scnSession = GetSceneSession(persistentId);
-    if (scnSession && listenerController_ != nullptr &&
-        (scnSession->GetSessionInfo().abilityInfo) != nullptr &&
-        !(scnSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
+    if (scnSession == nullptr) {
+        return;
+    }
+    auto abilityInfoPtr = scnSession->GetSessionInfo().abilityInfo;
+    if (abilityInfoPtr == nullptr) {
+        return;
+    }
+    if ((listenerController_ != nullptr) && !(abilityInfoPtr->excludeFromMissions)) {
         WLOGFD("NotifySessionCreated, id: %{public}d", persistentId);
         listenerController_->NotifySessionCreated(persistentId);
     }
+
+    if (taskScheduler_ == nullptr) {
+        return;
+    }
+    auto task = [this, abilityInfoPtr]() {
+        ProcessPreload(*abilityInfoPtr);
+    };
+    return taskScheduler_->PostAsyncTask(task);
 }
 
 void SceneSessionManager::NotifySessionMovedToFront(int32_t persistentId)
@@ -2462,6 +2497,14 @@ void SceneSessionManager::NotifySessionMovedToFront(int32_t persistentId)
 WSError SceneSessionManager::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label)
 {
     WLOGFI("run SetSessionLabel");
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
+        WLOGFE("The caller is not system-app, can not use system-api");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!SessionPermission::VerifySessionPermission()) {
+        WLOGFE("The caller has not permission granted");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
     auto sceneSession = FindSessionByToken(token);
     if (sceneSession == nullptr) {
         WLOGFI("fail to find session by token");
@@ -2483,6 +2526,14 @@ WSError SceneSessionManager::SetSessionIcon(const sptr<IRemoteObject> &token,
     const std::shared_ptr<Media::PixelMap> &icon)
 {
     WLOGFI("run SetSessionIcon");
+    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
+        WLOGFE("The caller is not system-app, can not use system-api");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!SessionPermission::VerifySessionPermission()) {
+        WLOGFE("The caller has not permission granted");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
     auto sceneSession = FindSessionByToken(token);
     if (sceneSession == nullptr) {
         WLOGFI("fail to find session by token");
@@ -2672,8 +2723,10 @@ WSError SceneSessionManager::GetSessionInfo(const std::string& deviceId,
             WLOGFD("GetSessionInfo sessionId:%{public}d bundleName:%{public}s", persistentId,
                 sceneSessionInfo.bundleName_.c_str());
             return SceneSessionConverter::ConvertToMissionInfo(iter->second, sessionInfo);
+        } else {
+            WLOGFW("sessionId: %{public}d not found", persistentId);
+            return WSError::WS_ERROR_INVALID_PARAM;
         }
-        return WSError::WS_OK;
     };
     return taskScheduler_->PostSyncTask(task);
 }
@@ -2797,10 +2850,54 @@ WSError SceneSessionManager::GetAllAbilityInfos(const AAFwk::Want &want, int32_t
         WLOGFE("bundleMgr_ is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    auto ret = bundleMgr_->QueryAllAbilityInfos(want, userId, abilityInfos);
-    if (!ret) {
-        WLOGFE("Query all ability infos from BMS failed!");
+    auto elementName = want.GetElement();
+    int32_t ret{0};
+    auto flag = (AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION |
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_METADATA |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE));
+    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    if (elementName.GetBundleName().empty() && elementName.GetAbilityName().empty()) {
+        WLOGFD("want is empty queryAllAbilityInfos");
+        ret = static_cast<int32_t>(bundleMgr_->GetBundleInfosV9(flag, bundleInfos, userId));
+        if (ret) {
+            WLOGFE("Query all ability infos from BMS failed!");
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+    } else if (!elementName.GetBundleName().empty()) {
+        AppExecFwk::BundleInfo bundleInfo;
+        WLOGFD("bundleName is not empty, query abilityInfo of %{public}s", elementName.GetBundleName().c_str());
+        ret = static_cast<int32_t>(bundleMgr_->GetBundleInfoV9(elementName.GetBundleName(), flag, bundleInfo, userId));
+        if (ret) {
+            WLOGFE("Query ability info from BMS failed!");
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+        bundleInfos.push_back(bundleInfo);
+    } else {
+        WLOGFE("invalid want:%{public}s", want.ToString().c_str());
         return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    return GetAbilityInfosFromBundleInfo(bundleInfos, abilityInfos);
+}
+
+WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
+    std::vector<AppExecFwk::AbilityInfo> &abilityInfos)
+{
+    if (bundleInfos.empty()) {
+        WLOGFE("bundleInfos is empty");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    for (auto bundleInfo: bundleInfos) {
+        auto hapModulesList = bundleInfo.hapModuleInfos;
+        if (hapModulesList.empty()) {
+            WLOGFD("hapModulesList is empty");
+            continue;
+        }
+        for (auto hapModule: hapModulesList) {
+            auto abilityInfoList = hapModule.abilityInfos;
+            abilityInfos.insert(abilityInfos.end(), abilityInfoList.begin(), abilityInfoList.end());
+        }
     }
     return WSError::WS_OK;
 }
@@ -2984,11 +3081,11 @@ WSError SceneSessionManager::BindDialogTarget(uint64_t persistentId, sptr<IRemot
     }
     auto scnSession = GetSceneSession(static_cast<int32_t>(persistentId));
     if (scnSession == nullptr) {
-        WLOGFE("Session is nullptr");
+        WLOGFE("Session is nullptr, persistentId:%{public}" PRIu64, persistentId);
         return WSError::WS_ERROR_NULLPTR;
     }
     if (scnSession->GetWindowType() != WindowType::WINDOW_TYPE_DIALOG) {
-        WLOGFE("Session is not dialog window");
+        WLOGFE("Session is not dialog window, window type:%{public}u", scnSession->GetWindowType());
         return WSError::WS_OK;
     }
     scnSession->dialogTargetToken_ = targetToken;
@@ -3077,7 +3174,8 @@ void SceneSessionManager::StartWindowInfoReportLoop()
     isReportTaskStart_ = true;
 }
 
-void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(const sptr<SceneSession>& sceneSession)
+void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
+    const sptr<SceneSession>& sceneSession, bool isInputUpdated)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     if (callingSession_ == nullptr) {
@@ -3092,25 +3190,44 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(const sptr<SceneSe
         return;
     }
 
+    bool isCallingSessionFloating;
+    if (callingSession_->GetSessionProperty() &&
+        callingSession_->GetSessionProperty()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        isCallingSessionFloating = true;
+    } else {
+        isCallingSessionFloating = false;
+    }
+
     const WSRect& softInputSessionRect = sceneSession->GetSessionRect();
-    const WSRect& callingSessionRect = callingSession_->GetSessionRect();
+    WSRect callingSessionRect;
+    if (isInputUpdated && isCallingSessionFloating) {
+        callingSessionRect = callingWindowRestoringRect_;
+    } else {
+        callingSessionRect = callingSession_->GetSessionRect();
+    }
     if (SessionHelper::IsEmptyRect(SessionHelper::GetOverlap(softInputSessionRect, callingSessionRect, 0, 0))) {
         WLOGFD("There is no overlap area");
         return;
     }
 
     // calculate new rect of calling window
-    WSRect newRect = callingSessionRect;
+    WSRect newRect;
+    if (isInputUpdated && isCallingSessionFloating) {
+        newRect = callingWindowRestoringRect_;
+    } else {
+        newRect = callingSessionRect;
+    }
     newRect.posY_ = softInputSessionRect.posY_ - static_cast<int32_t>(newRect.height_);
     newRect.posY_ = std::max(newRect.posY_, STATUS_BAR_AVOID_AREA);
 
-    if (callingSession_->GetSessionProperty() &&
-        callingSession_->GetSessionProperty()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        needUpdateSessionRect_ = true;
+    if (!isInputUpdated) {
+        callingWindowRestoringRect_ = callingSessionRect;
     }
-    callingWindowRestoringRect_ = callingSessionRect;
     NotifyOccupiedAreaChangeInfo(callingSession_, newRect, softInputSessionRect);
-    callingSession_->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
+    if (isCallingSessionFloating) {
+        needUpdateSessionRect_ = true;
+        callingSession_->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
+    }
 }
 
 void SceneSessionManager::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> callingSession,
@@ -3260,6 +3377,9 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
         auto scnSession = weakSceneSession.promote();
         if (FillWindowInfo(infos, scnSession)) {
             SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(infos, type);
+        }
+        if (WindowChangedFunc_ != nullptr && scnSession != nullptr) {
+            WindowChangedFunc_(scnSession->GetPersistentId(), type);
         }
     };
     taskScheduler_->PostAsyncTask(task);
@@ -3518,17 +3638,20 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentI
         return WSError::WS_DO_NOTHING;
     }
     if (haveListener) {
-        avoidAreaListenerSessionSet_.insert(sceneSession);
+        avoidAreaListenerSessionSet_.insert(persistentId);
     } else {
         lastUpdatedAvoidArea_.erase(persistentId);
-        avoidAreaListenerSessionSet_.erase(sceneSession);
+        avoidAreaListenerSessionSet_.erase(persistentId);
     }
     return WSError::WS_OK;
 }
 
 bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistentId,
-    const AvoidArea& avoidArea, AvoidAreaType avoidAreaType)
+    const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType)
 {
+    if (sceneSession == nullptr) {
+        return false;
+    }
     auto iter = lastUpdatedAvoidArea_.find(persistentId);
     bool needUpdate = true;
 
@@ -3547,11 +3670,6 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistent
         }
     }
     if (needUpdate) {
-        auto sceneSession = GetSceneSession(persistentId);
-        if (sceneSession == nullptr) {
-            WLOGFE("sceneSession is nullptr.");
-            return false;
-        }
         lastUpdatedAvoidArea_[persistentId][avoidAreaType] = avoidArea;
         sceneSession->UpdateAvoidArea(new AvoidArea(avoidArea), avoidAreaType);
     }
@@ -3559,10 +3677,53 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistent
     return needUpdate;
 }
 
+void SceneSessionManager::UpdateAvoidSessionAvoidArea(WindowType type, bool& needUpdate)
+{
+    bool ret = true;
+    AvoidAreaType avoidType = (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) ?
+        AvoidAreaType::TYPE_KEYBOARD : AvoidAreaType::TYPE_SYSTEM;
+    for (auto& persistentId : avoidAreaListenerSessionSet_) {
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr || !sceneSession->IsVisible()) {
+            continue;
+        }
+        AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
+        ret = UpdateSessionAvoidAreaIfNeed(
+            persistentId, sceneSession, avoidArea, static_cast<AvoidAreaType>(avoidType));
+        needUpdate = needUpdate || ret;
+    }
+
+    return;
+}
+
+void SceneSessionManager::UpdateNormalSessionAvoidArea(
+    const int32_t& persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate)
+{
+    bool ret = true;
+    if (sceneSession == nullptr || !sceneSession->IsVisible()) {
+        needUpdate = false;
+        return;
+    }
+    if (avoidAreaListenerSessionSet_.find(persistentId) == avoidAreaListenerSessionSet_.end()) {
+        WLOGD("id:%{public}d is not in avoidAreaListenerNodes, don't update avoid area.", persistentId);
+        needUpdate = false;
+        return;
+    }
+    uint32_t start = static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM);
+    uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_KEYBOARD);
+    for (uint32_t avoidType = start; avoidType <= end; avoidType++) {
+        AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
+        ret = UpdateSessionAvoidAreaIfNeed(
+            persistentId, sceneSession, avoidArea, static_cast<AvoidAreaType>(avoidType));
+        needUpdate = needUpdate || ret;
+    }
+
+    return;
+}
+
 bool SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
 {
     auto task = [this, persistentId]() {
-        bool ret = true;
         bool needUpdate = false;
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
@@ -3582,26 +3743,9 @@ bool SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
             (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
             (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM ||
             gravity == SessionGravity::SESSION_GRAVITY_DEFAULT))) {
-            AvoidAreaType avoidType = (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) ?
-                AvoidAreaType::TYPE_KEYBOARD : AvoidAreaType::TYPE_SYSTEM;
-            for (auto& session : avoidAreaListenerSessionSet_) {
-                AvoidArea avoidArea = session->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
-                ret = UpdateSessionAvoidAreaIfNeed(
-                    session->GetPersistentId(), avoidArea, static_cast<AvoidAreaType>(avoidType));
-                needUpdate = needUpdate || ret;
-            }
+            UpdateAvoidSessionAvoidArea(type, needUpdate);
         } else {
-            if (avoidAreaListenerSessionSet_.find(sceneSession) == avoidAreaListenerSessionSet_.end()) {
-                WLOGD("id:%{public}d is not in avoidAreaListenerNodes, don't update avoid area.", persistentId);
-                return false;
-            }
-            uint32_t start = static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM);
-            uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_KEYBOARD);
-            for (uint32_t avoidType = start; avoidType <= end; avoidType++) {
-                AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
-                ret = UpdateSessionAvoidAreaIfNeed(persistentId, avoidArea, static_cast<AvoidAreaType>(avoidType));
-                needUpdate = needUpdate || ret;
-            }
+            UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
         }
 
         return needUpdate;
@@ -3857,26 +4001,6 @@ bool SceneSessionManager::CheckCollaboratorType(int32_t type)
     return true;
 }
 
-void SceneSessionManager::QueryAbilityInfoFromBMS(const int32_t uId,
-    const SessionInfo& sessionInfo, AppExecFwk::AbilityInfo& abilityInfo)
-{
-    WLOGFI("run QueryAbilityInfoFromBMS");
-    if (bundleMgr_ == nullptr) {
-        WLOGFE("bundleMgr_ is nullptr!");
-        return;
-    }
-
-    AAFwk::Want want;
-    want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
-    auto abilityInfoFlag = (AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
-        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION |
-        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_METADATA);
-    bool ret = bundleMgr_->QueryAbilityInfo(want, abilityInfoFlag, uId, abilityInfo);
-    if (!ret) {
-        WLOGFE("Get ability info from BMS failed!");
-    }
-}
-
 void SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, const SessionInfo& sessionInfo)
 {
     WLOGFI("run NotifyStartAbility");
@@ -3887,7 +4011,7 @@ void SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, const Ses
     }
     if (sessionInfo.want == nullptr) {
         WLOGFI("sessionInfo.want is nullptr, init");
-        sessionInfo.want = new AAFwk::Want();
+        sessionInfo.want = std::make_shared<AAFwk::Want>();
         sessionInfo.want->SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_,
             sessionInfo.moduleName_);
     }

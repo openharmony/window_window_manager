@@ -24,6 +24,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "IntentionEventManager" };
 std::shared_ptr<MMI::PointerEvent> g_lastMouseEvent = nullptr;
 constexpr int32_t DELAY_TIME = 15;
+
 } // namespace
 
 IntentionEventManager::IntentionEventManager() {}
@@ -39,55 +40,58 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler)
 {
     if (uiContent == nullptr) {
-        WLOGFE("uiContent is null");
+        WLOGFE("EnableInputEventListener uiContent is null");
         return false;
     }
     if (eventHandler == nullptr) {
-        WLOGFE("eventHandler is null");
+        WLOGFE("EnableInputEventListener eventHandler is null");
         return false;
     }
     auto listener =
         std::make_shared<IntentionEventManager::InputEventListener>(uiContent, eventHandler);
     MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler);
-    listener->RegisterWindowFocusChanged();
+    listener->RegisterWindowChanged();
     return true;
 }
 
-void IntentionEventManager::InputEventListener::RegisterWindowFocusChanged()
+void IntentionEventManager::InputEventListener::RegisterWindowChanged()
 {
-    SceneSessionManager::GetInstance().RegisterWindowFocusChanged(
-        [this](int32_t persistentId, bool isFocused) {
-            WLOGFD("Window focus changed, persistentId:%{public}d, isFocused:%{public}d",
-                persistentId, isFocused);
-            this->ProcessEnterLeaveEvent();
+    SceneSessionManager::GetInstance().RegisterWindowChanged(
+        [this](int32_t persistentId, WindowUpdateType type) {
+            WLOGFD("Window changed, persistentId:%{public}d, type:%{public}d",
+                persistentId, type);
+            if (type == WindowUpdateType::WINDOW_UPDATE_BOUNDS) {
+                auto enterSession = SceneSession::GetEnterWindow().promote();
+                if (enterSession == nullptr) {
+                    WLOGFE("Enter session is null, do not reissuing enter leave events, persistentId:%{public}d, "
+                            "type:%{public}d", persistentId, type);
+                    return;
+                }
+                this->ProcessEnterLeaveEventAsync();
+            }
         }
     );
 }
 
-void IntentionEventManager::InputEventListener::ProcessEnterLeaveEvent()
+void IntentionEventManager::InputEventListener::ProcessEnterLeaveEventAsync()
 {
     auto task = [this]() {
         std::lock_guard<std::mutex> guard(mouseEventMutex_);
-        auto enterSession = SceneSession::GetEnterWindow().promote();
-        if ((enterSession != nullptr) && ((g_lastMouseEvent != nullptr) &&
-            (g_lastMouseEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE))) {
-            WLOGFD("Window changed, reissuing enter leave events");
-            auto leaveEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
-            leaveEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
-            enterSession->TransferPointerEvent(leaveEvent);
-
-            auto enterEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
-            enterEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
-            if (uiContent_ == nullptr) {
-                WLOGFE("uiContent_ is null");
-                return;
-            }
-            uiContent_->ProcessPointerEvent(enterEvent);
+        if (g_lastMouseEvent == nullptr) {
+            return;
         }
+        auto pointerEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
+        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+        pointerEvent->SetButtonId(MMI::PointerEvent::BUTTON_NONE);
+        if (uiContent_ == nullptr) {
+            WLOGFE("ProcessEnterLeaveEventAsync uiContent_ is null");
+            return;
+        }
+        uiContent_->ProcessPointerEvent(pointerEvent);
     };
     auto eventHandler = weakEventConsumer_.lock();
     if (eventHandler == nullptr) {
-        WLOGFE("eventHandler is null");
+        WLOGFE("ProcessEnterLeaveEventAsync eventHandler is null");
         return;
     }
     eventHandler->PostTask(std::move(task), DELAY_TIME, AppExecFwk::EventQueue::Priority::IMMEDIATE);
@@ -97,7 +101,7 @@ void IntentionEventManager::InputEventListener::UpdateLastMouseEvent(
     std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
     if (pointerEvent == nullptr) {
-        WLOGFE("pointerEvent is null");
+        WLOGFE("UpdateLastMouseEvent pointerEvent is null");
         return;
     }
     if ((pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
@@ -116,11 +120,11 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
     if (pointerEvent == nullptr) {
-        WLOGFE("pointerEvent is null");
+        WLOGFE("OnInputEvent pointerEvent is null");
         return;
     }
     if (uiContent_ == nullptr) {
-        WLOGFE("uiContent_ is null");
+        WLOGFE("OnInputEvent uiContent_ is null");
         return;
     }
 
@@ -130,7 +134,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         int32_t pointerId = pointerEvent->GetPointerId();
         MMI::PointerEvent::PointerItem pointerItem;
         if (!pointerEvent->GetPointerItem(pointerId, pointerItem)) {
-            WLOGFE("uiContent_ is null");
+            WLOGFE("OnInputEvent GetPointerItem failed, pointerId:%{public}d", pointerId);
         } else {
             SceneSessionManager::GetInstance().OnOutsideDownEvent(
                 pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
@@ -153,6 +157,15 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     auto focusedSceneSession = SceneSessionManager::GetInstance().GetSceneSession(focusedSessionId);
     if (focusedSceneSession == nullptr) {
         WLOGFE("focusedSceneSession is null");
+        return;
+    }
+    if (focusedSceneSession->GetSessionInfo().isSystem_) {
+        WLOGFD("Syetem window scene, transfer key event to root scene");
+        if (uiContent_ == nullptr) {
+            WLOGFE("uiContent_ is null");
+            return;
+        }
+        uiContent_->ProcessKeyEvent(keyEvent);
         return;
     }
     focusedSceneSession->TransferKeyEvent(keyEvent);

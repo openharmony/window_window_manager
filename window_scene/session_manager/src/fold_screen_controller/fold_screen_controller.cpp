@@ -56,7 +56,7 @@ sptr<FoldScreenPolicy> FoldScreenController::GetFoldScreenPolicy(DisplayDeviceTy
     return tempPolicy;
 }
 
-void FoldScreenController::SetDisplayMode(FoldDisplayMode displayMode)
+void FoldScreenController::SetDisplayMode(const FoldDisplayMode displayMode)
 {
     if (foldScreenPolicy_ == nullptr) {
         WLOGW("SetDisplayMode: foldScreenPolicy_ is null");
@@ -72,5 +72,20 @@ FoldDisplayMode FoldScreenController::GetDisplayMode()
         return FoldDisplayMode::UNKNOWN;
     }
     return foldScreenPolicy_->GetScreenDisplayMode();
+}
+
+bool FoldScreenController::IsFoldable()
+{
+    return true;
+}
+
+FoldStatus FoldScreenController::GetFoldStatus()
+{
+    return FoldStatus::UNKNOWN;
+}
+
+sptr<FoldCreaseRegion> FoldScreenController::GetCurrentFoldCreaseRegion()
+{
+    return nullptr;
 }
 } // namespace OHOS::Rosen

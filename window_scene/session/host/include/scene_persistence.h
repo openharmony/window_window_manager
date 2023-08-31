@@ -16,11 +16,10 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_PERSISTENCE_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_PERSISTENCE_H
 
+#include <string>
 #include <sys/stat.h>
 
 #include <refbase.h>
-
-#include "interfaces/include/ws_common.h"
 
 namespace OHOS::Media {
 class PixelMap;
@@ -29,42 +28,27 @@ class PixelMap;
 namespace OHOS::Rosen {
 class ScenePersistence : public RefBase {
 public:
-    ScenePersistence(const SessionInfo& info, const int32_t& persistentId);
+    ScenePersistence(const std::string& bundleName, const int32_t& persistentId);
     ~ScenePersistence() = default;
 
-    static inline bool CreateSnapshotDir(const std::string& strFilesDir)
-    {
-        strPersistPath_ = strFilesDir + "/SceneSnapShot/";
-        constexpr mode_t MKDIR_MODE = 0740;
-        if (mkdir(strPersistPath_.c_str(), MKDIR_MODE) != 0) {
-            return false;
-        }
-        return true;
-    }
-
-    static inline bool CreateUpdatedIconDir(const std::string& strFilesDir)
-    {
-        strPersistUpdatedIconPath_ = strFilesDir + "/UpdatedIcon/";
-        constexpr mode_t MKDIR_MODE = 0740;
-        if (mkdir(strPersistUpdatedIconPath_.c_str(), MKDIR_MODE) != 0) {
-            return false;
-        }
-        return true;
-    }
+    static bool CreateSnapshotDir(const std::string& directory);
+    static bool CreateUpdatedIconDir(const std::string& directory);
 
     bool IsSnapshotExisted() const;
     std::string GetSnapshotFilePath() const;
     std::pair<uint32_t, uint32_t> GetSnapshotSize() const;
     void SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap);
+
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& pixelMap);
     std::string GetUpdatedIconPath() const;
 
 private:
-    static std::string strPersistPath_;
-    static std::string strPersistUpdatedIconPath_;
+    static std::string snapshotDirectory_;
+    std::string snapshotPath_;
     std::pair<uint32_t, uint32_t> snapshotSize_;
-    std::string strSnapshotFile_;
-    std::string strUpdatedIconPath_;
+
+    static std::string updatedIconDirectory_;
+    std::string updatedIconPath_;
 };
 } // namespace OHOS::Rosen
 

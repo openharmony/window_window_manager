@@ -1032,6 +1032,7 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
                     smsScreenMapIter->second->ConvertToScreenInfo(), ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
             }
             screenSessionMap_.erase(smsScreenMapIter);
+            NotifyScreenDisconnected(screenId);
             WLOGFI("SCB: ScreenSessionManager::DestroyVirtualScreen id: %{public}" PRIu64"", screenId);
         }
     }
@@ -1866,16 +1867,16 @@ void ScreenSessionManager::NotifyPrivateSessionStateChanged(bool hasPrivate)
     }
 }
 
-void ScreenSessionManager::SetScreenPrivacyState(ScreenId id, bool hasPrivate)
+void ScreenSessionManager::SetScreenPrivacyState(bool hasPrivate)
 {
+    ScreenId id = GetDefaultScreenId();
     auto screenSession = GetScreenSession(id);
+    if (screenSession == nullptr) {
+        WLOGFE("can not get default screen now");
+        return;
+    }
     screenSession->SetPrivateSessionForeground(hasPrivate);
     NotifyPrivateSessionStateChanged(hasPrivate);
-}
-
-ScreenId ScreenSessionManager::GetScreenSessionIdBySceneSessionId(uint32_t persistentId)
-{
-    return 0; // current only has one screen
 }
 
 DMError ScreenSessionManager::HasPrivateWindow(DisplayId id, bool& hasPrivateWindow)
@@ -1969,7 +1970,7 @@ void ScreenSessionManager::OnScreenshot(sptr<ScreenshotInfo> info)
 
 sptr<CutoutInfo> ScreenSessionManager::GetCutoutInfo(DisplayId displayId)
 {
-    return screenCutoutController_ ? screenCutoutController_->GetScreenCutoutInfo() : nullptr;
+    return screenCutoutController_ ? screenCutoutController_->GetScreenCutoutInfo(displayId) : nullptr;
 }
 
 void ScreenSessionManager::SetDisplayBoundary(const sptr<ScreenSession> screenSession)
@@ -2072,7 +2073,7 @@ void ScreenSessionManager::DumpSpecialScreenInfo(ScreenId id, std::string& dumpI
     dumpInfo.append(oss.str());
 }
 
-//Fold Screen
+// --- Fold Screen ---
 ScreenProperty ScreenSessionManager::GetPhyScreenProperty(ScreenId screenId)
 {
     std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
@@ -2085,7 +2086,7 @@ ScreenProperty ScreenSessionManager::GetPhyScreenProperty(ScreenId screenId)
     return iter->second;
 }
 
-void ScreenSessionManager::SetFoldDisplayMode(FoldDisplayMode displayMode)
+void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
 {
     if (foldScreenController_ == nullptr) {
         WLOGFW("SetFoldDisplayMode foldScreenController_ is null");
@@ -2101,5 +2102,32 @@ FoldDisplayMode ScreenSessionManager::GetFoldDisplayMode()
         return FoldDisplayMode::UNKNOWN;
     }
     return foldScreenController_->GetDisplayMode();
+}
+
+bool ScreenSessionManager::IsFoldable()
+{
+    if (foldScreenController_ == nullptr) {
+        WLOGFW("foldScreenController_ is null");
+        return false;
+    }
+    return foldScreenController_->IsFoldable();
+}
+
+FoldStatus ScreenSessionManager::GetFoldStatus()
+{
+    if (foldScreenController_ == nullptr) {
+        WLOGFW("foldScreenController_ is null");
+        return FoldStatus::UNKNOWN;
+    }
+    return foldScreenController_->GetFoldStatus();
+}
+
+sptr<FoldCreaseRegion> ScreenSessionManager::GetCurrentFoldCreaseRegion()
+{
+    if (foldScreenController_ == nullptr) {
+        WLOGFW("foldScreenController_ is null");
+        return nullptr;
+    }
+    return foldScreenController_->GetCurrentFoldCreaseRegion();
 }
 } // namespace OHOS::Rosen

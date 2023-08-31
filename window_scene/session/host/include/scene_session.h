@@ -91,8 +91,6 @@ public:
     SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
     ~SceneSession() = default;
 
-    void Destroy();
-
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr) override;
@@ -190,9 +188,9 @@ private:
     sptr<MoveDragController> moveDragController_ = nullptr;
     sptr<SetWindowScenePatternFunc> setWindowScenePatternFunc_ = nullptr;
     bool isVisible_ = false;
-    MMI::WindowArea preWindowArea_;
     static wptr<SceneSession> enterSession_;
     static std::mutex enterSessionMutex_;
+    mutable std::mutex sessionChangeCbMutex_;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     sptr<IRemoteObject> selfToken_ = nullptr;
 };

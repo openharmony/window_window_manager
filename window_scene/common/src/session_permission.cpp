@@ -165,7 +165,8 @@ bool SessionPermission::IsStartedByInputMethod()
     // set ipc identity to raw
     IPCSkeleton::SetCallingIdentity(identity);
     if (!result) {
-        WLOGFE("failed to query extension ability info");
+        WLOGFE("failed to query extension ability info, bundleName:%{public}s, userId:%{public}d",
+                bundleName.c_str(), userId);
         return false;
     }
 

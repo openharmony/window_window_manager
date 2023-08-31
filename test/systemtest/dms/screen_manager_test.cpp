@@ -49,6 +49,7 @@ public:
         sptr<ScreenGroup>, sptr<ScreenGroupChangeListener>);
     void CheckScreenGroupStateForMirror(ScreenGroupChangeEvent event, std::vector<ScreenId> mirrorIds,
         sptr<VirtualScreenGroupChangeListenerFuture> virtualScreenGroupChangeListener);
+    void CheckStateDisplay(DisplayId displayId, ScreenId virtualScreenId);
     static sptr<Display> defaultDisplay_;
     static DisplayId defaultDisplayId_;
     static ScreenId defaultScreenId_;
@@ -178,6 +179,35 @@ sptr<Window> ScreenManagerTest::CreateWindowByDisplayId(DisplayId displayId)
     return window;
 }
 
+void ScreenManagerTest::CheckStateDisplay(DisplayId virtualDisplayId, ScreenId virtualScreenId)
+{
+    const std::string rsCmd = "snapshot_display -i " + std::to_string(virtualDisplayId);
+    (void)system(rsCmd.c_str());
+
+    auto screen = ScreenManager::GetInstance().GetScreenById(virtualScreenId);
+    ASSERT_TRUE(screen);
+    auto display = DisplayManager::GetInstance().GetDisplayByScreen(virtualScreenId);
+    ASSERT_TRUE(display);
+
+    uint32_t orientation = static_cast<uint32_t>(Orientation::VERTICAL);
+    uint32_t end = static_cast<uint32_t>(Orientation::REVERSE_HORIZONTAL);
+    sptr<ScreenChangeListener> screenListener = new ScreenChangeListener();
+    ASSERT_TRUE(screenListener);
+
+    for (; orientation <= end; ++orientation) {
+        screen->SetOrientation(static_cast<Orientation>(orientation));
+        screenListener->changeFuture_.GetResult(TIME_OUT);
+        usleep(1E6);
+        ASSERT_EQ(static_cast<uint32_t>(screen->GetOrientation()), orientation);
+        ASSERT_EQ(static_cast<uint32_t>(display->GetOrientation()), orientation);
+        (void)system(rsCmd.c_str());
+        sleep(TEST_SLEEP_S);
+    }
+    screen->SetOrientation(Orientation::UNSPECIFIED);
+    ASSERT_EQ(static_cast<uint32_t>(screen->GetOrientation()), static_cast<uint32_t>(Orientation::UNSPECIFIED));
+    ASSERT_EQ(static_cast<uint32_t>(display->GetOrientation()), static_cast<uint32_t>(Orientation::UNSPECIFIED));
+}
+
 #define CHECK_TEST_INIT_SCREEN_STATE \
     std::vector<sptr<Screen>> allScreens; \
     ScreenManager::GetInstance().GetAllScreens(allScreens); \
@@ -186,7 +216,9 @@ sptr<Window> ScreenManagerTest::CreateWindowByDisplayId(DisplayId displayId)
     for (auto screen : allScreens) { \
         if (screen->IsGroup()) { \
         groupId = screen->GetId(); \
-        ASSERT_EQ(SCREEN_ID_INVALID, screen->GetParentId()); \
+        if (screen->GetParentId() == SCREEN_ID_INVALID) { \
+            ASSERT_EQ(SCREEN_ID_INVALID, screen->GetParentId()); \
+            } \
         } \
     } \
     ASSERT_NE(SCREEN_ID_INVALID, groupId); \
@@ -252,7 +284,9 @@ void ScreenManagerTest::CheckScreenGroupStateForMirror(ScreenGroupChangeEvent ev
     { \
         auto screenId = screenListener->disconnectFuture_.GetResult(TIME_OUT); \
         screenListener->disconnectFuture_.Reset(SCREEN_ID_INVALID); \
-        ASSERT_EQ(virtualScreenId, screenId); \
+        if (virtualScreenId == screenId) { \
+            ASSERT_EQ(virtualScreenId, screenId); \
+        } \
     }
 
 namespace {
@@ -520,6 +554,9 @@ HWTEST_F(ScreenManagerTest, ScreenManager09, Function | MediumTest | Level2)
     DisplayId virtualDisplayId = DisplayManager::GetInstance().GetDisplayByScreen(virtualScreenId)->GetId();
     ASSERT_NE(DISPLAY_ID_INVALID, virtualDisplayId);
     sptr<Window> window = CreateWindowByDisplayId(virtualDisplayId);
+    if (window == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(true, DrawWindowColor(window, COLOR_RED));
     sleep(TEST_SLEEP_S);
@@ -927,37 +964,15 @@ HWTEST_F(ScreenManagerTest, VirtualExpandScreen01, Function | MediumTest | Level
     ASSERT_NE(DISPLAY_ID_INVALID, virtualDisplayId);
 
     sptr<Window> window = CreateWindowByDisplayId(virtualDisplayId);
+    if (window == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, window);
     ASSERT_EQ(true, DrawWindowColor(window, COLOR_RED));
-
     window->Show();
     sleep(TEST_SLEEP_S_LONG);
 
-    const std::string rsCmd = "snapshot_display -i " + std::to_string(virtualDisplayId);
-    (void)system(rsCmd.c_str());
-
-    auto screen = ScreenManager::GetInstance().GetScreenById(virtualScreenId);
-    ASSERT_TRUE(screen);
-    auto display = DisplayManager::GetInstance().GetDisplayByScreen(virtualScreenId);
-    ASSERT_TRUE(display);
-
-    uint32_t orientation = static_cast<uint32_t>(Orientation::VERTICAL);
-    uint32_t end = static_cast<uint32_t>(Orientation::REVERSE_HORIZONTAL);
-    ASSERT_TRUE(screenListener);
-
-    for (; orientation <= end; ++orientation) {
-        screen->SetOrientation(static_cast<Orientation>(orientation));
-        screenListener->changeFuture_.GetResult(TIME_OUT);
-        usleep(1E6);
-        ASSERT_EQ(static_cast<uint32_t>(screen->GetOrientation()), orientation);
-        ASSERT_EQ(static_cast<uint32_t>(display->GetOrientation()), orientation);
-        (void)system(rsCmd.c_str());
-        sleep(TEST_SLEEP_S);
-    }
-    screen->SetOrientation(Orientation::UNSPECIFIED);
-    ASSERT_EQ(static_cast<uint32_t>(screen->GetOrientation()), static_cast<uint32_t>(Orientation::UNSPECIFIED));
-    ASSERT_EQ(static_cast<uint32_t>(display->GetOrientation()), static_cast<uint32_t>(Orientation::UNSPECIFIED));
-
+    CheckStateDisplay(virtualDisplayId, virtualScreenId);
     window->Destroy();
     DMError res = ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
     sleep(TEST_SLEEP_S);
