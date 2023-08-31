@@ -1056,7 +1056,6 @@ std::future<int32_t> SceneSessionManager::RequestSceneSessionActivation(
             WindowInfoReporter::GetInstance().InsertShowReportInfo(sessionInfo.bundleName_);
         }
         NotifyCollaboratorAfterStart(scnSession, scnSessionInfo);
-        NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
         promise->set_value(static_cast<int32_t>(errCode));
         return WSError::WS_OK;
     };
@@ -1141,7 +1140,6 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
             WindowDestroyNotifyVisibility(sceneSession);
             dialog->NotifyDestroy();
             dialog->Disconnect();
-            NotifyWindowInfoChange(dialog->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
             {
                 std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
                 sceneSessionMap_.erase(dialog->GetPersistentId());
@@ -1183,7 +1181,6 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
             NotifyClearSession(scnSession->GetCollaboratorType(), scnSessionInfo->persistentId);
         }
         AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
-        NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
         if (needRemoveSession) {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMap_.erase(persistentId);
@@ -1380,7 +1377,6 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t& 
             sceneSession->NotifyDestroy();
         }
         ret = sceneSession->Disconnect();
-        NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
         {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMap_.erase(persistentId);
