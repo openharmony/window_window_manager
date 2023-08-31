@@ -79,6 +79,26 @@ WSError WindowEventChannelProxy::TransferPointerEvent(const std::shared_ptr<MMI:
     return static_cast<WSError>(ret);
 }
 
+WSError WindowEventChannelProxy::TransferBackpressedEventForConsumed(bool& isConsumed)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_BACKPRESSED_EVENT),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    isConsumed = reply.ReadBool();
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
 WSError WindowEventChannelProxy::TransferKeyEventForConsumed(
     const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
 {
