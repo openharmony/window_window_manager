@@ -3634,7 +3634,7 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentI
         persistentId, haveListener);
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        WLOGFE("sceneSession is nullptr.");
+        WLOGFD("sceneSession is nullptr.");
         return WSError::WS_DO_NOTHING;
     }
     if (haveListener) {
@@ -3727,7 +3727,7 @@ bool SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
         bool needUpdate = false;
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
-            WLOGFE("sceneSession is nullptr.");
+            WLOGFD("sceneSession is nullptr.");
             return false;
         }
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_BOUNDS);
