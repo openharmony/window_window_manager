@@ -620,7 +620,7 @@ HWTEST_F(WindowManagerServiceTest, RequestFocus, Function | SmallTest | Level2)
 {
     uint32_t windowId = 1;
     WMError res = wms->RequestFocus(windowId);
-    if (res == WMError::WM_ERROR_NULLPTR){
+    if (res == WMError::WM_ERROR_NULLPTR) {
         ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     }
 }
@@ -782,7 +782,7 @@ HWTEST_F(WindowManagerServiceTest, RaiseToAppTop, Function | SmallTest | Level2)
     WmErrorCode res = wms->RaiseToAppTop(windowId);
     if (WmErrorCode::WM_ERROR_STATE_ABNORMALLY == res) {
         ASSERT_EQ(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, res);
-    } 
+    }
 }
 
 /**

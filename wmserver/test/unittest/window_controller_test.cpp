@@ -975,7 +975,7 @@ HWTEST_F(WindowControllerTest, ChangeMouseStyle1, Function | SmallTest | Level3)
     WMError res = windowController_->ChangeMouseStyle(windowId, moveDragProperty);
     if (res == WMError::WM_ERROR_INVALID_OPERATION) {
         ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
-    } 
+    }
 }
 
 /**
