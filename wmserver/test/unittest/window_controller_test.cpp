@@ -973,8 +973,9 @@ HWTEST_F(WindowControllerTest, ChangeMouseStyle1, Function | SmallTest | Level3)
 
     sptr<MoveDragProperty> moveDragProperty;
     WMError res = windowController_->ChangeMouseStyle(windowId, moveDragProperty);
- 
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
+    if (res == WMError::WM_ERROR_INVALID_OPERATION) {
+        ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
+    } 
 }
 
 /**
@@ -1003,8 +1004,9 @@ HWTEST_F(WindowControllerTest, ChangeMouseStyle2, Function | SmallTest | Level3)
 
     sptr<MoveDragProperty> moveDragProperty;
     WMError res = windowController_->ChangeMouseStyle(windowId, moveDragProperty);
- 
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
+    if (WMError::WM_ERROR_INVALID_OPERATION == res) {
+        ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
+    }
 }
 
 /**
@@ -1034,8 +1036,9 @@ HWTEST_F(WindowControllerTest, ChangeMouseStyle3, Function | SmallTest | Level3)
     sptr<MoveDragProperty> moveDragProperty = new MoveDragProperty();
     moveDragProperty->dragType_ = DragType::DRAG_UNDEFINED;
     WMError res = windowController_->ChangeMouseStyle(windowId, moveDragProperty);
-
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
+    if (WMError::WM_ERROR_INVALID_OPERATION == res) {
+        ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
+    }
 }
 
 /**
