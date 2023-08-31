@@ -82,6 +82,23 @@ WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     return static_cast<WSError>(ret);
 }
 
+void SessionStageProxy::UpdateDensity()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_CHANGE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
 WSError SessionStageProxy::HandleBackEvent()
 {
     MessageParcel data;
