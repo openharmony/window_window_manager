@@ -30,6 +30,7 @@ public:
 
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
+    void UpdateDensity() override;
     WSError HandleBackEvent() override;
     WSError MarkProcessed(int32_t eventId) override;
     WSError UpdateFocus(bool isFocused) override;
