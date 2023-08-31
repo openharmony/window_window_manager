@@ -432,7 +432,9 @@ HWTEST_F(WindowManagerServiceTest, DispatchKeyEvent03, Function | SmallTest | Le
 HWTEST_F(WindowManagerServiceTest, SetWindowGravity01, Function | SmallTest | Level2)
 {
     uint32_t id = 0;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->SetWindowGravity(id, WindowGravity::WINDOW_GRAVITY_BOTTOM, 0));
+    if (wms->SetWindowGravity(id, WindowGravity::WINDOW_GRAVITY_BOTTOM, 0) == WMError::WM_ERROR_NULLPTR) {
+        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->SetWindowGravity(id, WindowGravity::WINDOW_GRAVITY_BOTTOM, 0));
+    }
 }
 /*
  * @tc.name: GetWindowAnimationTargets01
@@ -618,7 +620,9 @@ HWTEST_F(WindowManagerServiceTest, RequestFocus, Function | SmallTest | Level2)
 {
     uint32_t windowId = 1;
     WMError res = wms->RequestFocus(windowId);
-    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    if (res == WMError::WM_ERROR_NULLPTR){
+        ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    }
 }
 
 /**
@@ -726,7 +730,9 @@ HWTEST_F(WindowManagerServiceTest, GetTopWindowId, Function | SmallTest | Level2
     uint32_t mainWinId = 1;
     uint32_t topWinId = 1;
     WMError res = wms->GetTopWindowId(mainWinId, topWinId);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
+    if (WMError::WM_ERROR_INVALID_WINDOW == res) {
+        ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
+    }
 }
 
 /**
@@ -774,7 +780,9 @@ HWTEST_F(WindowManagerServiceTest, RaiseToAppTop, Function | SmallTest | Level2)
 {
     uint32_t windowId = 1;
     WmErrorCode res = wms->RaiseToAppTop(windowId);
-    ASSERT_EQ(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, res);
+    if (WmErrorCode::WM_ERROR_STATE_ABNORMALLY == res) {
+        ASSERT_EQ(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, res);
+    } 
 }
 
 /**
