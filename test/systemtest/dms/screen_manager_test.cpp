@@ -267,7 +267,7 @@ void ScreenManagerTest::CheckScreenStateInGroup(
     } else {
         if (childIds.end() == iter) {
             ASSERT_EQ(childIds.end(), iter);
-        } 
+        }
     }
 }
 
