@@ -100,6 +100,7 @@ public:
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason);
+    WSError UpdateDensity();
 
     void SetShowRecent(bool showRecent);
     bool GetShowRecent() const;

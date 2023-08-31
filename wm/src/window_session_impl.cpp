@@ -427,6 +427,14 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     return WSError::WS_OK;
 }
 
+void WindowSessionImpl::UpdateDensity()
+{
+    auto preRect = GetRect();
+    UpdateViewportConfig(preRect, WindowSizeChangeReason::UNDEFINED);
+    WLOGFI("WindowSessionImpl::UpdateDensity [%{public}d, %{public}d, %{public}u, %{public}u]",
+        preRect.posX_, preRect.posY_, preRect.width_, preRect.height_);
+}
+
 WSError WindowSessionImpl::UpdateFocus(bool isFocused)
 {
     WLOGFD("Report update focus: %{public}u", isFocused);

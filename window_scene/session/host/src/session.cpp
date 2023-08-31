@@ -517,6 +517,21 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
     return WSError::WS_OK;
 }
 
+WSError Session::UpdateDensity()
+{
+    WLOGFI("session update density: id: %{public}d.", GetPersistentId());
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (sessionStage_ != nullptr) {
+        sessionStage_->UpdateDensity();
+    } else {
+        WLOGFE("Session::UpdateDensity sessionStage_ is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return WSError::WS_OK;
+}
+
 void Session::NotifyCallingSessionUpdateRect()
 {
     if (notifyCallingSessionUpdateRectFunc_) {

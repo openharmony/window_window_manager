@@ -30,6 +30,8 @@ const std::map<uint32_t, SessionStageStubFunc> SessionStageStub::stubFuncMap_{
         &SessionStageStub::HandleSetActive),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SIZE_CHANGE),
         &SessionStageStub::HandleUpdateRect),
+    std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_CHANGE),
+        &SessionStageStub::HandleUpdateDensity),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_HANDLE_BACK_EVENT),
         &SessionStageStub::HandleBackEventInner),
     std::make_pair(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOCUS_CHANGE),
@@ -87,6 +89,13 @@ int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply
     SizeChangeReason reason = static_cast<SizeChangeReason>(data.ReadUint32());
     WSError errCode = UpdateRect(rect, reason);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleUpdateDensity(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("UpdateDensity!");
+    UpdateDensity();
     return ERR_NONE;
 }
 
