@@ -1420,6 +1420,7 @@ WSError SceneSessionManager::ProcessBackEvent()
 
 void SceneSessionManager::CleanUserMap()
 {
+    std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     WLOGFI("CleanUserMap in size = %{public}zu", sceneSessionMap_.size());
     auto iter = sceneSessionMap_.begin();
     while (iter != sceneSessionMap_.end()) {
@@ -1465,20 +1466,22 @@ WSError SceneSessionManager::SwitchUser(int32_t oldUserId, int32_t newUserId, st
         ScenePersistence::CreateSnapshotDir(fileDir);
         ScenePersistence::CreateUpdatedIconDir(fileDir);
         currentUserId_ = newUserId;
-        std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (const auto &item : sceneSessionMap_) {
-            auto scnSession = item.second;
-            auto persistentId = scnSession->GetPersistentId();
-            scnSession->SetActive(false);
-            scnSession->Background();
-            if (persistentId == brightnessSessionId_) {
-                UpdateBrightness(focusedSessionId_);
+        {
+            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            for (const auto &item : sceneSessionMap_) {
+                auto scnSession = item.second;
+                auto persistentId = scnSession->GetPersistentId();
+                scnSession->SetActive(false);
+                scnSession->Background();
+                if (persistentId == brightnessSessionId_) {
+                    UpdateBrightness(focusedSessionId_);
+                }
+                auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
+                if (!scnSessionInfo) {
+                    return WSError::WS_ERROR_NULLPTR;
+                }
+                AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo);
             }
-            auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
-            if (!scnSessionInfo) {
-                return WSError::WS_ERROR_NULLPTR;
-            }
-            AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(scnSessionInfo);
         }
         CleanUserMap();
         return WSError::WS_OK;
