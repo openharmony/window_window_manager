@@ -61,12 +61,6 @@ void IntentionEventManager::InputEventListener::RegisterWindowChanged()
             WLOGFD("Window changed, persistentId:%{public}d, type:%{public}d",
                 persistentId, type);
             if (type == WindowUpdateType::WINDOW_UPDATE_BOUNDS) {
-                auto enterSession = SceneSession::GetEnterWindow().promote();
-                if (enterSession == nullptr) {
-                    WLOGFE("Enter session is null, do not reissuing enter leave events, persistentId:%{public}d, "
-                            "type:%{public}d", persistentId, type);
-                    return;
-                }
                 this->ProcessEnterLeaveEventAsync();
             }
         }
@@ -80,14 +74,24 @@ void IntentionEventManager::InputEventListener::ProcessEnterLeaveEventAsync()
         if (g_lastMouseEvent == nullptr) {
             return;
         }
-        auto pointerEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
-        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
-        pointerEvent->SetButtonId(MMI::PointerEvent::BUTTON_NONE);
+        auto enterSession = SceneSession::GetEnterWindow().promote();
+        if (enterSession == nullptr) {
+            WLOGFE("Enter session is null, do not reissuing enter leave events");
+            return;
+        }
+        auto leavePointerEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
+        leavePointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
+        leavePointerEvent->SetButtonId(MMI::PointerEvent::BUTTON_NONE);
+        enterSession->TransferPointerEvent(leavePointerEvent);
+
+        auto enterPointerEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
+        enterPointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
+        enterPointerEvent->SetButtonId(MMI::PointerEvent::BUTTON_NONE);
         if (uiContent_ == nullptr) {
             WLOGFE("ProcessEnterLeaveEventAsync uiContent_ is null");
             return;
         }
-        uiContent_->ProcessPointerEvent(pointerEvent);
+        uiContent_->ProcessPointerEvent(enterPointerEvent);
     };
     auto eventHandler = weakEventConsumer_.lock();
     if (eventHandler == nullptr) {
