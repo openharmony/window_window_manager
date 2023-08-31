@@ -16,10 +16,13 @@
 #include "window_root.h"
 #include <ability_manager_client.h>
 #include <cinttypes>
-#include <display_power_mgr_client.h>
 #include <hisysevent.h>
 #include <hitrace_meter.h>
 #include <transaction/rs_transaction.h>
+
+#ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
+#include <display_power_mgr_client.h>
+#endif
 
 #include "display_manager_service_inner.h"
 #include "permission.h"
@@ -865,8 +868,10 @@ void WindowRoot::SetBrightness(uint32_t windowId, float brightness)
     if (windowId == container->GetActiveWindow()) {
         if (container->GetDisplayBrightness() != brightness) {
             WLOGFI("value: %{public}u", container->ToOverrideBrightness(brightness));
+#ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
             DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
                 container->ToOverrideBrightness(brightness));
+#endif
             container->SetDisplayBrightness(brightness);
         }
         container->SetBrightnessWindow(windowId);
