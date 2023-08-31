@@ -42,6 +42,7 @@ ohos_shared_library("libintention_event") {
     "input:libmmi-client",
   ]
 
+  defines = []
   if (!defined(global_parts_info) ||
       defined(global_parts_info.inputmethod_imf)) {
     imf_enable = true
