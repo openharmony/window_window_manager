@@ -3788,7 +3788,6 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
             }
             if (scnSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
                 scnSession->GetSessionState() == SessionState::STATE_ACTIVE) {
-                WSRect window_rect = scnSession->GetSessionRect();
                 scnSession->UpdateDensity();
                 WLOGFD("UpdateDensity name=%{public}s, persistendId=%{public}d, winType=%{public}d, "
                     "state=%{public}d, visible-%{public}d", scnSession->GetWindowName().c_str(), item.first,
