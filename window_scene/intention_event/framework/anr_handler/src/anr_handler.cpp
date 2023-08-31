@@ -179,11 +179,11 @@ void ANRHandler::ClearExpiredEvents(int32_t eventId)
 int32_t ANRHandler::GetPersistentIdOfEvent(int32_t eventId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (sessionStageMap_.find(eventId) == sessionStageMap_.end()) {
-        WLOGFE("No sessionStage for eventId:%{public}d", eventId);
-        return INVALID_PERSISTENT_ID;
+    if (sessionStageMap_.find(eventId) != sessionStageMap_.end()) {
+        return sessionStageMap_[eventId].persistentId;
     }
-    return sessionStageMap_[eventId].persistentId;
+    WLOGFE("No sessionStage for eventId:%{public}d", eventId);
+    return INVALID_PERSISTENT_ID;
 }
 
 bool ANRHandler::IsOnEventHandler(int32_t persistentId)
