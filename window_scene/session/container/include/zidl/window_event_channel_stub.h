@@ -35,6 +35,7 @@ public:
 private:
     static const std::map<uint32_t, WindowEventChannelStubFunc> stubFuncMap_;
 
+    int HandleTransferBackpressedEvent(MessageParcel& data, MessageParcel& reply);
     int HandleTransferKeyEvent(MessageParcel& data, MessageParcel& reply);
     int HandleTransferPointerEvent(MessageParcel& data, MessageParcel& reply);
     int HandleGetApplicationPid(MessageParcel& data, MessageParcel& reply);

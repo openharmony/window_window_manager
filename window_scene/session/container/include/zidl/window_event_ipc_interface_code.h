@@ -25,6 +25,7 @@ enum class WindowEventInterfaceCode {
     TRANS_ID_TRANSFER_FOCUS_ACTIVE_EVENT,
     TRANS_ID_TRANSFER_FOCUS_WINDOW_ID_EVENT,
     TRANS_ID_TRANSFER_FOCUS_STATE_EVENT,
+    TRANS_ID_TRANSFER_BACKPRESSED_EVENT,
 };
 }   // namespace Rosen
 }   // namespace OHOS
