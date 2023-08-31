@@ -971,7 +971,8 @@ WSError SceneSessionManagerProxy::UnlockSession(int32_t sessionId)
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds)
+WSError SceneSessionManagerProxy::MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds,
+    int32_t topSessionId)
 {
     WLOGFI("run SceneSessionManagerProxy::MoveSessionsToForeground");
     MessageParcel data;
@@ -985,6 +986,10 @@ WSError SceneSessionManagerProxy::MoveSessionsToForeground(const std::vector<std
         WLOGFE("Write sessionIds failed");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
+    if (!data.WriteInt32(topSessionId)) {
+        WLOGFE("Write topSessionId failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
     if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_MOVE_MISSIONS_TO_FOREGROUND),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -993,7 +998,8 @@ WSError SceneSessionManagerProxy::MoveSessionsToForeground(const std::vector<std
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds)
+WSError SceneSessionManagerProxy::MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds,
+    std::vector<int32_t>& result)
 {
     WLOGFI("run SceneSessionManagerProxy::MoveSessionsToBackground");
     MessageParcel data;
@@ -1007,11 +1013,16 @@ WSError SceneSessionManagerProxy::MoveSessionsToBackground(const std::vector<std
         WLOGFE("Write sessionIds failed");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
+    if (!data.WriteInt32Vector(result)) {
+        WLOGFE("Write result failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
     if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_MOVE_MISSIONS_TO_BACKGROUND),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
+    reply.ReadInt32Vector(&result);
     return static_cast<WSError>(reply.ReadInt32());
 }
 
