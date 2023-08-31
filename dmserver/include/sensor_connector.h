@@ -18,14 +18,19 @@
 
 #include <map>
 #include <refbase.h>
+
 #include "dm_common.h"
+#include "screen_rotation_controller.h"
+#include "window_manager_hilog.h"
+
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
 #include "motion_agent.h"
 #include "motion_callback_stub.h"
 #endif
-#include "screen_rotation_controller.h"
+
+#ifdef SENSOR_ENABLE
 #include "sensor_agent.h"
-#include "window_manager_hilog.h"
+#endif
 
 namespace OHOS {
 namespace Rosen {
@@ -38,6 +43,7 @@ public:
     static void UnsubscribeRotationSensor();
 };
 
+#ifdef SENSOR_ENABLE
 class GravitySensorSubscriber {
 friend SensorConnector;
 public:
@@ -56,6 +62,7 @@ private:
     static bool isGravitySensorSubscribed_;
     static long lastCallbackTime_;
 };
+#endif
 
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
 using OHOS::Msdp::MotionCallbackStub;
