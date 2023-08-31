@@ -695,6 +695,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (property_ && property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
         WindowHelper::IsMainWindow(property_->GetWindowType()) &&
         property_->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+        PresentFoucusIfNeed(pointerEvent->GetPointerAction());
         if (!moveDragController_) {
             WLOGE("moveDragController_ is null");
             return Session::TransferPointerEvent(pointerEvent);
