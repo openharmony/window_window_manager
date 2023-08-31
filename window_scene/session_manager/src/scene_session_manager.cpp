@@ -3783,12 +3783,17 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
                 continue;
             }
             SessionInfo sessionInfo = scnSession->GetSessionInfo();
-            if (sessionInfo.isSystem_ || !scnSession->IsActive()) continue;
-            WSRect window_rect = scnSession->GetSessionRect();
-            scnSession->UpdateDensity();
-            WLOGFD("UpdateDensity name=%{public}s, persistendId=%{public}d, winType=%{public}d, "
-                "state=%{public}d, visible-%{public}d", scnSession->GetWindowName().c_str(), item.first,
-                scnSession->GetWindowType(), scnSession->GetSessionState(), scnSession->IsVisible());
+            if (sessionInfo.isSystem_) {
+                continue;
+            }
+            if (scnSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
+                scnSession->GetSessionState() == SessionState::STATE_ACTIVE) {
+                WSRect window_rect = scnSession->GetSessionRect();
+                scnSession->UpdateDensity();
+                WLOGFD("UpdateDensity name=%{public}s, persistendId=%{public}d, winType=%{public}d, "
+                    "state=%{public}d, visible-%{public}d", scnSession->GetWindowName().c_str(), item.first,
+                    scnSession->GetWindowType(), scnSession->GetSessionState(), scnSession->IsVisible());
+            }
         }
         return WSError::WS_OK;
     };
