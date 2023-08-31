@@ -45,6 +45,8 @@ public:
     void OnDisplayChange(sptr<DisplayInfo>, DisplayChangeEvent);
     void OnScreenshot(sptr<ScreenshotInfo>);
     void NotifyPrivateWindowStateChanged(bool hasPrivate);
+    void NotifyFoldStatusChanged(FoldStatus);
+    void NotifyDisplayModeChanged(FoldDisplayMode);
 
 private:
     DisplayManagerAgentController() {}

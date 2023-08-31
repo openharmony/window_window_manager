@@ -96,7 +96,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(
         WLOGFI("Activate session with persistentId: %{public}d", persistentId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:RequestExtensionSessionActivation");
         if (extensionSessionMap_.count(persistentId) == 0) {
-            WLOGFE("Session is invalid!");
+            WLOGFE("RequestExtensionSessionActivation Session is invalid! persistentId:%{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         auto extSessionInfo = SetAbilitySessionInfo(extSession);
@@ -129,7 +129,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
         extSession->SetActive(false);
         extSession->Background();
         if (extensionSessionMap_.count(persistentId) == 0) {
-            WLOGFE("Session is invalid!");
+            WLOGFE("RequestExtensionSessionBackground Session is invalid! persistentId:%{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         auto extSessionInfo = SetAbilitySessionInfo(extSession);
@@ -159,7 +159,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:RequestExtensionSessionDestruction");
         extSession->Disconnect();
         if (extensionSessionMap_.count(persistentId) == 0) {
-            WLOGFE("Session is invalid!");
+            WLOGFE("RequestExtensionSessionDestruction Session is invalid! persistentId:%{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         auto extSessionInfo = SetAbilitySessionInfo(extSession);

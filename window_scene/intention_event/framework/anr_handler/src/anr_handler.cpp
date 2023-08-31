@@ -54,12 +54,11 @@ void ANRHandler::SetSessionStage(int32_t eventId, const wptr<ISessionStage> &ses
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (sessionStage == nullptr) {
         WLOGFE("SessionStage of eventId:%{public}d is nullptr", eventId);
-        sessionStageMap_[eventId] = nullptr;
+        sessionStageMap_[eventId] = { INVALID_PERSISTENT_ID, nullptr };
         return;
     }
-    sessionStageMap_[eventId] = sessionStage;
     int32_t persistentId = sessionStage->GetPersistentId();
-    windowEventMap_[persistentId].insert(eventId);
+    sessionStageMap_[eventId] = { persistentId, sessionStage };
     WLOGFD("SetSessionStage for eventId:%{public}d, persistentId:%{public}d", eventId, persistentId);
 }
 
@@ -101,7 +100,11 @@ void ANRHandler::OnWindowDestroyed(int32_t persistentId)
     }
     anrHandlerState_.eventsIterMap.erase(persistentId);
     WLOGFD("PersistentId:%{public}d erased in ANRHandler", persistentId);
-    ClearEventsOfDestroyedWindow(persistentId);
+    for (const auto &elem : sessionStageMap_) {
+        if (elem.second.persistentId == persistentId) {
+            sessionStageMap_.erase(elem.first);
+        }
+    }
 }
 
 void ANRHandler::SetAnrHandleState(int32_t eventId, bool status)
@@ -133,9 +136,9 @@ void ANRHandler::MarkProcessed()
     WLOGFI("MarkProcessed eventId:%{public}d, persistentId:%{public}d", eventId, GetPersistentIdOfEvent(eventId));
     if (sessionStageMap_.find(eventId) == sessionStageMap_.end()) {
         WLOGFE("SessionStage for eventId:%{public}d is not in sessionStageMap", eventId);
-    } else if (sessionStageMap_[eventId] == nullptr) {
+    } else if (sessionStageMap_[eventId].sessionStage == nullptr) {
         WLOGFE("SessionStage for eventId:%{public}d is nullptr", eventId);
-    } else if (WSError ret = sessionStageMap_[eventId]->MarkProcessed(eventId); ret != WSError::WS_OK) {
+    } else if (WSError ret = sessionStageMap_[eventId].sessionStage->MarkProcessed(eventId); ret != WSError::WS_OK) {
         WLOGFE("Send to sceneBoard failed, ret:%{public}d", ret);
     }
     SetAnrHandleState(eventId, false);
@@ -171,15 +174,6 @@ void ANRHandler::ClearExpiredEvents(int32_t eventId)
             iter++;
         }
     }
-    if (windowEventMap_.find(persistentId) == windowEventMap_.end()) {
-        WLOGFD("No events of persistentId:%{public}d in windowEventMap", persistentId);
-        return;
-    }
-    for (const auto& elem : windowEventMap_[persistentId]) {
-        if (elem <= eventId) {
-            windowEventMap_[persistentId].erase(elem);
-        }
-    }
 }
 
 int32_t ANRHandler::GetPersistentIdOfEvent(int32_t eventId)
@@ -189,12 +183,7 @@ int32_t ANRHandler::GetPersistentIdOfEvent(int32_t eventId)
         WLOGFE("No sessionStage for eventId:%{public}d", eventId);
         return INVALID_PERSISTENT_ID;
     }
-    auto sessionStage = sessionStageMap_[eventId];
-    if (sessionStage == nullptr) {
-        WLOGFE("SessionStage for eventId:%{public}d is nullptr", eventId);
-        return INVALID_PERSISTENT_ID;
-    }
-    return sessionStage->GetPersistentId();
+    return sessionStageMap_[eventId].persistentId;
 }
 
 bool ANRHandler::IsOnEventHandler(int32_t persistentId)
@@ -222,18 +211,5 @@ void ANRHandler::UpdateLatestEventId(int32_t eventId)
     }
 }
 
-void ANRHandler::ClearEventsOfDestroyedWindow(int32_t persistentId)
-{
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (windowEventMap_.find(persistentId) == windowEventMap_.end()) {
-        WLOGFE("No persistentId:%{public}d in windowEventMap", persistentId);
-        return;
-    }
-    for (const auto& eventId : windowEventMap_[persistentId]) {
-        sessionStageMap_.erase(eventId);
-    }
-    windowEventMap_.erase(persistentId);
-    WLOGFD("Clear events of persistentId:%{public}d in sessionStageMap and windowEventMap ", persistentId);
-}
 } // namespace Rosen
 } // namespace OHOS

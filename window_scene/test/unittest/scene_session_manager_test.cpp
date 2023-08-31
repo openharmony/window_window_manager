@@ -79,20 +79,20 @@ ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest::callbackFunc_
 
 void SceneSessionManagerTest::SetUpTestCase()
 {
-    ssm_ = new SceneSessionManager();
 }
 
 void SceneSessionManagerTest::TearDownTestCase()
 {
-    ssm_ = nullptr;
 }
 
 void SceneSessionManagerTest::SetUp()
 {
+    ssm_ = new SceneSessionManager();
 }
 
 void SceneSessionManagerTest::TearDown()
 {
+    ssm_ = nullptr;
 }
 
 namespace {
@@ -866,6 +866,177 @@ HWTEST_F(SceneSessionManagerTest, SwitchUser, Function | SmallTest | Level3)
     oldUserId = ssm_->GetCurrentUserId();
     WSError result02 = ssm_->SwitchUser(oldUserId, newUserId, fileDir);
     ASSERT_EQ(result02, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: PreHandleCollaborator
+ * @tc.desc: SceneSesionManager prehandle collaborator
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, PreHandleCollaborator, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "Foreground01";
+    info.bundleName_ = "Foreground01";
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->PreHandleCollaborator(nullptr);
+    ssm_->PreHandleCollaborator(scensession);
+    scensession = nullptr;
+    AppExecFwk::ApplicationInfo applicationInfo_;
+    applicationInfo_.codePath = std::to_string(CollaboratorType::RESERVE_TYPE);
+    AppExecFwk::AbilityInfo abilityInfo_;
+    abilityInfo_.applicationInfo = applicationInfo_;
+    info.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo_);
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->PreHandleCollaborator(scensession);
+    scensession = nullptr;
+    applicationInfo_.codePath = std::to_string(CollaboratorType::OTHERS_TYPE);
+    abilityInfo_.applicationInfo = applicationInfo_;
+    info.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo_);
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->PreHandleCollaborator(scensession);
+    EXPECT_EQ(scensession->GetSessionInfo().want, nullptr);
+    scensession = nullptr;
+    info.want = std::make_shared<AAFwk::Want>();
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->PreHandleCollaborator(scensession);
+    ASSERT_NE(scensession->GetSessionInfo().want, nullptr);
+    delete scensession;
+}
+
+/**
+ * @tc.name: CheckCollaboratorType
+ * @tc.desc: SceneSesionManager check collborator type
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, CheckCollaboratorType, Function | SmallTest | Level3)
+{
+    int32_t type_ = CollaboratorType::RESERVE_TYPE;
+    EXPECT_TRUE(ssm_->CheckCollaboratorType(type_));
+    type_ = CollaboratorType::OTHERS_TYPE;
+    EXPECT_TRUE(ssm_->CheckCollaboratorType(type_));
+    type_ = CollaboratorType::DEFAULT_TYPE;
+    ASSERT_FALSE(ssm_->CheckCollaboratorType(type_));
+}
+
+/**
+ * @tc.name: NotifyUpdateSessionInfo
+ * @tc.desc: SceneSesionManager notify update session info
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, NotifyUpdateSessionInfo, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "Foreground01";
+    info.bundleName_ = "Foreground01";
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->NotifyUpdateSessionInfo(nullptr);
+    ASSERT_EQ(scensession->GetSessionInfo().want, nullptr);
+    ssm_->NotifyUpdateSessionInfo(scensession);
+    int32_t collaboratorType_ = CollaboratorType::RESERVE_TYPE;
+    int32_t persistentId_ = 10086;
+    ssm_->NotifyMoveSessionToForeground(collaboratorType_, persistentId_);
+    ssm_->NotifyClearSession(collaboratorType_, persistentId_);
+    delete scensession;
+}
+
+/**
+ * @tc.name: NotifySessionCreate
+ * @tc.desc: SceneSesionManager notify session create
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, NotifySessionCreate, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "Foreground01";
+    info.bundleName_ = "Foreground01";
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->NotifySessionCreate(nullptr, info);
+    EXPECT_EQ(info.want, nullptr);
+    ssm_->NotifySessionCreate(scensession, info);
+    info.want = std::make_shared<AAFwk::Want>();
+    scensession = nullptr;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->NotifySessionCreate(scensession, info);
+    EXPECT_NE(info.want, nullptr);
+    AppExecFwk::AbilityInfo aInfo_;
+    sptr<AAFwk::SessionInfo> abilitySessionInfo_ = new AAFwk::SessionInfo();
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo_ = std::make_shared<AppExecFwk::AbilityInfo>(aInfo_);
+    int32_t collaboratorType_ = CollaboratorType::RESERVE_TYPE;
+    ssm_->NotifyLoadAbility(collaboratorType_, abilitySessionInfo_, abilityInfo_);
+    delete scensession;
+}
+
+/**
+ * @tc.name: QueryAbilityInfoFromBMS
+ * @tc.desc: SceneSesionManager QueryAbilityInfoFromBMS NotifyStartAbility
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, QueryAbilityInfoFromBMS, Function | SmallTest | Level3)
+{
+    const int32_t uId_ = 32;
+    SessionInfo sessionInfo_;
+    sessionInfo_.bundleName_ = "BundleName";
+    sessionInfo_.abilityName_ = "AbilityName";
+    sessionInfo_.moduleName_ = "ModuleName";
+    AppExecFwk::AbilityInfo abilityInfo_;
+    int32_t collaboratorType_ = CollaboratorType::RESERVE_TYPE;
+    ssm_->QueryAbilityInfoFromBMS(uId_, sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_);
+    EXPECT_EQ(sessionInfo_.want, nullptr);
+    ssm_->Init();
+    ssm_->QueryAbilityInfoFromBMS(uId_, sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_);
+    ssm_->NotifyStartAbility(collaboratorType_, sessionInfo_);
+    sessionInfo_.want = std::make_shared<AAFwk::Want>();
+    collaboratorType_ = CollaboratorType::OTHERS_TYPE;
+    ssm_->NotifyStartAbility(collaboratorType_, sessionInfo_);
+    ASSERT_NE(sessionInfo_.want, nullptr);
+}
+
+/**
+ * @tc.name: IsSessionClearable
+ * @tc.desc: SceneSesionManager is session clearable
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, IsSessionClearable, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "Foreground01";
+    info.bundleName_ = "Foreground01";
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_FALSE(ssm_->IsSessionClearable(nullptr));
+    EXPECT_FALSE(ssm_->IsSessionClearable(scensession));
+    AppExecFwk::AbilityInfo abilityInfo_;
+    abilityInfo_.excludeFromMissions = true;
+    info.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo_);
+    scensession = nullptr;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_FALSE(ssm_->IsSessionClearable(scensession));
+    abilityInfo_.excludeFromMissions = false;
+    abilityInfo_.unclearableMission = true;
+    info.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo_);
+    scensession = nullptr;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_FALSE(ssm_->IsSessionClearable(scensession));
+    abilityInfo_.unclearableMission = false;
+    info.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo_);
+    info.lockedState = true;
+    scensession = nullptr;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_TRUE(ssm_->IsSessionClearable(scensession));
+    info.lockedState = false;
+    info.isSystem_ = true;
+    scensession = nullptr;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_FALSE(ssm_->IsSessionClearable(scensession));
+    info.isSystem_ = false;
+    scensession = nullptr;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_TRUE(ssm_->IsSessionClearable(scensession));
+    delete scensession;
 }
 
 }

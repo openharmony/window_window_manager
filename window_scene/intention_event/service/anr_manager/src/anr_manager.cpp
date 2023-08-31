@@ -124,6 +124,7 @@ void ANRManager::SetAnrObserver(std::function<void(int32_t)> anrObserver)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
+    WLOGFD("SetAnrObserver, anrObserver is null:%{public}d", (anrObserver==nullptr));
     anrObserver_ = anrObserver;
 }
 
@@ -150,6 +151,7 @@ void ANRManager::RemoveTimers(int32_t persistentId)
 
 void ANRManager::RemovePersistentId(int32_t persistentId)
 {
+    WLOGFD("RemovePersistentId:%{public}d", persistentId);
     applicationMap_.erase(persistentId);
     DelayedSingleton<EventStage>::GetInstance()->OnSessionLost(persistentId);
 }
@@ -168,6 +170,7 @@ void ANRManager::SetAppInfoGetter(std::function<void(int32_t, std::string&, int3
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::mutex> guard(mtx_);
+    WLOGFD("SetAppInfoGetter, callback is null:%{public}d", (callback==nullptr));
     appInfoGetter_ = callback;
 }
 
@@ -190,7 +193,7 @@ void ANRManager::ExecuteAnrObserver(int32_t pid)
     if (anrObserver_ != nullptr) {
         anrObserver_(pid);
     } else {
-        WLOGFE("AnrObserver is nullptr, do nothing");
+        WLOGFE("AnrObserver is nullptr, do nothing, pid:%{public}d", pid);
     }
 }
 } // namespace Rosen

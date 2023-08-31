@@ -187,5 +187,57 @@ void JsDisplayListener::OnPrivateWindow(bool hasPrivate)
     AsyncTask::Schedule("JsDisplayListener::OnPrivateWindow", *engine_, std::make_unique<AsyncTask>(
             callback, std::move(execute), std::move(complete)));
 }
+
+void JsDisplayListener::OnFoldStatusChanged(FoldStatus foldStatus)
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    WLOGI("OnFoldStatusChanged is called, foldStatus: %{public}u", static_cast<uint32_t>(foldStatus));
+    if (jsCallBack_.empty()) {
+        WLOGFE("OnFoldStatusChanged not register!");
+        return;
+    }
+    if (jsCallBack_.find(EVENT_FOLD_STATUS_CHANGED) == jsCallBack_.end()) {
+        WLOGE("OnFoldStatusChanged not this event, return");
+        return;
+    }
+    sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
+        [this, listener, foldStatus] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            NativeValue* argv[] = {CreateJsValue(*engine_, foldStatus)};
+            CallJsMethod(EVENT_FOLD_STATUS_CHANGED, argv, ArraySize(argv));
+        }
+    );
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsDisplayListener::OnFoldStatusChanged", *engine_, std::make_unique<AsyncTask>(
+            callback, std::move(execute), std::move(complete)));
+}
+
+void JsDisplayListener::OnDisplayModeChanged(FoldDisplayMode displayMode)
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    WLOGI("OnDisplayModeChanged is called, displayMode: %{public}u", static_cast<uint32_t>(displayMode));
+    if (jsCallBack_.empty()) {
+        WLOGFE("OnDisplayModeChanged not register!");
+        return;
+    }
+    if (jsCallBack_.find(EVENT_DISPLAY_MODE_CHANGED) == jsCallBack_.end()) {
+        WLOGE("OnDisplayModeChanged not this event, return");
+        return;
+    }
+    sptr<JsDisplayListener> listener = this; // Avoid this be destroyed when using.
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
+        [this, listener, displayMode] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            NativeValue* argv[] = {CreateJsValue(*engine_, displayMode)};
+            CallJsMethod(EVENT_DISPLAY_MODE_CHANGED, argv, ArraySize(argv));
+        }
+    );
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsDisplayListener::OnDisplayModeChanged", *engine_, std::make_unique<AsyncTask>(
+            callback, std::move(execute), std::move(complete)));
+}
 } // namespace Rosen
 } // namespace OHOS

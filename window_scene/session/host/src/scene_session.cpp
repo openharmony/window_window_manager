@@ -45,11 +45,11 @@ wptr<SceneSession> SceneSession::enterSession_ = nullptr;
 std::mutex SceneSession::enterSessionMutex_;
 
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
-    : Session(info), preWindowArea_(MMI::WindowArea::EXIT)
+    : Session(info)
 {
     GeneratePersistentId(false, info);
     if (!info.bundleName_.empty()) {
-        scenePersistence_ = new (std::nothrow) ScenePersistence(info, GetPersistentId());
+        scenePersistence_ = new ScenePersistence(info.bundleName_, GetPersistentId());
     }
     specificCallback_ = specificCallback;
     moveDragController_ = new (std::nothrow) MoveDragController(GetPersistentId());
@@ -85,12 +85,6 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
         config.SurfaceNodeName = name;
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
     }
-}
-
-void SceneSession::Destroy()
-{
-    WLOGFI("SceneSession Destroy id: %{public}d", GetPersistentId());
-    sessionChangeCallback_ = nullptr;
 }
 
 WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
@@ -139,9 +133,11 @@ WSError SceneSession::Background()
     if (ret != WSError::WS_OK) {
         return ret;
     }
-    snapshot_ = Snapshot();
-    if (scenePersistence_ && snapshot_) {
-        scenePersistence_->SaveSnapshot(snapshot_);
+    if (WindowHelper::IsMainWindow(GetWindowType())) {
+        snapshot_ = Snapshot();
+        if (scenePersistence_ && snapshot_) {
+            scenePersistence_->SaveSnapshot(snapshot_);
+        }
     }
     NotifyBackground();
     snapshot_.reset();
@@ -171,6 +167,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
 void SceneSession::RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>&
     sessionChangeCallback)
 {
+    std::lock_guard<std::mutex> guard(sessionChangeCbMutex_);
     sessionChangeCallback_ = sessionChangeCallback;
 }
 
@@ -582,28 +579,26 @@ WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAre
 
 void SceneSession::HandleStyleEvent(MMI::WindowArea area)
 {
+    static std::pair<int32_t, MMI::WindowArea> preWindowArea =
+        std::make_pair(INVALID_WINDOW_ID, MMI::WindowArea::EXIT);
+    if (preWindowArea.first == Session::GetWindowId() && preWindowArea.second == area) {
+        return;
+    }
     if (area != MMI::WindowArea::EXIT) {
         if (Session::SetPointerStyle(area) != WSError::WS_OK) {
-            WLOGFE("Failed to set the cursor style");
+            WLOGFE("Failed to set the cursor style, WSError:%{public}d", Session::SetPointerStyle(area));
         }
     }
-
-    preWindowArea_ = area;
+    preWindowArea = { Session::GetWindowId(), area };
 }
 
 WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
 {
-    static Session* preSession = nullptr;
     if (displayX < 0 || displayY < 0) {
         WLOGE("Illegal parameter, displayX:%{public}d, displayY:%{public}d", displayX, displayY);
         return WSError::WS_ERROR_INVALID_PARAM;
     }
 
-    MMI::WindowArea area = MMI::WindowArea::EXIT;
-    if (preSession != nullptr && preSession != this) {
-        preSession->HandleStyleEvent(area);
-        preSession = nullptr;
-    }
     auto iter = Session::windowAreas_.cend();
     if (!Session::IsSystemSession() &&
         Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
@@ -616,6 +611,8 @@ WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
             }
         }
     }
+
+    MMI::WindowArea area = MMI::WindowArea::EXIT;
     if (iter == Session::windowAreas_.cend()) {
         bool isInRegion = false;
         WSRect rect = Session::winRect_;
@@ -636,10 +633,7 @@ WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
     } else {
         area = iter->first;
     }
-    if (area != preWindowArea_) {
-        HandleStyleEvent(area);
-        preSession = this;
-    }
+    HandleStyleEvent(area);
     return WSError::WS_OK;
 }
 
@@ -694,8 +688,8 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     static bool isNew = true;
     if (isNew) {
         auto ret = HandlePointerStyle(pointerEvent);
-        if (ret != WSError::WS_OK && ret != WSError::WS_DO_NOTHING) {
-            WLOGFE("Failed to update the mouse cursor style");
+        if ((ret != WSError::WS_OK) && (ret != WSError::WS_DO_NOTHING)) {
+            WLOGFE("Failed to update the mouse cursor style, ret:%{public}d", ret);
         }
     }
     if (property_ && property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
@@ -741,6 +735,7 @@ void SceneSession::ClearEnterWindow()
 
 void SceneSession::NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason)
 {
+    std::lock_guard<std::mutex> guard(sessionChangeCbMutex_);
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onRectChange_) {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::NotifySessionRectChange");
         sessionChangeCallback_->onRectChange_(rect, reason);
@@ -978,7 +973,7 @@ void SceneSession::UpdateNativeVisibility(bool visible)
     specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     // update private state
     if (!property_) {
-        WLOGFE("property_ is null");
+        WLOGFE("UpdateNativeVisibility property_ is null");
         return;
     }
 }
@@ -991,7 +986,7 @@ bool SceneSession::IsVisible() const
 void SceneSession::SetPrivacyMode(bool isPrivacy)
 {
     if (!property_) {
-        WLOGFE("property_ is null");
+        WLOGFE("SetPrivacyMode property_ is null");
         return;
     }
     if (!surfaceNode_) {
@@ -1000,7 +995,7 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
     }
     bool lastPrivacyMode = property_->GetPrivacyMode() || property_->GetSystemPrivacyMode();
     if (lastPrivacyMode == isPrivacy) {
-        WLOGFW("privacy mode is not change, do nothing");
+        WLOGFW("privacy mode is not change, do nothing, isPrivacy:%{public}d", isPrivacy);
         return;
     }
     property_->SetPrivacyMode(isPrivacy);
