@@ -3760,7 +3760,7 @@ void SceneSessionManager::SetVirtualPixelRatioChangeListener(const ProcessVirtua
     WLOGFI("SetVirtualPixelRatioChangeListener");
 }
 
-vodi SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
+void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
     const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
     if (displayInfo == nullptr) {
@@ -3779,7 +3779,7 @@ vodi SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
         for (const auto &item : sceneSessionMap_) {
             auto scnSession = item.second;
             if (scnSession == nullptr) {
-                WLOGEW("SceneSessionManager::ProcessVirtualPixelRatioChange null scene session");
+                WLOGFE("SceneSessionManager::ProcessVirtualPixelRatioChange null scene session");
                 continue;
             }
             SessionInfo sessionInfo = scnSession->GetSessionInfo();
@@ -3790,6 +3790,7 @@ vodi SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
                 "state=%{public}d, visible-%{public}d", scnSession->GetWindowName().c_str(), item.first,
                 scnSession->GetWindowType(), scnSession->GetSessionState(), scnSession->IsVisible());
         }
+        return WSError::WS_OK;
     };
     taskScheduler_->PostSyncTask(task);
 }
