@@ -164,6 +164,19 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         return;
     }
     if (focusedSceneSession->GetSessionInfo().isSystem_) {
+        bool inputMethodHasProcessed = false;
+#ifdef IMF_ENABLE
+        bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
+        if (isKeyboardEvent) {
+            WLOGD("dispatch keyEvent to input method");
+            inputMethodHasProcessed =
+                MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent);
+        }
+#endif // IMF_ENABLE
+        if (inputMethodHasProcessed) {
+            WLOGD("Input method has processed key event");
+            return;
+        }
         WLOGFD("Syetem window scene, transfer key event to root scene");
         if (uiContent_ == nullptr) {
             WLOGFE("uiContent_ is null");
@@ -173,6 +186,17 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         return;
     }
     focusedSceneSession->TransferKeyEvent(keyEvent);
+}
+
+bool IntentionEventManager::InputEventListener::IsKeyboardEvent(
+    const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
+{
+    int32_t keyCode = keyEvent->GetKeyCode();
+    bool isKeyFN = (keyCode == MMI::KeyEvent::KEYCODE_FN);
+    bool isKeyBack = (keyCode == MMI::KeyEvent::KEYCODE_BACK);
+    bool isKeyboard = (keyCode >= MMI::KeyEvent::KEYCODE_0 && keyCode <= MMI::KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN);
+    WLOGI("isKeyFN: %{public}d, isKeyboard: %{public}d", isKeyFN, isKeyboard);
+    return (isKeyFN || isKeyboard || isKeyBack);
 }
 
 void IntentionEventManager::InputEventListener::OnInputEvent(
