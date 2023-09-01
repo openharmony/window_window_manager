@@ -15,19 +15,18 @@
 
 #include "session/host/include/extension_session.h"
 
-#include "ws_common.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSession" };
-}
+} // namespace
 
 ExtensionSession::ExtensionSession(const SessionInfo& info) : Session(info)
 {
     WLOGFD("Create extension session, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s.",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
-    GeneratePersistentId(true, info);
+    GeneratePersistentId(true, info.persistentId_);
 }
 
 WSError ExtensionSession::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
