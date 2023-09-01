@@ -77,6 +77,14 @@ ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest::callbackFunc_
     gestureNavigationEnabled_ = enable;
 };
 
+void ProcessStatusBarEnabledChangeFuncTest(bool enable)
+{
+}
+
+void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos)
+{
+}
+
 void SceneSessionManagerTest::SetUpTestCase()
 {
 }
@@ -1037,6 +1045,300 @@ HWTEST_F(SceneSessionManagerTest, IsSessionClearable, Function | SmallTest | Lev
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_TRUE(ssm_->IsSessionClearable(scensession));
     delete scensession;
+}
+
+/**
+ * @tc.name: UpdateProperty
+ * @tc.desc: SceneSesionManager update property
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, UpdateProperty, Function | SmallTest | Level3)
+{
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE;
+    WSError result = ssm_->UpdateProperty(property, action);
+    ASSERT_EQ(result, WSError::WS_OK);
+    SessionInfo info;
+    info.abilityName_ = "Foreground01";
+    info.bundleName_ = "Foreground01";
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->UpdatePropertyRaiseEnabled(property, scensession);
+    delete scensession;
+    delete property;
+}
+
+/**
+ * @tc.name: HandleUpdateProperty01
+ * @tc.desc: SceneSesionManager handle update property
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, HandleUpdateProperty01, Function | SmallTest | Level3)
+{
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    SessionInfo info;
+    info.abilityName_ = "Foreground01";
+    info.bundleName_ = "Foreground01";
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    WSPropertyChangeAction action;
+    action = WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    action = WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    action = WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    action = WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    action = WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    WSError result = ssm_->UpdateProperty(property, action);
+    EXPECT_EQ(result, WSError::WS_OK);
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    action = WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    action = WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    delete scensession;
+    delete property;
+}
+
+/**
+ * @tc.name: HandleUpdateProperty02
+ * @tc.desc: SceneSesionManager handle update property
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, HandleUpdateProperty02, Function | SmallTest | Level3)
+{
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    SessionInfo info;
+    info.abilityName_ = "Foreground01";
+    info.bundleName_ = "Foreground01";
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    WSPropertyChangeAction action;
+    action = WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    action = WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    action = WSPropertyChangeAction::ACTION_UPDATE_FLAGS;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    action = WSPropertyChangeAction::ACTION_UPDATE_MODE;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    action = WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    action = WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    action = WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    action = WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    action = WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    action = WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    WSError result = ssm_->UpdateProperty(property, action);
+    EXPECT_EQ(result, WSError::WS_OK);
+    action = WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE;
+    ssm_->HandleUpdateProperty(property, action, scensession);
+    delete scensession;
+    delete property;
+}
+
+/**
+ * @tc.name: HandleTurnScreenOn
+ * @tc.desc: SceneSesionManager handle turn screen on and keep screen on
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, HandleTurnScreenOn, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "Foreground01";
+    info.bundleName_ = "Foreground01";
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE;
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    ssm_->HandleTurnScreenOn(scensession);
+    bool requireLock = true;
+    ssm_->HandleKeepScreenOn(scensession, requireLock);
+    requireLock = false;
+    ssm_->HandleKeepScreenOn(scensession, requireLock);
+    WSError result = ssm_->UpdateProperty(property, action);
+    ASSERT_EQ(result, WSError::WS_OK);
+    delete scensession;
+    delete property;
+}
+
+/**
+ * @tc.name: UpdateHideNonSystemFloatingWindows
+ * @tc.desc: SceneSesionManager update hide non system floating windows
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, UpdateHideNonSystemFloatingWindows, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "Foreground01";
+    info.bundleName_ = "Foreground01";
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<WindowSessionProperty> property = nullptr;
+    ssm_->UpdateForceHideState(scensession, property, true);
+    property = new WindowSessionProperty();
+    ssm_->UpdateHideNonSystemFloatingWindows(property, scensession);
+    property->SetHideNonSystemFloatingWindows(true);
+    ssm_->UpdateForceHideState(scensession, property, true);
+    ssm_->UpdateForceHideState(scensession, property, false);
+    property->SetHideNonSystemFloatingWindows(false);
+    property->SetFloatingWindowAppType(true);
+    ssm_->UpdateForceHideState(scensession, property, true);
+    ssm_->UpdateForceHideState(scensession, property, false);
+    uint32_t result = property->GetModeSupportInfo();
+    ASSERT_EQ(result, WindowModeSupport::WINDOW_MODE_SUPPORT_ALL);
+    delete scensession;
+    delete property;
+}
+
+/**
+ * @tc.name: UpdateBrightness
+ * @tc.desc: SceneSesionManager update brightness
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, UpdateBrightness, Function | SmallTest | Level3)
+{
+    int32_t persistentId_ = 10086;
+    WSError result01 = ssm_->UpdateBrightness(persistentId_);
+    EXPECT_EQ(result01, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: SetDisplayBrightness
+ * @tc.desc: SceneSesionManager set display brightness
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, SetDisplayBrightness, Function | SmallTest | Level3)
+{
+    float brightness = 2.0f;
+    float result01 = ssm_->GetDisplayBrightness();
+    EXPECT_EQ(result01, UNDEFINED_BRIGHTNESS);
+    ssm_->SetDisplayBrightness(brightness);
+    float result02 = ssm_->GetDisplayBrightness();
+    ASSERT_EQ(result02, 2.0f);
+}
+
+/**
+ * @tc.name: SetGestureNavigaionEnabled02
+ * @tc.desc: SceneSesionManager set gesture navigaion enable
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, SetGestureNavigaionEnabled02, Function | SmallTest | Level3)
+{
+    bool enable = true;
+    WMError result01 = ssm_->SetGestureNavigaionEnabled(enable);
+    EXPECT_EQ(result01, WMError::WM_DO_NOTHING);
+    ProcessGestureNavigationEnabledChangeFunc funcGesture_ = SceneSessionManagerTest::callbackFunc_;
+    ssm_->SetGestureNavigationEnabledChangeListener(funcGesture_);
+    WMError result02 = ssm_->SetGestureNavigaionEnabled(enable);
+    EXPECT_EQ(result02, WMError::WM_OK);
+    ProcessStatusBarEnabledChangeFunc funcStatus_ = ProcessStatusBarEnabledChangeFuncTest;
+    ssm_->SetStatusBarEnabledChangeListener(funcStatus_);
+    WMError result03 = ssm_->SetGestureNavigaionEnabled(enable);
+    ASSERT_EQ(result03, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetFocusedSession
+ * @tc.desc: SceneSesionManager set focused session
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, SetFocusedSession, Function | SmallTest | Level3)
+{
+    int32_t focusedSession_ = ssm_->GetFocusedSession();
+    EXPECT_EQ(focusedSession_, INVALID_SESSION_ID);
+    int32_t persistendId_ = INVALID_SESSION_ID;
+    WSError result01 = ssm_->SetFocusedSession(persistendId_);
+    EXPECT_EQ(result01, WSError::WS_DO_NOTHING);
+    persistendId_ = 10086;
+    WSError result02 = ssm_->SetFocusedSession(persistendId_);
+    EXPECT_EQ(result02, WSError::WS_OK);
+    ASSERT_EQ(ssm_->GetFocusedSession(), 10086);
+}
+
+/**
+ * @tc.name: RegisterSessionExceptionFunc
+ * @tc.desc: SceneSesionManager register session expection func
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, RegisterSessionExceptionFunc, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "Foreground01";
+    info.bundleName_ = "Foreground01";
+    sptr<SceneSession> scensession = nullptr;
+    ssm_->RegisterSessionExceptionFunc(scensession);
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->RegisterSessionExceptionFunc(scensession);
+    bool result01 = ssm_->IsSessionVisible(scensession);
+    EXPECT_FALSE(result01);
+    scensession->UpdateNativeVisibility(true);
+    bool result02 = ssm_->IsSessionVisible(scensession);
+    ASSERT_TRUE(result02);
+    delete scensession;
+}
+
+/**
+ * @tc.name: DumpSessionInfo
+ * @tc.desc: SceneSesionManager dump session info
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, DumpSessionInfo, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    std::ostringstream oss;
+    std::string dumpInfo;
+    info.abilityName_ = "Foreground01";
+    info.bundleName_ = "Foreground01";
+    info.isSystem_ = false;
+    sptr<SceneSession> scensession = nullptr;
+    ssm_->DumpSessionInfo(scensession, oss);
+    EXPECT_FALSE(scensession->IsVisible());
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->DumpSessionInfo(scensession, oss);
+    EXPECT_FALSE(scensession->IsVisible());
+    scensession = nullptr;
+    info.isSystem_ = true;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->DumpSessionInfo(scensession, oss);
+    scensession = nullptr;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->DumpAllAppSessionInfo(oss);
+}
+
+/**
+ * @tc.name: DumpSessionElementInfo
+ * @tc.desc: SceneSesionManager dump session element info
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, DumpSessionElementInfo, Function | SmallTest | Level3)
+{
+    DumpRootSceneElementInfoFunc func_ = DumpRootSceneElementInfoFuncTest;
+    ssm_->SetDumpRootSceneElementInfoListener(func_);
+    SessionInfo info;
+    info.abilityName_ = "Foreground01";
+    info.bundleName_ = "Foreground01";
+    info.isSystem_ = false;
+    std::string strId = "10086";
+    sptr<SceneSession> scensession = nullptr;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    std::vector<std::string> params_;
+    std::string dumpInfo_;
+    ssm_->DumpSessionElementInfo(scensession, params_, dumpInfo_);
+    scensession = nullptr;
+    info.isSystem_ = true;
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->DumpSessionElementInfo(scensession, params_, dumpInfo_);
+    WSError result01 = ssm_->GetSpecifiedSessionDumpInfo(dumpInfo_, params_, strId);
+    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 }
