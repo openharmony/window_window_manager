@@ -16,26 +16,21 @@
 #include "session/host/include/session.h"
 
 #include "ability_info.h"
+#include "ability_start_setting.h"
 #include "input_manager.h"
 #include "ipc_skeleton.h"
 #include "key_event.h"
 #include "pointer_event.h"
+#include <transaction/rs_interfaces.h>
+#include <ui/rs_surface_node.h>
 #include "../../proxy/include/window_info.h"
 
 #include "anr_manager.h"
-#include "foundation/ability/ability_base/interfaces/kits/native/want/include/want.h"
-#include "interfaces/include/ws_common.h"
-#include <string>
-#include <surface_capture_future.h>
-#include <transaction/rs_interfaces.h>
-#include <ui/rs_surface_node.h>
+#include "session_helper.h"
+#include "surface_capture_future.h"
 #include "util.h"
-#include <want.h>
-
-#include "ability_start_setting.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
-#include "session_helper.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -76,32 +71,6 @@ void Session::PostTask(Task&& task, int64_t delayTime)
 int32_t Session::GetPersistentId() const
 {
     return persistentId_;
-}
-
-int32_t Session::GetParentPersistentId() const
-{
-    if (property_ != nullptr) {
-        return property_->GetParentPersistentId();
-    }
-    return INVALID_SESSION_ID;
-}
-
-void Session::SetParentPersistentId(int32_t parentId)
-{
-    if (property_ == nullptr) {
-        return;
-    }
-    property_->SetParentPersistentId(parentId);
-}
-
-void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& property)
-{
-    property_ = property;
-}
-
-sptr<WindowSessionProperty> Session::GetWindowSessionProperty() const
-{
-    return property_;
 }
 
 std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
@@ -553,16 +522,7 @@ void Session::NotifyCallingSessionUpdateRect()
 
 WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
-    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
-{
-    callingPid_ = IPCSkeleton::GetCallingPid();
-    callingUid_ = IPCSkeleton::GetCallingUid();
-    return ConnectImpl(sessionStage, eventChannel, surfaceNode, systemConfig, property, token);
-}
-
-WSError Session::ConnectImpl(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
-    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
+    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid)
 {
     WLOGFI("Connect session, id: %{public}d, state: %{public}u, isTerminating: %{public}d", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()), isTerminating);
@@ -579,14 +539,12 @@ WSError Session::ConnectImpl(const sptr<ISessionStage>& sessionStage, const sptr
     surfaceNode_ = surfaceNode;
     abilityToken_ = token;
     systemConfig = systemConfig_;
+    property_ = property;
     if (property) {
         property->SetPersistentId(GetPersistentId());
     }
-    if (property_ == nullptr) {
-        property_ = property;
-    } else {
-        property_->CopyFrom(property);
-    }
+    callingPid_ = pid;
+    callingUid_ = uid;
 
     UpdateSessionState(SessionState::STATE_CONNECT);
     // once update rect before connect, update again when connect
@@ -1261,6 +1219,17 @@ WSError Session::UpdateWindowMode(WindowMode mode)
     return sessionStage_->UpdateWindowMode(mode);
 }
 
+WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
+{
+    property_ = property;
+    return WSError::WS_OK;
+}
+
+sptr<WindowSessionProperty> Session::GetSessionProperty() const
+{
+    return property_;
+}
+
 void Session::SetSessionRect(const WSRect& rect)
 {
     winRect_ = rect;
@@ -1293,11 +1262,6 @@ WSRect Session::GetSessionRequestRect() const
     WLOGFD("is: %{public}d, rect: [%{public}d, %{public}d, %{public}u, %{public}u]", persistentId_,
         rect.posX_, rect.posY_, rect.width_, rect.height_);
     return rect;
-}
-
-sptr<WindowSessionProperty> Session::GetSessionProperty() const
-{
-    return property_;
 }
 
 WindowType Session::GetWindowType() const
