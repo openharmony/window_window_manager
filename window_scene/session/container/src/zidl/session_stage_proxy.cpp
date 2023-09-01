@@ -77,12 +77,12 @@ WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     bool hasRSTransaction = rsTransaction != nullptr;
     if (!data.WriteBool(hasRSTransaction)) {
         WLOGFE("Write has transaction failed");
-        return WSError::WM_ERROR_IPC_FAILED;
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     if (hasRSTransaction) {
         if (!data.WriteParcelable(rsTransaction.get())) {
             WLOGFE("Write transaction sync Id failed");
-            return WSError::WM_ERROR_IPC_FAILED;
+            return WSError::WS_ERROR_IPC_FAILED;
         }
     }
 

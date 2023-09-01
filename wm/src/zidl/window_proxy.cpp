@@ -256,7 +256,6 @@ WMError WindowProxy::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeI
             WLOGFE("Write transaction sync Id failed");
             return WMError::WM_ERROR_IPC_FAILED;
         }
-        rsTransaction->MarshallTransactionSyncController(data);
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA),
@@ -298,7 +297,6 @@ WMError WindowProxy::UpdateOccupiedAreaAndRect(const sptr<OccupiedAreaChangeInfo
             WLOGFE("Write transaction sync Id failed");
             return WMError::WM_ERROR_IPC_FAILED;
         }
-        rsTransaction->MarshallTransactionSyncController(data);
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA_AND_RECT),
