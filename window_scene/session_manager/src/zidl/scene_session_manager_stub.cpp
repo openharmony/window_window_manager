@@ -569,7 +569,8 @@ int SceneSessionManagerStub::HandleMoveSessionsToForeground(MessageParcel &data,
     WLOGFI("run HandleMoveSessionsToForeground!");
     std::vector<int32_t> sessionIds;
     data.ReadInt32Vector(&sessionIds);
-    const WSError &ret = MoveSessionsToForeground(sessionIds);
+    int32_t topSessionId = data.ReadInt32();
+    const WSError &ret = MoveSessionsToForeground(sessionIds, topSessionId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
@@ -578,7 +579,10 @@ int SceneSessionManagerStub::HandleMoveSessionsToBackground(MessageParcel &data,
     WLOGFI("run HandleMoveSessionsToBackground!");
     std::vector<int32_t> sessionIds;
     data.ReadInt32Vector(&sessionIds);
-    const WSError &ret = MoveSessionsToBackground(sessionIds);
+    std::vector<int32_t> result;
+    data.ReadInt32Vector(&result);
+    const WSError &ret = MoveSessionsToBackground(sessionIds, result);
+    reply.WriteInt32Vector(result);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }

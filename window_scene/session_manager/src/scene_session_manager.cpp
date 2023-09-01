@@ -2525,14 +2525,6 @@ void SceneSessionManager::NotifySessionMovedToFront(int32_t persistentId)
 WSError SceneSessionManager::SetSessionLabel(const sptr<IRemoteObject> &token, const std::string &label)
 {
     WLOGFI("run SetSessionLabel");
-    if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
-        WLOGFE("The caller is not system-app, can not use system-api");
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
-    }
-    if (!SessionPermission::VerifySessionPermission()) {
-        WLOGFE("The caller has not permission granted");
-        return WSError::WS_ERROR_INVALID_PERMISSION;
-    }
     auto sceneSession = FindSessionByToken(token);
     if (sceneSession == nullptr) {
         WLOGFI("fail to find session by token");
@@ -3973,7 +3965,7 @@ WSError SceneSessionManager::UnlockSession(int32_t sessionId)
     return taskScheduler_->PostSyncTask(task);
 }
 
-WSError SceneSessionManager::MoveSessionsToForeground(const std::vector <std::int32_t> &sessionIds)
+WSError SceneSessionManager::MoveSessionsToForeground(const std::vector<int32_t>& sessionIds, int32_t topSessionId)
 {
     WLOGFI("run MoveSessionsToForeground");
     if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
@@ -3988,7 +3980,8 @@ WSError SceneSessionManager::MoveSessionsToForeground(const std::vector <std::in
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds)
+WSError SceneSessionManager::MoveSessionsToBackground(const std::vector<int32_t>& sessionIds,
+    std::vector<int32_t>& result)
 {
     WLOGFI("run MoveSessionsToBackground");
     if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
