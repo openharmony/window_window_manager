@@ -977,6 +977,13 @@ std::vector<sptr<Session>> Session::GetDialogVector() const
     return dialogVec_;
 }
 
+void Session::ClearDialogVector()
+{
+    std::unique_lock<std::mutex> lock(dialogVecMutex_);
+    dialogVec_.clear();
+    return;
+}
+
 bool Session::CheckDialogOnForeground()
 {
     std::unique_lock<std::mutex> lock(dialogVecMutex_);
