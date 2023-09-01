@@ -602,11 +602,11 @@ HWTEST_F(SceneSessionTest, SaveAspectRatio, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: NotifyIsCustomAnimatiomPlaying
- * @tc.desc: NotifyIsCustomAnimatiomPlaying
+ * @tc.name: NotifyIsCustomAnimationPlaying
+ * @tc.desc: NotifyIsCustomAnimationPlaying
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, NotifyIsCustomAnimatiomPlaying, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest, NotifyIsCustomAnimationPlaying, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "Background01";
@@ -619,7 +619,7 @@ HWTEST_F(SceneSessionTest, NotifyIsCustomAnimatiomPlaying, Function | SmallTest 
     sptr<SceneSession> scensession;
     scensession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scensession, nullptr);
-    scensession->NotifyIsCustomAnimatiomPlaying(false);
+    scensession->NotifyIsCustomAnimationPlaying(false);
 }
 
 /**
