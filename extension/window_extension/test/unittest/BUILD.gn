@@ -18,8 +18,9 @@ module_out_path = "window_manager/extension/window_extension"
 group("unittest") {
   testonly = true
 
-  deps = [ ":extension_window_extension_proxy_test",
-           ":extension_window_extension_stub_impl_test",
+  deps = [
+    ":extension_window_extension_proxy_test",
+    ":extension_window_extension_stub_impl_test",
   ]
 }
 
