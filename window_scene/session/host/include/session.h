@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_H
 
+#include <shared_mutex>
 #include <mutex>
 #include <vector>
 
@@ -70,7 +71,7 @@ public:
     virtual void OnExtensionDied() = 0;
 };
 
-class Session : public SessionStub, public virtual RefBase {
+class Session : public SessionStub {
 public:
     explicit Session(const SessionInfo& info);
     virtual ~Session() = default;
@@ -266,7 +267,6 @@ protected:
     int32_t persistentId_ = INVALID_SESSION_ID;
     SessionState state_ = SessionState::STATE_DISCONNECT;
     SessionInfo sessionInfo_;
-    sptr<WindowSessionProperty> property_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
     std::shared_ptr<Media::PixelMap> snapshot_;
@@ -331,6 +331,9 @@ private:
     std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;
     sptr<IWindowEventChannel> windowEventChannel_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
+
+    mutable std::shared_mutex propertyMutex_;
+    sptr<WindowSessionProperty> property_;
 
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
