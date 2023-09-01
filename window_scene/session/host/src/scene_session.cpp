@@ -419,9 +419,11 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect&rect, WSRect& newWi
         newRequestRect.posX_ = newWinRect.posX_;
         newWinRect.posY_ = defaultDisplayInfo->GetHeight() - static_cast<int32_t>(newWinRect.height_);
         newRequestRect.posY_ = newWinRect.posY_;
-
+        WLOGFI("Input rect change has changed, rect: %{public}s, newRequestRect: %{public}s, newWinRect: %{public}s",
+            rect.ToString().c_str(), newRequestRect.ToString().c_str(), newWinRect.ToString().c_str());
         return true;
     }
+    WLOGFD("There is no need to update input rect");
     return false;
 }
 
@@ -435,6 +437,7 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
         }
         auto newWinRect = session->winRect_;
         auto newRequestRect = session->GetSessionRequestRect();
+        SizeChangeReason newReason = reason;
         if (reason == SizeChangeReason::MOVE) {
             newWinRect.posX_ = rect.posX_;
             newWinRect.posY_ = rect.posY_;
@@ -444,7 +447,12 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
             session->SetSessionRequestRect(newRequestRect);
             session->NotifySessionRectChange(newRequestRect, reason);
         } else if (reason == SizeChangeReason::RESIZE) {
-            if (!session->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect)) {
+            bool needUpdateInputMethod = session->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
+            if (needUpdateInputMethod) {
+                newReason = SizeChangeReason::UNDEFINED;
+                WLOGFD("Input rect has totally changed, need to modify reason, id: %{public}d",
+                    session->GetPersistentId());
+            } else {
                 newWinRect.width_ = rect.width_;
                 newWinRect.height_ = rect.height_;
                 newRequestRect.width_ = rect.width_;
@@ -452,15 +460,15 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
             }
             session->SetSessionRect(newWinRect);
             session->SetSessionRequestRect(newRequestRect);
-            session->NotifySessionRectChange(newRequestRect, reason);
+            session->NotifySessionRectChange(newRequestRect, newReason);
         } else {
             session->SetSessionRect(rect);
             session->NotifySessionRectChange(rect, reason);
         }
 
-        WLOGFI("Id: %{public}d, reason: %{public}d, rect: %{public}s, "
-            "newRequestRect: %{public}s, newWinRect: %{public}s,", session->GetPersistentId(), reason,
-            rect.ToString().c_str(), newRequestRect.ToString().c_str(), newWinRect.ToString().c_str());
+        WLOGFI("Id: %{public}d, reason: %{public}d, newReason: %{public}d, rect: %{public}s, "
+            "newRequestRect: %{public}s, newWinRect: %{public}s", session->GetPersistentId(), reason,
+            newReason, rect.ToString().c_str(), newRequestRect.ToString().c_str(), newWinRect.ToString().c_str());
         return WSError::WS_OK;
     });
     return WSError::WS_OK;
