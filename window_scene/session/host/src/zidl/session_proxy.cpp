@@ -14,21 +14,20 @@
  */
 
 #include "session/host/include/zidl/session_proxy.h"
-#include "session/host/include/zidl/session_host_ipc_interface_code.h"
 
+#include "ability_start_setting.h"
 #include <ipc_types.h>
 #include <message_option.h>
 #include <ui/rs_surface_node.h>
-
-#include "ability_start_setting.h"
 #include "want.h"
-#include "want_params.h"
+
+#include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionProxy"};
-}
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionProxy" };
+} // namespace
 
 WSError SessionProxy::Foreground(sptr<WindowSessionProperty> property)
 {
@@ -52,7 +51,7 @@ WSError SessionProxy::Foreground(sptr<WindowSessionProperty> property)
         }
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_FOREGROUND),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FOREGROUND),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -71,7 +70,7 @@ WSError SessionProxy::Background()
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_BACKGROUND),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKGROUND),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -90,7 +89,7 @@ WSError SessionProxy::Disconnect()
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_DISCONNECT),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DISCONNECT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -100,7 +99,8 @@ WSError SessionProxy::Disconnect()
 }
 
 WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
+    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -138,7 +138,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_CONNECT),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONNECT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -188,7 +188,7 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -248,7 +248,7 @@ WSError SessionProxy::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
         WLOGFE("Write resultCode info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_TERMINATE),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TERMINATE),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -293,7 +293,7 @@ WSError SessionProxy::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
         WLOGFE("Write erroCode info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_EXCEPTION),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_EXCEPTION),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -315,7 +315,7 @@ WSError SessionProxy::UpdateActiveStatus(bool isActive)
         WLOGFE("Write active status failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_UPDATE_ACTIVE_STATUS),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACTIVE_STATUS),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -337,7 +337,7 @@ WSError SessionProxy::OnSessionEvent(SessionEvent event)
         WLOGFE("Write event id failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_SESSION_EVENT),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SESSION_EVENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -370,7 +370,7 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_UPDATE_SESSION_RECT),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_RECT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -418,7 +418,7 @@ WSError SessionProxy::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
         }
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(
-        SessionHostInterfaceCode::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION),
+        SessionInterfaceCode::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -447,7 +447,7 @@ WSError SessionProxy::DestroyAndDisconnectSpecificSession(const int32_t& persist
         WLOGFE("Write persistentId failed");
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(
-        SessionHostInterfaceCode::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION),
+        SessionInterfaceCode::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -465,7 +465,7 @@ WSError SessionProxy::RaiseToAppTop()
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_RAISE_TO_APP_TOP),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_TO_APP_TOP),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -486,7 +486,7 @@ WSError SessionProxy::RaiseAboveTarget(int32_t subWindowId)
     if (!data.WriteInt32(subWindowId)) {
         WLOGFE("Write subWindowId failed");
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_RAISE_ABOVE_TARGET),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_ABOVE_TARGET),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -508,7 +508,7 @@ WSError SessionProxy::OnNeedAvoid(bool status)
         WLOGFE("Write status failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_NEED_AVOID),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NEED_AVOID),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -531,7 +531,7 @@ AvoidArea SessionProxy::GetAvoidAreaByType(AvoidAreaType type)
         WLOGFE("Write type failed");
         return avoidArea;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_GET_AVOID_AREA),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return avoidArea;
@@ -556,7 +556,7 @@ WSError SessionProxy::RequestSessionBack(bool needMoveToBackground)
         WLOGFE("Write needMoveToBackground failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_BACKPRESSED),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKPRESSED),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -578,7 +578,7 @@ WSError SessionProxy::MarkProcessed(int32_t eventId)
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_MARK_PROCESSED),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MARK_PROCESSED),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -599,7 +599,7 @@ WSError OHOS::Rosen::SessionProxy::SetGlobalMaximizeMode(MaximizeMode mode)
     if (!data.WriteUint32(static_cast<uint32_t>(mode))) {
         WLOGFE("Write uint32_t failed");
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_SET_MAXIMIZE_MODE),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_MAXIMIZE_MODE),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -617,7 +617,7 @@ WSError SessionProxy::GetGlobalMaximizeMode(MaximizeMode& mode)
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_GET_MAXIMIZE_MODE),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_MAXIMIZE_MODE),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -627,7 +627,7 @@ WSError SessionProxy::GetGlobalMaximizeMode(MaximizeMode& mode)
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::UpdateWindowSessionProperty(sptr<WindowSessionProperty> property)
+WSError SessionProxy::SetSessionProperty(const sptr<WindowSessionProperty>& property)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -640,8 +640,8 @@ WSError SessionProxy::UpdateWindowSessionProperty(sptr<WindowSessionProperty> pr
         WLOGFE("Write property failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_UPDATE_WINDOW_SESSION_PROPERTY),
-                              data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SESSION_PROPERTY),
+        data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -662,7 +662,7 @@ WSError SessionProxy::SetAspectRatio(float ratio)
         WLOGFE("Write ratio failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_SET_ASPECT_RATIO),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_ASPECT_RATIO),
                               data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -684,7 +684,7 @@ WSError SessionProxy::UpdateWindowSceneAfterCustomAnimation(bool isAdd)
         WLOGFE("Write isAdd failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_UPDATE_CUSTOM_ANIMATION),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_CUSTOM_ANIMATION),
                               data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -710,7 +710,7 @@ WSError SessionProxy::TransferAbilityResult(uint32_t resultCode, const AAFwk::Wa
         WLOGFE("want write failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_TRANSFER_ABILITY_RESULT),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_ABILITY_RESULT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -732,7 +732,7 @@ WSError SessionProxy::TransferExtensionData(const AAFwk::WantParams& wantParams)
         WLOGFE("wantParams write failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_TRANSFER_EXTENSION_DATA),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_EXTENSION_DATA),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -750,7 +750,7 @@ void SessionProxy::NotifyRemoteReady()
         WLOGFE("WriteInterfaceToken failed");
         return;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_NOTIFY_REMOTE_READY),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_REMOTE_READY),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return;
@@ -766,7 +766,7 @@ void SessionProxy::NotifyExtensionDied()
         WLOGFE("WriteInterfaceToken failed");
         return;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return;
@@ -786,7 +786,7 @@ WSError SessionProxy::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
         WLOGFE("wantParams write failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG),
+    if (Remote()->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;

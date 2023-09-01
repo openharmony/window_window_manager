@@ -93,14 +93,13 @@ public:
 
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
-        sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr) override;
+        sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
+        int32_t pid = -1, int32_t uid = -1) override;
     WSError Foreground(sptr<WindowSessionProperty> property) override;
     WSError Background() override;
     WSError Disconnect() override;
 
     WSError UpdateActiveStatus(bool isActive) override;
-    WSError UpdateWindowSessionProperty(sptr<WindowSessionProperty> property) override;
-
     WSError OnSessionEvent(SessionEvent event) override;
     WSError RaiseToAppTop() override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
@@ -149,6 +148,8 @@ public:
 
     static MaximizeMode maximizeMode_;
 
+    void SetParentPersistentId(int32_t parentId);
+    int32_t GetParentPersistentId() const;
     WSError SetTurnScreenOn(bool turnScreenOn);
     bool IsTurnScreenOn() const;
     WSError SetKeepScreenOn(bool keepScreenOn);

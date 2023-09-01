@@ -90,11 +90,11 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
 
 WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
-    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
+    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid)
 {
     // Get pid and uid before posting task.
-    auto pid = IPCSkeleton::GetCallingPid();
-    auto uid = IPCSkeleton::GetCallingUid();
+    pid = pid == -1 ? IPCSkeleton::GetCallingPid() : pid;
+    uid = uid == -1 ? IPCSkeleton::GetCallingUid() : uid;
     return PostSyncTask(
         [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, &systemConfig, property, token, pid, uid]() {
         auto session = weakThis.promote();
@@ -103,12 +103,10 @@ WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const spt
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         auto ret = session->Session::Connect(
-            sessionStage, eventChannel, surfaceNode, systemConfig, property, token);
+            sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
         if (ret != WSError::WS_OK) {
             return ret;
         }
-        session->SetCallingPid(pid);
-        session->SetCallingUid(uid);
         session->NotifyPropertyWhenConnect();
         return ret;
     });
@@ -241,20 +239,6 @@ WSError SceneSession::UpdateActiveStatus(bool isActive)
         WLOGFD("UpdateActiveStatus, isActive: %{public}d, state: %{public}u",
             session->isActive_, session->GetSessionState());
         return ret;
-    });
-    return WSError::WS_OK;
-}
-
-WSError SceneSession::UpdateWindowSessionProperty(sptr<WindowSessionProperty> property)
-{
-    PostTask([weakThis = wptr(this), property]() {
-        auto session = weakThis.promote();
-        if (!session) {
-            WLOGFE("session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
-        }
-        session->property_ = property;
-        return WSError::WS_OK;
     });
     return WSError::WS_OK;
 }
@@ -533,9 +517,7 @@ WSError SceneSession::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
             return WSError::WS_ERROR_NULLPTR;
         }
         auto errCode = sceneSession->Connect(
-            sessionStage, eventChannel, surfaceNode, self->systemConfig_, property, token);
-        sceneSession->SetCallingPid(pid);
-        sceneSession->SetCallingUid(uid);
+            sessionStage, eventChannel, surfaceNode, self->systemConfig_, property, token, pid, uid);
         if (property) {
             persistentId = property->GetPersistentId();
         }
@@ -1112,6 +1094,22 @@ void SceneSession::SetZOrder(uint32_t zOrder)
             specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
         }
     }
+}
+
+void SceneSession::SetParentPersistentId(int32_t parentId)
+{
+    if (property_ == nullptr) {
+        return;
+    }
+    property_->SetParentPersistentId(parentId);
+}
+
+int32_t SceneSession::GetParentPersistentId() const
+{
+    if (property_ != nullptr) {
+        return property_->GetParentPersistentId();
+    }
+    return INVALID_SESSION_ID;
 }
 
 const std::string& SceneSession::GetWindowName() const

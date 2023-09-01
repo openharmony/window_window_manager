@@ -188,14 +188,13 @@ HWTEST_F(WindowSessionTest, IsSessionValid01, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: UpdateWindowSessionProperty01
- * @tc.desc: UpdateWindowSessionProperty
+ * @tc.name: SetSessionProperty01
+ * @tc.desc: SetSessionProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, UpdateWindowSessionProperty01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, SetSessionProperty01, Function | SmallTest | Level2)
 {
-    session_->state_ = SessionState::STATE_DISCONNECT;
-    ASSERT_EQ(session_->UpdateWindowSessionProperty(nullptr), WSError::WS_OK);
+    ASSERT_EQ(session_->SetSessionProperty(nullptr), WSError::WS_OK);
 }
 
 /**
