@@ -217,6 +217,7 @@ int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& repl
         abilitySessionInfo->callerToken = data.ReadRemoteObject();
     }
 
+    abilitySessionInfo->persistentId = data.ReadInt32();
     abilitySessionInfo->errorCode = data.ReadInt32();
     abilitySessionInfo->errorReason = data.ReadString();
     const WSError& errCode = NotifySessionException(abilitySessionInfo);

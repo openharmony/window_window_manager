@@ -843,6 +843,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
                 sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str(),
                 sessionInfo.want == nullptr ? "nullptr" : sessionInfo.want->ToString().c_str());
         }
+        RegisterSessionExceptionFunc(sceneSession);
         FillSessionInfo(sceneSession->GetSessionInfo());
         auto persistentId = sceneSession->GetPersistentId();
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSession(%d )", persistentId);
@@ -1182,12 +1183,9 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
             sceneSessionMap_.erase(persistentId);
             systemTopSceneSessionMap_.erase(persistentId);
             nonSystemFloatSceneSessionMap_.erase(persistentId);
-            if (listenerController_ != nullptr &&
-                (scnSession->GetSessionInfo().abilityInfo) != nullptr &&
-                !(scnSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
-                WLOGFD("NotifySessionDestroyed, id: %{public}d", persistentId);
-                listenerController_->NotifySessionDestroyed(persistentId);
-            }
+        }
+        if (listenerController_ != nullptr) {
+            NotifySessionForCallback(scnSession, needRemoveSession);
         }
         return WSError::WS_OK;
     };
@@ -2045,16 +2043,61 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
         return;
     }
     NotifySessionExceptionFunc sessionExceptionFunc = [this](const SessionInfo& info) {
-        if (info.errorCode == static_cast<int32_t>(AAFwk::ErrorLifecycleState::ABILITY_STATE_LOAD_TIMEOUT)) {
+        auto task = [this, info]() {
             auto scnSession = GetSceneSession(info.persistentId_);
-            if (scnSession && listenerController_ != nullptr) {
-                WLOGFD("NotifySessionClosed when ability load timeout, id: %{public}d", info.persistentId_);
+            if (scnSession == nullptr) {
+                WLOGFW("NotifySessionExceptionFunc, Not found session, id: %{public}d", info.persistentId_);
+                return;
+            }
+            if (listenerController_ == nullptr) {
+                WLOGFW("NotifySessionExceptionFunc, listenerController_ is nullptr");
+                return;
+            }
+            WLOGFI("NotifySessionExceptionFunc, errorCode: %{public}d, id: %{public}d", info.errorCode,
+                   info.persistentId_);
+            if (info.errorCode == static_cast<int32_t>(AAFwk::ErrorLifecycleState::ABILITY_STATE_LOAD_TIMEOUT) ||
+                info.errorCode == static_cast<int32_t>(AAFwk::ErrorLifecycleState::ABILITY_STATE_FOREGROUND_TIMEOUT)) {
+                WLOGFD("NotifySessionClosed when ability load timeout or foreground timeout, id: %{public}d",
+                       info.persistentId_);
                 listenerController_->NotifySessionClosed(info.persistentId_);
             }
-        }
+        };
+        taskScheduler_->PostVoidSyncTask(task);
     };
     sceneSession->SetSessionExceptionListener(sessionExceptionFunc);
-    WLOGFD("RegisterSessionExceptionFunc success");
+    WLOGFI("RegisterSessionExceptionFunc success, id: %{public}d", sceneSession->GetPersistentId());
+}
+
+void SceneSessionManager::NotifySessionForCallback(const sptr<SceneSession>& scnSession, const bool needRemoveSession)
+{
+    if (scnSession == nullptr) {
+        WLOGFW("NotifySessionForCallback, scnSession is nullptr");
+        return;
+    }
+    WLOGFI("NotifySessionForCallback, id: %{public}d, needRemoveSession: %{public}u", scnSession->GetPersistentId(),
+           static_cast<uint32_t>(needRemoveSession));
+    if (scnSession->GetSessionInfo().appIndex_ != 0) {
+        WLOGFI("NotifySessionDestroy, appIndex_: %{public}d, id: %{public}d",
+               scnSession->GetSessionInfo().appIndex_, scnSession->GetPersistentId());
+        listenerController_->NotifySessionDestroyed(scnSession->GetPersistentId());
+        return;
+    }
+    if (needRemoveSession) {
+        WLOGFI("NotifySessionDestroy, needRemoveSession, id: %{public}d", scnSession->GetPersistentId());
+        listenerController_->NotifySessionDestroyed(scnSession->GetPersistentId());
+        return;
+    }
+    if (scnSession->GetSessionInfo().abilityInfo == nullptr) {
+        WLOGFW("abilityInfo is nullptr, id: %{public}d", scnSession->GetPersistentId());
+    } else if ((scnSession->GetSessionInfo().abilityInfo)->removeMissionAfterTerminate ||
+               (scnSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
+        WLOGFI("NotifySessionDestroy, removeMissionAfterTerminate or excludeFromMissions, id: %{public}d",
+            scnSession->GetPersistentId());
+        listenerController_->NotifySessionDestroyed(scnSession->GetPersistentId());
+        return;
+    }
+    WLOGFI("NotifySessionClosed, id: %{public}d", scnSession->GetPersistentId());
+    listenerController_->NotifySessionClosed(scnSession->GetPersistentId());
 }
 
 bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
