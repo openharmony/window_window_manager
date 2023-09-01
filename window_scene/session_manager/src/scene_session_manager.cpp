@@ -1612,6 +1612,11 @@ std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFr
 
 WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
 {
+    if (action == WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE) {
+        if (!SessionPermission::VerifyCallingPermission("ohos.permission.PRIVACY_WINDOW")) {
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        }
+    }
     wptr<SceneSessionManager> weak = this;
     auto task = [weak, property, action]() {
         auto weakSession = weak.promote();
@@ -1684,6 +1689,12 @@ void SceneSessionManager::HandleUpdateProperty(const sptr<WindowSessionProperty>
             break;
         }
         case WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
+            bool isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
+            sceneSession->SetPrivacyMode(isPrivacyMode);
+            UpdatePrivateStateAndNotify(sceneSession->GetPersistentId());
+            break;
+        }
+        case WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE: {
             bool isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
             sceneSession->SetPrivacyMode(isPrivacyMode);
             UpdatePrivateStateAndNotify(sceneSession->GetPersistentId());
