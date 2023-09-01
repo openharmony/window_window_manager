@@ -285,6 +285,10 @@ WSError SessionProxy::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
+    if (!data.WriteInt32(abilitySessionInfo->persistentId)) {
+        WLOGFE("Write persistentId info failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (!data.WriteInt32(abilitySessionInfo->errorCode)) {
         WLOGFE("Write erroCode info failed");
         return WSError::WS_ERROR_IPC_FAILED;
