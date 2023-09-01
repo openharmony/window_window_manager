@@ -158,8 +158,8 @@ public:
     WSError ClearAllSessions();
     WSError LockSession(int32_t sessionId);
     WSError UnlockSession(int32_t sessionId);
-    WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds);
-    WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds);
+    WSError MoveSessionsToForeground(const std::vector<int32_t>& sessionIds, int32_t topSessionId);
+    WSError MoveSessionsToBackground(const std::vector<int32_t>& sessionIds, std::vector<int32_t>& result);
 
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
