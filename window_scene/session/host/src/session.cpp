@@ -44,6 +44,9 @@ constexpr float INNER_ANGLE_VP = 16.0f;
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
+    property_ = new WindowSessionProperty();
+    property_->SetWindowType(static_cast<WindowType>(info.windowType_));
+
     using type = std::underlying_type_t<MMI::WindowArea>;
     for (type area = static_cast<type>(MMI::WindowArea::FOCUS_ON_TOP);
         area <= static_cast<type>(MMI::WindowArea::FOCUS_ON_BOTTOM_RIGHT); ++area) {
@@ -217,13 +220,13 @@ void Session::UpdateSessionState(SessionState state)
 
 void Session::UpdateSessionFocusable(bool isFocusable)
 {
-    property_->SetFocusable(isFocusable);
+    GetSessionProperty()->SetFocusable(isFocusable);
     NotifySessionFocusableChange(isFocusable);
 }
 
 void Session::UpdateSessionTouchable(bool touchable)
 {
-    property_->SetTouchable(touchable);
+    GetSessionProperty()->SetTouchable(touchable);
     NotifySessionTouchableChange(touchable);
 }
 
@@ -238,8 +241,9 @@ WSError Session::SetFocusable(bool isFocusable)
 
 bool Session::GetFocusable() const
 {
-    if (property_ != nullptr) {
-        return property_->GetFocusable();
+    auto property = GetSessionProperty();
+    if (property) {
+        return property->GetFocusable();
     }
     WLOGFD("property is null");
     return true;
@@ -266,7 +270,7 @@ WSError Session::SetTouchable(bool touchable)
 
 bool Session::GetTouchable() const
 {
-    return property_->GetTouchable();
+    return GetSessionProperty()->GetTouchable();
 }
 
 WSError Session::SetVisible(bool isVisible)
@@ -320,19 +324,21 @@ sptr<IRemoteObject> Session::GetAbilityToken() const
 
 WSError Session::SetBrightness(float brightness)
 {
-    if (!property_) {
+    auto property = GetSessionProperty();
+    if (!property) {
         return WSError::WS_ERROR_NULLPTR;
     }
-    property_->SetBrightness(brightness);
+    property->SetBrightness(brightness);
     return WSError::WS_OK;
 }
 
 float Session::GetBrightness() const
 {
-    if (!property_) {
+    auto property = GetSessionProperty();
+    if (!property) {
         return UNDEFINED_BRIGHTNESS;
     }
-    return property_->GetBrightness();
+    return property->GetBrightness();
 }
 
 bool Session::IsSessionValid() const
@@ -539,7 +545,7 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     surfaceNode_ = surfaceNode;
     abilityToken_ = token;
     systemConfig = systemConfig_;
-    property_ = property;
+    SetSessionProperty(property);
     if (property) {
         property->SetPersistentId(GetPersistentId());
     }
@@ -1221,12 +1227,14 @@ WSError Session::UpdateWindowMode(WindowMode mode)
 
 WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
 {
+    std::unique_lock<std::shared_mutex> lock(propertyMutex_);
     property_ = property;
     return WSError::WS_OK;
 }
 
 sptr<WindowSessionProperty> Session::GetSessionProperty() const
 {
+    std::shared_lock<std::shared_mutex> lock(propertyMutex_);
     return property_;
 }
 
@@ -1242,11 +1250,12 @@ WSRect Session::GetSessionRect() const
 
 void Session::SetSessionRequestRect(const WSRect& rect)
 {
-    if (property_ == nullptr) {
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
         WLOGFD("id: %{public}d property is nullptr", persistentId_);
         return;
     }
-    property_->SetRequestRect(SessionHelper::TransferToRect(rect));
+    property->SetRequestRect(SessionHelper::TransferToRect(rect));
     WLOGFD("is: %{public}d, rect: [%{public}d, %{public}d, %{public}u, %{public}u]", persistentId_,
         rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
@@ -1254,20 +1263,21 @@ void Session::SetSessionRequestRect(const WSRect& rect)
 WSRect Session::GetSessionRequestRect() const
 {
     WSRect rect;
-    if (property_ == nullptr) {
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
         WLOGFD("id: %{public}d property is nullptr", persistentId_);
         return rect;
     }
-    rect = SessionHelper::TransferToWSRect(property_->GetRequestRect());
-    WLOGFD("is: %{public}d, rect: [%{public}d, %{public}d, %{public}u, %{public}u]", persistentId_,
-        rect.posX_, rect.posY_, rect.width_, rect.height_);
+    rect = SessionHelper::TransferToWSRect(property->GetRequestRect());
+    WLOGFD("id: %{public}d, rect: %{public}s", persistentId_, rect.ToString().c_str());
     return rect;
 }
 
 WindowType Session::GetWindowType() const
 {
-    if (property_ != nullptr) {
-        return property_->GetWindowType();
+    auto property = GetSessionProperty();
+    if (property) {
+        return property->GetWindowType();
     }
     return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 }
@@ -1339,11 +1349,12 @@ void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info)
 
 WindowMode Session::GetWindowMode()
 {
-    if (property_ == nullptr) {
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
         WLOGFW("null property.");
         return WindowMode::WINDOW_MODE_UNDEFINED;
     }
-    return property_->GetWindowMode();
+    return property->GetWindowMode();
 }
 
 void Session::SetZOrder(uint32_t zOrder)

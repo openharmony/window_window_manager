@@ -119,9 +119,9 @@ HWTEST_F(WindowSessionImplTest, Connect01, Function | SmallTest | Level2)
     sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _)).WillOnce(Return(WSError::WS_ERROR_NULLPTR));
+    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _, _, _)).WillOnce(Return(WSError::WS_ERROR_NULLPTR));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->Connect());
-    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
     ASSERT_EQ(WMError::WM_OK, window->Connect());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
@@ -525,10 +525,10 @@ HWTEST_F(WindowSessionImplTest, GetFloatingWindowParentId, Function | SmallTest 
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _))
+    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _, _, _))
         .WillOnce(Return(WSError::WS_ERROR_NULLPTR));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->Connect());
-    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _))
+    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _, _, _))
         .WillOnce(Return(WSError::WS_OK));
     ASSERT_EQ(WMError::WM_OK, window->Connect());
 
