@@ -218,6 +218,8 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         if (WindowHelper::IsMainWindow(GetType())) {
             maxFloatingWindowSize_ = windowSystemConfig_.maxFloatingWindowSize_;
             SetWindowMode(windowSystemConfig_.defaultWindowMode_);
+            NotifyWindowNeedAvoid(
+                (property_->GetWindowFlags()) & (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
             GetConfigurationFromAbilityInfo();
         }
     }
