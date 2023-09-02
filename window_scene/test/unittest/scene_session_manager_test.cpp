@@ -788,11 +788,8 @@ HWTEST_F(SceneSessionManagerTest, OnOutsideDownEvent, Function | SmallTest | Lev
 */
 HWTEST_F(SceneSessionManagerTest, NotifySessionTouchOutside, Function | SmallTest | Level3)
 {
-    int32_t x = 32;
-    int32_t y = 32;
-    int32_t action = MMI::PointerEvent::POINTER_ACTION_DOWN;
     int ret = 0;
-    ssm_->NotifySessionTouchOutside(action, x, y);
+    ssm_->NotifySessionTouchOutside(INVALID_SESSION_ID);
     ASSERT_EQ(ret, 0);
 }
 
