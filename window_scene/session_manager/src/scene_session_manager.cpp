@@ -786,6 +786,8 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onUpdateAvoidArea_ = std::bind(&SceneSessionManager::UpdateAvoidArea, this, std::placeholders::_1);
     specificCb->onWindowInfoUpdate_ = std::bind(&SceneSessionManager::NotifyWindowInfoChange,
         this, std::placeholders::_1, std::placeholders::_2);
+    specificCb->onSessionTouchOutside_ = std::bind(&SceneSessionManager::NotifySessionTouchOutside,
+        this, std::placeholders::_1);
     return specificCb;
 }
 
@@ -1331,44 +1333,29 @@ void SceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
     }
 }
 
-void SceneSessionManager::NotifySessionTouchOutside(int32_t action, int32_t x, int32_t y)
+void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
 {
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto &item : sceneSessionMap_) {
-        auto sceneSession = item.second;
-        if (sceneSession == nullptr) {
-            continue;
-        }
-        if (sceneSession->GetSessionInfo().isSystem_ ||
-            (sceneSession->GetSessionState() != SessionState::STATE_FOREGROUND &&
-            sceneSession->GetSessionState() != SessionState::STATE_ACTIVE)) {
-            continue;
-        }
-        auto persistentId = sceneSession->GetPersistentId();
-        auto touchHotAreaRects = sceneSession->GetTouchHotAreas();
-        if (!touchHotAreaRects.empty()) {
-            bool touchInsideFlag = false;
-            for (auto touchHotAreaRect : touchHotAreaRects) {
-                if (!SessionHelper::IsPointInRect(x, y, touchHotAreaRect)) {
-                    continue;
-                } else {
-                    WLOGFD("TouchInside %{public}d", persistentId);
-                    touchInsideFlag = true;
-                    break;
-                }
+    auto task = [this, persistentId]() {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto &item : sceneSessionMap_) {
+            auto sceneSession = item.second;
+            if (sceneSession == nullptr) {
+                continue;
             }
-            if (!touchInsideFlag) {
+            if (sceneSession->GetSessionInfo().isSystem_ ||
+                (sceneSession->GetSessionState() != SessionState::STATE_FOREGROUND &&
+                sceneSession->GetSessionState() != SessionState::STATE_ACTIVE)) {
+                continue;
+            }
+            auto sessionId = sceneSession->GetPersistentId();
+            if (sessionId != persistentId) {
                 sceneSession->NotifyTouchOutside();
             }
-        } else {
-            auto hotAreaRect = sceneSession->GetHotAreaRect(action);
-            if (!SessionHelper::IsPointInRect(x, y, hotAreaRect)) {
-                sceneSession->NotifyTouchOutside();
-            } else {
-                WLOGFD("TouchInside %{public}d", persistentId);
-            }
         }
-    }
+    };
+
+    taskScheduler_->PostAsyncTask(task);
+    return;
 }
 
 void SceneSessionManager::SetOutsideDownEventListener(const ProcessOutsideDownEventFunc& func)
