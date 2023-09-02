@@ -864,11 +864,16 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         WLOGFE("pointerEvent is null");
         return WSError::WS_ERROR_NULLPTR;
     }
+    int32_t action = pointerEvent->GetPointerAction();
     {
-        if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW) {
+        if (action == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW) {
             std::lock_guard<std::mutex> guard(enterSessionMutex_);
             enterSession_ = wptr<SceneSession>(this);
         }
+    }
+    if (specificCallback_ != nullptr && specificCallback_->onSessionTouchOutside_ != nullptr &&
+        (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN)) {
+        specificCallback_->onSessionTouchOutside_(GetPersistentId());
     }
 
     static bool isNew = true;
@@ -900,7 +905,6 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
     }
 
-    auto action = pointerEvent->GetPointerAction();
     bool raiseEnabled = WindowHelper::IsSubWindow(property->GetWindowType()) && property->GetRaiseEnabled() &&
         (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     if (raiseEnabled) {
