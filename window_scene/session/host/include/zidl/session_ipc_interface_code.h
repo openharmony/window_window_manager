@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef SESSION_HOST_IPC_INTERFACE_CODE_H
-#define SESSION_HOST_IPC_INTERFACE_CODE_H
+#ifndef OHOS_ROSEN_SESSION_IPC_INTERFACE_CODE_H
+#define OHOS_ROSEN_SESSION_IPC_INTERFACE_CODE_H
 
-/* SAID: 4606 */
 namespace OHOS {
 namespace Rosen {
-enum class SessionHostInterfaceCode {
+enum class SessionInterfaceCode {
     // Base
     TRANS_ID_CONNECT = 0,
     TRANS_ID_FOREGROUND,
@@ -42,7 +41,7 @@ enum class SessionHostInterfaceCode {
     TRANS_ID_GET_MAXIMIZE_MODE,
     TRANS_ID_NEED_AVOID,
     TRANS_ID_GET_AVOID_AREA,
-    TRANS_ID_UPDATE_WINDOW_SESSION_PROPERTY,
+    TRANS_ID_SET_SESSION_PROPERTY,
     TRANS_ID_SET_ASPECT_RATIO,
     TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG,
     TRANS_ID_UPDATE_CUSTOM_ANIMATION,
@@ -54,7 +53,7 @@ enum class SessionHostInterfaceCode {
     TRANS_ID_NOTIFY_REMOTE_READY = 502,
     TRANS_ID_NOTIFY_EXTENSION_DIED = 503
 };
-}   // namespace Rosen
-}   // namespace OHOS
+} // namespace Rosen
+} // namespace OHOS
 
-#endif  // SESSION_HOST_IPC_INTERFACE_CODE_H
+#endif  // OHOS_ROSEN_SESSION_IPC_INTERFACE_CODE_H

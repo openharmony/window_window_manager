@@ -14,81 +14,78 @@
  */
 
 #include "session/host/include/zidl/session_stub.h"
-#include "session/host/include/zidl/session_host_ipc_interface_code.h"
-
-#include <ipc_types.h>
-#include <ui/rs_surface_node.h>
 
 #include "ability_start_setting.h"
+#include <ipc_types.h>
+#include <ui/rs_surface_node.h>
 #include "want.h"
-#include "want_params.h"
+
+#include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStub"};
-}
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStub" };
+} // namespace
 
-const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_{
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_FOREGROUND),
-        &SessionStub::HandleForeground),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_BACKGROUND),
-        &SessionStub::HandleBackground),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_DISCONNECT),
-        &SessionStub::HandleDisconnect),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_CONNECT),
+const std::map<uint32_t, SessionStubFunc> SessionStub::stubFuncMap_ {
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONNECT),
         &SessionStub::HandleConnect),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION),
-        &SessionStub::HandlePendingSessionActivation),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_UPDATE_ACTIVE_STATUS),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FOREGROUND),
+        &SessionStub::HandleForeground),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKGROUND),
+        &SessionStub::HandleBackground),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DISCONNECT),
+        &SessionStub::HandleDisconnect),
+
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACTIVE_STATUS),
         &SessionStub::HandleUpdateActivateStatus),
-
-    // for scene only
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_SESSION_EVENT),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SESSION_EVENT),
         &SessionStub::HandleSessionEvent),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_TERMINATE),
-        &SessionStub::HandleTerminateSession),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_EXCEPTION),
-        &SessionStub::HandleSessionException),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_UPDATE_SESSION_RECT),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_RECT),
         &SessionStub::HandleUpdateSessionRect),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION),
         &SessionStub::HandleCreateAndConnectSpecificSession),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DESTROY_AND_DISCONNECT_SPECIFIC_SESSION),
         &SessionStub::HandleDestroyAndDisconnectSpecificSession),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_RAISE_TO_APP_TOP),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_TO_APP_TOP),
         &SessionStub::HandleRaiseToAppTop),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_BACKPRESSED),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKPRESSED),
         &SessionStub::HandleBackPressed),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_MARK_PROCESSED),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MARK_PROCESSED),
         &SessionStub::HandleMarkProcessed),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_SET_MAXIMIZE_MODE),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_MAXIMIZE_MODE),
         &SessionStub::HandleSetGlobalMaximizeMode),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_GET_MAXIMIZE_MODE),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_MAXIMIZE_MODE),
         &SessionStub::HandleGetGlobalMaximizeMode),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_NEED_AVOID),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NEED_AVOID),
         &SessionStub::HandleNeedAvoid),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_GET_AVOID_AREA),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA),
         &SessionStub::HandleGetAvoidAreaByType),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_UPDATE_WINDOW_SESSION_PROPERTY),
-        &SessionStub::HandleUpdateWindowSessionProperty),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_SET_ASPECT_RATIO),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SESSION_PROPERTY),
+        &SessionStub::HandleSetSessionProperty),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_ASPECT_RATIO),
         &SessionStub::HandleSetAspectRatio),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG),
         &SessionStub::HandleSetWindowAnimationFlag),
-
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_UPDATE_CUSTOM_ANIMATION),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_CUSTOM_ANIMATION),
         &SessionStub::HandleUpdateWindowSceneAfterCustomAnimation),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_RAISE_ABOVE_TARGET),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_ABOVE_TARGET),
         &SessionStub::HandleRaiseAboveTarget),
-    // for extension only
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_TRANSFER_ABILITY_RESULT),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION),
+        &SessionStub::HandlePendingSessionActivation),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TERMINATE),
+        &SessionStub::HandleTerminateSession),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_EXCEPTION),
+        &SessionStub::HandleSessionException),
+
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_ABILITY_RESULT),
         &SessionStub::HandleTransferAbilityResult),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_TRANSFER_EXTENSION_DATA),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_EXTENSION_DATA),
         &SessionStub::HandleTransferExtensionData),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_NOTIFY_REMOTE_READY),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_REMOTE_READY),
         &SessionStub::HandleNotifyRemoteReady),
-    std::make_pair(static_cast<uint32_t>(SessionHostInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED),
+    std::make_pair(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED),
         &SessionStub::HandleNotifyExtensionDied)
 };
 
@@ -400,12 +397,11 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
     return ERR_NONE;
 }
 
-int SessionStub::HandleUpdateWindowSessionProperty(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleSetSessionProperty(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("UpdateWindowSessionProperty!");
-    sptr<WindowSessionProperty> property = nullptr;
-    property = data.ReadStrongParcelable<WindowSessionProperty>();
-    const WSError& errCode = UpdateWindowSessionProperty(property);
+    WLOGFD("HandleSetSessionProperty!");
+    auto property = data.ReadStrongParcelable<WindowSessionProperty>();
+    auto errCode = SetSessionProperty(property);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

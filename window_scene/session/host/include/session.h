@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_H
 
+#include <shared_mutex>
 #include <mutex>
 #include <vector>
 
@@ -70,52 +71,23 @@ public:
     virtual void OnExtensionDied() = 0;
 };
 
-class Session : public SessionStub, public virtual RefBase {
+class Session : public SessionStub {
 public:
     explicit Session(const SessionInfo& info);
     virtual ~Session() = default;
 
-    int32_t GetPersistentId() const;
-    int32_t GetParentPersistentId() const;
-    void SetParentPersistentId(int32_t parentId);
-    void SetSessionRect(const WSRect& rect);
     void SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler);
-
-    std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
-    std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
-    std::shared_ptr<Media::PixelMap> GetSnapshot() const;
-    std::shared_ptr<Media::PixelMap> Snapshot();
-    SessionState GetSessionState() const;
-    SessionInfo& GetSessionInfo();
-    sptr<WindowSessionProperty> GetSessionProperty() const;
-    WSRect GetSessionRect() const;
-    WindowType GetWindowType() const;
-    float GetAspectRatio() const;
-    WSError SetAspectRatio(float ratio) override;
-
-    void SetWindowSessionProperty(const sptr<WindowSessionProperty>& property);
-    sptr<WindowSessionProperty> GetWindowSessionProperty() const;
-    void SetSessionRequestRect(const WSRect& rect);
-    WSRect GetSessionRequestRect() const;
-
-    virtual WSError SetActive(bool active);
-    virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason);
-    WSError UpdateDensity();
-
-    void SetShowRecent(bool showRecent);
-    bool GetShowRecent() const;
-    void SetBufferAvailable(bool bufferAvailable);
-    bool GetBufferAvailable() const;
 
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
-        sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr) override;
-    WSError ConnectImpl(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-        const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
-        sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr);
+        sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
+        int32_t pid = -1, int32_t uid = -1) override;
     WSError Foreground(sptr<WindowSessionProperty> property) override;
     WSError Background() override;
     WSError Disconnect() override;
+
+    bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
+    bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
 
     void NotifyActivation();
     void NotifyConnect();
@@ -130,8 +102,31 @@ public:
     WSError TransferFocusActiveEvent(bool isFocusActive);
     WSError TransferFocusStateEvent(bool focusState);
 
-    bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
-    bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
+    int32_t GetPersistentId() const;
+    std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
+    std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
+    std::shared_ptr<Media::PixelMap> GetSnapshot() const;
+    std::shared_ptr<Media::PixelMap> Snapshot();
+    SessionState GetSessionState() const;
+    SessionInfo& GetSessionInfo();
+    WindowType GetWindowType() const;
+    float GetAspectRatio() const;
+    WSError SetAspectRatio(float ratio) override;
+    WSError SetSessionProperty(const sptr<WindowSessionProperty>& property) override;
+    sptr<WindowSessionProperty> GetSessionProperty() const;
+    void SetSessionRect(const WSRect& rect);
+    WSRect GetSessionRect() const;
+    void SetSessionRequestRect(const WSRect& rect);
+    WSRect GetSessionRequestRect() const;
+
+    virtual WSError SetActive(bool active);
+    virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason);
+    WSError UpdateDensity();
+
+    void SetShowRecent(bool showRecent);
+    bool GetShowRecent() const;
+    void SetBufferAvailable(bool bufferAvailable);
+    bool GetBufferAvailable() const;
 
     void SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func);
     void SetTerminateSessionListener(const NotifyTerminateSessionFunc& func);
@@ -273,7 +268,6 @@ protected:
     int32_t persistentId_ = INVALID_SESSION_ID;
     SessionState state_ = SessionState::STATE_DISCONNECT;
     SessionInfo sessionInfo_;
-    sptr<WindowSessionProperty> property_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
     std::shared_ptr<Media::PixelMap> snapshot_;
@@ -339,6 +333,9 @@ private:
     sptr<IWindowEventChannel> windowEventChannel_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
 
+    mutable std::shared_mutex propertyMutex_;
+    sptr<WindowSessionProperty> property_;
+
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
 
@@ -347,8 +344,8 @@ private:
     sptr<Session> parentSession_;
 
     WSRect preRect_;
-    int32_t callingPid_ = { 0 };
-    int32_t callingUid_ = { 0 };
+    int32_t callingPid_ = -1;
+    int32_t callingUid_ = -1;
     int32_t appIndex_ = { 0 };
     std::string callingBundleName_ { "unknow" };
     bool isVisible_ {false};
