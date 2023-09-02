@@ -1238,9 +1238,9 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartedByInputMethod()) {
         WLOGFE("check input method permission failed");
     }
-    // get pid/uid before post sync task
-    int32_t pid = IPCSkeleton::GetCallingPid();
-    int32_t uid = IPCSkeleton::GetCallingUid();
+    // Get pid and uid before posting task.
+    auto pid = IPCSkeleton::GetCallingPid();
+    auto uid = IPCSkeleton::GetCallingUid();
     auto task = [this, sessionStage, eventChannel, surfaceNode, property, &persistentId, &session, token, pid, uid]() {
         // create specific session
         SessionInfo info;
@@ -1251,11 +1251,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         if (sceneSession == nullptr) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        sceneSession->SetCallingPid(pid);
-        sceneSession->SetCallingUid(uid);
-        // connect specific session and sessionStage
-        WSError errCode = sceneSession->ConnectImpl(
-            sessionStage, eventChannel, surfaceNode, systemConfig_, property, token);
+        auto errCode = sceneSession->Connect(
+            sessionStage, eventChannel, surfaceNode, systemConfig_, property, token, pid, uid);
         if (property) {
             persistentId = property->GetPersistentId();
         }
@@ -1828,7 +1825,7 @@ void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSe
         bool forceHideFloatNew = !systemTopSceneSessionMap_.empty();
         for (const auto &item : nonSystemFloatSceneSessionMap_) {
             auto forceHideSceneSession = item.second;
-            auto forceHideProperty = forceHideSceneSession->GetWindowSessionProperty();
+            auto forceHideProperty = forceHideSceneSession->GetSessionProperty();
             if (forceHideProperty && forceHideFloatNew != forceHideProperty->GetForceHide()) {
                 forceHideSceneSession->NotifyForceHideChange(forceHideFloatNew);
             }
@@ -2127,7 +2124,7 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
         sName = session->GetWindowName();
     }
     uint32_t displayId = 0;
-    uint32_t flag = session->GetWindowSessionProperty()->GetWindowFlags();
+    uint32_t flag = session->GetSessionProperty()->GetWindowFlags();
     uint32_t orientation = 0;
     const std::string& windowName = sName.size() <= WINDOW_NAME_MAX_LENGTH ?
         sName : sName.substr(0, WINDOW_NAME_MAX_LENGTH);
@@ -2323,7 +2320,7 @@ void FocusIDChange(int32_t persistentId, sptr<SceneSession>& sceneSession)
     // notify RS
     WLOGFD("current focus session: windowId: %{public}d, windowName: %{public}s, bundleName: %{public}s,"
         " abilityName: %{public}s, pid: %{public}d, uid: %{public}d", persistentId,
-        sceneSession->GetWindowSessionProperty()->GetWindowName().c_str(),
+        sceneSession->GetSessionProperty()->GetWindowName().c_str(),
         sceneSession->GetSessionInfo().bundleName_.c_str(),
         sceneSession->GetSessionInfo().abilityName_.c_str(),
         sceneSession->GetCallingPid(), sceneSession->GetCallingUid());
@@ -2451,13 +2448,13 @@ void SceneSessionManager::OnSessionStateChange(int32_t persistentId, const Sessi
     }
     switch (state) {
         case SessionState::STATE_FOREGROUND:
-            UpdateForceHideState(sceneSession, sceneSession->GetWindowSessionProperty(), true);
+            UpdateForceHideState(sceneSession, sceneSession->GetSessionProperty(), true);
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
             HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
             UpdatePrivateStateAndNotify(persistentId);
             break;
         case SessionState::STATE_BACKGROUND:
-            UpdateForceHideState(sceneSession, sceneSession->GetWindowSessionProperty(), false);
+            UpdateForceHideState(sceneSession, sceneSession->GetSessionProperty(), false);
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
             HandleKeepScreenOn(sceneSession, false);
             UpdatePrivateStateAndNotify(persistentId);
@@ -2473,7 +2470,7 @@ WSError SceneSessionManager::SetWindowFlags(const sptr<SceneSession>& sceneSessi
         WLOGFD("session is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    auto property = sceneSession->GetWindowSessionProperty();
+    auto property = sceneSession->GetSessionProperty();
     if (property == nullptr) {
         return WSError::WS_ERROR_NULLPTR;
     }

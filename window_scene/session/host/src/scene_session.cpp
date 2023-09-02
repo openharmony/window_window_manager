@@ -65,10 +65,6 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
             }
         }
     }
-    property_ = new(std::nothrow) WindowSessionProperty();
-    if (property_) {
-        property_->SetWindowType(static_cast<WindowType>(info.windowType_));
-    }
 
     auto name = sessionInfo_.bundleName_;
     auto pos = name.find_last_of('.');
@@ -90,11 +86,11 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
 
 WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
-    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token)
+    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid)
 {
     // Get pid and uid before posting task.
-    auto pid = IPCSkeleton::GetCallingPid();
-    auto uid = IPCSkeleton::GetCallingUid();
+    pid = pid == -1 ? IPCSkeleton::GetCallingPid() : pid;
+    uid = uid == -1 ? IPCSkeleton::GetCallingUid() : uid;
     return PostSyncTask(
         [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, &systemConfig, property, token, pid, uid]() {
         auto session = weakThis.promote();
@@ -103,12 +99,10 @@ WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const spt
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         auto ret = session->Session::Connect(
-            sessionStage, eventChannel, surfaceNode, systemConfig, property, token);
+            sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
         if (ret != WSError::WS_OK) {
             return ret;
         }
-        session->SetCallingPid(pid);
-        session->SetCallingUid(uid);
         session->NotifyPropertyWhenConnect();
         return ret;
     });
@@ -124,7 +118,7 @@ WSError SceneSession::Foreground(sptr<WindowSessionProperty> property)
         }
         // use property from client
         if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-            session->property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
+            session->GetSessionProperty()->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
             session->NotifyIsCustomAnimationPlaying(true);
             if (session->setWindowScenePatternFunc_ && session->setWindowScenePatternFunc_->setOpacityFunc_) {
                 session->setWindowScenePatternFunc_->setOpacityFunc_(0.0f);
@@ -156,8 +150,8 @@ WSError SceneSession::Background()
         }
         // background will remove surfaceNode, custom not execute
         // not animation playing when already background; inactive may be animation playing
-        if (session->property_ &&
-            session->property_->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        if (session->GetSessionProperty() &&
+            session->GetSessionProperty()->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
             session->NotifyIsCustomAnimationPlaying(true);
             return WSError::WS_OK;
         }
@@ -245,20 +239,6 @@ WSError SceneSession::UpdateActiveStatus(bool isActive)
     return WSError::WS_OK;
 }
 
-WSError SceneSession::UpdateWindowSessionProperty(sptr<WindowSessionProperty> property)
-{
-    PostTask([weakThis = wptr(this), property]() {
-        auto session = weakThis.promote();
-        if (!session) {
-            WLOGFE("session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
-        }
-        session->property_ = property;
-        return WSError::WS_OK;
-    });
-    return WSError::WS_OK;
-}
-
 WSError SceneSession::OnSessionEvent(SessionEvent event)
 {
     PostTask([weakThis = wptr(this), event]() {
@@ -329,7 +309,7 @@ WSError SceneSession::SetAspectRatio(float ratio)
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        if (!session->property_) {
+        if (!session->GetSessionProperty()) {
             WLOGE("SetAspectRatio failed because property is null");
             return WSError::WS_ERROR_NULLPTR;
         }
@@ -340,7 +320,7 @@ WSError SceneSession::SetAspectRatio(float ratio)
             WLOGD("vpr = %{public}f", vpr);
         }
         if (!MathHelper::NearZero(ratio)) {
-            auto limits = session->property_->GetWindowLimits();
+            auto limits = session->GetSessionProperty()->GetWindowLimits();
             if (session->IsDecorEnable()) {
                 if (limits.minWidth_ && limits.maxHeight_ &&
                     MathHelper::LessNotEqual(ratio, SessionUtils::ToLayoutWidth(limits.minWidth_, vpr)) /
@@ -400,7 +380,7 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect&rect, WSRect& newWi
 {
     SessionGravity gravity;
     uint32_t percent = 0;
-    property_->GetSessionGravity(gravity, percent);
+    GetSessionProperty()->GetSessionGravity(gravity, percent);
     if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT)) {
         auto defaultDisplayInfo = ScreenSessionManager::GetInstance().GetDefaultDisplayInfo();
@@ -541,9 +521,7 @@ WSError SceneSession::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
             return WSError::WS_ERROR_NULLPTR;
         }
         auto errCode = sceneSession->Connect(
-            sessionStage, eventChannel, surfaceNode, self->systemConfig_, property, token);
-        sceneSession->SetCallingPid(pid);
-        sceneSession->SetCallingUid(uid);
+            sessionStage, eventChannel, surfaceNode, self->systemConfig_, property, token, pid, uid);
         if (property) {
             persistentId = property->GetPersistentId();
         }
@@ -586,19 +564,20 @@ WSError SceneSession::DestroyAndDisconnectSpecificSession(const int32_t& persist
 void SceneSession::UpdateCameraFloatWindowStatus(bool isShowing)
 {
     if (GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA && specificCallback_ != nullptr) {
-        specificCallback_->onCameraFloatSessionChange_(property_->GetAccessTokenId(), isShowing);
+        specificCallback_->onCameraFloatSessionChange_(GetSessionProperty()->GetAccessTokenId(), isShowing);
     }
 }
 
 WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty)
 {
-    if (property_ == nullptr) {
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
         return WSError::WS_ERROR_NULLPTR;
     }
-    property_->SetSystemBarProperty(type, systemBarProperty);
+    property->SetSystemBarProperty(type, systemBarProperty);
     WLOGFD("SceneSession SetSystemBarProperty status:%{public}d", static_cast<int32_t>(type));
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnSystemBarPropertyChange_) {
-        sessionChangeCallback_->OnSystemBarPropertyChange_(property_->GetSystemBarProperty());
+        sessionChangeCallback_->OnSystemBarPropertyChange_(property->GetSystemBarProperty());
     }
     return WSError::WS_OK;
 }
@@ -606,12 +585,13 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
 void SceneSession::NotifyPropertyWhenConnect()
 {
     WLOGFI("Notify property when connect.");
-    if (property_ == nullptr) {
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
         WLOGFD("id: %{public}d property is nullptr", persistentId_);
         return;
     }
-    NotifySessionFocusableChange(property_->GetFocusable());
-    NotifySessionTouchableChange(property_->GetTouchable());
+    NotifySessionFocusableChange(property->GetFocusable());
+    NotifySessionTouchableChange(property->GetTouchable());
     OnShowWhenLocked(IsShowWhenLocked());
 }
 
@@ -643,7 +623,7 @@ WSError SceneSession::OnShowWhenLocked(bool showWhenLocked)
 
 bool SceneSession::IsShowWhenLocked() const
 {
-    return property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
+    return GetSessionProperty()->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
 }
 
 void SceneSession::CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, AvoidArea& avoidArea)
@@ -679,7 +659,7 @@ void SceneSession::CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, Avoid
 
 void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
-    if (property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)) {
+    if (GetSessionProperty()->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)) {
         return;
     }
     std::vector<sptr<SceneSession>> statusBarVector =
@@ -720,7 +700,7 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
     sptr<CutoutInfo> cutoutInfo = ScreenSessionManager::GetInstance().
-        GetCutoutInfo(property_->GetDisplayId());
+        GetCutoutInfo(GetSessionProperty()->GetDisplayId());
     if (cutoutInfo == nullptr) {
         WLOGFI("GetCutoutAvoidArea There is no CutoutInfo");
         return;
@@ -898,19 +878,20 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             WLOGFE("Failed to update the mouse cursor style, ret:%{public}d", ret);
         }
     }
-    if (property_ && property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-        WindowHelper::IsMainWindow(property_->GetWindowType()) &&
-        property_->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+    auto property = GetSessionProperty();
+    if (property && property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+        WindowHelper::IsMainWindow(property->GetWindowType()) &&
+        property->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
         PresentFoucusIfNeed(pointerEvent->GetPointerAction());
         if (!moveDragController_) {
             WLOGE("moveDragController_ is null");
             return Session::TransferPointerEvent(pointerEvent);
         }
-        if (property_->GetDragEnabled()) {
+        if (property->GetDragEnabled()) {
             if (!isNew) {
                 moveDragController_->HandleMouseStyle(pointerEvent, winRect_);
             }
-            if (moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property_, systemConfig_)) {
+            if (moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
                 return  WSError::WS_OK;
             }
         }
@@ -920,7 +901,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     }
 
     auto action = pointerEvent->GetPointerAction();
-    bool raiseEnabled = WindowHelper::IsSubWindow(property_->GetWindowType()) && property_->GetRaiseEnabled() &&
+    bool raiseEnabled = WindowHelper::IsSubWindow(property->GetWindowType()) && property->GetRaiseEnabled() &&
         (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     if (raiseEnabled) {
         RaiseToAppTop();
@@ -969,8 +950,9 @@ void SceneSession::NotifySessionRectChange(const WSRect& rect, const SizeChangeR
 
 bool SceneSession::IsDecorEnable()
 {
-    return WindowHelper::IsMainWindow(property_->GetWindowType()) && systemConfig_.isSystemDecorEnable_ &&
-        WindowHelper::IsWindowModeSupported(systemConfig_.decorModeSupportInfo_, property_->GetWindowMode());
+    auto property = GetSessionProperty();
+    return WindowHelper::IsMainWindow(property->GetWindowType()) && systemConfig_.isSystemDecorEnable_ &&
+        WindowHelper::IsWindowModeSupported(systemConfig_.decorModeSupportInfo_, property->GetWindowMode());
 }
 
 std::string SceneSession::GetRatioPreferenceKey()
@@ -997,8 +979,9 @@ bool SceneSession::FixRectByAspectRatio(WSRect& rect)
 {
     const int tolerancePx = 2; // 2: tolerance delta pixel value, unit: px
     WSRect originalRect = rect;
-    if (!property_ || property_->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING ||
-        !WindowHelper::IsMainWindow(property_->GetWindowType())) {
+    auto property = GetSessionProperty();
+    if (!property || property->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING ||
+        !WindowHelper::IsMainWindow(GetWindowType())) {
         return false;
     }
 
@@ -1014,7 +997,7 @@ bool SceneSession::FixRectByAspectRatio(WSRect& rect)
     int32_t maxW;
     int32_t minH;
     int32_t maxH;
-    SessionUtils::CalcFloatWindowRectLimits(property_->GetWindowLimits(), systemConfig_.maxFloatingWindowSize_, vpr,
+    SessionUtils::CalcFloatWindowRectLimits(property->GetWindowLimits(), systemConfig_.maxFloatingWindowSize_, vpr,
         minW, maxW, minH, maxH);
     rect.width_ = std::max(minW, static_cast<int32_t>(rect.width_));
     rect.width_ = std::min(maxW, static_cast<int32_t>(rect.width_));
@@ -1122,31 +1105,48 @@ void SceneSession::SetZOrder(uint32_t zOrder)
     }
 }
 
+void SceneSession::SetParentPersistentId(int32_t parentId)
+{
+    auto property = GetSessionProperty();
+    if (property) {
+        property->SetParentPersistentId(parentId);
+    }
+}
+
+int32_t SceneSession::GetParentPersistentId() const
+{
+    auto property = GetSessionProperty();
+    if (property) {
+        return property->GetParentPersistentId();
+    }
+    return INVALID_SESSION_ID;
+}
+
 const std::string& SceneSession::GetWindowName() const
 {
-    return property_->GetWindowName();
+    return GetSessionProperty()->GetWindowName();
 }
 
 WSError SceneSession::SetTurnScreenOn(bool turnScreenOn)
 {
-    property_->SetTurnScreenOn(turnScreenOn);
+    GetSessionProperty()->SetTurnScreenOn(turnScreenOn);
     return WSError::WS_OK;
 }
 
 bool SceneSession::IsTurnScreenOn() const
 {
-    return property_->IsTurnScreenOn();
+    return GetSessionProperty()->IsTurnScreenOn();
 }
 
 WSError SceneSession::SetKeepScreenOn(bool keepScreenOn)
 {
-    property_->SetKeepScreenOn(keepScreenOn);
+    GetSessionProperty()->SetKeepScreenOn(keepScreenOn);
     return WSError::WS_OK;
 }
 
 bool SceneSession::IsKeepScreenOn() const
 {
-    return property_->IsKeepScreenOn();
+    return GetSessionProperty()->IsKeepScreenOn();
 }
 
 std::string SceneSession::GetSessionSnapshotFilePath()
@@ -1197,8 +1197,8 @@ void SceneSession::UpdateNativeVisibility(bool visible)
     }
     specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     // update private state
-    if (!property_) {
-        WLOGFE("UpdateNativeVisibility property_ is null");
+    if (!GetSessionProperty()) {
+        WLOGFE("UpdateNativeVisibility property is null");
         return;
     }
 }
@@ -1210,21 +1210,22 @@ bool SceneSession::IsVisible() const
 
 void SceneSession::SetPrivacyMode(bool isPrivacy)
 {
-    if (!property_) {
-        WLOGFE("SetPrivacyMode property_ is null");
+    auto property = GetSessionProperty();
+    if (!property) {
+        WLOGFE("SetPrivacyMode property is null");
         return;
     }
     if (!surfaceNode_) {
         WLOGFE("surfaceNode_ is null");
         return;
     }
-    bool lastPrivacyMode = property_->GetPrivacyMode() || property_->GetSystemPrivacyMode();
+    bool lastPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
     if (lastPrivacyMode == isPrivacy) {
         WLOGFW("privacy mode is not change, do nothing, isPrivacy:%{public}d", isPrivacy);
         return;
     }
-    property_->SetPrivacyMode(isPrivacy);
-    property_->SetSystemPrivacyMode(isPrivacy);
+    property->SetPrivacyMode(isPrivacy);
+    property->SetSystemPrivacyMode(isPrivacy);
     surfaceNode_->SetSecurityLayer(isPrivacy);
     if (leashWinSurfaceNode_ != nullptr) {
         leashWinSurfaceNode_->SetSecurityLayer(isPrivacy);
@@ -1284,18 +1285,19 @@ WSError SceneSession::UpdateWindowSceneAfterCustomAnimation(bool isAdd)
 
 bool SceneSession::IsFloatingWindowAppType() const
 {
-    if (property_ == nullptr) {
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
         return false;
     }
-
-    return property_->IsFloatingWindowAppType();
+    return property->IsFloatingWindowAppType();
 }
 
 std::vector<Rect> SceneSession::GetTouchHotAreas() const
 {
     std::vector<Rect> touchHotAreas;
-    if (property_) {
-        property_->GetTouchHotAreas(touchHotAreas);
+    auto property = GetSessionProperty();
+    if (property) {
+        property->GetTouchHotAreas(touchHotAreas);
     }
     return touchHotAreas;
 }
@@ -1345,7 +1347,7 @@ WSError SceneSession::NotifyTouchOutside()
 void SceneSession::SetRequestedOrientation(Orientation orientation)
 {
     WLOGFI("id: %{public}d orientation: %{public}u", GetPersistentId(), static_cast<uint32_t>(orientation));
-    property_->SetRequestedOrientation(orientation);
+    GetSessionProperty()->SetRequestedOrientation(orientation);
     if (sessionChangeCallback_ && sessionChangeCallback_->OnRequestedOrientationChange_) {
         sessionChangeCallback_->OnRequestedOrientationChange_(static_cast<uint32_t>(orientation));
     }
@@ -1354,11 +1356,12 @@ void SceneSession::SetRequestedOrientation(Orientation orientation)
 void SceneSession::NotifyForceHideChange(bool hide)
 {
     WLOGFI("id: %{public}d forceHide: %{public}u", persistentId_, hide);
-    if (property_ == nullptr) {
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
         WLOGFD("id: %{public}d property is nullptr", persistentId_);
         return;
     }
-    property_->SetForceHide(hide);
+    property->SetForceHide(hide);
     if (sessionChangeCallback_ && sessionChangeCallback_->OnForceHideChange_) {
         sessionChangeCallback_->OnForceHideChange_(hide);
     }
@@ -1366,7 +1369,7 @@ void SceneSession::NotifyForceHideChange(bool hide)
 
 Orientation SceneSession::GetRequestedOrientation() const
 {
-    return property_->GetRequestedOrientation();
+    return GetSessionProperty()->GetRequestedOrientation();
 }
 
 int32_t SceneSession::GetCollaboratorType() const
@@ -1460,8 +1463,8 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s, \
             appIndex:%{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(),
             info.appIndex_);
-        WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}d, callingTokenId:%{public}d," \
-            "uiAbilityId: %{public}" PRIu64 ", windowMode: %{public}d",
+        WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}d, "
+            "callingTokenId:%{public}d, uiAbilityId: %{public}" PRIu64 ", windowMode: %{public}d",
             info.callState_, info.persistentId_, info.callingTokenId_, info.uiAbilityId_, info.windowMode);
         if (session->pendingSessionActivationFunc_) {
             session->pendingSessionActivationFunc_(info);
