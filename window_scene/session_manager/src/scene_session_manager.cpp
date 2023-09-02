@@ -3787,14 +3787,14 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
     return;
 }
 
-bool SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
+void SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
 {
     auto task = [this, persistentId]() {
         bool needUpdate = false;
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
             WLOGFD("sceneSession is nullptr.");
-            return false;
+            return;
         }
         NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_BOUNDS);
 
@@ -3814,10 +3814,11 @@ bool SceneSessionManager::UpdateAvoidArea(const int32_t& persistentId)
             UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
         }
 
-        return needUpdate;
+        return;
     };
 
-    return taskScheduler_->PostSyncTask(task);
+    taskScheduler_->PostAsyncTask(task);
+    return;
 }
 
 void SceneSessionManager::SetVirtualPixelRatioChangeListener(const ProcessVirtualPixelRatioChangeFunc& func)
