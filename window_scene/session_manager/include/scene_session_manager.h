@@ -210,7 +210,7 @@ private:
     void ConfigSubWindowSizeLimits(const WindowSceneConfig::ConfigItem& subWindowSizeConifg);
     void ConfigSnapshotScale();
     sptr<SceneSession::SpecificSessionCallback> CreateSpecificSessionCallback();
-    void FillSessionInfo(SessionInfo& sessionInfo);
+    void FillSessionInfo(sptr<SceneSession>& sceneSession);
     std::shared_ptr<AppExecFwk::AbilityInfo> QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
         const std::string& abilityName, const std::string& moduleName);
 
@@ -245,6 +245,9 @@ private:
                               std::vector<SessionInfoBean> &sessionInfos);
     int GetRemoteSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo);
 
+    void PerformRegisterInRequestSceneSession(sptr<SceneSession>& sceneSession);
+    WSError RequestSceneSessionActivationInner(sptr<SceneSession>& scnSession,
+        bool isNewActive, const std::shared_ptr<std::promise<int32_t>>& promise);
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
     WSError UpdateBrightness(int32_t persistentId);
     void SetDisplayBrightness(float brightness);
@@ -344,15 +347,16 @@ private:
     std::unordered_map<int32_t, sptr<AAFwk::IAbilityManagerCollaborator>> collaboratorMap_;
 
     bool CheckCollaboratorType(int32_t type);
-    void NotifyStartAbility(int32_t collaboratorType, const SessionInfo& sessionInfo);
+    void NotifyStartAbility(int32_t collaboratorType, SessionInfo& sessionInfo);
     void NotifySessionCreate(const sptr<SceneSession> sceneSession, SessionInfo& sessionInfo);
     void NotifyLoadAbility(int32_t collaboratorType, sptr<AAFwk::SessionInfo> abilitySessionInfo,
         std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void NotifyUpdateSessionInfo(const sptr<SceneSession> sceneSession);
     void NotifyClearSession(int32_t collaboratorType, int32_t persistentId);
     void NotifyMoveSessionToForeground(int32_t collaboratorType, int32_t persistendId);
-    void PreHandleCollaborator(sptr<SceneSession> sceneSession);
+    void PreHandleCollaborator(sptr<SceneSession>& sceneSession);
     void NotifyCollaboratorAfterStart(sptr<SceneSession>& scnSession, sptr<AAFwk::SessionInfo>& scnSessionInfo);
+    void UpdateCollaboratorSessionWant(sptr<SceneSession>& session);
 };
 } // namespace OHOS::Rosen
 
