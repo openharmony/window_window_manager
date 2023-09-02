@@ -3869,13 +3869,6 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
         return;
     }
     auto task = [this, displayInfo]() {
-        if (processVirtualPixelRatioChangeFunc_ != nullptr) {
-            Rect rect = { displayInfo->GetOffsetX(), displayInfo->GetOffsetY(),
-                displayInfo->GetWidth(), displayInfo->GetHeight()
-            };
-            processVirtualPixelRatioChangeFunc_(displayInfo->GetVirtualPixelRatio(), rect);
-        }
-
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto &item : sceneSessionMap_) {
             auto scnSession = item.second;
