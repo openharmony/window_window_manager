@@ -886,9 +886,9 @@ HWTEST_F(SceneSessionManagerTest, PreHandleCollaborator, Function | SmallTest | 
     SessionInfo info;
     info.abilityName_ = "Foreground01";
     info.bundleName_ = "Foreground01";
-    sptr<SceneSession> scensession;
+    sptr<SceneSession> scensession = nullptr;
+    ssm_->PreHandleCollaborator(scensession);
     scensession = new (std::nothrow) SceneSession(info, nullptr);
-    ssm_->PreHandleCollaborator(nullptr);
     ssm_->PreHandleCollaborator(scensession);
     scensession = nullptr;
     AppExecFwk::ApplicationInfo applicationInfo_;

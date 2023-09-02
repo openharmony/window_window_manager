@@ -127,6 +127,15 @@ enum CollaboratorType : int32_t {
     OTHERS_TYPE,
 };
 
+enum AncoSceneState: int32_t {
+    DEFAULT_STATE = 0,
+    NOTIFY_START,
+    NOTIFY_CREATE,
+    NOTIFY_LOAD,
+    NOTIFY_UPDATE,
+    NOTIFY_FOREGROUND,
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
@@ -154,6 +163,7 @@ struct SessionInfo {
     std::string time;
     ContinueState continueState = ContinueState::CONTINUESTATE_ACTIVE;
     int64_t uiAbilityId_ = 0;
+    int32_t ancoSceneState;
 };
 
 enum class SessionFlag : uint32_t {
