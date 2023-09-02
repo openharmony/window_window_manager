@@ -1127,11 +1127,11 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
         for (auto dialog : dialogVec) {
             if (dialog == nullptr) {
                 WLOGFE("dialog is nullptr");
-                return WSError::WS_ERROR_NULLPTR;
+                continue;
             }
             if (!GetSceneSession(dialog->GetPersistentId())) {
                 WLOGFE("session is invalid with %{public}d", dialog->GetPersistentId());
-                return WSError::WS_ERROR_INVALID_SESSION;
+                continue;
             }
             auto sceneSession = GetSceneSession(dialog->GetPersistentId());
             WindowDestroyNotifyVisibility(sceneSession);
@@ -1144,6 +1144,7 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
                 nonSystemFloatSceneSessionMap_.erase(dialog->GetPersistentId());
             }
         }
+        scnSession->ClearDialogVector();
         return WSError::WS_OK;
     }
     return WSError::WS_ERROR_INVALID_SESSION;
@@ -3302,7 +3303,7 @@ void SceneSessionManager::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> 
     // if keyboard will occupy calling, notify calling window the occupied area and safe height
     const WSRect& safeRect = SessionHelper::GetOverlap(occupiedArea, rect, 0, 0);
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
-        SessionHelper::TransferToRect(safeRect), safeRect.height_);
+        SessionHelper::TransferToRect(occupiedArea), safeRect.height_);
     WLOGFD("OccupiedAreaChangeInfo rect: %{public}u %{public}u %{public}u %{public}u",
         occupiedArea.posX_, occupiedArea.posY_, occupiedArea.width_, occupiedArea.height_);
     callingSession->NotifyOccupiedAreaChangeInfo(info);

@@ -159,6 +159,7 @@ public:
     void BindDialogToParentSession(const sptr<Session>& session);
     void RemoveDialogToParentSession(const sptr<Session>& session);
     std::vector<sptr<Session>> GetDialogVector() const;
+    void ClearDialogVector();
     void NotifyTouchDialogTarget();
     WSError NotifyDestroy();
 
