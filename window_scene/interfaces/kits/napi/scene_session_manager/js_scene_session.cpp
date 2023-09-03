@@ -229,18 +229,15 @@ void JsSceneSession::ProcessBindDialogTargetRegister()
 
 void JsSceneSession::ProcessSessionRectChangeRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
+    NotifySessionRectChangeFunc func = [this](const WSRect& rect, const SizeChangeReason& reason) {
+        this->OnSessionRectChange(rect, reason);
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
         return;
     }
-    sessionchangeCallback->onRectChange_ = std::bind(&JsSceneSession::OnSessionRectChange,
-        this, std::placeholders::_1, std::placeholders::_2);
-
-    auto session = weakSession_.promote();
-    if (session && session->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-        OnSessionRectChange(session->GetSessionRequestRect());
-    }
+    session->SetSessionRectChangeCallback(func);
     WLOGFD("ProcessSessionRectChangeRegister success");
 }
 
