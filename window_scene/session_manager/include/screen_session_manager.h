@@ -178,6 +178,7 @@ public:
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
 
     ScreenProperty GetPhyScreenProperty(ScreenId screenId);
+    uint32_t GetCurvedCompressionArea() const;
 
 protected:
     ScreenSessionManager();
