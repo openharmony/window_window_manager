@@ -180,7 +180,7 @@ public:
     void SetSelfToken(sptr<IRemoteObject> selfToken);
     sptr<IRemoteObject> GetSelfToken();
     WSError RaiseAboveTarget(int32_t subWindowId) override;
-
+    void SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func);
 private:
     void HandleStyleEvent(MMI::WindowArea area) override;
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
@@ -203,6 +203,7 @@ private:
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
     sptr<MoveDragController> moveDragController_ = nullptr;
     sptr<SetWindowScenePatternFunc> setWindowScenePatternFunc_ = nullptr;
+    NotifySessionRectChangeFunc sessionRectChangeFunc_;
     bool isVisible_ = false;
     static wptr<SceneSession> enterSession_;
     static std::mutex enterSessionMutex_;

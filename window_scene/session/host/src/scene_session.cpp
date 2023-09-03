@@ -407,6 +407,22 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect&rect, WSRect& newWi
     return false;
 }
 
+void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func)
+{
+    PostTask([weakThis = wptr(this), func]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        session->sessionRectChangeFunc_ = func;
+        if (session->sessionRectChangeFunc_ && session->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+            session->sessionRectChangeFunc_(session->GetSessionRequestRect(), SizeChangeReason::UNDEFINED);
+        }
+        return WSError::WS_OK;
+    });
+}
+
 WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason)
 {
     PostTask([weakThis = wptr(this), rect, reason]() {
@@ -946,9 +962,9 @@ void SceneSession::ClearEnterWindow()
 void SceneSession::NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason)
 {
     std::lock_guard<std::mutex> guard(sessionChangeCbMutex_);
-    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onRectChange_) {
+    if (sessionRectChangeFunc_) {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::NotifySessionRectChange");
-        sessionChangeCallback_->onRectChange_(rect, reason);
+        sessionRectChangeFunc_(rect, reason);
     }
 }
 
