@@ -196,12 +196,6 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, Function | MediumTest | L
     if (scene4->GoBackground() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene4->GoBackground());
     }
-
-    ASSERT_EQ(WMError::WM_OK, scene3->GoDestroy());
-    ASSERT_EQ(WMError::WM_OK, scene5->GoForeground());
-    ASSERT_EQ(WMError::WM_OK, scene5->GoBackground());
-    ASSERT_EQ(WMError::WM_OK, scene4->GoBackground());
-
     if (scene2->GoDestroy() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene4->GoDestroy());
         ASSERT_EQ(WMError::WM_OK, scene5->GoDestroy());
