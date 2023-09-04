@@ -417,7 +417,12 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
         }
         session->sessionRectChangeFunc_ = func;
         if (session->sessionRectChangeFunc_ && session->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-            session->sessionRectChangeFunc_(session->GetSessionRequestRect(), SizeChangeReason::UNDEFINED);
+            auto reason = SizeChangeReason::UNDEFINED;
+            auto rect = session->GetSessionRequestRect();
+            if (rect.width_ == 0 && rect.height_ == 0) {
+                reason = SizeChangeReason::MOVE;
+            }
+            session->sessionRectChangeFunc_(session->GetSessionRequestRect(), reason);
         }
         return WSError::WS_OK;
     });
