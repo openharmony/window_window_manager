@@ -15,13 +15,7 @@
 
 #include "common/include/task_scheduler.h"
 
-#include "window_manager_hilog.h"
-
 namespace OHOS::Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "TaskScheduler" };
-}
-
 TaskScheduler::TaskScheduler(const std::string& threadName)
 {
     auto runner = AppExecFwk::EventRunner::Create(threadName);
@@ -33,21 +27,19 @@ std::shared_ptr<AppExecFwk::EventHandler> TaskScheduler::GetEventHandler()
     return handler_;
 }
 
-void TaskScheduler::PostVoidSyncTask(Task task)
+void TaskScheduler::PostAsyncTask(Task&& task, int64_t delayTime)
 {
-    if (handler_ == nullptr) {
-        WLOGFE("PostVoidSyncTask Failed to post task, handler is null!");
-        return;
-    }
-    handler_->PostSyncTask(std::move(task), AppExecFwk::EventQueue::Priority::IMMEDIATE);
-}
-
-void TaskScheduler::PostAsyncTask(Task task, int64_t delayTime)
-{
-    if (handler_ == nullptr) {
-        WLOGFE("PostVoidSyncTask Failed to post task, handler is null!");
-        return;
+    if (!handler_ || handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        return task();
     }
     handler_->PostTask(std::move(task), delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+void TaskScheduler::PostVoidSyncTask(Task&& task)
+{
+    if (!handler_ || handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        return task();
+    }
+    handler_->PostSyncTask(std::move(task), AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 } // namespace OHOS::Rosen

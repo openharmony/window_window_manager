@@ -21,26 +21,27 @@
 namespace OHOS::Rosen {
 class TaskScheduler {
 public:
-    TaskScheduler(const std::string& threadName);
+    explicit TaskScheduler(const std::string& threadName);
     ~TaskScheduler() = default;
 
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler();
     using Task = std::function<void()>;
-    void PostAsyncTask(Task task, int64_t delayTime = 0);
-    void PostVoidSyncTask(Task task);
+    void PostAsyncTask(Task&& task, int64_t delayTime = 0);
+    void PostVoidSyncTask(Task&& task);
     template<typename SyncTask, typename Return = std::invoke_result_t<SyncTask>>
     Return PostSyncTask(SyncTask&& task)
     {
+        if (!handler_ || handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+            return task();
+        }
         Return ret;
         auto syncTask = [&ret, &task]() { ret = task(); };
-        if (handler_) {
-            handler_->PostSyncTask(syncTask, AppExecFwk::EventQueue::Priority::IMMEDIATE);
-        }
+        handler_->PostSyncTask(std::move(syncTask), AppExecFwk::EventQueue::Priority::IMMEDIATE);
         return ret;
     }
 
 private:
-    std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
+    std::shared_ptr<AppExecFwk::EventHandler> handler_;
 };
 } // namespace OHOS::Rosen
 
