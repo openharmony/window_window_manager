@@ -17,7 +17,6 @@
 #define OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_H
 
 #include "want.h"
-#include "want_params.h"
 
 #include "session/host/include/session.h"
 
@@ -36,13 +35,17 @@ public:
     explicit ExtensionSession(const SessionInfo& info);
     virtual ~ExtensionSession() = default;
 
+    WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
+        sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid) override;
+
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     WSError TransferComponentData(const AAFwk::WantParams& wantParams);
     void NotifyRemoteReady() override;
-    void RegisterExtensionSessionEventCallback(const sptr<ExtensionSessionEventCallback>&
-        extSessionEventCallback);
+    void RegisterExtensionSessionEventCallback(const sptr<ExtensionSessionEventCallback>& extSessionEventCallback);
     sptr<ExtensionSessionEventCallback> GetExtensionSessionEventCallback();
+
 private:
     sptr<ExtensionSessionEventCallback> extSessionEventCallback_ = nullptr;
 };
