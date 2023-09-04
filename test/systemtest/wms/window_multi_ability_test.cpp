@@ -84,7 +84,7 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow01, Function | MediumTest | L
 }
 
 /**
- * @tc.name: MultiAbilityWindow04
+ * @tc.name: MultiAbilityWindow02
  * @tc.desc: Five scene process in one thread, create/show/hide/destroy in order
  * @tc.type: FUNC
  */
@@ -130,6 +130,15 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, Function | MediumTest | L
     if (scene4->GoDestroy() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene4->GoDestroy());
     }
+}
+
+/**
+ * @tc.name: MultiAbilityWindow2
+ * @tc.desc: Five scene process in one thread, create/show/hide/destroy in order
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow2, Function | MediumTest | Level3)
+{
     sptr<WindowScene> scene5 = Utils::CreateWindowScene();
     if (scene5->GoForeground() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene5->GoForeground());
