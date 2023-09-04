@@ -91,7 +91,6 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow01, Function | MediumTest | L
 HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, Function | MediumTest | Level3)
 {
     sptr<WindowScene> scene1 = Utils::CreateWindowScene();
-
     if (scene1->GoForeground() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene1->GoForeground());
     }
@@ -101,7 +100,6 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, Function | MediumTest | L
     if (scene1->GoDestroy() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene1->GoDestroy());
     }
-
     sptr<WindowScene> scene2 = Utils::CreateWindowScene();
     if (scene2->GoForeground() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene2->GoForeground());
@@ -112,7 +110,6 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, Function | MediumTest | L
     if (scene2->GoDestroy() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene2->GoDestroy());
     }
-
     sptr<WindowScene> scene3 = Utils::CreateWindowScene();
     if (scene3->GoForeground() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene3->GoForeground());
@@ -133,7 +130,6 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, Function | MediumTest | L
     if (scene4->GoDestroy() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene4->GoDestroy());
     }
-
     sptr<WindowScene> scene5 = Utils::CreateWindowScene();
     if (scene5->GoForeground() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene5->GoForeground());
@@ -169,7 +165,6 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, Function | MediumTest | L
     if (scene1->GoDestroy() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene1->GoDestroy());
     }
-
     sptr<WindowScene> scene4 = Utils::CreateWindowScene();
     if (scene3->GoBackground() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene3->GoBackground());
