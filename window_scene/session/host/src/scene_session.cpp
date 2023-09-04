@@ -908,7 +908,6 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (property && property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
         WindowHelper::IsMainWindow(property->GetWindowType()) &&
         property->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-        PresentFoucusIfNeed(pointerEvent->GetPointerAction());
         if (!moveDragController_) {
             WLOGE("moveDragController_ is null");
             return Session::TransferPointerEvent(pointerEvent);
@@ -918,10 +917,12 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
                 moveDragController_->HandleMouseStyle(pointerEvent, winRect_);
             }
             if (moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
-                return  WSError::WS_OK;
+                PresentFoucusIfNeed(pointerEvent->GetPointerAction());
+                return WSError::WS_OK;
             }
         }
         if (IsDecorEnable() && moveDragController_->ConsumeMoveEvent(pointerEvent, winRect_)) {
+            PresentFoucusIfNeed(pointerEvent->GetPointerAction());
             return WSError::WS_OK;
         }
     }
