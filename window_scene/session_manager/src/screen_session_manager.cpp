@@ -2134,4 +2134,9 @@ sptr<FoldCreaseRegion> ScreenSessionManager::GetCurrentFoldCreaseRegion()
     }
     return foldScreenController_->GetCurrentFoldCreaseRegion();
 }
+
+uint32_t ScreenSessionManager::GetCurvedCompressionArea() const
+{
+    return ScreenSceneConfig::GetCurvedCompressionAreaInLandscape();
+}
 } // namespace OHOS::Rosen
