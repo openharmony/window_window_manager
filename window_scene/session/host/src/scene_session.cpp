@@ -1434,14 +1434,13 @@ void SceneSession::DumpSessionInfo(std::vector<std::string> &info) const
 
 std::shared_ptr<AppExecFwk::AbilityInfo> SceneSession::GetAbilityInfo()
 {
-    SessionInfo& sessionInfo = GetSessionInfo();
+    const SessionInfo& sessionInfo = GetSessionInfo();
     return sessionInfo.abilityInfo;
 }
 
 void SceneSession::SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo)
 {
-    SessionInfo& sessionInfo = GetSessionInfo();
-    sessionInfo.abilityInfo = abilityInfo;
+    SetSessionInfoAbilityInfo(abilityInfo);
 }
 
 void SceneSession::SetSelfToken(sptr<IRemoteObject> selfToken)
@@ -1522,8 +1521,11 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
         info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
         info.callerToken_ = abilitySessionInfo->callerToken;
         info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
-        session->sessionInfo_.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
-        session->sessionInfo_.resultCode = abilitySessionInfo->resultCode;
+        {
+            std::lock_guard<std::recursive_mutex> lock(session->sessionInfoMutex_);
+            session->sessionInfo_.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
+            session->sessionInfo_.resultCode = abilitySessionInfo->resultCode;
+        }
         if (session->terminateSessionFunc_) {
             session->terminateSessionFunc_(info);
         }
@@ -1556,9 +1558,12 @@ WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
         info.errorCode = abilitySessionInfo->errorCode;
         info.errorReason = abilitySessionInfo->errorReason;
         info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
-        session->sessionInfo_.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
-        session->sessionInfo_.errorCode = abilitySessionInfo->errorCode;
-        session->sessionInfo_.errorReason = abilitySessionInfo->errorReason;
+        {
+            std::lock_guard<std::recursive_mutex> lock(session->sessionInfoMutex_);
+            session->sessionInfo_.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
+            session->sessionInfo_.errorCode = abilitySessionInfo->errorCode;
+            session->sessionInfo_.errorReason = abilitySessionInfo->errorReason;
+        }
         if (!session->sessionExceptionFuncs_.empty()) {
             for (auto funcPtr : session->sessionExceptionFuncs_) {
                 auto sessionExceptionFunc = *funcPtr;
