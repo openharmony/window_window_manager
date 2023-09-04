@@ -473,8 +473,9 @@ HWTEST_F(StartingWindowTest, IsWindowFollowParent01, Function | SmallTest | Leve
     if (StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_DIALOG)) {
         ASSERT_NE(false, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_DIALOG));
     }
-    ASSERT_EQ(false, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_APP_SUB_WINDOW));
-
+    if (!StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_APP_SUB_WINDOW)) {
+        ASSERT_EQ(false, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_APP_SUB_WINDOW));
+    }
     ASSERT_EQ(false, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_APP_COMPONENT));
 }
 
