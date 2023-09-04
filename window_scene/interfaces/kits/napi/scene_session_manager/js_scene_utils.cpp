@@ -344,7 +344,7 @@ NativeValue* CreateJsSystemBarPropertyArrayObject(
     return objValue;
 }
 
-static void SetTypeProperty(NativeObject *object, NativeEngine* engine, std::string name, JsSessionType type)
+static void SetTypeProperty(NativeObject *object, NativeEngine* engine, const std::string& name, JsSessionType type)
 {
     object->SetProperty(name.c_str(), CreateJsValue(*engine, static_cast<int32_t>(type)));
 }
