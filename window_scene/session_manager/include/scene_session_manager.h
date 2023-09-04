@@ -347,8 +347,8 @@ private:
     std::unordered_map<int32_t, sptr<AAFwk::IAbilityManagerCollaborator>> collaboratorMap_;
 
     bool CheckCollaboratorType(int32_t type);
-    void NotifyStartAbility(int32_t collaboratorType, SessionInfo& sessionInfo);
-    void NotifySessionCreate(const sptr<SceneSession> sceneSession, SessionInfo& sessionInfo);
+    void NotifyStartAbility(int32_t collaboratorType, const SessionInfo& sessionInfo);
+    void NotifySessionCreate(const sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo);
     void NotifyLoadAbility(int32_t collaboratorType, sptr<AAFwk::SessionInfo> abilitySessionInfo,
         std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void NotifyUpdateSessionInfo(const sptr<SceneSession> sceneSession);

@@ -286,7 +286,7 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &
             WLOGFI("fail to find session by token.");
             return WSError::WS_ERROR_INVALID_PARAM;
         }
-        sceneSession->GetSessionInfo().continueState = continueState;
+        sceneSession->SetSessionInfoContinueState(continueState);
         DistributedClient dmsClient;
         dmsClient.SetMissionContinueState(sceneSession->GetPersistentId(),
             static_cast<AAFwk::ContinueState>(continueState));
@@ -884,7 +884,7 @@ void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
         if (session != nullptr && sessionInfo.want != nullptr) {
             WLOGFI("get exist session persistentId: %{public}d", sessionInfo.persistentId_);
             if (!CheckCollaboratorType(session->GetCollaboratorType())) {
-                session->GetSessionInfo().want = sessionInfo.want;
+                session->SetSessionInfoWant(sessionInfo.want);
                 WLOGFI("RequestSceneSession update want, persistentId:%{public}d", sessionInfo.persistentId_);
             } else {
                 UpdateCollaboratorSessionWant(session);
@@ -1101,7 +1101,7 @@ void SceneSessionManager::NotifyCollaboratorAfterStart(sptr<SceneSession>& scnSe
             scnSessionInfo, scnSession->GetSessionInfo().abilityInfo);
         NotifyUpdateSessionInfo(scnSession);
         NotifyMoveSessionToForeground(scnSession->GetCollaboratorType(), scnSessionInfo->persistentId);
-        scnSession->GetSessionInfo().ancoSceneState = AncoSceneState::NOTIFY_FOREGROUND;
+        scnSession->SetSessionInfoAncoSceneState(AncoSceneState::NOTIFY_FOREGROUND);
     }
 }
 
@@ -1596,8 +1596,8 @@ void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
         WLOGFE("FillSessionInfo abilityInfo is nullptr!");
         return;
     }
-    sceneSession->GetSessionInfo().abilityInfo = abilityInfo;
-    sceneSession->GetSessionInfo().time = GetCurrentTime();
+    sceneSession->SetSessionInfoAbilityInfo(abilityInfo);
+    sceneSession->SetSessionInfoTime(GetCurrentTime());
     if (abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE)) {
         sceneSession->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
     } else if (abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
@@ -4008,7 +4008,7 @@ WSError SceneSessionManager::LockSession(int32_t sessionId)
             WLOGFE("can not find sceneSession, sessionId:%{public}d", sessionId);
             return WSError::WS_ERROR_INVALID_PARAM;
         }
-        sceneSession->GetSessionInfo().lockedState = true;
+        sceneSession->SetSessionInfoLockedState(true);
         return WSError::WS_OK;
     };
     return taskScheduler_->PostSyncTask(task);
@@ -4031,7 +4031,7 @@ WSError SceneSessionManager::UnlockSession(int32_t sessionId)
             WLOGFE("can not find sceneSession, sessionId:%{public}d", sessionId);
             return WSError::WS_ERROR_INVALID_PARAM;
         }
-        sceneSession->GetSessionInfo().lockedState = false;
+        sceneSession->SetSessionInfoLockedState(false);
         return WSError::WS_OK;
     };
     return taskScheduler_->PostSyncTask(task);
@@ -4148,7 +4148,7 @@ bool SceneSessionManager::CheckCollaboratorType(int32_t type)
     return true;
 }
 
-void SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, SessionInfo& sessionInfo)
+void SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, const SessionInfo& sessionInfo)
 {
     WLOGFI("run NotifyStartAbility");
     auto iter = collaboratorMap_.find(collaboratorType);
@@ -4169,7 +4169,7 @@ void SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, SessionIn
     }
 }
 
-void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, SessionInfo& sessionInfo)
+void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo)
 {
     WLOGFI("run NotifySessionCreate");
     if (sceneSession == nullptr) {
@@ -4272,7 +4272,7 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession
         WLOGFE("sceneSession->GetSessionInfo().want is nullptr");
     }
     NotifySessionCreate(sceneSession, sceneSession->GetSessionInfo());
-    sceneSession->GetSessionInfo().ancoSceneState = AncoSceneState::NOTIFY_CREATE;
+    sceneSession->SetSessionInfoAncoSceneState(AncoSceneState::NOTIFY_CREATE);
 }
 
 } // namespace OHOS::Rosen

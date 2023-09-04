@@ -91,7 +91,67 @@ std::shared_ptr<Media::PixelMap> Session::GetSnapshot() const
     return snapshot_;
 }
 
-SessionInfo& Session::GetSessionInfo()
+void Session::SetSessionInfoAncoSceneState(int32_t ancoSceneState)
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    sessionInfo_.ancoSceneState = ancoSceneState;
+}
+
+void Session::SetSessionInfoTime(const std::string& time)
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    sessionInfo_.time = time;
+}
+
+void Session::SetSessionInfoAbilityInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo)
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    sessionInfo_.abilityInfo = abilityInfo;
+}
+
+void Session::SetSessionInfoWant(const std::shared_ptr<AAFwk::Want>& want)
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    sessionInfo_.want = want;
+}
+
+void Session::SetSessionInfoPersistentId(int32_t persistentId)
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    sessionInfo_.persistentId_ = persistentId;
+}
+
+void Session::SetSessionInfoCallerPersistentId(int32_t callerPersistentId)
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    sessionInfo_.callerPersistentId_ = callerPersistentId;
+}
+
+void Session::SetSessionInfoContinueState(ContinueState state)
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    sessionInfo_.continueState = state;
+}
+
+void Session::SetSessionInfoLockedState(bool state)
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    sessionInfo_.lockedState = state;
+}
+
+void Session::SetSessionInfo(const SessionInfo& info)
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    sessionInfo_.want = info.want;
+    sessionInfo_.callerToken_ = info.callerToken_;
+    sessionInfo_.requestCode = info.requestCode;
+    sessionInfo_.callerPersistentId_ = info.callerPersistentId_;
+    sessionInfo_.callingTokenId_ = info.callingTokenId_;
+    sessionInfo_.uiAbilityId_ = info.uiAbilityId_;
+    sessionInfo_.startSetting = info.startSetting;
+}
+
+const SessionInfo& Session::GetSessionInfo() const
 {
     return sessionInfo_;
 }
@@ -727,8 +787,11 @@ WSError Session::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessi
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.callerToken_ = abilitySessionInfo->callerToken;
     info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
-    sessionInfo_.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
-    sessionInfo_.resultCode = abilitySessionInfo->resultCode;
+    {
+        std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+        sessionInfo_.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
+        sessionInfo_.resultCode = abilitySessionInfo->resultCode;
+    }
     if (terminateSessionFuncNew_) {
         terminateSessionFuncNew_(info, needStartCaller);
     }
@@ -756,8 +819,11 @@ WSError Session::TerminateSessionTotal(const sptr<AAFwk::SessionInfo> abilitySes
     info.bundleName_ = abilitySessionInfo->want.GetElement().GetBundleName();
     info.callerToken_ = abilitySessionInfo->callerToken;
     info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
-    sessionInfo_.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
-    sessionInfo_.resultCode = abilitySessionInfo->resultCode;
+    {
+        std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+        sessionInfo_.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
+        sessionInfo_.resultCode = abilitySessionInfo->resultCode;
+    }
     if (terminateSessionFuncTotal_) {
         terminateSessionFuncTotal_(info, terminateType);
     }

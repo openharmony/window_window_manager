@@ -993,29 +993,17 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
                 return;
             }
         } else {
-            sceneSession->GetSessionInfo().want = info.want;
-            sceneSession->GetSessionInfo().callerToken_ = info.callerToken_;
-            sceneSession->GetSessionInfo().requestCode = info.requestCode;
-            sceneSession->GetSessionInfo().callerPersistentId_ = info.callerPersistentId_;
-            sceneSession->GetSessionInfo().callingTokenId_ = info.callingTokenId_;
-            sceneSession->GetSessionInfo().uiAbilityId_ = info.uiAbilityId_;
-            sceneSession->GetSessionInfo().startSetting = info.startSetting;
+            sceneSession->SetSessionInfo(info);
         }
         info.persistentId_ = sceneSession->GetPersistentId();
-        sceneSession->GetSessionInfo().persistentId_ = sceneSession->GetPersistentId();
+        sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
     } else {
         auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
         if (sceneSession == nullptr) {
             WLOGFE("GetSceneSession return nullptr");
             return;
         }
-        sceneSession->GetSessionInfo().want = info.want;
-        sceneSession->GetSessionInfo().callerToken_ = info.callerToken_;
-        sceneSession->GetSessionInfo().requestCode = info.requestCode;
-        sceneSession->GetSessionInfo().callerPersistentId_ = info.callerPersistentId_;
-        sceneSession->GetSessionInfo().callingTokenId_ = info.callingTokenId_;
-        sceneSession->GetSessionInfo().uiAbilityId_ = info.uiAbilityId_;
-        sceneSession->GetSessionInfo().startSetting = info.startSetting;
+        sceneSession->SetSessionInfo(info);
     }
 
     PendingSessionActivationInner(info);
