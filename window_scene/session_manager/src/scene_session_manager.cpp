@@ -2534,7 +2534,7 @@ void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult()
             }
         }
     }
-    if (lastWaterMarkShowState_ ^ currentWaterMarkShowState) {
+    if (lastWaterMarkShowState_ != currentWaterMarkShowState) {
         lastWaterMarkShowState_ = currentWaterMarkShowState;
         NotifyWaterMarkFlagChangedResult(currentWaterMarkShowState);
     }
