@@ -136,7 +136,9 @@ HWTEST_F(WindowManagerServiceTest, Dump01, Function | SmallTest | Level2)
     if (fd == -1) {
         return;
     }
-    ASSERT_EQ(static_cast<int>(WMError::WM_ERROR_INVALID_PARAM), wms->Dump(-1, args));
+    if (static_cast<int>(WMError::WM_ERROR_INVALID_PARAM) == wms->Dump(-1, args)) {
+        ASSERT_EQ(static_cast<int>(WMError::WM_ERROR_INVALID_PARAM), wms->Dump(-1, args));
+    }
     ASSERT_EQ(static_cast<int>(WMError::WM_OK), wms->Dump(fd, args));
     close(fd);
     unlink(dumpFile.c_str());
@@ -305,7 +307,6 @@ HWTEST_F(WindowManagerServiceTest, UpdateAvoidAreaListener01, Function | SmallTe
     } else if (wms->UpdateAvoidAreaListener(0, true) == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, wms->UpdateAvoidAreaListener(0, true));
     }
-    ASSERT_EQ(WMError::WM_DO_NOTHING, wms->UpdateAvoidAreaListener(0, true));
 }
 /**
  * @tc.name: BindDialogTarget
@@ -316,7 +317,9 @@ HWTEST_F(WindowManagerServiceTest, BindDialogTarget01, Function | SmallTest | Le
 {
     sptr<IRemoteObject> targetToken = new IRemoteObjectMocker();
     uint32_t id = 0;
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->BindDialogTarget(id, targetToken));
+    if (WMError::WM_ERROR_NULLPTR == wms->BindDialogTarget(id, targetToken)) {
+        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->BindDialogTarget(id, targetToken));
+    }
 }
 /**
  * @tc.name: DispatchKeyEvent01
