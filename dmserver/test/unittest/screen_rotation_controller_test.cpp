@@ -101,6 +101,12 @@ HWTEST_F(ScreenRotationControllerTest, DefaultDeviceRotationOffset, Function | S
 {
     ScreenRotationController::defaultDeviceRotationOffset_ = 90;
 
+    ScreenRotationController::SetDefaultDeviceRotationOffset(-90);
+    ASSERT_EQ(90, ScreenRotationController::defaultDeviceRotationOffset_);
+
+    ScreenRotationController::SetDefaultDeviceRotationOffset(-100);
+    ASSERT_EQ(90, ScreenRotationController::defaultDeviceRotationOffset_);
+
     ScreenRotationController::SetDefaultDeviceRotationOffset(360);
     ASSERT_EQ(90, ScreenRotationController::defaultDeviceRotationOffset_);
 
@@ -396,6 +402,73 @@ HWTEST_F(ScreenRotationControllerTest, ProcessOrientationSwitch, Function | Smal
     ScreenRotationController::ProcessOrientationSwitch(Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED, true);
     ScreenRotationController::ProcessOrientationSwitch(Orientation::LOCKED, true);
     ASSERT_EQ(Orientation::LOCKED, ScreenRotationController::lastOrientationType_);
+}
+
+/**
+ * @tc.name: HandleSensorEventInput
+ * @tc.desc: HandleSensorEventInput
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationControllerTest, HandleSensorEventInput, Function | SmallTest | Level3)
+{
+    DeviceRotation deviceRotation = DeviceRotation::INVALID;
+    ScreenRotationController::HandleSensorEventInput(deviceRotation);
+
+    deviceRotation = DeviceRotation::ROTATION_PORTRAIT;
+    ScreenRotationController::HandleSensorEventInput(deviceRotation);
+
+    ASSERT_EQ(deviceRotation, DeviceRotation::ROTATION_PORTRAIT);
+}
+
+/**
+ * @tc.name: IsDisplayRotationVertical
+ * @tc.desc: Check device rotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationControllerTest, IsDisplayRotationVertical, Function | SmallTest | Level3)
+{
+    ASSERT_EQ(true, ScreenRotationController::IsDisplayRotationVertical(Rotation::ROTATION_0));
+    ASSERT_EQ(false, ScreenRotationController::IsDisplayRotationVertical(Rotation::ROTATION_90));
+    ASSERT_EQ(false, ScreenRotationController::IsDisplayRotationVertical(Rotation::ROTATION_270));
+
+    ASSERT_EQ(false, ScreenRotationController::IsDisplayRotationHorizontal(Rotation::ROTATION_0));
+    ASSERT_EQ(true, ScreenRotationController::IsDisplayRotationHorizontal(Rotation::ROTATION_90));
+    ASSERT_EQ(true, ScreenRotationController::IsDisplayRotationHorizontal(Rotation::ROTATION_270));
+}
+
+/**
+ * @tc.name: ProcessSwitchToSensorUnrelatedOrientation
+ * @tc.desc: ProcessSwitchToSensorUnrelatedOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationControllerTest, ProcessSwitchToSensorUnrelatedOrientation, Function | SmallTest | Level3)
+{
+    Orientation orientation = Orientation::UNSPECIFIED;
+    ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(orientation, false);
+    orientation = Orientation::SENSOR;
+    ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(orientation, false);
+    ASSERT_EQ(orientation, Orientation::SENSOR);
+
+    orientation = Orientation::UNSPECIFIED;
+    ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(orientation, false);
+    ASSERT_EQ(orientation, Orientation::UNSPECIFIED);
+
+    orientation = Orientation::VERTICAL;
+    ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(orientation, false);
+    ASSERT_EQ(orientation, Orientation::VERTICAL);
+
+    orientation = Orientation::REVERSE_VERTICAL;
+    ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(orientation, false);
+    ASSERT_EQ(orientation, Orientation::REVERSE_VERTICAL);
+
+    orientation = Orientation::HORIZONTAL;
+    ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(orientation, false);
+    ASSERT_EQ(orientation, Orientation::HORIZONTAL);
+
+    orientation = Orientation::REVERSE_HORIZONTAL;
+    ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(orientation, false);
+    ASSERT_EQ(orientation, Orientation::REVERSE_HORIZONTAL);
+
 }
 
 #ifdef SENSOR_ENABLE
