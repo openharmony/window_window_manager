@@ -302,8 +302,8 @@ HWTEST_F(WindowManagerServiceTest, UpdateAvoidAreaListener01, Function | SmallTe
     wms->windowRoot_->windowNodeMap_.insert(std::make_pair(0, node));
     if (WMError::WM_DO_NOTHING == wms->UpdateAvoidAreaListener(0, true)) {
         ASSERT_EQ(WMError::WM_DO_NOTHING, wms->UpdateAvoidAreaListener(0, true));
-    } else if (wms->GetModeChangeHotZones(displayId, hotZone) == WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, wms->GetModeChangeHotZones(displayId, hotZone));
+    } else if (wms->UpdateAvoidAreaListener(0, true) == WMError::WM_OK) {
+        ASSERT_EQ(WMError::WM_OK, wms->UpdateAvoidAreaListener(0, true));
     }
     ASSERT_EQ(WMError::WM_DO_NOTHING, wms->UpdateAvoidAreaListener(0, true));
 }
