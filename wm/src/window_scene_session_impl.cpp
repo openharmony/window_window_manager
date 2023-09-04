@@ -509,11 +509,21 @@ void WindowSceneSessionImpl::PreProcessCreate()
 void WindowSceneSessionImpl::SetDefaultProperty()
 {
     switch (property_->GetWindowType()) {
-        case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT:{
-            property_->SetFocusable(false);
+        case WindowType::WINDOW_TYPE_TOAST:
+        case WindowType::WINDOW_TYPE_FLOAT:
+        case WindowType::WINDOW_TYPE_FLOAT_CAMERA:
+        case WindowType::WINDOW_TYPE_VOICE_INTERACTION:
+        case WindowType::WINDOW_TYPE_SEARCHING_BAR:
+        case WindowType::WINDOW_TYPE_SCREENSHOT:
+        case WindowType::WINDOW_TYPE_DIALOG:
+        case WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW: {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
         }
-        case WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR:{
+        case WindowType::WINDOW_TYPE_VOLUME_OVERLAY:
+        case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT:
+        case WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR: {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             property_->SetFocusable(false);
             break;
         }
