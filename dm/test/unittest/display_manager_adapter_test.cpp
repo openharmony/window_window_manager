@@ -147,9 +147,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetFreeze, Function | SmallTest | Level2)
 {
     std::vector<DisplayId> displayIds;
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SetFreeze(displayIds, false);
-    if (ret) {
-        ASSERT_TRUE(ret);
-    }
+    ASSERT_FALSE(ret);
 }
 
 /**
