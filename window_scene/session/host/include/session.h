@@ -16,8 +16,8 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_H
 
-#include <shared_mutex>
 #include <mutex>
+#include <shared_mutex>
 #include <vector>
 
 #include <event_handler.h>
@@ -331,7 +331,7 @@ private:
     {
         std::vector<std::weak_ptr<ILifecycleListener>> lifecycleListeners;
         {
-            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
             for (auto& listener : lifecycleListeners_) {
                 lifecycleListeners.push_back(listener);
             }
@@ -339,7 +339,7 @@ private:
         return lifecycleListeners;
     }
 
-    std::recursive_mutex mutex_;
+    std::mutex lifecycleListenersMutex_;
     std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;
     sptr<IWindowEventChannel> windowEventChannel_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
