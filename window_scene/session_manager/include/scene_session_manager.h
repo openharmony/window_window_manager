@@ -357,6 +357,7 @@ private:
     void PreHandleCollaborator(sptr<SceneSession>& sceneSession);
     void NotifyCollaboratorAfterStart(sptr<SceneSession>& scnSession, sptr<AAFwk::SessionInfo>& scnSessionInfo);
     void UpdateCollaboratorSessionWant(sptr<SceneSession>& session);
+    bool CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property) const;
 };
 } // namespace OHOS::Rosen
 
