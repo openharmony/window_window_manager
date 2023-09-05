@@ -813,6 +813,10 @@ HWTEST_F(WindowRootTest, NotifySystemBarTints, Function | SmallTest | Level2)
     ASSERT_TRUE((display != nullptr));
     sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
     windowRoot_->windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    DisplayId displayId = displayInfo->GetDisplayId();
+    std::vector<DisplayId> displayVec = { displayId };
+    windowRoot_->displayIdMap_.insert(std::make_pair(displayGroupId, displayVec));
     windowRoot_->NotifySystemBarTints();
 }
 
@@ -886,7 +890,7 @@ HWTEST_F(WindowRootTest, SetWindowLayoutMode, Function | SmallTest | Level2)
 
 /**
  * @tc.name: GetAllDisplayIds
- * @tc.desc: test WindowRoot GetAllDisplayIds
+ * @tc.desc: test WindowRoot GetAllDisplayIds,RemoveSingleUserWindowNodes
  * @tc.type: FUNC
  */
 HWTEST_F(WindowRootTest, GetAllDisplayIds, Function | SmallTest | Level2)
@@ -897,6 +901,14 @@ HWTEST_F(WindowRootTest, GetAllDisplayIds, Function | SmallTest | Level2)
     sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
     windowRoot_->windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
     windowRoot_->GetAllDisplayIds();
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    DisplayId displayId = displayInfo->GetDisplayId();
+    std::vector<DisplayId> displayVec = { displayId };
+    windowRoot_->displayIdMap_.insert(std::make_pair(displayGroupId, displayVec));
+    ASSERT_TRUE((windowRoot_ != nullptr));
+    windowRoot_->GetAllDisplayIds();
+    ASSERT_TRUE((windowRoot_ != nullptr));
+    windowRoot_->RemoveSingleUserWindowNodes(displayGroupId);
 }
 
 /**
@@ -912,6 +924,12 @@ HWTEST_F(WindowRootTest, GenAllWindowsLogInfo, Function | SmallTest | Level2)
     sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
     windowRoot_->windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
     windowRoot_->GenAllWindowsLogInfo();
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    DisplayId displayId = displayInfo->GetDisplayId();
+    std::vector<DisplayId> displayVec = { displayId };
+    windowRoot_->displayIdMap_.insert(std::make_pair(displayGroupId, displayVec));
+    ASSERT_TRUE((windowRoot_ != nullptr));
+    windowRoot_->GenAllWindowsLogInfo();
 }
 
 /**
@@ -926,7 +944,14 @@ HWTEST_F(WindowRootTest, FocusFaultDetection, Function | SmallTest | Level2)
     ASSERT_TRUE((display != nullptr));
     sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
     windowRoot_->windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    DisplayId displayId = displayInfo->GetDisplayId();
+    std::vector<DisplayId> displayVec = { displayId };
+    windowRoot_->displayIdMap_.insert(std::make_pair(displayGroupId, displayVec));
     windowRoot_->needCheckFocusWindow = false;
+    windowRoot_->FocusFaultDetection();
+    windowRoot_->needCheckFocusWindow = true;
+    ASSERT_TRUE((windowRoot_ != nullptr));
     windowRoot_->FocusFaultDetection();
 }
 
@@ -942,9 +967,12 @@ HWTEST_F(WindowRootTest, ProcessExpandDisplayCreate, Function | SmallTest | Leve
     ASSERT_TRUE((display != nullptr));
     sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
     windowRoot_->windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    DisplayId displayId = displayInfo->GetDisplayId();
+    std::vector<DisplayId> displayVec = { displayId };
+    windowRoot_->displayIdMap_.insert(std::make_pair(displayGroupId, displayVec));
     DisplayId defaultDisplayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
     ASSERT_NE(display, nullptr);
-    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
     displayInfo->SetWidth(100);
     displayInfo->SetHeight(100);
     std::map<DisplayId, Rect> displayRectMap = {};
@@ -1021,6 +1049,9 @@ HWTEST_F(WindowRootTest, ProcessDisplayChange, Function | SmallTest | Level2)
     sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
     std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
     DisplayStateChangeType type = DisplayStateChangeType::BEFORE_SUSPEND;
+    windowRoot_->ProcessDisplayChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+    displayInfo = nullptr;
+    ASSERT_TRUE((windowRoot_ != nullptr));
     windowRoot_->ProcessDisplayChange(defaultDisplayId, displayInfo, displayInfoMap, type);
 }
 
@@ -1229,16 +1260,19 @@ HWTEST_F(WindowRootTest, SetWindowMode01, Function | SmallTest | Level2)
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     ASSERT_TRUE((display != nullptr));
-    sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
-    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(display->GetScreenId(), container));
     sptr<WindowNode> node = new WindowNode();
-    node->SetDisplayId(display->GetScreenId());
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
+    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(node->GetDisplayId(), container));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    DisplayId displayId = displayInfo->GetDisplayId();
+    std::vector<DisplayId> displayVec = { displayId };
+    windowRoot_->displayIdMap_.insert(std::make_pair(node->GetDisplayId(), displayVec));
     WindowMode dstMode = WindowMode::WINDOW_MODE_UNDEFINED;
     auto ret = windowRoot_->SetWindowMode(node, dstMode);
-    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_DISPLAY);
+    ASSERT_EQ(ret, WMError::WM_OK);
     node->SetWindowMode(dstMode);
     ret = windowRoot_->SetWindowMode(node, dstMode);
-    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_DISPLAY);
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 
 /**
@@ -1339,13 +1373,15 @@ HWTEST_F(WindowRootTest, UpdateBrightnessWithWindowRemoved, Function | SmallTest
  */
 HWTEST_F(WindowRootTest, IsVerticalDisplay01, Function | SmallTest | Level2)
 {
-    ScreenId displayGroupId = 1;
     sptr<WindowNode> node = new WindowNode();
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
-    node->SetDisplayId(display->GetScreenId());
-    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
-    ASSERT_EQ(false, windowRoot_->IsVerticalDisplay(node));
+    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(node->GetDisplayId(), container));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    DisplayId displayId = displayInfo->GetDisplayId();
+    std::vector<DisplayId> displayVec = { displayId };
+    windowRoot_->displayIdMap_.insert(std::make_pair(node->GetDisplayId(), displayVec));
+    ASSERT_EQ(true, windowRoot_->IsVerticalDisplay(node));
 }
 
 /**
@@ -1355,21 +1391,23 @@ HWTEST_F(WindowRootTest, IsVerticalDisplay01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowRootTest, RequestFocus01, Function | SmallTest | Level2)
 {
-    ScreenId displayGroupId = 1;
     sptr<WindowNode> windowNode = new WindowNode();
     windowNode->currentVisibility_ = true;
     windowRoot_->windowNodeMap_.insert(std::make_pair(windowNode->GetWindowId(), windowNode));
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
-    windowNode->SetDisplayId(display->GetScreenId());
     windowNode->property_->SetFocusable(true);
-    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
+    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(windowNode->GetDisplayId(), container));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    DisplayId displayId = displayInfo->GetDisplayId();
+    std::vector<DisplayId> displayVec = { displayId };
+    windowRoot_->displayIdMap_.insert(std::make_pair(windowNode->GetDisplayId(), displayVec));
     auto ret = windowRoot_->RequestFocus(windowNode->GetWindowId());
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    ASSERT_EQ(WMError::WM_DO_NOTHING, ret);
     windowNode->property_->SetFocusable(false);
-    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
+    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(windowNode->GetDisplayId(), container));
     ret = windowRoot_->RequestFocus(windowNode->GetWindowId());
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 }
 
 /**
@@ -1393,16 +1431,18 @@ HWTEST_F(WindowRootTest, RequestActiveWindow01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowRootTest, RequestActiveWindow02, Function | SmallTest | Level2)
 {
-    ScreenId displayGroupId = 1;
     sptr<WindowNode> windowNode = new WindowNode();
     windowNode->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     windowRoot_->windowNodeMap_.insert(std::make_pair(windowNode->GetWindowId(), windowNode));
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
-    windowNode->SetDisplayId(display->GetScreenId());
-    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
+    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(windowNode->GetDisplayId(), container));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    DisplayId displayId = displayInfo->GetDisplayId();
+    std::vector<DisplayId> displayVec = { displayId };
+    windowRoot_->displayIdMap_.insert(std::make_pair(windowNode->GetDisplayId(), displayVec));
     auto ret = windowRoot_->RequestActiveWindow(windowNode->GetWindowId());
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    ASSERT_EQ(WMError::WM_DO_NOTHING, ret);
 }
 
 /**
@@ -1412,12 +1452,16 @@ HWTEST_F(WindowRootTest, RequestActiveWindow02, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowRootTest, ProcessWindowStateChange01, Function | SmallTest | Level2)
 {
-    ScreenId displayGroupId = 1;
+    sptr<WindowNode> windowNode = new WindowNode();
     WindowState state = WindowState::STATE_INITIAL;
     WindowStateChangeReason reason = WindowStateChangeReason::NORMAL;
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
-    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
+    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(windowNode->GetDisplayId(), container));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    DisplayId displayId = displayInfo->GetDisplayId();
+    std::vector<DisplayId> displayVec = { displayId };
+    windowRoot_->displayIdMap_.insert(std::make_pair(windowNode->GetDisplayId(), displayVec));
     windowRoot_->ProcessWindowStateChange(state, reason);
     ASSERT_EQ(reason, WindowStateChangeReason::NORMAL);
 }
@@ -1443,18 +1487,20 @@ HWTEST_F(WindowRootTest, FindWallpaperWindow, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowRootTest, RaiseZOrderForAppWindow01, Function | SmallTest | Level2)
 {
-    ScreenId displayGroupId = 1;
     sptr<WindowNode> windowNode = new WindowNode();
     windowNode->property_->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
     auto ret = windowRoot_->RaiseZOrderForAppWindow(windowNode);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
-    windowNode->SetDisplayId(display->GetScreenId());
     windowNode->property_->SetFocusable(true);
-    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
+    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(windowNode->GetDisplayId(), container));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    DisplayId displayId = displayInfo->GetDisplayId();
+    std::vector<DisplayId> displayVec = { displayId };
+    windowRoot_->displayIdMap_.insert(std::make_pair(windowNode->GetDisplayId(), displayVec));
     ret = windowRoot_->RaiseZOrderForAppWindow(windowNode);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -1464,18 +1510,20 @@ HWTEST_F(WindowRootTest, RaiseZOrderForAppWindow01, Function | SmallTest | Level
  */
 HWTEST_F(WindowRootTest, RaiseZOrderForAppWindow02, Function | SmallTest | Level2)
 {
-    ScreenId displayGroupId = 1;
     sptr<WindowNode> windowNode = new WindowNode();
     windowNode->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     auto ret = windowRoot_->RaiseZOrderForAppWindow(windowNode);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
-    windowNode->SetDisplayId(display->GetScreenId());
     windowNode->property_->SetFocusable(true);
-    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
+    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(windowNode->GetDisplayId(), container));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    DisplayId displayId = displayInfo->GetDisplayId();
+    std::vector<DisplayId> displayVec = { displayId };
+    windowRoot_->displayIdMap_.insert(std::make_pair(windowNode->GetDisplayId(), displayVec));
     ret = windowRoot_->RaiseZOrderForAppWindow(windowNode);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -1489,6 +1537,197 @@ HWTEST_F(WindowRootTest, RaiseZOrderForAppWindow03, Function | SmallTest | Level
     windowNode->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     auto ret = windowRoot_->RaiseZOrderForAppWindow(windowNode);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, ret);
+}
+
+/**
+ * @tc.name: DispatchKeyEvent01
+ * @tc.desc: test WindowRoot DispatchKeyEvent01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, DispatchKeyEvent01, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> windowNode = new WindowNode();
+    std::shared_ptr<MMI::KeyEvent> event = nullptr;
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
+    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(windowNode->GetDisplayId(), container));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    DisplayId displayId = displayInfo->GetDisplayId();
+    std::vector<DisplayId> displayVec = { displayId };
+    windowRoot_->displayIdMap_.insert(std::make_pair(windowNode->GetDisplayId(), displayVec));
+    ASSERT_TRUE((windowRoot_ != nullptr));
+    windowRoot_->DispatchKeyEvent(windowNode, event);
+}
+
+/**
+ * @tc.name: GetTopWindowId01
+ * @tc.desc: test WindowRoot GetTopWindowId01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, GetTopWindowId01, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> windowNode1 = new WindowNode();
+    windowNode1->currentVisibility_ = false;
+    windowRoot_->SaveWindow(windowNode1);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(windowNode1->GetWindowId(), windowNode1));
+    sptr<WindowNode> windowNode2 = new WindowNode();
+    windowNode2->currentVisibility_ = true;
+    windowRoot_->SaveWindow(windowNode2);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(windowNode2->GetWindowId(), windowNode2));
+    sptr<WindowNode> windowNode3 = new WindowNode();
+    windowNode3->currentVisibility_ = true;
+    windowNode3->children_.push_back(windowNode2);
+    windowRoot_->SaveWindow(windowNode3);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(windowNode3->GetWindowId(), windowNode3));
+    uint32_t topWinId = windowNode1->GetWindowId();
+    auto ret = windowRoot_->GetTopWindowId(windowNode3->GetWindowId(), topWinId);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    ret = windowRoot_->GetTopWindowId(windowNode1->GetWindowId(), topWinId);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    ret = windowRoot_->GetTopWindowId(windowNode2->GetWindowId(), topWinId);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+}
+
+/**
+ * @tc.name: SetWindowLayoutMode01
+ * @tc.desc: test WindowRoot SetWindowLayoutMode01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, SetWindowLayoutMode01, Function | SmallTest | Level2)
+{
+    WindowLayoutMode mode = WindowLayoutMode::BASE;
+    sptr<WindowNode> windowNode = new WindowNode();
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
+    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(windowNode->GetDisplayId(), container));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    DisplayId displayId = displayInfo->GetDisplayId();
+    std::vector<DisplayId> displayVec = { displayId };
+    windowRoot_->displayIdMap_.insert(std::make_pair(windowNode->GetDisplayId(), displayVec));
+    auto ret = windowRoot_->SetWindowLayoutMode(windowNode->GetDisplayId(), mode);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: GetAllDisplayRectsByDMS
+ * @tc.desc: test WindowRoot GetAllDisplayRectsByDMS
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, GetAllDisplayRectsByDMS, Function | SmallTest | Level2)
+{
+    ScreenId displayGroupId = 1;
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
+    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    DisplayId displayId = displayInfo->GetDisplayId();
+    std::vector<DisplayId> displayVec = { displayId };
+    windowRoot_->displayIdMap_.insert(std::make_pair(displayGroupId, displayVec));
+    ASSERT_TRUE((windowRoot_ != nullptr));
+    windowRoot_->GetAllDisplayRectsByDMS(displayInfo);
+}
+
+/**
+ * @tc.name: MoveNotShowingWindowToDefaultDisplay01
+ * @tc.desc: test WindowRoot MoveNotShowingWindowToDefaultDisplay01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, MoveNotShowingWindowToDefaultDisplay01, Function | SmallTest | Level2)
+{
+    DisplayId defaultDisplayId = DisplayGroupInfo::GetInstance().GetDefaultDisplayId();
+    ASSERT_TRUE((windowRoot_ != nullptr));
+    sptr<WindowNode> node = new WindowNode();
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<IWindow> iWindow = iface_cast<IWindow>(iRemoteObjectMocker);
+    node->SetWindowToken(iWindow);
+    node->currentVisibility_ = false;
+    windowRoot_->windowNodeMap_.insert(std::make_pair(node->GetWindowId(), node));
+    windowRoot_->MoveNotShowingWindowToDefaultDisplay(defaultDisplayId, node->GetDisplayId());
+}
+
+/**
+ * @tc.name: ProcessDisplayDestroy01
+ * @tc.desc: test WindowRoot ProcessDisplayDestroy01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, ProcessDisplayDestroy01, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> windowNode = new WindowNode();
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
+    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(windowNode->GetDisplayId(), container));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    DisplayId displayId = displayInfo->GetDisplayId();
+    std::vector<DisplayId> displayVec = { displayId };
+    windowRoot_->displayIdMap_.insert(std::make_pair(windowNode->GetDisplayId(), displayVec));
+    ASSERT_TRUE((display != nullptr));
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
+    displayInfoMap.insert(std::make_pair(windowNode->GetDisplayId(), display->GetDisplayInfo()));
+    ASSERT_TRUE((windowRoot_ != nullptr));
+    windowRoot_->ProcessDisplayDestroy(windowNode->GetDisplayId(), display->GetDisplayInfo(), displayInfoMap);
+}
+
+/**
+ * @tc.name: GetDisplayGroupRect
+ * @tc.desc: test WindowRoot GetDisplayGroupRect,HasPrivateWindow,HasMainFullScreenWindowShown
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, GetDisplayGroupRect01, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> windowNode = new WindowNode();
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
+    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(windowNode->GetDisplayId(), container));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    DisplayId displayId = displayInfo->GetDisplayId();
+    std::vector<DisplayId> displayVec = { displayId };
+    windowRoot_->displayIdMap_.insert(std::make_pair(windowNode->GetDisplayId(), displayVec));
+    ASSERT_TRUE((windowRoot_ != nullptr));
+    windowRoot_->GetDisplayGroupRect(windowNode->GetDisplayId());
+    ASSERT_TRUE((windowRoot_ != nullptr));
+    windowRoot_->HasPrivateWindow(windowNode->GetDisplayId());
+    ASSERT_TRUE((windowRoot_ != nullptr));
+    windowRoot_->HasMainFullScreenWindowShown(windowNode->GetDisplayId());
+}
+
+/**
+ * @tc.name: UpdateRsTree
+ * @tc.desc: test WindowRoot UpdateRsTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, UpdateRsTree, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> windowNode = new WindowNode();
+    windowRoot_->windowNodeMap_.insert(std::make_pair(windowNode->GetWindowId(), windowNode));
+    ASSERT_TRUE((windowRoot_ != nullptr));
+    auto res = windowRoot_->UpdateRsTree(windowNode->GetWindowId(), true);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res);
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
+    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(windowNode->GetDisplayId(), container));
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    DisplayId displayId = displayInfo->GetDisplayId();
+    std::vector<DisplayId> displayVec = { displayId };
+    windowRoot_->displayIdMap_.insert(std::make_pair(windowNode->GetDisplayId(), displayVec));
+    res = windowRoot_->UpdateRsTree(windowNode->GetWindowId(), true);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: CheckMultiDialogWindows
+ * @tc.desc: test WindowRoot CheckMultiDialogWindows
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, CheckMultiDialogWindows, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> windowNode = new WindowNode();
+    windowNode->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    windowNode->abilityToken_ = new IRemoteObjectMocker();
+    auto res = windowRoot_->CheckMultiDialogWindows(WindowType::WINDOW_TYPE_DIALOG, windowNode->abilityToken_);
+    ASSERT_EQ(false, res);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(windowNode->GetWindowId(), windowNode));
+    res = windowRoot_->CheckMultiDialogWindows(WindowType::WINDOW_TYPE_DIALOG, windowNode->abilityToken_);
+    ASSERT_EQ(false, res);
 }
 }
 }
