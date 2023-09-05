@@ -36,7 +36,9 @@ const std::map<uint32_t, WindowEventChannelStubFunc> WindowEventChannelStub::stu
     std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_ACTIVE_EVENT),
         &WindowEventChannelStub::HandleTransferFocusActiveEvent),
     std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_FOCUS_STATE_EVENT),
-        &WindowEventChannelStub::HandleTransferFocusStateEvent)
+        &WindowEventChannelStub::HandleTransferFocusStateEvent),
+    std::make_pair(static_cast<uint32_t>(WindowEventInterfaceCode::TRANS_ID_TRANSFER_BACKPRESSED_EVENT),
+        &WindowEventChannelStub::HandleTransferBackpressedEvent),
 };
 
 int WindowEventChannelStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
@@ -55,6 +57,17 @@ int WindowEventChannelStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
     }
 
     return (this->*(func->second))(data, reply);
+}
+
+int WindowEventChannelStub::HandleTransferBackpressedEvent(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("TransferBackpressedEvent!");
+    bool isConsumed = false;
+    WSError errCode = TransferBackpressedEventForConsumed(isConsumed);
+
+    reply.WriteBool(isConsumed);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
 }
 
 int WindowEventChannelStub::HandleTransferKeyEvent(MessageParcel& data, MessageParcel& reply)
