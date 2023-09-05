@@ -290,6 +290,7 @@ private:
     void CheckAndNotifyWaterMarkChangedResult(bool isAddingWaterMark);
     WSError NotifyWaterMarkFlagChangedResult(bool hasWaterMark);
     int32_t waterMarkSessionCount_ { 0 };
+    void ProcessPreload(const AppExecFwk::AbilityInfo& abilityInfo) const;
     WindowFocusChangedFunc windowFocusChangedFunc_;
     sptr<SceneSession> callingSession_ = nullptr;
     sptr<AgentDeathRecipient> windowDeath_ = new AgentDeathRecipient(
