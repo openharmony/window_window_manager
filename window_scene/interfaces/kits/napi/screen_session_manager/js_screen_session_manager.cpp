@@ -58,7 +58,7 @@ NativeValue* JsScreenSessionManager::Init(NativeEngine* engine, NativeValue* exp
     BindNativeFunction(*engine, *object, "on", moduleName, JsScreenSessionManager::RegisterCallback);
     BindNativeFunction(*engine, *object, "updateScreenRotationProperty", moduleName,
         JsScreenSessionManager::UpdateScreenRotationProperty);
-	BindNativeFunction(*engine, *object, "getCurvedScreenCompressionArea", moduleName,
+    BindNativeFunction(*engine, *object, "getCurvedScreenCompressionArea", moduleName,
         JsScreenSessionManager::GetCurvedCompressionArea);
     return engine->CreateUndefined();
 }
