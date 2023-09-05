@@ -1112,7 +1112,9 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect)
     }
     if (surfaceNode_ && leashWinSurfaceNode_) {
         leashWinSurfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        leashWinSurfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);
+        surfaceNode_->SetFrame(0, 0, rect.width_, rect.height_);
     } else {
         WLOGE("SetSurfaceBounds surfaceNode is null!");
     }
