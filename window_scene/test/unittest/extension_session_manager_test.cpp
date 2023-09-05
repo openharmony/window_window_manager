@@ -101,6 +101,55 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestruction01, Func
     ASSERT_EQ(WSError::WS_OK, 
                 ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(extensionSession));
 }
+
+/**
+ * @tc.name: GetInstance
+ * @tc.desc: ExtensionSessionManager get instance and init
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionManagerTest, GetInstance, Function | MediumTest | Level2)
+{
+    ExtensionSessionManager *instance = &ExtensionSessionManager::GetInstance();
+    if (instance == nullptr) {
+        instance->Init();
+    }
+    ASSERT_NE(nullptr, instance);
+}
+
+/**
+ * @tc.name: SetAbilitySessionInfo
+ * @tc.desc: ExtensionSessionManager set ability session info
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionManagerTest, SetAbilitySessionInfo, Function | MediumTest | Level2)
+{
+    AAFwk::Want want;
+    SessionInfo infoInput;
+    infoInput.want = std::make_shared<AAFwk::Want>(want);
+    sptr<ExtensionSession> extSession = new ExtensionSession(infoInput);
+    ExtensionSessionManager *instance = &ExtensionSessionManager::GetInstance();
+    sptr<AAFwk::SessionInfo> result = instance->SetAbilitySessionInfo(extSession);
+    int32_t persistentId = extSession->GetPersistentId();
+    ASSERT_EQ(result->persistentId, persistentId);
+    delete extSession;
+    delete result;
+}
+
+/**
+ * @tc.name: RequestExtensionSessionDestruction02
+ * @tc.desc: RequestExtensionSessionDestruction Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestruction02, Function | MediumTest | Level2)
+{
+    AAFwk::Want want;
+    SessionInfo infoInput;
+    infoInput.want = std::make_shared<AAFwk::Want>(want);
+    sptr<ExtensionSession> extSession = nullptr;
+    ExtensionSessionManager *instance = &ExtensionSessionManager::GetInstance();
+    WSError result01 = instance->RequestExtensionSessionDestruction(extSession);
+    EXPECT_EQ(result01, WSError::WS_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
