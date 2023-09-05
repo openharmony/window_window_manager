@@ -169,6 +169,7 @@ ohos_shared_library("screen_session_manager") {
     "hicollie:libhicollie",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "init:libbeget_proxy",
     "ipc:ipc_core",
     "sensor:sensor_interface_native",
   ]
