@@ -371,6 +371,7 @@ HWTEST_F(WindowSessionPropertyTest, Unmarshalling, Function | SmallTest | Level2
     Parcel parcel = Parcel();
     WindowSessionProperty windowSessionProperty;
     auto result = windowSessionProperty.Unmarshalling(parcel);
+    
     ASSERT_NE(nullptr, property);
     ASSERT_NE(nullptr, result);
 }
