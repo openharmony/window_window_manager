@@ -527,6 +527,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     property.SetPhyWidth(screenCapability.GetPhyWidth());
     property.SetPhyHeight(screenCapability.GetPhyHeight());
     property.SetBounds(screenBounds);
+    property.CalcDefaultDisplayOrientation();
     if (isDensityDpiLoad_) {
         property.SetVirtualPixelRatio(densityDpi_);
     } else {

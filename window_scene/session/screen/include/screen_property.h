@@ -66,6 +66,7 @@ public:
 
     void SetDisplayOrientation(DisplayOrientation displayOrientation);
     DisplayOrientation GetDisplayOrientation() const;
+    void CalcDefaultDisplayOrientation();
 
     float GetXDpi();
     float GetYDpi();
@@ -113,7 +114,6 @@ private:
 
     void UpdateXDpi();
     void UpdateYDpi();
-    void UpdateDisplayOrientation();
     void CalculateXYDpi(uint32_t phyWidth, uint32_t phyHeight);
 };
 } // namespace OHOS::Rosen
