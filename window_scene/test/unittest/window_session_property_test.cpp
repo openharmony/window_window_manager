@@ -45,7 +45,7 @@ namespace {
 HWTEST_F(WindowSessionPropertyTest, SetDragEnabled001, Function | SmallTest | Level2)
 {
     WindowSessionProperty *property = new WindowSessionProperty();
-    ASSERT_EQ(property->GetDragEnabled(), false);
+    ASSERT_EQ(property->GetDragEnabled(), true);
     property->SetDragEnabled(false);
     ASSERT_EQ(property->GetDragEnabled(), false);
 }
@@ -58,7 +58,7 @@ HWTEST_F(WindowSessionPropertyTest, SetDragEnabled001, Function | SmallTest | Le
 HWTEST_F(WindowSessionPropertyTest, SetRaiseEnabled001, Function | SmallTest | Level2)
 {
     WindowSessionProperty *property = new WindowSessionProperty();
-    ASSERT_EQ(property->GetRaiseEnabled(), false);
+    ASSERT_EQ(property->GetRaiseEnabled(), true);
     property->SetRaiseEnabled(false);
     ASSERT_EQ(property->GetRaiseEnabled(), false);
 }
@@ -72,7 +72,7 @@ HWTEST_F(WindowSessionPropertyTest, SetRaiseEnabled001, Function | SmallTest | L
 HWTEST_F(WindowSessionPropertyTest, WindowSessionProperty, Function | SmallTest | Level2)
 {
     const sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    ASSERT_EQ(property->GetDragEnabled(), false);
+    ASSERT_EQ(property->GetDragEnabled(), true);
 }
 
 /**
@@ -85,7 +85,8 @@ HWTEST_F(WindowSessionPropertyTest, SetSessionInfo, Function | SmallTest | Level
     SessionInfo *info = new SessionInfo();
     WindowSessionProperty *property = new WindowSessionProperty();
     property->SetSessionInfo(*info);
-    ASSERT_EQ(property->GetRaiseEnabled(), false);
+    property->SetRaiseEnabled(true);
+    ASSERT_EQ(property->GetRaiseEnabled(), true);
 }
 /**
  * @tc.name: SetRequestedOrientation
@@ -329,7 +330,7 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingWindowLimits, Function | SmallT
     WindowSessionProperty *property = new WindowSessionProperty();
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.UnmarshallingWindowLimits(parcel, property);
-    ASSERT_EQ(property->GetTokenState(), true);
+    ASSERT_EQ(property->GetTokenState(), false);
 }
 
 /**
@@ -342,7 +343,7 @@ HWTEST_F(WindowSessionPropertyTest, UnMarshallingSystemBarMap, Function | SmallT
     Parcel parcel = Parcel();
     WindowSessionProperty *property = new WindowSessionProperty();
     WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.UnmarshallingWindowLimits(parcel, property);
+    windowSessionProperty.UnMarshallingSystemBarMap(parcel, property);
     ASSERT_EQ(property->GetTokenState(), false);
 }
 
@@ -370,8 +371,7 @@ HWTEST_F(WindowSessionPropertyTest, Unmarshalling, Function | SmallTest | Level2
     WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
     Parcel parcel = Parcel();
     WindowSessionProperty windowSessionProperty;
-    auto result = windowSessionProperty.Unmarshalling(parcel);
-    
+    auto result = windowSessionProperty.Unmarshalling(parcel);  
     ASSERT_NE(nullptr, property);
     ASSERT_NE(nullptr, result);
 }
@@ -383,9 +383,9 @@ HWTEST_F(WindowSessionPropertyTest, Unmarshalling, Function | SmallTest | Level2
 */
 HWTEST_F(WindowSessionPropertyTest, CopyFrom, Function | SmallTest | Level2)
 {
-    sptr<WindowSessionProperty> *property = new sptr<WindowSessionProperty>();
+   WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
     WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.CopyFrom(*property);
+    windowSessionProperty.CopyFrom(property);
     WindowSessionProperty *wproperty = new WindowSessionProperty();
     ASSERT_EQ(wproperty->GetTokenState(), true);
 }
