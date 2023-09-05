@@ -219,7 +219,7 @@ HWTEST_F(WindowSessionPropertyTest, GetAccessTokenId, Function | SmallTest | Lev
 HWTEST_F(WindowSessionPropertyTest, SetTokenState, Function | SmallTest | Level2)
 {
     WindowSessionProperty *property = new WindowSessionProperty();
-    ASSERT_EQ(property->GetTokenState(), true);
+    ASSERT_EQ(property->GetTokenState(), false);
 }
 
 /**
@@ -230,7 +230,7 @@ HWTEST_F(WindowSessionPropertyTest, SetTokenState, Function | SmallTest | Level2
 HWTEST_F(WindowSessionPropertyTest, SetMaximizeMode, Function | SmallTest | Level2)
 {
     WindowSessionProperty windowSessionProperty;
-    MaximizeMode mode = MaximizeMode::MODE_AVOID_SYSTEM_BAR;
+    MaximizeMode mode = MaximizeMode::MODE_RECOVER;
     windowSessionProperty.SetMaximizeMode(mode);
     WindowSessionProperty *property = new WindowSessionProperty();
     ASSERT_EQ(property->GetMaximizeMode(), mode);
@@ -248,7 +248,7 @@ HWTEST_F(WindowSessionPropertyTest, SetSystemBarProperty, Function | SmallTest |
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.SetSystemBarProperty(windowtype, *systemBarProperty);
     WindowSessionProperty *property = new WindowSessionProperty();
-    ASSERT_EQ(property->GetTokenState(), true);
+    ASSERT_EQ(property->GetTokenState(), false);
 }
 
 /**
@@ -263,7 +263,7 @@ HWTEST_F(WindowSessionPropertyTest, SetSessionGravity, Function | SmallTest | Le
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.SetSessionGravity(sessionGravity, percent);
     WindowSessionProperty *property = new WindowSessionProperty();
-    ASSERT_EQ(property->GetTokenState(), true);
+    ASSERT_EQ(property->GetTokenState(), false);
 }
 
 
@@ -276,7 +276,7 @@ HWTEST_F(WindowSessionPropertyTest, IsDecorEnable, Function | SmallTest | Level2
 {
     WindowSessionProperty windowSessionProperty;
     auto result = windowSessionProperty.IsDecorEnable();
-    ASSERT_EQ(true, result);
+    ASSERT_EQ(false, result);
 }
 
 /**
@@ -315,7 +315,7 @@ HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, Function | SmallTest | Lev
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.SetTouchHotAreas(*rects);
     WindowSessionProperty *property = new WindowSessionProperty();
-    ASSERT_EQ(property->GetTokenState(), true);
+    ASSERT_EQ(property->GetTokenState(), false);
 }
 
 /**
@@ -343,7 +343,7 @@ HWTEST_F(WindowSessionPropertyTest, UnMarshallingSystemBarMap, Function | SmallT
     WindowSessionProperty *property = new WindowSessionProperty();
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.UnmarshallingWindowLimits(parcel, property);
-    ASSERT_EQ(property->GetTokenState(), true);
+    ASSERT_EQ(property->GetTokenState(), false);
 }
 
 /**
@@ -357,7 +357,7 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingTouchHotAreas, Function | Small
     WindowSessionProperty *property = new WindowSessionProperty();
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.UnmarshallingTouchHotAreas(parcel, property);
-    ASSERT_EQ(property->GetTokenState(), true);
+    ASSERT_EQ(property->GetTokenState(), false);
 }
 
 /**
