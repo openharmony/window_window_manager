@@ -108,7 +108,16 @@ public:
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     std::shared_ptr<Media::PixelMap> Snapshot();
     SessionState GetSessionState() const;
-    SessionInfo& GetSessionInfo();
+    void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
+    void SetSessionInfoTime(const std::string& time);
+    void SetSessionInfoAbilityInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
+    void SetSessionInfoWant(const std::shared_ptr<AAFwk::Want>& want);
+    void SetSessionInfoPersistentId(int32_t persistentId);
+    void SetSessionInfoCallerPersistentId(int32_t callerPersistentId);
+    void SetSessionInfoContinueState(ContinueState state);
+    void SetSessionInfoLockedState(bool state);
+    void SetSessionInfo(const SessionInfo& info);
+    const SessionInfo& GetSessionInfo() const;
     WindowType GetWindowType() const;
     float GetAspectRatio() const;
     WSError SetAspectRatio(float ratio) override;
@@ -268,6 +277,7 @@ protected:
     int32_t persistentId_ = INVALID_SESSION_ID;
     SessionState state_ = SessionState::STATE_DISCONNECT;
     SessionInfo sessionInfo_;
+    std::recursive_mutex sessionInfoMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
     std::shared_ptr<Media::PixelMap> snapshot_;
