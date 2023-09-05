@@ -25,6 +25,8 @@
 #include "mock/mock_window_event_channel.h"
 #include "context.h"
 
+const std::string EMPTY_DEVICE_ID = "";
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -76,6 +78,10 @@ bool SceneSessionManagerTest::gestureNavigationEnabled_ = true;
 ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest::callbackFunc_ = [](bool enable) {
     gestureNavigationEnabled_ = enable;
 };
+
+void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type)
+{
+}
 
 void ProcessStatusBarEnabledChangeFuncTest(bool enable)
 {
@@ -1336,6 +1342,318 @@ HWTEST_F(SceneSessionManagerTest, DumpSessionElementInfo, Function | SmallTest |
     ssm_->DumpSessionElementInfo(scensession, params_, dumpInfo_);
     WSError result01 = ssm_->GetSpecifiedSessionDumpInfo(dumpInfo_, params_, strId);
     EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: NotifyDumpInfoResult
+ * @tc.desc: SceneSesionManager notify dump info result
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, NotifyDumpInfoResult, Function | SmallTest | Level3)
+{
+    std::vector<std::string> info = {"std::", "vector", "<std::string>"};
+    ssm_->NotifyDumpInfoResult(info);
+    std::vector<std::string> params = {"-a"};
+    std::string dumpInfo = "";
+    WSError result01 = ssm_->GetSessionDumpInfo(params, dumpInfo);
+    EXPECT_EQ(result01, WSError::WS_OK);
+    params.clear();
+    params.push_back("-w");
+    params.push_back("23456");
+    WSError result02 = ssm_->GetSessionDumpInfo(params, dumpInfo);
+    EXPECT_EQ(result02, WSError::WS_ERROR_INVALID_PARAM);
+    params.clear();
+    WSError result03 = ssm_->GetSessionDumpInfo(params, dumpInfo);
+    EXPECT_EQ(result03, WSError::WS_ERROR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: UpdateFocus
+ * @tc.desc: SceneSesionManager update focus
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, UpdateFocus, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 10086;
+    SessionInfo info;
+    info.bundleName_ = "bundleName_";
+    bool isFocused = true;
+    WSError result = ssm_->UpdateFocus(persistentId, isFocused);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: UpdateWindowMode
+ * @tc.desc: SceneSesionManager update window mode
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, UpdateWindowMode, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 10086;
+    int32_t windowMode = 3;
+    WSError result = ssm_->UpdateWindowMode(persistentId, windowMode);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_WINDOW);
+    std::function<void(int32_t persistentId, WindowUpdateType type)> func = WindowChangedFuncTest;
+    ssm_->RegisterWindowChanged(func);
+}
+
+/**
+ * @tc.name: UpdatePrivateStateAndNotify
+ * @tc.desc: SceneSesionManager update private state and notify
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, UpdatePrivateStateAndNotify, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 10086;
+    SessionInfo info;
+    info.bundleName_ = "bundleName";
+    sptr<SceneSession> scensession = nullptr;
+    ssm_->RegisterSessionStateChangeNotifyManagerFunc(scensession);
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->RegisterSessionStateChangeNotifyManagerFunc(scensession);
+    ssm_->UpdatePrivateStateAndNotify(persistentId);
+    int result = ssm_->GetSceneSessionPrivacyModeCount();
+    EXPECT_EQ(result, 0);
+    delete scensession;
+}
+
+/**
+ * @tc.name: SetWindowFlags
+ * @tc.desc: SceneSesionManager set window flags
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, SetWindowFlags, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "bundleName";
+    uint32_t flags = 1;
+    sptr<SceneSession> scensession = nullptr;
+    WSError result01 = ssm_->SetWindowFlags(scensession, flags);
+    EXPECT_EQ(result01, WSError::WS_ERROR_NULLPTR);
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    WSError result02 = ssm_->SetWindowFlags(scensession, flags);
+    EXPECT_EQ(result02, WSError::WS_ERROR_NULLPTR);
+    WSError result03 = ssm_->SetWindowFlags(scensession, flags);
+    ASSERT_EQ(result03, WSError::WS_OK);
+    delete scensession;
+}
+
+/**
+ * @tc.name: NotifyWaterMarkFlagChangedResult
+ * @tc.desc: SceneSesionManager notify water mark flag changed result
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, NotifyWaterMarkFlagChangedResult, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 10086;
+    ssm_->NotifyCompleteFirstFrameDrawing(persistentId);
+    bool hasWaterMark = true;
+    AppExecFwk::AbilityInfo abilityInfo;
+    WSError result01 = ssm_->NotifyWaterMarkFlagChangedResult(hasWaterMark);
+    EXPECT_EQ(result01, WSError::WS_OK);
+    ssm_->CheckAndNotifyWaterMarkChangedResult();
+    ssm_->ProcessPreload(abilityInfo);
+}
+
+/**
+ * @tc.name: IsValidSessionIds
+ * @tc.desc: SceneSesionManager is valid session id
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, IsValidSessionIds, Function | SmallTest | Level3)
+{
+    std::vector<int32_t> sessionIds = {0, 1, 2, 3, 4, 5, 24, 10086};
+    std::vector<bool> results = {};
+    WSError result = ssm_->IsValidSessionIds(sessionIds, results);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: UnRegisterSessionListener
+ * @tc.desc: SceneSesionManager un register session listener
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, UnRegisterSessionListener, Function | SmallTest | Level3)
+{
+    OHOS::MessageParcel data;
+    sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
+    WSError result = ssm_->UnRegisterSessionListener(listener);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+    delete listener;
+}
+
+/**
+ * @tc.name: GetSessionInfos
+ * @tc.desc: SceneSesionManager get session infos
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetSessionInfos, Function | SmallTest | Level3)
+{
+    std::string deviceId = "1245";
+    int32_t numMax = 1024;
+    AAFwk::MissionInfo infoFrist;
+    infoFrist.label = "fristBundleName";
+    AAFwk::MissionInfo infoSecond;
+    infoSecond.label = "secondBundleName";
+    std::vector<SessionInfoBean> sessionInfos = {infoFrist, infoSecond};
+    WSError result = ssm_->GetSessionInfos(deviceId, numMax, sessionInfos);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+    int32_t persistentId = 24;
+    SessionInfoBean sessionInfo;
+    int result01 = ssm_->GetRemoteSessionInfo(deviceId, persistentId, sessionInfo);
+    ASSERT_NE(result01, ERR_OK);
+}
+
+/**
+ * @tc.name: CheckIsRemote
+ * @tc.desc: SceneSesionManager check is remote
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, CheckIsRemote, Function | SmallTest | Level3)
+{
+    std::string deviceId;
+    bool result = ssm_->CheckIsRemote(deviceId);
+    EXPECT_FALSE(result);
+    deviceId.assign("deviceId");
+    result = ssm_->CheckIsRemote(deviceId);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AnonymizeDeviceId
+ * @tc.desc: SceneSesionManager anonymize deviceId
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, AnonymizeDeviceId, Function | SmallTest | Level3)
+{
+    std::string deviceId;
+    std::string result(ssm_->AnonymizeDeviceId(deviceId));
+    EXPECT_EQ(result, EMPTY_DEVICE_ID);
+    deviceId.assign("100964857");
+    std::string result01 = "100964******";
+    ASSERT_EQ(ssm_->AnonymizeDeviceId(deviceId), result01);
+}
+
+/**
+ * @tc.name: TerminateSessionNew
+ * @tc.desc: SceneSesionManager terminate session new
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, TerminateSessionNew, Function | SmallTest | Level3)
+{
+    sptr<AAFwk::SessionInfo> info = nullptr;
+    bool needStartCaller = true;
+    WSError result01 = ssm_->TerminateSessionNew(info, needStartCaller);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, result01);
+    info = new (std::nothrow) AAFwk::SessionInfo();
+    WSError result02 = ssm_->TerminateSessionNew(info, needStartCaller);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, result02);
+    delete info;
+}
+
+/**
+ * @tc.name: RegisterSessionListener01
+ * @tc.desc: SceneSesionManager register session listener
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, RegisterSessionListener01, Function | SmallTest | Level3)
+{
+    OHOS::MessageParcel data;
+    sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
+    WSError result = ssm_->RegisterSessionListener(listener);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+    delete listener;
+}
+
+/**
+ * @tc.name: RegisterSessionListener02
+ * @tc.desc: SceneSesionManager register session listener
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, RegisterSessionListener02, Function | SmallTest | Level3)
+{
+    OHOS::MessageParcel data;
+    sptr<ISessionChangeListener> sessionListener = nullptr;
+    WSError result01 = ssm_->RegisterSessionListener(sessionListener);
+    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_SESSION_LISTENER);
+    ssm_->UnregisterSessionListener();
+    delete sessionListener;
+}
+
+/**
+ * @tc.name: RequestSceneSessionByCall
+ * @tc.desc: SceneSesionManager request scene session by call
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, RequestSceneSessionByCall, Function | SmallTest | Level3)
+{
+    sptr<SceneSession> scensession = nullptr;
+    WSError result01 = ssm_->RequestSceneSessionByCall(nullptr);
+    EXPECT_EQ(result01, WSError::WS_OK);
+    SessionInfo info;
+    info.bundleName_ = "bundleName";
+    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    WSError result02 = ssm_->RequestSceneSessionByCall(scensession);
+    ASSERT_EQ(result02, WSError::WS_OK);
+    delete scensession;
+}
+
+/**
+ * @tc.name: FindMainWindowWithToken
+ * @tc.desc: SceneSesionManager find main window with token
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, FindMainWindowWithToken, Function | SmallTest | Level3)
+{
+    sptr<IRemoteObject> targetToken = nullptr;
+    sptr<SceneSession> result = ssm_->FindMainWindowWithToken(targetToken);
+    EXPECT_EQ(result, nullptr);
+    uint64_t persistentId = 1423;
+    WSError result01 = ssm_->BindDialogTarget(persistentId, targetToken);
+    EXPECT_EQ(result01, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: MoveSessionsToBackground
+ * @tc.desc: SceneSesionManager move sessions to background
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, MoveSessionsToBackground, Function | SmallTest | Level3)
+{
+    int32_t type = CollaboratorType::RESERVE_TYPE;
+    WSError result01 = ssm_->UnregisterIAbilityManagerCollaborator(type);
+    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_PERMISSION);
+    std::vector<std::int32_t> sessionIds = {1, 2, 3, 15, 1423};
+    std::vector<int32_t> res = {1, 2, 3, 15, 1423};
+    WSError result03 = ssm_->MoveSessionsToBackground(sessionIds, res);
+    ASSERT_EQ(result03, WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: MoveSessionsToForeground
+ * @tc.desc: SceneSesionManager move sessions to foreground
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, MoveSessionsToForeground, Function | SmallTest | Level3)
+{
+    std::vector<std::int32_t> sessionIds = {1, 2, 3, 15, 1423};
+    int32_t topSessionId = 1;
+    WSError result = ssm_->MoveSessionsToForeground(sessionIds, topSessionId);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: UnlockSession
+ * @tc.desc: SceneSesionManager unlock session
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, UnlockSession, Function | SmallTest | Level3)
+{
+    int32_t sessionId = 1;
+    WSError result = ssm_->UnlockSession(sessionId);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+    result = ssm_->LockSession(sessionId);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
 }
 
 }
