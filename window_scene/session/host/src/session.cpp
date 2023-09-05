@@ -173,7 +173,7 @@ bool Session::RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, co
         WLOGFE("listener is nullptr");
         return false;
     }
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
     if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
         WLOGFE("Listener already registered");
         return false;
@@ -189,7 +189,7 @@ bool Session::UnregisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, 
         WLOGFE("listener could not be null");
         return false;
     }
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(lifecycleListenersMutex_);
     holder.erase(std::remove_if(holder.begin(), holder.end(),
         [listener](std::shared_ptr<T> registeredListener) { return registeredListener == listener; }),
         holder.end());
@@ -889,7 +889,6 @@ void Session::SetSessionExceptionListener(const NotifySessionExceptionFunc& func
         WLOGFE("func is nullptr");
         return;
     }
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     std::shared_ptr<NotifySessionExceptionFunc> funcSptr = std::make_shared<NotifySessionExceptionFunc>(func);
     if (std::find(sessionExceptionFuncs_.begin(), sessionExceptionFuncs_.end(), funcSptr) !=
         sessionExceptionFuncs_.end()) {
