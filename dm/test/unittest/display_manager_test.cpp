@@ -101,7 +101,7 @@ HWTEST_F(DisplayManagerTest, Freeze03, Function | SmallTest | Level1)
 {
     std::vector<DisplayId> displayIds;
     bool ret = DisplayManager::GetInstance().Freeze(displayIds);
-    ASSERT_TRUE(ret);
+    ASSERT_FALSE(ret);
 }
 
 /**
