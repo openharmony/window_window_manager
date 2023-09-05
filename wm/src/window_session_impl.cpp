@@ -391,6 +391,8 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
             lastGravity_ = node->GetStagingProperties().GetFrameGravity();
             node->SetFrameGravity(Gravity::RESIZE);
         }
+        RSSystemProperties::SetDrawTextAsBitmap(true);
+        RSInterfaces::GetInstance().EnableCacheForRotation();
         rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(600);
@@ -400,6 +402,8 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
             auto node = weak.lock();
             if (rotationAnimationCount_ == 0 && node) {
                 node->SetFrameGravity(lastGravity_);
+                RSSystemProperties::SetDrawTextAsBitmap(false);
+                RSInterfaces::GetInstance().DisableCacheForRotation();
             }
         });
         if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_)) {
