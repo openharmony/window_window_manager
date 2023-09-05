@@ -544,7 +544,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         return nullptr;
     }
 
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession(screenId, property, GetDefaultAbstractScreenId());
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession(screenId, property, GetDefaultScreenId());
     if (!session) {
         WLOGFE("ScreenSessionManager::GetOrCreateScreenSession screen session is nullptr");
         return session;
@@ -1166,7 +1166,7 @@ DMError ScreenSessionManager::MakeExpand(std::vector<ScreenId> screenId,
         }
         pointsMap[screenId[i]] = startPoint[i];
     }
-    ScreenId defaultScreenId = GetDefaultAbstractScreenId();
+    ScreenId defaultScreenId = GetDefaultScreenId();
     auto allExpandScreenIds = GetAllValidScreenIds(screenId);
     auto iter = std::find(allExpandScreenIds.begin(), allExpandScreenIds.end(), defaultScreenId);
     if (iter != allExpandScreenIds.end()) {
@@ -1200,7 +1200,7 @@ DMError ScreenSessionManager::MakeExpand(std::vector<ScreenId> screenId,
 
 bool ScreenSessionManager::OnMakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
 {
-    ScreenId defaultScreenId = GetDefaultAbstractScreenId();
+    ScreenId defaultScreenId = GetDefaultScreenId();
     WLOGI("OnMakeExpand, defaultScreenId:%{public}" PRIu64"", defaultScreenId);
     auto defaultScreen = GetScreenSession(defaultScreenId);
     if (defaultScreen == nullptr) {
@@ -1312,19 +1312,12 @@ bool ScreenSessionManager::ScreenIdManager::HasRsScreenId(ScreenId smsScreenId) 
     return rs2SmsScreenIdMap_.find(smsScreenId) != rs2SmsScreenIdMap_.end();
 }
 
-ScreenId ScreenSessionManager::GetDefaultAbstractScreenId()
-{
-    WLOGFI("SCB: ScreenSessionManager::GetDefaultAbstractScreenId ENTER");
-    defaultRsScreenId_ = rsInterface_.GetDefaultScreenId();
-    return screenIdManager_.ConvertToSmsScreenId(defaultRsScreenId_);
-}
-
 sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId, ScreenId rsId,
     VirtualScreenOption option)
 {
     WLOGFI("SCB: ScreenSessionManager::InitVirtualScreen: Enter");
     sptr<ScreenSession> screenSession =
-        new(std::nothrow) ScreenSession(option.name_, smsScreenId, rsId, GetDefaultAbstractScreenId());
+        new(std::nothrow) ScreenSession(option.name_, smsScreenId, rsId, GetDefaultScreenId());
     sptr<SupportedScreenModes> info = new(std::nothrow) SupportedScreenModes();
     if (screenSession == nullptr || info == nullptr) {
         WLOGFI("SCB: ScreenSessionManager::InitVirtualScreen: new screenSession or info failed");
@@ -1334,7 +1327,7 @@ sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId
     }
     info->width_ = option.width_;
     info->height_ = option.height_;
-    auto defaultScreen = GetScreenSession(GetDefaultAbstractScreenId());
+    auto defaultScreen = GetScreenSession(GetDefaultScreenId());
     if (defaultScreen != nullptr && defaultScreen->GetActiveScreenMode() != nullptr) {
         info->refreshRate_ = defaultScreen->GetActiveScreenMode()->refreshRate_;
     }
@@ -1385,7 +1378,7 @@ sptr<ScreenSession> ScreenSessionManager::InitAndGetScreen(ScreenId rsScreenId)
     WLOGFD("SCB: Screen name is %{public}s, phyWidth is %{public}u, phyHeight is %{public}u",
         screenCapability.GetName().c_str(), screenCapability.GetPhyWidth(), screenCapability.GetPhyHeight());
     sptr<ScreenSession> screenSession =
-        new(std::nothrow) ScreenSession(screenCapability.GetName(), smsScreenId, rsScreenId, GetDefaultAbstractScreenId());
+        new(std::nothrow) ScreenSession(screenCapability.GetName(), smsScreenId, rsScreenId, GetDefaultScreenId());
     if (screenSession == nullptr) {
         WLOGFE("SCB: ScreenSessionManager::InitAndGetScreen: screenSession == nullptr.");
         screenIdManager_.DeleteScreenId(smsScreenId);
@@ -1438,7 +1431,7 @@ sptr<ScreenSessionGroup> ScreenSessionManager::AddAsFirstScreenLocked(sptr<Scree
     }
     screenGroup->groupSmsId_ = 1;
     Point point;
-    if (!screenGroup->AddChild(newScreen, point, GetScreenSession(GetDefaultAbstractScreenId()))) {
+    if (!screenGroup->AddChild(newScreen, point, GetScreenSession(GetDefaultScreenId()))) {
         WLOGE("fail to add screen to group. screen=%{public}" PRIu64"", newScreen->screenId_);
         screenIdManager_.DeleteScreenId(smsGroupScreenId);
         return nullptr;
@@ -1460,7 +1453,7 @@ sptr<ScreenSessionGroup> ScreenSessionManager::AddAsFirstScreenLocked(sptr<Scree
 
 sptr<ScreenSessionGroup> ScreenSessionManager::AddAsSuccedentScreenLocked(sptr<ScreenSession> newScreen)
 {
-    ScreenId defaultScreenId = GetDefaultAbstractScreenId();
+    ScreenId defaultScreenId = GetDefaultScreenId();
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     auto iter = screenSessionMap_.find(defaultScreenId);
     if (iter == screenSessionMap_.end()) {
@@ -1602,7 +1595,7 @@ void ScreenSessionManager::AddScreenToGroup(sptr<ScreenSessionGroup> group,
         Point expandPoint = addChildPos[i];
         WLOGFI("screenId: %{public}" PRIu64", Point: %{public}d, %{public}d",
             screen->screenId_, expandPoint.posX_, expandPoint.posY_);
-        bool addChildRes = group->AddChild(screen, expandPoint, GetScreenSession(GetDefaultAbstractScreenId()));
+        bool addChildRes = group->AddChild(screen, expandPoint, GetScreenSession(GetDefaultScreenId()));
         if (removeChildResMap[screenId] && addChildRes) {
             changeGroup.emplace_back(screen->ConvertToScreenInfo());
             WLOGFD("changeGroup");
