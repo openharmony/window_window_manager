@@ -252,6 +252,9 @@ private:
     //Fold Screen
     std::map<ScreenId, ScreenProperty> phyScreenPropMap_;
     mutable std::recursive_mutex phyScreenPropMapMutex_;
+    static void BootFinishedCallback(const char *key, const char *value, void *context);
+    std::function<void()> foldScreenPowerInit_ = nullptr;
+    void SetFoldScreenPowerInit(std::function<void()> foldScreenPowerInit);
 };
 } // namespace OHOS::Rosen
 

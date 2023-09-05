@@ -17,6 +17,7 @@
 
 #include <hitrace_meter.h>
 #include <iomanip>
+#include <parameter.h>
 #include <parameters.h>
 #include <transaction/rs_interfaces.h>
 #include <xcollie/watchdog.h>
@@ -34,6 +35,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScreenSessionManager" };
 const std::string SCREEN_SESSION_MANAGER_THREAD = "ScreenSessionManager";
 const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
+const std::string BOOTEVENT_BOOT_COMPLETED = "bootevent.boot.completed";
 std::recursive_mutex g_instanceMutex;
 } // namespace
 
@@ -53,13 +55,37 @@ ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetIns
     LoadScreenSceneXml();
     taskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_THREAD);
     screenCutoutController_ = new (std::nothrow) ScreenCutoutController();
-    bool foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "") != "";
-    if (foldScreenFlag) {
-        foldScreenController_ = new (std::nothrow) FoldScreenController();
-    }
     sessionDisplayPowerController_ = new SessionDisplayPowerController(
         std::bind(&ScreenSessionManager::NotifyDisplayStateChange, this,
             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+    bool foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "") != "";
+    if (foldScreenFlag) {
+        foldScreenController_ = new (std::nothrow) FoldScreenController();
+        ScreenId screenIdFull = 0;
+        ScreenId screenIdMain = 5;
+        int64_t timeStamp = 3000;
+        SetFoldScreenPowerInit([&]() {
+            WLOGFI("ScreenSessionManager Fold Screen Power Init 1.");
+            rsInterface_.SetScreenPowerStatus(screenIdFull, ScreenPowerStatus::POWER_STATUS_OFF);
+            rsInterface_.SetScreenPowerStatus(screenIdMain, ScreenPowerStatus::POWER_STATUS_ON);
+            std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
+
+            WLOGFI("ScreenSessionManager Fold Screen Power Init 2.");
+            rsInterface_.SetScreenPowerStatus(screenIdMain, ScreenPowerStatus::POWER_STATUS_OFF);
+            rsInterface_.SetScreenPowerStatus(screenIdFull, ScreenPowerStatus::POWER_STATUS_ON);
+            std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
+
+            WLOGFI("ScreenSessionManager Fold Screen Power Init 3.");
+            rsInterface_.SetScreenPowerStatus(screenIdFull, ScreenPowerStatus::POWER_STATUS_OFF);
+            rsInterface_.SetScreenPowerStatus(screenIdMain, ScreenPowerStatus::POWER_STATUS_ON);
+            std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
+
+            WLOGFI("ScreenSessionManager Fold Screen Power Init 4.");
+            rsInterface_.SetScreenPowerStatus(screenIdMain, ScreenPowerStatus::POWER_STATUS_OFF);
+            rsInterface_.SetScreenPowerStatus(screenIdFull, ScreenPowerStatus::POWER_STATUS_ON);
+        });
+        WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedCallback, this);
+    }
 }
 
 void ScreenSessionManager::Init()
@@ -638,6 +664,21 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
 
     return NotifyDisplayPowerEvent(state == ScreenPowerState::POWER_ON ? DisplayPowerEvent::DISPLAY_ON :
         DisplayPowerEvent::DISPLAY_OFF, EventStatus::END);
+}
+
+void ScreenSessionManager::BootFinishedCallback(const char *key, const char *value, void *context)
+{
+    auto &that = *reinterpret_cast<ScreenSessionManager *>(context);
+    if (strcmp(key, BOOTEVENT_BOOT_COMPLETED.c_str()) == 0 && strcmp(value, "true") == 0
+            && that.foldScreenPowerInit_ != nullptr) {
+        WLOGFI("ScreenSessionManager BootFinishedCallback boot animation finished");
+        that.foldScreenPowerInit_();
+    }
+}
+
+void ScreenSessionManager::SetFoldScreenPowerInit(std::function<void()> foldScreenPowerInit)
+{
+    foldScreenPowerInit_ = foldScreenPowerInit;
 }
 
 std::vector<ScreenId> ScreenSessionManager::GetAllScreenIds()
