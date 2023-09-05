@@ -1265,8 +1265,9 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session, sptr<IRemoteObject> token)
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartedByInputMethod()) {
-        WLOGFE("check input method permission failed");
+    if (!CheckSystemWindowPermission(property)) {
+        WLOGFE("create system window permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     // Get pid and uid before posting task.
     auto pid = IPCSkeleton::GetCallingPid();
@@ -1299,6 +1300,37 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     };
 
     return taskScheduler_->PostSyncTask(task);
+}
+
+bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property) const
+{
+    WindowType type = property->GetWindowType();
+    if (!WindowHelper::IsSystemWindow(type)) {
+        // type is not system
+        return true;
+    }
+    if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && SessionPermission::IsStartedByInputMethod()) {
+        // WINDOW_TYPE_INPUT_METHOD_FLOAT counld be created by input method app
+        WLOGFD("check create permission success, input method app create input method window.");
+        return true;
+    }
+    if (type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT || type == WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW ||
+        type == WindowType::WINDOW_TYPE_TOAST || type == WindowType::WINDOW_TYPE_DIALOG) {
+        // some system types counld be created by normal app
+        return true;
+    }
+    if (type == WindowType::WINDOW_TYPE_FLOAT &&
+        SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
+        // WINDOW_TYPE_FLOAT counld be created by normal app with the corresponding permission
+        WLOGFD("check create permission success, normal app create float window with request permission.");
+        return true;
+    }
+    if (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd()) {
+        WLOGFD("check create permission success, create with system calling.");
+        return true;
+    }
+    WLOGFE("check system window permission failed.");
+    return false;
 }
 
 void SceneSessionManager::SetCreateSpecificSessionListener(const NotifyCreateSpecificSessionFunc& func)
