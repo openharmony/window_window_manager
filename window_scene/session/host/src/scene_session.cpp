@@ -272,7 +272,7 @@ void SceneSession::RegisterSessionChangeCallback(const sptr<SceneSession::Sessio
 
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
 {
-    PostTask([weakThis = wptr(this), mode]() {
+    return PostSyncTask([weakThis = wptr(this), mode]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -284,7 +284,6 @@ WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
             ScenePersistentStorageType::MAXIMIZE_STATE);
         return WSError::WS_OK;
     });
-    return WSError::WS_OK;
 }
 
 WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode &mode)
@@ -303,7 +302,7 @@ WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode &mode)
 
 WSError SceneSession::SetAspectRatio(float ratio)
 {
-    PostTask([weakThis = wptr(this), ratio]() {
+    return PostSyncTask([weakThis = wptr(this), ratio]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -356,7 +355,6 @@ WSError SceneSession::SetAspectRatio(float ratio)
         }
         return WSError::WS_OK;
     });
-    return WSError::WS_OK;
 }
 
 WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason)
@@ -481,7 +479,7 @@ WSError SceneSession::RaiseToAppTop()
         WLOGFE("raise to app top permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    PostTask([weakThis = wptr(this)]() {
+    return PostSyncTask([weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -492,7 +490,6 @@ WSError SceneSession::RaiseToAppTop()
         }
         return WSError::WS_OK;
     });
-    return WSError::WS_OK;
 }
 
 WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
@@ -501,7 +498,7 @@ WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
         WLOGFE("RaiseAboveTarget permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    PostTask([weakThis = wptr(this), subWindowId]() {
+    return PostSyncTask([weakThis = wptr(this), subWindowId]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -512,7 +509,6 @@ WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
         }
         return WSError::WS_OK;
     });
-    return WSError::WS_OK;
 }
 
 WSError SceneSession::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -1263,7 +1259,7 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
 
 WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 {
-    PostTask([weakThis = wptr(this), needDefaultAnimationFlag]() {
+    return PostSyncTask([weakThis = wptr(this), needDefaultAnimationFlag]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -1274,7 +1270,6 @@ WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
         }
         return WSError::WS_OK;
     });
-    return WSError::WS_OK;
 }
 
 void SceneSession::NotifyIsCustomAnimationPlaying(bool isPlaying)
