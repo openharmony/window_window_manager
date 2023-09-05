@@ -58,9 +58,8 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSession, Function | Medium
 {
     SessionInfo sessionInfo;
     sessionInfo.abilityName_ = "RequestExtensionSession";
-    ExtensionSessionManager extensionSessionManager;
     ASSERT_NE(nullptr, 
-                extensionSessionManager.RequestExtensionSession(sessionInfo));
+                ExtensionSessionManager::GetInstance().RequestExtensionSession(sessionInfo));
 }
 
 /**
@@ -72,9 +71,8 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionActivation01, Funct
 {
     SessionInfo info;
     sptr<ExtensionSession> extensionSession = new ExtensionSession(info);
-    ExtensionSessionManager extensionSessionManager;
     ASSERT_EQ(WSError::WS_OK, 
-                extensionSessionManager.RequestExtensionSessionActivation(extensionSession, 1));
+                ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(extensionSession, 1));
 }
 
 /**
@@ -86,9 +84,8 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionBackground01, Funct
 {
     SessionInfo info;
     sptr<ExtensionSession> extensionSession = new ExtensionSession(info);
-    ExtensionSessionManager extensionSessionManager;
     ASSERT_EQ(WSError::WS_OK, 
-                extensionSessionManager.RequestExtensionSessionBackground(extensionSession));
+                ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(extensionSession));
 }
 
 
@@ -101,9 +98,8 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestruction01, Func
 {
     SessionInfo info;
     sptr<ExtensionSession> extensionSession = new ExtensionSession(info);
-    ExtensionSessionManager extensionSessionManager;
     ASSERT_EQ(WSError::WS_OK, 
-                extensionSessionManager.RequestExtensionSessionDestruction(extensionSession));
+                ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(extensionSession));
 }
 } // namespace
 } // namespace Rosen
