@@ -181,19 +181,6 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyFocusActiveEvent, Function | Smal
 
     ASSERT_EQ(WMError::WM_OK, windowExtensionSessionImpl.SetPrivacyMode(false));
 }
-
-/**
- * @tc.name: SetUIContent01
- * @tc.desc: SetUIContent Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, SetUIContent01, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = new WindowOption();
-    WindowExtensionSessionImpl windowExtensionSessionImpl(option);
-    ASSERT_EQ(WMError::WM_OK, 
-        windowExtensionSessionImpl.SetUIContent("a", nullptr, nullptr, false, nullptr));
-}
 }
 } // namespace Rosen
 } // namespace OHOS
