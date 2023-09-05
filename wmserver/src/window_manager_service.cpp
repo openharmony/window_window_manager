@@ -850,7 +850,7 @@ bool WindowManagerService::CheckSystemWindowPermission(const sptr<WindowProperty
         return true;
     }
     if (type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT || type == WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW ||
-        type == WindowType::WINDOW_TYPE_TOAST) {
+        type == WindowType::WINDOW_TYPE_TOAST || type == WindowType::WINDOW_TYPE_DIALOG) {
         // some system types counld be created by normal app
         return true;
     }
