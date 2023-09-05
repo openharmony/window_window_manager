@@ -607,6 +607,10 @@ bool ScreenSessionGroup::GetRSDisplayNodeConfig(sptr<ScreenSession>& screenSessi
                 WLOGI("AddChild, SCREEN_MIRROR, config is not mirror");
                 break;
             }
+            if (defaultScreenSession == nullptr) {
+                WLOGFE("AddChild fail, defaultScreenSession is nullptr");
+                break;
+            }
             std::shared_ptr<RSDisplayNode> displayNode = defaultScreenSession->GetDisplayNode();
             if (displayNode == nullptr) {
                 WLOGFE("AddChild fail, displayNode is nullptr, cannot get DisplayNode");
