@@ -393,7 +393,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         }
         rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
-        protocol.SetDuration(600);
+        protocol.SetDuration(300);
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
         RSNode::OpenImplicitAnimation(protocol, curve, [this, weak = std::weak_ptr<RSSurfaceNode>(node)]() {
             rotationAnimationCount_--;
