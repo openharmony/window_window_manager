@@ -124,7 +124,6 @@ public:
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(DisplayId displayId);
 
     sptr<ScreenSession> InitVirtualScreen(ScreenId smsScreenId, ScreenId rsId, VirtualScreenOption option);
-    ScreenId GetDefaultAbstractScreenId();
     sptr<ScreenSession> InitAndGetScreen(ScreenId rsScreenId);
     bool InitAbstractScreenModesInfo(sptr<ScreenSession>& absScreen);
     std::vector<ScreenId> GetAllValidScreenIds(const std::vector<ScreenId>& screenIds) const;
