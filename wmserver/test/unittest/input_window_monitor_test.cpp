@@ -137,7 +137,6 @@ HWTEST_F(InputWindowMonitorTest, TransformWindowRects, Function | SmallTest | Le
  */
 HWTEST_F(InputWindowMonitorTest, GetDisplayDirectionForMmi02, Function | SmallTest | Level2)
 {
-
     MMI::Direction direction = MMI::DIRECTION0;
     Rotation rotate = Rotation::ROTATION_90;
     rotate = Rotation::ROTATION_180;
