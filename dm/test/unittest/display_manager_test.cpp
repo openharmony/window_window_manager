@@ -374,6 +374,58 @@ HWTEST_F(DisplayManagerTest, GetScreenBrightness, Function | SmallTest | Level1)
     auto ret = DisplayManager::GetInstance().GetScreenBrightness(screenId);
     ASSERT_FALSE(ret == 1);
 }
+
+/**
+ * @tc.name: GetDisplayById
+ * @tc.desc: GetDisplayById fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetDisplayById, Function | SmallTest | Level1)
+{
+    DisplayId displayId = 0;
+    DisplayManager::GetInstance().destroyed_ = true;
+    auto ret = DisplayManager::GetInstance().GetDisplayById(displayId);
+    ASSERT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: RegisterPrivateWindowListener
+ * @tc.desc: RegisterPrivateWindowListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, RegisterPrivateWindowListener, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IPrivateWindowListener> listener;
+    auto ret = DisplayManager::GetInstance().RegisterPrivateWindowListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: UnregisterPrivateWindowListener
+ * @tc.desc: UnregisterPrivateWindowListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, UnregisterPrivateWindowListener, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IPrivateWindowListener> listener = nullptr;
+    sptr<DisplayManager::Impl> impl_;
+    auto ret = DisplayManager::GetInstance().UnregisterPrivateWindowListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: ImplUnregisterPrivateWindowListener
+ * @tc.desc: ImplUnregisterPrivateWindowListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ImplUnregisterPrivateWindowListener, Function | SmallTest | Level1)
+{
+    std::recursive_mutex mutex;
+    DisplayManager::Impl impl(mutex);
+    sptr<DisplayManager::IPrivateWindowListener> listener;
+    auto ret = impl.UnregisterPrivateWindowListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
