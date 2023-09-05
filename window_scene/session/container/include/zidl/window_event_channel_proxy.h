@@ -28,6 +28,7 @@ public:
 
     ~WindowEventChannelProxy() {};
 
+    WSError TransferBackpressedEventForConsumed(bool& isConsumed) override;
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;

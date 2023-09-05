@@ -1152,6 +1152,15 @@ WSError Session::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
     return WSError::WS_OK;
 }
 
+WSError Session::TransferBackPressedEventForConsumed(bool& isConsumed)
+{
+    if (!windowEventChannel_) {
+        WLOGFE("windowEventChannel_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return windowEventChannel_->TransferBackpressedEventForConsumed(isConsumed);
+}
+
 WSError Session::TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
 {
     if (!windowEventChannel_) {
