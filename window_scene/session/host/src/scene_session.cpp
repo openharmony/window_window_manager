@@ -477,15 +477,15 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
 
 WSError SceneSession::RaiseToAppTop()
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        WLOGFE("raise to app top permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     PostTask([weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
-        }
-        if (!SessionPermission::IsSystemCalling()) {
-            WLOGFE("raise to app top permission denied!");
-            return WSError::WS_ERROR_NOT_SYSTEM_APP;
         }
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onRaiseToTop_) {
             session->sessionChangeCallback_->onRaiseToTop_();
@@ -497,15 +497,15 @@ WSError SceneSession::RaiseToAppTop()
 
 WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("RaiseAboveTarget permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
     PostTask([weakThis = wptr(this), subWindowId]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
-        }
-        if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-            WLOGFE("RaiseAboveTarget permission denied!");
-            return WSError::WS_ERROR_NOT_SYSTEM_APP;
         }
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onRaiseAboveTarget_) {
             session->sessionChangeCallback_->onRaiseAboveTarget_(subWindowId);
