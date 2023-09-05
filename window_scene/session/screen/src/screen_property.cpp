@@ -41,7 +41,6 @@ void ScreenProperty::SetBounds(const RRect& bounds)
     bounds_ = bounds;
     UpdateXDpi();
     UpdateYDpi();
-    UpdateDisplayOrientation();
 }
 
 RRect ScreenProperty::GetBounds() const
@@ -189,7 +188,7 @@ void ScreenProperty::UpdateVirtualPixelRatio(const RRect& bounds)
     }
 }
 
-void ScreenProperty::UpdateDisplayOrientation()
+void ScreenProperty::CalcDefaultDisplayOrientation()
 {
     if (bounds_.rect_.width_ > bounds_.rect_.height_) {
         displayOrientation_ = DisplayOrientation::LANDSCAPE;

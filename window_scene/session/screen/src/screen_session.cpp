@@ -259,10 +259,10 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation)
             break;
     }
     DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation);
-    property_.SetDisplayOrientation(displayOrientation);
     property_.SetBounds(bounds);
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
+    property_.SetDisplayOrientation(displayOrientation);
     WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f], rotation: %{public}u",
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(), targetRotation);
