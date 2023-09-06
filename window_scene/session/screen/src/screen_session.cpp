@@ -304,7 +304,28 @@ void ScreenSession::SetScreenRequestedOrientation(Orientation orientation)
 
 void ScreenSession::SetScreenRotationLocked(bool isLocked)
 {
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        isScreenLocked_ = isLocked;
+    }
+    for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            continue;
+        }
+        listener->OnScreenRotationLockedChange(isLocked);
+    }
+}
+
+void ScreenSession::SetScreenRotationLockedFromJs(bool isLocked)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     isScreenLocked_ = isLocked;
+}
+
+bool ScreenSession::IsScreenRotationLocked()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return isScreenLocked_;
 }
 
 Orientation ScreenSession::GetScreenRequestedOrientation() const
