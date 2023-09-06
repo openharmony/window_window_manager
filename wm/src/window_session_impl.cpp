@@ -327,7 +327,9 @@ WMError WindowSessionImpl::Destroy(bool needClearListener)
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    hostSession_->Disconnect();
+    if (hostSession_ != nullptr) {
+        hostSession_->Disconnect();
+    }
     NotifyBeforeDestroy(GetWindowName());
     if (needClearListener) {
         ClearListenersById(GetPersistentId());
