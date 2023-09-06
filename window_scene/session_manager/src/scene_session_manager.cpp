@@ -3302,6 +3302,22 @@ void SceneSessionManager::StartWindowInfoReportLoop()
     isReportTaskStart_ = true;
 }
 
+int32_t SceneSessionManager::GetStatusBarHeight()
+{
+    int32_t statusBarHeight = 0;
+    int32_t height = 0;
+    std::vector<sptr<SceneSession>> statusBarVector = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    for (auto& statusBar : statusBarVector) {
+        if (statusBar == nullptr || !IsSessionVisible(statusBar)) {
+            continue;
+        }
+        height = statusBar->GetSessionRect().height_;
+        statusBarHeight = (statusBarHeight > height) ? statusBarHeight : height;
+    }
+
+    return statusBarHeight;
+}
+
 void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
     const sptr<SceneSession>& sceneSession, bool isInputUpdated)
 {
@@ -3339,14 +3355,10 @@ void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(
     }
 
     // calculate new rect of calling window
-    WSRect newRect;
-    if (isInputUpdated && isCallingSessionFloating) {
-        newRect = callingWindowRestoringRect_;
-    } else {
-        newRect = callingSessionRect;
-    }
+    WSRect newRect = callingSessionRect;
     newRect.posY_ = softInputSessionRect.posY_ - static_cast<int32_t>(newRect.height_);
-    newRect.posY_ = std::max(newRect.posY_, STATUS_BAR_AVOID_AREA);
+    int32_t statusHeight = GetStatusBarHeight();
+    newRect.posY_ = std::max(newRect.posY_, statusHeight);
 
     if (!isInputUpdated) {
         callingWindowRestoringRect_ = callingSessionRect;
@@ -3363,6 +3375,12 @@ void SceneSessionManager::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> 
 {
     // if keyboard will occupy calling, notify calling window the occupied area and safe height
     const WSRect& safeRect = SessionHelper::GetOverlap(occupiedArea, rect, 0, 0);
+    const WSRect& lastSafeRect = callingSession->GetLastSafeRect();
+    if (lastSafeRect == safeRect) {
+        WLOGFI("NotifyOccupiedAreaChangeInfo lastSafeRect is same to safeRect");
+        return;
+    }
+    callingSession->SetLastSafeRect(safeRect);
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
         SessionHelper::TransferToRect(safeRect), safeRect.height_);
     WLOGFD("OccupiedAreaChangeInfo rect: %{public}u %{public}u %{public}u %{public}u",

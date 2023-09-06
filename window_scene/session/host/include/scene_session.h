@@ -181,6 +181,9 @@ public:
     sptr<IRemoteObject> GetSelfToken();
     WSError RaiseAboveTarget(int32_t subWindowId) override;
     void SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func);
+    WSRect GetLastSafeRect();
+    void SetLastSafeRect(WSRect rect);
+
 private:
     void HandleStyleEvent(MMI::WindowArea area) override;
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
@@ -210,6 +213,7 @@ private:
     mutable std::mutex sessionChangeCbMutex_;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     sptr<IRemoteObject> selfToken_ = nullptr;
+    WSRect lastSafeRect = { 0, 0, 0, 0 };
 };
 } // namespace OHOS::Rosen
 
