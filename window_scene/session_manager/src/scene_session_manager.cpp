@@ -4065,6 +4065,7 @@ WSError SceneSessionManager::MoveSessionsToBackground(const std::vector<int32_t>
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
 
+    result.insert(result.end(), sessionIds.begin(), sessionIds.end());
     return WSError::WS_OK;
 }
 
