@@ -136,6 +136,14 @@ enum AncoSceneState: int32_t {
     NOTIFY_FOREGROUND,
 };
 
+/**
+ * @brief collaborator type.
+ */
+enum SessionOperationType : int32_t {
+    TYPE_DEFAULT = 0,
+    TYPE_CLEAR,
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
@@ -164,6 +172,7 @@ struct SessionInfo {
     ContinueState continueState = ContinueState::CONTINUESTATE_ACTIVE;
     int64_t uiAbilityId_ = 0;
     int32_t ancoSceneState;
+    bool isClearSession = false;
 };
 
 enum class SessionFlag : uint32_t {

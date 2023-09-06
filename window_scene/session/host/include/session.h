@@ -117,6 +117,7 @@ public:
     void SetSessionInfoCallerPersistentId(int32_t callerPersistentId);
     void SetSessionInfoContinueState(ContinueState state);
     void SetSessionInfoLockedState(bool state);
+    void SetSessionInfoIsClearSession(bool isClearSession);
     void SetSessionInfo(const SessionInfo& info);
     const SessionInfo& GetSessionInfo() const;
     WindowType GetWindowType() const;

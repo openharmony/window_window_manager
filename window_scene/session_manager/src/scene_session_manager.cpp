@@ -988,6 +988,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     abilitySessionInfo->startSetting = sessionInfo.startSetting;
     abilitySessionInfo->callingTokenId = sessionInfo.callingTokenId_;
     abilitySessionInfo->userId = currentUserId_;
+    abilitySessionInfo->isClearSession = sessionInfo.isClearSession;
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = *sessionInfo.want;
     } else {
@@ -1208,7 +1209,11 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
         if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
             NotifyClearSession(scnSession->GetCollaboratorType(), scnSessionInfo->persistentId);
         }
+        if (scnSessionInfo->isClearSession) {
+            scnSessionInfo->resultCode = -1;
+        }
         AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
+        scnSession->SetSessionInfoAncoSceneState(AncoSceneState::DEFAULT_STATE);
         if (needRemoveSession) {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMap_.erase(persistentId);
