@@ -919,7 +919,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
     return engine.CreateUndefined();
 }
 
-void SetIsClearSession(NativeEngine& engine, NativeObject* jsSceneSessionObj, sptr<SceneSession>& sceneSession)
+void JsSceneSessionManager::SetIsClearSession(NativeEngine& engine, NativeObject* jsSceneSessionObj, sptr<SceneSession>& sceneSession)
 {
     NativeValue* jsOperatorType = jsSceneSessionObj->GetProperty("operatorType");
     if (jsOperatorType->TypeOf() != NATIVE_UNDEFINED) {
