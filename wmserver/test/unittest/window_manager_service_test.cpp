@@ -136,9 +136,7 @@ HWTEST_F(WindowManagerServiceTest, Dump01, Function | SmallTest | Level2)
     if (fd == -1) {
         return;
     }
-    if (static_cast<int>(WMError::WM_ERROR_INVALID_PARAM) == wms->Dump(-1, args)) {
-        ASSERT_EQ(static_cast<int>(WMError::WM_ERROR_INVALID_PARAM), wms->Dump(-1, args));
-    }
+    ASSERT_NE(static_cast<int>(WMError::WM_ERROR_INVALID_PARAM), wms->Dump(-1, args));
     ASSERT_EQ(static_cast<int>(WMError::WM_OK), wms->Dump(fd, args));
     close(fd);
     unlink(dumpFile.c_str());
@@ -153,11 +151,7 @@ HWTEST_F(WindowManagerServiceTest, NotifyWindowTransition01, Function | SmallTes
     sptr<WindowTransitionInfo> fromInfo = nullptr;
     sptr<WindowTransitionInfo> toInfo = nullptr;
     ASSERT_EQ(WMError::WM_OK, wms->NotifyWindowTransition(fromInfo, toInfo, false));
-    if (wms->NotifyWindowTransition(fromInfo, toInfo, true) == WMError::WM_ERROR_NO_REMOTE_ANIMATION) {
-        ASSERT_EQ(WMError::WM_ERROR_NO_REMOTE_ANIMATION, wms->NotifyWindowTransition(fromInfo, toInfo, true));
-    } else if (wms->NotifyWindowTransition(fromInfo, toInfo, true) == WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, wms->NotifyWindowTransition(fromInfo, toInfo, true));
-    }
+    ASSERT_NE(WMError::WM_ERROR_NO_REMOTE_ANIMATION, wms->NotifyWindowTransition(fromInfo, toInfo, true));
 }
 /**
  * @tc.name: StartingWindow
@@ -286,11 +280,7 @@ HWTEST_F(WindowManagerServiceTest, GetModeChangeHotZones01, Function | SmallTest
     ASSERT_EQ(WMError::WM_DO_NOTHING, wms->GetModeChangeHotZones(displayId, hotZone));
     config.isModeChangeHotZoneConfigured_ = true;
     wms->hotZonesConfig_ = config;
-    if (wms->GetModeChangeHotZones(displayId, hotZone) == WMError::WM_ERROR_NULLPTR) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->GetModeChangeHotZones(displayId, hotZone));
-    } else if (wms->GetModeChangeHotZones(displayId, hotZone) == WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, wms->GetModeChangeHotZones(displayId, hotZone));
-    }
+    ASSERT_NE(WMError::WM_ERROR_NULLPTR, wms->GetModeChangeHotZones(displayId, hotZone));
 }
 /**
  * @tc.name: UpdateAvoidAreaListener
@@ -302,11 +292,7 @@ HWTEST_F(WindowManagerServiceTest, UpdateAvoidAreaListener01, Function | SmallTe
     sptr<WindowProperty> property = new WindowProperty();
     sptr<WindowNode> node = new WindowNode(property);
     wms->windowRoot_->windowNodeMap_.insert(std::make_pair(0, node));
-    if (WMError::WM_DO_NOTHING == wms->UpdateAvoidAreaListener(0, true)) {
-        ASSERT_EQ(WMError::WM_DO_NOTHING, wms->UpdateAvoidAreaListener(0, true));
-    } else if (wms->UpdateAvoidAreaListener(0, true) == WMError::WM_OK) {
-        ASSERT_EQ(WMError::WM_OK, wms->UpdateAvoidAreaListener(0, true));
-    }
+    ASSERT_NE(WMError::WM_DO_NOTHING, wms->UpdateAvoidAreaListener(0, true));
 }
 /**
  * @tc.name: BindDialogTarget
@@ -317,9 +303,7 @@ HWTEST_F(WindowManagerServiceTest, BindDialogTarget01, Function | SmallTest | Le
 {
     sptr<IRemoteObject> targetToken = new IRemoteObjectMocker();
     uint32_t id = 0;
-    if (WMError::WM_ERROR_NULLPTR == wms->BindDialogTarget(id, targetToken)) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->BindDialogTarget(id, targetToken));
-    }
+    ASSERT_NE(WMError::WM_ERROR_NULLPTR, wms->BindDialogTarget(id, targetToken));
 }
 /**
  * @tc.name: DispatchKeyEvent01
@@ -435,9 +419,7 @@ HWTEST_F(WindowManagerServiceTest, DispatchKeyEvent03, Function | SmallTest | Le
 HWTEST_F(WindowManagerServiceTest, SetWindowGravity01, Function | SmallTest | Level2)
 {
     uint32_t id = 0;
-    if (wms->SetWindowGravity(id, WindowGravity::WINDOW_GRAVITY_BOTTOM, 0) == WMError::WM_ERROR_NULLPTR) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->SetWindowGravity(id, WindowGravity::WINDOW_GRAVITY_BOTTOM, 0));
-    }
+    ASSERT_NE(WMError::WM_ERROR_NULLPTR, wms->SetWindowGravity(id, WindowGravity::WINDOW_GRAVITY_BOTTOM, 0));
 }
 /*
  * @tc.name: GetWindowAnimationTargets01
@@ -733,9 +715,7 @@ HWTEST_F(WindowManagerServiceTest, GetTopWindowId, Function | SmallTest | Level2
     uint32_t mainWinId = 1;
     uint32_t topWinId = 1;
     WMError res = wms->GetTopWindowId(mainWinId, topWinId);
-    if (WMError::WM_ERROR_INVALID_WINDOW == res) {
-        ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
-    }
+    ASSERT_NE(WMError::WM_ERROR_INVALID_WINDOW, res);
 }
 
 /**
@@ -783,9 +763,7 @@ HWTEST_F(WindowManagerServiceTest, RaiseToAppTop, Function | SmallTest | Level2)
 {
     uint32_t windowId = 1;
     WmErrorCode res = wms->RaiseToAppTop(windowId);
-    if (WmErrorCode::WM_ERROR_STATE_ABNORMALLY == res) {
-        ASSERT_EQ(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, res);
-    }
+    ASSERT_NE(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, res);
 }
 
 /**
