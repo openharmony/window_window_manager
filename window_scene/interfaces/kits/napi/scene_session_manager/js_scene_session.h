@@ -62,6 +62,7 @@ private:
     void ProcessBindDialogTargetRegister();
     void ProcessSessionRectChangeRegister();
     void ProcessRaiseToTopRegister();
+    void ProcessRaiseToTopForPointDownRegister();
     void ProcessBackPressedRegister();
     void ProcessSessionFocusableChangeRegister();
     void ProcessSessionTouchableChangeRegister();
@@ -91,6 +92,7 @@ private:
     void OnBindDialogTarget(const sptr<SceneSession>& sceneSession);
     void OnSessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void OnRaiseToTop();
+    void OnRaiseToTopForPointDown();
     void OnRaiseAboveTarget(int32_t subWindowId);
     void OnBackPressed(bool needMoveToBackground);
     void OnSessionFocusableChange(bool isFocusable);
