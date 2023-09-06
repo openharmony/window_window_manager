@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCREEN_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCREEN_SESSION_H
 
+#include <mutex>
 #include <vector>
 
 #include <refbase.h>
@@ -42,6 +43,7 @@ public:
     virtual void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason) = 0;
     virtual void OnSensorRotationChange(float sensorRotation) = 0;
     virtual void OnScreenOrientationChange(float screenOrientation) = 0;
+    virtual void OnScreenRotationLockedChange(bool isLocked) = 0;
 };
 
 enum class ScreenState : int32_t {
@@ -100,6 +102,8 @@ public:
     void SetPrivateSessionForeground(bool hasPrivate);
     void SetDisplayBoundary(const RectF& rect, const uint32_t& offsetY);
     void SetScreenRotationLocked(bool isLocked);
+    void SetScreenRotationLockedFromJs(bool isLocked);
+    bool IsScreenRotationLocked();
     void UpdatePropertyAfterRotation(RRect bounds, int rotation);
 
     std::string name_ { "UNKNOW" };
@@ -129,6 +133,7 @@ private:
     std::vector<IScreenChangeListener*> screenChangeListenerList_;
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     bool hasPrivateWindowForeground_ = false;
+    std::recursive_mutex mutex_;
 };
 
 class ScreenSessionGroup : public ScreenSession {
