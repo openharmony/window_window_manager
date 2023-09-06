@@ -17,11 +17,14 @@
 
 #include <context.h>
 #include <js_runtime_utils.h>
+#include "interfaces/include/ws_common.h"
 #include "napi_common_want.h"
+#include "native_value.h"
 #include "session/host/include/scene_persistence.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session.h"
 #include "session_manager/include/scene_session_manager.h"
+#include <stdint.h>
 #include <ui_content.h>
 #include "want.h"
 #include "window_manager_hilog.h"
@@ -890,6 +893,16 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
                 errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
             } else {
                 sceneSession = jsSceneSession->GetNativeSession();
+                NativeValue* jsOperatorType = jsSceneSessionObj->GetProperty("operatorType");
+                if (jsOperatorType->TypeOf() != NATIVE_UNDEFINED) {
+                    int32_t operatorType = -1;
+                    if (ConvertFromJsValue(engine, jsOperatorType, operatorType)) {
+                        WLOGFI("[NAPI]operatorType: %{public}d", operatorType);
+                        if (operatorType == SessionOperationType::TYPE_CLEAR) {
+                            sceneSession->GetSessionInfo().isClearSession = true;
+                        }
+                    }
+                }
             }
         }
     }
