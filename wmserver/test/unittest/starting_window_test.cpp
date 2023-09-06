@@ -470,7 +470,7 @@ HWTEST_F(StartingWindowTest, SetStartingWindowAnimation01, Function | SmallTest 
  */
 HWTEST_F(StartingWindowTest, IsWindowFollowParent01, Function | SmallTest | Level2)
 {
-    ASSERT_NE(true, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_DIALOG));
+    ASSERT_EQ(true, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_DIALOG));
     ASSERT_EQ(true, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_APP_SUB_WINDOW));
     ASSERT_EQ(false, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_APP_COMPONENT));
 }

@@ -280,7 +280,7 @@ HWTEST_F(WindowManagerServiceTest, GetModeChangeHotZones01, Function | SmallTest
     ASSERT_EQ(WMError::WM_DO_NOTHING, wms->GetModeChangeHotZones(displayId, hotZone));
     config.isModeChangeHotZoneConfigured_ = true;
     wms->hotZonesConfig_ = config;
-    ASSERT_NE(WMError::WM_ERROR_NULLPTR, wms->GetModeChangeHotZones(displayId, hotZone));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->GetModeChangeHotZones(displayId, hotZone));
 }
 /**
  * @tc.name: UpdateAvoidAreaListener
