@@ -1483,7 +1483,7 @@ HWTEST_F(WindowLayoutPolicyTest, NotifyClientAndAnimation, Function | SmallTest 
     WindowSizeChangeReason reason=WindowSizeChangeReason::DRAG;
     WindowNode windowNode;
     EXPECT_EQ(windowNode.GetWindowToken(), nullptr);
-    layoutPolicy_->NotifyClientAndAnimation( node, winRect , reason);
+    layoutPolicy_->NotifyClientAndAnimation(node, winRect, reason);
 }
 
 }
