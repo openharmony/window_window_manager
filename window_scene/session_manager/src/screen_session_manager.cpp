@@ -714,7 +714,12 @@ DMError ScreenSessionManager::IsScreenRotationLocked(bool& isLocked)
         WLOGFE("SCB: ScreenSessionManager is screen rotation locked permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    isLocked = ScreenRotationProperty::IsScreenRotationLocked();
+    sptr<ScreenSession> screenSession = GetDefaultScreenSession();
+    if (screenSession == nullptr) {
+        WLOGFE("fail to get default screenSession");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    isLocked = screenSession->IsScreenRotationLocked();
     WLOGFI("SCB: IsScreenRotationLocked:isLocked: %{public}u", isLocked);
     return DMError::DM_OK;
 }
@@ -725,8 +730,14 @@ DMError ScreenSessionManager::SetScreenRotationLocked(bool isLocked)
         WLOGFE("SCB: ScreenSessionManager set screen rotation locked permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
+    sptr<ScreenSession> screenSession = GetDefaultScreenSession();
+    if (screenSession == nullptr) {
+        WLOGFE("fail to get default screenSession");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    screenSession->SetScreenRotationLocked(isLocked);
     WLOGFI("SCB: SetScreenRotationLocked: isLocked: %{public}u", isLocked);
-    return ScreenRotationProperty::SetScreenRotationLocked(isLocked);
+    return DMError::DM_OK;
 }
 
 void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, RRect bounds, int rotation)
