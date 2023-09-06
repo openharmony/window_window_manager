@@ -120,6 +120,7 @@ HWTEST_F(WindowPropertyTest, Read, Function | SmallTest | Level2)
     winPropDst.Read(parcel, PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY);
     winPropDst.Read(parcel, PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
     winPropDst.Read(parcel, PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
+    winPropDst.Read(parcel, PropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE);
 
     ASSERT_EQ(true, winPropDst.GetPrivacyMode());
     ASSERT_EQ(false, winPropDst.GetTransparent());
