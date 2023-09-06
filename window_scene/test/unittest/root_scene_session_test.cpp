@@ -16,8 +16,6 @@
 #include "root_scene_session.h"
 #include <gtest/gtest.h>
 #include "session_info.h"
-// #include "native_engine.h"
-// #include "native_value.h"
 
 using namespace testing;
 using namespace testing::ext;
