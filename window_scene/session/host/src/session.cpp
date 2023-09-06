@@ -139,6 +139,12 @@ void Session::SetSessionInfoLockedState(bool state)
     sessionInfo_.lockedState = state;
 }
 
+void Session::SetSessionInfoIsClearSession(bool isClearSession)
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    sessionInfo_.isClearSession = isClearSession;
+}
+
 void Session::SetSessionInfo(const SessionInfo& info)
 {
     std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);

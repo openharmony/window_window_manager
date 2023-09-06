@@ -24,7 +24,6 @@
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session.h"
 #include "session_manager/include/scene_session_manager.h"
-#include <stdint.h>
 #include <ui_content.h>
 #include "want.h"
 #include "window_manager_hilog.h"
@@ -893,16 +892,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
                 errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
             } else {
                 sceneSession = jsSceneSession->GetNativeSession();
-                NativeValue* jsOperatorType = jsSceneSessionObj->GetProperty("operatorType");
-                if (jsOperatorType->TypeOf() != NATIVE_UNDEFINED) {
-                    int32_t operatorType = -1;
-                    if (ConvertFromJsValue(engine, jsOperatorType, operatorType)) {
-                        WLOGFI("[NAPI]operatorType: %{public}d", operatorType);
-                        if (operatorType == SessionOperationType::TYPE_CLEAR) {
-                            sceneSession->GetSessionInfo().isClearSession = true;
-                        }
-                    }
-                }
+                SetIsClearSession(engine, jsSceneSessionObj, sceneSession);
             }
         }
     }
@@ -927,6 +917,20 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
 
     SceneSessionManager::GetInstance().RequestSceneSessionDestruction(sceneSession, needRemoveSession);
     return engine.CreateUndefined();
+}
+
+void SetIsClearSession(NativeEngine& engine, NativeObject* jsSceneSessionObj, sptr<SceneSession>& sceneSession)
+{
+    NativeValue* jsOperatorType = jsSceneSessionObj->GetProperty("operatorType");
+    if (jsOperatorType->TypeOf() != NATIVE_UNDEFINED) {
+        int32_t operatorType = -1;
+        if (ConvertFromJsValue(engine, jsOperatorType, operatorType)) {
+            WLOGFI("[NAPI]operatorType: %{public}d", operatorType);
+            if (operatorType == SessionOperationType::TYPE_CLEAR) {
+                sceneSession->SetSessionInfoIsClearSession(true);
+            }
+        }
+    }
 }
 
 NativeValue* JsSceneSessionManager::OnRequestSceneSessionByCall(NativeEngine& engine, NativeCallbackInfo& info)
