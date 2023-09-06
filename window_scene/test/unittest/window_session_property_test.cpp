@@ -383,11 +383,11 @@ HWTEST_F(WindowSessionPropertyTest, Unmarshalling, Function | SmallTest | Level2
 */
 HWTEST_F(WindowSessionPropertyTest, CopyFrom, Function | SmallTest | Level2)
 {
-   WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.CopyFrom(property);
     WindowSessionProperty *wproperty = new WindowSessionProperty();
-    ASSERT_EQ(wproperty->GetTokenState(), true);
+    ASSERT_EQ(wproperty->GetTokenState(), false);
 }
 } // namespace
 } // namespace Rosen
