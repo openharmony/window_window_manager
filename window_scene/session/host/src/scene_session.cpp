@@ -901,7 +901,10 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
     }
     auto property = GetSessionProperty();
-    if (property && property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+    if (property == nullptr) {
+        return Session::TransferPointerEvent(pointerEvent);
+    }
+    if (property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
         WindowHelper::IsMainWindow(property->GetWindowType()) &&
         property->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
         if (!moveDragController_) {
@@ -973,6 +976,10 @@ void SceneSession::NotifySessionRectChange(const WSRect& rect, const SizeChangeR
 bool SceneSession::IsDecorEnable()
 {
     auto property = GetSessionProperty();
+    if (property == nullptr) {
+        WLOGE("property is nullptr");
+        return false;
+    }
     return WindowHelper::IsMainWindow(property->GetWindowType()) && systemConfig_.isSystemDecorEnable_ &&
         WindowHelper::IsWindowModeSupported(systemConfig_.decorModeSupportInfo_, property->GetWindowMode());
 }
