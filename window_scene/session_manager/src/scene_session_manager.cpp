@@ -2736,7 +2736,7 @@ WSError SceneSessionManager::GetSessionInfos(const std::string& deviceId, int32_
         for (iter = sceneSessionMap_.begin(); iter != sceneSessionMap_.end(); iter++) {
             auto sceneSession = iter->second;
             if (sceneSession == nullptr) {
-                WLOGFE("session: %{public}d is nullptr", sceneSession->GetPersistentId());
+                WLOGFE("session is nullptr");
                 continue;
             }
             auto sessionInfo = sceneSession->GetSessionInfo();
