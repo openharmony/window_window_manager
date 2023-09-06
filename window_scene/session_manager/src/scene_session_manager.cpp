@@ -1213,6 +1213,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
             scnSessionInfo->resultCode = -1;
         }
         AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(scnSessionInfo);
+        scnSession->SetSessionInfoAncoSceneState(AncoSceneState::DEFAULT_STATE)；
         if (needRemoveSession) {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMap_.erase(persistentId);
