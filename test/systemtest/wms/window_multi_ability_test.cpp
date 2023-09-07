@@ -205,28 +205,6 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow2, Function | MediumTest | Le
  */
 HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, Function | MediumTest | Level3)
 {
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        sptr<WindowScene> scene1 = Utils::CreateWindowScene();
-        ASSERT_EQ(WMError::WM_OK, scene1->GoForeground());
-        sptr<WindowScene> scene2 = Utils::CreateWindowScene();
-        sptr<WindowScene> scene3 = Utils::CreateWindowScene();
-        ASSERT_EQ(WMError::WM_OK, scene3->GoForeground());
-        ASSERT_EQ(WMError::WM_OK, scene1->GoBackground());
-        ASSERT_EQ(WMError::WM_OK, scene1->GoDestroy());
-        sptr<WindowScene> scene4 = Utils::CreateWindowScene();
-        ASSERT_EQ(WMError::WM_OK, scene3->GoBackground());
-        ASSERT_EQ(WMError::WM_OK, scene2->GoForeground());
-        ASSERT_EQ(WMError::WM_OK, scene4->GoForeground());
-        ASSERT_EQ(WMError::WM_OK, scene2->GoBackground());
-        sptr<WindowScene> scene5 = Utils::CreateWindowScene();
-        ASSERT_EQ(WMError::WM_OK, scene3->GoDestroy());
-        ASSERT_EQ(WMError::WM_OK, scene5->GoForeground());
-        ASSERT_EQ(WMError::WM_OK, scene5->GoBackground());
-        ASSERT_EQ(WMError::WM_OK, scene4->GoBackground());
-        ASSERT_EQ(WMError::WM_OK, scene4->GoDestroy());
-        ASSERT_EQ(WMError::WM_OK, scene5->GoDestroy());
-        ASSERT_EQ(WMError::WM_OK, scene2->GoDestroy());
-    }else {
         sptr<WindowScene> scene1 = Utils::CreateWindowScene();
         ASSERT_NE(WMError::WM_OK, scene1->GoForeground());
         sptr<WindowScene> scene2 = Utils::CreateWindowScene();
@@ -247,7 +225,6 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, Function | MediumTest | L
         ASSERT_NE(WMError::WM_OK, scene4->GoDestroy());
         ASSERT_NE(WMError::WM_OK, scene5->GoDestroy());
         ASSERT_NE(WMError::WM_OK, scene2->GoDestroy());
-    }
 }
 } // namespace Rosen
 } // namespace OHOS
