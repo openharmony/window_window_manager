@@ -837,7 +837,7 @@ HWTEST_F(WindowControllerTest, RequestFocus, Function | SmallTest | Level3)
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
        ASSERT_NE(WMError::WM_ERROR_INVALID_OPERATION, res);
     } else {
-       AASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
+       ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
     }
 }
 
