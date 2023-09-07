@@ -462,6 +462,7 @@ ohos_static_library("wms_systemtest_common") {
     "${window_base_path}/dm:libdm",
     "${window_base_path}/dmserver:libdms",
     "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/wm:libwm",
     "//commonlibrary/c_utils/base:utils",
     "//foundation/arkui/napi:ace_napi",
