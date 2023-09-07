@@ -629,7 +629,7 @@ HWTEST_F(WindowManagerServiceTest, RequestFocus, Function | SmallTest | Level2)
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
        ASSERT_NE(res, WMError::WM_ERROR_NULLPTR);
     } else {
-       ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+       ASSERT_EQ(res, WMError::WM_OK);
     }
 }
 
