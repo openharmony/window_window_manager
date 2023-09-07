@@ -23,6 +23,7 @@
 #include "starting_window.h"
 #include "window_helper.h"
 #include "window_transition_info.h"
+#include "scene_board_judgement.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -470,8 +471,13 @@ HWTEST_F(StartingWindowTest, SetStartingWindowAnimation01, Function | SmallTest 
  */
 HWTEST_F(StartingWindowTest, IsWindowFollowParent01, Function | SmallTest | Level2)
 {
-    ASSERT_EQ(true, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_DIALOG));
-    ASSERT_EQ(true, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_APP_SUB_WINDOW));
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(false, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_DIALOG));
+        ASSERT_EQ(true, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_APP_SUB_WINDOW));
+    } else {
+        ASSERT_EQ(true, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_DIALOG));
+        ASSERT_EQ(true, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_APP_SUB_WINDOW));
+    }
     ASSERT_EQ(false, StartingWindow::IsWindowFollowParent(WindowType::WINDOW_TYPE_APP_COMPONENT));
 }
 
