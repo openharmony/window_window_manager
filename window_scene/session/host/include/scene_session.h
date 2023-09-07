@@ -45,6 +45,7 @@ using NotifyBindDialogSessionFunc = std::function<void(const sptr<SceneSession>&
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect, const SizeChangeReason& reason)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
+using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
 using SetWindowPatternOpacityFunc = std::function<void(float opacity)>;
 using NotifyIsCustomAnimationPlayingCallback = std::function<void(bool isFinish)>;
 using NotifySystemBarPropertyChangeFunc = std::function<void(
@@ -74,6 +75,7 @@ public:
         NotifyBindDialogSessionFunc onBindDialogTarget_;
         NotifySessionRectChangeFunc onRectChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
+        NotifyRaiseToTopForPointDownFunc onRaiseToTopForPointDown_;
         NotifySessionEventFunc OnSessionEvent_;
         NotifySystemBarPropertyChangeFunc OnSystemBarPropertyChange_;
         NotifyNeedAvoidFunc OnNeedAvoid_;
@@ -104,6 +106,7 @@ public:
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
     WSError RaiseToAppTop() override;
+    WSError RaiseToAppTopForPointDown();
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) override;
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,

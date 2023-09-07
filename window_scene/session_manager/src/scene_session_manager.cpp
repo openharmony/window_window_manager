@@ -2172,10 +2172,34 @@ void SceneSessionManager::NotifySessionForCallback(const sptr<SceneSession>& scn
 
 bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
 {
-    if (session->IsVisible() || session->GetSessionState() == SessionState::STATE_ACTIVE ||
-        session->GetSessionState() == SessionState::STATE_FOREGROUND) {
+    if (session == nullptr) {
+        return false;
+    }
+    const auto& state = session->GetSessionState();
+    if (WindowHelper::IsSubWindow(session->GetWindowType())) {
+        const auto& parentSceneSession = GetSceneSession(session->GetParentPersistentId());
+        if (parentSceneSession == nullptr) {
+            WLOGFW("Can not find parent for this sub window, id: %{public}d", session->GetPersistentId());
+            return false;
+        }
+        const auto& parentState = parentSceneSession->GetSessionState();
+        if (session->IsVisible() || (state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND)) {
+            if (parentState == SessionState::STATE_INACTIVE || parentState == SessionState::STATE_BACKGROUND) {
+                WLOGFD("Parent of this sub window is at background, id: %{public}d", session->GetPersistentId());
+                return false;
+            }
+            WLOGFD("Sub window is at foreground, id: %{public}d", session->GetPersistentId());
+            return true;
+        }
+        WLOGFD("Sub window is at background, id: %{public}d", session->GetPersistentId());
+        return false;
+    }
+
+    if (session->IsVisible() || state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND) {
+        WLOGFD("Window is at foreground, id: %{public}d", session->GetPersistentId());
         return true;
     }
+    WLOGFD("Window is at background, id: %{public}d", session->GetPersistentId());
     return false;
 }
 

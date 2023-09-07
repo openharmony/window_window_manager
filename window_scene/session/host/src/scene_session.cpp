@@ -492,6 +492,23 @@ WSError SceneSession::RaiseToAppTop()
     });
 }
 
+WSError SceneSession::RaiseToAppTopForPointDown()
+{
+    PostTask([weakThis = wptr(this)]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onRaiseToTopForPointDown_) {
+            session->sessionChangeCallback_->onRaiseToTopForPointDown_();
+        }
+        WLOGFD("RaiseToAppTopForPointDown, id: %{public}d", session->GetPersistentId());
+        return WSError::WS_OK;
+    });
+    return WSError::WS_OK;
+}
+
 WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
@@ -926,10 +943,11 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
     }
 
-    bool raiseEnabled = WindowHelper::IsSubWindow(property->GetWindowType()) && property->GetRaiseEnabled() &&
+    bool raiseEnabled = (WindowHelper::IsSubWindow(property->GetWindowType()) ||
+        property->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) && property->GetRaiseEnabled() &&
         (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     if (raiseEnabled) {
-        RaiseToAppTop();
+        RaiseToAppTopForPointDown();
     }
     return Session::TransferPointerEvent(pointerEvent);
 }
