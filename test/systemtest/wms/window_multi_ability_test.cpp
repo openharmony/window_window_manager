@@ -73,14 +73,14 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow01, Function | MediumTest | L
         ASSERT_NE(WMError::WM_OK, scene3->GoForeground());
         ASSERT_NE(WMError::WM_OK, scene4->GoForeground());
         ASSERT_NE(WMError::WM_OK, scene5->GoForeground());
-    } 
+    }
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(WMError::WM_OK, scene5->GoBackground());
         ASSERT_EQ(WMError::WM_OK, scene4->GoBackground());
         ASSERT_EQ(WMError::WM_OK, scene3->GoBackground());
         ASSERT_EQ(WMError::WM_OK, scene2->GoBackground());
         ASSERT_EQ(WMError::WM_OK, scene1->GoBackground());
-    }else{
+    }else {
         ASSERT_NE(WMError::WM_OK, scene5->GoBackground());
         ASSERT_NE(WMError::WM_OK, scene4->GoBackground());
         ASSERT_NE(WMError::WM_OK, scene3->GoBackground());
@@ -248,7 +248,6 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, Function | MediumTest | L
         ASSERT_NE(WMError::WM_OK, scene5->GoDestroy());
         ASSERT_NE(WMError::WM_OK, scene2->GoDestroy());
     }
-   
 }
 } // namespace Rosen
 } // namespace OHOS

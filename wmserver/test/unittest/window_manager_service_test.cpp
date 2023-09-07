@@ -138,9 +138,9 @@ HWTEST_F(WindowManagerServiceTest, Dump01, Function | SmallTest | Level2)
         return;
     }
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-       ASSERT_EQ(static_cast<int>(WMError::WM_ERROR_INVALID_PARAM), wms->Dump(-1, args));
+        ASSERT_EQ(static_cast<int>(WMError::WM_ERROR_INVALID_PARAM), wms->Dump(-1, args));
     } else {
-       ASSERT_NE(static_cast<int>(WMError::WM_ERROR_INVALID_PARAM), wms->Dump(-1, args));
+        ASSERT_NE(static_cast<int>(WMError::WM_ERROR_INVALID_PARAM), wms->Dump(-1, args));
     }
     ASSERT_EQ(static_cast<int>(WMError::WM_OK), wms->Dump(fd, args));
     close(fd);
@@ -157,9 +157,9 @@ HWTEST_F(WindowManagerServiceTest, NotifyWindowTransition01, Function | SmallTes
     sptr<WindowTransitionInfo> toInfo = nullptr;
     ASSERT_EQ(WMError::WM_OK, wms->NotifyWindowTransition(fromInfo, toInfo, false));
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-       ASSERT_EQ(WMError::WM_ERROR_NO_REMOTE_ANIMATION, wms->NotifyWindowTransition(fromInfo, toInfo, true));
+        ASSERT_EQ(WMError::WM_ERROR_NO_REMOTE_ANIMATION, wms->NotifyWindowTransition(fromInfo, toInfo, true));
     } else {
-       ASSERT_NE(WMError::WM_ERROR_NO_REMOTE_ANIMATION, wms->NotifyWindowTransition(fromInfo, toInfo, true));
+        ASSERT_NE(WMError::WM_ERROR_NO_REMOTE_ANIMATION, wms->NotifyWindowTransition(fromInfo, toInfo, true));
     }
 }
 /**
@@ -437,9 +437,9 @@ HWTEST_F(WindowManagerServiceTest, SetWindowGravity01, Function | SmallTest | Le
 {
     uint32_t id = 0;
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-       ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->SetWindowGravity(id, WindowGravity::WINDOW_GRAVITY_BOTTOM, 0));
+        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->SetWindowGravity(id, WindowGravity::WINDOW_GRAVITY_BOTTOM, 0));
     } else {
-       ASSERT_NE(WMError::WM_ERROR_NULLPTR, wms->SetWindowGravity(id, WindowGravity::WINDOW_GRAVITY_BOTTOM, 0));
+        ASSERT_NE(WMError::WM_ERROR_NULLPTR, wms->SetWindowGravity(id, WindowGravity::WINDOW_GRAVITY_BOTTOM, 0));
     }
 }
 /*
@@ -627,9 +627,9 @@ HWTEST_F(WindowManagerServiceTest, RequestFocus, Function | SmallTest | Level2)
     uint32_t windowId = 1;
     WMError res = wms->RequestFocus(windowId);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-       ASSERT_NE(res, WMError::WM_ERROR_NULLPTR);
+        ASSERT_NE(res, WMError::WM_ERROR_NULLPTR);
     } else {
-       ASSERT_EQ(res, WMError::WM_OK);
+        ASSERT_EQ(res, WMError::WM_OK);
     }
 }
 
@@ -739,9 +739,9 @@ HWTEST_F(WindowManagerServiceTest, GetTopWindowId, Function | SmallTest | Level2
     uint32_t topWinId = 1;
     WMError res = wms->GetTopWindowId(mainWinId, topWinId);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-       ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
+        ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
     } else {
-       ASSERT_NE(WMError::WM_ERROR_INVALID_WINDOW, res);
+        ASSERT_NE(WMError::WM_ERROR_INVALID_WINDOW, res);
     }
 }
 
@@ -791,9 +791,9 @@ HWTEST_F(WindowManagerServiceTest, RaiseToAppTop, Function | SmallTest | Level2)
     uint32_t windowId = 1;
     WmErrorCode res = wms->RaiseToAppTop(windowId);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-       ASSERT_EQ(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, res);
+        ASSERT_EQ(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, res);
     } else {
-       ASSERT_NE(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, res);
+        ASSERT_NE(WmErrorCode::WM_ERROR_STATE_ABNORMALLY, res);
     }
 }
 
