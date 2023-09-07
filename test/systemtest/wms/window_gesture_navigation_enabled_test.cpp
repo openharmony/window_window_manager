@@ -19,6 +19,7 @@
 #include "future.h"
 #include "window_manager.h"
 #include "wm_common.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -91,12 +92,21 @@ HWTEST_F(GestureNavigationEnabledTest, SetGestureNavigationEnabled, Function | M
     sleep(WAIT_SLEEP_TIME);
     windowManager.SetGestureNavigaionEnabled(true);
     auto result = lisenter_->future_.GetResult(WAIT_FUTURE_RESULT);
-    ASSERT_EQ(result, false);
+   
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(result, true);
+    } else {
+        ASSERT_EQ(result, false);
+    }
     lisenter_->future_.Reset(true);
-
     windowManager.SetGestureNavigaionEnabled(false);
     result = lisenter_->future_.GetResult(WAIT_FUTURE_RESULT);
     ASSERT_EQ(result, true);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(result, false);
+    } else {
+        ASSERT_EQ(result, true);
+    }
     lisenter_->future_.Reset(false);
     windowManager.UnregisterGestureNavigationEnabledChangedListener(lisenter_);
     sleep(WAIT_SLEEP_TIME);

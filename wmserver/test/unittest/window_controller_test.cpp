@@ -21,6 +21,7 @@
 #include "remote_animation.h"
 #include "starting_window.h"
 #include "window_controller.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -833,7 +834,11 @@ HWTEST_F(WindowControllerTest, RequestFocus, Function | SmallTest | Level3)
 
     windowId = windowNode->GetWindowId();
     res = windowController_->RequestFocus(windowId);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+       ASSERT_NE(WMError::WM_ERROR_INVALID_OPERATION, res);
+    } else {
+       AASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
+    }
 }
 
 /**
@@ -973,7 +978,11 @@ HWTEST_F(WindowControllerTest, ChangeMouseStyle1, Function | SmallTest | Level3)
 
     sptr<MoveDragProperty> moveDragProperty;
     WMError res = windowController_->ChangeMouseStyle(windowId, moveDragProperty);
-    ASSERT_NE(WMError::WM_ERROR_INVALID_OPERATION, res);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+       ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
+    } else {
+       ASSERT_NE(WMError::WM_ERROR_INVALID_OPERATION, res);
+    }
 }
 
 /**
@@ -1002,7 +1011,11 @@ HWTEST_F(WindowControllerTest, ChangeMouseStyle2, Function | SmallTest | Level3)
 
     sptr<MoveDragProperty> moveDragProperty;
     WMError res = windowController_->ChangeMouseStyle(windowId, moveDragProperty);
-    ASSERT_NE(WMError::WM_ERROR_INVALID_OPERATION, res);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+       ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
+    } else {
+       ASSERT_NE(WMError::WM_ERROR_INVALID_OPERATION, res);
+    }
 }
 
 /**

@@ -17,7 +17,6 @@
 #include <gtest/gtest.h>
 #include "window_test_utils.h"
 #include "scene_board_judgement.h"
-#include "window_scene.h"
 
 using namespace testing;
 using namespace testing::ext;
