@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <bundle_mgr_interface.h>
 #include "interfaces/include/ws_common.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
@@ -190,10 +191,1144 @@ HWTEST_F(SceneSessionManagerTest, ConfigWindowSizeLimits01, Function | SmallTest
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     SceneSessionManager* sceneSessionManager = new SceneSessionManager();
     sceneSessionManager->ConfigWindowSizeLimits();
-    ASSERT_EQ(sceneSessionManager->systemConfig_.miniWidthOfMainWindow_, 10);
-    ASSERT_EQ(sceneSessionManager->systemConfig_.miniHeightOfMainWindow_, 20);
-    ASSERT_EQ(sceneSessionManager->systemConfig_.miniWidthOfSubWindow_, 30);
-    ASSERT_EQ(sceneSessionManager->systemConfig_.miniHeightOfSubWindow_, 40);
+    ASSERT_EQ(sceneSessionManager->systemConfig_.miniWidthOfMainWindow_, static_cast<uint32_t>(10));
+    ASSERT_EQ(sceneSessionManager->systemConfig_.miniHeightOfMainWindow_, static_cast<uint32_t>(20));
+    ASSERT_EQ(sceneSessionManager->systemConfig_.miniWidthOfSubWindow_, static_cast<uint32_t>(30));
+    ASSERT_EQ(sceneSessionManager->systemConfig_.miniHeightOfSubWindow_, static_cast<uint32_t>(40));
+}
+
+/**
+ * @tc.name: ConfigWindowEffect01
+ * @tc.desc: call ConfigWindowEffect all success focused
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowEffect01, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<windowEffect>"
+                "<appWindows>"
+                    "<cornerRadius>"
+                        "<fullScreen>off</fullScreen>"
+                        "<split>off</split>"
+                        "<float>off</float>"
+                    "</cornerRadius>"
+                    "<shadow>"
+                        "<focused>"
+                            "<elevation>0</elevation>"
+                            "<color>#000000</color>"
+                            "<offsetX>1</offsetX>"
+                            "<offsetY>1</offsetY>"
+                            "<alpha>0</alpha>"
+                            "<radius>0.5</radius>"
+                        "</focused>"
+                    "</shadow>"
+                "</appWindows>"
+            "</windowEffect>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.focusedShadow_.alpha_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.focusedShadow_.offsetX_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.focusedShadow_.offsetY_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.focusedShadow_.radius_, 0.5);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigWindowEffect02
+ * @tc.desc: call ConfigWindowEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowEffect02, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<windowEffect>"
+                "<appWindows>"
+                    "<cornerRadius>"
+                        "<fullScreen>off</fullScreen>"
+                        "<split>off</split>"
+                    "</cornerRadius>"
+                    "<shadow>"
+                        "<focused>"
+                            "<elevation>0</elevation>"
+                            "<alpha>0</alpha>"
+                        "</focused>"
+                        "<unfocused>"
+                            "<elevation>0</elevation>"
+                        "</unfocused>"
+                    "</shadow>"
+                "</appWindows>"
+            "</windowEffect>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.focusedShadow_.alpha_, 0);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigWindowEffect03
+ * @tc.desc: call ConfigWindowEffect ConfigAppWindowShadow unfocused
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowEffect03, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<windowEffect>"
+                "<appWindows>"
+                    "<shadow>"
+                        "<unfocused>"
+                            "<elevation>0</elevation>"
+                            "<color>#000000</color>"
+                            "<offsetX>1</offsetX>"
+                            "<offsetY>1</offsetY>"
+                            "<alpha>0</alpha>"
+                            "<radius>0.5</radius>"
+                        "</unfocused>"
+                    "</shadow>"
+                "</appWindows>"
+            "</windowEffect>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.alpha_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.offsetX_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.offsetY_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.radius_, 0.5);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigWindowEffect04
+ * @tc.desc: call ConfigWindowEffect all
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowEffect04, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<windowEffect>"
+                "<appWindows>"
+                    "<cornerRadius>"
+                        "<fullScreen>off</fullScreen>"
+                        "<split>off</split>"
+                        "<float>off</float>"
+                    "</cornerRadius>"
+                    "<shadow>"
+                        "<focused>"
+                            "<elevation>0</elevation>"
+                            "<color>#000000</color>"
+                            "<offsetX>1</offsetX>"
+                            "<offsetY>1</offsetY>"
+                            "<alpha>0</alpha>"
+                            "<radius>0.5</radius>"
+                        "</focused>"
+                        "<unfocused>"
+                            "<elevation>0</elevation>"
+                            "<color>#000000</color>"
+                            "<offsetX>1</offsetX>"
+                            "<offsetY>1</offsetY>"
+                            "<alpha>0</alpha>"
+                            "<radius>0.5</radius>"
+                        "</unfocused>"
+                    "</shadow>"
+                "</appWindows>"
+            "</windowEffect>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.focusedShadow_.alpha_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.focusedShadow_.offsetX_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.focusedShadow_.offsetY_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.focusedShadow_.radius_, 0.5);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.alpha_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.offsetX_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.offsetY_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.radius_, 0.5);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigWindowEffect05
+ * @tc.desc: call ConfigWindowEffect all offsetX.size is not 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowEffect05, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<windowEffect>"
+                "<appWindows>"
+                    "<shadow>"
+                        "<focused>"
+                            "<elevation>0</elevation>"
+                            "<offsetX>1</offsetX>"
+                            "<offsetX>2</offsetX>"
+                        "</focused>"
+                        "<unfocused>"
+                            "<elevation>0</elevation>"
+                            "<color>#000000</color>"
+                            "<offsetX>1</offsetX>"
+                            "<offsetY>1</offsetY>"
+                            "<alpha>0</alpha>"
+                            "<radius>0.5</radius>"
+                        "</unfocused>"
+                    "</shadow>"
+                "</appWindows>"
+            "</windowEffect>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.alpha_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.offsetX_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.offsetY_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.radius_, 0.5);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigWindowEffect06
+ * @tc.desc: call ConfigWindowEffect offsetY.size is not 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowEffect06, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<windowEffect>"
+                "<appWindows>"
+                    "<shadow>"
+                        "<focused>"
+                            "<elevation>0</elevation>"
+                            "<offsetY>1</offsetY>"
+                            "<offsetY>2</offsetY>"
+                        "</focused>"
+                        "<unfocused>"
+                            "<elevation>0</elevation>"
+                            "<color>#000000</color>"
+                            "<offsetX>1</offsetX>"
+                            "<offsetY>1</offsetY>"
+                            "<alpha>0</alpha>"
+                            "<radius>0.5</radius>"
+                        "</unfocused>"
+                    "</shadow>"
+                "</appWindows>"
+            "</windowEffect>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.alpha_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.offsetX_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.offsetY_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.radius_, 0.5);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigWindowEffect07
+ * @tc.desc: call ConfigWindowEffect alpha.size is not 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowEffect07, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<windowEffect>"
+                "<appWindows>"
+                    "<shadow>"
+                        "<focused>"
+                            "<elevation>0</elevation>"
+                            "<alpha>1</alpha>"
+                            "<alpha>2</alpha>"
+                        "</focused>"
+                        "<unfocused>"
+                            "<elevation>0</elevation>"
+                            "<color>#000000</color>"
+                            "<offsetX>1</offsetX>"
+                            "<offsetY>1</offsetY>"
+                            "<alpha>0</alpha>"
+                            "<radius>0.5</radius>"
+                        "</unfocused>"
+                    "</shadow>"
+                "</appWindows>"
+            "</windowEffect>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.alpha_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.offsetX_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.offsetY_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.radius_, 0.5);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigWindowEffect08
+ * @tc.desc: call ConfigWindowEffect radius.size is not 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowEffect08, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<windowEffect>"
+                "<appWindows>"
+                    "<shadow>"
+                        "<focused>"
+                            "<elevation>0</elevation>"
+                            "<radius>1</radius>"
+                            "<radius>2</radius>"
+                        "</focused>"
+                        "<unfocused>"
+                            "<elevation>0</elevation>"
+                            "<color>#000000</color>"
+                            "<offsetX>1</offsetX>"
+                            "<offsetY>1</offsetY>"
+                            "<alpha>0</alpha>"
+                            "<radius>0.5</radius>"
+                        "</unfocused>"
+                    "</shadow>"
+                "</appWindows>"
+            "</windowEffect>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.alpha_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.offsetX_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.offsetY_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.unfocusedShadow_.radius_, 0.5);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigDecor
+ * @tc.desc: call ConfigDecor fullscreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigDecor01, Function | SmallTest | Level3)
+{
+    std::string xmlStr1 = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<decor enable=\"111\">"
+        "<supportedMode>fullscreen</supportedMode>"
+        "</decor>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr1);
+    SceneSessionManager* sceneSessionManager1 = new SceneSessionManager();
+    sceneSessionManager1->ConfigWindowSceneXml();
+    delete sceneSessionManager1;
+
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<decor enable=\"true\">"
+        "<supportedMode>fullscreen</supportedMode>"
+        "</decor>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->systemConfig_.decorModeSupportInfo_,
+        static_cast<uint32_t>(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN));
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigDecor
+ * @tc.desc: call ConfigDecor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigDecor02, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<decor enable=\"true\">"
+        "</decor>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->systemConfig_.decorModeSupportInfo_,
+        WindowModeSupport::WINDOW_MODE_SUPPORT_ALL);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigDecor
+ * @tc.desc: call ConfigDecor floating
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigDecor03, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<decor enable=\"true\">"
+        "<supportedMode>floating</supportedMode>"
+        "</decor>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->systemConfig_.decorModeSupportInfo_,
+        WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigDecor
+ * @tc.desc: call ConfigDecor pip
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigDecor04, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<decor enable=\"true\">"
+        "<supportedMode>pip</supportedMode>"
+        "</decor>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->systemConfig_.decorModeSupportInfo_,
+        WindowModeSupport::WINDOW_MODE_SUPPORT_PIP);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigDecor
+ * @tc.desc: call ConfigDecor split
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigDecor05, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<decor enable=\"true\">"
+        "<supportedMode>split</supportedMode>"
+        "</decor>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->systemConfig_.decorModeSupportInfo_,
+        WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+        WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigDecor
+ * @tc.desc: call ConfigDecor default
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigDecor06, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<decor enable=\"true\">"
+        "<supportedMode>111</supportedMode>"
+        "</decor>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->systemConfig_.decorModeSupportInfo_,
+        WINDOW_MODE_SUPPORT_ALL);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigWindowSceneXml01
+ * @tc.desc: call defaultWindowMode 
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml01, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<defaultWindowMode>10</defaultWindowMode>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    delete sceneSessionManager;
+
+    std::string xmlStr1 = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<defaultWindowMode>102</defaultWindowMode>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr1);
+    SceneSessionManager* sceneSessionManager1 = new SceneSessionManager();
+    sceneSessionManager1->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager1->systemConfig_.defaultWindowMode_,
+        static_cast<WindowMode>(static_cast<uint32_t>(102)));
+    delete sceneSessionManager1;
+}
+
+/**
+ * @tc.name: ConfigWindowSceneXml02
+ * @tc.desc: call defaultWindowMode 
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml02, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<defaultWindowMode>1 1</defaultWindowMode>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    delete sceneSessionManager;
+
+    std::string xmlStr1 = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<defaultWindowMode>1</defaultWindowMode>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr1);
+    SceneSessionManager* sceneSessionManager1 = new SceneSessionManager();
+    sceneSessionManager1->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager1->systemConfig_.defaultWindowMode_,
+        static_cast<WindowMode>(static_cast<uint32_t>(1)));
+    delete sceneSessionManager1;
+}
+
+/**
+ * @tc.name: ConfigWindowSceneXml03
+ * @tc.desc: call defaultMaximizeMode 
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml03, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<defaultMaximizeMode>1 1</defaultMaximizeMode>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    delete sceneSessionManager;
+
+    std::string xmlStr1 = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<defaultMaximizeMode>1</defaultMaximizeMode>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr1);
+    SceneSessionManager* sceneSessionManager1 = new SceneSessionManager();
+    sceneSessionManager1->ConfigWindowSceneXml();
+    ASSERT_EQ(SceneSession::maximizeMode_,
+        static_cast<MaximizeMode>(static_cast<uint32_t>(1)));
+    delete sceneSessionManager1;
+}
+
+/**
+ * @tc.name: ConfigWindowSceneXml04
+ * @tc.desc: call defaultMaximizeMode 
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml04, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<defaultMaximizeMode>111</defaultMaximizeMode>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    delete sceneSessionManager;
+
+    std::string xmlStr1 = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<defaultMaximizeMode>0</defaultMaximizeMode>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr1);
+    SceneSessionManager* sceneSessionManager1 = new SceneSessionManager();
+    sceneSessionManager1->ConfigWindowSceneXml();
+    ASSERT_EQ(SceneSession::maximizeMode_,
+        static_cast<MaximizeMode>(static_cast<uint32_t>(0)));
+    delete sceneSessionManager1;
+}
+
+/**
+ * @tc.name: ConfigWindowSceneXml05
+ * @tc.desc: call maxFloatingWindowSize 
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowSceneXml05, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<maxFloatingWindowSize>1</maxFloatingWindowSize>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    delete sceneSessionManager;
+
+    std::string xmlStr1 = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<maxFloatingWindowSize>1</maxFloatingWindowSize>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr1);
+    SceneSessionManager* sceneSessionManager1 = new SceneSessionManager();
+    sceneSessionManager1->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager1->systemConfig_.maxFloatingWindowSize_,
+        static_cast<uint32_t>(1));
+    delete sceneSessionManager1;
+}
+
+/**
+ * @tc.name: ConfigKeyboardAnimation01
+ * @tc.desc: call ConfigKeyboardAnimation default
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigKeyboardAnimation01, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<keyboardAnimation>"
+                "<timing>"
+                    "<durationIn>abv</durationIn>"
+                    "<durationOut>abc</durationOut>"
+                    "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
+                "</timing>"
+            "</keyboardAnimation>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager1 = new SceneSessionManager();
+    sceneSessionManager1->ConfigWindowSceneXml();
+    delete sceneSessionManager1;
+
+    std::string xmlStr1 = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<keyboardAnimation>"
+                "<timing>"
+                    "<durationIn>500</durationIn>"
+                    "<durationOut>300</durationOut>"
+                    "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
+                "</timing>"
+            "</keyboardAnimation>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr1);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->systemConfig_.keyboardAnimationConfig_.durationIn_, static_cast<uint32_t>(500));
+    ASSERT_EQ(sceneSessionManager->systemConfig_.keyboardAnimationConfig_.durationOut_, static_cast<uint32_t>(300));
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigKeyboardAnimation02
+ * @tc.desc: call ConfigKeyboardAnimation default
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigKeyboardAnimation02, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<keyboardAnimation>"
+                "<timing>"
+                    "<durationIn>500</durationIn>"
+                    "<durationIn>600</durationIn>"
+                    "<durationOut>300</durationOut>"
+                "</timing>"
+            "</keyboardAnimation>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->systemConfig_.keyboardAnimationConfig_.durationOut_, static_cast<uint32_t>(300));
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigKeyboardAnimation03
+ * @tc.desc: call ConfigKeyboardAnimation default
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigKeyboardAnimation03, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<keyboardAnimation>"
+                "<timing>"
+                    "<durationIn>500</durationIn>"
+                    "<durationOut>300</durationOut>"
+                    "<durationOut>400</durationOut>"
+                "</timing>"
+            "</keyboardAnimation>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->systemConfig_.keyboardAnimationConfig_.durationIn_, static_cast<uint32_t>(500));
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigKeyboardAnimation03
+ * @tc.desc: call maxFloatingWindowSize default
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigKeyboardAnimation04, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<keyboardAnimation>"
+                "<timing>"
+                    "<durationIn>500</durationIn>"
+                    "<durationOut>300</durationOut>"
+                    "<durationOut>400</durationOut>"
+                "</timing>"
+            "</keyboardAnimation>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->systemConfig_.keyboardAnimationConfig_.durationIn_, static_cast<uint32_t>(500));
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigWindowAnimation01
+ * @tc.desc: call ConfigWindowAnimation default
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowAnimation01, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<windowAnimation>"
+                "<timing>"
+                    "<duration>350</duration>"
+                    "<curve name=\"easeOut\"></curve>"
+                "</timing>"
+                "<scale>0.7 0.7</scale>"
+                "<rotation>0 0 1 0</rotation>"
+                "<translate>0 0</translate>"
+                "<opacity>0</opacity>"
+            "</windowAnimation>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.duration_, 350);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.scaleX_, static_cast<float>(0.7));
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.scaleY_, static_cast<float>(0.7));
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.rotationX_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.rotationY_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.rotationZ_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.angle_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.translateX_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.translateY_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.opacity_, 0);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigWindowAnimation02
+ * @tc.desc: call ConfigWindowAnimation no change
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowAnimation02, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<windowAnimation>"
+                "<timing>"
+                    "<duration>350</duration>"
+                    "<curve name=\"easeOut\"></curve>"
+                "</timing>"
+            "</windowAnimation>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.duration_, 350);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigWindowAnimation03
+ * @tc.desc: call ConfigWindowAnimation no timing
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowAnimation03, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<windowAnimation>"
+                "<timing>"
+                "</timing>"
+                "<scale>0.7 0.7</scale>"
+                "<rotation>0 0 1 0</rotation>"
+                "<translate>0 0</translate>"
+                "<opacity>0</opacity>"
+            "</windowAnimation>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.scaleX_, static_cast<float>(0.7));
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.scaleY_, static_cast<float>(0.7));
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.rotationX_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.rotationY_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.rotationZ_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.angle_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.translateX_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.translateY_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.opacity_, 0);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigWindowAnimation04
+ * @tc.desc: call ConfigWindowAnimation default timing is not int
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowAnimation04, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<windowAnimation>"
+                "<timing>"
+                    "<duration>aaa</duration>"
+                    "<curve></curve>"
+                "</timing>"
+                "<scale>0.7 0.7</scale>"
+                "<rotation>0 0 1 0</rotation>"
+                "<translate>0 0</translate>"
+                "<opacity>0</opacity>"
+            "</windowAnimation>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.scaleX_, static_cast<float>(0.7));
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.scaleY_, static_cast<float>(0.7));
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.rotationX_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.rotationY_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.rotationZ_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.angle_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.translateX_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.translateY_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.opacity_, 0);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigWindowAnimation05
+ * @tc.desc: call ConfigWindowAnimation default timing is error size
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowAnimation05, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<windowAnimation>"
+                "<timing>"
+                    "<duration>350 350</duration>"
+                    "<curve></curve>"
+                "</timing>"
+                "<scale>0.7 0.7</scale>"
+                "<rotation>0 0 1 0</rotation>"
+                "<translate>0 0</translate>"
+                "<opacity>0</opacity>"
+            "</windowAnimation>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.scaleX_, static_cast<float>(0.7));
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.scaleY_, static_cast<float>(0.7));
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.rotationX_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.rotationY_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.rotationZ_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.angle_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.translateX_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.translateY_, 0);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.opacity_, 0);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigWindowAnimation06
+ * @tc.desc: call ConfigWindowAnimation default change is not int
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowAnimation06, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<windowAnimation>"
+                "<timing>"
+                    "<duration>350</duration>"
+                    "<curve name=\"easeOut\"></curve>"
+                "</timing>"
+                "<scale>a a</scale>"
+                "<rotation>a a a a</rotation>"
+                "<translate>a a</translate>"
+                "<opacity>a</opacity>"
+            "</windowAnimation>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.duration_, 350);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigWindowAnimation07
+ * @tc.desc: call ConfigWindowAnimation default change error size
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigWindowAnimation07, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<windowAnimation>"
+                "<timing>"
+                    "<duration>350</duration>"
+                    "<curve name=\"easeOut\"></curve>"
+                "</timing>"
+                "<scale>0.7 0.7 0.7</scale>"
+                "<rotation>0 0 1 0 1</rotation>"
+                "<translate>0 0 1</translate>"
+                "<opacity>0 1</opacity>"
+            "</windowAnimation>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.windowAnimation_.duration_, 350);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigStartingWindowAnimation01
+ * @tc.desc: call ConfigStartingWindowAnimation default
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigStartingWindowAnimation01, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<startWindowTransitionAnimation enable=\"false\">"
+                "<timing>"
+                    "<duration>200</duration>"
+                    "<curve name=\"linear\"></curve>"
+                "</timing>"
+                "<opacityStart>1</opacityStart>"
+                "<opacityEnd>0</opacityEnd>"
+            "</startWindowTransitionAnimation>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.startingWindowAnimationConfig_.enabled_, false);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.startingWindowAnimationConfig_.duration_, 200);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.startingWindowAnimationConfig_.opacityStart_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.startingWindowAnimationConfig_.opacityEnd_, 0);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigStartingWindowAnimation02
+ * @tc.desc: call ConfigStartingWindowAnimation default
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigStartingWindowAnimation02, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<startWindowTransitionAnimation enable=\"aaa\">"
+                "<timing>"
+                    "<duration>200</duration>"
+                    "<curve name=\"linear\"></curve>"
+                "</timing>"
+                "<opacityStart>1</opacityStart>"
+                "<opacityEnd>0</opacityEnd>"
+            "</startWindowTransitionAnimation>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.startingWindowAnimationConfig_.duration_, 200);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.startingWindowAnimationConfig_.opacityStart_, 1);
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.startingWindowAnimationConfig_.opacityEnd_, 0);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigStartingWindowAnimation03
+ * @tc.desc: call ConfigStartingWindowAnimation default
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigStartingWindowAnimation03, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<startWindowTransitionAnimation enable=\"false\">"
+                "<timing>"
+                    "<duration>aaa</duration>"
+                    "<curve name=\"linear\"></curve>"
+                "</timing>"
+                "<opacityStart>aaa</opacityStart>"
+                "<opacityEnd>aaa</opacityEnd>"
+            "</startWindowTransitionAnimation>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.startingWindowAnimationConfig_.enabled_, false);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigStartingWindowAnimation04
+ * @tc.desc: call ConfigStartingWindowAnimation default
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigStartingWindowAnimation04, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<startWindowTransitionAnimation enable=\"false\">"
+                "<timing>"
+                    "<duration>200 200</duration>"
+                    "<curve name=\"linear\"></curve>"
+                "</timing>"
+                "<opacityStart>1 1</opacityStart>"
+                "<opacityEnd>0 1</opacityEnd>"
+            "</startWindowTransitionAnimation>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.startingWindowAnimationConfig_.enabled_, false);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigStartingWindowAnimation05
+ * @tc.desc: call ConfigStartingWindowAnimation default
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigStartingWindowAnimation05, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+            "<startWindowTransitionAnimation enable=\"false\">"
+                "<timing>"
+                    "<duration>aaa aaa</duration>"
+                    "<curve name=\"linear\"></curve>"
+                "</timing>"
+                "<opacityStart>a a</opacityStart>"
+                "<opacityEnd>a a</opacityEnd>"
+            "</startWindowTransitionAnimation>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigWindowSceneXml();
+    ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.startingWindowAnimationConfig_.enabled_, false);
+    delete sceneSessionManager;
+}
+
+/**
+ * @tc.name: ConfigSnapshotScale01
+ * @tc.desc: call ConfigSnapshotScale and check the snapshotScale_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigSnapshotScale01, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<snapshotScale>0.7</snapshotScale>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigSnapshotScale();
+    ASSERT_EQ(sceneSessionManager->snapshotScale_, static_cast<float>(0.7));
+}
+
+/**
+ * @tc.name: ConfigSnapshotScale02
+ * @tc.desc: call ConfigSnapshotScale and check the snapshotScale_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigSnapshotScale02, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<snapshotScale>0.7 0.7</snapshotScale>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigSnapshotScale();
+    ASSERT_EQ(sceneSessionManager->snapshotScale_, 0.5);
+}
+
+/**
+ * @tc.name: ConfigSnapshotScale03
+ * @tc.desc: call ConfigSnapshotScale and check the snapshotScale_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigSnapshotScale03, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<snapshotScale>aaa</snapshotScale>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigSnapshotScale();
+    ASSERT_EQ(sceneSessionManager->snapshotScale_, 0.5);
+}
+
+/**
+ * @tc.name: ConfigSnapshotScale04
+ * @tc.desc: call ConfigSnapshotScale and check the snapshotScale_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigSnapshotScale04, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<snapshotScale>-0.1</snapshotScale>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigSnapshotScale();
+    ASSERT_EQ(sceneSessionManager->snapshotScale_, 0.5);
+}
+
+/**
+ * @tc.name: ConfigSnapshotScale05
+ * @tc.desc: call ConfigSnapshotScale and check the snapshotScale_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigSnapshotScale05, Function | SmallTest | Level3)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<snapshotScale>1.5</snapshotScale>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    SceneSessionManager* sceneSessionManager = new SceneSessionManager();
+    sceneSessionManager->ConfigSnapshotScale();
+    ASSERT_EQ(sceneSessionManager->snapshotScale_, 0.5);
 }
 
 /**
@@ -1655,8 +2790,6 @@ HWTEST_F(SceneSessionManagerTest, UnlockSession, Function | SmallTest | Level3)
     result = ssm_->LockSession(sessionId);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
 }
-
 }
 } // namespace Rosen
 } // namespace OHOS
-
