@@ -101,7 +101,6 @@ HWTEST_F(GestureNavigationEnabledTest, SetGestureNavigationEnabled, Function | M
     lisenter_->future_.Reset(true);
     windowManager.SetGestureNavigaionEnabled(false);
     result = lisenter_->future_.GetResult(WAIT_FUTURE_RESULT);
-    ASSERT_EQ(result, true);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(result, false);
     } else {
