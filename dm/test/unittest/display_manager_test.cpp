@@ -22,6 +22,7 @@
 #include "singleton_mocker.h"
 #include "display_manager.cpp"
 #include "window_scene.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
