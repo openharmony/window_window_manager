@@ -235,6 +235,370 @@ HWTEST_F(WindowManagerProxyTest, GetWindowAnimationTargets01, Function | SmallTe
     WMError err = windowManagerProxy_->GetWindowAnimationTargets(missionIds, targets);
     ASSERT_EQ(err, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: RemoveWindow
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, RemoveWindow, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 0;
+    bool isFromInnerkits = true;
+    WMError err = windowManagerProxy_->RemoveWindow(windowId, isFromInnerkits);
+    EXPECT_EQ(err, static_cast<WMError>(1));
+}
+
+/**
+ * @tc.name: DestroyWindow
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, DestroyWindow, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 0;
+    bool isFromInnerkits = true;
+    WMError err = windowManagerProxy_->DestroyWindow(windowId, isFromInnerkits);
+    EXPECT_EQ(err, static_cast<WMError>(1));
+}
+
+/**
+ * @tc.name: GetAvoidAreaByType
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, GetAvoidAreaByType, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 0;
+    AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM;
+    AvoidArea avoidArea;
+    AvoidArea err = windowManagerProxy_->GetAvoidAreaByType(windowId, type);
+    EXPECT_EQ(err, avoidArea);
+}
+
+/**
+ * @tc.name: RegisterWindowManagerAgent
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, RegisterWindowManagerAgent, Function | SmallTest | Level2)
+{
+    MessageParcel reply;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    WMError err = windowManagerProxy_->RegisterWindowManagerAgent(type, windowManagerAgent);
+    EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
+}
+
+/**
+ * @tc.name: UnregisterWindowManagerAgent
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, UnregisterWindowManagerAgent, Function | SmallTest | Level2)
+{
+    MessageParcel reply;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    WMError err = windowManagerProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+    EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
+}
+
+/**
+ * @tc.name: NotifyServerReadyToMoveOrDrag
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, NotifyServerReadyToMoveOrDrag, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 0;
+    sptr<WindowProperty> windowProperty;
+    sptr<MoveDragProperty> moveDragProperty;
+    MessageParcel reply;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    windowManagerProxy_->NotifyServerReadyToMoveOrDrag(windowId, windowProperty, moveDragProperty);
+    WMError err = windowManagerProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+    EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
+}
+
+/**
+ * @tc.name: ProcessPointDown
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, ProcessPointDown, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 0;
+    bool isPointDown = true;
+    MessageParcel reply;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    windowManagerProxy_->ProcessPointDown(windowId, isPointDown);
+    WMError err = windowManagerProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+    EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
+}
+
+/**
+ * @tc.name: ProcessPointUp
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, ProcessPointUp, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 0;
+    MessageParcel reply;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    windowManagerProxy_->ProcessPointUp(windowId);
+    WMError err = windowManagerProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+    EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
+}
+
+/**
+ * @tc.name: MinimizeAllAppWindows
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, MinimizeAllAppWindows, Function | SmallTest | Level2)
+{
+    DisplayId displayId = 0;
+    WMError err = windowManagerProxy_->MinimizeAllAppWindows(displayId);
+    EXPECT_EQ(err, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetWindowLayoutMode
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, SetWindowLayoutMode, Function | SmallTest | Level2)
+{
+    WindowLayoutMode mode = WindowLayoutMode::BASE;
+    MessageParcel reply;
+    WMError err = windowManagerProxy_->SetWindowLayoutMode(mode);
+    EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
+}
+
+/**
+ * @tc.name: UpdateProperty
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, UpdateProperty, Function | SmallTest | Level2)
+{
+    sptr<WindowProperty> windowProperty;
+    PropertyChangeAction action = PropertyChangeAction::ACTION_UPDATE_RECT;
+    bool isAsyncTask = true;
+    MessageParcel reply;
+    WMError err = windowManagerProxy_->UpdateProperty(windowProperty, action, isAsyncTask);
+    EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
+}
+
+/**
+ * @tc.name: SetWindowGravity
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, SetWindowGravity, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 1;
+    WindowGravity gravity = WindowGravity::WINDOW_GRAVITY_FLOAT;
+    uint32_t percent = 1;
+    MessageParcel reply;
+    WMError err = windowManagerProxy_->SetWindowGravity(windowId, gravity, percent);
+    EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
+}
+
+/**
+ * @tc.name: GetSystemConfig
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, GetSystemConfig, Function | SmallTest | Level2)
+{
+    SystemConfig systemConfig;
+    MessageParcel reply;
+    WMError err = windowManagerProxy_->GetSystemConfig(systemConfig);
+    EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
+}
+
+/**
+ * @tc.name: UpdateAvoidAreaListener
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, UpdateAvoidAreaListener, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 0;
+    bool haveListener = true;
+    MessageParcel reply;
+    WMError err = windowManagerProxy_->UpdateAvoidAreaListener(windowId, haveListener);
+    EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
+}
+
+/**
+ * @tc.name: SetAnchorAndScale
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, SetAnchorAndScale, Function | SmallTest | Level2)
+{
+    int32_t x = 0;
+    int32_t y = 1;
+    float scale = 1.1;
+    MessageParcel reply;
+    SystemConfig systemConfig;
+    windowManagerProxy_->SetAnchorAndScale(x, y, scale);
+    WMError err = windowManagerProxy_->GetSystemConfig(systemConfig);
+    EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
+}
+
+/**
+ * @tc.name: SetAnchorOffset
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, SetAnchorOffset, Function | SmallTest | Level2)
+{
+    int32_t deltaX = 0;
+    int32_t deltaY = 1;
+    SystemConfig systemConfig;
+    MessageParcel reply;
+    windowManagerProxy_->SetAnchorOffset(deltaX, deltaY);
+    WMError err = windowManagerProxy_->GetSystemConfig(systemConfig);
+    EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
+}
+
+/**
+ * @tc.name: OffWindowZoom
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, OffWindowZoom, Function | SmallTest | Level2)
+{
+    SystemConfig systemConfig;
+    MessageParcel reply;
+    windowManagerProxy_->OffWindowZoom();
+    WMError err = windowManagerProxy_->GetSystemConfig(systemConfig);
+    EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
+}
+
+/**
+ * @tc.name: RaiseToAppTop
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, RaiseToAppTop, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 0;
+    WmErrorCode err = windowManagerProxy_->RaiseToAppTop(windowId);
+    EXPECT_EQ(err, WmErrorCode::WM_OK);
+}
+
+/**
+ * @tc.name: GetSnapshot
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, GetSnapshot, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 0;
+    Media::InitializationOptions opts;
+    opts.size.width = 200;
+    opts.size.height = 300;
+    std::shared_ptr<Media::PixelMap> pixelMap(Media::PixelMap::Create(opts).release());
+    auto res = windowManagerProxy_->GetSnapshot(windowId);
+    EXPECT_EQ(res, pixelMap);
+}
+
+/**
+ * @tc.name: SetGestureNavigaionEnabled
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, SetGestureNavigaionEnabled, Function | SmallTest | Level2)
+{
+    bool enable = true;
+    MessageParcel reply;
+    WMError err = windowManagerProxy_->SetGestureNavigaionEnabled(enable);
+    EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
+}
+
+/**
+ * @tc.name: DispatchKeyEvent
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, DispatchKeyEvent, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 0;
+    std::shared_ptr<MMI::KeyEvent> event;
+    SystemConfig systemConfig;
+    MessageParcel reply;
+    windowManagerProxy_->DispatchKeyEvent(windowId, event);
+    WMError err = windowManagerProxy_->GetSystemConfig(systemConfig);
+    EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
+}
+
+/**
+ * @tc.name: NotifyDumpInfoResult
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, NotifyDumpInfoResult, Function | SmallTest | Level2)
+{
+    std::vector<std::string> info;
+    string windowName = "windowName";
+    info.push_back(windowName);
+    SystemConfig systemConfig;
+    MessageParcel reply;
+    windowManagerProxy_->NotifyDumpInfoResult(info);
+    WMError err = windowManagerProxy_->GetSystemConfig(systemConfig);
+    EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
+}
+
+/**
+ * @tc.name: SetMaximizeMode
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, SetMaximizeMode, Function | SmallTest | Level2)
+{
+    MaximizeMode maximizeMode = MaximizeMode::MODE_FULL_FILL;
+    SystemConfig systemConfig;
+    MessageParcel reply;
+    windowManagerProxy_->SetMaximizeMode(maximizeMode);
+    WMError err = windowManagerProxy_->GetSystemConfig(systemConfig);
+    EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
+}
+
+/**
+ * @tc.name: GetMaximizeMode
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, GetMaximizeMode, Function | SmallTest | Level2)
+{
+    MessageParcel reply;
+    MaximizeMode mode = windowManagerProxy_->GetMaximizeMode();
+    EXPECT_EQ(mode, static_cast<MaximizeMode>(reply.ReadInt32()));
+}
+
+/**
+ * @tc.name: GetFocusWindowInfo
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, GetFocusWindowInfo, Function | SmallTest | Level2)
+{
+    FocusChangeInfo focusInfo;
+    SystemConfig systemConfig;
+    MessageParcel reply;
+    windowManagerProxy_->GetFocusWindowInfo(focusInfo);
+    WMError err = windowManagerProxy_->GetSystemConfig(systemConfig);
+    EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
+}
 }
 }
 }
