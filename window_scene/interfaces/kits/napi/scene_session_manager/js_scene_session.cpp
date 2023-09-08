@@ -1017,8 +1017,10 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
         appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
         info.abilityName_.c_str(), info.appIndex_, info.reuse);
     if (info.persistentId_ == 0) {
+        SceneSessionManager::GetInstance().CheckIfReuseSession(info);
         sptr<SceneSession> sceneSession = nullptr;
         if (info.reuse) {
+             WLOGFI("session need to be reusesd.");
             sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(
                 info.bundleName_, info.moduleName_, info.abilityName_, info.appIndex_);
         }
