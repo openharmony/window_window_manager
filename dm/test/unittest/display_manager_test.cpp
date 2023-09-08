@@ -454,7 +454,6 @@ HWTEST_F(DisplayManagerTest, RegisterFoldStatusListener, Function | SmallTest | 
     ret = DisplayManager::GetInstance().RegisterFoldStatusListener(listener);
     ASSERT_EQ(ret, DisplayManager::GetInstance().pImpl_->RegisterFoldStatusListener(listener));
     listener.clear();
-
 }
 
 /**
