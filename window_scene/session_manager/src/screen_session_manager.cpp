@@ -277,7 +277,7 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSession(ScreenId screenId) co
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     auto iter = screenSessionMap_.find(screenId);
     if (iter == screenSessionMap_.end()) {
-        WLOGFE("Error found screen session with id: %{public}" PRIu64"", screenId);
+        WLOGFD("Error found screen session with id: %{public}" PRIu64"", screenId);
         return nullptr;
     }
     return iter->second;
@@ -2131,7 +2131,7 @@ ScreenProperty ScreenSessionManager::GetPhyScreenProperty(ScreenId screenId)
     ScreenProperty property;
     auto iter = phyScreenPropMap_.find(screenId);
     if (iter == phyScreenPropMap_.end()) {
-        WLOGFI("Error found physic screen config with id: %{public}" PRIu64, screenId);
+        WLOGFD("Error found physic screen config with id: %{public}" PRIu64, screenId);
         return property;
     }
     return iter->second;

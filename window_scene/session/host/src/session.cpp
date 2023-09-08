@@ -410,7 +410,7 @@ float Session::GetBrightness() const
 bool Session::IsSessionValid() const
 {
     if (sessionInfo_.isSystem_) {
-        WLOGFI("session is system, id: %{public}d, name: %{public}s, state: %{public}u",
+        WLOGFD("session is system, id: %{public}d, name: %{public}s, state: %{public}u",
             GetPersistentId(), sessionInfo_.bundleName_.c_str(), state_);
         return false;
     }
@@ -550,7 +550,7 @@ void Session::UpdatePointerArea(const WSRect& rect)
 
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
-    WLOGFI("session update rect: id: %{public}d, rect[%{public}d, %{public}d, %{public}u, %{public}u], "\
+    WLOGFD("session update rect: id: %{public}d, rect[%{public}d, %{public}d, %{public}u, %{public}u], "\
         "reason:%{public}u", GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
     if (!IsSessionValid()) {
         winRect_ = rect;
@@ -571,7 +571,7 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 
 WSError Session::UpdateDensity()
 {
-    WLOGFI("session update density: id: %{public}d.", GetPersistentId());
+    WLOGFD("session update density: id: %{public}d.", GetPersistentId());
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -596,7 +596,7 @@ WSError Session::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWi
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
     sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid)
 {
-    WLOGFI("Connect session, id: %{public}d, state: %{public}u, isTerminating: %{public}d", GetPersistentId(),
+    WLOGFD("Connect session, id: %{public}d, state: %{public}u, isTerminating: %{public}d", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()), isTerminating);
     if (GetSessionState() != SessionState::STATE_DISCONNECT && !isTerminating) {
         WLOGFE("state is not disconnect!");
@@ -631,7 +631,7 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property)
 {
     HandleDialogForeground();
     SessionState state = GetSessionState();
-    WLOGFI("Foreground session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
+    WLOGFD("Foreground session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
     if (state != SessionState::STATE_CONNECT && state != SessionState::STATE_BACKGROUND) {
         WLOGFE("Foreground state invalid! state:%{public}u", state);
@@ -705,7 +705,7 @@ WSError Session::Background()
 {
     HandleDialogBackground();
     SessionState state = GetSessionState();
-    WLOGFI("Background session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
+    WLOGFD("Background session, id: %{public}d, state: %{public}" PRIu32"", GetPersistentId(),
         static_cast<uint32_t>(state));
     if (state != SessionState::STATE_INACTIVE) {
         WLOGFE("Background state invalid! state:%{public}u", state);
@@ -729,7 +729,7 @@ void Session::NotifyCallingSessionBackground()
 WSError Session::Disconnect()
 {
     auto state = GetSessionState();
-    WLOGFI("Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
+    WLOGFD("Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     UpdateSessionState(SessionState::STATE_DISCONNECT);
     NotifyDisconnect();
@@ -740,7 +740,7 @@ WSError Session::Disconnect()
 WSError Session::SetActive(bool active)
 {
     SessionState state = GetSessionState();
-    WLOGFI("Session update active: %{public}d, id: %{public}d, state: %{public}" PRIu32"",
+    WLOGFD("Session update active: %{public}d, id: %{public}d, state: %{public}" PRIu32"",
         active, GetPersistentId(), static_cast<uint32_t>(state));
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -857,7 +857,7 @@ void Session::SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc 
 
 WSError Session::SetSessionIcon(const std::shared_ptr<Media::PixelMap> &icon)
 {
-    WLOGFI("run Session::SetSessionIcon");
+    WLOGFD("run Session::SetSessionIcon");
     if (scenePersistence_ == nullptr) {
         WLOGFI("scenePersistence_ is nullptr.");
         return WSError::WS_ERROR_INVALID_OPERATION;
@@ -911,7 +911,7 @@ void Session::SetPendingSessionToForegroundListener(const NotifyPendingSessionTo
 
 WSError Session::PendingSessionToForeground()
 {
-    WLOGFI("run PendingSessionToForeground");
+    WLOGFD("run PendingSessionToForeground");
     SessionInfo info = GetSessionInfo();
     if (pendingSessionActivationFunc_) {
         pendingSessionActivationFunc_(info);
@@ -927,7 +927,7 @@ void Session::SetPendingSessionToBackgroundForDelegatorListener(
 
 WSError Session::PendingSessionToBackgroundForDelegator()
 {
-    WLOGFI("run PendingSessionToBackgroundForDelegator");
+    WLOGFD("run PendingSessionToBackgroundForDelegator");
     SessionInfo info = GetSessionInfo();
     if (pendingSessionToBackgroundForDelegatorFunc_) {
         pendingSessionToBackgroundForDelegatorFunc_(info);
@@ -1097,7 +1097,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             "bundleName:%{public}s, pid:%{public}d", pointerEvent->GetId(), pointerEvent->DumpPointerAction(),
             persistentId_, callingBundleName_.c_str(), callingPid_);
     } else {
-        WLOGFI("Session TransferPointEvent, eventId:%{public}d, action:%{public}s, persistentId:%{public}d, "
+        WLOGFD("Session TransferPointEvent, eventId:%{public}d, action:%{public}s, persistentId:%{public}d, "
             "bundleName:%{public}s, pid:%{public}d", pointerEvent->GetId(), pointerEvent->DumpPointerAction(),
             persistentId_, callingBundleName_.c_str(), callingPid_);
     }
@@ -1231,7 +1231,7 @@ void Session::SetSessionStateChangeNotifyManagerListener(const NotifySessionStat
 
 void Session::NotifySessionStateChange(const SessionState& state)
 {
-    WLOGFI("state: %{public}u", static_cast<uint32_t>(state));
+    WLOGFD("state: %{public}u", static_cast<uint32_t>(state));
     if (sessionStateChangeFunc_) {
         sessionStateChangeFunc_(state);
     }
@@ -1259,7 +1259,7 @@ void Session::SetClickListener(const NotifyClickFunc& func)
 
 void Session::NotifySessionFocusableChange(bool isFocusable)
 {
-    WLOGFI("Notify session focusable change: %{public}u", isFocusable);
+    WLOGFD("Notify session focusable change: %{public}u", isFocusable);
     if (sessionFocusableChangeFunc_) {
         sessionFocusableChangeFunc_(isFocusable);
     }
@@ -1267,7 +1267,7 @@ void Session::NotifySessionFocusableChange(bool isFocusable)
 
 void Session::NotifySessionTouchableChange(bool touchable)
 {
-    WLOGFI("Notify session touchable change: %{public}u", touchable);
+    WLOGFD("Notify session touchable change: %{public}u", touchable);
     if (sessionTouchableChangeFunc_) {
         sessionTouchableChangeFunc_(touchable);
     }
@@ -1275,7 +1275,7 @@ void Session::NotifySessionTouchableChange(bool touchable)
 
 void Session::NotifyClick()
 {
-    WLOGFI("Notify click");
+    WLOGFD("Notify click");
     if (clickFunc_) {
         clickFunc_();
     }
@@ -1291,7 +1291,7 @@ void Session::PresentFoucusIfNeed(int32_t pointerAction)
 
 WSError Session::UpdateFocus(bool isFocused)
 {
-    WLOGFI("Session update focus id: %{public}d", GetPersistentId());
+    WLOGFD("Session update focus id: %{public}d", GetPersistentId());
     if (isFocused_ == isFocused) {
         WLOGFD("Session focus do not change: [%{public}d]", isFocused);
         return WSError::WS_DO_NOTHING;
@@ -1307,7 +1307,7 @@ WSError Session::UpdateFocus(bool isFocused)
 
 WSError Session::UpdateWindowMode(WindowMode mode)
 {
-    WLOGFI("Session update window mode, id: %{public}d, mode: %{public}d", GetPersistentId(),
+    WLOGFD("Session update window mode, id: %{public}d, mode: %{public}d", GetPersistentId(),
         static_cast<int32_t>(mode));
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;

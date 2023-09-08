@@ -565,7 +565,7 @@ void JsSceneSession::Finalizer(NativeEngine* engine, void* data, void* hint)
 
 NativeValue* JsSceneSession::RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGI("[NAPI]RegisterCallback");
+    WLOGD("[NAPI]RegisterCallback");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(engine, info);
     return (me != nullptr) ? me->OnRegisterCallback(*engine, *info) : nullptr;
 }
@@ -593,7 +593,7 @@ NativeValue* JsSceneSession::SetShowRecent(NativeEngine* engine, NativeCallbackI
 
 NativeValue* JsSceneSession::SetZOrder(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGI("[NAPI]SetZOrder");
+    WLOGD("[NAPI]SetZOrder");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(engine, info);
     return (me != nullptr) ? me->OnSetZOrder(*engine, *info) : nullptr;
 }
@@ -663,7 +663,7 @@ NativeValue* JsSceneSession::OnRegisterCallback(NativeEngine& engine, NativeCall
     callbackRef.reset(engine.CreateReference(value, 1));
     jsCbMap_[cbType] = callbackRef;
     (this->*listenerFunc_[cbType])();
-    WLOGFI("[NAPI]Register end, type = %{public}s", cbType.c_str());
+    WLOGFD("[NAPI]Register end, type = %{public}s", cbType.c_str());
     return engine.CreateUndefined();
 }
 
@@ -725,13 +725,13 @@ NativeValue* JsSceneSession::OnSetPrivacyMode(NativeEngine& engine, NativeCallba
 
 void JsSceneSession::OnCreateSpecificSession(const sptr<SceneSession>& sceneSession)
 {
-    WLOGFI("OnCreateSpecificSession");
+    WLOGFD("OnCreateSpecificSession");
     if (sceneSession == nullptr) {
         WLOGFI("[NAPI]sceneSession is nullptr");
         return;
     }
 
-    WLOGFI("[NAPI]OnCreateSpecificSession");
+    WLOGFD("[NAPI]OnCreateSpecificSession");
     auto iter = jsCbMap_.find(CREATE_SPECIFIC_SCENE_CB);
     if (iter == jsCbMap_.end()) {
         return;
@@ -803,7 +803,7 @@ void JsSceneSession::OnBindDialogTarget(const sptr<SceneSession>& sceneSession)
 
 void JsSceneSession::OnSessionStateChange(const SessionState& state)
 {
-    WLOGFI("[NAPI]OnSessionStateChange, state: %{public}u", static_cast<uint32_t>(state));
+    WLOGFD("[NAPI]OnSessionStateChange, state: %{public}u", static_cast<uint32_t>(state));
     auto iter = jsCbMap_.find(SESSION_STATE_CHANGE_CB);
     if (iter == jsCbMap_.end()) {
         return;
@@ -832,7 +832,7 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect, const SizeChangeRea
         WLOGFD("Rect is empty, there is no need to notify");
         return;
     }
-    WLOGFI("[NAPI]OnSessionRectChange");
+    WLOGFD("[NAPI]OnSessionRectChange");
     auto iter = jsCbMap_.find(SESSION_RECT_CHANGE_CB);
     if (iter == jsCbMap_.end()) {
         return;
@@ -939,7 +939,7 @@ void JsSceneSession::OnRaiseAboveTarget(int32_t subWindowId)
 
 void JsSceneSession::OnSessionFocusableChange(bool isFocusable)
 {
-    WLOGFI("[NAPI]OnSessionFocusableChange, state: %{public}u", isFocusable);
+    WLOGFD("[NAPI]OnSessionFocusableChange, state: %{public}u", isFocusable);
     auto iter = jsCbMap_.find(SESSION_FOCUSABLE_CHANGE_CB);
     if (iter == jsCbMap_.end()) {
         return;
