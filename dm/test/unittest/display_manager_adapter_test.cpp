@@ -16,6 +16,8 @@
 #include <gtest/gtest.h>
 #include "display_manager_adapter.h"
 #include "display_manager_proxy.h"
+#include "window_scene.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -147,7 +149,11 @@ HWTEST_F(DisplayManagerAdapterTest, SetFreeze, Function | SmallTest | Level2)
 {
     std::vector<DisplayId> displayIds;
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SetFreeze(displayIds, false);
-    ASSERT_TRUE(ret);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(ret);
+    } else {
+        ASSERT_FALSE(ret);
+    }
 }
 
 /**
