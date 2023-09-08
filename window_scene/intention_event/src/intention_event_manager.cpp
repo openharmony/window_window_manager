@@ -82,6 +82,8 @@ void IntentionEventManager::InputEventListener::ProcessEnterLeaveEventAsync()
             WLOGFE("Enter session is null, do not reissuing enter leave events");
             return;
         }
+        WLOGFD("Reissue enter leave, enter persistentId:%{public}d",
+            enterSession->GetPersistentId());
         auto leavePointerEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
         leavePointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
         leavePointerEvent->SetButtonId(MMI::PointerEvent::BUTTON_NONE);
