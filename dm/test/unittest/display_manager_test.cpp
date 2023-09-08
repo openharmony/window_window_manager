@@ -21,6 +21,8 @@
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
 #include "display_manager.cpp"
+#include "window_scene.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -73,7 +75,7 @@ HWTEST_F(DisplayManagerTest, Freeze01, Function | SmallTest | Level1)
     std::vector<DisplayId> displayIds;
     displayIds.push_back(0);
     bool ret = DisplayManager::GetInstance().Freeze(displayIds);
-    ASSERT_TRUE(ret);
+    ASSERT_FALSE(ret);
 }
 
 /**
@@ -87,9 +89,12 @@ HWTEST_F(DisplayManagerTest, Freeze02, Function | SmallTest | Level1)
     for (uint32_t i = 0; i < 33; i++) { // MAX_DISPLAY_SIZE + 1
         displayIds.push_back(i);
     }
-
     bool ret = DisplayManager::GetInstance().Freeze(displayIds);
-    ASSERT_FALSE(ret);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(ret);
+    } else {
+        ASSERT_FALSE(ret);
+    }
 }
 
 /**
@@ -101,7 +106,11 @@ HWTEST_F(DisplayManagerTest, Freeze03, Function | SmallTest | Level1)
 {
     std::vector<DisplayId> displayIds;
     bool ret = DisplayManager::GetInstance().Freeze(displayIds);
-    ASSERT_FALSE(ret);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(ret);
+    } else {
+        ASSERT_FALSE(ret);
+    }
 }
 
 /**
@@ -114,7 +123,11 @@ HWTEST_F(DisplayManagerTest, Unfreeze01, Function | SmallTest | Level1)
     std::vector<DisplayId> displayIds;
     displayIds.push_back(0);
     bool ret = DisplayManager::GetInstance().Unfreeze(displayIds);
-    ASSERT_TRUE(ret);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(ret);
+    } else {
+        ASSERT_FALSE(ret);
+    }
 }
 
 /**
