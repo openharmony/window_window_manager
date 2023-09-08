@@ -19,6 +19,7 @@
 #include <shared_mutex>
 #include <mutex>
 
+#include <string>
 #include <transaction/rs_interfaces.h>
 
 #include "agent_death_recipient.h"
@@ -188,6 +189,7 @@ public:
 
     WMError CheckWindowId(int32_t windowId, int32_t &pid);
     int GetSceneSessionPrivacyModeCount();
+    bool CheckIfReuseSession(SessionInfo& sessionInfo);
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager() = default;
@@ -359,6 +361,7 @@ private:
     void NotifyCollaboratorAfterStart(sptr<SceneSession>& scnSession, sptr<AAFwk::SessionInfo>& scnSessionInfo);
     void UpdateCollaboratorSessionWant(sptr<SceneSession>& session);
     bool CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property) const;
+    sptr<SceneSession> FindSessionByAffinity(std::string affinity);
 };
 } // namespace OHOS::Rosen
 

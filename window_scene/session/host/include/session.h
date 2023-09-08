@@ -118,6 +118,7 @@ public:
     void SetSessionInfoContinueState(ContinueState state);
     void SetSessionInfoLockedState(bool state);
     void SetSessionInfoIsClearSession(bool isClearSession);
+    void SetSessionInfoAffinity(std::string affinity);
     void SetSessionInfo(const SessionInfo& info);
     const SessionInfo& GetSessionInfo() const;
     WindowType GetWindowType() const;
