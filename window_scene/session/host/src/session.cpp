@@ -145,6 +145,13 @@ void Session::SetSessionInfoIsClearSession(bool isClearSession)
     sessionInfo_.isClearSession = isClearSession;
 }
 
+void Session::SetSessionInfoAffinity(std::string affinity)
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    sessionInfo_.sessionAffinity = affinity;
+}
+
+
 void Session::SetSessionInfo(const SessionInfo& info)
 {
     std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);

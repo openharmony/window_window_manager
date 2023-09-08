@@ -3766,7 +3766,7 @@ sptr<SceneSession> SceneSessionManager::FindSessionByAffinity(std::string affini
 {
     sptr<SceneSession> session = nullptr;
     auto cmpFunc = [this, affinity](const std::map<uint64_t, sptr<SceneSession>>::value_type& pair) {
-        if (pair.second == nullptr || !CheckCollaboratorType(pair.second->GetCollaborator())) {
+        if (pair.second == nullptr || !CheckCollaboratorType(pair.second->GetCollaboratorType())) {
             return false;
         }
         return pair.second->GetSessionInfo().sessionAffinity == affinity;
