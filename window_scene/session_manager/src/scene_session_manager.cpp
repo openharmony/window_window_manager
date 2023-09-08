@@ -21,7 +21,6 @@
 #include <map>
 #include <memory>
 #include <sstream>
-#include <stdint.h>
 #include <unistd.h>
 
 #include <ability_context.h>
