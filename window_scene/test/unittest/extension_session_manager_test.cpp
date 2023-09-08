@@ -110,7 +110,7 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestruction01, Func
 HWTEST_F(ExtensionSessionManagerTest, GetInstance, Function | MediumTest | Level2)
 {
     ExtensionSessionManager *instance = &ExtensionSessionManager::GetInstance();
-    if (instance == nullptr) {
+    if (instance != nullptr) {
         instance->Init();
     }
     ASSERT_NE(nullptr, instance);
