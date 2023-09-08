@@ -150,7 +150,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetFreeze, Function | SmallTest | Level2)
     std::vector<DisplayId> displayIds;
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SetFreeze(displayIds, false);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TURe(ret);
+        ASSERT_TRUE(ret);
     } else {
         ASSERT_FALSE(ret);
     }
