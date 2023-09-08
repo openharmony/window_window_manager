@@ -34,10 +34,6 @@ public:
     void TearDown() override;
 };
 
-AAFwk::Want WindowExtensionContextTest::CreateWant(const std::string& abilityName, const std::string& bundleName)
-{
-}
-
 void WindowExtensionContextTest::SetUpTestCase()
 {
 }
