@@ -832,7 +832,7 @@ WSError SceneSessionManagerProxy::GetSessionDumpInfo(const std::vector<std::stri
 }
 
 WSError SceneSessionManagerProxy::GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
-    std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution)
+                                                     SessionSnapshot& snapshot, bool isLowResolution)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -860,8 +860,8 @@ WSError SceneSessionManagerProxy::GetSessionSnapshot(const std::string& deviceId
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    std::shared_ptr<Media::PixelMap> sessionSnapshot(reply.ReadParcelable<Media::PixelMap>());
-    snapshot = sessionSnapshot;
+    std::unique_ptr<SessionSnapshot> info(reply.ReadParcelable<SessionSnapshot>());
+    snapshot = *info;
     return static_cast<WSError>(reply.ReadInt32());
 }
 
