@@ -29,12 +29,20 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "Sessi
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SessionManager)
 
+SessionManager::~SessionManager()
+{
+    WLOGFI("SessionManager destory!");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    destroyed_ = true;
+}
+
 void SessionManager::ClearSessionManagerProxy()
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     WLOGFI("ClearSessionManagerProxy enter!");
-    if ((sceneSessionManagerProxy_ != nullptr) && (sceneSessionManagerProxy_->AsObject() != nullptr)) {
-        sceneSessionManagerProxy_->AsObject()->RemoveDeathRecipient(ssmDeath_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (destroyed_) {
+        WLOGFE("Already destroyed");
+        return;
     }
     if (mockSessionManagerServiceProxy_ != nullptr) {
         mockSessionManagerServiceProxy_ = nullptr;
