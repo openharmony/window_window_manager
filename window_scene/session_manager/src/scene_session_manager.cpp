@@ -3557,7 +3557,8 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
         if (FillWindowInfo(infos, scnSession)) {
             SessionManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(infos, type);
         }
-        if (WindowChangedFunc_ != nullptr && scnSession != nullptr) {
+        if (WindowChangedFunc_ != nullptr && scnSession != nullptr &&
+            scnSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
             WindowChangedFunc_(scnSession->GetPersistentId(), type);
         }
     };
