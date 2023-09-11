@@ -826,7 +826,8 @@ WSError SceneSessionManagerProxy::GetSessionDumpInfo(const std::vector<std::stri
         return WSError::WS_ERROR_IPC_FAILED;
     }
     auto infoSize = reply.ReadUint32();
-    info = reinterpret_cast<const char*>(reply.ReadRawData(infoSize));
+    const char* infoPtr = reinterpret_cast<const char*>(reply.ReadRawData(infoSize));
+    info = (infoPtr) ? infoPtr : "";
     WLOGFD("GetSessionDumpInfo, infoSize: %{public}d", infoSize);
     return static_cast<WSError>(reply.ReadInt32());
 }
