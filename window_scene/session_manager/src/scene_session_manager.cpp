@@ -926,7 +926,6 @@ void SceneSessionManager::OnInputMethodUpdate(const int32_t& persistentId)
         WLOGFE("Input method is null");
         return;
     }
-    callingSession_ = GetSceneSession(focusedSessionId_);
     ResizeSoftInputCallingSessionIfNeed(scnSession, true);
 }
 
