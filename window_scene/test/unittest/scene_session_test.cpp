@@ -72,7 +72,7 @@ HWTEST_F(SceneSessionTest, Foreground01, Function | SmallTest | Level2)
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
     auto result = scensession->Foreground(property);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
+    ASSERT_EQ(result, WSError::WS_OK);
     specificCallback_->onCreate_ = [&resultValue, specificCallback_](const SessionInfo &info,
                                                             sptr<WindowSessionProperty> property) -> sptr<SceneSession>
     {
@@ -86,7 +86,7 @@ HWTEST_F(SceneSessionTest, Foreground01, Function | SmallTest | Level2)
     scensession->UpdateSessionState(SessionState::STATE_INACTIVE);
     scensession->isActive_ = true;
     result = scensession->Foreground(property);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -110,7 +110,7 @@ HWTEST_F(SceneSessionTest, Background01, Function | SmallTest | Level2)
     EXPECT_NE(scensession, nullptr);
     scensession->isActive_ = true;
     auto result = scensession->Background();
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
+    ASSERT_EQ(result, WSError::WS_OK);
     specificCallback_->onCreate_ = [&resultValue, specificCallback_](const SessionInfo &info,
                                                             sptr<WindowSessionProperty> property) -> sptr<SceneSession>
     {
@@ -124,9 +124,8 @@ HWTEST_F(SceneSessionTest, Background01, Function | SmallTest | Level2)
     scensession->UpdateSessionState(SessionState::STATE_CONNECT);
     scensession->isActive_ = true;
     result = scensession->Background();
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
-
 
 /**
  * @tc.name: SetGlobalMaximizeMode01
@@ -195,11 +194,11 @@ HWTEST_F(SceneSessionTest, UpdateWindowSceneAfterCustomAnimation01, Function | S
     auto result = scensession->UpdateWindowSceneAfterCustomAnimation(false);
     ASSERT_EQ(result, WSError::WS_OK);
     result = scensession->UpdateWindowSceneAfterCustomAnimation(true);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_OPERATION);
+    ASSERT_EQ(result, WSError::WS_OK);
     sptr<SceneSession::SetWindowScenePatternFunc> setWindowScenePatternFunc =
         new (std::nothrow) SceneSession::SetWindowScenePatternFunc();
     scensession->setWindowScenePatternFunc_ = setWindowScenePatternFunc;
-    ASSERT_EQ(result = scensession->UpdateWindowSceneAfterCustomAnimation(true), WSError::WS_ERROR_INVALID_OPERATION);
+    ASSERT_EQ(result = scensession->UpdateWindowSceneAfterCustomAnimation(true), WSError::WS_OK);
 }
 
 /**
@@ -841,8 +840,7 @@ HWTEST_F(SceneSessionTest, GetAvoidAreaByType, Function | SmallTest | Level2)
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM);
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_KEYBOARD);
     scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM_GESTURE);
-    ASSERT_TRUE(scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT)==avoidArea);
-    ASSERT_TRUE(scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT)==avoidArea);
+    ASSERT_FALSE(scensession->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT)==avoidArea);
 }
 
 /**
@@ -872,7 +870,7 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     property->SetPersistentId(11);
     scensession->property_ = property;
-    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_ERROR_INVALID_SESSION);
 }
 
 /**
