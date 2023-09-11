@@ -75,7 +75,8 @@ void IntentionEventManager::InputEventListener::ProcessEnterLeaveEventAsync()
     auto task = [this]() {
         std::lock_guard<std::mutex> guard(mouseEventMutex_);
         if ((g_lastMouseEvent == nullptr) ||
-            (g_lastMouseEvent->GetButtonId() != MMI::PointerEvent::BUTTON_NONE)) {
+            (g_lastMouseEvent->GetButtonId() != MMI::PointerEvent::BUTTON_NONE &&
+            g_lastMouseEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_BUTTON_UP)) {
             return;
         }
         auto enterSession = SceneSession::GetEnterWindow().promote();
