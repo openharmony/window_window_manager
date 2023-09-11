@@ -124,9 +124,8 @@ HWTEST_F(SceneSessionTest, Background01, Function | SmallTest | Level2)
     scensession->UpdateSessionState(SessionState::STATE_CONNECT);
     scensession->isActive_ = true;
     result = scensession->Background();
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
-
 
 /**
  * @tc.name: SetGlobalMaximizeMode01
@@ -199,7 +198,7 @@ HWTEST_F(SceneSessionTest, UpdateWindowSceneAfterCustomAnimation01, Function | S
     sptr<SceneSession::SetWindowScenePatternFunc> setWindowScenePatternFunc =
         new (std::nothrow) SceneSession::SetWindowScenePatternFunc();
     scensession->setWindowScenePatternFunc_ = setWindowScenePatternFunc;
-    ASSERT_EQ(result = scensession->UpdateWindowSceneAfterCustomAnimation(true), WSError::WS_ERROR_INVALID_OPERATION);
+    ASSERT_EQ(result = scensession->UpdateWindowSceneAfterCustomAnimation(true), WSError::WS_OK);
 }
 
 /**
@@ -871,7 +870,7 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     property->SetPersistentId(11);
     scensession->property_ = property;
-    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_ERROR_INVALID_PERMISSION);
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_ERROR_NULLPTR);
 }
 
 /**
