@@ -417,7 +417,8 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         RSTransaction::FlushImplicitTransaction();
         postTaskDone_ = true;
     };
-    if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
+    if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION &&
+            (preRect.width_ != wmRect.width_ || preRect.height_ == wmRect.height_)) {
         postTaskDone_ = false;
         handler_->PostTask(task);
     } else {
