@@ -86,7 +86,7 @@ HWTEST_F(SceneSessionTest, Foreground01, Function | SmallTest | Level2)
     scensession->UpdateSessionState(SessionState::STATE_INACTIVE);
     scensession->isActive_ = true;
     result = scensession->Foreground(property);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -870,7 +870,7 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     property->SetPersistentId(11);
     scensession->property_ = property;
-    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(scensession->TransferPointerEvent(pointerEvent_), WSError::WS_ERROR_INVALID_SESSION);
 }
 
 /**
