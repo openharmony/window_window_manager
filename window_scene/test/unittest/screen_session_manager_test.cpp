@@ -448,17 +448,17 @@ HWTEST_F(ScreenSessionManagerTest, SetMirror, Function | SmallTest | Level3)
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
-    std::vector<ScreenId> screens {0, 1, 2, 3, 4, 5, 6, 7};
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(2,screens));
+    std::vector<ScreenId> screens{0, 1, 2, 3, 4, 5, 6, 7};
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(2, screens));
     auto screen = ssm_->GetScreenSession(2);
     screen->GetScreenProperty().SetScreenType(ScreenType::REAL);
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(2,screens));
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(9,screens));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(2, screens));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(9, screens));
     screen->GetScreenProperty().SetScreenType(ScreenType::REAL);
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(2,screens));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(2, screens));
     sptr<ScreenSession> newScreen = new (std::nothrow) ScreenSession();
     ssm_->AddAsFirstScreenLocked(newScreen);
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(2,screens));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(2, screens));
 }
 
 /**
