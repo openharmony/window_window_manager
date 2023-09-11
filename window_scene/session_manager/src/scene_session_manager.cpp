@@ -692,7 +692,7 @@ sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     auto iter = sceneSessionMap_.find(persistentId);
     if (iter == sceneSessionMap_.end()) {
-        WLOGFE("Error found scene session with id: %{public}d", persistentId);
+        WLOGFD("Error found scene session with id: %{public}d", persistentId);
         return nullptr;
     }
     return iter->second;
@@ -1364,7 +1364,7 @@ void SceneSessionManager::SetGestureNavigationEnabledChangeListener(
 
 void SceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
 {
-    WLOGFI("OnOutsideDownEvent x = %{public}d, y = %{public}d", x, y);
+    WLOGFD("OnOutsideDownEvent x = %{public}d, y = %{public}d", x, y);
     if (outsideDownEventFunc_) {
         outsideDownEventFunc_(x, y);
     }
@@ -1687,7 +1687,7 @@ WSError SceneSessionManager::UpdateProperty(sptr<WindowSessionProperty>& propert
         if (sceneSession == nullptr) {
             return;
         }
-        WLOGI("Id: %{public}d, action: %{public}u", sceneSession->GetPersistentId(), action);
+        WLOGD("Id: %{public}d, action: %{public}u", sceneSession->GetPersistentId(), action);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:UpdateProperty");
         weakSession->HandleUpdateProperty(property, action, sceneSession);
     };
@@ -3499,7 +3499,7 @@ void SceneSessionManager::RelayoutKeyBoard(sptr<SceneSession> sceneSession)
     requestRect.posY_ = defaultDisplayInfo->GetHeight() -
         static_cast<int32_t>(requestRect.height_);
     sceneSession->GetSessionProperty()->SetRequestRect(requestRect);
-    WLOGFI("Id: %{public}d, rect: %{public}s", sceneSession->GetPersistentId(),
+    WLOGFD("Id: %{public}d, rect: %{public}s", sceneSession->GetPersistentId(),
         SessionHelper::TransferToWSRect(requestRect).ToString().c_str());
     sceneSession->UpdateSessionRect(SessionHelper::TransferToWSRect(requestRect), SizeChangeReason::UNDEFINED);
 }
@@ -3544,7 +3544,7 @@ WMError SceneSessionManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessi
 
 void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpdateType type)
 {
-    WLOGFI("NotifyWindowInfoChange, persistentId = %{public}d, updateType = %{public}d", persistentId, type);
+    WLOGFD("NotifyWindowInfoChange, persistentId = %{public}d, updateType = %{public}d", persistentId, type);
     sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         WLOGFE("GetSessionSnapshot sceneSession nullptr!");
@@ -3714,12 +3714,12 @@ void SceneSessionManager::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclu
         CheckAndNotifyWaterMarkChangedResult();
     }
         if (windowVisibilityInfos.size() != 0) {
-            WLOGI("Notify windowvisibilityinfo changed start");
+            WLOGD("Notify windowvisibilityinfo changed start");
             SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
         }
 #ifdef MEMMGR_WINDOW_ENABLE
         if (memMgrWindowInfos.size() != 0) {
-            WLOGI("Notify memMgrWindowInfos changed start");
+            WLOGD("Notify memMgrWindowInfos changed start");
             Memory::MemMgrClient::GetInstance().OnWindowVisibilityChanged(memMgrWindowInfos);
         }
 #endif
@@ -3812,7 +3812,7 @@ WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<I
 
 WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject> &token)
 {
-    WLOGFI("run GetFocusSessionToken with focusedSessionId: %{public}d", focusedSessionId_);
+    WLOGFD("run GetFocusSessionToken with focusedSessionId: %{public}d", focusedSessionId_);
     auto sceneSession = GetSceneSession(focusedSessionId_);
     if (sceneSession) {
         token = sceneSession->GetAbilityToken();

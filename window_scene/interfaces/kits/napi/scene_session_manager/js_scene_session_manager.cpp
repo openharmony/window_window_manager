@@ -118,7 +118,7 @@ void JsSceneSessionManager::OnCreateSpecificSession(const sptr<SceneSession>& sc
         return;
     }
 
-    WLOGFI("[NAPI]OnCreateSpecificSession");
+    WLOGFD("[NAPI]OnCreateSpecificSession");
     auto iter = jsCbMap_.find(CREATE_SPECIFIC_SCENE_CB);
     if (iter == jsCbMap_.end()) {
         return;
@@ -192,7 +192,7 @@ void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable)
 
 void JsSceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
 {
-    WLOGFI("[NAPI]OnOutsideDownEvent");
+    WLOGFD("[NAPI]OnOutsideDownEvent");
     auto iter = jsCbMap_.find(OUTSIDE_DOWN_EVENT_CB);
     if (iter == jsCbMap_.end()) {
         return;
@@ -258,14 +258,14 @@ void JsSceneSessionManager::ProcessOutsideDownEvent()
 
 NativeValue* JsSceneSessionManager::RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]RegisterCallback");
+    WLOGFD("[NAPI]RegisterCallback");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
     return (me != nullptr) ? me->OnRegisterCallback(*engine, *info) : nullptr;
 }
 
 NativeValue* JsSceneSessionManager::UpdateFocus(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGI("[NAPI]UpdateFocus");
+    WLOGD("[NAPI]UpdateFocus");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
     return (me != nullptr) ? me->OnUpdateFocus(*engine, *info) : nullptr;
 }
@@ -313,7 +313,7 @@ NativeValue* JsSceneSessionManager::UpdateSceneSessionWant(NativeEngine* engine,
 
 NativeValue* JsSceneSessionManager::RequestSceneSessionActivation(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGI("[NAPI]RequestSceneSessionActivation");
+    WLOGD("[NAPI]RequestSceneSessionActivation");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
     return (me != nullptr) ? me->OnRequestSceneSessionActivation(*engine, *info) : nullptr;
 }
@@ -348,7 +348,7 @@ NativeValue* JsSceneSessionManager::StartAbilityBySpecified(NativeEngine* engine
 
 NativeValue* JsSceneSessionManager::GetWindowSceneConfig(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGI("[NAPI]GetWindowSceneConfig");
+    WLOGD("[NAPI]GetWindowSceneConfig");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
     return (me != nullptr) ? me->OnGetWindowSceneConfig(*engine, *info) : nullptr;
 }
@@ -440,7 +440,7 @@ NativeValue* JsSceneSessionManager::OnRegisterCallback(NativeEngine& engine, Nat
     std::shared_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
     jsCbMap_[cbType] = callbackRef;
-    WLOGFI("[NAPI]Register end, type = %{public}s", cbType.c_str());
+    WLOGFD("[NAPI]Register end, type = %{public}s", cbType.c_str());
     return engine.CreateUndefined();
 }
 
@@ -785,7 +785,7 @@ NativeValue* JsSceneSessionManager::OnUpdateSceneSessionWant(NativeEngine& engin
 
 NativeValue* JsSceneSessionManager::OnRequestSceneSessionActivation(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGI("[NAPI]OnRequestSceneSessionActivation");
+    WLOGD("[NAPI]OnRequestSceneSessionActivation");
     if (info.argc < 2) { // 2: params num
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM), "InputInvalid"));
@@ -1010,7 +1010,7 @@ NativeValue* JsSceneSessionManager::OnStartAbilityBySpecified(NativeEngine& engi
 
 NativeValue* JsSceneSessionManager::OnGetWindowSceneConfig(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("[NAPI]OnGetWindowSceneConfig");
+    WLOGFD("[NAPI]OnGetWindowSceneConfig");
     const AppWindowSceneConfig& windowSceneConfig = SceneSessionManager::GetInstance().GetWindowSceneConfig();
     NativeValue* jsWindowSceneConfigObj = JsWindowSceneConfig::CreateWindowSceneConfig(engine, windowSceneConfig);
     if (jsWindowSceneConfigObj == nullptr) {
