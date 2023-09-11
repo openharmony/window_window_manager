@@ -86,7 +86,7 @@ namespace {
      * @tc.desc: FoldScreenController whether is foldable device or not
      * @tc.type: FUNC
      */
-    HWTEST_F(FoldScreenControllerTest, ConvertBoundaryRectsByRotation, Function | SmallTest | Level3)
+    HWTEST_F(FoldScreenControllerTest, IsFoldable, Function | SmallTest | Level3)
     {
         ASSERT_EQ(true, ssm_.IsFoldable());
     }
