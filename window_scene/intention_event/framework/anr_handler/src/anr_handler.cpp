@@ -52,12 +52,13 @@ ANRHandler::~ANRHandler() {}
 void ANRHandler::SetSessionStage(int32_t eventId, const wptr<ISessionStage> &sessionStage)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (sessionStage == nullptr) {
-        WLOGFE("SessionStage of eventId:%{public}d is nullptr", eventId);
+    sptr<ISessionStage> session = sessionStage.promote();
+    if (session == nullptr) {
+        WLOGFE("SessionStage for eventId:%{public}d is nullptr", eventId);
         sessionStageMap_[eventId] = { INVALID_PERSISTENT_ID, nullptr };
         return;
     }
-    int32_t persistentId = sessionStage->GetPersistentId();
+    int32_t persistentId = session->GetPersistentId();
     sessionStageMap_[eventId] = { persistentId, sessionStage };
     WLOGFD("SetSessionStage for eventId:%{public}d, persistentId:%{public}d", eventId, persistentId);
 }
