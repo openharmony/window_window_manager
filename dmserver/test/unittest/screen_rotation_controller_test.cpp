@@ -79,27 +79,6 @@ void ScreenRotationControllerTest::TearDown()
 
 namespace {
 /**
- * @tc.name: GravitySensor
- * @tc.desc: Subscribe and unsubscribe gravity sensor
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenRotationControllerTest, GravitySensor, Function | SmallTest | Level3)
-{
-    GravitySensorSubscriber::isGravitySensorSubscribed_ = true;
-    GravitySensorSubscriber::SubscribeGravitySensor();
-    ASSERT_EQ(true, GravitySensorSubscriber::isGravitySensorSubscribed_);
-
-    GravitySensorSubscriber::isGravitySensorSubscribed_ = false;
-    GravitySensorSubscriber::SubscribeGravitySensor();
-
-    GravitySensorSubscriber::isGravitySensorSubscribed_ = false;
-    GravitySensorSubscriber::UnsubscribeGravitySensor();
-
-    GravitySensorSubscriber::isGravitySensorSubscribed_ = true;
-    GravitySensorSubscriber::UnsubscribeGravitySensor();
-}
-
-/**
  * @tc.name: ScreenRotationLocked
  * @tc.desc: Set and get screen rotation locked
  * @tc.type: FUNC
@@ -122,6 +101,12 @@ HWTEST_F(ScreenRotationControllerTest, DefaultDeviceRotationOffset, Function | S
 {
     ScreenRotationController::defaultDeviceRotationOffset_ = 90;
 
+    ScreenRotationController::SetDefaultDeviceRotationOffset(-90);
+    ASSERT_EQ(90, ScreenRotationController::defaultDeviceRotationOffset_);
+
+    ScreenRotationController::SetDefaultDeviceRotationOffset(-100);
+    ASSERT_EQ(90, ScreenRotationController::defaultDeviceRotationOffset_);
+
     ScreenRotationController::SetDefaultDeviceRotationOffset(360);
     ASSERT_EQ(90, ScreenRotationController::defaultDeviceRotationOffset_);
 
@@ -132,73 +117,6 @@ HWTEST_F(ScreenRotationControllerTest, DefaultDeviceRotationOffset, Function | S
     ASSERT_EQ(180, ScreenRotationController::defaultDeviceRotationOffset_);
 }
 
-/**
- * @tc.name: CheckCallbackTimeInterval
- * @tc.desc: Check callbcak time interval
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenRotationControllerTest, CheckCallbackTimeInterval, Function | SmallTest | Level3)
-{
-    std::chrono::milliseconds ms = std::chrono::time_point_cast<std::chrono::milliseconds>(
-        std::chrono::steady_clock::now()).time_since_epoch();
-    long currentTimeInMillitm = ms.count();
-
-    GravitySensorSubscriber::lastCallbackTime_ = currentTimeInMillitm;
-    ASSERT_EQ(false, GravitySensorSubscriber::CheckCallbackTimeInterval());
-
-    GravitySensorSubscriber::lastCallbackTime_ = currentTimeInMillitm - 200;
-    ASSERT_EQ(true, GravitySensorSubscriber::CheckCallbackTimeInterval());
-}
-
-/**
- * @tc.name: HandleGravitySensorEventCallback
- * @tc.desc: Handel gravity sensor event callback
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenRotationControllerTest, HandleGravitySensorEventCallback, Function | SmallTest | Level3)
-{
-    SensorEvent event;
-    GravityData data = {0.f, 0.f, 0.f};
-    event.sensorTypeId = SENSOR_TYPE_ID_NONE;
-    event.data = reinterpret_cast<uint8_t*>(&data);
-
-    std::chrono::milliseconds ms = std::chrono::time_point_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now()).time_since_epoch();
-    long currentTimeInMillitm = ms.count();
-
-    GravitySensorSubscriber::lastCallbackTime_ = currentTimeInMillitm;
-    GravitySensorSubscriber::HandleGravitySensorEventCallback(&event);
-
-    GravitySensorSubscriber::lastCallbackTime_ = currentTimeInMillitm - 200;
-    GravitySensorSubscriber::HandleGravitySensorEventCallback(&event);
-
-    event.sensorTypeId = SENSOR_TYPE_ID_GRAVITY;
-    GravitySensorSubscriber::lastCallbackTime_ = currentTimeInMillitm - 200;
-    GravitySensorSubscriber::HandleGravitySensorEventCallback(&event);
-
-    auto currentSensorRotationValue = ScreenRotationController::lastSensorRotationConverted_;
-    data.z = 1.f;
-    GravitySensorSubscriber::lastCallbackTime_ = currentTimeInMillitm - 200;
-    GravitySensorSubscriber::HandleGravitySensorEventCallback(&event);
-    ASSERT_EQ(currentSensorRotationValue, ScreenRotationController::lastSensorRotationConverted_);
-}
-
-/**
- * @tc.name: CalcRotationDegree
- * @tc.desc: Calc rotation degree
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenRotationControllerTest, CalcRotationDegree, Function | SmallTest | Level3)
-{
-    GravityData data0 = {0.f, 0.f, 0.f};
-    ASSERT_EQ(270, GravitySensorSubscriber::CalcRotationDegree(&data0));
-
-    GravityData data1 = {0.f, 0.f, 1.f};
-    ASSERT_EQ(-1, GravitySensorSubscriber::CalcRotationDegree(&data1));
-
-    GravityData data2 = {1.f, 1.f, 1.f};
-    ASSERT_EQ(315, GravitySensorSubscriber::CalcRotationDegree(&data2));
-}
 
 /**
  * @tc.name: CalcTargetDisplayRotation
@@ -429,22 +347,6 @@ HWTEST_F(ScreenRotationControllerTest, ProcessSwitchToAutoRotation, Function | S
 }
 
 /**
- * @tc.name: CalcSensorRotation
- * @tc.desc: Calc sensor rotation
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenRotationControllerTest, CalcSensorRotation, Function | SmallTest | Level3)
-{
-    ASSERT_EQ(SensorRotation::INVALID, GravitySensorSubscriber::CalcSensorRotation(-30));
-    ASSERT_EQ(SensorRotation::ROTATION_0, GravitySensorSubscriber::CalcSensorRotation(15));
-    ASSERT_EQ(SensorRotation::ROTATION_0, GravitySensorSubscriber::CalcSensorRotation(345));
-    ASSERT_EQ(SensorRotation::ROTATION_90, GravitySensorSubscriber::CalcSensorRotation(75));
-    ASSERT_EQ(SensorRotation::ROTATION_180, GravitySensorSubscriber::CalcSensorRotation(180));
-    ASSERT_EQ(SensorRotation::ROTATION_270, GravitySensorSubscriber::CalcSensorRotation(270));
-    ASSERT_EQ(SensorRotation::ROTATION_0, GravitySensorSubscriber::CalcSensorRotation(600));
-}
-
-/**
  * @tc.name: ConvertRotation
  * @tc.desc: Convert rotation
  * @tc.type: FUNC
@@ -501,6 +403,180 @@ HWTEST_F(ScreenRotationControllerTest, ProcessOrientationSwitch, Function | Smal
     ScreenRotationController::ProcessOrientationSwitch(Orientation::LOCKED, true);
     ASSERT_EQ(Orientation::LOCKED, ScreenRotationController::lastOrientationType_);
 }
+
+/**
+ * @tc.name: HandleSensorEventInput
+ * @tc.desc: HandleSensorEventInput
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationControllerTest, HandleSensorEventInput, Function | SmallTest | Level3)
+{
+    DeviceRotation deviceRotation = DeviceRotation::INVALID;
+    ScreenRotationController::HandleSensorEventInput(deviceRotation);
+
+    deviceRotation = DeviceRotation::ROTATION_PORTRAIT;
+    ScreenRotationController::HandleSensorEventInput(deviceRotation);
+
+    ASSERT_EQ(deviceRotation, DeviceRotation::ROTATION_PORTRAIT);
+}
+
+/**
+ * @tc.name: IsDisplayRotationVertical
+ * @tc.desc: Check device rotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationControllerTest, IsDisplayRotationVertical, Function | SmallTest | Level3)
+{
+    ASSERT_EQ(true, ScreenRotationController::IsDisplayRotationVertical(Rotation::ROTATION_0));
+    ASSERT_EQ(false, ScreenRotationController::IsDisplayRotationVertical(Rotation::ROTATION_90));
+    ASSERT_EQ(false, ScreenRotationController::IsDisplayRotationVertical(Rotation::ROTATION_270));
+
+    ASSERT_EQ(false, ScreenRotationController::IsDisplayRotationHorizontal(Rotation::ROTATION_0));
+    ASSERT_EQ(true, ScreenRotationController::IsDisplayRotationHorizontal(Rotation::ROTATION_90));
+    ASSERT_EQ(true, ScreenRotationController::IsDisplayRotationHorizontal(Rotation::ROTATION_270));
+}
+
+/**
+ * @tc.name: ProcessSwitchToSensorUnrelatedOrientation
+ * @tc.desc: ProcessSwitchToSensorUnrelatedOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationControllerTest, ProcessSwitchToSensorUnrelatedOrientation, Function | SmallTest | Level3)
+{
+    Orientation orientation = Orientation::UNSPECIFIED;
+    ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(orientation, false);
+    orientation = Orientation::SENSOR;
+    ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(orientation, false);
+    ASSERT_EQ(orientation, Orientation::SENSOR);
+
+    orientation = Orientation::UNSPECIFIED;
+    ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(orientation, false);
+    ASSERT_EQ(orientation, Orientation::UNSPECIFIED);
+
+    orientation = Orientation::VERTICAL;
+    ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(orientation, false);
+    ASSERT_EQ(orientation, Orientation::VERTICAL);
+
+    orientation = Orientation::REVERSE_VERTICAL;
+    ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(orientation, false);
+    ASSERT_EQ(orientation, Orientation::REVERSE_VERTICAL);
+
+    orientation = Orientation::HORIZONTAL;
+    ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(orientation, false);
+    ASSERT_EQ(orientation, Orientation::HORIZONTAL);
+
+    orientation = Orientation::REVERSE_HORIZONTAL;
+    ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(orientation, false);
+    ASSERT_EQ(orientation, Orientation::REVERSE_HORIZONTAL);
+
+}
+
+#ifdef SENSOR_ENABLE
+/**
+ * @tc.name: GravitySensor
+ * @tc.desc: Subscribe and unsubscribe gravity sensor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationControllerTest, GravitySensor, Function | SmallTest | Level3)
+{
+    GravitySensorSubscriber::isGravitySensorSubscribed_ = true;
+    GravitySensorSubscriber::SubscribeGravitySensor();
+    ASSERT_EQ(true, GravitySensorSubscriber::isGravitySensorSubscribed_);
+
+    GravitySensorSubscriber::isGravitySensorSubscribed_ = false;
+    GravitySensorSubscriber::SubscribeGravitySensor();
+
+    GravitySensorSubscriber::isGravitySensorSubscribed_ = false;
+    GravitySensorSubscriber::UnsubscribeGravitySensor();
+
+    GravitySensorSubscriber::isGravitySensorSubscribed_ = true;
+    GravitySensorSubscriber::UnsubscribeGravitySensor();
+}
+
+/**
+ * @tc.name: CheckCallbackTimeInterval
+ * @tc.desc: Check callbcak time interval
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationControllerTest, CheckCallbackTimeInterval, Function | SmallTest | Level3)
+{
+    std::chrono::milliseconds ms = std::chrono::time_point_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now()).time_since_epoch();
+    long currentTimeInMillitm = ms.count();
+
+    GravitySensorSubscriber::lastCallbackTime_ = currentTimeInMillitm;
+    ASSERT_EQ(false, GravitySensorSubscriber::CheckCallbackTimeInterval());
+
+    GravitySensorSubscriber::lastCallbackTime_ = currentTimeInMillitm - 200;
+    ASSERT_EQ(true, GravitySensorSubscriber::CheckCallbackTimeInterval());
+}
+
+/**
+ * @tc.name: HandleGravitySensorEventCallback
+ * @tc.desc: Handel gravity sensor event callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationControllerTest, HandleGravitySensorEventCallback, Function | SmallTest | Level3)
+{
+    SensorEvent event;
+    GravityData data = {0.f, 0.f, 0.f};
+    event.sensorTypeId = SENSOR_TYPE_ID_NONE;
+    event.data = reinterpret_cast<uint8_t*>(&data);
+
+    std::chrono::milliseconds ms = std::chrono::time_point_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now()).time_since_epoch();
+    long currentTimeInMillitm = ms.count();
+
+    GravitySensorSubscriber::lastCallbackTime_ = currentTimeInMillitm;
+    GravitySensorSubscriber::HandleGravitySensorEventCallback(&event);
+
+    GravitySensorSubscriber::lastCallbackTime_ = currentTimeInMillitm - 200;
+    GravitySensorSubscriber::HandleGravitySensorEventCallback(&event);
+
+    event.sensorTypeId = SENSOR_TYPE_ID_GRAVITY;
+    GravitySensorSubscriber::lastCallbackTime_ = currentTimeInMillitm - 200;
+    GravitySensorSubscriber::HandleGravitySensorEventCallback(&event);
+
+    auto currentSensorRotationValue = ScreenRotationController::lastSensorRotationConverted_;
+    data.z = 1.f;
+    GravitySensorSubscriber::lastCallbackTime_ = currentTimeInMillitm - 200;
+    GravitySensorSubscriber::HandleGravitySensorEventCallback(&event);
+    ASSERT_EQ(currentSensorRotationValue, ScreenRotationController::lastSensorRotationConverted_);
+}
+
+/**
+ * @tc.name: CalcRotationDegree
+ * @tc.desc: Calc rotation degree
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationControllerTest, CalcRotationDegree, Function | SmallTest | Level3)
+{
+    GravityData data0 = {0.f, 0.f, 0.f};
+    ASSERT_EQ(270, GravitySensorSubscriber::CalcRotationDegree(&data0));
+
+    GravityData data1 = {0.f, 0.f, 1.f};
+    ASSERT_EQ(-1, GravitySensorSubscriber::CalcRotationDegree(&data1));
+
+    GravityData data2 = {1.f, 1.f, 1.f};
+    ASSERT_EQ(315, GravitySensorSubscriber::CalcRotationDegree(&data2));
+}
+/**
+ * @tc.name: CalcSensorRotation
+ * @tc.desc: Calc sensor rotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenRotationControllerTest, CalcSensorRotation, Function | SmallTest | Level3)
+{
+    ASSERT_EQ(SensorRotation::INVALID, GravitySensorSubscriber::CalcSensorRotation(-30));
+    ASSERT_EQ(SensorRotation::ROTATION_0, GravitySensorSubscriber::CalcSensorRotation(15));
+    ASSERT_EQ(SensorRotation::ROTATION_0, GravitySensorSubscriber::CalcSensorRotation(345));
+    ASSERT_EQ(SensorRotation::ROTATION_90, GravitySensorSubscriber::CalcSensorRotation(75));
+    ASSERT_EQ(SensorRotation::ROTATION_180, GravitySensorSubscriber::CalcSensorRotation(180));
+    ASSERT_EQ(SensorRotation::ROTATION_270, GravitySensorSubscriber::CalcSensorRotation(270));
+    ASSERT_EQ(SensorRotation::ROTATION_0, GravitySensorSubscriber::CalcSensorRotation(600));
+}
+#endif
+
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
 /**
  * @tc.name: SubscribeMotionSensor

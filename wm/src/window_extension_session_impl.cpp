@@ -136,6 +136,15 @@ void WindowExtensionSessionImpl::NotifyFocusActiveEvent(bool isFocusActive)
     }
 }
 
+void WindowExtensionSessionImpl::NotifyBackpressedEvent(bool& isConsumed)
+{
+    if (uiContent_) {
+        WLOGFD("Transfer backpressed event to uiContent");
+        isConsumed = uiContent_->ProcessBackPressed();
+    }
+    WLOGFD("Backpressed event is not cosumed");
+}
+
 WMError WindowExtensionSessionImpl::SetUIContent(const std::string& contentInfo,
     NativeEngine* engine, NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability)
 {

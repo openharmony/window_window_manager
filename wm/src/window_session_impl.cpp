@@ -327,7 +327,9 @@ WMError WindowSessionImpl::Destroy(bool needClearListener)
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    hostSession_->Disconnect();
+    if (hostSession_ != nullptr) {
+        hostSession_->Disconnect();
+    }
     NotifyBeforeDestroy(GetWindowName());
     if (needClearListener) {
         ClearListenersById(GetPersistentId());
@@ -391,15 +393,19 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
             lastGravity_ = node->GetStagingProperties().GetFrameGravity();
             node->SetFrameGravity(Gravity::RESIZE);
         }
+        RSSystemProperties::SetDrawTextAsBitmap(true);
+        RSInterfaces::GetInstance().EnableCacheForRotation();
         rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
-        protocol.SetDuration(600);
+        protocol.SetDuration(300);
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
         RSNode::OpenImplicitAnimation(protocol, curve, [this, weak = std::weak_ptr<RSSurfaceNode>(node)]() {
             rotationAnimationCount_--;
             auto node = weak.lock();
             if (rotationAnimationCount_ == 0 && node) {
                 node->SetFrameGravity(lastGravity_);
+                RSSystemProperties::SetDrawTextAsBitmap(false);
+                RSInterfaces::GetInstance().DisableCacheForRotation();
             }
         });
         if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_)) {
@@ -425,6 +431,14 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     WLOGFI("update rect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u", rect.posX_, rect.posY_,
         rect.width_, rect.height_, wmReason);
     return WSError::WS_OK;
+}
+
+void WindowSessionImpl::UpdateDensity()
+{
+    auto preRect = GetRect();
+    UpdateViewportConfig(preRect, WindowSizeChangeReason::UNDEFINED);
+    WLOGFI("WindowSessionImpl::UpdateDensity [%{public}d, %{public}d, %{public}u, %{public}u]",
+        preRect.posX_, preRect.posY_, preRect.width_, preRect.height_);
 }
 
 WSError WindowSessionImpl::UpdateFocus(bool isFocused)
@@ -1505,6 +1519,11 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
             listener->OnSizeChange(info);
         }
     }
+}
+
+KeyboardAnimationConfig WindowSessionImpl::GetKeyboardAnimationConfig()
+{
+    return windowSystemConfig_.keyboardAnimationConfig_;
 }
 
 void WindowSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& params)

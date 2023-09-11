@@ -16,9 +16,9 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_EXTENSION_SESSION_H
 
-#include "session/host/include/session.h"
 #include "want.h"
-#include "want_params.h"
+
+#include "session/host/include/session.h"
 
 namespace OHOS::Rosen {
 using NotifyTransferAbilityResultFunc = std::function<void(uint32_t resultCode, const AAFwk::Want& want)>;
@@ -31,16 +31,21 @@ public:
         NotifyTransferExtensionDataFunc transferExtensionDataFunc_;
         NotifyRemoteReadyFunc notifyRemoteReadyFunc_;
     };
-    ExtensionSession(const SessionInfo& info);
-    ~ExtensionSession() = default;
+
+    explicit ExtensionSession(const SessionInfo& info);
+    virtual ~ExtensionSession() = default;
+
+    WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
+        sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid) override;
 
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     WSError TransferComponentData(const AAFwk::WantParams& wantParams);
     void NotifyRemoteReady() override;
-    void RegisterExtensionSessionEventCallback(const sptr<ExtensionSessionEventCallback>&
-        extSessionEventCallback);
+    void RegisterExtensionSessionEventCallback(const sptr<ExtensionSessionEventCallback>& extSessionEventCallback);
     sptr<ExtensionSessionEventCallback> GetExtensionSessionEventCallback();
+
 private:
     sptr<ExtensionSessionEventCallback> extSessionEventCallback_ = nullptr;
 };

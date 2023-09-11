@@ -95,6 +95,56 @@ HWTEST_F(InputWindowMonitorTest, UpdateDisplayInfo01, Function | SmallTest | Lev
     input_monitor_->UpdateDisplayInfo(displayInfos, displayInfoVector);
     ASSERT_EQ(0, displayInfoVector.size());
 }
+
+/**
+ * @tc.name: UpdateDisplayInfo02
+ * @tc.desc: UpdateDisplayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputWindowMonitorTest, UpdateDisplayInfo02, Function | SmallTest | Level2)
+{
+    std::vector<sptr<DisplayInfo>> displayInfos;
+    std::vector<MMI::DisplayInfo> displayInfoVector;
+    displayInfos.clear();
+    displayInfoVector.clear();
+    sptr<DisplayInfo> displayInfo = new (std::nothrow) DisplayInfo();
+    displayInfos.emplace_back(displayInfo);
+    input_monitor_->UpdateDisplayInfo(displayInfos, displayInfoVector);
+    displayInfo->waterfallDisplayCompressionStatus_ = true;
+    ASSERT_NE(0, displayInfoVector.size());
+}
+/**
+ * @tc.name: TransformWindowRects
+ * @tc.desc: TransformWindowRects
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputWindowMonitorTest, TransformWindowRects, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> windowNode = new WindowNode();
+    Rect areaRect;
+    std::vector<Rect> touchHotAreas;
+    std::vector<Rect> pointerHotAreas;
+    input_monitor_->TransformWindowRects(windowNode, areaRect, touchHotAreas, pointerHotAreas);
+    WindowProperty windowProperty;
+    auto result = windowProperty.isNeedComputerTransform();
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GetDisplayDirectionForMmi02
+ * @tc.desc: get display direction
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputWindowMonitorTest, GetDisplayDirectionForMmi02, Function | SmallTest | Level2)
+{
+    MMI::Direction direction = MMI::DIRECTION0;
+    Rotation rotate = Rotation::ROTATION_90;
+    rotate = Rotation::ROTATION_180;
+    EXPECT_NE(direction, MMI::DIRECTION180);
+    rotate = Rotation::ROTATION_270;
+    EXPECT_NE(direction, MMI::DIRECTION270);
+    ASSERT_NE(MMI::DIRECTION0, input_monitor_->GetDisplayDirectionForMmi(rotate));
+}
 }
 }
 }

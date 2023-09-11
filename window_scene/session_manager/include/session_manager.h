@@ -51,7 +51,7 @@ public:
 
 protected:
     SessionManager() = default;
-    virtual ~SessionManager() = default;
+    virtual ~SessionManager();
 
 private:
     void InitSessionManagerServiceProxy();
@@ -66,6 +66,7 @@ private:
     sptr<ScreenLock::ScreenLockManagerInterface> screenLockManagerProxy_ = nullptr;
     sptr<SSMDeathRecipient> ssmDeath_ = nullptr;
     std::recursive_mutex mutex_;
+    bool destroyed_ = false;
 };
 } // namespace OHOS::Rosen
 

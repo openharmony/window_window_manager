@@ -14,6 +14,9 @@
  */
 #include "intention_event_manager.h"
 
+#ifdef IMF_ENABLE
+#include <input_method_controller.h>
+#endif // IMF_ENABLE
 #include "scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
@@ -61,12 +64,6 @@ void IntentionEventManager::InputEventListener::RegisterWindowChanged()
             WLOGFD("Window changed, persistentId:%{public}d, type:%{public}d",
                 persistentId, type);
             if (type == WindowUpdateType::WINDOW_UPDATE_BOUNDS) {
-                auto enterSession = SceneSession::GetEnterWindow().promote();
-                if (enterSession == nullptr) {
-                    WLOGFE("Enter session is null, do not reissuing enter leave events, persistentId:%{public}d, "
-                            "type:%{public}d", persistentId, type);
-                    return;
-                }
                 this->ProcessEnterLeaveEventAsync();
             }
         }
@@ -80,14 +77,26 @@ void IntentionEventManager::InputEventListener::ProcessEnterLeaveEventAsync()
         if (g_lastMouseEvent == nullptr) {
             return;
         }
-        auto pointerEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
-        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
-        pointerEvent->SetButtonId(MMI::PointerEvent::BUTTON_NONE);
+        auto enterSession = SceneSession::GetEnterWindow().promote();
+        if (enterSession == nullptr) {
+            WLOGFE("Enter session is null, do not reissuing enter leave events");
+            return;
+        }
+        WLOGFD("Reissue enter leave, enter persistentId:%{public}d",
+            enterSession->GetPersistentId());
+        auto leavePointerEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
+        leavePointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
+        leavePointerEvent->SetButtonId(MMI::PointerEvent::BUTTON_NONE);
+        enterSession->TransferPointerEvent(leavePointerEvent);
+
+        auto enterPointerEvent = std::make_shared<MMI::PointerEvent>(*g_lastMouseEvent);
+        enterPointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
+        enterPointerEvent->SetButtonId(MMI::PointerEvent::BUTTON_NONE);
         if (uiContent_ == nullptr) {
             WLOGFE("ProcessEnterLeaveEventAsync uiContent_ is null");
             return;
         }
-        uiContent_->ProcessPointerEvent(pointerEvent);
+        uiContent_->ProcessPointerEvent(enterPointerEvent);
     };
     auto eventHandler = weakEventConsumer_.lock();
     if (eventHandler == nullptr) {
@@ -138,8 +147,6 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         } else {
             SceneSessionManager::GetInstance().OnOutsideDownEvent(
                 pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
-            SceneSessionManager::GetInstance().NotifySessionTouchOutside(
-                action, pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
         }
     }
     uiContent_->ProcessPointerEvent(pointerEvent);
@@ -160,6 +167,19 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         return;
     }
     if (focusedSceneSession->GetSessionInfo().isSystem_) {
+        bool inputMethodHasProcessed = false;
+#ifdef IMF_ENABLE
+        bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
+        if (isKeyboardEvent) {
+            WLOGD("dispatch keyEvent to input method");
+            inputMethodHasProcessed =
+                MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent);
+        }
+#endif // IMF_ENABLE
+        if (inputMethodHasProcessed) {
+            WLOGD("Input method has processed key event");
+            return;
+        }
         WLOGFD("Syetem window scene, transfer key event to root scene");
         if (uiContent_ == nullptr) {
             WLOGFE("uiContent_ is null");
@@ -169,6 +189,17 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         return;
     }
     focusedSceneSession->TransferKeyEvent(keyEvent);
+}
+
+bool IntentionEventManager::InputEventListener::IsKeyboardEvent(
+    const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
+{
+    int32_t keyCode = keyEvent->GetKeyCode();
+    bool isKeyFN = (keyCode == MMI::KeyEvent::KEYCODE_FN);
+    bool isKeyBack = (keyCode == MMI::KeyEvent::KEYCODE_BACK);
+    bool isKeyboard = (keyCode >= MMI::KeyEvent::KEYCODE_0 && keyCode <= MMI::KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN);
+    WLOGI("isKeyFN: %{public}d, isKeyboard: %{public}d", isKeyFN, isKeyboard);
+    return (isKeyFN || isKeyboard || isKeyBack);
 }
 
 void IntentionEventManager::InputEventListener::OnInputEvent(

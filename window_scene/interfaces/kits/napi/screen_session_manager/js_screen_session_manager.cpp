@@ -58,6 +58,8 @@ NativeValue* JsScreenSessionManager::Init(NativeEngine* engine, NativeValue* exp
     BindNativeFunction(*engine, *object, "on", moduleName, JsScreenSessionManager::RegisterCallback);
     BindNativeFunction(*engine, *object, "updateScreenRotationProperty", moduleName,
         JsScreenSessionManager::UpdateScreenRotationProperty);
+    BindNativeFunction(*engine, *object, "getCurvedScreenCompressionArea", moduleName,
+        JsScreenSessionManager::GetCurvedCompressionArea);
     return engine->CreateUndefined();
 }
 
@@ -225,5 +227,18 @@ NativeValue* JsScreenSessionManager::OnUpdateScreenRotationProperty(NativeEngine
     }
     ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(screenId, bounds, rotation);
     return engine.CreateUndefined();
+}
+
+NativeValue* JsScreenSessionManager::GetCurvedCompressionArea(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGD("[NAPI]GetCurvedCompressionArea");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(engine, info);
+    return (me != nullptr) ? me->OnGetCurvedCompressionArea(*engine, *info) : nullptr;
+}
+
+NativeValue* JsScreenSessionManager::OnGetCurvedCompressionArea(NativeEngine& engine, const NativeCallbackInfo& info)
+{
+    WLOGD("[NAPI]OnGetCurvedCompressionArea");
+    return engine.CreateNumber(ScreenSessionManager::GetInstance().GetCurvedCompressionArea());
 }
 } // namespace OHOS::Rosen

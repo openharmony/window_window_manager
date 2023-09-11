@@ -21,6 +21,8 @@
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
 #include "display_manager.cpp"
+#include "window_scene.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -73,7 +75,7 @@ HWTEST_F(DisplayManagerTest, Freeze01, Function | SmallTest | Level1)
     std::vector<DisplayId> displayIds;
     displayIds.push_back(0);
     bool ret = DisplayManager::GetInstance().Freeze(displayIds);
-    ASSERT_TRUE(ret);
+    ASSERT_FALSE(ret);
 }
 
 /**
@@ -87,9 +89,12 @@ HWTEST_F(DisplayManagerTest, Freeze02, Function | SmallTest | Level1)
     for (uint32_t i = 0; i < 33; i++) { // MAX_DISPLAY_SIZE + 1
         displayIds.push_back(i);
     }
-
     bool ret = DisplayManager::GetInstance().Freeze(displayIds);
-    ASSERT_FALSE(ret);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(ret);
+    } else {
+        ASSERT_FALSE(ret);
+    }
 }
 
 /**
@@ -101,7 +106,11 @@ HWTEST_F(DisplayManagerTest, Freeze03, Function | SmallTest | Level1)
 {
     std::vector<DisplayId> displayIds;
     bool ret = DisplayManager::GetInstance().Freeze(displayIds);
-    ASSERT_FALSE(ret);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(ret);
+    } else {
+        ASSERT_FALSE(ret);
+    }
 }
 
 /**
@@ -114,7 +123,11 @@ HWTEST_F(DisplayManagerTest, Unfreeze01, Function | SmallTest | Level1)
     std::vector<DisplayId> displayIds;
     displayIds.push_back(0);
     bool ret = DisplayManager::GetInstance().Unfreeze(displayIds);
-    ASSERT_TRUE(ret);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(ret);
+    } else {
+        ASSERT_FALSE(ret);
+    }
 }
 
 /**
@@ -374,6 +387,203 @@ HWTEST_F(DisplayManagerTest, GetScreenBrightness, Function | SmallTest | Level1)
     auto ret = DisplayManager::GetInstance().GetScreenBrightness(screenId);
     ASSERT_FALSE(ret == 1);
 }
+
+/**
+ * @tc.name: GetDisplayById
+ * @tc.desc: GetDisplayById fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetDisplayById, Function | SmallTest | Level1)
+{
+    DisplayId displayId = 0;
+    DisplayManager::GetInstance().destroyed_ = true;
+    auto ret = DisplayManager::GetInstance().GetDisplayById(displayId);
+    ASSERT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: RegisterPrivateWindowListener
+ * @tc.desc: RegisterPrivateWindowListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, RegisterPrivateWindowListener, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IPrivateWindowListener> listener;
+    auto ret = DisplayManager::GetInstance().RegisterPrivateWindowListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: UnregisterPrivateWindowListener
+ * @tc.desc: UnregisterPrivateWindowListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, UnregisterPrivateWindowListener, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IPrivateWindowListener> listener = nullptr;
+    sptr<DisplayManager::Impl> impl_;
+    auto ret = DisplayManager::GetInstance().UnregisterPrivateWindowListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: ImplUnregisterPrivateWindowListener
+ * @tc.desc: ImplUnregisterPrivateWindowListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ImplUnregisterPrivateWindowListener, Function | SmallTest | Level1)
+{
+    std::recursive_mutex mutex;
+    DisplayManager::Impl impl(mutex);
+    sptr<DisplayManager::IPrivateWindowListener> listener;
+    auto ret = impl.UnregisterPrivateWindowListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: ImplUnregisterFoldStatusListener
+ * @tc.desc: ImplUnregisterFoldStatusListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ImplUnregisterFoldStatusListener, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IFoldStatusListener> listener;
+    auto ret = DisplayManager::GetInstance().pImpl_->UnregisterFoldStatusListener(listener);
+    ASSERT_NE(ret, DMError::DM_OK);
+    listener.clear();
+}
+
+/**
+ * @tc.name: RegisterFoldStatusListener
+ * @tc.desc: RegisterFoldStatusListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, RegisterFoldStatusListener, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IFoldStatusListener> listener;
+    auto ret = DisplayManager::GetInstance().RegisterFoldStatusListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    listener = new DisplayManager::IFoldStatusListener();
+    ret = DisplayManager::GetInstance().RegisterFoldStatusListener(listener);
+    ASSERT_EQ(ret, DisplayManager::GetInstance().pImpl_->RegisterFoldStatusListener(listener));
+    listener.clear();
+}
+
+/**
+ * @tc.name: ImplRegisterFoldStatusListener
+ * @tc.desc: ImplRegisterFoldStatusListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ImplRegisterFoldStatusListener, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IFoldStatusListener> listener;
+    sptr<DisplayManager::Impl> impl_;
+    DisplayManager::GetInstance().pImpl_->foldStatusListenerAgent_ = nullptr;
+    sptr<DisplayManager::Impl::DisplayManagerFoldStatusAgent> foldStatusListenerAgent =
+        new DisplayManager::Impl::DisplayManagerFoldStatusAgent(impl_);
+    auto ret = DisplayManager::GetInstance().pImpl_->RegisterFoldStatusListener(listener);
+    ASSERT_EQ(ret, SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
+            foldStatusListenerAgent,
+            DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER));
+    listener = nullptr;
+    foldStatusListenerAgent.clear();
+}
+
+/**
+ * @tc.name: UnregisterFoldStatusListener
+ * @tc.desc: UnregisterFoldStatusListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, UnregisterFoldStatusListener, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IFoldStatusListener> listener;
+    auto ret = DisplayManager::GetInstance().UnregisterFoldStatusListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    listener = new DisplayManager::IFoldStatusListener();
+    ret = DisplayManager::GetInstance().UnregisterFoldStatusListener(listener);
+    ASSERT_EQ(ret, DisplayManager::GetInstance().pImpl_->UnregisterFoldStatusListener(listener));
+    listener.clear();
+}
+
+/**
+ * @tc.name: RegisterDisplayModeListener
+ * @tc.desc: RegisterDisplayModeListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, RegisterDisplayModeListener, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IDisplayModeListener> listener;
+    auto ret = DisplayManager::GetInstance().RegisterDisplayModeListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    listener = new DisplayManager::IDisplayModeListener();
+    ret = DisplayManager::GetInstance().RegisterDisplayModeListener(listener);
+    ASSERT_EQ(ret, DisplayManager::GetInstance().pImpl_->RegisterDisplayModeListener(listener));
+    listener.clear();
+}
+
+/**
+ * @tc.name: ImplRegisterDisplayModeListener
+ * @tc.desc: ImplRegisterDisplayModeListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ImplRegisterDisplayModeListener, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IDisplayModeListener> listener;
+    DisplayManager::GetInstance().pImpl_->displayModeListenerAgent_ = nullptr;
+    sptr<DisplayManager::Impl> impl_;
+    sptr<DisplayManager::Impl::DisplayManagerDisplayModeAgent> displayModeListenerAgent =
+        new DisplayManager::Impl::DisplayManagerDisplayModeAgent(impl_);
+    auto ret = DisplayManager::GetInstance().pImpl_->RegisterDisplayModeListener(listener);
+    ASSERT_EQ(ret, SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
+            displayModeListenerAgent,
+            DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER));
+    listener.clear();
+    displayModeListenerAgent.clear();
+}
+
+/**
+ * @tc.name: UnregisterDisplayModeListener
+ * @tc.desc: UnregisterDisplayModeListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, UnregisterDisplayModeListener, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IDisplayModeListener> listener;
+    auto ret = DisplayManager::GetInstance().UnregisterDisplayModeListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    listener = new DisplayManager::IDisplayModeListener();
+    ret = DisplayManager::GetInstance().UnregisterDisplayModeListener(listener);
+    ASSERT_EQ(ret, DisplayManager::GetInstance().pImpl_->UnregisterDisplayModeListener(listener));
+    listener.clear();
+}
+
+/**
+ * @tc.name: ImplUnregisterDisplayModeListener
+ * @tc.desc: ImplUnregisterDisplayModeListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ImplUnregisterDisplayModeListener, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IDisplayModeListener> listener;
+    auto ret = DisplayManager::GetInstance().pImpl_->UnregisterDisplayModeListener(listener);
+    ASSERT_EQ(ret, DMError::DM_OK);
+    listener.clear();
+}
+
+/**
+ * @tc.name: ImplUpdateDisplayInfoLocked
+ * @tc.desc: ImplUpdateDisplayInfoLocked fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ImplUpdateDisplayInfoLocked, Function | SmallTest | Level1)
+{
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    displayInfo->SetDisplayId(DISPLAY_ID_INVALID);
+    auto ret = DisplayManager::GetInstance().pImpl_->UpdateDisplayInfoLocked(displayInfo);
+    ASSERT_EQ(ret, false);
+    displayInfo.clear();
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

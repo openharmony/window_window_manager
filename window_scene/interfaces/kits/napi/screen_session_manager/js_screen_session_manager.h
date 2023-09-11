@@ -35,9 +35,11 @@ public:
 private:
     static NativeValue* RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* UpdateScreenRotationProperty(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* GetCurvedCompressionArea(NativeEngine* engine, NativeCallbackInfo* info);
 
     NativeValue* OnRegisterCallback(NativeEngine& engine, const NativeCallbackInfo& info);
     NativeValue* OnUpdateScreenRotationProperty(NativeEngine& engine, const NativeCallbackInfo& info);
+    NativeValue* OnGetCurvedCompressionArea(NativeEngine& engine, const NativeCallbackInfo& info);
 
     std::shared_ptr<NativeReference> screenConnectionCallback_;
     NativeEngine& engine_;

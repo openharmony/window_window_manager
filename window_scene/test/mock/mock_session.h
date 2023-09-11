@@ -24,9 +24,10 @@ class SessionMocker : public Session {
 public:
     SessionMocker(const SessionInfo& info) : Session(info) {}
     ~SessionMocker() {}
-    MOCK_METHOD6(Connect, WSError(const sptr<ISessionStage>& sessionStage,
+    MOCK_METHOD8(Connect, WSError(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token));
+        SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token,
+        int32_t pid, int32_t uid));
     MOCK_METHOD7(CreateAndConnectSpecificSession, WSError(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,

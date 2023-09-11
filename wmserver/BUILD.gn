@@ -182,7 +182,6 @@ ohos_shared_library("libwms") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "config_policy:configpolicy_util",
-    "display_manager:displaymgr",
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
     "graphic_2d:window_animation",
@@ -193,7 +192,6 @@ ohos_shared_library("libwms") {
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "power_manager:powermgr_client",
     "safwk:system_ability_fwk",
   ]
 
@@ -225,6 +223,18 @@ ohos_shared_library("libwms") {
     external_deps += [ "init:libbegetutil" ]
   } else {
     external_deps += [ "init_lite:libbegetutil" ]
+  }
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.powermgr_power_manager)) {
+    external_deps += [ "power_manager:powermgr_client" ]
+    defines += [ "POWER_MANAGER_ENABLE" ]
+  }
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.powermgr_display_manager)) {
+    external_deps += [ "display_manager:displaymgr" ]
+    defines += [ "POWERMGR_DISPLAY_MANAGER_ENABLE" ]
   }
 
   part_name = "window_manager"

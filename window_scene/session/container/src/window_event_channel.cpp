@@ -67,6 +67,17 @@ WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::Poin
     return WSError::WS_OK;
 }
 
+WSError WindowEventChannel::TransferBackpressedEventForConsumed(bool& isConsumed)
+{
+    WLOGFD("WindowEventChannel receive backpressed event");
+    if (!sessionStage_) {
+        WLOGFE("session stage is null!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    sessionStage_->NotifyBackpressedEvent(isConsumed);
+    return WSError::WS_OK;
+}
+
 WSError WindowEventChannel::TransferKeyEventForConsumed(
     const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
 {
@@ -75,8 +86,8 @@ WSError WindowEventChannel::TransferKeyEventForConsumed(
         WLOGFE("session stage is null!");
         return WSError::WS_ERROR_NULLPTR;
     }
-    DelayedSingleton<ANRHandler>::GetInstance()->SetSessionStage(keyEvent->GetId(), sessionStage_);
     if (keyEvent != nullptr) {
+        DelayedSingleton<ANRHandler>::GetInstance()->SetSessionStage(keyEvent->GetId(), sessionStage_);
         WLOGFD("SetProcessedCallback enter");
         keyEvent->SetProcessedCallback(dispatchCallback_);
         WLOGFD("SetProcessedCallback leave");

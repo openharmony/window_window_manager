@@ -23,6 +23,16 @@
 #include "window_layout_policy_cascade.h"
 #include "window_layout_policy_tile.h"
 #include "window_node_container.h"
+#include "window_layout_policy.h"
+#include "display_manager_service_inner.h"
+#include "window_inner_manager.h"
+#include "window_manager_hilog.h"
+#include "wm_common_inner.h"
+#include "wm_math.h"
+#include "window_node.h"
+#include <transaction/rs_sync_transaction_controller.h>
+#include "display.h"
+#include "persistent_storage.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1342,6 +1352,140 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateLayoutRect, Function | SmallTest | Level2
     node->SetCallingWindow(1);
     layoutPolicyTile_->UpdateLayoutRect(node);
 }
+
+/**
+ * @tc.name: IsFullScreenRecentWindowExist
+ * @tc.desc: test IsFullScreenRecentWindowExist
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, IsFullScreenRecentWindowExist, Function | SmallTest | Level2)
+{
+    std::vector<sptr<WindowNode>> *nodeVec = new std::vector<sptr<WindowNode>>;
+    auto result = layoutPolicy_->IsFullScreenRecentWindowExist(*nodeVec);
+    sptr<WindowNode> node = CreateWindowNode(windowInfo_);
+    EXPECT_NE(node->GetWindowType(), WindowType::WINDOW_TYPE_LAUNCHER_RECENT);
+    EXPECT_NE(node->GetWindowMode(), WindowMode::WINDOW_MODE_FULLSCREEN);
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GetDividerRect
+ * @tc.desc: test GetDividerRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, GetDividerRect, Function | SmallTest | Level2)
+{
+    DisplayId displayId = 0;
+    auto result = layoutPolicy_->GetDividerRect(displayId);
+    Rect rect{0, 0, 0, 0};
+    ASSERT_NE(result, rect);
+}
+/**
+ * @tc.name: AdjustFixedOrientationRSSurfaceNode
+ * @tc.desc: test AdjustFixedOrientationRSSurfaceNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, AdjustFixedOrientationRSSurfaceNode, Function | SmallTest | Level2)
+{
+    std::shared_ptr<RSSurfaceNode> surfaceNode = std::shared_ptr<RSSurfaceNode>();
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>();
+    ASSERT_EQ(nullptr, displayInfo);
+}
+
+/**
+ * @tc.name: IsTileRectSatisfiedWithSizeLimits
+ * @tc.desc: test IsTileRectSatisfiedWithSizeLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, IsTileRectSatisfiedWithSizeLimits, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> *node = new sptr<WindowNode>;
+    auto result = layoutPolicy_->IsTileRectSatisfiedWithSizeLimits(*node);
+    ASSERT_EQ(true, result);
+}
+
+/**
+ * @tc.name: SetCascadeRectBottomPosYLimit
+ * @tc.desc: test SetCascadeRectBottomPosYLimit
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, SetCascadeRectBottomPosYLimit, Function | SmallTest | Level2)
+{
+    uint32_t floatingBottomPosY = 0;
+    layoutPolicy_->SetCascadeRectBottomPosYLimit(floatingBottomPosY);
+    auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
+}
+
+/**
+ * @tc.name: SetMaxFloatingWindowSize
+ * @tc.desc: test SetMaxFloatingWindowSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, SetMaxFloatingWindowSize, Function | SmallTest | Level2)
+{
+    uint32_t maxSize = 0;
+    layoutPolicy_->SetMaxFloatingWindowSize(maxSize);
+    auto displayRect = displayGroupInfo_.GetDisplayRect(defaultDisplayInfo_->GetDisplayId());
+    ASSERT_FALSE(WindowHelper::IsEmptyRect(displayRect));
+}
+
+/**
+ * @tc.name: GetStoragedAspectRatio
+ * @tc.desc: test GetStoragedAspectRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, GetStoragedAspectRatio, Function | SmallTest | Level2)
+{
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    sptr<WindowNode> node = new WindowNode();
+    layoutPolicy_->GetStoragedAspectRatio(node);
+    auto abilityName = "";
+    auto nameVector = WindowHelper::Split(abilityName, ".");
+    std::string keyName = " ";
+    auto result = PersistentStorage::HasKey(keyName, PersistentStorageType::ASPECT_RATIO);
+    ASSERT_EQ(false, result);
+}
+/**
+ * @tc.name: FixWindowRectWithinDisplay
+ * @tc.desc: test FixWindowRectWithinDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, FixWindowRectWithinDisplay, Function | SmallTest | Level2)
+{
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    sptr<WindowNode> node = new WindowNode();
+    layoutPolicy_->FixWindowRectWithinDisplay(node);
+    auto displayInfo = display->GetDisplayInfo();
+    EXPECT_EQ(displayInfo->GetWaterfallDisplayCompressionStatus(), false);
+}
+/**
+ * @tc.name: IsNeedAnimationSync
+ * @tc.desc: test IsNeedAnimationSync
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, IsNeedAnimationSync, Function | SmallTest | Level2)
+{
+    WindowType windowType = WindowType::ABOVE_APP_SYSTEM_WINDOW_END;
+    auto result = layoutPolicy_->IsNeedAnimationSync(windowType);
+    ASSERT_EQ(true, result);
+}
+
+/**
+ * @tc.name: NotifyClientAndAnimation
+ * @tc.desc: test NotifyClientAndAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, NotifyClientAndAnimation, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> node= new WindowNode();
+    Rect winRect;
+    WindowSizeChangeReason reason=WindowSizeChangeReason::DRAG;
+    WindowNode windowNode;
+    EXPECT_EQ(windowNode.GetWindowToken(), nullptr);
+    layoutPolicy_->NotifyClientAndAnimation(node, winRect, reason);
+}
+
 }
 }
 }

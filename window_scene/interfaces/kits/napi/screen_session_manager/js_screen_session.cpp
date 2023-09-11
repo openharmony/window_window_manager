@@ -30,6 +30,7 @@ const std::string ON_DISCONNECTION_CALLBACK = "disconnect";
 const std::string ON_PROPERTY_CHANGE_CALLBACK = "propertyChange";
 const std::string ON_SENSOR_ROTATION_CHANGE_CALLBACK = "sensorRotationChange";
 const std::string ON_SCREEN_ORIENTATION_CHANGE_CALLBACK = "screenOrientationChange";
+const std::string ON_SCREEN_ROTATION_LOCKED_CHANGE = "screenRotationLockedChange";
 } // namespace
 
 NativeValue* JsScreenSession::Create(NativeEngine& engine, const sptr<ScreenSession>& screenSession)
@@ -92,7 +93,7 @@ NativeValue* JsScreenSession::OnSetScreenRotationLocked(NativeEngine& engine, Na
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
-    screenSession_->SetScreenRotationLocked(isLocked);
+    screenSession_->SetScreenRotationLockedFromJs(isLocked);
     WLOGFI("SetScreenRotationLocked %{public}u success.", static_cast<uint32_t>(isLocked));
     return engine.CreateUndefined();
 }
@@ -291,7 +292,8 @@ void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, Screen
     auto jsCallbackRef = mCallback_[callbackType];
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [jsCallbackRef, callbackType, screenSessionWeak, reason](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [jsCallbackRef, callbackType, screenSessionWeak, newProperty, reason](
+            NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (jsCallbackRef == nullptr) {
                 WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
                 return;
@@ -307,8 +309,38 @@ void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, Screen
                 return;
             }
             NativeValue* propertyChangeReason = CreateJsValue(engine, static_cast<int32_t>(reason));
-            NativeValue* argv[] = { JsScreenUtils::CreateJsScreenProperty(engine,
-                screenSession->GetScreenProperty()), propertyChangeReason };
+            NativeValue* argv[] = { JsScreenUtils::CreateJsScreenProperty(engine, newProperty), propertyChangeReason };
+            engine.CallFunction(engine.CreateUndefined(), method, argv, ArraySize(argv));
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsScreenSession::" + callbackType, engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsScreenSession::OnScreenRotationLockedChange(bool isLocked)
+{
+    const std::string callbackType = ON_SCREEN_ROTATION_LOCKED_CHANGE;
+    WLOGD("Call js callback: %{public}s isLocked:%{public}u.", callbackType.c_str(), isLocked);
+    if (mCallback_.count(callbackType) == 0) {
+        WLOGFE("Callback %{public}s is unregistered!", callbackType.c_str());
+        return;
+    }
+
+    auto jsCallbackRef = mCallback_[callbackType];
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [jsCallbackRef, callbackType, isLocked](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (jsCallbackRef == nullptr) {
+                WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
+                return;
+            }
+            auto method = jsCallbackRef->Get();
+            if (method == nullptr) {
+                WLOGFE("Call js callback %{public}s failed, method is null!", callbackType.c_str());
+                return;
+            }
+            NativeValue* argv[] = { CreateJsValue(engine, isLocked) };
             engine.CallFunction(engine.CreateUndefined(), method, argv, ArraySize(argv));
         });
 

@@ -347,20 +347,20 @@ HWTEST_F(SessionProxyTest, GetGlobalMaximizeMode, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: UpdateWindowSessionProperty
+ * @tc.name: SetSessionProperty
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyTest, UpdateWindowSessionProperty, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyTest, SetSessionProperty, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionProxyTest: UpdateWindowSessionProperty start";
+    GTEST_LOG_(INFO) << "SessionProxyTest: SetSessionProperty start";
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    WSError res = sProxy->UpdateWindowSessionProperty(property);
+    WSError res = sProxy->SetSessionProperty(property);
     ASSERT_EQ(res, WSError::WS_OK);
 
-    GTEST_LOG_(INFO) << "SessionProxyTest: UpdateWindowSessionProperty end";
+    GTEST_LOG_(INFO) << "SessionProxyTest: SetSessionProperty end";
 }
 
 /**

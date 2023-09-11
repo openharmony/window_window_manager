@@ -29,17 +29,27 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "Sessi
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SessionManager)
 
+SessionManager::~SessionManager()
+{
+    WLOGFI("SessionManager destory!");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    destroyed_ = true;
+}
+
 void SessionManager::ClearSessionManagerProxy()
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     WLOGFI("ClearSessionManagerProxy enter!");
-    if ((sceneSessionManagerProxy_ != nullptr) && (sceneSessionManagerProxy_->AsObject() != nullptr)) {
-        sceneSessionManagerProxy_->AsObject()->RemoveDeathRecipient(ssmDeath_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (destroyed_) {
+        WLOGFE("Already destroyed");
+        return;
     }
     if (mockSessionManagerServiceProxy_ != nullptr) {
         mockSessionManagerServiceProxy_ = nullptr;
     }
     if (sessionManagerServiceProxy_ != nullptr) {
+        int refCount = sessionManagerServiceProxy_->GetSptrRefCount();
+        WLOGFI("sessionManagerServiceProxy_ GetSptrRefCount : %{public}d", refCount);
         sessionManagerServiceProxy_ = nullptr;
     }
     if (sceneSessionManagerProxy_ != nullptr) {
@@ -98,8 +108,12 @@ void SessionManager::InitSessionManagerServiceProxy()
         WLOGFW("Get mock session manager service proxy failed, nullptr");
         return;
     }
-    sessionManagerServiceProxy_ = iface_cast<ISessionManagerService>(
-            mockSessionManagerServiceProxy_->GetSessionManagerService());
+    sptr<IRemoteObject> remoteObject2 = mockSessionManagerServiceProxy_->GetSessionManagerService();
+    if (!remoteObject2) {
+        WLOGFE("Remote object2 is nullptr");
+        return;
+    }
+    sessionManagerServiceProxy_ = iface_cast<ISessionManagerService>(remoteObject2);
     if (!sessionManagerServiceProxy_) {
         WLOGFE("sessionManagerServiceProxy_ is nullptr");
     }

@@ -44,6 +44,7 @@ private:
     void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason) override;
     void OnSensorRotationChange(float sensorRotation) override;
     void OnScreenOrientationChange(float screenOrientation) override;
+    void OnScreenRotationLockedChange(bool isLocked) override;
 
     NativeEngine& engine_;
     sptr<ScreenSession> screenSession_;

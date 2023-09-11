@@ -17,15 +17,13 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_INTERFACE_H
 
 #include <iremote_broker.h>
+#include <session_info.h>
+
 #include "interfaces/include/ws_common.h"
 #include "common/include/window_session_property.h"
 #include "session/container/include/zidl/session_stage_interface.h"
 #include "session/container/include/zidl/window_event_channel_interface.h"
-#include "session_info.h"
 
-namespace OHOS::AAFwk {
-class Want;
-}
 namespace OHOS::Rosen {
 class RSSurfaceNode;
 class ISession : public IRemoteBroker {
@@ -34,41 +32,44 @@ public:
 
     virtual WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
-        sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr) = 0;
+        sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
+        int32_t pid = -1, int32_t uid = -1) = 0;
     virtual WSError Foreground(sptr<WindowSessionProperty> property) = 0;
     virtual WSError Background() = 0;
     virtual WSError Disconnect() = 0;
-    virtual WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo) = 0;
-    virtual WSError UpdateActiveStatus(bool isActive) = 0;
-    virtual WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) = 0;
-    virtual WSError NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo) = 0;
 
     // scene session
-    virtual WSError OnSessionEvent(SessionEvent event) = 0;
-    virtual WSError RaiseToAppTop() = 0;
-    virtual WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) = 0;
+    virtual WSError UpdateActiveStatus(bool isActive) { return WSError::WS_OK; }
+    virtual WSError OnSessionEvent(SessionEvent event) { return WSError::WS_OK; }
+    virtual WSError RaiseToAppTop() { return WSError::WS_OK; }
+    virtual WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason& reason) { return WSError::WS_OK; }
     virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
-        sptr<IRemoteObject> token = nullptr) = 0;
-    virtual WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId) = 0;
-    virtual WSError OnNeedAvoid(bool status) = 0;
-    virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type) = 0;
-    virtual WSError RequestSessionBack(bool needMoveToBackground) = 0;
-    virtual WSError MarkProcessed(int32_t eventId) = 0;
-    virtual WSError SetGlobalMaximizeMode(MaximizeMode mode) = 0;
-    virtual WSError GetGlobalMaximizeMode(MaximizeMode& mode) = 0;
-    virtual WSError UpdateWindowSessionProperty(sptr<WindowSessionProperty>) = 0;
-    virtual WSError SetAspectRatio(float ratio) = 0;
-    virtual WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) = 0;
-    virtual WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) = 0;
-    virtual WSError RaiseAboveTarget(int32_t subWindowId) = 0;
+        sptr<IRemoteObject> token = nullptr) { return WSError::WS_OK; }
+    virtual WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId) { return WSError::WS_OK; }
+    virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
+    virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type) { return {}; }
+    virtual WSError RequestSessionBack(bool needMoveToBackground) { return WSError::WS_OK; }
+    virtual WSError MarkProcessed(int32_t eventId) { return WSError::WS_OK; }
+    virtual WSError SetGlobalMaximizeMode(MaximizeMode mode) { return WSError::WS_OK; }
+    virtual WSError GetGlobalMaximizeMode(MaximizeMode& mode) { return WSError::WS_OK; }
+    virtual WSError SetSessionProperty(const sptr<WindowSessionProperty>& property) { return WSError::WS_OK; }
+    virtual WSError SetAspectRatio(float ratio) { return WSError::WS_OK; }
+    virtual WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) { return WSError::WS_OK; }
+    virtual WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) { return WSError::WS_OK; }
+    virtual WSError RaiseAboveTarget(int32_t subWindowId) { return WSError::WS_OK; }
+    virtual WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
+        { return WSError::WS_OK; }
+    virtual WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) { return WSError::WS_OK; }
+    virtual WSError NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo) { return WSError::WS_OK; }
 
     // extension session
-    virtual WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) = 0;
-    virtual WSError TransferExtensionData(const AAFwk::WantParams& wantParams) = 0;
-    virtual void NotifyRemoteReady() = 0;
-    virtual void NotifyExtensionDied() = 0;
+    virtual WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) { return WSError::WS_OK; }
+    virtual WSError TransferExtensionData(const AAFwk::WantParams& wantParams) { return WSError::WS_OK; }
+    virtual void NotifyRemoteReady() {}
+    virtual void NotifyExtensionDied() {}
 };
 } // namespace OHOS::Rosen
+
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_INTERFACE_H
