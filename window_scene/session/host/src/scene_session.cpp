@@ -1515,10 +1515,11 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
         info.reuse = abilitySessionInfo->reuse;
         if (info.want != nullptr) {
             info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
+            info.sessionAffinity = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
         }
         WLOGFI("PendingSessionActivation:bundleName %{public}s, moduleName:%{public}s, abilityName:%{public}s, \
-            appIndex:%{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(),
-            info.appIndex_);
+            appIndex:%{public}d, affinity:%{public}s", info.bundleName_.c_str(), info.moduleName_.c_str(),
+            info.abilityName_.c_str(), info.appIndex_, info.sessionAffinity.c_str());
         WLOGFI("PendingSessionActivation callState:%{public}d, want persistentId: %{public}d, "
             "callingTokenId:%{public}d, uiAbilityId: %{public}" PRIu64 ", windowMode: %{public}d",
             info.callState_, info.persistentId_, info.callingTokenId_, info.uiAbilityId_, info.windowMode);

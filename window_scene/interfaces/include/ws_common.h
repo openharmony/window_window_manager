@@ -173,6 +173,7 @@ struct SessionInfo {
     int64_t uiAbilityId_ = 0;
     int32_t ancoSceneState;
     bool isClearSession = false;
+    std::string sessionAffinity;
 };
 
 enum class SessionFlag : uint32_t {

@@ -30,6 +30,9 @@ namespace OHOS::PowerMgr {
 }
 
 namespace OHOS::Rosen {
+namespace PARAM_KEY {
+    const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity";
+}
 class SceneSession;
 
 using SpecificSessionCreateCallback = std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;

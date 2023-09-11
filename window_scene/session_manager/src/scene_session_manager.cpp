@@ -3771,6 +3771,23 @@ sptr<SceneSession> SceneSessionManager::FindSessionByToken(const sptr<IRemoteObj
     return session;
 }
 
+sptr<SceneSession> SceneSessionManager::FindSessionByAffinity(std::string affinity)
+{
+    sptr<SceneSession> session = nullptr;
+    auto cmpFunc = [this, affinity](const std::map<uint64_t, sptr<SceneSession>>::value_type& pair) {
+        if (pair.second == nullptr || !CheckCollaboratorType(pair.second->GetCollaboratorType())) {
+            return false;
+        }
+        return pair.second->GetSessionInfo().sessionAffinity == affinity;
+    };
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    auto iter = std::find_if(sceneSessionMap_.begin(), sceneSessionMap_.end(), cmpFunc);
+    if (iter != sceneSessionMap_.end()) {
+        session = iter->second;
+    }
+    return session;
+}
+
 WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject> &token)
 {
     WLOGFI("run PendingSessionToForeground");
@@ -4231,6 +4248,34 @@ bool SceneSessionManager::CheckCollaboratorType(int32_t type)
     return true;
 }
 
+bool SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
+{
+    auto abilityInfo = QueryAbilityInfoFromBMS(currentUserId_, sessionInfo.bundleName_, sessionInfo.abilityName_,
+        sessionInfo.moduleName_);
+    if (abilityInfo == nullptr) {
+        WLOGFE("CheckIfReuseSession abilityInfo is nullptr!");
+        return false;
+    }
+    sessionInfo.abilityInfo = abilityInfo;
+    int32_t collaboratorType = CollaboratorType::DEFAULT_TYPE;
+    if (abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE)) {
+        collaboratorType = CollaboratorType::RESERVE_TYPE;
+    } else if (abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
+        collaboratorType = CollaboratorType::OTHERS_TYPE;
+    }
+    if (!CheckCollaboratorType(collaboratorType)) {
+        WLOGFE("CheckIfReuseSession not collaborator!");
+        return false;
+    }
+    NotifyStartAbility(collaboratorType, sessionInfo);
+    std::string sessionAffinity = sessionInfo.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
+    if (FindSessionByAffinity(sessionAffinity) != nullptr) {
+        WLOGFI("FindSessionByAffinity: %{public}s, try to reuse", sessionAffinity.c_str());
+        sessionInfo.reuse = true;
+    }
+    return true;
+}
+
 void SceneSessionManager::NotifyStartAbility(int32_t collaboratorType, const SessionInfo& sessionInfo)
 {
     WLOGFI("run NotifyStartAbility");
@@ -4351,6 +4396,9 @@ void SceneSessionManager::PreHandleCollaborator(sptr<SceneSession>& sceneSession
     if (sceneSession->GetSessionInfo().want != nullptr) {
         WLOGFI("broker persistentId: %{public}d",
             sceneSession->GetSessionInfo().want->GetIntParam(AncoConsts::ANCO_SESSION_ID, 0));
+        sceneSession->SetSessionInfoAffinity(sceneSession->GetSessionInfo().want
+            ->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY));
+        WLOGFI("affinity: %{public}s", sceneSession->GetSessionInfo().sessionAffinity.c_str());
     } else {
         WLOGFE("sceneSession->GetSessionInfo().want is nullptr");
     }
