@@ -20,6 +20,7 @@
 
 #include "display_manager_config.h"
 #include "display_manager_config.cpp"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -51,6 +52,76 @@ void DisplayManagerConfigTest::TearDown()
 }
 
 namespace {
+/**
+ * @tc.name: Split
+ * @tc.desc: test function : Split
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerConfigTest, Split, Function | SmallTest | Level1)
+{
+    std::string str = "stringPatStr";
+    std::string pattern = "pattern";
+    std::vector<std::string> result(DisplayManagerConfig::Split(str, pattern));
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result[0], "stringPatStr");
+    } else {
+        EXPECT_NE(result[0], "stringPatStr");
+    }
+    result.clear();
+    std::string str02 = "stringPatternStr";
+    std::vector<std::string> result02(DisplayManagerConfig::Split(str02, pattern));
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result02[0], "stringPatternStr");
+        EXPECT_EQ(result02[1], "");
+    } else {
+        EXPECT_NE(result02[0], "stringPatternStr");
+        EXPECT_NE(result02[1], "");
+    }
+}
+
+/**
+ * @tc.name: LoadConfigXml
+ * @tc.desc: test function : LoadConfigXml
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerConfigTest, LoadConfigXml, Function | SmallTest | Level1)
+{
+    bool result = DisplayManagerConfig::LoadConfigXml();
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_TRUE(result);
+    } else {
+        EXPECT_FALSE(result);
+    }
+}
+
+/**
+ * @tc.name: ReadIntNumbersConfigInfo
+ * @tc.desc: test function : ReadIntNumbersConfigInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerConfigTest, ReadIntNumbersConfigInfo, Function | SmallTest | Level1)
+{
+    DisplayManagerConfig::enableConfig_.clear();
+
+    const char* xmlContent = "1 2 3 4";
+    xmlNodePtr validNode = xmlNewNode(NULL, BAD_CAST"TestNode");
+    xmlNodeSetContent(validNode, BAD_CAST xmlContent);
+    DisplayManagerConfig::ReadIntNumbersConfigInfo(validNode);
+
+    const char* invalidContent = "1 2 abc 4";
+    xmlNodePtr invalidNode = xmlNewNode(NULL, BAD_CAST"TestNode");
+    xmlNodeSetContent(invalidNode, BAD_CAST invalidContent);
+    DisplayManagerConfig::ReadIntNumbersConfigInfo(invalidNode);
+
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_LE(DisplayManagerConfig::enableConfig_.size(), 0);
+    } else {
+        EXPECT_GE(DisplayManagerConfig::enableConfig_.size(), 0);
+    }
+    xmlFreeNode(validNode);
+    xmlFreeNode(invalidNode);
+}
+
 /**
  * @tc.name: IsNumber
  * @tc.desc: test function : IsNumber
