@@ -20,6 +20,7 @@
 #include "display_manager_agent_default.h"
 #include "common_test_utils.h"
 #include "mock_rs_display_node.h"
+#include "scene_board_judgement.h"
 
 
 using namespace testing;
@@ -86,6 +87,22 @@ public:
 };
 
 namespace {
+/**
+ * @tc.name: OnStart
+ * @tc.desc: DMS OnStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, OnStart, Function | SmallTest | Level3)
+{
+    dms_->OnStart();
+    bool result = dms_->Init();
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_TRUE(result);
+    } else {
+        EXPECT_FALSE(result);
+    }
+}
+
 /**
  * @tc.name: Dump
  * @tc.desc: DMS dump
@@ -244,6 +261,30 @@ HWTEST_F(DisplayManagerServiceTest, VirtualScreen, Function | SmallTest | Level3
 
     std::vector<ScreenId> screens;
     dms_->RemoveVirtualScreenFromGroup(screens);
+
+    DMError result = dms_->DestroyVirtualScreen(10086);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result, DMError::DM_ERROR_INVALID_CALLING);
+    } else {
+        EXPECT_NE(result, DMError::DM_ERROR_INVALID_CALLING);
+    }
+}
+
+/**
+ * @tc.name: GetDisplaySnapshot
+ * @tc.desc: DMS get display snapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, GetDisplaySnapshot, Function | SmallTest | Level3)
+{
+    DisplayId displayId = 10086;
+    DmErrorCode* errorCode = nullptr;
+    std::shared_ptr<Media::PixelMap> result = dms_->GetDisplaySnapshot(displayId, errorCode);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result, nullptr);
+    } else {
+        EXPECT_NE(result, nullptr);
+    }
 }
 
 /**
