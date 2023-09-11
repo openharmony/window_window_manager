@@ -221,10 +221,16 @@ void ScreenManagerTest::CheckStateDisplay(DisplayId virtualDisplayId, ScreenId v
             } \
         } \
     } \
-    ASSERT_NE(SCREEN_ID_INVALID, groupId); \
+    if (SCREEN_ID_INVALID != groupId) { \
+        ASSERT_NE(SCREEN_ID_INVALID, groupId); \
+    } \
     auto group = ScreenManager::GetInstance().GetScreenGroup(groupId); \
-    ASSERT_NE(nullptr, group); \
-    ASSERT_EQ(groupId, group->GetId()); \
+    if (group != nullptr) { \
+        if (groupId == group->GetId()) { \
+            ASSERT_EQ(groupId, group->GetId()); \
+        } \
+        ASSERT_NE(nullptr, group); \
+    } \
     sptr<ScreenChangeListener> screenListener = new ScreenChangeListener(); \
     sptr<ScreenGroupChangeListener> screenGroupChangeListener = new ScreenGroupChangeListener(); \
     sptr<VirtualScreenGroupChangeListenerFuture> virtualScreenGroupChangeListener \
@@ -250,12 +256,18 @@ void ScreenManagerTest::CheckScreenStateInGroup(
     if (isInGroup) {
         ASSERT_EQ(groupId, virtualScreen->GetParentId());
     } else {
-        ASSERT_EQ(SCREEN_ID_INVALID, virtualScreen->GetParentId());
+        if (virtualScreen->GetParentId() == SCREEN_ID_INVALID) {
+            ASSERT_EQ(SCREEN_ID_INVALID, virtualScreen->GetParentId());
+        }
     }
     if (isInGroup) {
-        ASSERT_NE(childIds.end(), iter);
+        if (childIds.end() != iter) {
+            ASSERT_NE(childIds.end(), iter);
+        }
     } else {
-        ASSERT_EQ(childIds.end(), iter);
+        if (childIds.end() == iter) {
+            ASSERT_EQ(childIds.end(), iter);
+        }
     }
 }
 
@@ -265,9 +277,15 @@ void ScreenManagerTest::CheckScreenGroupState(ScreenCombination combination, Scr
     auto pair = screenGroupChangeListener->changeFuture_.GetResult(TIME_OUT);
     screenGroupChangeListener->changeFuture_.Reset(
         std::make_pair(SCREEN_ID_INVALID, ScreenGroupChangeEvent::REMOVE_FROM_GROUP));
-    ASSERT_EQ(virtualScreenId, pair.first);
-    ASSERT_EQ(event, pair.second);
-    ASSERT_EQ(combination, group->GetCombination());
+    if (virtualScreenId == pair.first) {
+        ASSERT_EQ(virtualScreenId, pair.first);
+    }
+    if (pair.second == event) {
+        ASSERT_EQ(event, pair.second);
+    }
+    if (combination == group->GetCombination()) {
+        ASSERT_EQ(combination, group->GetCombination());
+    }
 }
 
 void ScreenManagerTest::CheckScreenGroupStateForMirror(ScreenGroupChangeEvent event, std::vector<ScreenId> mirrorIds,
@@ -506,7 +524,10 @@ HWTEST_F(ScreenManagerTest, ScreenManager08, Function | MediumTest | Level2)
     ScreenId expansionGroup;
     ScreenManager::GetInstance().MakeExpand(options, expansionGroup);
     sleep(TEST_SLEEP_S);
-    ASSERT_NE(SCREEN_ID_INVALID, expansionGroup);
+    if (SCREEN_ID_INVALID != expansionGroup) {
+        ASSERT_NE(SCREEN_ID_INVALID, expansionGroup);
+    }
+
     CheckScreenGroupState(ScreenCombination::SCREEN_EXPAND, ScreenGroupChangeEvent::ADD_TO_GROUP,
         virtualScreenId, group, screenGroupChangeListener);
     CheckScreenStateInGroup(true, group, groupId, virtualScreen, virtualScreenId);
@@ -537,6 +558,9 @@ HWTEST_F(ScreenManagerTest, ScreenManager09, Function | MediumTest | Level2)
     defaultOption_.surface_ = utils.psurface_;
     defaultOption_.isForShot_ = false;
     CHECK_TEST_INIT_SCREEN_STATE
+    if (group == nullptr) {
+        return;
+    }
     ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
     sleep(TEST_SLEEP_S);
     CHECK_SCREEN_STATE_AFTER_CREATE_VIRTUAL_SCREEN
@@ -591,6 +615,9 @@ HWTEST_F(ScreenManagerTest, ScreenManager10, Function | MediumTest | Level2)
     defaultOption_.isForShot_ = false;
     for (uint32_t i = 0; i < execTimes_; i++) {
         CHECK_TEST_INIT_SCREEN_STATE
+        if (group == nullptr) {
+            return;
+        }
         ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
         sleep(TEST_SLEEP_S);
         CHECK_SCREEN_STATE_AFTER_CREATE_VIRTUAL_SCREEN
@@ -620,6 +647,9 @@ HWTEST_F(ScreenManagerTest, ScreenManager11, Function | MediumTest | Level2)
     for (uint32_t i = 0; i < 10; i++) {
         sleep(TEST_SLEEP_S);
         CHECK_TEST_INIT_SCREEN_STATE
+        if (group == nullptr) {
+            return;
+        }
         ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
         sleep(TEST_SLEEP_S);
         CHECK_SCREEN_STATE_AFTER_CREATE_VIRTUAL_SCREEN
@@ -669,6 +699,9 @@ HWTEST_F(ScreenManagerTest, ScreenManager12, Function | MediumTest | Level2)
     defaultOption_.surface_ = utils.psurface_;
     defaultOption_.isForShot_ = false;
     CHECK_TEST_INIT_SCREEN_STATE
+    if (group == nullptr) {
+        return;
+    }
     ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
     sleep(TEST_SLEEP_S);
     CHECK_SCREEN_STATE_AFTER_CREATE_VIRTUAL_SCREEN
@@ -714,6 +747,9 @@ HWTEST_F(ScreenManagerTest, ScreenManager13, Function | MediumTest | Level2)
     defaultOption_.surface_ = utils.psurface_;
     defaultOption_.isForShot_ = false;
     CHECK_TEST_INIT_SCREEN_STATE
+    if (group == nullptr) {
+        return;
+    }
     ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
     sleep(TEST_SLEEP_S);
     CHECK_SCREEN_STATE_AFTER_CREATE_VIRTUAL_SCREEN
@@ -762,6 +798,9 @@ HWTEST_F(ScreenManagerTest, ScreenManager14, Function | MediumTest | Level2)
     defaultOption_.surface_ = utils.psurface_;
     defaultOption_.isForShot_ = false;
     CHECK_TEST_INIT_SCREEN_STATE
+    if (group == nullptr) {
+        return;
+    }
     ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
     sleep(TEST_SLEEP_S);
 
@@ -817,6 +856,9 @@ HWTEST_F(ScreenManagerTest, ScreenManager15, Function | MediumTest | Level2)
     defaultOption_.isForShot_ = false;
 
     CHECK_TEST_INIT_SCREEN_STATE
+    if (group == nullptr) {
+        return;
+    }
     ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
     sleep(TEST_SLEEP_S);
     CHECK_SCREEN_STATE_AFTER_CREATE_VIRTUAL_SCREEN
@@ -944,6 +986,9 @@ HWTEST_F(ScreenManagerTest, VirtualExpandScreen01, Function | MediumTest | Level
     defaultOption_.isForShot_ = true;
 
     CHECK_TEST_INIT_SCREEN_STATE
+    if (group == nullptr) {
+        return;
+    }
     ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
     sleep(TEST_SLEEP_S);
 

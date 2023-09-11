@@ -15,19 +15,40 @@
 
 #include "session/host/include/extension_session.h"
 
-#include "ws_common.h"
+#include "ipc_skeleton.h"
+
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSession" };
-}
+} // namespace
 
 ExtensionSession::ExtensionSession(const SessionInfo& info) : Session(info)
 {
     WLOGFD("Create extension session, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s.",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
-    GeneratePersistentId(true, info);
+    GeneratePersistentId(true, info.persistentId_);
+}
+
+WSError ExtensionSession::Connect(
+    const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
+    sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid)
+{
+    // Get pid and uid before posting task.
+    pid = pid == -1 ? IPCSkeleton::GetCallingPid() : pid;
+    uid = uid == -1 ? IPCSkeleton::GetCallingUid() : uid;
+    return PostSyncTask(
+        [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, &systemConfig, property, token, pid, uid]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        return session->Session::Connect(
+            sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
+    });
 }
 
 WSError ExtensionSession::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)

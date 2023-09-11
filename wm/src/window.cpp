@@ -118,6 +118,14 @@ sptr<Window> Window::Create(sptr<WindowOption>& option, const std::shared_ptr<OH
         WLOGFE("window name in option is empty");
         return nullptr;
     }
+    uint32_t version = 10;
+    if ((context != nullptr) && (context->GetApplicationInfo() != nullptr)) {
+        version = context->GetApplicationInfo()->apiCompatibleVersion;
+    }
+    // 10 ArkUI new framework support after API10
+    if (version < 10) {
+        option->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+    }
     WindowType type = option->GetWindowType();
     if (!(WindowHelper::IsAppWindow(type) || WindowHelper::IsUIExtensionWindow(type)
         || WindowHelper::IsAppComponentWindow(type))) {

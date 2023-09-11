@@ -30,8 +30,8 @@ class RootSceneSession : public SceneSession {
 public:
     using LoadContentFunc =
         std::function<void(const std::string&, NativeEngine*, NativeValue*, AbilityRuntime::Context*)>;
-    RootSceneSession(const SessionInfo& info);
-    ~RootSceneSession() = default;
+    RootSceneSession() : SceneSession({}, nullptr) {}
+    virtual ~RootSceneSession() = default;
 
     void SetLoadContentFunc(const LoadContentFunc& loadContentFunc);
     void LoadContent(

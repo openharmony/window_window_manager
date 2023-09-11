@@ -17,7 +17,9 @@
 
 #include <context.h>
 #include <js_runtime_utils.h>
+#include "interfaces/include/ws_common.h"
 #include "napi_common_want.h"
+#include "native_value.h"
 #include "session/host/include/scene_persistence.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session.h"
@@ -116,7 +118,7 @@ void JsSceneSessionManager::OnCreateSpecificSession(const sptr<SceneSession>& sc
         return;
     }
 
-    WLOGFI("[NAPI]OnCreateSpecificSession");
+    WLOGFD("[NAPI]OnCreateSpecificSession");
     auto iter = jsCbMap_.find(CREATE_SPECIFIC_SCENE_CB);
     if (iter == jsCbMap_.end()) {
         return;
@@ -190,7 +192,7 @@ void JsSceneSessionManager::OnGestureNavigationEnabledUpdate(bool enable)
 
 void JsSceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
 {
-    WLOGFI("[NAPI]OnOutsideDownEvent");
+    WLOGFD("[NAPI]OnOutsideDownEvent");
     auto iter = jsCbMap_.find(OUTSIDE_DOWN_EVENT_CB);
     if (iter == jsCbMap_.end()) {
         return;
@@ -256,14 +258,14 @@ void JsSceneSessionManager::ProcessOutsideDownEvent()
 
 NativeValue* JsSceneSessionManager::RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]RegisterCallback");
+    WLOGFD("[NAPI]RegisterCallback");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
     return (me != nullptr) ? me->OnRegisterCallback(*engine, *info) : nullptr;
 }
 
 NativeValue* JsSceneSessionManager::UpdateFocus(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGI("[NAPI]UpdateFocus");
+    WLOGD("[NAPI]UpdateFocus");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
     return (me != nullptr) ? me->OnUpdateFocus(*engine, *info) : nullptr;
 }
@@ -311,7 +313,7 @@ NativeValue* JsSceneSessionManager::UpdateSceneSessionWant(NativeEngine* engine,
 
 NativeValue* JsSceneSessionManager::RequestSceneSessionActivation(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGI("[NAPI]RequestSceneSessionActivation");
+    WLOGD("[NAPI]RequestSceneSessionActivation");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
     return (me != nullptr) ? me->OnRequestSceneSessionActivation(*engine, *info) : nullptr;
 }
@@ -346,7 +348,7 @@ NativeValue* JsSceneSessionManager::StartAbilityBySpecified(NativeEngine* engine
 
 NativeValue* JsSceneSessionManager::GetWindowSceneConfig(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGI("[NAPI]GetWindowSceneConfig");
+    WLOGD("[NAPI]GetWindowSceneConfig");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(engine, info);
     return (me != nullptr) ? me->OnGetWindowSceneConfig(*engine, *info) : nullptr;
 }
@@ -438,7 +440,7 @@ NativeValue* JsSceneSessionManager::OnRegisterCallback(NativeEngine& engine, Nat
     std::shared_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
     jsCbMap_[cbType] = callbackRef;
-    WLOGFI("[NAPI]Register end, type = %{public}s", cbType.c_str());
+    WLOGFD("[NAPI]Register end, type = %{public}s", cbType.c_str());
     return engine.CreateUndefined();
 }
 
@@ -649,6 +651,17 @@ void JsSceneSessionManager::RegisterDumpRootSceneElementInfoListener()
     SceneSessionManager::GetInstance().SetDumpRootSceneElementInfoListener(func);
 }
 
+void JsSceneSessionManager::RegisterVirtualPixelRatioChangeListener()
+{
+    ProcessVirtualPixelRatioChangeFunc func = [this](float density, const Rect& rect) {
+        WLOGFI("VirtualPixelRatioChangeListener %{public}d,%{public}d,%{public}d,%{public}d;%{public}f",
+            rect.posX_, rect.posY_, rect.width_, rect.height_, density);
+        RootScene::staticRootScene_->SetDisplayDensity(density);
+        RootScene::staticRootScene_->UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
+    };
+    SceneSessionManager::GetInstance().SetVirtualPixelRatioChangeListener(func);
+}
+
 NativeValue* JsSceneSessionManager::OnGetRootSceneSession(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGI("[NAPI]OnGetRootSceneSession");
@@ -664,6 +677,7 @@ NativeValue* JsSceneSessionManager::OnGetRootSceneSession(NativeEngine& engine, 
     }
     RootScene::staticRootScene_ = rootScene_;
     RegisterDumpRootSceneElementInfoListener();
+    RegisterVirtualPixelRatioChangeListener();
     rootSceneSession->SetLoadContentFunc([rootScene = rootScene_]
         (const std::string& contentUrl, NativeEngine* engine, NativeValue* storage, AbilityRuntime::Context* context) {
             rootScene->LoadContent(contentUrl, engine, storage, context);
@@ -771,7 +785,7 @@ NativeValue* JsSceneSessionManager::OnUpdateSceneSessionWant(NativeEngine& engin
 
 NativeValue* JsSceneSessionManager::OnRequestSceneSessionActivation(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGI("[NAPI]OnRequestSceneSessionActivation");
+    WLOGD("[NAPI]OnRequestSceneSessionActivation");
     if (info.argc < 2) { // 2: params num
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM), "InputInvalid"));
@@ -878,6 +892,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
                 errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
             } else {
                 sceneSession = jsSceneSession->GetNativeSession();
+                SetIsClearSession(engine, jsSceneSessionObj, sceneSession);
             }
         }
     }
@@ -902,6 +917,20 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
 
     SceneSessionManager::GetInstance().RequestSceneSessionDestruction(sceneSession, needRemoveSession);
     return engine.CreateUndefined();
+}
+
+void JsSceneSessionManager::SetIsClearSession(NativeEngine& engine, NativeObject* jsSceneSessionObj, sptr<SceneSession>& sceneSession)
+{
+    NativeValue* jsOperatorType = jsSceneSessionObj->GetProperty("operatorType");
+    if (jsOperatorType->TypeOf() != NATIVE_UNDEFINED) {
+        int32_t operatorType = -1;
+        if (ConvertFromJsValue(engine, jsOperatorType, operatorType)) {
+            WLOGFI("[NAPI]operatorType: %{public}d", operatorType);
+            if (operatorType == SessionOperationType::TYPE_CLEAR) {
+                sceneSession->SetSessionInfoIsClearSession(true);
+            }
+        }
+    }
 }
 
 NativeValue* JsSceneSessionManager::OnRequestSceneSessionByCall(NativeEngine& engine, NativeCallbackInfo& info)
@@ -981,7 +1010,7 @@ NativeValue* JsSceneSessionManager::OnStartAbilityBySpecified(NativeEngine& engi
 
 NativeValue* JsSceneSessionManager::OnGetWindowSceneConfig(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("[NAPI]OnGetWindowSceneConfig");
+    WLOGFD("[NAPI]OnGetWindowSceneConfig");
     const AppWindowSceneConfig& windowSceneConfig = SceneSessionManager::GetInstance().GetWindowSceneConfig();
     NativeValue* jsWindowSceneConfigObj = JsWindowSceneConfig::CreateWindowSceneConfig(engine, windowSceneConfig);
     if (jsWindowSceneConfigObj == nullptr) {

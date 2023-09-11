@@ -18,11 +18,14 @@
 
 #include <ipc_skeleton.h>
 #include <refbase.h>
-#include <running_lock.h>
 #include <ui/rs_surface_node.h>
 #include "zidl/window_interface.h"
 #include "window_manager_hilog.h"
 #include "window_node_state_machine.h"
+
+#ifdef POWER_MANAGER_ENABLE
+#include <running_lock.h>
+#endif
 
 namespace OHOS {
 namespace Rosen {
@@ -140,7 +143,11 @@ public:
     std::shared_ptr<RSSurfaceNode> closeWinSurfaceNode_ = nullptr;
     sptr<IRemoteObject> dialogTargetToken_ = nullptr;
     sptr<IRemoteObject> abilityToken_ = nullptr;
-    std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
+
+#ifdef POWER_MANAGER_ENABLE
+    std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_ = nullptr;
+#endif
+
     int32_t priority_ { 0 };
     uint32_t zOrder_ { 0 };
     bool requestedVisibility_ { false };

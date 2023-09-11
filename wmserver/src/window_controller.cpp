@@ -20,11 +20,14 @@
 #include <hisysevent.h>
 #include <hitrace_meter.h>
 #include <parameters.h>
-#include <power_mgr_client.h>
 #include <rs_window_animation_finished_callback.h>
 #include <transaction/rs_transaction.h>
 #include <transaction/rs_sync_transaction_controller.h>
 #include <sstream>
+
+#ifdef POWER_MANAGER_ENABLE
+#include <power_mgr_client.h>
+#endif
 
 #include "display_group_info.h"
 #include "display_manager_service_inner.h"
@@ -572,6 +575,7 @@ void WindowController::HandleTurnScreenOn(const sptr<WindowNode>& node)
         return;
     }
     WLOGFD("Win: %{public}s, is turn on%{public}d", node->GetWindowName().c_str(), node->IsTurnScreenOn());
+#ifdef POWER_MANAGER_ENABLE
     // reset ipc identity
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     if (node->IsTurnScreenOn() && !PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
@@ -580,6 +584,7 @@ void WindowController::HandleTurnScreenOn(const sptr<WindowNode>& node)
     }
     // set ipc identity to raw
     IPCSkeleton::SetCallingIdentity(identity);
+#endif
 }
 
 WMError WindowController::RemoveWindowNode(uint32_t windowId, bool fromAnimation)

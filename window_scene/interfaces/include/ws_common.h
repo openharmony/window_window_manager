@@ -17,11 +17,13 @@
 #define OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
 
 #include <inttypes.h>
+#include <iomanip>
 #include <map>
+#include <sstream>
 #include <string>
-#include <want.h>
 
-#include "iremote_broker.h"
+#include <iremote_broker.h>
+#include <want.h>
 
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
@@ -125,6 +127,23 @@ enum CollaboratorType : int32_t {
     OTHERS_TYPE,
 };
 
+enum AncoSceneState: int32_t {
+    DEFAULT_STATE = 0,
+    NOTIFY_START,
+    NOTIFY_CREATE,
+    NOTIFY_LOAD,
+    NOTIFY_UPDATE,
+    NOTIFY_FOREGROUND,
+};
+
+/**
+ * @brief collaborator type.
+ */
+enum SessionOperationType : int32_t {
+    TYPE_DEFAULT = 0,
+    TYPE_CLEAR,
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
@@ -152,6 +171,9 @@ struct SessionInfo {
     std::string time;
     ContinueState continueState = ContinueState::CONTINUESTATE_ACTIVE;
     int64_t uiAbilityId_ = 0;
+    int32_t ancoSceneState;
+    bool isClearSession = false;
+    std::string sessionAffinity;
 };
 
 enum class SessionFlag : uint32_t {
@@ -259,6 +281,15 @@ struct WSRectT {
     {
         return GreatOrEqual(pointX, posX_) && LessOrEqual(pointX, posX_ + width_) &&
                GreatOrEqual(pointY, posY_) && LessOrEqual(pointY, posY_ + height_);
+    }
+
+    inline std::string ToString() const
+    {
+        constexpr int precision = 2;
+        std::stringstream ss;
+        ss << "[" << std::fixed << std::setprecision(precision) << posX_ << " " << posY_ << " " <<
+            width_ << " " << height_ << "]";
+        return ss.str();
     }
 };
 

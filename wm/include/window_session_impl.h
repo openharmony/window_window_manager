@@ -88,11 +88,13 @@ public:
     // inherits from session stage
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
+    void UpdateDensity() override;
     WSError UpdateFocus(bool focus) override;
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError HandleBackEvent() override { return WSError::WS_OK; }
     WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
+    KeyboardAnimationConfig GetKeyboardAnimationConfig() override;
 
     void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void NotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed) override;

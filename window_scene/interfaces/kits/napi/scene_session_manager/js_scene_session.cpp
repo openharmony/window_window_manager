@@ -31,6 +31,7 @@ const std::string SESSION_RECT_CHANGE_CB = "sessionRectChange";
 const std::string CREATE_SPECIFIC_SCENE_CB = "createSpecificSession";
 const std::string BIND_DIALOG_TARGET_CB = "bindDialogTarget";
 const std::string RAISE_TO_TOP_CB = "raiseToTop";
+const std::string RAISE_TO_TOP_POINT_DOWN_CB = "raiseToTopForPointDown";
 const std::string BACK_PRESSED_CB = "backPressed";
 const std::string SESSION_FOCUSABLE_CHANGE_CB = "sessionFocusableChange";
 const std::string SESSION_TOUCHABLE_CHANGE_CB = "sessionTouchableChange";
@@ -95,34 +96,35 @@ JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& s
     : engine_(engine), weakSession_(session)
 {
     listenerFunc_ = {
-        { PENDING_SCENE_CB,               &JsSceneSession::ProcessPendingSceneSessionActivationRegister },
-        { SESSION_STATE_CHANGE_CB,        &JsSceneSession::ProcessSessionStateChangeRegister },
-        { SESSION_EVENT_CB,               &JsSceneSession::ProcessSessionEventRegister },
-        { SESSION_RECT_CHANGE_CB,         &JsSceneSession::ProcessSessionRectChangeRegister },
-        { CREATE_SPECIFIC_SCENE_CB,       &JsSceneSession::ProcessCreateSpecificSessionRegister },
-        { BIND_DIALOG_TARGET_CB,       &JsSceneSession::ProcessBindDialogTargetRegister },
-        { RAISE_TO_TOP_CB,                &JsSceneSession::ProcessRaiseToTopRegister },
-        { BACK_PRESSED_CB,                &JsSceneSession::ProcessBackPressedRegister },
-        { SESSION_FOCUSABLE_CHANGE_CB,    &JsSceneSession::ProcessSessionFocusableChangeRegister },
-        { SESSION_TOUCHABLE_CHANGE_CB,    &JsSceneSession::ProcessSessionTouchableChangeRegister },
-        { CLICK_CB,                       &JsSceneSession::ProcessClickRegister },
-        { TERMINATE_SESSION_CB,           &JsSceneSession::ProcessTerminateSessionRegister },
-        { TERMINATE_SESSION_CB_NEW,       &JsSceneSession::ProcessTerminateSessionRegisterNew },
-        { TERMINATE_SESSION_CB_TOTAL,           &JsSceneSession::ProcessTerminateSessionRegisterTotal },
-        { SESSION_EXCEPTION_CB,           &JsSceneSession::ProcessSessionExceptionRegister },
-        { UPDATE_SESSION_LABEL_CB,        &JsSceneSession::ProcessUpdateSessionLabelRegister },
-        { UPDATE_SESSION_ICON_CB,         &JsSceneSession::ProcessUpdateSessionIconRegister },
-        { SYSTEMBAR_PROPERTY_CHANGE_CB,   &JsSceneSession::ProcessSystemBarPropertyChangeRegister },
-        { NEED_AVOID_CB,          &JsSceneSession::ProcessNeedAvoidRegister },
-        { PENDING_SESSION_TO_FOREGROUND_CB,           &JsSceneSession::ProcessPendingSessionToForegroundRegister },
+        { PENDING_SCENE_CB,                      &JsSceneSession::ProcessPendingSceneSessionActivationRegister },
+        { SESSION_STATE_CHANGE_CB,               &JsSceneSession::ProcessSessionStateChangeRegister },
+        { SESSION_EVENT_CB,                      &JsSceneSession::ProcessSessionEventRegister },
+        { SESSION_RECT_CHANGE_CB,                &JsSceneSession::ProcessSessionRectChangeRegister },
+        { CREATE_SPECIFIC_SCENE_CB,              &JsSceneSession::ProcessCreateSpecificSessionRegister },
+        { BIND_DIALOG_TARGET_CB,                 &JsSceneSession::ProcessBindDialogTargetRegister },
+        { RAISE_TO_TOP_CB,                       &JsSceneSession::ProcessRaiseToTopRegister },
+        { RAISE_TO_TOP_POINT_DOWN_CB,            &JsSceneSession::ProcessRaiseToTopForPointDownRegister },
+        { BACK_PRESSED_CB,                       &JsSceneSession::ProcessBackPressedRegister },
+        { SESSION_FOCUSABLE_CHANGE_CB,           &JsSceneSession::ProcessSessionFocusableChangeRegister },
+        { SESSION_TOUCHABLE_CHANGE_CB,           &JsSceneSession::ProcessSessionTouchableChangeRegister },
+        { CLICK_CB,                              &JsSceneSession::ProcessClickRegister },
+        { TERMINATE_SESSION_CB,                  &JsSceneSession::ProcessTerminateSessionRegister },
+        { TERMINATE_SESSION_CB_NEW,              &JsSceneSession::ProcessTerminateSessionRegisterNew },
+        { TERMINATE_SESSION_CB_TOTAL,            &JsSceneSession::ProcessTerminateSessionRegisterTotal },
+        { SESSION_EXCEPTION_CB,                  &JsSceneSession::ProcessSessionExceptionRegister },
+        { UPDATE_SESSION_LABEL_CB,               &JsSceneSession::ProcessUpdateSessionLabelRegister },
+        { UPDATE_SESSION_ICON_CB,                &JsSceneSession::ProcessUpdateSessionIconRegister },
+        { SYSTEMBAR_PROPERTY_CHANGE_CB,          &JsSceneSession::ProcessSystemBarPropertyChangeRegister },
+        { NEED_AVOID_CB,                         &JsSceneSession::ProcessNeedAvoidRegister },
+        { PENDING_SESSION_TO_FOREGROUND_CB,      &JsSceneSession::ProcessPendingSessionToForegroundRegister },
         { PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB,
             &JsSceneSession::ProcessPendingSessionToBackgroundForDelegatorRegister },
         { NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB, &JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister },
-        { CUSTOM_ANIMATION_PLAYING_CB,                  &JsSceneSession::ProcessIsCustomAnimationPlaying },
-        { SHOW_WHEN_LOCKED_CB,            &JsSceneSession::ProcessShowWhenLockedRegister },
-        { REQUESTED_ORIENTATION_CHANGE_CB,            &JsSceneSession::ProcessRequestedOrientationChange },
-        { RAISE_ABOVE_TARGET_CB,          &JsSceneSession::ProcessRaiseAboveTargetRegister },
-        { FORCE_HIDE_CHANGE_CB,           &JsSceneSession::ProcessForceHideChangeRegister }
+        { CUSTOM_ANIMATION_PLAYING_CB,           &JsSceneSession::ProcessIsCustomAnimationPlaying },
+        { SHOW_WHEN_LOCKED_CB,                   &JsSceneSession::ProcessShowWhenLockedRegister },
+        { REQUESTED_ORIENTATION_CHANGE_CB,       &JsSceneSession::ProcessRequestedOrientationChange },
+        { RAISE_ABOVE_TARGET_CB,                 &JsSceneSession::ProcessRaiseAboveTargetRegister },
+        { FORCE_HIDE_CHANGE_CB,                  &JsSceneSession::ProcessForceHideChangeRegister }
     };
 
     sptr<SceneSession::SessionChangeCallback> sessionchangeCallback = new (std::nothrow)
@@ -229,18 +231,15 @@ void JsSceneSession::ProcessBindDialogTargetRegister()
 
 void JsSceneSession::ProcessSessionRectChangeRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
+    NotifySessionRectChangeFunc func = [this](const WSRect& rect, const SizeChangeReason& reason) {
+        this->OnSessionRectChange(rect, reason);
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr");
         return;
     }
-    sessionchangeCallback->onRectChange_ = std::bind(&JsSceneSession::OnSessionRectChange,
-        this, std::placeholders::_1, std::placeholders::_2);
-
-    auto session = weakSession_.promote();
-    if (session && session->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-        OnSessionRectChange(session->GetSessionRequestRect());
-    }
+    session->SetSessionRectChangeCallback(func);
     WLOGFD("ProcessSessionRectChangeRegister success");
 }
 
@@ -253,6 +252,17 @@ void JsSceneSession::ProcessRaiseToTopRegister()
     }
     sessionchangeCallback->onRaiseToTop_ = std::bind(&JsSceneSession::OnRaiseToTop, this);
     WLOGFD("ProcessRaiseToTopRegister success");
+}
+
+void JsSceneSession::ProcessRaiseToTopForPointDownRegister()
+{
+    auto sessionchangeCallback = sessionchangeCallback_.promote();
+    if (sessionchangeCallback == nullptr) {
+        WLOGFE("sessionchangeCallback is nullptr");
+        return;
+    }
+    sessionchangeCallback->onRaiseToTopForPointDown_ = std::bind(&JsSceneSession::OnRaiseToTopForPointDown, this);
+    WLOGFD("ProcessRaiseToTopForPointDownRegister success");
 }
 
 void JsSceneSession::ProcessRaiseAboveTargetRegister()
@@ -555,7 +565,7 @@ void JsSceneSession::Finalizer(NativeEngine* engine, void* data, void* hint)
 
 NativeValue* JsSceneSession::RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGI("[NAPI]RegisterCallback");
+    WLOGD("[NAPI]RegisterCallback");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(engine, info);
     return (me != nullptr) ? me->OnRegisterCallback(*engine, *info) : nullptr;
 }
@@ -583,7 +593,7 @@ NativeValue* JsSceneSession::SetShowRecent(NativeEngine* engine, NativeCallbackI
 
 NativeValue* JsSceneSession::SetZOrder(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGI("[NAPI]SetZOrder");
+    WLOGD("[NAPI]SetZOrder");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(engine, info);
     return (me != nullptr) ? me->OnSetZOrder(*engine, *info) : nullptr;
 }
@@ -653,7 +663,7 @@ NativeValue* JsSceneSession::OnRegisterCallback(NativeEngine& engine, NativeCall
     callbackRef.reset(engine.CreateReference(value, 1));
     jsCbMap_[cbType] = callbackRef;
     (this->*listenerFunc_[cbType])();
-    WLOGFI("[NAPI]Register end, type = %{public}s", cbType.c_str());
+    WLOGFD("[NAPI]Register end, type = %{public}s", cbType.c_str());
     return engine.CreateUndefined();
 }
 
@@ -715,13 +725,13 @@ NativeValue* JsSceneSession::OnSetPrivacyMode(NativeEngine& engine, NativeCallba
 
 void JsSceneSession::OnCreateSpecificSession(const sptr<SceneSession>& sceneSession)
 {
-    WLOGFI("OnCreateSpecificSession");
+    WLOGFD("OnCreateSpecificSession");
     if (sceneSession == nullptr) {
         WLOGFI("[NAPI]sceneSession is nullptr");
         return;
     }
 
-    WLOGFI("[NAPI]OnCreateSpecificSession");
+    WLOGFD("[NAPI]OnCreateSpecificSession");
     auto iter = jsCbMap_.find(CREATE_SPECIFIC_SCENE_CB);
     if (iter == jsCbMap_.end()) {
         return;
@@ -793,7 +803,7 @@ void JsSceneSession::OnBindDialogTarget(const sptr<SceneSession>& sceneSession)
 
 void JsSceneSession::OnSessionStateChange(const SessionState& state)
 {
-    WLOGFI("[NAPI]OnSessionStateChange, state: %{public}u", static_cast<uint32_t>(state));
+    WLOGFD("[NAPI]OnSessionStateChange, state: %{public}u", static_cast<uint32_t>(state));
     auto iter = jsCbMap_.find(SESSION_STATE_CHANGE_CB);
     if (iter == jsCbMap_.end()) {
         return;
@@ -822,7 +832,7 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect, const SizeChangeRea
         WLOGFD("Rect is empty, there is no need to notify");
         return;
     }
-    WLOGFI("[NAPI]OnSessionRectChange");
+    WLOGFD("[NAPI]OnSessionRectChange");
     auto iter = jsCbMap_.find(SESSION_RECT_CHANGE_CB);
     if (iter == jsCbMap_.end()) {
         return;
@@ -870,6 +880,30 @@ void JsSceneSession::OnRaiseToTop()
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
+void JsSceneSession::OnRaiseToTopForPointDown()
+{
+    WLOGFI("[NAPI]OnRaiseToTopForPointDown");
+    auto iter = jsCbMap_.find(RAISE_TO_TOP_POINT_DOWN_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [jsCallBack, eng = &engine_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (!jsCallBack) {
+                WLOGFE("[NAPI]jsCallBack is nullptr");
+                return;
+            }
+            NativeValue* argv[] = {};
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, 0);
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSession::OnRaiseToTopForPointDown", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
 void JsSceneSession::OnRaiseAboveTarget(int32_t subWindowId)
 {
     WLOGFI("[NAPI]OnRaiseAboveTarget");
@@ -905,7 +939,7 @@ void JsSceneSession::OnRaiseAboveTarget(int32_t subWindowId)
 
 void JsSceneSession::OnSessionFocusableChange(bool isFocusable)
 {
-    WLOGFI("[NAPI]OnSessionFocusableChange, state: %{public}u", isFocusable);
+    WLOGFD("[NAPI]OnSessionFocusableChange, state: %{public}u", isFocusable);
     auto iter = jsCbMap_.find(SESSION_FOCUSABLE_CHANGE_CB);
     if (iter == jsCbMap_.end()) {
         return;
@@ -983,8 +1017,10 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
         appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
         info.abilityName_.c_str(), info.appIndex_, info.reuse);
     if (info.persistentId_ == 0) {
+        SceneSessionManager::GetInstance().CheckIfReuseSession(info);
         sptr<SceneSession> sceneSession = nullptr;
         if (info.reuse) {
+            WLOGFI("session need to be reusesd.");
             sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByName(
                 info.bundleName_, info.moduleName_, info.abilityName_, info.appIndex_);
         }
@@ -996,29 +1032,17 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
                 return;
             }
         } else {
-            sceneSession->GetSessionInfo().want = info.want;
-            sceneSession->GetSessionInfo().callerToken_ = info.callerToken_;
-            sceneSession->GetSessionInfo().requestCode = info.requestCode;
-            sceneSession->GetSessionInfo().callerPersistentId_ = info.callerPersistentId_;
-            sceneSession->GetSessionInfo().callingTokenId_ = info.callingTokenId_;
-            sceneSession->GetSessionInfo().uiAbilityId_ = info.uiAbilityId_;
-            sceneSession->GetSessionInfo().startSetting = info.startSetting;
+            sceneSession->SetSessionInfo(info);
         }
         info.persistentId_ = sceneSession->GetPersistentId();
-        sceneSession->GetSessionInfo().persistentId_ = sceneSession->GetPersistentId();
+        sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
     } else {
         auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId_);
         if (sceneSession == nullptr) {
             WLOGFE("GetSceneSession return nullptr");
             return;
         }
-        sceneSession->GetSessionInfo().want = info.want;
-        sceneSession->GetSessionInfo().callerToken_ = info.callerToken_;
-        sceneSession->GetSessionInfo().requestCode = info.requestCode;
-        sceneSession->GetSessionInfo().callerPersistentId_ = info.callerPersistentId_;
-        sceneSession->GetSessionInfo().callingTokenId_ = info.callingTokenId_;
-        sceneSession->GetSessionInfo().uiAbilityId_ = info.uiAbilityId_;
-        sceneSession->GetSessionInfo().startSetting = info.startSetting;
+        sceneSession->SetSessionInfo(info);
     }
 
     PendingSessionActivationInner(info);

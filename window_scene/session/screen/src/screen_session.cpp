@@ -259,10 +259,10 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation)
             break;
     }
     DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation);
-    property_.SetDisplayOrientation(displayOrientation);
     property_.SetBounds(bounds);
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
+    property_.SetDisplayOrientation(displayOrientation);
     WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f], rotation: %{public}u",
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(), targetRotation);
@@ -304,7 +304,28 @@ void ScreenSession::SetScreenRequestedOrientation(Orientation orientation)
 
 void ScreenSession::SetScreenRotationLocked(bool isLocked)
 {
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        isScreenLocked_ = isLocked;
+    }
+    for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            continue;
+        }
+        listener->OnScreenRotationLockedChange(isLocked);
+    }
+}
+
+void ScreenSession::SetScreenRotationLockedFromJs(bool isLocked)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     isScreenLocked_ = isLocked;
+}
+
+bool ScreenSession::IsScreenRotationLocked()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return isScreenLocked_;
 }
 
 Orientation ScreenSession::GetScreenRequestedOrientation() const
@@ -605,6 +626,10 @@ bool ScreenSessionGroup::GetRSDisplayNodeConfig(sptr<ScreenSession>& screenSessi
         case ScreenCombination::SCREEN_MIRROR: {
             if (GetChildCount() == 0 || mirrorScreenId_ == screenSession->screenId_) {
                 WLOGI("AddChild, SCREEN_MIRROR, config is not mirror");
+                break;
+            }
+            if (defaultScreenSession == nullptr) {
+                WLOGFE("AddChild fail, defaultScreenSession is nullptr");
                 break;
             }
             std::shared_ptr<RSDisplayNode> displayNode = defaultScreenSession->GetDisplayNode();

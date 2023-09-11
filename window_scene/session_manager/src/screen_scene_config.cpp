@@ -311,7 +311,7 @@ std::vector<int> ScreenSceneConfig::GetCurvedScreenBoundaryConfig()
 uint32_t ScreenSceneConfig::GetCurvedCompressionAreaInLandscape()
 {
     if (!isWaterfallDisplay_ || !isScreenCompressionEnableInLandscape_) {
-        WLOGFW("noy waterfall screen or waterfall compression is not enabled");
+        WLOGFW("not waterfall screen or waterfall compression is not enabled");
         return NO_WATERFALL_DISPLAY_COMPRESSION_SIZE;
     }
     return curvedAreaInLandscape_;

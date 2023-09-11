@@ -123,8 +123,9 @@ public:
     virtual WSError ClearAllSessions() = 0;
     virtual WSError LockSession(int32_t sessionId) = 0;
     virtual WSError UnlockSession(int32_t sessionId) = 0;
-    virtual WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds) = 0;
-    virtual WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds) = 0;
+    virtual WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds, int32_t topSessionId) = 0;
+    virtual WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds,
+        std::vector<std::int32_t>& result) = 0;
 
     virtual WSError RegisterIAbilityManagerCollaborator(int32_t type, const sptr<AAFwk::IAbilityManagerCollaborator> &impl) = 0;
     virtual WSError UnregisterIAbilityManagerCollaborator(int32_t type) = 0;

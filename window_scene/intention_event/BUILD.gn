@@ -41,6 +41,21 @@ ohos_shared_library("libintention_event") {
     "hitrace:hitrace_meter",
     "input:libmmi-client",
   ]
+
+  defines = []
+  if (!defined(global_parts_info) ||
+      defined(global_parts_info.inputmethod_imf)) {
+    imf_enable = true
+  } else {
+    imf_enable = false
+  }
+  print("imf_enable: ", imf_enable)
+
+  if (imf_enable == true) {
+    external_deps += [ "imf:inputmethod_client" ]
+    defines += [ "IMF_ENABLE" ]
+  }
+
   part_name = "window_manager"
   subsystem_name = "window"
 }

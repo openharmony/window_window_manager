@@ -15,8 +15,10 @@
 
 #include "session_manager/include/extension_session_manager.h"
 
-#include <hitrace_meter.h>
+#include <mutex>
+
 #include <ability_manager_client.h>
+#include <hitrace_meter.h>
 #include <session_info.h>
 #include <start_options.h>
 
@@ -27,10 +29,12 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSessionManager" };
 const std::string EXTENSION_SESSION_MANAGER_THREAD = "ExtensionSessionManager";
+std::recursive_mutex g_instanceMutex;
 } // namespace
 
 ExtensionSessionManager& ExtensionSessionManager::GetInstance()
 {
+    std::lock_guard<std::recursive_mutex> lock(g_instanceMutex);
     static ExtensionSessionManager* instance = nullptr;
     if (instance == nullptr) {
         instance = new ExtensionSessionManager();
@@ -65,15 +69,12 @@ sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sp
 sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const SessionInfo& sessionInfo)
 {
     auto task = [this, sessionInfo]() {
-        sptr<ExtensionSession> extensionSession = new (std::nothrow) ExtensionSession(sessionInfo);
-        if (extensionSession == nullptr) {
-            WLOGFE("extensionSession is nullptr!");
-            return extensionSession;
-        }
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "RequestExtensionSession");
+        sptr<ExtensionSession> extensionSession = new ExtensionSession(sessionInfo);
         auto persistentId = extensionSession->GetPersistentId();
-        WLOGFI("create session persistentId: %{public}d, bundleName: %{public}s, abilityName: %{public}s",
-            persistentId, sessionInfo.bundleName_.c_str(), sessionInfo.abilityName_.c_str());
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:RequestExtensionSession");
+        WLOGFI("persistentId: %{public}d, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
+            persistentId, sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
+            sessionInfo.abilityName_.c_str());
         extensionSessionMap_.insert({ persistentId, extensionSession });
         return extensionSession;
     };

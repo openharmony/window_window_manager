@@ -17,7 +17,9 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_STUB_H
 
 #include <map>
+
 #include <iremote_stub.h>
+
 #include "session/host/include/zidl/session_interface.h"
 
 namespace OHOS::Rosen {
@@ -27,23 +29,18 @@ using SessionStubFunc = int (SessionStub::*)(MessageParcel& data, MessageParcel&
 class SessionStub : public IRemoteStub<ISession> {
 public:
     SessionStub() = default;
-    ~SessionStub() = default;
+    virtual ~SessionStub() = default;
 
-    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-        MessageOption &option) override;
+    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 private:
-    static const std::map<uint32_t, SessionStubFunc> stubFuncMap_;
-
+    int HandleConnect(MessageParcel& data, MessageParcel& reply);
     int HandleForeground(MessageParcel& data, MessageParcel& reply);
     int HandleBackground(MessageParcel& data, MessageParcel& reply);
     int HandleDisconnect(MessageParcel& data, MessageParcel& reply);
-    int HandleConnect(MessageParcel& data, MessageParcel& reply);
-    int HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply);
+
+    // scene session
     int HandleUpdateActivateStatus(MessageParcel& data, MessageParcel& reply);
-    int HandleTerminateSession(MessageParcel& data, MessageParcel& reply);
-    int HandleSessionException(MessageParcel& data, MessageParcel& reply);
-    // for scene
     int HandleSessionEvent(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply);
     int HandleCreateAndConnectSpecificSession(MessageParcel& data, MessageParcel& reply);
@@ -55,17 +52,23 @@ private:
     int HandleGetGlobalMaximizeMode(MessageParcel& data, MessageParcel& reply);
     int HandleNeedAvoid(MessageParcel& data, MessageParcel& reply);
     int HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& reply);
-    int HandleUpdateWindowSessionProperty(MessageParcel& data, MessageParcel& reply);
+    int HandleSetSessionProperty(MessageParcel& data, MessageParcel& reply);
     int HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply);
     int HandleSetWindowAnimationFlag(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateWindowSceneAfterCustomAnimation(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseAboveTarget(MessageParcel& data, MessageParcel& reply);
+    int HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply);
+    int HandleTerminateSession(MessageParcel& data, MessageParcel& reply);
+    int HandleSessionException(MessageParcel& data, MessageParcel& reply);
 
-    // for extension
+    // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);
     int HandleTransferExtensionData(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyRemoteReady(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyExtensionDied(MessageParcel& data, MessageParcel& reply);
+
+    static const std::map<uint32_t, SessionStubFunc> stubFuncMap_;
 };
 } // namespace OHOS::Rosen
+
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_STUB_H

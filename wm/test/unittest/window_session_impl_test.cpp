@@ -119,9 +119,9 @@ HWTEST_F(WindowSessionImplTest, Connect01, Function | SmallTest | Level2)
     sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _)).WillOnce(Return(WSError::WS_ERROR_NULLPTR));
+    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _, _, _)).WillOnce(Return(WSError::WS_ERROR_NULLPTR));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->Connect());
-    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _, _, _)).WillOnce(Return(WSError::WS_OK));
     ASSERT_EQ(WMError::WM_OK, window->Connect());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
@@ -204,7 +204,7 @@ HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled01, Function | SmallTest |
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     retCode = window->SetResizeByDragEnabled(true);
-    ASSERT_EQ(retCode, WMError::WM_DO_NOTHING);
+    ASSERT_EQ(retCode, WMError::WM_OK);
 }
 
 /**
@@ -525,10 +525,10 @@ HWTEST_F(WindowSessionImplTest, GetFloatingWindowParentId, Function | SmallTest 
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _))
+    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _, _, _))
         .WillOnce(Return(WSError::WS_ERROR_NULLPTR));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->Connect());
-    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _))
+    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _, _, _))
         .WillOnce(Return(WSError::WS_OK));
     ASSERT_EQ(WMError::WM_OK, window->Connect());
 
@@ -666,7 +666,7 @@ HWTEST_F(WindowSessionImplTest, SetBrightness01, Function | SmallTest | Level2)
 
     float brightness = -1.0; // brightness < 0
     WMError res = window->SetBrightness(brightness);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+    ASSERT_EQ(res, WMError::WM_OK);
     brightness = 2.0; // brightness > 1
     res = window->SetBrightness(brightness);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
@@ -1322,7 +1322,7 @@ HWTEST_F(WindowSessionImplTest, SetRaiseByClickEnabled01, Function | SmallTest |
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     retCode = window->SetRaiseByClickEnabled(true);
-    ASSERT_EQ(retCode, WMError::WM_DO_NOTHING);
+    ASSERT_EQ(retCode, WMError::WM_OK);
 }
 
 /**
@@ -1345,7 +1345,7 @@ HWTEST_F(WindowSessionImplTest, HideNonSystemFloatingWindows01, Function | Small
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     retCode = window->HideNonSystemFloatingWindows(false);
-    ASSERT_EQ(retCode, WMError::WM_DO_NOTHING);
+    ASSERT_EQ(retCode, WMError::WM_OK);
 }
 }
 } // namespace Rosen
