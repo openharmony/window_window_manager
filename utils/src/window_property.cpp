@@ -854,6 +854,9 @@ bool WindowProperty::Write(Parcel& parcel, PropertyChangeAction action)
             ret = ret && parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_)
                 && parcel.WriteBool(onlySkipSnapshot_);
             break;
+        case PropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE:
+            ret = ret && parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_);
+            break;
         case PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO:
             ret = ret && parcel.WriteFloat(aspectRatio_);
             break;
@@ -925,6 +928,10 @@ void WindowProperty::Read(Parcel& parcel, PropertyChangeAction action)
             SetPrivacyMode(parcel.ReadBool());
             SetSystemPrivacyMode(parcel.ReadBool());
             SetOnlySkipSnapshot(parcel.ReadBool());
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE:
+            SetPrivacyMode(parcel.ReadBool());
+            SetSystemPrivacyMode(parcel.ReadBool());
             break;
         case PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO:
             SetAspectRatio(parcel.ReadFloat());
