@@ -1778,7 +1778,7 @@ void WindowImpl::SetSystemPrivacyMode(bool isSystemPrivacyMode)
 {
     WLOGFD("id : %{public}u, SetSystemPrivacyMode, %{public}u", GetWindowId(), isSystemPrivacyMode);
     property_->SetSystemPrivacyMode(isSystemPrivacyMode);
-    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
+    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE);
 }
 
 WMError WindowImpl::SetSnapshotSkip(bool isSkip)
