@@ -3117,7 +3117,6 @@ void SceneSessionManager::StartWindowInfoReportLoop()
 
 void SceneSessionManager::ResizeSoftInputCallingSessionIfNeed(const sptr<SceneSession>& sceneSession)
 {
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     if (callingSession_ == nullptr) {
         WLOGFE("calling session is nullptr");
         return;
@@ -3165,7 +3164,6 @@ void SceneSessionManager::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession> 
 
 void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
 {
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     WLOGFD("RestoreCallingSessionSizeIfNeed");
     if (callingSession_ == nullptr) {
         WLOGFE("Calling session is nullptr");
@@ -3186,29 +3184,32 @@ void SceneSessionManager::RestoreCallingSessionSizeIfNeed()
 
 WSError SceneSessionManager::SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent)
 {
-    auto sceneSession = GetSceneSession(persistentId);
-    if (!sceneSession) {
-        WLOGFE("scene session is nullptr");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-        WLOGFE("scene session is not input method");
-        return WSError::WS_ERROR_INVALID_TYPE;
-    }
-    sceneSession->GetSessionProperty()->SetSessionGravity(gravity, percent);
-    RelayoutKeyBoard(sceneSession);
-    if (callingSession_ == nullptr) {
-        WLOGFD("callingSession_ is nullptr");
-        callingSession_ = GetSceneSession(focusedSessionId_);
-    }
-    if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
-        WLOGFD("input method is float mode");
-        RestoreCallingSessionSizeIfNeed();
-    } else {
-        WLOGFD("input method is bottom mode");
-        ResizeSoftInputCallingSessionIfNeed(sceneSession);
-    }
-    return WSError::WS_OK;
+    auto task = [this, persistentId, gravity, percent]() -> WSError {
+        auto sceneSession = GetSceneSession(persistentId);
+        if (!sceneSession) {
+            WLOGFE("scene session is nullptr");
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+            WLOGFE("scene session is not input method");
+            return WSError::WS_ERROR_INVALID_TYPE;
+        }
+        sceneSession->GetSessionProperty()->SetSessionGravity(gravity, percent);
+        RelayoutKeyBoard(sceneSession);
+        if (callingSession_ == nullptr) {
+            WLOGFD("callingSession_ is nullptr");
+            callingSession_ = GetSceneSession(focusedSessionId_);
+        }
+        if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
+            WLOGFD("input method is float mode");
+            RestoreCallingSessionSizeIfNeed();
+        } else {
+            WLOGFD("input method is bottom mode");
+            ResizeSoftInputCallingSessionIfNeed(sceneSession);
+        }
+        return WSError::WS_OK;
+    };
+    return taskScheduler_->PostSyncTask(task);
 }
 
 void SceneSessionManager::RelayoutKeyBoard(sptr<SceneSession> sceneSession)
