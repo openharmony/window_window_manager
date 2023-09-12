@@ -28,7 +28,7 @@ void DisplayManagerAgentProxy::NotifyDisplayPowerEvent(DisplayPowerEvent event, 
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;
@@ -53,7 +53,7 @@ void DisplayManagerAgentProxy::NotifyDisplayStateChanged(DisplayId id, DisplaySt
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;
