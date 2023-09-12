@@ -67,7 +67,7 @@ public:
     void NotifyDumpInfoResult(const std::vector<std::string>& info) override;
     WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) override;
     WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
-                               std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution) override;
+                               SessionSnapshot& snapshot, bool isLowResolution) override;
     WSError LockSession(int32_t persistentId) override;
     WSError UnlockSession(int32_t persistentId) override;
     WSError MoveSessionsToForeground(const std::vector<int32_t>& sessionIds, int32_t topSessionId) override;

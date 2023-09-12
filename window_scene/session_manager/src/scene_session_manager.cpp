@@ -3077,7 +3077,7 @@ WSError SceneSessionManager::TerminateSessionNew(const sptr<AAFwk::SessionInfo> 
 }
 
 WSError SceneSessionManager::GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
-                                                std::shared_ptr<Media::PixelMap>& snapshot, bool isLowResolution)
+                                                SessionSnapshot& snapshot, bool isLowResolution)
 {
     WLOGFI("run GetSessionSnapshot");
     if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
@@ -3090,13 +3090,12 @@ WSError SceneSessionManager::GetSessionSnapshot(const std::string& deviceId, int
     }
     auto task = [this, &deviceId, persistentId, &snapshot, isLowResolution]() {
         if (CheckIsRemote(deviceId)) {
-            WLOGFI("get remote session snapshot.");
             std::unique_ptr<AAFwk::MissionSnapshot> missionSnapshotPtr = std::make_unique<AAFwk::MissionSnapshot>();
             int ret = GetRemoteSessionSnapshotInfo(deviceId, persistentId, *missionSnapshotPtr);
             if (ret != ERR_OK) {
                 return WSError::WS_ERROR_INVALID_PARAM;
             } else {
-                snapshot = missionSnapshotPtr->snapshot;
+                snapshot.snapshot = missionSnapshotPtr->snapshot;
                 return WSError::WS_OK;
             }
         }
@@ -3105,6 +3104,14 @@ WSError SceneSessionManager::GetSessionSnapshot(const std::string& deviceId, int
             WLOGFE("fail to find session by persistentId: %{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_PARAM;
         }
+        auto sessionInfo = sceneSession->GetSessionInfo();
+        if (sessionInfo.abilityName_.empty() || sessionInfo.moduleName_.empty() || sessionInfo.bundleName_.empty()) {
+            WLOGFW("sessionInfo: %{public}d, abilityName or moduleName or bundleName is empty",
+                   sceneSession->GetPersistentId());
+        }
+        snapshot.topAbility.SetElementBundleName(&(snapshot.topAbility), sessionInfo.bundleName_.c_str());
+        snapshot.topAbility.SetElementModuleName(&(snapshot.topAbility), sessionInfo.moduleName_.c_str());
+        snapshot.topAbility.SetElementAbilityName(&(snapshot.topAbility), sessionInfo.abilityName_.c_str());
         auto oriSnapshot = sceneSession->Snapshot();
         if (oriSnapshot != nullptr) {
             if (isLowResolution) {
@@ -3112,9 +3119,9 @@ WSError SceneSessionManager::GetSessionSnapshot(const std::string& deviceId, int
                 options.size.width = oriSnapshot->GetWidth() / 2; // low resolution ratio
                 options.size.height = oriSnapshot->GetHeight() / 2; // low resolution ratio
                 std::unique_ptr<OHOS::Media::PixelMap> reducedPixelMap = OHOS::Media::PixelMap::Create(*oriSnapshot, options);
-                snapshot = std::shared_ptr<OHOS::Media::PixelMap>(reducedPixelMap.release());
+                snapshot.snapshot = std::shared_ptr<OHOS::Media::PixelMap>(reducedPixelMap.release());
             } else {
-                snapshot = oriSnapshot;
+                snapshot.snapshot = oriSnapshot;
             }
         }
         return WSError::WS_OK;
@@ -3547,7 +3554,7 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
     WLOGFD("NotifyWindowInfoChange, persistentId = %{public}d, updateType = %{public}d", persistentId, type);
     sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        WLOGFE("GetSessionSnapshot sceneSession nullptr!");
+        WLOGFE("NotifyWindowInfoChange sceneSession nullptr!");
         return;
     }
     wptr<SceneSession> weakSceneSession(sceneSession);
@@ -3607,10 +3614,10 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
 
 std::string SceneSessionManager::GetSessionSnapshotFilePath(int32_t persistentId)
 {
-    WLOGFI("GetSessionSnapshot persistentId %{public}d", persistentId);
+    WLOGFI("GetSessionSnapshotFilePath persistentId %{public}d", persistentId);
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        WLOGFE("GetSessionSnapshot sceneSession nullptr!");
+        WLOGFE("GetSessionSnapshotFilePath sceneSession nullptr!");
         return "";
     }
     wptr<SceneSession> weakSceneSession(sceneSession);

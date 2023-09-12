@@ -30,6 +30,7 @@
 #include "session_info.h"
 #include "mission_listener_interface.h"
 #include "mission_info.h"
+#include "mission_snapshot.h"
 #include "iability_manager_collaborator.h"
 
 namespace OHOS::Media {
@@ -40,6 +41,7 @@ namespace OHOS::Rosen {
 class RSSurfaceNode;
 using ISessionListener = AAFwk::IMissionListener;
 using SessionInfoBean = AAFwk::MissionInfo;
+using SessionSnapshot = AAFwk::MissionSnapshot;
 class ISceneSessionManager : public IWindowManager {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISceneSessionManager");
@@ -118,7 +120,7 @@ public:
     virtual WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller) = 0;
     virtual WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) = 0;
     virtual WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
-                                       std::shared_ptr<Media::PixelMap> &snapshot, bool isLowResolution) = 0;
+                                       SessionSnapshot& snapshot, bool isLowResolution) = 0;
     virtual WSError ClearSession(int32_t persistentId) = 0;
     virtual WSError ClearAllSessions() = 0;
     virtual WSError LockSession(int32_t sessionId) = 0;
