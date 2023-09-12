@@ -143,7 +143,7 @@ DMError ScreenSessionManager::RegisterDisplayManagerAgent(
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     if (type < DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER
-        || type > DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER) {
+        || type > DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER) {
         WLOGFE("SCB:DisplayManagerAgentType: %{public}u", static_cast<uint32_t>(type));
         return DMError::DM_ERROR_INVALID_PARAM;
     }
@@ -2185,5 +2185,29 @@ sptr<FoldCreaseRegion> ScreenSessionManager::GetCurrentFoldCreaseRegion()
 uint32_t ScreenSessionManager::GetCurvedCompressionArea() const
 {
     return ScreenSceneConfig::GetCurvedCompressionAreaInLandscape();
+}
+
+void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
+{
+    WLOGI("NotifyFoldStatusChanged foldStatus:%{public}d", foldStatus);
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    for (auto& agent: agents) {
+        agent->NotifyFoldStatusChanged(foldStatus);
+    }
+}
+
+void ScreenSessionManager::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
+{
+    WLOGI("NotifyDisplayModeChanged displayMode:%{public}d", displayMode);
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    for (auto& agent: agents) {
+        agent->NotifyDisplayModeChanged(displayMode);
+    }
 }
 } // namespace OHOS::Rosen

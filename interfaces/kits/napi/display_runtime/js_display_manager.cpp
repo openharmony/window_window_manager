@@ -254,6 +254,10 @@ DMError RegisterDisplayListenerWithType(NativeEngine& engine, const std::string&
         ret = SingletonContainer::Get<DisplayManager>().RegisterDisplayListener(displayListener);
     } else if (type == EVENT_PRIVATE_MODE_CHANGE) {
         ret = SingletonContainer::Get<DisplayManager>().RegisterPrivateWindowListener(displayListener);
+    } else if (type == EVENT_FOLD_STATUS_CHANGED) {
+        ret = SingletonContainer::Get<DisplayManager>().RegisterFoldStatusListener(displayListener);
+    } else if (type == EVENT_DISPLAY_MODE_CHANGED) {
+        ret = SingletonContainer::Get<DisplayManager>().RegisterDisplayModeListener(displayListener);
     } else {
         WLOGFE("RegisterDisplayListenerWithType failed, %{public}s not support", type.c_str());
         return DMError::DM_ERROR_INVALID_PARAM;
