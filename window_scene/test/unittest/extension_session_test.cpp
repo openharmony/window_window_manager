@@ -143,6 +143,7 @@ HWTEST_F(ExtensionSessionTest, NotifyRemoteReady, Function | SmallTest | Level1)
     info.bundleName_ = "SetBrightness1";
     ExtensionSession extensionSession_(info);
     extSessionEventCallback->notifyRemoteReadyFunc_= NotifyRemoteReadyTest;
+    ASSERT_TRUE(extensionSession_ != nullptr);
     extensionSession_.RegisterExtensionSessionEventCallback(extSessionEventCallback);
     extensionSession_.NotifyRemoteReady();
 }

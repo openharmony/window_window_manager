@@ -95,6 +95,7 @@ namespace {
         DMRect emptyRect_ = {1, 2, 3, 3};
         DisplayId displayId = 0;
         std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
+        ASSERT_TRUE(controller != nullptr);
         controller->ConvertBoundaryRectsByRotation(boundaryRects, displayId);
         delete controller;
     }
@@ -113,6 +114,7 @@ namespace {
         sptr<DisplayInfo> displayInfo = new DisplayInfo();
         displayInfo->SetWidth(35);
         displayInfo->SetHeight(35);
+        ASSERT_TRUE(controller != nullptr);
         controller->CheckBoundaryRects(boundaryRects, displayInfo);
         delete displayInfo;
         delete controller;
@@ -127,6 +129,7 @@ namespace {
     {
         DisplayId displayId = 0;
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        ASSERT_TRUE(controller != nullptr);
         controller->CalcWaterfallRects(displayId);
         delete controller;
     }
@@ -144,6 +147,7 @@ namespace {
         uint32_t displayWidth = 512;
         std::vector<uint32_t> realNumVec = {16, 32, 8, 8};
         rotation = Rotation::ROTATION_0;
+        ASSERT_TRUE(controller != nullptr);
         controller->CalcWaterfallRectsByRotation(rotation, displayHeight, displayWidth, realNumVec);
         rotation = Rotation::ROTATION_90;
         controller->CalcWaterfallRectsByRotation(rotation, displayHeight, displayWidth, realNumVec);
@@ -221,6 +225,7 @@ namespace {
     HWTEST_F(ScreenCutoutControllerTest, ProcessRotationMapping, Function | SmallTest | Level3)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        ASSERT_TRUE(controller != nullptr);
         controller->ProcessRotationMapping();
     }
 
