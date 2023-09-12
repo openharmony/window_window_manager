@@ -531,13 +531,13 @@ HWTEST_F(ScreenSessionManagerTest, InitVirtualScreen, Function | SmallTest | Lev
     virtualOption.name_ = "DeleteScreenId";
     sptr<ScreenSession> screenSession;
     VirtualScreenOption option;
-    ASSERT_NE(screenSession, ssm_->InitVirtualScreen(1,2,option));
+    ASSERT_NE(screenSession, ssm_->InitVirtualScreen(1, 2, option));
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
     screenSession =new  (std::nothrow) ScreenSession();
-    ASSERT_NE(screenSession, ssm_->InitVirtualScreen(1,2,option));
+    ASSERT_NE(screenSession, ssm_->InitVirtualScreen(1, 2, option));
 }
 
 /**
@@ -619,13 +619,13 @@ HWTEST_F(ScreenSessionManagerTest, AddScreenToGroup, Function | SmallTest | Leve
     const std::vector<Point> addChildPos;
     std::map<ScreenId, bool> removeChildResMap;
     sptr<ScreenSessionGroup> group;
-    ssm_->AddScreenToGroup(group,addScreens, addChildPos, removeChildResMap);
+    ssm_->AddScreenToGroup(group, addScreens, addChildPos, removeChildResMap);
     sptr<ScreenSession> screenSession =new  (std::nothrow) ScreenSession();
     ASSERT_NE(screenSession, ssm_->InitAndGetScreen(2));
 }
 
 /**
- * @tc.name: GetRSDisplayNodeByScreenId  
+ * @tc.name: GetRSDisplayNodeByScreenId
  * @tc.desc: GetRSDisplayNodeByScreenId virtual screen
  * @tc.type: FUNC
  */
