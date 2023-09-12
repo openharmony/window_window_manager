@@ -63,6 +63,7 @@ HWTEST_F(EventStageTest, SetAnrStatus, Function | SmallTest | Level1)
     eventStage_.SetAnrStatus(persistentId, status);
     status = true;
     eventStage_.SetAnrStatus(persistentId, status);
+    ASSERT_EQ(status, true);
 }
 
 /**
@@ -73,7 +74,8 @@ HWTEST_F(EventStageTest, SetAnrStatus, Function | SmallTest | Level1)
 HWTEST_F(EventStageTest, CheckAnrStatus, Function | SmallTest | Level1)
 {
     int32_t persistentId = 0;
-    eventStage_.CheckAnrStatus(persistentId);
+    auto res  = eventStage_.CheckAnrStatus(persistentId);
+    ASSERT_EQ(res, false);
 }
 
 /**
@@ -87,6 +89,7 @@ HWTEST_F(EventStageTest, SaveANREvent, Function | SmallTest | Level1)
     int32_t eventId = 0;
     int32_t timerId = 0;
     eventStage_.SaveANREvent(persistentId, eventId, timerId);
+    ASSERT_EQ(eventId, 0);
 }
 
 /**
@@ -98,6 +101,7 @@ HWTEST_F(EventStageTest, GetTimerIds, Function | SmallTest | Level1)
 {
     int32_t persistentId = 0;
     eventStage_.GetTimerIds(persistentId);
+    ASSERT_EQ(persistentId, 0);
 }
 
 /**
@@ -110,6 +114,7 @@ HWTEST_F(EventStageTest, DelEvents, Function | SmallTest | Level1)
     int32_t persistentId = 0;
     int32_t eventId = 0;
     eventStage_.DelEvents(persistentId, eventId);
+    ASSERT_EQ(eventId, 0);
 }
 
 /**
