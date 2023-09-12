@@ -93,7 +93,7 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
         faultData.faultType = AppExecFwk::FaultDataType::APP_FREEZE;
         faultData.pid = pid;
         faultData.errorObject.name = AppExecFwk::AppFreezeType::APP_INPUT_BLOCK;
-        faultData.errorObject.message = "User input does not respond normally";
+        faultData.errorObject.message = "User input does not respond normally, report by sceneBoard.";
         faultData.errorObject.stack = "";
         if (int32_t ret = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFaultBySA(faultData);
             ret != 0) {

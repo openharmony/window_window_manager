@@ -52,13 +52,15 @@ ANRHandler::~ANRHandler() {}
 void ANRHandler::SetSessionStage(int32_t eventId, const wptr<ISessionStage> &sessionStage)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (sessionStage == nullptr) {
-        WLOGFE("SessionStage of eventId:%{public}d is nullptr", eventId);
-        sessionStageMap_[eventId] = nullptr;
+    sptr<ISessionStage> session = sessionStage.promote();
+    if (session == nullptr) {
+        WLOGFE("SessionStage for eventId:%{public}d is nullptr", eventId);
+        sessionStageMap_[eventId] = { INVALID_PERSISTENT_ID, nullptr };
         return;
     }
-    sessionStageMap_[eventId] = sessionStage;
-    WLOGFD("SetSessionStage for eventId:%{public}d, persistentId:%{public}d", eventId, sessionStage->GetPersistentId());
+    int32_t persistentId = session->GetPersistentId();
+    sessionStageMap_[eventId] = { persistentId, sessionStage };
+    WLOGFD("SetSessionStage for eventId:%{public}d, persistentId:%{public}d", eventId, persistentId);
 }
 
 void ANRHandler::HandleEventConsumed(int32_t eventId, int64_t actionTime)
@@ -84,16 +86,18 @@ void ANRHandler::HandleEventConsumed(int32_t eventId, int64_t actionTime)
     }
 }
 
-void ANRHandler::ClearDestroyedPersistentId(int32_t persistentId)
+void ANRHandler::OnWindowDestroyed(int32_t persistentId)
 {
     CALL_DEBUG_ENTER;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (anrHandlerState_.sendStatus.find(persistentId) == anrHandlerState_.sendStatus.end()) {
-        WLOGFE("PersistentId:%{public}d not in ANRHandler", persistentId);
-        return;
-    }
     anrHandlerState_.sendStatus.erase(persistentId);
-    WLOGFD("PersistentId:%{public}d erased in ANRHandler", persistentId);
+    anrHandlerState_.eventsIterMap.erase(persistentId);
+    for (const auto &elem : sessionStageMap_) {
+        if (elem.second.persistentId == persistentId) {
+            sessionStageMap_.erase(elem.first);
+        }
+    }
+    WLOGFD("PersistentId:%{public}d and its events erased in ANRHandler", persistentId);
 }
 
 void ANRHandler::SetAnrHandleState(int32_t eventId, bool status)
@@ -103,9 +107,11 @@ void ANRHandler::SetAnrHandleState(int32_t eventId, bool status)
     int32_t persistentId = GetPersistentIdOfEvent(eventId);
     anrHandlerState_.sendStatus[persistentId] = status;
     if (status) {
-        anrHandlerState_.eventsToReceipt.push_back(eventId);
+        auto iter = anrHandlerState_.eventsToReceipt.insert(anrHandlerState_.eventsToReceipt.end(), eventId);
+        anrHandlerState_.eventsIterMap[persistentId] = iter;
     } else {
         anrHandlerState_.eventsToReceipt.pop_front();
+        anrHandlerState_.eventsIterMap[persistentId] = anrHandlerState_.eventsToReceipt.end();
         ClearExpiredEvents(eventId);
     }
 }
@@ -123,10 +129,13 @@ void ANRHandler::MarkProcessed()
     WLOGFI("MarkProcessed eventId:%{public}d, persistentId:%{public}d", eventId, GetPersistentIdOfEvent(eventId));
     if (sessionStageMap_.find(eventId) == sessionStageMap_.end()) {
         WLOGFE("SessionStage for eventId:%{public}d is not in sessionStageMap", eventId);
-    } else if (sessionStageMap_[eventId] == nullptr) {
-        WLOGFE("SessionStage for eventId:%{public}d is nullptr", eventId);
-    } else if (WSError ret = sessionStageMap_[eventId]->MarkProcessed(eventId); ret != WSError::WS_OK) {
-        WLOGFE("Send to sceneBoard failed, ret:%{public}d", ret);
+    } else {
+        sptr<ISessionStage> session = sessionStageMap_[eventId].sessionStage.promote();
+        if (session == nullptr) {
+            WLOGFE("SessionStage for eventId:%{public}d is nullptr", eventId);
+        } else if (WSError ret = session->MarkProcessed(eventId); ret != WSError::WS_OK) {
+            WLOGFE("Send to sceneBoard failed, ret:%{public}d", ret);
+        }
     }
     SetAnrHandleState(eventId, false);
 }
@@ -152,13 +161,11 @@ void ANRHandler::ClearExpiredEvents(int32_t eventId)
     CALL_DEBUG_ENTER;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     int32_t persistentId = GetPersistentIdOfEvent(eventId);
-    for (auto iter = sessionStageMap_.begin(); iter != sessionStageMap_.end();) {
-        auto currentPersistentId = GetPersistentIdOfEvent(iter->first);
-        if (iter->first < eventId &&
+    for (const auto& elem : sessionStageMap_) {
+        auto currentPersistentId = GetPersistentIdOfEvent(elem.first);
+        if (elem.first < eventId &&
             (currentPersistentId == persistentId || currentPersistentId == INVALID_PERSISTENT_ID)) {
-            sessionStageMap_.erase(iter++);
-        } else {
-            iter++;
+            sessionStageMap_.erase(elem.first);
         }
     }
 }
@@ -166,16 +173,11 @@ void ANRHandler::ClearExpiredEvents(int32_t eventId)
 int32_t ANRHandler::GetPersistentIdOfEvent(int32_t eventId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (sessionStageMap_.find(eventId) == sessionStageMap_.end()) {
-        WLOGFE("No sessionStage for eventId:%{public}d", eventId);
-        return INVALID_PERSISTENT_ID;
+    if (sessionStageMap_.find(eventId) != sessionStageMap_.end()) {
+        return sessionStageMap_[eventId].persistentId;
     }
-    auto sessionStage = sessionStageMap_[eventId];
-    if (sessionStage == nullptr) {
-        WLOGFE("SessionStage for eventId:%{public}d is nullptr", eventId);
-        return INVALID_PERSISTENT_ID;
-    }
-    return sessionStage->GetPersistentId();
+    WLOGFE("No sessionStage for eventId:%{public}d", eventId);
+    return INVALID_PERSISTENT_ID;
 }
 
 bool ANRHandler::IsOnEventHandler(int32_t persistentId)
@@ -192,13 +194,16 @@ void ANRHandler::UpdateLatestEventId(int32_t eventId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto currentPersistentId = GetPersistentIdOfEvent(eventId);
-    for (auto& event : anrHandlerState_.eventsToReceipt) {
-        if ((GetPersistentIdOfEvent(event) == currentPersistentId) && (eventId > event)) {
-            WLOGFD("Replace eventId:%{public}d by newer eventId:%{public}d", event, eventId);
-            event = eventId;
-            break;
-        }
+    auto pendingEventIter = anrHandlerState_.eventsIterMap[currentPersistentId];
+    if (pendingEventIter == anrHandlerState_.eventsToReceipt.end()) {
+        WLOGFE("No pending event on eventsToReceipt");
+        return;
+    }
+    if (eventId > *pendingEventIter) {
+        WLOGFD("Replace eventId:%{public}d by newer eventId:%{public}d", *pendingEventIter, eventId);
+        *pendingEventIter = eventId;
     }
 }
+
 } // namespace Rosen
 } // namespace OHOS

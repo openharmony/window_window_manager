@@ -63,14 +63,13 @@ std::vector<int32_t> EventStage::GetTimerIds(int32_t persistentId)
         return {};
     }
     std::vector<int32_t> timers;
-    for (auto &item : events_[persistentId]) {
+    for (const auto &item : events_[persistentId]) {
         timers.push_back(item.timerId);
-        item.timerId = -1;
     }
     return timers;
 }
 
-std::list<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t eventId)
+std::vector<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t eventId)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     WLOGFD("Delete events, persistentId:%{public}d, eventId:%{public}d", persistentId, eventId);
@@ -82,7 +81,7 @@ std::list<int32_t> EventStage::DelEvents(int32_t persistentId, int32_t eventId)
     auto fistMatchIter = find_if(events.begin(), events.end(), [eventId](const auto &item) {
         return item.eventId > eventId;
     });
-    std::list<int32_t> timerIds;
+    std::vector<int32_t> timerIds;
     for (auto iter = events.begin(); iter != fistMatchIter; iter++) {
         timerIds.push_back(iter->timerId);
     }
@@ -98,6 +97,5 @@ void EventStage::OnSessionLost(int32_t persistentId)
     events_.erase(persistentId);
     isAnrProcess_.erase(persistentId);
 }
-
 } // namespace Rosen
 } // namespace OHOS
