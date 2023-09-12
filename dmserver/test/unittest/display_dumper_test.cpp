@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "display_dumper.h"
 #include "display_manager_service.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -333,6 +334,142 @@ HWTEST_F(DisplayDumperTest, DumpAllScreenInfo01, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: DumpScreenInfo01
+ * @tc.desc: DumpScreenInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayDumperTest, DumpScreenInfo01, Function | SmallTest | Level1)
+{
+    sptr<DisplayDumper> displayDumper;
+    displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
+        DisplayManagerService::GetInstance().abstractScreenController_,
+        DisplayManagerService::GetInstance().mutex_);
+    sptr<AbstractScreenGroup> screenGroup = nullptr;
+    std::string dumpInfo;
+    DMError result = displayDumper->DumpScreenInfo(screenGroup, dumpInfo);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
+    } else {
+        EXPECT_NE(result, DMError::DM_ERROR_NULLPTR);
+    }
+}
+
+/**
+ * @tc.name: DumpScreenInfo02
+ * @tc.desc: DumpScreenInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayDumperTest, DumpScreenInfo02, Function | SmallTest | Level1)
+{
+    sptr<DisplayDumper> displayDumper;
+    displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
+        DisplayManagerService::GetInstance().abstractScreenController_,
+        DisplayManagerService::GetInstance().mutex_);
+    std::string name = "testDisplay";
+    sptr<SupportedScreenModes> info = new SupportedScreenModes();
+    info->width_ = 100;
+    info->height_ = 200;
+    sptr<AbstractScreen> absScreen = new AbstractScreen(DisplayManagerService::GetInstance().abstractScreenController_,
+        name, 0, 0);
+    absScreen->activeIdx_ = 0;
+    absScreen->modes_.clear();
+    absScreen->modes_ = { { info } };
+    absScreen->groupDmsId_ = SCREEN_ID_INVALID;
+    sptr<AbstractScreenGroup> screenGroup = absScreen->GetGroup();
+    std::string dumpInfo;
+    DMError result = displayDumper->DumpScreenInfo(screenGroup, dumpInfo);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
+    } else {
+        EXPECT_NE(result, DMError::DM_ERROR_NULLPTR);
+    }
+}
+
+/**
+ * @tc.name: TransferTypeToString
+ * @tc.desc: TransferTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayDumperTest, TransferTypeToString, Function | SmallTest | Level1)
+{
+    sptr<DisplayDumper> displayDumper;
+    displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
+        DisplayManagerService::GetInstance().abstractScreenController_,
+        DisplayManagerService::GetInstance().mutex_);
+    ScreenType type = ScreenType::REAL;
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_STREQ(displayDumper->TransferTypeToString(type).c_str(), "REAL");
+    } else {
+        EXPECT_STRNE(displayDumper->TransferTypeToString(type).c_str(), "REAL");
+    }
+
+    type = ScreenType::VIRTUAL;
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_STREQ(displayDumper->TransferTypeToString(type).c_str(), "VIRTUAL");
+    } else {
+        EXPECT_STRNE(displayDumper->TransferTypeToString(type).c_str(), "VIRTUAL");
+    }
+
+    type = ScreenType::UNDEFINED;
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_STREQ(displayDumper->TransferTypeToString(type).c_str(), "UNDEFINED");
+    } else {
+        EXPECT_STRNE(displayDumper->TransferTypeToString(type).c_str(), "UNDEFINED");
+    }
+}
+
+/**
+ * @tc.name: GetScreenInfo01
+ * @tc.desc: GetScreenInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayDumperTest, GetScreenInfo01, Function | SmallTest | Level1)
+{
+    sptr<DisplayDumper> displayDumper;
+    displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
+        DisplayManagerService::GetInstance().abstractScreenController_,
+        DisplayManagerService::GetInstance().mutex_);
+    std::ostringstream oss;
+    displayDumper->GetScreenInfo(nullptr, oss);
+    std::string result = oss.str();
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(result.size(), 0);
+    } else {
+        ASSERT_NE(result.size(), 0);
+    }
+}
+
+/**
+ * @tc.name: GetScreenInfo02
+ * @tc.desc: GetScreenInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayDumperTest, GetScreenInfo02, Function | SmallTest | Level1)
+{
+    sptr<DisplayDumper> displayDumper;
+    displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
+        DisplayManagerService::GetInstance().abstractScreenController_,
+        DisplayManagerService::GetInstance().mutex_);
+    std::ostringstream oss;
+    std::string name = "testDisplay";
+    sptr<SupportedScreenModes> info = new SupportedScreenModes();
+    info->width_ = 100;
+    info->height_ = 200;
+    sptr<AbstractScreen> absScreen = new AbstractScreen(DisplayManagerService::GetInstance().abstractScreenController_,
+        name, 0, 0);
+    absScreen->activeIdx_ = 0;
+    absScreen->modes_.clear();
+    absScreen->modes_ = { { info } };
+    displayDumper->GetScreenInfo(absScreen, oss);
+    std::string result = oss.str();
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(result.size(), 165);
+    } else {
+        ASSERT_NE(result.size(), 165);
+    }
+}
+
+/**
  * @tc.name: GetDisplayInfo01
  * @tc.desc: GetDisplayInfo
  * @tc.type: FUNC
@@ -347,6 +484,39 @@ HWTEST_F(DisplayDumperTest, GetDisplayInfo01, Function | SmallTest | Level1)
     displayDumper->GetDisplayInfo(nullptr, oss);
     std::string result = oss.str();
     ASSERT_EQ(result.size(), 0);
+}
+
+/**
+ * @tc.name: GetDisplayInfo02
+ * @tc.desc: GetDisplayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayDumperTest, GetDisplayInfo02, Function | SmallTest | Level1)
+{
+    sptr<DisplayDumper> displayDumper;
+    displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
+        DisplayManagerService::GetInstance().abstractScreenController_,
+        DisplayManagerService::GetInstance().mutex_);
+    std::ostringstream oss;
+
+    std::string name = "testDisplay";
+    sptr<SupportedScreenModes> info = new SupportedScreenModes();
+    info->width_ = 100;
+    info->height_ = 200;
+    sptr<AbstractScreen> absScreen = new AbstractScreen(DisplayManagerService::GetInstance().abstractScreenController_,
+        name, 0, 0);
+    absScreen->activeIdx_ = 0;
+    absScreen->modes_.clear();
+    absScreen->modes_ = { { info } };
+    sptr<AbstractDisplay> absDisplay = new AbstractDisplay(0, info, absScreen);
+    displayDumper->GetDisplayInfo(absDisplay, oss);
+    std::string result = oss.str();
+
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result.size(), 109);
+    } else {
+        EXPECT_NE(result.size(), 109);
+    }
 }
 }
 }
