@@ -179,6 +179,9 @@ public:
     ScreenProperty GetPhyScreenProperty(ScreenId screenId);
     uint32_t GetCurvedCompressionArea() const;
 
+    void NotifyFoldStatusChanged(FoldStatus foldStatus);
+    void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
+
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;

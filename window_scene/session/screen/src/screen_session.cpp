@@ -143,6 +143,11 @@ ScreenId ScreenSession::GetScreenId()
     return screenId_;
 }
 
+ScreenProperty ScreenSession::SetScreenProperty(ScreenProperty prop)
+{
+    property_ = prop;
+}
+
 ScreenProperty ScreenSession::GetScreenProperty() const
 {
     return property_;
