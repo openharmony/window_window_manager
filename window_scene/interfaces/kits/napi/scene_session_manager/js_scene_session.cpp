@@ -143,6 +143,15 @@ JsSceneSession::~JsSceneSession()
     WLOGD("~JsSceneSession");
 }
 
+void JsSceneSession::ClearCbMap(bool needRemove)
+{
+    if (!needRemove) {
+        return;
+    }
+    WLOGFI("clear callbackMap");
+    jsCbMap_.clear();
+}
+
 void JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister()
 {
     auto sessionchangeCallback = sessionchangeCallback_.promote();
