@@ -184,6 +184,9 @@ HWTEST_F(WindowRootTest, WindowRootTest05, Function | SmallTest | Level2)
     sptr<WindowNode> windowNode3 = new WindowNode();
     windowRoot_->SaveWindow(windowNode3);
     windowRoot_->windowNodeMap_.insert(std::make_pair(windowNode3->GetWindowId(), windowNode3));
+    windowNodes.push_back(windowNode1);
+    windowNodes.push_back(windowNode2);
+    windowNodes.push_back(windowNode3);
     windowRoot_->GetBackgroundNodesByScreenId(screenGroupId, windowNodes);
 
     windowRoot_->DestroyWindowInner(windowNode1);
@@ -1728,6 +1731,25 @@ HWTEST_F(WindowRootTest, CheckMultiDialogWindows, Function | SmallTest | Level2)
     windowRoot_->windowNodeMap_.insert(std::make_pair(windowNode->GetWindowId(), windowNode));
     res = windowRoot_->CheckMultiDialogWindows(WindowType::WINDOW_TYPE_DIALOG, windowNode->abilityToken_);
     ASSERT_EQ(false, res);
+}
+
+
+/**
+ * @tc.name: GetSplitScreenWindowNodes
+ * @tc.desc: test WindowRoot GetSplitScreenWindowNodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRootTest, GetSplitScreenWindowNodes, Function | SmallTest | Level2)
+{
+    ScreenId displayGroupId = 1;
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_TRUE((display != nullptr));
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(display->GetDisplayInfo(), display->GetScreenId());
+    windowRoot_->windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
+    std::vector<sptr<WindowNode>> windowNodes = windowRoot_->GetSplitScreenWindowNodes(DISPLAY_ID_INVALID);
+    ASSERT_EQ(windowNodes.empty(), true);
+    windowNodes = windowRoot_->GetSplitScreenWindowNodes(displayGroupId);
+    ASSERT_EQ(windowNodes.empty(), true);
 }
 }
 }
