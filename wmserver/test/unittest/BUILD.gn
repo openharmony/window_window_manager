@@ -25,7 +25,9 @@ group("unittest") {
     ":wmserver_drag_controller_test",
     ":wmserver_input_window_monitor_test",
     ":wmserver_minimize_app_test",
+    ":wmserver_mock_screen_manager_service_stub_test",
     ":wmserver_mock_screen_manager_service_test",
+    ":wmserver_mock_session_manager_service_stub_test",
     ":wmserver_mock_session_manager_service_test",
     ":wmserver_remote_animation_test",
     ":wmserver_starting_window_test",
@@ -83,7 +85,6 @@ test_public_deps = [
 test_inner_deps = [
   "${window_base_path}/dm:libdm",
   "${window_base_path}/utils:libwmutil",
-  "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   "${window_base_path}/wm:libwm",
   "${window_base_path}/wmserver:sms",
   "../..:libwms",
@@ -427,6 +428,26 @@ ohos_unittest("wmserver_mock_session_manager_service_test") {
   module_out_path = module_out_path
   configs = test_public_config
   sources = [ "mock_session_manager_service_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wmserver_mock_screen_manager_service_stub_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "mock_screen_manager_service_stub_test.cpp" ]
+
+  deps = test_inner_deps
+  public_deps = test_public_deps
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wmserver_mock_session_manager_service_stub_test") {
+  module_out_path = module_out_path
+  configs = test_public_config
+  sources = [ "mock_session_manager_service_stub_test.cpp" ]
 
   deps = test_inner_deps
   public_deps = test_public_deps
