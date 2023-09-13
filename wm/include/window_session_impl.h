@@ -165,6 +165,7 @@ protected:
     uint32_t GetBackgroundColor() const;
     virtual WMError SetLayoutFullScreenByApiVersion(bool status);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason);
+    void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
 
     sptr<ISession> hostSession_;
     std::unique_ptr<Ace::UIContent> uiContent_;
@@ -210,7 +211,6 @@ private:
     void NotifyAfterFocused();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
 
-    void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
 
     static std::recursive_mutex globalMutex_;
