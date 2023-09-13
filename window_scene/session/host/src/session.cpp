@@ -285,6 +285,15 @@ SessionState Session::GetSessionState() const
     return state_;
 }
 
+void Session::SetSessionState(SessionState state)
+{
+    if (state < SessionState::STATE_DISCONNECT || state > SessionState::STATE_END) {
+        WLOGFD("Invalid session state: %{public}u", state);
+        return;
+    }
+    state_ = state;
+}
+
 void Session::UpdateSessionState(SessionState state)
 {
     state_ = state;
@@ -682,8 +691,7 @@ void Session::HandleDialogBackground()
             continue;
         }
         WLOGFD("Background dialog, id: %{public}d, dialogId: %{public}d", GetPersistentId(), dialog->GetPersistentId());
-        dialog->SetActive(false);
-        dialog->Background();
+        dialog->SetSessionState(SessionState::STATE_BACKGROUND);
     }
 }
 
@@ -692,6 +700,7 @@ void Session::HandleDialogForeground()
     const auto& type = GetWindowType();
     if (type < WindowType::APP_MAIN_WINDOW_BASE || type >= WindowType::APP_MAIN_WINDOW_END) {
         WLOGFD("Current session is not main window, id: %{public}d, type: %{public}d", GetPersistentId(), type);
+        return;
     }
 
     std::vector<sptr<Session>> dialogVec;
@@ -704,7 +713,7 @@ void Session::HandleDialogForeground()
             continue;
         }
         WLOGFD("Foreground dialog, id: %{public}d, dialogId: %{public}d", GetPersistentId(), dialog->GetPersistentId());
-        dialog->Foreground(dialog->GetSessionProperty());
+        dialog->SetSessionState(SessionState::STATE_FOREGROUND);
     }
 }
 
