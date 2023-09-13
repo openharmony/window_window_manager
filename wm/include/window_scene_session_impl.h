@@ -47,7 +47,7 @@ public:
         const sptr<Rosen::ISession>& iSession) override;
     WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
-    WMError Destroy(bool needClearListener) override;
+    WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
     void PreProcessCreate();
     void SetDefaultProperty();
     WSError SetActive(bool active) override;

@@ -15,6 +15,7 @@
 
 #include "session/host/include/scene_session.h"
 
+#include <algorithm>
 #include <hitrace_meter.h>
 #include <ipc_skeleton.h>
 #include <pointer_event.h>
@@ -563,6 +564,11 @@ WSError SceneSession::CreateAndConnectSpecificSession(const sptr<ISessionStage>&
             self->sessionChangeCallback_->onCreateSpecificSession_(sceneSession);
         }
         session = sceneSession;
+        bool res = self->AddSubSession(sceneSession);
+        if (!res) {
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+        sceneSession->SetParentSession(self);
         return errCode;
     });
 }
@@ -591,7 +597,15 @@ WSError SceneSession::DestroyAndDisconnectSpecificSession(const int32_t& persist
             WLOGFE("specificCallback_ is null");
             return WSError::WS_ERROR_NULLPTR;
         }
-        return session->specificCallback_->onDestroy_(persistentId);
+        auto ret = session->specificCallback_->onDestroy_(persistentId);
+        if (ret != WSError::WS_OK) {
+            return ret;
+        }
+        bool res = session->RemoveSubSession(persistentId);
+        if (!res) {
+            ret = WSError::WS_ERROR_INVALID_SESSION;
+        }
+        return ret;
     });
 }
 
@@ -1619,5 +1633,48 @@ void SceneSession::SetLastSafeRect(WSRect rect)
     lastSafeRect.width_ = rect.width_;
     lastSafeRect.height_ = rect.height_;
     return;
+}
+
+bool SceneSession::AddSubSession(const sptr<SceneSession>& subSession)
+{
+    if (subSession == nullptr) {
+        WLOGFE("subSession is nullptr");
+        return false;
+    }
+    const auto& persistentId = subSession->GetPersistentId();
+    auto iter = std::find_if(subSession_.begin(), subSession_.end(),
+        [persistentId](sptr<SceneSession> session) {
+            bool res = (session != nullptr && session->GetPersistentId() == persistentId) ? true : false;
+            return res;
+        });
+    if (iter != subSession_.end()) {
+        WLOGFE("Sub ession is already exists, id: %{public}d, parentId: %{public}d",
+            subSession->GetPersistentId(), GetPersistentId());
+        return false;
+    }
+    WLOGFD("Success, id: %{public}d, parentId: %{public}d", subSession->GetPersistentId(), GetPersistentId());
+    subSession_.push_back(subSession);
+    return true;
+}
+
+bool SceneSession::RemoveSubSession(int32_t persistentId)
+{
+    auto iter = std::find_if(subSession_.begin(), subSession_.end(),
+        [persistentId](sptr<SceneSession> session) {
+            bool res = (session != nullptr && session->GetPersistentId() == persistentId) ? true : false;
+            return res;
+        });
+    if (iter == subSession_.end()) {
+        WLOGFE("Could not find subsession, id: %{public}d, parentId: %{public}d", persistentId, GetPersistentId());
+        return false;
+    }
+    WLOGFD("Success, id: %{public}d, parentId: %{public}d", persistentId, GetPersistentId());
+    subSession_.erase(iter);
+    return true;
+}
+
+std::vector<sptr<SceneSession>> SceneSession::GetSubSession() const
+{
+    return subSession_;
 }
 } // namespace OHOS::Rosen
