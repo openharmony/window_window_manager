@@ -16,6 +16,8 @@
 #include <gtest/gtest.h>
 
 #include "display_manager_agent_controller.h"
+#include "../../dm/include/display_manager_agent_default.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -48,6 +50,36 @@ void DisplayManagerAgentControllerTest::TearDown()
 
 namespace {
 /**
+ * @tc.name: NotifyDisplayStateChanged
+ * @tc.desc: NotifyDisplayStateChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentControllerTest, NotifyDisplayStateChanged, Function | SmallTest | Level3)
+{
+    DisplayManagerAgentController displayManagerAgentController;
+    DisplayId id = 3;
+    DisplayState state = DisplayState::ON;
+    bool result = displayManagerAgentController.NotifyDisplayStateChanged(id, state);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_FALSE(result);
+    } else {
+        EXPECT_TRUE(result);
+    }
+
+    sptr<IDisplayManagerAgent> idma_ = new DisplayManagerAgentDefault();
+    std::set<sptr<IDisplayManagerAgent>> setIDisplay;
+    setIDisplay.insert(idma_);
+    displayManagerAgentController.dmAgentContainer_.agentMap_.insert(
+        {DisplayManagerAgentType::DISPLAY_STATE_LISTENER, setIDisplay});
+    result = displayManagerAgentController.NotifyDisplayStateChanged(id, state);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(result);
+    } else {
+        ASSERT_FALSE(result);
+    }
+}
+
+/**
  * @tc.name: OnScreenConnect
  * @tc.desc: OnScreenConnect test
  * @tc.type: FUNC
@@ -58,6 +90,23 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenConnect, Function | SmallTes
     DisplayManagerAgentController::GetInstance().OnScreenConnect(screenInfo);
     ASSERT_EQ(0, DisplayManagerAgentController::GetInstance().
                 dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
+
+    DisplayManagerAgentController displayManagerAgentController;
+    screenInfo = new ScreenInfo();
+    displayManagerAgentController.OnScreenConnect(screenInfo);
+    sptr<IDisplayManagerAgent> idma_ = new DisplayManagerAgentDefault();
+    std::set<sptr<IDisplayManagerAgent>> setIDisplay;
+    setIDisplay.insert(idma_);
+    displayManagerAgentController.dmAgentContainer_.agentMap_.insert(
+        {DisplayManagerAgentType::SCREEN_EVENT_LISTENER, setIDisplay});
+    displayManagerAgentController.OnScreenConnect(screenInfo);
+    int result = displayManagerAgentController.dmAgentContainer_.
+        GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(result, 1);
+    } else {
+        ASSERT_NE(result, 1);
+    }
 }
 /**
  * @tc.name: OnScreenChange
@@ -70,6 +119,24 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenChange, Function | SmallTest
     DisplayManagerAgentController::GetInstance().OnScreenChange(screenInfo, ScreenChangeEvent::UPDATE_ROTATION);
     ASSERT_EQ(0, DisplayManagerAgentController::GetInstance().
                 dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
+
+    DisplayManagerAgentController displayManagerAgentController;
+    screenInfo = new ScreenInfo();
+    ScreenChangeEvent screenChangeEvent = ScreenChangeEvent::CHANGE_MODE;
+    displayManagerAgentController.OnScreenChange(screenInfo, screenChangeEvent);
+    sptr<IDisplayManagerAgent> idma_ = new DisplayManagerAgentDefault();
+    std::set<sptr<IDisplayManagerAgent>> setIDisplay;
+    setIDisplay.insert(idma_);
+    displayManagerAgentController.dmAgentContainer_.agentMap_.insert(
+        {DisplayManagerAgentType::SCREEN_EVENT_LISTENER, setIDisplay});
+    displayManagerAgentController.OnScreenChange(screenInfo, screenChangeEvent);
+    int result = displayManagerAgentController.dmAgentContainer_.
+        GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(result, 1);
+    } else {
+        ASSERT_NE(result, 1);
+    }
 }
 /**
  * @tc.name: OnScreenGroupChange
@@ -88,6 +155,23 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenGroupChange, Function | Smal
     screenInfos.push_back(screenInfo);
     DisplayManagerAgentController::GetInstance().OnScreenGroupChange(trigger, screenInfos,
         ScreenGroupChangeEvent::ADD_TO_GROUP);
+
+    DisplayManagerAgentController displayManagerAgentController;
+    ScreenGroupChangeEvent groupEvent = ScreenGroupChangeEvent::ADD_TO_GROUP;
+    sptr<IDisplayManagerAgent> idma_ = new DisplayManagerAgentDefault();
+    std::set<sptr<IDisplayManagerAgent>> setIDisplay;
+    setIDisplay.insert(idma_);
+    displayManagerAgentController.dmAgentContainer_.agentMap_.insert(
+        {DisplayManagerAgentType::SCREEN_EVENT_LISTENER, setIDisplay});
+    displayManagerAgentController.OnScreenGroupChange(trigger, screenInfos, groupEvent);
+    int result = displayManagerAgentController.dmAgentContainer_.
+        GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(result, 1);
+    } else {
+        ASSERT_NE(result, 1);
+    }
+    delete screenInfo;
 }
 /**
  * @tc.name: OnDisplayCreate
@@ -100,6 +184,23 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayCreate, Function | SmallTes
     DisplayManagerAgentController::GetInstance().OnDisplayCreate(displayInfo);
     ASSERT_EQ(0, DisplayManagerAgentController::GetInstance().
                 dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
+
+    DisplayManagerAgentController displayManagerAgentController;
+    displayInfo = new DisplayInfo();
+    sptr<IDisplayManagerAgent> idma_ = new DisplayManagerAgentDefault();
+    std::set<sptr<IDisplayManagerAgent>> setIDisplay;
+    setIDisplay.insert(idma_);
+    displayManagerAgentController.dmAgentContainer_.agentMap_.insert(
+        {DisplayManagerAgentType::DISPLAY_EVENT_LISTENER, setIDisplay});
+    displayManagerAgentController.OnDisplayCreate(displayInfo);
+    int result = displayManagerAgentController.dmAgentContainer_.
+        GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(result, 0);
+    } else {
+        ASSERT_NE(result, 0);
+    }
+    delete displayInfo;
 }
 /**
  * @tc.name: OnDisplayDestroy
@@ -112,6 +213,21 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayDestroy, Function | SmallTe
     DisplayManagerAgentController::GetInstance().OnDisplayDestroy(displayId);
     ASSERT_EQ(0, DisplayManagerAgentController::GetInstance().
                 dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
+
+    DisplayManagerAgentController displayManagerAgentController;
+    sptr<IDisplayManagerAgent> idma_ = new DisplayManagerAgentDefault();
+    std::set<sptr<IDisplayManagerAgent>> setIDisplay;
+    setIDisplay.insert(idma_);
+    displayManagerAgentController.dmAgentContainer_.agentMap_.insert(
+        {DisplayManagerAgentType::DISPLAY_EVENT_LISTENER, setIDisplay});
+    displayManagerAgentController.OnDisplayDestroy(displayId);
+    int result = displayManagerAgentController.dmAgentContainer_.
+        GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(result, 0);
+    } else {
+        ASSERT_NE(result, 0);
+    }
 }
 /**
  * @tc.name: OnDisplayChange
@@ -128,6 +244,22 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayChange, Function | SmallTes
     DisplayManagerAgentController::GetInstance().OnDisplayChange(displayInfo, DisplayChangeEvent::UNKNOWN);
     ASSERT_EQ(0, DisplayManagerAgentController::GetInstance().
                 dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
+
+    DisplayChangeEvent displayChangeEvent = DisplayChangeEvent::UNKNOWN;
+    DisplayManagerAgentController displayManagerAgentController;
+    sptr<IDisplayManagerAgent> idma_ = new DisplayManagerAgentDefault();
+    std::set<sptr<IDisplayManagerAgent>> setIDisplay;
+    setIDisplay.insert(idma_);
+    displayManagerAgentController.dmAgentContainer_.agentMap_.insert(
+        {DisplayManagerAgentType::DISPLAY_EVENT_LISTENER, setIDisplay});
+    displayManagerAgentController.OnDisplayChange(displayInfo, displayChangeEvent);
+    int result = displayManagerAgentController.dmAgentContainer_.
+        GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(result, 0);
+    } else {
+        ASSERT_NE(result, 0);
+    }
 }
 /**
  * @tc.name: OnScreenshot
@@ -140,6 +272,98 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenshot, Function | SmallTest |
     DisplayManagerAgentController::GetInstance().OnScreenshot(info);
     ASSERT_EQ(0, DisplayManagerAgentController::GetInstance().
                 dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size());
+
+    info = new ScreenshotInfo();
+    DisplayManagerAgentController displayManagerAgentController;
+    displayManagerAgentController.OnScreenshot(info);
+    sptr<IDisplayManagerAgent> idma_ = new DisplayManagerAgentDefault();
+    std::set<sptr<IDisplayManagerAgent>> setIDisplay;
+    setIDisplay.insert(idma_);
+    displayManagerAgentController.dmAgentContainer_.agentMap_.insert(
+        {DisplayManagerAgentType::SCREENSHOT_EVENT_LISTENER, setIDisplay});
+    displayManagerAgentController.OnScreenshot(info);
+    int result = displayManagerAgentController.dmAgentContainer_.
+        GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(result, 0);
+    } else {
+        ASSERT_NE(result, 0);
+    }
+}
+
+/**
+ * @tc.name: NotifyPrivateWindowStateChanged
+ * @tc.desc: NotifyPrivateWindowStateChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentControllerTest, NotifyPrivateWindowStateChanged, Function | SmallTest | Level3)
+{
+    bool hasPrivate = true;
+    DisplayManagerAgentController displayManagerAgentController;
+    displayManagerAgentController.NotifyPrivateWindowStateChanged(hasPrivate);
+    sptr<IDisplayManagerAgent> idma_ = new DisplayManagerAgentDefault();
+    std::set<sptr<IDisplayManagerAgent>> setIDisplay;
+    setIDisplay.insert(idma_);
+    displayManagerAgentController.dmAgentContainer_.agentMap_.insert(
+        {DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER, setIDisplay});
+    displayManagerAgentController.NotifyPrivateWindowStateChanged(hasPrivate);
+    int result = displayManagerAgentController.dmAgentContainer_.
+        GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(result, 0);
+    } else {
+        ASSERT_NE(result, 0);
+    }
+}
+
+/**
+ * @tc.name: NotifyFoldStatusChanged
+ * @tc.desc: NotifyFoldStatusChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentControllerTest, NotifyFoldStatusChanged, Function | SmallTest | Level3)
+{
+    FoldStatus foldStatus = FoldStatus::UNKNOWN;
+    DisplayManagerAgentController displayManagerAgentController;
+    displayManagerAgentController.NotifyFoldStatusChanged(foldStatus);
+    sptr<IDisplayManagerAgent> idma_ = new DisplayManagerAgentDefault();
+    std::set<sptr<IDisplayManagerAgent>> setIDisplay;
+    setIDisplay.insert(idma_);
+    displayManagerAgentController.dmAgentContainer_.agentMap_.insert(
+        {DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER, setIDisplay});
+    displayManagerAgentController.NotifyFoldStatusChanged(foldStatus);
+    int result = displayManagerAgentController.dmAgentContainer_.
+        GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(result, 0);
+    } else {
+        ASSERT_NE(result, 0);
+    }
+}
+
+/**
+ * @tc.name: NotifyDisplayModeChanged
+ * @tc.desc: NotifyDisplayModeChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentControllerTest, NotifyDisplayModeChanged, Function | SmallTest | Level3)
+{
+    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+    DisplayManagerAgentController displayManagerAgentController;
+    displayManagerAgentController.NotifyDisplayModeChanged(displayMode);
+    sptr<IDisplayManagerAgent> idma_ = new DisplayManagerAgentDefault();
+    std::set<sptr<IDisplayManagerAgent>> setIDisplay;
+    setIDisplay.insert(idma_);
+    displayManagerAgentController.dmAgentContainer_.agentMap_.insert(
+        {DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER, setIDisplay});
+    displayManagerAgentController.NotifyDisplayModeChanged(displayMode);
+    int result = displayManagerAgentController.dmAgentContainer_.
+        GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(result, 0);
+    } else {
+        ASSERT_NE(result, 0);
+    }
 }
 }
 } // namespace Rosen

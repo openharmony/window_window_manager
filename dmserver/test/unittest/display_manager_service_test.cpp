@@ -372,6 +372,14 @@ HWTEST_F(DisplayManagerServiceTest, ScreenPower, Function | SmallTest | Level3)
 
     ASSERT_EQ(false, dms_->SetScreenPowerForAll(state, reason));
 
+    ScreenId dmsScreenId = 2;
+    ScreenPowerState result = dms_->GetScreenPower(dmsScreenId);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result, ScreenPowerState::INVALID_STATE);
+    } else {
+        EXPECT_NE(result, ScreenPowerState::INVALID_STATE);
+    }
+
     ASSERT_EQ(true, dms_->SetDisplayState(displayState));
     ASSERT_EQ(DisplayState::ON, dms_->GetDisplayState(0));
 }
@@ -455,6 +463,13 @@ HWTEST_F(DisplayManagerServiceTest, AddAndRemoveSurfaceNode, Function | SmallTes
 {
     sptr<DisplayManagerService> dms = new DisplayManagerService();
     std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    DMError result = dms_->RemoveSurfaceNodeFromDisplay(DEFAULT_DISPLAY, surfaceNode);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
+    } else {
+        EXPECT_NE(result, DMError::DM_ERROR_NULLPTR);
+    }
+
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms->AddSurfaceNodeToDisplay(DEFAULT_DISPLAY, surfaceNode, true));
     surfaceNode = std::make_shared<RSSurfaceNode>(RSSurfaceNodeConfig{}, true);
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms->AddSurfaceNodeToDisplay(DEFAULT_DISPLAY, surfaceNode, true));
@@ -477,6 +492,22 @@ HWTEST_F(DisplayManagerServiceTest, AddAndRemoveSurfaceNode, Function | SmallTes
     ASSERT_EQ(DMError::DM_OK, dms->RemoveSurfaceNodeFromDisplay(DEFAULT_DISPLAY, surfaceNode));
 
     testing::Mock::AllowLeak(displayNode.get());
+}
+
+/**
+ * @tc.name: SetGravitySensorSubscriptionEnabled
+ * @tc.desc: DMS set gravity sensor subscription enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, SetGravitySensorSubscriptionEnabled, Function | SmallTest | Level3)
+{
+    dms_->SetGravitySensorSubscriptionEnabled();
+    DMError result = dms_->DestroyVirtualScreen(10086);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result, DMError::DM_ERROR_INVALID_CALLING);
+    } else {
+        EXPECT_NE(result, DMError::DM_ERROR_INVALID_CALLING);
+    }
 }
 }
 } // namespace Rosen
