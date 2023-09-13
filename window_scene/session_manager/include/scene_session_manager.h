@@ -223,7 +223,7 @@ private:
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& scnSession);
     WSError DestroyDialogWithMainWindow(const sptr<SceneSession>& scnSession);
     sptr<SceneSession> FindMainWindowWithToken(sptr<IRemoteObject> targetToken);
-    WSError UpdateParentSession(const sptr<SceneSession>& sceneSession, sptr<WindowSessionProperty> property);
+    WSError UpdateParentSessionForDialog(const sptr<SceneSession>& sceneSession, sptr<WindowSessionProperty> property);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void UpdateFocusableProperty(int32_t persistentId);
     std::vector<sptr<SceneSession>> GetSceneSessionVectorByType(WindowType type);
@@ -362,6 +362,7 @@ private:
     void UpdateCollaboratorSessionWant(sptr<SceneSession>& session);
     bool CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property) const;
     sptr<SceneSession> FindSessionByAffinity(std::string affinity);
+    void DestroySubSession(const sptr<SceneSession>& sceneSession);
 };
 } // namespace OHOS::Rosen
 

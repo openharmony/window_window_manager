@@ -176,6 +176,9 @@ public:
     Orientation GetRequestedOrientation() const;
     WSError BindDialogTarget(const sptr<SceneSession>& sceneSession);
     void DumpSessionInfo(std::vector<std::string> &info) const;
+    bool AddSubSession(const sptr<SceneSession>& subSession);
+    bool RemoveSubSession(int32_t persistentId);
+    std::vector<sptr<SceneSession>> GetSubSession() const;
 
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 
@@ -220,6 +223,7 @@ private:
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     sptr<IRemoteObject> selfToken_ = nullptr;
     WSRect lastSafeRect = { 0, 0, 0, 0 };
+    std::vector<sptr<SceneSession>> subSession_;
 };
 } // namespace OHOS::Rosen
 

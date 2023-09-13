@@ -2133,6 +2133,61 @@ HWTEST_F(SceneSessionTest, NotifySessionException, Function | SmallTest | Level2
     ASSERT_EQ(result, WSError::WS_OK);
     delete scensession;
 }
+
+/**
+ * @tc.name: AddSubSession
+ * @tc.desc: AddSubSession Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, AddSubSession, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifySessionException";
+    info.bundleName_ = "NotifySessionException";
+
+    sptr<SceneSession> session = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    sptr<SceneSession> subSession = nullptr;
+    bool res = session->AddSubSession(subSession);
+    ASSERT_EQ(res, false);
+
+    subSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(subSession, nullptr);
+
+    res = session->AddSubSession(subSession);
+    ASSERT_EQ(res, true);
+
+    res = session->AddSubSession(subSession);
+    ASSERT_EQ(res, false);
+}
+
+/**
+ * @tc.name: RemoveSubSession
+ * @tc.desc: RemoveSubSession Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, RemoveSubSession, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifySessionException";
+    info.bundleName_ = "NotifySessionException";
+
+    sptr<SceneSession> session = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    bool res = session->RemoveSubSession(0);
+    ASSERT_EQ(res, false);
+
+    sptr<SceneSession> subSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(subSession, nullptr);
+
+    res = session->AddSubSession(subSession);
+    ASSERT_EQ(res, true);
+
+    res = session->RemoveSubSession(subSession->GetPersistentId());
+    ASSERT_EQ(res, true);
+}
 }
 }
 }
