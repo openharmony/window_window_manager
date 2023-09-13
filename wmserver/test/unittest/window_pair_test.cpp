@@ -1235,6 +1235,199 @@ HWTEST_F(WindowPairTest, IsDuringSplit, Function | SmallTest | Level2)
     windowPair->secondary_->property_->SetWindowType(WindowType::WINDOW_TYPE_LAUNCHER_RECENT);
     ASSERT_EQ(result, true);
 }
+
+/**
+ * @tc.name: SetSplitRatio
+ * @tc.desc: check function SetSplitRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, SetSplitRatio, Function | SmallTest | Level2)
+{
+    float ratio = 0.2;
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    windowPair->SetSplitRatio(ratio);
+    auto result = windowPair->IsDuringSplit();
+    result = windowPair->IsDuringSplit();
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: ExitSplitMode04
+ * @tc.desc: Exit Split Mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, ExitSplitMode04, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    ASSERT_EQ(windowPair->IsPaired(), false);
+    sptr<WindowNode> secondary_ = new WindowNode();
+    sptr<WindowNode> primary_ = new WindowNode();
+    Rect rect = {1, 1, 10, 20};
+    primary_->SetWindowRect(rect);
+    secondary_->SetWindowRect(rect);
+    sptr<WindowNode> node = new WindowNode();
+    auto result = windowPair->StatusSupprtedWhenRecentUpdate(node);
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: Clear
+ * @tc.desc:  Clear
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, Clear02, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    sptr<WindowNode> primary_ = new WindowNode();
+    sptr<WindowProperty> property1 = new WindowProperty();
+    sptr<WindowNode> node1 = new WindowNode(property1);
+    windowPair->primary_ = node1;
+    property1->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    sptr<WindowProperty> property = new WindowProperty();
+    sptr<WindowProperty> windowProperty = new WindowProperty();
+    primary_->SetWindowProperty(windowProperty);
+    sptr<WindowNode> node0 = new WindowNode(property);
+    ASSERT_EQ(windowPair->StatusSupprtedWhenRecentUpdate(node0), false);
+}
+
+/**
+ * @tc.name: StatusSupprtedWhenRecentUpdate
+ * @tc.desc: check function StatusSupprtedWhenRecentUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, StatusSupprtedWhenRecentUpdate, Function | SmallTest | Level2)
+{
+    WindowPairStatus status_ = WindowPairStatus::SINGLE_PRIMARY;
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    windowPair->primary_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    sptr<WindowNode> node;
+    ASSERT_EQ(status_, WindowPairStatus::SINGLE_PRIMARY);
+    auto result = windowPair->StatusSupprtedWhenRecentUpdate(node);
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: CheckOrderedPairZorder
+ * @tc.desc: check function CheckOrderedPairZorder
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, CheckOrderedPairZorder, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> node = new WindowNode();
+    bool hasPrimaryDialog = true;
+    bool hasSecondaryDialog = true;
+    bool isPrimaryAbove = true;
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    windowPair->CheckOrderedPairZorder(node, hasPrimaryDialog, hasSecondaryDialog, isPrimaryAbove);
+    sptr<WindowProperty> property = new WindowProperty();
+    sptr<WindowNode> belowAppWindowNode_ = new WindowNode();
+    sptr<WindowNode> appWindowNode_ = new WindowNode();
+    sptr<WindowNode> aboveAppWindowNode_ = new WindowNode();
+    std::vector<sptr<WindowNode>> children_ = {belowAppWindowNode_, appWindowNode_, aboveAppWindowNode_};
+    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    auto result = windowPair->StatusSupprtedWhenRecentUpdate(node);
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GetOrderedPair
+ * @tc.desc: Get all window node form pair in Z order.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, GetOrderedPair08, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> node = new WindowNode();
+    bool hasPrimaryDialog_ = true;
+    bool isPrimaryAbove_ = true;
+    ASSERT_TRUE(hasPrimaryDialog_);
+    ASSERT_TRUE(isPrimaryAbove_);
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    windowPair->GetOrderedPair(node);
+    auto result = windowPair->StatusSupprtedWhenRecentUpdate(node);
+    ASSERT_EQ(result, false);
+}
+/**
+ * @tc.name: UpdateIfSplitRelated01
+ * @tc.desc:  UpdateIfSplitRelated
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, UpdateIfSplitRelated01, Function | SmallTest | Level2)
+{
+    sptr<OHOS::Rosen::WindowNode> node = new WindowNode();
+    node = nullptr;
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    windowPair->UpdateIfSplitRelated(node);
+    auto result = windowPair->StatusSupprtedWhenRecentUpdate(node);
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: UpdateIfSplitRelated02
+ * @tc.desc:  UpdateIfSplitRelated
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, UpdateIfSplitRelated02, Function | SmallTest | Level2)
+{
+
+    sptr<WindowNode> node = new WindowNode();
+    sptr<WindowProperty> property1 = new WindowProperty();
+    property1->SetWindowType(WindowType::WINDOW_TYPE_LAUNCHER_RECENT);
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    sptr<WindowNode> primary_ = new WindowNode();
+    primary_->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    node->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    windowPair->UpdateIfSplitRelated(node);
+    auto result = windowPair->StatusSupprtedWhenRecentUpdate(node);
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: UpdateIfSplitRelated03
+ * @tc.desc:  UpdateIfSplitRelated
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, UpdateIfSplitRelated03, Function | SmallTest | Level2)
+{
+
+    sptr<WindowNode> node = new WindowNode();
+    sptr<WindowProperty> property1 = new WindowProperty();
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    auto result = node->IsSplitMode();
+    result = true;
+    ASSERT_EQ(result, true);
+    property1->SetWindowType(WindowType::WINDOW_TYPE_LAUNCHER_RECENT);
+    auto result2 = windowPair->StatusSupprtedWhenRecentUpdate(node);
+    result2 = true;
+    ASSERT_EQ(result2, true);
+    ASSERT_EQ(false, windowPair->IsPaired());
+}
+
+/**
+ * @tc.name: SwitchPosition04
+ * @tc.desc:  SwitchPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, SwitchPosition04, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    sptr<WindowNode> primary_ = new WindowNode();
+    IWindowMocker *w = new IWindowMocker;
+    sptr<IWindow> window(w);
+    primary_->SetWindowToken(window);
+    ASSERT_EQ(false, windowPair->IsPaired());
+}
+/**
+ * @tc.name: SwitchPosition04
+ * @tc.desc:  SwitchPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, SwitchPosition05, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    sptr<WindowNode> secondary_ = new WindowNode();
+    secondary_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    ASSERT_EQ(false, windowPair->IsPaired());
+}
 }
 }
 }
