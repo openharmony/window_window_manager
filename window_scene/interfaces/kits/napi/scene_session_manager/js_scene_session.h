@@ -38,6 +38,7 @@ public:
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
 
     sptr<SceneSession> GetNativeSession() const;
+    void ClearCbMap(bool needRemove);
 
 private:
     static NativeValue* RegisterCallback(NativeEngine* engine, NativeCallbackInfo* info);
