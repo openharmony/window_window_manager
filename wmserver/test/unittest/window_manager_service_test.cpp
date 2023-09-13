@@ -1103,6 +1103,106 @@ HWTEST_F(WindowManagerServiceTest, CreateWindow02, Function | SmallTest | Level2
     ASSERT_EQ(WMError::WM_OK, wms->CreateWindow(iWindow, property, surfaceNode, id, nullptr));
     wms->DestroyWindow(id, true);
 }
+
+/**
+ * @tc.name: AddWindow02
+ * @tc.desc: AddWindow02 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, AddWindow02, Function | SmallTest | Level2)
+{
+    
+    sptr<WindowProperty> property = new WindowProperty();
+    property->SetWindowType(WindowType::WINDOW_TYPE_WALLPAPER);
+    ASSERT_EQ(WMError::WM_OK, wms->AddWindow(property));
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+}
+
+/**
+ * @tc.name: RemoveWindow
+ * @tc.desc: RemoveWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, RemoveWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> appNode = new WindowNode();
+    IWindowMocker* token = new IWindowMocker;
+    appNode->SetWindowToken(token);
+    bool isFromInnerkits = false;
+    wms->windowController_->windowRoot_->windowNodeMap_[appNode->GetWindowId()] = appNode;
+    WMError res = wms->RemoveWindow(appNode->GetWindowId(), isFromInnerkits);
+    ASSERT_EQ(res, WMError::WM_OK);
+    res = wms->RemoveWindow(appNode->GetWindowId(), isFromInnerkits);
+    ASSERT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: DestroyWindow
+ * @tc.desc: DestroyWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, DestroyWindow, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<IWindow> iWindow = iface_cast<IWindow>(iRemoteObjectMocker);
+    sptr<WindowNode> appNode = new WindowNode();
+    RSSurfaceNodeConfig config;
+    config.SurfaceNodeName = "webTestSurfaceName";
+    auto surfaceNode = RSSurfaceNode::Create(config, false);
+    sptr<WindowProperty> property = new WindowProperty();
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    uint32_t id = appNode->GetWindowId();
+    ASSERT_EQ(WMError::WM_OK, wms->CreateWindow(iWindow, property, surfaceNode, id, nullptr));
+    IWindowMocker* token = new IWindowMocker;
+    appNode->SetWindowToken(token);
+    bool isFromInnerkits = true;
+    wms->windowController_->windowRoot_->windowNodeMap_[appNode->GetWindowId()] = appNode;
+    WMError res = wms->RemoveWindow(appNode->GetWindowId(), isFromInnerkits);
+    ASSERT_EQ(res, WMError::WM_OK);
+    res = wms->DestroyWindow(appNode->GetWindowId(), true);
+    ASSERT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: OnScreenshot01
+ * @tc.desc: OnScreenshot01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, OnScreenshot01, Function | SmallTest | Level2)
+{
+    DisplayId displayId = 1;
+    ASSERT_TRUE(listener != nullptr);
+    listener->OnScreenshot(displayId);
+}
+
+/**
+ * @tc.name: NotifyServerReadyToMoveOrDrag02
+ * @tc.desc: NotifyServerReadyToMoveOrDrag02 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, NotifyServerReadyToMoveOrDrag02, Function | SmallTest | Level2)
+{
+    sptr<WindowNode> appNode = new WindowNode();
+    IWindowMocker* token = new IWindowMocker;
+    appNode->SetWindowToken(token);
+    wms->windowController_->windowRoot_->windowNodeMap_[appNode->GetWindowId()] = appNode;
+    sptr<WindowProperty> property = new WindowProperty();
+    sptr<MoveDragProperty> moveDragProperty = new MoveDragProperty();
+    ASSERT_TRUE(wms != nullptr);
+    wms->NotifyServerReadyToMoveOrDrag(appNode->GetWindowId(), property, moveDragProperty);
+}
+
+/**
+ * @tc.name: ProcessPointUp
+ * @tc.desc: ProcessPointUp test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, ProcessPointUp, Function | SmallTest | Level2)
+{
+    uint32_t windowId = 1;
+    ASSERT_TRUE(wms != nullptr);
+    wms->ProcessPointUp(windowId);
+}
 }
 }
 }
