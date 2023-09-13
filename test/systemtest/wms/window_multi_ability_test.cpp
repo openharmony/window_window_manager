@@ -217,16 +217,16 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, Function | MediumTest | L
 {
     sptr<WindowScene> scene1 = Utils::CreateWindowScene();
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-      ASSERT_EQ(WMError::WM_OK, scene1->GoForeground());
+        ASSERT_EQ(WMError::WM_OK, scene1->GoForeground());
     } else {
-      ASSERT_NE(WMError::WM_OK, scene1->GoForeground());
+        ASSERT_NE(WMError::WM_OK, scene1->GoForeground());
     }
     sptr<WindowScene> scene2 = Utils::CreateWindowScene();
     sptr<WindowScene> scene3 = Utils::CreateWindowScene();
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-      ASSERT_EQ(WMError::WM_OK, scene3->GoForeground());
+        ASSERT_EQ(WMError::WM_OK, scene3->GoForeground());
     } else {
-      ASSERT_NE(WMError::WM_OK, scene3->GoForeground());
+        ASSERT_NE(WMError::WM_OK, scene3->GoForeground());
     }
     DoSceneResource(scene1);
     sptr<WindowScene> scene4 = Utils::CreateWindowScene();
