@@ -58,6 +58,11 @@ ohos_unittest("dmserver_display_manager_agent_controller_test") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
+
+  cflags = [
+    "-Dprivate = public",
+    "-Dprotected = public",
+  ]
 }
 
 ohos_unittest("dmserver_abstract_display_test") {
