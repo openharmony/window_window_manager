@@ -716,19 +716,16 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionByName(const std::string&
 
 std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByType(WindowType type)
 {
-    auto task = [this, type]() {
-        std::vector<sptr<SceneSession>> sceneSessionVector;
-        for (const auto &item : sceneSessionMap_) {
-            auto sceneSession = item.second;
-            if (sceneSession->GetWindowType() == type) {
-                sceneSessionVector.emplace_back(sceneSession);
-            }
+    std::vector<sptr<SceneSession>> sceneSessionVector;
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto &item : sceneSessionMap_) {
+        auto sceneSession = item.second;
+        if (sceneSession->GetWindowType() == type) {
+            sceneSessionVector.emplace_back(sceneSession);
         }
+    }
 
-        return sceneSessionVector;
-    };
-
-    return taskScheduler_->PostSyncTask(task);
+    return sceneSessionVector;
 }
 
 WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& sceneSession,
