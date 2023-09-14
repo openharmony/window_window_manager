@@ -1205,6 +1205,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
         if (!scnSessionInfo) {
             return WSError::WS_ERROR_NULLPTR;
         }
+        scnSession->GetCloseAbilityWantAndClean(scnSessionInfo->want);
         if (CheckCollaboratorType(scnSession->GetCollaboratorType())) {
             NotifyClearSession(scnSession->GetCollaboratorType(), scnSessionInfo->persistentId);
         }

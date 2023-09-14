@@ -1555,7 +1555,7 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
         info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
         {
             std::lock_guard<std::recursive_mutex> lock(session->sessionInfoMutex_);
-            session->sessionInfo_.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
+            session->sessionInfo_.closeAbilityWant = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
             session->sessionInfo_.resultCode = abilitySessionInfo->resultCode;
         }
         if (session->terminateSessionFunc_) {
@@ -1592,7 +1592,7 @@ WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
         info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
         {
             std::lock_guard<std::recursive_mutex> lock(session->sessionInfoMutex_);
-            session->sessionInfo_.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
+            session->sessionInfo_.closeAbilityWant = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
             session->sessionInfo_.errorCode = abilitySessionInfo->errorCode;
             session->sessionInfo_.errorReason = abilitySessionInfo->errorReason;
         }

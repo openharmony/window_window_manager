@@ -120,6 +120,7 @@ public:
     void SetSessionInfoLockedState(bool state);
     void SetSessionInfoIsClearSession(bool isClearSession);
     void SetSessionInfoAffinity(std::string affinity);
+    void GetCloseAbilityWantAndClean(AAFwk::Want& outWant);
     void SetSessionInfo(const SessionInfo& info);
     const SessionInfo& GetSessionInfo() const;
     WindowType GetWindowType() const;
