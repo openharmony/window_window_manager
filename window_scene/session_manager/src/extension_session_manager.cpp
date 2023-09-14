@@ -82,12 +82,11 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
     return taskScheduler_->PostSyncTask(task);
 }
 
-WSError ExtensionSessionManager::RequestExtensionSessionActivation(
-    const sptr<ExtensionSession>& extensionSession, uint32_t hostWindowId)
+WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession,
+    uint32_t hostWindowId, const std::function<void(WSError)>&& resultCallback)
 {
     wptr<ExtensionSession> weakExtSession(extensionSession);
-    WSError ret = WSError::WS_OK;
-    auto task = [this, weakExtSession, &ret, hostWindowId]() {
+    auto task = [this, weakExtSession, hostWindowId, callback = std::move(resultCallback)]() {
         auto extSession = weakExtSession.promote();
         if (extSession == nullptr) {
             WLOGFE("session is nullptr");
@@ -107,18 +106,22 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(
         extSessionInfo->hostWindowId = hostWindowId;
         auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIExtensionAbility(extSessionInfo,
             AAFwk::DEFAULT_INVAL_VALUE);
-        ret = (errorCode == ERR_OK) ? WSError::WS_OK : WSError::WS_ERROR_START_UI_EXTENSION_ABILITY_FAILED;
-        return ret;
+        if (callback) {
+            auto ret = errorCode == ERR_OK ? WSError::WS_OK : WSError::WS_ERROR_START_UI_EXTENSION_ABILITY_FAILED;
+            callback(ret);
+            return ret;
+        }
+        return WSError::WS_OK;
     };
-    taskScheduler_->PostSyncTask(task);
-    return ret;
+    taskScheduler_->PostAsyncTask(task);
+    return WSError::WS_OK;
 }
 
-WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<ExtensionSession>& extensionSession)
+WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<ExtensionSession>& extensionSession,
+    const std::function<void(WSError)>&& resultCallback)
 {
     wptr<ExtensionSession> weakExtSession(extensionSession);
-    WSError ret = WSError::WS_OK;
-    auto task = [this, weakExtSession, &ret]() {
+    auto task = [this, weakExtSession, callback = std::move(resultCallback)]() {
         auto extSession = weakExtSession.promote();
         if (extSession == nullptr) {
             WLOGFE("session is nullptr");
@@ -138,18 +141,22 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
             return WSError::WS_ERROR_NULLPTR;
         }
         auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIExtensionAbility(extSessionInfo);
-        ret = (errorCode == ERR_OK) ? WSError::WS_OK : WSError::WS_ERROR_MIN_UI_EXTENSION_ABILITY_FAILED;
-        return ret;
+        if (callback) {
+            auto ret = errorCode == ERR_OK ? WSError::WS_OK : WSError::WS_ERROR_MIN_UI_EXTENSION_ABILITY_FAILED;
+            callback(ret);
+            return ret;
+        }
+        return WSError::WS_OK;
     };
-    taskScheduler_->PostSyncTask(task);
-    return ret;
+    taskScheduler_->PostAsyncTask(task);
+    return WSError::WS_OK;
 }
 
-WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<ExtensionSession>& extensionSession)
+WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<ExtensionSession>& extensionSession,
+    const std::function<void(WSError)>&& resultCallback)
 {
     wptr<ExtensionSession> weakExtSession(extensionSession);
-    WSError ret = WSError::WS_OK;
-    auto task = [this, weakExtSession, &ret]() {
+    auto task = [this, weakExtSession, callback = std::move(resultCallback)]() {
         auto extSession = weakExtSession.promote();
         if (extSession == nullptr) {
             WLOGFE("session is nullptr");
@@ -169,10 +176,14 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
         }
         auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->TerminateUIExtensionAbility(extSessionInfo);
         extensionSessionMap_.erase(persistentId);
-        ret = (errorCode == ERR_OK) ? WSError::WS_OK : WSError::WS_ERROR_TERMINATE_UI_EXTENSION_ABILITY_FAILED;
-        return ret;
+        if (callback) {
+            auto ret = errorCode == ERR_OK ? WSError::WS_OK : WSError::WS_ERROR_TERMINATE_UI_EXTENSION_ABILITY_FAILED;
+            callback(ret);
+            return ret;
+        }
+        return WSError::WS_OK;
     };
-    taskScheduler_->PostSyncTask(task);
-    return ret;
+    taskScheduler_->PostAsyncTask(task);
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
