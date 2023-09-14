@@ -893,7 +893,7 @@ WSError SceneSession::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent
 
 WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    WLOGFD("SceneSession TransferPointEvent");
+    WLOGFD("SceneSession TransferPointEvent, id: %{public}d", GetPersistentId());
     if (pointerEvent == nullptr) {
         WLOGFE("pointerEvent is null");
         return WSError::WS_ERROR_NULLPTR;
