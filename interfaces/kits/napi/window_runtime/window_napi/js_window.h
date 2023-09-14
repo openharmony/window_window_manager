@@ -58,6 +58,7 @@ public:
     static NativeValue* UnregisterWindowCallback(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* BindDialogTarget(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* LoadContent(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* LoadContentByName(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* GetUIContext(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetUIContent(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetFullScreen(NativeEngine* engine, NativeCallbackInfo* info);
@@ -130,8 +131,8 @@ private:
     static bool ParseScaleOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans);
     static bool ParseRotateOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans);
     static bool ParseTranslateOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans);
-    NativeValue* LoadContentScheduleOld(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* LoadContentScheduleNew(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* LoadContentScheduleOld(NativeEngine& engine, NativeCallbackInfo& info, bool isLoadedByName);
+    NativeValue* LoadContentScheduleNew(NativeEngine& engine, NativeCallbackInfo& info, bool isLoadedByName);
     NativeValue* OnShow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnShowWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnShowWithAnimation(NativeEngine& engine, NativeCallbackInfo& info);
@@ -157,7 +158,7 @@ private:
     NativeValue* OnSetWindowSystemBarEnable(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetSystemBarProperties(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetWindowSystemBarProperties(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info, bool isLoadedByName);
     NativeValue* OnGetUIContext(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetUIContent(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& info);

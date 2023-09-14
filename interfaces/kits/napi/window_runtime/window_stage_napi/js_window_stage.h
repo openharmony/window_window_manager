@@ -40,6 +40,7 @@ public:
     static NativeValue* On(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* Off(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* LoadContent(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* LoadContentByName(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* GetWindowMode(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* CreateSubWindow(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* GetSubWindow(NativeEngine* engine, NativeCallbackInfo* info);
@@ -52,7 +53,7 @@ private:
     NativeValue* OnGetMainWindowSync(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnEvent(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OffEvent(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info, bool isLoadedByName);
     NativeValue* OnGetWindowMode(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnCreateSubWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetSubWindow(NativeEngine& engine, NativeCallbackInfo& info);
