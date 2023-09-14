@@ -27,11 +27,13 @@ public:
     virtual ~FoldScreenPolicy();
     virtual void ChangeScreenDisplayMode(FoldDisplayMode displayMode);
     virtual FoldDisplayMode GetScreenDisplayMode();
+    virtual FoldStatus GetFoldStatus();
     virtual void SendSensorResult(FoldStatus foldStatus);
     ScreenId screenId_;
     ScreenProperty screenProperty_;
     mutable std::recursive_mutex displayModeMutex_;
     FoldDisplayMode currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
+    FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
 };
 } // namespace OHOS::Rosen
 #endif //OHOS_ROSEN_WINDOW_SCENE_FOLD_SCREEN_POLICY_H
