@@ -15,8 +15,10 @@
 
 #include "root_scene.h"
 
+#include <bundlemgr/launcher_service.h>
 #include <event_handler.h>
 #include <input_manager.h>
+#include <iremote_stub.h>
 #include <ui_content.h>
 #include <viewport_config.h>
 
@@ -57,12 +59,40 @@ public:
 private:
     RootScene* rootScene_;
 };
+
+class BundleStatusCallback : public IRemoteStub<AppExecFwk::IBundleStatusCallback> {
+public:
+    explicit BundleStatusCallback(RootScene* rootScene): rootScene_(rootScene) {}
+    virtual ~BundleStatusCallback() = default;
+
+    void OnBundleStateChanged(const uint8_t installType,
+        const int32_t resultCode, const std::string& resultMsg, const std::string& bundleName) override {}
+
+    void OnBundleAdded(const std::string& bundleName, const int userId) override
+    {
+        rootScene_->OnBundleUpdated(bundleName);
+    }
+
+    void OnBundleUpdated(const std::string& bundleName, const int userId) override
+    {
+        rootScene_->OnBundleUpdated(bundleName);
+    }
+
+    void OnBundleRemoved(const std::string& bundleName, const int userId) override {}
+
+private:
+    RootScene* rootScene_;
+};
 } // namespace
 
 sptr<RootScene> RootScene::staticRootScene_;
 
 RootScene::RootScene()
 {
+    launcherService_ = new AppExecFwk::LauncherService();
+    if (!launcherService_->RegisterCallback(new BundleStatusCallback(this))) {
+        WLOGFE("Failed to register bundle status callback.");
+    }
 }
 
 RootScene::~RootScene()
@@ -173,6 +203,14 @@ int64_t RootScene::GetVSyncPeriod()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return VsyncStation::GetInstance().GetVSyncPeriod();
+}
+
+void RootScene::OnBundleUpdated(const std::string& bundleName)
+{
+    WLOGFD("bundle %{public}s updated", bundleName.c_str());
+    if (uiContent_) {
+        uiContent_->UpdateResource();
+    }
 }
 } // namespace Rosen
 } // namespace OHOS
