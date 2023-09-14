@@ -1111,7 +1111,6 @@ HWTEST_F(WindowManagerServiceTest, CreateWindow02, Function | SmallTest | Level2
  */
 HWTEST_F(WindowManagerServiceTest, AddWindow02, Function | SmallTest | Level2)
 {
-    
     sptr<WindowProperty> property = new WindowProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_WALLPAPER);
     ASSERT_EQ(WMError::WM_OK, wms->AddWindow(property));
