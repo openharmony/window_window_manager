@@ -1089,6 +1089,21 @@ public:
         return WMError::WM_OK;
     }
     /**
+     * @brief set window ui content
+     *
+     * @param contentInfo content info path
+     * @param engine
+     * @param storage
+     * @param isDistributed
+     * @param ability
+     * @return WMError
+     */
+    virtual WMError SetUIContentByName(const std::string& contentInfo, NativeEngine* engine, NativeValue* storage,
+        AppExecFwk::Ability* ability = nullptr)
+    {
+        return WMError::WM_OK;
+    }
+    /**
      * @brief Get ui content info.
      *
      * @return UI content info.

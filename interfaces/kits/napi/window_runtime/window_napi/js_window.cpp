@@ -222,7 +222,14 @@ NativeValue* JsWindow::LoadContent(NativeEngine* engine, NativeCallbackInfo* inf
 {
     WLOGD("LoadContent");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
-    return (me != nullptr) ? me->OnLoadContent(*engine, *info) : nullptr;
+    return (me != nullptr) ? me->OnLoadContent(*engine, *info, false) : nullptr;
+}
+
+NativeValue* JsWindow::LoadContentByName(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGD("LoadContentByName");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnLoadContent(*engine, *info, true) : nullptr;
 }
 
 NativeValue* JsWindow::GetUIContext(NativeEngine* engine, NativeCallbackInfo* info)
@@ -1452,13 +1459,17 @@ NativeValue* JsWindow::OnBindDialogTarget(NativeEngine& engine, NativeCallbackIn
 }
 
 static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std::string contextUrl,
-    sptr<Window> weakWindow, NativeEngine& engine, AsyncTask& task)
+    sptr<Window> weakWindow, NativeEngine& engine, AsyncTask& task, bool isLoadedByName)
 {
     NativeValue* nativeStorage =  (contentStorage == nullptr) ? nullptr : contentStorage->Get();
     AppExecFwk::Ability* ability = nullptr;
     GetAPI7Ability(engine, ability);
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-        weakWindow->SetUIContent(contextUrl, &engine, nativeStorage, false, ability));
+    WmErrorCode ret;
+    if (isLoadedByName) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetUIContentByName(contextUrl, &engine, nativeStorage, ability));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetUIContent(contextUrl, &engine, nativeStorage, false, ability));
+    }
     if (ret == WmErrorCode::WM_OK) {
         task.Resolve(engine, engine.CreateUndefined());
     } else {
@@ -1469,7 +1480,7 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     return;
 }
 
-NativeValue* JsWindow::LoadContentScheduleOld(NativeEngine& engine, NativeCallbackInfo& info)
+NativeValue* JsWindow::LoadContentScheduleOld(NativeEngine& engine, NativeCallbackInfo& info, bool isLoadedByName)
 {
     WMError errCode = WMError::WM_OK;
     if (info.argc < 1 || info.argc > 2) { // 2 maximum param num
@@ -1489,28 +1500,28 @@ NativeValue* JsWindow::LoadContentScheduleOld(NativeEngine& engine, NativeCallba
     std::shared_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
         std::shared_ptr<NativeReference>(engine.CreateReference(storage, 1));
     wptr<Window> weakToken(windowToken_);
-    AsyncTask::CompleteCallback complete =
-        [weakToken, contentStorage, contextUrl, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr) {
-                WLOGFE("window is nullptr");
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
-                return;
-            }
-            if (errCode != WMError::WM_OK) {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
-                WLOGFE("Window is nullptr or get invalid param");
-                return;
-            }
-            LoadContentTask(contentStorage, contextUrl, weakWindow, engine, task);
-        };
+    AsyncTask::CompleteCallback complete = [weakToken, contentStorage, contextUrl, errCode, isLoadedByName](
+                                               NativeEngine& engine, AsyncTask& task, int32_t status) {
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            WLOGFE("window is nullptr");
+            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+            return;
+        }
+        if (errCode != WMError::WM_OK) {
+            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
+            WLOGFE("Window is nullptr or get invalid param");
+            return;
+        }
+        LoadContentTask(contentStorage, contextUrl, weakWindow, engine, task, isLoadedByName);
+    };
     NativeValue* result = nullptr;
     AsyncTask::Schedule("JsWindow::OnLoadContent",
         engine, CreateAsyncTaskWithLastParam(engine, callBack, nullptr, std::move(complete), &result));
     return result;
 }
 
-NativeValue* JsWindow::LoadContentScheduleNew(NativeEngine& engine, NativeCallbackInfo& info)
+NativeValue* JsWindow::LoadContentScheduleNew(NativeEngine& engine, NativeCallbackInfo& info, bool isLoadedByName)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
     if (info.argc < 2) { // 2 param num
@@ -1539,24 +1550,23 @@ NativeValue* JsWindow::LoadContentScheduleNew(NativeEngine& engine, NativeCallba
     std::shared_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
         std::shared_ptr<NativeReference>(engine.CreateReference(storage, 1));
     wptr<Window> weakToken(windowToken_);
-    AsyncTask::CompleteCallback complete =
-        [weakToken, contentStorage, contextUrl](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr) {
-                WLOGFE("Window is nullptr or get invalid param");
-                task.Reject(engine, CreateJsError(engine,
-                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
-                return;
-            }
-            LoadContentTask(contentStorage, contextUrl, weakWindow, engine, task);
-        };
+    AsyncTask::CompleteCallback complete = [weakToken, contentStorage, contextUrl, isLoadedByName](
+                                               NativeEngine& engine, AsyncTask& task, int32_t status) {
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            WLOGFE("Window is nullptr or get invalid param");
+            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+            return;
+        }
+        LoadContentTask(contentStorage, contextUrl, weakWindow, engine, task, isLoadedByName);
+    };
     NativeValue* result = nullptr;
     AsyncTask::Schedule("JsWindow::OnLoadContent",
         engine, CreateAsyncTaskWithLastParam(engine, callBack, nullptr, std::move(complete), &result));
     return result;
 }
 
-NativeValue* JsWindow::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info)
+NativeValue* JsWindow::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info, bool isLoadedByName)
 {
     bool oldApi = false;
     if (info.argc == 1) {
@@ -1570,9 +1580,9 @@ NativeValue* JsWindow::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& i
         }
     }
     if (oldApi) {
-        return LoadContentScheduleOld(engine, info);
+        return LoadContentScheduleOld(engine, info, isLoadedByName);
     } else {
-        return LoadContentScheduleNew(engine, info);
+        return LoadContentScheduleNew(engine, info, isLoadedByName);
     }
 }
 
@@ -1643,7 +1653,7 @@ NativeValue* JsWindow::OnSetUIContent(NativeEngine& engine, NativeCallbackInfo& 
                     CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
                 return;
             }
-            LoadContentTask(contentStorage, contextUrl, weakWindow, engine, task);
+            LoadContentTask(contentStorage, contextUrl, weakWindow, engine, task, false);
         };
     NativeValue* result = nullptr;
     AsyncTask::Schedule("JsWindow::OnSetUIContent",
@@ -4357,6 +4367,7 @@ void BindFunctions(NativeEngine& engine, NativeObject* object, const char *modul
     BindNativeFunction(engine, *object, "off", moduleName, JsWindow::UnregisterWindowCallback);
     BindNativeFunction(engine, *object, "bindDialogTarget", moduleName, JsWindow::BindDialogTarget);
     BindNativeFunction(engine, *object, "loadContent", moduleName, JsWindow::LoadContent);
+    BindNativeFunction(engine, *object, "loadContentByName", moduleName, JsWindow::LoadContentByName);
     BindNativeFunction(engine, *object, "getUIContext", moduleName, JsWindow::GetUIContext);
     BindNativeFunction(engine, *object, "setUIContent", moduleName, JsWindow::SetUIContent);
     BindNativeFunction(engine, *object, "setFullScreen", moduleName, JsWindow::SetFullScreen);

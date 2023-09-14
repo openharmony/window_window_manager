@@ -543,8 +543,20 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     uiContent_->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, false);
 }
 
-WMError WindowSessionImpl::SetUIContent(const std::string& contentInfo,
-    NativeEngine* engine, NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability)
+WMError WindowSessionImpl::SetUIContent(const std::string& contentInfo, NativeEngine* engine, NativeValue* storage,
+    bool isdistributed, AppExecFwk::Ability* ability)
+{
+    return SetUIContentInner(contentInfo, engine, storage, isdistributed, false, ability);
+}
+
+WMError WindowSessionImpl::SetUIContentByName(
+    const std::string& contentInfo, NativeEngine* engine, NativeValue* storage, AppExecFwk::Ability* ability)
+{
+    return SetUIContentInner(contentInfo, engine, storage, false, true, ability);
+}
+
+WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, NativeEngine* engine, NativeValue* storage,
+    bool isdistributed, bool isLoadedByName, AppExecFwk::Ability* ability)
 {
     WLOGFD("SetUIContent: %{public}s state:%{public}u", contentInfo.c_str(), state_);
     if (uiContent_) {
@@ -562,6 +574,8 @@ WMError WindowSessionImpl::SetUIContent(const std::string& contentInfo,
     }
     if (isdistributed) {
         uiContent->Restore(this, contentInfo, storage);
+    } else if (isLoadedByName) {
+        uiContent->InitializeByName(this, contentInfo, storage);
     } else {
         uiContent->Initialize(this, contentInfo, storage);
     }
