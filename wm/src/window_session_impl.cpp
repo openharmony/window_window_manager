@@ -468,7 +468,13 @@ WSError WindowSessionImpl::UpdateFocus(bool isFocused)
     } else {
         NotifyAfterUnfocused();
     }
+    isFocused_ = isFocused;
     return WSError::WS_OK;
+}
+
+bool WindowSessionImpl::IsFocused() const
+{
+    return isFocused_;
 }
 
 WSError WindowSessionImpl::UpdateWindowMode(WindowMode mode)

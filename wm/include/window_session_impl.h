@@ -90,6 +90,7 @@ public:
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason) override;
     void UpdateDensity() override;
     WSError UpdateFocus(bool focus) override;
+    bool IsFocused() const override;
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError HandleBackEvent() override { return WSError::WS_OK; }
     WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;
@@ -232,6 +233,7 @@ private:
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
     Gravity lastGravity_ = Gravity::RESIZE;
+    bool isFocused_ { false };
 };
 } // namespace Rosen
 } // namespace OHOS
