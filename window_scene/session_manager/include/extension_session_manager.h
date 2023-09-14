@@ -42,21 +42,24 @@ public:
      * @param extensionSession the extension session need to be activated
      * @return WSError
      */
-    WSError RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession, uint32_t hostWindowId);
+    WSError RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession, uint32_t hostWindowId,
+        const std::function<void(WSError)>&& resultCallback);
     /**
      * @brief background extension session
      *
      * @param extensionSession the extension session need to be go background
      * @return WSError
      */
-    WSError RequestExtensionSessionBackground(const sptr<ExtensionSession>& extensionSession);
+    WSError RequestExtensionSessionBackground(
+        const sptr<ExtensionSession>& extensionSession, const std::function<void(WSError)>&& resultCallback);
     /**
      * @brief destroy extension session
      *
      * @param extensionSession the extension session need to be destroyed
      * @return WSError
      */
-    WSError RequestExtensionSessionDestruction(const sptr<ExtensionSession>& extensionSession);
+    WSError RequestExtensionSessionDestruction(
+        const sptr<ExtensionSession>& extensionSession, const std::function<void(WSError)>&& resultCallback);
 
 private:
     void Init();
