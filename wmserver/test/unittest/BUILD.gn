@@ -85,6 +85,7 @@ test_public_deps = [
 test_inner_deps = [
   "${window_base_path}/dm:libdm",
   "${window_base_path}/utils:libwmutil",
+  "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   "${window_base_path}/wm:libwm",
   "${window_base_path}/wmserver:sms",
   "../..:libwms",
