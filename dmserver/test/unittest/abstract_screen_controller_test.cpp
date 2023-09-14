@@ -133,6 +133,34 @@ HWTEST_F(AbstractScreenControllerTest, SetScreenRotateAnimation01, Function | Sm
     ASSERT_EQ(Rotation::ROTATION_270, screen->rotation_);
 }
 /**
+ * @tc.name: SetScreenRotateAnimation
+ * @tc.desc: SetScreenRotateAnimation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, SetScreenRotateAnimation02, Function | SmallTest | Level3)
+{
+    RSDisplayNodeConfig config;
+    absController_->dmsScreenMap_[1]->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    sptr<AbstractScreen> screen = screenVec[0];
+    screen->rotation_ = Rotation::ROTATION_0;
+    absController_->SetScreenRotateAnimation(screen, 1, Rotation::ROTATION_270, true);
+    ASSERT_EQ(Rotation::ROTATION_0, screen->rotation_);
+}
+/**
+ * @tc.name: SetScreenRotateAnimation
+ * @tc.desc: SetScreenRotateAnimation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, SetScreenRotateAnimation03, Function | SmallTest | Level3)
+{
+    RSDisplayNodeConfig config;
+    absController_->dmsScreenMap_[1]->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    sptr<AbstractScreen> screen = screenVec[0];
+    screen->rotation_ = Rotation::ROTATION_0;
+    absController_->SetScreenRotateAnimation(screen, 1, Rotation::ROTATION_270, false);
+    ASSERT_EQ(Rotation::ROTATION_0, screen->rotation_);
+}
+/**
  * @tc.name: MakeMirror
  * @tc.desc: MakeMirror test
  * @tc.type: FUNC
@@ -184,6 +212,20 @@ HWTEST_F(AbstractScreenControllerTest, MakeMirror04, Function | SmallTest | Leve
     ASSERT_EQ(DMError::DM_OK, absController_->StopScreens(screens, ScreenCombination::SCREEN_MIRROR));
 }
 /**
+ * @tc.name: MakeMirror
+ * @tc.desc: MakeMirror test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, MakeMirror05, Function | SmallTest | Level3)
+{
+    std::vector<ScreenId> screens;
+    absController_->dmsScreenMap_[2]->type_ = ScreenType::REAL;
+    absController_->dmsScreenMap_[2]->groupDmsId_ = 2;
+    absController_->abstractScreenCallback_ = new AbstractScreenController::AbstractScreenCallback;
+    ASSERT_TRUE(DMError::DM_OK == absController_->MakeMirror(2, screens));
+    ASSERT_EQ(DMError::DM_OK, absController_->StopScreens(screens, ScreenCombination::SCREEN_MIRROR));
+}
+/**
  * @tc.name: ProcessScreenConnected
  * @tc.desc: ProcessScreenConnected test
  * @tc.type: FUNC
@@ -214,6 +256,30 @@ HWTEST_F(AbstractScreenControllerTest, OnRsScreenConnectionChange01, Function | 
 HWTEST_F(AbstractScreenControllerTest, OnRsScreenConnectionChange02, Function | SmallTest | Level3)
 {
     ScreenEvent event = ScreenEvent::UNKNOWN;
+    ScreenId rsScreenId = 1;
+    absController_->OnRsScreenConnectionChange(rsScreenId, event);
+    ASSERT_EQ(6, absController_->dmsScreenMap_.size());
+}
+/**
+ * @tc.name: OnRsScreenConnectionChange
+ * @tc.desc: OnRsScreenConnectionChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, OnRsScreenConnectionChange03, Function | SmallTest | Level3)
+{
+    ScreenEvent event = ScreenEvent::CONNECTED;
+    ScreenId rsScreenId = 1;
+    absController_->OnRsScreenConnectionChange(rsScreenId, event);
+    ASSERT_EQ(6, absController_->dmsScreenMap_.size());
+}
+/**
+ * @tc.name: OnRsScreenConnectionChange
+ * @tc.desc: OnRsScreenConnectionChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, OnRsScreenConnectionChange04, Function | SmallTest | Level3)
+{
+    ScreenEvent event = ScreenEvent::DISCONNECTED;
     ScreenId rsScreenId = 1;
     absController_->OnRsScreenConnectionChange(rsScreenId, event);
     ASSERT_EQ(6, absController_->dmsScreenMap_.size());
@@ -281,6 +347,40 @@ HWTEST_F(AbstractScreenControllerTest, UpdateRSTree03, Function | SmallTest | Le
     ASSERT_NE(nullptr, absController_->GetAbstractScreen(parentId));
     parentScreen->rsDisplayNode_ = nullptr;
     absController_->UpdateRSTree(id, parentId, node, true, true);
+}
+/**
+ * @tc.name: UpdateRSTree
+ * @tc.desc: UpdateRSTree test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, UpdateRSTree04, Function | SmallTest | Level3)
+{
+    ScreenId id = 1;
+    ScreenId parentId = 2;
+    std::shared_ptr<RSSurfaceNode> node = nullptr;
+    RSDisplayNodeConfig config;
+    ASSERT_NE(nullptr, absController_->GetAbstractScreen(id));
+    sptr<AbstractScreen> parentScreen = absController_->GetAbstractScreen(parentId);
+    ASSERT_NE(nullptr, absController_->GetAbstractScreen(parentId));
+    parentScreen->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);;
+    absController_->UpdateRSTree(id, parentId, node, true, true);
+}
+/**
+ * @tc.name: UpdateRSTree
+ * @tc.desc: UpdateRSTree test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, UpdateRSTree05, Function | SmallTest | Level3)
+{
+    ScreenId id = 1;
+    ScreenId parentId = 2;
+    std::shared_ptr<RSSurfaceNode> node = nullptr;
+    RSDisplayNodeConfig config;
+    ASSERT_NE(nullptr, absController_->GetAbstractScreen(id));
+    sptr<AbstractScreen> parentScreen = absController_->GetAbstractScreen(parentId);
+    ASSERT_NE(nullptr, absController_->GetAbstractScreen(parentId));
+    parentScreen->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);;
+    absController_->UpdateRSTree(id, parentId, node, true, false);
 }
 /**
  * @tc.name: RegisterAbstractScreenCallback
@@ -464,6 +564,9 @@ HWTEST_F(AbstractScreenControllerTest, SetRotation01, Function | SmallTest | Lev
     absController_->dmsScreenMap_[1]->rotation_ = Rotation::ROTATION_180;
     absController_->screenIdManager_.dms2RsScreenIdMap_.erase(1);
     ASSERT_EQ(true, absController_->SetRotation(1, Rotation::ROTATION_0, true));
+    absController_->abstractScreenCallback_ = new AbstractScreenController::AbstractScreenCallback;
+    ASSERT_EQ(false, absController_->SetRotation(1, Rotation::ROTATION_0, false));
+    ASSERT_EQ(false, absController_->SetRotation(1, Rotation::ROTATION_0, true));
 }
 /**
  * @tc.name: SetScreenActiveMode
@@ -511,6 +614,32 @@ HWTEST_F(AbstractScreenControllerTest, ProcessScreenModeChanged02, Function | Sm
  */
 HWTEST_F(AbstractScreenControllerTest, ProcessScreenModeChanged03, Function | SmallTest | Level3)
 {
+    absController_->ProcessScreenModeChanged(2);
+    ASSERT_NE(nullptr, absController_->dmsScreenMap_[2]);
+}
+/**
+ * @tc.name: ProcessScreenModeChanged
+ * @tc.desc: ProcessScreenModeChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, ProcessScreenModeChanged04, Function | SmallTest | Level3)
+{
+    sptr<AbstractScreen> screen = absController_->GetAbstractScreen(2);
+    screen->activeIdx_ = 0;
+    absController_->abstractScreenCallback_ = nullptr;
+    absController_->ProcessScreenModeChanged(2);
+    ASSERT_NE(nullptr, absController_->dmsScreenMap_[2]);
+}
+/**
+ * @tc.name: ProcessScreenModeChanged
+ * @tc.desc: ProcessScreenModeChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, ProcessScreenModeChanged05, Function | SmallTest | Level3)
+{
+    sptr<AbstractScreen> screen = absController_->GetAbstractScreen(2);
+    screen->activeIdx_ = 0;
+    absController_->abstractScreenCallback_ = new AbstractScreenController::AbstractScreenCallback;
     absController_->ProcessScreenModeChanged(2);
     ASSERT_NE(nullptr, absController_->dmsScreenMap_[2]);
 }
@@ -764,6 +893,64 @@ HWTEST_F(AbstractScreenControllerTest, SetVirtualPixelRatio02, Function | SmallT
     float ratio = 1.0;
     absController_->abstractScreenCallback_ = nullptr;
     ASSERT_EQ(DMError::DM_OK, absController_->SetVirtualPixelRatio(id, ratio));
+}
+/**
+ * @tc.name: RegisterRsScreenConnectionChangeListener
+ * @tc.desc: RegisterRsScreenConnectionChangeListener test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, RegisterRsScreenConnectionChangeListener, Function | SmallTest | Level3)
+{
+    sptr<IRemoteObject> agent = new IRemoteObjectMocker();
+    absController_->Init();
+    ASSERT_EQ(true, absController_->OnRemoteDied(agent));
+    agent.clear();
+}
+/**
+ * @tc.name: RemoveSurfaceNodeFromScreen
+ * @tc.desc: RemoveSurfaceNodeFromScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, RemoveSurfaceNodeFromScreen, Function | SmallTest | Level3)
+{
+    ScreenId dmsScreenId = 8;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, absController_->RemoveSurfaceNodeFromScreen(dmsScreenId, surfaceNode));
+    ASSERT_EQ(nullptr, absController_->GetAbstractScreen(dmsScreenId));
+}
+/**
+ * @tc.name: ProcessDefaultScreenReconnected
+ * @tc.desc: ProcessDefaultScreenReconnected test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, ProcessDefaultScreenReconnected01, Function | SmallTest | Level3)
+{
+    ScreenId rsScreenId = 8;
+    absController_->ProcessDefaultScreenReconnected(rsScreenId);
+    absController_->defaultRsScreenId_ = 8;
+    rsScreenId = 1;
+    absController_->ProcessDefaultScreenReconnected(rsScreenId);
+    rsScreenId = 8;
+    absController_->ProcessDefaultScreenReconnected(rsScreenId);
+    ASSERT_EQ(nullptr, absController_->GetAbstractScreen(rsScreenId));
+}
+/**
+ * @tc.name: ProcessDefaultScreenReconnected
+ * @tc.desc: ProcessDefaultScreenReconnected test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, ProcessDefaultScreenReconnected02, Function | SmallTest | Level3)
+{
+    ScreenId rsScreenId = 8;
+    absController_->defaultRsScreenId_ = 8;
+    absController_->ProcessDefaultScreenReconnected(rsScreenId);
+    ASSERT_EQ(nullptr, absController_->GetAbstractScreen(rsScreenId));
+    rsScreenId = 5;
+    absController_->defaultRsScreenId_ = 5;
+    absController_->ProcessDefaultScreenReconnected(rsScreenId);
+    rsScreenId = 1;
+    absController_->defaultRsScreenId_ = 1;
+    absController_->ProcessDefaultScreenReconnected(rsScreenId);
 }
 }
 } // namespace Rosen
