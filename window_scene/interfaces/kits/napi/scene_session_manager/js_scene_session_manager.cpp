@@ -921,6 +921,9 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
 
 void JsSceneSessionManager::SetIsClearSession(NativeEngine& engine, NativeObject* jsSceneSessionObj, sptr<SceneSession>& sceneSession)
 {
+    if (sceneSession == nullptr) {
+        return;
+    }
     NativeValue* jsOperatorType = jsSceneSessionObj->GetProperty("operatorType");
     if (jsOperatorType->TypeOf() != NATIVE_UNDEFINED) {
         int32_t operatorType = -1;
