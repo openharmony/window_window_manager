@@ -26,6 +26,7 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManagerStub"};
+constexpr uint32_t MAX_VECTOR_SIZE = 100;
 }
 
 const std::map<uint32_t, SceneSessionManagerStubFunc> SceneSessionManagerStub::stubFuncMap_{
@@ -522,6 +523,10 @@ int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel &data, Mes
     WLOGFI("HandleNotifyDumpInfoResult");
     std::vector<std::string> info;
     uint32_t vectorSize = data.ReadUint32();
+    if (vectorSize > MAX_VECTOR_SIZE) {
+        WLOGFI("Vector is too big!");
+        return -1;
+    }
     for (uint32_t i = 0; i < vectorSize; i++) {
         uint32_t curSize = data.ReadUint32();
         info.emplace_back(reinterpret_cast<const char*>(data.ReadRawData(curSize)));
