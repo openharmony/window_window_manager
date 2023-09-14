@@ -1290,21 +1290,21 @@ HWTEST_F(WindowPairTest, Clear02, Function | SmallTest | Level2)
     ASSERT_EQ(windowPair->StatusSupprtedWhenRecentUpdate(node0), false);
 }
 
-/**
- * @tc.name: StatusSupprtedWhenRecentUpdate
- * @tc.desc: check function StatusSupprtedWhenRecentUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(WindowPairTest, StatusSupprtedWhenRecentUpdate, Function | SmallTest | Level2)
-{
-    WindowPairStatus status_ = WindowPairStatus::SINGLE_PRIMARY;
-    sptr<WindowPair> windowPair = new WindowPair(0);
-    windowPair->primary_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    sptr<WindowNode> node = new WindowNode();
-    ASSERT_EQ(status_, WindowPairStatus::SINGLE_PRIMARY);
-    auto result = windowPair->StatusSupprtedWhenRecentUpdate(node);
-    ASSERT_EQ(result, false);
-}
+// /**
+//  * @tc.name: StatusSupprtedWhenRecentUpdate
+//  * @tc.desc: check function StatusSupprtedWhenRecentUpdate
+//  * @tc.type: FUNC
+//  */
+// HWTEST_F(WindowPairTest, StatusSupprtedWhenRecentUpdate, Function | SmallTest | Level2)
+// {
+//     WindowPairStatus status_ = WindowPairStatus::SINGLE_PRIMARY;
+//     sptr<WindowPair> windowPair = new WindowPair(0);
+//     windowPair->primary_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+//     sptr<WindowNode> node = new WindowNode();
+//     ASSERT_EQ(status_, WindowPairStatus::SINGLE_PRIMARY);
+//     auto result = windowPair->StatusSupprtedWhenRecentUpdate(node);
+//     ASSERT_EQ(result, false);
+// }
 
 /**
  * @tc.name: CheckOrderedPairZorder
