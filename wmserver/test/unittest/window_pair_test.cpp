@@ -1300,7 +1300,7 @@ HWTEST_F(WindowPairTest, StatusSupprtedWhenRecentUpdate, Function | SmallTest | 
     WindowPairStatus status_ = WindowPairStatus::SINGLE_PRIMARY;
     sptr<WindowPair> windowPair = new WindowPair(0);
     windowPair->primary_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    sptr<WindowNode> node;
+    sptr<WindowNode> node = new WindowNode();
     ASSERT_EQ(status_, WindowPairStatus::SINGLE_PRIMARY);
     auto result = windowPair->StatusSupprtedWhenRecentUpdate(node);
     ASSERT_EQ(result, false);
