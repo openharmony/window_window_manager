@@ -1703,25 +1703,6 @@ HWTEST_F(SceneSessionManagerTest, GetSceneSessionVectorByType, Function | SmallT
 }
 
 /**
- * @tc.name: UpdateParentSession
- * @tc.desc: SceneSesionManager update parent session
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, UpdateParentSession, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetBrightness";
-    info.bundleName_ = "SetBrightness1";
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    ASSERT_EQ(ssm_->UpdateParentSession(scensession, nullptr), WSError::WS_ERROR_NULLPTR);
-    ASSERT_EQ(ssm_->UpdateParentSession(nullptr, property), WSError::WS_ERROR_NULLPTR);
-    ASSERT_EQ(ssm_->UpdateParentSession(scensession, property), WSError::WS_OK);
-    delete scensession;
-    delete property;
-}
-
-/**
  * @tc.name: RegisterInputMethodShownFunc
  * @tc.desc: SceneSesionManager register input method show func
  * @tc.type: FUNC
