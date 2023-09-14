@@ -54,7 +54,7 @@ const std::string EVENT_CHANGE = "change";
 const std::string EVENT_PRIVATE_MODE_CHANGE = "privateModeChange";
 const std::string
 EVENT_FOLD_STATUS_CHANGED = "foldStatusChange";
-const std::string EVENT_DISPLAY_MODE_CHANGED = "displayModeChanged";
+const std::string EVENT_DISPLAY_MODE_CHANGED = "foldDisplayModeChange";
 }  // namespace Rosen
 }  // namespace OHOS
 #endif /* OHOS_JS_DISPLAY_LISTENER_H */

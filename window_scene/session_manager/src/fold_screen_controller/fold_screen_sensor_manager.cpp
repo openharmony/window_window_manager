@@ -17,6 +17,7 @@
 
 #include "fold_screen_controller/fold_screen_sensor_manager.h"
 #include "window_manager_hilog.h"
+#include "screen_session_manager.h"
 
 void SensorPostureDataCallback(SensorEvent *event)
 {
@@ -111,6 +112,7 @@ void FoldScreenSensorManager::HandleSensorData(float angle, int hall)
     if (mState_ != nextState) {
         WLOGFI("current state: %{public}d, next state: %{public}d.", mState_, nextState);
         mState_ = nextState;
+        ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(mState_);
         if (foldScreenPolicy_ != nullptr) {
             foldScreenPolicy_->SendSensorResult(mState_);
         }
