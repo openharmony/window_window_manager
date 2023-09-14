@@ -1910,6 +1910,9 @@ WMError WindowSceneSessionImpl::UpdateWindowModeImmediately(WindowMode mode)
         property_->SetWindowMode(mode);
         UpdateTitleButtonVisibility();
         UpdateDecorEnable(true);
+        if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
+        }
     }
     return WMError::WM_OK;
 }
