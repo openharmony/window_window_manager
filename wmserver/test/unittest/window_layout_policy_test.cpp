@@ -1402,6 +1402,11 @@ HWTEST_F(WindowLayoutPolicyTest, IsTileRectSatisfiedWithSizeLimits, Function | S
     sptr<WindowNode> *node = new sptr<WindowNode>;
     auto result = layoutPolicy_->IsTileRectSatisfiedWithSizeLimits(*node);
     ASSERT_EQ(true, result);
+    sptr<WindowProperty> property = new WindowProperty();
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    result = layoutPolicyTile_ -> IsTileRectSatisfiedWithSizeLimits(windowNode);
+    ASSERT_EQ(true, result);
 }
 
 /**
