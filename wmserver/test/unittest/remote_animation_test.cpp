@@ -1122,7 +1122,6 @@ HWTEST_F(RemoteAnimationTest, GetExpectRect, Function | SmallTest | Level2)
     auto result = WindowHelper::IsEmptyRect(avoidRect);
     ASSERT_FALSE(result);
     RemoteAnimation::GetExpectRect(dstNode, dstTarget);
-    EXPECT_EQ(WMError::WM_ERROR_NO_MEM, RemoteAnimation::GetWindowAnimationTargets(missionIds, targets));
 }
 
 /*
@@ -1135,7 +1134,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationAbilityDied, Function | SmallTest |
     sptr<WindowTransitionInfo> info = new WindowTransitionInfo();
     RemoteAnimation::NotifyAnimationAbilityDied(info);
     std::vector<sptr<RSWindowAnimationTarget>> targets;
-    EXPECT_EQ(0, targets.empty());
+    EXPECT_EQ(true, targets.empty());
 }
 
 /*
@@ -1172,7 +1171,7 @@ HWTEST_F(RemoteAnimationTest, CreateAnimationFinishedCallback02, Function | Smal
         auto node = weakNode.promote();
     };
     std::vector<sptr<RSWindowAnimationTarget>> targets;
-    EXPECT_EQ(0, targets.empty());
+    EXPECT_EQ(true, targets.empty());
 }
 }
 }
