@@ -52,6 +52,7 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
 
                 screenSession->SetDisplayNodeScreenId(screenIdMain);
                 screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenIdMain);
+                screenSession->SetScreenProperty(screenProperty_);
                 screenSession->PropertyChange(screenProperty_, ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND);
                 screenId_ = screenIdMain;
                 break;
@@ -65,6 +66,7 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
 
                 screenSession->SetDisplayNodeScreenId(screenIdFull);
                 screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenIdFull);
+                screenSession->SetScreenProperty(screenProperty_);
                 screenSession->PropertyChange(screenProperty_, ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND);
                 screenId_ = screenIdFull;
                 break;
@@ -78,6 +80,10 @@ void DualDisplayDevicePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
                 break;
             }
         }
+        if (currentDisplayMode_ != displayMode) {
+            WLOGFI("DualDisplayDevicePolicy NotifyDisplayModeChanged displayMode %{pubilc}d", displayMode);
+            ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
+        }
         currentDisplayMode_ = displayMode;
     }
 }
@@ -86,6 +92,11 @@ FoldDisplayMode DualDisplayDevicePolicy::GetScreenDisplayMode()
 {
     std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
     return currentDisplayMode_;
+}
+
+FoldStatus DualDisplayDevicePolicy::GetFoldStatus()
+{
+    return currentFoldStatus_;
 }
 
 void DualDisplayDevicePolicy::SendSensorResult(FoldStatus foldStatus)
@@ -109,6 +120,8 @@ void DualDisplayDevicePolicy::SendSensorResult(FoldStatus foldStatus)
             WLOGI("DualDisplayDevicePolicy SendSensorResult FoldStatus is invalid");
         }
     }
+
+    currentFoldStatus_ = foldStatus;
 
     if (tempDisplayMode != currentDisplayMode_) {
         ChangeScreenDisplayMode(tempDisplayMode);
