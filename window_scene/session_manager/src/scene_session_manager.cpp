@@ -276,6 +276,7 @@ void SceneSessionManager::ConfigWindowSceneXml()
     ConfigWindowSizeLimits();
     ConfigSnapshotScale();
 }
+
 WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject> &token,
     const ContinueState& continueState)
 {
@@ -1543,12 +1544,19 @@ sptr<AppExecFwk::IBundleMgr> SceneSessionManager::GetBundleManager()
     return iface_cast<AppExecFwk::IBundleMgr>(bmsObj);
 }
 
-std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::CreateResourceManager(
+std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::GetResourceManager(
     const AppExecFwk::AbilityInfo& abilityInfo)
 {
-    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
-    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
-    resourceMgr->UpdateResConfig(*resConfig);
+    auto context = rootSceneContextWeak_.lock();
+    if (!context) {
+        WLOGFE("context is nullptr.");
+        return nullptr;
+    }
+    auto resourceMgr = context->GetResourceManager();
+    if (!resourceMgr) {
+        WLOGFE("resource manager is nullptr.");
+        return nullptr;
+    }
 
     std::string loadPath;
     if (!abilityInfo.hapPath.empty()) { // zipped hap
@@ -1558,27 +1566,27 @@ std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::CreateRe
     }
 
     if (!resourceMgr->AddResource(loadPath.c_str())) {
-        WLOGFE("Add resource %{private}s failed.", loadPath.c_str());
-        return nullptr;
+        WLOGFD("Add resource %{private}s failed.", loadPath.c_str());
+        return resourceMgr;
     }
     return resourceMgr;
 }
 
-void SceneSessionManager::GetStartPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo,
+void SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo,
     std::string& path, uint32_t& bgColor)
 {
-    auto resourceMgr = CreateResourceManager(abilityInfo);
+    auto resourceMgr = GetResourceManager(abilityInfo);
     if (resourceMgr == nullptr) {
         WLOGFE("resource manager is nullptr.");
         return;
     }
 
     if (resourceMgr->GetColorById(abilityInfo.startWindowBackgroundId, bgColor) != Global::Resource::RState::SUCCESS) {
-        WLOGFW("Failed to get background color id %{private}d.", abilityInfo.startWindowBackgroundId);
+        WLOGFW("Failed to get background color id %{public}d.", abilityInfo.startWindowBackgroundId);
     }
 
     if (resourceMgr->GetMediaById(abilityInfo.startWindowIconId, path) != Global::Resource::RState::SUCCESS) {
-        WLOGFE("Failed to get icon id %{private}d.", abilityInfo.startWindowIconId);
+        WLOGFE("Failed to get icon id %{public}d.", abilityInfo.startWindowIconId);
         return;
     }
 
@@ -1592,13 +1600,13 @@ void SceneSessionManager::GetStartPageFromResource(const AppExecFwk::AbilityInfo
     }
 }
 
-void SceneSessionManager::GetStartPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor)
+void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor)
 {
     if (!bundleMgr_) {
         WLOGFE("bundle manager is nullptr.");
         return;
     }
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetStartPage");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetStartupPage");
     AAFwk::Want want;
     want.SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_, sessionInfo.moduleName_);
     AppExecFwk::AbilityInfo abilityInfo;
@@ -1609,7 +1617,7 @@ void SceneSessionManager::GetStartPage(const SessionInfo& sessionInfo, std::stri
         return;
     }
 
-    GetStartPageFromResource(abilityInfo, path, bgColor);
+    GetStartupPageFromResource(abilityInfo, path, bgColor);
 }
 
 void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
