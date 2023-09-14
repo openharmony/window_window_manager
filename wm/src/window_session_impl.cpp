@@ -379,12 +379,12 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         }
     }
     auto preRect = GetRect();
-    if (preRect.width_ == wmRect.height_ && preRect.height_ == wmRect.width_) {
+    if (preRect.width_ == wmRect.height_ && preRect.height_ == wmRect.width_ &&
+            (preRect.width_ != wmRect.width_ || preRect.height_ != wmRect.height_)) {
         wmReason = WindowSizeChangeReason::ROTATION;
     }
     property_->SetWindowRect(wmRect);
-    if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION &&
-            (preRect.width_ != wmRect.width_ || preRect.height_ != wmRect.height_)) {
+    if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
         UpdateRectForRotation(wmRect, preRect, wmReason);
     } else {
