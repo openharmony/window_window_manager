@@ -379,48 +379,14 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         }
     }
     auto preRect = GetRect();
-    if (preRect.width_ == wmRect.height_ && preRect.height_ == wmRect.width_) {
+    if (preRect.width_ == wmRect.height_ && preRect.height_ == wmRect.width_ &&
+            (preRect.width_ != wmRect.width_ || preRect.height_ != wmRect.height_)) {
         wmReason = WindowSizeChangeReason::ROTATION;
     }
     property_->SetWindowRect(wmRect);
-    auto task = [this, wmReason, wmRect, preRect]() mutable {
-        RSTransaction::FlushImplicitTransaction();
-        auto node = GetSurfaceNode();
-        if (!node) {
-            return;
-        }
-        if (rotationAnimationCount_ == 0) {
-            lastGravity_ = node->GetStagingProperties().GetFrameGravity();
-            node->SetFrameGravity(Gravity::RESIZE);
-        }
-        RSSystemProperties::SetDrawTextAsBitmap(true);
-        RSInterfaces::GetInstance().EnableCacheForRotation();
-        rotationAnimationCount_++;
-        RSAnimationTimingProtocol protocol;
-        protocol.SetDuration(300);
-        auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
-        RSNode::OpenImplicitAnimation(protocol, curve, [this, weak = std::weak_ptr<RSSurfaceNode>(node)]() {
-            rotationAnimationCount_--;
-            auto node = weak.lock();
-            if (rotationAnimationCount_ == 0 && node) {
-                node->SetFrameGravity(lastGravity_);
-                RSSystemProperties::SetDrawTextAsBitmap(false);
-                RSInterfaces::GetInstance().DisableCacheForRotation();
-            }
-        });
-        if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_)) {
-            NotifySizeChange(wmRect, wmReason);
-            lastSizeChangeReason_ = wmReason;
-        }
-        UpdateViewportConfig(wmRect, wmReason);
-        RSNode::CloseImplicitAnimation();
-        RSTransaction::FlushImplicitTransaction();
-        postTaskDone_ = true;
-    };
-    if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION &&
-            (preRect.width_ != wmRect.width_ || preRect.height_ != wmRect.height_)) {
+    if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
-        handler_->PostTask(task);
+        UpdateRectForRotation(wmRect, preRect, wmReason);
     } else {
         if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_) {
             NotifySizeChange(wmRect, wmReason);
@@ -432,6 +398,52 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     WLOGFI("update rect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u", rect.posX_, rect.posY_,
         rect.width_, rect.height_, wmReason);
     return WSError::WS_OK;
+}
+
+void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason)
+{
+    handler_->PostTask([weak = wptr(this), wmReason, wmRect, preRect]() mutable {
+        RSTransaction::FlushImplicitTransaction();
+        auto window = weak.promote();
+        if (!window) {
+            return;
+        }
+        auto node = window->GetSurfaceNode();
+        if (!node) {
+            return;
+        }
+        if (window->rotationAnimationCount_ == 0) {
+            window->lastGravity_ = node->GetStagingProperties().GetFrameGravity();
+            node->SetFrameGravity(Gravity::RESIZE);
+        }
+        RSSystemProperties::SetDrawTextAsBitmap(true);
+        RSInterfaces::GetInstance().EnableCacheForRotation();
+        window->rotationAnimationCount_++;
+        RSAnimationTimingProtocol protocol;
+        protocol.SetDuration(300);
+        auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
+        RSNode::OpenImplicitAnimation(protocol, curve, [weak]() {
+            auto window = weak.promote();
+            if (!window) {
+                return;
+            }
+            window->rotationAnimationCount_--;
+            auto node = window->GetSurfaceNode();
+            if (window->rotationAnimationCount_ == 0 && node) {
+                node->SetFrameGravity(window->lastGravity_);
+                RSSystemProperties::SetDrawTextAsBitmap(false);
+                RSInterfaces::GetInstance().DisableCacheForRotation();
+            }
+        });
+        if ((wmRect != preRect) || (wmReason != window->lastSizeChangeReason_)) {
+            window->NotifySizeChange(wmRect, wmReason);
+            window->lastSizeChangeReason_ = wmReason;
+        }
+        window->UpdateViewportConfig(wmRect, wmReason);
+        RSNode::CloseImplicitAnimation();
+        RSTransaction::FlushImplicitTransaction();
+        window->postTaskDone_ = true;
+    });
 }
 
 void WindowSessionImpl::UpdateDensity()
