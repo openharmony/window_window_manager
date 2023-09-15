@@ -29,8 +29,8 @@ class SessionDisplayPowerController : public RefBase {
 using SessionDisplayStateChangeListener = std::function<void(DisplayId, sptr<DisplayInfo>,
     const std::map<DisplayId, sptr<DisplayInfo>>&, DisplayStateChangeType)>;
 public:
-    SessionDisplayPowerController(SessionDisplayStateChangeListener listener)
-        : displayStateChangeListener_(listener)
+    SessionDisplayPowerController(std::recursive_mutex& mutex, SessionDisplayStateChangeListener listener)
+        : mutex_(mutex), displayStateChangeListener_(listener)
     {
     }
     virtual ~SessionDisplayPowerController() = default;
@@ -42,6 +42,7 @@ public:
 
 private:
     DisplayState displayState_ { DisplayState::UNKNOWN };
+    std::recursive_mutex& mutex_;
     SessionDisplayStateChangeListener displayStateChangeListener_;
 };
 }
