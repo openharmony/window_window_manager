@@ -3107,12 +3107,10 @@ WSError SceneSessionManager::GetSessionSnapshot(const std::string& deviceId, int
     }
     auto task = [this, &deviceId, persistentId, &snapshot, isLowResolution]() {
         if (CheckIsRemote(deviceId)) {
-            std::unique_ptr<AAFwk::MissionSnapshot> missionSnapshotPtr = std::make_unique<AAFwk::MissionSnapshot>();
-            int ret = GetRemoteSessionSnapshotInfo(deviceId, persistentId, *missionSnapshotPtr);
+            int ret = GetRemoteSessionSnapshotInfo(deviceId, persistentId, snapshot);
             if (ret != ERR_OK) {
                 return WSError::WS_ERROR_INVALID_PARAM;
             } else {
-                snapshot.snapshot = missionSnapshotPtr->snapshot;
                 return WSError::WS_OK;
             }
         }
