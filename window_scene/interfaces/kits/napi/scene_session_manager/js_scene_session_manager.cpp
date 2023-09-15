@@ -879,6 +879,12 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
         errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
     }
 
+    bool needRemoveSession = false;
+    if (info.argc == 2 && info.argv[1]->TypeOf() == NATIVE_BOOLEAN) { // 2: params total num
+        ConvertFromJsValue(engine, info.argv[1], needRemoveSession);
+        WLOGFD("[NAPI]needRemoveSession: %{public}u", needRemoveSession);
+    }
+
     sptr<SceneSession> sceneSession = nullptr;
     if (errCode == WSErrorCode::WS_OK) {
         auto jsSceneSessionObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
@@ -891,6 +897,7 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
                 WLOGFE("[NAPI]Failed to get scene session from js object");
                 errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
             } else {
+                jsSceneSession->ClearCbMap(needRemoveSession);
                 sceneSession = jsSceneSession->GetNativeSession();
                 SetIsClearSession(engine, jsSceneSessionObj, sceneSession);
             }
@@ -907,12 +914,6 @@ NativeValue* JsSceneSessionManager::OnRequestSceneSessionDestruction(NativeEngin
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return engine.CreateUndefined();
-    }
-
-    bool needRemoveSession = false;
-    if (info.argc == 2 && info.argv[1]->TypeOf() == NATIVE_BOOLEAN) { // 2: params total num
-        ConvertFromJsValue(engine, info.argv[1], needRemoveSession);
-        WLOGFD("[NAPI]needRemoveSession: %{public}u", needRemoveSession);
     }
 
     SceneSessionManager::GetInstance().RequestSceneSessionDestruction(sceneSession, needRemoveSession);
