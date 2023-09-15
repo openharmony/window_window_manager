@@ -43,10 +43,6 @@ void WindowManagerAgentProxy::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>&
         return;
     }
 
-    if (!data.WriteRemoteObject(focusChangeInfo->abilityToken_)) {
-        WLOGI("Write abilityToken failed");
-    }
-
     if (!data.WriteBool(focused)) {
         WLOGFE("Write Focus failed");
         return;
