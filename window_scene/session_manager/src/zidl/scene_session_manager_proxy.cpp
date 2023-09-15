@@ -862,7 +862,11 @@ WSError SceneSessionManagerProxy::GetSessionSnapshot(const std::string& deviceId
         return WSError::WS_ERROR_IPC_FAILED;
     }
     std::unique_ptr<SessionSnapshot> info(reply.ReadParcelable<SessionSnapshot>());
-    snapshot = *info;
+    if (info) {
+        snapshot = *info;
+    } else {
+        WLOGFW("Read SessionSnapshot is null.");
+    }
     return static_cast<WSError>(reply.ReadInt32());
 }
 
