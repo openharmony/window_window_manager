@@ -35,6 +35,7 @@ bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
 {
     WLOGFI("state:%{public}u", state);
     {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
         if (displayState_ == state) {
             WLOGFE("state is already set");
             return false;
@@ -43,12 +44,16 @@ bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
     switch (state) {
         case DisplayState::ON: {
             {
+                std::lock_guard<std::recursive_mutex> lock(mutex_);
                 displayState_ = state;
             }
+            ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
+                EventStatus::BEGIN);
             break;
         }
         case DisplayState::OFF: {
             {
+                std::lock_guard<std::recursive_mutex> lock(mutex_);
                 displayState_ = state;
             }
             ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_OFF,
@@ -78,10 +83,6 @@ void SessionDisplayPowerController::NotifyDisplayEvent(DisplayEvent event)
         ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DESKTOP_READY,
             EventStatus::BEGIN);
         return;
-    }
-    if (event == DisplayEvent::KEYGUARD_DRAWN) {
-        ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
-            EventStatus::BEGIN);
     }
 }
 }
