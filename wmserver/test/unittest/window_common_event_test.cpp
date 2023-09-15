@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include <cstdint>
 #include <gtest/gtest.h>
 #include "display_manager.h"
@@ -30,9 +29,9 @@
 #include "window_common_event.h"
 #include "scene_board_judgement.h"
 #include "vector"
+
 using namespace testing;
 using namespace testing::ext;
-
 
 namespace OHOS {
 namespace Rosen {
@@ -42,7 +41,6 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-
 };
 
 void WindowCommonEventTest::SetUpTestCase()
@@ -56,7 +54,6 @@ void WindowCommonEventTest::SetUp()
 {
 }
 
-
 void WindowCommonEventTest::TearDown()
 {
 }
@@ -69,7 +66,7 @@ namespace {
  */
 HWTEST_F(WindowCommonEventTest, SubscriberEventInner, Function | SmallTest | Level2)
 {
-    sptr<WindowCommonEvent> windowCommonEvent_=new WindowCommonEvent();
+    sptr<WindowCommonEvent> windowCommonEvent_ = new WindowCommonEvent();
     windowCommonEvent_->SubscriberEventInner(0);
     std::vector<uint32_t> windowIds;
     ASSERT_EQ(0, windowIds.size());
@@ -82,7 +79,7 @@ HWTEST_F(WindowCommonEventTest, SubscriberEventInner, Function | SmallTest | Lev
  */
 HWTEST_F(WindowCommonEventTest, UnSubscriberEvent, Function | SmallTest | Level2)
 {
-   sptr<WindowCommonEvent> windowCommonEvent_=new WindowCommonEvent();
+    sptr<WindowCommonEvent> windowCommonEvent_ = new WindowCommonEvent();
     windowCommonEvent_->UnSubscriberEvent();
     std::vector<uint32_t> windowIdsa;
     ASSERT_EQ(0, windowIdsa.size());
@@ -95,12 +92,13 @@ HWTEST_F(WindowCommonEventTest, UnSubscriberEvent, Function | SmallTest | Level2
  */
 HWTEST_F(WindowCommonEventTest, OnReceiveEvent, Function | SmallTest | Level2)
 {
-   sptr<WindowCommonEvent> windowCommonEvent_=new WindowCommonEvent();
+    sptr<WindowCommonEvent> windowCommonEvent_ = new WindowCommonEvent();
     EventFwk::CommonEventData data;
     windowCommonEvent_->OnReceiveEvent(data);
     std::vector<uint32_t> windowIds;
     ASSERT_EQ(0, windowIds.size());
 }
+
 /**
  * @tc.name: HandleAccountSwitched
  * @tc.desc: HandleAccountSwitched
@@ -108,7 +106,7 @@ HWTEST_F(WindowCommonEventTest, OnReceiveEvent, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowCommonEventTest, HandleAccountSwitched, Function | SmallTest | Level2)
 {
-    sptr<WindowCommonEvent> windowCommonEvent_=new WindowCommonEvent();
+    sptr<WindowCommonEvent> windowCommonEvent_ = new WindowCommonEvent();
     EventFwk::CommonEventData data;
     windowCommonEvent_->HandleAccountSwitched(data);
     std::vector<uint32_t> windowIds;
