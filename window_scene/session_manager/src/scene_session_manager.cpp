@@ -49,6 +49,7 @@
 #endif
 
 #include "ability_start_setting.h"
+#include "anr_manager.h"
 #include "color_parser.h"
 #include "common/include/session_permission.h"
 #include "interfaces/include/ws_common.h"
@@ -728,7 +729,7 @@ std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByType
     return sceneSessionVector;
 }
 
-WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& sceneSession,
+WSError SceneSessionManager::UpdateParentSessionForDialog(const sptr<SceneSession>& sceneSession,
     sptr<WindowSessionProperty> property)
 {
     if (property == nullptr) {
@@ -740,17 +741,7 @@ WSError SceneSessionManager::UpdateParentSession(const sptr<SceneSession>& scene
         return WSError::WS_ERROR_NULLPTR;
     }
     auto parentPersistentId = property->GetParentPersistentId();
-    if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
-        auto parentSceneSession = GetSceneSession(parentPersistentId);
-        if (!parentSceneSession) {
-            WLOGFD("Session is invalid");
-            return WSError::WS_ERROR_INVALID_SESSION;
-        }
-        sceneSession->SetParentSession(parentSceneSession);
-        WLOGFD("Update parent of subWindow success, id %{public}d, parentId %{public}d",
-            sceneSession->GetPersistentId(), parentPersistentId);
-    } else if (property->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG &&
-        parentPersistentId != INVALID_SESSION_ID) {
+    if (property->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && parentPersistentId != INVALID_SESSION_ID) {
         auto parentSession = GetSceneSession(parentPersistentId);
         if (parentSession == nullptr) {
             WLOGFE("Parent session is nullptr, parentPersistentId:%{public}d", parentPersistentId);
@@ -849,7 +840,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSession(%d )", persistentId);
         sceneSession->SetSystemConfig(systemConfig_);
         sceneSession->SetSnapshotScale(snapshotScale_);
-        UpdateParentSession(sceneSession, property);
+        UpdateParentSessionForDialog(sceneSession, property);
         if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
             WLOGFD("ancoSceneState: %{public}d", sceneSession->GetSessionInfo().ancoSceneState);
             PreHandleCollaborator(sceneSession);
@@ -1156,11 +1147,11 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
                 WLOGFE("dialog is nullptr");
                 continue;
             }
-            if (!GetSceneSession(dialog->GetPersistentId())) {
-                WLOGFE("session is invalid with %{public}d", dialog->GetPersistentId());
-                continue;
-            }
             auto sceneSession = GetSceneSession(dialog->GetPersistentId());
+            if (sceneSession == nullptr) {
+                WLOGFE("dialog is invalid, id: %{public}d", dialog->GetPersistentId());
+                return WSError::WS_ERROR_INVALID_SESSION;
+            }
             WindowDestroyNotifyVisibility(sceneSession);
             dialog->NotifyDestroy();
             dialog->Disconnect();
@@ -1177,6 +1168,26 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
     return WSError::WS_ERROR_INVALID_SESSION;
 }
 
+void SceneSessionManager::DestroySubSession(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        return;
+    }
+    for (const auto& elem : sceneSession->GetSubSession()) {
+        if (elem != nullptr) {
+            const auto& persistentId = elem->GetPersistentId();
+            WLOGFD("DestroySubSession, id: %{public}d", persistentId);
+            DelayedSingleton<ANRManager>::GetInstance()->OnSessionLost(persistentId);
+            WindowDestroyNotifyVisibility(sceneSession);
+            NotifyWindowInfoChange(elem->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
+            {
+                std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+                sceneSessionMap_.erase(persistentId);
+            }
+        }
+    }
+}
+
 WSError SceneSessionManager::RequestSceneSessionDestruction(
     const sptr<SceneSession>& sceneSession, const bool needRemoveSession)
 {
@@ -1190,6 +1201,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(
         auto persistentId = scnSession->GetPersistentId();
         lastUpdatedAvoidArea_.erase(persistentId);
         DestroyDialogWithMainWindow(scnSession);
+        DestroySubSession(scnSession); // destroy sub session by destruction
         WLOGFI("destroy session persistentId: %{public}d", persistentId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionDestruction (%" PRIu32" )", persistentId);
         WindowDestroyNotifyVisibility(scnSession);
@@ -3258,7 +3270,7 @@ WSError SceneSessionManager::BindDialogTarget(uint64_t persistentId, sptr<IRemot
     }
     scnSession->SetParentSession(parentSession);
     scnSession->SetParentPersistentId(parentSession->GetPersistentId());
-    UpdateParentSession(scnSession, scnSession->GetSessionProperty());
+    UpdateParentSessionForDialog(scnSession, scnSession->GetSessionProperty());
     WLOGFD("Bind dialog success, dialog id %{public}" PRIu64 ", parent id %{public}d",
         persistentId, parentSession->GetPersistentId());
     return WSError::WS_OK;
