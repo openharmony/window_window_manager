@@ -792,7 +792,7 @@ WMError SceneSessionManager::CheckWindowId(int32_t windowId, int32_t &pid)
 {
     auto task = [this, windowId, &pid]() -> WMError {
         pid = INVALID_PID;
-        std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         auto iter = sceneSessionMap_.find(windowId);
         if (iter == sceneSessionMap_.end()) {
             WLOGFE("Window(%{public}d) cannot set cursor style", windowId);
