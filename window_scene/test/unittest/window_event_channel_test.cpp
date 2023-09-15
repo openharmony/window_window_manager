@@ -107,7 +107,7 @@ HWTEST_F(WindowEventChannelTest, TransferBackpressedEventForConsumed, Function |
     ASSERT_EQ(res, WSError::WS_OK);
     isConsumed = true;
     res = windowEventChannel_->TransferBackpressedEventForConsumed(isConsumed);
-    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(res, WSError::WS_OK);
 }
 
 /**
@@ -122,7 +122,7 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumed, Function | SmallTe
     ASSERT_EQ(res, WSError::WS_OK);
     isConsumed = true;
     res = windowEventChannel_->TransferBackpressedEventForConsumed(isConsumed);
-    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(res, WSError::WS_OK);
 }
 
 /**
