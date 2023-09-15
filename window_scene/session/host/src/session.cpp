@@ -993,7 +993,8 @@ WSError Session::NotifyDestroy()
 void Session::SetParentSession(const sptr<Session>& session)
 {
     if (session == nullptr) {
-        WLOGFD("Session is nullptr");
+        WLOGFW("Session is nullptr");
+        return;
     }
     parentSession_ = session;
     WLOGFD("Set parent success, parentId: %{public}d, id: %{public}d",
