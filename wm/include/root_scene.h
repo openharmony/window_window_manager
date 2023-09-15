@@ -22,6 +22,7 @@
 
 namespace OHOS::AppExecFwk {
 class EventHandler;
+class LauncherService;
 } // namespace OHOS::AppExecFwk
 
 namespace OHOS::Ace {
@@ -43,6 +44,8 @@ public:
 
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     int64_t GetVSyncPeriod() override;
+
+    void OnBundleUpdated(const std::string& bundleName);
 
     void SetDisplayDensity(float density)
     {
@@ -80,15 +83,12 @@ private:
     void RegisterInputEventListener();
 
     std::unique_ptr<Ace::UIContent> uiContent_;
-
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
-
+    sptr<AppExecFwk::LauncherService> launcherService_;
     std::recursive_mutex mutex_;
-
     float density_ = 1.0f;
 
     WindowType type_ = WindowType::WINDOW_TYPE_SCENE_BOARD;
-
     std::string name_ = "EntryView";
 };
 } // namespace Rosen
