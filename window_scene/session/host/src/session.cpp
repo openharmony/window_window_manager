@@ -1074,6 +1074,7 @@ const char* Session::DumpPointerWindowArea(MMI::WindowArea area) const
 
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    WLOGFD("Session TransferPointEvent, id: %{public}d", GetPersistentId());
     if (!IsSystemSession() && !IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -1081,14 +1082,16 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         WLOGFE("PointerEvent is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
+    auto pointerAction = pointerEvent->GetPointerAction();
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         if (CheckDialogOnForeground()) {
-            WLOGFD("Has dialog on foreground, not transfer pointer event");
+            WLOGFD("Point main window, has dialog on foreground, id: %{public}d", GetPersistentId());
+            PresentFoucusIfNeed(pointerAction);
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     } else if (GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
         if (parentSession_ && parentSession_->CheckDialogOnForeground()) {
-            WLOGFD("Its main window has dialog on foreground, not transfer pointer event");
+            WLOGFD("Its main window has dialog on foreground, id: %{public}d", GetPersistentId());
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
@@ -1097,7 +1100,6 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             "persistentId:%{public}d", callingBundleName_.c_str(), callingPid_, persistentId_);
         return WSError::WS_DO_NOTHING;
     }
-    auto pointerAction = pointerEvent->GetPointerAction();
     PresentFoucusIfNeed(pointerAction);
     if (!windowEventChannel_) {
         WLOGFE("windowEventChannel_ is null");
