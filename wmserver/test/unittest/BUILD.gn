@@ -434,7 +434,6 @@ ohos_unittest("wmserver_mock_session_manager_service_test") {
   external_deps = test_external_deps
 }
 
-
 ohos_unittest("wmserver_window_common_event_test") {
   module_out_path = module_out_path
   configs = test_public_config
