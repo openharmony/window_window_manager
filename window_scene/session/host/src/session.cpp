@@ -1328,6 +1328,9 @@ WSError Session::UpdateWindowMode(WindowMode mode)
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
+    }
     return sessionStage_->UpdateWindowMode(mode);
 }
 
