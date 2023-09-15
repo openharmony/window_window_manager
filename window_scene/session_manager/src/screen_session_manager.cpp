@@ -55,7 +55,7 @@ ScreenSessionManager::ScreenSessionManager() : rsInterface_(RSInterfaces::GetIns
     LoadScreenSceneXml();
     taskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_THREAD);
     screenCutoutController_ = new (std::nothrow) ScreenCutoutController();
-    sessionDisplayPowerController_ = new SessionDisplayPowerController(
+    sessionDisplayPowerController_ = new SessionDisplayPowerController(mutex_,
         std::bind(&ScreenSessionManager::NotifyDisplayStateChange, this,
             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
     bool foldScreenFlag = system::GetParameter("const.window.foldscreen.type", "") != "";
@@ -693,6 +693,7 @@ std::vector<ScreenId> ScreenSessionManager::GetAllScreenIds()
 
 DisplayState ScreenSessionManager::GetDisplayState(DisplayId displayId)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     return sessionDisplayPowerController_->GetDisplayState(displayId);
 }
 
