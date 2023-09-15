@@ -134,7 +134,7 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(std::string name, 
 WindowSessionImpl::~WindowSessionImpl()
 {
     WLOGFD("~WindowSessionImpl, id: %{public}d", GetPersistentId());
-    Destroy(false);
+    Destroy(true, false);
 }
 
 uint32_t WindowSessionImpl::GetWindowId() const
@@ -320,9 +320,10 @@ WMError WindowSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFrom
     return WMError::WM_OK;
 }
 
-WMError WindowSessionImpl::Destroy(bool needClearListener)
+WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener)
 {
-    WLOGFI("Id:%{public}d Destroy, state_:%{public}u", GetPersistentId(), state_);
+    WLOGFI("Id: %{public}d Destroy, state_:%{public}u, needNotifyServer: %{public}d, needClearListener: %{public}d",
+        GetPersistentId(), state_, needNotifyServer, needClearListener);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;

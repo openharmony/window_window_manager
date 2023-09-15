@@ -602,15 +602,16 @@ void WindowSceneSessionImpl::DestroySubWindow()
     }
 }
 
-WMError WindowSceneSessionImpl::Destroy(bool needClearListener)
+WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearListener)
 {
-    WLOGFI("Id:%{public}d Destroy, state_:%{public}u", property_->GetPersistentId(), state_);
+    WLOGFI("Id: %{public}d Destroy, state_:%{public}u, needNotifyServer: %{public}d, needClearListener: %{public}d",
+        property_->GetPersistentId(), state_, needNotifyServer, needClearListener);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_OK;
     }
     WSError ret = WSError::WS_OK;
-    if (!WindowHelper::IsMainWindow(GetType())) {
+    if (!WindowHelper::IsMainWindow(GetType()) && needNotifyServer) {
         if (WindowHelper::IsSystemWindow(GetType())) {
             // main window no need to notify host, since host knows hide first
             SessionManager::GetInstance().DestroyAndDisconnectSpecificSession(property_->GetPersistentId());
