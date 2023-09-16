@@ -1172,6 +1172,7 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
 void SceneSessionManager::DestroySubSession(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
+        WLOGFW("sceneSession is nullptr");
         return;
     }
     for (const auto& elem : sceneSession->GetSubSession()) {
