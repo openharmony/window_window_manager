@@ -2901,19 +2901,23 @@ NativeValue* JsWindow::OnSetResizeByDragEnabled(NativeEngine& engine, NativeCall
     AsyncTask::CompleteCallback complete =
         [weakToken, dragEnabled, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
+            WmErrorCode wmErrorCode;
             if (weakWindow == nullptr) {
                 WLOGFE("window is nullptr");
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(wmErrorCode)));
                 return;
             }
             if (errCode != WMError::WM_OK) {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(wmErrorCode), "Invalidate params."));
                 return;
             }
             WMError ret = weakWindow->SetResizeByDragEnabled(dragEnabled);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
+                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set dragEnabled failed"));
             }
             WLOGI("Window [%{public}u, %{public}s] set dragEnabled end",
@@ -2950,12 +2954,15 @@ NativeValue* JsWindow::OnSetRaiseByClickEnabled(NativeEngine& engine, NativeCall
     AsyncTask::CompleteCallback complete =
         [weakToken, raiseEnabled, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
+            WmErrorCode wmErrorCode;
             if (weakWindow == nullptr) {
                 WLOGFE("window is nullptr");
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(wmErrorCode)));
                 return;
             }
             if (errCode != WMError::WM_OK) {
+                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
@@ -2963,7 +2970,9 @@ NativeValue* JsWindow::OnSetRaiseByClickEnabled(NativeEngine& engine, NativeCall
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set raiseEnabled failed"));
+                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(wmErrorCode),
+                                                  "Window set raiseEnabled failed"));
             }
             WLOGI("Window [%{public}u, %{public}s] set raiseEnabled end",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
@@ -4296,7 +4305,8 @@ NativeValue* JsWindow::OnMinimize(NativeEngine& engine, NativeCallbackInfo& info
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Minimize failed."));
+                WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(wmErrorCode), "Minimize failed."));
             }
             WLOGI("[NAPI]Window [%{public}u, %{public}s] minimize end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);

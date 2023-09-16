@@ -103,6 +103,11 @@ void WindowSessionProperty::SetSystemPrivacyMode(bool isSystemPrivate)
     isSystemPrivacyMode_ = isSystemPrivate;
 }
 
+void WindowSessionProperty::SetSystemCalling(bool isSystemCalling)
+{
+    isSystemCalling_ = isSystemCalling;
+}
+
 void WindowSessionProperty::SetDisplayId(DisplayId displayId)
 {
     displayId_ = displayId;
@@ -186,6 +191,11 @@ bool WindowSessionProperty::GetPrivacyMode() const
 bool WindowSessionProperty::GetSystemPrivacyMode() const
 {
     return isSystemPrivacyMode_;
+}
+
+bool WindowSessionProperty::GetSystemCalling() const
+{
+    return isSystemCalling_;
 }
 
 DisplayId WindowSessionProperty::GetDisplayId() const
@@ -477,7 +487,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(hideNonSystemFloatingWindows_) && parcel.WriteBool(forceHide_) &&
         MarshallingWindowLimits(parcel) &&
         MarshallingSystemBarMap(parcel) && parcel.WriteUint32(animationFlag_) &&
-        parcel.WriteBool(isFloatingWindowAppType_) && MarshallingTouchHotAreas(parcel);
+        parcel.WriteBool(isFloatingWindowAppType_) && MarshallingTouchHotAreas(parcel) &&
+        parcel.WriteBool(isSystemCalling_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -520,6 +531,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetAnimationFlag(parcel.ReadUint32());
     property->SetFloatingWindowAppType(parcel.ReadBool());
     UnmarshallingTouchHotAreas(parcel, property);
+    property->SetSystemCalling(parcel.ReadBool());
     return property;
 }
 
@@ -557,6 +569,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     animationFlag_ = property->animationFlag_;
     isFloatingWindowAppType_ = property->isFloatingWindowAppType_;
     touchHotAreas_ = property->touchHotAreas_;
+    isSystemCalling_ = property->isSystemCalling_;
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)

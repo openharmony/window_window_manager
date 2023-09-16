@@ -232,7 +232,7 @@ WMError SessionManager::UpdateProperty(sptr<WindowSessionProperty>& property, WS
         WLOGFE("sceneSessionManagerProxy_ is nullptr");
         return WMError::WM_DO_NOTHING;
     }
-    return static_cast<WMError>(sceneSessionManagerProxy_->UpdateProperty(property, action));
+    return sceneSessionManagerProxy_->UpdateProperty(property, action);
 }
 
 WMError SessionManager::SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent)
