@@ -172,6 +172,11 @@ sptr<WindowSessionProperty> WindowSessionImpl::GetProperty() const
     return property_;
 }
 
+SystemSessionConfig WindowSessionImpl::GetSystemSessionConfig() const
+{
+    return windowSystemConfig_;
+}
+
 sptr<ISession> WindowSessionImpl::GetHostSession() const
 {
     return hostSession_;

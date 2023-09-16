@@ -2175,8 +2175,8 @@ HWTEST_F(SceneSessionManagerTest, UpdateProperty, Function | SmallTest | Level3)
 {
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE;
-    WSError result = ssm_->UpdateProperty(property, action);
-    ASSERT_EQ(result, WSError::WS_OK);
+    WMError result = ssm_->UpdateProperty(property, action);
+    ASSERT_EQ(result, WMError::WM_OK);
     SessionInfo info;
     info.abilityName_ = "Foreground01";
     info.bundleName_ = "Foreground01";
@@ -2211,8 +2211,8 @@ HWTEST_F(SceneSessionManagerTest, HandleUpdateProperty01, Function | SmallTest |
     ssm_->HandleUpdateProperty(property, action, scensession);
     action = WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS;
     ssm_->HandleUpdateProperty(property, action, scensession);
-    WSError result = ssm_->UpdateProperty(property, action);
-    EXPECT_EQ(result, WSError::WS_OK);
+    WMError result = ssm_->UpdateProperty(property, action);
+    EXPECT_EQ(result, WMError::WM_OK);
     ssm_->HandleUpdateProperty(property, action, scensession);
     action = WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION;
     ssm_->HandleUpdateProperty(property, action, scensession);
@@ -2256,8 +2256,8 @@ HWTEST_F(SceneSessionManagerTest, HandleUpdateProperty02, Function | SmallTest |
     ssm_->HandleUpdateProperty(property, action, scensession);
     action = WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED;
     ssm_->HandleUpdateProperty(property, action, scensession);
-    WSError result = ssm_->UpdateProperty(property, action);
-    EXPECT_EQ(result, WSError::WS_OK);
+    WMError result = ssm_->UpdateProperty(property, action);
+    EXPECT_EQ(result, WMError::WM_OK);
     action = WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE;
     ssm_->HandleUpdateProperty(property, action, scensession);
     delete scensession;
@@ -2283,8 +2283,8 @@ HWTEST_F(SceneSessionManagerTest, HandleTurnScreenOn, Function | SmallTest | Lev
     ssm_->HandleKeepScreenOn(scensession, requireLock);
     requireLock = false;
     ssm_->HandleKeepScreenOn(scensession, requireLock);
-    WSError result = ssm_->UpdateProperty(property, action);
-    ASSERT_EQ(result, WSError::WS_OK);
+    WMError result = ssm_->UpdateProperty(property, action);
+    ASSERT_EQ(result, WMError::WM_OK);
     delete scensession;
     delete property;
 }
