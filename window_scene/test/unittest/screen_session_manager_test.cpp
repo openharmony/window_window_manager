@@ -677,12 +677,13 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenGamutMap, Function | SmallTest | Lev
     ssm_->GetRSDisplayNodeByScreenId(2);
     sptr<ScreenSession> screenSession =new  (std::nothrow) ScreenSession();
     std::vector<DisplayId>  displays(2);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->SetScreenGamutMap(SCREEN_ID_INVALID,ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION));
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM,
+              ssm_->SetScreenGamutMap(SCREEN_ID_INVALID, ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION));
     ASSERT_EQ(DMError::DM_OK, ssm_->SetScreenGamutMap(6,ScreenGamutMap::GAMUT_MAP_EXTENSION));
 }
 
 /**
- * @tc.name: StopExpand  
+ * @tc.name: StopExpand
  * @tc.desc: StopExpand virtual screen
  * @tc.type: FUNC
  */
@@ -700,7 +701,7 @@ HWTEST_F(ScreenSessionManagerTest, StopExpand, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: OnScreenDisconnect  
+ * @tc.name: OnScreenDisconnect
  * @tc.desc: OnScreenDisconnect virtual screen
  * @tc.type: FUNC
  */
@@ -720,7 +721,7 @@ HWTEST_F(ScreenSessionManagerTest, OnScreenDisconnect, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: SetScreenColorGamut  
+ * @tc.name: SetScreenColorGamut
  * @tc.desc: SetScreenColorGamut virtual screen
  * @tc.type: FUNC
  */
@@ -735,12 +736,12 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenColorGamut, Function | SmallTest | L
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
     ssm_->GetRSDisplayNodeByScreenId(2);
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->SetScreenColorGamut(SCREEN_ID_INVALID,2));
-    ASSERT_EQ(DMError::DM_OK, ssm_->SetScreenColorGamut(screenId,2));
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->SetScreenColorGamut(SCREEN_ID_INVALID, 2));
+    ASSERT_EQ(DMError::DM_OK, ssm_->SetScreenColorGamut(screenId, 2));
 }
 
 /**
- * @tc.name: SetScreenRotationLocked  
+ * @tc.name: SetScreenRotationLocked
  * @tc.desc: SetScreenRotationLocked virtual screen
  * @tc.type: FUNC
  */
@@ -758,7 +759,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenRotationLocked, Function | SmallTest
 }
 
 /**
- * @tc.name: UpdateScreenRotationProperty  
+ * @tc.name: UpdateScreenRotationProperty
  * @tc.desc: UpdateScreenRotationProperty virtual screen
  * @tc.type: FUNC
  */
@@ -776,13 +777,13 @@ HWTEST_F(ScreenSessionManagerTest, UpdateScreenRotationProperty, Function | Smal
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
-    ssm_->UpdateScreenRotationProperty(1,bounds,rotation);
-    sptr<ScreenSession> screenSession =new  (std::nothrow) ScreenSession();
+    ssm_->UpdateScreenRotationProperty(1, bounds, rotation);
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession();
     ASSERT_NE(screenSession, ssm_->InitAndGetScreen(2));
 }
 
 /**
- * @tc.name: SetOrientationFromWindow  
+ * @tc.name: SetOrientationFromWindow
  * @tc.desc: SetOrientationFromWindow virtual screen
  * @tc.type: FUNC
  */
