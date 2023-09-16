@@ -580,7 +580,6 @@ HWTEST_F(ScreenSessionManagerTest, RemoveFromGroupLocked, Function | SmallTest |
     ASSERT_EQ(sessiongroup, ssm_->RemoveFromGroupLocked(newScreen));
 }
 
-
 /**
  * @tc.name: CreateAndGetNewScreenId
  * @tc.desc: CreateAndGetNewScreenId virtual screen
@@ -598,7 +597,6 @@ HWTEST_F(ScreenSessionManagerTest, CreateAndGetNewScreenId, Function | SmallTest
     ScreenSessionManager::ScreenIdManager sim;
     ASSERT_EQ(2, sim.CreateAndGetNewScreenId(2));
 }
-
 
 /**
  * @tc.name: AddScreenToGroup
@@ -795,9 +793,7 @@ HWTEST_F(ScreenSessionManagerTest, SetOrientationFromWindow, Function | SmallTes
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "DeleteScreenId";
-
     ASSERT_EQ(DMError::DM_OK, ssm_->SetOrientationFromWindow(1,Orientation::AUTO_ROTATION_RESTRICTED));
-
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
