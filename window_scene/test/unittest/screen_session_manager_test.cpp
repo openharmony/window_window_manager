@@ -678,7 +678,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenGamutMap, Function | SmallTest | Lev
     sptr<ScreenSession> screenSession =new  (std::nothrow) ScreenSession();
     std::vector<DisplayId>  displays(2);
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->SetScreenGamutMap(SCREEN_ID_INVALID,ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION));
-    ASSERT_EQ(DMError::DM_OK, ssm_->SetScreenGamutMap(6,gamutMap));
+    ASSERT_EQ(DMError::DM_OK, ssm_->SetScreenGamutMap(6,ScreenGamutMap::GAMUT_MAP_EXTENSION));
 }
 
 /**
@@ -688,11 +688,9 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenGamutMap, Function | SmallTest | Lev
  */
 HWTEST_F(ScreenSessionManagerTest, StopExpand, Function | SmallTest | Level3)
 {
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "DeleteScreenId";
-     ;
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
