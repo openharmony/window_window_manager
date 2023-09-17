@@ -85,7 +85,14 @@ NativeValue* JsWindowStage::LoadContent(NativeEngine* engine, NativeCallbackInfo
 {
     WLOGFD("[NAPI]LoadContent");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
-    return (me != nullptr) ? me->OnLoadContent(*engine, *info) : nullptr;
+    return (me != nullptr) ? me->OnLoadContent(*engine, *info, false) : nullptr;
+}
+
+NativeValue* JsWindowStage::LoadContentByName(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFD("[NAPI]LoadContentByName");
+    JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
+    return (me != nullptr) ? me->OnLoadContent(*engine, *info, true) : nullptr;
 }
 
 NativeValue* JsWindowStage::GetWindowMode(NativeEngine* engine, NativeCallbackInfo* info)
@@ -289,10 +296,15 @@ NativeValue* JsWindowStage::OffEvent(NativeEngine& engine, NativeCallbackInfo& i
 }
 
 static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std::string contextUrl,
-    sptr<Window> weakWindow, NativeEngine& engine, AsyncTask& task)
+    sptr<Window> weakWindow, NativeEngine& engine, AsyncTask& task, bool isLoadedByName)
 {
-    NativeValue* nativeStorage =  (contentStorage == nullptr) ? nullptr : contentStorage->Get();
-    WMError ret = weakWindow->SetUIContent(contextUrl, &engine, nativeStorage, false);
+    NativeValue* nativeStorage = (contentStorage == nullptr) ? nullptr : contentStorage->Get();
+    WMError ret;
+    if (isLoadedByName) {
+        ret = weakWindow->SetUIContentByName(contextUrl, &engine, nativeStorage);
+    } else {
+        ret = weakWindow->SetUIContent(contextUrl, &engine, nativeStorage, false);
+    }
     if (ret == WMError::WM_OK) {
         task.Resolve(engine, engine.CreateUndefined());
     } else {
@@ -303,7 +315,7 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     return;
 }
 
-NativeValue* JsWindowStage::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info)
+NativeValue* JsWindowStage::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info, bool isLoadedByName)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
     std::string contextUrl;
@@ -331,7 +343,7 @@ NativeValue* JsWindowStage::OnLoadContent(NativeEngine& engine, NativeCallbackIn
     std::shared_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
         std::shared_ptr<NativeReference>(engine.CreateReference(storage, 1));
     AsyncTask::CompleteCallback complete =
-        [weak = windowScene_, contentStorage, contextUrl](
+        [weak = windowScene_, contentStorage, contextUrl, isLoadedByName](
             NativeEngine& engine, AsyncTask& task, int32_t status) {
             auto weakScene = weak.lock();
             sptr<Window> win = weakScene ? weakScene->GetMainWindow() : nullptr;
@@ -341,7 +353,7 @@ NativeValue* JsWindowStage::OnLoadContent(NativeEngine& engine, NativeCallbackIn
                 WLOGFE("[NAPI]Get window failed");
                 return;
             }
-            LoadContentTask(contentStorage, contextUrl, win, engine, task);
+            LoadContentTask(contentStorage, contextUrl, win, engine, task, isLoadedByName);
         };
     NativeValue* result = nullptr;
     AsyncTask::Schedule("JsWindowStage::OnLoadContent",
@@ -547,6 +559,8 @@ NativeValue* CreateJsWindowStage(NativeEngine& engine, std::shared_ptr<Rosen::Wi
         *object, "setUIContent", moduleName, JsWindowStage::SetUIContent);
     BindNativeFunction(engine,
         *object, "loadContent", moduleName, JsWindowStage::LoadContent);
+    BindNativeFunction(engine,
+        *object, "loadContentByName", moduleName, JsWindowStage::LoadContentByName);
     BindNativeFunction(engine,
         *object, "getMainWindow", moduleName, JsWindowStage::GetMainWindow);
     BindNativeFunction(engine,

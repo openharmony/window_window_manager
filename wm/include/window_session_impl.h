@@ -57,6 +57,8 @@ public:
     virtual WMError Destroy(bool needNotifyServer, bool needClearListener = true);
     WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability) override;
+    WMError SetUIContentByName(const std::string& contentInfo, NativeEngine* engine, NativeValue* storage,
+        AppExecFwk::Ability* ability) override;
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
     const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
     Rect GetRequestRect() const override;
@@ -211,6 +213,9 @@ private:
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
     void NotifyAfterFocused();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
+
+    WMError SetUIContentInner(const std::string& contentInfo, NativeEngine* engine, NativeValue* storage,
+        bool isdistributed, bool isLoadedByName, AppExecFwk::Ability* ability);
 
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason);
