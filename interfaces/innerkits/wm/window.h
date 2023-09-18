@@ -1352,7 +1352,7 @@ public:
      *
      * @return WM_OK means raise success, others means raise failed.
      */
-    virtual WmErrorCode RaiseAboveTarget(int32_t subWindowId) { return WmErrorCode::WM_OK; }
+    virtual WmErrorCode RaiseAboveTarget(int32_t subWindowId) { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Hide non-system floating windows.
