@@ -31,6 +31,7 @@ group("unittest") {
     ":wmserver_mock_session_manager_service_test",
     ":wmserver_remote_animation_test",
     ":wmserver_starting_window_test",
+    ":wmserver_window_common_event_test",
     ":wmserver_window_controller_test",
     ":wmserver_window_display_zoom_controller_test",
     ":wmserver_window_dumper_test",
@@ -51,7 +52,6 @@ group("unittest") {
     ":wmserver_window_snapshot_test",
     ":wmserver_window_system_effect_test",
     ":wmserver_window_zorder_policy_test",
-    ":wmserver_window_common_event_test",
   ]
 }
 
