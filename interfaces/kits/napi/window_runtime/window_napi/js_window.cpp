@@ -1158,7 +1158,8 @@ NativeValue* JsWindow::OnSetWindowType(NativeEngine& engine, NativeCallbackInfo&
         if (nativeType == nullptr) {
             WLOGFE("Failed to convert parameter to windowType");
             errCode = WMError::WM_ERROR_INVALID_PARAM;
-        } else if (static_cast<uint32_t>(*nativeType) >= static_cast<uint32_t>(WindowType::SYSTEM_WINDOW_BASE)) {
+        } else if (static_cast<uint32_t>(*nativeType) >= static_cast<uint32_t>(WindowType::SYSTEM_WINDOW_BASE) &&
+            static_cast<uint32_t>(*nativeType) <= static_cast<uint32_t>(WindowType::SYSTEM_WINDOW_END)) {
             winType = static_cast<WindowType>(static_cast<uint32_t>(*nativeType)); // adapt to the old version
         } else {
             if (JS_TO_NATIVE_WINDOW_TYPE_MAP.count(
