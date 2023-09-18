@@ -754,6 +754,11 @@ WmErrorCode WindowImpl::RaiseToAppTop()
     return WmErrorCode::WM_OK;
 }
 
+WmErrorCode WindowImpl::RaiseAboveTarget(int32_t subWindowId)
+{
+    return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+}
+
 WMError WindowImpl::SetAspectRatio(float ratio)
 {
     return WMError::WM_OK;

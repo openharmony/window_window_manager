@@ -241,6 +241,7 @@ public:
 
     virtual void CreateSurfaceNode(const std::string name, const SendRenderDataCallback& callback) = 0;
     virtual void SetContentInfoCallback(const ContentInfoCallback& callback) = 0;
+    virtual WmErrorCode RaiseAboveTarget(int32_t subWindowId) = 0;
 };
 }
 }
