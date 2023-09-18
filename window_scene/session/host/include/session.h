@@ -227,6 +227,7 @@ public:
     {
         return std::vector<Rect>();
     }
+    WSError RaiseAboveTarget(int32_t subWindowId) override;
 
 protected:
     void GeneratePersistentId(const bool isExtension, const SessionInfo& sessionInfo);

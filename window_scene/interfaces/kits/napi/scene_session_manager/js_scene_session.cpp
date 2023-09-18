@@ -47,6 +47,7 @@ const std::string NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB = "needDefaultAnimationF
 const std::string CUSTOM_ANIMATION_PLAYING_CB = "isCustomAnimationPlaying";
 const std::string SHOW_WHEN_LOCKED_CB = "sessionShowWhenLockedChange";
 const std::string REQUESTED_ORIENTATION_CHANGE_CB = "sessionRequestedOrientationChange";
+const std::string RAISE_ABOVE_TARGET_CB = "raiseAboveTarget";
 } // namespace
 
 NativeValue* JsSceneSession::Create(NativeEngine& engine, const sptr<SceneSession>& session)
@@ -114,7 +115,8 @@ JsSceneSession::JsSceneSession(NativeEngine& engine, const sptr<SceneSession>& s
         { NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB, &JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister },
         { CUSTOM_ANIMATION_PLAYING_CB,                  &JsSceneSession::ProcessIsCustomAnimationPlaying },
         { SHOW_WHEN_LOCKED_CB,            &JsSceneSession::ProcessShowWhenLockedRegister },
-        { REQUESTED_ORIENTATION_CHANGE_CB,            &JsSceneSession::ProcessRequestedOrientationChange }
+        { REQUESTED_ORIENTATION_CHANGE_CB,            &JsSceneSession::ProcessRequestedOrientationChange },
+        { RAISE_ABOVE_TARGET_CB,          &JsSceneSession::ProcessRaiseAboveTargetRegister }
     };
 
     sptr<SceneSession::SessionChangeCallback> sessionchangeCallback = new (std::nothrow)
@@ -244,6 +246,18 @@ void JsSceneSession::ProcessRaiseToTopRegister()
         return;
     }
     sessionchangeCallback->onRaiseToTop_ = std::bind(&JsSceneSession::OnRaiseToTop, this);
+    WLOGFD("ProcessRaiseToTopRegister success");
+}
+
+void JsSceneSession::ProcessRaiseAboveTargetRegister()
+{
+    auto sessionchangeCallback = sessionchangeCallback_.promote();
+    if (sessionchangeCallback == nullptr) {
+        WLOGFE("sessionchangeCallback is nullptr");
+        return;
+    }
+    sessionchangeCallback->onRaiseAboveTarget_ = std::bind(&JsSceneSession::OnRaiseAboveTarget,
+        this, std::placeholders::_1);
     WLOGFD("ProcessRaiseToTopRegister success");
 }
 
@@ -811,6 +825,39 @@ void JsSceneSession::OnRaiseToTop()
     AsyncTask::Schedule("JsSceneSession::OnRaiseToTop", engine_,
         std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
+
+void JsSceneSession::OnRaiseAboveTarget(int32_t subWindowId)
+{
+    WLOGFI("[NAPI]OnRaiseAboveTarget");
+    auto iter = jsCbMap_.find(RAISE_ABOVE_TARGET_CB);
+    if (iter == jsCbMap_.end()) {
+        return;
+    }
+    auto jsCallBack = iter->second;
+    auto complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [jsCallBack, eng = &engine_, subWindowId](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (!jsCallBack) {
+                WLOGFE("[NAPI]jsCallBack is nullptr");
+                return;
+            }
+            NativeValue* jsSceneSessionObj = CreateJsValue(engine, subWindowId);
+            if (jsSceneSessionObj == nullptr) {
+                WLOGFE("[NAPI]jsSceneSessionObj is nullptr");
+                return;
+            }
+            NativeValue* argv[] = {
+                [0]=CreateJsError(engine, 0),
+                [1]=jsSceneSessionObj
+            };
+            engine.CallFunction(engine.CreateUndefined(), jsCallBack->Get(), argv, ArraySize(argv));
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsSceneSession::OnRaiseAboveTarget", engine_,
+        std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
 
 void JsSceneSession::OnSessionFocusableChange(bool isFocusable)
 {
