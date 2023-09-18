@@ -1125,6 +1125,11 @@ WSError Session::RaiseToAppTop()
     return WSError::WS_OK;
 }
 
+WSError Session::RaiseAboveTarget(int32_t subWindowId)
+{
+    return WSError::WS_OK;
+}
+
 WSError Session::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session, sptr<IRemoteObject> token)

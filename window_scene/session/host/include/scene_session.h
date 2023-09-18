@@ -49,6 +49,7 @@ using NotifyNeedAvoidFunc = std::function<void(bool status)>;
 using NotifyWindowAnimationFlagChangeFunc = std::function<void(const bool flag)>;
 using NotifyShowWhenLockedFunc = std::function<void(bool showWhenLocked)>;
 using NotifyReqOrientationChangeFunc = std::function<void(uint32_t orientation)>;
+using NotifyRaiseAboveTargetFunc = std::function<void(int32_t subWindowId)>;
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -74,6 +75,7 @@ public:
         NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
         NotifyShowWhenLockedFunc OnShowWhenLocked_;
         NotifyReqOrientationChangeFunc OnRequestedOrientationChange_;
+        NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
     };
 
     // func for change window scene pattern property
@@ -153,6 +155,7 @@ public:
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void UpdateBrokerPersistentId(int32_t persistendId);
     int32_t GetBrokerPersistentId();
+    WSError RaiseAboveTarget(int32_t subWindowId) override;
 private:
     void UpdateCameraFloatWindowStatus(bool isShowing);
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);

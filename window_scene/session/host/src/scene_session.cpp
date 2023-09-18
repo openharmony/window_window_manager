@@ -19,6 +19,7 @@
 #include <pointer_event.h>
 #include <transaction/rs_transaction.h>
 
+#include "common/include/session_permission.h"
 #include "interfaces/include/ws_common.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session_utils.h"
@@ -273,6 +274,18 @@ WSError SceneSession::RaiseToAppTop()
 {
     if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onRaiseToTop_) {
         sessionChangeCallback_->onRaiseToTop_();
+    }
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        WLOGFE("RaiseAboveTarget permission denied!");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onRaiseAboveTarget_) {
+        sessionChangeCallback_->onRaiseAboveTarget_(subWindowId);
     }
     return WSError::WS_OK;
 }
