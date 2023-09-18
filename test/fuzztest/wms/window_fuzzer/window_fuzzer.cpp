@@ -295,6 +295,8 @@ void CheckWindowImplFunctionsPart1(sptr<Window> window, const uint8_t* data, siz
     window->IsFocused();
     startPos += GetObject(boolVal, data + startPos, size - startPos);
     window->SetTouchable(boolVal);
+    window->SetResizeByDragEnabled(boolVal);
+    window->SetRaiseByClickEnabled(boolVal);
 
     WindowType windowType;
     WindowMode windowMode;

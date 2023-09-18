@@ -205,6 +205,8 @@ public:
 
     virtual void CreateSurfaceNode(const std::string name, const SendRenderDataCallback& callback) override;
     virtual void SetContentInfoCallback(const ContentInfoCallback& callback) override;
+    virtual WMError SetResizeByDragEnabled(bool dragEnabled) override;
+    virtual WMError SetRaiseByClickEnabled(bool raiseEnabled) override;
     virtual WmErrorCode RaiseAboveTarget(int32_t subWindowId) override;
 private:
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;
