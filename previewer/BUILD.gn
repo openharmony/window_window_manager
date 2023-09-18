@@ -136,7 +136,6 @@ if (!ispreview) {
       "ace_engine:ace_uicontent",
       "hilog:libhilog",
       "napi:ace_napi",
-      "napi:ace_napi_ark",
     ]
 
     cflags_cc = [ "-DWINDOW_PREVIEW" ]
