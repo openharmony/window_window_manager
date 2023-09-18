@@ -360,19 +360,27 @@ WSError SceneSession::SetAspectRatio(float ratio)
 
 WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason)
 {
-    WLOGFD("Id: %{public}d, reason: %{public}d, rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
-        GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_, rect.height_);
-    bool isMoveOrDrag = moveDragController_ &&
-        (moveDragController_->GetStartDragFlag() || moveDragController_->GetStartMoveFlag());
-    if (isMoveOrDrag && reason == SizeChangeReason::UNDEFINED) {
-        WLOGFD("skip redundant rect update!");
-        return WSError::WS_ERROR_REPEAT_OPERATION;
-    }
-    WSError ret = Session::UpdateRect(rect, reason);
-    if ((ret == WSError::WS_OK || sessionInfo_.isSystem_) && specificCallback_ != nullptr) {
-        specificCallback_->onUpdateAvoidArea_(GetPersistentId());
-    }
-    return ret;
+    PostTask([weakThis = wptr(this), rect, reason]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        WLOGFD("Id: %{public}d, reason: %{public}d, rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
+            session->GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_, rect.height_);
+        bool isMoveOrDrag = session->moveDragController_ &&
+            (session->moveDragController_->GetStartDragFlag() || session->moveDragController_->GetStartMoveFlag());
+        if (isMoveOrDrag && reason == SizeChangeReason::UNDEFINED) {
+            WLOGFD("skip redundant rect update!");
+            return WSError::WS_ERROR_REPEAT_OPERATION;
+        }
+        WSError ret = session->Session::UpdateRect(rect, reason);
+        if ((ret == WSError::WS_OK || session->sessionInfo_.isSystem_) && session->specificCallback_ != nullptr) {
+            session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
+        }
+        return ret;
+    });
+    return WSError::WS_OK;
 }
 
 bool SceneSession::UpdateInputMethodSessionRect(const WSRect&rect, WSRect& newWinRect, WSRect& newRequestRect)
