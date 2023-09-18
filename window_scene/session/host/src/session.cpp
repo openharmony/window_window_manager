@@ -151,6 +151,14 @@ void Session::SetSessionInfoAffinity(std::string affinity)
     sessionInfo_.sessionAffinity = affinity;
 }
 
+void Session::GetCloseAbilityWantAndClean(AAFwk::Want& outWant)
+{
+    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+    if (sessionInfo_.closeAbilityWant != nullptr) {
+        outWant = *sessionInfo_.closeAbilityWant;
+        sessionInfo_.closeAbilityWant = nullptr;
+    }
+}
 
 void Session::SetSessionInfo(const SessionInfo& info)
 {
@@ -811,7 +819,7 @@ WSError Session::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessi
     info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
     {
         std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
-        sessionInfo_.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
+        sessionInfo_.closeAbilityWant = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
         sessionInfo_.resultCode = abilitySessionInfo->resultCode;
     }
     if (terminateSessionFuncNew_) {
@@ -843,7 +851,7 @@ WSError Session::TerminateSessionTotal(const sptr<AAFwk::SessionInfo> abilitySes
     info.persistentId_ = static_cast<int32_t>(abilitySessionInfo->persistentId);
     {
         std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
-        sessionInfo_.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
+        sessionInfo_.closeAbilityWant = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
         sessionInfo_.resultCode = abilitySessionInfo->resultCode;
     }
     if (terminateSessionFuncTotal_) {
