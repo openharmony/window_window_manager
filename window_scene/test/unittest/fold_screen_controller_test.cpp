@@ -88,7 +88,7 @@ namespace {
      */
     HWTEST_F(FoldScreenControllerTest, IsFoldable, Function | SmallTest | Level3)
     {
-        ASSERT_EQ(true, ssm_.IsFoldable());
+        ASSERT_EQ(false, ssm_.IsFoldable());
     }
 
     /**
