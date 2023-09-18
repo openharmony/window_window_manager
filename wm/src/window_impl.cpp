@@ -1454,7 +1454,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
 
 WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
-    WLOGI("id:%{public}u Hide, reason:%{public}u, Animation:%{public}d",
+    WLOGD("id:%{public}u Hide, reason:%{public}u, Animation:%{public}d",
         property_->GetWindowId(), reason, withAnimation);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
