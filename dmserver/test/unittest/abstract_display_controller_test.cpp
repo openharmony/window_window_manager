@@ -74,6 +74,8 @@ void AbstractDisplayControllerTest::SetUp()
     ASSERT_NE(nullptr, absDisplay_);
     defaultDisplayId_ = absDisplay_->GetId();
     displayCutoutController_ = new DisplayCutoutController();
+    DisplayId displayid = 1;
+    absDisplayController_->abstractDisplayMap_.insert(std::make_pair(displayid, absDisplay_));
 }
 
 void AbstractDisplayControllerTest::TearDown()
@@ -198,6 +200,11 @@ HWTEST_F(AbstractDisplayControllerTest, OnAbstractScreenChange01, Function | Sma
     EXPECT_NE(nullptr, absScreen_);
     absDisplayController_->OnAbstractScreenChange(absScreen_, DisplayChangeEvent::UNKNOWN);
     absDisplayController_->OnAbstractScreenChange(absScreen_, DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
+    absDisplayController_->OnAbstractScreenChange(absScreen_, DisplayChangeEvent::UPDATE_ORIENTATION);
+    absDisplayController_->OnAbstractScreenChange(absScreen_, DisplayChangeEvent::UPDATE_ORIENTATION_FROM_WINDOW);
+    absDisplayController_->OnAbstractScreenChange(absScreen_, DisplayChangeEvent::DISPLAY_VIRTUAL_PIXEL_RATIO_CHANGED);
+    absDisplayController_->OnAbstractScreenChange(absScreen_, DisplayChangeEvent::UPDATE_ROTATION);
+    absDisplayController_->OnAbstractScreenChange(absScreen_, DisplayChangeEvent::UPDATE_ROTATION_FROM_WINDOW);
 }
 
 /**
@@ -215,6 +222,9 @@ HWTEST_F(AbstractDisplayControllerTest, ProcessDisplayRotationChange01, Function
     EXPECT_NE(nullptr, display);
     display->rotation_ = absScreen_->rotation_;
     EXPECT_EQ(false, display->RequestRotation(absScreen->rotation_));
+    absDisplayController_->ProcessDisplayRotationChange(absScreen_, DisplayStateChangeType::UPDATE_ROTATION);
+    display->rotation_ = Rotation::ROTATION_270;
+    EXPECT_EQ(true, display->RequestRotation(absScreen_->rotation_));
     absDisplayController_->ProcessDisplayRotationChange(absScreen_, DisplayStateChangeType::UPDATE_ROTATION);
 }
 
@@ -234,7 +244,7 @@ HWTEST_F(AbstractDisplayControllerTest, ProcessDisplayCompression01, Function | 
     EXPECT_EQ(true, DisplayCutoutController::IsWaterfallAreaCompressionEnableWhenHorizontal());
     DisplayCutoutController::SetWaterfallAreaCompressionSizeWhenHorizontal(20); // 20 is test size
     uint32_t sizeInVp = DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal();
-    EXPECT_NE(0, sizeInVp);
+    EXPECT_EQ(20, sizeInVp);
     auto mode = absScreen_->GetActiveScreenMode();
     EXPECT_NE(nullptr, mode);
     mode->height_ = 60; // 60 is test data
@@ -245,6 +255,12 @@ HWTEST_F(AbstractDisplayControllerTest, ProcessDisplayCompression01, Function | 
 
     mode->height_ = 100; // 100 is test data
     absDisplayController_->ProcessDisplayCompression(absScreen_);
+
+    mode->width_ = 100; // 100 is test data
+    absDisplayController_->ProcessDisplayCompression(absScreen_);
+    
+    sptr<DisplayInfo> displayInfo = new(std::nothrow) DisplayInfo();
+    displayInfo->rotation_ = static_cast<Rotation>(Rotation::ROTATION_90);
 
     auto oriIdx = absScreen_->activeIdx_;
     absScreen_->activeIdx_ = -1;
@@ -318,6 +334,10 @@ HWTEST_F(AbstractDisplayControllerTest, ProcessDisplayUpdateOrientation01, Funct
 
     group->combination_ = static_cast<ScreenCombination>(100); // 100 is test data
     absDisplayController_->ProcessDisplayUpdateOrientation(absScreen_, DisplayStateChangeType::UPDATE_ROTATION);
+    
+    sptr<AbstractScreen> absScreen = new AbstractScreen(absScreenController_, name_, 1, 1);
+    EXPECT_EQ(nullptr, absDisplayController_->GetAbstractDisplayByAbsScreen(absScreen));
+    absDisplayController_->ProcessDisplayUpdateOrientation(absScreen, DisplayStateChangeType::UPDATE_ROTATION);
 }
 
 /**
@@ -338,6 +358,11 @@ HWTEST_F(AbstractDisplayControllerTest, ProcessDisplaySizeChange01, Function | S
 
     absDisplayController_->abstractDisplayMap_.clear();
     absDisplayController_->ProcessDisplaySizeChange(absScreen_);
+
+    SetUp();
+    sptr<AbstractScreen> absScreen = new AbstractScreen(absScreenController_, name_, 1, 1);
+    EXPECT_EQ(nullptr, absDisplayController_->GetAbstractDisplayByAbsScreen(absScreen));
+    absDisplayController_->ProcessDisplaySizeChange(absScreen);
 
     auto oriIdx = absScreen_->activeIdx_;
     absScreen_->activeIdx_ = -1;
@@ -502,6 +527,54 @@ HWTEST_F(AbstractDisplayControllerTest, GetDefaultDisplayId01, Function | SmallT
     sptr<AbstractDisplay> defaultDisplay = absDisplayController->GetAbstractDisplayByScreen(defaultScreenId);
     EXPECT_EQ(nullptr, defaultDisplay);
     EXPECT_EQ(DISPLAY_ID_INVALID, absDisplayController->GetDefaultDisplayId());
+}
+
+/**
+ * @tc.name: GetAbstractDisplayByScreen
+ * @tc.desc: GetAbstractDisplayByScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractDisplayControllerTest, GetAbstractDisplayByScreen, Function | SmallTest | Level3)
+{
+    ScreenId screenId = SCREEN_ID_INVALID;
+    auto ret = absDisplayController_->GetAbstractDisplayByScreen(screenId);
+    EXPECT_EQ(nullptr, ret);
+}
+
+/**
+ * @tc.name: GetScreenSnapshot
+ * @tc.desc: GetScreenSnapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractDisplayControllerTest, GetScreenSnapshot01, Function | SmallTest | Level3)
+{
+    ScreenId screenId = SCREEN_ID_INVALID;
+    auto ret = absDisplayController_->GetScreenSnapshot(screenId);
+    EXPECT_EQ(nullptr, ret);
+}
+
+/**
+ * @tc.name: GetScreenSnapshot
+ * @tc.desc: GetScreenSnapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractDisplayControllerTest, GetScreenSnapshot02, Function | SmallTest | Level3)
+{
+    ScreenId screenId = 2;
+    auto ret = absDisplayController_->GetScreenSnapshot(screenId);
+    EXPECT_EQ(nullptr, ret);
+}
+
+/**
+ * @tc.name: GetScreenSnapshot
+ * @tc.desc: GetScreenSnapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractDisplayControllerTest, GetScreenSnapshot03, Function | SmallTest | Level3)
+{
+    ScreenId screenId = 1;
+    auto ret = absDisplayController_->GetScreenSnapshot(screenId);
+    EXPECT_NE(nullptr, ret);
 }
 }
 } // namespace Rosen
