@@ -35,6 +35,7 @@ struct Point {
 };
 
 struct SupportedScreenModes : public RefBase {
+    uint32_t id_;
     uint32_t width_;
     uint32_t height_;
     uint32_t refreshRate_;
