@@ -1328,6 +1328,14 @@ WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
     });
 }
 
+void SceneSession::SetWindowAnimationFlag(bool needDefaultAnimationFlag)
+{
+    if (sessionChangeCallback_ && sessionChangeCallback_->onWindowAnimationFlagChange_) {
+        sessionChangeCallback_->onWindowAnimationFlagChange_(needDefaultAnimationFlag);
+    }
+    return;
+}
+
 void SceneSession::NotifyIsCustomAnimationPlaying(bool isPlaying)
 {
     WLOGFI("id %{public}d %{public}u", GetPersistentId(), isPlaying);

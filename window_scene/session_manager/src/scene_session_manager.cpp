@@ -3481,9 +3481,11 @@ WSError SceneSessionManager::SetSessionGravity(int32_t persistentId, SessionGrav
         }
         if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
             WLOGFD("input method is float mode");
+            sceneSession->SetWindowAnimationFlag(false);
             RestoreCallingSessionSizeIfNeed();
         } else {
             WLOGFD("input method is bottom mode");
+            sceneSession->SetWindowAnimationFlag(true);
             ResizeSoftInputCallingSessionIfNeed(sceneSession);
         }
         return WSError::WS_OK;
