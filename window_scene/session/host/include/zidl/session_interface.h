@@ -59,6 +59,7 @@ public:
         TRANS_ID_SET_ASPECT_RATIO,
         TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG,
         TRANS_ID_UPDATE_CUSTOM_ANIMATION,
+        TRANS_ID_RAISE_ABOVE_TARGET,
 
         // Extension
         TRANS_ID_TRANSFER_ABILITY_RESULT = 500,
@@ -96,6 +97,7 @@ public:
     virtual WSError SetAspectRatio(float ratio) = 0;
     virtual WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) = 0;
     virtual WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) = 0;
+    virtual WSError RaiseAboveTarget(int32_t subWindowId) = 0;
 
     // extension session
     virtual WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) = 0;
