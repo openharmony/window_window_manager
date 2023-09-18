@@ -63,6 +63,16 @@ void WindowSessionProperty::SetTouchable(bool isTouchable)
     touchable_ = isTouchable;
 }
 
+void WindowSessionProperty::SetDragEnabled(bool dragEnabled)
+{
+    dragEnabled_ = dragEnabled;
+}
+
+void WindowSessionProperty::SetRaiseEnabled(bool raiseEnabled)
+{
+    raiseEnabled_ = raiseEnabled;
+}
+
 void WindowSessionProperty::SetBrightness(float brightness)
 {
     brightness_ = brightness;
@@ -81,6 +91,11 @@ void WindowSessionProperty::SetPrivacyMode(bool isPrivate)
 void WindowSessionProperty::SetSystemPrivacyMode(bool isSystemPrivate)
 {
     isSystemPrivacyMode_ = isSystemPrivate;
+}
+
+void WindowSessionProperty::SetSystemCalling(bool isSystemCalling)
+{
+    isSystemCalling_ = isSystemCalling;
 }
 
 void WindowSessionProperty::SetDisplayId(DisplayId displayId)
@@ -128,6 +143,16 @@ bool WindowSessionProperty::GetTouchable() const
     return touchable_;
 }
 
+bool WindowSessionProperty::GetDragEnabled() const
+{
+    return dragEnabled_;
+}
+
+bool WindowSessionProperty::GetRaiseEnabled() const
+{
+    return raiseEnabled_;
+}
+
 float WindowSessionProperty::GetBrightness() const
 {
     return brightness_;
@@ -146,6 +171,11 @@ bool WindowSessionProperty::GetPrivacyMode() const
 bool WindowSessionProperty::GetSystemPrivacyMode() const
 {
     return isSystemPrivacyMode_;
+}
+
+bool WindowSessionProperty::GetSystemCalling() const
+{
+    return isSystemCalling_;
 }
 
 DisplayId WindowSessionProperty::GetDisplayId() const
@@ -432,11 +462,12 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteFloat(brightness_) &&
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
-        parcel.WriteUint32(flags_) &&
-        parcel.WriteBool(isDecorEnable_) &&
+        parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) &&
+        parcel.WriteBool(isDecorEnable_) && parcel.WriteBool(dragEnabled_) &&
         MarshallingWindowLimits(parcel) &&
         MarshallingSystemBarMap(parcel) && parcel.WriteUint32(animationFlag_) &&
-        parcel.WriteBool(isFloatingWindowAppType_) && MarshallingTouchHotAreas(parcel);
+        parcel.WriteBool(isFloatingWindowAppType_) && MarshallingTouchHotAreas(parcel) &&
+        parcel.WriteBool(isSystemCalling_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -469,12 +500,15 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));
     property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
     property->SetWindowFlags(parcel.ReadUint32());
+    property->SetRaiseEnabled(parcel.ReadBool());
     property->SetDecorEnable(parcel.ReadBool());
+    property->SetDragEnabled(parcel.ReadBool());
     UnmarshallingWindowLimits(parcel, property);
     UnMarshallingSystemBarMap(parcel, property);
     property->SetAnimationFlag(parcel.ReadUint32());
     property->SetFloatingWindowAppType(parcel.ReadBool());
     UnmarshallingTouchHotAreas(parcel, property);
+    property->SetSystemCalling(parcel.ReadBool());
     return property;
 }
 
@@ -487,6 +521,8 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     type_ = property->type_;
     focusable_= property->focusable_;
     touchable_ = property->touchable_;
+    dragEnabled_ = property->dragEnabled_;
+    raiseEnabled_ = property->raiseEnabled_;
     tokenState_ = property->tokenState_;
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
@@ -508,6 +544,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     animationFlag_ = property->animationFlag_;
     isFloatingWindowAppType_ = property->isFloatingWindowAppType_;
     touchHotAreas_ = property->touchHotAreas_;
+    isSystemCalling_ = property->isSystemCalling_;
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)

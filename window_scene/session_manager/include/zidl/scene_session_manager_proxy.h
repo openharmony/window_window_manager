@@ -32,7 +32,7 @@ public:
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
         sptr<IRemoteObject> token = nullptr) override;
     WSError DestroyAndDisconnectSpecificSession(const int32_t& persistentId) override;
-    WSError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) override;
+    WMError UpdateProperty(sptr<WindowSessionProperty>& property, WSPropertyChangeAction action) override;
     WSError BindDialogTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;
 
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
