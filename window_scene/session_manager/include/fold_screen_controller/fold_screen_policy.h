@@ -25,10 +25,13 @@ class FoldScreenPolicy : public RefBase {
 public:
     FoldScreenPolicy();
     virtual ~FoldScreenPolicy();
+
     virtual void ChangeScreenDisplayMode(FoldDisplayMode displayMode);
     virtual FoldDisplayMode GetScreenDisplayMode();
     virtual FoldStatus GetFoldStatus();
     virtual void SendSensorResult(FoldStatus foldStatus);
+    virtual ScreenId GetCurrentScreenId();
+
     ScreenId screenId_;
     ScreenProperty screenProperty_;
     mutable std::recursive_mutex displayModeMutex_;

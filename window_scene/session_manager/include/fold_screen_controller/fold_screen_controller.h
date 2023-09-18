@@ -32,14 +32,13 @@ class FoldScreenController : public RefBase {
 public:
     FoldScreenController();
     virtual ~FoldScreenController();
+
     void SetDisplayMode(const FoldDisplayMode displayMode);
     FoldDisplayMode GetDisplayMode();
-
     bool IsFoldable();
-
     FoldStatus GetFoldStatus();
-
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
+    ScreenId GetCurrentScreenId();
 private:
     sptr<FoldScreenPolicy> GetFoldScreenPolicy(DisplayDeviceType productType);
     sptr<FoldScreenPolicy> foldScreenPolicy_;
