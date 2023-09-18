@@ -479,7 +479,12 @@ int SceneSessionManagerStub::HandleGetSessionDump(MessageParcel &data, MessagePa
     uint32_t infoSize = static_cast<uint32_t>(strlen(info));
     WLOGFI("HandleGetSessionDump, infoSize: %{public}d", infoSize);
     reply.WriteUint32(infoSize);
-    reply.WriteRawData(info, infoSize);
+    if (infoSize != 0) {
+        if (!reply.WriteRawData(info, infoSize)) {
+            WLOGFE("Fail to write dumpInfo");
+            return -1;
+        }
+    }
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
@@ -527,8 +532,12 @@ int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel &data, Mes
     }
     for (uint32_t i = 0; i < vectorSize; i++) {
         uint32_t curSize = data.ReadUint32();
-        const char* infoPtr = reinterpret_cast<const char*>(data.ReadRawData(curSize));
-        std::string curInfo = (infoPtr) ? infoPtr : "";
+        std::string curInfo = "";
+        if (curSize != 0) {
+            const char* infoPtr = nullptr;
+            infoPtr = reinterpret_cast<const char*>(data.ReadRawData(curSize));
+            curInfo = (infoPtr) ? std::string(infoPtr, curSize) : "";
+        }
         info.emplace_back(curInfo);
         WLOGFD("HandleNotifyDumpInfoResult count: %{public}u, infoSize: %{public}u", i, curSize);
     }
