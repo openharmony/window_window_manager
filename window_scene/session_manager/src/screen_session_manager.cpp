@@ -249,7 +249,14 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
         return;
     }
     if (screenEvent == ScreenEvent::CONNECTED) {
-        if (screenId == 0) {
+        if (foldScreenController_ != nullptr) {
+            if (screenId == 0) {
+                for (auto listener : screenConnectionListenerList_) {
+                    listener->OnScreenConnect(screenSession);
+                }
+                screenSession->Connect();
+            }
+        } else {
             for (auto listener : screenConnectionListenerList_) {
                 listener->OnScreenConnect(screenSession);
             }
@@ -566,7 +573,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         phyScreenPropMap_[screenId] = property;
     }
 
-    if (screenId != 0) {
+    if (foldScreenController_ != nullptr && screenId != 0) {
         return nullptr;
     }
 
@@ -658,8 +665,12 @@ bool ScreenSessionManager::SetScreenPowerForAll(ScreenPowerState state, PowerSta
         }
     }
 
-    for (auto screenId : screenIds) {
-        rsInterface_.SetScreenPowerStatus(screenId, status);
+    if (foldScreenController_ != nullptr) {
+        rsInterface_.SetScreenPowerStatus(foldScreenController_->GetCurrentScreenId(), status);
+    } else {
+        for (auto screenId : screenIds) {
+            rsInterface_.SetScreenPowerStatus(screenId, status);
+        }
     }
 
     return NotifyDisplayPowerEvent(state == ScreenPowerState::POWER_ON ? DisplayPowerEvent::DISPLAY_ON :
