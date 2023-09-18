@@ -240,7 +240,6 @@ private:
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
-    bool isFocused_ { false };
 };
 } // namespace Rosen
 } // namespace OHOS

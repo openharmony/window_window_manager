@@ -17,9 +17,7 @@ import("//foundation/window/window_manager/windowmanager_aafwk.gni")
 config("transaction_manager_config") {
   visibility = [ ":*" ]
 
-  include_dirs = [
-    "${window_base_path}/wm/include",
-  ]
+  include_dirs = [ "${window_base_path}/wm/include" ]
 }
 
 ohos_shared_library("transactionmanager_napi") {
@@ -28,13 +26,9 @@ ohos_shared_library("transactionmanager_napi") {
     "transaction_manager_module.cpp",
   ]
 
-  configs = [
-    ":transaction_manager_config",
-  ]
+  configs = [ ":transaction_manager_config" ]
 
-  deps = [
-    "${window_base_path}/utils:libwmutil",
-  ]
+  deps = [ "${window_base_path}/utils:libwmutil" ]
 
   external_deps = [
     "ability_runtime:runtime",

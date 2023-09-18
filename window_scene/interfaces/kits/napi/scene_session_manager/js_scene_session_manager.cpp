@@ -1217,5 +1217,6 @@ NativeValue* JsSceneSessionManager::OnSendTouchEvent(NativeEngine& engine, Nativ
         return engine.CreateUndefined();
     }
     SceneSessionManager::GetInstance().SendTouchEvent(pointerEvent, zIndex);
+    return engine.CreateUndefined();
 }
 } // namespace OHOS::Rosen

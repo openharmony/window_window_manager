@@ -398,7 +398,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
             lastSizeChangeReason_ = wmReason;
             postTaskDone_ = true;
         }
-        UpdateViewportConfig(wmRect, wmReason);
+        UpdateViewportConfig(wmRect, wmReason, rsTransaction);
     }
     WLOGFI("update rect [%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u", rect.posX_, rect.posY_,
         rect.width_, rect.height_, wmReason);
